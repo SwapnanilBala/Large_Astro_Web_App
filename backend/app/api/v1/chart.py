@@ -3,7 +3,6 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
-from app.api.deps import get_optional_current_user
 from app.models.chart_models import BirthDetails, ChartResponse, ForecastReading, SubPeriodInfo
 from app.services.chart_service import ChartService, get_chart_service
 from app.services.nakshatra_engine import NakshatraEngine
@@ -38,17 +37,15 @@ def _safe_build_chart(
 def create_chart(
     payload: BirthDetails,
     include_transits: bool = Query(False),
-    current_user: dict | None = Depends(get_optional_current_user),
     service: ChartService = Depends(get_chart_service),
 ) -> ChartResponse:
-    subscription_tier = current_user.get("subscription_tier", "guest") if current_user else "guest"
     return _safe_build_chart(
         service,
         payload,
         include_transits=include_transits,
         include_premium=True,
         include_ultimate=True,
-        subscription_tier=subscription_tier,
+        subscription_tier="guest",
     )
 
 
@@ -67,7 +64,6 @@ def get_chart(
     town: str = Query(""),
     time_zone_id: str = Query(""),
     include_transits: bool = Query(False),
-    current_user: dict | None = Depends(get_optional_current_user),
     service: ChartService = Depends(get_chart_service),
 ) -> ChartResponse:
     payload = BirthDetails(
@@ -84,14 +80,13 @@ def get_chart(
         town=town,
         time_zone_id=time_zone_id,
     )
-    subscription_tier = current_user.get("subscription_tier", "guest") if current_user else "guest"
     return _safe_build_chart(
         service,
         payload,
         include_transits=include_transits,
         include_premium=True,
         include_ultimate=True,
-        subscription_tier=subscription_tier,
+        subscription_tier="guest",
     )
 
 

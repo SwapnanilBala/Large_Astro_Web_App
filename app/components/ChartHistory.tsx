@@ -4,24 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import { listSavedCharts } from "@/lib/workspace-store";
 import { HiOutlineSparkles } from "react-icons/hi2";
 import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
 
 type ChartHistoryProps = {
   userName?: string;
-};
-
-const ASTRO_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-type SavedChartApiEntry = {
-  saved_chart_id: string;
-  name: string;
-  city: string;
-  birth_date: string;
-  ascendant_sign: string;
-  query_string: string;
-  saved_at: string;
 };
 
 function loadLocalEntries(): ChartHistoryEntry[] {
@@ -34,7 +22,7 @@ function loadLocalEntries(): ChartHistoryEntry[] {
 }
 
 export default function ChartHistory({ userName }: ChartHistoryProps) {
-  const { isAuthenticated, isLoading, token } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ChartHistoryEntry[]>([]);
   const router = useRouter();
@@ -45,20 +33,13 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
   }, [isAuthenticated]);
 
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated || !user) return;
 
     let isCancelled = false;
 
     const loadSavedCharts = async () => {
       try {
-        const res = await fetch(`${ASTRO_API}/api/v1/saved-charts`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) return;
-
-        const data: SavedChartApiEntry[] = await res.json();
+        const data = await listSavedCharts(user.user_id);
         if (isCancelled || data.length === 0) return;
 
         setEntries(
@@ -81,7 +62,7 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
     return () => {
       isCancelled = true;
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, user]);
 
   if (isLoading || !isAuthenticated) {
     return null;

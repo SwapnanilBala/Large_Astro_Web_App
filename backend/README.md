@@ -4,8 +4,7 @@ This service implements:
 
 - Swiss Ephemeris based chart computation (`pyswisseph`)
 - Deterministic interpretation rules (Lagna/Sun/Moon + element and house concentration)
-- MongoDB Atlas persistence with PyMongo
-- Authenticated saved-chart history endpoints
+- Stateless chart, dasha, transit, and compatibility computation
 
 ## Setup
 
@@ -17,14 +16,14 @@ pip install -r requirements.txt
 copy .env.example .env
 ```
 
-Recommended MongoDB Atlas environment variables:
+Recommended backend environment variables:
 
 ```bash
-MONGODB_URI=mongodb+srv://<db-user>:<url-encoded-password>@<cluster-host>/<db_name>?retryWrites=true&w=majority&appName=<app-name>
-MONGODB_DB_NAME=swapastro
+EPHEMERIS_PATH=
+CORS_ORIGINS=["http://localhost:7001","http://127.0.0.1:7001"]
 ```
 
-The backend initializes its Mongo collections and indexes automatically on startup.
+Workspace storage and auth now live in Supabase on the frontend side, so this backend only needs to stay reachable from the Next.js app.
 
 ## Notes for Windows
 
@@ -43,9 +42,7 @@ API docs: `http://127.0.0.1:8000/docs`
 
 - `POST /api/v1/chart`
 - `GET /api/v1/chart`
-- `GET /api/v1/saved-charts`
-- `POST /api/v1/saved-charts`
-- `GET /api/v1/export/excel`
+- `POST /api/v1/compatibility`
 - `GET /health`
 
 The chart output includes:

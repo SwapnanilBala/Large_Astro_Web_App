@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 import InsightsContent from "@/app/insights/components/insights-content";
 import type { ChartApiResponse } from "@/lib/astro-types";
@@ -93,17 +92,11 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   let fetchError = "";
 
   try {
-    const token = (await cookies()).get("astro_token")?.value;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 8000);
     const response = await fetch(chartUrl, {
       cache: "no-store",
       signal: controller.signal,
-      headers: token
-        ? {
-            Authorization: `Bearer ${decodeURIComponent(token)}`,
-          }
-        : undefined,
     });
     clearTimeout(timeoutId);
     if (!response.ok) {

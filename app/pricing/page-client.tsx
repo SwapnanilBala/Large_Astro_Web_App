@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
-import { useToast } from "@/lib/toast-context";
 
 type PricingPageClientProps = {
   returnTo?: string;
@@ -101,45 +100,9 @@ function normalizePlan(tier: string | undefined): PlanId | "guest" {
 }
 
 export default function PricingPageClient({ returnTo = "" }: PricingPageClientProps) {
-  const { isAuthenticated, user, redeemPlanCode } = useAuth();
-  const { pushToast } = useToast();
-  const [codes, setCodes] = useState<Record<PlanId, string>>({
-    basic: "",
-    pro: "",
-    ultimate: "",
-  });
-  const [status, setStatus] = useState<Record<PlanId, string>>({
-    basic: "",
-    pro: "",
-    ultimate: "",
-  });
-  const [isSubmitting, setIsSubmitting] = useState<Record<PlanId, boolean>>({
-    basic: false,
-    pro: false,
-    ultimate: false,
-  });
+  const { isAuthenticated, user } = useAuth();
 
   const currentPlan = useMemo(() => normalizePlan(user?.subscription_tier), [user?.subscription_tier]);
-
-  const redeem = async (planId: PlanId) => {
-    setIsSubmitting((previous) => ({ ...previous, [planId]: true }));
-    const result = await redeemPlanCode(codes[planId], planId);
-    if (result.ok) {
-      setCodes((previous) => ({ ...previous, [planId]: "" }));
-      setStatus((previous) => ({
-        ...previous,
-        [planId]: `Plan updated to ${planId}.`,
-      }));
-      pushToast(`Plan updated to ${planId}.`, "success");
-    } else {
-      setStatus((previous) => ({
-        ...previous,
-        [planId]: result.error ?? "Plan redemption failed.",
-      }));
-      pushToast(result.error ?? "Plan redemption failed.", "error");
-    }
-    setIsSubmitting((previous) => ({ ...previous, [planId]: false }));
-  };
 
   return (
     <main className="insights-shell">
@@ -149,8 +112,8 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
         <p className="kicker">Pricing</p>
         <h1>Open access and account labels</h1>
         <p className="lead">
-          All chart features are now open to every visitor, and the app begins in guest mode. This page
-          stays around only for demo account labels and code-redemption testing.
+          All chart features are open to every visitor, and account-backed workspace data now lives in
+          Supabase instead of the old backend database layer.
         </p>
 
         <div className="pricing-active-plan">
@@ -192,33 +155,14 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
                     <p key={feature}>{feature}</p>
                   ))}
                 </div>
-
-                <label className={`pricing-code-label ${plan.fieldClass}`}>
-                  Want to change the account label for testing? Type the code below.
-                  <input
-                    type="text"
-                    value={codes[plan.id]}
-                    onChange={(event) =>
-                      setCodes((previous) => ({ ...previous, [plan.id]: event.target.value }))
-                    }
-                    placeholder={`Enter ${plan.id.toUpperCase()} code`}
-                    disabled={!isAuthenticated || isSubmitting[plan.id]}
-                  />
-                </label>
-
-                <button
-                  type="button"
-                  onClick={() => void redeem(plan.id)}
-                  disabled={!isAuthenticated || isSubmitting[plan.id]}
-                >
-                  {isSubmitting[plan.id] ? "Applying..." : `Activate ${plan.id}`}
-                </button>
-
-                {status[plan.id] && (
-                  <p className={status[plan.id].startsWith("Plan updated") ? "pricing-success" : "error-note"}>
-                    {status[plan.id]}
-                  </p>
-                )}
+                <p className={`pricing-code-label ${plan.fieldClass}`}>
+                  {plan.id === "basic" &&
+                    "Guest mode is the default. Create an account only if you want synced charts and saved reports."}
+                  {plan.id === "pro" &&
+                    "Supabase auth keeps your workspace synced across devices while the chart engine stays open-access."}
+                  {plan.id === "ultimate" &&
+                    "Ultimate is now just an account label; it no longer controls chart access or hidden modules."}
+                </p>
               </article>
             );
           })}

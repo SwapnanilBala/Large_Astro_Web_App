@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type User = {
   user_id: string;
@@ -30,23 +32,29 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-const AUTH_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
 const PREMIUM_TIERS = new Set(["pro", "ultimate", "admin", "premium", "premium_trial"]);
 
-function syncTokenCookie(token: string | null) {
-  if (typeof document === "undefined") return;
-  if (!token) {
-    document.cookie = "astro_token=; Path=/; Max-Age=0; SameSite=Lax";
-    return;
+function toAppUser(user: SupabaseUser | null): User | null {
+  if (!user?.email) {
+    return null;
   }
-  document.cookie = `astro_token=${encodeURIComponent(token)}; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Lax`;
-}
 
-function persistAuth(nextUser: User, nextToken: string) {
-  localStorage.setItem("astro_token", nextToken);
-  localStorage.setItem("astro_user", JSON.stringify(nextUser));
-  syncTokenCookie(nextToken);
+  const metadata = user.user_metadata ?? {};
+  const displayName =
+    typeof metadata.display_name === "string" && metadata.display_name.trim().length > 0
+      ? metadata.display_name
+      : user.email.split("@")[0] ?? "Guest";
+  const subscriptionTier =
+    typeof metadata.subscription_tier === "string" && metadata.subscription_tier.trim().length > 0
+      ? metadata.subscription_tier
+      : "guest";
+
+  return {
+    user_id: user.id,
+    email: user.email,
+    display_name: displayName,
+    subscription_tier: subscriptionTier,
+  };
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -55,128 +63,125 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const storedToken = localStorage.getItem("astro_token");
-      const storedUser = localStorage.getItem("astro_user");
-      if (storedToken && storedUser) {
-        const parsedUser = JSON.parse(storedUser) as Partial<User>;
-        setToken(storedToken);
-        setUser({
-          user_id: parsedUser.user_id ?? "",
-          email: parsedUser.email ?? "",
-          display_name: parsedUser.display_name ?? "",
-          subscription_tier: parsedUser.subscription_tier ?? "guest",
-        });
-        syncTokenCookie(storedToken);
-      }
-    } catch {
-      // Ignore corrupt storage
-    } finally {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
       setIsLoading(false);
+      return;
     }
+
+    let isMounted = true;
+    const applySession = (session: Session | null) => {
+      if (!isMounted) {
+        return;
+      }
+      setToken(session?.access_token ?? null);
+      setUser(toAppUser(session?.user ?? null));
+      setIsLoading(false);
+    };
+
+    void supabase.auth.getSession().then(({ data }: { data: { session: Session } }) => {
+      applySession(data.session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event: string, session: Session) => {
+      applySession(session);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const login = useCallback(async (email: string, password: string) => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      return { ok: false, error: "Supabase is not configured yet." };
+    }
+
     try {
-      const res = await fetch(`${AUTH_API}/api/v1/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "Login failed" }));
-        return { ok: false, error: err.detail ?? "Login failed" };
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        return { ok: false, error: error.message };
       }
-      const data = await res.json();
-      const nextUser: User = {
-        user_id: data.user_id,
-        email: data.email,
-        display_name: data.display_name,
-        subscription_tier: data.subscription_tier ?? "guest",
-      };
-      setUser(nextUser);
-      setToken(data.token);
-      persistAuth(nextUser, data.token);
+      setToken(data.session?.access_token ?? null);
+      setUser(toAppUser(data.user));
       return { ok: true };
     } catch {
-      return { ok: false, error: "Network error - is the backend running?" };
+      return { ok: false, error: "Could not reach Supabase authentication." };
     }
   }, []);
 
   const register = useCallback(async (email: string, password: string, displayName: string) => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      return { ok: false, error: "Supabase is not configured yet." };
+    }
+
     try {
-      const res = await fetch(`${AUTH_API}/api/v1/auth/register`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, display_name: displayName }),
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: displayName.trim(),
+            subscription_tier: "guest",
+          },
+        },
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({ detail: "Registration failed" }));
-        return { ok: false, error: err.detail ?? "Registration failed" };
+
+      if (error) {
+        return { ok: false, error: error.message };
       }
-      const data = await res.json();
-      const nextUser: User = {
-        user_id: data.user_id,
-        email: data.email,
-        display_name: data.display_name,
-        subscription_tier: data.subscription_tier ?? "guest",
-      };
-      setUser(nextUser);
-      setToken(data.token);
-      persistAuth(nextUser, data.token);
+
+      setToken(data.session?.access_token ?? null);
+      setUser(toAppUser(data.user));
       return { ok: true };
     } catch {
-      return { ok: false, error: "Network error - is the backend running?" };
+      return { ok: false, error: "Could not reach Supabase authentication." };
     }
   }, []);
 
   const redeemPlanCode = useCallback(
     async (code: string, expectedPlan?: "basic" | "pro" | "ultimate") => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        return { ok: false, error: "Supabase is not configured yet." };
+      }
+
       if (!token) {
-        return { ok: false, error: "Sign in before redeeming a plan code." };
+        return { ok: false, error: "Sign in before changing the account label." };
       }
 
-      try {
-        const res = await fetch(`${AUTH_API}/api/v1/auth/redeem-plan`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            code,
-            expected_plan: expectedPlan,
-          }),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({ detail: "Plan redemption failed" }));
-          return { ok: false, error: err.detail ?? "Plan redemption failed" };
-        }
-
-        const data = await res.json();
-        const nextUser: User = {
-          user_id: data.user_id,
-          email: data.email,
-          display_name: data.display_name,
-          subscription_tier: data.subscription_tier ?? "guest",
-        };
-        setUser(nextUser);
-        setToken(data.token);
-        persistAuth(nextUser, data.token);
-        return { ok: true };
-      } catch {
-        return { ok: false, error: "Network error - is the backend running?" };
+      if (!code.trim() || !expectedPlan) {
+        return { ok: false, error: "Plan-code flows were removed in Supabase mode." };
       }
+
+      const { data, error } = await supabase.auth.updateUser({
+        data: {
+          subscription_tier: expectedPlan,
+        },
+      });
+
+      if (error) {
+        return { ok: false, error: error.message };
+      }
+
+      setUser(toAppUser(data.user));
+      return { ok: true };
     },
     [token]
   );
 
   const logout = useCallback(() => {
+    const supabase = getSupabaseBrowserClient();
     setUser(null);
     setToken(null);
-    localStorage.removeItem("astro_token");
-    localStorage.removeItem("astro_user");
-    syncTokenCookie(null);
+    if (supabase) {
+      void supabase.auth.signOut();
+    }
   }, []);
 
   return (

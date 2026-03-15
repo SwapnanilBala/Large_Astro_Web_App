@@ -5,9 +5,17 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
-
-const ASTRO_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
+import {
+  deleteSavedChart,
+  deleteSavedComparison,
+  exportWorkspaceSnapshot,
+  listSavedCharts,
+  listSavedComparisons,
+  toggleSavedChartArchive,
+  toggleSavedComparisonArchive,
+  updateSavedChartNotes,
+  updateSavedComparisonNotes,
+} from "@/lib/workspace-store";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 type StatusFilter = "active" | "archived" | "all";
@@ -40,8 +48,39 @@ function matchesStatus<T extends SavedChartRecord | SavedComparisonRecord>(
   return !item.archived_at;
 }
 
+function matchesSearch<T extends SavedChartRecord | SavedComparisonRecord>(
+  item: T,
+  search: string,
+  getLabel: (item: T) => string,
+  getSummary: (item: T) => string
+) {
+  const normalized = search.trim().toLowerCase();
+  if (!normalized) return true;
+
+  if (getLabel(item).toLowerCase().includes(normalized)) {
+    return true;
+  }
+
+  if (getSummary(item).toLowerCase().includes(normalized)) {
+    return true;
+  }
+
+  if ("notes" in item && item.notes.toLowerCase().includes(normalized)) {
+    return true;
+  }
+
+  if ("city" in item) {
+    return (
+      item.city.toLowerCase().includes(normalized) ||
+      item.ascendant_sign.toLowerCase().includes(normalized)
+    );
+  }
+
+  return false;
+}
+
 export default function WorkspacePageClient() {
-  const { isAuthenticated, isLoading, token, user } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const { pushToast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
@@ -56,41 +95,25 @@ export default function WorkspacePageClient() {
   const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !token) {
+    if (!isAuthenticated || !user) {
       setSavedCharts([]);
       setSavedComparisons([]);
       return;
     }
 
-    const controller = new AbortController();
-    const q = deferredSearch.trim();
-    const chartUrl = new URL("/api/v1/saved-charts", ASTRO_API);
-    const comparisonUrl = new URL("/api/v1/saved-comparisons", ASTRO_API);
-
-    chartUrl.searchParams.set("status", statusFilter);
-    comparisonUrl.searchParams.set("status", statusFilter);
-    if (q) {
-      chartUrl.searchParams.set("q", q);
-      comparisonUrl.searchParams.set("q", q);
-    }
+    let isCancelled = false;
 
     const loadWorkspace = async () => {
       try {
         setPageError("");
-        const headers = { Authorization: `Bearer ${token}` };
-        const [chartsResponse, comparisonsResponse] = await Promise.all([
-          fetch(chartUrl.toString(), { headers, signal: controller.signal }),
-          fetch(comparisonUrl.toString(), { headers, signal: controller.signal }),
-        ]);
-
-        if (!chartsResponse.ok || !comparisonsResponse.ok) {
-          throw new Error("Workspace data could not be loaded.");
-        }
-
         const [charts, comparisons] = await Promise.all([
-          chartsResponse.json() as Promise<SavedChartRecord[]>,
-          comparisonsResponse.json() as Promise<SavedComparisonRecord[]>,
+          listSavedCharts(user.user_id),
+          listSavedComparisons(user.user_id),
         ]);
+
+        if (isCancelled) {
+          return;
+        }
 
         setSavedCharts(charts);
         setSavedComparisons(comparisons);
@@ -105,35 +128,47 @@ export default function WorkspacePageClient() {
           return next;
         });
       } catch (error) {
-        if (controller.signal.aborted) {
-          return;
-        }
         setPageError(error instanceof Error ? error.message : "Workspace request failed.");
       }
     };
 
     void loadWorkspace();
 
-    return () => controller.abort();
-  }, [deferredSearch, isAuthenticated, statusFilter, token]);
+    return () => {
+      isCancelled = true;
+    };
+  }, [deferredSearch, isAuthenticated, statusFilter, user]);
 
   const visibleCharts = useMemo(
     () =>
       sortByMode(
-        savedCharts.filter((item) => matchesStatus(item, statusFilter)),
+        savedCharts.filter(
+          (item) =>
+            matchesStatus(item, statusFilter) &&
+            matchesSearch(item, deferredSearch, (chart) => chart.name, (chart) => chart.query_string)
+        ),
         sortMode,
         (item) => item.name
       ),
-    [savedCharts, sortMode, statusFilter]
+    [deferredSearch, savedCharts, sortMode, statusFilter]
   );
   const visibleComparisons = useMemo(
     () =>
       sortByMode(
-        savedComparisons.filter((item) => matchesStatus(item, statusFilter)),
+        savedComparisons.filter(
+          (item) =>
+            matchesStatus(item, statusFilter) &&
+            matchesSearch(
+              item,
+              deferredSearch,
+              (comparison) => `${comparison.primary_name} ${comparison.partner_name}`,
+              (comparison) => comparison.summary
+            )
+        ),
         sortMode,
         (item) => `${item.primary_name} ${item.partner_name}`
       ),
-    [savedComparisons, sortMode, statusFilter]
+    [deferredSearch, savedComparisons, sortMode, statusFilter]
   );
 
   const updateNoteDraft = (key: string, value: string) => {
@@ -142,21 +177,17 @@ export default function WorkspacePageClient() {
   };
 
   const saveChartNotes = async (savedChartId: string) => {
-    if (!token) return;
+    if (!user) return;
     try {
       setSaveStates((previous) => ({ ...previous, [savedChartId]: "saving" }));
-      const response = await fetch(`${ASTRO_API}/api/v1/saved-charts/${savedChartId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ notes: notesDrafts[savedChartId] ?? "" }),
-      });
-      if (!response.ok) {
+      const updated = await updateSavedChartNotes(
+        user.user_id,
+        savedChartId,
+        notesDrafts[savedChartId] ?? ""
+      );
+      if (!updated) {
         throw new Error("Could not save chart notes.");
       }
-      const updated = (await response.json()) as SavedChartRecord;
       setSavedCharts((previous) =>
         previous.map((item) => (item.saved_chart_id === savedChartId ? updated : item))
       );
@@ -169,21 +200,17 @@ export default function WorkspacePageClient() {
   };
 
   const saveComparisonNotes = async (savedComparisonId: string) => {
-    if (!token) return;
+    if (!user) return;
     try {
       setSaveStates((previous) => ({ ...previous, [savedComparisonId]: "saving" }));
-      const response = await fetch(`${ASTRO_API}/api/v1/saved-comparisons/${savedComparisonId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ notes: notesDrafts[savedComparisonId] ?? "" }),
-      });
-      if (!response.ok) {
+      const updated = await updateSavedComparisonNotes(
+        user.user_id,
+        savedComparisonId,
+        notesDrafts[savedComparisonId] ?? ""
+      );
+      if (!updated) {
         throw new Error("Could not save comparison notes.");
       }
-      const updated = (await response.json()) as SavedComparisonRecord;
       setSavedComparisons((previous) =>
         previous.map((item) => (item.saved_comparison_id === savedComparisonId ? updated : item))
       );
@@ -196,20 +223,16 @@ export default function WorkspacePageClient() {
   };
 
   const toggleChartArchive = async (chart: SavedChartRecord) => {
-    if (!token) return;
+    if (!user) return;
     try {
-      const response = await fetch(`${ASTRO_API}/api/v1/saved-charts/${chart.saved_chart_id}/archive`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ archived: !chart.archived_at }),
-      });
-      if (!response.ok) {
+      const updated = await toggleSavedChartArchive(
+        user.user_id,
+        chart.saved_chart_id,
+        !chart.archived_at
+      );
+      if (!updated) {
         throw new Error("Archive update failed.");
       }
-      const updated = (await response.json()) as SavedChartRecord;
       setSavedCharts((previous) =>
         previous.map((item) => (item.saved_chart_id === chart.saved_chart_id ? updated : item))
       );
@@ -220,23 +243,16 @@ export default function WorkspacePageClient() {
   };
 
   const toggleComparisonArchive = async (comparison: SavedComparisonRecord) => {
-    if (!token) return;
+    if (!user) return;
     try {
-      const response = await fetch(
-        `${ASTRO_API}/api/v1/saved-comparisons/${comparison.saved_comparison_id}/archive`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ archived: !comparison.archived_at }),
-        }
+      const updated = await toggleSavedComparisonArchive(
+        user.user_id,
+        comparison.saved_comparison_id,
+        !comparison.archived_at
       );
-      if (!response.ok) {
+      if (!updated) {
         throw new Error("Archive update failed.");
       }
-      const updated = (await response.json()) as SavedComparisonRecord;
       setSavedComparisons((previous) =>
         previous.map((item) =>
           item.saved_comparison_id === comparison.saved_comparison_id ? updated : item
@@ -249,18 +265,13 @@ export default function WorkspacePageClient() {
   };
 
   const deleteChart = async (chart: SavedChartRecord) => {
-    if (!token) return;
+    if (!user) return;
     if (!window.confirm(`Delete ${chart.name}'s saved chart permanently?`)) {
       return;
     }
     try {
-      const response = await fetch(`${ASTRO_API}/api/v1/saved-charts/${chart.saved_chart_id}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (!response.ok) {
+      const deleted = await deleteSavedChart(user.user_id, chart.saved_chart_id);
+      if (!deleted) {
         throw new Error("Delete failed.");
       }
       setSavedCharts((previous) =>
@@ -273,21 +284,16 @@ export default function WorkspacePageClient() {
   };
 
   const deleteComparison = async (comparison: SavedComparisonRecord) => {
-    if (!token) return;
+    if (!user) return;
     if (!window.confirm(`Delete the saved report for ${comparison.primary_name} and ${comparison.partner_name}?`)) {
       return;
     }
     try {
-      const response = await fetch(
-        `${ASTRO_API}/api/v1/saved-comparisons/${comparison.saved_comparison_id}`,
-        {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const deleted = await deleteSavedComparison(
+        user.user_id,
+        comparison.saved_comparison_id
       );
-      if (!response.ok) {
+      if (!deleted) {
         throw new Error("Delete failed.");
       }
       setSavedComparisons((previous) =>
@@ -324,23 +330,17 @@ export default function WorkspacePageClient() {
   };
 
   const exportWorkspace = async () => {
-    if (!token) return;
+    if (!user) return;
     try {
       setIsExporting(true);
-      const response = await fetch(`${ASTRO_API}/api/v1/export/excel`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const snapshot = await exportWorkspaceSnapshot(user.user_id);
+      const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
+        type: "application/json",
       });
-      if (!response.ok) {
-        throw new Error("Export failed.");
-      }
-
-      const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const anchor = document.createElement("a");
       anchor.href = url;
-      anchor.download = "astro_workspace.xlsx";
+      anchor.download = "astro_workspace.json";
       document.body.appendChild(anchor);
       anchor.click();
       anchor.remove();

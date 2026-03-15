@@ -2,8 +2,6 @@ from datetime import date, datetime, time, timedelta, timezone
 from functools import lru_cache
 
 from app.config import get_settings
-from app.db.session import get_mongo_database
-from app.infrastructure.database_gateway import DatabaseGateway
 from app.models.chart_models import (
     AccessMetadata,
     AspectInfo,
@@ -19,6 +17,7 @@ from app.models.chart_models import (
     ForecastReading,
     NakshatraInfo,
     NavamsaPositionInfo,
+    StorageStatus,
     TransitAspectInfo,
     TransitData,
     TransitPositionInfo,
@@ -115,7 +114,6 @@ class ChartService:
         self._settings = get_settings()
         self._engine = SwissEphemerisEngine(self._settings)
         self._rule_engine = DeterministicRuleEngine()
-        self._gateway_factory = lambda: DatabaseGateway(get_mongo_database())
         self._nakshatra_engine = NakshatraEngine()
         self._aspect_engine = AspectEngine()
         self._navamsa_engine = NavamsaEngine()
@@ -420,30 +418,14 @@ class ChartService:
                 ],
             )
 
-        if persist_result:
-            persistence_payload = {
-                "client": client.model_dump(mode="json"),
-                "chart": astro_chart.model_dump(mode="json"),
-                "engine": {
-                    "engine_id": preset.engine_id,
-                    "engine_label": preset.label,
-                    "ephemeris_provider": "Swiss Ephemeris (pyswisseph)",
-                    "ayanamsha": preset.ayanamsha,
-                    "house_system": preset.house_system,
-                    "fallback_mode": computed.fallback_mode,
-                },
-                "birth": {
-                    "birth_date": birth.birth_date.isoformat(),
-                    "birth_time": birth.birth_time.isoformat(),
-                },
-            }
-            storage_status = self._gateway_factory().persist_chart(persistence_payload)
-        else:
-            storage_status = {
-                "configured": True,
-                "persisted": False,
-                "message": "Persistence skipped for this request.",
-            }
+        storage_status = StorageStatus(
+            configured=False,
+            persisted=False,
+            message=(
+                "Backend persistence is disabled. Save charts and workspace records through "
+                "the Next.js app's Supabase layer."
+            ),
+        )
 
         locked_features: list[str] = []
         if not include_premium:

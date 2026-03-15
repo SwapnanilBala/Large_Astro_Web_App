@@ -21,14 +21,13 @@ class ChartAccessTests(unittest.TestCase):
                 longitude=0,
             ),
             include_transits=True,
-            current_user={"subscription_tier": "basic"},
             service=service,
         )
 
         _, kwargs = service.build_chart.call_args
         self.assertTrue(kwargs["include_premium"])
         self.assertTrue(kwargs["include_ultimate"])
-        self.assertEqual(kwargs["subscription_tier"], "basic")
+        self.assertEqual(kwargs["subscription_tier"], "guest")
 
     def test_pro_user_gets_full_chart(self) -> None:
         service = Mock()
@@ -47,14 +46,13 @@ class ChartAccessTests(unittest.TestCase):
             town="",
             time_zone_id="",
             include_transits=True,
-            current_user={"subscription_tier": "pro"},
             service=service,
         )
 
         _, kwargs = service.build_chart.call_args
         self.assertTrue(kwargs["include_premium"])
         self.assertTrue(kwargs["include_ultimate"])
-        self.assertEqual(kwargs["subscription_tier"], "pro")
+        self.assertEqual(kwargs["subscription_tier"], "guest")
 
     def test_ultimate_user_gets_full_chart_modules(self) -> None:
         service = Mock()
@@ -73,14 +71,13 @@ class ChartAccessTests(unittest.TestCase):
             town="",
             time_zone_id="",
             include_transits=True,
-            current_user={"subscription_tier": "ultimate"},
             service=service,
         )
 
         _, kwargs = service.build_chart.call_args
         self.assertTrue(kwargs["include_premium"])
         self.assertTrue(kwargs["include_ultimate"])
-        self.assertEqual(kwargs["subscription_tier"], "ultimate")
+        self.assertEqual(kwargs["subscription_tier"], "guest")
 
     def test_guest_user_gets_full_chart(self) -> None:
         service = Mock()
@@ -99,7 +96,6 @@ class ChartAccessTests(unittest.TestCase):
             town="",
             time_zone_id="",
             include_transits=False,
-            current_user=None,
             service=service,
         )
 

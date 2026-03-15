@@ -10,6 +10,7 @@ import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-q
 import { useAuth } from "@/lib/auth-context";
 import { profileInitialState } from "@/lib/astro-types";
 import { useToast } from "@/lib/toast-context";
+import { saveComparison } from "@/lib/workspace-store";
 
 const ASTRO_API =
   process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
@@ -255,10 +256,37 @@ function ProfileCard({ title, profile, setProfile }: ProfileCardProps) {
   );
 }
 
+function buildCompatibilityQueryString(primary: ProfileQueryInput, partner: ProfileQueryInput) {
+  return new URLSearchParams({
+    name: primary.name,
+    birthDate: primary.birthDate,
+    birthTime: primary.birthTime,
+    timezoneOffsetMinutes: primary.timezoneOffsetMinutes,
+    latitude: primary.latitude,
+    longitude: primary.longitude,
+    country: primary.country,
+    state: primary.state,
+    city: primary.city,
+    town: primary.town,
+    timeZoneId: primary.timeZoneId,
+    partnerName: partner.name,
+    partnerBirthDate: partner.birthDate,
+    partnerBirthTime: partner.birthTime,
+    partnerTimezoneOffsetMinutes: partner.timezoneOffsetMinutes,
+    partnerLatitude: partner.latitude,
+    partnerLongitude: partner.longitude,
+    partnerCountry: partner.country,
+    partnerState: partner.state,
+    partnerCity: partner.city,
+    partnerTown: partner.town,
+    partnerTimeZoneId: partner.timeZoneId,
+  }).toString();
+}
+
 export default function CompatibilityPageClient({
   initialSearchParams,
 }: CompatibilityPageClientProps) {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { pushToast } = useToast();
   const [primary, setPrimary] = useState<ProfileQueryInput>(() =>
     profileFromParams(initialSearchParams, "")
@@ -291,12 +319,11 @@ export default function CompatibilityPageClient({
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify({
           primary: buildBirthDetailsPayload(primary),
           partner: buildBirthDetailsPayload(partner),
-          save_result: saveResult,
+          save_result: false,
         }),
       });
 
@@ -306,6 +333,16 @@ export default function CompatibilityPageClient({
       }
 
       const payload = (await response.json()) as CompatibilityApiResponse;
+      if (saveResult && user) {
+        const saved = await saveComparison(user.user_id, {
+          primary_name: payload.primary_client.name,
+          partner_name: payload.partner_client.name,
+          compatibility_score: payload.compatibility_score,
+          summary: payload.summary,
+          query_string: buildCompatibilityQueryString(primary, partner),
+        });
+        payload.saved_comparison_id = saved.saved_comparison_id;
+      }
       setResult(payload);
       pushToast(
         saveResult ? "Compatibility report saved." : "Compatibility report ready.",
@@ -317,34 +354,10 @@ export default function CompatibilityPageClient({
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, partner, primary, pushToast, token]);
+  }, [canSubmit, partner, primary, pushToast, user]);
 
   const shareCompatibility = async () => {
-    const params = new URLSearchParams({
-      name: primary.name,
-      birthDate: primary.birthDate,
-      birthTime: primary.birthTime,
-      timezoneOffsetMinutes: primary.timezoneOffsetMinutes,
-      latitude: primary.latitude,
-      longitude: primary.longitude,
-      country: primary.country,
-      state: primary.state,
-      city: primary.city,
-      town: primary.town,
-      timeZoneId: primary.timeZoneId,
-      partnerName: partner.name,
-      partnerBirthDate: partner.birthDate,
-      partnerBirthTime: partner.birthTime,
-      partnerTimezoneOffsetMinutes: partner.timezoneOffsetMinutes,
-      partnerLatitude: partner.latitude,
-      partnerLongitude: partner.longitude,
-      partnerCountry: partner.country,
-      partnerState: partner.state,
-      partnerCity: partner.city,
-      partnerTown: partner.town,
-      partnerTimeZoneId: partner.timeZoneId,
-    });
-    const url = `${window.location.origin}/insights/compatibility?${params.toString()}`;
+    const url = `${window.location.origin}/insights/compatibility?${buildCompatibilityQueryString(primary, partner)}`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -390,7 +403,7 @@ export default function CompatibilityPageClient({
         <h1>Compatibility workspace</h1>
         <p className="lead">
           Compare two full birth profiles, inspect the strongest synastry links, and save the report
-          into your Neon-backed account workspace.
+          into your Supabase-backed account workspace.
         </p>
 
         <div className="compatibility-grid">

@@ -6,7 +6,7 @@ This project now has:
 - Python FastAPI backend for astrology chart generation
 - Swiss Ephemeris integration for planetary and Lagna calculation
 - Deterministic rule engine for immediate chart interpretation
-- MongoDB Atlas persistence for auth, chart storage, export, and saved history
+- Supabase-backed auth and workspace storage on the Next.js side
 
 ## Run Next.js App
 
@@ -37,26 +37,28 @@ Create `.env.local` in project root (or use `.env.example`):
 ```bash
 ASTRO_API_BASE_URL=http://127.0.0.1:8000
 NEXT_PUBLIC_ASTRO_API_BASE_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-Create `backend/.env` from `backend/.env.example` and set your MongoDB Atlas connection:
+Create `backend/.env` from `backend/.env.example` only if you want to customize CORS or the Swiss Ephemeris path:
 
 ```bash
-MONGODB_URI=mongodb+srv://<db-user>:<url-encoded-password>@<cluster-host>/<db_name>?retryWrites=true&w=majority&appName=<app-name>
-MONGODB_DB_NAME=swapastro
+EPHEMERIS_PATH=
+CORS_ORIGINS=["http://localhost:7001","http://127.0.0.1:7001"]
 ```
-
-If the password contains special characters like `@` or `#`, URL-encode it before placing it in the URI.
 
 ## Database
 
-The backend now supports:
+This repo now uses:
 
-- MongoDB Atlas via `MONGODB_URI`
-- Automatic collection/index initialization on backend startup
-- Persistent auth, saved charts, saved comparisons, and workspace export from the same Mongo database
+- Supabase Auth for sign-in and registration
+- Supabase tables for saved charts and saved compatibility reports
+- A stateless FastAPI backend for astrology computation only
 
-For Vercel deployments, add the same `MONGODB_URI` and `MONGODB_DB_NAME` values in the project environment settings.
+Run the SQL in [schema.sql](/c:/Users/Retro/Large_Scale_Astro_App/Next.js_Version/supabase/schema.sql) in your Supabase SQL editor before using synced workspace storage.
+
+For Vercel deployments, add the same `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ASTRO_API_BASE_URL`, and `NEXT_PUBLIC_ASTRO_API_BASE_URL` values in the project environment settings.
 
 ## Windows Note
 

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
 import { buildSavedChartPayload } from "@/lib/chart-query";
+import { saveChart as saveChartRecord } from "@/lib/workspace-store";
 
 export type ChartHistoryEntry = {
   name: string;
@@ -15,8 +16,6 @@ export type ChartHistoryEntry = {
 
 const STORAGE_KEY = "astro_chart_history";
 const MAX_ENTRIES = 20;
-const ASTRO_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
 
 type ChartHistorySaverProps = {
   name: string;
@@ -33,7 +32,7 @@ export default function ChartHistorySaver({
   ascendantSign,
   queryString,
 }: ChartHistorySaverProps) {
-  const { isAuthenticated, token } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     try {
@@ -62,25 +61,18 @@ export default function ChartHistorySaver({
   }, [name, city, birthDate, ascendantSign, queryString]);
 
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated || !user) return;
 
-    const saveChart = async () => {
+    const syncChart = async () => {
       try {
-        await fetch(`${ASTRO_API}/api/v1/saved-charts`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(buildSavedChartPayload(queryString, ascendantSign)),
-        });
+        await saveChartRecord(user.user_id, buildSavedChartPayload(queryString, ascendantSign));
       } catch {
-        /* ignore backend save failures and keep local fallback */
+        /* ignore remote sync failures and keep local fallback */
       }
     };
 
-    void saveChart();
-  }, [ascendantSign, birthDate, city, isAuthenticated, name, queryString, token]);
+    void syncChart();
+  }, [ascendantSign, birthDate, city, isAuthenticated, name, queryString, user]);
 
   return null;
 }

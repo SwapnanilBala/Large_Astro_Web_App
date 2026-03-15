@@ -5,17 +5,11 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTheme } from "@/lib/theme-context";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
+import { listSavedCharts } from "@/lib/workspace-store";
 import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
 
-const ASTRO_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
-
-type SavedChartApiEntry = {
-  query_string: string;
-};
-
 export default function Navbar() {
-  const { user, token, isAuthenticated, isLoading, isPremium, logout } = useAuth();
+  const { user, isAuthenticated, isLoading, isPremium, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useTranslation();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -40,20 +34,12 @@ export default function Navbar() {
 
     setLastChartFromLocal();
 
-    if (!token) return;
-
     let isCancelled = false;
 
     const loadSavedCharts = async () => {
       try {
-        const res = await fetch(`${ASTRO_API}/api/v1/saved-charts`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (!res.ok) return;
-
-        const data: SavedChartApiEntry[] = await res.json();
+        if (!user) return;
+        const data = await listSavedCharts(user.user_id);
         if (isCancelled || data.length === 0) return;
 
         setLastChartUrl(`/insights?${data[0].query_string}`);
@@ -67,7 +53,7 @@ export default function Navbar() {
     return () => {
       isCancelled = true;
     };
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, user]);
 
   /* Close language dropdown on outside click */
   useEffect(() => {
