@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "cmd",
+      "runtimeArgs": [
+        "/c",
+        "npx next dev -p 7002"
+      ],
+      "port": 7002,
+      "autoPort": true
+    }
+  ]
+}

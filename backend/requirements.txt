@@ -1,0 +1,11 @@
+fastapi>=0.115.0,<1.0.0
+uvicorn[standard]>=0.30.0,<1.0.0
+pyswisseph>=2.10.3.2,<3.0.0
+pydantic-settings>=2.4.0,<3.0.0
+openpyxl>=3.1.0,<4.0.0
+python-dotenv>=1.1.0,<2.0.0
+bcrypt>=4.0.0,<5.0.0
+PyJWT>=2.8.0,<3.0.0
+SQLAlchemy>=2.0.38,<3.0.0
+psycopg[binary]>=3.2.6,<4.0.0
+alembic>=1.14.1,<2.0.0
