@@ -67,7 +67,7 @@ class AuthService:
         self,
         email: str,
         display_name: str,
-        requested_tier: str = "basic",
+        requested_tier: str = "guest",
     ) -> str:
         if self._settings.is_reserved_ultimate_member(
             display_name=display_name,

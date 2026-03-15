@@ -24,9 +24,9 @@ class AuthServiceTests(unittest.TestCase):
         }
         self.service._redeem_cooldown_seconds = 5
 
-    def test_register_defaults_to_basic_tier(self) -> None:
-        result = self.service.register("basic@example.com", "pass1234", "Basic User")
-        self.assertEqual(result["subscription_tier"], "basic")
+    def test_register_defaults_to_guest_tier(self) -> None:
+        result = self.service.register("guest@example.com", "pass1234", "Guest User")
+        self.assertEqual(result["subscription_tier"], "guest")
 
     def test_redeem_plan_updates_subscription_tier(self) -> None:
         created = self.service.register("pro@example.com", "pass1234", "Pro User")

@@ -86,7 +86,7 @@ class UserRecord(Base):
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     display_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    subscription_tier: Mapped[str] = mapped_column(String(32), default="basic", nullable=False)
+    subscription_tier: Mapped[str] = mapped_column(String(32), default="guest", nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now, nullable=False)
 
 

@@ -24,9 +24,9 @@ const PLAN_ORDER: Array<{
     accentClass: "pricing-card--basic",
     fieldClass: "input-glow-aqua",
     featureLines: [
-      "Core natal chart reading",
-      "Account workspace and saved charts",
-      "Accurate location and timezone resolution",
+      "Guest mode starts here by default",
+      "All chart-reading features are already unlocked",
+      "Create an account only if you want synced workspace storage",
     ],
   },
   {
@@ -35,9 +35,9 @@ const PLAN_ORDER: Array<{
     accentClass: "pricing-card--pro",
     fieldClass: "input-glow-gold",
     featureLines: [
-      "Everything in Basic",
-      "Nakshatra, dasha, aspects, and Navamsa",
-      "Compatibility reports and saved comparisons",
+      "Same open chart access as guest mode",
+      "Useful if you still want to test plan-code flows",
+      "Keeps compatibility and workspace tools under an account label",
     ],
   },
   {
@@ -46,10 +46,10 @@ const PLAN_ORDER: Array<{
     accentClass: "pricing-card--ultimate",
     fieldClass: "input-glow-coral",
     featureLines: [
-      "Everything in Pro",
-      "Live transits and workspace export",
-      "Life-domain deep dives for love, family, influence, and more",
-      "Reserved full-access credential for every feature",
+      "Same open chart access as every other tier",
+      "Reserved labels still work for internal/demo accounts",
+      "Useful for testing upgrade flows without changing public access",
+      "Does not unlock extra chart modules because they are already open",
     ],
   },
 ];
@@ -64,31 +64,31 @@ const FEATURE_MATRIX: Array<{
   },
   {
     label: "Saved charts workspace",
-    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
+    plans: { basic: "Account required", pro: "Account required", ultimate: "Account required" },
   },
   {
     label: "Nakshatra and dasha",
-    plans: { basic: "Locked", pro: "Included", ultimate: "Included" },
+    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
   },
   {
     label: "Aspects and Navamsa",
-    plans: { basic: "Locked", pro: "Included", ultimate: "Included" },
+    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
   },
   {
     label: "Compatibility reports",
-    plans: { basic: "Locked", pro: "Included", ultimate: "Included" },
+    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
   },
   {
     label: "Live transits",
-    plans: { basic: "Locked", pro: "Locked", ultimate: "Included" },
+    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
   },
   {
     label: "Workspace export",
-    plans: { basic: "Locked", pro: "Locked", ultimate: "Included" },
+    plans: { basic: "Account required", pro: "Account required", ultimate: "Account required" },
   },
   {
     label: "Life-domain deep dives",
-    plans: { basic: "Locked", pro: "Locked", ultimate: "Included" },
+    plans: { basic: "Included", pro: "Included", ultimate: "Included" },
   },
 ];
 
@@ -147,24 +147,24 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
       <div className="ambient ambient-right" />
       <section className="dashboard-shell">
         <p className="kicker">Pricing</p>
-        <h1>Mock pricing and code redemption</h1>
+        <h1>Open access and account labels</h1>
         <p className="lead">
-          This is a temporary pricing screen. There is no real checkout yet. Each plan can be unlocked
-          by entering the matching code under the card.
+          All chart features are now open to every visitor, and the app begins in guest mode. This page
+          stays around only for demo account labels and code-redemption testing.
         </p>
 
         <div className="pricing-active-plan">
           <span className="access-pill access-pill--premium">Active plan</span>
           <p>
             {isAuthenticated
-              ? `You are currently on ${currentPlan === "guest" ? "no active plan" : currentPlan}.`
-              : "Sign in to activate a plan code."}
+              ? `Your account label is ${currentPlan === "guest" ? "guest" : currentPlan}.`
+              : "You are currently browsing as guest with full chart access."}
           </p>
         </div>
 
         {!isAuthenticated && (
           <p className="error-note">
-            Sign in first, then redeem a plan code to update your account tier.
+            Sign in only if you want synced saved charts, workspace actions, or account-based testing.
           </p>
         )}
 
@@ -194,7 +194,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
                 </div>
 
                 <label className={`pricing-code-label ${plan.fieldClass}`}>
-                  Already purchased? Type the code below.
+                  Want to change the account label for testing? Type the code below.
                   <input
                     type="text"
                     value={codes[plan.id]}
@@ -227,12 +227,12 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
         <section className="rules-panel pricing-matrix-panel">
           <div className="rules-header">
             <p className="kicker">Feature Matrix</p>
-            <h2>What each plan unlocks</h2>
+            <h2>Current access state</h2>
           </div>
           <div className="pricing-matrix">
             <div className="pricing-matrix-row pricing-matrix-row--header">
               <span>Feature</span>
-              <span>Basic</span>
+              <span>Guest</span>
               <span>Pro</span>
               <span>Ultimate</span>
             </div>

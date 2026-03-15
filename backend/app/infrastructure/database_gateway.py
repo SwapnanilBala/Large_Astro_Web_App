@@ -170,7 +170,7 @@ class DatabaseGateway:
         email: str,
         password_hash: str,
         display_name: str,
-        subscription_tier: str = "basic",
+        subscription_tier: str = "guest",
     ) -> dict:
         user = UserRecord(
             email=email,

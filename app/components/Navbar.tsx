@@ -159,8 +159,9 @@ export default function Navbar() {
         ) : (
           <>
             <Link href="/pricing" className="navbar-chart-link">
-              Pricing
+              Access
             </Link>
+            <span className="navbar-tier navbar-tier--core">guest</span>
             <Link href="/login" className="navbar-signin-link">
               {t("navbar.signInPrompt")} <span>{t("navbar.signIn")}</span>
             </Link>

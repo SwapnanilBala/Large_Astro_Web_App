@@ -372,10 +372,10 @@ export default function WorkspacePageClient() {
         <div className="ambient ambient-right" />
         <section className="dashboard-shell">
           <p className="kicker">Workspace</p>
-          <h1>Sign in to open your saved charts.</h1>
+          <h1>Guest mode has full chart access. Workspace still needs an account.</h1>
           <p className="lead">
-            Your account-backed workspace includes saved charts, saved compatibility reports, notes,
-            archive controls, delete actions, and export.
+            The astrology engine is fully open for guests. Sign in only if you want account-backed saved
+            charts, saved compatibility reports, notes, archive controls, delete actions, and export.
           </p>
           <div className="workspace-actions">
             <Link href="/login" className="ghost-link">
@@ -462,7 +462,7 @@ export default function WorkspacePageClient() {
           <article className="metric-card">
             <h3>Subscription tier</h3>
             <p>{user?.subscription_tier ?? "guest"}</p>
-            <small>Used by the backend to decide premium chart access.</small>
+            <small>Current account label. Chart modules are open regardless of tier.</small>
           </article>
         </div>
 

@@ -65,7 +65,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user_id: parsedUser.user_id ?? "",
           email: parsedUser.email ?? "",
           display_name: parsedUser.display_name ?? "",
-          subscription_tier: parsedUser.subscription_tier ?? "basic",
+          subscription_tier: parsedUser.subscription_tier ?? "guest",
         });
         syncTokenCookie(storedToken);
       }
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user_id: data.user_id,
         email: data.email,
         display_name: data.display_name,
-        subscription_tier: data.subscription_tier ?? "basic",
+        subscription_tier: data.subscription_tier ?? "guest",
       };
       setUser(nextUser);
       setToken(data.token);
@@ -119,7 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user_id: data.user_id,
         email: data.email,
         display_name: data.display_name,
-        subscription_tier: data.subscription_tier ?? "basic",
+        subscription_tier: data.subscription_tier ?? "guest",
       };
       setUser(nextUser);
       setToken(data.token);
@@ -158,7 +158,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user_id: data.user_id,
           email: data.email,
           display_name: data.display_name,
-          subscription_tier: data.subscription_tier ?? "basic",
+          subscription_tier: data.subscription_tier ?? "guest",
         };
         setUser(nextUser);
         setToken(data.token);

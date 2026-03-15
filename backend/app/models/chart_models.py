@@ -285,8 +285,8 @@ class StorageStatus(BaseModel):
 
 class AccessMetadata(BaseModel):
     subscription_tier: str = "guest"
-    premium_features_enabled: bool = False
-    ultimate_features_enabled: bool = False
+    premium_features_enabled: bool = True
+    ultimate_features_enabled: bool = True
     locked_features: list[str] = Field(default_factory=list)
 
 
