@@ -1,10 +1,8 @@
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from app.api.deps import get_optional_current_user
-from app.db.session import get_db_session
+from app.api.deps import get_database_gateway, get_optional_current_user
 from app.infrastructure.database_gateway import DatabaseGateway
 from app.models.chart_models import CompatibilityRequest, CompatibilityResponse
 from app.services.compatibility_service import CompatibilityService
@@ -44,7 +42,7 @@ def _build_query_string(payload: CompatibilityRequest) -> str:
 def create_compatibility_report(
     payload: CompatibilityRequest,
     current_user: dict | None = Depends(get_optional_current_user),
-    session: Session = Depends(get_db_session),
+    gateway: DatabaseGateway = Depends(get_database_gateway),
 ) -> CompatibilityResponse:
     service = CompatibilityService()
     response = service.build_compatibility(payload.primary, payload.partner)
@@ -56,15 +54,18 @@ def create_compatibility_report(
                 detail="Sign in to save compatibility reports.",
             )
 
-        saved = DatabaseGateway(session).save_comparison_for_user(
-            user_id=current_user["sub"],
-            primary_name=response.primary_client.name,
-            partner_name=response.partner_client.name,
-            compatibility_score=response.compatibility_score,
-            summary=response.summary,
-            query_string=_build_query_string(payload),
-            report_json=response.model_dump(mode="json"),
-        )
+        try:
+            saved = gateway.save_comparison_for_user(
+                user_id=current_user["sub"],
+                primary_name=response.primary_client.name,
+                partner_name=response.partner_client.name,
+                compatibility_score=response.compatibility_score,
+                summary=response.summary,
+                query_string=_build_query_string(payload),
+                report_json=response.model_dump(mode="json"),
+            )
+        except RuntimeError as exc:
+            raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
         response.saved_comparison_id = saved.saved_comparison_id
 
     return response

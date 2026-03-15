@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import FileResponse
 
 from app.api.deps import get_current_user
@@ -14,7 +14,10 @@ def export_excel(
     settings: Settings = Depends(get_settings),
 ) -> FileResponse:
     service = ExcelExportService(settings)
-    file_path = service.export_user_workspace(current_user["sub"])
+    try:
+        file_path = service.export_user_workspace(current_user["sub"])
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail=str(exc)) from exc
     return FileResponse(
         path=file_path,
         filename="astro_workspace.xlsx",

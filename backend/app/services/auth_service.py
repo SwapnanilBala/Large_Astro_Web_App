@@ -6,7 +6,7 @@ import bcrypt
 import jwt
 
 from app.config import get_settings
-from app.db.session import get_session_factory
+from app.db.session import get_mongo_database
 from app.infrastructure.database_gateway import DatabaseGateway
 
 
@@ -15,10 +15,10 @@ class AuthService:
 
     def __init__(self) -> None:
         self._settings = get_settings()
-        self._session_factory = get_session_factory()
         self._secret = self._settings.jwt_secret
         self._algorithm = "HS256"
         self._expiry_days = 7
+        self._gateway_factory = lambda: DatabaseGateway(get_mongo_database())
         self._plan_redemption_codes = {
             tier: code.strip().upper()
             for tier, code in self._settings.get_plan_redemption_codes().items()
@@ -77,20 +77,19 @@ class AuthService:
         return requested_tier
 
     def register(self, email: str, password: str, display_name: str) -> dict:
-        with self._session_factory() as session:
-            gateway = DatabaseGateway(session)
-            existing = gateway.find_user_by_email(email)
-            if existing:
-                raise ValueError("An account with this email already exists.")
+        gateway = self._gateway_factory()
+        existing = gateway.find_user_by_email(email)
+        if existing:
+            raise ValueError("An account with this email already exists.")
 
-            password_hash = self._hash_password(password)
-            subscription_tier = self._resolve_subscription_tier(email, display_name)
-            user = gateway.create_user(
-                email,
-                password_hash,
-                display_name,
-                subscription_tier=subscription_tier,
-            )
+        password_hash = self._hash_password(password)
+        subscription_tier = self._resolve_subscription_tier(email, display_name)
+        user = gateway.create_user(
+            email,
+            password_hash,
+            display_name,
+            subscription_tier=subscription_tier,
+        )
 
         token = self._create_token(
             user["user_id"],
@@ -104,27 +103,26 @@ class AuthService:
         }
 
     def login(self, email: str, password: str) -> dict | None:
-        with self._session_factory() as session:
-            gateway = DatabaseGateway(session)
-            user = gateway.find_user_by_email(email)
+        gateway = self._gateway_factory()
+        user = gateway.find_user_by_email(email)
+        if not user:
+            return None
+
+        if not self._verify_password(password, user["password_hash"]):
+            return None
+
+        effective_tier = self._resolve_subscription_tier(
+            user["email"],
+            user["display_name"],
+            user["subscription_tier"],
+        )
+        if effective_tier != user["subscription_tier"]:
+            user = gateway.update_user_subscription_tier(
+                user["user_id"],
+                effective_tier,
+            )
             if not user:
                 return None
-
-            if not self._verify_password(password, user["password_hash"]):
-                return None
-
-            effective_tier = self._resolve_subscription_tier(
-                user["email"],
-                user["display_name"],
-                user["subscription_tier"],
-            )
-            if effective_tier != user["subscription_tier"]:
-                user = gateway.update_user_subscription_tier(
-                    user["user_id"],
-                    effective_tier,
-                )
-                if not user:
-                    return None
 
         token = self._create_token(
             user["user_id"],
@@ -159,20 +157,19 @@ class AuthService:
         if expected_plan and expected_plan != plan:
             raise ValueError("That code does not match the selected plan.")
 
-        with self._session_factory() as session:
-            gateway = DatabaseGateway(session)
-            current_user = gateway.find_user_by_id(user_id)
-            if not current_user:
-                raise ValueError("User account not found.")
+        gateway = self._gateway_factory()
+        current_user = gateway.find_user_by_id(user_id)
+        if not current_user:
+            raise ValueError("User account not found.")
 
-            effective_plan = self._resolve_subscription_tier(
-                current_user["email"],
-                current_user["display_name"],
-                plan,
-            )
-            user = gateway.update_user_subscription_tier(user_id, effective_plan)
-            if not user:
-                raise ValueError("User account not found.")
+        effective_plan = self._resolve_subscription_tier(
+            current_user["email"],
+            current_user["display_name"],
+            plan,
+        )
+        user = gateway.update_user_subscription_tier(user_id, effective_plan)
+        if not user:
+            raise ValueError("User account not found.")
 
         token = self._create_token(
             user["user_id"],

@@ -1,75 +1,67 @@
 from functools import lru_cache
 from typing import Generator
 
-from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
-from sqlalchemy.orm import Session, sessionmaker
+from pymongo import ASCENDING, DESCENDING, MongoClient
+from pymongo.database import Database
 
-from app.db.base import Base
 from app.config import Settings, get_settings
 
 
-def normalize_database_url(url: str) -> str:
-    if url.startswith("postgresql+psycopg://") or url.startswith("sqlite"):
-        return url
-    if url.startswith("postgresql://"):
-        return url.replace("postgresql://", "postgresql+psycopg://", 1)
-    if url.startswith("postgres://"):
-        return url.replace("postgres://", "postgresql+psycopg://", 1)
-    return url
-
-
-def _create_engine(settings: Settings, direct: bool = False) -> Engine:
-    raw_url = settings.get_database_direct_url() if direct else settings.get_database_url()
-    database_url = normalize_database_url(raw_url)
-
-    if database_url.startswith("sqlite"):
-        return create_engine(
-            database_url,
-            connect_args={"check_same_thread": False},
-            future=True,
-        )
-
-    return create_engine(
-        database_url,
-        pool_pre_ping=True,
-        pool_size=settings.db_pool_size,
-        max_overflow=settings.db_max_overflow,
-        pool_recycle=settings.db_pool_recycle_seconds,
-        future=True,
+def _build_client(settings: Settings) -> MongoClient | None:
+    if not settings.mongodb_uri.strip():
+        return None
+    return MongoClient(
+        settings.mongodb_uri,
+        tz_aware=True,
+        serverSelectionTimeoutMS=settings.mongodb_server_selection_timeout_ms,
     )
 
 
 @lru_cache
-def get_engine() -> Engine:
-    return _create_engine(get_settings())
+def get_mongo_client() -> MongoClient | None:
+    return _build_client(get_settings())
 
 
 @lru_cache
-def get_direct_engine() -> Engine:
-    return _create_engine(get_settings(), direct=True)
+def get_mongo_database() -> Database | None:
+    settings = get_settings()
+    client = get_mongo_client()
+    if client is None:
+        return None
+    return client[settings.mongodb_db_name]
 
 
-@lru_cache
-def get_session_factory() -> sessionmaker[Session]:
-    return sessionmaker(
-        bind=get_engine(),
-        autoflush=False,
-        autocommit=False,
-        expire_on_commit=False,
-        future=True,
-    )
-
-
-def get_db_session() -> Generator[Session, None, None]:
-    session = get_session_factory()()
-    try:
-        yield session
-    finally:
-        session.close()
+def get_db_session() -> Generator[Database | None, None, None]:
+    yield get_mongo_database()
 
 
 def init_database() -> None:
-    import app.db.models  # noqa: F401
+    database = get_mongo_database()
+    if database is None:
+        return
 
-    Base.metadata.create_all(bind=get_direct_engine())
+    database.command("ping")
+
+    database.users.create_index([("email", ASCENDING)], unique=True, name="users_email_unique")
+    database.saved_charts.create_index(
+        [
+            ("user_id", ASCENDING),
+            ("name", ASCENDING),
+            ("birth_date", ASCENDING),
+            ("birth_time", ASCENDING),
+        ],
+        unique=True,
+        name="saved_charts_user_profile_unique",
+    )
+    database.saved_charts.create_index(
+        [("user_id", ASCENDING), ("updated_at", DESCENDING)],
+        name="saved_charts_user_updated_idx",
+    )
+    database.saved_comparisons.create_index(
+        [("user_id", ASCENDING), ("updated_at", DESCENDING)],
+        name="saved_comparisons_user_updated_idx",
+    )
+    database.clients.create_index(
+        [("name", ASCENDING), ("birth_date", ASCENDING), ("birth_time", ASCENDING)],
+        name="clients_identity_idx",
+    )

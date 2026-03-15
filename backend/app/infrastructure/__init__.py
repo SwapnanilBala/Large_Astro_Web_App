@@ -1,1 +1,1 @@
-"""Infrastructure adapters (SQLite persistence, Excel export)."""
+"""Infrastructure adapters for MongoDB persistence and exports."""

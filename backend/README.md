@@ -4,7 +4,7 @@ This service implements:
 
 - Swiss Ephemeris based chart computation (`pyswisseph`)
 - Deterministic interpretation rules (Lagna/Sun/Moon + element and house concentration)
-- Neon-ready Postgres persistence with SQLAlchemy + Alembic
+- MongoDB Atlas persistence with PyMongo
 - Authenticated saved-chart history endpoints
 
 ## Setup
@@ -15,17 +15,16 @@ python -m venv .venv
 .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env
-alembic upgrade head
 ```
 
-Recommended Neon environment variables:
+Recommended MongoDB Atlas environment variables:
 
 ```bash
-DATABASE_URL=postgresql://<pooled-neon-connection>
-DATABASE_DIRECT_URL=postgresql://<direct-neon-connection>
+MONGODB_URI=mongodb+srv://<db-user>:<url-encoded-password>@<cluster-host>/<db_name>?retryWrites=true&w=majority&appName=<app-name>
+MONGODB_DB_NAME=swapastro
 ```
 
-If those are omitted, the backend falls back to the local SQLite database.
+The backend initializes its Mongo collections and indexes automatically on startup.
 
 ## Notes for Windows
 

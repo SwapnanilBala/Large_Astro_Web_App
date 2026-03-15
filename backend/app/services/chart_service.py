@@ -2,7 +2,7 @@ from datetime import date, datetime, time, timedelta, timezone
 from functools import lru_cache
 
 from app.config import get_settings
-from app.db.session import get_session_factory
+from app.db.session import get_mongo_database
 from app.infrastructure.database_gateway import DatabaseGateway
 from app.models.chart_models import (
     AccessMetadata,
@@ -115,7 +115,7 @@ class ChartService:
         self._settings = get_settings()
         self._engine = SwissEphemerisEngine(self._settings)
         self._rule_engine = DeterministicRuleEngine()
-        self._session_factory = get_session_factory()
+        self._gateway_factory = lambda: DatabaseGateway(get_mongo_database())
         self._nakshatra_engine = NakshatraEngine()
         self._aspect_engine = AspectEngine()
         self._navamsa_engine = NavamsaEngine()
@@ -422,8 +422,8 @@ class ChartService:
 
         if persist_result:
             persistence_payload = {
-                "client": client.model_dump(),
-                "chart": astro_chart.model_dump(),
+                "client": client.model_dump(mode="json"),
+                "chart": astro_chart.model_dump(mode="json"),
                 "engine": {
                     "engine_id": preset.engine_id,
                     "engine_label": preset.label,
@@ -433,12 +433,11 @@ class ChartService:
                     "fallback_mode": computed.fallback_mode,
                 },
                 "birth": {
-                    "birth_date": birth.birth_date,
+                    "birth_date": birth.birth_date.isoformat(),
                     "birth_time": birth.birth_time.isoformat(),
                 },
             }
-            with self._session_factory() as session:
-                storage_status = DatabaseGateway(session).persist_chart(persistence_payload)
+            storage_status = self._gateway_factory().persist_chart(persistence_payload)
         else:
             storage_status = {
                 "configured": True,

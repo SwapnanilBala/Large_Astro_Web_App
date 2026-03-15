@@ -1,7 +1,5 @@
-"""Authentication endpoints: register and login."""
-
 from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field
 
 from app.api.deps import get_current_user
 from app.services.auth_service import AuthService
@@ -45,11 +43,22 @@ def register(body: RegisterRequest) -> AuthResponse:
             status_code=status.HTTP_409_CONFLICT,
             detail=str(exc),
         ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
 
 
 @router.post("/login", response_model=AuthResponse)
 def login(body: LoginRequest) -> AuthResponse:
-    result = _auth_service.login(body.email, body.password)
+    try:
+        result = _auth_service.login(body.email, body.password)
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail=str(exc),
+        ) from exc
     if not result:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -73,5 +82,10 @@ def redeem_plan(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        ) from exc
+    except RuntimeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail=str(exc),
         ) from exc

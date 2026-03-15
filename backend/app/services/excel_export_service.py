@@ -2,10 +2,10 @@ from pathlib import Path
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
-from sqlalchemy import text
 
 from app.config import Settings
-from app.db.session import get_engine
+from app.db.session import get_mongo_database
+from app.infrastructure.database_gateway import DatabaseGateway
 
 
 class ExcelExportService:
@@ -14,58 +14,50 @@ class ExcelExportService:
 
     def export_user_workspace(self, user_id: str) -> str:
         Path(self._export_path).parent.mkdir(parents=True, exist_ok=True)
-        engine = get_engine()
+        gateway = DatabaseGateway(get_mongo_database())
+        charts = gateway.list_saved_charts_for_user(user_id, limit=5000, status="all")
+        comparisons = gateway.list_saved_comparisons_for_user(user_id, limit=5000, status="all")
 
         wb = Workbook()
         ws_saved_charts = wb.active
         ws_saved_charts.title = "Saved Charts"
-        self._write_query(
-            engine,
+        self._write_rows(
             ws_saved_charts,
-            """
-            SELECT
-              name,
-              city,
-              birth_date,
-              birth_time,
-              timezone_offset_minutes,
-              country,
-              state,
-              town,
-              latitude,
-              longitude,
-              time_zone_id,
-              ascendant_sign,
-              notes,
-              saved_at,
-              updated_at,
-              archived_at
-            FROM saved_charts
-            WHERE user_id = :user_id
-            ORDER BY updated_at DESC
-            """,
-            {"user_id": user_id},
+            [
+                "name",
+                "city",
+                "birth_date",
+                "birth_time",
+                "timezone_offset_minutes",
+                "country",
+                "state",
+                "town",
+                "latitude",
+                "longitude",
+                "time_zone_id",
+                "ascendant_sign",
+                "notes",
+                "saved_at",
+                "updated_at",
+                "archived_at",
+            ],
+            [chart.model_dump(mode="json") for chart in charts],
         )
 
         ws_saved_comparisons = wb.create_sheet("Saved Comparisons")
-        self._write_query(
-            engine,
+        self._write_rows(
             ws_saved_comparisons,
-            """
-            SELECT
-              primary_name,
-              partner_name,
-              compatibility_score,
-              summary,
-              notes,
-              saved_at,
-              updated_at,
-              archived_at
-            FROM saved_comparisons
-            WHERE user_id = :user_id
-            ORDER BY updated_at DESC
-            """,
-            {"user_id": user_id},
+            [
+                "primary_name",
+                "partner_name",
+                "compatibility_score",
+                "summary",
+                "notes",
+                "saved_at",
+                "updated_at",
+                "archived_at",
+            ],
+            [comparison.model_dump(mode="json") for comparison in comparisons],
         )
 
         header_font = Font(bold=True, color="FFFFFF")
@@ -85,10 +77,7 @@ class ExcelExportService:
         return self._export_path
 
     @staticmethod
-    def _write_query(engine, ws, query: str, params: dict) -> None:
-        with engine.connect() as connection:
-            result = connection.execute(text(query), params)
-            columns = list(result.keys())
-            ws.append(columns)
-            for row in result.mappings():
-                ws.append([row.get(column) for column in columns])
+    def _write_rows(ws, columns: list[str], rows: list[dict]) -> None:
+        ws.append(columns)
+        for row in rows:
+            ws.append([row.get(column) for column in columns])

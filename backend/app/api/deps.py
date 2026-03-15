@@ -1,5 +1,7 @@
 from fastapi import Header, HTTPException, status
 
+from app.db.session import get_mongo_database
+from app.infrastructure.database_gateway import DatabaseGateway
 from app.services.auth_service import AuthService
 
 _auth_service = AuthService()
@@ -33,3 +35,7 @@ def get_optional_current_user(authorization: str | None = Header(default=None)) 
         return None
 
     return payload
+
+
+def get_database_gateway() -> DatabaseGateway:
+    return DatabaseGateway(get_mongo_database())

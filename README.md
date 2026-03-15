@@ -6,7 +6,7 @@ This project now has:
 - Python FastAPI backend for astrology chart generation
 - Swiss Ephemeris integration for planetary and Lagna calculation
 - Deterministic rule engine for immediate chart interpretation
-- Neon-ready Postgres persistence for auth, chart storage, export, and saved history
+- MongoDB Atlas persistence for auth, chart storage, export, and saved history
 
 ## Run Next.js App
 
@@ -39,30 +39,24 @@ ASTRO_API_BASE_URL=http://127.0.0.1:8000
 NEXT_PUBLIC_ASTRO_API_BASE_URL=http://127.0.0.1:8000
 ```
 
-Create `backend/.env` from `backend/.env.example` and set Neon connection strings:
+Create `backend/.env` from `backend/.env.example` and set your MongoDB Atlas connection:
 
 ```bash
-DATABASE_URL=postgresql://<pooled-neon-connection>
-DATABASE_DIRECT_URL=postgresql://<direct-neon-connection>
+MONGODB_URI=mongodb+srv://<db-user>:<url-encoded-password>@<cluster-host>/<db_name>?retryWrites=true&w=majority&appName=<app-name>
+MONGODB_DB_NAME=swapastro
 ```
 
-Use the pooled URL for the running FastAPI app and the direct URL for migrations and schema changes.
+If the password contains special characters like `@` or `#`, URL-encode it before placing it in the URI.
 
 ## Database
 
 The backend now supports:
 
-- Neon/Postgres via `DATABASE_URL`
-- Direct migration connections via `DATABASE_DIRECT_URL`
-- SQLite fallback when no Postgres URL is configured
+- MongoDB Atlas via `MONGODB_URI`
+- Automatic collection/index initialization on backend startup
+- Persistent auth, saved charts, saved comparisons, and workspace export from the same Mongo database
 
-Optional migration command:
-
-```bash
-cd backend
-.venv\Scripts\activate
-alembic upgrade head
-```
+For Vercel deployments, add the same `MONGODB_URI` and `MONGODB_DB_NAME` values in the project environment settings.
 
 ## Windows Note
 

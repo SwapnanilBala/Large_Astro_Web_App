@@ -6,7 +6,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False)
+    model_config = SettingsConfigDict(env_file=".env", case_sensitive=False, extra="ignore")
 
     app_name: str = "Astro Intelligence API"
     api_prefix: str = "/api/v1"
@@ -15,13 +15,10 @@ class Settings(BaseSettings):
     )
     ephemeris_path: str = ""
 
-    database_url: str | None = None
-    database_direct_url: str | None = None
-    sqlite_db_path: str = "data/astro_charts.db"
+    mongodb_uri: str = ""
+    mongodb_db_name: str = "swapastro"
+    mongodb_server_selection_timeout_ms: int = 5000
     excel_export_path: str = "data/astro_export.xlsx"
-    db_pool_size: int = 5
-    db_max_overflow: int = 5
-    db_pool_recycle_seconds: int = 1800
 
     jwt_secret: str = "change-me-in-production"
     plan_basic_code: str = "LAGNA-BASIC-5"
@@ -31,13 +28,8 @@ class Settings(BaseSettings):
     ultimate_member_display_names: str = "Swapnanil Bala"
     ultimate_member_emails: str = ""
 
-    def get_database_url(self) -> str:
-        if self.database_url:
-            return self.database_url
-        return f"sqlite:///{self.sqlite_db_path}"
-
-    def get_database_direct_url(self) -> str:
-        return self.database_direct_url or self.get_database_url()
+    def has_mongodb(self) -> bool:
+        return bool(self.mongodb_uri.strip())
 
     def get_plan_redemption_codes(self) -> dict[str, str]:
         return {
