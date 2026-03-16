@@ -60,6 +60,17 @@ Run the SQL in [schema.sql](/c:/Users/Retro/Large_Scale_Astro_App/Next.js_Versio
 
 For Vercel deployments, add the same `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `ASTRO_API_BASE_URL`, and `NEXT_PUBLIC_ASTRO_API_BASE_URL` values in the project environment settings.
 
+## Deploy Backend
+
+The repo now includes [render.yaml](/c:/Users/Retro/Large_Scale_Astro_App/Next.js_Version/render.yaml) for deploying the slimmed-down FastAPI backend on Render.
+
+After the Render service is live, use its public URL for:
+
+```bash
+ASTRO_API_BASE_URL=https://your-render-service.onrender.com
+NEXT_PUBLIC_ASTRO_API_BASE_URL=https://your-render-service.onrender.com
+```
+
 ## Windows Note
 
 `pyswisseph` can require Microsoft C++ Build Tools on Python 3.12+ if no prebuilt wheel is available.
