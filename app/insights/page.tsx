@@ -2,6 +2,8 @@ import Link from "next/link";
 import InsightsContent from "@/app/insights/components/insights-content";
 import type { ChartApiResponse } from "@/lib/astro-types";
 
+export const maxDuration = 60;
+
 type InsightsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
@@ -17,6 +19,8 @@ const requiredParams = [
   "state",
   "city"
 ] as const;
+
+const BACKEND_REQUEST_TIMEOUT_MS = 55_000;
 
 const getSingle = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
@@ -93,7 +97,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
 
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const timeoutId = setTimeout(() => controller.abort(), BACKEND_REQUEST_TIMEOUT_MS);
     const response = await fetch(chartUrl, {
       cache: "no-store",
       signal: controller.signal,
@@ -105,7 +109,9 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
     payload = (await response.json()) as ChartApiResponse;
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") {
-      fetchError = "Request timed out after 8 seconds. Is the backend running?";
+      fetchError =
+        `Request timed out after ${Math.round(BACKEND_REQUEST_TIMEOUT_MS / 1000)} seconds. ` +
+        "The backend may be waking up from an idle cold start.";
     } else {
       fetchError = error instanceof Error ? error.message : "Unknown API error";
     }
@@ -119,7 +125,8 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
           <h1>FastAPI chart service is not available.</h1>
           <p className="lead">
             Start the Python backend on <code>http://127.0.0.1:8000</code> or set
-            <code> ASTRO_API_BASE_URL</code> in your Next.js environment.
+            <code> ASTRO_API_BASE_URL</code> in your Next.js environment. If you are using a free
+            backend host, it may need a short wake-up window after sitting idle.
           </p>
           <p className="error-note">Error: {fetchError}</p>
           <Link href="/" className="ghost-link">
