@@ -13,6 +13,7 @@
   /* Extra padding so the 600px wheel has breathing room */
   padding: 0;
   z-index: 1;
+  will-change: transform;
 }
 
 /* ── Zodiac Wheel ─────────────────────────────── */
@@ -44,6 +45,7 @@
   overflow: hidden;
   /* Elevate above the zodiac wheel */
   z-index: 2;
+  will-change: transform;
 }
 
 .panel::before {
@@ -66,7 +68,7 @@
 }
 
 .form button[type="submit"] {
-  margin-top: 1.5rem;
+  margin-top: 0;
 }
 
 /* Floating quotes & chart history styles are in globals.css

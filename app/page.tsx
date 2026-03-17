@@ -34,6 +34,10 @@ const withClientTimezoneDefault = (): ProfileQueryInput => ({
   timeZoneId: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : ""
 });
 
+function lerp(a: number, b: number, t: number) {
+  return a + (b - a) * t;
+}
+
 export default function Home() {
   const { user } = useAuth();
   const { t } = useTranslation();
@@ -44,7 +48,7 @@ export default function Home() {
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // ── Validation shimmer: track previous draft to detect empty→filled ──
+  // ── Validation shimmer: track previous draft to detect empty->filled ──
   const prevDraftRef = useRef<ProfileQueryInput>(withClientTimezoneDefault());
   const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
   const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
@@ -60,7 +64,6 @@ export default function Home() {
       const nowFilled = !!draft[field].trim();
       if (wasEmpty && nowFilled) {
         setValidatedFields((s) => new Set(s).add(field));
-        // Clear any existing timer for this field
         const existingTimer = shimmerTimers.current.get(field);
         if (existingTimer) clearTimeout(existingTimer);
         const timer = setTimeout(() => {
@@ -77,11 +80,10 @@ export default function Home() {
     prevDraftRef.current = { ...draft };
   }, [draft]);
 
-  // Cleanup shimmer timers on unmount
   useEffect(() => {
     const timers = shimmerTimers.current;
     return () => {
-      timers.forEach((t) => clearTimeout(t));
+      timers.forEach((tmr) => clearTimeout(tmr));
     };
   }, []);
 
@@ -111,11 +113,124 @@ export default function Home() {
     return () => observer.disconnect();
   }, []);
 
-  // Helper: returns "input-validated" class if a field is shimmer-active
   const shimmerClass = useCallback(
     (field: keyof ProfileQueryInput) => (validatedFields.has(field) ? "input-validated" : ""),
     [validatedFields]
   );
+
+  // ── Feature 1: Parallax refs ──
+  const shellRef = useRef<HTMLElement>(null);
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const orbLeftRef = useRef<HTMLDivElement>(null);
+  const orbRightRef = useRef<HTMLDivElement>(null);
+  const orbCenterRef = useRef<HTMLDivElement>(null);
+
+  // ── Feature 2: Mouse tracking state for ambient orbs ──
+  const mousePos = useRef({ x: 0, y: 0 });
+  const smoothOrbLeft = useRef({ x: 0, y: 0 });
+  const smoothOrbRight = useRef({ x: 0, y: 0 });
+  const smoothOrbCenter = useRef({ x: 0, y: 0 });
+
+  // ── Feature 3: Hero text animation state ──
+  const [heroReady, setHeroReady] = useState(false);
+  const [cursorPhase, setCursorPhase] = useState<"hidden" | "blinking" | "out">("hidden");
+
+  const headingText = t("home.heading");
+  const headingWords = useMemo(() => headingText.split(/\s+/), [headingText]);
+
+  const kickerDelay = 300;
+  const headingStartDelay = kickerDelay + 300;
+  const wordCount = headingWords.length;
+  const headingTotalDuration = headingStartDelay + wordCount * 80 + 500;
+  const leadDelay = headingTotalDuration + 200;
+
+  // ── Combined rAF loop for parallax + orb mouse tracking (Features 1 & 2) ──
+  useEffect(() => {
+    let rafId: number;
+    let scrollY = 0;
+
+    const onScroll = () => {
+      scrollY = window.scrollY;
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const shell = shellRef.current;
+      if (!shell) return;
+      const rect = shell.getBoundingClientRect();
+      mousePos.current.x = (e.clientX - rect.left) / rect.width - 0.5;
+      mousePos.current.y = (e.clientY - rect.top) / rect.height - 0.5;
+    };
+
+    const loop = () => {
+      // Parallax transforms
+      if (wheelRef.current) {
+        wheelRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
+      }
+      if (panelRef.current) {
+        panelRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+      }
+
+      // Orb lerp-based cursor reactivity
+      const mx = mousePos.current.x;
+      const my = mousePos.current.y;
+      const lf = 0.06;
+
+      // Left orb: moves AWAY from cursor (multiplier 0.02)
+      smoothOrbLeft.current.x = lerp(smoothOrbLeft.current.x, -mx * 0.02 * window.innerWidth, lf);
+      smoothOrbLeft.current.y = lerp(smoothOrbLeft.current.y, -my * 0.02 * window.innerHeight, lf);
+
+      // Right orb: moves TOWARD cursor (multiplier 0.015)
+      smoothOrbRight.current.x = lerp(smoothOrbRight.current.x, mx * 0.015 * window.innerWidth, lf);
+      smoothOrbRight.current.y = lerp(smoothOrbRight.current.y, my * 0.015 * window.innerHeight, lf);
+
+      // Center orb: moves perpendicular to cursor
+      smoothOrbCenter.current.x = lerp(smoothOrbCenter.current.x, my * 0.018 * window.innerWidth, lf);
+      smoothOrbCenter.current.y = lerp(smoothOrbCenter.current.y, -mx * 0.018 * window.innerHeight, lf);
+
+      const pY = scrollY * 0.15;
+      if (orbLeftRef.current) {
+        orbLeftRef.current.style.transform = `translate(${smoothOrbLeft.current.x}px, ${smoothOrbLeft.current.y + pY}px)`;
+      }
+      if (orbRightRef.current) {
+        orbRightRef.current.style.transform = `translate(${smoothOrbRight.current.x}px, ${smoothOrbRight.current.y + pY}px)`;
+      }
+      if (orbCenterRef.current) {
+        orbCenterRef.current.style.transform = `translate(${smoothOrbCenter.current.x}px, ${smoothOrbCenter.current.y + pY}px)`;
+      }
+
+      rafId = requestAnimationFrame(loop);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    const shell = shellRef.current;
+    if (shell) {
+      shell.addEventListener("mousemove", onMouseMove, { passive: true });
+    }
+    scrollY = window.scrollY;
+    rafId = requestAnimationFrame(loop);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+      if (shell) {
+        shell.removeEventListener("mousemove", onMouseMove);
+      }
+    };
+  }, []);
+
+  // ── Feature 3: Hero text reveal timing ──
+  useEffect(() => {
+    const t1 = setTimeout(() => setHeroReady(true), kickerDelay);
+    const t2 = setTimeout(() => setCursorPhase("blinking"), headingTotalDuration);
+    const t3 = setTimeout(() => setCursorPhase("out"), headingTotalDuration + 2000);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [headingTotalDuration, kickerDelay]);
 
   useEffect(() => {
     const clientOffset = String(-new Date().getTimezoneOffset());
@@ -175,6 +290,62 @@ export default function Home() {
     return requiredFields.every((field) => draft[field].trim().length > 0);
   }, [draft]);
 
+  // ── Cosmic charge: tracks form completion ratio ──
+  const chargeFields: Array<keyof ProfileQueryInput> = ["name", "birthDate", "birthTime", "country", "state", "city"];
+  const chargeLevel = useMemo(() => {
+    const filled = chargeFields.filter((f) => draft[f].trim().length > 0).length;
+    return filled / chargeFields.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
+
+  const submitWrapperRef = useRef<HTMLDivElement>(null);
+
+  const spawnParticleBurst = useCallback((clientX: number, clientY: number) => {
+    const wrapper = submitWrapperRef.current;
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const originX = clientX - rect.left;
+    const originY = clientY - rect.top;
+
+    const ripple = document.createElement("div");
+    ripple.className = "cosmic-ripple";
+    ripple.style.left = `${originX}px`;
+    ripple.style.top = `${originY}px`;
+    wrapper.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 500);
+
+    const count = 12 + Math.floor(Math.random() * 5);
+    const colors = [
+      "rgba(242, 194, 108, 0.9)",
+      "rgba(255, 215, 100, 0.9)",
+      "rgba(108, 225, 212, 0.9)",
+      "rgba(140, 230, 220, 0.9)",
+    ];
+
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+      const dist = 40 + Math.random() * 60;
+      const bx = Math.cos(angle) * dist;
+      const by = Math.sin(angle) * dist;
+
+      const particle = document.createElement("div");
+      particle.className = "cosmic-particle";
+      particle.style.left = `${originX}px`;
+      particle.style.top = `${originY}px`;
+      particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      particle.style.setProperty("--burst-x", `${bx}px`);
+      particle.style.setProperty("--burst-y", `${by}px`);
+      particle.style.width = `${3 + Math.random() * 5}px`;
+      particle.style.height = particle.style.width;
+      wrapper.appendChild(particle);
+      setTimeout(() => particle.remove(), 600);
+    }
+  }, []);
+
+  const handleSubmitClick = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
+    spawnParticleBurst(e.clientX, e.clientY);
+  }, [spawnParticleBurst]);
+
   const updateField =
     (field: keyof ProfileQueryInput) =>
     (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -199,7 +370,6 @@ export default function Home() {
     setGeoStatus("idle");
   };
 
-  // Cascading handlers: changing a parent clears its children
   const handleCountryChange = (value: string) => {
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
@@ -237,26 +407,70 @@ export default function Home() {
   };
 
   return (
-    <main className="home-shell">
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
+    <main className="home-shell" ref={shellRef}>
+      <div className="ambient ambient-left" ref={orbLeftRef} />
+      <div className="ambient ambient-right" ref={orbRightRef} />
+      <div className="ambient ambient-center" ref={orbCenterRef} />
       <FloatingQuotes />
 
       <ChartHistory userName={user?.display_name} />
 
       {/* ── Hero wrapper: positions wheel behind the panel ── */}
-      <div className={styles.heroWrapper}>
+      <div className={styles.heroWrapper} ref={wheelRef}>
         <ZodiacWheel />
 
-      <section className={`intake-panel anim-rise-in ${styles.panel}`}>
-        <p className="kicker anim-slide-in-left" style={{ animationDelay: "0.15s" }}>
+      <section className={`intake-panel anim-rise-in ${styles.panel}`} ref={panelRef}>
+        <p
+          className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`}
+          style={{
+            animationDelay: "0.15s",
+            opacity: heroReady ? undefined : 0,
+            transition: "opacity 400ms ease-out",
+          }}
+        >
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
-        <h1 className={styles.heroHeading} style={{ animationDelay: "0.3s" }}>
-          {t("home.heading")}
+        <h1
+          className={styles.heroHeading}
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            gap: "0 0.3em",
+            animationDelay: "0.3s",
+          }}
+        >
+          {headingWords.map((word, i) => {
+            const wordDelay = headingStartDelay + i * 80;
+            return (
+              <span
+                key={i}
+                className={`hero-word ${heroReady ? "hero-word-in" : ""}`}
+                style={{
+                  display: "inline-block",
+                  transitionDelay: `${wordDelay}ms`,
+                }}
+              >
+                {word}
+              </span>
+            );
+          })}
+          {cursorPhase !== "hidden" && (
+            <span
+              className={`hero-cursor ${cursorPhase === "out" ? "hero-cursor-out" : ""}`}
+            >
+              |
+            </span>
+          )}
         </h1>
-        <p className="lead anim-fade-in" style={{ animationDelay: "0.45s" }}>
+        <p
+          className={`lead anim-fade-in ${heroReady ? "" : "hero-pre"}`}
+          style={{
+            animationDelay: `${leadDelay}ms`,
+            opacity: heroReady ? undefined : 0,
+            transition: `opacity 500ms ease-out ${leadDelay}ms`,
+          }}
+        >
           {t("home.lead")}
         </p>
 
@@ -431,11 +645,31 @@ export default function Home() {
             </div>
           </div>
 
-          {/* ── Section 6: Submit ── */}
+          {/* ── Section 6: Submit with Cosmic Charge ── */}
           <div className="glass-section field-hidden" data-field-reveal="6">
-            <button type="submit" disabled={!canSubmit || isSubmitting}>
-              {isSubmitting ? t("home.submitting") : t("home.submit")}
-            </button>
+            <div
+              ref={submitWrapperRef}
+              className="cosmic-submit-wrapper"
+              onClick={handleSubmitClick}
+            >
+              <button
+                type="submit"
+                disabled={!canSubmit || isSubmitting}
+                style={{
+                  ["--charge-level" as string]: chargeLevel,
+                  opacity: 0.6 + chargeLevel * 0.4,
+                  filter: `saturate(${0.5 + chargeLevel * 0.5})`,
+                  boxShadow: chargeLevel >= 1
+                    ? undefined
+                    : `0 0 ${chargeLevel * 30}px rgba(242, 194, 108, ${chargeLevel * 0.3}), 0 0 ${chargeLevel * 60}px rgba(108, 225, 212, ${chargeLevel * 0.15})`,
+                  animation: chargeLevel >= 1
+                    ? "chargeGlow 2s ease-in-out infinite, submitGradientShift 4s ease infinite"
+                    : undefined,
+                }}
+              >
+                {isSubmitting ? t("home.submitting") : t("home.submit")}
+              </button>
+            </div>
           </div>
         </form>
       </section>
