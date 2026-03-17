@@ -91,6 +91,9 @@ html[data-theme="light"] .ambient-left {
 html[data-theme="light"] .ambient-right {
   background: radial-gradient(circle, rgba(184, 135, 62, 0.1), transparent 68%);
 }
+html[data-theme="light"] .ambient-center {
+  background: radial-gradient(circle, rgba(160, 80, 130, 0.08), rgba(120, 100, 180, 0.06), transparent 68%);
+}
 
 /* Buttons: invert for light mode — dark bg, light text */
 html[data-theme="light"] button:not(.logout-btn):not(.theme-toggle-btn):not(.dasha-popup-close):not(.chart-history-hero):not(.chart-history-card):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn):not(.drawer-signout-btn) {
@@ -258,7 +261,8 @@ h3 {
   border-radius: 50%;
   filter: blur(10px);
   z-index: 0;
-  animation: drift 11s ease-in-out infinite;
+  animation: drift 11s ease-in-out infinite, orbColorShift 30s ease-in-out infinite;
+  will-change: transform;
 }
 
 .ambient-left {
@@ -276,6 +280,65 @@ h3 {
   bottom: -160px;
   background: radial-gradient(circle, rgba(242, 194, 108, 0.2), transparent 68%);
   animation-delay: 1.4s;
+}
+
+.ambient-center {
+  width: 280px;
+  height: 280px;
+  left: 50%;
+  bottom: -80px;
+  margin-left: -140px;
+  background: radial-gradient(circle, rgba(220, 120, 180, 0.22), rgba(167, 139, 250, 0.12), transparent 68%);
+  animation: drift 15s ease-in-out infinite, orbColorShift 30s ease-in-out infinite;
+  animation-delay: 2.8s;
+}
+
+@keyframes orbColorShift {
+  0%   { filter: blur(10px) hue-rotate(0deg); }
+  25%  { filter: blur(10px) hue-rotate(40deg); }
+  50%  { filter: blur(10px) hue-rotate(90deg); }
+  75%  { filter: blur(10px) hue-rotate(160deg); }
+  100% { filter: blur(10px) hue-rotate(360deg); }
+}
+
+/* ── Hero Word Split Animation (Feature 3) ── */
+
+.hero-word {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 500ms ease-out, transform 500ms ease-out;
+}
+
+.hero-word-in {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.hero-cursor {
+  display: inline-block;
+  color: var(--accent-gold);
+  font-weight: 300;
+  animation: heroCursorBlink 530ms step-end infinite;
+  -webkit-text-fill-color: var(--accent-gold);
+  margin-left: 0.05em;
+}
+
+.hero-cursor-out {
+  animation: heroCursorFadeOut 500ms ease-out forwards;
+}
+
+.hero-pre {
+  opacity: 0 !important;
+}
+
+@keyframes heroCursorBlink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes heroCursorFadeOut {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 .intake-panel,
