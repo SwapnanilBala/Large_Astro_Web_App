@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 
 // ---------------------------------------------------------------------------
@@ -67,8 +67,6 @@ const VALID_MEDIA_TYPES = new Set([
   "image/webp",
 ]);
 
-type ValidMediaType = "image/jpeg" | "image/png" | "image/webp";
-
 // ---------------------------------------------------------------------------
 // POST /api/palm-reading
 // ---------------------------------------------------------------------------
@@ -102,31 +100,29 @@ export async function POST(request: NextRequest) {
     }
 
     // -- Check API key --
-    if (!process.env.ANTHROPIC_API_KEY) {
+    if (!process.env.OPENAI_API_KEY) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "ANTHROPIC_API_KEY not configured. Add it to .env.local",
+        "OPENAI_API_KEY not configured. Add it to .env.local",
       );
     }
 
-    // -- Call Claude Vision API --
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    // -- Call OpenAI Vision API --
+    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-    const response = await client.messages.create({
-      model: "claude-sonnet-4-6-20250514",
+    const dataUrl = `data:${mediaType};base64,${image}`;
+
+    const response = await client.chat.completions.create({
+      model: "gpt-4o",
       max_tokens: 2000,
-      system: PALM_READING_SYSTEM_PROMPT,
       messages: [
+        { role: "system", content: PALM_READING_SYSTEM_PROMPT },
         {
           role: "user",
           content: [
             {
-              type: "image",
-              source: {
-                type: "base64",
-                media_type: mediaType as ValidMediaType,
-                data: image,
-              },
+              type: "image_url",
+              image_url: { url: dataUrl, detail: "high" },
             },
             {
               type: "text",
@@ -138,15 +134,13 @@ export async function POST(request: NextRequest) {
     });
 
     // -- Extract text from response --
-    const textBlock = response.content.find((block) => block.type === "text");
-    if (!textBlock || textBlock.type !== "text") {
+    const rawText = response.choices[0]?.message?.content;
+    if (!rawText) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "No text response received from Claude",
+        "No text response received from OpenAI",
       );
     }
-
-    const rawText = textBlock.text;
 
     // -- Parse JSON from response --
     let reading: Record<string, unknown>;
