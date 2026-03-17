@@ -5637,10 +5637,44 @@ html[data-theme="light"] .back-btn:hover {
   margin-inline: auto;
 }
 
-.chart-history-grid {
-  display: grid;
-  gap: 0.65rem;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+/* ── Carousel wrapper with fade masks ── */
+.chart-history-carousel-wrapper {
+  position: relative;
+}
+
+.chart-history-carousel-wrapper::before,
+.chart-history-carousel-wrapper::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.chart-history-carousel-wrapper::before {
+  left: 0;
+  background: linear-gradient(to right, var(--surface, #0a0a1a), transparent);
+}
+
+.chart-history-carousel-wrapper::after {
+  right: 0;
+  background: linear-gradient(to left, var(--surface, #0a0a1a), transparent);
+}
+
+.chart-history-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chart-history-carousel::-webkit-scrollbar {
+  display: none;
 }
 
 .chart-history-card {
@@ -5657,7 +5691,6 @@ html[data-theme="light"] .back-btn:hover {
   color: var(--ink-main);
   font-family: inherit;
   font-size: 0.88rem;
-  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
   letter-spacing: normal;
   font-weight: 400;
   background-image: none;
@@ -5665,6 +5698,16 @@ html[data-theme="light"] .back-btn:hover {
   box-shadow: none;
   margin-top: 0;
   min-height: auto;
+  /* Carousel card sizing */
+  scroll-snap-align: start;
+  flex-shrink: 0;
+  min-width: 240px;
+  /* 3D tilt base */
+  transform-style: preserve-3d;
+  will-change: transform;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 240ms ease, border-color 240ms ease;
 }
 
 .chart-history-card::after {
@@ -5672,14 +5715,42 @@ html[data-theme="light"] .back-btn:hover {
 }
 
 .chart-history-card:hover {
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   border-color: rgba(108, 225, 212, 0.3);
   background-image: none;
   filter: none;
 }
 
+/* ── Tilt light reflection overlay ── */
+.chart-history-tilt-light {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    circle at var(--tilt-light-x, 50%) var(--tilt-light-y, 50%),
+    rgba(255, 255, 255, 0.12) 0%,
+    transparent 60%
+  );
+  opacity: var(--tilt-light-opacity, 0);
+  transition: opacity 300ms ease-out;
+  z-index: 1;
+}
+
+/* ── Zodiac sign color dot ── */
+.chart-history-sign-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.45rem;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
 .chart-history-name {
+  display: flex;
+  align-items: center;
   font-weight: 600;
   color: var(--accent-gold);
   font-size: 0.92rem;
@@ -5717,9 +5788,11 @@ html[data-theme="light"] .back-btn:hover {
   box-shadow: 0 2px 16px rgba(242, 194, 108, 0.08);
   margin-bottom: 0.75rem;
   min-height: auto;
-  transition: transform 280ms ease, box-shadow 280ms ease, border-color 280ms ease;
+  transition: box-shadow 280ms ease, border-color 280ms ease;
   position: relative;
   overflow: hidden;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 .chart-history-hero::before {
@@ -5742,7 +5815,6 @@ html[data-theme="light"] .back-btn:hover {
 }
 
 .chart-history-hero:hover {
-  transform: translateY(-3px);
   box-shadow: 0 10px 32px rgba(242, 194, 108, 0.15), 0 0 24px rgba(108, 225, 212, 0.08);
   border-color: rgba(242, 194, 108, 0.4);
   background-image: none;
@@ -5760,11 +5832,18 @@ html[data-theme="light"] .back-btn:hover {
 }
 
 .chart-history-hero-name {
+  display: flex;
+  align-items: center;
   font-family: var(--font-display), serif;
   font-size: 1.3rem;
   font-weight: 600;
   color: var(--accent-gold);
   letter-spacing: 0.01em;
+}
+
+.chart-history-hero-name .chart-history-sign-dot {
+  width: 10px;
+  height: 10px;
 }
 
 .chart-history-hero-meta {
@@ -5828,8 +5907,8 @@ html[data-theme="light"] .chart-history-card {
 
 /* Chart history responsive */
 @media (max-width: 680px) {
-  .chart-history-grid {
-    grid-template-columns: 1fr;
+  .chart-history-carousel .chart-history-card {
+    min-width: 200px;
   }
 
   .chart-history-hero {
