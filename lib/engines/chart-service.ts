@@ -556,7 +556,7 @@ export function buildChart(
     engine: {
       engine_id: preset.engine_id,
       engine_label: preset.label,
-      ephemeris_provider: "Swiss Ephemeris (swisseph npm)",
+      ephemeris_provider: "astronomy-engine (pure JS)",
       ayanamsha: preset.ayanamsha,
       house_system: preset.house_system,
       fallback_mode: computed.fallback_mode,

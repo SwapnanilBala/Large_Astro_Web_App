@@ -1,22 +1,8 @@
-// Uses the `swisseph` npm package (Node.js bindings for Swiss Ephemeris)
+// Pure JavaScript astronomical calculations using astronomy-engine
+// Replaces the native swisseph C addon for Vercel compatibility
 
-import swisseph from "swisseph";
+import * as Astronomy from "astronomy-engine";
 import { getEnginePreset, type EnginePreset } from "./engine-registry";
-
-// --------------------------------------------------------------------------
-// Ephemeris path configuration (module-level, set once)
-// --------------------------------------------------------------------------
-
-let ephemerisPathSet = false;
-
-function ensureEphemerisPath(): void {
-  if (ephemerisPathSet) return;
-  ephemerisPathSet = true;
-  const ephePath = process.env.EPHEMERIS_PATH;
-  if (ephePath) {
-    swisseph.swe_set_ephe_path(ephePath);
-  }
-}
 
 // --------------------------------------------------------------------------
 // Types
@@ -81,23 +67,28 @@ export const SIGNS = [
   "Pisces",
 ];
 
-const PLANET_CODES: Record<string, number> = {
-  Sun: swisseph.SE_SUN,
-  Moon: swisseph.SE_MOON,
-  Mercury: swisseph.SE_MERCURY,
-  Venus: swisseph.SE_VENUS,
-  Mars: swisseph.SE_MARS,
-  Jupiter: swisseph.SE_JUPITER,
-  Saturn: swisseph.SE_SATURN,
-  Rahu: swisseph.SE_MEAN_NODE,
+const PLANET_BODIES: Record<string, Astronomy.Body> = {
+  Sun: Astronomy.Body.Sun,
+  Moon: Astronomy.Body.Moon,
+  Mercury: Astronomy.Body.Mercury,
+  Venus: Astronomy.Body.Venus,
+  Mars: Astronomy.Body.Mars,
+  Jupiter: Astronomy.Body.Jupiter,
+  Saturn: Astronomy.Body.Saturn,
 };
 
-// Map preset sidereal mode names to swisseph constants
-const SIDEREAL_MODES: Record<string, number> = {
-  SE_SIDM_LAHIRI: swisseph.SE_SIDM_LAHIRI,
-  SE_SIDM_RAMAN: swisseph.SE_SIDM_RAMAN,
-  SE_SIDM_KRISHNAMURTI: swisseph.SE_SIDM_KRISHNAMURTI,
+// Ayanamsa values at J2000.0 (Jan 1, 2000 12:00 TT) in degrees
+const AYANAMSA_J2000: Record<string, number> = {
+  SE_SIDM_LAHIRI: 23.853,
+  SE_SIDM_RAMAN: 22.3947,
+  SE_SIDM_KRISHNAMURTI: 23.7986,
 };
+
+// Annual precession rate in degrees per year
+const PRECESSION_RATE = 50.2388475 / 3600;
+
+// J2000.0 epoch as Julian Day
+const J2000 = 2451545.0;
 
 // --------------------------------------------------------------------------
 // Helpers
@@ -117,6 +108,26 @@ function getSign(longitude: number): { sign: string; degree_in_sign: number; sig
   };
 }
 
+function round4(v: number): number {
+  return Math.round(v * 10000) / 10000;
+}
+
+function round6(v: number): number {
+  return Math.round(v * 1000000) / 1000000;
+}
+
+function degToRad(deg: number): number {
+  return (deg * Math.PI) / 180;
+}
+
+function radToDeg(rad: number): number {
+  return (rad * 180) / Math.PI;
+}
+
+// --------------------------------------------------------------------------
+// Julian Day calculation
+// --------------------------------------------------------------------------
+
 function datetimeToJulian(
   year: number,
   month: number,
@@ -126,12 +137,122 @@ function datetimeToJulian(
   second: number
 ): number {
   const decimalHour = hour + minute / 60 + second / 3600;
-  return swisseph.swe_julday(year, month, day, decimalHour, swisseph.SE_GREG_CAL);
+  // Standard Meeus formula for Gregorian calendar
+  let y = year;
+  let m = month;
+  if (m <= 2) {
+    y -= 1;
+    m += 12;
+  }
+  const A = Math.floor(y / 100);
+  const B = 2 - A + Math.floor(A / 4);
+  return (
+    Math.floor(365.25 * (y + 4716)) +
+    Math.floor(30.6001 * (m + 1)) +
+    day +
+    decimalHour / 24 +
+    B -
+    1524.5
+  );
 }
 
-function setSiderealMode(preset: EnginePreset): void {
-  const mode = SIDEREAL_MODES[preset.sidereal_mode_name] ?? swisseph.SE_SIDM_LAHIRI;
-  swisseph.swe_set_sid_mode(mode, 0, 0);
+// --------------------------------------------------------------------------
+// Ayanamsa calculation
+// --------------------------------------------------------------------------
+
+function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
+  const yearsFromJ2000 = (jd_ut - J2000) / 365.25;
+  const base = AYANAMSA_J2000[siderealModeName] ?? AYANAMSA_J2000.SE_SIDM_LAHIRI;
+  return base + yearsFromJ2000 * PRECESSION_RATE;
+}
+
+// --------------------------------------------------------------------------
+// Mean Lunar Node (Rahu) calculation
+// --------------------------------------------------------------------------
+
+function computeMeanLunarNode(jd_ut: number): number {
+  // Mean longitude of ascending lunar node (Rahu)
+  // Based on Meeus, Astronomical Algorithms
+  const T = (jd_ut - J2000) / 36525.0; // Julian centuries from J2000.0
+  const omega =
+    125.04452 -
+    1934.136261 * T +
+    0.0020708 * T * T +
+    (T * T * T) / 450000.0;
+  return normalize(omega);
+}
+
+// --------------------------------------------------------------------------
+// Ascendant calculation
+// --------------------------------------------------------------------------
+
+function computeObliquity(jd_ut: number): number {
+  // Mean obliquity of the ecliptic (Meeus formula)
+  const T = (jd_ut - J2000) / 36525.0;
+  // In arcseconds, then convert to degrees
+  const obliquityArcsec =
+    84381.448 - 46.815 * T - 0.00059 * T * T + 0.001813 * T * T * T;
+  return obliquityArcsec / 3600.0;
+}
+
+function computeGMST(jd_ut: number): number {
+  // Greenwich Mean Sidereal Time in degrees
+  const T = (jd_ut - J2000) / 36525.0;
+  // GMST at 0h UT in seconds
+  let gmst =
+    280.46061837 +
+    360.98564736629 * (jd_ut - J2000) +
+    0.000387933 * T * T -
+    (T * T * T) / 38710000.0;
+  return normalize(gmst);
+}
+
+function computeAscendantLongitude(
+  jd_ut: number,
+  latitude: number,
+  longitude: number
+): number {
+  const obliquity = degToRad(computeObliquity(jd_ut));
+  const gmst = computeGMST(jd_ut);
+  // Local Sidereal Time in degrees, then radians
+  const lst = degToRad(normalize(gmst + longitude));
+  const lat = degToRad(latitude);
+
+  // Ascendant formula
+  const y = -Math.cos(lst);
+  const x = Math.sin(lst) * Math.cos(obliquity) + Math.tan(lat) * Math.sin(obliquity);
+  let asc = radToDeg(Math.atan2(y, x));
+  return normalize(asc);
+}
+
+// --------------------------------------------------------------------------
+// Planet position using astronomy-engine
+// --------------------------------------------------------------------------
+
+function makeAstroTime(
+  year: number,
+  month: number,
+  day: number,
+  hour: number,
+  minute: number,
+  second: number
+): Astronomy.AstroTime {
+  return Astronomy.MakeTime(
+    new Date(Date.UTC(year, month - 1, day, hour, minute, second))
+  );
+}
+
+function getTropicalLongitude(body: Astronomy.Body, time: Astronomy.AstroTime): number {
+  if (body === Astronomy.Body.Sun) {
+    return Astronomy.SunPosition(time).elon;
+  }
+  if (body === Astronomy.Body.Moon) {
+    return Astronomy.EclipticGeoMoon(time).lon;
+  }
+  // For other planets, use geocentric ecliptic coordinates
+  const geo = Astronomy.GeoVector(body, time, true);
+  const ecliptic = Astronomy.Ecliptic(geo);
+  return normalize(ecliptic.elon);
 }
 
 // --------------------------------------------------------------------------
@@ -139,9 +260,7 @@ function setSiderealMode(preset: EnginePreset): void {
 // --------------------------------------------------------------------------
 
 export function calculate(input: BirthInput): SwissEngineResult {
-  ensureEphemerisPath();
   const preset = getEnginePreset(input.engine_id);
-  setSiderealMode(preset);
 
   const jd_ut = datetimeToJulian(
     input.utc_year,
@@ -152,23 +271,38 @@ export function calculate(input: BirthInput): SwissEngineResult {
     input.utc_second
   );
 
-  const siderealFlags = swisseph.SEFLG_SWIEPH | swisseph.SEFLG_SIDEREAL;
-  let fallback_mode = false;
+  const ayanamsa = computeAyanamsa(jd_ut, preset.sidereal_mode_name);
 
-  let asc_longitude: number;
-  let placements: Array<{ name: string; longitude: number }>;
+  const time = makeAstroTime(
+    input.utc_year,
+    input.utc_month,
+    input.utc_day,
+    input.utc_hour,
+    input.utc_minute,
+    input.utc_second
+  );
 
-  try {
-    asc_longitude = computeAscendant(jd_ut, input.latitude, input.longitude, siderealFlags);
-    placements = computePlanets(jd_ut, siderealFlags);
-  } catch {
-    // Fallback to Moshier ephemeris
-    fallback_mode = true;
-    const fallbackFlags = swisseph.SEFLG_MOSEPH | swisseph.SEFLG_SIDEREAL;
-    setSiderealMode(preset);
-    asc_longitude = computeAscendant(jd_ut, input.latitude, input.longitude, fallbackFlags);
-    placements = computePlanets(jd_ut, fallbackFlags);
+  // Compute tropical planet positions and convert to sidereal
+  const placements: Array<{ name: string; longitude: number }> = [];
+
+  for (const [planetName, body] of Object.entries(PLANET_BODIES)) {
+    const tropicalLon = getTropicalLongitude(body, time);
+    const siderealLon = normalize(tropicalLon - ayanamsa);
+    placements.push({ name: planetName, longitude: siderealLon });
   }
+
+  // Rahu (Mean Lunar Node)
+  const rahuTropical = computeMeanLunarNode(jd_ut);
+  const rahuSidereal = normalize(rahuTropical - ayanamsa);
+  placements.push({ name: "Rahu", longitude: rahuSidereal });
+
+  // Ketu (opposite of Rahu)
+  const ketuSidereal = normalize(rahuSidereal + 180);
+  placements.push({ name: "Ketu", longitude: ketuSidereal });
+
+  // Compute ascendant (tropical → sidereal)
+  const ascTropical = computeAscendantLongitude(jd_ut, input.latitude, input.longitude);
+  const asc_longitude = normalize(ascTropical - ayanamsa);
 
   const ascInfo = getSign(asc_longitude);
   const ascendant: AscendantData = {
@@ -209,59 +343,8 @@ export function calculate(input: BirthInput): SwissEngineResult {
     ascendant,
     planets,
     houses,
-    fallback_mode,
+    fallback_mode: false,
   };
-}
-
-// --------------------------------------------------------------------------
-// Internal computation helpers
-// --------------------------------------------------------------------------
-
-function computePlanets(
-  jd_ut: number,
-  flags: number
-): Array<{ name: string; longitude: number }> {
-  const placements: Array<{ name: string; longitude: number }> = [];
-
-  for (const [planetName, planetCode] of Object.entries(PLANET_CODES)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = swisseph.swe_calc_ut(jd_ut, planetCode, flags);
-    if (result.error) {
-      throw new Error(`swe_calc_ut error for ${planetName}: ${result.error}`);
-    }
-    placements.push({ name: planetName, longitude: normalize(result.longitude) });
-  }
-
-  const rahu = placements.find((p) => p.name === "Rahu")!;
-  const ketuLongitude = normalize(rahu.longitude + 180);
-  placements.push({ name: "Ketu", longitude: ketuLongitude });
-
-  return placements;
-}
-
-function computeAscendant(
-  jd_ut: number,
-  latitude: number,
-  longitude: number,
-  flags: number
-): number {
-  // "P" = Placidus house system (used only for ascendant; actual houses are whole-sign)
-  // The mivion/swisseph binding accepts the house system as a string character.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result: any = swisseph.swe_houses_ex(jd_ut, flags, latitude, longitude, "P");
-  if (result.error) {
-    throw new Error(`swe_houses_ex error: ${result.error}`);
-  }
-  // result.ascendant contains the ascendant longitude
-  return normalize(result.ascendant);
-}
-
-function round4(v: number): number {
-  return Math.round(v * 10000) / 10000;
-}
-
-function round6(v: number): number {
-  return Math.round(v * 1000000) / 1000000;
 }
 
 // --------------------------------------------------------------------------
@@ -272,53 +355,60 @@ export function computeTransitPositions(
   utcDate: Date,
   engineId?: string
 ): Array<{ name: string; longitude: number; sign: string; degree_in_sign: number }> {
-  ensureEphemerisPath();
   const preset = getEnginePreset(engineId);
-  setSiderealMode(preset);
 
   const decimalHour =
     utcDate.getUTCHours() +
     utcDate.getUTCMinutes() / 60 +
     utcDate.getUTCSeconds() / 3600;
-  const jd_ut = swisseph.swe_julday(
+  const jd_ut = datetimeToJulian(
     utcDate.getUTCFullYear(),
     utcDate.getUTCMonth() + 1,
     utcDate.getUTCDate(),
-    decimalHour,
-    swisseph.SE_GREG_CAL
+    utcDate.getUTCHours(),
+    utcDate.getUTCMinutes(),
+    utcDate.getUTCSeconds()
   );
 
-  const siderealFlags = swisseph.SEFLG_SWIEPH | swisseph.SEFLG_SIDEREAL;
+  const ayanamsa = computeAyanamsa(jd_ut, preset.sidereal_mode_name);
+  const time = Astronomy.MakeTime(utcDate);
+
   const positions: Array<{
     name: string;
     longitude: number;
     sign: string;
     degree_in_sign: number;
   }> = [];
-  let rahuLongitude = 0;
 
-  for (const [planetName, planetCode] of Object.entries(PLANET_CODES)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result: any = swisseph.swe_calc_ut(jd_ut, planetCode, siderealFlags);
-    if (result.error) {
-      throw new Error(`swe_calc_ut error for ${planetName}: ${result.error}`);
-    }
-    const lon = normalize(result.longitude);
-    const info = getSign(lon);
+  for (const [planetName, body] of Object.entries(PLANET_BODIES)) {
+    const tropicalLon = getTropicalLongitude(body, time);
+    const siderealLon = normalize(tropicalLon - ayanamsa);
+    const info = getSign(siderealLon);
     positions.push({
       name: planetName,
-      longitude: round4(lon),
+      longitude: round4(siderealLon),
       sign: info.sign,
       degree_in_sign: round4(info.degree_in_sign),
     });
-    if (planetName === "Rahu") rahuLongitude = lon;
   }
 
-  const ketuLon = normalize(rahuLongitude + 180);
-  const ketuInfo = getSign(ketuLon);
+  // Rahu
+  const rahuTropical = computeMeanLunarNode(jd_ut);
+  const rahuSidereal = normalize(rahuTropical - ayanamsa);
+  const rahuInfo = getSign(rahuSidereal);
+  positions.push({
+    name: "Rahu",
+    longitude: round4(rahuSidereal),
+    sign: rahuInfo.sign,
+    degree_in_sign: round4(rahuInfo.degree_in_sign),
+  });
+
+  // Ketu
+  const ketuSidereal = normalize(rahuSidereal + 180);
+  const ketuInfo = getSign(ketuSidereal);
   positions.push({
     name: "Ketu",
-    longitude: round4(ketuLon),
+    longitude: round4(ketuSidereal),
     sign: ketuInfo.sign,
     degree_in_sign: round4(ketuInfo.degree_in_sign),
   });

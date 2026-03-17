@@ -1,74 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-
-// ---------------------------------------------------------------------------
-// Mock swisseph BEFORE importing the engine
-// ---------------------------------------------------------------------------
-vi.mock("swisseph", () => {
-  const SE_SUN = 0;
-  const SE_MOON = 1;
-  const SE_MERCURY = 2;
-  const SE_VENUS = 3;
-  const SE_MARS = 4;
-  const SE_JUPITER = 5;
-  const SE_SATURN = 6;
-  const SE_MEAN_NODE = 10;
-  const SE_GREG_CAL = 1;
-  const SEFLG_SWIEPH = 2;
-  const SEFLG_SIDEREAL = 64;
-  const SEFLG_MOSEPH = 4;
-  const SE_SIDM_LAHIRI = 1;
-  const SE_SIDM_RAMAN = 3;
-  const SE_SIDM_KRISHNAMURTI = 5;
-
-  // Deterministic longitude table keyed by planet code
-  const PLANET_LONGITUDES: Record<number, number> = {
-    [SE_SUN]: 45.5,       // Taurus 15.5
-    [SE_MOON]: 120.25,    // Leo 0.25
-    [SE_MERCURY]: 60.0,   // Gemini 0
-    [SE_VENUS]: 200.8,    // Libra 20.8
-    [SE_MARS]: 310.0,     // Aquarius 10
-    [SE_JUPITER]: 90.0,   // Cancer 0
-    [SE_SATURN]: 270.0,   // Capricorn 0
-    [SE_MEAN_NODE]: 150.0, // Virgo 0 (Rahu)
-  };
-
-  return {
-    default: {
-      SE_SUN,
-      SE_MOON,
-      SE_MERCURY,
-      SE_VENUS,
-      SE_MARS,
-      SE_JUPITER,
-      SE_SATURN,
-      SE_MEAN_NODE,
-      SE_GREG_CAL,
-      SEFLG_SWIEPH,
-      SEFLG_SIDEREAL,
-      SEFLG_MOSEPH,
-      SE_SIDM_LAHIRI,
-      SE_SIDM_RAMAN,
-      SE_SIDM_KRISHNAMURTI,
-
-      swe_julday: vi.fn((year: number, month: number, day: number, hour: number, _cal: number) => {
-        // Simplified Julian day calculation (not astronomically precise but deterministic)
-        return 2451545.0 + (year - 2000) * 365.25 + (month - 1) * 30.4375 + day + hour / 24;
-      }),
-
-      swe_set_sid_mode: vi.fn(),
-
-      swe_calc_ut: vi.fn((_jd: number, planet: number, _flags: number) => {
-        const lon = PLANET_LONGITUDES[planet];
-        if (lon === undefined) return { error: `Unknown planet ${planet}` };
-        return { longitude: lon, latitude: 0, distance: 1 };
-      }),
-
-      swe_houses_ex: vi.fn((_jd: number, _flags: number, _lat: number, _lon: number, _sys: string) => {
-        return { ascendant: 30.0, cusps: Array(13).fill(0) }; // Asc at 30.0 -> Taurus 0
-      }),
-    },
-  };
-});
+import { describe, it, expect } from "vitest";
 
 import {
   calculate,
@@ -152,13 +82,6 @@ describe("swiss-ephemeris-engine", () => {
       expect(SIGNS).toContain(result.ascendant.sign);
     });
 
-    it("ascendant sign matches mock data (30 deg = Taurus 0)", () => {
-      const result = calculate(birth);
-      // Mock returns 30.0 for ascendant -> sign_index 1 -> Taurus
-      expect(result.ascendant.sign).toBe("Taurus");
-      expect(result.ascendant.degree_in_sign).toBeCloseTo(0, 2);
-    });
-
     it("Ketu is exactly 180 degrees from Rahu", () => {
       const result = calculate(birth);
       const rahu = result.planets.find((p) => p.name === "Rahu")!;
@@ -170,10 +93,10 @@ describe("swiss-ephemeris-engine", () => {
 
     it("houses use whole-sign system starting from ascendant sign", () => {
       const result = calculate(birth);
-      // Asc is Taurus (index 1), so house 1 = Taurus, house 2 = Gemini, etc.
-      expect(result.houses[0].sign).toBe("Taurus");
-      expect(result.houses[1].sign).toBe("Gemini");
-      expect(result.houses[11].sign).toBe("Aries");
+      const ascSignIndex = SIGNS.indexOf(result.ascendant.sign);
+      expect(result.houses[0].sign).toBe(SIGNS[ascSignIndex]);
+      expect(result.houses[1].sign).toBe(SIGNS[(ascSignIndex + 1) % 12]);
+      expect(result.houses[11].sign).toBe(SIGNS[(ascSignIndex + 11) % 12]);
     });
 
     it("planets in each house are correctly distributed", () => {
@@ -184,7 +107,7 @@ describe("swiss-ephemeris-engine", () => {
       expect(allHousePlanets.sort()).toEqual(planetNames.sort());
     });
 
-    it("fallback_mode is false on normal execution", () => {
+    it("fallback_mode is false", () => {
       const result = calculate(birth);
       expect(result.fallback_mode).toBe(false);
     });
@@ -192,6 +115,14 @@ describe("swiss-ephemeris-engine", () => {
     it("accepts engine_id parameter", () => {
       const result = calculate({ ...birth, engine_id: "raman_classic" });
       expect(result).toHaveProperty("ascendant");
+      expect(result.planets).toHaveLength(9);
+    });
+
+    it("different ayanamsa engines produce different longitudes", () => {
+      const lahiri = calculate({ ...birth, engine_id: "lahiri_classic" });
+      const raman = calculate({ ...birth, engine_id: "raman_classic" });
+      // Lahiri and Raman ayanamsas differ, so longitudes should differ
+      expect(lahiri.planets[0].longitude).not.toBeCloseTo(raman.planets[0].longitude, 0);
     });
 
     it("julian day is a plausible number", () => {
@@ -259,16 +190,6 @@ describe("swiss-ephemeris-engine", () => {
     it("accepts optional engine_id", () => {
       const positions = computeTransitPositions(new Date(), "krishnamurti_classic");
       expect(positions).toHaveLength(9);
-    });
-  });
-
-  describe("sidereal mode", () => {
-    it("swe_set_sid_mode is called during calculate", async () => {
-      const swisseph = (await import("swisseph")).default;
-      (swisseph.swe_set_sid_mode as ReturnType<typeof vi.fn>).mockClear();
-
-      calculate(birth);
-      expect(swisseph.swe_set_sid_mode).toHaveBeenCalled();
     });
   });
 });
