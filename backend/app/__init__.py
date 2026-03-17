@@ -1,1 +1,0 @@
-"""Astrology backend package."""

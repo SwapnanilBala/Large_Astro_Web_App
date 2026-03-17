@@ -1,0 +1,401 @@
+/* ═══════════════════════════════════════════════
+   HOME PAGE — CSS Module
+   ═══════════════════════════════════════════════ */
+
+/* ── Hero Wrapper — positions zodiac wheel + panel ── */
+
+.heroWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* Extra padding so the 600px wheel has breathing room */
+  padding: 0;
+  z-index: 1;
+}
+
+/* ── Zodiac Wheel ─────────────────────────────── */
+
+:global(.zodiac-wheel) {
+  animation: zodiacSpin 120s linear infinite;
+  /* pointer-events already set inline, but belt-and-suspenders */
+  pointer-events: none;
+}
+
+@keyframes zodiacSpin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ── Hero Heading glow ───────────────────────── */
+/* text-shadow won't show on clip-text elements; use filter drop-shadow instead */
+
+.heroHeading {
+  filter:
+    drop-shadow(0 0 40px rgba(167, 139, 250, 0.40))
+    drop-shadow(0 0 80px rgba(167, 139, 250, 0.15));
+}
+
+/* ── Intake Panel (home-specific overrides) ───── */
+
+.panel {
+  position: relative;
+  overflow: hidden;
+  /* Elevate above the zodiac wheel */
+  z-index: 2;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('/background.webp') center / cover no-repeat;
+  opacity: 0.06;
+  z-index: -1;
+  border-radius: 30px;
+  pointer-events: none;
+}
+
+/* ── Intake Form ──────────────────────────────── */
+
+.form {
+  margin-top: 1.6rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.form > button[type="submit"] {
+  margin-top: 1.5rem;
+}
+
+/* Floating quotes & chart history styles are in globals.css
+   (those child components use string classNames, not CSS modules) */
+
+/* ═══════════════════════════════════════════════
+   FORM VISUAL UPGRADE — Intake Form Specific
+   ═══════════════════════════════════════════════ */
+
+/* ── Select Dropdown ── */
+
+.form select {
+  appearance: none;
+  -webkit-appearance: none;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(18px);
+  padding-right: 3rem;
+  background-image: none;
+  position: relative;
+}
+
+.form select:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow:
+    0 0 0 3px rgba(242, 194, 108, 0.18),
+    0 0 18px rgba(242, 194, 108, 0.1),
+    inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23f2c26c' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: calc(100% - 1rem) center;
+  background-size: 1rem 1rem;
+}
+
+.form select option {
+  background: #0a1e2e;
+  color: #eef7ff;
+  padding: 0.5rem;
+}
+
+/* ── Text Inputs — Animated Underline ── */
+
+.form label {
+  position: relative;
+}
+
+.form :is(input, select, textarea) {
+  position: relative;
+}
+
+.form label::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-aqua));
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.form label:focus-within::after {
+  width: 80%;
+  left: 10%;
+}
+
+/* Subtle inner shadow on focus for depth */
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+  box-shadow:
+    var(--field-glow),
+    inset 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Form Section Headers — Icon Glow + Decorative Divider ── */
+
+.sectionHeading {
+  margin: 1.4rem 0 0.5rem;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-family: var(--font-display), "Times New Roman", serif;
+  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-aqua) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  position: relative;
+  padding-bottom: 0.75rem;
+}
+
+.sectionHeading::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--accent-gold), rgba(108, 225, 212, 0.5), transparent 80%);
+  opacity: 0.5;
+}
+
+.sectionHeading :global(.section-icon) {
+  -webkit-text-fill-color: var(--accent-gold);
+  filter: drop-shadow(0 0 6px rgba(242, 194, 108, 0.3));
+  position: relative;
+  z-index: 1;
+}
+
+/* Glow behind the section icons */
+.sectionHeading > :global(.section-icon)::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 194, 108, 0.3), transparent 70%);
+  z-index: -1;
+  filter: blur(4px);
+  pointer-events: none;
+}
+
+/* ── Submit Button Enhancement ── */
+
+.form > button[type="submit"] {
+  background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
+  background-size: 300% 100%;
+  animation: submitGradientShift 4s ease infinite;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, filter 0.2s ease;
+}
+
+@keyframes submitGradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Sparkle pseudo-element on hover */
+.form > button[type="submit"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle 2px at 20% 30%, rgba(255, 255, 255, 0.8) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 75% 20%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(circle 2px at 40% 70%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(circle 1px at 85% 65%, rgba(255, 255, 255, 0.7) 0%, transparent 100%),
+    radial-gradient(circle 1.5px at 10% 80%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    radial-gradient(circle 1px at 60% 15%, rgba(255, 255, 255, 0.6) 0%, transparent 100%),
+    radial-gradient(circle 2px at 90% 40%, rgba(255, 255, 255, 0.5) 0%, transparent 100%);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.form > button[type="submit"]:hover:not(:disabled)::before {
+  opacity: 1;
+  animation: sparkleFloat 2s ease-in-out infinite;
+}
+
+@keyframes sparkleFloat {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50% { transform: translateY(-2px) scale(1.05); opacity: 0.7; }
+}
+
+.form > button[type="submit"]:hover:not(:disabled) {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow:
+    0 28px 52px rgba(242, 194, 108, 0.28),
+    0 0 40px rgba(242, 194, 108, 0.15),
+    0 0 80px rgba(108, 225, 212, 0.1);
+  filter: saturate(1.1) brightness(1.05);
+}
+
+.form > button[type="submit"]:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+  transition: transform 80ms ease-out;
+  box-shadow:
+    0 8px 20px rgba(242, 194, 108, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* ── Intake Panel — Animated Border Gradient + Corner Stars ── */
+
+.panel {
+  background-clip: padding-box;
+}
+
+/* Animated border gradient overlay */
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 30px;
+  padding: 1px;
+  background: conic-gradient(from var(--panel-border-angle, 0deg), rgba(242, 194, 108, 0.25), rgba(108, 225, 212, 0.2), rgba(242, 194, 108, 0.05), rgba(108, 225, 212, 0.2), rgba(242, 194, 108, 0.25));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+  animation: rotatePanelBorder 12s linear infinite;
+}
+
+@property --panel-border-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes rotatePanelBorder {
+  to { --panel-border-angle: 360deg; }
+}
+
+/* Corner star decorations */
+.panel .form::before,
+.panel .form::after {
+  content: "+";
+  position: absolute;
+  font-size: 0.7rem;
+  font-weight: 300;
+  color: rgba(242, 194, 108, 0.3);
+  pointer-events: none;
+  line-height: 1;
+  text-shadow: 0 0 8px rgba(242, 194, 108, 0.2);
+  z-index: 0;
+}
+
+.panel .form::before {
+  top: -0.8rem;
+  right: 0.5rem;
+}
+
+.panel .form::after {
+  bottom: -0.5rem;
+  left: 0.5rem;
+  color: rgba(108, 225, 212, 0.3);
+  text-shadow: 0 0 8px rgba(108, 225, 212, 0.2);
+}
+
+.form {
+  position: relative;
+}
+
+/* ── Collapsible Section — Smooth Spring Expand ── */
+
+.form :global(.collapsible-section) :global(.input-grid) {
+  animation: springBounceIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-origin: top center;
+}
+
+@keyframes springBounceIn {
+  from {
+    opacity: 0;
+    transform: scaleY(0.85) translateY(-8px);
+  }
+  60% {
+    opacity: 1;
+    transform: scaleY(1.02) translateY(1px);
+  }
+  to {
+    transform: scaleY(1) translateY(0);
+  }
+}
+
+/* ── Form Fields Staggered Entrance ── */
+
+.form > label:nth-child(1) { animation: fieldFadeUp 0.5s ease-out 0.1s both; }
+.form > h2:nth-of-type(1) { animation: fieldFadeUp 0.5s ease-out 0.15s both; }
+.form > :global(.input-grid):nth-of-type(1) { animation: fieldFadeUp 0.5s ease-out 0.2s both; }
+.form > label:nth-child(4) { animation: fieldFadeUp 0.5s ease-out 0.25s both; }
+.form > h2:nth-of-type(2) { animation: fieldFadeUp 0.5s ease-out 0.3s both; }
+.form > :global(.input-grid):nth-of-type(2) { animation: fieldFadeUp 0.5s ease-out 0.35s both; }
+.form > label:nth-child(7) { animation: fieldFadeUp 0.5s ease-out 0.4s both; }
+.form > :global(.geo-status) { animation: fieldFadeUp 0.5s ease-out 0.42s both; }
+.form > :global(.collapsible-section) { animation: fieldFadeUp 0.5s ease-out 0.45s both; }
+.form > button[type="submit"] { animation: fieldFadeUp 0.5s ease-out 0.5s both, submitGradientShift 4s ease infinite 0.5s; }
+
+@keyframes fieldFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   LIGHT THEME OVERRIDES
+   ═══════════════════════════════════════════════ */
+
+:global([data-theme="light"]) .form select option {
+  background: #f7efe8;
+  color: #3d2c1e;
+}
+
+:global([data-theme="light"]) .sectionHeading::after {
+  background: linear-gradient(90deg, var(--accent-gold), rgba(46, 133, 120, 0.5), transparent 80%);
+}
+
+:global([data-theme="light"]) .panel::after {
+  background: conic-gradient(from var(--panel-border-angle, 0deg), rgba(138, 100, 32, 0.15), rgba(46, 133, 120, 0.12), rgba(138, 100, 32, 0.03), rgba(46, 133, 120, 0.12), rgba(138, 100, 32, 0.15));
+}
+
+:global([data-theme="light"]) .panel .form::before {
+  color: rgba(138, 100, 32, 0.25);
+  text-shadow: 0 0 6px rgba(138, 100, 32, 0.15);
+}
+
+:global([data-theme="light"]) .panel .form::after {
+  color: rgba(46, 133, 120, 0.25);
+  text-shadow: 0 0 6px rgba(46, 133, 120, 0.15);
+}
+
+:global([data-theme="light"]) .form > button[type="submit"] {
+  background: linear-gradient(110deg, #8a6420, #b8873e, #8a6420, #6b4e18);
+  background-size: 300% 100%;
+}
+
+/* Chart history light mode & responsive rules are in globals.css */

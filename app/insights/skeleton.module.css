@@ -1,0 +1,744 @@
+/* ═══════════════════════════════════════════════
+   INSIGHTS SKELETON MODULE — panel-accurate shapes
+   ═══════════════════════════════════════════════ */
+
+/* ── Shimmer animation ── */
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.04) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 255, 255, 0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite ease-in-out;
+}
+
+/* ── Shared orbital spinner (kept from original for loading hero) ── */
+@keyframes skelOrbitSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes skelFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skelTwinkle {
+  0%, 100% { opacity: 0; transform: scale(0.5); }
+  50%       { opacity: 0.8; transform: scale(1.2); }
+}
+
+@keyframes skelProgress {
+  0%   { width: 0%; }
+  10%  { width: 12%; }
+  30%  { width: 30%; }
+  60%  { width: 55%; }
+  80%  { width: 72%; }
+  95%  { width: 88%; }
+  100% { width: 95%; }
+}
+
+/* ── Shell ── */
+.shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  overflow: hidden;
+}
+
+/* ── Stars ── */
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+.star {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  opacity: 0;
+  animation: skelTwinkle 3s ease-in-out infinite;
+}
+
+/* ── Loading hero ── */
+.loadingHero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 2rem 0 1rem;
+  z-index: 1;
+}
+
+.orbitalSpinner {
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.sun {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--accent-gold), #c9922a);
+  box-shadow: 0 0 20px rgba(242, 194, 108, 0.5), 0 0 40px rgba(242, 194, 108, 0.2);
+}
+
+.orbit {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  border: 1px solid rgba(195, 231, 255, 0.12);
+  border-radius: 50%;
+  animation: skelOrbitSpin linear infinite;
+}
+
+.orbit1 {
+  width: 52px; height: 52px;
+  margin: -26px 0 0 -26px;
+  animation-duration: 2.4s;
+}
+
+.orbit2 {
+  width: 82px; height: 82px;
+  margin: -41px 0 0 -41px;
+  animation-duration: 4s;
+  animation-direction: reverse;
+}
+
+.orbit3 {
+  width: 112px; height: 112px;
+  margin: -56px 0 0 -56px;
+  animation-duration: 6s;
+}
+
+.planet {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  margin-left: -4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-aqua);
+  box-shadow: 0 0 8px rgba(108, 225, 212, 0.5);
+}
+
+.orbit1 .planet {
+  width: 6px; height: 6px;
+  top: -3px; margin-left: -3px;
+  background: var(--accent-coral);
+  box-shadow: 0 0 8px rgba(255, 143, 126, 0.5);
+}
+
+.orbit3 .planet {
+  width: 5px; height: 5px;
+  top: -2.5px; margin-left: -2.5px;
+  background: var(--accent-gold);
+  box-shadow: 0 0 8px rgba(242, 194, 108, 0.4);
+}
+
+.message {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.03em;
+  text-align: center;
+  animation: skelFadeIn 500ms ease-out;
+}
+
+.progressTrack {
+  width: min(280px, 80%);
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(195, 231, 255, 0.1);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent-aqua), var(--accent-gold));
+  animation: skelProgress 55s cubic-bezier(0.1, 0.4, 0.2, 1) forwards;
+}
+
+/* ═══════════════════════════════
+   SHARED CARD SHELL
+   ═══════════════════════════════ */
+.card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+/* ── Shimmer bar helper ── */
+.bar {
+  composes: shimmer;
+  border-radius: 8px;
+}
+
+/* ── Hero section skeleton ── */
+.hero {
+  text-align: center;
+  padding: 2.5rem 1rem 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════
+   TOP METRIC CARDS ROW
+   (3 cards: lagna, engine, access)
+   ═══════════════════════════════ */
+.gridHero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  z-index: 1;
+}
+
+.metricCard {
+  composes: card;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  min-height: 110px;
+}
+
+.metricCardGold  { border-top: 2px solid rgba(242, 194, 108, 0.35); }
+.metricCardAqua  { border-top: 2px solid rgba(108, 225, 212, 0.35); }
+.metricCardPlain { border-top: 2px solid rgba(195, 231, 255, 0.15); }
+
+/* Icon circle placeholder */
+.metricIcon {
+  composes: shimmer;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════
+   MAIN BENTO ROW
+   Lagna Chart (2fr) + Planets (1fr)
+   ═══════════════════════════════ */
+.gridMain {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1rem;
+  z-index: 1;
+}
+
+/* ── Lagna Chart Skeleton ── */
+.lagnaCard {
+  composes: card;
+  padding: 0;
+  /* Match actual cardChart which has no padding */
+}
+
+.lagnaInner {
+  /* Wrap to constrain the SVG placeholder */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Toggle bar (Diamond / Constellation buttons) */
+.chartToggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chartToggleBtn {
+  composes: shimmer;
+  height: 2rem;
+  width: 7rem;
+  border-radius: 8px;
+}
+
+/* North-Indian diamond grid placeholder:
+   A square rotated 45° creates the outer diamond.
+   Structural lines are created as SVG-like pseudo-element overlays. */
+.lagnaChart {
+  position: relative;
+  width: 100%;
+  /* Maintain square aspect ratio matching 600x600 viewBox */
+  aspect-ratio: 1 / 1;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+/* Outer square (the bounding box of the chart) */
+.lagnaSquare {
+  composes: shimmer;
+  position: absolute;
+  inset: 0;
+  border-radius: 8px;
+  opacity: 0.5;
+}
+
+/* Diagonal lines — rendered as thin rotated divs */
+.lagnaDiag1,
+.lagnaDiag2 {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: rgba(242, 194, 108, 0.18);
+  transform-origin: center;
+}
+
+.lagnaDiag1 { transform: translateY(-50%) rotate(45deg) scaleX(1.415); }
+.lagnaDiag2 { transform: translateY(-50%) rotate(-45deg) scaleX(1.415); }
+
+/* Inner diamond outline */
+.lagnaInnerDiamond {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 70.7%;   /* sqrt(2)/2 ≈ 0.707 of the square side */
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(108, 225, 212, 0.22);
+}
+
+/* Horizontal + vertical midlines */
+.lagnaMidH,
+.lagnaMidV {
+  position: absolute;
+  background: rgba(242, 194, 108, 0.1);
+}
+
+.lagnaMidH {
+  top: 50%; left: 0;
+  width: 100%; height: 1px;
+  transform: translateY(-50%);
+}
+
+.lagnaMidV {
+  top: 0; left: 50%;
+  width: 1px; height: 100%;
+  transform: translateX(-50%);
+}
+
+/* Planet dot placeholders — scattered around the 12 house regions */
+.lagnaDot {
+  composes: shimmer;
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+/* Center circle decoration */
+.lagnaCenter {
+  composes: shimmer;
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 18%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.3;
+}
+
+/* ── Planetary Snapshots Skeleton ── */
+.planetsCard {
+  composes: card;
+  padding: 1.5rem;
+  overflow: hidden;
+  max-height: 560px;
+}
+
+.planetsHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* 9–10 pill-shaped cards stacked vertically */
+.planetGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.planetPill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.8rem;
+  border-radius: 10px;
+  background: rgba(6, 24, 38, 0.4);
+  border: 1px solid rgba(195, 231, 255, 0.08);
+  /* Colored left accent matching actual planet card */
+  border-left-width: 3px;
+  border-left-style: solid;
+}
+
+.planetGlyph {
+  composes: shimmer;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.planetLines {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.planetLine1 {
+  composes: shimmer;
+  height: 0.82rem;
+  border-radius: 6px;
+  width: 55%;
+}
+
+.planetLine2 {
+  composes: shimmer;
+  height: 0.7rem;
+  border-radius: 6px;
+  width: 75%;
+}
+
+/* ═══════════════════════════════
+   FORECAST CARD (full width)
+   ═══════════════════════════════ */
+.forecastCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 140px;
+  z-index: 1;
+}
+
+/* ═══════════════════════════════
+   COLLAPSIBLE RULES CARD
+   (Core insights — 4 rule cards)
+   ═══════════════════════════════ */
+.rulesCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 1;
+}
+
+.ruleCardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
+.ruleCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(6, 24, 38, 0.4);
+  border: 1px solid rgba(195, 231, 255, 0.08);
+  border-left: 3px solid rgba(242, 194, 108, 0.3);
+}
+
+.ruleCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* ═══════════════════════════════
+   ADVANCED GRID
+   (Dasha, Aspects, Navamsa, Transits)
+   ═══════════════════════════════ */
+.gridAdvanced {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  z-index: 1;
+}
+
+.fullWidth {
+  grid-column: 1 / -1;
+}
+
+/* ── Nakshatra & Dasha Skeleton (full-width) ── */
+.dashaCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Two nakshatra info cards side-by-side */
+.nakshatraGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.nakshatraCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(6, 24, 38, 0.4);
+  border: 1px solid rgba(195, 231, 255, 0.08);
+}
+
+/* Nakshatra wheel circle placeholder */
+.nakshatraWheel {
+  composes: shimmer;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  border: 2px solid rgba(242, 194, 108, 0.15);
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+/* Dasha Gantt timeline — horizontal bar divided into ~9 colored segments */
+.dashaTimelineLabel {
+  composes: shimmer;
+  height: 0.85rem;
+  border-radius: 6px;
+  width: 8rem;
+}
+
+.dashaTimeline {
+  display: flex;
+  width: 100%;
+  height: 2.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  gap: 2px;
+}
+
+/* Each segment mimics a dasha period bar */
+.dashaBar {
+  composes: shimmer;
+  border-radius: 6px;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+/* ── Aspects Panel Skeleton (half-width) ── */
+.aspectsCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Matrix of small square cells */
+.aspectsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+}
+
+.aspectCell {
+  composes: shimmer;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  min-height: 44px;
+}
+
+/* ── Navamsa Skeleton (half-width) ── */
+.navamsaCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Small diamond-style placeholder */
+.navamsaChart {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  max-width: 260px;
+  margin: 0 auto;
+}
+
+.navamsaSquare {
+  composes: shimmer;
+  position: absolute;
+  inset: 0;
+  border-radius: 6px;
+  opacity: 0.45;
+}
+
+.navamsaDiag1,
+.navamsaDiag2 {
+  position: absolute;
+  top: 50%; left: 0;
+  width: 100%; height: 1px;
+  background: rgba(242, 194, 108, 0.15);
+  transform-origin: center;
+}
+
+.navamsaDiag1 { transform: translateY(-50%) rotate(45deg) scaleX(1.415); }
+.navamsaDiag2 { transform: translateY(-50%) rotate(-45deg) scaleX(1.415); }
+
+.navamsaInnerDiamond {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 70.7%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%) rotate(45deg);
+  border: 1px solid rgba(108, 225, 212, 0.2);
+}
+
+/* ── Transits Skeleton (full-width) ── */
+.transitsCard {
+  composes: card;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 140px;
+}
+
+.transitRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.transitDot {
+  composes: shimmer;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ═══════════════════════════════
+   SECTION HEADER (kicker + heading)
+   ═══════════════════════════════ */
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ═══════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════ */
+@media (max-width: 900px) {
+  .gridMain {
+    grid-template-columns: 1fr;
+  }
+
+  .gridAdvanced {
+    grid-template-columns: 1fr;
+  }
+
+  .nakshatraGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .aspectsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .gridHero {
+    grid-template-columns: 1fr;
+  }
+
+  .ruleCardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .orbitalSpinner {
+    width: 90px;
+    height: 90px;
+  }
+
+  .orbit1 { width: 40px; height: 40px; margin: -20px 0 0 -20px; }
+  .orbit2 { width: 62px; height: 62px; margin: -31px 0 0 -31px; }
+  .orbit3 { width: 84px; height: 84px; margin: -42px 0 0 -42px; }
+}
+
+/* ═══════════════════════════════
+   LIGHT THEME OVERRIDES
+   ═══════════════════════════════ */
+:global(html[data-theme="light"]) .shimmer,
+:global(html[data-theme="light"]) .bar,
+:global(html[data-theme="light"]) .metricIcon,
+:global(html[data-theme="light"]) .chartToggleBtn,
+:global(html[data-theme="light"]) .lagnaSquare,
+:global(html[data-theme="light"]) .lagnaCenter,
+:global(html[data-theme="light"]) .lagnaDot,
+:global(html[data-theme="light"]) .planetGlyph,
+:global(html[data-theme="light"]) .planetLine1,
+:global(html[data-theme="light"]) .planetLine2,
+:global(html[data-theme="light"]) .nakshatraWheel,
+:global(html[data-theme="light"]) .dashaTimelineLabel,
+:global(html[data-theme="light"]) .dashaBar,
+:global(html[data-theme="light"]) .aspectCell,
+:global(html[data-theme="light"]) .navamsaSquare,
+:global(html[data-theme="light"]) .transitDot {
+  background: linear-gradient(
+    90deg,
+    rgba(160, 120, 90, 0.07) 0%,
+    rgba(160, 120, 90, 0.15) 50%,
+    rgba(160, 120, 90, 0.07) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s infinite ease-in-out;
+}
+
+:global(html[data-theme="light"]) .card {
+  background: rgba(255, 248, 242, 0.6);
+  border-color: rgba(160, 120, 90, 0.12);
+}
+
+:global(html[data-theme="light"]) .planetPill,
+:global(html[data-theme="light"]) .ruleCard,
+:global(html[data-theme="light"]) .nakshatraCard {
+  background: rgba(255, 252, 248, 0.5);
+  border-color: rgba(160, 120, 90, 0.08);
+}

@@ -4,13 +4,15 @@ import type { ChangeEvent, FormEvent } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
-import { HiOutlineSparkles, HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
+import { HiOutlineSparkles } from "react-icons/hi2";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import FloatingQuotes from "./components/FloatingQuotes";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
+import ZodiacWheel from "./components/ZodiacWheel";
+import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
   "name",
@@ -111,6 +113,38 @@ export default function Home() {
     setDraft((previous) => ({ ...previous, [field]: value }));
   };
 
+  const clearGeoResults = () => {
+    setDraft((prev) => ({
+      ...prev,
+      latitude: "",
+      longitude: "",
+      timezoneOffsetMinutes: String(-new Date().getTimezoneOffset()),
+      timeZoneId: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
+    }));
+    setGeoStatus("idle");
+  };
+
+  // Cascading handlers: changing a parent clears its children
+  const handleCountryChange = (value: string) => {
+    setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
+    clearGeoResults();
+  };
+
+  const handleCountrySelect = (value: string) => {
+    setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
+    clearGeoResults();
+  };
+
+  const handleStateChange = (value: string) => {
+    setDraft((prev) => ({ ...prev, state: value, city: "" }));
+    clearGeoResults();
+  };
+
+  const handleStateSelect = (value: string) => {
+    setDraft((prev) => ({ ...prev, state: value, city: "" }));
+    clearGeoResults();
+  };
+
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!canSubmit || isSubmitting) {
@@ -124,7 +158,7 @@ export default function Home() {
       params.set(key, value.trim());
     });
 
-    router.push(`/insights?${params.toString()}`);
+    router.push(`/engine-select?${params.toString()}`);
   };
 
   return (
@@ -135,12 +169,16 @@ export default function Home() {
 
       <ChartHistory userName={user?.display_name} />
 
-      <section className="intake-panel anim-rise-in">
+      {/* ── Hero wrapper: positions wheel behind the panel ── */}
+      <div className={styles.heroWrapper}>
+        <ZodiacWheel />
+
+      <section className={`intake-panel anim-rise-in ${styles.panel}`}>
         <p className="kicker anim-slide-in-left" style={{ animationDelay: "0.15s" }}>
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
-        <h1 style={{ animationDelay: "0.3s" }}>
+        <h1 className={styles.heroHeading} style={{ animationDelay: "0.3s" }}>
           {t("home.heading")}
         </h1>
         <p className="lead anim-fade-in" style={{ animationDelay: "0.45s" }}>
@@ -151,7 +189,7 @@ export default function Home() {
           <span className="cosmic-divider-icon"><GiStarSattelites /></span>
         </div>
 
-        <form className="intake-form anim-fade-up" onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
+        <form className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
           <label className="input-glow-gold">
             <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
             <input
@@ -163,57 +201,42 @@ export default function Home() {
             />
           </label>
 
-          <h2 className="form-section-heading">
+          <h2 className={styles.sectionHeading}>
             <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
           </h2>
 
           <div className="input-grid">
             <label className="input-glow-aqua">
               {t("home.formBirthDate")}
-              <div className="datetime-field">
-                <input
-                  type="date"
-                  value={draft.birthDate}
-                  onChange={updateField("birthDate")}
-                  required
-                />
-                <HiOutlineCalendarDays className="datetime-icon datetime-icon-aqua" />
-              </div>
+              <input
+                type="date"
+                value={draft.birthDate}
+                onChange={updateField("birthDate")}
+                required
+              />
             </label>
             <label className="input-glow-coral">
               {t("home.formBirthTime")}
-              <div className="datetime-field">
-                <input
-                  type="time"
-                  value={draft.birthTime}
-                  onChange={updateField("birthTime")}
-                  required
-                />
-                <HiOutlineClock className="datetime-icon datetime-icon-coral" />
-              </div>
+              <input
+                type="time"
+                value={draft.birthTime}
+                onChange={updateField("birthTime")}
+                required
+              />
             </label>
           </div>
 
-          <label className="input-glow-gold">
-            Calculation Engine
-            <select value={draft.engineId} onChange={updateField("engineId")}>
-              <option value="lahiri_classic">Lahiri Classic</option>
-              <option value="raman_classic">Raman Classic</option>
-              <option value="krishnamurti_classic">Krishnamurti Classic</option>
-            </select>
-          </label>
-
-          <h2 className="form-section-heading">
+          <h2 className={styles.sectionHeading}>
             <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
           </h2>
 
-          <div className="input-grid two-col">
+          <div className="input-grid three-col location-row">
             <label className="input-glow-violet">
               {t("home.formCountry")}
               <AutocompleteInput
                 value={draft.country}
-                onChange={setField("country")}
-                onSelect={setField("country")}
+                onChange={handleCountryChange}
+                onSelect={handleCountrySelect}
                 placeholder={t("home.formCountryPlaceholder")}
                 suggestType="country"
                 required
@@ -223,26 +246,28 @@ export default function Home() {
               {t("home.formState")}
               <AutocompleteInput
                 value={draft.state}
-                onChange={setField("state")}
-                onSelect={setField("state")}
+                onChange={handleStateChange}
+                onSelect={handleStateSelect}
                 placeholder={t("home.formStatePlaceholder")}
                 suggestType="state"
+                contextCountry={draft.country}
+                required
+              />
+            </label>
+            <label className="input-glow-gold">
+              {t("home.formCity")}
+              <AutocompleteInput
+                value={draft.city}
+                onChange={setField("city")}
+                onSelect={setField("city")}
+                placeholder={t("home.formCityPlaceholder")}
+                suggestType="city"
+                contextCountry={draft.country}
+                contextState={draft.state}
                 required
               />
             </label>
           </div>
-
-          <label className="input-glow-gold">
-            {t("home.formCity")}
-            <AutocompleteInput
-              value={draft.city}
-              onChange={setField("city")}
-              onSelect={setField("city")}
-              placeholder={t("home.formCityPlaceholder")}
-              suggestType="city"
-              required
-            />
-          </label>
 
           {geoStatus !== "idle" && (
             <p className={`geo-status ${geoStatus}`}>
@@ -316,6 +341,7 @@ export default function Home() {
           </button>
         </form>
       </section>
+      </div>{/* /heroWrapper */}
     </main>
   );
 }

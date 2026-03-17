@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import type { ForecastReading } from "@/lib/astro-types";
 
 type FutureForecastPanelProps = {
@@ -8,6 +8,7 @@ type FutureForecastPanelProps = {
 };
 
 const DEFAULT_LOOKAHEAD_DAYS = 90;
+const FORECAST_TIMEOUT_MS = 30_000;
 
 function formatFutureDate(offsetDays: number) {
   const date = new Date();
@@ -25,8 +26,7 @@ function formatFriendlyDate(value: string) {
 
 function buildForecastUrl(queryString: string, targetDate: string) {
   const params = new URLSearchParams(queryString);
-  const baseUrl = process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
-  const url = new URL("/api/v1/chart/forecast", baseUrl);
+  const url = new URL("/api/chart/forecast", window.location.origin);
 
   url.searchParams.set("name", params.get("name") ?? "");
   url.searchParams.set("birth_date", params.get("birthDate") ?? "");
@@ -49,31 +49,63 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
   const [forecast, setForecast] = useState<ForecastReading | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isTimeout, setIsTimeout] = useState(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const loadForecast = async (dateValue: string) => {
-    if (!dateValue) {
-      return;
-    }
+  const loadForecast = useCallback(
+    async (dateValue: string) => {
+      if (!dateValue) return;
 
-    setIsLoading(true);
-    setError("");
-    try {
-      const response = await fetch(buildForecastUrl(queryString, dateValue));
-      if (!response.ok) {
-        throw new Error(`Forecast API error (${response.status})`);
+      // Abort any in-flight request
+      abortControllerRef.current?.abort();
+
+      setIsLoading(true);
+      setError("");
+      setIsTimeout(false);
+
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
+      const timeoutId = setTimeout(() => controller.abort(), FORECAST_TIMEOUT_MS);
+
+      try {
+        const response = await fetch(buildForecastUrl(queryString, dateValue), {
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Forecast API error (${response.status})`);
+        }
+        const data = (await response.json()) as ForecastReading;
+        setForecast(data);
+      } catch (fetchError) {
+        clearTimeout(timeoutId);
+        setForecast(null);
+
+        if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
+          setIsTimeout(true);
+          setError(
+            `Request timed out after ${Math.round(FORECAST_TIMEOUT_MS / 1000)} seconds. ` +
+              "The server may be busy. Please try again."
+          );
+        } else {
+          setError(
+            fetchError instanceof Error ? fetchError.message : "Could not load forecast."
+          );
+        }
+      } finally {
+        setIsLoading(false);
       }
-      const data = (await response.json()) as ForecastReading;
-      setForecast(data);
-    } catch (fetchError) {
-      setForecast(null);
-      setError(fetchError instanceof Error ? fetchError.message : "Could not load forecast.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    },
+    [queryString]
+  );
 
   useEffect(() => {
     void loadForecast(targetDate);
+    return () => {
+      abortControllerRef.current?.abort();
+    };
     // The query string changes when the engine changes, so we deliberately refetch here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryString]);
@@ -110,7 +142,23 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
         </button>
       </form>
 
-      {error && <p className="error-note">{error}</p>}
+      {error && (
+        <div className="forecast-error">
+          <p className="error-note">
+            {isTimeout ? "Timeout: " : "Error: "}
+            {error}
+          </p>
+          <button
+            type="button"
+            className="skel-retry-btn"
+            onClick={() => void loadForecast(targetDate)}
+            disabled={isLoading}
+          >
+            <span className="skel-retry-icon">&#x21BB;</span>
+            Retry
+          </button>
+        </div>
+      )}
 
       {forecast && (
         <article className="forecast-card">

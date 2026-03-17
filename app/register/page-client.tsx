@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import BackButton from "../components/BackButton";
+import styles from "../login/login.module.css";
 
 type RegisterPageClientProps = {
   returnTo?: string;
@@ -58,7 +60,7 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
       <main className="home-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
-        <section className="auth-panel" style={{ textAlign: "center" }}>
+        <section className={styles.panel} style={{ textAlign: "center" }}>
           <p className="kicker">{t("register.redirecting")}</p>
         </section>
       </main>
@@ -69,12 +71,13 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
     <main className="home-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
-      <section className="auth-panel">
+      <BackButton href="/" />
+      <section className={styles.panel}>
         <p className="kicker">{t("register.kicker")}</p>
         <h1>{t("register.heading")}</h1>
         <p className="lead">{t("register.lead")}</p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <label className="input-glow-gold">
             {t("register.displayName")}
             <input
@@ -119,14 +122,14 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
             />
           </label>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && <p className={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading}>
             {loading ? t("register.submitting") : t("register.submit")}
           </button>
         </form>
 
-        <p className="auth-switch">
+        <p className={styles.switchText}>
           {t("register.switchText")}{" "}
           <Link href={loginHref} className="ghost-link">
             {t("register.switchLink")}

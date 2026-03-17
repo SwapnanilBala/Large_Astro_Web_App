@@ -61,7 +61,7 @@ export default function TransitsPanel({ transits }: TransitsPanelProps) {
 
         <div className="transits-col">
           <h3>{t("transits.aspects")}</h3>
-          <div className="transit-aspect-list">
+          <div className="transit-aspect-list" role="list" aria-label="Transit aspects to natal planets">
             {tightestAspects.map((aspect, index) => {
               const isExpanded = expandedIndex === index;
               const interpretation = getTransitInterpretation(
@@ -77,6 +77,7 @@ export default function TransitsPanel({ transits }: TransitsPanelProps) {
                   onClick={() => handleToggle(index)}
                   role="button"
                   tabIndex={0}
+                  aria-expanded={isExpanded}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();

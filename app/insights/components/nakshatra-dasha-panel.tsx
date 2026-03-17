@@ -90,6 +90,21 @@ const HOUSE_MODIFIER: Record<number, string> = {
   12: "Placed in the 12th house, foreign lands, spiritual retreats, and expenditure are themes. This can mean overseas opportunities but also isolation or hidden expenses.",
 };
 
+/* ────────────────────────────────────────────────
+   Planet color palette for the Gantt timeline
+   ──────────────────────────────────────────────── */
+const DASHA_COLORS: Record<string, string> = {
+  Sun:     '#f5a623',
+  Moon:    '#a8d8ea',
+  Mars:    '#e74c3c',
+  Rahu:    '#8e44ad',
+  Jupiter: '#f1c40f',
+  Saturn:  '#7f8c8d',
+  Mercury: '#2ecc71',
+  Ketu:    '#e67e22',
+  Venus:   '#e91e8c',
+};
+
 const LEVEL_LABELS: Record<number, string> = {
   1: "Maha Dasha",
   2: "Antardasha",
@@ -184,7 +199,7 @@ export default function NakshatraDashaPanel({
     sequenceEnd?: string
   ) => `${lord}-${start}-${end}-${level}-${sequenceStart ?? start}-${sequenceEnd ?? end}`;
 
-  /* Fetch sub-periods from backend */
+  /* Fetch sub-periods from API */
   const fetchSubPeriods = useCallback(
     async (
       parentLord: string,
@@ -200,8 +215,7 @@ export default function NakshatraDashaPanel({
 
       setLoadingLevel(level);
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
-        const url = new URL("/api/v1/chart/dasha-subperiods", baseUrl);
+        const url = new URL("/api/chart/dasha-subperiods", window.location.origin);
         url.searchParams.set("parent_lord", parentLord);
         url.searchParams.set("parent_start", parentStart);
         url.searchParams.set("parent_end", parentEnd);
@@ -597,80 +611,146 @@ export default function NakshatraDashaPanel({
           </nav>
         )}
 
-        {/* ── Level 1: Maha Dasha Timeline ── */}
-        {drillPath.length === 0 && (
-          <div className="dasha-level-section">
-            <span className="dasha-level-label" style={{ color: LEVEL_COLORS[1] }}>
-              {LEVEL_LABELS[1]}
-            </span>
-            <div className="dasha-timeline">
-              {dasha.periods.map((period, index) => {
-                const widthPercent = (period.years / 120) * 100;
-                const isCurrent = period.planet === currentPlanet;
-                const isActive = popup?.planet === period.planet && popup?.level === 1;
+        {/* ── Level 1: Maha Dasha Gantt Timeline ── */}
+        {drillPath.length === 0 && (() => {
+          /* Compute total span in days from first start → last end */
+          const allStarts = dasha.periods.map((p) => new Date(p.start_date + "T00:00:00").getTime());
+          const allEnds   = dasha.periods.map((p) => new Date(p.end_date   + "T00:00:00").getTime());
+          const spanStart = Math.min(...allStarts);
+          const spanEnd   = Math.max(...allEnds);
+          const totalMs   = spanEnd - spanStart || 1;
 
-                return (
-                  <div
-                    key={`${period.planet}-${index}`}
-                    className={`dasha-bar${isCurrent ? " dasha-bar--current" : ""}${isActive ? " dasha-bar--active" : ""}`}
-                    style={{ width: `${widthPercent}%` }}
-                    title={`${period.planet}: ${period.years} years (${period.start_date} – ${period.end_date})`}
-                    onClick={(e) => {
-                      handleBarClick(
-                        period.planet,
-                        isCurrent,
-                        period.start_date,
-                        period.end_date,
-                        1,
-                        period.sequence_start_date,
-                        period.sequence_end_date,
-                        period.years,
-                        e
-                      );
-                      handleDrillDown(
-                        period.planet,
-                        period.start_date,
-                        period.end_date,
-                        1,
-                        [],
-                        period.sequence_start_date,
-                        period.sequence_end_date
-                      );
-                    }}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        handleBarClick(
-                          period.planet,
-                          isCurrent,
-                          period.start_date,
-                          period.end_date,
-                          1,
-                          period.sequence_start_date,
-                          period.sequence_end_date,
-                          period.years,
-                          e as unknown as React.MouseEvent<HTMLDivElement>
-                        );
-                        handleDrillDown(
-                          period.planet,
-                          period.start_date,
-                          period.end_date,
-                          1,
-                          [],
-                          period.sequence_start_date,
-                          period.sequence_end_date
-                        );
-                      }
-                    }}
+          const todayMs   = new Date().setHours(0, 0, 0, 0);
+          const todayPct  = Math.max(0, Math.min(100, ((todayMs - spanStart) / totalMs) * 100));
+          const todayInSpan = todayMs >= spanStart && todayMs <= spanEnd;
+
+          const activePeriod = dasha.periods.find((p) => p.planet === currentPlanet);
+          const activeDaysRemaining = activePeriod
+            ? Math.max(0, Math.ceil((new Date(activePeriod.end_date + "T00:00:00").getTime() - Date.now()) / 86_400_000))
+            : null;
+
+          return (
+            <div className="dasha-level-section">
+              <span className="dasha-level-label" style={{ color: LEVEL_COLORS[1] }}>
+                {LEVEL_LABELS[1]}
+              </span>
+
+              {/* ── Gantt track wrapper ── */}
+              <div className="dasha-gantt-wrap">
+                <div className="dasha-gantt-track">
+                  {dasha.periods.map((period, index) => {
+                    const pStart   = new Date(period.start_date + "T00:00:00").getTime();
+                    const pEnd     = new Date(period.end_date   + "T00:00:00").getTime();
+                    const leftPct  = ((pStart - spanStart) / totalMs) * 100;
+                    const widthPct = ((pEnd   - pStart)   / totalMs) * 100;
+                    const isCurrent = period.planet === currentPlanet;
+                    const isActive  = popup?.planet === period.planet && popup?.level === 1;
+                    const baseColor = DASHA_COLORS[period.planet] ?? '#6ce1d4';
+
+                    return (
+                      <div
+                        key={`${period.planet}-${index}`}
+                        className={`dasha-gantt-bar${isCurrent ? " dasha-gantt-bar--current" : ""}${isActive ? " dasha-bar--active" : ""}`}
+                        style={{
+                          left:  `${leftPct}%`,
+                          width: `${widthPct}%`,
+                          backgroundColor: baseColor,
+                          boxShadow: isCurrent
+                            ? `0 0 12px 3px ${baseColor}88, inset 0 0 8px ${baseColor}44`
+                            : undefined,
+                        }}
+                        title={`${period.planet}: ${period.years} years (${period.start_date} – ${period.end_date})`}
+                        onClick={(e) => {
+                          handleBarClick(
+                            period.planet,
+                            isCurrent,
+                            period.start_date,
+                            period.end_date,
+                            1,
+                            period.sequence_start_date,
+                            period.sequence_end_date,
+                            period.years,
+                            e
+                          );
+                          handleDrillDown(
+                            period.planet,
+                            period.start_date,
+                            period.end_date,
+                            1,
+                            [],
+                            period.sequence_start_date,
+                            period.sequence_end_date
+                          );
+                        }}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            handleBarClick(
+                              period.planet,
+                              isCurrent,
+                              period.start_date,
+                              period.end_date,
+                              1,
+                              period.sequence_start_date,
+                              period.sequence_end_date,
+                              period.years,
+                              e as unknown as React.MouseEvent<HTMLDivElement>
+                            );
+                            handleDrillDown(
+                              period.planet,
+                              period.start_date,
+                              period.end_date,
+                              1,
+                              [],
+                              period.sequence_start_date,
+                              period.sequence_end_date
+                            );
+                          }
+                        }}
+                      >
+                        <span className="dasha-gantt-label">{period.planet}</span>
+                      </div>
+                    );
+                  })}
+
+                  {/* ── TODAY needle ── */}
+                  {todayInSpan && (
+                    <div
+                      className="dasha-gantt-needle"
+                      style={{ left: `${todayPct}%` }}
+                      title="Today"
+                    >
+                      <span className="dasha-gantt-needle-label">TODAY</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Active dasha detail card ── */}
+              {activePeriod && (
+                <div
+                  className="dasha-active-card"
+                  style={{ borderColor: `${DASHA_COLORS[activePeriod.planet] ?? '#6ce1d4'}44` }}
+                >
+                  <span
+                    className="dasha-active-card-planet"
+                    style={{ color: DASHA_COLORS[activePeriod.planet] ?? '#6ce1d4' }}
                   >
-                    <span className="dasha-label">{period.planet}</span>
+                    {activePeriod.planet}
+                  </span>
+                  <span className="dasha-active-card-badge">Active Maha Dasha</span>
+                  <div className="dasha-active-card-meta">
+                    <span>{formatDate(activePeriod.start_date)} &ndash; {formatDate(activePeriod.end_date)}</span>
+                    {activeDaysRemaining !== null && (
+                      <span className="dasha-active-card-days">{activeDaysRemaining.toLocaleString()} days remaining</span>
+                    )}
                   </div>
-                );
-              })}
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* ── Sub-Period Drill-Down Levels ── */}
         {currentSubPeriods && currentSubPeriods.length > 0 && (

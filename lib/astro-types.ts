@@ -115,11 +115,21 @@ export type AspectInfo = {
   vedic: boolean;
 };
 
+export type NavamsaDignity =
+  | "exalted"
+  | "own"
+  | "moolatrikona"
+  | "friend"
+  | "neutral"
+  | "enemy"
+  | "debilitated";
+
 export type NavamsaPositionInfo = {
   name: string;
   rashi_sign: string;
   navamsa_sign: string;
   navamsa_division: number;
+  dignity?: NavamsaDignity;
 };
 
 export type TransitPositionInfo = {
@@ -143,7 +153,7 @@ export type TransitData = {
 };
 
 export type LifeDomainInsight = {
-  key: "love_life" | "career" | "family" | "inheritance" | "influence" | "life_cycle";
+  key: "love_life" | "career" | "family" | "inheritance" | "influence" | "life_cycle" | "travel_destinations";
   label: string;
   headline: string;
   overview: string;
@@ -271,6 +281,47 @@ export type SavedComparisonRecord = {
   saved_at: string;
   updated_at: string;
   archived_at?: string | null;
+};
+
+export type ClientReadingRecord = {
+  reading_id: string;
+  user_id: string;
+  name: string;
+  birth_date: string;
+  birth_time: string;
+  city: string;
+  country: string;
+  state: string;
+  town: string;
+  latitude: number;
+  longitude: number;
+  timezone_offset: number;
+  time_zone_id: string;
+  engine_id: string;
+  ascendant_sign: string;
+  brief_career: string;
+  brief_love: string;
+  brief_family: string;
+  brief_travel: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type GuestReadingRecord = {
+  reading_id: string;
+  name: string;
+  birth_date: string;
+  birth_time: string;
+  city: string;
+  country: string;
+  state: string;
+  latitude: number;
+  longitude: number;
+  timezone_offset: number;
+  time_zone_id: string;
+  engine_id: string;
+  brief_general: string;
+  created_at: string;
 };
 
 export type CompatibilityTheme = {

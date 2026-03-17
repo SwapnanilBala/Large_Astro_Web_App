@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
+import BackButton from "@/app/components/BackButton";
+import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
 import { useAuth } from "@/lib/auth-context";
@@ -12,8 +14,110 @@ import { profileInitialState } from "@/lib/astro-types";
 import { useToast } from "@/lib/toast-context";
 import { saveComparison } from "@/lib/workspace-store";
 
-const ASTRO_API =
-  process.env.NEXT_PUBLIC_ASTRO_API_BASE_URL ?? "http://127.0.0.1:8000";
+/** Derives the Western (Tropical) sun sign from a YYYY-MM-DD birth date string. */
+function sunSignFromDate(birthDate: string): string {
+  if (!birthDate) return "";
+  const parts = birthDate.split("-");
+  if (parts.length < 3) return "";
+  const month = parseInt(parts[1], 10);
+  const day = parseInt(parts[2], 10);
+  if (isNaN(month) || isNaN(day)) return "";
+
+  if ((month === 3 && day >= 21) || (month === 4 && day <= 19)) return "Aries";
+  if ((month === 4 && day >= 20) || (month === 5 && day <= 20)) return "Taurus";
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 20)) return "Gemini";
+  if ((month === 6 && day >= 21) || (month === 7 && day <= 22)) return "Cancer";
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return "Leo";
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return "Virgo";
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 22)) return "Libra";
+  if ((month === 10 && day >= 23) || (month === 11 && day <= 21)) return "Scorpio";
+  if ((month === 11 && day >= 22) || (month === 12 && day <= 21)) return "Sagittarius";
+  if ((month === 12 && day >= 22) || (month === 1 && day <= 19)) return "Capricorn";
+  if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return "Aquarius";
+  return "Pisces";
+}
+
+function CompatibilityRing({ score }: { score: number }) {
+  const [animated, setAnimated] = useState(false);
+
+  useEffect(() => {
+    // Trigger animation on mount after a brief delay so the transition fires
+    const id = setTimeout(() => setAnimated(true), 60);
+    return () => clearTimeout(id);
+  }, []);
+
+  const radius = 54;
+  const stroke = 8;
+  const circumference = 2 * Math.PI * radius;
+  const offset = animated ? circumference - (score / 100) * circumference : circumference;
+
+  const color = score >= 70 ? '#4ade80' : score >= 45 ? '#fbbf24' : '#f87171';
+
+  const label =
+    score >= 70 ? 'Harmonious' :
+    score >= 45 ? 'Compatible' :
+    'Challenging';
+
+  const labelColor =
+    score >= 70 ? '#4ade80' :
+    score >= 45 ? '#fbbf24' :
+    '#f87171';
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+      <div style={{ position: 'relative', width: 140, height: 140, margin: '0 auto' }}>
+        <svg width="140" height="140" style={{ transform: 'rotate(-90deg)' }}>
+          <defs>
+            <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={color} stopOpacity={0.4} />
+              <stop offset="100%" stopColor={color} stopOpacity={1} />
+            </linearGradient>
+          </defs>
+          {/* Track */}
+          <circle
+            cx="70" cy="70" r={radius}
+            fill="none"
+            stroke="rgba(255,255,255,0.08)"
+            strokeWidth={stroke}
+          />
+          {/* Progress arc */}
+          <circle
+            cx="70" cy="70" r={radius}
+            fill="none"
+            stroke="url(#ringGrad)"
+            strokeWidth={stroke}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={offset}
+            style={{ transition: 'stroke-dashoffset 1.2s ease' }}
+          />
+        </svg>
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
+          alignItems: 'center', justifyContent: 'center',
+        }}>
+          <span style={{ fontSize: '2rem', fontWeight: 700, color, lineHeight: 1 }}>
+            {Math.round(score)}
+          </span>
+          <span style={{
+            fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)',
+            textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.2rem',
+          }}>
+            Score
+          </span>
+        </div>
+      </div>
+      <span style={{
+        fontSize: '0.85rem', fontWeight: 600, color: labelColor,
+        letterSpacing: '0.05em', textTransform: 'uppercase',
+      }}>
+        {label}
+      </span>
+    </div>
+  );
+}
+
+const ASTRO_API = "";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
   "name",
@@ -35,6 +139,7 @@ type ProfileCardProps = {
   title: string;
   profile: ProfileQueryInput;
   setProfile: Dispatch<SetStateAction<ProfileQueryInput>>;
+  accentColor: "aqua" | "coral";
 };
 
 function profileFromParams(
@@ -73,7 +178,14 @@ function profileFromParams(
   };
 }
 
-function ProfileCard({ title, profile, setProfile }: ProfileCardProps) {
+function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardProps) {
+  const signBorderColor = accentColor === "aqua"
+    ? "rgba(100,200,255,0.5)"
+    : "rgba(255,100,150,0.5)";
+  const signShadowColor = accentColor === "aqua"
+    ? "rgba(100,200,255,0.25)"
+    : "rgba(255,100,150,0.25)";
+  const profileSign = sunSignFromDate(profile.birthDate);
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -150,7 +262,20 @@ function ProfileCard({ title, profile, setProfile }: ProfileCardProps) {
     <section className="rules-panel compatibility-profile-card">
       <div className="rules-header">
         <p className="kicker">Profile</p>
-        <h2>{title}</h2>
+        <h2 style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
+          {profileSign && (
+            <ZodiacSignImage
+              sign={profileSign}
+              size={36}
+              style={{
+                border: `2px solid ${signBorderColor}`,
+                boxShadow: `0 0 12px ${signShadowColor}`,
+                flexShrink: 0,
+              }}
+            />
+          )}
+          {profile.name || title}
+        </h2>
       </div>
       <p className="section-intro">
         Fine-tune the birth profile and let the app resolve coordinates plus historical timezone context automatically.
@@ -315,7 +440,7 @@ export default function CompatibilityPageClient({
       setIsSubmitting(true);
       setError("");
 
-      const response = await fetch(`${ASTRO_API}/api/v1/compatibility`, {
+      const response = await fetch(`${ASTRO_API}/api/compatibility`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -397,6 +522,7 @@ export default function CompatibilityPageClient({
     <main className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
+      <BackButton />
 
       <section className="dashboard-shell">
         <p className="kicker">Synastry Analysis</p>
@@ -407,8 +533,8 @@ export default function CompatibilityPageClient({
         </p>
 
         <div className="compatibility-grid">
-          <ProfileCard title="Primary profile" profile={primary} setProfile={setPrimary} />
-          <ProfileCard title="Partner profile" profile={partner} setProfile={setPartner} />
+          <ProfileCard title="Primary profile" profile={primary} setProfile={setPrimary} accentColor="aqua" />
+          <ProfileCard title="Partner profile" profile={partner} setProfile={setPartner} accentColor="coral" />
         </div>
 
         <div className="workspace-actions">
@@ -441,9 +567,44 @@ export default function CompatibilityPageClient({
         {result && (
           <>
             <div className="workspace-summary-grid">
-              <article className="metric-card">
+              <article className="metric-card metric-card--score-ring">
                 <h3>Compatibility score</h3>
-                <p>{result.compatibility_score.toFixed(1)}</p>
+                <div style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1rem",
+                  marginBottom: "1.5rem",
+                }}>
+                  <div style={{ textAlign: "center" }}>
+                    <ZodiacSignImage
+                      sign={sunSignFromDate(primary.birthDate)}
+                      size={72}
+                      style={{
+                        border: "2px solid rgba(100,200,255,0.5)",
+                        boxShadow: "0 0 20px rgba(100,200,255,0.25)",
+                      }}
+                    />
+                    <p style={{ margin: "0.4rem 0 0", fontSize: "0.75rem", opacity: 0.7 }}>
+                      {result.primary_client.name}
+                    </p>
+                  </div>
+                  <span style={{ fontSize: "1.5rem", opacity: 0.4 }}>✦</span>
+                  <div style={{ textAlign: "center" }}>
+                    <ZodiacSignImage
+                      sign={sunSignFromDate(partner.birthDate)}
+                      size={72}
+                      style={{
+                        border: "2px solid rgba(255,100,150,0.5)",
+                        boxShadow: "0 0 20px rgba(255,100,150,0.25)",
+                      }}
+                    />
+                    <p style={{ margin: "0.4rem 0 0", fontSize: "0.75rem", opacity: 0.7 }}>
+                      {result.partner_client.name}
+                    </p>
+                  </div>
+                </div>
+                <CompatibilityRing score={result.compatibility_score} />
                 <small>Composite synastry score from aspects and elemental fit.</small>
               </article>
               <article className="metric-card">
@@ -464,15 +625,37 @@ export default function CompatibilityPageClient({
               </div>
               <p className="section-intro">{result.summary}</p>
               <div className="rules-list">
-                {result.themes.map((theme) => (
-                  <article key={theme.title} className="rule-card rule-medium">
-                    <header>
-                      <h3>{theme.title}</h3>
-                      <span>{Math.round(theme.confidence_score * 100)}%</span>
-                    </header>
-                    <p>{theme.insight}</p>
-                  </article>
-                ))}
+                {result.themes.map((theme) => {
+                  const ZODIAC_SIGNS = [
+                    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+                    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+                  ];
+                  const signsInTitle = ZODIAC_SIGNS.filter((s) =>
+                    theme.title.includes(s)
+                  );
+                  const signsInInsight = ZODIAC_SIGNS.filter((s) =>
+                    theme.insight.includes(s)
+                  );
+                  return (
+                    <article key={theme.title} className="rule-card rule-medium">
+                      <header>
+                        <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                          {signsInTitle.map((s) => (
+                            <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
+                          ))}
+                          {theme.title}
+                        </h3>
+                        <span>{Math.round(theme.confidence_score * 100)}%</span>
+                      </header>
+                      <p style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                        {signsInInsight.length > 0 && signsInInsight.map((s) => (
+                          <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
+                        ))}
+                        {theme.insight}
+                      </p>
+                    </article>
+                  );
+                })}
               </div>
             </section>
 

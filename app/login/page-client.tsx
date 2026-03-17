@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import BackButton from "../components/BackButton";
+import styles from "./login.module.css";
 
 type LoginPageClientProps = {
   returnTo?: string;
@@ -50,7 +52,7 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
       <main className="home-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
-        <section className="auth-panel" style={{ textAlign: "center" }}>
+        <section className={styles.panel} style={{ textAlign: "center" }}>
           <p className="kicker">{t("login.redirecting")}</p>
         </section>
       </main>
@@ -61,12 +63,13 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
     <main className="home-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
-      <section className="auth-panel">
+      <BackButton href="/" />
+      <section className={styles.panel}>
         <p className="kicker">{t("login.kicker")}</p>
         <h1>{t("login.heading")}</h1>
         <p className="lead">{t("login.lead")}</p>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+        <form className={styles.form} onSubmit={handleSubmit}>
           <label className="input-glow-aqua">
             {t("login.email")}
             <input
@@ -89,14 +92,14 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
             />
           </label>
 
-          {error && <p className="auth-error">{error}</p>}
+          {error && <p className={styles.error}>{error}</p>}
 
           <button type="submit" disabled={loading}>
             {loading ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
 
-        <p className="auth-switch">
+        <p className={styles.switchText}>
           {t("login.switchText")}{" "}
           <Link href={registerHref} className="ghost-link">
             {t("login.switchLink")}

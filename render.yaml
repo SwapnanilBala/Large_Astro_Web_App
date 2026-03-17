@@ -1,17 +1,14 @@
 services:
   - type: web
-    name: swapastro-api
-    runtime: python
+    name: swapastro-nextjs
+    runtime: node
     plan: free
-    rootDir: backend
-    autoDeployTrigger: commit
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
+    buildCommand: npm install && npm run build
+    startCommand: npm start
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.12.10
-      - key: CORS_ORIGINS
+      - key: NODE_VERSION
+        value: 20.11.0
+      - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
-      - key: EPHEMERIS_PATH
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
         sync: false

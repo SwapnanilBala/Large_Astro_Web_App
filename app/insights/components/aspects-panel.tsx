@@ -34,11 +34,12 @@ export default function AspectsPanel({ aspects }: AspectsPanelProps) {
         <h2>{t("aspects.heading")}</h2>
       </div>
 
-      <div className="aspect-grid">
+      <div className="aspect-grid" role="list" aria-label="Planetary aspects">
         {aspects.map((aspect, index) => (
           <article
             key={`${aspect.planet1}-${aspect.planet2}-${aspect.aspect_type}-${index}`}
             className={`aspect-card aspect-card--${aspect.aspect_type.toLowerCase()}`}
+            role="listitem"
           >
             <h3>
               {aspect.planet1}

@@ -113,3 +113,104 @@ create policy "saved comparisons delete own"
 on public.saved_comparisons
 for delete
 using (auth.uid() = user_id);
+
+-- =========================================================================
+-- CLIENT READINGS (authenticated users — full birth data + domain briefs)
+-- =========================================================================
+
+create table if not exists public.client_readings (
+  reading_id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  birth_date date not null,
+  birth_time text not null default '',
+  city text not null default '',
+  country text not null default '',
+  state text not null default '',
+  town text not null default '',
+  latitude double precision not null default 0,
+  longitude double precision not null default 0,
+  timezone_offset integer not null default 0,
+  time_zone_id text not null default '',
+  engine_id text not null default 'lahiri_classic',
+  ascendant_sign text not null default '',
+  brief_career text not null default '',
+  brief_love text not null default '',
+  brief_family text not null default '',
+  brief_travel text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create unique index if not exists client_readings_user_profile_unique
+  on public.client_readings (user_id, name, birth_date, birth_time);
+
+drop trigger if exists client_readings_set_updated_at on public.client_readings;
+create trigger client_readings_set_updated_at
+before update on public.client_readings
+for each row
+execute function public.set_current_timestamp_updated_at();
+
+alter table public.client_readings enable row level security;
+
+drop policy if exists "client readings select own" on public.client_readings;
+create policy "client readings select own"
+on public.client_readings
+for select
+using (auth.uid() = user_id);
+
+drop policy if exists "client readings insert own" on public.client_readings;
+create policy "client readings insert own"
+on public.client_readings
+for insert
+with check (auth.uid() = user_id);
+
+drop policy if exists "client readings update own" on public.client_readings;
+create policy "client readings update own"
+on public.client_readings
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+drop policy if exists "client readings delete own" on public.client_readings;
+create policy "client readings delete own"
+on public.client_readings
+for delete
+using (auth.uid() = user_id);
+
+-- =========================================================================
+-- GUEST READINGS (anonymous — birth data + short general prediction only)
+-- =========================================================================
+
+create table if not exists public.guest_readings (
+  reading_id uuid primary key default gen_random_uuid(),
+  name text not null,
+  birth_date date not null,
+  birth_time text not null default '',
+  city text not null default '',
+  country text not null default '',
+  state text not null default '',
+  latitude double precision not null default 0,
+  longitude double precision not null default 0,
+  timezone_offset integer not null default 0,
+  time_zone_id text not null default '',
+  engine_id text not null default 'lahiri_classic',
+  brief_general text not null default '',
+  created_at timestamptz not null default now()
+);
+
+alter table public.guest_readings enable row level security;
+
+-- Guests can only insert (via anon key), never read back or modify
+drop policy if exists "guest readings insert anon" on public.guest_readings;
+create policy "guest readings insert anon"
+on public.guest_readings
+for insert
+with check (true);
+
+-- Authenticated users (e.g. admins) can read guest readings
+drop policy if exists "guest readings select auth" on public.guest_readings;
+create policy "guest readings select auth"
+on public.guest_readings
+for select
+using (auth.uid() is not null);

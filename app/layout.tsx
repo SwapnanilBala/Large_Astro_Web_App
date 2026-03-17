@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Sora } from "next/font/google";
 import "./globals.css";
 import StarField from "./components/StarField";
 import Navbar from "./components/Navbar";
+import BottomNav from "./components/BottomNav";
 import ViewportScaler from "./components/ViewportScaler";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
@@ -41,6 +42,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+        <a href="#main-content" className="skip-nav">
+          Skip to main content
+        </a>
         <ViewportScaler />
         <StarField />
         <ThemeProvider>
@@ -48,7 +52,10 @@ export default function RootLayout({
             <ToastProvider>
               <AuthProvider>
                 <Navbar />
-                {children}
+                <main id="main-content">
+                  {children}
+                </main>
+                <BottomNav />
               </AuthProvider>
             </ToastProvider>
           </LanguageProvider>

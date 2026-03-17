@@ -15,6 +15,3 @@ pnpm-debug.log*
 .env.test.local
 .env.production.local
 .venv
-backend/.venv
-__pycache__/
-*.pyc

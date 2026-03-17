@@ -14,6 +14,8 @@ interface AutocompleteInputProps {
   placeholder?: string;
   suggestType: "country" | "state" | "city";
   required?: boolean;
+  contextCountry?: string;
+  contextState?: string;
 }
 
 export default function AutocompleteInput({
@@ -23,6 +25,8 @@ export default function AutocompleteInput({
   placeholder,
   suggestType,
   required,
+  contextCountry,
+  contextState,
 }: AutocompleteInputProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -42,6 +46,8 @@ export default function AutocompleteInput({
     timer.current = setTimeout(async () => {
       try {
         const params = new URLSearchParams({ q: value, type: suggestType });
+        if (contextCountry) params.set("country", contextCountry);
+        if (contextState) params.set("state", contextState);
         const res = await fetch(`/api/suggest?${params.toString()}`);
         const data: Suggestion[] = await res.json();
         setSuggestions(data);
@@ -56,7 +62,7 @@ export default function AutocompleteInput({
     return () => {
       if (timer.current) clearTimeout(timer.current);
     };
-  }, [value, suggestType]);
+  }, [value, suggestType, contextCountry, contextState]);
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {

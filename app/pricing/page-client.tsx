@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
+import BackButton from "../components/BackButton";
+import styles from "./pricing.module.css";
 
 type PricingPageClientProps = {
   returnTo?: string;
@@ -10,17 +12,21 @@ type PricingPageClientProps = {
 
 type PlanId = "basic" | "pro" | "ultimate";
 
+const ACCENT_MAP: Record<PlanId, string> = {
+  basic: styles.cardBasic,
+  pro: styles.cardPro,
+  ultimate: styles.cardUltimate,
+};
+
 const PLAN_ORDER: Array<{
   id: PlanId;
   priceLabel: string;
-  accentClass: string;
   fieldClass: string;
   featureLines: string[];
 }> = [
   {
     id: "basic",
     priceLabel: "$5",
-    accentClass: "pricing-card--basic",
     fieldClass: "input-glow-aqua",
     featureLines: [
       "Guest mode starts here by default",
@@ -31,7 +37,6 @@ const PLAN_ORDER: Array<{
   {
     id: "pro",
     priceLabel: "$20",
-    accentClass: "pricing-card--pro",
     fieldClass: "input-glow-gold",
     featureLines: [
       "Same open chart access as guest mode",
@@ -42,7 +47,6 @@ const PLAN_ORDER: Array<{
   {
     id: "ultimate",
     priceLabel: "$50",
-    accentClass: "pricing-card--ultimate",
     fieldClass: "input-glow-coral",
     featureLines: [
       "Same open chart access as every other tier",
@@ -108,6 +112,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
     <main className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
+      <BackButton href="/" />
       <section className="dashboard-shell">
         <p className="kicker">Pricing</p>
         <h1>Open access and account labels</h1>
@@ -116,7 +121,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
           Supabase instead of the old backend database layer.
         </p>
 
-        <div className="pricing-active-plan">
+        <div className={styles.activePlan}>
           <span className="access-pill access-pill--premium">Active plan</span>
           <p>
             {isAuthenticated
@@ -131,16 +136,16 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
           </p>
         )}
 
-        <div className="pricing-grid">
+        <div className={styles.grid}>
           {PLAN_ORDER.map((plan) => {
             const isCurrentPlan = currentPlan === plan.id;
 
             return (
               <article
                 key={plan.id}
-                className={`pricing-card ${plan.accentClass}${isCurrentPlan ? " pricing-card--active" : ""}`}
+                className={`${isCurrentPlan ? styles.cardActive : styles.card} ${ACCENT_MAP[plan.id]}`}
               >
-                <div className="pricing-card-header">
+                <div className={styles.cardHeader}>
                   <div>
                     <p className="kicker">{plan.id}</p>
                     <h2>{plan.priceLabel}</h2>
@@ -150,12 +155,12 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
                   )}
                 </div>
 
-                <div className="pricing-feature-list">
+                <div className={styles.featureList}>
                   {plan.featureLines.map((feature) => (
                     <p key={feature}>{feature}</p>
                   ))}
                 </div>
-                <p className={`pricing-code-label ${plan.fieldClass}`}>
+                <p className={`${styles.codeLabel} ${plan.fieldClass}`}>
                   {plan.id === "basic" &&
                     "Guest mode is the default. Create an account only if you want synced charts and saved reports."}
                   {plan.id === "pro" &&
@@ -168,20 +173,20 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
           })}
         </div>
 
-        <section className="rules-panel pricing-matrix-panel">
+        <section className={`rules-panel ${styles.matrixPanel}`}>
           <div className="rules-header">
             <p className="kicker">Feature Matrix</p>
             <h2>Current access state</h2>
           </div>
-          <div className="pricing-matrix">
-            <div className="pricing-matrix-row pricing-matrix-row--header">
+          <div className={styles.matrix}>
+            <div className={styles.matrixRowHeader}>
               <span>Feature</span>
               <span>Guest</span>
               <span>Pro</span>
               <span>Ultimate</span>
             </div>
             {FEATURE_MATRIX.map((row) => (
-              <div key={row.label} className="pricing-matrix-row">
+              <div key={row.label} className={styles.matrixRow}>
                 <span>{row.label}</span>
                 <span>{row.plans.basic}</span>
                 <span>{row.plans.pro}</span>

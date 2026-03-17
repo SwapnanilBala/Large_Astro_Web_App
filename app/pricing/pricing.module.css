@@ -1,0 +1,190 @@
+/* ── Pricing Page ── */
+
+.grid {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card {
+  border-radius: 24px;
+  border: 1px solid var(--line-soft);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02)),
+    var(--surface-strong);
+  padding: 1.2rem;
+  display: grid;
+  gap: 1rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(108, 225, 212, 0.05));
+  opacity: 0.9;
+}
+
+@media (hover: hover) {
+  .card:hover {
+    border-color: rgba(195, 231, 255, 0.3);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    transform: translateY(-2px);
+  }
+}
+
+.cardActive {
+  composes: card;
+  border-color: rgba(242, 194, 108, 0.38);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 194, 108, 0.18),
+    0 16px 44px rgba(242, 194, 108, 0.08);
+}
+
+.activePlan {
+  margin-top: 1.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.activePlan p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.cardBasic {
+  box-shadow: inset 0 0 0 1px rgba(108, 225, 212, 0.08);
+}
+
+.cardPro {
+  box-shadow: inset 0 0 0 1px rgba(242, 194, 108, 0.12);
+}
+
+.cardUltimate {
+  background:
+    radial-gradient(500px 180px at 100% 0%, rgba(242, 194, 108, 0.16), transparent 72%),
+    var(--surface-strong);
+  box-shadow: inset 0 0 0 1px rgba(255, 143, 126, 0.1);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+.cardHeader h2 {
+  margin: 0.35rem 0 0;
+  font-size: 2.4rem;
+  line-height: 1;
+}
+
+.featureList {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.featureList p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  position: relative;
+  padding-left: 1.35rem;
+}
+
+.featureList p::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.52rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-aqua));
+  box-shadow: 0 0 12px rgba(242, 194, 108, 0.18);
+}
+
+.codeLabel {
+  margin: 0;
+}
+
+.success {
+  margin: 0;
+  color: var(--accent-aqua);
+  font-size: 0.9rem;
+}
+
+.matrixPanel {
+  margin-top: 1.4rem;
+}
+
+.matrix {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.matrixRow {
+  display: grid;
+  grid-template-columns: 1.3fr repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: center;
+  border-radius: 16px;
+  border: 1px solid var(--line-soft);
+  padding: 0.85rem 1rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    var(--surface-soft);
+  transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.matrixRow::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(108, 225, 212, 0.05));
+  opacity: 0.9;
+}
+
+@media (hover: hover) {
+  .matrixRow:hover {
+    border-color: rgba(195, 231, 255, 0.3);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    transform: translateY(-2px);
+  }
+}
+
+.matrixRowHeader {
+  composes: matrixRow;
+  background: rgba(108, 225, 212, 0.08);
+  border-color: rgba(108, 225, 212, 0.18);
+  text-transform: uppercase;
+  letter-spacing: 0.06rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .matrixRow,
+  .matrixRowHeader {
+    grid-template-columns: 1fr;
+  }
+}

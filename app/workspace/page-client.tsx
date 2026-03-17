@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
+import BackButton from "../components/BackButton";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/lib/toast-context";
+import styles from "./workspace.module.css";
 import {
   deleteSavedChart,
   deleteSavedComparison,
@@ -357,6 +359,7 @@ export default function WorkspacePageClient() {
   if (isLoading) {
     return (
       <main className="insights-shell">
+        <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Workspace</p>
           <h1>Loading your saved astrology workspace...</h1>
@@ -370,6 +373,7 @@ export default function WorkspacePageClient() {
       <main className="insights-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
+        <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Workspace</p>
           <h1>Guest mode has full chart access. Workspace still needs an account.</h1>
@@ -394,6 +398,7 @@ export default function WorkspacePageClient() {
     <main className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
+      <BackButton href="/" />
       <section className="dashboard-shell">
         <p className="kicker">Workspace</p>
         <h1>{user?.display_name ?? "Your"} astrology workspace</h1>
@@ -401,8 +406,8 @@ export default function WorkspacePageClient() {
           Search saved charts, revisit compatibility readings, archive old items, share links, and export account data.
         </p>
 
-        <div className="workspace-toolbar">
-          <label className="workspace-search input-glow-gold">
+        <div className={styles.toolbar}>
+          <label className={`${styles.search} input-glow-gold`}>
             Search charts, cities, signs, or notes
             <input
               type="text"
@@ -411,7 +416,7 @@ export default function WorkspacePageClient() {
               placeholder="Search your workspace"
             />
           </label>
-          <div className="workspace-toolbar-actions">
+          <div className={styles.toolbarActions}>
             <Link href="/pricing" className="ghost-link">
               Manage plan
             </Link>
@@ -421,8 +426,8 @@ export default function WorkspacePageClient() {
           </div>
         </div>
 
-        <div className="workspace-filter-bar">
-          <label className="workspace-inline-filter input-glow-aqua">
+        <div className={styles.filterBar}>
+          <label className={`${styles.inlineFilter} input-glow-aqua`}>
             Status
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}>
               <option value="active">Active</option>
@@ -430,7 +435,7 @@ export default function WorkspacePageClient() {
               <option value="all">All</option>
             </select>
           </label>
-          <label className="workspace-inline-filter input-glow-coral">
+          <label className={`${styles.inlineFilter} input-glow-coral`}>
             Content
             <select value={contentFilter} onChange={(event) => setContentFilter(event.target.value as ContentFilter)}>
               <option value="all">All</option>
@@ -438,7 +443,7 @@ export default function WorkspacePageClient() {
               <option value="comparisons">Comparisons only</option>
             </select>
           </label>
-          <label className="workspace-inline-filter input-glow-violet">
+          <label className={`${styles.inlineFilter} input-glow-violet`}>
             Sort
             <select value={sortMode} onChange={(event) => setSortMode(event.target.value as SortMode)}>
               <option value="newest">Newest first</option>
@@ -448,7 +453,7 @@ export default function WorkspacePageClient() {
           </label>
         </div>
 
-        <div className="workspace-summary-grid">
+        <div className={styles.summaryGrid}>
           <article className="metric-card">
             <h3>Saved charts</h3>
             <p>{visibleCharts.length}</p>
@@ -469,7 +474,7 @@ export default function WorkspacePageClient() {
         {pageError && <p className="error-note">{pageError}</p>}
 
         {contentFilter !== "comparisons" && (
-          <section className="rules-panel workspace-section">
+          <section className={`rules-panel ${styles.section}`}>
             <div className="rules-header">
               <p className="kicker">Saved Charts</p>
               <h2>Birth profiles</h2>
@@ -478,37 +483,37 @@ export default function WorkspacePageClient() {
             {visibleCharts.length === 0 ? (
               <p className="section-intro">No saved charts match the current filters yet.</p>
             ) : (
-              <div className="workspace-card-grid">
+              <div className={styles.cardGrid}>
                 {visibleCharts.map((chart) => {
                   const state = saveStates[chart.saved_chart_id] ?? "idle";
                   const chartPath = `/insights?${chart.query_string}`;
                   return (
-                    <article key={chart.saved_chart_id} className="workspace-card">
-                      <div className="workspace-card-header">
+                    <article key={chart.saved_chart_id} className={styles.card}>
+                      <div className={styles.cardHeader}>
                         <div>
                           <h3>{chart.name}</h3>
                           <p>
                             {chart.city || chart.town || "Unknown city"} • {chart.ascendant_sign} Lagna
                           </p>
                         </div>
-                        <div className="workspace-chip-row">
+                        <div className={styles.chipRow}>
                           {chart.archived_at && <span className="access-pill access-pill--limited">Archived</span>}
                           <Link href={chartPath} className="ghost-link">
                             Open chart
                           </Link>
                         </div>
                       </div>
-                      <p className="workspace-card-meta">
+                      <p className={styles.cardMeta}>
                         Born {chart.birth_date} at {chart.birth_time || "unknown time"}
                         {chart.time_zone_id ? ` • ${chart.time_zone_id}` : ""}
                       </p>
                       <textarea
-                        className="workspace-notes"
+                        className={styles.notes}
                         value={notesDrafts[chart.saved_chart_id] ?? ""}
                         onChange={(event) => updateNoteDraft(chart.saved_chart_id, event.target.value)}
                         placeholder="Add notes about this profile"
                       />
-                      <div className="workspace-card-actions">
+                      <div className={styles.cardActions}>
                         <button type="button" onClick={() => saveChartNotes(chart.saved_chart_id)}>
                           {state === "saving" ? "Saving..." : "Save notes"}
                         </button>
@@ -521,7 +526,7 @@ export default function WorkspacePageClient() {
                         <button type="button" className="danger-btn" onClick={() => void deleteChart(chart)}>
                           Delete
                         </button>
-                        <span className={`workspace-save-state workspace-save-state--${state}`}>
+                        <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
                           {state === "saved" && "Saved"}
                           {state === "error" && "Save failed"}
                         </span>
@@ -535,7 +540,7 @@ export default function WorkspacePageClient() {
         )}
 
         {contentFilter !== "charts" && (
-          <section className="rules-panel workspace-section">
+          <section className={`rules-panel ${styles.section}`}>
             <div className="rules-header">
               <p className="kicker">Saved Comparisons</p>
               <h2>Synastry reports</h2>
@@ -544,36 +549,36 @@ export default function WorkspacePageClient() {
             {visibleComparisons.length === 0 ? (
               <p className="section-intro">No saved compatibility reports match the current filters yet.</p>
             ) : (
-              <div className="workspace-card-grid">
+              <div className={styles.cardGrid}>
                 {visibleComparisons.map((comparison) => {
                   const state = saveStates[comparison.saved_comparison_id] ?? "idle";
                   const comparisonPath = `/insights/compatibility?${comparison.query_string}`;
                   return (
-                    <article key={comparison.saved_comparison_id} className="workspace-card">
-                      <div className="workspace-card-header">
+                    <article key={comparison.saved_comparison_id} className={styles.card}>
+                      <div className={styles.cardHeader}>
                         <div>
                           <h3>
                             {comparison.primary_name} + {comparison.partner_name}
                           </h3>
                           <p>{comparison.compatibility_score.toFixed(1)} / 100 compatibility score</p>
                         </div>
-                        <div className="workspace-chip-row">
+                        <div className={styles.chipRow}>
                           {comparison.archived_at && <span className="access-pill access-pill--limited">Archived</span>}
                           <Link href={comparisonPath} className="ghost-link">
                             Open report
                           </Link>
                         </div>
                       </div>
-                      <p className="workspace-card-meta">{comparison.summary}</p>
+                      <p className={styles.cardMeta}>{comparison.summary}</p>
                       <textarea
-                        className="workspace-notes"
+                        className={styles.notes}
                         value={notesDrafts[comparison.saved_comparison_id] ?? ""}
                         onChange={(event) =>
                           updateNoteDraft(comparison.saved_comparison_id, event.target.value)
                         }
                         placeholder="Add notes about this comparison"
                       />
-                      <div className="workspace-card-actions">
+                      <div className={styles.cardActions}>
                         <button
                           type="button"
                           onClick={() => saveComparisonNotes(comparison.saved_comparison_id)}
@@ -607,7 +612,7 @@ export default function WorkspacePageClient() {
                         >
                           Delete
                         </button>
-                        <span className={`workspace-save-state workspace-save-state--${state}`}>
+                        <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
                           {state === "saved" && "Saved"}
                           {state === "error" && "Save failed"}
                         </span>
