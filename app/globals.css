@@ -6273,3 +6273,591 @@ html[data-theme="light"] .chart-history-card {
     opacity: 0;
   }
 }
+
+/* ═══════════════════════════════════════════════
+   PALM READING PANEL
+   ═══════════════════════════════════════════════ */
+
+.palm-panel {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 1.5rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.palm-panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+}
+
+.palm-header {
+  margin-bottom: 1rem;
+}
+
+.palm-kicker {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--accent-gold);
+  background: rgba(242, 194, 108, 0.12);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 0.5rem;
+}
+
+.palm-heading {
+  margin: 0.5rem 0 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--ink-main);
+  display: flex;
+  align-items: center;
+}
+
+.palm-intro {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 1.2rem;
+}
+
+.palm-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.palm-btn-camera,
+.palm-btn-upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.6rem 1.2rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-main);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
+}
+
+.palm-btn-camera:hover,
+.palm-btn-upload:hover {
+  border-color: var(--accent-aqua);
+  box-shadow: 0 0 16px rgba(108, 225, 212, 0.15);
+  transform: translateY(-1px);
+}
+
+.palm-tips {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.palm-tips li {
+  position: relative;
+  padding-left: 1.2rem;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
+  line-height: 1.5;
+}
+
+.palm-tips li::before {
+  content: "✦";
+  position: absolute;
+  left: 0;
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+}
+
+/* ── Camera phase ── */
+
+.palm-camera-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--line-soft);
+  background: #000;
+  margin-bottom: 1rem;
+}
+
+.palm-camera-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.palm-camera-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.palm-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-coral);
+  margin-bottom: 0.6rem;
+}
+
+.palm-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-coral);
+  animation: palmPulse 1.4s ease-in-out infinite;
+}
+
+.palm-status--detected {
+  color: var(--accent-gold);
+}
+
+.palm-status--detected .palm-status-dot {
+  background: var(--accent-gold);
+}
+
+.palm-status--clear {
+  color: #4ade80;
+}
+
+.palm-status--clear .palm-status-dot {
+  background: #4ade80;
+}
+
+@keyframes palmPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.7); }
+}
+
+.palm-confidence {
+  position: relative;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.palm-confidence-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-aqua), var(--accent-gold));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.palm-confidence-label {
+  position: absolute;
+  right: 0;
+  top: -18px;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+/* ── Capture button (camera shutter style) ── */
+
+.palm-capture-btn {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  border: 3px solid var(--ink-main);
+  background: transparent !important;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.palm-capture-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.palm-capture-btn:not(:disabled):hover {
+  transform: scale(1.08);
+}
+
+.palm-capture-inner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--accent-coral);
+  transition: background 0.2s;
+}
+
+.palm-capture-btn:not(:disabled):hover .palm-capture-inner {
+  background: #ff6b57;
+}
+
+/* ── Preview ── */
+
+.palm-preview {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.palm-preview img {
+  max-width: 400px;
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--line-soft);
+}
+
+.palm-preview--dimmed {
+  opacity: 0.4;
+}
+
+.palm-preview--small {
+  margin-bottom: 0;
+}
+
+.palm-preview--small img {
+  max-width: 120px;
+  border-radius: 8px;
+}
+
+/* ── Submit / Analyze button ── */
+
+.palm-submit {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(110deg, var(--accent-gold), #e8a838, var(--accent-aqua)) !important;
+  color: var(--btn-text) !important;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: box-shadow 0.3s, transform 0.2s;
+}
+
+.palm-submit:hover {
+  box-shadow: 0 8px 28px rgba(242, 194, 108, 0.3), 0 0 20px rgba(108, 225, 212, 0.15);
+  transform: translateY(-1px);
+}
+
+/* ── Loading / Analyzing ── */
+
+.palm-loading {
+  text-align: center;
+}
+
+.palm-loading-content {
+  margin: 1.5rem 0;
+}
+
+.palm-loading-icon {
+  animation: palmHandPulse 1.5s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes palmHandPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.6; }
+}
+
+.palm-loading-text {
+  font-size: 1.1rem;
+  color: var(--ink-main);
+  font-weight: 600;
+}
+
+.palm-dots::after {
+  content: "";
+  animation: palmDots 1.5s steps(4, end) infinite;
+}
+
+@keyframes palmDots {
+  0% { content: ""; }
+  25% { content: "."; }
+  50% { content: ".."; }
+  75% { content: "..."; }
+}
+
+.palm-skeleton {
+  margin-top: 1.5rem;
+}
+
+.palm-skel-block {
+  height: 60px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  animation: palmSkelShimmer 1.8s ease-in-out infinite;
+  margin-bottom: 0.75rem;
+}
+
+.palm-skel-summary {
+  height: 90px;
+}
+
+.palm-skel-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+@keyframes palmSkelShimmer {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.15; }
+}
+
+/* ── Results ── */
+
+.palm-results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.palm-results-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.palm-summary-card {
+  border-radius: 14px;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+  background-image: linear-gradient(var(--surface), var(--surface)),
+    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+
+.palm-summary-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--accent-aqua);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.palm-summary-card p {
+  margin: 0;
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+.palm-hand-note {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/* ── Lines grid ── */
+
+.palm-lines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .palm-lines-grid {
+    grid-template-columns: 1fr;
+  }
+  .palm-skel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.palm-line-card {
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(6, 26, 41, 0.78);
+  border: 1px solid var(--line-soft);
+  border-left: 3px solid var(--accent-aqua);
+  transition: transform 240ms ease, box-shadow 240ms ease;
+}
+
+.palm-line-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.palm-line-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.palm-line-header h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--ink-main);
+}
+
+.palm-strength {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.palm-strength--strong { color: var(--accent-aqua); border: 1px solid rgba(108, 225, 212, 0.3); }
+.palm-strength--moderate { color: var(--accent-gold); border: 1px solid rgba(242, 194, 108, 0.3); }
+.palm-strength--faint { color: var(--accent-coral); border: 1px solid rgba(255, 143, 126, 0.3); }
+.palm-strength--absent { color: #888; border: 1px solid rgba(136, 136, 136, 0.3); }
+
+.palm-line-desc {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0 0 0.35rem;
+  line-height: 1.5;
+}
+
+.palm-line-interp {
+  font-size: 0.82rem;
+  color: var(--ink-main);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ── Section cards (mounts, fingers, markings) ── */
+
+.palm-section-card {
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(6, 26, 41, 0.78);
+  border: 1px solid var(--line-soft);
+}
+
+.palm-section-card h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  color: var(--accent-aqua);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.palm-section-card p {
+  margin: 0.4rem 0 0;
+  font-size: 0.85rem;
+  color: var(--ink-main);
+  line-height: 1.6;
+}
+
+.palm-observation {
+  font-style: italic;
+  color: var(--ink-soft) !important;
+}
+
+/* ── Chips ── */
+
+.palm-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.palm-chip {
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 16px;
+  background: rgba(108, 225, 212, 0.1);
+  color: var(--accent-aqua);
+  border: 1px solid rgba(108, 225, 212, 0.2);
+}
+
+/* ── Guidance card ── */
+
+.palm-guidance {
+  border-radius: 14px;
+  padding: 1.2rem;
+  background: rgba(242, 194, 108, 0.06);
+  border: 1px solid rgba(242, 194, 108, 0.25);
+}
+
+.palm-guidance h3 {
+  margin: 0 0 0.5rem;
+  font-size: 0.92rem;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.palm-guidance p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-main);
+  line-height: 1.65;
+}
+
+/* ── Error ── */
+
+.palm-error {
+  margin-top: 0.75rem;
+  padding: 0.7rem 1rem;
+  border-radius: 10px;
+  background: rgba(255, 143, 126, 0.1);
+  border: 1px solid rgba(255, 143, 126, 0.25);
+  color: var(--accent-coral);
+  font-size: 0.85rem;
+}
+
+/* ── Light mode overrides ── */
+
+html[data-theme="light"] .palm-panel {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(160, 120, 90, 0.12);
+  box-shadow: 0 8px 32px rgba(120, 80, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+html[data-theme="light"] .palm-panel:hover {
+  border-color: rgba(160, 120, 90, 0.22);
+  box-shadow: 0 8px 40px rgba(120, 80, 40, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 20px rgba(140, 100, 60, 0.05);
+}
+
+html[data-theme="light"] .palm-line-card,
+html[data-theme="light"] .palm-section-card {
+  background: var(--surface-soft);
+  border-color: var(--line-soft);
+}
+
+html[data-theme="light"] .palm-summary-card {
+  background-image: linear-gradient(rgba(255, 250, 246, 0.95), rgba(255, 250, 246, 0.95)),
+    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+}
+
+html[data-theme="light"] .palm-skel-block {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+html[data-theme="light"] .palm-capture-btn {
+  border-color: var(--ink-main);
+}
