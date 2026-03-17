@@ -5579,13 +5579,55 @@ html[data-theme="light"] .back-btn:hover {
   animation: floatQuote 20s ease-in-out both;
   --drift-x: 30px;
   --drift-y: -40px;
+  --depth-opacity: 0.2;
+  transition: filter 0.5s ease;
+}
+
+/* Depth layers */
+.floating-quote--depth-1 {
+  --depth-opacity: 0.35;
+}
+
+.floating-quote--depth-2 {
+  --depth-opacity: 0.2;
+}
+
+.floating-quote--depth-3 {
+  --depth-opacity: 0.12;
+}
+
+/* Exiting state — 1s fade-out */
+.floating-quote--exiting {
+  animation: floatQuoteExit 1s ease-out forwards !important;
 }
 
 @keyframes floatQuote {
-  0% { opacity: 0; transform: translate(0, 0); }
-  10% { opacity: 0.55; }
-  90% { opacity: 0.55; }
-  100% { opacity: 0; transform: translate(var(--drift-x), var(--drift-y)); }
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.95);
+  }
+  8% {
+    opacity: var(--depth-opacity);
+    transform: translate(0, 0) scale(1);
+  }
+  90% {
+    opacity: var(--depth-opacity);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift-x), var(--drift-y)) scale(0.97);
+  }
+}
+
+@keyframes floatQuoteExit {
+  0% {
+    opacity: var(--depth-opacity);
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(0, -10px) scale(0.92);
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -5934,6 +5976,186 @@ html[data-theme="light"] .chart-history-card {
   }
 }
 
+/* ═══════════════════════════════════════════════
+   GLASSMORPHISM DEPTH LAYERS
+   ═══════════════════════════════════════════════ */
+.glass-section {
+  position: relative;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%),
+    rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 0.75rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 0.3s ease;
+}
+
+.glass-section:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+/* Aqua tint — birth details */
+.glass-section--aqua {
+  background:
+    linear-gradient(135deg, rgba(108, 225, 212, 0.06) 0%, rgba(108, 225, 212, 0.01) 100%),
+    rgba(255, 255, 255, 0.02);
+  border-color: rgba(108, 225, 212, 0.08);
+}
+.glass-section--aqua:hover {
+  border-color: rgba(108, 225, 212, 0.18);
+}
+
+/* Gold tint — birth location */
+.glass-section--gold {
+  background:
+    linear-gradient(135deg, rgba(242, 194, 108, 0.06) 0%, rgba(242, 194, 108, 0.01) 100%),
+    rgba(255, 255, 255, 0.02);
+  border-color: rgba(242, 194, 108, 0.08);
+}
+.glass-section--gold:hover {
+  border-color: rgba(242, 194, 108, 0.18);
+}
+
+/* Violet tint — timezone / coordinates */
+.glass-section--violet {
+  background:
+    linear-gradient(135deg, rgba(167, 139, 250, 0.06) 0%, rgba(167, 139, 250, 0.01) 100%),
+    rgba(255, 255, 255, 0.02);
+  border-color: rgba(167, 139, 250, 0.08);
+}
+.glass-section--violet:hover {
+  border-color: rgba(167, 139, 250, 0.18);
+}
+
+/* Light theme overrides for glass sections */
+html[data-theme="light"] .glass-section {
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.005) 100%),
+    rgba(0, 0, 0, 0.015);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+html[data-theme="light"] .glass-section:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ═══════════════════════════════════════════════
+   FORM FIELD MICRO-INTERACTIONS
+   ═══════════════════════════════════════════════ */
+
+/* Scroll-triggered reveal */
+.field-hidden {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.field-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+/* Validation shimmer */
+@keyframes validationShimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.input-validated input,
+.input-validated .autocomplete-input input {
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(242, 194, 108, 0.25) 40%,
+    rgba(242, 194, 108, 0.35) 50%,
+    rgba(242, 194, 108, 0.25) 60%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: validationShimmer 600ms ease forwards;
+}
+
+/* ═══════════════════════════════════════════════
+   COSMIC CHARGE — Submit Button Effects
+   ═══════════════════════════════════════════════ */
+
+@keyframes chargeGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 20px rgba(242, 194, 108, 0.4),
+      0 0 40px rgba(242, 194, 108, 0.2),
+      0 0 60px rgba(108, 225, 212, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 30px rgba(242, 194, 108, 0.6),
+      0 0 60px rgba(242, 194, 108, 0.35),
+      0 0 90px rgba(108, 225, 212, 0.25);
+  }
+}
+
+@keyframes cosmicParticleBurst {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--burst-x), var(--burst-y)) scale(0);
+  }
+}
+
+@keyframes cosmicRippleExpand {
+  0% {
+    opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(4);
+  }
+}
+
+.cosmic-submit-wrapper {
+  position: relative;
+  overflow: visible;
+  margin-top: 1.5rem;
+}
+
+.cosmic-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: cosmicParticleBurst 600ms ease-out forwards;
+  z-index: 10;
+}
+
+.cosmic-ripple {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(242, 194, 108, 0.5), transparent 70%);
+  pointer-events: none;
+  animation: cosmicRippleExpand 500ms ease-out forwards;
+  z-index: 9;
+}
+
 /* ─── Accessibility: Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -5944,5 +6166,25 @@ html[data-theme="light"] .chart-history-card {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* ── Zodiac Wheel Interactivity ──────────────────────────── */
+
+.zodiac-segment {
+  transition: opacity 300ms ease, filter 300ms ease;
+}
+
+.zodiac-segment-hitarea {
+  cursor: pointer;
+}
+
+.zodiac-tooltip {
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+@keyframes activeSignPulse {
+  0%, 100% { flood-color: #ffd700; }
+  50%      { flood-color: #00e5ff; }
 }
 

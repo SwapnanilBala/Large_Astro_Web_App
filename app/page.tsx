@@ -1,7 +1,7 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent, MouseEvent as ReactMouseEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
 import { HiOutlineSparkles } from "react-icons/hi2";
@@ -26,6 +26,8 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "city",
 ];
 
+const REVEAL_STAGGER_MS = 80;
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
@@ -41,6 +43,79 @@ export default function Home() {
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+
+  // ── Validation shimmer: track previous draft to detect empty→filled ──
+  const prevDraftRef = useRef<ProfileQueryInput>(withClientTimezoneDefault());
+  const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
+  const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  useEffect(() => {
+    const prev = prevDraftRef.current;
+    const fieldsToCheck: Array<keyof ProfileQueryInput> = [
+      "name", "birthDate", "birthTime", "country", "state", "city",
+      "timezoneOffsetMinutes", "latitude", "longitude",
+    ];
+    for (const field of fieldsToCheck) {
+      const wasEmpty = !prev[field].trim();
+      const nowFilled = !!draft[field].trim();
+      if (wasEmpty && nowFilled) {
+        setValidatedFields((s) => new Set(s).add(field));
+        // Clear any existing timer for this field
+        const existingTimer = shimmerTimers.current.get(field);
+        if (existingTimer) clearTimeout(existingTimer);
+        const timer = setTimeout(() => {
+          setValidatedFields((s) => {
+            const next = new Set(s);
+            next.delete(field);
+            return next;
+          });
+          shimmerTimers.current.delete(field);
+        }, 650);
+        shimmerTimers.current.set(field, timer);
+      }
+    }
+    prevDraftRef.current = { ...draft };
+  }, [draft]);
+
+  // Cleanup shimmer timers on unmount
+  useEffect(() => {
+    const timers = shimmerTimers.current;
+    return () => {
+      timers.forEach((t) => clearTimeout(t));
+    };
+  }, []);
+
+  // ── IntersectionObserver for scroll-triggered reveal ──
+  const formRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+    const sections = form.querySelectorAll<HTMLElement>("[data-field-reveal]");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            const idx = Number(el.dataset.fieldReveal ?? 0);
+            setTimeout(() => {
+              el.classList.remove("field-hidden");
+              el.classList.add("field-revealed");
+            }, idx * REVEAL_STAGGER_MS);
+            observer.unobserve(el);
+          }
+        }
+      },
+      { threshold: 0.1 }
+    );
+    sections.forEach((s) => observer.observe(s));
+    return () => observer.disconnect();
+  }, []);
+
+  // Helper: returns "input-validated" class if a field is shimmer-active
+  const shimmerClass = useCallback(
+    (field: keyof ProfileQueryInput) => (validatedFields.has(field) ? "input-validated" : ""),
+    [validatedFields]
+  );
 
   useEffect(() => {
     const clientOffset = String(-new Date().getTimezoneOffset());
@@ -189,156 +264,179 @@ export default function Home() {
           <span className="cosmic-divider-icon"><GiStarSattelites /></span>
         </div>
 
-        <form className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
-          <label className="input-glow-gold">
-            <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
-            <input
-              type="text"
-              value={draft.name}
-              onChange={updateField("name")}
-              placeholder={t("home.formNamePlaceholder")}
-              required
-            />
-          </label>
-
-          <h2 className={styles.sectionHeading}>
-            <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
-          </h2>
-
-          <div className="input-grid">
-            <label className="input-glow-aqua">
-              {t("home.formBirthDate")}
+        <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
+          {/* ── Section 0: Name ── */}
+          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="0">
+            <label className={`input-glow-gold ${shimmerClass("name")}`}>
+              <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
               <input
-                type="date"
-                value={draft.birthDate}
-                onChange={updateField("birthDate")}
-                required
-              />
-            </label>
-            <label className="input-glow-coral">
-              {t("home.formBirthTime")}
-              <input
-                type="time"
-                value={draft.birthTime}
-                onChange={updateField("birthTime")}
+                type="text"
+                value={draft.name}
+                onChange={updateField("name")}
+                placeholder={t("home.formNamePlaceholder")}
                 required
               />
             </label>
           </div>
 
-          <h2 className={styles.sectionHeading}>
-            <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
-          </h2>
-
-          <div className="input-grid three-col location-row">
-            <label className="input-glow-violet">
-              {t("home.formCountry")}
-              <AutocompleteInput
-                value={draft.country}
-                onChange={handleCountryChange}
-                onSelect={handleCountrySelect}
-                placeholder={t("home.formCountryPlaceholder")}
-                suggestType="country"
-                required
-              />
-            </label>
-            <label className="input-glow-rose">
-              {t("home.formState")}
-              <AutocompleteInput
-                value={draft.state}
-                onChange={handleStateChange}
-                onSelect={handleStateSelect}
-                placeholder={t("home.formStatePlaceholder")}
-                suggestType="state"
-                contextCountry={draft.country}
-                required
-              />
-            </label>
-            <label className="input-glow-gold">
-              {t("home.formCity")}
-              <AutocompleteInput
-                value={draft.city}
-                onChange={setField("city")}
-                onSelect={setField("city")}
-                placeholder={t("home.formCityPlaceholder")}
-                suggestType="city"
-                contextCountry={draft.country}
-                contextState={draft.state}
-                required
-              />
-            </label>
+          {/* ── Section 1: Birth Details heading ── */}
+          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="1">
+            <h2 className={styles.sectionHeading}>
+              <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
+            </h2>
           </div>
 
-          {geoStatus !== "idle" && (
-            <p className={`geo-status ${geoStatus}`}>
-              {geoStatus === "loading" && t("home.geoLoading")}
-              {geoStatus === "found" && t("home.geoFound", { lat: Number(draft.latitude).toFixed(4), lon: Number(draft.longitude).toFixed(4) })}
-              {geoStatus === "not-found" && t("home.geoNotFound")}
-            </p>
-          )}
+          {/* ── Section 2: Birth date & time ── */}
+          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="2">
+            <div className="input-grid">
+              <label className={`input-glow-aqua ${shimmerClass("birthDate")}`}>
+                {t("home.formBirthDate")}
+                <input
+                  type="date"
+                  value={draft.birthDate}
+                  onChange={updateField("birthDate")}
+                  required
+                />
+              </label>
+              <label className={`input-glow-coral ${shimmerClass("birthTime")}`}>
+                {t("home.formBirthTime")}
+                <input
+                  type="time"
+                  value={draft.birthTime}
+                  onChange={updateField("birthTime")}
+                  required
+                />
+              </label>
+            </div>
+          </div>
 
-          <div className="collapsible-section">
-            <button
-              type="button"
-              className="collapsible-toggle"
-              onClick={() => setLatLonExpanded((prev) => !prev)}
-            >
-              {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
-              <span className={`toggle-arrow ${latLonExpanded ? "expanded" : ""}`}>&#9662;</span>
-            </button>
+          {/* ── Section 3: Birth Location heading ── */}
+          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="3">
+            <h2 className={styles.sectionHeading}>
+              <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
+            </h2>
+          </div>
 
-            {latLonExpanded && (
-              <div className="input-grid three-col" style={{ marginTop: "0.6rem" }}>
-                <label className="input-glow-aqua">
-                  {t("home.formTimezone")}
-                  <input
-                    type="number"
-                    value={draft.timezoneOffsetMinutes}
-                    onChange={updateField("timezoneOffsetMinutes")}
-                    placeholder="e.g. 330, -300"
-                    min={-720}
-                    max={840}
-                    required
-                  />
-                  {draft.timeZoneId && (
-                    <small style={{ display: "block", marginTop: "0.35rem", opacity: 0.78 }}>
-                      {draft.timeZoneId}
-                    </small>
-                  )}
-                </label>
-                <label className="input-glow-coral">
-                  {t("home.formLatitude")}
-                  <input
-                    type="number"
-                    value={draft.latitude}
-                    onChange={updateField("latitude")}
-                    placeholder="e.g. 28.6139"
-                    min={-90}
-                    max={90}
-                    step="0.0001"
-                    required
-                  />
-                </label>
-                <label className="input-glow-violet">
-                  {t("home.formLongitude")}
-                  <input
-                    type="number"
-                    value={draft.longitude}
-                    onChange={updateField("longitude")}
-                    placeholder="e.g. 77.2090"
-                    min={-180}
-                    max={180}
-                    step="0.0001"
-                    required
-                  />
-                </label>
-              </div>
+          {/* ── Section 4: Country / State / City ── */}
+          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="4">
+            <div className="input-grid three-col location-row">
+              <label className={`input-glow-violet ${shimmerClass("country")}`}>
+                {t("home.formCountry")}
+                <AutocompleteInput
+                  value={draft.country}
+                  onChange={handleCountryChange}
+                  onSelect={handleCountrySelect}
+                  placeholder={t("home.formCountryPlaceholder")}
+                  suggestType="country"
+                  required
+                />
+              </label>
+              <label className={`input-glow-rose ${shimmerClass("state")}`}>
+                {t("home.formState")}
+                <AutocompleteInput
+                  value={draft.state}
+                  onChange={handleStateChange}
+                  onSelect={handleStateSelect}
+                  placeholder={t("home.formStatePlaceholder")}
+                  suggestType="state"
+                  contextCountry={draft.country}
+                  required
+                />
+              </label>
+              <label className={`input-glow-gold ${shimmerClass("city")}`}>
+                {t("home.formCity")}
+                <AutocompleteInput
+                  value={draft.city}
+                  onChange={setField("city")}
+                  onSelect={setField("city")}
+                  placeholder={t("home.formCityPlaceholder")}
+                  suggestType="city"
+                  contextCountry={draft.country}
+                  contextState={draft.state}
+                  required
+                />
+              </label>
+            </div>
+          </div>
+
+          {/* ── Section 5: Geo status ── */}
+          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="5">
+            {geoStatus !== "idle" && (
+              <p className={`geo-status ${geoStatus}`}>
+                {geoStatus === "loading" && t("home.geoLoading")}
+                {geoStatus === "found" && t("home.geoFound", { lat: Number(draft.latitude).toFixed(4), lon: Number(draft.longitude).toFixed(4) })}
+                {geoStatus === "not-found" && t("home.geoNotFound")}
+              </p>
             )}
+
+            <div className="collapsible-section">
+              <button
+                type="button"
+                className="collapsible-toggle"
+                onClick={() => setLatLonExpanded((prev) => !prev)}
+              >
+                {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
+                <span className={`toggle-arrow ${latLonExpanded ? "expanded" : ""}`}>&#9662;</span>
+              </button>
+
+              {latLonExpanded && (
+                <div className="glass-section glass-section--violet" style={{ marginTop: "0.6rem" }}>
+                  <div className="input-grid three-col">
+                    <label className={`input-glow-aqua ${shimmerClass("timezoneOffsetMinutes")}`}>
+                      {t("home.formTimezone")}
+                      <input
+                        type="number"
+                        value={draft.timezoneOffsetMinutes}
+                        onChange={updateField("timezoneOffsetMinutes")}
+                        placeholder="e.g. 330, -300"
+                        min={-720}
+                        max={840}
+                        required
+                      />
+                      {draft.timeZoneId && (
+                        <small style={{ display: "block", marginTop: "0.35rem", opacity: 0.78 }}>
+                          {draft.timeZoneId}
+                        </small>
+                      )}
+                    </label>
+                    <label className={`input-glow-coral ${shimmerClass("latitude")}`}>
+                      {t("home.formLatitude")}
+                      <input
+                        type="number"
+                        value={draft.latitude}
+                        onChange={updateField("latitude")}
+                        placeholder="e.g. 28.6139"
+                        min={-90}
+                        max={90}
+                        step="0.0001"
+                        required
+                      />
+                    </label>
+                    <label className={`input-glow-violet ${shimmerClass("longitude")}`}>
+                      {t("home.formLongitude")}
+                      <input
+                        type="number"
+                        value={draft.longitude}
+                        onChange={updateField("longitude")}
+                        placeholder="e.g. 77.2090"
+                        min={-180}
+                        max={180}
+                        step="0.0001"
+                        required
+                      />
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
-          <button type="submit" disabled={!canSubmit || isSubmitting}>
-            {isSubmitting ? t("home.submitting") : t("home.submit")}
-          </button>
+          {/* ── Section 6: Submit ── */}
+          <div className="glass-section field-hidden" data-field-reveal="6">
+            <button type="submit" disabled={!canSubmit || isSubmitting}>
+              {isSubmitting ? t("home.submitting") : t("home.submit")}
+            </button>
+          </div>
         </form>
       </section>
       </div>{/* /heroWrapper */}
