@@ -23,6 +23,7 @@ const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { s
 const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -743,6 +744,25 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
         </div>
+
+        {/* ── Palm Reading ── */}
+        <motion.div
+          className={`${styles.cardPalm} ${styles.cardFullWidth}`}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+        >
+          <PanelErrorBoundary panelName="Palm Reading">
+            <AuthGate
+              featureLabel="Palm Reading"
+              isLocked={lockedFeatures.has("palm_reading")}
+              requiredTier="premium"
+            >
+              <PalmReadingPanel />
+            </AuthGate>
+          </PanelErrorBoundary>
+        </motion.div>
 
         {/* ─── Life Domain Deep Dives ─── */}
         <AuthGate

@@ -733,6 +733,22 @@
 }
 
 /* ── Advanced Module Cards Overrides ── */
+.cardPalm {
+  composes: card;
+  padding: 0;
+}
+
+.cardPalm :global(.palm-panel) {
+  margin: 0;
+  padding: 1.5rem;
+  border: none;
+  background: none;
+}
+
+.cardPalm :global(.palm-panel)::after {
+  display: none;
+}
+
 .cardDasha,
 .cardAspects,
 .cardNavamsa,
