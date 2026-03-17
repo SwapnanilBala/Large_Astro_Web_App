@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
-import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 
 const PLANET_COLORS: Record<string, string> = {
   Sun: "#f5a623",
@@ -112,18 +111,7 @@ export default function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps)
 
                 <div className="planet-card__title-group">
                   <h3 style={{ color }}>{planet.name}</h3>
-                  <span className="planet-card__sign-group">
-                    <ZodiacSignImage
-                      sign={planet.sign}
-                      size={20}
-                      style={{
-                        border: `1px solid ${color}44`,
-                        boxShadow: `0 0 6px ${color}33`,
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span className="planet-card__sign">{planet.sign}</span>
-                  </span>
+                  <span className="planet-card__sign">{planet.sign}</span>
                 </div>
 
                 <span
@@ -136,21 +124,6 @@ export default function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps)
 
               {/* ── Expanded detail (revealed on hover/click) ── */}
               <div className="planet-card__detail">
-                {/* Sign image header in expanded view */}
-                <div className="planet-card__sign-banner">
-                  <ZodiacSignImage
-                    sign={planet.sign}
-                    size={48}
-                    style={{
-                      border: `2px solid ${color}66`,
-                      boxShadow: `0 0 16px ${color}44`,
-                    }}
-                  />
-                  <div>
-                    <span style={{ fontSize: "0.7rem", opacity: 0.5, textTransform: "uppercase", letterSpacing: "0.08em" }}>Sign</span>
-                    <p style={{ margin: 0, fontWeight: 600, color }}>{planet.sign}</p>
-                  </div>
-                </div>
                 <div className="planet-card__detail-row">
                   <span className="planet-card__detail-label">
                     {t("insights.house")}

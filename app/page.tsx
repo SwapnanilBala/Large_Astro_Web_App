@@ -1,7 +1,7 @@
 "use client";
 
-import type { ChangeEvent, FormEvent, MouseEvent as ReactMouseEvent } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import type { ChangeEvent, FormEvent } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
 import { HiOutlineSparkles } from "react-icons/hi2";
@@ -26,17 +26,11 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "city",
 ];
 
-const REVEAL_STAGGER_MS = 80;
-
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
   timeZoneId: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : ""
 });
-
-function lerp(a: number, b: number, t: number) {
-  return a + (b - a) * t;
-}
 
 export default function Home() {
   const { user } = useAuth();
@@ -48,189 +42,171 @@ export default function Home() {
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
-  // ── Validation shimmer: track previous draft to detect empty->filled ──
+  /* ── Scroll-reveal & validation shimmer ── */
+  const formRef = useRef<HTMLFormElement>(null);
   const prevDraftRef = useRef<ProfileQueryInput>(withClientTimezoneDefault());
   const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
   const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  useEffect(() => {
-    const prev = prevDraftRef.current;
-    const fieldsToCheck: Array<keyof ProfileQueryInput> = [
-      "name", "birthDate", "birthTime", "country", "state", "city",
-      "timezoneOffsetMinutes", "latitude", "longitude",
-    ];
-    for (const field of fieldsToCheck) {
-      const wasEmpty = !prev[field].trim();
-      const nowFilled = !!draft[field].trim();
-      if (wasEmpty && nowFilled) {
-        setValidatedFields((s) => new Set(s).add(field));
-        const existingTimer = shimmerTimers.current.get(field);
-        if (existingTimer) clearTimeout(existingTimer);
-        const timer = setTimeout(() => {
-          setValidatedFields((s) => {
-            const next = new Set(s);
-            next.delete(field);
-            return next;
-          });
-          shimmerTimers.current.delete(field);
-        }, 650);
-        shimmerTimers.current.set(field, timer);
-      }
-    }
-    prevDraftRef.current = { ...draft };
-  }, [draft]);
+  /* ── Split-text hero animation ── */
+  const [heroReady, setHeroReady] = useState(false);
+  const [cursorPhase, setCursorPhase] = useState<"hidden" | "blinking" | "done">("hidden");
+  const headingText = t("home.heading");
+  const headingWords = useMemo(() => headingText.split(/\s+/), [headingText]);
+  const WORD_STAGGER = 80;
+  const WORD_DURATION = 500;
+  const KICKER_LEAD = 300;
 
   useEffect(() => {
-    const timers = shimmerTimers.current;
+    const kickerTimer = setTimeout(() => setHeroReady(true), KICKER_LEAD);
+    const totalHeadingTime = KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION;
+    const cursorTimer = setTimeout(() => setCursorPhase("blinking"), totalHeadingTime + 200);
+    const cursorEndTimer = setTimeout(() => setCursorPhase("done"), totalHeadingTime + 200 + 2000);
     return () => {
-      timers.forEach((tmr) => clearTimeout(tmr));
+      clearTimeout(kickerTimer);
+      clearTimeout(cursorTimer);
+      clearTimeout(cursorEndTimer);
     };
+  }, [headingWords.length]);
+
+  const leadDelay = (KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION + 200) / 1000;
+
+  /* ── Parallax refs ── */
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLElement>(null);
+  const ambientLeftRef = useRef<HTMLDivElement>(null);
+  const ambientRightRef = useRef<HTMLDivElement>(null);
+  const ambientCenterRef = useRef<HTMLDivElement>(null);
+
+  /* ── Cursor-reactive orb state ── */
+  const mouseTarget = useRef({ x: 0, y: 0 });
+  const mouseCurrent = useRef({ x: 0, y: 0 });
+  const cursorRafId = useRef<number>(0);
+
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+
+  const animateOrbs = useCallback(() => {
+    const cur = mouseCurrent.current;
+    const tgt = mouseTarget.current;
+    cur.x = lerp(cur.x, tgt.x, 0.08);
+    cur.y = lerp(cur.y, tgt.y, 0.08);
+
+    const scrollY = window.scrollY;
+
+    // Left orb: moves AWAY from cursor (parallax depth)
+    if (ambientLeftRef.current) {
+      const ox = -cur.x * 0.02;
+      const oy = -cur.y * 0.02 + scrollY * 0.15;
+      ambientLeftRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
+    }
+    // Right orb: moves TOWARD cursor slightly
+    if (ambientRightRef.current) {
+      const ox = cur.x * 0.015;
+      const oy = cur.y * 0.015 + scrollY * 0.15;
+      ambientRightRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
+    }
+    // Center orb: moves perpendicular to cursor direction
+    if (ambientCenterRef.current) {
+      const ox = cur.y * 0.012;
+      const oy = -cur.x * 0.012 + scrollY * 0.15;
+      ambientCenterRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
+    }
+
+    if (wheelRef.current) {
+      wheelRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
+    }
+    if (panelRef.current) {
+      panelRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+    }
+
+    cursorRafId.current = requestAnimationFrame(animateOrbs);
   }, []);
 
-  // ── IntersectionObserver for scroll-triggered reveal ──
-  const formRef = useRef<HTMLFormElement | null>(null);
+  useEffect(() => {
+    cursorRafId.current = requestAnimationFrame(animateOrbs);
+    return () => cancelAnimationFrame(cursorRafId.current);
+  }, [animateOrbs]);
+
+  useEffect(() => {
+    const onMouseMove = (e: MouseEvent) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      mouseTarget.current = { x: e.clientX - cx, y: e.clientY - cy };
+    };
+    window.addEventListener("mousemove", onMouseMove, { passive: true });
+    return () => window.removeEventListener("mousemove", onMouseMove);
+  }, []);
+
+  /* ── Scroll-triggered field reveal (IntersectionObserver) ── */
   useEffect(() => {
     const form = formRef.current;
     if (!form) return;
-    const sections = form.querySelectorAll<HTMLElement>("[data-field-reveal]");
+
+    const fields = form.querySelectorAll<HTMLElement>("[data-field-reveal]");
+    fields.forEach((el) => el.classList.add("field-hidden"));
+
     const observer = new IntersectionObserver(
       (entries) => {
-        for (const entry of entries) {
+        entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement;
             const idx = Number(el.dataset.fieldReveal ?? 0);
             setTimeout(() => {
               el.classList.remove("field-hidden");
               el.classList.add("field-revealed");
-            }, idx * REVEAL_STAGGER_MS);
+            }, idx * 80);
             observer.unobserve(el);
           }
-        }
+        });
       },
-      { threshold: 0.1 }
+      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
     );
-    sections.forEach((s) => observer.observe(s));
+
+    fields.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  const shimmerClass = useCallback(
-    (field: keyof ProfileQueryInput) => (validatedFields.has(field) ? "input-validated" : ""),
-    [validatedFields]
-  );
-
-  // ── Feature 1: Parallax refs ──
-  const shellRef = useRef<HTMLElement>(null);
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
-  const orbLeftRef = useRef<HTMLDivElement>(null);
-  const orbRightRef = useRef<HTMLDivElement>(null);
-  const orbCenterRef = useRef<HTMLDivElement>(null);
-
-  // ── Feature 2: Mouse tracking state for ambient orbs ──
-  const mousePos = useRef({ x: 0, y: 0 });
-  const smoothOrbLeft = useRef({ x: 0, y: 0 });
-  const smoothOrbRight = useRef({ x: 0, y: 0 });
-  const smoothOrbCenter = useRef({ x: 0, y: 0 });
-
-  // ── Feature 3: Hero text animation state ──
-  const [heroReady, setHeroReady] = useState(false);
-  const [cursorPhase, setCursorPhase] = useState<"hidden" | "blinking" | "out">("hidden");
-
-  const headingText = t("home.heading");
-  const headingWords = useMemo(() => headingText.split(/\s+/), [headingText]);
-
-  const kickerDelay = 300;
-  const headingStartDelay = kickerDelay + 300;
-  const wordCount = headingWords.length;
-  const headingTotalDuration = headingStartDelay + wordCount * 80 + 500;
-  const leadDelay = headingTotalDuration + 200;
-
-  // ── Combined rAF loop for parallax + orb mouse tracking (Features 1 & 2) ──
+  /* ── Validation shimmer: detect empty -> non-empty transitions ── */
   useEffect(() => {
-    let rafId: number;
-    let scrollY = 0;
+    const prev = prevDraftRef.current;
+    const fieldsToCheck: Array<keyof ProfileQueryInput> = [
+      "name", "birthDate", "birthTime", "country", "state", "city",
+    ];
 
-    const onScroll = () => {
-      scrollY = window.scrollY;
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      const shell = shellRef.current;
-      if (!shell) return;
-      const rect = shell.getBoundingClientRect();
-      mousePos.current.x = (e.clientX - rect.left) / rect.width - 0.5;
-      mousePos.current.y = (e.clientY - rect.top) / rect.height - 0.5;
-    };
-
-    const loop = () => {
-      // Parallax transforms
-      if (wheelRef.current) {
-        wheelRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
+    const newlyValid: string[] = [];
+    for (const f of fieldsToCheck) {
+      if (prev[f].trim() === "" && draft[f].trim() !== "") {
+        newlyValid.push(f);
       }
-      if (panelRef.current) {
-        panelRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
-      }
-
-      // Orb lerp-based cursor reactivity
-      const mx = mousePos.current.x;
-      const my = mousePos.current.y;
-      const lf = 0.06;
-
-      // Left orb: moves AWAY from cursor (multiplier 0.02)
-      smoothOrbLeft.current.x = lerp(smoothOrbLeft.current.x, -mx * 0.02 * window.innerWidth, lf);
-      smoothOrbLeft.current.y = lerp(smoothOrbLeft.current.y, -my * 0.02 * window.innerHeight, lf);
-
-      // Right orb: moves TOWARD cursor (multiplier 0.015)
-      smoothOrbRight.current.x = lerp(smoothOrbRight.current.x, mx * 0.015 * window.innerWidth, lf);
-      smoothOrbRight.current.y = lerp(smoothOrbRight.current.y, my * 0.015 * window.innerHeight, lf);
-
-      // Center orb: moves perpendicular to cursor
-      smoothOrbCenter.current.x = lerp(smoothOrbCenter.current.x, my * 0.018 * window.innerWidth, lf);
-      smoothOrbCenter.current.y = lerp(smoothOrbCenter.current.y, -mx * 0.018 * window.innerHeight, lf);
-
-      const pY = scrollY * 0.15;
-      if (orbLeftRef.current) {
-        orbLeftRef.current.style.transform = `translate(${smoothOrbLeft.current.x}px, ${smoothOrbLeft.current.y + pY}px)`;
-      }
-      if (orbRightRef.current) {
-        orbRightRef.current.style.transform = `translate(${smoothOrbRight.current.x}px, ${smoothOrbRight.current.y + pY}px)`;
-      }
-      if (orbCenterRef.current) {
-        orbCenterRef.current.style.transform = `translate(${smoothOrbCenter.current.x}px, ${smoothOrbCenter.current.y + pY}px)`;
-      }
-
-      rafId = requestAnimationFrame(loop);
-    };
-
-    window.addEventListener("scroll", onScroll, { passive: true });
-    const shell = shellRef.current;
-    if (shell) {
-      shell.addEventListener("mousemove", onMouseMove, { passive: true });
     }
-    scrollY = window.scrollY;
-    rafId = requestAnimationFrame(loop);
 
-    return () => {
-      cancelAnimationFrame(rafId);
-      window.removeEventListener("scroll", onScroll);
-      if (shell) {
-        shell.removeEventListener("mousemove", onMouseMove);
+    if (newlyValid.length > 0) {
+      setValidatedFields((s) => {
+        const next = new Set(s);
+        newlyValid.forEach((f) => next.add(f));
+        return next;
+      });
+
+      // Remove shimmer class after animation completes
+      for (const f of newlyValid) {
+        const existing = shimmerTimers.current.get(f);
+        if (existing) clearTimeout(existing);
+        shimmerTimers.current.set(
+          f,
+          setTimeout(() => {
+            setValidatedFields((s) => {
+              const next = new Set(s);
+              next.delete(f);
+              return next;
+            });
+            shimmerTimers.current.delete(f);
+          }, 650)
+        );
       }
-    };
-  }, []);
+    }
 
-  // ── Feature 3: Hero text reveal timing ──
-  useEffect(() => {
-    const t1 = setTimeout(() => setHeroReady(true), kickerDelay);
-    const t2 = setTimeout(() => setCursorPhase("blinking"), headingTotalDuration);
-    const t3 = setTimeout(() => setCursorPhase("out"), headingTotalDuration + 2000);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-    };
-  }, [headingTotalDuration, kickerDelay]);
+    prevDraftRef.current = { ...draft };
+  }, [draft]);
 
   useEffect(() => {
     const clientOffset = String(-new Date().getTimezoneOffset());
@@ -290,61 +266,86 @@ export default function Home() {
     return requiredFields.every((field) => draft[field].trim().length > 0);
   }, [draft]);
 
-  // ── Cosmic charge: tracks form completion ratio ──
-  const chargeFields: Array<keyof ProfileQueryInput> = ["name", "birthDate", "birthTime", "country", "state", "city"];
+  /* ── Cosmic charge level (0-1) based on visible form fields ── */
   const chargeLevel = useMemo(() => {
-    const filled = chargeFields.filter((f) => draft[f].trim().length > 0).length;
-    return filled / chargeFields.length;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const chargeKeys: Array<keyof ProfileQueryInput> = ["name", "birthDate", "birthTime", "country", "state", "city"];
+    const filled = chargeKeys.filter((f) => draft[f].trim().length > 0).length;
+    return filled / chargeKeys.length;
   }, [draft]);
 
   const submitWrapperRef = useRef<HTMLDivElement>(null);
 
-  const spawnParticleBurst = useCallback((clientX: number, clientY: number) => {
+  /* ── Particle burst on click ── */
+  const spawnParticles = useCallback((originX: number, originY: number) => {
     const wrapper = submitWrapperRef.current;
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
-    const originX = clientX - rect.left;
-    const originY = clientY - rect.top;
-
-    const ripple = document.createElement("div");
-    ripple.className = "cosmic-ripple";
-    ripple.style.left = `${originX}px`;
-    ripple.style.top = `${originY}px`;
-    wrapper.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 500);
-
+    const cx = originX - rect.left;
+    const cy = originY - rect.top;
     const count = 12 + Math.floor(Math.random() * 5);
-    const colors = [
-      "rgba(242, 194, 108, 0.9)",
-      "rgba(255, 215, 100, 0.9)",
-      "rgba(108, 225, 212, 0.9)",
-      "rgba(140, 230, 220, 0.9)",
-    ];
 
     for (let i = 0; i < count; i++) {
+      const particle = document.createElement("span");
+      const size = 3 + Math.random() * 2;
       const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
       const dist = 40 + Math.random() * 60;
-      const bx = Math.cos(angle) * dist;
-      const by = Math.sin(angle) * dist;
+      const dx = Math.cos(angle) * dist;
+      const dy = Math.sin(angle) * dist;
+      const isGold = Math.random() > 0.5;
+      const color = isGold ? "rgba(242,194,108,0.9)" : "rgba(108,225,212,0.9)";
 
-      const particle = document.createElement("div");
-      particle.className = "cosmic-particle";
-      particle.style.left = `${originX}px`;
-      particle.style.top = `${originY}px`;
-      particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-      particle.style.setProperty("--burst-x", `${bx}px`);
-      particle.style.setProperty("--burst-y", `${by}px`);
-      particle.style.width = `${3 + Math.random() * 5}px`;
-      particle.style.height = particle.style.width;
+      particle.style.cssText = [
+        "position:absolute",
+        `left:${cx}px`,
+        `top:${cy}px`,
+        `width:${size}px`,
+        `height:${size}px`,
+        "border-radius:50%",
+        `background:${color}`,
+        "pointer-events:none",
+        "z-index:10",
+        `--dx:${dx}px`,
+        `--dy:${dy}px`,
+        "animation:cosmicParticleBurst 600ms ease-out forwards",
+      ].join(";");
       wrapper.appendChild(particle);
-      setTimeout(() => particle.remove(), 600);
+      setTimeout(() => particle.remove(), 650);
     }
   }, []);
 
-  const handleSubmitClick = useCallback((e: ReactMouseEvent<HTMLDivElement>) => {
-    spawnParticleBurst(e.clientX, e.clientY);
-  }, [spawnParticleBurst]);
+  /* ── Ripple effect on click ── */
+  const spawnRipple = useCallback((originX: number, originY: number) => {
+    const wrapper = submitWrapperRef.current;
+    if (!wrapper) return;
+    const rect = wrapper.getBoundingClientRect();
+    const cx = originX - rect.left;
+    const cy = originY - rect.top;
+
+    const ripple = document.createElement("span");
+    ripple.style.cssText = [
+      "position:absolute",
+      `left:${cx}px`,
+      `top:${cy}px`,
+      "width:0",
+      "height:0",
+      "border-radius:50%",
+      "background:rgba(242,194,108,0.3)",
+      "transform:translate(-50%,-50%)",
+      "pointer-events:none",
+      "z-index:9",
+      "animation:cosmicRippleExpand 500ms ease-out forwards",
+    ].join(";");
+    wrapper.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 550);
+  }, []);
+
+  const handleSubmitClick = useCallback(
+    (e: React.MouseEvent<HTMLDivElement>) => {
+      spawnParticles(e.clientX, e.clientY);
+      spawnRipple(e.clientX, e.clientY);
+    },
+    [spawnParticles, spawnRipple],
+  );
 
   const updateField =
     (field: keyof ProfileQueryInput) =>
@@ -370,6 +371,7 @@ export default function Home() {
     setGeoStatus("idle");
   };
 
+  // Cascading handlers: changing a parent clears its children
   const handleCountryChange = (value: string) => {
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
@@ -407,69 +409,45 @@ export default function Home() {
   };
 
   return (
-    <main className="home-shell" ref={shellRef}>
-      <div className="ambient ambient-left" ref={orbLeftRef} />
-      <div className="ambient ambient-right" ref={orbRightRef} />
-      <div className="ambient ambient-center" ref={orbCenterRef} />
+    <main className="home-shell">
+      <div ref={ambientLeftRef} className="ambient ambient-left" />
+      <div ref={ambientRightRef} className="ambient ambient-right" />
+      <div ref={ambientCenterRef} className="ambient ambient-center" />
       <FloatingQuotes />
 
       <ChartHistory userName={user?.display_name} />
 
       {/* ── Hero wrapper: positions wheel behind the panel ── */}
-      <div className={styles.heroWrapper} ref={wheelRef}>
-        <ZodiacWheel />
+      <div className={styles.heroWrapper}>
+        <div ref={wheelRef} className={styles.parallaxWheel}>
+          <ZodiacWheel />
+        </div>
 
-      <section className={`intake-panel anim-rise-in ${styles.panel}`} ref={panelRef}>
-        <p
-          className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`}
-          style={{
-            animationDelay: "0.15s",
-            opacity: heroReady ? undefined : 0,
-            transition: "opacity 400ms ease-out",
-          }}
-        >
+      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`}>
+        <p className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`} style={{ animationDelay: "0s" }}>
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
-        <h1
-          className={styles.heroHeading}
-          style={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: "0 0.3em",
-            animationDelay: "0.3s",
-          }}
-        >
-          {headingWords.map((word, i) => {
-            const wordDelay = headingStartDelay + i * 80;
-            return (
-              <span
-                key={i}
-                className={`hero-word ${heroReady ? "hero-word-in" : ""}`}
-                style={{
-                  display: "inline-block",
-                  transitionDelay: `${wordDelay}ms`,
-                }}
-              >
-                {word}
-              </span>
-            );
-          })}
-          {cursorPhase !== "hidden" && (
+        <h1 className={styles.heroHeading}>
+          {headingWords.map((word, i) => (
             <span
-              className={`hero-cursor ${cursorPhase === "out" ? "hero-cursor-out" : ""}`}
+              key={i}
+              className={`hero-word ${heroReady ? "hero-word-in" : ""}`}
+              style={{ transitionDelay: `${i * WORD_STAGGER}ms` }}
             >
-              |
+              {word}
             </span>
+          ))}
+          {cursorPhase === "blinking" && (
+            <span className="hero-cursor" aria-hidden="true" />
+          )}
+          {cursorPhase === "done" && (
+            <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
           )}
         </h1>
         <p
-          className={`lead anim-fade-in ${heroReady ? "" : "hero-pre"}`}
-          style={{
-            animationDelay: `${leadDelay}ms`,
-            opacity: heroReady ? undefined : 0,
-            transition: `opacity 500ms ease-out ${leadDelay}ms`,
-          }}
+          className={`lead ${heroReady ? "anim-fade-in" : "hero-pre"}`}
+          style={{ animationDelay: `${leadDelay}s` }}
         >
           {t("home.lead")}
         </p>
@@ -479,197 +457,173 @@ export default function Home() {
         </div>
 
         <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
-          {/* ── Section 0: Name ── */}
-          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="0">
-            <label className={`input-glow-gold ${shimmerClass("name")}`}>
-              <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
+          <label data-field-reveal="0" className={`input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
+            <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
+            <input
+              type="text"
+              value={draft.name}
+              onChange={updateField("name")}
+              placeholder={t("home.formNamePlaceholder")}
+              required
+            />
+          </label>
+
+          <div className="glass-section glass-section--aqua">
+            <h2 data-field-reveal="1" className={styles.sectionHeading}>
+              <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
+            </h2>
+
+            <div data-field-reveal="2" className="input-grid">
+            <label className={`input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
+              {t("home.formBirthDate")}
               <input
-                type="text"
-                value={draft.name}
-                onChange={updateField("name")}
-                placeholder={t("home.formNamePlaceholder")}
+                type="date"
+                value={draft.birthDate}
+                onChange={updateField("birthDate")}
+                required
+              />
+            </label>
+            <label className={`input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
+              {t("home.formBirthTime")}
+              <input
+                type="time"
+                value={draft.birthTime}
+                onChange={updateField("birthTime")}
+                required
+              />
+            </label>
+            </div>
+          </div>
+
+          <div className="glass-section glass-section--gold">
+            <h2 data-field-reveal="3" className={styles.sectionHeading}>
+              <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
+            </h2>
+
+            <div data-field-reveal="4" className="input-grid three-col location-row">
+            <label className={`input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
+              {t("home.formCountry")}
+              <AutocompleteInput
+                value={draft.country}
+                onChange={handleCountryChange}
+                onSelect={handleCountrySelect}
+                placeholder={t("home.formCountryPlaceholder")}
+                suggestType="country"
+                required
+              />
+            </label>
+            <label className={`input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
+              {t("home.formState")}
+              <AutocompleteInput
+                value={draft.state}
+                onChange={handleStateChange}
+                onSelect={handleStateSelect}
+                placeholder={t("home.formStatePlaceholder")}
+                suggestType="state"
+                contextCountry={draft.country}
+                required
+              />
+            </label>
+            <label className={`input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
+              {t("home.formCity")}
+              <AutocompleteInput
+                value={draft.city}
+                onChange={setField("city")}
+                onSelect={setField("city")}
+                placeholder={t("home.formCityPlaceholder")}
+                suggestType="city"
+                contextCountry={draft.country}
+                contextState={draft.state}
                 required
               />
             </label>
           </div>
 
-          {/* ── Section 1: Birth Details heading ── */}
-          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="1">
-            <h2 className={styles.sectionHeading}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
-            </h2>
+          {geoStatus !== "idle" && (
+            <p className={`geo-status ${geoStatus}`}>
+              {geoStatus === "loading" && t("home.geoLoading")}
+              {geoStatus === "found" && t("home.geoFound", { lat: Number(draft.latitude).toFixed(4), lon: Number(draft.longitude).toFixed(4) })}
+              {geoStatus === "not-found" && t("home.geoNotFound")}
+            </p>
+          )}
           </div>
 
-          {/* ── Section 2: Birth date & time ── */}
-          <div className="glass-section glass-section--aqua field-hidden" data-field-reveal="2">
-            <div className="input-grid">
-              <label className={`input-glow-aqua ${shimmerClass("birthDate")}`}>
-                {t("home.formBirthDate")}
-                <input
-                  type="date"
-                  value={draft.birthDate}
-                  onChange={updateField("birthDate")}
-                  required
-                />
-              </label>
-              <label className={`input-glow-coral ${shimmerClass("birthTime")}`}>
-                {t("home.formBirthTime")}
-                <input
-                  type="time"
-                  value={draft.birthTime}
-                  onChange={updateField("birthTime")}
-                  required
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* ── Section 3: Birth Location heading ── */}
-          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="3">
-            <h2 className={styles.sectionHeading}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
-            </h2>
-          </div>
-
-          {/* ── Section 4: Country / State / City ── */}
-          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="4">
-            <div className="input-grid three-col location-row">
-              <label className={`input-glow-violet ${shimmerClass("country")}`}>
-                {t("home.formCountry")}
-                <AutocompleteInput
-                  value={draft.country}
-                  onChange={handleCountryChange}
-                  onSelect={handleCountrySelect}
-                  placeholder={t("home.formCountryPlaceholder")}
-                  suggestType="country"
-                  required
-                />
-              </label>
-              <label className={`input-glow-rose ${shimmerClass("state")}`}>
-                {t("home.formState")}
-                <AutocompleteInput
-                  value={draft.state}
-                  onChange={handleStateChange}
-                  onSelect={handleStateSelect}
-                  placeholder={t("home.formStatePlaceholder")}
-                  suggestType="state"
-                  contextCountry={draft.country}
-                  required
-                />
-              </label>
-              <label className={`input-glow-gold ${shimmerClass("city")}`}>
-                {t("home.formCity")}
-                <AutocompleteInput
-                  value={draft.city}
-                  onChange={setField("city")}
-                  onSelect={setField("city")}
-                  placeholder={t("home.formCityPlaceholder")}
-                  suggestType="city"
-                  contextCountry={draft.country}
-                  contextState={draft.state}
-                  required
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* ── Section 5: Geo status ── */}
-          <div className="glass-section glass-section--gold field-hidden" data-field-reveal="5">
-            {geoStatus !== "idle" && (
-              <p className={`geo-status ${geoStatus}`}>
-                {geoStatus === "loading" && t("home.geoLoading")}
-                {geoStatus === "found" && t("home.geoFound", { lat: Number(draft.latitude).toFixed(4), lon: Number(draft.longitude).toFixed(4) })}
-                {geoStatus === "not-found" && t("home.geoNotFound")}
-              </p>
-            )}
-
-            <div className="collapsible-section">
-              <button
-                type="button"
-                className="collapsible-toggle"
-                onClick={() => setLatLonExpanded((prev) => !prev)}
-              >
-                {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
-                <span className={`toggle-arrow ${latLonExpanded ? "expanded" : ""}`}>&#9662;</span>
-              </button>
-
-              {latLonExpanded && (
-                <div className="glass-section glass-section--violet" style={{ marginTop: "0.6rem" }}>
-                  <div className="input-grid three-col">
-                    <label className={`input-glow-aqua ${shimmerClass("timezoneOffsetMinutes")}`}>
-                      {t("home.formTimezone")}
-                      <input
-                        type="number"
-                        value={draft.timezoneOffsetMinutes}
-                        onChange={updateField("timezoneOffsetMinutes")}
-                        placeholder="e.g. 330, -300"
-                        min={-720}
-                        max={840}
-                        required
-                      />
-                      {draft.timeZoneId && (
-                        <small style={{ display: "block", marginTop: "0.35rem", opacity: 0.78 }}>
-                          {draft.timeZoneId}
-                        </small>
-                      )}
-                    </label>
-                    <label className={`input-glow-coral ${shimmerClass("latitude")}`}>
-                      {t("home.formLatitude")}
-                      <input
-                        type="number"
-                        value={draft.latitude}
-                        onChange={updateField("latitude")}
-                        placeholder="e.g. 28.6139"
-                        min={-90}
-                        max={90}
-                        step="0.0001"
-                        required
-                      />
-                    </label>
-                    <label className={`input-glow-violet ${shimmerClass("longitude")}`}>
-                      {t("home.formLongitude")}
-                      <input
-                        type="number"
-                        value={draft.longitude}
-                        onChange={updateField("longitude")}
-                        placeholder="e.g. 77.2090"
-                        min={-180}
-                        max={180}
-                        step="0.0001"
-                        required
-                      />
-                    </label>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* ── Section 6: Submit with Cosmic Charge ── */}
-          <div className="glass-section field-hidden" data-field-reveal="6">
-            <div
-              ref={submitWrapperRef}
-              className="cosmic-submit-wrapper"
-              onClick={handleSubmitClick}
+          <div className="glass-section glass-section--violet">
+            <div data-field-reveal="5" className="collapsible-section">
+            <button
+              type="button"
+              className="collapsible-toggle"
+              onClick={() => setLatLonExpanded((prev) => !prev)}
             >
-              <button
-                type="submit"
-                disabled={!canSubmit || isSubmitting}
-                style={{
-                  ["--charge-level" as string]: chargeLevel,
-                  opacity: 0.6 + chargeLevel * 0.4,
-                  filter: `saturate(${0.5 + chargeLevel * 0.5})`,
-                  boxShadow: chargeLevel >= 1
-                    ? undefined
-                    : `0 0 ${chargeLevel * 30}px rgba(242, 194, 108, ${chargeLevel * 0.3}), 0 0 ${chargeLevel * 60}px rgba(108, 225, 212, ${chargeLevel * 0.15})`,
-                  animation: chargeLevel >= 1
-                    ? "chargeGlow 2s ease-in-out infinite, submitGradientShift 4s ease infinite"
-                    : undefined,
-                }}
-              >
-                {isSubmitting ? t("home.submitting") : t("home.submit")}
-              </button>
+              {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
+              <span className={`toggle-arrow ${latLonExpanded ? "expanded" : ""}`}>&#9662;</span>
+            </button>
+
+            {latLonExpanded && (
+              <div className="input-grid three-col" style={{ marginTop: "0.6rem" }}>
+                <label className="input-glow-aqua">
+                  {t("home.formTimezone")}
+                  <input
+                    type="number"
+                    value={draft.timezoneOffsetMinutes}
+                    onChange={updateField("timezoneOffsetMinutes")}
+                    placeholder="e.g. 330, -300"
+                    min={-720}
+                    max={840}
+                    required
+                  />
+                  {draft.timeZoneId && (
+                    <small style={{ display: "block", marginTop: "0.35rem", opacity: 0.78 }}>
+                      {draft.timeZoneId}
+                    </small>
+                  )}
+                </label>
+                <label className="input-glow-coral">
+                  {t("home.formLatitude")}
+                  <input
+                    type="number"
+                    value={draft.latitude}
+                    onChange={updateField("latitude")}
+                    placeholder="e.g. 28.6139"
+                    min={-90}
+                    max={90}
+                    step="0.0001"
+                    required
+                  />
+                </label>
+                <label className="input-glow-violet">
+                  {t("home.formLongitude")}
+                  <input
+                    type="number"
+                    value={draft.longitude}
+                    onChange={updateField("longitude")}
+                    placeholder="e.g. 77.2090"
+                    min={-180}
+                    max={180}
+                    step="0.0001"
+                    required
+                  />
+                </label>
+              </div>
+            )}
             </div>
+          </div>
+
+          {/* ── Cosmic Charge Submit Button ── */}
+          <div
+            ref={submitWrapperRef}
+            data-field-reveal="6"
+            className={styles.submitChargeWrapper}
+            onClick={handleSubmitClick}
+            style={{ "--charge-level": chargeLevel } as React.CSSProperties}
+          >
+            <button
+              type="submit"
+              disabled={!canSubmit || isSubmitting}
+              className={chargeLevel >= 1 ? styles.fullyCharged : undefined}
+            >
+              {isSubmitting ? t("home.submitting") : t("home.submit")}
+            </button>
           </div>
         </form>
       </section>

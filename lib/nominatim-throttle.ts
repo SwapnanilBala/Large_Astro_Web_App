@@ -14,7 +14,7 @@
 const MIN_INTERVAL_MS = 1_000;
 
 let lastRequestTime = 0;
-let queue: Array<{
+const queue: Array<{
   resolve: (value: Response) => void;
   reject: (reason: unknown) => void;
   url: string;

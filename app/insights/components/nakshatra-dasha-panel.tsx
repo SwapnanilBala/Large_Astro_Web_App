@@ -91,6 +91,112 @@ const HOUSE_MODIFIER: Record<number, string> = {
 };
 
 /* ────────────────────────────────────────────────
+   Combination Effects: how a sub-lord modifies
+   the Maha Dasha lord's expression.
+   Keys are "MahaLord-SubLord" pairs.
+   ──────────────────────────────────────────────── */
+const DASHA_COMBO_EFFECTS: Record<string, string> = {
+  // Sun combinations
+  "Sun-Sun":     "A concentrated period of authority and self-assertion. Career visibility peaks and ego-driven decisions dominate.",
+  "Sun-Moon":    "Authority meets emotional intelligence. Public image softens; dealings with government or father figures carry an emotional undertone.",
+  "Sun-Mars":    "Fiery ambition and bold leadership. Expect career aggression, possible conflicts with authority, and physical vitality surges.",
+  "Sun-Mercury": "Leadership through communication. Administrative acumen peaks — writing, public speaking, and intellectual authority thrive.",
+  "Sun-Jupiter": "Benevolent authority and spiritual leadership. Promotions, honors, and mentorship roles are strongly favored.",
+  "Sun-Venus":   "Power meets pleasure. Career gains may come through art, diplomacy, or romantic connections. Public charm is enhanced.",
+  "Sun-Saturn":  "Authority tested by discipline. Hard work under pressure; father-figure tensions. Lasting achievements if you persevere.",
+  "Sun-Rahu":    "Unconventional rise to power. Sudden recognition or controversy in public life. Foreign authority figures become relevant.",
+  "Sun-Ketu":    "Ego dissolution through service. Spiritual authority grows while worldly ambition fades. Detachment from status.",
+
+  // Moon combinations
+  "Moon-Sun":    "Emotional life brightened by confidence. Public visibility and nurturing leadership; mother-father dynamics come alive.",
+  "Moon-Moon":   "Deep emotional immersion. Heightened intuition and sensitivity. Domestic matters and inner peace take full focus.",
+  "Moon-Mars":   "Emotional energy channeled into action. Property moves, protective instincts, and passion intensify. Watch for emotional impulsiveness.",
+  "Moon-Mercury":"Mental agility meets emotional depth. Excellent for writing, counseling, and intuitive business decisions.",
+  "Moon-Jupiter":"Emotional wisdom and spiritual nurturing. A very auspicious period for family, children, and inner growth.",
+  "Moon-Venus":  "Love and comfort merge. Romantic feelings deepen, artistic inspiration flows, and domestic life becomes luxurious.",
+  "Moon-Saturn": "Emotional maturity through hardship. Melancholy or loneliness may surface, but builds lasting emotional resilience.",
+  "Moon-Rahu":   "Restless mind and unusual emotional experiences. Foreign travels, unconventional relationships, or public obsessions.",
+  "Moon-Ketu":   "Emotional detachment and psychic sensitivity. Past-life memories or spiritual experiences. Solitude brings clarity.",
+
+  // Mars combinations
+  "Mars-Sun":    "Courageous leadership and physical assertiveness. Military or competitive success. Father-sibling dynamics activated.",
+  "Mars-Moon":   "Action driven by emotion. Property and domestic energy spike. Protective instincts but also impulsive reactions.",
+  "Mars-Mars":   "Peak intensity — doubled fire energy. Major physical undertakings, property deals, or competitions. Guard against aggression and accidents.",
+  "Mars-Mercury":"Strategic action and sharp communication. Technical skills shine. Legal disputes or negotiations require quick thinking.",
+  "Mars-Jupiter":"Righteous action and expansion. Property growth, athletic success, and courageous dharmic pursuits are favored.",
+  "Mars-Venus":  "Passion meets beauty. Romantic intensity, creative boldness, and luxury through action. Property and vehicles highlighted.",
+  "Mars-Saturn": "Disciplined force under pressure. Hard physical labor or delayed results. Perseverance through obstacles builds resilience.",
+  "Mars-Rahu":   "Explosive ambition and unconventional courage. Sudden property gains or technological ventures. Risk of reckless moves.",
+  "Mars-Ketu":   "Spiritual warrior energy. Past-life karmic actions surface. Surgery, martial arts, or renunciation of conflict.",
+
+  // Mercury combinations
+  "Mercury-Sun":    "Intellectual authority and expressive leadership. Writing, commerce, and analytical roles gain official backing.",
+  "Mercury-Moon":   "Intuitive intellect. Emotional intelligence fuels communication and business. Trade and travel blend with nurturing.",
+  "Mercury-Mars":   "Sharp, decisive communication. Technical problem-solving, competitive debates, and bold business moves.",
+  "Mercury-Mercury":"Peak mental clarity. Exceptional for learning, writing, coding, trading, and all forms of information processing.",
+  "Mercury-Jupiter":"Wisdom meets intellect. Higher education, publishing, and philosophical communication flourish. Financial acumen sharpens.",
+  "Mercury-Venus":  "Artistic intellect and diplomatic speech. Creative writing, design, and luxurious commerce. Charming negotiations.",
+  "Mercury-Saturn": "Disciplined thinking and systematic work. Accounting, research, and structured learning. Slow but thorough progress.",
+  "Mercury-Rahu":   "Innovative ideas and unconventional communication. Tech breakthroughs, foreign trade, and outside-the-box thinking.",
+  "Mercury-Ketu":   "Intuitive analysis and detached reasoning. Spiritual study, occult research, and letting go of overthinking.",
+
+  // Jupiter combinations
+  "Jupiter-Sun":    "Spiritual authority and divine leadership. Teachers, mentors, and father figures bring blessings. Recognition for wisdom.",
+  "Jupiter-Moon":   "Emotional wisdom and nurturing faith. Family blessings, spiritual comfort, and public goodwill. A deeply auspicious time.",
+  "Jupiter-Mars":   "Expansive action and righteous courage. Property growth, adventurous dharma, and bold philosophical pursuits.",
+  "Jupiter-Mercury":"Intellectual expansion and scholarly communication. Publishing, teaching, and commercial wisdom combine powerfully.",
+  "Jupiter-Jupiter":"Maximum expansion and fortune. The most auspicious sub-period — spiritual growth, wealth, children, and blessings multiply.",
+  "Jupiter-Venus":  "Abundance in love and luxury. Marriage blessings, artistic patronage, and wealth through wisdom. A beautiful period.",
+  "Jupiter-Saturn": "Wisdom tested by karma. Spiritual discipline, structured growth, and service-oriented expansion. Patient faith rewarded.",
+  "Jupiter-Rahu":   "Unconventional spiritual expansion. Foreign teachers, unorthodox philosophies, and rapid but restless growth.",
+  "Jupiter-Ketu":   "Deep spiritual liberation. Detachment from material expansion. Mystical experiences and past-life wisdom emerge.",
+
+  // Venus combinations
+  "Venus-Sun":    "Love illuminated by confidence. Creative recognition, romantic visibility, and luxury through authority connections.",
+  "Venus-Moon":   "Deep romantic feelings and aesthetic comfort. Domestic beauty, emotional harmony, and artistic flow.",
+  "Venus-Mars":   "Passionate love and bold creativity. Romantic intensity, luxury acquisitions, and creative action. Exciting but impulsive pleasures.",
+  "Venus-Mercury":"Refined taste and eloquent charm. Design, writing, diplomacy, and commercial aesthetics thrive. Witty and graceful communication.",
+  "Venus-Jupiter":"Love and wisdom merge. Marriage blessings, artistic expansion, and financial prosperity through partnerships. Highly auspicious.",
+  "Venus-Venus":  "Peak indulgence and beauty. Relationships, art, and luxury fully activated. Balance enjoyment with deeper purpose.",
+  "Venus-Saturn": "Love tested by responsibility. Mature relationships, disciplined creativity, and delayed but lasting material gains.",
+  "Venus-Rahu":   "Unconventional love and exotic luxury. Foreign romance, technology-aided art, and sudden financial shifts.",
+  "Venus-Ketu":   "Spiritual love and detachment from pleasure. Artistic transcendence, past-life romantic karma, and inner beauty.",
+
+  // Saturn combinations
+  "Saturn-Sun":    "Karmic authority and disciplined leadership. Career restructuring through hard work. Father-figure lessons intensify.",
+  "Saturn-Moon":   "Emotional endurance and stoic patience. Loneliness or domestic responsibility. Inner strength through emotional hardship.",
+  "Saturn-Mars":   "Grinding effort and focused force. Hard physical labor, property struggles, and disciplined competitive drive.",
+  "Saturn-Mercury":"Methodical intellect and structured communication. Research, accounting, and systematic learning. Slow but precise results.",
+  "Saturn-Jupiter":"Karma meets wisdom. Spiritual discipline, structured growth, and service-oriented expansion bear lasting fruit.",
+  "Saturn-Venus":  "Discipline in love and measured luxury. Mature relationships, structured creativity, and financial prudence.",
+  "Saturn-Saturn": "Peak karmic intensity. The most demanding sub-period — maximum discipline required. Lasting foundations built through patience.",
+  "Saturn-Rahu":   "Relentless ambition under pressure. Foreign hardships, unconventional labor, and karmic breakthroughs through persistence.",
+  "Saturn-Ketu":   "Deep karmic release and spiritual austerity. Letting go of worldly structures. Monastic energy and liberation through suffering.",
+
+  // Rahu combinations
+  "Rahu-Sun":    "Sudden ambition for authority. Unconventional career rise, foreign government connections, and shadow-side of power.",
+  "Rahu-Moon":   "Restless emotions and public obsession. Unusual domestic situations, foreign travel, and heightened psychic sensitivity.",
+  "Rahu-Mars":   "Explosive, risk-taking energy. Technology meets aggression. Sudden property gains or dangerous ventures. Channel carefully.",
+  "Rahu-Mercury":"Brilliant but scattered intellect. Tech innovation, foreign trade, and unconventional communication. Guard against deception.",
+  "Rahu-Jupiter":"Rapid spiritual seeking and unorthodox wisdom. Foreign teachers, philosophical experimentation, and mixed blessings.",
+  "Rahu-Venus":  "Exotic romance and unconventional luxury. Foreign love affairs, technology-driven art, and glamorous but unstable pleasures.",
+  "Rahu-Saturn": "Intense karmic pressure with unconventional labor. Foreign hardships, systematic disruption, and transformative perseverance.",
+  "Rahu-Rahu":   "Maximum disruption and transformation. Obsessive ambition, identity confusion, and radical life changes. Navigate with awareness.",
+  "Rahu-Ketu":   "Axis of destiny activated. Past and future collide. Major karmic turning points, spiritual crisis, and profound shifts.",
+
+  // Ketu combinations
+  "Ketu-Sun":    "Ego dissolution and spiritual authority. Detachment from power, but inner radiance grows. Father-figure karmic closure.",
+  "Ketu-Moon":   "Emotional release and psychic awakening. Past-life memories, maternal karma, and intuitive depth. Solitude is healing.",
+  "Ketu-Mars":   "Spiritual warrior energy. Surgical precision, martial discipline turned inward, and releasing anger or aggression patterns.",
+  "Ketu-Mercury":"Intuitive intellect beyond logic. Spiritual study, occult communication, and releasing attachment to analytical thinking.",
+  "Ketu-Jupiter":"Liberation through wisdom. Deep spiritual realization, detachment from worldly expansion, and guru-disciple karma.",
+  "Ketu-Venus":  "Transcending attachment to pleasure. Spiritual art, past-life romantic closure, and finding beauty in simplicity.",
+  "Ketu-Saturn": "Ultimate karmic release. Intense austerity, letting go of worldly structures, and liberation through disciplined surrender.",
+  "Ketu-Rahu":   "Destiny axis reversed. Karmic crossroads — past-life patterns demand resolution. Confusion yields to spiritual clarity.",
+  "Ketu-Ketu":   "Maximum spiritual intensity. Complete withdrawal from material concerns. Mystical experiences and final karmic dissolution.",
+};
+
+/* ────────────────────────────────────────────────
    Planet color palette for the Gantt timeline
    ──────────────────────────────────────────────── */
 const DASHA_COLORS: Record<string, string> = {
@@ -415,9 +521,29 @@ export default function NakshatraDashaPanel({
     return { remainingDays, progressPercent };
   };
 
+  /* Build combination insight from the current drill path */
+  const getCombinationInsight = (): { lords: string[]; effect: string; themes: string[] } | null => {
+    if (drillPath.length === 0) return null;
+
+    const lords = drillPath.map((step) => step.planet);
+    const themes = lords
+      .map((lord) => DASHA_LORD_THEMES[lord]?.theme)
+      .filter(Boolean) as string[];
+
+    /* Use the deepest two lords for the combination effect */
+    const mahaLord = lords[0];
+    const deepestLord = lords[lords.length - 1];
+    const comboKey = `${mahaLord}-${deepestLord}`;
+    const effect = DASHA_COMBO_EFFECTS[comboKey]
+      ?? `${DASHA_LORD_THEMES[mahaLord]?.theme ?? mahaLord} energy is filtered through ${DASHA_LORD_THEMES[deepestLord]?.theme ?? deepestLord} at the ${LEVEL_LABELS[drillPath.length + 1] ?? "sub-period"} level.`;
+
+    return { lords, effect, themes };
+  };
+
   const interpretation = popup ? getInterpretation(popup.planet) : null;
   const currentSubPeriods = getCurrentSubPeriods();
   const currentDrillLevel = drillPath.length > 0 ? drillPath[drillPath.length - 1].level + 1 : 1;
+  const combinationInsight = getCombinationInsight();
 
   return (
     <section className="nakshatra-panel">
@@ -609,6 +735,31 @@ export default function NakshatraDashaPanel({
               </span>
             ))}
           </nav>
+        )}
+
+        {/* ── Combination Insight Card ── */}
+        {combinationInsight && (
+          <div className="dasha-combo-card anim-fade-in">
+            <div className="dasha-combo-header">
+              <span className="dasha-combo-label">Combined Influence</span>
+              <div className="dasha-combo-lords">
+                {combinationInsight.lords.map((lord, idx) => (
+                  <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `${DASHA_COLORS[lord] ?? '#6ce1d4'}22`, color: DASHA_COLORS[lord] ?? '#6ce1d4', borderColor: `${DASHA_COLORS[lord] ?? '#6ce1d4'}44` }}>
+                    {lord}
+                    {idx < combinationInsight.lords.length - 1 && <span className="dasha-combo-arrow">&rarr;</span>}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <p className="dasha-combo-effect">{combinationInsight.effect}</p>
+            <div className="dasha-combo-themes">
+              {combinationInsight.themes.map((theme, idx) => (
+                <span key={theme} className="dasha-combo-theme-tag">
+                  {combinationInsight.lords[idx]}: {theme}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* ── Level 1: Maha Dasha Gantt Timeline ── */}

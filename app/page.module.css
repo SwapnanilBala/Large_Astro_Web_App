@@ -13,21 +13,15 @@
   /* Extra padding so the 600px wheel has breathing room */
   padding: 0;
   z-index: 1;
+}
+
+/* ── Parallax wheel wrapper ──────────────────── */
+.parallaxWheel {
   will-change: transform;
 }
 
 /* ── Zodiac Wheel ─────────────────────────────── */
-
-:global(.zodiac-wheel) {
-  animation: zodiacSpin 120s linear infinite;
-  /* pointer-events: auto so hover detection works on segments */
-  pointer-events: auto;
-}
-
-@keyframes zodiacSpin {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg); }
-}
+/* Animation lives in globals.css as .zodiac-wheel */
 
 /* ── Hero Heading glow ───────────────────────── */
 /* text-shadow won't show on clip-text elements; use filter drop-shadow instead */
@@ -67,8 +61,9 @@
   gap: 1rem;
 }
 
-.form button[type="submit"] {
-  margin-top: 0;
+.form > button[type="submit"],
+.submitChargeWrapper button[type="submit"] {
+  margin-top: 1.5rem;
 }
 
 /* Floating quotes & chart history styles are in globals.css
@@ -199,7 +194,57 @@
 
 /* ── Submit Button Enhancement ── */
 
-.form button[type="submit"] {
+/* ── Cosmic Charge Wrapper ── */
+.submitChargeWrapper {
+  position: relative;
+  overflow: visible;
+  margin-top: 1.5rem;
+}
+
+.submitChargeWrapper button[type="submit"] {
+  margin-top: 0;
+  width: 100%;
+}
+
+/* Energy charge: dynamic opacity & glow driven by --charge-level */
+.submitChargeWrapper button[type="submit"] {
+  background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
+  background-size: 300% 100%;
+  animation: submitGradientShift 4s ease infinite;
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, filter 0.4s ease, opacity 0.4s ease;
+  opacity: calc(0.6 + var(--charge-level, 0) * 0.4);
+  filter:
+    saturate(calc(0.5 + var(--charge-level, 0) * 0.5))
+    brightness(calc(0.85 + var(--charge-level, 0) * 0.15));
+  box-shadow:
+    0 0 calc(var(--charge-level, 0) * 30px) rgba(242, 194, 108, calc(var(--charge-level, 0) * 0.25)),
+    0 0 calc(var(--charge-level, 0) * 60px) rgba(108, 225, 212, calc(var(--charge-level, 0) * 0.1));
+}
+
+/* Fully charged: pulse glow animation */
+.fullyCharged {
+  animation: submitGradientShift 4s ease infinite, chargeGlow 2s ease-in-out infinite !important;
+}
+
+@keyframes chargeGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 30px rgba(242, 194, 108, 0.25),
+      0 0 60px rgba(108, 225, 212, 0.1),
+      0 4px 20px rgba(242, 194, 108, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 45px rgba(242, 194, 108, 0.4),
+      0 0 90px rgba(108, 225, 212, 0.2),
+      0 8px 35px rgba(242, 194, 108, 0.25);
+  }
+}
+
+.form > button[type="submit"] {
   background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
@@ -216,7 +261,8 @@
 }
 
 /* Sparkle pseudo-element on hover */
-.form button[type="submit"]::before {
+.submitChargeWrapper button[type="submit"]::before,
+.form > button[type="submit"]::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -234,7 +280,14 @@
   z-index: 1;
 }
 
-.form button[type="submit"]:hover:not(:disabled)::before {
+/* Enhanced sparkle at full charge (always visible) */
+.fullyCharged::before {
+  opacity: 0.7 !important;
+  animation: sparkleFloat 2s ease-in-out infinite !important;
+}
+
+.submitChargeWrapper button[type="submit"]:hover:not(:disabled)::before,
+.form > button[type="submit"]:hover:not(:disabled)::before {
   opacity: 1;
   animation: sparkleFloat 2s ease-in-out infinite;
 }
@@ -244,7 +297,8 @@
   50% { transform: translateY(-2px) scale(1.05); opacity: 0.7; }
 }
 
-.form button[type="submit"]:hover:not(:disabled) {
+.submitChargeWrapper button[type="submit"]:hover:not(:disabled),
+.form > button[type="submit"]:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow:
     0 28px 52px rgba(242, 194, 108, 0.28),
@@ -253,7 +307,8 @@
   filter: saturate(1.1) brightness(1.05);
 }
 
-.form button[type="submit"]:active:not(:disabled) {
+.submitChargeWrapper button[type="submit"]:active:not(:disabled),
+.form > button[type="submit"]:active:not(:disabled) {
   transform: translateY(0) scale(0.97);
   transition: transform 80ms ease-out;
   box-shadow:
@@ -355,7 +410,8 @@
 .form > label:nth-child(7) { animation: fieldFadeUp 0.5s ease-out 0.4s both; }
 .form > :global(.geo-status) { animation: fieldFadeUp 0.5s ease-out 0.42s both; }
 .form > :global(.collapsible-section) { animation: fieldFadeUp 0.5s ease-out 0.45s both; }
-.form button[type="submit"] { animation: fieldFadeUp 0.5s ease-out 0.5s both, submitGradientShift 4s ease infinite 0.5s; }
+.form > button[type="submit"] { animation: fieldFadeUp 0.5s ease-out 0.5s both, submitGradientShift 4s ease infinite 0.5s; }
+.form > .submitChargeWrapper { animation: fieldFadeUp 0.5s ease-out 0.5s both; }
 
 @keyframes fieldFadeUp {
   from {
@@ -395,7 +451,8 @@
   text-shadow: 0 0 6px rgba(46, 133, 120, 0.15);
 }
 
-:global([data-theme="light"]) .form button[type="submit"] {
+:global([data-theme="light"]) .form > button[type="submit"],
+:global([data-theme="light"]) .submitChargeWrapper button[type="submit"] {
   background: linear-gradient(110deg, #8a6420, #b8873e, #8a6420, #6b4e18);
   background-size: 300% 100%;
 }

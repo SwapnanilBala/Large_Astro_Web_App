@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { m as motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
 import ConstellationChart from "./constellation-chart";
 import chartStyles from "../insights.module.css";

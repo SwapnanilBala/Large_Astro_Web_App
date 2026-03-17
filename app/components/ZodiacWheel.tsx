@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, type ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 /* ─────────────────────────────────────────────────────────
    ZodiacWheel — slow-rotating decorative SVG background
@@ -8,8 +8,8 @@ import { useState, useCallback, type ReactNode } from "react";
    Colour: ultra-subtle semi-transparent white/violet.
 
    Interactive features:
-   - Hover-to-highlight individual zodiac segments
-   - Optional `activeSigns` prop for externally-highlighted signs
+   - Hover-to-highlight with tooltip
+   - activeSigns prop for permanent glow on specific signs
    ───────────────────────────────────────────────────────── */
 
 const ZODIAC_IMAGES = [
@@ -48,18 +48,17 @@ function polarToCartesian(cx: number, cy: number, r: number, angleDeg: number) {
   };
 }
 
-/** Build an SVG arc-wedge path from center covering a 30-degree segment. */
-function wedgePath(index: number): string {
+/** Build an SVG arc-wedge path for a 30-degree segment */
+function segmentPath(index: number): string {
   const startAngle = index * 30;
   const endAngle = startAngle + 30;
   const innerStart = polarToCartesian(CX, CY, R_INNER, startAngle);
-  const innerEnd   = polarToCartesian(CX, CY, R_INNER, endAngle);
+  const innerEnd = polarToCartesian(CX, CY, R_INNER, endAngle);
   const outerStart = polarToCartesian(CX, CY, R_SPOKE, startAngle);
-  const outerEnd   = polarToCartesian(CX, CY, R_SPOKE, endAngle);
-
-  // Move to outer-start, arc to outer-end, line to inner-end, arc back to inner-start, close
+  const outerEnd = polarToCartesian(CX, CY, R_SPOKE, endAngle);
   return [
-    `M ${outerStart.x} ${outerStart.y}`,
+    `M ${innerStart.x} ${innerStart.y}`,
+    `L ${outerStart.x} ${outerStart.y}`,
     `A ${R_SPOKE} ${R_SPOKE} 0 0 1 ${outerEnd.x} ${outerEnd.y}`,
     `L ${innerEnd.x} ${innerEnd.y}`,
     `A ${R_INNER} ${R_INNER} 0 0 0 ${innerStart.x} ${innerStart.y}`,
@@ -68,49 +67,25 @@ function wedgePath(index: number): string {
 }
 
 interface ZodiacWheelProps {
-  /** Signs to mark as "active" — they get a pulsing gold/aqua glow. */
+  /** Sign names (e.g. "Aries") to permanently highlight with a pulsing glow */
   activeSigns?: string[];
 }
 
 export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
-  const handleMouseEnter = useCallback((i: number) => setHoveredIndex(i), []);
-  const handleMouseLeave = useCallback(() => setHoveredIndex(null), []);
-
   const activeSet = new Set(activeSigns.map((s) => s.toLowerCase()));
 
   const spokes: ReactNode[] = [];
-  const glyphs: ReactNode[] = [];
-  const dots:   ReactNode[] = [];
-  const hitAreas: ReactNode[] = [];
-  const tooltips: ReactNode[] = [];
+  const segments: ReactNode[] = [];
+  const dots: ReactNode[] = [];
 
   for (let i = 0; i < 12; i++) {
-    const angle = i * 30; // each sign = 30°
+    const angle = i * 30;
     const isHovered = hoveredIndex === i;
-    const isActive  = activeSet.has(ZODIAC_NAMES[i].toLowerCase());
-    const anyHovered = hoveredIndex !== null;
-
-    // Determine opacity & filter for this segment
-    let segmentOpacity: number;
-    let segmentFilter: string;
-
-    if (isHovered) {
-      segmentOpacity = 1.0;
-      segmentFilter = "saturate(1.0) brightness(1.1)";
-    } else if (isActive && !anyHovered) {
-      segmentOpacity = 0.85;
-      segmentFilter = "saturate(1.2) brightness(1.05)";
-    } else if (anyHovered) {
-      // Another segment is hovered — dim this one
-      segmentOpacity = isActive ? 0.5 : 0.35;
-      segmentFilter = "saturate(0.5) brightness(0.8)";
-    } else {
-      // Default idle state (matches original look)
-      segmentOpacity = 0.55;
-      segmentFilter = "saturate(0.7) brightness(0.9)";
-    }
+    const isActive = activeSet.has(ZODIAC_NAMES[i].toLowerCase());
+    const someHovered = hoveredIndex !== null;
+    const isDimmed = someHovered && !isHovered;
 
     // Spoke lines from inner hub to outer boundary
     const inner = polarToCartesian(CX, CY, R_INNER, angle);
@@ -127,25 +102,71 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
       />
     );
 
-    // Sign image at midpoint of each segment (angle + 15°)
+    // Sign image at midpoint of each segment (angle + 15deg)
     const glyphAngle = angle + 15;
     const gp = polarToCartesian(CX, CY, R_GLYPH, glyphAngle);
-    glyphs.push(
-      <g
-        key={`sign-${i}`}
-        className="zodiac-segment"
-        style={{ opacity: segmentOpacity }}
-        filter={isActive ? "url(#activeGlow)" : undefined}
-      >
+
+    // Determine image opacity and filter per state
+    let imgOpacity = 0.55;
+    let imgFilter = "saturate(0.7) brightness(0.9)";
+    if (isHovered) {
+      imgOpacity = 1.0;
+      imgFilter = "saturate(1.0) brightness(1.1)";
+    } else if (isDimmed) {
+      imgOpacity = 0.35;
+      imgFilter = "saturate(0.5) brightness(0.7)";
+    } else if (isActive) {
+      imgOpacity = 0.85;
+      imgFilter = "saturate(0.9) brightness(1.0)";
+    }
+
+    // Glow filter reference for active signs
+    const glowFilter = isActive ? "url(#active-glow)" : undefined;
+
+    segments.push(
+      <g key={`segment-${i}`}>
+        {/* Invisible hit-area for hover detection */}
+        <path
+          d={segmentPath(i)}
+          fill="transparent"
+          style={{ cursor: "pointer" }}
+          onMouseEnter={() => setHoveredIndex(i)}
+          onMouseLeave={() => setHoveredIndex(null)}
+        />
+
         {/* Circular border ring behind the image */}
         <circle
           cx={gp.x}
           cy={gp.y}
           r="19"
           fill="none"
-          stroke="rgba(200,180,255,0.20)"
-          strokeWidth="1"
+          stroke={
+            isHovered
+              ? "rgba(255,255,255,0.50)"
+              : isActive
+              ? "rgba(200,180,255,0.45)"
+              : "rgba(200,180,255,0.20)"
+          }
+          strokeWidth={isHovered ? "1.5" : "1"}
+          style={{ transition: "stroke 300ms ease, stroke-width 300ms ease" }}
+          filter={glowFilter}
+          pointerEvents="none"
         />
+
+        {/* Active-sign pulsing glow ring */}
+        {isActive && (
+          <circle
+            cx={gp.x}
+            cy={gp.y}
+            r="22"
+            fill="none"
+            stroke="rgba(0,220,220,0.35)"
+            strokeWidth="2"
+            className="zodiac-active-pulse"
+            pointerEvents="none"
+          />
+        )}
+
         {/* The actual sign image, clipped to a circle */}
         <image
           href={ZODIAC_IMAGES[i]}
@@ -154,12 +175,17 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           width="36"
           height="36"
           clipPath={`url(#clip-${ZODIAC_NAMES[i]})`}
-          style={{ filter: segmentFilter }}
+          opacity={imgOpacity}
+          style={{
+            filter: imgFilter,
+            transition: "opacity 300ms ease, filter 300ms ease",
+          }}
+          pointerEvents="none"
         />
       </g>
     );
 
-    // Dot markers at every 30° on the outer dot ring
+    // Dot markers at every 30deg on the outer dot ring
     const dp = polarToCartesian(CX, CY, R_DOT, angle);
     dots.push(
       <circle
@@ -170,144 +196,140 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         fill="rgba(255,255,255,0.18)"
       />
     );
+  }
 
-    // Invisible hit-area wedge for hover detection
-    hitAreas.push(
-      <path
-        key={`hit-${i}`}
-        d={wedgePath(i)}
-        fill="transparent"
-        className="zodiac-segment-hitarea"
-        onMouseEnter={() => handleMouseEnter(i)}
-        onMouseLeave={handleMouseLeave}
-      />
-    );
-
-    // Tooltip (visible only when hovered)
-    const tooltipPos = polarToCartesian(CX, CY, R_GLYPH - 42, glyphAngle);
-    tooltips.push(
-      <g
-        key={`tooltip-${i}`}
-        className="zodiac-tooltip"
-        style={{ opacity: isHovered ? 1 : 0 }}
-      >
+  // Tooltip for hovered segment
+  let tooltip: ReactNode = null;
+  if (hoveredIndex !== null) {
+    const tAngle = hoveredIndex * 30 + 15;
+    const tp = polarToCartesian(CX, CY, R_GLYPH - 45, tAngle);
+    tooltip = (
+      <g pointerEvents="none">
+        {/* Background pill */}
         <rect
-          x={tooltipPos.x - 38}
-          y={tooltipPos.y - 12}
-          width="76"
-          height="22"
-          rx="6"
-          fill="rgba(15, 10, 30, 0.85)"
-          stroke="rgba(200,180,255,0.35)"
+          x={tp.x - 40}
+          y={tp.y - 12}
+          width="80"
+          height="24"
+          rx="12"
+          fill="rgba(10,10,30,0.85)"
+          stroke="rgba(200,180,255,0.40)"
           strokeWidth="0.8"
         />
         <text
-          x={tooltipPos.x}
-          y={tooltipPos.y + 3}
+          x={tp.x}
+          y={tp.y + 4}
           textAnchor="middle"
-          fill="rgba(220,200,255,0.95)"
+          fill="rgba(255,255,255,0.92)"
           fontSize="11"
           fontFamily="inherit"
           fontWeight="500"
         >
-          {ZODIAC_NAMES[i]}
+          {ZODIAC_NAMES[hoveredIndex]}
         </text>
       </g>
     );
   }
 
   return (
-    <svg
-      viewBox="0 0 600 600"
-      width="600"
-      height="600"
-      aria-hidden="true"
-      className="zodiac-wheel"
-      style={{
-        position: "absolute",
-        top: "50%",
-        left: "50%",
-        transform: "translate(-50%, -50%)",
-        pointerEvents: "auto",
-        filter: "drop-shadow(0 0 8px rgba(160,100,255,0.20))",
-        zIndex: 0,
-      }}
-    >
-      {/* ClipPath definitions for circular sign images + active glow filter */}
-      <defs>
-        {ZODIAC_NAMES.map((name, i) => {
-          const glyphAngle = i * 30 + 15;
-          const gp = polarToCartesian(CX, CY, R_GLYPH, glyphAngle);
-          return (
-            <clipPath key={`clip-${name}`} id={`clip-${name}`}>
-              <circle cx={gp.x} cy={gp.y} r="18" />
-            </clipPath>
-          );
-        })}
+    <>
+      {/* Injected styles for interactive features */}
+      <style>{`
+        @keyframes zodiacActivePulse {
+          0%, 100% { stroke-opacity: 0.35; r: 22; }
+          50%      { stroke-opacity: 0.70; r: 25; }
+        }
+        .zodiac-active-pulse {
+          animation: zodiacActivePulse 2s ease-in-out infinite;
+        }
+      `}</style>
 
-        {/* SVG filter for active-sign pulsing gold/aqua glow */}
-        <filter id="activeGlow" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow
-            dx="0"
-            dy="0"
-            stdDeviation="4"
-            floodColor="#ffd700"
-            floodOpacity="0.7"
-          >
-            <animate
-              attributeName="flood-color"
-              values="#ffd700;#00e5ff;#ffd700"
-              dur="2s"
-              repeatCount="indefinite"
-            />
-          </feDropShadow>
-        </filter>
-      </defs>
+      <svg
+        viewBox="0 0 600 600"
+        width="600"
+        height="600"
+        aria-hidden="true"
+        className="zodiac-wheel"
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          /* pointerEvents enabled so hover detection works */
+          pointerEvents: "auto",
+          filter: "drop-shadow(0 0 8px rgba(160,100,255,0.20))",
+          zIndex: 0,
+        }}
+      >
+        {/* ClipPath & filter definitions */}
+        <defs>
+          {ZODIAC_NAMES.map((name, i) => {
+            const glyphAngle = i * 30 + 15;
+            const gp = polarToCartesian(CX, CY, R_GLYPH, glyphAngle);
+            return (
+              <clipPath key={`clip-${name}`} id={`clip-${name}`}>
+                <circle cx={gp.x} cy={gp.y} r="18" />
+              </clipPath>
+            );
+          })}
 
-      {/* Outer decorative ring */}
-      <circle
-        cx={CX}
-        cy={CY}
-        r={R_RING}
-        fill="none"
-        stroke="rgba(255,255,255,0.12)"
-        strokeWidth="1"
-      />
+          {/* SVG glow filter for active signs (gold / aqua) */}
+          <filter id="active-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+            <feFlood floodColor="rgba(0,220,210,0.6)" result="aqua" />
+            <feComposite in="aqua" in2="blur" operator="in" result="aquaGlow" />
+            <feFlood floodColor="rgba(255,200,50,0.4)" result="gold" />
+            <feComposite in="gold" in2="blur" operator="in" result="goldGlow" />
+            <feMerge>
+              <feMergeNode in="goldGlow" />
+              <feMergeNode in="aquaGlow" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
 
-      {/* Inner hub ring */}
-      <circle
-        cx={CX}
-        cy={CY}
-        r={R_INNER}
-        fill="none"
-        stroke="rgba(255,255,255,0.08)"
-        strokeWidth="0.7"
-      />
+        {/* Outer decorative ring */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={R_RING}
+          fill="none"
+          stroke="rgba(255,255,255,0.12)"
+          strokeWidth="1"
+        />
 
-      {/* Outer boundary ring (at R_SPOKE) */}
-      <circle
-        cx={CX}
-        cy={CY}
-        r={R_SPOKE}
-        fill="none"
-        stroke="rgba(255,255,255,0.07)"
-        strokeWidth="0.6"
-      />
+        {/* Inner hub ring */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={R_INNER}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="0.7"
+        />
 
-      {/* Spokes */}
-      {spokes}
+        {/* Outer boundary ring (at R_SPOKE) */}
+        <circle
+          cx={CX}
+          cy={CY}
+          r={R_SPOKE}
+          fill="none"
+          stroke="rgba(255,255,255,0.07)"
+          strokeWidth="0.6"
+        />
 
-      {/* Zodiac sign images */}
-      {glyphs}
+        {/* Spokes */}
+        {spokes}
 
-      {/* Dot markers */}
-      {dots}
+        {/* Zodiac segments (hit areas + images) */}
+        {segments}
 
-      {/* Invisible hit-area wedges (on top for pointer events) */}
-      {hitAreas}
+        {/* Dot markers */}
+        {dots}
 
-      {/* Tooltips (rendered last so they appear above everything) */}
-      {tooltips}
-    </svg>
+        {/* Tooltip (rendered last so it's on top) */}
+        {tooltip}
+      </svg>
+    </>
   );
 }
