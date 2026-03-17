@@ -1,4 +1,3 @@
-// Deterministic rule engine - port of backend/app/services/rule_engine.py
 
 import type { PlanetPosition, HousePlacement } from "./swiss-ephemeris-engine";
 

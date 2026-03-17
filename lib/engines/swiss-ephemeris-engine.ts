@@ -1,4 +1,3 @@
-// Swiss Ephemeris engine - port of backend/app/services/swiss_ephemeris_engine.py
 // Uses the `swisseph` npm package (Node.js bindings for Swiss Ephemeris)
 
 import swisseph from "swisseph";

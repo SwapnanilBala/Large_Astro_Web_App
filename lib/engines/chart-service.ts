@@ -1,4 +1,3 @@
-// Chart service orchestrator - port of backend/app/services/chart_service.py
 
 import {
   calculate,

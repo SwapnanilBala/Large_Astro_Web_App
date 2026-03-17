@@ -1,4 +1,3 @@
-// Transit engine - port of backend/app/services/transit_engine.py
 
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 import { computeTransitPositions } from "./swiss-ephemeris-engine";

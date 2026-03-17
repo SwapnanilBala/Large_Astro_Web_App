@@ -1,4 +1,3 @@
-// Navamsa (D9) divisional chart engine - port of backend/app/services/navamsa_engine.py
 
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 

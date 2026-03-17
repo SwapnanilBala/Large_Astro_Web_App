@@ -1,4 +1,3 @@
-// Engine preset registry - port of backend/app/services/engine_registry.py
 
 export interface EnginePreset {
   engine_id: string;

@@ -1,4 +1,3 @@
-// Planetary aspect calculation engine - port of backend/app/services/aspect_engine.py
 
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 

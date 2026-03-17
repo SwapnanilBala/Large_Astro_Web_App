@@ -1,4 +1,3 @@
-// Compatibility service - port of backend/app/services/compatibility_service.py
 
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 import { buildChart } from "./chart-service";

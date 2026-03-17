@@ -1,4 +1,3 @@
-// Nakshatra & Vimshottari Dasha engine - port of backend/app/services/nakshatra_engine.py
 
 // --------------------------------------------------------------------------
 // Constants

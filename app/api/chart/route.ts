@@ -8,7 +8,7 @@ import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 const CACHE_HEADER = "private, max-age=3600, stale-while-revalidate=1800";
 
 // --------------------------------------------------------------------------
-// GET /api/chart  (query-string based, mirrors the old FastAPI GET)
+// GET /api/chart  (query-string based)
 // --------------------------------------------------------------------------
 
 export async function GET(request: NextRequest) {
@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
 }
 
 // --------------------------------------------------------------------------
-// POST /api/chart  (JSON body based, mirrors the old FastAPI POST)
+// POST /api/chart  (JSON body based)
 // --------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
