@@ -40,6 +40,50 @@
   margin: 0 0 1.5rem;
 }
 
+/* ── Preset Buttons ── */
+
+.presetRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.presetBtn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 0.35rem 0.9rem;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 500;
+  font-family: var(--font-body), sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.presetBtn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.presetBtnActive {
+  background: rgba(242, 194, 108, 0.12);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  font-weight: 600;
+}
+
+/* ── Results Summary ── */
+
+.resultsSummary {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  text-align: center;
+  margin: 0 0 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
 /* ── Form Controls ── */
 
 .form {

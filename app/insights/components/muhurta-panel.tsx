@@ -54,6 +54,12 @@ const ACTIVITIES = [
 ];
 
 const TIMEOUT_MS = 60_000;
+const MAX_RANGE_DAYS = 14;
+const PRESETS = [
+  { label: "3 Days", days: 3 },
+  { label: "7 Days", days: 7 },
+  { label: "14 Days", days: 14 },
+] as const;
 
 // --------------------------------------------------------------------------
 // Helpers
@@ -66,6 +72,12 @@ function todayStr(): string {
 function futureStr(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
+  return d.toISOString().split("T")[0] ?? "";
+}
+
+function maxEndStr(start: string): string {
+  const d = new Date(start);
+  d.setDate(d.getDate() + MAX_RANGE_DAYS);
   return d.toISOString().split("T")[0] ?? "";
 }
 
@@ -112,10 +124,29 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const [activity, setActivity] = useState("general_auspicious");
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(() => futureStr(7));
+  const [activePreset, setActivePreset] = useState<number>(7);
   const [result, setResult] = useState<MuhurtaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const abortRef = useRef<AbortController | null>(null);
+
+  const handlePreset = (days: number) => {
+    setStartDate(todayStr());
+    setEndDate(futureStr(days));
+    setActivePreset(days);
+  };
+
+  const handleStartChange = (val: string) => {
+    setStartDate(val);
+    setActivePreset(0);
+    const max = maxEndStr(val);
+    if (endDate > max) setEndDate(max);
+  };
+
+  const handleEndChange = (val: string) => {
+    setEndDate(val);
+    setActivePreset(0);
+  };
 
   const search = useCallback(async () => {
     if (!startDate || !endDate) return;
@@ -183,6 +214,19 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         Panchanga factors: Tithi, Nakshatra, Yoga, Karana, and weekday alignment.
       </p>
 
+      <div className={styles.presetRow}>
+        {PRESETS.map((p) => (
+          <button
+            key={p.days}
+            type="button"
+            className={`${styles.presetBtn} ${activePreset === p.days ? styles.presetBtnActive : ""}`}
+            onClick={() => handlePreset(p.days)}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
       <form
         className={styles.form}
         onSubmit={(e) => {
@@ -212,7 +256,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             className={styles.dateInput}
             value={startDate}
             min={todayStr()}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => handleStartChange(e.target.value)}
           />
         </div>
 
@@ -223,7 +267,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             className={styles.dateInput}
             value={endDate}
             min={startDate || todayStr()}
-            onChange={(e) => setEndDate(e.target.value)}
+            max={maxEndStr(startDate || todayStr())}
+            onChange={(e) => handleEndChange(e.target.value)}
           />
         </div>
 
@@ -264,6 +309,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       {!isLoading && result && result.windows.length > 0 && (
         <div className={styles.results}>
+          <p className={styles.resultsSummary}>
+            {formatWindowDate(result.search_window.start_date)} &mdash; {formatWindowDate(result.search_window.end_date)}
+            {" \u00b7 "}
+            Found {result.windows.length} auspicious window{result.windows.length !== 1 ? "s" : ""}
+          </p>
           {result.windows.map((w, idx) => (
             <article key={`${w.start}-${idx}`} className={styles.windowCard}>
               <div className={styles.windowHeader}>

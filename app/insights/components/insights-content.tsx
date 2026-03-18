@@ -526,44 +526,33 @@ export default function InsightsContent({
           </motion.div>
         </motion.div>
 
-        {/* ─── Future Forecast ─── */}
-        <motion.div
-          className={styles.cardForecast}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+        {/* ─── Forecasts & Timing (Collapsible) ─── */}
+        <CollapsibleSection
+          kicker="Timing & Electional"
+          title="Forecasts & Muhurta"
+          defaultOpen={true}
+          className={styles.cardRules}
         >
-          <PanelErrorBoundary panelName="Future Forecast">
-            <FutureForecastPanel queryString={historyQs} />
-          </PanelErrorBoundary>
-        </motion.div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <div className={styles.cardForecast}>
+              <PanelErrorBoundary panelName="Future Forecast">
+                <FutureForecastPanel queryString={historyQs} />
+              </PanelErrorBoundary>
+            </div>
 
-        {/* ─── Muhurta (Best Time Finder) ─── */}
-        <motion.div
-          className={styles.cardForecast}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-        >
-          <PanelErrorBoundary panelName="Muhurta">
-            <MuhurtaPanel queryString={historyQs} />
-          </PanelErrorBoundary>
-        </motion.div>
+            <div className={styles.cardForecast}>
+              <PanelErrorBoundary panelName="Muhurta">
+                <MuhurtaPanel queryString={historyQs} />
+              </PanelErrorBoundary>
+            </div>
 
-        {/* ─── Varshaphal / Annual Profections ─── */}
-        <motion.div
-          className={styles.cardForecast}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-        >
-          <PanelErrorBoundary panelName="Varshaphal & Annual Profections">
-            <VarshaphalPanel queryString={historyQs} birthDate={birthDate} />
-          </PanelErrorBoundary>
-        </motion.div>
+            <div className={styles.cardForecast}>
+              <PanelErrorBoundary panelName="Varshaphal & Annual Profections">
+                <VarshaphalPanel queryString={historyQs} birthDate={birthDate} />
+              </PanelErrorBoundary>
+            </div>
+          </div>
+        </CollapsibleSection>
 
         {/* ─── Core Rules Section ─── */}
         <CollapsibleSection
@@ -669,7 +658,13 @@ export default function InsightsContent({
           </div>
         )}
 
-        {/* ─── Advanced Modules Grid ─── */}
+        {/* ─── Advanced Modules Grid (Collapsible) ─── */}
+        <CollapsibleSection
+          kicker="Advanced Analysis"
+          title="Advanced Vedic Modules"
+          defaultOpen={false}
+          className={styles.cardRules}
+        >
         <div className={styles.gridAdvanced}>
           {/* Nakshatra & Dasha */}
           <motion.div
@@ -864,14 +859,14 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
         </div>
+        </CollapsibleSection>
 
-        {/* ── Palm Reading ── */}
-        <motion.div
-          className={`${styles.cardPalm} ${styles.cardFullWidth}`}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+        {/* ── Palm Reading (Collapsible) ── */}
+        <CollapsibleSection
+          kicker="Palmistry"
+          title="Palm Reading Analysis"
+          defaultOpen={false}
+          className={styles.cardRules}
         >
           <PanelErrorBoundary panelName="Palm Reading">
             <AuthGate
@@ -882,7 +877,7 @@ export default function InsightsContent({
               <PalmReadingPanel />
             </AuthGate>
           </PanelErrorBoundary>
-        </motion.div>
+        </CollapsibleSection>
 
         {/* ─── Life Domain Deep Dives ─── */}
         <AuthGate

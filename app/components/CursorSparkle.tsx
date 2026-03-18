@@ -22,10 +22,14 @@ export default function CursorSparkle() {
   const lastSpawn = useRef(0);
   const prefersReducedMotion = useRef(false);
   const isTouchDevice = useRef(false);
+  const isScrolling = useRef(false);
+  const scrollTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastMousePos = useRef({ x: 0, y: 0 });
 
   const spawnParticle = useCallback((x: number, y: number) => {
     const container = containerRef.current;
     if (!container || prefersReducedMotion.current || isTouchDevice.current) return;
+    if (isScrolling.current) return;
 
     const now = Date.now();
     if (now - lastSpawn.current < THROTTLE_MS) return;
@@ -82,7 +86,20 @@ export default function CursorSparkle() {
     };
     touchMql.addEventListener("change", handleTouchChange);
 
+    const handleScroll = () => {
+      isScrolling.current = true;
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+      scrollTimer.current = setTimeout(() => {
+        isScrolling.current = false;
+      }, 200);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
     const handleMouseMove = (e: MouseEvent) => {
+      const dx = Math.abs(e.clientX - lastMousePos.current.x);
+      const dy = Math.abs(e.clientY - lastMousePos.current.y);
+      lastMousePos.current = { x: e.clientX, y: e.clientY };
+      if (dx < 2 && dy < 2) return;
       spawnParticle(e.clientX, e.clientY);
     };
 
@@ -90,6 +107,8 @@ export default function CursorSparkle() {
 
     return () => {
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("scroll", handleScroll);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
       mql.removeEventListener("change", handleMotionChange);
       touchMql.removeEventListener("change", handleTouchChange);
     };

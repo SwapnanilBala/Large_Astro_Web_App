@@ -35,7 +35,7 @@ export default function AutocompleteInput({
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!value || value.length < 2) {
+    if (!value || value.length < 1) {
       setSuggestions([]);
       setIsOpen(false);
       return;
@@ -57,7 +57,7 @@ export default function AutocompleteInput({
         setSuggestions([]);
         setIsOpen(false);
       }
-    }, 400);
+    }, 150);
 
     return () => {
       if (timer.current) clearTimeout(timer.current);
