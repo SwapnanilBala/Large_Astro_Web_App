@@ -5,6 +5,7 @@ import {
   type PlanetPosition,
   type HousePlacement,
   type AscendantData,
+  type SwissEngineResult,
 } from "./swiss-ephemeris-engine";
 import { generateRules, generateLifeDomainInsights, HOUSE_THEMES } from "./rule-engine";
 import type { DeterministicRule, LifeDomainInsight } from "./rule-engine";
@@ -26,6 +27,7 @@ import {
   type EnginePreset,
 } from "./engine-registry";
 import type { BirthDetailsInput } from "./compatibility-service";
+import { ServerCache, makeCacheKey } from "../server-cache";
 
 // --------------------------------------------------------------------------
 // Response types (matching ChartApiResponse in astro-types.ts)
@@ -241,6 +243,65 @@ const ASPECT_TONES: Record<string, string> = {
 };
 
 // --------------------------------------------------------------------------
+// Stage-level cache instances (survive hot-reload via globalThis)
+// --------------------------------------------------------------------------
+
+const STAGE_CACHE_KEY = "__chartStageCaches";
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+interface StageCaches {
+  positions: ServerCache<CorePositionsResult>;
+  dasha: ServerCache<DashaStageResult>;
+  aspects: ServerCache<AspectStageResult>;
+  navamsa: ServerCache<NavamsaStageResult>;
+  insights: ServerCache<InsightsStageResult>;
+}
+
+function createStageCaches(): StageCaches {
+  return {
+    positions: new ServerCache<CorePositionsResult>("stage_positions", 500, DAY_MS),
+    dasha: new ServerCache<DashaStageResult>("stage_dasha", 300, DAY_MS),
+    aspects: new ServerCache<AspectStageResult>("stage_aspects", 300, DAY_MS),
+    navamsa: new ServerCache<NavamsaStageResult>("stage_navamsa", 300, DAY_MS),
+    insights: new ServerCache<InsightsStageResult>("stage_insights", 300, DAY_MS),
+  };
+}
+
+const sg = globalThis as unknown as Record<string, StageCaches>;
+if (!sg[STAGE_CACHE_KEY]) {
+  sg[STAGE_CACHE_KEY] = createStageCaches();
+}
+const stageCaches: StageCaches = sg[STAGE_CACHE_KEY];
+
+// --------------------------------------------------------------------------
+// Stage result types
+// --------------------------------------------------------------------------
+
+interface CorePositionsResult {
+  julian_day_ut: number;
+  ascendant: AscendantData;
+  planets: PlanetPosition[];
+  houses: HousePlacement[];
+  fallback_mode: boolean;
+  rules: DeterministicRule[];
+  summary: string;
+}
+
+interface DashaStageResult {
+  nakshatraInfo: NonNullable<ChartResponse["chart"]["nakshatra"]>;
+  dashaInfo: NonNullable<ChartResponse["chart"]["dasha"]>;
+  calculationAudit: Record<string, unknown>;
+}
+
+type AspectStageResult = NonNullable<ChartResponse["chart"]["aspects"]>;
+
+type NavamsaStageResult = NonNullable<ChartResponse["chart"]["navamsa"]>;
+
+interface InsightsStageResult {
+  lifeDomainInsights: LifeDomainInsight[];
+}
+
+// --------------------------------------------------------------------------
 // Helpers
 // --------------------------------------------------------------------------
 
@@ -336,8 +397,251 @@ function toForecastAspect(
   };
 }
 
+/**
+ * Simple djb2 hash of a string of planet longitudes, used for cache keys
+ * that depend on the computed positions rather than birth input.
+ */
+function hashLongitudes(planets: PlanetPosition[]): string {
+  const raw = planets.map((p) => p.longitude.toFixed(4)).join(",");
+  let hash = 5381;
+  for (let i = 0; i < raw.length; i++) {
+    hash = ((hash << 5) + hash + raw.charCodeAt(i)) | 0;
+  }
+  return (hash >>> 0).toString(36);
+}
+
 // --------------------------------------------------------------------------
-// Build chart
+// Stage A: Core positions (planets, houses, ascendant, rules)
+// --------------------------------------------------------------------------
+
+function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
+  const cacheKey = makeCacheKey("pos", {
+    birth_date: birth.birth_date,
+    birth_time: birth.birth_time,
+    tz: birth.timezone_offset_minutes,
+    lat: birth.latitude,
+    lng: birth.longitude,
+    engine_id: birth.engine_id ?? "lahiri_classic",
+  });
+
+  const cached = stageCaches.positions.get(cacheKey);
+  if (cached) return cached;
+
+  const utc = parseBirthUTC(birth);
+  const computed = calculate({
+    ...utc,
+    latitude: birth.latitude,
+    longitude: birth.longitude,
+    engine_id: birth.engine_id,
+  });
+
+  const { rules, summary } = generateRules(
+    computed.ascendant.sign,
+    computed.planets,
+    computed.houses
+  );
+
+  const result: CorePositionsResult = {
+    julian_day_ut: computed.julian_day_ut,
+    ascendant: computed.ascendant,
+    planets: computed.planets,
+    houses: computed.houses,
+    fallback_mode: computed.fallback_mode,
+    rules,
+    summary,
+  };
+
+  stageCaches.positions.set(cacheKey, result);
+  return result;
+}
+
+// --------------------------------------------------------------------------
+// Stage B: Dasha timeline (nakshatra + dasha periods + calculation audit)
+// --------------------------------------------------------------------------
+
+function computeDashaTimeline(
+  birth: BirthDetailsInput,
+  planets: PlanetPosition[],
+  currentLocalStr: string,
+): DashaStageResult {
+  const moon = planets.find((p) => p.name === "Moon")!;
+  // Round Moon longitude to 0.001 degrees for cache key stability
+  const moonLngRounded = Math.round(moon.longitude * 1000) / 1000;
+
+  const cacheKey = makeCacheKey("dasha_stage", {
+    moon_lng: moonLngRounded,
+    birth_date: birth.birth_date,
+    birth_time: birth.birth_time,
+    tz: birth.timezone_offset_minutes,
+    ref_date: currentLocalStr,
+  });
+
+  const cached = stageCaches.dasha.get(cacheKey);
+  if (cached) return cached;
+
+  const birthLocalStr = birthLocalMomentStr(birth);
+  const nakData = calculateNakshatra(moon.longitude);
+  const dashaTimeline = calculateDashaTimeline(nakData, birthLocalStr, currentLocalStr);
+
+  const nakshatraInfo = {
+    name: nakData.name,
+    index: nakData.index,
+    lord: nakData.lord,
+    pada: nakData.pada,
+    degree_in_nakshatra: Math.round(nakData.degree_in_nakshatra * 10000) / 10000,
+  };
+
+  const dashaInfo: NonNullable<ChartResponse["chart"]["dasha"]> = {
+    current_dasha: dashaTimeline.current_dasha?.planet ?? "Unknown",
+    current_antardasha: dashaTimeline.current_antardasha?.sub_lord ?? "Unknown",
+    current_dasha_start: dashaTimeline.current_dasha_start ?? "",
+    current_dasha_end: dashaTimeline.current_dasha_end ?? "",
+    current_antardasha_start: dashaTimeline.current_antardasha_start ?? "",
+    current_antardasha_end: dashaTimeline.current_antardasha_end ?? "",
+    periods: dashaTimeline.periods.map((p) => ({
+      planet: p.planet,
+      start_date: p.start_date,
+      end_date: p.end_date,
+      years: p.years,
+      sequence_start_date: p.sequence_start_date,
+      sequence_end_date: p.sequence_end_date,
+      is_partial: p.is_partial,
+    })),
+  };
+
+  // Calculation audit
+  const preset = getEnginePreset(birth.engine_id);
+  const fractionElapsed = nakData.degree_in_nakshatra / NAKSHATRA_SPAN;
+  const dashaSeedTotalYears = DASHA_YEARS[nakData.lord];
+  const dashaSeedElapsedYears = fractionElapsed * dashaSeedTotalYears;
+  const dashaSeedRemainingYears = Math.max(dashaSeedTotalYears - dashaSeedElapsedYears, 0);
+
+  const birthLocalDate = new Date(birth.birth_date + "T" + birth.birth_time + ":00");
+  const birthUtcDate = new Date(
+    birthLocalDate.getTime() - (birth.timezone_offset_minutes ?? 0) * 60000
+  );
+  const nowUtc = new Date();
+  const nowLocal = new Date(
+    nowUtc.getTime() + (birth.timezone_offset_minutes ?? 0) * 60000
+  );
+
+  const dashaSeedStartLocal = new Date(
+    birthLocalDate.getTime() - dashaSeedElapsedYears * YEAR_DAYS * 86400000
+  );
+  const dashaSeedEndLocal = new Date(
+    dashaSeedStartLocal.getTime() + dashaSeedTotalYears * YEAR_DAYS * 86400000
+  );
+
+  const calculationAudit: Record<string, unknown> = {
+    engine_id: preset.engine_id,
+    engine_label: preset.label,
+    ayanamsha: preset.ayanamsha,
+    house_system: preset.house_system,
+    time_zone_id: birth.time_zone_id ?? "",
+    timezone_offset_minutes: birth.timezone_offset_minutes,
+    latitude: Math.round(birth.latitude * 1000000) / 1000000,
+    longitude: Math.round(birth.longitude * 1000000) / 1000000,
+    birth_local_iso: isoMinute(birthLocalDate),
+    birth_utc_iso: isoMinute(birthUtcDate),
+    reference_local_iso: isoMinute(nowLocal),
+    reference_utc_iso: isoMinute(nowUtc),
+    moon_sidereal_longitude: moon.longitude,
+    moon_sign: moon.sign,
+    moon_degree_in_sign: moon.degree_in_sign,
+    nakshatra_name: nakData.name,
+    nakshatra_lord: nakData.lord,
+    nakshatra_pada: nakData.pada,
+    degree_in_nakshatra: Math.round(nakData.degree_in_nakshatra * 10000) / 10000,
+    nakshatra_progress_percent: Math.round(fractionElapsed * 10000) / 100,
+    dasha_seed_lord: nakData.lord,
+    dasha_seed_total_years: Math.round(dashaSeedTotalYears * 100) / 100,
+    dasha_seed_elapsed_years: Math.round(dashaSeedElapsedYears * 100) / 100,
+    dasha_seed_remaining_years: Math.round(dashaSeedRemainingYears * 100) / 100,
+    dasha_seed_start_local_iso: isoMinute(dashaSeedStartLocal),
+    dasha_seed_end_local_iso: isoMinute(dashaSeedEndLocal),
+  };
+
+  const result: DashaStageResult = { nakshatraInfo, dashaInfo, calculationAudit };
+  stageCaches.dasha.set(cacheKey, result);
+  return result;
+}
+
+// --------------------------------------------------------------------------
+// Stage C: Aspects
+// --------------------------------------------------------------------------
+
+function computeAspects(planets: PlanetPosition[]): AspectStageResult {
+  const longHash = hashLongitudes(planets);
+  const cacheKey = `asp_${longHash}`;
+
+  const cached = stageCaches.aspects.get(cacheKey);
+  if (cached) return cached;
+
+  const result = calculateAspects(planets).map((a) => ({
+    planet1: a.planet1,
+    planet2: a.planet2,
+    aspect_type: a.aspect_type,
+    exact_angle: a.exact_angle,
+    orb: a.orb,
+    applying: a.applying,
+    vedic: a.vedic,
+  }));
+
+  stageCaches.aspects.set(cacheKey, result);
+  return result;
+}
+
+// --------------------------------------------------------------------------
+// Stage D: Navamsa (D9)
+// --------------------------------------------------------------------------
+
+function computeNavamsa(planets: PlanetPosition[]): NavamsaStageResult {
+  const longHash = hashLongitudes(planets);
+  const cacheKey = `nav_${longHash}`;
+
+  const cached = stageCaches.navamsa.get(cacheKey);
+  if (cached) return cached;
+
+  const result = calculateNavamsa(planets).map((n) => ({
+    name: n.name,
+    rashi_sign: n.rashi_sign,
+    navamsa_sign: n.navamsa_sign,
+    navamsa_division: n.navamsa_division,
+  }));
+
+  stageCaches.navamsa.set(cacheKey, result);
+  return result;
+}
+
+// --------------------------------------------------------------------------
+// Stage E: Life domain insights
+// --------------------------------------------------------------------------
+
+function computeInsights(
+  ascendantSign: string,
+  planets: PlanetPosition[],
+  houses: HousePlacement[],
+): InsightsStageResult {
+  const longHash = hashLongitudes(planets);
+  const houseSig = houses.map((h) => h.sign).join(",");
+  let hHash = 5381;
+  for (let i = 0; i < houseSig.length; i++) {
+    hHash = ((hHash << 5) + hHash + houseSig.charCodeAt(i)) | 0;
+  }
+  const cacheKey = `ins_${longHash}_${(hHash >>> 0).toString(36)}`;
+
+  const cached = stageCaches.insights.get(cacheKey);
+  if (cached) return cached;
+
+  const lifeDomainInsights = generateLifeDomainInsights(ascendantSign, planets, houses);
+  const result: InsightsStageResult = { lifeDomainInsights };
+
+  stageCaches.insights.set(cacheKey, result);
+  return result;
+}
+
+// --------------------------------------------------------------------------
+// Build chart (same signature and return type as before)
 // --------------------------------------------------------------------------
 
 export interface BuildChartOptions {
@@ -358,23 +662,9 @@ export function buildChart(
     subscriptionTier = "guest",
   } = options;
 
+  // Stage A: core positions (planets, houses, ascendant, rules)
+  const core = computeCorePositions(birth);
   const preset = getEnginePreset(birth.engine_id);
-  const utc = parseBirthUTC(birth);
-  const computed = calculate({
-    ...utc,
-    latitude: birth.latitude,
-    longitude: birth.longitude,
-    engine_id: birth.engine_id,
-  });
-
-  const currentLocalStr = currentLocalDateStr(birth);
-  const birthLocalStr = birthLocalMomentStr(birth);
-
-  const { rules, summary } = generateRules(
-    computed.ascendant.sign,
-    computed.planets,
-    computed.houses
-  );
 
   let nakshatraInfo: ChartResponse["chart"]["nakshatra"] = null;
   let dashaInfo: ChartResponse["chart"]["dasha"] = null;
@@ -384,126 +674,36 @@ export function buildChart(
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
 
   if (includePremium) {
-    // Nakshatra & Dasha
-    const moon = computed.planets.find((p) => p.name === "Moon")!;
-    const nakData = calculateNakshatra(moon.longitude);
-    const dashaTimeline = calculateDashaTimeline(
-      nakData,
-      birthLocalStr,
-      currentLocalStr
-    );
+    const currentLocalStr = currentLocalDateStr(birth);
 
-    nakshatraInfo = {
-      name: nakData.name,
-      index: nakData.index,
-      lord: nakData.lord,
-      pada: nakData.pada,
-      degree_in_nakshatra: Math.round(nakData.degree_in_nakshatra * 10000) / 10000,
-    };
+    // Stage B: dasha timeline
+    const dashaStage = computeDashaTimeline(birth, core.planets, currentLocalStr);
+    nakshatraInfo = dashaStage.nakshatraInfo;
+    dashaInfo = dashaStage.dashaInfo;
+    calculationAudit = dashaStage.calculationAudit;
 
-    dashaInfo = {
-      current_dasha: dashaTimeline.current_dasha?.planet ?? "Unknown",
-      current_antardasha: dashaTimeline.current_antardasha?.sub_lord ?? "Unknown",
-      current_dasha_start: dashaTimeline.current_dasha_start ?? "",
-      current_dasha_end: dashaTimeline.current_dasha_end ?? "",
-      current_antardasha_start: dashaTimeline.current_antardasha_start ?? "",
-      current_antardasha_end: dashaTimeline.current_antardasha_end ?? "",
-      periods: dashaTimeline.periods.map((p) => ({
-        planet: p.planet,
-        start_date: p.start_date,
-        end_date: p.end_date,
-        years: p.years,
-        sequence_start_date: p.sequence_start_date,
-        sequence_end_date: p.sequence_end_date,
-        is_partial: p.is_partial,
-      })),
-    };
+    // Stage C: aspects
+    aspectsInfo = computeAspects(core.planets);
 
-    // Calculation audit
-    const fractionElapsed = nakData.degree_in_nakshatra / NAKSHATRA_SPAN;
-    const dashaSeedTotalYears = DASHA_YEARS[nakData.lord];
-    const dashaSeedElapsedYears = fractionElapsed * dashaSeedTotalYears;
-    const dashaSeedRemainingYears = Math.max(dashaSeedTotalYears - dashaSeedElapsedYears, 0);
-
-    // Build local/utc dates for audit
-    const birthLocalDate = new Date(birth.birth_date + "T" + birth.birth_time + ":00");
-    const birthUtcDate = new Date(
-      birthLocalDate.getTime() - (birth.timezone_offset_minutes ?? 0) * 60000
-    );
-    const nowUtc = new Date();
-    const nowLocal = new Date(
-      nowUtc.getTime() + (birth.timezone_offset_minutes ?? 0) * 60000
-    );
-
-    const dashaSeedStartLocal = new Date(
-      birthLocalDate.getTime() - dashaSeedElapsedYears * YEAR_DAYS * 86400000
-    );
-    const dashaSeedEndLocal = new Date(
-      dashaSeedStartLocal.getTime() + dashaSeedTotalYears * YEAR_DAYS * 86400000
-    );
-
-    calculationAudit = {
-      engine_id: preset.engine_id,
-      engine_label: preset.label,
-      ayanamsha: preset.ayanamsha,
-      house_system: preset.house_system,
-      time_zone_id: birth.time_zone_id ?? "",
-      timezone_offset_minutes: birth.timezone_offset_minutes,
-      latitude: Math.round(birth.latitude * 1000000) / 1000000,
-      longitude: Math.round(birth.longitude * 1000000) / 1000000,
-      birth_local_iso: isoMinute(birthLocalDate),
-      birth_utc_iso: isoMinute(birthUtcDate),
-      reference_local_iso: isoMinute(nowLocal),
-      reference_utc_iso: isoMinute(nowUtc),
-      moon_sidereal_longitude: moon.longitude,
-      moon_sign: moon.sign,
-      moon_degree_in_sign: moon.degree_in_sign,
-      nakshatra_name: nakData.name,
-      nakshatra_lord: nakData.lord,
-      nakshatra_pada: nakData.pada,
-      degree_in_nakshatra: Math.round(nakData.degree_in_nakshatra * 10000) / 10000,
-      nakshatra_progress_percent: Math.round(fractionElapsed * 10000) / 100,
-      dasha_seed_lord: nakData.lord,
-      dasha_seed_total_years: Math.round(dashaSeedTotalYears * 100) / 100,
-      dasha_seed_elapsed_years: Math.round(dashaSeedElapsedYears * 100) / 100,
-      dasha_seed_remaining_years: Math.round(dashaSeedRemainingYears * 100) / 100,
-      dasha_seed_start_local_iso: isoMinute(dashaSeedStartLocal),
-      dasha_seed_end_local_iso: isoMinute(dashaSeedEndLocal),
-    };
-
-    // Aspects
-    aspectsInfo = calculateAspects(computed.planets).map((a) => ({
-      planet1: a.planet1,
-      planet2: a.planet2,
-      aspect_type: a.aspect_type,
-      exact_angle: a.exact_angle,
-      orb: a.orb,
-      applying: a.applying,
-      vedic: a.vedic,
-    }));
-
-    // Navamsa
-    navamsaInfo = calculateNavamsa(computed.planets).map((n) => ({
-      name: n.name,
-      rashi_sign: n.rashi_sign,
-      navamsa_sign: n.navamsa_sign,
-      navamsa_division: n.navamsa_division,
-    }));
+    // Stage D: navamsa
+    navamsaInfo = computeNavamsa(core.planets);
   }
 
   if (includeUltimate) {
-    lifeDomainInsights = generateLifeDomainInsights(
-      computed.ascendant.sign,
-      computed.planets,
-      computed.houses
+    // Stage E: life domain insights
+    const insightsStage = computeInsights(
+      core.ascendant.sign,
+      core.planets,
+      core.houses,
     );
+    lifeDomainInsights = insightsStage.lifeDomainInsights;
   }
 
-  // Transits
+  // Transits (not cached at stage level — short-lived, already cached at API layer)
   let transitsData: ChartResponse["transits"] = null;
   if (includePremium && includeTransits) {
     const transitPositions = computeTransitPositions(new Date(), birth.engine_id);
-    const transitAspects = computeTransitAspects(computed.planets, transitPositions);
+    const transitAspects = computeTransitAspects(core.planets, transitPositions);
     transitsData = {
       computed_at_utc: new Date().toISOString(),
       positions: transitPositions.map((tp) => ({
@@ -540,12 +740,12 @@ export function buildChart(
       time_zone_id: birth.time_zone_id ?? "",
     },
     chart: {
-      julian_day_ut: computed.julian_day_ut,
-      ascendant: computed.ascendant,
-      planets: computed.planets,
-      houses: computed.houses,
-      deterministic_rules: rules,
-      summary,
+      julian_day_ut: core.julian_day_ut,
+      ascendant: core.ascendant,
+      planets: core.planets,
+      houses: core.houses,
+      deterministic_rules: core.rules,
+      summary: core.summary,
       nakshatra: nakshatraInfo,
       dasha: dashaInfo,
       calculation_audit: calculationAudit,
@@ -559,7 +759,7 @@ export function buildChart(
       ephemeris_provider: "astronomy-engine (pure JS)",
       ayanamsha: preset.ayanamsha,
       house_system: preset.house_system,
-      fallback_mode: computed.fallback_mode,
+      fallback_mode: core.fallback_mode,
       available_engines: listEnginePresets().map(presetToMetadata),
     },
     storage: {
@@ -579,6 +779,38 @@ export function buildChart(
 }
 
 // --------------------------------------------------------------------------
+// computeTransitsOnly — reuses cached natal positions, only computes transits
+// --------------------------------------------------------------------------
+
+export function computeTransitsOnly(
+  birth: BirthDetailsInput,
+  transitDate?: Date,
+): NonNullable<ChartResponse["transits"]> {
+  // Reuse cached core positions (planets never change for same birth input)
+  const core = computeCorePositions(birth);
+  const when = transitDate ?? new Date();
+
+  const transitPositions = computeTransitPositions(when, birth.engine_id);
+  const transitAspects = computeTransitAspects(core.planets, transitPositions);
+
+  return {
+    computed_at_utc: when.toISOString(),
+    positions: transitPositions.map((tp) => ({
+      name: tp.name,
+      longitude: tp.longitude,
+      sign: tp.sign,
+      degree_in_sign: tp.degree_in_sign,
+    })),
+    active_aspects: transitAspects.map((ta) => ({
+      transit_planet: ta.transit_planet,
+      natal_planet: ta.natal_planet,
+      aspect_type: ta.aspect_type,
+      orb: ta.orb,
+    })),
+  };
+}
+
+// --------------------------------------------------------------------------
 // Build forecast
 // --------------------------------------------------------------------------
 
@@ -586,19 +818,13 @@ export function buildForecast(
   birth: BirthDetailsInput,
   targetDateStr: string
 ): ForecastReading {
-  const preset = getEnginePreset(birth.engine_id);
-  const utc = parseBirthUTC(birth);
-  const computed = calculate({
-    ...utc,
-    latitude: birth.latitude,
-    longitude: birth.longitude,
-    engine_id: birth.engine_id,
-  });
+  // Reuse cached core positions instead of re-calculating
+  const core = computeCorePositions(birth);
 
   const birthLocalStr = birthLocalMomentStr(birth);
 
   // Build nakshatra/dasha for target date
-  const moon = computed.planets.find((p) => p.name === "Moon")!;
+  const moon = core.planets.find((p) => p.name === "Moon")!;
   const nakData = calculateNakshatra(moon.longitude);
   const dashaTimeline = calculateDashaTimeline(nakData, birthLocalStr, targetDateStr);
 
@@ -628,7 +854,7 @@ export function buildForecast(
   );
 
   const transitPositions = computeTransitPositions(targetUtc, birth.engine_id);
-  const transitAspects = computeTransitAspects(computed.planets, transitPositions).map(
+  const transitAspects = computeTransitAspects(core.planets, transitPositions).map(
     (a) => ({
       transit_planet: a.transit_planet,
       natal_planet: a.natal_planet,
@@ -647,10 +873,10 @@ export function buildForecast(
     .slice(0, 3)
     .map(toForecastAspect);
 
-  const currentDashaPlanet = computed.planets.find(
+  const currentDashaPlanet = core.planets.find(
     (p) => p.name === dashaInfo.current_dasha
   )!;
-  const currentAntardashaPlanet = computed.planets.find(
+  const currentAntardashaPlanet = core.planets.find(
     (p) => p.name === dashaInfo.current_antardasha
   )!;
   const dashaTheme = DASHA_FORECAST_THEMES[dashaInfo.current_dasha];
