@@ -24,6 +24,7 @@ const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, load
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -530,6 +531,19 @@ export default function InsightsContent({
         >
           <PanelErrorBoundary panelName="Future Forecast">
             <FutureForecastPanel queryString={historyQs} />
+          </PanelErrorBoundary>
+        </motion.div>
+
+        {/* ─── Muhurta (Best Time Finder) ─── */}
+        <motion.div
+          className={styles.cardForecast}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+        >
+          <PanelErrorBoundary panelName="Muhurta">
+            <MuhurtaPanel queryString={historyQs} />
           </PanelErrorBoundary>
         </motion.div>
 

@@ -154,6 +154,26 @@ export const GeocodeInputSchema = z.object({
 
 export type GeocodeInput = z.infer<typeof GeocodeInputSchema>;
 
+/** Muhurta endpoint: find auspicious times for an activity. */
+export const MuhurtaInputSchema = z.object({
+  activity: z.enum([
+    "marriage", "business_start", "travel", "education",
+    "property_purchase", "medical_procedure", "job_interview",
+    "investment", "spiritual_practice", "general_auspicious",
+  ], { error: "activity must be a valid muhurta activity type" }),
+  start_date: z
+    .string({ error: "start_date is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "start_date must match YYYY-MM-DD format"),
+  end_date: z
+    .string({ error: "end_date is required" })
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "end_date must match YYYY-MM-DD format"),
+  latitude: latitudeField,
+  longitude: longitudeField,
+  timezone_offset_minutes: timezoneOffsetField,
+});
+
+export type MuhurtaInput = z.infer<typeof MuhurtaInputSchema>;
+
 /** Suggest (autocomplete) endpoint. */
 export const SuggestInputSchema = z.object({
   q: z.string().min(2, "query must be at least 2 characters"),

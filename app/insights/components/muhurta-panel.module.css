@@ -1,0 +1,330 @@
+/* ═══════════════════════════════════════════════
+   MUHURTA (Electional Astrology) PANEL
+   ═══════════════════════════════════════════════ */
+
+.panel {
+  background: var(--surface);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 2rem;
+  backdrop-filter: blur(12px);
+}
+
+.header {
+  margin-bottom: 1.25rem;
+}
+
+.kicker {
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-gold);
+  margin: 0 0 0.5rem;
+}
+
+.heading {
+  font-family: var(--font-heading), serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--ink-main);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.intro {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+/* ── Form Controls ── */
+
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 160px;
+}
+
+.fieldLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-soft);
+}
+
+.select,
+.dateInput {
+  background: var(--surface-soft);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  color: var(--ink-main);
+  font-size: 0.9rem;
+  font-family: var(--font-body), sans-serif;
+  transition: border-color 0.2s;
+}
+
+.select:focus,
+.dateInput:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 2px rgba(242, 194, 108, 0.15);
+}
+
+.submitBtn {
+  background: linear-gradient(135deg, var(--accent-gold) 0%, #d4a44a 100%);
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.5rem;
+  color: #1a1a2e;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-body), sans-serif;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+  white-space: nowrap;
+  height: fit-content;
+}
+
+.submitBtn:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Error State ── */
+
+.error {
+  background: rgba(220, 53, 69, 0.08);
+  border: 1px solid rgba(220, 53, 69, 0.2);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.errorText {
+  color: #f87171;
+  font-size: 0.9rem;
+  margin: 0;
+  flex: 1;
+}
+
+.retryBtn {
+  background: rgba(220, 53, 69, 0.12);
+  border: 1px solid rgba(220, 53, 69, 0.25);
+  border-radius: 6px;
+  color: #f87171;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* ── Empty State ── */
+
+.empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+/* ── Results List ── */
+
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.windowCard {
+  background: var(--surface-soft);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1.25rem;
+  transition: border-color 0.2s;
+}
+
+.windowCard:hover {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.windowHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.windowTime {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-main);
+  margin: 0;
+}
+
+.windowDate {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin: 0.15rem 0 0;
+}
+
+/* ── Score Badge ── */
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.scoreExcellent {
+  composes: scoreBadge;
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.25);
+}
+
+.scoreGood {
+  composes: scoreBadge;
+  background: rgba(250, 204, 21, 0.12);
+  color: var(--accent-gold);
+  border: 1px solid rgba(250, 204, 21, 0.2);
+}
+
+.scoreFair {
+  composes: scoreBadge;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink-soft);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scorePoor {
+  composes: scoreBadge;
+  background: rgba(220, 53, 69, 0.08);
+  color: #f87171;
+  border: 1px solid rgba(220, 53, 69, 0.15);
+}
+
+/* ── Factors Grid ── */
+
+.factors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.factorChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 6px;
+  padding: 0.25rem 0.6rem;
+  font-size: 0.75rem;
+  color: var(--ink-soft);
+}
+
+.factorName {
+  font-weight: 600;
+  color: var(--accent-gold);
+}
+
+.factorPositive {
+  composes: factorChip;
+  border-color: rgba(34, 197, 94, 0.15);
+}
+
+.factorNegative {
+  composes: factorChip;
+  border-color: rgba(220, 53, 69, 0.12);
+}
+
+/* ── Recommendation ── */
+
+.recommendation {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ── Loading Spinner ── */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem 1rem;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-gold);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingText {
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 640px) {
+  .panel {
+    padding: 1.25rem;
+  }
+
+  .form {
+    flex-direction: column;
+  }
+
+  .field {
+    min-width: 100%;
+  }
+
+  .windowHeader {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
