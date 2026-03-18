@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
 import BackButton from "../components/BackButton";
+import ScrollReveal from "../components/ScrollReveal";
 import styles from "./pricing.module.css";
 
 type PricingPageClientProps = {
@@ -137,64 +138,67 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
         )}
 
         <div className={styles.grid}>
-          {PLAN_ORDER.map((plan) => {
+          {PLAN_ORDER.map((plan, idx) => {
             const isCurrentPlan = currentPlan === plan.id;
 
             return (
-              <article
-                key={plan.id}
-                className={`${isCurrentPlan ? styles.cardActive : styles.card} ${ACCENT_MAP[plan.id]}`}
-              >
-                <div className={styles.cardHeader}>
-                  <div>
-                    <p className="kicker">{plan.id}</p>
-                    <h2>{plan.priceLabel}</h2>
+              <ScrollReveal key={plan.id} delay={idx * 120}>
+                <article
+                  className={`${isCurrentPlan ? styles.cardActive : styles.card} ${ACCENT_MAP[plan.id]}`}
+                >
+                  <div className={styles.cardHeader}>
+                    <div>
+                      <p className="kicker">{plan.id}</p>
+                      <h2>{plan.priceLabel}</h2>
+                    </div>
+                    {isCurrentPlan && (
+                      <span className="access-pill access-pill--premium">Already purchased</span>
+                    )}
                   </div>
-                  {isCurrentPlan && (
-                    <span className="access-pill access-pill--premium">Already purchased</span>
-                  )}
-                </div>
 
-                <div className={styles.featureList}>
-                  {plan.featureLines.map((feature) => (
-                    <p key={feature}>{feature}</p>
-                  ))}
-                </div>
-                <p className={`${styles.codeLabel} ${plan.fieldClass}`}>
-                  {plan.id === "basic" &&
-                    "Guest mode is the default. Create an account only if you want synced charts and saved reports."}
-                  {plan.id === "pro" &&
-                    "Supabase auth keeps your workspace synced across devices while the chart engine stays open-access."}
-                  {plan.id === "ultimate" &&
-                    "Ultimate is now just an account label; it no longer controls chart access or hidden modules."}
-                </p>
-              </article>
+                  <div className={styles.featureList}>
+                    {plan.featureLines.map((feature) => (
+                      <p key={feature}>{feature}</p>
+                    ))}
+                  </div>
+                  <p className={`${styles.codeLabel} ${plan.fieldClass}`}>
+                    {plan.id === "basic" &&
+                      "Guest mode is the default. Create an account only if you want synced charts and saved reports."}
+                    {plan.id === "pro" &&
+                      "Supabase auth keeps your workspace synced across devices while the chart engine stays open-access."}
+                    {plan.id === "ultimate" &&
+                      "Ultimate is now just an account label; it no longer controls chart access or hidden modules."}
+                  </p>
+                </article>
+              </ScrollReveal>
             );
           })}
         </div>
 
-        <section className={`rules-panel ${styles.matrixPanel}`}>
-          <div className="rules-header">
-            <p className="kicker">Feature Matrix</p>
-            <h2>Current access state</h2>
-          </div>
-          <div className={styles.matrix}>
-            <div className={styles.matrixRowHeader}>
-              <span>Feature</span>
-              <span>Guest</span>
-              <span>Pro</span>
-              <span>Ultimate</span>
+        <ScrollReveal delay={400}>
+          <section className={`rules-panel ${styles.matrixPanel}`}>
+            <div className="rules-header">
+              <p className="kicker">Feature Matrix</p>
+              <h2>Current access state</h2>
             </div>
-            {FEATURE_MATRIX.map((row) => (
-              <div key={row.label} className={styles.matrixRow}>
-                <span>{row.label}</span>
-                <span>{row.plans.basic}</span>
-                <span>{row.plans.pro}</span>
-                <span>{row.plans.ultimate}</span>
+            <div className={styles.matrix}>
+              <div className={styles.matrixRowHeader}>
+                <span>Feature</span>
+                <span>Guest</span>
+                <span>Pro</span>
+                <span>Ultimate</span>
               </div>
-            ))}
-          </div>
-        </section>
+              {FEATURE_MATRIX.map((row) => (
+                <div key={row.label} className={styles.matrixRow}>
+                  <span>{row.label}</span>
+                  <span>{row.plans.basic}</span>
+                  <span>{row.plans.pro}</span>
+                  <span>{row.plans.ultimate}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+        </ScrollReveal>
 
         <div className="workspace-actions">
           {isAuthenticated ? (
