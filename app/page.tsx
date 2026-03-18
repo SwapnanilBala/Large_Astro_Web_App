@@ -12,6 +12,7 @@ import FloatingQuotes from "./components/FloatingQuotes";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
+import CursorSparkle from "./components/CursorSparkle";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -427,6 +428,7 @@ export default function Home() {
 
   return (
     <main className="home-shell">
+      <CursorSparkle />
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
         <div className={styles.auroraLayer} />

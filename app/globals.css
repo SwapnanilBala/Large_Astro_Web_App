@@ -7030,3 +7030,18 @@ html[data-theme="light"] .palm-subsection {
 html[data-theme="light"] .palm-error-detail code {
   background: rgba(0, 0, 0, 0.06);
 }
+
+/* ── Cursor Sparkle Trail ──────────────────────────────────── */
+.sparkle-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: sparkleFadeUp 800ms ease-out forwards;
+}
+
+@keyframes sparkleFadeUp {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-20px) scale(0.3); }
+}
