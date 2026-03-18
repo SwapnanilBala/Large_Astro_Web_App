@@ -753,6 +753,7 @@
 .cardAspects,
 .cardNavamsa,
 .cardTransits,
+.cardAshtakavarga,
 .cardDomains {
   composes: card;
   padding: 0;
@@ -761,7 +762,8 @@
 .cardDasha :global(.nakshatra-panel),
 .cardAspects :global(.aspects-panel),
 .cardNavamsa :global(.navamsa-panel),
-.cardTransits :global(.transits-panel) {
+.cardTransits :global(.transits-panel),
+.cardAshtakavarga :global(.ashtakavarga-panel) {
   margin: 0;
   padding: 1.5rem;
   border: none;
@@ -771,7 +773,8 @@
 .cardDasha :global(.nakshatra-panel)::after,
 .cardAspects :global(.aspects-panel)::after,
 .cardNavamsa :global(.navamsa-panel)::after,
-.cardTransits :global(.transits-panel)::after {
+.cardTransits :global(.transits-panel)::after,
+.cardAshtakavarga :global(.ashtakavarga-panel)::after {
   display: none;
 }
 

@@ -26,6 +26,8 @@ import { calculateShadbala } from "./shadbala-engine";
 import type { ShadbalaResult } from "./shadbala-engine";
 import { detectYogas } from "./yoga-engine";
 import type { YogaDetectionResult } from "./yoga-engine";
+import { computeAshtakavarga } from "./ashtakavarga-engine";
+import type { AshtakavargaResult } from "./ashtakavarga-engine";
 import {
   getEnginePreset,
   listEnginePresets,
@@ -156,6 +158,7 @@ export interface ChartResponse {
       orb: number;
     }>;
   } | null;
+  ashtakavarga?: AshtakavargaResult | null;
 }
 
 export interface ForecastReading {
@@ -698,6 +701,7 @@ export function buildChart(
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
   let shadbalInfo: ShadbalaResult[] | null = null;
   let yogasInfo: YogaDetectionResult[] | null = null;
+  let ashtakavargaData: AshtakavargaResult | null = null;
 
   if (includePremium) {
     const currentLocalStr = currentLocalDateStr(birth);
@@ -729,6 +733,9 @@ export function buildChart(
       houses: core.houses,
       ascendantSign: core.ascendant.sign,
     });
+
+    // Stage D5: ashtakavarga
+    ashtakavargaData = computeAshtakavarga(core.planets, core.ascendant.sign);
   }
 
   if (includeUltimate) {
@@ -821,6 +828,7 @@ export function buildChart(
       locked_features: lockedFeatures,
     },
     transits: transitsData,
+    ashtakavarga: ashtakavargaData,
   };
 }
 

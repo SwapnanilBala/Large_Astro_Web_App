@@ -2740,6 +2740,229 @@ html[data-theme="light"] .dasha-active-card {
   font-style: italic;
 }
 
+/* ── Ashtakavarga Panel ── */
+
+.ashtakavarga-panel {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 1.5rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.ashtakavarga-panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(242, 194, 108, 0.05);
+}
+
+.ashtakavarga-total {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+}
+
+.ashtakavarga-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+
+.ashtakavarga-tab {
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--line-soft);
+  background: rgba(5, 25, 39, 0.6);
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+
+.ashtakavarga-tab:hover {
+  background: rgba(5, 25, 39, 0.85);
+  color: var(--ink-main);
+}
+
+.ashtakavarga-tab--active {
+  background: linear-gradient(135deg, rgba(242, 194, 108, 0.2), rgba(242, 194, 108, 0.08));
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.ashtakavarga-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ashtakavarga-cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.6rem 0.4rem;
+  border-radius: 10px;
+  border: 1px solid var(--line-soft);
+  background: rgba(5, 25, 39, 0.7);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.ashtakavarga-cell:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+}
+
+.ashtakavarga-cell--strong {
+  border-color: rgba(108, 225, 212, 0.35);
+  background: rgba(108, 225, 212, 0.08);
+}
+
+.ashtakavarga-cell--weak {
+  border-color: rgba(255, 143, 126, 0.35);
+  background: rgba(255, 143, 126, 0.08);
+}
+
+.ashtakavarga-cell--neutral {
+  border-color: rgba(242, 194, 108, 0.2);
+  background: rgba(242, 194, 108, 0.04);
+}
+
+.ashtakavarga-cell--transit {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 12px rgba(242, 194, 108, 0.3), inset 0 0 8px rgba(242, 194, 108, 0.1);
+}
+
+.ashtakavarga-glyph {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.ashtakavarga-sign-name {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ashtakavarga-bindu {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ink-main);
+}
+
+.ashtakavarga-transit-badge {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.35rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  background: var(--accent-gold);
+  color: var(--btn-text);
+  white-space: nowrap;
+}
+
+.ashtakavarga-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  margin-top: 0.8rem;
+}
+
+.ashtakavarga-summary-group h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ashtakavarga-sign-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.ashtakavarga-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.ashtakavarga-chip--strong {
+  background: rgba(108, 225, 212, 0.12);
+  color: var(--accent-aqua);
+  border: 1px solid rgba(108, 225, 212, 0.3);
+}
+
+.ashtakavarga-chip--weak {
+  background: rgba(255, 143, 126, 0.12);
+  color: var(--accent-coral);
+  border: 1px solid rgba(255, 143, 126, 0.3);
+}
+
+@media (max-width: 640px) {
+  .ashtakavarga-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .ashtakavarga-tabs {
+    gap: 0.3rem;
+  }
+  .ashtakavarga-tab {
+    font-size: 0.72rem;
+    padding: 0.3rem 0.55rem;
+  }
+}
+
+/* Light theme overrides */
+html[data-theme="light"] .ashtakavarga-panel,
+html[data-theme="light"] .ashtakavarga-panel:hover {
+  background: var(--surface);
+  border-color: var(--line-soft);
+  box-shadow: var(--shadow-card);
+}
+
+html[data-theme="light"] .ashtakavarga-cell {
+  background: var(--surface-soft);
+}
+
+html[data-theme="light"] .ashtakavarga-cell--strong {
+  background: rgba(35, 107, 96, 0.08);
+  border-color: rgba(35, 107, 96, 0.3);
+}
+
+html[data-theme="light"] .ashtakavarga-cell--weak {
+  background: rgba(198, 90, 74, 0.08);
+  border-color: rgba(198, 90, 74, 0.3);
+}
+
+html[data-theme="light"] .ashtakavarga-tab {
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .ashtakavarga-tab--active {
+  background: rgba(138, 100, 32, 0.12);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
 /* ── Planet Card Expandable Interpretations ── */
 
 .planet-card {
