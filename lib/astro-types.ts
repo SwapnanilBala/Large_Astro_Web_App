@@ -225,6 +225,7 @@ export type ChartApiResponse = {
     aspects?: AspectInfo[];
     navamsa?: NavamsaPositionInfo[];
     life_domain_insights?: LifeDomainInsight[];
+    shadbala?: ShadbalaResult[];
   };
   engine: {
     engine_id: string;
@@ -322,6 +323,21 @@ export type GuestReadingRecord = {
   engine_id: string;
   brief_general: string;
   created_at: string;
+};
+
+export type ShadbalaResult = {
+  planet: string;
+  sthanaBala: number;
+  digBala: number;
+  kalaBala: number;
+  cheshtaBala: number;
+  naisargikaBala: number;
+  drikBala: number;
+  totalVirupas: number;
+  totalRupas: number;
+  requiredMinimum: number;
+  strengthRatio: number;
+  isStrong: boolean;
 };
 
 export type CompatibilityTheme = {

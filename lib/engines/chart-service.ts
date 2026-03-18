@@ -19,6 +19,8 @@ import type { NakshatraData } from "./nakshatra-engine";
 import { calculateAspects } from "./aspect-engine";
 import { calculateNavamsa } from "./navamsa-engine";
 import { computeTransitAspects } from "./transit-engine";
+import { calculateShadbala } from "./shadbala-engine";
+import type { ShadbalaResult } from "./shadbala-engine";
 import {
   getEnginePreset,
   listEnginePresets,
@@ -92,6 +94,7 @@ export interface ChartResponse {
       navamsa_division: number;
     }> | null;
     life_domain_insights?: LifeDomainInsight[] | null;
+    shadbala?: ShadbalaResult[] | null;
   };
   engine: {
     engine_id: string;
@@ -382,6 +385,7 @@ export function buildChart(
   let aspectsInfo: ChartResponse["chart"]["aspects"] = null;
   let navamsaInfo: ChartResponse["chart"]["navamsa"] = null;
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
+  let shadbalInfo: ShadbalaResult[] | null = null;
 
   if (includePremium) {
     // Nakshatra & Dasha
@@ -489,6 +493,9 @@ export function buildChart(
       navamsa_sign: n.navamsa_sign,
       navamsa_division: n.navamsa_division,
     }));
+
+    // Shadbala
+    shadbalInfo = calculateShadbala(computed.planets, navamsaInfo, aspectsInfo);
   }
 
   if (includeUltimate) {
@@ -552,6 +559,7 @@ export function buildChart(
       aspects: aspectsInfo,
       navamsa: navamsaInfo,
       life_domain_insights: lifeDomainInsights,
+      shadbala: shadbalInfo,
     },
     engine: {
       engine_id: preset.engine_id,

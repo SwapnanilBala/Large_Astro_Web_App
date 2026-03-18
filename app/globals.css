@@ -7030,3 +7030,310 @@ html[data-theme="light"] .palm-subsection {
 html[data-theme="light"] .palm-error-detail code {
   background: rgba(0, 0, 0, 0.06);
 }
+
+/* ═══════════════════════════════════════════════
+   SHADBALA PANEL
+   ═══════════════════════════════════════════════ */
+
+.shadbala-panel {
+  padding: 1.5rem;
+}
+
+.shadbala-intro {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 1.25rem;
+  max-width: 700px;
+}
+
+/* Summary strip */
+.shadbala-summary {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.shadbala-summary-item {
+  flex: 1;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: var(--surface-soft);
+  border: 1px solid var(--line-soft);
+}
+
+.shadbala-summary-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.shadbala-summary-planet {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--ink-main);
+}
+
+.shadbala-summary-strong .shadbala-summary-planet {
+  color: var(--accent-aqua);
+}
+
+.shadbala-summary-weak .shadbala-summary-planet {
+  color: var(--accent-coral);
+}
+
+.shadbala-summary-value {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+}
+
+/* Bar chart rows */
+.shadbala-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.shadbala-row {
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-soft);
+  border: 1px solid var(--line-soft);
+  transition: border-color 0.2s;
+}
+
+.shadbala-row:hover {
+  border-color: var(--line-strong);
+}
+
+.shadbala-row-header {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--ink-main);
+}
+
+.shadbala-planet-name {
+  min-width: 90px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.shadbala-planet-symbol {
+  font-size: 1.1rem;
+  opacity: 0.7;
+}
+
+.shadbala-bar-container {
+  flex: 1;
+  height: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 7px;
+  position: relative;
+  overflow: hidden;
+}
+
+.shadbala-bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 2px;
+}
+
+.shadbala-bar-threshold {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.35);
+  pointer-events: none;
+}
+
+.shadbala-total {
+  min-width: 48px;
+  text-align: right;
+  font-weight: 700;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.shadbala-ratio-badge {
+  min-width: 42px;
+  text-align: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: 6px;
+}
+
+.shadbala-ratio-strong {
+  background: rgba(108, 225, 212, 0.15);
+  color: var(--accent-aqua);
+}
+
+.shadbala-ratio-moderate {
+  background: rgba(242, 194, 108, 0.15);
+  color: var(--accent-gold);
+}
+
+.shadbala-ratio-weak {
+  background: rgba(255, 143, 126, 0.15);
+  color: var(--accent-coral);
+}
+
+.shadbala-chevron {
+  font-size: 0.7rem;
+  transition: transform 0.2s;
+  color: var(--ink-soft);
+}
+
+.shadbala-chevron-open {
+  transform: rotate(180deg);
+}
+
+/* Expanded breakdown */
+.shadbala-breakdown {
+  padding: 0.5rem 0.85rem 0.85rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.shadbala-breakdown-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.shadbala-comp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.shadbala-comp-label {
+  min-width: 130px;
+  display: flex;
+  flex-direction: column;
+}
+
+.shadbala-comp-name {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-main);
+}
+
+.shadbala-comp-desc {
+  font-size: 0.68rem;
+  color: var(--ink-soft);
+  line-height: 1.3;
+}
+
+.shadbala-comp-bar-container {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.shadbala-comp-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: width 0.4s ease;
+}
+
+.shadbala-comp-value {
+  min-width: 40px;
+  text-align: right;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.shadbala-breakdown-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--line-soft);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.shadbala-strength-label {
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+}
+
+.shadbala-label-strong {
+  background: rgba(108, 225, 212, 0.12);
+  color: var(--accent-aqua);
+}
+
+.shadbala-label-moderate {
+  background: rgba(242, 194, 108, 0.12);
+  color: var(--accent-gold);
+}
+
+.shadbala-label-weak {
+  background: rgba(255, 143, 126, 0.12);
+  color: var(--accent-coral);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .shadbala-comp-label {
+    min-width: 90px;
+  }
+
+  .shadbala-comp-desc {
+    display: none;
+  }
+
+  .shadbala-planet-name {
+    min-width: 70px;
+  }
+
+  .shadbala-summary {
+    flex-direction: column;
+  }
+}
+
+/* Light theme overrides */
+html[data-theme="light"] .shadbala-bar-container {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+html[data-theme="light"] .shadbala-comp-bar-container {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .shadbala-bar-threshold {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+html[data-theme="light"] .shadbala-row-header {
+  color: var(--ink-main);
+}

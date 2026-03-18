@@ -24,6 +24,7 @@ const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, load
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const ShadbalaPanel = dynamic(() => import("./shadbala-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -718,6 +719,26 @@ export default function InsightsContent({
             </AuthGate>
             </PanelErrorBoundary>
           </motion.div>
+
+          {/* Shadbala */}
+          {payload.chart.shadbala && payload.chart.shadbala.length > 0 && (
+            <motion.div
+              className={`${styles.cardFullWidth}`}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.12 }}
+            >
+              <PanelErrorBoundary panelName="Shadbala Analysis">
+                <AuthGate
+                  featureLabel="Shadbala Analysis"
+                  isLocked={lockedFeatures.has("planetary_aspects")}
+                >
+                  <ShadbalaPanel shadbala={payload.chart.shadbala} />
+                </AuthGate>
+              </PanelErrorBoundary>
+            </motion.div>
+          )}
 
           {/* Transits */}
           <motion.div
