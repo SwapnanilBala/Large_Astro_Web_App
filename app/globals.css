@@ -194,6 +194,36 @@ html[data-theme="light"] .planet-card {
   border-color: var(--line-soft);
 }
 
+/* Paper texture overlay — subtle noise grain for light theme */
+html[data-theme="light"] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px 256px;
+}
+
+/* Warm-toned shadows for cards and panels in light theme */
+html[data-theme="light"] .lagna-panel,
+html[data-theme="light"] .planet-card,
+html[data-theme="light"] .rule-card,
+html[data-theme="light"] .metric-card,
+html[data-theme="light"] .dasha-audit-card,
+html[data-theme="light"] .dasha-active-card {
+  box-shadow: 0 2px 16px rgba(139, 100, 32, 0.08), 0 1px 4px rgba(139, 100, 32, 0.05);
+}
+
+/* Slightly more vibrant gold for interactive element hovers in light theme */
+html[data-theme="light"] a:hover,
+html[data-theme="light"] .nav-link:hover,
+html[data-theme="light"] .drawer-link:hover {
+  color: #9a7020;
+}
+
 * {
   box-sizing: border-box;
 }
