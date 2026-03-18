@@ -7030,3 +7030,302 @@ html[data-theme="light"] .palm-subsection {
 html[data-theme="light"] .palm-error-detail code {
   background: rgba(0, 0, 0, 0.06);
 }
+
+/* ═══════════════════════════════════════════════
+   YOGAS PANEL
+   ═══════════════════════════════════════════════ */
+
+.yogas-panel {
+  padding: 1.5rem;
+}
+
+.yogas-intro {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin: 0 0 1.25rem;
+  max-width: 720px;
+}
+
+/* ── Category Tabs ── */
+.yogas-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.yogas-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.03rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.yogas-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.14);
+  color: var(--ink-main);
+}
+
+.yogas-tab--active {
+  background: rgba(242, 194, 108, 0.15);
+  border-color: rgba(242, 194, 108, 0.35);
+  color: var(--accent-gold);
+}
+
+.yogas-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ink-soft);
+}
+
+.yogas-tab--active .yogas-tab-count {
+  background: rgba(242, 194, 108, 0.25);
+  color: var(--accent-gold);
+}
+
+/* ── Yoga Grid ── */
+.yogas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1rem;
+}
+
+/* ── Yoga Card ── */
+.yoga-card {
+  border-radius: 14px;
+  border: 1px solid var(--line-soft);
+  background: rgba(5, 25, 39, 0.82);
+  padding: 1.1rem;
+  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+}
+
+.yoga-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.yoga-card--benefic {
+  border-left: 3px solid var(--accent-gold);
+}
+
+.yoga-card--benefic:hover {
+  border-color: var(--accent-gold);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 20px rgba(242, 194, 108, 0.08);
+}
+
+.yoga-card--challenging {
+  border-left: 3px solid var(--accent-coral);
+}
+
+.yoga-card--challenging:hover {
+  border-color: var(--accent-coral);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 20px rgba(255, 143, 126, 0.08);
+}
+
+/* ── Card Header ── */
+.yoga-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.yoga-card-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.yoga-card-name {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink-main);
+  line-height: 1.3;
+}
+
+.yoga-card-sanskrit {
+  font-size: 0.82rem;
+  color: var(--accent-gold);
+  opacity: 0.85;
+  font-style: italic;
+}
+
+/* ── Strength Indicator ── */
+.yoga-strength {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  flex-shrink: 0;
+}
+
+.yoga-strength-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  transition: background 0.2s ease;
+}
+
+.yoga-strength-dot--active.yoga-strength-dot--strong {
+  background: var(--accent-gold);
+  box-shadow: 0 0 6px rgba(242, 194, 108, 0.4);
+}
+
+.yoga-strength-dot--active.yoga-strength-dot--moderate {
+  background: var(--accent-aqua);
+  box-shadow: 0 0 6px rgba(108, 225, 212, 0.4);
+}
+
+.yoga-strength-dot--active.yoga-strength-dot--weak {
+  background: var(--accent-coral);
+  box-shadow: 0 0 6px rgba(255, 143, 126, 0.4);
+}
+
+.yoga-strength-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04rem;
+  color: var(--ink-soft);
+  margin-left: 0.2rem;
+}
+
+/* ── Planet Chips ── */
+.yoga-card-planets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+.yoga-planet-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.03rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--ink-soft);
+}
+
+.yoga-planet-glyph {
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+/* ── Card Body Text ── */
+.yoga-card-description {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0 0 0.5rem;
+}
+
+.yoga-card-effects {
+  font-size: 0.85rem;
+  color: var(--ink-main);
+  line-height: 1.55;
+  margin: 0 0 0.5rem;
+  font-weight: 500;
+}
+
+.yoga-card-cancellation {
+  font-size: 0.8rem;
+  color: var(--accent-coral);
+  line-height: 1.5;
+  margin: 0.5rem 0 0;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 143, 126, 0.06);
+  border-radius: 8px;
+  border-left: 2px solid rgba(255, 143, 126, 0.3);
+}
+
+/* ── Empty State ── */
+.yogas-empty {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  opacity: 0.7;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .yogas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .yogas-tabs {
+    gap: 0.35rem;
+  }
+
+  .yogas-tab {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+/* ── Light Theme ── */
+html[data-theme="light"] .yoga-card {
+  background: rgba(255, 248, 242, 0.9);
+  border-color: var(--line-soft);
+}
+
+html[data-theme="light"] .yoga-card--benefic {
+  border-left-color: var(--accent-gold);
+}
+
+html[data-theme="light"] .yoga-card--challenging {
+  border-left-color: var(--accent-coral);
+}
+
+html[data-theme="light"] .yogas-tab {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .yogas-tab--active {
+  background: rgba(138, 100, 32, 0.1);
+  border-color: rgba(138, 100, 32, 0.3);
+  color: var(--accent-gold);
+}
+
+html[data-theme="light"] .yoga-planet-chip {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .yoga-strength-dot {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .yoga-card-cancellation {
+  background: rgba(198, 90, 74, 0.06);
+  border-left-color: rgba(198, 90, 74, 0.3);
+}

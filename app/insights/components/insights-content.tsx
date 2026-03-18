@@ -24,6 +24,7 @@ const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, load
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const YogasPanel = dynamic(() => import("./yogas-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -718,6 +719,21 @@ export default function InsightsContent({
             </AuthGate>
             </PanelErrorBoundary>
           </motion.div>
+
+          {/* Yogas */}
+          {payload.chart.yogas && payload.chart.yogas.length > 0 && (
+            <motion.div
+              className={`${styles.card} ${styles.cardFullWidth}`}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-60px" }}
+              transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.15 }}
+            >
+              <PanelErrorBoundary panelName="Planetary Yogas">
+                <YogasPanel yogas={payload.chart.yogas} />
+              </PanelErrorBoundary>
+            </motion.div>
+          )}
 
           {/* Transits */}
           <motion.div
