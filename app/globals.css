@@ -239,6 +239,7 @@ h2,
 h3 {
   font-family: var(--font-display), "Times New Roman", serif;
   letter-spacing: 0.01em;
+  line-height: 1.1;
 }
 
 .home-shell,
@@ -7306,4 +7307,30 @@ html[data-theme="light"] .accent-card {
   border: 1px solid rgba(160, 120, 90, 0.25);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
     0 0 60px rgba(160, 120, 90, 0.06);
+}
+
+/* ═══════════════════════════════════════════════
+   TYPOGRAPHY UTILITIES
+   ═══════════════════════════════════════════════ */
+
+.text-display {
+  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  font-weight: 300;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-aqua), var(--accent-gold));
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmerTitle 8s ease-in-out infinite;
+}
+
+.text-editorial {
+  font-family: var(--font-display, 'Cormorant Garamond', serif);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
 }

@@ -134,7 +134,13 @@
       "Bash(find C:UsersRetroLarge_Scale_Astro_AppNext.js_Versionlibengines -type f -name *.ts -o -name *.tsx)",
       "Bash(find C:UsersRetroLarge_Scale_Astro_AppNext.js_Version -type f \\\\\\(-name *.sql -o -name *schema* -o -name *.prisma -o -name *.env \\\\\\))",
       "Bash(git -C \"C:\\\\Users\\\\Retro\\\\Large_Scale_Astro_App\\\\Next.js_Version\" log --oneline)",
-      "Bash(find C:UsersRetroLarge_Scale_Astro_AppNext.js_Versionlib -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))"
+      "Bash(find C:UsersRetroLarge_Scale_Astro_AppNext.js_Versionlib -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(git merge:*)",
+      "Bash(git -C \".claude/worktrees/agent-adbf0e26\" status --short)",
+      "Bash(git -C \".claude/worktrees/agent-a5ba3c25\" status --short)",
+      "Bash(git -C \".claude/worktrees/agent-a657b495\" status --short)",
+      "Bash(git -C \"C:/Users/Retro/Large_Scale_Astro_App/Next.js_Version/.claude/worktrees/agent-a5ba3c25\" add app/components/PageTransition.tsx app/components/StaggerChildren.tsx app/insights/components/insights-loader.tsx app/insights/page.tsx app/login/page-client.tsx app/page.tsx app/pricing/page-client.tsx app/register/page-client.tsx)",
+      "Bash(git -C:*)"
     ]
   }
 }
