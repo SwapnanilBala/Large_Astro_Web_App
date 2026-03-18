@@ -235,19 +235,57 @@ function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
 }
 
 // --------------------------------------------------------------------------
-// Mean Lunar Node (Rahu) calculation
+// True Lunar Node (Rahu) calculation — osculating node
 // --------------------------------------------------------------------------
 
-function computeMeanLunarNode(jd_ut: number): number {
-  // Mean longitude of ascending lunar node (Rahu)
-  // Based on Meeus, Astronomical Algorithms
+function computeTrueLunarNode(jd_ut: number): number {
+  // True (osculating) longitude of the ascending lunar node (Rahu).
+  // Computed as the mean node plus the principal nutation in longitude,
+  // which causes the node to oscillate ~±1.5° around the mean position.
+  //
+  // Source: Meeus, "Astronomical Algorithms" (2nd ed.)
+  //   - Chapter 22: mean longitude of the ascending node (Ω)
+  //   - Chapter 22 / Table 22.A: nutation in longitude (dominant terms)
+  //   - L₀ (mean Sun longitude): Meeus eq. 25.2
+  //   - L_moon (mean Moon longitude): Meeus Table 47.A fundamental arguments
+
   const T = (jd_ut - J2000) / 36525.0; // Julian centuries from J2000.0
+
+  // Mean longitude of the ascending node (Ω)
   const omega =
     125.04452 -
     1934.136261 * T +
     0.0020708 * T * T +
     (T * T * T) / 450000.0;
-  return normalize(omega);
+
+  // Mean longitude of the Sun (L₀) — Meeus eq. 25.2
+  const L0 =
+    280.46646 +
+    36000.76983 * T +
+    0.0003032 * T * T;
+
+  // Mean longitude of the Moon (L_moon) — Meeus Table 47.A
+  const Lmoon =
+    218.3165 +
+    481267.8813 * T;
+
+  // Principal nutation in longitude (ΔΩ), converted from arcseconds to degrees.
+  // Dominant terms from Meeus Table 22.A:
+  //   −17.20″ sin(Ω)  −1.32″ sin(2L₀)  −0.23″ sin(2L_moon)  +0.21″ sin(2Ω)
+  const omegaRad = degToRad(omega);
+  const L0Rad = degToRad(L0);
+  const LmoonRad = degToRad(Lmoon);
+
+  const nutationArcsec =
+    -17.20 * Math.sin(omegaRad) -
+    1.32 * Math.sin(2 * L0Rad) -
+    0.23 * Math.sin(2 * LmoonRad) +
+    0.21 * Math.sin(2 * omegaRad);
+
+  const nutationDeg = nutationArcsec / 3600.0;
+
+  // True node = mean node + nutation correction
+  return normalize(omega + nutationDeg);
 }
 
 // --------------------------------------------------------------------------
@@ -369,8 +407,8 @@ export function calculate(input: BirthInput): SwissEngineResult {
     placements.push({ name: planetName, longitude: siderealLon });
   }
 
-  // Rahu (Mean Lunar Node)
-  const rahuTropical = computeMeanLunarNode(jd_ut);
+  // Rahu (True Lunar Node — osculating node)
+  const rahuTropical = computeTrueLunarNode(jd_ut);
   const rahuSidereal = normalize(rahuTropical - ayanamsa);
   placements.push({ name: "Rahu", longitude: rahuSidereal });
 
@@ -471,7 +509,7 @@ export function computeTransitPositions(
   }
 
   // Rahu
-  const rahuTropical = computeMeanLunarNode(jd_ut);
+  const rahuTropical = computeTrueLunarNode(jd_ut);
   const rahuSidereal = normalize(rahuTropical - ayanamsa);
   const rahuInfo = getSign(rahuSidereal);
   positions.push({
