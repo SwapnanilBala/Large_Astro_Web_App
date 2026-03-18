@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo, useRef, useCallback } from "react";
+import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
+import { useChartWorker } from "@/lib/hooks/useChartWorker";
+import type { ChartWorkerOutput } from "@/lib/hooks/useChartWorker";
 
 type ConstellationChartProps = {
   ascendantSign: string;
@@ -174,9 +176,15 @@ export default function ConstellationChart({
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
   const shouldReduceMotion = useReducedMotion();
+  const { compute } = useChartWorker();
+
+  // Worker result state — starts null, populated async by the worker
+  const [workerResult, setWorkerResult] = useState<ChartWorkerOutput | null>(null);
+
+  // ── Synchronous fallback computations (used until worker responds) ────
 
   // Generate stars with seeded random
-  const stars = useMemo(() => {
+  const starsFallback = useMemo(() => {
     const rng = seededRandom(ascendantSign);
     const count = 50;
     const result: { x: number; y: number; r: number; dur: number; delay: number }[] = [];
@@ -196,7 +204,7 @@ export default function ConstellationChart({
   const signIndex = useCallback((sign: string) => SIGN_ORDER.indexOf(sign), []);
 
   // Planet positions on the wheel
-  const planetPositions = useMemo(() => {
+  const planetPositionsFallback = useMemo(() => {
     if (!planets || planets.length === 0) return [];
 
     // Group planets by proximity to offset overlapping ones
@@ -237,10 +245,10 @@ export default function ConstellationChart({
   }, [planets]);
 
   // Conjunction lines (planets in same house)
-  const conjunctionLines = useMemo(() => {
+  const conjunctionLinesFallback = useMemo(() => {
     const lines: { x1: number; y1: number; x2: number; y2: number }[] = [];
-    const houseGroups: Record<number, typeof planetPositions> = {};
-    for (const p of planetPositions) {
+    const houseGroups: Record<number, typeof planetPositionsFallback> = {};
+    for (const p of planetPositionsFallback) {
       if (!houseGroups[p.house]) houseGroups[p.house] = [];
       houseGroups[p.house].push(p);
     }
@@ -259,7 +267,34 @@ export default function ConstellationChart({
       }
     }
     return lines;
-  }, [planetPositions]);
+  }, [planetPositionsFallback]);
+
+  // ── Dispatch to Web Worker when inputs change ─────────────────────────
+
+  useEffect(() => {
+    const promise = compute({
+      planets: planets ?? [],
+      ascendantSign,
+    });
+
+    // Worker unavailable — fallback useMemos are already in use
+    if (!promise) return;
+
+    let cancelled = false;
+    promise.then((result) => {
+      if (!cancelled) setWorkerResult(result);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [planets, ascendantSign, compute]);
+
+  // ── Resolved values: prefer worker result, fall back to synchronous ───
+
+  const stars = workerResult?.stars ?? starsFallback;
+  const planetPositions = workerResult?.planetPositions ?? planetPositionsFallback;
+  const conjunctionLines = workerResult?.conjunctionLines ?? conjunctionLinesFallback;
 
   // Aspect lines for hovered planet
   const aspectLines = useMemo(() => {
