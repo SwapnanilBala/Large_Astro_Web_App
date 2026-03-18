@@ -126,6 +126,7 @@ interface GlobalCaches {
   compatibility: ServerCache;
   suggest: ServerCache;
   geocode: ServerCache;
+  varshaphal: ServerCache;
 }
 
 function createCaches(): GlobalCaches {
@@ -142,6 +143,8 @@ function createCaches(): GlobalCaches {
     suggest: new ServerCache("suggest", 300, 24 * 60 * 60 * 1000),
     /** 200 entries, 24 hour TTL — geocode lookups */
     geocode: new ServerCache("geocode", 200, 24 * 60 * 60 * 1000),
+    /** 200 entries, 1 hour TTL — varshaphal / solar return */
+    varshaphal: new ServerCache("varshaphal", 200, 60 * 60 * 1000),
   };
 }
 
