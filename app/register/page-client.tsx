@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
 import styles from "../login/login.module.css";
 
@@ -57,6 +58,7 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
 
   if (isLoading || redirecting) {
     return (
+      <PageTransition>
       <main className="home-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
@@ -64,10 +66,12 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
           <p className="kicker">{t("register.redirecting")}</p>
         </section>
       </main>
+      </PageTransition>
     );
   }
 
   return (
+    <PageTransition>
     <main className="home-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
@@ -137,5 +141,6 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
         </p>
       </section>
     </main>
+    </PageTransition>
   );
 }

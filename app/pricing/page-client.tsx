@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
+import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
 import styles from "./pricing.module.css";
 
@@ -109,6 +110,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
   const currentPlan = useMemo(() => normalizePlan(user?.subscription_tier), [user?.subscription_tier]);
 
   return (
+    <PageTransition>
     <main className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
@@ -219,5 +221,6 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
         </div>
       </section>
     </main>
+    </PageTransition>
   );
 }

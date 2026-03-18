@@ -1,6 +1,7 @@
 import Link from "next/link";
 import InsightsLoader from "@/app/insights/components/insights-loader";
 import BackButton from "@/app/components/BackButton";
+import PageTransition from "@/app/components/PageTransition";
 
 export const maxDuration = 60;
 
@@ -45,6 +46,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
 
   if (!hasAllInputs) {
     return (
+      <PageTransition>
       <main className="insights-shell">
         <BackButton href="/" />
         <section className="dashboard-shell">
@@ -58,6 +60,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
           </Link>
         </section>
       </main>
+      </PageTransition>
     );
   }
 
@@ -70,9 +73,11 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   };
 
   return (
+    <PageTransition>
     <main className="insights-shell">
       <BackButton href="/" />
       <InsightsLoader chartParams={chartParams} />
     </main>
+    </PageTransition>
   );
 }
