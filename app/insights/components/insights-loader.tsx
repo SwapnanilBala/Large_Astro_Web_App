@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
 import InsightsContent from "@/app/insights/components/insights-content";
 import InsightsSkeleton from "@/app/insights/components/insights-skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
@@ -153,53 +154,77 @@ export default function InsightsLoader({ chartParams }: InsightsLoaderProps) {
     void fetchChart();
   }, [fetchChart]);
 
-  /* ── Loading state ── */
-  if (isLoading) {
-    return <InsightsSkeleton />;
-  }
-
-  /* ── Error state ── */
-  if (error || !payload) {
-    return (
-      <>
-        <div className="ambient ambient-left" />
-        <div className="ambient ambient-right" />
-        <section className="dashboard-shell">
-          <p className="kicker">Chart Error</p>
-          <h1>Chart calculation could not be completed.</h1>
-          <p className="lead">
-            The chart engine encountered an error. Please check that the <code>swisseph</code> npm
-            package is installed and your input data is valid, then try again.
-          </p>
-          <p className="error-note">Error: {error || "No data received"}</p>
-          <div className="skel-error-actions">
-            <button
-              type="button"
-              className="skel-retry-btn"
-              onClick={() => void fetchChart()}
-            >
-              <span className="skel-retry-icon">&#x21BB;</span>
-              Retry
-            </button>
-            <Link href="/" className="ghost-link">
-              Edit Intake Data
-            </Link>
-          </div>
-        </section>
-      </>
-    );
-  }
-
-  /* ── Success state ── */
-  const historyQs = buildHistoryQs(chartParams);
+  const historyQs = payload ? buildHistoryQs(chartParams) : "";
 
   return (
-    <ErrorBoundary>
-      <InsightsContent
-        payload={payload}
-        birthDate={chartParams.birthDate}
-        historyQs={historyQs}
-      />
-    </ErrorBoundary>
+    <AnimatePresence mode="wait">
+      {/* ── Loading state ── */}
+      {isLoading && (
+        <motion.div
+          key="skeleton"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <InsightsSkeleton />
+        </motion.div>
+      )}
+
+      {/* ── Error state ── */}
+      {!isLoading && (error || !payload) && (
+        <motion.div
+          key="error"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeOut" }}
+        >
+          <div className="ambient ambient-left" />
+          <div className="ambient ambient-right" />
+          <section className="dashboard-shell">
+            <p className="kicker">Chart Error</p>
+            <h1>Chart calculation could not be completed.</h1>
+            <p className="lead">
+              The chart engine encountered an error. Please check that the <code>swisseph</code> npm
+              package is installed and your input data is valid, then try again.
+            </p>
+            <p className="error-note">Error: {error || "No data received"}</p>
+            <div className="skel-error-actions">
+              <button
+                type="button"
+                className="skel-retry-btn"
+                onClick={() => void fetchChart()}
+              >
+                <span className="skel-retry-icon">&#x21BB;</span>
+                Retry
+              </button>
+              <Link href="/" className="ghost-link">
+                Edit Intake Data
+              </Link>
+            </div>
+          </section>
+        </motion.div>
+      )}
+
+      {/* ── Success state ── */}
+      {!isLoading && !error && payload && (
+        <motion.div
+          key="content"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <ErrorBoundary>
+            <InsightsContent
+              payload={payload}
+              birthDate={chartParams.birthDate}
+              historyQs={historyQs}
+            />
+          </ErrorBoundary>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

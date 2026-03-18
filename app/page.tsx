@@ -8,6 +8,7 @@ import { HiOutlineSparkles } from "react-icons/hi2";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import PageTransition from "./components/PageTransition";
 import FloatingQuotes from "./components/FloatingQuotes";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
@@ -426,6 +427,7 @@ export default function Home() {
   };
 
   return (
+    <PageTransition>
     <main className="home-shell">
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
@@ -752,5 +754,6 @@ export default function Home() {
       </section>
       </div>{/* /heroWrapper */}
     </main>
+    </PageTransition>
   );
 }
