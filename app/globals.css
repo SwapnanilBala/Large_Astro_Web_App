@@ -158,6 +158,7 @@ html[data-theme="light"] .planet-panel,
 html[data-theme="light"] .nakshatra-panel,
 html[data-theme="light"] .aspects-panel,
 html[data-theme="light"] .navamsa-panel,
+html[data-theme="light"] .divisional-panel,
 html[data-theme="light"] .transits-panel,
 html[data-theme="light"] .forecast-panel {
   background: rgba(255, 255, 255, 0.55);
@@ -171,6 +172,7 @@ html[data-theme="light"] .planet-panel:hover,
 html[data-theme="light"] .nakshatra-panel:hover,
 html[data-theme="light"] .aspects-panel:hover,
 html[data-theme="light"] .navamsa-panel:hover,
+html[data-theme="light"] .divisional-panel:hover,
 html[data-theme="light"] .transits-panel:hover,
 html[data-theme="light"] .forecast-panel:hover {
   border-color: rgba(160, 120, 90, 0.22);
@@ -2416,6 +2418,197 @@ html[data-theme="light"] .dasha-active-card {
   background: rgba(242, 194, 108, 0.25);
   color: var(--accent-gold);
   border: 1px solid rgba(242, 194, 108, 0.4);
+}
+
+/* ── Divisional Charts Panel ── */
+
+.divisional-panel {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  padding: 1.5rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.divisional-panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+}
+
+.divisional-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 1rem 0;
+}
+
+.divisional-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 25, 39, 0.6);
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
+}
+
+.divisional-tab:hover {
+  background: rgba(5, 25, 39, 0.85);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--ink-main);
+}
+
+.divisional-tab--active {
+  background: rgba(100, 200, 255, 0.12);
+  border-color: rgba(100, 200, 255, 0.35);
+  color: var(--accent-aqua);
+  font-weight: 600;
+}
+
+.divisional-tab-label {
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.divisional-tab-name {
+  font-size: 0.7rem;
+}
+
+.divisional-theme-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(100, 200, 255, 0.15);
+  background: rgba(100, 200, 255, 0.06);
+}
+
+.divisional-theme-badge {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--accent-aqua);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: rgba(100, 200, 255, 0.15);
+  white-space: nowrap;
+}
+
+.divisional-theme-text {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--ink-main);
+}
+
+.divisional-table {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.divisional-row {
+  display: grid;
+  grid-template-columns: 1.4fr 1.2fr 0.4fr 1.4fr;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(195, 231, 255, 0.08);
+  background: rgba(5, 25, 39, 0.6);
+  transition: background 180ms ease;
+}
+
+.divisional-row:last-child {
+  border-bottom: none;
+}
+
+.divisional-row:hover {
+  background: rgba(5, 25, 39, 0.85);
+}
+
+.divisional-row--header {
+  background: rgba(6, 26, 41, 0.9);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.divisional-row--header:hover {
+  background: rgba(6, 26, 41, 0.9);
+}
+
+.divisional-planet {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--ink-main);
+}
+
+.divisional-planet-glyph {
+  font-size: 1.1rem;
+  color: var(--accent-aqua);
+}
+
+.divisional-planet-name {
+  font-size: 0.9rem;
+}
+
+.divisional-sign {
+  font-size: 0.9rem;
+  color: var(--ink-main);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.divisional-arrow {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.divisional-same-sign {
+  background: rgba(100, 200, 255, 0.08);
+  border-left: 3px solid var(--accent-aqua);
+}
+
+.divisional-same-sign:hover {
+  background: rgba(100, 200, 255, 0.14);
+}
+
+.divisional-same-label {
+  display: inline-block;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.04rem;
+  text-transform: uppercase;
+  background: rgba(100, 200, 255, 0.2);
+  color: var(--accent-aqua);
+  border: 1px solid rgba(100, 200, 255, 0.35);
+}
+
+.divisional-hint {
+  margin-top: 0.75rem;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  text-align: center;
+  font-style: italic;
 }
 
 /* ── Transits Panel ── */

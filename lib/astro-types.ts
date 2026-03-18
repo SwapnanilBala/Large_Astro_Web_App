@@ -132,6 +132,20 @@ export type NavamsaPositionInfo = {
   dignity?: NavamsaDignity;
 };
 
+export type DivisionalPositionInfo = {
+  name: string;
+  rashi_sign: string;
+  divisional_sign: string;
+  division_number: number;
+};
+
+export type DivisionalChartInfo = {
+  division: number;
+  label: string;
+  description: string;
+  positions: DivisionalPositionInfo[];
+};
+
 export type TransitPositionInfo = {
   name: string;
   longitude: number;
@@ -224,6 +238,7 @@ export type ChartApiResponse = {
     calculation_audit?: CalculationAuditInfo;
     aspects?: AspectInfo[];
     navamsa?: NavamsaPositionInfo[];
+    divisional_charts?: Record<number, DivisionalChartInfo>;
     life_domain_insights?: LifeDomainInsight[];
   };
   engine: {
