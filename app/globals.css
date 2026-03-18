@@ -6186,6 +6186,46 @@ html[data-theme="light"] .chart-history-card {
   /* pointer-events managed inline by the component (auto for interactivity) */
 }
 
+/* Subtle outer ring glow around the entire wheel */
+.zodiac-wheel-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 580px;
+  height: 580px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(160, 100, 255, 0.0) 55%,
+    rgba(160, 100, 255, 0.06) 70%,
+    rgba(242, 194, 108, 0.04) 85%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 40px 8px rgba(160, 100, 255, 0.08),
+    0 0 80px 20px rgba(242, 194, 108, 0.04);
+  z-index: 0;
+}
+
+/* Segment hover brightness boost */
+.zodiac-segment {
+  transition: filter 200ms ease;
+}
+.zodiac-segment:hover {
+  filter: brightness(1.2);
+}
+
+/* Gold glow pulse for active/selected signs */
+@keyframes signGlow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(242, 194, 108, 0.3)); }
+  50%      { filter: drop-shadow(0 0 14px rgba(242, 194, 108, 0.6)); }
+}
+.zodiac-active-glow {
+  animation: signGlow 2s ease-in-out infinite;
+}
+
 /* ── Insights Error Page (app/insights/error.tsx) ──────────────── */
 .error-page {
   min-height: 80vh;

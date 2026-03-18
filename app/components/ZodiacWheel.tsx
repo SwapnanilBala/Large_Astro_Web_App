@@ -124,7 +124,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
     const glowFilter = isActive ? "url(#active-glow)" : undefined;
 
     segments.push(
-      <g key={`segment-${i}`}>
+      <g key={`segment-${i}`} className="zodiac-segment">
         {/* Invisible hit-area for hover detection */}
         <path
           d={segmentPath(i)}
@@ -144,7 +144,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
             isHovered
               ? "rgba(255,255,255,0.50)"
               : isActive
-              ? "rgba(200,180,255,0.45)"
+              ? "rgba(242,194,108,0.50)"
               : "rgba(200,180,255,0.20)"
           }
           strokeWidth={isHovered ? "1.5" : "1"}
@@ -153,16 +153,16 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           pointerEvents="none"
         />
 
-        {/* Active-sign pulsing glow ring */}
+        {/* Active-sign pulsing glow ring (gold accent) */}
         {isActive && (
           <circle
             cx={gp.x}
             cy={gp.y}
             r="22"
             fill="none"
-            stroke="rgba(0,220,220,0.35)"
+            stroke="rgba(242, 194, 108, 0.45)"
             strokeWidth="2"
-            className="zodiac-active-pulse"
+            className="zodiac-active-pulse zodiac-active-glow"
             pointerEvents="none"
           />
         )}
@@ -244,6 +244,9 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         }
       `}</style>
 
+      {/* Outer ring glow behind the wheel */}
+      <div className="zodiac-wheel-glow" />
+
       <svg
         viewBox="0 0 600 600"
         width="600"
@@ -273,16 +276,16 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
             );
           })}
 
-          {/* SVG glow filter for active signs (gold / aqua) */}
+          {/* SVG glow filter for active signs (gold accent #f2c26c) */}
           <filter id="active-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-            <feFlood floodColor="rgba(0,220,210,0.6)" result="aqua" />
-            <feComposite in="aqua" in2="blur" operator="in" result="aquaGlow" />
-            <feFlood floodColor="rgba(255,200,50,0.4)" result="gold" />
-            <feComposite in="gold" in2="blur" operator="in" result="goldGlow" />
+            <feFlood floodColor="rgba(242,194,108,0.6)" result="goldOuter" />
+            <feComposite in="goldOuter" in2="blur" operator="in" result="goldOuterGlow" />
+            <feFlood floodColor="rgba(242,194,108,0.35)" result="goldInner" />
+            <feComposite in="goldInner" in2="blur" operator="in" result="goldInnerGlow" />
             <feMerge>
-              <feMergeNode in="goldGlow" />
-              <feMergeNode in="aquaGlow" />
+              <feMergeNode in="goldOuterGlow" />
+              <feMergeNode in="goldInnerGlow" />
               <feMergeNode in="SourceGraphic" />
             </feMerge>
           </filter>
