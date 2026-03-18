@@ -127,6 +127,7 @@ interface GlobalCaches {
   suggest: ServerCache;
   geocode: ServerCache;
   muhurta: ServerCache;
+  varshaphal: ServerCache;
 }
 
 function createCaches(): GlobalCaches {
@@ -145,6 +146,8 @@ function createCaches(): GlobalCaches {
     geocode: new ServerCache("geocode", 200, 24 * 60 * 60 * 1000),
     /** 100 entries, 1 hour TTL — muhurta windows */
     muhurta: new ServerCache("muhurta", 100, 60 * 60 * 1000),
+    /** 200 entries, 1 hour TTL — varshaphal / solar return */
+    varshaphal: new ServerCache("varshaphal", 200, 60 * 60 * 1000),
   };
 }
 

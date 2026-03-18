@@ -1,0 +1,395 @@
+/* ═══════════════════════════════════════════════
+   VARSHAPHAL / ANNUAL PROFECTIONS PANEL
+   ═══════════════════════════════════════════════ */
+
+.panel {
+  margin-top: 1.2rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1.5rem;
+  backdrop-filter: blur(12px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.panel:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 0 20px rgba(100, 200, 255, 0.05);
+}
+
+.header {
+  margin-bottom: 1rem;
+}
+
+.kicker {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--accent-gold);
+  margin: 0 0 0.5rem;
+}
+
+.heading {
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  color: var(--ink-main);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.intro {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin-bottom: 1.25rem;
+}
+
+/* ── Year Selector ── */
+
+.yearForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: flex-end;
+  margin-bottom: 1.5rem;
+}
+
+.yearField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+}
+
+.yearField select {
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink-main);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.yearField select:hover,
+.yearField select:focus {
+  border-color: var(--accent-aqua);
+  outline: none;
+}
+
+.yearBtn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  border: 1px solid var(--accent-aqua);
+  background: rgba(108, 225, 212, 0.1);
+  color: var(--accent-aqua);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.yearBtn:hover:not(:disabled) {
+  background: rgba(108, 225, 212, 0.2);
+}
+
+.yearBtn:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.yearBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ── Error / Loading ── */
+
+.error {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  color: #ff7070;
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+/* ── Section Cards ── */
+
+.sectionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .sectionGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.section {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.15rem;
+}
+
+.sectionTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-gold);
+  margin: 0 0 0.75rem;
+}
+
+.sectionFull {
+  composes: section;
+  grid-column: 1 / -1;
+}
+
+/* ── Profection Info ── */
+
+.profectionRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink-main);
+}
+
+.tagGold {
+  composes: tag;
+  border-color: rgba(242, 194, 108, 0.3);
+  background: rgba(242, 194, 108, 0.08);
+  color: var(--accent-gold);
+}
+
+.tagAqua {
+  composes: tag;
+  border-color: rgba(108, 225, 212, 0.3);
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--accent-aqua);
+}
+
+.themesList {
+  list-style: none;
+  padding: 0;
+  margin: 0.5rem 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.themesList li {
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--ink-soft);
+}
+
+/* ── Solar Return Detail ── */
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.35rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  font-size: 0.85rem;
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  color: var(--ink-soft);
+  font-weight: 500;
+}
+
+.detailValue {
+  color: var(--ink-main);
+  font-weight: 600;
+}
+
+/* ── Year Summary ── */
+
+.summaryText {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  line-height: 1.6;
+  margin: 0 0 0.6rem;
+}
+
+.summaryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.summaryList li {
+  padding: 0.4rem 0;
+  padding-left: 1rem;
+  position: relative;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
+.summaryList li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.65rem;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-aqua);
+}
+
+/* ── Profection Wheel (SVG) ── */
+
+.wheelWrapper {
+  display: flex;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+.wheel {
+  max-width: 320px;
+  width: 100%;
+}
+
+.wheelSegment {
+  fill: rgba(255, 255, 255, 0.03);
+  stroke: rgba(255, 255, 255, 0.1);
+  stroke-width: 0.5;
+  transition: fill 0.3s ease;
+}
+
+.wheelSegmentActive {
+  fill: rgba(242, 194, 108, 0.15);
+  stroke: var(--accent-gold);
+  stroke-width: 1.2;
+}
+
+.wheelLabel {
+  font-size: 3.2px;
+  fill: var(--ink-soft);
+  text-anchor: middle;
+  dominant-baseline: central;
+  pointer-events: none;
+}
+
+.wheelLabelActive {
+  fill: var(--accent-gold);
+  font-weight: 700;
+  font-size: 3.5px;
+}
+
+.wheelCenter {
+  font-size: 5px;
+  fill: var(--ink-main);
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.wheelCenterSub {
+  font-size: 3px;
+  fill: var(--ink-soft);
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* ── Interpretation Block ── */
+
+.interpretation {
+  margin-top: 1rem;
+  padding: 1rem 1.15rem;
+  border-radius: 10px;
+  background: rgba(242, 194, 108, 0.04);
+  border: 1px solid rgba(242, 194, 108, 0.12);
+}
+
+.interpretation p {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.65;
+  margin: 0;
+}
+
+.interpretation strong {
+  color: var(--accent-gold);
+}
+
+/* ── Light mode overrides ── */
+
+:global(html[data-theme="light"]) .panel {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(160, 120, 90, 0.12);
+  box-shadow: 0 8px 32px rgba(120, 80, 40, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
+:global(html[data-theme="light"]) .panel:hover {
+  border-color: rgba(160, 120, 90, 0.22);
+  box-shadow: 0 8px 40px rgba(120, 80, 40, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    0 0 20px rgba(140, 100, 60, 0.05);
+}
+
+:global(html[data-theme="light"]) .section {
+  background: rgba(255, 255, 255, 0.4);
+  border-color: rgba(160, 120, 90, 0.08);
+}
+
+:global(html[data-theme="light"]) .wheelSegment {
+  fill: rgba(0, 0, 0, 0.02);
+  stroke: rgba(0, 0, 0, 0.1);
+}
+
+:global(html[data-theme="light"]) .wheelSegmentActive {
+  fill: rgba(138, 100, 32, 0.1);
+  stroke: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .wheelLabel {
+  fill: var(--ink-soft);
+}
+
+:global(html[data-theme="light"]) .wheelLabelActive {
+  fill: var(--accent-gold);
+}
