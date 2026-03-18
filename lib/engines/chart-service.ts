@@ -49,6 +49,7 @@ export interface ChartResponse {
     ascendant: AscendantData;
     planets: PlanetPosition[];
     houses: HousePlacement[];
+    house_cusps?: number[];
     deterministic_rules: DeterministicRule[];
     summary: string;
     nakshatra?: {
@@ -544,6 +545,7 @@ export function buildChart(
       ascendant: computed.ascendant,
       planets: computed.planets,
       houses: computed.houses,
+      house_cusps: computed.house_cusps,
       deterministic_rules: rules,
       summary,
       nakshatra: nakshatraInfo,

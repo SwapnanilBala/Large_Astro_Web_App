@@ -33,6 +33,7 @@ export interface SwissEngineResult {
   ascendant: AscendantData;
   planets: PlanetPosition[];
   houses: HousePlacement[];
+  house_cusps: number[];
   fallback_mode: boolean;
 }
 
@@ -226,6 +227,398 @@ function computeAscendantLongitude(
 }
 
 // --------------------------------------------------------------------------
+// House system types
+// --------------------------------------------------------------------------
+
+export type HouseSystemCode =
+  | "whole_sign"
+  | "equal"
+  | "placidus"
+  | "koch"
+  | "campanus"
+  | "regiomontanus";
+
+// --------------------------------------------------------------------------
+// Midheaven (MC) calculation
+// --------------------------------------------------------------------------
+
+function computeMC(obliquityDeg: number, lstDeg: number): number {
+  const eps = degToRad(obliquityDeg);
+  const lst = degToRad(lstDeg);
+  // MC = atan2(sin(LST), cos(LST) * cos(ε))
+  // This gives the ecliptic longitude of the meridian
+  let mc = radToDeg(Math.atan2(Math.sin(lst), Math.cos(lst) * Math.cos(eps)));
+  return normalize(mc);
+}
+
+// --------------------------------------------------------------------------
+// Convert right ascension to ecliptic longitude
+// --------------------------------------------------------------------------
+
+function raToEclipticLon(raDeg: number, obliquityDeg: number): number {
+  // Given a point on the celestial equator at right ascension raDeg (declination=0),
+  // project it to the ecliptic. For equatorial house systems the declination
+  // of the cusp point is zero on the equator, so:
+  // tan(λ) = tan(RA) / cos(ε)  (only valid for points on the equator)
+  // We use atan2 for proper quadrant:
+  const ra = degToRad(raDeg);
+  const eps = degToRad(obliquityDeg);
+  const lon = radToDeg(Math.atan2(Math.sin(ra) * Math.cos(eps), Math.cos(ra)));
+  return normalize(lon);
+}
+
+// --------------------------------------------------------------------------
+// House cusp calculation for different systems
+// --------------------------------------------------------------------------
+
+function computeWholeSignCusps(ascLongitude: number): number[] {
+  const ascSignIndex = Math.floor(normalize(ascLongitude) / 30);
+  const cusps: number[] = [];
+  for (let i = 0; i < 12; i++) {
+    cusps.push(normalize(((ascSignIndex + i) % 12) * 30));
+  }
+  return cusps;
+}
+
+function computeEqualCusps(ascLongitude: number): number[] {
+  const cusps: number[] = [];
+  for (let i = 0; i < 12; i++) {
+    cusps.push(normalize(ascLongitude + i * 30));
+  }
+  return cusps;
+}
+
+function computePlacidus(
+  ascLongitude: number,
+  mcLongitude: number,
+  obliquityDeg: number,
+  latitudeDeg: number,
+  lstDeg: number
+): number[] {
+  const eps = degToRad(obliquityDeg);
+  const phi = degToRad(latitudeDeg);
+  const RAMC = normalize(lstDeg); // Right Ascension of MC in degrees
+
+  // House 1 = Ascendant, House 10 = MC
+  const cusps: number[] = new Array(12);
+  cusps[0] = normalize(ascLongitude); // H1 = Asc
+  cusps[9] = normalize(mcLongitude);  // H10 = MC
+  cusps[3] = normalize(mcLongitude + 180); // H4 = IC
+  cusps[6] = normalize(ascLongitude + 180); // H7 = Desc
+
+  // Placidus uses semi-arc trisection.
+  // For houses 11, 12 (above horizon) and 2, 3 (below horizon),
+  // we iteratively solve for the ecliptic longitude where the
+  // fraction of the semi-arc matches 1/3 or 2/3.
+
+  // Diurnal semi-arc fraction method:
+  // For a point at ecliptic longitude λ, its declination is:
+  //   sin(δ) = sin(ε) * sin(λ)
+  // Its ascensional difference is:
+  //   AD = asin(tan(δ) * tan(φ))
+  // Diurnal semi-arc: DSA = 90 + AD
+  // Nocturnal semi-arc: NSA = 90 - AD
+  //
+  // For cusp 11: RAMC + DSA/3 = RA of cusp
+  // For cusp 12: RAMC + 2*DSA/3 = RA of cusp
+  // For cusp 2: RAMC + 180 + NSA/3 = RA of cusp
+  // For cusp 3: RAMC + 180 + 2*NSA/3 = RA of cusp
+
+  // Iterative method: start with a guess, compute the cusp RA that would
+  // be needed, convert to ecliptic longitude, check if consistent.
+
+  function eclipticLonToRA(lonDeg: number): number {
+    const lon = degToRad(lonDeg);
+    const ra = Math.atan2(
+      Math.sin(lon) * Math.cos(eps),
+      Math.cos(lon)
+    );
+    return normalize(radToDeg(ra));
+  }
+
+  function eclipticLonToDecl(lonDeg: number): number {
+    const lon = degToRad(lonDeg);
+    return radToDeg(Math.asin(Math.sin(eps) * Math.sin(lon)));
+  }
+
+  function raToEclipticWithDecl(raDeg: number, declDeg: number): number {
+    const ra = degToRad(raDeg);
+    const decl = degToRad(declDeg);
+    const lon = Math.atan2(
+      Math.sin(ra) * Math.cos(eps) + Math.tan(decl) * Math.sin(eps),
+      Math.cos(ra)
+    );
+    return normalize(radToDeg(lon));
+  }
+
+  function placidusIterate(targetRA: number, fraction: number, isDiurnal: boolean): number {
+    // Start from a simple ecliptic guess
+    let lon = raToEclipticLon(targetRA, obliquityDeg);
+
+    for (let iter = 0; iter < 50; iter++) {
+      const decl = eclipticLonToDecl(lon);
+      const tanDtanP = Math.tan(degToRad(decl)) * Math.tan(phi);
+      // Clamp to avoid asin domain errors at extreme latitudes
+      const clampedAD = Math.max(-1, Math.min(1, tanDtanP));
+      const AD = radToDeg(Math.asin(clampedAD));
+
+      let semiArc: number;
+      if (isDiurnal) {
+        semiArc = 90 + AD;
+      } else {
+        semiArc = 90 - AD;
+      }
+
+      const neededRA = normalize(
+        isDiurnal
+          ? RAMC + fraction * semiArc
+          : RAMC + 180 + fraction * semiArc
+      );
+
+      const newLon = raToEclipticWithDecl(neededRA, decl);
+      if (Math.abs(normalize(newLon - lon)) < 0.0001 || Math.abs(normalize(newLon - lon) - 360) < 0.0001) {
+        return normalize(newLon);
+      }
+      lon = newLon;
+    }
+    return normalize(lon);
+  }
+
+  // Houses above horizon (diurnal): 11, 12
+  cusps[10] = placidusIterate(RAMC + 30, 1 / 3, true);  // H11
+  cusps[11] = placidusIterate(RAMC + 60, 2 / 3, true);  // H12
+
+  // Houses below horizon (nocturnal): 2, 3
+  cusps[1] = placidusIterate(RAMC + 210, 1 / 3, false);  // H2
+  cusps[2] = placidusIterate(RAMC + 240, 2 / 3, false);  // H3
+
+  // Opposite houses: H5=H11+180, H6=H12+180, H8=H2+180, H9=H3+180
+  cusps[4] = normalize(cusps[10] + 180); // H5
+  cusps[5] = normalize(cusps[11] + 180); // H6
+  cusps[7] = normalize(cusps[1] + 180);  // H8
+  cusps[8] = normalize(cusps[2] + 180);  // H9
+
+  return cusps;
+}
+
+function computeKoch(
+  ascLongitude: number,
+  mcLongitude: number,
+  obliquityDeg: number,
+  latitudeDeg: number,
+  lstDeg: number
+): number[] {
+  const eps = degToRad(obliquityDeg);
+  const phi = degToRad(latitudeDeg);
+  const RAMC = normalize(lstDeg);
+
+  const cusps: number[] = new Array(12);
+  cusps[0] = normalize(ascLongitude);
+  cusps[9] = normalize(mcLongitude);
+  cusps[3] = normalize(mcLongitude + 180);
+  cusps[6] = normalize(ascLongitude + 180);
+
+  // Koch: divides the time for the MC degree to rise from horizon to culmination
+  // The MC's declination:
+  const mcDecl = radToDeg(Math.asin(Math.sin(eps) * Math.sin(degToRad(mcLongitude))));
+  const tanDtanP = Math.tan(degToRad(mcDecl)) * Math.tan(phi);
+  const clampedVal = Math.max(-1, Math.min(1, tanDtanP));
+  const AD_mc = radToDeg(Math.asin(clampedVal)); // ascensional difference of MC
+
+  // Koch semi-arc of MC
+  const DSA_mc = 90 + AD_mc;
+
+  // For Koch, intermediate cusps use:
+  // cusp RA = RAMC + f * DSA_mc (for houses 11, 12)
+  // cusp RA = RAMC + 180 + f * (180 - DSA_mc) (for houses 2, 3)
+  // Then convert RA to ecliptic longitude using the ascendant formula approach
+
+  function kochCusp(ramc: number, f: number, _isDiurnal: boolean): number {
+    let targetRA: number;
+    if (_isDiurnal) {
+      targetRA = normalize(ramc + f * DSA_mc);
+    } else {
+      const NSA_mc = 90 - AD_mc;
+      targetRA = normalize(ramc + 180 + f * NSA_mc);
+    }
+    // Convert using the ascendant-like formula at this RA
+    const H = degToRad(targetRA);
+    const y = -Math.cos(H);
+    const x = Math.sin(H) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps);
+    return normalize(radToDeg(Math.atan2(y, x)));
+  }
+
+  cusps[10] = kochCusp(RAMC, 1 / 3, true);  // H11
+  cusps[11] = kochCusp(RAMC, 2 / 3, true);  // H12
+  cusps[1] = kochCusp(RAMC, 1 / 3, false);   // H2
+  cusps[2] = kochCusp(RAMC, 2 / 3, false);   // H3
+
+  cusps[4] = normalize(cusps[10] + 180);
+  cusps[5] = normalize(cusps[11] + 180);
+  cusps[7] = normalize(cusps[1] + 180);
+  cusps[8] = normalize(cusps[2] + 180);
+
+  return cusps;
+}
+
+function computeCampanus(
+  ascLongitude: number,
+  mcLongitude: number,
+  obliquityDeg: number,
+  latitudeDeg: number,
+  lstDeg: number
+): number[] {
+  const eps = degToRad(obliquityDeg);
+  const phi = degToRad(latitudeDeg);
+
+  // Campanus divides the prime vertical into 12 equal arcs of 30 degrees,
+  // then projects these points onto the ecliptic via great circles
+  // through the north and south points of the horizon.
+
+  const cusps: number[] = [];
+
+  for (let i = 0; i < 12; i++) {
+    // Campanus azimuth: starting from the East point, going through
+    // the zenith. The prime vertical poles are N/S horizon points.
+    // Azimuth on prime vertical for house cusp i:
+    const A = degToRad(i * 30); // 0, 30, 60, ... on prime vertical
+
+    // Project from prime vertical to ecliptic:
+    // The pole of the prime vertical is the North/South point of the horizon.
+    // Formula: tan(λ - LST) = tan(A) / cos(φ), with ecliptic correction
+
+    // Campanus formula (simplified Placidus-style projection):
+    // For house cusp at prime vertical angle A:
+    //   tan(H) = tan(A) * cos(phi)
+    //   where H is the hour angle
+    // Then convert H to ecliptic longitude:
+
+    const tanA = Math.tan(A);
+    const H = Math.atan2(tanA, Math.cos(phi));
+    // D (declination on the prime vertical circle):
+    const D = Math.atan(Math.sin(phi) * Math.sin(H) / Math.cos(H));
+
+    // RA = LST - H converted to ecliptic
+    const lstRad = degToRad(lstDeg);
+    const RA = lstRad - H;
+
+    // Convert equatorial (RA, D) to ecliptic longitude:
+    const lon = Math.atan2(
+      Math.sin(RA) * Math.cos(eps) + Math.tan(D) * Math.sin(eps),
+      Math.cos(RA)
+    );
+
+    cusps.push(normalize(radToDeg(lon)));
+  }
+
+  return cusps;
+}
+
+function computeRegiomontanus(
+  ascLongitude: number,
+  mcLongitude: number,
+  obliquityDeg: number,
+  latitudeDeg: number,
+  lstDeg: number
+): number[] {
+  const eps = degToRad(obliquityDeg);
+  const phi = degToRad(latitudeDeg);
+  const RAMC = lstDeg; // RAMC = LST in degrees
+
+  // Regiomontanus divides the celestial equator into 12 equal 30-degree arcs
+  // starting from RAMC, then projects these via hour circles to the ecliptic.
+  // The projection goes through the North and South points of the horizon.
+
+  const cusps: number[] = [];
+
+  for (let i = 0; i < 12; i++) {
+    // RA of the cusp on the equator:
+    const RA_cusp = normalize(RAMC + (i + 10) * 30); // H10 starts at RAMC
+
+    // The Regiomontanus formula projects through the intersection with
+    // the horizon plane. Hour angle:
+    const HA = degToRad(normalize(RAMC - RA_cusp + 360));
+
+    // Meridian distance → declination of the cusp point:
+    // tan(δ) = tan(φ) * cos(HA) (Regiomontanus projection)
+    // But the standard formula is:
+    // For Regiomontanus, the cusp longitude λ is found from:
+    //   tan(λ) = (sin(RA) * cos(ε) + tan(δ) * sin(ε)) / cos(RA)
+    // where δ = atan(tan(φ) * sin(HA)) — the Regiomontanus declination
+
+    // Regiomontanus declination:
+    const declCusp = Math.atan(Math.cos(HA) * Math.tan(phi));
+
+    const ra = degToRad(RA_cusp);
+    const lon = Math.atan2(
+      Math.sin(ra) * Math.cos(eps) + Math.tan(declCusp) * Math.sin(eps),
+      Math.cos(ra)
+    );
+
+    cusps.push(normalize(radToDeg(lon)));
+  }
+
+  // Reorder: the loop above gives H10, H11, H12, H1, H2, ..., H9
+  // We need H1, H2, ..., H12
+  const reordered: number[] = [];
+  for (let h = 0; h < 12; h++) {
+    reordered.push(cusps[(h + 3) % 12]); // shift so index 0 = H1
+  }
+
+  return reordered;
+}
+
+/**
+ * Compute house cusps for the given house system.
+ * Returns an array of 12 cusp longitudes (0-360), where index 0 = House 1.
+ */
+export function computeHouseCusps(
+  system: HouseSystemCode,
+  ascLongitude: number,
+  mcLongitude: number,
+  obliquityDeg: number,
+  latitudeDeg: number,
+  lstDeg: number
+): number[] {
+  switch (system) {
+    case "equal":
+      return computeEqualCusps(ascLongitude);
+    case "placidus":
+      return computePlacidus(ascLongitude, mcLongitude, obliquityDeg, latitudeDeg, lstDeg);
+    case "koch":
+      return computeKoch(ascLongitude, mcLongitude, obliquityDeg, latitudeDeg, lstDeg);
+    case "campanus":
+      return computeCampanus(ascLongitude, mcLongitude, obliquityDeg, latitudeDeg, lstDeg);
+    case "regiomontanus":
+      return computeRegiomontanus(ascLongitude, mcLongitude, obliquityDeg, latitudeDeg, lstDeg);
+    case "whole_sign":
+    default:
+      return computeWholeSignCusps(ascLongitude);
+  }
+}
+
+/**
+ * Assign a planet to a house based on cusp-based boundaries.
+ * A planet is in house N if its longitude falls between cusp N and cusp N+1.
+ */
+function assignHouseByCusps(planetLongitude: number, cusps: number[]): number {
+  const lon = normalize(planetLongitude);
+  for (let i = 0; i < 12; i++) {
+    const cuspStart = cusps[i];
+    const cuspEnd = cusps[(i + 1) % 12];
+
+    if (cuspStart < cuspEnd) {
+      // Normal case: cusp range doesn't wrap around 360
+      if (lon >= cuspStart && lon < cuspEnd) return i + 1;
+    } else {
+      // Wraps around 360
+      if (lon >= cuspStart || lon < cuspEnd) return i + 1;
+    }
+  }
+  return 1; // fallback
+}
+
+// --------------------------------------------------------------------------
 // Planet position using astronomy-engine
 // --------------------------------------------------------------------------
 
@@ -311,11 +704,37 @@ export function calculate(input: BirthInput): SwissEngineResult {
     degree_in_sign: round4(ascInfo.degree_in_sign),
   };
 
+  // Determine house system from preset
+  const houseSystemCode = (preset.house_system_code ?? "whole_sign") as HouseSystemCode;
+
+  // Compute MC and house cusps based on the house system
+  const obliquity = computeObliquity(jd_ut);
+  const gmst = computeGMST(jd_ut);
+  const lstDeg = normalize(gmst + input.longitude); // tropical LST in degrees
+  const lstSidereal = normalize(lstDeg - ayanamsa); // sidereal LST
+
+  const mcTropical = computeMC(obliquity, lstDeg);
+  const mcSidereal = normalize(mcTropical - ayanamsa);
+
+  const cusps = computeHouseCusps(
+    houseSystemCode,
+    asc_longitude,
+    mcSidereal,
+    obliquity,
+    input.latitude,
+    lstSidereal
+  );
+
+  const useWholeSign = houseSystemCode === "whole_sign";
   const asc_sign_index = ascInfo.sign_index;
 
   const planets: PlanetPosition[] = placements.map((p) => {
     const info = getSign(p.longitude);
-    const house_number = ((info.sign_index - asc_sign_index + 12) % 12) + 1;
+    // For Whole Sign, use sign-based house assignment (original behavior)
+    // For all other systems, use cusp-based assignment
+    const house_number = useWholeSign
+      ? ((info.sign_index - asc_sign_index + 12) % 12) + 1
+      : assignHouseByCusps(p.longitude, cusps);
     return {
       name: p.name,
       longitude: round4(p.longitude),
@@ -327,7 +746,11 @@ export function calculate(input: BirthInput): SwissEngineResult {
 
   const houses: HousePlacement[] = [];
   for (let h = 1; h <= 12; h++) {
-    const houseSign = SIGNS[(asc_sign_index + h - 1) % 12];
+    // For Whole Sign, house sign is determined by sign index offset
+    // For cusp-based systems, house sign is determined by cusp longitude
+    const houseSign = useWholeSign
+      ? SIGNS[(asc_sign_index + h - 1) % 12]
+      : getSign(cusps[h - 1]).sign;
     const housePlanets = planets
       .filter((p) => p.house === h)
       .map((p) => p.name);
@@ -343,6 +766,7 @@ export function calculate(input: BirthInput): SwissEngineResult {
     ascendant,
     planets,
     houses,
+    house_cusps: cusps.map(round4),
     fallback_mode: false,
   };
 }
