@@ -22,6 +22,8 @@ import { calculateNavamsa } from "./navamsa-engine";
 import { computeMultipleDivisionalCharts } from "./divisional-engine";
 import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
+import { calculateShadbala } from "./shadbala-engine";
+import type { ShadbalaResult } from "./shadbala-engine";
 import {
   getEnginePreset,
   listEnginePresets,
@@ -108,6 +110,7 @@ export interface ChartResponse {
       }>;
     }> | null;
     life_domain_insights?: LifeDomainInsight[] | null;
+    shadbala?: ShadbalaResult[] | null;
   };
   engine: {
     engine_id: string;
@@ -690,6 +693,7 @@ export function buildChart(
   let navamsaInfo: ChartResponse["chart"]["navamsa"] = null;
   let divisionalChartsInfo: ChartResponse["chart"]["divisional_charts"] = null;
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
+  let shadbalInfo: ShadbalaResult[] | null = null;
 
   if (includePremium) {
     const currentLocalStr = currentLocalDateStr(birth);
@@ -711,6 +715,9 @@ export function buildChart(
       core.planets,
       [2, 3, 4, 7, 10, 12]
     );
+
+    // Stage D3: shadbala (planetary strength)
+    shadbalInfo = calculateShadbala(core.planets, navamsaInfo, aspectsInfo);
   }
 
   if (includeUltimate) {
@@ -778,6 +785,7 @@ export function buildChart(
       navamsa: navamsaInfo,
       divisional_charts: divisionalChartsInfo,
       life_domain_insights: lifeDomainInsights,
+      shadbala: shadbalInfo,
     },
     engine: {
       engine_id: preset.engine_id,
