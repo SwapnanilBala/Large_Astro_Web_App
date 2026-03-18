@@ -166,6 +166,19 @@ export type TransitData = {
   active_aspects: TransitAspectInfo[];
 };
 
+export type YogaDetectionResult = {
+  yoga_id: string;
+  name: string;
+  sanskrit: string;
+  category: "mahapurusha" | "wealth" | "benefic" | "challenging" | "viparita" | "nabhasa";
+  present: boolean;
+  strength: "strong" | "moderate" | "weak";
+  involved_planets: string[];
+  description: string;
+  effects: string;
+  cancellation?: string;
+};
+
 export type LifeDomainInsight = {
   key: "love_life" | "career" | "family" | "inheritance" | "influence" | "life_cycle" | "travel_destinations";
   label: string;
@@ -243,6 +256,7 @@ export type ChartApiResponse = {
     divisional_charts?: Record<number, DivisionalChartInfo>;
     life_domain_insights?: LifeDomainInsight[];
     shadbala?: ShadbalaResult[];
+    yogas?: YogaDetectionResult[];
   };
   engine: {
     engine_id: string;

@@ -24,6 +24,8 @@ import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
 import { calculateShadbala } from "./shadbala-engine";
 import type { ShadbalaResult } from "./shadbala-engine";
+import { detectYogas } from "./yoga-engine";
+import type { YogaDetectionResult } from "./yoga-engine";
 import {
   getEnginePreset,
   listEnginePresets,
@@ -111,6 +113,7 @@ export interface ChartResponse {
     }> | null;
     life_domain_insights?: LifeDomainInsight[] | null;
     shadbala?: ShadbalaResult[] | null;
+    yogas?: YogaDetectionResult[] | null;
   };
   engine: {
     engine_id: string;
@@ -694,6 +697,7 @@ export function buildChart(
   let divisionalChartsInfo: ChartResponse["chart"]["divisional_charts"] = null;
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
   let shadbalInfo: ShadbalaResult[] | null = null;
+  let yogasInfo: YogaDetectionResult[] | null = null;
 
   if (includePremium) {
     const currentLocalStr = currentLocalDateStr(birth);
@@ -718,6 +722,13 @@ export function buildChart(
 
     // Stage D3: shadbala (planetary strength)
     shadbalInfo = calculateShadbala(core.planets, navamsaInfo, aspectsInfo);
+
+    // Stage D4: yogas (classical combinations)
+    yogasInfo = detectYogas({
+      planets: core.planets,
+      houses: core.houses,
+      ascendantSign: core.ascendant.sign,
+    });
   }
 
   if (includeUltimate) {
@@ -786,6 +797,7 @@ export function buildChart(
       divisional_charts: divisionalChartsInfo,
       life_domain_insights: lifeDomainInsights,
       shadbala: shadbalInfo,
+      yogas: yogasInfo,
     },
     engine: {
       engine_id: preset.engine_id,
