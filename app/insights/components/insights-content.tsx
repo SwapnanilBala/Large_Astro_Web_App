@@ -23,6 +23,7 @@ const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { s
 const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const DivisionalChartsPanel = dynamic(() => import("./divisional-charts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
@@ -713,6 +714,31 @@ export default function InsightsContent({
                 <LockedFeaturePreview
                   title="Navamsa D9 refinement"
                   description="Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
+                />
+              )}
+            </AuthGate>
+            </PanelErrorBoundary>
+          </motion.div>
+
+          {/* Divisional Charts */}
+          <motion.div
+            className={`${styles.cardNavamsa} ${styles.cardFullWidth}`}
+            initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.18 }}
+          >
+            <PanelErrorBoundary panelName="Divisional Charts">
+            <AuthGate
+              featureLabel="Divisional Charts"
+              isLocked={lockedFeatures.has("divisional_charts")}
+            >
+              {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 ? (
+                <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
+              ) : (
+                <LockedFeaturePreview
+                  title="Divisional Varga Charts"
+                  description="Unlock D2 through D12 divisional charts to examine wealth, siblings, career, children, and more."
                 />
               )}
             </AuthGate>

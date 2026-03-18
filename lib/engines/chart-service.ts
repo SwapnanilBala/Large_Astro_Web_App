@@ -18,6 +18,8 @@ import {
 import type { NakshatraData } from "./nakshatra-engine";
 import { calculateAspects } from "./aspect-engine";
 import { calculateNavamsa } from "./navamsa-engine";
+import { computeMultipleDivisionalCharts } from "./divisional-engine";
+import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
 import {
   getEnginePreset,
@@ -90,6 +92,17 @@ export interface ChartResponse {
       rashi_sign: string;
       navamsa_sign: string;
       navamsa_division: number;
+    }> | null;
+    divisional_charts?: Record<number, {
+      division: number;
+      label: string;
+      description: string;
+      positions: Array<{
+        name: string;
+        rashi_sign: string;
+        divisional_sign: string;
+        division_number: number;
+      }>;
     }> | null;
     life_domain_insights?: LifeDomainInsight[] | null;
   };
@@ -165,6 +178,7 @@ const PREMIUM_FEATURES = [
   "nakshatra_dasha",
   "planetary_aspects",
   "navamsa_d9",
+  "divisional_charts",
   "live_transits",
 ];
 const ULTIMATE_FEATURES = ["life_domain_readings"];
@@ -381,6 +395,7 @@ export function buildChart(
   let calculationAudit: Record<string, unknown> | null = null;
   let aspectsInfo: ChartResponse["chart"]["aspects"] = null;
   let navamsaInfo: ChartResponse["chart"]["navamsa"] = null;
+  let divisionalChartsInfo: ChartResponse["chart"]["divisional_charts"] = null;
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
 
   if (includePremium) {
@@ -489,6 +504,12 @@ export function buildChart(
       navamsa_sign: n.navamsa_sign,
       navamsa_division: n.navamsa_division,
     }));
+
+    // Divisional charts (D2, D3, D4, D7, D10, D12)
+    divisionalChartsInfo = computeMultipleDivisionalCharts(
+      computed.planets,
+      [2, 3, 4, 7, 10, 12]
+    );
   }
 
   if (includeUltimate) {
@@ -551,6 +572,7 @@ export function buildChart(
       calculation_audit: calculationAudit,
       aspects: aspectsInfo,
       navamsa: navamsaInfo,
+      divisional_charts: divisionalChartsInfo,
       life_domain_insights: lifeDomainInsights,
     },
     engine: {
