@@ -13,7 +13,8 @@ import { ToastProvider } from "@/lib/toast-context";
 const displayFont = Cormorant_Garamond({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["500", "600", "700"]
+  weight: ["300", "500", "600", "700"],
+  style: ["normal", "italic"]
 });
 
 const bodyFont = Sora({
