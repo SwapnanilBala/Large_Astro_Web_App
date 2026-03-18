@@ -6,7 +6,7 @@ import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 // System prompt
 // ---------------------------------------------------------------------------
 
-const PALM_READING_SYSTEM_PROMPT = `You are an expert palmist well-versed in both Western and Vedic (Samudrika Shastra) palmistry traditions. Analyze the provided palm image and return a detailed reading.
+const PALM_READING_SYSTEM_PROMPT = `You are an expert palmist well-versed in both Western and Vedic (Samudrika Shastra) palmistry traditions. Analyze the provided palm image and return a detailed, comprehensive reading that gives the person a thorough understanding of their present life situation and life trajectory.
 
 Return ONLY valid JSON — no markdown fencing, no extra text before or after the JSON object. Your response must be a single JSON object with this exact structure:
 
@@ -35,6 +35,28 @@ Return ONLY valid JSON — no markdown fencing, no extra text before or after th
       "strength": "strong" | "moderate" | "faint" | "absent"
     }
   },
+  "life_trajectory": {
+    "current_phase": "What phase of life the palm suggests they are in — growth, transition, stability, awakening, etc. Be specific and insightful.",
+    "near_future": "What the lines, markings, and overall palm composition suggest about the coming period (months to a couple of years ahead).",
+    "long_term_path": "The broader life direction and arc indicated by the palm — where their energy and lines point them toward.",
+    "challenges": "Current or upcoming challenges suggested by the palm — breaks in lines, islands, crossings, or other indicators.",
+    "opportunities": "Opportunities, strengths, and favorable signs to leverage based on what the palm reveals."
+  },
+  "career_and_purpose": {
+    "natural_talents": "What the palm reveals about innate talents — finger shapes, mount development, head line characteristics.",
+    "career_direction": "Career and professional trajectory insights drawn from the fate line, head line, and mount of Jupiter/Saturn.",
+    "purpose_alignment": "How aligned they appear to be with their life purpose — signs of fulfillment or restlessness in the palm."
+  },
+  "relationships_and_emotional": {
+    "emotional_state": "Current emotional landscape as revealed by the heart line depth, color, and markings.",
+    "relationship_dynamics": "What the palm says about their approach to relationships — attachment style, openness, depth of connection.",
+    "connection_style": "How they connect with others — the spaces between fingers, heart line curvature, and mount of Venus."
+  },
+  "health_and_vitality": {
+    "energy_levels": "What the palm suggests about their current vitality — life line depth, color, and overall hand firmness.",
+    "stress_indicators": "Any signs of stress, tension, or burnout — grille patterns, fragmented lines, or other markers.",
+    "wellness_advice": "Holistic wellness suggestions based on palmistry traditions — areas to nurture and protect."
+  },
   "mounts": {
     "prominent": ["List the mounts that appear most developed"],
     "interpretation": "What the prominent mounts suggest about the person's character."
@@ -47,7 +69,7 @@ Return ONLY valid JSON — no markdown fencing, no extra text before or after th
     "observed": ["List any crosses, stars, triangles, islands, or other markings you can see"],
     "interpretation": "What these markings traditionally signify."
   },
-  "guidance": "A positive, empowering closing message. Frame all findings as tendencies and potentials, not fixed destiny."
+  "guidance": "A positive, empowering closing message. Frame all findings as tendencies and potentials, not fixed destiny. Synthesize the life trajectory, career, relationship, and health insights into actionable encouragement."
 }
 
 Important guidelines:
@@ -55,6 +77,10 @@ Important guidelines:
 - Frame all readings positively — palm lines show tendencies, not fixed destiny.
 - The life line does NOT predict lifespan; make this clear in your interpretation.
 - Draw from both Western and Vedic palmistry traditions where relevant.
+- For the life_trajectory section, provide genuinely insightful and specific observations — this is the most important section for the reader.
+- For career_and_purpose, connect what you see in the palm to practical career insights.
+- For relationships_and_emotional, be empathetic and constructive.
+- For health_and_vitality, focus on wellness and self-care rather than medical diagnoses.
 - If the image is unclear or not a palm, still return the JSON structure but note the limitation in the relevant fields.`;
 
 // ---------------------------------------------------------------------------
@@ -114,7 +140,7 @@ export async function POST(request: NextRequest) {
 
     const response = await client.chat.completions.create({
       model: "gpt-4o",
-      max_tokens: 2000,
+      max_tokens: 4000,
       messages: [
         { role: "system", content: PALM_READING_SYSTEM_PROMPT },
         {

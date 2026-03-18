@@ -458,3 +458,246 @@
 }
 
 /* Chart history light mode & responsive rules are in globals.css */
+
+/* ═══════════════════════════════════════════════
+   VISUAL UPGRADE #1 — Animated Constellation SVG
+   ═══════════════════════════════════════════════ */
+
+.constellationBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0.35;
+}
+
+.constellationBg svg {
+  width: 100%;
+  height: 100%;
+  animation: constellationSpin 120s linear infinite;
+}
+
+.constellationBg line {
+  stroke: rgba(108, 225, 212, 0.3);
+  stroke-width: 0.5;
+}
+
+.constellationBg circle {
+  fill: rgba(242, 194, 108, 0.6);
+}
+
+/* Subtle pulsing glow on constellation nodes */
+.constellationNode {
+  animation: constellationPulse 4s ease-in-out infinite;
+}
+
+.constellationNode:nth-child(2n) {
+  animation-delay: 1s;
+}
+
+.constellationNode:nth-child(3n) {
+  animation-delay: 2.5s;
+}
+
+@keyframes constellationSpin {
+  from { transform: rotate(0deg) scale(1.15); }
+  to { transform: rotate(360deg) scale(1.15); }
+}
+
+@keyframes constellationPulse {
+  0%, 100% { opacity: 0.5; r: 1.5; }
+  50% { opacity: 1; r: 2.5; }
+}
+
+/* ═══════════════════════════════════════════════
+   VISUAL UPGRADE #2 — Glowing Section Dividers
+   ═══════════════════════════════════════════════ */
+
+.glowDivider {
+  position: relative;
+  height: 2px;
+  margin: 0.5rem 0;
+  border: none;
+  background: transparent;
+  overflow: visible;
+}
+
+.glowDivider::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(108, 225, 212, 0.4) 15%,
+    rgba(242, 194, 108, 0.6) 50%,
+    rgba(108, 225, 212, 0.4) 85%,
+    transparent 100%
+  );
+  animation: dividerShimmer 3s ease-in-out infinite;
+}
+
+.glowDivider::after {
+  content: "";
+  position: absolute;
+  top: -3px;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(108, 225, 212, 0.1) 15%,
+    rgba(242, 194, 108, 0.2) 50%,
+    rgba(108, 225, 212, 0.1) 85%,
+    transparent 100%
+  );
+  filter: blur(4px);
+  animation: dividerShimmer 3s ease-in-out infinite;
+}
+
+@keyframes dividerShimmer {
+  0%, 100% {
+    opacity: 0.6;
+    background-position: -200% center;
+  }
+  50% {
+    opacity: 1;
+    background-position: 200% center;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   VISUAL UPGRADE #3 — Mystical Rotating Tagline
+   ═══════════════════════════════════════════════ */
+
+.mysticalTagline {
+  position: relative;
+  height: 1.6em;
+  overflow: hidden;
+  margin: 0.4rem 0 0.2rem;
+  font-size: clamp(0.85rem, 1.5vw, 1.05rem);
+  font-family: var(--font-display), "Times New Roman", serif;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.mysticalTaglineInner {
+  display: inline-block;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-aqua));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: taglineFade 4s ease-in-out infinite;
+  opacity: 0;
+}
+
+@keyframes taglineFade {
+  0% { opacity: 0; transform: translateY(8px); }
+  12% { opacity: 1; transform: translateY(0); }
+  88% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-8px); }
+}
+
+/* ═══════════════════════════════════════════════
+   VISUAL UPGRADE #4 — Aurora Effect (top of page)
+   ═══════════════════════════════════════════════ */
+
+.auroraEffect {
+  position: absolute;
+  top: -60px;
+  left: -10%;
+  right: -10%;
+  height: 320px;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+  opacity: 0.5;
+}
+
+.auroraLayer {
+  position: absolute;
+  inset: 0;
+  border-radius: 0 0 50% 50%;
+  filter: blur(60px);
+}
+
+.auroraLayer:nth-child(1) {
+  background: radial-gradient(
+    ellipse 80% 50% at 30% 40%,
+    rgba(108, 225, 212, 0.2),
+    transparent 70%
+  );
+  animation: auroraPulse1 8s ease-in-out infinite;
+}
+
+.auroraLayer:nth-child(2) {
+  background: radial-gradient(
+    ellipse 60% 50% at 70% 30%,
+    rgba(242, 194, 108, 0.15),
+    transparent 70%
+  );
+  animation: auroraPulse2 10s ease-in-out infinite 2s;
+}
+
+.auroraLayer:nth-child(3) {
+  background: radial-gradient(
+    ellipse 70% 40% at 50% 50%,
+    rgba(180, 120, 220, 0.12),
+    transparent 70%
+  );
+  animation: auroraPulse3 12s ease-in-out infinite 4s;
+}
+
+@keyframes auroraPulse1 {
+  0%, 100% { transform: translateX(-5%) scaleY(1); opacity: 0.4; }
+  50% { transform: translateX(5%) scaleY(1.2); opacity: 0.7; }
+}
+
+@keyframes auroraPulse2 {
+  0%, 100% { transform: translateX(5%) scaleY(1.1); opacity: 0.3; }
+  50% { transform: translateX(-8%) scaleY(0.9); opacity: 0.6; }
+}
+
+@keyframes auroraPulse3 {
+  0%, 100% { transform: translateX(0%) scaleY(1); opacity: 0.25; }
+  50% { transform: translateX(3%) scaleY(1.3); opacity: 0.55; }
+}
+
+/* ═══════════════════════════════════════════════
+   VISUAL UPGRADE #5 — Floating Cosmic Particles
+   ═══════════════════════════════════════════════ */
+
+.cosmicParticles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.cosmicParticle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0;
+  animation: particleFloat linear infinite;
+}
+
+@keyframes particleFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(0) translateX(0);
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-100vh) translateX(30px);
+  }
+}

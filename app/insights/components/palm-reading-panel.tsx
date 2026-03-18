@@ -13,6 +13,32 @@ type LineReading = {
   strength: "strong" | "moderate" | "faint" | "absent";
 };
 
+type LifeTrajectory = {
+  current_phase: string;
+  near_future: string;
+  long_term_path: string;
+  challenges: string;
+  opportunities: string;
+};
+
+type CareerAndPurpose = {
+  natural_talents: string;
+  career_direction: string;
+  purpose_alignment: string;
+};
+
+type RelationshipsAndEmotional = {
+  emotional_state: string;
+  relationship_dynamics: string;
+  connection_style: string;
+};
+
+type HealthAndVitality = {
+  energy_levels: string;
+  stress_indicators: string;
+  wellness_advice: string;
+};
+
 type PalmReading = {
   overall_summary: string;
   dominant_hand_note: string;
@@ -22,6 +48,10 @@ type PalmReading = {
     life_line: LineReading;
     fate_line: LineReading;
   };
+  life_trajectory: LifeTrajectory;
+  career_and_purpose: CareerAndPurpose;
+  relationships_and_emotional: RelationshipsAndEmotional;
+  health_and_vitality: HealthAndVitality;
   mounts: { prominent: string[]; interpretation: string };
   fingers: { observation: string; interpretation: string };
   special_markings: { observed: string[]; interpretation: string };
@@ -334,6 +364,9 @@ export default function PalmReadingPanel() {
       ? "palm-status palm-status--clear"
       : "palm-status palm-status--detected";
 
+  /* ── error helpers ── */
+  const isApiKeyError = error?.toLowerCase().includes("openai_api_key") || error?.toLowerCase().includes("not configured");
+
   /* ── stagger animation variants ── */
   const containerVariants = {
     hidden: {},
@@ -399,7 +432,22 @@ export default function PalmReadingPanel() {
             <li>Ensure good, even lighting without harsh shadows</li>
             <li>Keep your fingers slightly spread apart</li>
           </ul>
-          {error && <div className="palm-error">{error}</div>}
+          {error && (
+            <div className={isApiKeyError ? "palm-error palm-error--config" : "palm-error"}>
+              {isApiKeyError ? (
+                <>
+                  <strong>OpenAI API key not configured.</strong>
+                  <span className="palm-error-detail">
+                    If deployed, add <code>OPENAI_API_KEY</code> to your Vercel Environment Variables
+                    (Settings &rarr; Environment Variables). For local development, add it to your{" "}
+                    <code>.env.local</code> file.
+                  </span>
+                </>
+              ) : (
+                error
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -456,7 +504,22 @@ export default function PalmReadingPanel() {
           <button className="palm-submit" onClick={analyzePalm}>
             Analyze My Palm
           </button>
-          {error && <div className="palm-error">{error}</div>}
+          {error && (
+            <div className={isApiKeyError ? "palm-error palm-error--config" : "palm-error"}>
+              {isApiKeyError ? (
+                <>
+                  <strong>OpenAI API key not configured.</strong>
+                  <span className="palm-error-detail">
+                    If deployed, add <code>OPENAI_API_KEY</code> to your Vercel Environment Variables
+                    (Settings &rarr; Environment Variables). For local development, add it to your{" "}
+                    <code>.env.local</code> file.
+                  </span>
+                </>
+              ) : (
+                error
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -542,6 +605,92 @@ export default function PalmReadingPanel() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Life Trajectory — Hero Card */}
+          {reading.life_trajectory && (
+            <motion.div className="palm-trajectory-hero" variants={itemVariants}>
+              <h3>Life Trajectory</h3>
+              <div className="palm-trajectory-grid">
+                <div className="palm-trajectory-item">
+                  <span className="palm-trajectory-label">Current Phase</span>
+                  <p>{reading.life_trajectory.current_phase}</p>
+                </div>
+                <div className="palm-trajectory-item">
+                  <span className="palm-trajectory-label">Near Future</span>
+                  <p>{reading.life_trajectory.near_future}</p>
+                </div>
+                <div className="palm-trajectory-item">
+                  <span className="palm-trajectory-label">Long-Term Path</span>
+                  <p>{reading.life_trajectory.long_term_path}</p>
+                </div>
+                <div className="palm-trajectory-item palm-trajectory-item--challenge">
+                  <span className="palm-trajectory-label">Challenges</span>
+                  <p>{reading.life_trajectory.challenges}</p>
+                </div>
+                <div className="palm-trajectory-item palm-trajectory-item--opportunity">
+                  <span className="palm-trajectory-label">Opportunities</span>
+                  <p>{reading.life_trajectory.opportunities}</p>
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Career & Purpose */}
+          {reading.career_and_purpose && (
+            <motion.div className="palm-section-card palm-section-card--career" variants={itemVariants}>
+              <h3>Career &amp; Life Purpose</h3>
+              <div className="palm-subsection">
+                <h4>Natural Talents</h4>
+                <p>{reading.career_and_purpose.natural_talents}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Career Direction</h4>
+                <p>{reading.career_and_purpose.career_direction}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Purpose Alignment</h4>
+                <p>{reading.career_and_purpose.purpose_alignment}</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Relationships & Emotional */}
+          {reading.relationships_and_emotional && (
+            <motion.div className="palm-section-card palm-section-card--relationships" variants={itemVariants}>
+              <h3>Relationships &amp; Emotional Landscape</h3>
+              <div className="palm-subsection">
+                <h4>Emotional State</h4>
+                <p>{reading.relationships_and_emotional.emotional_state}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Relationship Dynamics</h4>
+                <p>{reading.relationships_and_emotional.relationship_dynamics}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Connection Style</h4>
+                <p>{reading.relationships_and_emotional.connection_style}</p>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Health & Vitality */}
+          {reading.health_and_vitality && (
+            <motion.div className="palm-section-card palm-section-card--health" variants={itemVariants}>
+              <h3>Health &amp; Vitality</h3>
+              <div className="palm-subsection">
+                <h4>Energy Levels</h4>
+                <p>{reading.health_and_vitality.energy_levels}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Stress Indicators</h4>
+                <p>{reading.health_and_vitality.stress_indicators}</p>
+              </div>
+              <div className="palm-subsection">
+                <h4>Wellness Advice</h4>
+                <p>{reading.health_and_vitality.wellness_advice}</p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Mounts */}
           <motion.div className="palm-section-card" variants={itemVariants}>
