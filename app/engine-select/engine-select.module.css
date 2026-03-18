@@ -220,6 +220,111 @@
   margin: 0;
 }
 
+/* ── House System Selector ── */
+
+.houseSection {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  border-radius: 18px;
+  background: rgba(6, 24, 38, 0.35);
+  border: 1px solid rgba(195, 231, 255, 0.08);
+}
+
+.houseSectionTitle {
+  font-family: var(--font-heading), serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ink-main);
+  margin: 0 0 0.35rem;
+}
+
+.houseSectionLead {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+  margin: 0 0 1rem;
+}
+
+.houseGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.houseChip {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 12px;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: var(--ink-soft);
+  background: rgba(6, 24, 38, 0.5);
+  border: 1.5px solid rgba(195, 231, 255, 0.1);
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.houseChip:hover:not(:disabled) {
+  border-color: rgba(195, 231, 255, 0.2);
+  color: var(--ink-main);
+}
+
+.houseChip:focus-visible {
+  outline: 2px solid var(--accent-aqua);
+  outline-offset: 2px;
+}
+
+.houseChipActive {
+  border-color: rgba(108, 225, 212, 0.4);
+  background: rgba(108, 225, 212, 0.1);
+  color: var(--accent-aqua);
+  box-shadow: 0 0 12px rgba(108, 225, 212, 0.08);
+}
+
+.houseChipActive:hover {
+  border-color: rgba(108, 225, 212, 0.5);
+}
+
+.houseChipDisabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.houseChipLabel {
+  white-space: nowrap;
+}
+
+:global(html[data-theme="light"]) .houseSection {
+  background: rgba(255, 248, 242, 0.5);
+  border-color: rgba(160, 120, 90, 0.08);
+}
+
+:global(html[data-theme="light"]) .houseChip {
+  background: rgba(255, 248, 242, 0.7);
+  border-color: rgba(160, 120, 90, 0.1);
+  color: var(--ink-soft);
+}
+
+:global(html[data-theme="light"]) .houseChip:hover:not(:disabled) {
+  border-color: rgba(160, 120, 90, 0.2);
+}
+
+:global(html[data-theme="light"]) .houseChipActive {
+  border-color: rgba(60, 160, 150, 0.35);
+  background: rgba(60, 160, 150, 0.08);
+  color: #2a7a70;
+}
+
 .footer {
   text-align: center;
 }

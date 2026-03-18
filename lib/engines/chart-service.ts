@@ -53,6 +53,7 @@ export interface ChartResponse {
     ascendant: AscendantData;
     planets: PlanetPosition[];
     houses: HousePlacement[];
+    house_cusps?: number[];
     deterministic_rules: DeterministicRule[];
     summary: string;
     nakshatra?: {
@@ -296,6 +297,7 @@ interface CorePositionsResult {
   ascendant: AscendantData;
   planets: PlanetPosition[];
   houses: HousePlacement[];
+  house_cusps?: number[];
   fallback_mode: boolean;
   rules: DeterministicRule[];
   summary: string;
@@ -460,6 +462,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
     ascendant: computed.ascendant,
     planets: computed.planets,
     houses: computed.houses,
+    house_cusps: computed.house_cusps,
     fallback_mode: computed.fallback_mode,
     rules,
     summary,
@@ -765,6 +768,7 @@ export function buildChart(
       ascendant: core.ascendant,
       planets: core.planets,
       houses: core.houses,
+      house_cusps: core.house_cusps,
       deterministic_rules: core.rules,
       summary: core.summary,
       nakshatra: nakshatraInfo,

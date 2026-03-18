@@ -185,6 +185,7 @@ export type EnginePresetInfo = {
   label: string;
   ayanamsha: string;
   house_system: string;
+  house_system_code: string;
   description: string;
 };
 
@@ -231,6 +232,7 @@ export type ChartApiResponse = {
     };
     planets: PlanetPosition[];
     houses: HousePlacement[];
+    house_cusps?: number[];
     deterministic_rules: DeterministicRule[];
     summary: string;
     nakshatra?: NakshatraInfo;

@@ -29,6 +29,7 @@ describe("engine-registry", () => {
         expect(preset).toHaveProperty("label");
         expect(preset).toHaveProperty("ayanamsha");
         expect(preset).toHaveProperty("house_system");
+        expect(preset).toHaveProperty("house_system_code");
         expect(preset).toHaveProperty("description");
         expect(preset).toHaveProperty("sidereal_mode_name");
 
@@ -36,15 +37,22 @@ describe("engine-registry", () => {
         expect(typeof preset.label).toBe("string");
         expect(typeof preset.ayanamsha).toBe("string");
         expect(typeof preset.house_system).toBe("string");
+        expect(typeof preset.house_system_code).toBe("string");
         expect(typeof preset.description).toBe("string");
         expect(typeof preset.sidereal_mode_name).toBe("string");
       }
     });
 
-    it("all presets use Whole Sign house system", () => {
-      for (const preset of Object.values(ENGINE_PRESETS)) {
-        expect(preset.house_system).toBe("Whole Sign");
-      }
+    it("classic presets use Whole Sign house system", () => {
+      expect(ENGINE_PRESETS.lahiri_classic.house_system).toBe("Whole Sign");
+      expect(ENGINE_PRESETS.raman_classic.house_system).toBe("Whole Sign");
+      expect(ENGINE_PRESETS.krishnamurti_classic.house_system).toBe("Whole Sign");
+    });
+
+    it("has Placidus variant presets", () => {
+      expect(ENGINE_PRESETS).toHaveProperty("lahiri_placidus");
+      expect(ENGINE_PRESETS.lahiri_placidus.house_system).toBe("Placidus");
+      expect(ENGINE_PRESETS.lahiri_placidus.house_system_code).toBe("placidus");
     });
 
     it("each preset has a valid sidereal mode name", () => {
@@ -115,12 +123,14 @@ describe("engine-registry", () => {
       expect(list.length).toBe(Object.keys(ENGINE_PRESETS).length);
     });
 
-    it("contains all 3 presets", () => {
+    it("contains all presets", () => {
       const list = listEnginePresets();
       const ids = list.map((p) => p.engine_id);
       expect(ids).toContain("lahiri_classic");
+      expect(ids).toContain("lahiri_placidus");
       expect(ids).toContain("raman_classic");
       expect(ids).toContain("krishnamurti_classic");
+      expect(ids).toContain("krishnamurti_placidus");
     });
 
     it("each item is a full EnginePreset", () => {
