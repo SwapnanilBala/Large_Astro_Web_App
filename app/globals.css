@@ -7030,3 +7030,204 @@ html[data-theme="light"] .palm-subsection {
 html[data-theme="light"] .palm-error-detail code {
   background: rgba(0, 0, 0, 0.06);
 }
+
+/* ═══════════════════════════════════════════════
+   MICRO-INTERACTIONS & HOVER FEEDBACK
+   ═══════════════════════════════════════════════ */
+
+/* ── 1. Button Press Effects ─────────────────── */
+/* Tactile :active press for all button-like elements */
+
+.ghost-link:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 60ms ease-out, box-shadow 60ms ease-out;
+}
+
+.recalculate-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow:
+    0 6px 14px rgba(108, 225, 212, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: transform 60ms ease-out, box-shadow 60ms ease-out;
+}
+
+.compatibility-cta-button:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow:
+    0 6px 14px rgba(255, 130, 180, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  transition: transform 60ms ease-out, box-shadow 60ms ease-out;
+}
+
+.dasha-bar[role="button"]:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.chart-history-card:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: transform 60ms ease-out, box-shadow 60ms ease-out;
+}
+
+.chart-history-hero:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.constellation-chart-toggle button:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.lang-option:active,
+.lang-toggle:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.navbar-hamburger:active,
+.drawer-close-btn:active,
+.drawer-signout-btn:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.theme-toggle-btn:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+.logout-btn:active {
+  transform: scale(0.97);
+  transition: transform 60ms ease-out;
+}
+
+/* ── 2. Card Lift on Hover ───────────────────── */
+/* Enhanced hover lift with soft shadow bloom for card containers */
+
+.lagna-panel,
+.rules-panel,
+.planet-panel {
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 0.3s ease;
+}
+
+.lagna-panel:hover,
+.rules-panel:hover,
+.planet-panel:hover {
+  transform: translateY(-4px);
+}
+
+.rule-card {
+  transition: transform 280ms ease, box-shadow 280ms ease;
+}
+
+.rule-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.28),
+    0 0 18px rgba(108, 225, 212, 0.06);
+}
+
+.planet-card {
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 240ms ease;
+}
+
+.planet-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.3),
+    0 0 18px rgba(108, 225, 212, 0.08);
+}
+
+.metric-card {
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 240ms ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+}
+
+.dasha-bar {
+  transition: transform 280ms ease, box-shadow 280ms ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.dasha-bar:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.chart-history-card {
+  transition: transform 280ms ease, box-shadow 280ms ease, border-color 240ms ease;
+}
+
+.chart-history-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 14px 36px rgba(0, 0, 0, 0.28),
+    0 0 14px rgba(108, 225, 212, 0.06);
+}
+
+@media (hover: hover) {
+  .compatibility-cta:hover,
+  .career-summary-card:hover,
+  .love-summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.2),
+      0 0 18px rgba(108, 225, 212, 0.05);
+  }
+}
+
+/* ── 3. Input Focus Glow ─────────────────────── */
+/* Animated gold ring glow on form input focus */
+
+input:focus,
+select:focus,
+textarea:focus {
+  box-shadow:
+    0 0 0 3px rgba(242, 194, 108, 0.35),
+    0 0 18px rgba(242, 194, 108, 0.12),
+    var(--field-shadow);
+  border-color: var(--accent-gold);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(242, 194, 108, 0.35),
+    0 0 18px rgba(242, 194, 108, 0.12),
+    var(--field-shadow);
+  border-color: var(--accent-gold);
+}
+
+/* Gold glow variant for warm-themed input groups */
+.input-glow-gold :is(input, select, textarea):focus {
+  box-shadow:
+    0 0 0 3px rgba(242, 194, 108, 0.35),
+    0 0 18px rgba(242, 194, 108, 0.15),
+    var(--field-shadow);
+}
+
+/* Light theme adjustments for input focus glow */
+html[data-theme="light"] input:focus,
+html[data-theme="light"] select:focus,
+html[data-theme="light"] textarea:focus {
+  box-shadow:
+    0 0 0 3px rgba(138, 100, 32, 0.25),
+    0 0 14px rgba(138, 100, 32, 0.08),
+    var(--field-shadow);
+  border-color: var(--accent-gold);
+}
+
+html[data-theme="light"] input:focus-visible,
+html[data-theme="light"] select:focus-visible,
+html[data-theme="light"] textarea:focus-visible {
+  box-shadow:
+    0 0 0 3px rgba(138, 100, 32, 0.25),
+    0 0 14px rgba(138, 100, 32, 0.08),
+    var(--field-shadow);
+  border-color: var(--accent-gold);
+}
