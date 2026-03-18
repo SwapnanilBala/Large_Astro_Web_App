@@ -7231,3 +7231,79 @@ html[data-theme="light"] textarea:focus-visible {
     var(--field-shadow);
   border-color: var(--accent-gold);
 }
+
+/* ══════════════════════════════════════════════════════
+   Unified Card / Panel Design System
+   Three-tier glass surface utilities
+   ══════════════════════════════════════════════════════ */
+
+.surface-card,
+.elevated-card,
+.accent-card {
+  transition: transform 280ms ease, box-shadow 280ms ease;
+}
+
+/* ── Tier 1: Surface Card — subtle glass ── */
+
+.surface-card {
+  background: rgba(15, 38, 55, 0.4);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+  padding: 1.25rem;
+}
+
+/* ── Tier 2: Elevated Card — stronger glass + glow border ── */
+
+.elevated-card {
+  background: rgba(15, 38, 55, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(242, 194, 108, 0.15);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2),
+    0 0 40px rgba(242, 194, 108, 0.04);
+}
+
+/* ── Tier 3: Accent Card — gold/aqua highlight ── */
+
+.accent-card {
+  background: rgba(15, 38, 55, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(242, 194, 108, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25),
+    0 0 60px rgba(242, 194, 108, 0.08);
+}
+
+/* ── Light theme variants ── */
+
+html[data-theme="light"] .surface-card {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .elevated-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(160, 120, 90, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+    0 0 40px rgba(160, 120, 90, 0.04);
+}
+
+html[data-theme="light"] .accent-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(160, 120, 90, 0.25);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
+    0 0 60px rgba(160, 120, 90, 0.06);
+}
