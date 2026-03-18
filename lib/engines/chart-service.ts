@@ -19,6 +19,8 @@ import type { NakshatraData } from "./nakshatra-engine";
 import { calculateAspects } from "./aspect-engine";
 import { calculateNavamsa } from "./navamsa-engine";
 import { computeTransitAspects } from "./transit-engine";
+import { computeAshtakavarga } from "./ashtakavarga-engine";
+import type { AshtakavargaResult } from "./ashtakavarga-engine";
 import {
   getEnginePreset,
   listEnginePresets,
@@ -134,6 +136,7 @@ export interface ChartResponse {
       orb: number;
     }>;
   } | null;
+  ashtakavarga?: AshtakavargaResult | null;
 }
 
 export interface ForecastReading {
@@ -382,6 +385,7 @@ export function buildChart(
   let aspectsInfo: ChartResponse["chart"]["aspects"] = null;
   let navamsaInfo: ChartResponse["chart"]["navamsa"] = null;
   let lifeDomainInsights: LifeDomainInsight[] | null = null;
+  let ashtakavargaData: AshtakavargaResult | null = null;
 
   if (includePremium) {
     // Nakshatra & Dasha
@@ -489,6 +493,9 @@ export function buildChart(
       navamsa_sign: n.navamsa_sign,
       navamsa_division: n.navamsa_division,
     }));
+
+    // Ashtakavarga
+    ashtakavargaData = computeAshtakavarga(computed.planets, computed.ascendant.sign);
   }
 
   if (includeUltimate) {
@@ -575,6 +582,7 @@ export function buildChart(
       locked_features: lockedFeatures,
     },
     transits: transitsData,
+    ashtakavarga: ashtakavargaData,
   };
 }
 

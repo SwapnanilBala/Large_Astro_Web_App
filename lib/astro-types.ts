@@ -152,6 +152,14 @@ export type TransitData = {
   active_aspects: TransitAspectInfo[];
 };
 
+export type AshtakavargaData = {
+  bhinnashtakavarga: Record<string, number[]>;
+  sarvashtakavarga: number[];
+  totalBindus: number;
+  strongSigns: string[];
+  weakSigns: string[];
+};
+
 export type LifeDomainInsight = {
   key: "love_life" | "career" | "family" | "inheritance" | "influence" | "life_cycle" | "travel_destinations";
   label: string;
@@ -247,6 +255,7 @@ export type ChartApiResponse = {
     locked_features: string[];
   };
   transits?: TransitData;
+  ashtakavarga?: AshtakavargaData;
 };
 
 export type SavedChartRecord = {

@@ -23,6 +23,7 @@ const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { s
 const NavamsaChart = dynamic(() => import("./navamsa-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const TransitsPanel = dynamic(() => import("./transits-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const AspectsPanel = dynamic(() => import("./aspects-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const AshtakavargaPanel = dynamic(() => import("./ashtakavarga-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PalmReadingPanel = dynamic(() => import("./palm-reading-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
@@ -738,6 +739,34 @@ export default function InsightsContent({
                 <LockedFeaturePreview
                   title="Live transits"
                   description="Track the current sky against the natal chart to understand active triggers and near-term windows."
+                />
+              )}
+            </AuthGate>
+            </PanelErrorBoundary>
+          </motion.div>
+
+          {/* Ashtakavarga */}
+          <motion.div
+            className={`${styles.cardAshtakavarga} ${styles.cardFullWidth}`}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.25 }}
+          >
+            <PanelErrorBoundary panelName="Ashtakavarga">
+            <AuthGate
+              featureLabel="Ashtakavarga"
+              isLocked={lockedFeatures.has("live_transits")}
+            >
+              {payload.ashtakavarga ? (
+                <AshtakavargaPanel
+                  ashtakavarga={payload.ashtakavarga}
+                  transits={payload.transits}
+                />
+              ) : (
+                <LockedFeaturePreview
+                  title="Ashtakavarga scoring"
+                  description="Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
                 />
               )}
             </AuthGate>
