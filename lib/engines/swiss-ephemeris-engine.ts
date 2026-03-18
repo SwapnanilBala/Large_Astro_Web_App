@@ -77,18 +77,44 @@ const PLANET_BODIES: Record<string, Astronomy.Body> = {
   Saturn: Astronomy.Body.Saturn,
 };
 
-// Ayanamsa values at J2000.0 (Jan 1, 2000 12:00 TT) in degrees
-const AYANAMSA_J2000: Record<string, number> = {
-  SE_SIDM_LAHIRI: 23.853,
-  SE_SIDM_RAMAN: 22.3947,
-  SE_SIDM_KRISHNAMURTI: 23.7986,
-};
-
-// Annual precession rate in degrees per year
-const PRECESSION_RATE = 50.2388475 / 3600;
-
 // J2000.0 epoch as Julian Day
 const J2000 = 2451545.0;
+
+// --------------------------------------------------------------------------
+// Ayanamsha reference values per sidereal mode
+//
+// Each preset defines a reference epoch (as Julian Day) and the ayanamsha
+// value at that epoch in degrees. The ayanamsha for an arbitrary date is then
+// computed by adding the IAU 2006 general-precession increment accumulated
+// between the reference epoch and the target date.
+//
+// Sources / reference points:
+//   Lahiri        – Indian Astronomical Ephemeris: 23°15'00" on 21 Mar 1956
+//   Raman         – B.V. Raman's value: 22°27'37.76" on 21 Mar 1956
+//   Krishnamurti  – KP system: 23°45'00" at J1900.0 (JD 2415020.0)
+// --------------------------------------------------------------------------
+
+interface AyanamsaRef {
+  /** Ayanamsha value at the reference epoch, in degrees */
+  value_deg: number;
+  /** Julian Day of the reference epoch */
+  jd_epoch: number;
+}
+
+const AYANAMSA_REF: Record<string, AyanamsaRef> = {
+  SE_SIDM_LAHIRI: {
+    value_deg: 23 + 15 / 60 + 0 / 3600, // 23°15'00"
+    jd_epoch: 2435190.5,                  // 21 March 1956 0h UT
+  },
+  SE_SIDM_RAMAN: {
+    value_deg: 22 + 27 / 60 + 37.76 / 3600, // 22°27'37.76"
+    jd_epoch: 2435190.5,                      // 21 March 1956 0h UT
+  },
+  SE_SIDM_KRISHNAMURTI: {
+    value_deg: 23 + 45 / 60, // 23°45'00"
+    jd_epoch: 2415020.0,     // J1900.0 (31 Dec 1899 12h TT)
+  },
+};
 
 // --------------------------------------------------------------------------
 // Helpers
@@ -157,13 +183,55 @@ function datetimeToJulian(
 }
 
 // --------------------------------------------------------------------------
-// Ayanamsa calculation
+// IAU 2006 general precession in longitude
+//
+// The general precession in longitude ψ_A (arcseconds) as a function of
+// Julian centuries T from J2000.0 (Capitaine et al. 2003 / IAU 2006):
+//
+//   ψ_A = 5038.481507″ T
+//        −    1.0790069″ T²
+//        −    0.00114045″ T³
+//        +    0.000132851″ T⁴
+//        −    0.0000000951″ T⁵
+//
+// This replaces the older constant-rate 50.24″/yr approximation and gives
+// substantially better accuracy for dates far from J2000.0.
+// --------------------------------------------------------------------------
+
+/**
+ * Evaluate the IAU 2006 general precession polynomial at T Julian centuries
+ * from J2000.0. Returns the accumulated precession in **degrees**.
+ */
+function precessionIAU2006(T: number): number {
+  // Polynomial in arcseconds
+  const psiA =
+    5038.481507 * T
+    - 1.0790069 * T * T
+    - 0.00114045 * T * T * T
+    + 0.000132851 * T * T * T * T
+    - 0.0000000951 * T * T * T * T * T;
+  return psiA / 3600.0; // convert arcseconds → degrees
+}
+
+// --------------------------------------------------------------------------
+// Ayanamsa calculation (IAU 2006 precession model)
+//
+// For a given Julian Day and sidereal mode the ayanamsha is:
+//
+//   ayanamsa(jd) = ref_value + [ ψ_A(T_target) − ψ_A(T_ref) ]
+//
+// where T_target and T_ref are Julian centuries from J2000.0 for the target
+// date and the mode's reference epoch respectively, and ψ_A is the IAU 2006
+// general-precession polynomial evaluated above.
 // --------------------------------------------------------------------------
 
 function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
-  const yearsFromJ2000 = (jd_ut - J2000) / 365.25;
-  const base = AYANAMSA_J2000[siderealModeName] ?? AYANAMSA_J2000.SE_SIDM_LAHIRI;
-  return base + yearsFromJ2000 * PRECESSION_RATE;
+  const ref = AYANAMSA_REF[siderealModeName] ?? AYANAMSA_REF.SE_SIDM_LAHIRI;
+
+  const T_target = (jd_ut - J2000) / 36525.0;
+  const T_ref = (ref.jd_epoch - J2000) / 36525.0;
+
+  return ref.value_deg + (precessionIAU2006(T_target) - precessionIAU2006(T_ref));
 }
 
 // --------------------------------------------------------------------------
@@ -187,11 +255,21 @@ function computeMeanLunarNode(jd_ut: number): number {
 // --------------------------------------------------------------------------
 
 function computeObliquity(jd_ut: number): number {
-  // Mean obliquity of the ecliptic (Meeus formula)
+  // Mean obliquity of the ecliptic — IAU 2006 (Hilton et al. 2006)
+  //
+  //   ε = 84381.406″ − 46.836769″ T − 0.0001831″ T²
+  //     + 0.00200340″ T³ − 0.000000576″ T⁴ − 0.0000000434″ T⁵
+  //
+  // where T = Julian centuries from J2000.0.
+  // This supersedes the older Lieske (1979) / Meeus formula.
   const T = (jd_ut - J2000) / 36525.0;
-  // In arcseconds, then convert to degrees
   const obliquityArcsec =
-    84381.448 - 46.815 * T - 0.00059 * T * T + 0.001813 * T * T * T;
+    84381.406
+    - 46.836769 * T
+    - 0.0001831 * T * T
+    + 0.00200340 * T * T * T
+    - 0.000000576 * T * T * T * T
+    - 0.0000000434 * T * T * T * T * T;
   return obliquityArcsec / 3600.0;
 }
 
