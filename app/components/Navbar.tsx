@@ -17,6 +17,7 @@ export default function Navbar() {
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
   const [langOpen, setLangOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -58,6 +59,16 @@ export default function Navbar() {
     };
   }, [isAuthenticated, user]);
 
+  /* Track scroll position for glass effect */
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 40);
+    };
+    onScroll(); // check initial position
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   /* Close language dropdown on outside click */
   useEffect(() => {
     if (!langOpen) return;
@@ -86,7 +97,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="site-navbar">
+      <nav className={`site-navbar${scrolled ? " navbar-scrolled" : ""}`}>
         {/* -- Left side: theme toggle + brand -- */}
         <div className="navbar-left">
           <button
