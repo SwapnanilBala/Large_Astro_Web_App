@@ -340,6 +340,7 @@ h3 {
 .intake-panel,
 .dashboard-shell {
   width: min(1200px, 100%);
+  margin: 0 auto;
   border-radius: 24px;
   border: 1px solid var(--line-soft);
   background: var(--surface-strong);
@@ -8567,7 +8568,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   .intake-panel,
   .dashboard-shell {
-    margin: 0.75rem;
+    margin: 0.75rem auto;
     padding: clamp(1rem, 3vw, 1.5rem);
     border-radius: 16px;
   }
@@ -8623,7 +8624,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   .intake-panel,
   .dashboard-shell {
-    margin: 0.5rem;
+    margin: 0.5rem auto;
     padding: clamp(0.75rem, 3vw, 1.2rem);
     border-radius: 14px;
     max-width: 100%;
@@ -8692,7 +8693,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   .intake-panel,
   .dashboard-shell {
-    margin: 0.35rem;
+    margin: 0.35rem auto;
     padding: 0.7rem;
     border-radius: 12px;
   }
