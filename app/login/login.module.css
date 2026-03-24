@@ -54,6 +54,7 @@
   color: var(--ink-main);
   margin: 0.6rem 0 0;
   line-height: 1.2;
+  text-align: center;
 }
 
 .lead {
