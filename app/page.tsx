@@ -656,75 +656,38 @@ export default function Home() {
             <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
           )}
         </h1>
-        {/* ── Zodiac Elemental Groups ── */}
+        {/* ── Scattered Zodiac Backdrop Signs ── */}
         <div
-          className={`${styles.zodiacStrip} ${heroReady ? "anim-fade-in" : "hero-pre"}`}
+          className={`${styles.zodiacBackdrop} ${heroReady ? "anim-fade-in" : "hero-pre"}`}
           style={{ animationDelay: `${leadDelay}s` }}
           aria-hidden="true"
         >
           {[
-            {
-              elementKey: "zodiacElements.fire",
-              color: "#F07068",
-              glow: "rgba(240, 112, 104, 0.25)",
-              signs: [
-                { src: "/zodiac/aries.jpg", name: "Aries", symbol: "♈" },
-                { src: "/zodiac/leo.jpg", name: "Leo", symbol: "♌" },
-                { src: "/zodiac/sagittarius.jpg", name: "Sagittarius", symbol: "♐" },
-              ],
-            },
-            {
-              elementKey: "zodiacElements.earth",
-              color: "#3ECDA5",
-              glow: "rgba(62, 205, 165, 0.25)",
-              signs: [
-                { src: "/zodiac/taurus.jpg", name: "Taurus", symbol: "♉" },
-                { src: "/zodiac/virgo.jpg", name: "Virgo", symbol: "♍" },
-                { src: "/zodiac/capricorn.png", name: "Capricorn", symbol: "♑" },
-              ],
-            },
-            {
-              elementKey: "zodiacElements.air",
-              color: "#8B8FA3",
-              glow: "rgba(139, 143, 163, 0.25)",
-              signs: [
-                { src: "/zodiac/gemini.jpg", name: "Gemini", symbol: "♊" },
-                { src: "/zodiac/libra.jpg", name: "Libra", symbol: "♎" },
-                { src: "/zodiac/aquarius.png", name: "Aquarius", symbol: "♒" },
-              ],
-            },
-            {
-              elementKey: "zodiacElements.water",
-              color: "#5B9BD5",
-              glow: "rgba(91, 155, 213, 0.25)",
-              signs: [
-                { src: "/zodiac/cancer.jpg", name: "Cancer", symbol: "♋" },
-                { src: "/zodiac/scorpio.jpg", name: "Scorpio", symbol: "♏" },
-                { src: "/zodiac/pisces.jpg", name: "Pisces", symbol: "♓" },
-              ],
-            },
-          ].map((group, gi) => (
-            <div
-              key={group.elementKey}
-              className={styles.elementGroup}
+            { src: "/zodiac/aries.jpg",       top: "5%",  left: "3%" },
+            { src: "/zodiac/taurus.jpg",      top: "12%", left: "88%" },
+            { src: "/zodiac/gemini.jpg",       top: "28%", left: "6%" },
+            { src: "/zodiac/cancer.jpg",       top: "45%", left: "92%" },
+            { src: "/zodiac/leo.jpg",          top: "62%", left: "2%" },
+            { src: "/zodiac/virgo.jpg",        top: "75%", left: "90%" },
+            { src: "/zodiac/libra.jpg",        top: "88%", left: "8%" },
+            { src: "/zodiac/scorpio.jpg",      top: "8%",  left: "48%" },
+            { src: "/zodiac/sagittarius.jpg",  top: "35%", left: "95%" },
+            { src: "/zodiac/capricorn.png",    top: "55%", left: "5%" },
+            { src: "/zodiac/aquarius.png",     top: "92%", left: "52%" },
+            { src: "/zodiac/pisces.jpg",       top: "78%", left: "45%" },
+          ].map((sign, i) => (
+            <img
+              key={i}
+              src={sign.src}
+              alt=""
+              className={styles.zodiacBackdropSign}
+              loading="lazy"
               style={{
-                "--element-color": group.color,
-                "--element-glow": group.glow,
-                animationDelay: `${leadDelay + 0.15 * gi}s`,
-              } as React.CSSProperties}
-            >
-              <div className={styles.elementBackdrop} />
-              <span className={styles.elementLabel}>{t(group.elementKey)}</span>
-              <div className={styles.elementSigns}>
-                {group.signs.map((sign, si) => (
-                  <div key={sign.name} className={styles.zodiacStripItem} style={{ animationDelay: `${leadDelay + 0.15 * gi + 0.08 * si}s` }}>
-                    <img src={sign.src} alt={sign.name} className={styles.zodiacStripImg} loading="lazy" />
-                    <span className={styles.zodiacStripSymbol}>{sign.symbol}</span>
-                    <span className={styles.zodiacStripName}>{sign.name}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+                top: sign.top,
+                left: sign.left,
+                animationDelay: `${leadDelay + 0.1 * i}s`,
+              }}
+            />
           ))}
         </div>
 

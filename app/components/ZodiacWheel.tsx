@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, type ReactNode } from "react";
+import { useState, useEffect, useRef, type ReactNode } from "react";
 
 /* ─────────────────────────────────────────────────────────
    ZodiacWheel — slow-rotating decorative SVG background
@@ -76,6 +76,8 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
   const [visibleSegments, setVisibleSegments] = useState<Set<number>>(new Set());
   const [ringsVisible, setRingsVisible] = useState(false);
   const [entranceComplete, setEntranceComplete] = useState(false);
+  const mountTimeRef = useRef(Date.now());
+  const [counterAngle, setCounterAngle] = useState(0);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -106,6 +108,20 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
 
     return () => timers.forEach(clearTimeout);
   }, []);
+
+  // Track CSS rotation angle to counter-rotate tooltip so text stays upright
+  useEffect(() => {
+    if (hoveredIndex === null) return;
+    const SPIN_DURATION = 120000; // 120s per rotation, matches CSS
+    const update = () => {
+      const elapsed = Date.now() - mountTimeRef.current;
+      const angle = (360 * elapsed / SPIN_DURATION) % 360;
+      setCounterAngle(-angle);
+    };
+    update();
+    const id = setInterval(update, 50);
+    return () => clearInterval(id);
+  }, [hoveredIndex]);
 
   const activeSet = new Set(activeSigns.map((s) => s.toLowerCase()));
 
@@ -258,7 +274,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
     const tAngle = hoveredIndex * 30 + 15;
     const tp = polarToCartesian(CX, CY, R_GLYPH - 45, tAngle);
     tooltip = (
-      <g pointerEvents="none">
+      <g pointerEvents="none" transform={`rotate(${counterAngle}, ${tp.x}, ${tp.y})`}>
         {/* Background pill */}
         <rect
           x={tp.x - 40}
