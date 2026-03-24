@@ -11,7 +11,6 @@ import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import PageTransition from "./components/PageTransition";
-import FloatingQuotes from "./components/FloatingQuotes";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
@@ -457,7 +456,6 @@ export default function Home() {
         })}
       </div>
 
-      <FloatingQuotes />
 
       <ChartHistory userName={user?.display_name} />
 
