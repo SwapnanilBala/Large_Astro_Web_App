@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { AspectInfo } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { ASPECT_SYMBOLS, getAspectBriefInterpretation } from "./aspect-interpretations";
@@ -24,7 +25,7 @@ function getAspectBadgeClass(aspectType: string, vedic: boolean): string {
   return "aspect-badge";
 }
 
-export default function AspectsPanel({ aspects }: AspectsPanelProps) {
+function AspectsPanel({ aspects }: AspectsPanelProps) {
   const { t } = useTranslation();
 
   return (
@@ -73,3 +74,5 @@ export default function AspectsPanel({ aspects }: AspectsPanelProps) {
     </section>
   );
 }
+
+export default memo(AspectsPanel);

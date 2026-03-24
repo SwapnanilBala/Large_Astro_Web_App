@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { TransitData } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { getTransitInterpretation } from "./transit-interpretations";
@@ -23,7 +23,7 @@ function getTransitAspectClass(aspectType: string): string {
   return "transit-aspect-item";
 }
 
-export default function TransitsPanel({ transits }: TransitsPanelProps) {
+function TransitsPanel({ transits }: TransitsPanelProps) {
   const { t } = useTranslation();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -113,3 +113,5 @@ export default function TransitsPanel({ transits }: TransitsPanelProps) {
     </section>
   );
 }
+
+export default memo(TransitsPanel);

@@ -5,6 +5,20 @@ import { BirthInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 
+// ---------------------------------------------------------------------------
+// Structured error logger
+// ---------------------------------------------------------------------------
+
+function logApiError(route: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route,
+    error: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  }));
+}
+
 const CACHE_HEADER = "private, max-age=3600, stale-while-revalidate=1800";
 
 // --------------------------------------------------------------------------
@@ -76,7 +90,9 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Chart API error:", error);
+    logApiError("/api/chart [GET]", error, {
+      params: Object.fromEntries(request.nextUrl.searchParams.entries()),
+    });
     return errorResponse(error, "Chart calculation failed");
   }
 }
@@ -137,7 +153,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Chart API error:", error);
+    logApiError("/api/chart [POST]", error);
     return errorResponse(error, "Chart calculation failed");
   }
 }

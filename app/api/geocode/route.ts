@@ -6,16 +6,51 @@ import { GeocodeInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 
+// ---------------------------------------------------------------------------
+// Structured error logger
+// ---------------------------------------------------------------------------
+
+function logApiError(route: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route,
+    error: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  }));
+}
+
+const NOMINATIM_TIMEOUT_MS = 10_000;
+const MAX_PARAM_LENGTH = 200;
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
 
+    // -- Input validation: trim and length limits --
+    const rawCity = (searchParams.get("city") ?? "").trim();
+    const rawState = (searchParams.get("state") ?? "").trim();
+    const rawCountry = (searchParams.get("country") ?? "").trim();
+    const rawBirthDate = (searchParams.get("birthDate") ?? "").trim();
+    const rawBirthTime = (searchParams.get("birthTime") ?? "").trim();
+
+    if (
+      rawCity.length > MAX_PARAM_LENGTH ||
+      rawState.length > MAX_PARAM_LENGTH ||
+      rawCountry.length > MAX_PARAM_LENGTH
+    ) {
+      throw new ApiError(
+        ErrorCode.VALIDATION_FAILED,
+        "Parameter exceeds maximum length of 200 characters",
+      );
+    }
+
     const parsed = GeocodeInputSchema.safeParse({
-      city: searchParams.get("city") ?? "",
-      state: searchParams.get("state") ?? "",
-      country: searchParams.get("country") ?? "",
-      birthDate: searchParams.get("birthDate") ?? "",
-      birthTime: searchParams.get("birthTime") ?? "",
+      city: rawCity,
+      state: rawState,
+      country: rawCountry,
+      birthDate: rawBirthDate,
+      birthTime: rawBirthTime,
     });
 
     if (!parsed.success) {
@@ -44,16 +79,29 @@ export async function GET(request: NextRequest) {
     nominatimUrl.searchParams.set("format", "json");
     nominatimUrl.searchParams.set("limit", "1");
 
-    const response = await nominatimFetch(nominatimUrl.toString(), {
-      headers: {
-        "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
-      },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await nominatimFetch(nominatimUrl.toString(), {
+        headers: {
+          "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
+        },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
-      throw new ApiError(
-        ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "Geocoding service error",
+      logApiError("/api/geocode", new Error(`Nominatim returned ${response.status}`), {
+        url: nominatimUrl.toString(),
+        status: response.status,
+        query,
+      });
+      return NextResponse.json(
+        { found: false, error: "Geocoding service unavailable" },
+        { status: 502 },
       );
     }
 
@@ -69,6 +117,7 @@ export async function GET(request: NextRequest) {
     let timeZoneId = "";
     let timezoneOffsetMinutes: number | null = null;
 
+    let timezoneError: string | undefined;
     try {
       timeZoneId = tzLookup(latitude, longitude);
       if (birthDate && birthTime) {
@@ -76,12 +125,18 @@ export async function GET(request: NextRequest) {
           getTimezoneOffset(timeZoneId, new Date(`${birthDate}T${birthTime}:00`)) / 60000
         );
       }
-    } catch {
+    } catch (tzError) {
+      logApiError("/api/geocode", tzError, {
+        context: "timezone_lookup",
+        latitude,
+        longitude,
+      });
       timeZoneId = "";
       timezoneOffsetMinutes = null;
+      timezoneError = "Timezone lookup failed";
     }
 
-    const result = {
+    const result: Record<string, unknown> = {
       lat: data[0].lat,
       lon: data[0].lon,
       displayName: data[0].display_name,
@@ -90,13 +145,26 @@ export async function GET(request: NextRequest) {
       found: true,
     };
 
+    if (timezoneError) {
+      result.error = timezoneError;
+    }
+
     serverCaches.geocode.set(cacheKey, result);
 
     return NextResponse.json(result, {
       headers: { "X-Cache": "MISS" },
     });
   } catch (error) {
-    console.error("Geocode API error:", error);
+    const isTimeout = error instanceof DOMException && error.name === "AbortError";
+    logApiError("/api/geocode", error, {
+      type: isTimeout ? "timeout" : "unknown",
+    });
+    if (isTimeout) {
+      return NextResponse.json(
+        { found: false, error: "Geocoding service timed out" },
+        { status: 504 },
+      );
+    }
     return errorResponse(error, "Geocoding request failed");
   }
 }

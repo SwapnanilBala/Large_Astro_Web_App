@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Sora } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import StarField from "./components/StarField";
 import Navbar from "./components/Navbar";
@@ -25,7 +26,13 @@ const bodyFont = Sora({
 
 export const metadata: Metadata = {
   title: "Lagna Atelier",
-  description: "Swiss Ephemeris astrology intelligence workspace"
+  description: "Swiss Ephemeris astrology intelligence workspace",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Lagna Atelier",
+  },
 };
 
 export const viewport: Viewport = {
@@ -61,6 +68,9 @@ export default function RootLayout({
             </ToastProvider>
           </LanguageProvider>
         </ThemeProvider>
+        <Script id="sw-register" strategy="afterInteractive">
+          {`if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`}
+        </Script>
       </body>
     </html>
   );

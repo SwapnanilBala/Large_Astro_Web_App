@@ -1,17 +1,19 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslation } from '@/lib/i18n-context';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Home', icon: '⊙' },
-  { href: '/insights', label: 'Insights', icon: '✦' },
-  { href: '/workspace', label: 'Saved', icon: '♡' },
-  { href: '/pricing', label: 'Plans', icon: '◈' },
+  { href: '/', labelKey: 'bottomNav.home', icon: '⊙' },
+  { href: '/insights', labelKey: 'bottomNav.insights', icon: '✦' },
+  { href: '/workspace', labelKey: 'bottomNav.saved', icon: '♡' },
+  { href: '/pricing', labelKey: 'bottomNav.plans', icon: '◈' },
 ];
 
 export default function BottomNav() {
   const pathname = usePathname();
+  const { t } = useTranslation();
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
       {NAV_ITEMS.map(item => (
@@ -22,7 +24,7 @@ export default function BottomNav() {
           aria-current={pathname === item.href ? 'page' : undefined}
         >
           <span className={styles.icon}>{item.icon}</span>
-          <span className={styles.label}>{item.label}</span>
+          <span className={styles.label}>{t(item.labelKey)}</span>
         </Link>
       ))}
     </nav>

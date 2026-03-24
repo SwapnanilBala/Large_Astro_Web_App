@@ -48,6 +48,9 @@ export default function Home() {
   const [latLonExpanded, setLatLonExpanded] = useState(false);
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
   /* ── Scroll-reveal & validation shimmer ── */
@@ -57,13 +60,16 @@ export default function Home() {
   const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   /* ── Mystical tagline rotation ── */
-  const mysticalPhrases = useMemo(() => [
-    "Written in the Stars",
-    "Decode Your Destiny",
-    "Cosmic Blueprint Revealed",
-    "The Universe Speaks",
-    "Align With Your Path",
-  ], []);
+  const mysticalPhrases = useMemo(() => {
+    const phrases: string[] = [];
+    for (let i = 1; ; i++) {
+      const key = `home.mysticalPhrase${i}`;
+      const val = t(key);
+      if (val === key) break;   // t() returns the key when missing
+      phrases.push(val);
+    }
+    return phrases.length > 0 ? phrases : ["Written in the Stars"];
+  }, [t]);
   const [taglineIndex, setTaglineIndex] = useState(0);
 
   useEffect(() => {
@@ -267,6 +273,51 @@ export default function Home() {
     setDraft((previous) => ({ ...previous, timezoneOffsetMinutes: clientOffset }));
   }, []);
 
+  /* ── Restore draft from localStorage on mount (runs after timezone default) ── */
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("astro_intake_draft");
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as Record<string, unknown>;
+      // Validate shape: every key in profileInitialState must be a string
+      const keys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
+      const isValid = keys.every((k) => typeof parsed[k] === "string");
+      if (!isValid) return;
+      setDraft(parsed as unknown as ProfileQueryInput);
+    } catch {
+      // localStorage may throw in private browsing or if data is corrupt
+    }
+  }, []);
+
+  /* ── Auto-save draft to localStorage (debounced 500ms) ── */
+  useEffect(() => {
+    if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+
+    draftSaveTimer.current = setTimeout(() => {
+      try {
+        // Only save if user has entered something meaningful
+        const userFields: Array<keyof ProfileQueryInput> = [
+          "name", "birthDate", "birthTime", "country", "state", "city",
+        ];
+        const hasContent = userFields.some((f) => draft[f].trim().length > 0);
+        if (!hasContent) {
+          localStorage.removeItem("astro_intake_draft");
+          return;
+        }
+        localStorage.setItem("astro_intake_draft", JSON.stringify(draft));
+        setDraftSaved(true);
+        if (draftSavedDisplayTimer.current) clearTimeout(draftSavedDisplayTimer.current);
+        draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
+      } catch {
+        // localStorage may throw in private browsing
+      }
+    }, 500);
+
+    return () => {
+      if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+    };
+  }, [draft]);
+
   const draftCountry = draft.country;
   const draftState = draft.state;
   const draftCity = draft.city;
@@ -459,6 +510,12 @@ export default function Home() {
       params.set(key, value.trim());
     });
 
+    try {
+      localStorage.removeItem("astro_intake_draft");
+    } catch {
+      // localStorage may throw in private browsing
+    }
+
     router.push(`/engine-select?${params.toString()}`);
   };
 
@@ -617,7 +674,7 @@ export default function Home() {
         >
           {[
             {
-              element: "Fire",
+              elementKey: "zodiacElements.fire",
               color: "#ff6b35",
               glow: "rgba(255, 107, 53, 0.25)",
               signs: [
@@ -627,7 +684,7 @@ export default function Home() {
               ],
             },
             {
-              element: "Earth",
+              elementKey: "zodiacElements.earth",
               color: "#6abf69",
               glow: "rgba(106, 191, 105, 0.25)",
               signs: [
@@ -637,7 +694,7 @@ export default function Home() {
               ],
             },
             {
-              element: "Air",
+              elementKey: "zodiacElements.air",
               color: "#f2c26c",
               glow: "rgba(242, 194, 108, 0.25)",
               signs: [
@@ -647,7 +704,7 @@ export default function Home() {
               ],
             },
             {
-              element: "Water",
+              elementKey: "zodiacElements.water",
               color: "#6ce1d4",
               glow: "rgba(108, 225, 212, 0.25)",
               signs: [
@@ -658,7 +715,7 @@ export default function Home() {
             },
           ].map((group, gi) => (
             <div
-              key={group.element}
+              key={group.elementKey}
               className={styles.elementGroup}
               style={{
                 "--element-color": group.color,
@@ -667,7 +724,7 @@ export default function Home() {
               } as React.CSSProperties}
             >
               <div className={styles.elementBackdrop} />
-              <span className={styles.elementLabel}>{group.element}</span>
+              <span className={styles.elementLabel}>{t(group.elementKey)}</span>
               <div className={styles.elementSigns}>
                 {group.signs.map((sign, si) => (
                   <div key={sign.name} className={styles.zodiacStripItem} style={{ animationDelay: `${leadDelay + 0.15 * gi + 0.08 * si}s` }}>
@@ -686,6 +743,13 @@ export default function Home() {
         </div>
 
         <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
+          <span
+            className={styles.draftSavedIndicator}
+            style={{ opacity: draftSaved ? 1 : 0 }}
+            aria-live="polite"
+          >
+            Draft saved
+          </span>
           {/* ── Name Card ── */}
           <div data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>

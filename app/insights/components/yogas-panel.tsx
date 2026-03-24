@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { YogaDetectionResult } from "@/lib/astro-types";
 
 // --------------------------------------------------------------------------
@@ -115,7 +115,7 @@ type YogasPanelProps = {
   yogas: YogaDetectionResult[];
 };
 
-export default function YogasPanel({ yogas }: YogasPanelProps) {
+function YogasPanel({ yogas }: YogasPanelProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("all");
 
   const filtered =
@@ -184,3 +184,5 @@ export default function YogasPanel({ yogas }: YogasPanelProps) {
     </section>
   );
 }
+
+export default memo(YogasPanel);

@@ -9,6 +9,8 @@
  * - Deterministic cache-key generation from sorted params
  */
 
+import { createHash } from "crypto";
+
 // ---------------------------------------------------------------------------
 // Generic LRU + TTL cache
 // ---------------------------------------------------------------------------
@@ -105,12 +107,9 @@ export function makeCacheKey(
     .map((k) => `${k}=${params[k] ?? ""}`)
     .join("&");
 
-  // djb2 hash for a compact key
-  let hash = 5381;
-  for (let i = 0; i < sorted.length; i++) {
-    hash = ((hash << 5) + hash + sorted.charCodeAt(i)) | 0;
-  }
-  return `${prefix}_${(hash >>> 0).toString(36)}`;
+  // SHA-256 truncated to 16 hex chars for a compact, collision-resistant key
+  const hash = createHash("sha256").update(sorted).digest("hex").slice(0, 16);
+  return `${prefix}_${hash}`;
 }
 
 // ---------------------------------------------------------------------------

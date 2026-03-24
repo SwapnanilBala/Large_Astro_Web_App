@@ -3,6 +3,23 @@ import { nominatimFetch } from "@/lib/nominatim-throttle";
 import { SuggestInputSchema } from "@/lib/schemas";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 
+// ---------------------------------------------------------------------------
+// Structured error logger
+// ---------------------------------------------------------------------------
+
+function logApiError(route: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route,
+    error: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  }));
+}
+
+const NOMINATIM_TIMEOUT_MS = 10_000;
+const MAX_PARAM_LENGTH = 200;
+
 // Map of common country names to ISO 3166-1 alpha-2 codes for Nominatim countrycodes filter
 const countryCodeMap: Record<string, string> = {
   india: "in",
@@ -74,16 +91,34 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
 
+    // -- Input validation: length limits --
+    const rawQ = (searchParams.get("q") ?? "").trim();
+    const rawType = (searchParams.get("type") ?? "city").trim();
+    const rawCountry = (searchParams.get("country") ?? "").trim();
+    const rawState = (searchParams.get("state") ?? "").trim();
+
+    if (
+      rawQ.length > MAX_PARAM_LENGTH ||
+      rawType.length > MAX_PARAM_LENGTH ||
+      rawCountry.length > MAX_PARAM_LENGTH ||
+      rawState.length > MAX_PARAM_LENGTH
+    ) {
+      return NextResponse.json(
+        { error: "Parameter exceeds maximum length of 200 characters", results: [] },
+        { status: 400 },
+      );
+    }
+
     const parsed = SuggestInputSchema.safeParse({
-      q: searchParams.get("q") ?? "",
-      type: searchParams.get("type") ?? "city",
-      country: searchParams.get("country") ?? "",
-      state: searchParams.get("state") ?? "",
+      q: rawQ,
+      type: rawType,
+      country: rawCountry,
+      state: rawState,
     });
 
     if (!parsed.success) {
-      // For suggest, return empty array on validation failure (matches previous behavior)
-      return NextResponse.json([]);
+      // For suggest, return empty results with error info on validation failure
+      return NextResponse.json({ error: "Invalid input parameters", results: [] });
     }
 
     const { q: query, type, country: contextCountry, state: contextState } = parsed.data;
@@ -132,14 +167,26 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const response = await nominatimFetch(nominatimUrl.toString(), {
-      headers: {
-        "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
-      },
-    });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
+    let response: Response;
+    try {
+      response = await nominatimFetch(nominatimUrl.toString(), {
+        headers: {
+          "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
+        },
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
 
     if (!response.ok) {
-      return NextResponse.json([]);
+      logApiError("/api/suggest", new Error(`Nominatim returned ${response.status}`), {
+        url: nominatimUrl.toString(),
+        status: response.status,
+      });
+      return NextResponse.json({ error: "Suggestion service temporarily unavailable", results: [] });
     }
 
     const data = await response.json();
@@ -175,7 +222,16 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(unique, {
       headers: { "X-Cache": "MISS" },
     });
-  } catch {
-    return NextResponse.json([]);
+  } catch (error) {
+    const isTimeout = error instanceof DOMException && error.name === "AbortError";
+    logApiError("/api/suggest", error, {
+      type: isTimeout ? "timeout" : "unknown",
+    });
+    return NextResponse.json({
+      error: isTimeout
+        ? "Suggestion service timed out"
+        : "Suggestion service temporarily unavailable",
+      results: [],
+    });
   }
 }

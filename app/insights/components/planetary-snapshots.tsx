@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 
@@ -52,7 +52,7 @@ type PlanetarySnapshotsProps = {
   planets: PlanetPosition[];
 };
 
-export default function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
+function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
   const { t } = useTranslation();
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
@@ -171,3 +171,5 @@ export default function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps)
     </section>
   );
 }
+
+export default memo(PlanetarySnapshots);

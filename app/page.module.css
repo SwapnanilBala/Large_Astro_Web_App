@@ -1144,3 +1144,16 @@
 :global([data-theme="light"]) .glassAccentImg {
   filter: saturate(0.4) brightness(0.9) blur(0.5px);
 }
+
+/* ── Draft-saved indicator ──────────────────── */
+.draftSavedIndicator {
+  display: block;
+  text-align: right;
+  font-size: 0.75rem;
+  color: rgba(108, 225, 212, 0.85);
+  letter-spacing: 0.04em;
+  height: 1.2em;
+  margin-bottom: 0.25rem;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}

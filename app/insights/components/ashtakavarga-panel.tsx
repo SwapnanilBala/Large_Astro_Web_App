@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { AshtakavargaData, TransitData } from "@/lib/astro-types";
 
 const SIGNS = [
@@ -39,7 +39,7 @@ function getTransitSign(transits: TransitData | null | undefined, planet: string
   return pos?.sign ?? null;
 }
 
-export default function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
+function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
   const [selectedPlanet, setSelectedPlanet] = useState<string | null>(null);
 
   const showingBAV = selectedPlanet !== null;
@@ -132,3 +132,5 @@ export default function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
     </section>
   );
 }
+
+export default memo(AshtakavargaPanel);

@@ -3,7 +3,7 @@
  *
  * - Map-based with TTL expiration per entry
  * - LRU eviction when max entries is reached
- * - Cache key: SHA-256 hash of query string (or plain string if crypto unavailable)
+ * - Cache key: dual-pass FNV-1a 64-bit hash of query string
  */
 
 const DEFAULT_TTL_MS = 30 * 60 * 1000; // 30 minutes
@@ -26,15 +26,28 @@ class ChartCache<T = unknown> {
 
   /**
    * Generate a cache key from an arbitrary query string.
-   * Uses a simple hash when crypto.subtle is unavailable (sync fallback).
+   * Uses two-pass FNV-1a to produce a 64-bit hash (16 hex chars),
+   * providing much better collision resistance than a single 32-bit hash
+   * while remaining synchronous for client-side use.
    */
   static makeKey(input: string): string {
-    // Simple djb2 hash - fast, deterministic, no async needed
-    let hash = 5381;
+    // FNV-1a pass 1 (standard offset basis)
+    let h1 = 0x811c9dc5;
     for (let i = 0; i < input.length; i++) {
-      hash = ((hash << 5) + hash + input.charCodeAt(i)) | 0;
+      h1 ^= input.charCodeAt(i);
+      h1 = Math.imul(h1, 0x01000193);
     }
-    return `chart_${(hash >>> 0).toString(36)}`;
+
+    // FNV-1a pass 2 (different offset basis for independent bits)
+    let h2 = 0x050c5d1f;
+    for (let i = 0; i < input.length; i++) {
+      h2 ^= input.charCodeAt(i);
+      h2 = Math.imul(h2, 0x01000193);
+    }
+
+    const hex1 = (h1 >>> 0).toString(16).padStart(8, "0");
+    const hex2 = (h2 >>> 0).toString(16).padStart(8, "0");
+    return `chart_${hex1}${hex2}`;
   }
 
   get(key: string): T | null {

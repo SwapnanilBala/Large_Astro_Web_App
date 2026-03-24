@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { ShadbalaResult } from "@/lib/astro-types";
 
 type ShadbalaPanelProps = {
@@ -39,7 +39,7 @@ function getStrengthLabel(ratio: number): string {
   return "Weak";
 }
 
-export default function ShadbalaPanel({ shadbala }: ShadbalaPanelProps) {
+function ShadbalaPanel({ shadbala }: ShadbalaPanelProps) {
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
   if (!shadbala || shadbala.length === 0) return null;
@@ -192,3 +192,5 @@ export default function ShadbalaPanel({ shadbala }: ShadbalaPanelProps) {
     </section>
   );
 }
+
+export default memo(ShadbalaPanel);

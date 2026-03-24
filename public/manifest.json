@@ -1,0 +1,16 @@
+{
+  "name": "Lagna Atelier",
+  "short_name": "Lagna",
+  "description": "Swiss Ephemeris astrology intelligence workspace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#041420",
+  "theme_color": "#041420",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

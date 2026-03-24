@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { DivisionalChartInfo } from "@/lib/astro-types";
 
 // --------------------------------------------------------------------------
@@ -50,7 +50,7 @@ const PLANET_GLYPHS: Record<string, string> = {
 // Component
 // --------------------------------------------------------------------------
 
-export default function DivisionalChartsPanel({
+function DivisionalChartsPanel({
   divisionalCharts,
 }: DivisionalChartsPanelProps) {
   const divisionKeys = Object.keys(divisionalCharts)
@@ -157,3 +157,5 @@ export default function DivisionalChartsPanel({
     </section>
   );
 }
+
+export default memo(DivisionalChartsPanel);

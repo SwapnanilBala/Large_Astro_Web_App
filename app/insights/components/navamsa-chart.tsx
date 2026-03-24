@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { NavamsaPositionInfo } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { getNavamsaInterpretation } from "./navamsa-interpretations";
@@ -45,7 +45,7 @@ const PLANET_GLYPHS: Record<string, string> = {
   Ketu:    "☋",
 };
 
-export default function NavamsaChart({ navamsa }: NavamsaChartProps) {
+function NavamsaChart({ navamsa }: NavamsaChartProps) {
   const { t } = useTranslation();
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
@@ -219,3 +219,5 @@ export default function NavamsaChart({ navamsa }: NavamsaChartProps) {
     </section>
   );
 }
+
+export default memo(NavamsaChart);

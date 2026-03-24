@@ -1,32 +1,9 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
+import { useTranslation } from "@/lib/i18n-context";
 
-const QUOTES = [
-  "The stars incline, they do not compel",
-  "As above, so below",
-  "The cosmos is within us",
-  "We are made of starstuff",
-  "The soul of the newly born baby is marked for life by the pattern of the stars",
-  "A wise man shall overrule his stars",
-  "The starry vault of heaven is in truth the open book of cosmic projection",
-  "Follow the light of your natal star",
-  "The planets speak in whispers to those who listen",
-  "Every soul is destined by the stars that witnessed its birth",
-  "In the dance of the planets, find the rhythm of your fate",
-  "The ascendant reveals what the soul already knows",
-  "Saturn teaches through patience what Jupiter grants through grace",
-  "The Moon remembers what the mind forgets",
-  "Through the houses of heaven, the self discovers its path",
-  "Beneath every chart lies a universe waiting to speak",
-  "The Nakshatras weave destiny thread by thread",
-  "Where planets converge, purpose is revealed",
-  "Your Lagna is the doorway to self-knowledge",
-  "The Navamsha whispers what the Rashi shouts",
-  "Time is the canvas; the planets are the paint",
-  "In Jyotish, nothing is random \u2014 all is rhythm",
-  "The Dasha unfolds what karma has written",
-];
+const QUOTE_COUNT = 23;
 
 type DepthLayer = 1 | 2 | 3;
 
@@ -78,8 +55,8 @@ function getEdgeBlur(x: number, y: number): number {
   return maxProximity * 3;
 }
 
-function generateQuote(id: number): FloatingQuote {
-  const text = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+function makeQuote(id: number, quoteTexts: string[]): FloatingQuote {
+  const text = quoteTexts[Math.floor(Math.random() * quoteTexts.length)];
   const direction = Math.random() > 0.5 ? 1 : -1;
   const depth = ([1, 2, 3] as DepthLayer[])[Math.floor(Math.random() * 3)];
   const config = DEPTH_CONFIGS[depth];
@@ -101,8 +78,29 @@ function generateQuote(id: number): FloatingQuote {
 }
 
 export default function FloatingQuotes() {
+  const { t } = useTranslation();
   const [quotes, setQuotes] = useState<FloatingQuote[]>([]);
   const [exitingIds, setExitingIds] = useState<Set<number>>(new Set());
+
+  /* ── Load translated quotes ── */
+  const quoteTexts = useMemo(() => {
+    const texts: string[] = [];
+    for (let i = 1; i <= QUOTE_COUNT; i++) {
+      const key = `quotes.${i}`;
+      const val = t(key);
+      if (val !== key) texts.push(val);  // t() returns the key when missing
+    }
+    return texts.length > 0 ? texts : ["The stars incline, they do not compel"];
+  }, [t]);
+
+  /* Stable ref so the interval callback always sees the latest quoteTexts */
+  const quoteTextsRef = useRef(quoteTexts);
+  quoteTextsRef.current = quoteTexts;
+
+  const generateQuote = useCallback(
+    (id: number) => makeQuote(id, quoteTextsRef.current),
+    [],
+  );
 
   useEffect(() => {
     const initial = Array.from({ length: 5 }, (_, i) => generateQuote(i));
@@ -133,7 +131,7 @@ export default function FloatingQuotes() {
     }, 8000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [generateQuote]);
 
   return (
     <div className="floating-quotes-container" aria-hidden="true">

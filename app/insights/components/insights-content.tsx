@@ -17,6 +17,42 @@ function PanelSkeleton() {
   return <div className={styles.card} style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>Loading…</div>;
 }
 
+/* ─── Intersection Observer Lazy Panel ─── */
+function LazyPanel({
+  children,
+  fallback,
+  rootMargin = "200px",
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+  rootMargin?: string;
+}) {
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [rootMargin]);
+
+  return (
+    <div ref={ref}>
+      {isVisible ? children : (fallback ?? <PanelSkeleton />)}
+    </div>
+  );
+}
+
 const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LagnaChart = dynamic(() => import("./lagna-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
@@ -535,21 +571,27 @@ export default function InsightsContent({
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div className={styles.cardForecast}>
-              <PanelErrorBoundary panelName="Future Forecast">
-                <FutureForecastPanel queryString={historyQs} />
-              </PanelErrorBoundary>
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Future Forecast">
+                  <FutureForecastPanel queryString={historyQs} />
+                </PanelErrorBoundary>
+              </LazyPanel>
             </div>
 
             <div className={styles.cardForecast}>
-              <PanelErrorBoundary panelName="Muhurta">
-                <MuhurtaPanel queryString={historyQs} />
-              </PanelErrorBoundary>
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Muhurta">
+                  <MuhurtaPanel queryString={historyQs} />
+                </PanelErrorBoundary>
+              </LazyPanel>
             </div>
 
             <div className={styles.cardForecast}>
-              <PanelErrorBoundary panelName="Varshaphal & Annual Profections">
-                <VarshaphalPanel queryString={historyQs} birthDate={birthDate} />
-              </PanelErrorBoundary>
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Varshaphal & Annual Profections">
+                  <VarshaphalPanel queryString={historyQs} birthDate={birthDate} />
+                </PanelErrorBoundary>
+              </LazyPanel>
             </div>
           </div>
         </CollapsibleSection>
@@ -674,26 +716,28 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
           >
-            <PanelErrorBoundary panelName="Nakshatra & Dasha">
-            <AuthGate
-              featureLabel="Nakshatra & Dasha"
-              isLocked={lockedFeatures.has("nakshatra_dasha")}
-            >
-              {payload.chart.nakshatra && payload.chart.dasha ? (
-                <NakshatraDashaPanel
-                  nakshatra={payload.chart.nakshatra}
-                  dasha={payload.chart.dasha}
-                  audit={payload.chart.calculation_audit}
-                  planets={payload.chart.planets}
-                />
-              ) : (
-                <LockedFeaturePreview
-                  title="Nakshatra and Dasha timing"
-                  description="Unlock lunar mansion analysis, current dasha sequencing, and timing-sensitive drill-downs."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Nakshatra & Dasha">
+              <AuthGate
+                featureLabel="Nakshatra & Dasha"
+                isLocked={lockedFeatures.has("nakshatra_dasha")}
+              >
+                {payload.chart.nakshatra && payload.chart.dasha ? (
+                  <NakshatraDashaPanel
+                    nakshatra={payload.chart.nakshatra}
+                    dasha={payload.chart.dasha}
+                    audit={payload.chart.calculation_audit}
+                    planets={payload.chart.planets}
+                  />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Nakshatra and Dasha timing"
+                    description="Unlock lunar mansion analysis, current dasha sequencing, and timing-sensitive drill-downs."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
 
           {/* Aspects */}
@@ -704,21 +748,23 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
           >
-            <PanelErrorBoundary panelName="Planetary Aspects">
-            <AuthGate
-              featureLabel="Planetary Aspects"
-              isLocked={lockedFeatures.has("planetary_aspects")}
-            >
-              {payload.chart.aspects && payload.chart.aspects.length > 0 ? (
-                <AspectsPanel aspects={payload.chart.aspects} />
-              ) : (
-                <LockedFeaturePreview
-                  title="Planetary aspect matrix"
-                  description="See the strongest harmonious and friction-heavy contacts in the natal chart, ranked by orb."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Planetary Aspects">
+              <AuthGate
+                featureLabel="Planetary Aspects"
+                isLocked={lockedFeatures.has("planetary_aspects")}
+              >
+                {payload.chart.aspects && payload.chart.aspects.length > 0 ? (
+                  <AspectsPanel aspects={payload.chart.aspects} />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Planetary aspect matrix"
+                    description="See the strongest harmonious and friction-heavy contacts in the natal chart, ranked by orb."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
 
           {/* Navamsa */}
@@ -729,21 +775,23 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.15 }}
           >
-            <PanelErrorBoundary panelName="Navamsa D9 Chart">
-            <AuthGate
-              featureLabel="Navamsa D9 Chart"
-              isLocked={lockedFeatures.has("navamsa_d9")}
-            >
-              {payload.chart.navamsa && payload.chart.navamsa.length > 0 ? (
-                <NavamsaChart navamsa={payload.chart.navamsa} />
-              ) : (
-                <LockedFeaturePreview
-                  title="Navamsa D9 refinement"
-                  description="Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Navamsa D9 Chart">
+              <AuthGate
+                featureLabel="Navamsa D9 Chart"
+                isLocked={lockedFeatures.has("navamsa_d9")}
+              >
+                {payload.chart.navamsa && payload.chart.navamsa.length > 0 ? (
+                  <NavamsaChart navamsa={payload.chart.navamsa} />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Navamsa D9 refinement"
+                    description="Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
 
           {/* Divisional Charts */}
@@ -754,21 +802,23 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.18 }}
           >
-            <PanelErrorBoundary panelName="Divisional Charts">
-            <AuthGate
-              featureLabel="Divisional Charts"
-              isLocked={lockedFeatures.has("divisional_charts")}
-            >
-              {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 ? (
-                <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
-              ) : (
-                <LockedFeaturePreview
-                  title="Divisional Varga Charts"
-                  description="Unlock D2 through D12 divisional charts to examine wealth, siblings, career, children, and more."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Divisional Charts">
+              <AuthGate
+                featureLabel="Divisional Charts"
+                isLocked={lockedFeatures.has("divisional_charts")}
+              >
+                {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 ? (
+                  <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Divisional Varga Charts"
+                    description="Unlock D2 through D12 divisional charts to examine wealth, siblings, career, children, and more."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
 
           {/* Shadbala */}
@@ -780,14 +830,16 @@ export default function InsightsContent({
               viewport={{ once: true, margin: "-60px" }}
               transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.12 }}
             >
-              <PanelErrorBoundary panelName="Shadbala Analysis">
-                <AuthGate
-                  featureLabel="Shadbala Analysis"
-                  isLocked={lockedFeatures.has("planetary_aspects")}
-                >
-                  <ShadbalaPanel shadbala={payload.chart.shadbala} />
-                </AuthGate>
-              </PanelErrorBoundary>
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Shadbala Analysis">
+                  <AuthGate
+                    featureLabel="Shadbala Analysis"
+                    isLocked={lockedFeatures.has("planetary_aspects")}
+                  >
+                    <ShadbalaPanel shadbala={payload.chart.shadbala} />
+                  </AuthGate>
+                </PanelErrorBoundary>
+              </LazyPanel>
             </motion.div>
           )}
 
@@ -800,9 +852,11 @@ export default function InsightsContent({
               viewport={{ once: true, margin: "-60px" }}
               transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.15 }}
             >
-              <PanelErrorBoundary panelName="Planetary Yogas">
-                <YogasPanel yogas={payload.chart.yogas} />
-              </PanelErrorBoundary>
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Planetary Yogas">
+                  <YogasPanel yogas={payload.chart.yogas} />
+                </PanelErrorBoundary>
+              </LazyPanel>
             </motion.div>
           )}
 
@@ -814,21 +868,23 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
           >
-            <PanelErrorBoundary panelName="Live Transits">
-            <AuthGate
-              featureLabel="Live Transits"
-              isLocked={lockedFeatures.has("live_transits")}
-            >
-              {payload.transits ? (
-                <TransitsPanel transits={payload.transits} />
-              ) : (
-                <LockedFeaturePreview
-                  title="Live transits"
-                  description="Track the current sky against the natal chart to understand active triggers and near-term windows."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Live Transits">
+              <AuthGate
+                featureLabel="Live Transits"
+                isLocked={lockedFeatures.has("live_transits")}
+              >
+                {payload.transits ? (
+                  <TransitsPanel transits={payload.transits} />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Live transits"
+                    description="Track the current sky against the natal chart to understand active triggers and near-term windows."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
 
           {/* Ashtakavarga */}
@@ -839,24 +895,26 @@ export default function InsightsContent({
             viewport={{ once: true, margin: "-60px" }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.25 }}
           >
-            <PanelErrorBoundary panelName="Ashtakavarga">
-            <AuthGate
-              featureLabel="Ashtakavarga"
-              isLocked={lockedFeatures.has("live_transits")}
-            >
-              {payload.ashtakavarga ? (
-                <AshtakavargaPanel
-                  ashtakavarga={payload.ashtakavarga}
-                  transits={payload.transits}
-                />
-              ) : (
-                <LockedFeaturePreview
-                  title="Ashtakavarga scoring"
-                  description="Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
-                />
-              )}
-            </AuthGate>
-            </PanelErrorBoundary>
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Ashtakavarga">
+              <AuthGate
+                featureLabel="Ashtakavarga"
+                isLocked={lockedFeatures.has("live_transits")}
+              >
+                {payload.ashtakavarga ? (
+                  <AshtakavargaPanel
+                    ashtakavarga={payload.ashtakavarga}
+                    transits={payload.transits}
+                  />
+                ) : (
+                  <LockedFeaturePreview
+                    title="Ashtakavarga scoring"
+                    description="Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
+                  />
+                )}
+              </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
           </motion.div>
         </div>
         </CollapsibleSection>
@@ -868,15 +926,17 @@ export default function InsightsContent({
           defaultOpen={false}
           className={styles.cardRules}
         >
-          <PanelErrorBoundary panelName="Palm Reading">
-            <AuthGate
-              featureLabel="Palm Reading"
-              isLocked={lockedFeatures.has("palm_reading")}
-              requiredTier="premium"
-            >
-              <PalmReadingPanel />
-            </AuthGate>
-          </PanelErrorBoundary>
+          <LazyPanel>
+            <PanelErrorBoundary panelName="Palm Reading">
+              <AuthGate
+                featureLabel="Palm Reading"
+                isLocked={lockedFeatures.has("palm_reading")}
+                requiredTier="premium"
+              >
+                <PalmReadingPanel />
+              </AuthGate>
+            </PanelErrorBoundary>
+          </LazyPanel>
         </CollapsibleSection>
 
         {/* ─── Life Domain Deep Dives ─── */}

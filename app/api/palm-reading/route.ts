@@ -3,6 +3,22 @@ import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 
 // ---------------------------------------------------------------------------
+// Structured error logger
+// ---------------------------------------------------------------------------
+
+function logApiError(route: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route,
+    error: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  }));
+}
+
+const OPENAI_TIMEOUT_MS = 30_000;
+
+// ---------------------------------------------------------------------------
 // System prompt
 // ---------------------------------------------------------------------------
 
@@ -138,26 +154,36 @@ export async function POST(request: NextRequest) {
 
     const dataUrl = `data:${mediaType};base64,${image}`;
 
-    const response = await client.chat.completions.create({
-      model: "gpt-4o",
-      max_tokens: 4000,
-      messages: [
-        { role: "system", content: PALM_READING_SYSTEM_PROMPT },
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+    let response: OpenAI.Chat.Completions.ChatCompletion;
+    try {
+      response = await client.chat.completions.create(
         {
-          role: "user",
-          content: [
+          model: "gpt-4o",
+          max_tokens: 4000,
+          messages: [
+            { role: "system", content: PALM_READING_SYSTEM_PROMPT },
             {
-              type: "image_url",
-              image_url: { url: dataUrl, detail: "high" },
-            },
-            {
-              type: "text",
-              text: "Analyze this palm image and provide a detailed palmistry reading.",
+              role: "user",
+              content: [
+                {
+                  type: "image_url",
+                  image_url: { url: dataUrl, detail: "high" },
+                },
+                {
+                  type: "text",
+                  text: "Analyze this palm image and provide a detailed palmistry reading.",
+                },
+              ],
             },
           ],
         },
-      ],
-    });
+        { signal: controller.signal },
+      );
+    } finally {
+      clearTimeout(timeout);
+    }
 
     // -- Extract text from response --
     const rawText = response.choices[0]?.message?.content;
@@ -186,7 +212,21 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(reading);
   } catch (error) {
-    console.error("Palm reading API error:", error);
+    const isTimeout =
+      (error instanceof DOMException && error.name === "AbortError") ||
+      (error instanceof Error && error.message?.includes("aborted"));
+    logApiError("/api/palm-reading", error, {
+      type: isTimeout ? "timeout" : "unknown",
+    });
+    if (isTimeout) {
+      return errorResponse(
+        new ApiError(
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+          "Palm reading service timed out — please try again",
+        ),
+        "Palm reading timed out",
+      );
+    }
     return errorResponse(error, "Palm reading failed");
   }
 }

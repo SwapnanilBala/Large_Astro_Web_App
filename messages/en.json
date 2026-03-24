@@ -31,7 +31,12 @@
     "geoFound": "Coordinates detected ({lat}, {lon})",
     "geoNotFound": "Could not detect coordinates — enter manually below",
     "submit": "Generate Chart Intelligence",
-    "submitting": "Building chart..."
+    "submitting": "Building chart...",
+    "mysticalPhrase1": "Written in the Stars",
+    "mysticalPhrase2": "Decode Your Destiny",
+    "mysticalPhrase3": "Cosmic Blueprint Revealed",
+    "mysticalPhrase4": "The Universe Speaks",
+    "mysticalPhrase5": "Align With Your Path"
   },
   "login": {
     "kicker": "Welcome Back",
@@ -182,5 +187,49 @@
     "lead": "Enter your partner's birth details to generate a Vedic compatibility report.",
     "comingSoon": "Full compatibility engine coming soon. For now, explore the relationship themes in your natal chart.",
     "backToChart": "Back to Chart"
+  },
+  "bottomNav": {
+    "home": "Home",
+    "insights": "Insights",
+    "saved": "Saved",
+    "plans": "Plans"
+  },
+  "errorBoundary": {
+    "heading": "Something went wrong",
+    "description": "An unexpected error disrupted the cosmic flow. You can try again or return to the previous page.",
+    "tryAgain": "Try again",
+    "copyError": "Report this error",
+    "copied": "Copied!"
+  },
+  "zodiacElements": {
+    "fire": "Fire",
+    "earth": "Earth",
+    "air": "Air",
+    "water": "Water"
+  },
+  "quotes": {
+    "1": "The stars incline, they do not compel",
+    "2": "As above, so below",
+    "3": "The cosmos is within us",
+    "4": "We are made of starstuff",
+    "5": "The soul of the newly born baby is marked for life by the pattern of the stars",
+    "6": "A wise man shall overrule his stars",
+    "7": "The starry vault of heaven is in truth the open book of cosmic projection",
+    "8": "Follow the light of your natal star",
+    "9": "The planets speak in whispers to those who listen",
+    "10": "Every soul is destined by the stars that witnessed its birth",
+    "11": "In the dance of the planets, find the rhythm of your fate",
+    "12": "The ascendant reveals what the soul already knows",
+    "13": "Saturn teaches through patience what Jupiter grants through grace",
+    "14": "The Moon remembers what the mind forgets",
+    "15": "Through the houses of heaven, the self discovers its path",
+    "16": "Beneath every chart lies a universe waiting to speak",
+    "17": "The Nakshatras weave destiny thread by thread",
+    "18": "Where planets converge, purpose is revealed",
+    "19": "Your Lagna is the doorway to self-knowledge",
+    "20": "The Navamsha whispers what the Rashi shouts",
+    "21": "Time is the canvas; the planets are the paint",
+    "22": "In Jyotish, nothing is random — all is rhythm",
+    "23": "The Dasha unfolds what karma has written"
   }
 }
