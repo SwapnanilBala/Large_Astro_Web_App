@@ -2,13 +2,14 @@
 
 .panel {
   width: min(520px, 100%);
-  border-radius: 30px;
+  border-radius: 20px;
   border: 1px solid var(--line-soft);
-  background:
-    linear-gradient(130deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)),
-    var(--surface);
-  backdrop-filter: blur(16px);
-  box-shadow: var(--shadow-card);
+  background: var(--surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.08);
   padding: clamp(1.5rem, 3vw, 2.8rem);
   z-index: 1;
   animation: rise 650ms ease-out;
@@ -29,8 +30,8 @@
 
 @media (hover: hover) {
   .panel:hover {
-    border-color: rgba(195, 231, 255, 0.3);
-    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
+    border-color: rgba(255, 255, 255, 0.14);
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.14);
     transform: translateY(-2px);
   }
 }
