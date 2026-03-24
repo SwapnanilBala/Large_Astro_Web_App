@@ -5,18 +5,21 @@
 .panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.08));
+  background: var(--surface, rgba(255, 255, 255, 0.06));
   padding: 1.5rem;
-  backdrop-filter: blur(12px);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1),
-    0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: var(--line-strong, rgba(255, 255, 255, 0.14));
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 20px rgba(62, 205, 165, 0.04);
+  transform: translateY(-2px);
 }
 
 .header {
@@ -27,8 +30,8 @@
   font-size: 0.8rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 3px;
-  color: var(--accent-gold);
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
   margin: 0 0 0.5rem;
 }
 
@@ -68,8 +71,8 @@
 
 .yearField select {
   padding: 0.5rem 0.75rem;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
   background: rgba(255, 255, 255, 0.06);
   color: var(--ink-main);
   font-size: 0.9rem;
@@ -85,9 +88,9 @@
 
 .yearBtn {
   padding: 0.5rem 1.25rem;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid var(--accent-aqua);
-  background: rgba(108, 225, 212, 0.1);
+  background: rgba(62, 205, 165, 0.1);
   color: var(--accent-aqua);
   font-weight: 600;
   font-size: 0.85rem;
@@ -96,7 +99,7 @@
 }
 
 .yearBtn:hover:not(:disabled) {
-  background: rgba(108, 225, 212, 0.2);
+  background: rgba(62, 205, 165, 0.2);
 }
 
 .yearBtn:active:not(:disabled) {
@@ -112,10 +115,10 @@
 
 .error {
   padding: 0.75rem 1rem;
-  border-radius: 8px;
-  background: rgba(255, 80, 80, 0.08);
-  border: 1px solid rgba(255, 80, 80, 0.2);
-  color: #ff7070;
+  border-radius: 12px;
+  background: rgba(240, 112, 104, 0.08);
+  border: 1px solid rgba(240, 112, 104, 0.2);
+  color: #F07068;
   font-size: 0.85rem;
   margin-bottom: 1rem;
 }
@@ -145,10 +148,11 @@
 }
 
 .section {
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
   padding: 1.15rem;
+  backdrop-filter: blur(12px);
 }
 
 .sectionTitle {
@@ -189,15 +193,15 @@
 
 .tagGold {
   composes: tag;
-  border-color: rgba(242, 194, 108, 0.3);
-  background: rgba(242, 194, 108, 0.08);
+  border-color: rgba(240, 183, 84, 0.3);
+  background: rgba(240, 183, 84, 0.08);
   color: var(--accent-gold);
 }
 
 .tagAqua {
   composes: tag;
-  border-color: rgba(108, 225, 212, 0.3);
-  background: rgba(108, 225, 212, 0.08);
+  border-color: rgba(62, 205, 165, 0.3);
+  background: rgba(62, 205, 165, 0.08);
   color: var(--accent-aqua);
 }
 
@@ -212,10 +216,10 @@
 
 .themesList li {
   padding: 0.25rem 0.55rem;
-  border-radius: 6px;
+  border-radius: 12px;
   font-size: 0.78rem;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--ink-soft);
 }
 
@@ -300,7 +304,7 @@
 }
 
 .wheelSegmentActive {
-  fill: rgba(242, 194, 108, 0.15);
+  fill: rgba(240, 183, 84, 0.15);
   stroke: var(--accent-gold);
   stroke-width: 1.2;
 }
@@ -339,9 +343,9 @@
 .interpretation {
   margin-top: 1rem;
   padding: 1rem 1.15rem;
-  border-radius: 10px;
-  background: rgba(242, 194, 108, 0.04);
-  border: 1px solid rgba(242, 194, 108, 0.12);
+  border-radius: 16px;
+  background: rgba(240, 183, 84, 0.04);
+  border: 1px solid rgba(240, 183, 84, 0.12);
 }
 
 .interpretation p {
@@ -358,31 +362,31 @@
 /* ── Light mode overrides ── */
 
 :global(html[data-theme="light"]) .panel {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(160, 120, 90, 0.12);
-  box-shadow: 0 8px 32px rgba(120, 80, 40, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 :global(html[data-theme="light"]) .panel:hover {
-  border-color: rgba(160, 120, 90, 0.22);
-  box-shadow: 0 8px 40px rgba(120, 80, 40, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 0 20px rgba(140, 100, 60, 0.05);
+  border-color: rgba(0, 0, 0, 0.14);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 0 20px rgba(62, 205, 165, 0.04);
 }
 
 :global(html[data-theme="light"]) .section {
-  background: rgba(255, 255, 255, 0.4);
-  border-color: rgba(160, 120, 90, 0.08);
+  background: rgba(255, 255, 255, 0.45);
+  border-color: rgba(0, 0, 0, 0.06);
 }
 
 :global(html[data-theme="light"]) .wheelSegment {
   fill: rgba(0, 0, 0, 0.02);
-  stroke: rgba(0, 0, 0, 0.1);
+  stroke: rgba(0, 0, 0, 0.08);
 }
 
 :global(html[data-theme="light"]) .wheelSegmentActive {
-  fill: rgba(138, 100, 32, 0.1);
+  fill: rgba(62, 205, 165, 0.1);
   stroke: var(--accent-gold);
 }
 
