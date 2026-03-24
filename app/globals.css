@@ -1,21 +1,21 @@
 :root {
-  --bg-night: #041420;
-  --bg-deep: #0f2637;
-  --surface: rgba(6, 24, 38, 0.72);
-  --surface-soft: rgba(7, 30, 46, 0.56);
-  --surface-strong: rgba(4, 19, 30, 0.84);
-  --line-soft: rgba(195, 231, 255, 0.22);
-  --line-strong: rgba(195, 231, 255, 0.44);
-  --ink-main: #eef7ff;
-  --ink-soft: #b9d0e1;
-  --accent-gold: #f2c26c;
-  --accent-aqua: #6ce1d4;
-  --accent-coral: #ff8f7e;
-  --shadow-card: 0 26px 90px rgba(0, 0, 0, 0.42);
-  --btn-text: #102332;
-  --field-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 14px 36px rgba(0, 0, 0, 0.16);
-  --field-glow: 0 0 0 3px rgba(108, 225, 212, 0.22), 0 16px 36px rgba(108, 225, 212, 0.12);
-  --field-glow-warm: 0 0 0 3px rgba(242, 194, 108, 0.18), 0 16px 36px rgba(242, 194, 108, 0.12);
+  --bg-night: #06080f;
+  --bg-deep: #0d1117;
+  --surface: rgba(13, 17, 25, 0.80);
+  --surface-soft: rgba(16, 22, 34, 0.65);
+  --surface-strong: rgba(8, 12, 20, 0.90);
+  --line-soft: rgba(212, 164, 86, 0.14);
+  --line-strong: rgba(212, 164, 86, 0.30);
+  --ink-main: #f0f0f5;
+  --ink-soft: #9ca3b0;
+  --accent-gold: #d4a456;
+  --accent-aqua: #5ec2b8;
+  --accent-coral: #e87c6b;
+  --shadow-card: 0 20px 60px rgba(0, 0, 0, 0.55), 0 0 1px rgba(212, 164, 86, 0.10);
+  --btn-text: #0a0c14;
+  --field-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 12px 32px rgba(0, 0, 0, 0.25);
+  --field-glow: 0 0 0 3px rgba(94, 194, 184, 0.20), 0 12px 32px rgba(94, 194, 184, 0.08);
+  --field-glow-warm: 0 0 0 3px rgba(212, 164, 86, 0.20), 0 12px 32px rgba(212, 164, 86, 0.08);
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;
   --app-viewport-scale: 1;
@@ -240,9 +240,9 @@ body {
   text-size-adjust: 100%;
   transition: background-color 0.35s ease, color 0.35s ease;
   background:
-    radial-gradient(1100px 640px at 12% -10%, rgba(108, 225, 212, 0.12), transparent 62%),
-    radial-gradient(1000px 660px at 93% 0%, rgba(242, 194, 108, 0.13), transparent 60%),
-    linear-gradient(145deg, var(--bg-night), var(--bg-deep) 58%, #1b3144);
+    radial-gradient(ellipse 60% 50% at 15% 20%, rgba(94, 194, 184, 0.04), transparent 60%),
+    radial-gradient(ellipse 50% 40% at 85% 80%, rgba(212, 164, 86, 0.03), transparent 60%),
+    linear-gradient(160deg, var(--bg-night), var(--bg-deep) 40%, #0a0d18);
   overflow-x: hidden;
 }
 

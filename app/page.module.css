@@ -28,8 +28,8 @@
 
 .heroHeading {
   filter:
-    drop-shadow(0 0 40px rgba(167, 139, 250, 0.40))
-    drop-shadow(0 0 80px rgba(167, 139, 250, 0.15));
+    drop-shadow(0 0 50px rgba(212, 164, 86, 0.35))
+    drop-shadow(0 0 100px rgba(212, 164, 86, 0.10));
 }
 
 /* ── Intake Panel (home-specific overrides) ───── */
