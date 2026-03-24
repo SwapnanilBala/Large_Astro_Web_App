@@ -550,8 +550,8 @@ export default function Home() {
           <ZodiacWheel />
         </div>
 
-      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`}>
-        <p className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`} style={{ animationDelay: "0s" }}>
+      <section ref={panelRef} className={`intake-panel ${styles.panel}`}>
+        <p className={`kicker ${heroReady ? "" : "hero-pre"}`}>
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
@@ -586,7 +586,7 @@ export default function Home() {
           </span>
         </div>
 
-        <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
+        <form ref={formRef} className={`intake-form ${styles.form}`} onSubmit={submitProfile}>
           <span
             className={styles.draftSavedIndicator}
             style={{ opacity: draftSaved ? 1 : 0 }}
