@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 /* ─────────────────────────────────────────────────────────
    ZodiacWheel — slow-rotating decorative SVG background
@@ -73,6 +73,39 @@ interface ZodiacWheelProps {
 
 export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [visibleSegments, setVisibleSegments] = useState<Set<number>>(new Set());
+  const [ringsVisible, setRingsVisible] = useState(false);
+  const [entranceComplete, setEntranceComplete] = useState(false);
+
+  useEffect(() => {
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      setRingsVisible(true);
+      setVisibleSegments(new Set(Array.from({ length: 12 }, (_, i) => i)));
+      setEntranceComplete(true);
+      return;
+    }
+
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    // Show rings first (300ms to let the page settle)
+    timers.push(setTimeout(() => setRingsVisible(true), 300));
+
+    // Then stagger segments in from center
+    for (let i = 0; i < 12; i++) {
+      timers.push(
+        setTimeout(() => {
+          setVisibleSegments((prev) => new Set(prev).add(i));
+        }, 500 + i * 60)
+      );
+    }
+
+    // Mark entrance complete after last segment finishes its transition
+    // Last segment appears at 500 + 11*60 = 1160ms, plus 400ms transition
+    timers.push(setTimeout(() => setEntranceComplete(true), 1160 + 400));
+
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   const activeSet = new Set(activeSigns.map((s) => s.toLowerCase()));
 
@@ -99,6 +132,12 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         y2={outer.y}
         stroke="rgba(255,255,255,0.10)"
         strokeWidth="0.8"
+        style={{
+          opacity: visibleSegments.has(i) ? 1 : 0,
+          transform: visibleSegments.has(i) ? 'scale(1)' : 'scale(0.3)',
+          transformOrigin: '300px 300px',
+          transition: 'opacity 400ms ease-out, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
       />
     );
 
@@ -124,7 +163,16 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
     const glowFilter = isActive ? "url(#active-glow)" : undefined;
 
     segments.push(
-      <g key={`segment-${i}`} className="zodiac-segment">
+      <g
+        key={`segment-${i}`}
+        className="zodiac-segment"
+        style={{
+          opacity: visibleSegments.has(i) ? 1 : 0,
+          transform: visibleSegments.has(i) ? 'scale(1)' : 'scale(0.3)',
+          transformOrigin: '300px 300px',
+          transition: 'opacity 400ms ease-out, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
+      >
         {/* Invisible hit-area for hover detection */}
         <path
           d={segmentPath(i)}
@@ -194,6 +242,12 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         cy={dp.y}
         r="2"
         fill="rgba(255,255,255,0.18)"
+        style={{
+          opacity: visibleSegments.has(i) ? 1 : 0,
+          transform: visibleSegments.has(i) ? 'scale(1)' : 'scale(0.3)',
+          transformOrigin: `${dp.x}px ${dp.y}px`,
+          transition: 'opacity 400ms ease-out, transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        }}
       />
     );
   }
@@ -299,6 +353,10 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           fill="none"
           stroke="rgba(255,255,255,0.12)"
           strokeWidth="1"
+          style={{
+            opacity: ringsVisible ? 1 : 0,
+            transition: 'opacity 400ms ease-out',
+          }}
         />
 
         {/* Inner hub ring */}
@@ -309,6 +367,10 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           fill="none"
           stroke="rgba(255,255,255,0.08)"
           strokeWidth="0.7"
+          style={{
+            opacity: ringsVisible ? 1 : 0,
+            transition: 'opacity 400ms ease-out',
+          }}
         />
 
         {/* Outer boundary ring (at R_SPOKE) */}
@@ -319,6 +381,10 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           fill="none"
           stroke="rgba(255,255,255,0.07)"
           strokeWidth="0.6"
+          style={{
+            opacity: ringsVisible ? 1 : 0,
+            transition: 'opacity 400ms ease-out',
+          }}
         />
 
         {/* Spokes */}

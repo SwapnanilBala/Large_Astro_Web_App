@@ -14,6 +14,12 @@ import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
 import CursorSparkle from "./components/CursorSparkle";
+import StarField from "./components/StarField";
+import { useTextScramble } from "./components/TextScramble";
+import MorphingBlobs from "./components/MorphingBlobs";
+import FormCelebration from "./components/FormCelebration";
+import NoiseOverlay from "./components/NoiseOverlay";
+import ScrollConstellationLine from "./components/ScrollConstellationLine";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -90,6 +96,28 @@ export default function Home() {
 
   const leadDelay = (KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION + 200) / 1000;
 
+  /* ── Text scramble effect on hero heading ── */
+  const scrambledHeading = useTextScramble(headingText, heroReady, { duration: 1500, staggerPerChar: 50 });
+
+  /* ── 3D tilt on intake panel ── */
+  const panelTilt = useRef({ x: 0, y: 0 });
+  const panelTiltTarget = useRef({ x: 0, y: 0 });
+
+  const handlePanelMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const maxTilt = 3; // degrees
+    panelTiltTarget.current = {
+      x: -((e.clientY - cy) / (rect.height / 2)) * maxTilt,
+      y: ((e.clientX - cx) / (rect.width / 2)) * maxTilt,
+    };
+  }, []);
+
+  const handlePanelMouseLeave = useCallback(() => {
+    panelTiltTarget.current = { x: 0, y: 0 };
+  }, []);
+
   /* ── Parallax refs ── */
   const wheelRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -134,8 +162,15 @@ export default function Home() {
     if (wheelRef.current) {
       wheelRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
     }
+
+    // 3D tilt on intake panel
+    const tilt = panelTilt.current;
+    const tiltTgt = panelTiltTarget.current;
+    tilt.x = lerp(tilt.x, tiltTgt.x, 0.08);
+    tilt.y = lerp(tilt.y, tiltTgt.y, 0.08);
+
     if (panelRef.current) {
-      panelRef.current.style.transform = `translateY(${scrollY * 0.1}px)`;
+      panelRef.current.style.transform = `translateY(${scrollY * 0.1}px) perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
     }
 
     cursorRafId.current = requestAnimationFrame(animateOrbs);
@@ -431,6 +466,11 @@ export default function Home() {
     <PageTransition>
     <main className="home-shell">
       <CursorSparkle />
+      <StarField />
+      <NoiseOverlay />
+      <MorphingBlobs />
+      <FormCelebration isComplete={canSubmit} />
+      <ScrollConstellationLine />
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
         <div className={styles.auroraLayer} />
@@ -541,7 +581,7 @@ export default function Home() {
           <ZodiacWheel />
         </div>
 
-      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`}>
+      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`} onMouseMove={handlePanelMouseMove} onMouseLeave={handlePanelMouseLeave}>
         <p className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`} style={{ animationDelay: "0s" }}>
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
@@ -553,7 +593,7 @@ export default function Home() {
           </span>
         </div>
         <h1 className={styles.heroHeading}>
-          {headingWords.map((word, i) => (
+          {scrambledHeading.split(/\s+/).map((word, i) => (
             <span
               key={i}
               className={`hero-word ${heroReady ? "hero-word-in" : ""}`}

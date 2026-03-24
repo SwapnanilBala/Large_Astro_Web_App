@@ -159,7 +159,36 @@ export default function FloatingQuotes() {
               filter: totalBlur > 0 ? `blur(${totalBlur}px)` : "none",
             }}
           >
-            {q.text}
+            <span
+              style={{
+                display: "inline-block",
+                background:
+                  q.depth === 1
+                    ? "rgba(255, 255, 255, 0.06)"
+                    : q.depth === 2
+                      ? "rgba(255, 255, 255, 0.04)"
+                      : "rgba(255, 255, 255, 0.02)",
+                backdropFilter:
+                  q.depth === 1
+                    ? "blur(10px)"
+                    : q.depth === 2
+                      ? "blur(8px)"
+                      : "blur(6px)",
+                WebkitBackdropFilter:
+                  q.depth === 1
+                    ? "blur(10px)"
+                    : q.depth === 2
+                      ? "blur(8px)"
+                      : "blur(6px)",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: "20px",
+                padding: "0.5rem 1rem",
+                boxShadow:
+                  "0 2px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)",
+              }}
+            >
+              {q.text}
+            </span>
           </div>
         );
       })}

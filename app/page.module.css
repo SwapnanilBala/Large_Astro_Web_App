@@ -322,20 +322,36 @@
   background-clip: padding-box;
 }
 
-/* Animated border gradient overlay */
+/* Animated border gradient overlay — enhanced cosmic energy ring */
 .panel::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: 30px;
-  padding: 1px;
-  background: conic-gradient(from var(--panel-border-angle, 0deg), rgba(242, 194, 108, 0.25), rgba(108, 225, 212, 0.2), rgba(242, 194, 108, 0.05), rgba(108, 225, 212, 0.2), rgba(242, 194, 108, 0.25));
+  padding: 1.5px;
+  background: conic-gradient(from var(--panel-border-angle, 0deg),
+    rgba(242, 194, 108, 0.45),
+    rgba(108, 225, 212, 0.35),
+    rgba(180, 120, 220, 0.20),
+    rgba(242, 194, 108, 0.08),
+    rgba(108, 225, 212, 0.35),
+    rgba(180, 120, 220, 0.20),
+    rgba(242, 194, 108, 0.45));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
   z-index: 0;
-  animation: rotatePanelBorder 12s linear infinite;
+  animation: rotatePanelBorder 8s linear infinite;
+  filter: blur(0.3px);
+}
+
+/* Outer glow ring behind the border for extra energy effect */
+.panel {
+  box-shadow:
+    0 0 30px rgba(242, 194, 108, 0.06),
+    0 0 60px rgba(108, 225, 212, 0.04),
+    0 0 100px rgba(180, 120, 220, 0.03);
 }
 
 @property --panel-border-angle {
@@ -345,7 +361,8 @@
 }
 
 @keyframes rotatePanelBorder {
-  to { --panel-border-angle: 360deg; }
+  0% { --panel-border-angle: 0deg; }
+  100% { --panel-border-angle: 360deg; }
 }
 
 /* Corner star decorations */
@@ -438,7 +455,20 @@
 }
 
 :global([data-theme="light"]) .panel::after {
-  background: conic-gradient(from var(--panel-border-angle, 0deg), rgba(138, 100, 32, 0.15), rgba(46, 133, 120, 0.12), rgba(138, 100, 32, 0.03), rgba(46, 133, 120, 0.12), rgba(138, 100, 32, 0.15));
+  background: conic-gradient(from var(--panel-border-angle, 0deg),
+    rgba(138, 100, 32, 0.25),
+    rgba(46, 133, 120, 0.20),
+    rgba(120, 80, 160, 0.12),
+    rgba(138, 100, 32, 0.05),
+    rgba(46, 133, 120, 0.20),
+    rgba(120, 80, 160, 0.12),
+    rgba(138, 100, 32, 0.25));
+}
+
+:global([data-theme="light"]) .panel {
+  box-shadow:
+    0 0 25px rgba(138, 100, 32, 0.05),
+    0 0 50px rgba(46, 133, 120, 0.03);
 }
 
 :global([data-theme="light"]) .panel .form::before {
