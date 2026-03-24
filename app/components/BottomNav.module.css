@@ -5,11 +5,11 @@
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(13, 11, 10, 0.95);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(74, 63, 52, 0.35);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+  background: rgba(15, 17, 23, 0.90);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.25);
   border-radius: 0;
   padding: 0.5rem 0 calc(0.5rem + env(safe-area-inset-bottom));
   grid-template-columns: repeat(4, 1fr);
@@ -21,10 +21,10 @@
   align-items: center;
   gap: 4px;
   padding: 6px 0;
-  color: #9A8C7D;
+  color: #8B8FA3;
   text-decoration: none;
   transition: color 0.2s ease, transform 0.15s ease;
-  font-family: var(--font-display), 'Cinzel', serif;
+  font-family: var(--font-body), sans-serif;
   font-size: 0.65rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -35,8 +35,8 @@
 }
 
 .navItem.active {
-  color: #B8963E;
-  border-bottom: 2px solid #B8963E;
+  color: #3ECDA5;
+  border-bottom: 2px solid #3ECDA5;
 }
 
 .icon {
@@ -45,7 +45,7 @@
 }
 
 .active .icon {
-  filter: drop-shadow(0 0 6px rgba(184, 150, 62, 0.3));
+  filter: drop-shadow(0 0 8px rgba(62, 205, 165, 0.4));
 }
 
 .label {

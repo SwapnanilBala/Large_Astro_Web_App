@@ -18,11 +18,11 @@
 
 .panel {
   width: min(960px, 100%);
-  border-radius: 30px;
-  border: 1px solid var(--line-soft);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    linear-gradient(130deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)),
-    var(--surface);
+    linear-gradient(130deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)),
+    #161922;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 2.5rem 2.5rem 2rem;
@@ -38,7 +38,7 @@
   background: url('/background.webp') center / cover no-repeat;
   opacity: 0.04;
   z-index: -1;
-  border-radius: 30px;
+  border-radius: 20px;
   pointer-events: none;
 }
 
@@ -53,18 +53,18 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: var(--accent-gold);
+  color: #F0B754;
   margin: 0 0 0.5rem;
 }
 
 .heading {
-  font-family: var(--font-heading), serif;
+  font-family: var(--font-heading), sans-serif;
   font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: 700;
-  color: var(--ink-main);
+  color: #EAEDF3;
   margin: 0 0 0.75rem;
   line-height: 1.2;
-  background: linear-gradient(135deg, var(--ink-main) 40%, var(--accent-gold));
+  background: linear-gradient(135deg, #EAEDF3 40%, #F0B754);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -72,7 +72,7 @@
 
 .lead {
   font-size: 0.95rem;
-  color: var(--ink-soft);
+  color: #8B8FA3;
   line-height: 1.65;
   max-width: 620px;
   margin: 0 auto;
@@ -94,11 +94,11 @@
   flex-direction: column;
   gap: 0.65rem;
   padding: 1.5rem;
-  border-radius: 18px;
-  background: rgba(6, 24, 38, 0.5);
-  border: 1.5px solid rgba(195, 231, 255, 0.1);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition:
     border-color 0.35s ease,
     box-shadow 0.35s ease,
@@ -107,32 +107,32 @@
 }
 
 .card:hover {
-  border-color: rgba(195, 231, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.15);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 .card:focus-visible {
-  outline: 2px solid var(--accent-aqua);
+  outline: 2px solid #3ECDA5;
   outline-offset: 3px;
 }
 
 .cardSelected {
-  border-color: rgba(242, 194, 108, 0.45);
+  border-color: rgba(62, 205, 165, 0.45);
   background:
-    linear-gradient(135deg, rgba(242, 194, 108, 0.1), rgba(108, 225, 212, 0.06)),
-    rgba(6, 24, 38, 0.55);
+    linear-gradient(135deg, rgba(62, 205, 165, 0.10), rgba(240, 183, 84, 0.06)),
+    rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 0 24px rgba(242, 194, 108, 0.1),
+    0 0 24px rgba(62, 205, 165, 0.10),
     0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 0 30px rgba(242, 194, 108, 0.03);
+    inset 0 0 30px rgba(62, 205, 165, 0.03);
 }
 
 .cardSelected:hover {
-  border-color: rgba(242, 194, 108, 0.55);
+  border-color: rgba(62, 205, 165, 0.55);
   box-shadow:
-    0 0 30px rgba(242, 194, 108, 0.14),
+    0 0 30px rgba(62, 205, 165, 0.14),
     0 8px 32px rgba(0, 0, 0, 0.25),
-    inset 0 0 30px rgba(242, 194, 108, 0.04);
+    inset 0 0 30px rgba(62, 205, 165, 0.04);
 }
 
 .cardCheck {
@@ -145,24 +145,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid rgba(195, 231, 255, 0.15);
-  background: rgba(6, 24, 38, 0.4);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   color: transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cardCheckVisible {
-  border-color: var(--accent-gold);
-  background: linear-gradient(135deg, var(--accent-gold), #e5a94e);
-  color: #1a1a2e;
-  box-shadow: 0 0 12px rgba(242, 194, 108, 0.3);
+  border-color: #3ECDA5;
+  background: linear-gradient(135deg, #3ECDA5, #2eb892);
+  color: #0F1117;
+  box-shadow: 0 0 12px rgba(62, 205, 165, 0.3);
 }
 
 .cardLabel {
-  font-family: var(--font-heading), serif;
+  font-family: var(--font-heading), sans-serif;
   font-size: 1.2rem;
   font-weight: 700;
-  color: var(--ink-main);
+  color: #EAEDF3;
   margin: 0;
   padding-right: 2rem;
   line-height: 1.3;
@@ -178,11 +178,11 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--accent-aqua);
-  background: rgba(108, 225, 212, 0.12);
-  border: 1px solid rgba(108, 225, 212, 0.2);
+  color: #3ECDA5;
+  background: rgba(62, 205, 165, 0.12);
+  border: 1px solid rgba(62, 205, 165, 0.2);
   padding: 0.15rem 0.5rem;
-  border-radius: 10px;
+  border-radius: 8px;
   white-space: nowrap;
 }
 
@@ -198,24 +198,24 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: 0.2rem 0.6rem;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .cardBadgeAyanamsha {
-  background: rgba(242, 194, 108, 0.12);
-  color: var(--accent-gold);
-  border: 1px solid rgba(242, 194, 108, 0.2);
+  background: rgba(240, 183, 84, 0.12);
+  color: #F0B754;
+  border: 1px solid rgba(240, 183, 84, 0.2);
 }
 
 .cardBadgeHouse {
-  background: rgba(108, 225, 212, 0.1);
-  color: var(--accent-aqua);
-  border: 1px solid rgba(108, 225, 212, 0.15);
+  background: rgba(62, 205, 165, 0.10);
+  color: #3ECDA5;
+  border: 1px solid rgba(62, 205, 165, 0.15);
 }
 
 .cardDesc {
   font-size: 0.88rem;
-  color: var(--ink-soft);
+  color: #8B8FA3;
   line-height: 1.6;
   margin: 0;
 }
@@ -225,22 +225,22 @@
 .houseSection {
   margin-bottom: 2rem;
   padding: 1.5rem;
-  border-radius: 18px;
-  background: rgba(6, 24, 38, 0.35);
-  border: 1px solid rgba(195, 231, 255, 0.08);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .houseSectionTitle {
-  font-family: var(--font-heading), serif;
+  font-family: var(--font-heading), sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: var(--ink-main);
+  color: #EAEDF3;
   margin: 0 0 0.35rem;
 }
 
 .houseSectionLead {
   font-size: 0.82rem;
-  color: var(--ink-soft);
+  color: #8B8FA3;
   line-height: 1.55;
   margin: 0 0 1rem;
 }
@@ -259,14 +259,14 @@
   align-items: center;
   gap: 0.35rem;
   padding: 0.45rem 0.9rem;
-  border-radius: 12px;
+  border-radius: 8px;
   font-family: var(--font-body), sans-serif;
   font-size: 0.78rem;
   font-weight: 600;
   letter-spacing: 0.3px;
-  color: var(--ink-soft);
-  background: rgba(6, 24, 38, 0.5);
-  border: 1.5px solid rgba(195, 231, 255, 0.1);
+  color: #8B8FA3;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.08);
   transition:
     border-color 0.3s ease,
     background 0.3s ease,
@@ -275,24 +275,24 @@
 }
 
 .houseChip:hover:not(:disabled) {
-  border-color: rgba(195, 231, 255, 0.2);
-  color: var(--ink-main);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #EAEDF3;
 }
 
 .houseChip:focus-visible {
-  outline: 2px solid var(--accent-aqua);
+  outline: 2px solid #3ECDA5;
   outline-offset: 2px;
 }
 
 .houseChipActive {
-  border-color: rgba(108, 225, 212, 0.4);
-  background: rgba(108, 225, 212, 0.1);
-  color: var(--accent-aqua);
-  box-shadow: 0 0 12px rgba(108, 225, 212, 0.08);
+  border-color: rgba(62, 205, 165, 0.4);
+  background: rgba(62, 205, 165, 0.10);
+  color: #3ECDA5;
+  box-shadow: 0 0 12px rgba(62, 205, 165, 0.08);
 }
 
 .houseChipActive:hover {
-  border-color: rgba(108, 225, 212, 0.5);
+  border-color: rgba(62, 205, 165, 0.5);
 }
 
 .houseChipDisabled {
@@ -305,24 +305,24 @@
 }
 
 :global(html[data-theme="light"]) .houseSection {
-  background: rgba(255, 248, 242, 0.5);
-  border-color: rgba(160, 120, 90, 0.08);
+  background: rgba(240, 242, 248, 0.6);
+  border-color: rgba(139, 143, 163, 0.12);
 }
 
 :global(html[data-theme="light"]) .houseChip {
-  background: rgba(255, 248, 242, 0.7);
-  border-color: rgba(160, 120, 90, 0.1);
+  background: rgba(240, 242, 248, 0.7);
+  border-color: rgba(139, 143, 163, 0.15);
   color: var(--ink-soft);
 }
 
 :global(html[data-theme="light"]) .houseChip:hover:not(:disabled) {
-  border-color: rgba(160, 120, 90, 0.2);
+  border-color: rgba(139, 143, 163, 0.25);
 }
 
 :global(html[data-theme="light"]) .houseChipActive {
-  border-color: rgba(60, 160, 150, 0.35);
-  background: rgba(60, 160, 150, 0.08);
-  color: #2a7a70;
+  border-color: rgba(62, 205, 165, 0.35);
+  background: rgba(62, 205, 165, 0.08);
+  color: #2a9a80;
 }
 
 .footer {
@@ -340,12 +340,12 @@
   width: 100%;
   max-width: 400px;
   padding: 1rem 2rem;
-  border-radius: 999px;
+  border-radius: 12px;
   font-family: var(--font-body), sans-serif;
   font-size: 1rem;
   font-weight: 700;
-  color: #1a1a2e;
-  background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
+  color: #0F1117;
+  background: linear-gradient(110deg, #3ECDA5, #5ad8b8, #3ECDA5, #2eb892);
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   transition:
@@ -359,9 +359,9 @@
 .cta:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow:
-    0 28px 52px rgba(242, 194, 108, 0.28),
-    0 0 40px rgba(242, 194, 108, 0.15),
-    0 0 80px rgba(108, 225, 212, 0.1);
+    0 28px 52px rgba(62, 205, 165, 0.28),
+    0 0 40px rgba(62, 205, 165, 0.15),
+    0 0 80px rgba(240, 183, 84, 0.1);
   filter: saturate(1.1) brightness(1.05);
 }
 
@@ -369,7 +369,7 @@
   transform: translateY(0) scale(0.97);
   transition: transform 80ms ease-out;
   box-shadow:
-    0 8px 20px rgba(242, 194, 108, 0.2),
+    0 8px 20px rgba(62, 205, 165, 0.2),
     inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -380,7 +380,7 @@
 }
 
 .cta:focus-visible {
-  outline: 2px solid var(--accent-aqua);
+  outline: 2px solid #F0B754;
   outline-offset: 3px;
 }
 
@@ -414,45 +414,48 @@
 
 /* ── Engine Select Light Theme ── */
 :global(html[data-theme="light"]) .panel {
-  border-color: rgba(160, 120, 90, 0.12);
+  border-color: rgba(139, 143, 163, 0.15);
+  background:
+    linear-gradient(130deg, rgba(255, 255, 255, 0.85), rgba(240, 242, 248, 0.9)),
+    #f0f2f8;
 }
 
 :global(html[data-theme="light"]) .heading {
-  background: linear-gradient(135deg, var(--ink-main) 40%, #8a6420);
+  background: linear-gradient(135deg, #1D2030 40%, #3ECDA5);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 :global(html[data-theme="light"]) .card {
-  background: rgba(255, 248, 242, 0.6);
-  border-color: rgba(160, 120, 90, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(139, 143, 163, 0.12);
 }
 
 :global(html[data-theme="light"]) .card:hover {
-  border-color: rgba(160, 120, 90, 0.2);
+  border-color: rgba(139, 143, 163, 0.22);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 :global(html[data-theme="light"]) .cardSelected {
-  border-color: rgba(160, 120, 50, 0.35);
-  background: linear-gradient(135deg, rgba(180, 130, 50, 0.08), rgba(60, 160, 150, 0.05));
-  box-shadow: 0 0 20px rgba(180, 130, 50, 0.08);
+  border-color: rgba(62, 205, 165, 0.35);
+  background: linear-gradient(135deg, rgba(62, 205, 165, 0.08), rgba(240, 183, 84, 0.05));
+  box-shadow: 0 0 20px rgba(62, 205, 165, 0.08);
 }
 
 :global(html[data-theme="light"]) .cardCheck {
-  border-color: rgba(160, 120, 90, 0.15);
-  background: rgba(255, 248, 242, 0.7);
+  border-color: rgba(139, 143, 163, 0.15);
+  background: rgba(255, 255, 255, 0.7);
 }
 
 :global(html[data-theme="light"]) .cardCheckVisible {
-  border-color: #8a6420;
-  background: linear-gradient(135deg, #8a6420, #b8873e);
+  border-color: #2a9a80;
+  background: linear-gradient(135deg, #3ECDA5, #2eb892);
   color: #fff;
 }
 
 :global(html[data-theme="light"]) .cta {
-  background: linear-gradient(110deg, #8a6420, #b8873e, #8a6420, #6b4e18);
+  background: linear-gradient(110deg, #3ECDA5, #2eb892, #3ECDA5, #269e7d);
   background-size: 300% 100%;
   color: #fff;
 }
@@ -465,7 +468,7 @@
 
   .panel {
     padding: 1.8rem 1.5rem 1.5rem;
-    border-radius: 22px;
+    border-radius: 16px;
   }
 }
 
