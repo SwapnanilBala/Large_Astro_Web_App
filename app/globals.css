@@ -299,6 +299,23 @@ h3 {
   overflow: hidden;
 }
 
+/* Backdrop image for results/insights pages */
+.insights-shell::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: url('/backdrop.png') center center / cover no-repeat;
+  opacity: 0.08;
+  pointer-events: none;
+}
+
+html[data-theme="light"] .insights-shell::before {
+  opacity: 0.05;
+  filter: brightness(0.9) saturate(0.7);
+  mix-blend-mode: multiply;
+}
+
 .ambient {
   position: absolute;
   border-radius: 50%;
