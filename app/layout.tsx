@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Inter, Playfair_Display } from "next/font/google";
+import { Cinzel, Libre_Baskerville } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import StarField from "./components/StarField";
@@ -11,23 +11,16 @@ import { ThemeProvider } from "@/lib/theme-context";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ToastProvider } from "@/lib/toast-context";
 
-const displayFont = Cormorant_Garamond({
+const displayFont = Cinzel({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["300", "500", "600", "700"],
-  style: ["normal", "italic"]
-});
-
-const bodyFont = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
   weight: ["400", "500", "600", "700"]
 });
 
-const serifDisplay = Playfair_Display({
+const bodyFont = Libre_Baskerville({
   subsets: ["latin"],
-  variable: "--font-serif-display",
-  weight: ["400", "600", "700"],
+  variable: "--font-body",
+  weight: ["400", "700"],
   style: ["normal", "italic"]
 });
 
@@ -46,7 +39,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#080011",
+  themeColor: "#0D0B0A",
 };
 
 export default function RootLayout({
@@ -56,7 +49,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${displayFont.variable} ${bodyFont.variable} ${serifDisplay.variable}`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable}`}>
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>

@@ -51,7 +51,7 @@ export default async function EngineSelectPage({
 
   if (!hasAllInputs) {
     return (
-      <main className={styles.shell}>
+      <div className={styles.shell}>
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Missing Input</p>
@@ -63,7 +63,7 @@ export default async function EngineSelectPage({
             Back to Intake
           </Link>
         </section>
-      </main>
+      </div>
     );
   }
 
@@ -73,12 +73,12 @@ export default async function EngineSelectPage({
   if (timeZoneId) forwardParams.timeZoneId = timeZoneId;
 
   return (
-    <main className={styles.shell}>
+    <div className={styles.shell}>
       <BackButton href="/" />
       <EngineSelectClient
         profileParams={forwardParams}
         defaultEngineId={defaultEngineId}
       />
-    </main>
+    </div>
   );
 }

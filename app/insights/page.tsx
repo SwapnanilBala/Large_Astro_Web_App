@@ -47,7 +47,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   if (!hasAllInputs) {
     return (
       <PageTransition>
-      <main className="insights-shell">
+      <div className="insights-shell">
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Missing Input</p>
@@ -59,7 +59,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
             Back to Intake
           </Link>
         </section>
-      </main>
+      </div>
       </PageTransition>
     );
   }
@@ -74,10 +74,10 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
 
   return (
     <PageTransition>
-    <main className="insights-shell">
+    <div className="insights-shell">
       <BackButton href="/" />
       <InsightsLoader chartParams={chartParams} />
-    </main>
+    </div>
     </PageTransition>
   );
 }
