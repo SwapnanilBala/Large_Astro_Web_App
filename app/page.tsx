@@ -14,7 +14,6 @@ import PageTransition from "./components/PageTransition";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
-import { useTextScramble } from "./components/TextScramble";
 import FormCelebration from "./components/FormCelebration";
 import styles from "./page.module.css";
 
@@ -90,26 +89,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  /* ── Split-text hero animation ── */
-  const [heroReady, setHeroReady] = useState(false);
   const headingText = t("home.heading");
-  const headingWords = useMemo(() => headingText.split(/\s+/), [headingText]);
-  const WORD_STAGGER = 80;
-  const WORD_DURATION = 500;
-  const KICKER_LEAD = 300;
-
-  useEffect(() => {
-    const kickerTimer = setTimeout(() => setHeroReady(true), KICKER_LEAD);
-    const totalHeadingTime = KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION;
-    return () => {
-      clearTimeout(kickerTimer);
-    };
-  }, [headingWords.length]);
-
-  const leadDelay = (KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION + 200) / 1000;
-
-  /* ── Text scramble effect on hero heading ── */
-  const scrambledHeading = useTextScramble(headingText, heroReady, { duration: 1500, staggerPerChar: 50 });
 
   /* ── Panel & wheel refs (no scroll transforms — clean render) ── */
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -522,20 +502,12 @@ export default function Home() {
         </div>
 
       <section ref={panelRef} className={`intake-panel ${styles.panel}`}>
-        <p className={`kicker ${heroReady ? "" : "hero-pre"}`}>
+        <p className="kicker">
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
         <h1 className={styles.heroHeading}>
-          {scrambledHeading.split(/\s+/).map((word, i) => (
-            <span
-              key={i}
-              className={`hero-word ${heroReady ? "hero-word-in" : ""}`}
-              style={{ transitionDelay: `${i * WORD_STAGGER}ms` }}
-            >
-              {word}
-            </span>
-          ))}
+          {headingText}
         </h1>
         {/* ── Zodiac Backdrop — one-at-a-time centered cycle ── */}
         <div className={styles.zodiacBackdrop} aria-hidden="true">
