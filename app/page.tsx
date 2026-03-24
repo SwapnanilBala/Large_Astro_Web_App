@@ -543,12 +543,6 @@ export default function Home() {
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
         </p>
-        {/* ── Mystical Rotating Tagline ── */}
-        <div className={styles.mysticalTagline}>
-          <span key={taglineIndex} className={styles.mysticalTaglineInner}>
-            {mysticalPhrases[taglineIndex]}
-          </span>
-        </div>
         <h1 className={styles.heroHeading}>
           {scrambledHeading.split(/\s+/).map((word, i) => (
             <span
@@ -599,6 +593,13 @@ export default function Home() {
               }}
             />
           ))}
+        </div>
+
+        {/* ── Mystical Rotating Tagline (centered between heading & form) ── */}
+        <div className={`${styles.mysticalTagline} ${styles.mysticalTaglineCentered}`}>
+          <span key={taglineIndex} className={styles.mysticalTaglineInner}>
+            {mysticalPhrases[taglineIndex]}
+          </span>
         </div>
 
         <div className="cosmic-divider anim-fade-in" style={{ animationDelay: "0.55s" }}>
