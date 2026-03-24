@@ -116,34 +116,8 @@ export default function Home() {
   const wheelRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
 
-  /* ── Scroll-triggered field reveal (IntersectionObserver) ── */
-  useEffect(() => {
-    const form = formRef.current;
-    if (!form) return;
-
-    const fields = form.querySelectorAll<HTMLElement>("[data-field-reveal]");
-    fields.forEach((el) => el.classList.add("field-hidden"));
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const el = entry.target as HTMLElement;
-            const idx = Number(el.dataset.fieldReveal ?? 0);
-            setTimeout(() => {
-              el.classList.remove("field-hidden");
-              el.classList.add("field-revealed");
-            }, idx * 80);
-            observer.unobserve(el);
-          }
-        });
-      },
-      { threshold: 0.15, rootMargin: "0px 0px -40px 0px" }
-    );
-
-    fields.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+  /* Field reveal removed — was causing layout bounce on load
+     (fields started at translateY(20px) then jumped to 0) */
 
   /* ── Validation shimmer: detect empty -> non-empty transitions ── */
   useEffect(() => {
@@ -439,7 +413,6 @@ export default function Home() {
   };
 
   return (
-    <PageTransition>
     <div className="home-shell">
       <FormCelebration isComplete={canSubmit} />
       {/* ── Aurora Effect (top of page) ── */}
@@ -845,6 +818,6 @@ export default function Home() {
       </section>
       </div>{/* /heroWrapper */}
     </div>
-    </PageTransition>
+    </div>
   );
 }
