@@ -100,97 +100,9 @@ export default function Home() {
   /* ── Text scramble effect on hero heading ── */
   const scrambledHeading = useTextScramble(headingText, heroReady, { duration: 1500, staggerPerChar: 50 });
 
-  /* ── 3D tilt on intake panel ── */
-  const panelTilt = useRef({ x: 0, y: 0 });
-  const panelTiltTarget = useRef({ x: 0, y: 0 });
-
-  const handlePanelMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-    const maxTilt = 3; // degrees
-    panelTiltTarget.current = {
-      x: -((e.clientY - cy) / (rect.height / 2)) * maxTilt,
-      y: ((e.clientX - cx) / (rect.width / 2)) * maxTilt,
-    };
-  }, []);
-
-  const handlePanelMouseLeave = useCallback(() => {
-    panelTiltTarget.current = { x: 0, y: 0 };
-  }, []);
-
-  /* ── Parallax refs ── */
+  /* ── Panel & wheel refs (no scroll transforms — clean render) ── */
   const wheelRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLElement>(null);
-  const ambientLeftRef = useRef<HTMLDivElement>(null);
-  const ambientRightRef = useRef<HTMLDivElement>(null);
-  const ambientCenterRef = useRef<HTMLDivElement>(null);
-
-  /* ── Cursor-reactive orb state ── */
-  const mouseTarget = useRef({ x: 0, y: 0 });
-  const mouseCurrent = useRef({ x: 0, y: 0 });
-  const cursorRafId = useRef<number>(0);
-
-  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
-
-  const animateOrbs = useCallback(() => {
-    const cur = mouseCurrent.current;
-    const tgt = mouseTarget.current;
-    cur.x = lerp(cur.x, tgt.x, 0.08);
-    cur.y = lerp(cur.y, tgt.y, 0.08);
-
-    const scrollY = window.scrollY;
-
-    // Left orb: moves AWAY from cursor (parallax depth)
-    if (ambientLeftRef.current) {
-      const ox = -cur.x * 0.02;
-      const oy = -cur.y * 0.02 + scrollY * 0.15;
-      ambientLeftRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
-    }
-    // Right orb: moves TOWARD cursor slightly
-    if (ambientRightRef.current) {
-      const ox = cur.x * 0.015;
-      const oy = cur.y * 0.015 + scrollY * 0.15;
-      ambientRightRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
-    }
-    // Center orb: moves perpendicular to cursor direction
-    if (ambientCenterRef.current) {
-      const ox = cur.y * 0.012;
-      const oy = -cur.x * 0.012 + scrollY * 0.15;
-      ambientCenterRef.current.style.transform = `translate(${ox}px, ${oy}px)`;
-    }
-
-    if (wheelRef.current) {
-      wheelRef.current.style.transform = `translateY(${scrollY * 0.3}px)`;
-    }
-
-    // 3D tilt on intake panel
-    const tilt = panelTilt.current;
-    const tiltTgt = panelTiltTarget.current;
-    tilt.x = lerp(tilt.x, tiltTgt.x, 0.08);
-    tilt.y = lerp(tilt.y, tiltTgt.y, 0.08);
-
-    if (panelRef.current) {
-      panelRef.current.style.transform = `translateY(${scrollY * 0.1}px) perspective(800px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
-    }
-
-    cursorRafId.current = requestAnimationFrame(animateOrbs);
-  }, []);
-
-  useEffect(() => {
-    cursorRafId.current = requestAnimationFrame(animateOrbs);
-    return () => cancelAnimationFrame(cursorRafId.current);
-  }, [animateOrbs]);
-
-  useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      const cx = window.innerWidth / 2;
-      const cy = window.innerHeight / 2;
-      mouseTarget.current = { x: e.clientX - cx, y: e.clientY - cy };
-    };
-    window.addEventListener("mousemove", onMouseMove, { passive: true });
-    return () => window.removeEventListener("mousemove", onMouseMove);
-  }, []);
 
   /* ── Scroll-triggered field reveal (IntersectionObserver) ── */
   useEffect(() => {
@@ -525,9 +437,7 @@ export default function Home() {
         <div className={styles.auroraLayer} />
       </div>
 
-      <div ref={ambientLeftRef} className="ambient ambient-left" />
-      <div ref={ambientRightRef} className="ambient ambient-right" />
-      <div ref={ambientCenterRef} className="ambient ambient-center" />
+      {/* Ambient background handled by GradientBlobs in layout */}
 
       {/* ── Floating Cosmic Particles ── */}
       <div className={styles.cosmicParticles}>
@@ -628,7 +538,7 @@ export default function Home() {
           <ZodiacWheel />
         </div>
 
-      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`} onMouseMove={handlePanelMouseMove} onMouseLeave={handlePanelMouseLeave}>
+      <section ref={panelRef} className={`intake-panel anim-rise-in ${styles.panel}`}>
         <p className={`kicker anim-slide-in-left ${heroReady ? "" : "hero-pre"}`} style={{ animationDelay: "0s" }}>
           <HiOutlineSparkles className="section-icon" />
           {t("home.kicker")}
