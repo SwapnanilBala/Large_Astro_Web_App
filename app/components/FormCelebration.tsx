@@ -10,8 +10,8 @@ const ZODIAC_SYMBOLS = [
   "\u2648", "\u2649", "\u264A", "\u264B", "\u264C", "\u264D",
   "\u264E", "\u264F", "\u2650", "\u2651", "\u2652", "\u2653",
 ];
-const GOLD = "#f2c26c";
-const AQUA = "#6ce1d4";
+const GOLD = "#F0B754";
+const AQUA = "#3ECDA5";
 const PARTICLE_COUNT = 24;
 const ANIMATION_DURATION_MS = 1500;
 

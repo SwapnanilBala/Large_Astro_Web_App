@@ -130,7 +130,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         y1={inner.y}
         x2={outer.x}
         y2={outer.y}
-        stroke="rgba(255,255,255,0.10)"
+        stroke="rgba(255,255,255,0.12)"
         strokeWidth="0.8"
         style={{
           opacity: visibleSegments.has(i) ? 1 : 0,
@@ -192,8 +192,8 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
             isHovered
               ? "rgba(255,255,255,0.50)"
               : isActive
-              ? "rgba(242,194,108,0.50)"
-              : "rgba(200,180,255,0.20)"
+              ? "rgba(240,183,84,0.50)"
+              : "rgba(255,255,255,0.12)"
           }
           strokeWidth={isHovered ? "1.5" : "1"}
           style={{ transition: "stroke 300ms ease, stroke-width 300ms ease" }}
@@ -208,7 +208,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
             cy={gp.y}
             r="22"
             fill="none"
-            stroke="rgba(242, 194, 108, 0.45)"
+            stroke="rgba(240, 183, 84, 0.45)"
             strokeWidth="2"
             className="zodiac-active-pulse zodiac-active-glow"
             pointerEvents="none"
@@ -241,7 +241,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
         cx={dp.x}
         cy={dp.y}
         r="2"
-        fill="rgba(255,255,255,0.18)"
+        fill="rgba(255,255,255,0.12)"
         style={{
           opacity: visibleSegments.has(i) ? 1 : 0,
           transform: visibleSegments.has(i) ? 'scale(1)' : 'scale(0.3)',
@@ -266,8 +266,8 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           width="80"
           height="24"
           rx="12"
-          fill="rgba(10,10,30,0.85)"
-          stroke="rgba(200,180,255,0.40)"
+          fill="rgba(255,255,255,0.06)"
+          stroke="rgba(255,255,255,0.12)"
           strokeWidth="0.8"
         />
         <text
@@ -314,7 +314,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           transform: "translate(-50%, -50%)",
           /* pointerEvents enabled so hover detection works */
           pointerEvents: "auto",
-          filter: "drop-shadow(0 0 8px rgba(160,100,255,0.20))",
+          filter: "drop-shadow(0 0 8px rgba(255,255,255,0.08))",
           zIndex: 0,
         }}
       >
@@ -330,12 +330,12 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
             );
           })}
 
-          {/* SVG glow filter for active signs (gold accent #f2c26c) */}
+          {/* SVG glow filter for active signs (gold accent #F0B754) */}
           <filter id="active-glow" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-            <feFlood floodColor="rgba(242,194,108,0.6)" result="goldOuter" />
+            <feFlood floodColor="rgba(240,183,84,0.6)" result="goldOuter" />
             <feComposite in="goldOuter" in2="blur" operator="in" result="goldOuterGlow" />
-            <feFlood floodColor="rgba(242,194,108,0.35)" result="goldInner" />
+            <feFlood floodColor="rgba(240,183,84,0.35)" result="goldInner" />
             <feComposite in="goldInner" in2="blur" operator="in" result="goldInnerGlow" />
             <feMerge>
               <feMergeNode in="goldOuterGlow" />
@@ -364,8 +364,8 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           cx={CX}
           cy={CY}
           r={R_INNER}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
+          fill="rgba(255,255,255,0.06)"
+          stroke="rgba(255,255,255,0.12)"
           strokeWidth="0.7"
           style={{
             opacity: ringsVisible ? 1 : 0,
@@ -379,7 +379,7 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           cy={CY}
           r={R_SPOKE}
           fill="none"
-          stroke="rgba(255,255,255,0.07)"
+          stroke="rgba(255,255,255,0.12)"
           strokeWidth="0.6"
           style={{
             opacity: ringsVisible ? 1 : 0,

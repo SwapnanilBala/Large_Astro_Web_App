@@ -13,13 +13,8 @@ import FloatingQuotes from "./components/FloatingQuotes";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
-import CursorSparkle from "./components/CursorSparkle";
-import StarField from "./components/StarField";
 import { useTextScramble } from "./components/TextScramble";
-import MorphingBlobs from "./components/MorphingBlobs";
 import FormCelebration from "./components/FormCelebration";
-import NoiseOverlay from "./components/NoiseOverlay";
-import ScrollConstellationLine from "./components/ScrollConstellationLine";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -522,12 +517,7 @@ export default function Home() {
   return (
     <PageTransition>
     <div className="home-shell">
-      <CursorSparkle />
-      <StarField />
-      <NoiseOverlay />
-      <MorphingBlobs />
       <FormCelebration isComplete={canSubmit} />
-      <ScrollConstellationLine />
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
         <div className={styles.auroraLayer} />
@@ -675,8 +665,8 @@ export default function Home() {
           {[
             {
               elementKey: "zodiacElements.fire",
-              color: "#ff6b35",
-              glow: "rgba(255, 107, 53, 0.25)",
+              color: "#F07068",
+              glow: "rgba(240, 112, 104, 0.25)",
               signs: [
                 { src: "/zodiac/aries.jpg", name: "Aries", symbol: "♈" },
                 { src: "/zodiac/leo.jpg", name: "Leo", symbol: "♌" },
@@ -685,8 +675,8 @@ export default function Home() {
             },
             {
               elementKey: "zodiacElements.earth",
-              color: "#6abf69",
-              glow: "rgba(106, 191, 105, 0.25)",
+              color: "#3ECDA5",
+              glow: "rgba(62, 205, 165, 0.25)",
               signs: [
                 { src: "/zodiac/taurus.jpg", name: "Taurus", symbol: "♉" },
                 { src: "/zodiac/virgo.jpg", name: "Virgo", symbol: "♍" },
@@ -695,8 +685,8 @@ export default function Home() {
             },
             {
               elementKey: "zodiacElements.air",
-              color: "#f2c26c",
-              glow: "rgba(242, 194, 108, 0.25)",
+              color: "#8B8FA3",
+              glow: "rgba(139, 143, 163, 0.25)",
               signs: [
                 { src: "/zodiac/gemini.jpg", name: "Gemini", symbol: "♊" },
                 { src: "/zodiac/libra.jpg", name: "Libra", symbol: "♎" },
@@ -705,8 +695,8 @@ export default function Home() {
             },
             {
               elementKey: "zodiacElements.water",
-              color: "#6ce1d4",
-              glow: "rgba(108, 225, 212, 0.25)",
+              color: "#5B9BD5",
+              glow: "rgba(91, 155, 213, 0.25)",
               signs: [
                 { src: "/zodiac/cancer.jpg", name: "Cancer", symbol: "♋" },
                 { src: "/zodiac/scorpio.jpg", name: "Scorpio", symbol: "♏" },
