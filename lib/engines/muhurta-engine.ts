@@ -218,6 +218,234 @@ function getKarana(tithiNum: number, half: 0 | 1): { name: string; quality: Kara
 const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 // --------------------------------------------------------------------------
+// Rahukaala & Yamaghantaka — inauspicious period slot indices (1-based)
+// Each day is divided into 8 equal parts from sunrise to sunset.
+// --------------------------------------------------------------------------
+
+/** Rahukaala period number (1-8) indexed by weekday (0=Sun..6=Sat) */
+const RAHUKAALA_SLOT: Record<number, number> = {
+  0: 8, // Sunday
+  1: 2, // Monday
+  2: 7, // Tuesday
+  3: 5, // Wednesday
+  4: 6, // Thursday
+  5: 4, // Friday
+  6: 3, // Saturday
+};
+
+/** Yamaghantaka period number (1-8) indexed by weekday (0=Sun..6=Sat) */
+const YAMAGHANTAKA_SLOT: Record<number, number> = {
+  0: 5, // Sunday
+  1: 4, // Monday
+  2: 3, // Tuesday
+  3: 2, // Wednesday
+  4: 1, // Thursday
+  5: 7, // Friday
+  6: 6, // Saturday
+};
+
+// --------------------------------------------------------------------------
+// Sunrise / Sunset approximation
+// --------------------------------------------------------------------------
+
+const DEG_TO_RAD = Math.PI / 180;
+const RAD_TO_DEG = 180 / Math.PI;
+
+/**
+ * Approximate solar declination for a given day-of-year.
+ * Uses the simplified equation: decl ≈ -23.44 * cos(360/365 * (dayOfYear + 10))
+ */
+function solarDeclination(dayOfYear: number): number {
+  return -23.44 * Math.cos(DEG_TO_RAD * (360 / 365) * (dayOfYear + 10));
+}
+
+/** Day-of-year (1-366) from a Date object (treats the date as UTC). */
+function getDayOfYear(d: Date): number {
+  const start = Date.UTC(d.getUTCFullYear(), 0, 1);
+  return Math.floor((d.getTime() - start) / 86400000) + 1;
+}
+
+/**
+ * Returns approximate sunrise and sunset as UTC timestamps for the given
+ * date, latitude, and timezone offset (minutes ahead of UTC).
+ *
+ * Uses the hour-angle formula:
+ *   cos(HA) = -tan(lat) * tan(declination)
+ *   dayLength = 2 * HA / 15  (hours)
+ *
+ * Falls back to 6:00 AM / 6:00 PM local for extreme latitudes.
+ */
+function approxSunriseSunset(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes: number,
+): { sunrise: number; sunset: number } {
+  const doy = getDayOfYear(date);
+  const decl = solarDeclination(doy);
+
+  const latRad = latitude * DEG_TO_RAD;
+  const declRad = decl * DEG_TO_RAD;
+
+  const cosHA = -Math.tan(latRad) * Math.tan(declRad);
+
+  let dayLengthHours: number;
+  if (cosHA < -1) {
+    // Midnight sun — treat as 18-hour "day"
+    dayLengthHours = 18;
+  } else if (cosHA > 1) {
+    // Polar night — treat as 6-hour "day" centred at noon
+    dayLengthHours = 6;
+  } else {
+    const haRad = Math.acos(cosHA);
+    dayLengthHours = (2 * haRad * RAD_TO_DEG) / 15;
+  }
+
+  // Solar noon in local time is approximately 12:00
+  const noonLocalMs = 12 * 3600000;
+  const halfDayMs = (dayLengthHours / 2) * 3600000;
+
+  // Build sunrise/sunset as UTC timestamps for the given date
+  const startOfDayUTC = Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
+  // Local midnight = startOfDayUTC - timezoneOffsetMinutes * 60000
+  const localMidnightUTC = startOfDayUTC - timezoneOffsetMinutes * 60000;
+
+  const sunriseUTC = localMidnightUTC + noonLocalMs - halfDayMs;
+  const sunsetUTC = localMidnightUTC + noonLocalMs + halfDayMs;
+
+  return { sunrise: sunriseUTC, sunset: sunsetUTC };
+}
+
+// --------------------------------------------------------------------------
+// Rahukaala & Yamaghantaka helpers
+// --------------------------------------------------------------------------
+
+/**
+ * Compute an inauspicious period (Rahukaala or Yamaghantaka) for a date.
+ *
+ * Divides daylight hours into 8 equal parts and returns the start/end
+ * of the specified slot.
+ */
+function computeInauspiciousPeriod(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes: number,
+  slotTable: Record<number, number>,
+): { start: Date; end: Date } {
+  // Determine the local weekday
+  const localDate = new Date(date.getTime() + timezoneOffsetMinutes * 60000);
+  const weekday = localDate.getUTCDay();
+
+  const { sunrise, sunset } = approxSunriseSunset(date, latitude, timezoneOffsetMinutes);
+  const dayLengthMs = sunset - sunrise;
+  const slotLengthMs = dayLengthMs / 8;
+
+  const slot = slotTable[weekday] ?? 1; // 1-based
+  const slotStart = sunrise + (slot - 1) * slotLengthMs;
+  const slotEnd = slotStart + slotLengthMs;
+
+  return { start: new Date(slotStart), end: new Date(slotEnd) };
+}
+
+// --------------------------------------------------------------------------
+// Hora Lord (Planetary Hour)
+// --------------------------------------------------------------------------
+
+/**
+ * Chaldean order of planets used for hora computation.
+ * Starting from Saturn and cycling: Sat, Jup, Mar, Sun, Ven, Mer, Moon
+ */
+const CHALDEAN_ORDER = ["Saturn", "Jupiter", "Mars", "Sun", "Venus", "Mercury", "Moon"];
+
+/**
+ * Day lord for each weekday (0=Sun..6=Sat).
+ * The first planetary hour of the day is ruled by this planet.
+ */
+const DAY_LORD: Record<number, string> = {
+  0: "Sun",       // Sunday
+  1: "Moon",      // Monday
+  2: "Mars",      // Tuesday
+  3: "Mercury",   // Wednesday
+  4: "Jupiter",   // Thursday
+  5: "Venus",     // Friday
+  6: "Saturn",    // Saturday
+};
+
+/**
+ * Compute the Hora lord for a given moment.
+ *
+ * Day hours: divide sunrise-to-sunset into 12 equal parts.
+ * Night hours: divide sunset-to-next-sunrise into 12 equal parts.
+ * The first hour is the day lord; subsequent hours follow Chaldean order.
+ */
+function computeHoraLord(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes: number,
+): string {
+  const ts = date.getTime();
+
+  // Sunrise/sunset for the given date
+  const { sunrise, sunset } = approxSunriseSunset(date, latitude, timezoneOffsetMinutes);
+
+  let hourIndex: number; // 0-based count of planetary hours from sunrise
+
+  if (ts >= sunrise && ts < sunset) {
+    // Daytime — 12 equal day-hours
+    const dayHourMs = (sunset - sunrise) / 12;
+    hourIndex = Math.floor((ts - sunrise) / dayHourMs);
+    hourIndex = Math.min(hourIndex, 11);
+  } else {
+    // Nighttime — need next day's sunrise for night length
+    const nextDay = new Date(date.getTime() + 86400000);
+    const { sunrise: nextSunrise } = approxSunriseSunset(nextDay, latitude, timezoneOffsetMinutes);
+
+    let nightStart: number;
+    let nightEnd: number;
+
+    if (ts >= sunset) {
+      // After sunset on the given date
+      nightStart = sunset;
+      nightEnd = nextSunrise;
+    } else {
+      // Before sunrise — use previous day's sunset
+      const prevDay = new Date(date.getTime() - 86400000);
+      const { sunset: prevSunset } = approxSunriseSunset(prevDay, latitude, timezoneOffsetMinutes);
+      nightStart = prevSunset;
+      nightEnd = sunrise;
+    }
+
+    const nightHourMs = (nightEnd - nightStart) / 12;
+    hourIndex = 12 + Math.floor((ts - nightStart) / nightHourMs);
+    hourIndex = Math.min(hourIndex, 23);
+  }
+
+  // Find the day lord (first hour lord) for this calendar day
+  const localDate = new Date(ts + timezoneOffsetMinutes * 60000);
+  const weekday = localDate.getUTCDay();
+  const dayLord = DAY_LORD[weekday];
+
+  // The day lord's position in the Chaldean order
+  const dayLordIdx = CHALDEAN_ORDER.indexOf(dayLord);
+
+  // Advance through the Chaldean order by hourIndex positions
+  const lordIdx = (dayLordIdx + hourIndex) % 7;
+  return CHALDEAN_ORDER[lordIdx];
+}
+
+/** Hora quality classification */
+type HoraQuality = "benefic" | "malefic" | "neutral";
+
+function getHoraQuality(lord: string): HoraQuality {
+  if (lord === "Jupiter" || lord === "Venus" || lord === "Mercury" || lord === "Moon") {
+    return "benefic";
+  }
+  if (lord === "Saturn" || lord === "Mars") {
+    return "malefic";
+  }
+  return "neutral"; // Sun
+}
+
+// --------------------------------------------------------------------------
 // Activity preference maps
 // --------------------------------------------------------------------------
 
@@ -349,6 +577,9 @@ function scoreHour(
   sunLong: number,
   moonLong: number,
   weekday: number, // 0=Sun..6=Sat
+  utcDate?: Date,
+  latitude?: number,
+  timezoneOffsetMinutes?: number,
 ): { score: number; factors: MuhurtaFactor[] } {
   const prefs = ACTIVITY_PREFERENCES[activity];
   const factors: MuhurtaFactor[] = [];
@@ -409,6 +640,45 @@ function scoreHour(
     score: weekdayBonus,
   });
 
+  // 6. Rahukaala penalty (-30 if within Rahu's inauspicious period)
+  if (utcDate && latitude !== undefined && timezoneOffsetMinutes !== undefined) {
+    const rahuPeriod = computeInauspiciousPeriod(utcDate, latitude, timezoneOffsetMinutes, RAHUKAALA_SLOT);
+    const ts = utcDate.getTime();
+    const inRahukaala = ts >= rahuPeriod.start.getTime() && ts < rahuPeriod.end.getTime();
+    const rahukaalaScore = inRahukaala ? -30 : 0;
+    rawScore += rahukaalaScore;
+    factors.push({
+      name: "Rahukaala",
+      value: inRahukaala ? "Active" : "Clear",
+      quality: inRahukaala ? "inauspicious" : "favorable",
+      score: rahukaalaScore,
+    });
+
+    // 7. Yamaghantaka penalty (-15 if within Yama's inauspicious period)
+    const yamaPeriod = computeInauspiciousPeriod(utcDate, latitude, timezoneOffsetMinutes, YAMAGHANTAKA_SLOT);
+    const inYamaghantaka = ts >= yamaPeriod.start.getTime() && ts < yamaPeriod.end.getTime();
+    const yamaScore = inYamaghantaka ? -15 : 0;
+    rawScore += yamaScore;
+    factors.push({
+      name: "Yamaghantaka",
+      value: inYamaghantaka ? "Active" : "Clear",
+      quality: inYamaghantaka ? "inauspicious" : "favorable",
+      score: yamaScore,
+    });
+
+    // 8. Hora Lord (planetary hour bonus/penalty)
+    const horaLord = computeHoraLord(utcDate, latitude, timezoneOffsetMinutes);
+    const horaQuality = getHoraQuality(horaLord);
+    const horaScore = horaQuality === "benefic" ? 10 : horaQuality === "malefic" ? -5 : 0;
+    rawScore += horaScore;
+    factors.push({
+      name: "Hora",
+      value: `${horaLord} hora`,
+      quality: horaQuality === "benefic" ? "auspicious" : horaQuality === "malefic" ? "inauspicious" : "neutral",
+      score: horaScore,
+    });
+  }
+
   // Clamp to 0-100
   const score = Math.max(0, Math.min(100, rawScore));
   return { score, factors };
@@ -427,6 +697,9 @@ function buildRecommendation(
   const tithiFactor = factors.find((f) => f.name === "Tithi");
   const nakFactor = factors.find((f) => f.name === "Nakshatra");
   const yogaFactor = factors.find((f) => f.name === "Yoga");
+  const rahuFactor = factors.find((f) => f.name === "Rahukaala");
+  const yamaFactor = factors.find((f) => f.name === "Yamaghantaka");
+  const horaFactor = factors.find((f) => f.name === "Hora");
 
   const quality = score >= 75 ? "excellent" : score >= 60 ? "good" : "modest";
   const parts: string[] = [
@@ -441,6 +714,21 @@ function buildRecommendation(
   }
   if (yogaFactor && yogaFactor.score > 0) {
     parts.push(`${yogaFactor.value} yoga enhances the timing.`);
+  }
+
+  // Warnings for inauspicious periods
+  if (rahuFactor && rahuFactor.score < 0) {
+    parts.push("Caution: falls within Rahukaala.");
+  }
+  if (yamaFactor && yamaFactor.score < 0) {
+    parts.push("Note: Yamaghantaka period is active.");
+  }
+
+  // Hora lord information
+  if (horaFactor && horaFactor.score > 0) {
+    parts.push(`${horaFactor.value} is benefic, enhancing this window.`);
+  } else if (horaFactor && horaFactor.score < 0) {
+    parts.push(`${horaFactor.value} is malefic during this window.`);
   }
 
   return parts.join(" ");
@@ -491,7 +779,10 @@ export function findMuhurta(
     const moon = positions.find((p) => p.name === "Moon");
 
     if (sun && moon) {
-      const { score, factors } = scoreHour(activity, sun.longitude, moon.longitude, weekday);
+      const { score, factors } = scoreHour(
+        activity, sun.longitude, moon.longitude, weekday,
+        utcDate, latitude, timezoneOffsetMinutes,
+      );
       slots.push({ utcDate, score, factors, weekday });
     }
 
@@ -560,4 +851,63 @@ export const MUHURTA_ACTIVITIES = Object.keys(ACTIVITY_PREFERENCES) as MuhurtaAc
 
 export function getActivityLabel(activity: MuhurtaActivity): string {
   return ACTIVITY_PREFERENCES[activity]?.label ?? activity;
+}
+
+// --------------------------------------------------------------------------
+// Exported Rahukaala / Yamaghantaka / Hora helpers
+// --------------------------------------------------------------------------
+
+/**
+ * Get the Rahukaala (inauspicious period of Rahu) for a given date and location.
+ *
+ * Divides daylight hours (sunrise to sunset) into 8 equal parts and returns
+ * the slot designated as Rahukaala for that weekday.
+ *
+ * @param date  - A Date object (UTC) representing the day of interest.
+ * @param latitude - Observer latitude in degrees.
+ * @param timezoneOffsetMinutes - Minutes ahead of UTC (e.g., IST = 330).
+ */
+export function getRahukaala(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes = 0,
+): { start: Date; end: Date } {
+  return computeInauspiciousPeriod(date, latitude, timezoneOffsetMinutes, RAHUKAALA_SLOT);
+}
+
+/**
+ * Get the Yamaghantaka (secondary inauspicious period) for a given date and location.
+ *
+ * Same division as Rahukaala but with a different slot table.
+ *
+ * @param date  - A Date object (UTC) representing the day of interest.
+ * @param latitude - Observer latitude in degrees.
+ * @param timezoneOffsetMinutes - Minutes ahead of UTC (e.g., IST = 330).
+ */
+export function getYamaghantaka(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes = 0,
+): { start: Date; end: Date } {
+  return computeInauspiciousPeriod(date, latitude, timezoneOffsetMinutes, YAMAGHANTAKA_SLOT);
+}
+
+/**
+ * Get the Hora lord (planetary hour ruler) for a given moment and location.
+ *
+ * The day is divided into 24 planetary hours (12 day + 12 night). The first
+ * hour of each day is ruled by the day lord (Sun on Sunday, Moon on Monday,
+ * etc.), and subsequent hours follow the Chaldean order.
+ *
+ * @param date  - A Date object (UTC) representing the moment of interest.
+ * @param latitude - Observer latitude in degrees.
+ * @param timezoneOffsetMinutes - Minutes ahead of UTC (e.g., IST = 330).
+ * @returns The name of the ruling planet (e.g., "Jupiter", "Venus", "Saturn").
+ */
+export function getHoraLord(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes = 0,
+): string {
+  return computeHoraLord(date, latitude, timezoneOffsetMinutes);
 }

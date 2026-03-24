@@ -14,6 +14,9 @@ export interface PlanetPosition {
   sign: string;
   degree_in_sign: number;
   house: number;
+  speed?: number;           // degrees per day (negative = retrograde)
+  is_retrograde?: boolean;  // true if speed < 0
+  is_combust?: boolean;     // true if within combustion orb of Sun
 }
 
 export interface AscendantData {
@@ -765,6 +768,35 @@ function getTropicalLongitude(body: Astronomy.Body, time: Astronomy.AstroTime): 
 }
 
 // --------------------------------------------------------------------------
+// Retrograde detection helper
+// --------------------------------------------------------------------------
+
+/**
+ * Returns true if the planet is retrograde (speed < 0).
+ * If `speed` is not populated, returns false.
+ */
+export function isRetrograde(planet: PlanetPosition): boolean {
+  return planet.is_retrograde === true;
+}
+
+// --------------------------------------------------------------------------
+// Combustion orbs (degrees from the Sun)
+//
+// Traditional Vedic combustion orbs. Some planets have a tighter orb when
+// retrograde — supply the retrograde orb as the second element.
+//   [direct_orb, retrograde_orb]  (retrograde_orb is optional)
+// --------------------------------------------------------------------------
+
+const COMBUSTION_ORBS: Record<string, [number, number?]> = {
+  Moon:    [12],
+  Mars:    [17],
+  Mercury: [14, 12],
+  Jupiter: [11],
+  Venus:   [10, 8],
+  Saturn:  [15],
+};
+
+// --------------------------------------------------------------------------
 // Main calculation
 // --------------------------------------------------------------------------
 
@@ -791,23 +823,59 @@ export function calculate(input: BirthInput): SwissEngineResult {
     input.utc_second
   );
 
-  // Compute tropical planet positions and convert to sidereal
-  const placements: Array<{ name: string; longitude: number }> = [];
+  // Compute tropical planet positions and convert to sidereal.
+  // Also compute positions at jd + 0.01 days to derive daily speed.
+  const DT = 0.01; // time step in days for velocity estimation
+  const jd_ut2 = jd_ut + DT;
+  const ayanamsa2 = computeAyanamsa(jd_ut2, preset.sidereal_mode_name);
+  const time2 = Astronomy.MakeTime(
+    new Date(
+      Date.UTC(
+        input.utc_year,
+        input.utc_month - 1,
+        input.utc_day,
+        input.utc_hour,
+        input.utc_minute,
+        input.utc_second
+      ) + DT * 86400000 // add DT days in milliseconds
+    )
+  );
+
+  const placements: Array<{ name: string; longitude: number; speed: number }> = [];
 
   for (const [planetName, body] of Object.entries(PLANET_BODIES)) {
     const tropicalLon = getTropicalLongitude(body, time);
     const siderealLon = normalize(tropicalLon - ayanamsa);
-    placements.push({ name: planetName, longitude: siderealLon });
+
+    const tropicalLon2 = getTropicalLongitude(body, time2);
+    const siderealLon2 = normalize(tropicalLon2 - ayanamsa2);
+
+    // Angular difference handling 360° wraparound
+    let diff = siderealLon2 - siderealLon;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    const speed = diff / DT; // degrees per day
+
+    placements.push({ name: planetName, longitude: siderealLon, speed });
   }
 
   // Rahu (True Lunar Node — osculating node)
   const rahuTropical = computeTrueLunarNode(jd_ut);
   const rahuSidereal = normalize(rahuTropical - ayanamsa);
-  placements.push({ name: "Rahu", longitude: rahuSidereal });
+
+  const rahuTropical2 = computeTrueLunarNode(jd_ut2);
+  const rahuSidereal2 = normalize(rahuTropical2 - ayanamsa2);
+  let rahuDiff = rahuSidereal2 - rahuSidereal;
+  if (rahuDiff > 180) rahuDiff -= 360;
+  if (rahuDiff < -180) rahuDiff += 360;
+  const rahuSpeed = rahuDiff / DT;
+
+  // Rahu and Ketu are always retrograde (mean motion is negative)
+  placements.push({ name: "Rahu", longitude: rahuSidereal, speed: Math.min(rahuSpeed, -0.001) });
 
   // Ketu (opposite of Rahu)
   const ketuSidereal = normalize(rahuSidereal + 180);
-  placements.push({ name: "Ketu", longitude: ketuSidereal });
+  placements.push({ name: "Ketu", longitude: ketuSidereal, speed: Math.min(rahuSpeed, -0.001) });
 
   // Compute ascendant (tropical → sidereal)
   const ascTropical = computeAscendantLongitude(jd_ut, input.latitude, input.longitude);
@@ -857,8 +925,33 @@ export function calculate(input: BirthInput): SwissEngineResult {
       sign: info.sign,
       degree_in_sign: round4(info.degree_in_sign),
       house: house_number,
+      speed: round4(p.speed),
+      is_retrograde: p.speed < 0,
     };
   });
+
+  // ---------- Combustion detection ----------
+  // Find the Sun's longitude to compute angular distances
+  const sunPlanet = planets.find((p) => p.name === "Sun");
+  if (sunPlanet) {
+    const sunLon = sunPlanet.longitude;
+    for (const planet of planets) {
+      const orbEntry = COMBUSTION_ORBS[planet.name];
+      if (!orbEntry) {
+        // Sun, Rahu, Ketu — not subject to combustion
+        planet.is_combust = false;
+        continue;
+      }
+      // Pick the appropriate orb (retrograde orb if planet is retrograde and one exists)
+      const orb = (planet.is_retrograde && orbEntry[1] != null)
+        ? orbEntry[1]
+        : orbEntry[0];
+      // Angular distance between planet and Sun (shortest arc)
+      let angularDist = Math.abs(planet.longitude - sunLon);
+      if (angularDist > 180) angularDist = 360 - angularDist;
+      planet.is_combust = angularDist <= orb;
+    }
+  }
 
   const houses: HousePlacement[] = [];
   for (let h = 1; h <= 12; h++) {

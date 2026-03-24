@@ -29,6 +29,9 @@ export type PlanetPosition = {
   sign: string;
   degree_in_sign: number;
   house: number;
+  speed?: number;           // degrees per day (negative = retrograde)
+  is_retrograde?: boolean;  // true if speed < 0
+  is_combust?: boolean;     // true if within combustion orb of Sun
 };
 
 export type HousePlacement = {
@@ -62,6 +65,10 @@ export type DashaInfo = {
   current_dasha_end: string;
   current_antardasha_start: string;
   current_antardasha_end: string;
+  current_pratyantar?: string;
+  current_pratyantar_start?: string;
+  current_pratyantar_end?: string;
+  pratyantar_periods?: DashaPeriodInfo[];
   periods: DashaPeriodInfo[];
 };
 

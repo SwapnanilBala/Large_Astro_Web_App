@@ -52,14 +52,26 @@ export interface AntarDashaPeriod {
   end_date: string;
 }
 
+export interface PratyantarDashaPeriod {
+  major_lord: string;
+  sub_lord: string;
+  pratyantar_lord: string;
+  start_date: string;
+  end_date: string;
+}
+
 export interface DashaTimeline {
   periods: DashaPeriod[];
   current_dasha: DashaPeriod | null;
   current_antardasha: AntarDashaPeriod | null;
+  current_pratyantar: PratyantarDashaPeriod | null;
+  pratyantar_periods: PratyantarDashaPeriod[];
   current_dasha_start: string | null;
   current_dasha_end: string | null;
   current_antardasha_start: string | null;
   current_antardasha_end: string | null;
+  current_pratyantar_start: string | null;
+  current_pratyantar_end: string | null;
 }
 
 export interface SubPeriodInfo {
@@ -280,6 +292,8 @@ export function calculateDashaTimeline(
   let currentAntardasha: AntarDashaPeriod | null = null;
   let currentAntardashaStart: string | null = null;
   let currentAntardashaEnd: string | null = null;
+  let currentAntarSeqStartMs = 0;
+  let currentAntarSeqEndMs = 0;
 
   if (currentDasha) {
     const subPeriods = buildSubPeriodWindows(
@@ -305,7 +319,57 @@ export function calculateDashaTimeline(
         };
         currentAntardashaStart = sp.sequence_start_date;
         currentAntardashaEnd = sp.sequence_end_date;
+        currentAntarSeqStartMs = sp.sequence_start_ms;
+        currentAntarSeqEndMs = sp.sequence_end_ms;
         break;
+      }
+    }
+  }
+
+  // Compute Pratyantar Dasha inside current Antar Dasha
+  let currentPratyantar: PratyantarDashaPeriod | null = null;
+  let currentPratyantarStart: string | null = null;
+  let currentPratyantarEnd: string | null = null;
+  const pratyantarPeriods: PratyantarDashaPeriod[] = [];
+
+  if (currentAntardasha && currentDasha) {
+    const pratyantarWindows = buildSubPeriodWindows(
+      currentAntardasha.sub_lord,
+      currentAntardasha.start_date,
+      currentAntardasha.end_date,
+      3,
+      [currentDasha.planet, currentAntardasha.sub_lord],
+      currentAntardashaStart ?? undefined,
+      currentAntardashaEnd ?? undefined
+    );
+
+    for (let i = 0; i < pratyantarWindows.length; i++) {
+      const pw = pratyantarWindows[i];
+
+      // Collect all Pratyantar periods within this Antardasha
+      pratyantarPeriods.push({
+        major_lord: currentDasha.planet,
+        sub_lord: currentAntardasha.sub_lord,
+        pratyantar_lord: pw.planet,
+        start_date: pw.sequence_start_date,
+        end_date: pw.sequence_end_date,
+      });
+
+      // Identify the currently active Pratyantar
+      if (!currentPratyantar) {
+        const isLast = i === pratyantarWindows.length - 1;
+        if (isLast ? pw.sequence_start_ms <= currentMs && currentMs <= pw.sequence_end_ms
+          : pw.sequence_start_ms <= currentMs && currentMs < pw.sequence_end_ms) {
+          currentPratyantar = {
+            major_lord: currentDasha.planet,
+            sub_lord: currentAntardasha.sub_lord,
+            pratyantar_lord: pw.planet,
+            start_date: pw.sequence_start_date,
+            end_date: pw.sequence_end_date,
+          };
+          currentPratyantarStart = pw.sequence_start_date;
+          currentPratyantarEnd = pw.sequence_end_date;
+        }
       }
     }
   }
@@ -314,10 +378,14 @@ export function calculateDashaTimeline(
     periods,
     current_dasha: currentDasha,
     current_antardasha: currentAntardasha,
+    current_pratyantar: currentPratyantar,
+    pratyantar_periods: pratyantarPeriods,
     current_dasha_start: currentDashaSeqStartStr,
     current_dasha_end: currentDashaSeqEndStr,
     current_antardasha_start: currentAntardashaStart,
     current_antardasha_end: currentAntardashaEnd,
+    current_pratyantar_start: currentPratyantarStart,
+    current_pratyantar_end: currentPratyantarEnd,
   };
 }
 

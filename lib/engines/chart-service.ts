@@ -76,6 +76,15 @@ export interface ChartResponse {
       current_dasha_end: string;
       current_antardasha_start: string;
       current_antardasha_end: string;
+      current_pratyantar?: string;
+      current_pratyantar_start?: string;
+      current_pratyantar_end?: string;
+      pratyantar_periods?: Array<{
+        planet: string;
+        start_date: string;
+        end_date: string;
+        years: number;
+      }>;
       periods: Array<{
         planet: string;
         start_date: string;
@@ -524,6 +533,15 @@ function computeDashaTimeline(
     current_dasha_end: dashaTimeline.current_dasha_end ?? "",
     current_antardasha_start: dashaTimeline.current_antardasha_start ?? "",
     current_antardasha_end: dashaTimeline.current_antardasha_end ?? "",
+    current_pratyantar: dashaTimeline.current_pratyantar?.pratyantar_lord ?? undefined,
+    current_pratyantar_start: dashaTimeline.current_pratyantar_start ?? undefined,
+    current_pratyantar_end: dashaTimeline.current_pratyantar_end ?? undefined,
+    pratyantar_periods: dashaTimeline.pratyantar_periods.map((pp) => ({
+      planet: pp.pratyantar_lord,
+      start_date: pp.start_date,
+      end_date: pp.end_date,
+      years: 0,
+    })),
     periods: dashaTimeline.periods.map((p) => ({
       planet: p.planet,
       start_date: p.start_date,
@@ -889,6 +907,15 @@ export function buildForecast(
     current_dasha_end: dashaTimeline.current_dasha_end ?? "",
     current_antardasha_start: dashaTimeline.current_antardasha_start ?? "",
     current_antardasha_end: dashaTimeline.current_antardasha_end ?? "",
+    current_pratyantar: dashaTimeline.current_pratyantar?.pratyantar_lord ?? undefined,
+    current_pratyantar_start: dashaTimeline.current_pratyantar_start ?? undefined,
+    current_pratyantar_end: dashaTimeline.current_pratyantar_end ?? undefined,
+    pratyantar_periods: dashaTimeline.pratyantar_periods.map((pp) => ({
+      planet: pp.pratyantar_lord,
+      start_date: pp.start_date,
+      end_date: pp.end_date,
+      years: 0,
+    })),
     periods: dashaTimeline.periods.map((p) => ({
       planet: p.planet,
       start_date: p.start_date,

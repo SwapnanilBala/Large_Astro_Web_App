@@ -609,29 +609,74 @@ export default function Home() {
             <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
           )}
         </h1>
-        {/* ── Zodiac Sign Image Strip (replaces generic lead text) ── */}
+        {/* ── Zodiac Elemental Groups ── */}
         <div
           className={`${styles.zodiacStrip} ${heroReady ? "anim-fade-in" : "hero-pre"}`}
           style={{ animationDelay: `${leadDelay}s` }}
           aria-hidden="true"
         >
           {[
-            { src: "/zodiac/aries.jpg", name: "Aries", symbol: "♈" },
-            { src: "/zodiac/taurus.jpg", name: "Taurus", symbol: "♉" },
-            { src: "/zodiac/gemini.jpg", name: "Gemini", symbol: "♊" },
-            { src: "/zodiac/cancer.jpg", name: "Cancer", symbol: "♋" },
-            { src: "/zodiac/leo.jpg", name: "Leo", symbol: "♌" },
-            { src: "/zodiac/virgo.jpg", name: "Virgo", symbol: "♍" },
-            { src: "/zodiac/libra.jpg", name: "Libra", symbol: "♎" },
-            { src: "/zodiac/scorpio.jpg", name: "Scorpio", symbol: "♏" },
-            { src: "/zodiac/sagittarius.jpg", name: "Sagittarius", symbol: "♐" },
-            { src: "/zodiac/capricorn.png", name: "Capricorn", symbol: "♑" },
-            { src: "/zodiac/aquarius.png", name: "Aquarius", symbol: "♒" },
-            { src: "/zodiac/pisces.jpg", name: "Pisces", symbol: "♓" },
-          ].map((sign, i) => (
-            <div key={sign.name} className={styles.zodiacStripItem} style={{ animationDelay: `${leadDelay + 0.08 * i}s` }}>
-              <img src={sign.src} alt={sign.name} className={styles.zodiacStripImg} loading="lazy" />
-              <span className={styles.zodiacStripSymbol}>{sign.symbol}</span>
+            {
+              element: "Fire",
+              color: "#ff6b35",
+              glow: "rgba(255, 107, 53, 0.25)",
+              signs: [
+                { src: "/zodiac/aries.jpg", name: "Aries", symbol: "♈" },
+                { src: "/zodiac/leo.jpg", name: "Leo", symbol: "♌" },
+                { src: "/zodiac/sagittarius.jpg", name: "Sagittarius", symbol: "♐" },
+              ],
+            },
+            {
+              element: "Earth",
+              color: "#6abf69",
+              glow: "rgba(106, 191, 105, 0.25)",
+              signs: [
+                { src: "/zodiac/taurus.jpg", name: "Taurus", symbol: "♉" },
+                { src: "/zodiac/virgo.jpg", name: "Virgo", symbol: "♍" },
+                { src: "/zodiac/capricorn.png", name: "Capricorn", symbol: "♑" },
+              ],
+            },
+            {
+              element: "Air",
+              color: "#f2c26c",
+              glow: "rgba(242, 194, 108, 0.25)",
+              signs: [
+                { src: "/zodiac/gemini.jpg", name: "Gemini", symbol: "♊" },
+                { src: "/zodiac/libra.jpg", name: "Libra", symbol: "♎" },
+                { src: "/zodiac/aquarius.png", name: "Aquarius", symbol: "♒" },
+              ],
+            },
+            {
+              element: "Water",
+              color: "#6ce1d4",
+              glow: "rgba(108, 225, 212, 0.25)",
+              signs: [
+                { src: "/zodiac/cancer.jpg", name: "Cancer", symbol: "♋" },
+                { src: "/zodiac/scorpio.jpg", name: "Scorpio", symbol: "♏" },
+                { src: "/zodiac/pisces.jpg", name: "Pisces", symbol: "♓" },
+              ],
+            },
+          ].map((group, gi) => (
+            <div
+              key={group.element}
+              className={styles.elementGroup}
+              style={{
+                "--element-color": group.color,
+                "--element-glow": group.glow,
+                animationDelay: `${leadDelay + 0.15 * gi}s`,
+              } as React.CSSProperties}
+            >
+              <div className={styles.elementBackdrop} />
+              <span className={styles.elementLabel}>{group.element}</span>
+              <div className={styles.elementSigns}>
+                {group.signs.map((sign, si) => (
+                  <div key={sign.name} className={styles.zodiacStripItem} style={{ animationDelay: `${leadDelay + 0.15 * gi + 0.08 * si}s` }}>
+                    <img src={sign.src} alt={sign.name} className={styles.zodiacStripImg} loading="lazy" />
+                    <span className={styles.zodiacStripSymbol}>{sign.symbol}</span>
+                    <span className={styles.zodiacStripName}>{sign.name}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -641,62 +686,66 @@ export default function Home() {
         </div>
 
         <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
-          <label data-field-reveal="0" className={`input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
-            <GiCrystalBall className="section-icon" style={{ fontSize: "0.9rem" }} /> {t("home.formName")}
-            <input
-              type="text"
-              value={draft.name}
-              onChange={updateField("name")}
-              placeholder={t("home.formNamePlaceholder")}
-              required
-            />
-          </label>
+          {/* ── Name Card ── */}
+          <div data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+            <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
+              <GiCrystalBall className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formName")}</span>
+              <input
+                type="text"
+                value={draft.name}
+                onChange={updateField("name")}
+                placeholder={t("home.formNamePlaceholder")}
+                className={styles.fieldInput}
+                required
+              />
+            </label>
+          </div>
 
-          <div className={styles.glowDivider} />
-          <div className={`glass-section glass-section--aqua ${styles.glassEnhanced}`}>
-            <div className={styles.glassAccentImages}>
-              <img src="/zodiac/cancer.jpg" alt="" className={styles.glassAccentImg} />
-              <img src="/zodiac/leo.jpg" alt="" className={styles.glassAccentImg} />
+          {/* ── Birth Date Card ── */}
+          <div data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua}`}>
+            <div className={styles.fieldCardAccent}>
+              <img src="/zodiac/cancer.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
-            <h2 data-field-reveal="1" className={styles.sectionHeading}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
-            </h2>
-
-            <div data-field-reveal="2" className="input-grid">
-            <label className={`input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
-              {t("home.formBirthDate")}
+            <label className={`${styles.fieldLabel} input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
+              <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formBirthDate")}</span>
               <input
                 type="date"
                 value={draft.birthDate}
                 onChange={updateField("birthDate")}
+                className={styles.fieldInput}
                 required
               />
             </label>
-            <label className={`input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
-              {t("home.formBirthTime")}
+          </div>
+
+          {/* ── Birth Time Card ── */}
+          <div data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral}`}>
+            <div className={styles.fieldCardAccent}>
+              <img src="/zodiac/leo.jpg" alt="" className={styles.fieldCardAccentImg} />
+            </div>
+            <label className={`${styles.fieldLabel} input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
+              <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formBirthTime")}</span>
               <input
                 type="time"
                 value={draft.birthTime}
                 onChange={updateField("birthTime")}
+                className={styles.fieldInput}
                 required
               />
             </label>
-            </div>
           </div>
 
-          <div className={styles.glowDivider} />
-          <div className={`glass-section glass-section--gold ${styles.glassEnhanced}`}>
-            <div className={styles.glassAccentImages}>
-              <img src="/zodiac/sagittarius.jpg" alt="" className={styles.glassAccentImg} />
-              <img src="/zodiac/capricorn.png" alt="" className={styles.glassAccentImg} />
+          {/* ── Country Card ── */}
+          <div data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet}`}>
+            <div className={styles.fieldCardAccent}>
+              <img src="/zodiac/sagittarius.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
-            <h2 data-field-reveal="3" className={styles.sectionHeading}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
-            </h2>
-
-            <div data-field-reveal="4" className="input-grid three-col location-row">
-            <label className={`input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
-              {t("home.formCountry")}
+            <label className={`${styles.fieldLabel} input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
+              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formCountry")}</span>
               <AutocompleteInput
                 value={draft.country}
                 onChange={handleCountryChange}
@@ -706,8 +755,16 @@ export default function Home() {
                 required
               />
             </label>
-            <label className={`input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
-              {t("home.formState")}
+          </div>
+
+          {/* ── State Card ── */}
+          <div data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose}`}>
+            <div className={styles.fieldCardAccent}>
+              <img src="/zodiac/capricorn.png" alt="" className={styles.fieldCardAccentImg} />
+            </div>
+            <label className={`${styles.fieldLabel} input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
+              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formState")}</span>
               <AutocompleteInput
                 value={draft.state}
                 onChange={handleStateChange}
@@ -718,8 +775,16 @@ export default function Home() {
                 required
               />
             </label>
-            <label className={`input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
-              {t("home.formCity")}
+          </div>
+
+          {/* ── City Card ── */}
+          <div data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+            <div className={styles.fieldCardAccent}>
+              <img src="/zodiac/pisces.jpg" alt="" className={styles.fieldCardAccentImg} />
+            </div>
+            <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
+              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <span className={styles.fieldLabelText}>{t("home.formCity")}</span>
               <AutocompleteInput
                 value={draft.city}
                 onChange={setField("city")}
@@ -740,15 +805,8 @@ export default function Home() {
               {geoStatus === "not-found" && t("home.geoNotFound")}
             </p>
           )}
-          </div>
 
-          <div className={styles.glowDivider} />
-          <div className={`glass-section glass-section--violet ${styles.glassEnhanced}`}>
-            <div className={styles.glassAccentImages}>
-              <img src="/zodiac/aquarius.png" alt="" className={styles.glassAccentImg} />
-              <img src="/zodiac/pisces.jpg" alt="" className={styles.glassAccentImg} />
-            </div>
-            <div data-field-reveal="5" className="collapsible-section">
+          <div data-field-reveal="6" className="collapsible-section">
             <button
               type="button"
               className="collapsible-toggle"
@@ -806,12 +864,11 @@ export default function Home() {
               </div>
             )}
             </div>
-          </div>
 
           {/* ── Cosmic Charge Submit Button ── */}
           <div
             ref={submitWrapperRef}
-            data-field-reveal="6"
+            data-field-reveal="7"
             className={styles.submitChargeWrapper}
             onClick={handleSubmitClick}
             style={{ "--charge-level": chargeLevel } as React.CSSProperties}

@@ -3,6 +3,7 @@ import type { PlanetPosition, HousePlacement } from "./swiss-ephemeris-engine";
 import { SIGNS } from "./swiss-ephemeris-engine";
 import type { NavamsaPosition } from "./navamsa-engine";
 import type { AspectData } from "./aspect-engine";
+import { computeDivisionalChart } from "./divisional-engine";
 
 // --------------------------------------------------------------------------
 // Types
@@ -66,6 +67,35 @@ const PLANET_DEBILITATION_SIGNS: Record<string, string> = {
   Sun: "Libra", Moon: "Scorpio", Mercury: "Pisces", Venus: "Virgo",
   Mars: "Cancer", Jupiter: "Capricorn", Saturn: "Aries",
 };
+
+/** Moolatrikona signs and degree ranges */
+const MOOLATRIKONA_SIGNS: Record<string, { sign: string; start: number; end: number }> = {
+  Sun:     { sign: "Leo",         start: 0,  end: 20 },
+  Moon:    { sign: "Taurus",      start: 4,  end: 20 },
+  Mars:    { sign: "Aries",       start: 0,  end: 12 },
+  Mercury: { sign: "Virgo",       start: 16, end: 20 },
+  Jupiter: { sign: "Sagittarius", start: 0,  end: 10 },
+  Venus:   { sign: "Libra",       start: 0,  end: 15 },
+  Saturn:  { sign: "Aquarius",    start: 0,  end: 20 },
+};
+
+/** The 7 vargas used for Saptavargaja Bala */
+const SAPTAVARGA_DIVISIONS = [1, 2, 3, 7, 9, 12, 30] as const;
+
+/** Average daily speeds in degrees/day for Cheshta Bala */
+const AVERAGE_DAILY_SPEEDS: Record<string, number> = {
+  Sun: 1.0,
+  Moon: 13.2,
+  Mercury: 1.38,
+  Venus: 1.2,
+  Mars: 0.52,
+  Jupiter: 0.08,
+  Saturn: 0.03,
+};
+
+/** Day-strong planets: Sun, Jupiter, Venus; Night-strong: Moon, Mars, Saturn; Always: Mercury */
+const DAY_STRONG_PLANETS = new Set(["Sun", "Jupiter", "Venus"]);
+const NIGHT_STRONG_PLANETS = new Set(["Moon", "Mars", "Saturn"]);
 
 /** Natural friendship table for Saptavargaja */
 const NATURAL_FRIENDS: Record<string, Set<string>> = {
@@ -145,15 +175,26 @@ function signIndex(sign: string): number {
   return SIGNS.indexOf(sign);
 }
 
-function getDignityScore(planetName: string, sign: string): number {
+function getDignityScore(planetName: string, sign: string, degreeInSign?: number): number {
   // Returns virupas for a single divisional chart dignity
-  if (sign === PLANET_EXALTATION_SIGNS[planetName]) return 30; // exalted → same as own for vargaja
+  // Scoring: own=30, exalted=20, moolatrikona=15, friend=10, neutral=5, enemy=2, debilitated=0
+  if (sign === PLANET_DEBILITATION_SIGNS[planetName]) return 0;
+  if (sign === PLANET_EXALTATION_SIGNS[planetName]) return 20;
+  // Check moolatrikona (sign match + degree range in D1 context)
+  const mt = MOOLATRIKONA_SIGNS[planetName];
+  if (mt && sign === mt.sign) {
+    if (degreeInSign !== undefined && degreeInSign >= mt.start && degreeInSign <= mt.end) {
+      return 15; // moolatrikona
+    }
+    // Even outside MT degree range, it's still own sign if the planet rules it
+    if (PLANET_OWN_SIGNS[planetName]?.has(sign)) return 30;
+  }
   if (PLANET_OWN_SIGNS[planetName]?.has(sign)) return 30;
   const signLord = SIGN_RULERS[sign];
-  if (!signLord) return 7.5;
-  if (NATURAL_FRIENDS[planetName]?.has(signLord)) return 15;
-  if (NATURAL_ENEMIES[planetName]?.has(signLord)) return 3.75;
-  return 7.5; // neutral
+  if (!signLord) return 5;
+  if (NATURAL_FRIENDS[planetName]?.has(signLord)) return 10;
+  if (NATURAL_ENEMIES[planetName]?.has(signLord)) return 2;
+  return 5; // neutral
 }
 
 // --------------------------------------------------------------------------
@@ -169,23 +210,44 @@ function uchchaBala(planet: PlanetPosition): number {
 
 function saptavargajaBala(
   planet: PlanetPosition,
-  navamsa: NavamsaPosition | undefined
+  navamsa: NavamsaPosition | undefined,
+  allPlanets?: PlanetPosition[]
 ): number {
-  // Evaluate D1 (rashi) and D9 (navamsa) dignity, then scale
-  // Full calculation uses 7 vargas; we approximate with 2 and scale by 7/2
+  // Evaluate dignity in all 7 Saptavarga divisions:
+  // D1 (Rashi), D2 (Hora), D3 (Drekkana), D7 (Saptamsa),
+  // D9 (Navamsa), D12 (Dwadasamsa), D30 (Trimsamsa)
+  // Max score per varga = 30, total max = 210 virupas
   let total = 0;
-  // D1 dignity
-  total += getDignityScore(planet.name, planet.sign);
-  // D9 dignity
-  if (navamsa) {
-    total += getDignityScore(planet.name, navamsa.navamsa_sign);
-  } else {
-    total += 7.5; // neutral fallback
+
+  for (const div of SAPTAVARGA_DIVISIONS) {
+    if (div === 1) {
+      // D1: use natal sign directly with degree for moolatrikona check
+      total += getDignityScore(planet.name, planet.sign, planet.degree_in_sign);
+    } else if (div === 9 && navamsa) {
+      // D9: use pre-computed navamsa if available
+      total += getDignityScore(planet.name, navamsa.navamsa_sign);
+    } else {
+      // Compute the divisional chart position using the divisional engine
+      // We pass a single-planet array for efficiency
+      try {
+        const divPositions = computeDivisionalChart(
+          allPlanets ? allPlanets.filter((p) => p.name === planet.name) : [planet],
+          div
+        );
+        const pos = divPositions.find((p) => p.name === planet.name);
+        if (pos) {
+          total += getDignityScore(planet.name, pos.divisional_sign);
+        } else {
+          total += 5; // neutral fallback
+        }
+      } catch {
+        // If divisional chart computation fails, use neutral score
+        total += 5;
+      }
+    }
   }
-  // Scale: we computed 2 charts worth, each max 30. Full is 7 charts.
-  // Scale proportionally: (total / 2) * 7 = total * 3.5
-  // But cap at 45 max since full vargaja max is ~45 in practice
-  return Math.min(total * 3.5, 45);
+
+  return total;
 }
 
 function ojayugmarasiBala(planet: PlanetPosition): number {
@@ -227,11 +289,12 @@ function drekkanaBala(planet: PlanetPosition): number {
 
 function sthanaBala(
   planet: PlanetPosition,
-  navamsa: NavamsaPosition | undefined
+  navamsa: NavamsaPosition | undefined,
+  allPlanets?: PlanetPosition[]
 ): number {
   return (
     uchchaBala(planet) +
-    saptavargajaBala(planet, navamsa) +
+    saptavargajaBala(planet, navamsa, allPlanets) +
     ojayugmarasiBala(planet) +
     kendradiBala(planet) +
     drekkanaBala(planet)
@@ -253,21 +316,127 @@ function digBala(planet: PlanetPosition): number {
 }
 
 // --------------------------------------------------------------------------
-// 3. Kala Bala (Temporal Strength) — simplified
+// 3. Kala Bala (Temporal Strength)
 // --------------------------------------------------------------------------
+
+/**
+ * Approximate hour angle of sunrise/sunset using latitude and Sun's declination.
+ * Returns the half-day arc in hours (from solar noon to sunset).
+ * Sun declination is approximated from its sidereal longitude.
+ */
+function approxHalfDayArcHours(latitudeDeg: number, sunLongitude: number): number {
+  // Approximate Sun's declination from ecliptic longitude
+  // Obliquity of ecliptic ~ 23.44 degrees
+  const obliquity = 23.44;
+  const sunLonRad = (sunLongitude * Math.PI) / 180;
+  const declRad = Math.asin(Math.sin((obliquity * Math.PI) / 180) * Math.sin(sunLonRad));
+  const latRad = (latitudeDeg * Math.PI) / 180;
+
+  // Hour angle at sunrise/sunset: cos(H) = -tan(lat)*tan(decl)
+  const cosH = -Math.tan(latRad) * Math.tan(declRad);
+
+  // Clamp for polar regions (midnight sun / polar night)
+  if (cosH <= -1) return 12; // Sun never sets — full 24h day
+  if (cosH >= 1) return 0;   // Sun never rises — full 24h night
+
+  const hourAngleRad = Math.acos(cosH);
+  return (hourAngleRad * 12) / Math.PI; // convert to hours (half the day arc)
+}
+
+/**
+ * Compute Nathonnatha Bala (day/night strength).
+ * Day-strong planets (Sun, Jupiter, Venus) get strength proportional to daylight.
+ * Night-strong planets (Moon, Mars, Saturn) get strength proportional to nighttime.
+ * Mercury is always strong and receives full score.
+ *
+ * We use the Sun's house position to estimate how far into day/night we are,
+ * and the latitude + Sun longitude to compute approximate day/night length.
+ */
+function nathonnathaBala(
+  planet: PlanetPosition,
+  sunLongitude: number,
+  sunHouse: number,
+  latitude?: number
+): number {
+  const maxScore = 60;
+
+  // Mercury is always strong (diurnal and nocturnal)
+  if (planet.name === "Mercury") return maxScore;
+
+  // Determine if it's daytime based on Sun's house
+  // Sun in houses 7-12 (above horizon in Vedic whole-sign) = daytime
+  // Sun in houses 1-6 (below horizon) = nighttime
+  const isDaytime = sunHouse >= 7 && sunHouse <= 12;
+
+  // If latitude is available, compute proportional day/night fraction
+  // Otherwise use a simpler house-based approximation
+  let dayFraction = 0.5; // default: equal day/night
+  if (latitude !== undefined) {
+    const halfDayHours = approxHalfDayArcHours(latitude, sunLongitude);
+    const dayHours = halfDayHours * 2;
+    const nightHours = 24 - dayHours;
+
+    if (isDaytime) {
+      // Estimate how far into the day we are using Sun's house position
+      // Houses 7->12 map to sunrise->sunset (6 houses = full day)
+      const dayProgress = sunHouse >= 7 ? (sunHouse - 7) / 6 : 0;
+      dayFraction = dayProgress;
+    } else {
+      // Houses 1->6 map to sunset->sunrise (6 houses = full night)
+      const nightProgress = sunHouse >= 1 && sunHouse <= 6 ? (sunHouse - 1) / 6 : 0;
+      dayFraction = 1 - nightProgress; // invert: night-strong planets want night progress
+    }
+
+    // Day-strong planets score higher with longer days
+    if (DAY_STRONG_PLANETS.has(planet.name)) {
+      if (isDaytime) {
+        // Score proportional to day length and progress through the day
+        // Peak at solar noon (midday), min at sunrise/sunset
+        const sineFactor = Math.sin(dayFraction * Math.PI); // peaks at 0.5 (noon)
+        return maxScore * (dayHours / 24) * sineFactor;
+      }
+      // Day-strong planet during night: reduced strength
+      return maxScore * 0.1;
+    }
+
+    if (NIGHT_STRONG_PLANETS.has(planet.name)) {
+      if (!isDaytime) {
+        const nightProgress2 = sunHouse >= 1 && sunHouse <= 6 ? (sunHouse - 1) / 6 : 0;
+        const sineFactor = Math.sin(nightProgress2 * Math.PI); // peaks at midnight
+        return maxScore * (nightHours / 24) * sineFactor;
+      }
+      // Night-strong planet during day: reduced strength
+      return maxScore * 0.1;
+    }
+  }
+
+  // Fallback: simple day/night scoring without latitude
+  if (DAY_STRONG_PLANETS.has(planet.name)) {
+    return isDaytime ? maxScore * 0.75 : maxScore * 0.25;
+  }
+  if (NIGHT_STRONG_PLANETS.has(planet.name)) {
+    return isDaytime ? maxScore * 0.25 : maxScore * 0.75;
+  }
+
+  return maxScore * 0.5; // shouldn't reach here
+}
 
 function kalaBala(
   planet: PlanetPosition,
   sunLongitude: number,
-  moonLongitude: number
+  moonLongitude: number,
+  sunHouse?: number,
+  latitude?: number
 ): number {
-  // Nathonnatha Bala (day/night birth approximation)
-  // We approximate: if Sun is in houses 7-12 (above horizon), it's daytime
-  // For simplicity, use a fixed 30 virupas for nathonnatha (midpoint)
-  // since we don't have precise sunrise/sunset times
-  const nathonnathaBala = 30;
+  // Nathonnatha Bala (day/night strength)
+  const nathonnatha = nathonnathaBala(
+    planet,
+    sunLongitude,
+    sunHouse ?? planet.house, // fallback to planet's own house if Sun house unavailable
+    latitude
+  );
 
-  // Paksha Bala
+  // Paksha Bala (lunar phase strength)
   const moonSunAngle = normalize(moonLongitude - sunLongitude);
   const isShuklaPaksha = moonSunAngle <= 180;
 
@@ -292,17 +461,48 @@ function kalaBala(
   }
   pakshaBala = Math.max(0, Math.min(60, pakshaBala));
 
-  return nathonnathaBala + pakshaBala;
+  return nathonnatha + pakshaBala;
 }
 
 // --------------------------------------------------------------------------
-// 4. Cheshta Bala (Motional Strength) — simplified
+// 4. Cheshta Bala (Motional Strength)
 // --------------------------------------------------------------------------
 
-function cheshtaBala(_planet: PlanetPosition): number {
-  // Without retrograde data, default to direct motion = 30 virupas
-  // Sun and Moon don't have retrograde, so they get 30 as well
-  return 30;
+function cheshtaBala(planet: PlanetPosition): number {
+  // Sun and Moon never retrograde — give them a baseline of 30
+  if (planet.name === "Sun" || planet.name === "Moon") return 30;
+
+  // If speed data is not available, fall back to 30 (backward compatible)
+  if (planet.speed === undefined && planet.is_retrograde === undefined) return 30;
+
+  // If we have is_retrograde flag but no speed
+  if (planet.speed === undefined) {
+    return planet.is_retrograde ? 60 : 30;
+  }
+
+  const speed = planet.speed;
+  const absSpeed = Math.abs(speed);
+
+  // Retrograde: maximum strength (60 virupas)
+  // In Vedic astrology, retrograde planets are considered strong (vakri = powerful)
+  if (speed < 0 || planet.is_retrograde) return 60;
+
+  // Stationary: near-zero speed (within ±0.1 deg/day) — 30 virupas
+  if (absSpeed <= 0.1) return 30;
+
+  // Direct motion: score based on speed relative to average
+  const avgSpeed = AVERAGE_DAILY_SPEEDS[planet.name] ?? 1;
+
+  if (absSpeed < avgSpeed) {
+    // Direct slow (below average): 15 virupas
+    return 15;
+  } else if (absSpeed <= avgSpeed * 1.5) {
+    // Direct normal (around average): 7.5 virupas
+    return 7.5;
+  } else {
+    // Direct fast (above 1.5x average): 3.75 virupas
+    return 3.75;
+  }
 }
 
 // --------------------------------------------------------------------------
@@ -384,7 +584,8 @@ function drikBala(
 export function calculateShadbala(
   planets: PlanetPosition[],
   navamsaData: Array<{ name: string; navamsa_sign: string }> | null | undefined,
-  aspects: AspectData[] | null | undefined
+  aspects: AspectData[] | null | undefined,
+  options?: { latitude?: number }
 ): ShadbalaResult[] {
   const results: ShadbalaResult[] = [];
 
@@ -392,6 +593,8 @@ export function calculateShadbala(
   const moon = planets.find((p) => p.name === "Moon");
   const sunLon = sun?.longitude ?? 0;
   const moonLon = moon?.longitude ?? 0;
+  const sunHouse = sun?.house ?? 10; // default to midheaven if Sun not found
+  const latitude = options?.latitude;
 
   for (const planetName of CLASSICAL_PLANETS) {
     const planet = planets.find((p) => p.name === planetName);
@@ -401,9 +604,9 @@ export function calculateShadbala(
       | NavamsaPosition
       | undefined;
 
-    const sthana = sthanaBala(planet, navamsa);
+    const sthana = sthanaBala(planet, navamsa, planets);
     const dig = digBala(planet);
-    const kala = kalaBala(planet, sunLon, moonLon);
+    const kala = kalaBala(planet, sunLon, moonLon, sunHouse, latitude);
     const cheshta = cheshtaBala(planet);
     const naisargika = naisargikaBala(planetName);
     const drik = drikBala(planet, planets, aspects, moonLon);

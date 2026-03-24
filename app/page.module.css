@@ -40,6 +40,10 @@
   /* Elevate above the zodiac wheel */
   z-index: 2;
   will-change: transform;
+  /* Prevent 3D tilt + animated border from causing jitter */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .panel::before {
@@ -58,7 +62,134 @@
 .form {
   margin-top: 1.6rem;
   display: grid;
-  gap: 1rem;
+  gap: 1.2rem;
+}
+
+/* ═══════════════════════════════════════════════
+   INDIVIDUAL FIELD CARDS — Each input in its own box
+   ═══════════════════════════════════════════════ */
+
+.fieldCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
+    rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  padding: 1.3rem 1.4rem 1.1rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition: border-color 280ms ease, box-shadow 280ms ease, transform 280ms ease;
+}
+
+.fieldCard:hover {
+  transform: translateY(-2px);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* Color-tinted glow per card variant */
+.fieldCardGold { border-left: 3px solid rgba(242, 194, 108, 0.4); }
+.fieldCardAqua { border-left: 3px solid rgba(108, 225, 212, 0.4); }
+.fieldCardCoral { border-left: 3px solid rgba(255, 143, 126, 0.4); }
+.fieldCardViolet { border-left: 3px solid rgba(178, 130, 255, 0.4); }
+.fieldCardRose { border-left: 3px solid rgba(255, 130, 180, 0.4); }
+
+.fieldCardGold:hover { border-left-color: rgba(242, 194, 108, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 20px rgba(242, 194, 108, 0.08); }
+.fieldCardAqua:hover { border-left-color: rgba(108, 225, 212, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 20px rgba(108, 225, 212, 0.08); }
+.fieldCardCoral:hover { border-left-color: rgba(255, 143, 126, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 20px rgba(255, 143, 126, 0.08); }
+.fieldCardViolet:hover { border-left-color: rgba(178, 130, 255, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 20px rgba(178, 130, 255, 0.08); }
+.fieldCardRose:hover { border-left-color: rgba(255, 130, 180, 0.8); box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18), 0 0 20px rgba(255, 130, 180, 0.08); }
+
+/* Zodiac accent image in corner of each card */
+.fieldCardAccent {
+  position: absolute;
+  top: -6px;
+  right: -2px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.12;
+  transition: opacity 400ms ease;
+}
+
+.fieldCard:hover .fieldCardAccent {
+  opacity: 0.25;
+}
+
+.fieldCardAccentImg {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: saturate(0.5) brightness(0.8);
+  mask-image: radial-gradient(circle, black 35%, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle, black 35%, transparent 70%);
+}
+
+/* ── Field Label — Bold, large, appealing ── */
+.fieldLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  position: relative;
+  z-index: 1;
+}
+
+.fieldLabel :global(.section-icon) {
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 6px rgba(242, 194, 108, 0.3));
+}
+
+.fieldLabelText {
+  font-family: var(--font-display), "Cormorant Garamond", "Times New Roman", serif;
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  background: linear-gradient(135deg, var(--ink-main, #eef7ff) 0%, var(--text-soft, #b9d0e1) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── Bigger Input Fields ── */
+.fieldInput,
+.fieldCard input,
+.fieldCard :global(.autocomplete-input) {
+  font-size: clamp(1.05rem, 1.8vw, 1.2rem) !important;
+  font-weight: 600 !important;
+  padding: 1.1rem 1.2rem !important;
+  font-family: var(--font-body), "Sora", sans-serif !important;
+  letter-spacing: 0.02em;
+  border-radius: 16px !important;
+}
+
+.fieldCard input::placeholder {
+  font-weight: 400 !important;
+  font-size: clamp(0.95rem, 1.5vw, 1.05rem) !important;
+}
+
+/* ── Light Theme ── */
+:global([data-theme="light"]) .fieldCard {
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.015), rgba(0, 0, 0, 0.005)),
+    rgba(255, 255, 255, 0.5);
+  border-color: rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+:global([data-theme="light"]) .fieldLabelText {
+  background: linear-gradient(135deg, var(--ink-main, #3d2c1e) 0%, var(--text-soft, #6b5a4e) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .form > button[type="submit"],
@@ -342,8 +473,11 @@
   mask-composite: exclude;
   pointer-events: none;
   z-index: 0;
-  animation: rotatePanelBorder 8s linear infinite;
-  filter: blur(0.3px);
+  animation: rotatePanelBorder 12s linear infinite;
+  /* Removed blur filter — it forced extra compositing and caused jitter */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
 }
 
 /* Outer glow ring behind the border for extra energy effect */
@@ -740,16 +874,95 @@
 }
 
 /* ═══════════════════════════════════════════════
-   ZODIAC SIGN IMAGE STRIP (replaces lead text)
+   ZODIAC ELEMENTAL GROUPS
    ═══════════════════════════════════════════════ */
 
 .zodiacStrip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(0.5rem, 1.5vw, 1rem);
+  padding: 1.2rem 0 0.8rem;
+  width: 100%;
+}
+
+@media (max-width: 600px) {
+  .zodiacStrip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ── Element Group Card ── */
+.elementGroup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.8rem 0.5rem 0.7rem;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  overflow: hidden;
+  opacity: 0;
+  animation: elementGroupReveal 0.6s ease-out forwards;
+  transition: border-color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
+}
+
+.elementGroup:hover {
+  border-color: var(--element-color, rgba(255, 255, 255, 0.15));
+  box-shadow:
+    0 0 24px var(--element-glow, rgba(255, 255, 255, 0.1)),
+    0 4px 20px rgba(0, 0, 0, 0.2);
+  transform: translateY(-3px);
+}
+
+/* ── Flashy Backdrop Glow ── */
+.elementBackdrop {
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse 80% 80% at 50% 50%,
+    var(--element-glow, rgba(255, 255, 255, 0.1)),
+    transparent 70%
+  );
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(20px);
+  transition: opacity 400ms ease;
+  transform: translateZ(0);
+  will-change: opacity;
+}
+
+.elementGroup:hover .elementBackdrop {
+  opacity: 0.8;
+}
+
+/* ── Element Label ── */
+.elementLabel {
+  font-family: var(--font-display), "Times New Roman", serif;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--element-color, var(--accent-gold));
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 0 12px var(--element-glow, transparent);
+}
+
+/* ── Sign Icons Row ── */
+.elementSigns {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(0.4rem, 1.2vw, 0.85rem);
-  padding: 1rem 0 0.6rem;
-  flex-wrap: wrap;
+  gap: clamp(0.4rem, 1vw, 0.7rem);
+  position: relative;
+  z-index: 1;
 }
 
 .zodiacStripItem {
@@ -757,58 +970,84 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.25rem;
   opacity: 0;
   animation: zodiacItemReveal 0.5s ease-out forwards;
 }
 
 .zodiacStripImg {
-  width: clamp(36px, 5vw, 52px);
-  height: clamp(36px, 5vw, 52px);
+  width: clamp(48px, 6.5vw, 68px);
+  height: clamp(48px, 6.5vw, 68px);
   border-radius: 50%;
   object-fit: cover;
-  border: 1.5px solid rgba(255, 255, 255, 0.10);
+  border: 2px solid rgba(255, 255, 255, 0.08);
   box-shadow:
-    0 0 12px rgba(242, 194, 108, 0.12),
-    0 2px 8px rgba(0, 0, 0, 0.25);
+    0 0 14px var(--element-glow, rgba(242, 194, 108, 0.12)),
+    0 3px 10px rgba(0, 0, 0, 0.3);
   transition: transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1),
               border-color 300ms ease,
               box-shadow 300ms ease,
               filter 300ms ease;
-  filter: saturate(0.7) brightness(0.85);
+  filter: saturate(0.75) brightness(0.88);
 }
 
 .zodiacStripItem:hover .zodiacStripImg {
-  transform: scale(1.2) translateY(-4px);
-  border-color: rgba(242, 194, 108, 0.5);
+  transform: scale(1.18) translateY(-4px);
+  border-color: var(--element-color, rgba(242, 194, 108, 0.5));
   box-shadow:
-    0 0 20px rgba(242, 194, 108, 0.3),
-    0 0 40px rgba(108, 225, 212, 0.12),
-    0 6px 16px rgba(0, 0, 0, 0.3);
-  filter: saturate(1.1) brightness(1.05);
+    0 0 24px var(--element-glow, rgba(242, 194, 108, 0.3)),
+    0 0 48px var(--element-glow, rgba(108, 225, 212, 0.12)),
+    0 8px 20px rgba(0, 0, 0, 0.35);
+  filter: saturate(1.15) brightness(1.08);
 }
 
 .zodiacStripSymbol {
-  font-size: 0.65rem;
-  color: var(--accent-gold);
-  opacity: 0;
+  font-size: 0.85rem;
+  color: var(--element-color, var(--accent-gold));
+  opacity: 0.7;
   transition: opacity 300ms ease, transform 300ms ease;
-  transform: translateY(2px);
+  transform: translateY(0);
+  text-shadow: 0 0 8px var(--element-glow, transparent);
 }
 
 .zodiacStripItem:hover .zodiacStripSymbol {
+  opacity: 1;
+  transform: translateY(-2px);
+}
+
+.zodiacStripName {
+  font-size: 0.55rem;
+  font-family: var(--font-body), sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-soft, rgba(185, 208, 225, 0.7));
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.zodiacStripItem:hover .zodiacStripName {
   opacity: 0.8;
-  transform: translateY(0);
 }
 
 @keyframes zodiacItemReveal {
   from {
     opacity: 0;
-    transform: scale(0.5) translateY(10px);
+    transform: scale(0.4) translateY(12px);
   }
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes elementGroupReveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -867,24 +1106,31 @@
   width: 100%;
 }
 
-/* ── Light theme overrides for zodiac strip ── */
+/* ── Light theme overrides for zodiac groups ── */
+
+:global([data-theme="light"]) .elementGroup {
+  background:
+    linear-gradient(135deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
+  border-color: rgba(0, 0, 0, 0.06);
+}
 
 :global([data-theme="light"]) .zodiacStripImg {
-  border-color: rgba(138, 100, 32, 0.15);
+  border-color: rgba(0, 0, 0, 0.08);
   box-shadow:
-    0 0 8px rgba(138, 100, 32, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.10);
+    0 0 8px rgba(0, 0, 0, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-:global([data-theme="light"]) .zodiacStripItem:hover .zodiacStripImg {
-  border-color: rgba(138, 100, 32, 0.4);
-  box-shadow:
-    0 0 16px rgba(138, 100, 32, 0.2),
-    0 4px 12px rgba(0, 0, 0, 0.12);
+:global([data-theme="light"]) .zodiacStripName {
+  color: rgba(61, 44, 30, 0.5);
 }
 
-:global([data-theme="light"]) .zodiacStripSymbol {
-  color: var(--accent-gold);
+:global([data-theme="light"]) .elementBackdrop {
+  opacity: 0.2;
+}
+
+:global([data-theme="light"]) .elementGroup:hover .elementBackdrop {
+  opacity: 0.4;
 }
 
 :global([data-theme="light"]) .glassAccentImages {
