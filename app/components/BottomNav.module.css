@@ -64,3 +64,13 @@
     display: grid;
   }
 }
+
+@media (max-width: 480px) {
+  .label {
+    font-size: 0.55rem;
+  }
+
+  .icon {
+    font-size: 1.1rem;
+  }
+}

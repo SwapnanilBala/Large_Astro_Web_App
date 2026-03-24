@@ -191,3 +191,29 @@
     grid-template-columns: 1fr;
   }
 }
+
+@media (max-width: 768px) {
+  .card {
+    padding: clamp(1rem, 3vw, 1.5rem);
+    border-radius: 14px;
+  }
+
+  .matrixRow {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 0.8rem;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 0.7rem;
+    border-radius: 10px;
+  }
+}

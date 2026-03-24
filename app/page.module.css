@@ -1276,3 +1276,52 @@
   pointer-events: none;
   transition: opacity 0.35s ease;
 }
+
+@media (max-width: 768px) {
+  .panel {
+    padding: clamp(1rem, 3vw, 1.5rem);
+  }
+
+  .heroHeading {
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+  }
+
+  .bentoGrid {
+    grid-template-columns: 1fr;
+    gap: 0.6rem;
+  }
+
+  .fieldCard {
+    padding: 14px 14px 12px;
+    border-radius: 12px;
+  }
+
+  .zodiacBackdrop {
+    width: clamp(100px, 18vw, 160px);
+    height: clamp(100px, 18vw, 160px);
+  }
+
+  .mysticalTaglineCentered {
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
+    margin: 0.6rem auto 0.5rem;
+  }
+
+  .parallaxWheel {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .heroHeading {
+    font-size: clamp(1.2rem, 6vw, 1.6rem);
+  }
+
+  .fieldCard {
+    padding: 12px 10px 10px;
+    border-radius: 10px;
+  }
+
+  .mysticalTaglineCentered {
+    font-size: clamp(0.8rem, 3vw, 1rem);
+  }
+}

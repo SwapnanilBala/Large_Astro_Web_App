@@ -68,3 +68,20 @@
   font-size: 0.9rem;
   color: var(--ink-soft);
 }
+
+@media (max-width: 768px) {
+  .panel {
+    max-width: 100%;
+    margin: 1rem;
+    padding: clamp(1.2rem, 4vw, 2rem);
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel {
+    margin: 0.5rem;
+    padding: 1rem;
+    border-radius: 12px;
+  }
+}
