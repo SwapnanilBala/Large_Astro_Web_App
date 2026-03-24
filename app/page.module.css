@@ -72,26 +72,27 @@
 .fieldCard {
   position: relative;
   overflow: hidden;
-  border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 22px;
+  border: 1px solid rgba(212, 164, 86, 0.08);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01)),
-    rgba(255, 255, 255, 0.02);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 1.3rem 1.4rem 1.1rem;
+    linear-gradient(145deg, rgba(18, 24, 38, 0.70), rgba(12, 16, 28, 0.80)),
+    rgba(10, 14, 22, 0.50);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 1.4rem 1.5rem 1.2rem;
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    0 8px 32px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
   transition: border-color 280ms ease, box-shadow 280ms ease, transform 280ms ease;
 }
 
 .fieldCard:hover {
-  transform: translateY(-2px);
-  border-color: rgba(255, 255, 255, 0.12);
+  transform: translateY(-3px);
+  border-color: rgba(212, 164, 86, 0.18);
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.18),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    0 12px 40px rgba(0, 0, 0, 0.28),
+    0 0 20px rgba(212, 164, 86, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /* Color-tinted glow per card variant */
@@ -281,7 +282,7 @@
   margin: 1.4rem 0 0.5rem;
   font-size: clamp(1.3rem, 2.5vw, 1.8rem);
   font-family: var(--font-display), "Times New Roman", serif;
-  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-aqua) 100%);
+  background: linear-gradient(135deg, #d4a456 0%, #5ec2b8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -339,7 +340,7 @@
 
 /* Energy charge: dynamic opacity & glow driven by --charge-level */
 .submitChargeWrapper button[type="submit"] {
-  background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
+  background: linear-gradient(110deg, #d4a456, #e8c878, #d4a456, #c08840);
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   position: relative;
@@ -376,7 +377,7 @@
 }
 
 .form > button[type="submit"] {
-  background: linear-gradient(110deg, var(--accent-gold), #ffe0a0, #f2c26c, #e5a94e);
+  background: linear-gradient(110deg, #d4a456, #e8c878, #d4a456, #c08840);
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   position: relative;
@@ -461,13 +462,13 @@
   border-radius: 30px;
   padding: 1.5px;
   background: conic-gradient(from var(--panel-border-angle, 0deg),
-    rgba(242, 194, 108, 0.45),
-    rgba(108, 225, 212, 0.35),
-    rgba(180, 120, 220, 0.20),
-    rgba(242, 194, 108, 0.08),
-    rgba(108, 225, 212, 0.35),
-    rgba(180, 120, 220, 0.20),
-    rgba(242, 194, 108, 0.45));
+    rgba(212, 164, 86, 0.45),
+    rgba(94, 194, 184, 0.35),
+    rgba(120, 80, 180, 0.20),
+    rgba(212, 164, 86, 0.08),
+    rgba(94, 194, 184, 0.35),
+    rgba(120, 80, 180, 0.20),
+    rgba(212, 164, 86, 0.45));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -482,10 +483,11 @@
 
 /* Outer glow ring behind the border for extra energy effect */
 .panel {
+  background-clip: padding-box;
   box-shadow:
-    0 0 30px rgba(242, 194, 108, 0.06),
-    0 0 60px rgba(108, 225, 212, 0.04),
-    0 0 100px rgba(180, 120, 220, 0.03);
+    0 0 40px rgba(212, 164, 86, 0.05),
+    0 0 80px rgba(94, 194, 184, 0.03),
+    0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
 @property --panel-border-angle {
@@ -695,9 +697,9 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    rgba(108, 225, 212, 0.4) 15%,
-    rgba(242, 194, 108, 0.6) 50%,
-    rgba(108, 225, 212, 0.4) 85%,
+    rgba(94, 194, 184, 0.3) 15%,
+    rgba(212, 164, 86, 0.5) 50%,
+    rgba(94, 194, 184, 0.3) 85%,
     transparent 100%
   );
   animation: dividerShimmer 3s ease-in-out infinite;
@@ -798,7 +800,7 @@
 .auroraLayer:nth-child(1) {
   background: radial-gradient(
     ellipse 80% 50% at 30% 40%,
-    rgba(108, 225, 212, 0.2),
+    rgba(94, 194, 184, 0.12),
     transparent 70%
   );
   animation: auroraPulse1 8s ease-in-out infinite;
@@ -807,7 +809,7 @@
 .auroraLayer:nth-child(2) {
   background: radial-gradient(
     ellipse 60% 50% at 70% 30%,
-    rgba(242, 194, 108, 0.15),
+    rgba(212, 164, 86, 0.08),
     transparent 70%
   );
   animation: auroraPulse2 10s ease-in-out infinite 2s;
@@ -816,7 +818,7 @@
 .auroraLayer:nth-child(3) {
   background: radial-gradient(
     ellipse 70% 40% at 50% 50%,
-    rgba(180, 120, 220, 0.12),
+    rgba(120, 80, 180, 0.10),
     transparent 70%
   );
   animation: auroraPulse3 12s ease-in-out infinite 4s;
@@ -899,12 +901,12 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.8rem 0.5rem 0.7rem;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+    linear-gradient(145deg, rgba(18, 22, 36, 0.50), rgba(12, 16, 26, 0.60));
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   overflow: hidden;
   opacity: 0;
   animation: elementGroupReveal 0.6s ease-out forwards;
@@ -976,19 +978,19 @@
 }
 
 .zodiacStripImg {
-  width: clamp(48px, 6.5vw, 68px);
-  height: clamp(48px, 6.5vw, 68px);
+  width: clamp(52px, 7vw, 72px);
+  height: clamp(52px, 7vw, 72px);
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(212, 164, 86, 0.15);
   box-shadow:
-    0 0 14px var(--element-glow, rgba(242, 194, 108, 0.12)),
-    0 3px 10px rgba(0, 0, 0, 0.3);
+    0 0 16px rgba(212, 164, 86, 0.10),
+    0 4px 12px rgba(0, 0, 0, 0.35);
   transition: transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1),
               border-color 300ms ease,
               box-shadow 300ms ease,
               filter 300ms ease;
-  filter: saturate(0.75) brightness(0.88);
+  filter: saturate(0.85) brightness(0.90);
 }
 
 .zodiacStripItem:hover .zodiacStripImg {
