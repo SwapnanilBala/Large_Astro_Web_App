@@ -29,6 +29,13 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "city",
 ];
 
+const ZODIAC_BACKDROP = [
+  "/zodiac/aries.jpg", "/zodiac/taurus.jpg", "/zodiac/gemini.jpg",
+  "/zodiac/cancer.jpg", "/zodiac/leo.jpg", "/zodiac/virgo.jpg",
+  "/zodiac/libra.jpg", "/zodiac/scorpio.jpg", "/zodiac/sagittarius.jpg",
+  "/zodiac/capricorn.png", "/zodiac/aquarius.png", "/zodiac/pisces.jpg",
+];
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
@@ -66,6 +73,7 @@ export default function Home() {
     return phrases.length > 0 ? phrases : ["Written in the Stars"];
   }, [t]);
   const [taglineIndex, setTaglineIndex] = useState(0);
+  const [activeZodiacIdx, setActiveZodiacIdx] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -73,6 +81,13 @@ export default function Home() {
     }, 4000);
     return () => clearInterval(interval);
   }, [mysticalPhrases.length]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setActiveZodiacIdx((prev) => (prev + 1) % ZODIAC_BACKDROP.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, []);
 
   /* ── Split-text hero animation ── */
   const [heroReady, setHeroReady] = useState(false);
@@ -560,37 +575,15 @@ export default function Home() {
             <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
           )}
         </h1>
-        {/* ── Scattered Zodiac Backdrop Signs ── */}
-        <div
-          className={`${styles.zodiacBackdrop} ${heroReady ? "anim-fade-in" : "hero-pre"}`}
-          style={{ animationDelay: `${leadDelay}s` }}
-          aria-hidden="true"
-        >
-          {[
-            { src: "/zodiac/aries.jpg",       top: "5%",  left: "3%" },
-            { src: "/zodiac/taurus.jpg",      top: "12%", left: "88%" },
-            { src: "/zodiac/gemini.jpg",       top: "28%", left: "6%" },
-            { src: "/zodiac/cancer.jpg",       top: "45%", left: "92%" },
-            { src: "/zodiac/leo.jpg",          top: "62%", left: "2%" },
-            { src: "/zodiac/virgo.jpg",        top: "75%", left: "90%" },
-            { src: "/zodiac/libra.jpg",        top: "88%", left: "8%" },
-            { src: "/zodiac/scorpio.jpg",      top: "8%",  left: "48%" },
-            { src: "/zodiac/sagittarius.jpg",  top: "35%", left: "95%" },
-            { src: "/zodiac/capricorn.png",    top: "55%", left: "5%" },
-            { src: "/zodiac/aquarius.png",     top: "92%", left: "52%" },
-            { src: "/zodiac/pisces.jpg",       top: "78%", left: "45%" },
-          ].map((sign, i) => (
+        {/* ── Zodiac Backdrop — one-at-a-time centered cycle ── */}
+        <div className={styles.zodiacBackdrop} aria-hidden="true">
+          {ZODIAC_BACKDROP.map((src, i) => (
             <img
-              key={i}
-              src={sign.src}
+              key={src}
+              src={src}
               alt=""
-              className={styles.zodiacBackdropSign}
+              className={`${styles.zodiacBackdropSign} ${i === activeZodiacIdx ? styles.zodiacBackdropActive : ""}`}
               loading="lazy"
-              style={{
-                top: sign.top,
-                left: sign.left,
-                animationDelay: `${leadDelay + 0.1 * i}s`,
-              }}
             />
           ))}
         </div>
