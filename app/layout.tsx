@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Sora } from "next/font/google";
+import { Cormorant_Garamond, Inter, Playfair_Display } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import StarField from "./components/StarField";
@@ -18,10 +18,17 @@ const displayFont = Cormorant_Garamond({
   style: ["normal", "italic"]
 });
 
-const bodyFont = Sora({
+const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["400", "500", "600", "700"]
+});
+
+const serifDisplay = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-serif-display",
+  weight: ["400", "600", "700"],
+  style: ["normal", "italic"]
 });
 
 export const metadata: Metadata = {
@@ -39,7 +46,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#041420",
+  themeColor: "#080011",
 };
 
 export default function RootLayout({
@@ -49,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} ${serifDisplay.variable}`}>
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>
