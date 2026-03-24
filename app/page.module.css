@@ -124,35 +124,57 @@
   grid-column: 1 / -1;
 }
 
-/* ── Zodiac Symbol Spacer (between date/time and country) ── */
+/* ── Section Divider (between date/time and country) ── */
 .sectionSpacer {
   grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.8rem, 1.8vw, 1.2rem);
+  padding: clamp(1.8rem, 4vw, 3rem) 0;
+}
+
+.spacerSymbolRow {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: clamp(0.6rem, 1.5vw, 1rem);
-  padding: clamp(0.8rem, 2vw, 1.4rem) 0;
 }
 
 .spacerSymbol {
   font-size: clamp(1rem, 2vw, 1.4rem);
   color: var(--accent-gold);
-  opacity: 0.15;
+  opacity: 0.12;
   letter-spacing: 0.05em;
   user-select: none;
   transition: opacity 0.3s ease;
 }
 
 .sectionSpacer:hover .spacerSymbol {
-  opacity: 0.25;
+  opacity: 0.22;
 }
 
 .spacerLine {
-  flex: 1;
-  max-width: 60px;
+  width: 50px;
   height: 1px;
   background: linear-gradient(90deg, transparent, var(--line-soft), transparent);
-  opacity: 0.5;
+  opacity: 0.4;
+}
+
+.spacerQuote {
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: clamp(0.85rem, 1.6vw, 1.1rem);
+  font-style: italic;
+  font-weight: 400;
+  color: var(--ink-soft);
+  opacity: 0.35;
+  text-align: center;
+  letter-spacing: 0.03em;
+  line-height: 1.5;
+  max-width: 380px;
+  margin: 0;
+  padding: 0 1rem;
 }
 
 @media (max-width: 600px) {
@@ -162,12 +184,17 @@
   }
 
   .sectionSpacer {
-    padding: 0.5rem 0;
-    gap: 0.5rem;
+    padding: 1.2rem 0;
+    gap: 0.6rem;
   }
 
   .spacerSymbol {
     font-size: 0.85rem;
+  }
+
+  .spacerQuote {
+    font-size: 0.78rem;
+    max-width: 280px;
   }
 }
 

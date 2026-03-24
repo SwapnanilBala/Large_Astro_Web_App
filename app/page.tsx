@@ -654,15 +654,31 @@ export default function Home() {
             </label>
           </div>
 
-          {/* ── Zodiac Symbol Spacer ── */}
+          {/* ── Section Divider with quote ── */}
           <div className={styles.sectionSpacer} aria-hidden="true">
-            <span className={styles.spacerSymbol}>♈</span>
-            <span className={styles.spacerSymbol}>♉</span>
-            <span className={styles.spacerSymbol}>♊</span>
-            <span className={styles.spacerLine} />
-            <span className={styles.spacerSymbol}>♋</span>
-            <span className={styles.spacerSymbol}>♌</span>
-            <span className={styles.spacerSymbol}>♍</span>
+            <div className={styles.spacerSymbolRow}>
+              <span className={styles.spacerSymbol}>♈</span>
+              <span className={styles.spacerSymbol}>♉</span>
+              <span className={styles.spacerSymbol}>♊</span>
+              <span className={styles.spacerLine} />
+              <span className={styles.spacerSymbol}>♋</span>
+              <span className={styles.spacerSymbol}>♌</span>
+              <span className={styles.spacerSymbol}>♍</span>
+            </div>
+            <p className={styles.spacerQuote}>
+              {t("home.mysticalPhrase1") !== "home.mysticalPhrase1"
+                ? t("home.mysticalPhrase1")
+                : "The stars incline, they do not compel"}
+            </p>
+            <div className={styles.spacerSymbolRow}>
+              <span className={styles.spacerSymbol}>♎</span>
+              <span className={styles.spacerSymbol}>♏</span>
+              <span className={styles.spacerSymbol}>♐</span>
+              <span className={styles.spacerLine} />
+              <span className={styles.spacerSymbol}>♑</span>
+              <span className={styles.spacerSymbol}>♒</span>
+              <span className={styles.spacerSymbol}>♓</span>
+            </div>
           </div>
 
           {/* ── Country Card ── */}
