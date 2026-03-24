@@ -93,7 +93,6 @@ export default function Home() {
 
   /* ── Split-text hero animation ── */
   const [heroReady, setHeroReady] = useState(false);
-  const [cursorPhase, setCursorPhase] = useState<"hidden" | "blinking" | "done">("hidden");
   const headingText = t("home.heading");
   const headingWords = useMemo(() => headingText.split(/\s+/), [headingText]);
   const WORD_STAGGER = 80;
@@ -103,12 +102,8 @@ export default function Home() {
   useEffect(() => {
     const kickerTimer = setTimeout(() => setHeroReady(true), KICKER_LEAD);
     const totalHeadingTime = KICKER_LEAD + headingWords.length * WORD_STAGGER + WORD_DURATION;
-    const cursorTimer = setTimeout(() => setCursorPhase("blinking"), totalHeadingTime + 200);
-    const cursorEndTimer = setTimeout(() => setCursorPhase("done"), totalHeadingTime + 200 + 2000);
     return () => {
       clearTimeout(kickerTimer);
-      clearTimeout(cursorTimer);
-      clearTimeout(cursorEndTimer);
     };
   }, [headingWords.length]);
 
@@ -570,12 +565,6 @@ export default function Home() {
               {word}
             </span>
           ))}
-          {cursorPhase === "blinking" && (
-            <span className="hero-cursor" aria-hidden="true" />
-          )}
-          {cursorPhase === "done" && (
-            <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
-          )}
         </h1>
         {/* ── Zodiac Backdrop — one-at-a-time centered cycle ── */}
         <div className={styles.zodiacBackdrop} aria-hidden="true">
