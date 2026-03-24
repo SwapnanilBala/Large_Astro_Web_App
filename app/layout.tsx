@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel, Libre_Baskerville } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
-import StarField from "./components/StarField";
+import GradientBlobs from "./components/GradientBlobs";
 import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
 import ViewportScaler from "./components/ViewportScaler";
@@ -11,17 +11,16 @@ import { ThemeProvider } from "@/lib/theme-context";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ToastProvider } from "@/lib/toast-context";
 
-const displayFont = Cinzel({
+const displayFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700"]
+  weight: ["400", "500", "600", "700", "800"]
 });
 
-const bodyFont = Libre_Baskerville({
+const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "700"],
-  style: ["normal", "italic"]
+  weight: ["400", "500", "600", "700"]
 });
 
 export const metadata: Metadata = {
@@ -39,7 +38,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0D0B0A",
+  themeColor: "#0F1117",
 };
 
 export default function RootLayout({
@@ -54,7 +53,7 @@ export default function RootLayout({
           Skip to main content
         </a>
         <ViewportScaler />
-        <StarField />
+        <GradientBlobs />
         <ThemeProvider>
           <LanguageProvider>
             <ToastProvider>
