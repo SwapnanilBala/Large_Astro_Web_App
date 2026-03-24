@@ -681,6 +681,17 @@ export default function Home() {
             </label>
           </div>
 
+          {/* ── Zodiac Symbol Spacer ── */}
+          <div className={styles.sectionSpacer} aria-hidden="true">
+            <span className={styles.spacerSymbol}>♈</span>
+            <span className={styles.spacerSymbol}>♉</span>
+            <span className={styles.spacerSymbol}>♊</span>
+            <span className={styles.spacerLine} />
+            <span className={styles.spacerSymbol}>♋</span>
+            <span className={styles.spacerSymbol}>♌</span>
+            <span className={styles.spacerSymbol}>♍</span>
+          </div>
+
           {/* ── Country Card ── */}
           <div className={styles.bentoWide}>
           <div data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet}`}>

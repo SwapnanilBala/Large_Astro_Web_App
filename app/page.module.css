@@ -32,6 +32,10 @@
 /* text-shadow won't show on clip-text elements; use filter drop-shadow instead */
 
 .heroHeading {
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   filter:
     drop-shadow(0 0 50px rgba(62, 205, 165, 0.20))
     drop-shadow(0 0 100px rgba(62, 205, 165, 0.06));
@@ -120,10 +124,50 @@
   grid-column: 1 / -1;
 }
 
+/* ── Zodiac Symbol Spacer (between date/time and country) ── */
+.sectionSpacer {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.6rem, 1.5vw, 1rem);
+  padding: clamp(0.8rem, 2vw, 1.4rem) 0;
+}
+
+.spacerSymbol {
+  font-size: clamp(1rem, 2vw, 1.4rem);
+  color: var(--accent-gold);
+  opacity: 0.15;
+  letter-spacing: 0.05em;
+  user-select: none;
+  transition: opacity 0.3s ease;
+}
+
+.sectionSpacer:hover .spacerSymbol {
+  opacity: 0.25;
+}
+
+.spacerLine {
+  flex: 1;
+  max-width: 60px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--line-soft), transparent);
+  opacity: 0.5;
+}
+
 @media (max-width: 600px) {
   .bentoGrid {
     grid-template-columns: 1fr;
     gap: 12px;
+  }
+
+  .sectionSpacer {
+    padding: 0.5rem 0;
+    gap: 0.5rem;
+  }
+
+  .spacerSymbol {
+    font-size: 0.85rem;
   }
 }
 
