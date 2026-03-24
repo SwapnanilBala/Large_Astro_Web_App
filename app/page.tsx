@@ -5,6 +5,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
 import { HiOutlineSparkles } from "react-icons/hi2";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
@@ -636,12 +638,27 @@ export default function Home() {
             <label className={`${styles.fieldLabel} input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
               <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formBirthDate")}</span>
-              <input
-                type="date"
-                value={draft.birthDate}
-                onChange={updateField("birthDate")}
+              <DatePicker
+                selected={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
+                onChange={(date: Date | null) => {
+                  if (date) {
+                    const yyyy = date.getFullYear();
+                    const mm = String(date.getMonth() + 1).padStart(2, "0");
+                    const dd = String(date.getDate()).padStart(2, "0");
+                    setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
+                  }
+                }}
+                dateFormat="dd MMM yyyy"
+                showMonthDropdown
+                showYearDropdown
+                dropdownMode="select"
+                placeholderText="Select birth date"
                 className={styles.fieldInput}
+                calendarClassName={styles.glassCalendar}
+                popperPlacement="bottom-start"
                 required
+                maxDate={new Date()}
+                showPopperArrow={false}
               />
             </label>
           </div>
@@ -655,12 +672,26 @@ export default function Home() {
             <label className={`${styles.fieldLabel} input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
               <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formBirthTime")}</span>
-              <input
-                type="time"
-                value={draft.birthTime}
-                onChange={updateField("birthTime")}
+              <DatePicker
+                selected={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
+                onChange={(date: Date | null) => {
+                  if (date) {
+                    const hh = String(date.getHours()).padStart(2, "0");
+                    const mm = String(date.getMinutes()).padStart(2, "0");
+                    setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                  }
+                }}
+                showTimeSelect
+                showTimeSelectOnly
+                timeIntervals={15}
+                timeCaption="Time"
+                dateFormat="h:mm aa"
+                placeholderText="Select birth time"
                 className={styles.fieldInput}
+                calendarClassName={styles.glassCalendar}
+                popperPlacement="bottom-start"
                 required
+                showPopperArrow={false}
               />
             </label>
           </div>

@@ -2,6 +2,11 @@
    HOME PAGE — CSS Module
    ═══════════════════════════════════════════════ */
 
+/* Placeholder for scoped calendar wrapper — actual styling in globals.css */
+.glassCalendar {
+  /* see globals.css react-datepicker overrides */
+}
+
 /* ── Hero Wrapper — positions zodiac wheel + panel ── */
 
 .heroWrapper {
