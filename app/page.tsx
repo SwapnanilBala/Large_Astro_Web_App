@@ -834,6 +834,5 @@ export default function Home() {
       </section>
       </div>{/* /heroWrapper */}
     </div>
-    </div>
   );
 }
