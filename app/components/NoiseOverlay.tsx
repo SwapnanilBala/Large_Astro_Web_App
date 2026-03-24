@@ -17,16 +17,17 @@ export default function NoiseOverlay() {
     return () => mql.removeEventListener("change", handler);
   }, []);
 
+  /* Slow seed cycling: swap every 2s for subtle texture drift instead of 100ms strobe */
   useEffect(() => {
     if (prefersReducedMotion) return;
 
     let seed = 0;
     const interval = setInterval(() => {
       if (turbulenceRef.current) {
-        seed = (seed + 1) % 100;
+        seed = (seed + 1) % 50;
         turbulenceRef.current.setAttribute("seed", String(seed));
       }
-    }, 100);
+    }, 2000);
 
     return () => clearInterval(interval);
   }, [prefersReducedMotion]);
@@ -39,6 +40,7 @@ export default function NoiseOverlay() {
         inset: 0,
         pointerEvents: "none",
         zIndex: 1,
+        willChange: "auto",
       }}
     >
       <svg
@@ -50,7 +52,7 @@ export default function NoiseOverlay() {
         }}
       >
         <defs>
-          <filter id="noise-overlay-filter">
+          <filter id="noise-overlay-filter" colorInterpolationFilters="sRGB">
             <feTurbulence
               ref={turbulenceRef}
               type="fractalNoise"
@@ -59,6 +61,10 @@ export default function NoiseOverlay() {
               stitchTiles="stitch"
               seed={0}
             />
+            {/* Fade transitions between seed changes via opacity */}
+            <feComponentTransfer>
+              <feFuncA type="linear" slope="0.5" />
+            </feComponentTransfer>
           </filter>
         </defs>
       </svg>
@@ -67,8 +73,8 @@ export default function NoiseOverlay() {
           position: "absolute",
           inset: 0,
           filter: "url(#noise-overlay-filter)",
-          opacity: 0.035,
-          mixBlendMode: "overlay",
+          opacity: 0.025,
+          mixBlendMode: "soft-light",
         }}
       />
     </div>

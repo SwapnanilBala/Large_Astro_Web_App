@@ -22,14 +22,23 @@ export default function MorphingBlobs() {
 
     let frameId: number;
     const startTime = performance.now();
+    let lastUpdate = 0;
 
     const animate = (now: number) => {
+      // Throttle to ~10 FPS to avoid excessive SVG filter recalcs
+      if (now - lastUpdate < 100) {
+        frameId = requestAnimationFrame(animate);
+        return;
+      }
+      lastUpdate = now;
+
       const elapsed = (now - startTime) / 1000;
 
       // Each blob oscillates at a different speed and phase for organic variety
-      const freq1 = 0.006 + 0.002 * Math.sin(elapsed * 0.3);
-      const freq2 = 0.005 + 0.002 * Math.sin(elapsed * 0.2 + 1.5);
-      const freq3 = 0.007 + 0.002 * Math.sin(elapsed * 0.25 + 3.0);
+      // Slowed down oscillation rates for smoother, less jarring transitions
+      const freq1 = 0.006 + 0.001 * Math.sin(elapsed * 0.15);
+      const freq2 = 0.005 + 0.001 * Math.sin(elapsed * 0.1 + 1.5);
+      const freq3 = 0.007 + 0.001 * Math.sin(elapsed * 0.12 + 3.0);
 
       if (turbRef1.current) {
         turbRef1.current.setAttribute(

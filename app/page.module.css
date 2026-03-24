@@ -645,6 +645,10 @@
   z-index: 0;
   overflow: hidden;
   opacity: 0.5;
+  /* Promote to own compositing layer to prevent scroll repaints */
+  transform: translateZ(0);
+  will-change: opacity;
+  contain: strict;
 }
 
 .auroraLayer {
@@ -652,6 +656,9 @@
   inset: 0;
   border-radius: 0 0 50% 50%;
   filter: blur(60px);
+  /* GPU-accelerate each layer to prevent jitter during scroll */
+  transform: translateZ(0);
+  will-change: transform, opacity;
 }
 
 .auroraLayer:nth-child(1) {
