@@ -609,12 +609,32 @@ export default function Home() {
             <span className="hero-cursor hero-cursor-out" aria-hidden="true" />
           )}
         </h1>
-        <p
-          className={`lead ${heroReady ? "anim-fade-in" : "hero-pre"}`}
+        {/* ── Zodiac Sign Image Strip (replaces generic lead text) ── */}
+        <div
+          className={`${styles.zodiacStrip} ${heroReady ? "anim-fade-in" : "hero-pre"}`}
           style={{ animationDelay: `${leadDelay}s` }}
+          aria-hidden="true"
         >
-          {t("home.lead")}
-        </p>
+          {[
+            { src: "/zodiac/aries.jpg", name: "Aries", symbol: "♈" },
+            { src: "/zodiac/taurus.jpg", name: "Taurus", symbol: "♉" },
+            { src: "/zodiac/gemini.jpg", name: "Gemini", symbol: "♊" },
+            { src: "/zodiac/cancer.jpg", name: "Cancer", symbol: "♋" },
+            { src: "/zodiac/leo.jpg", name: "Leo", symbol: "♌" },
+            { src: "/zodiac/virgo.jpg", name: "Virgo", symbol: "♍" },
+            { src: "/zodiac/libra.jpg", name: "Libra", symbol: "♎" },
+            { src: "/zodiac/scorpio.jpg", name: "Scorpio", symbol: "♏" },
+            { src: "/zodiac/sagittarius.jpg", name: "Sagittarius", symbol: "♐" },
+            { src: "/zodiac/capricorn.png", name: "Capricorn", symbol: "♑" },
+            { src: "/zodiac/aquarius.png", name: "Aquarius", symbol: "♒" },
+            { src: "/zodiac/pisces.jpg", name: "Pisces", symbol: "♓" },
+          ].map((sign, i) => (
+            <div key={sign.name} className={styles.zodiacStripItem} style={{ animationDelay: `${leadDelay + 0.08 * i}s` }}>
+              <img src={sign.src} alt={sign.name} className={styles.zodiacStripImg} loading="lazy" />
+              <span className={styles.zodiacStripSymbol}>{sign.symbol}</span>
+            </div>
+          ))}
+        </div>
 
         <div className="cosmic-divider anim-fade-in" style={{ animationDelay: "0.55s" }}>
           <span className="cosmic-divider-icon"><GiStarSattelites /></span>
@@ -633,7 +653,11 @@ export default function Home() {
           </label>
 
           <div className={styles.glowDivider} />
-          <div className="glass-section glass-section--aqua">
+          <div className={`glass-section glass-section--aqua ${styles.glassEnhanced}`}>
+            <div className={styles.glassAccentImages}>
+              <img src="/zodiac/cancer.jpg" alt="" className={styles.glassAccentImg} />
+              <img src="/zodiac/leo.jpg" alt="" className={styles.glassAccentImg} />
+            </div>
             <h2 data-field-reveal="1" className={styles.sectionHeading}>
               <GiSunrise className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthDetails")}
             </h2>
@@ -661,7 +685,11 @@ export default function Home() {
           </div>
 
           <div className={styles.glowDivider} />
-          <div className="glass-section glass-section--gold">
+          <div className={`glass-section glass-section--gold ${styles.glassEnhanced}`}>
+            <div className={styles.glassAccentImages}>
+              <img src="/zodiac/sagittarius.jpg" alt="" className={styles.glassAccentImg} />
+              <img src="/zodiac/capricorn.png" alt="" className={styles.glassAccentImg} />
+            </div>
             <h2 data-field-reveal="3" className={styles.sectionHeading}>
               <GiCompass className="section-icon" style={{ fontSize: "1.1rem" }} /> {t("home.birthLocation")}
             </h2>
@@ -715,7 +743,11 @@ export default function Home() {
           </div>
 
           <div className={styles.glowDivider} />
-          <div className="glass-section glass-section--violet">
+          <div className={`glass-section glass-section--violet ${styles.glassEnhanced}`}>
+            <div className={styles.glassAccentImages}>
+              <img src="/zodiac/aquarius.png" alt="" className={styles.glassAccentImg} />
+              <img src="/zodiac/pisces.jpg" alt="" className={styles.glassAccentImg} />
+            </div>
             <div data-field-reveal="5" className="collapsible-section">
             <button
               type="button"

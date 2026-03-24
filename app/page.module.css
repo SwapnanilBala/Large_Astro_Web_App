@@ -731,3 +731,163 @@
     transform: translateY(-100vh) translateX(30px);
   }
 }
+
+/* ═══════════════════════════════════════════════
+   ZODIAC SIGN IMAGE STRIP (replaces lead text)
+   ═══════════════════════════════════════════════ */
+
+.zodiacStrip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.4rem, 1.2vw, 0.85rem);
+  padding: 1rem 0 0.6rem;
+  flex-wrap: wrap;
+}
+
+.zodiacStripItem {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0;
+  animation: zodiacItemReveal 0.5s ease-out forwards;
+}
+
+.zodiacStripImg {
+  width: clamp(36px, 5vw, 52px);
+  height: clamp(36px, 5vw, 52px);
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid rgba(255, 255, 255, 0.10);
+  box-shadow:
+    0 0 12px rgba(242, 194, 108, 0.12),
+    0 2px 8px rgba(0, 0, 0, 0.25);
+  transition: transform 350ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              border-color 300ms ease,
+              box-shadow 300ms ease,
+              filter 300ms ease;
+  filter: saturate(0.7) brightness(0.85);
+}
+
+.zodiacStripItem:hover .zodiacStripImg {
+  transform: scale(1.2) translateY(-4px);
+  border-color: rgba(242, 194, 108, 0.5);
+  box-shadow:
+    0 0 20px rgba(242, 194, 108, 0.3),
+    0 0 40px rgba(108, 225, 212, 0.12),
+    0 6px 16px rgba(0, 0, 0, 0.3);
+  filter: saturate(1.1) brightness(1.05);
+}
+
+.zodiacStripSymbol {
+  font-size: 0.65rem;
+  color: var(--accent-gold);
+  opacity: 0;
+  transition: opacity 300ms ease, transform 300ms ease;
+  transform: translateY(2px);
+}
+
+.zodiacStripItem:hover .zodiacStripSymbol {
+  opacity: 0.8;
+  transform: translateY(0);
+}
+
+@keyframes zodiacItemReveal {
+  from {
+    opacity: 0;
+    transform: scale(0.5) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   ENHANCED GLASS SECTIONS & HEADERS
+   ═══════════════════════════════════════════════ */
+
+.glassEnhanced {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Zodiac accent images floating in top-right corner of each glass section */
+.glassAccentImages {
+  position: absolute;
+  top: -8px;
+  right: -4px;
+  display: flex;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.15;
+  transition: opacity 400ms ease;
+}
+
+.glassEnhanced:hover .glassAccentImages {
+  opacity: 0.30;
+}
+
+.glassAccentImg {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: saturate(0.5) brightness(0.8) blur(0.5px);
+  mask-image: radial-gradient(circle, black 40%, transparent 72%);
+  -webkit-mask-image: radial-gradient(circle, black 40%, transparent 72%);
+}
+
+/* Enhanced section heading with glow underline */
+.sectionHeading::before {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, var(--accent-gold), var(--accent-aqua), var(--accent-gold));
+  transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  filter: blur(1px);
+  opacity: 0.6;
+}
+
+.glassEnhanced:hover .sectionHeading::before {
+  width: 100%;
+}
+
+/* ── Light theme overrides for zodiac strip ── */
+
+:global([data-theme="light"]) .zodiacStripImg {
+  border-color: rgba(138, 100, 32, 0.15);
+  box-shadow:
+    0 0 8px rgba(138, 100, 32, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.10);
+}
+
+:global([data-theme="light"]) .zodiacStripItem:hover .zodiacStripImg {
+  border-color: rgba(138, 100, 32, 0.4);
+  box-shadow:
+    0 0 16px rgba(138, 100, 32, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+:global([data-theme="light"]) .zodiacStripSymbol {
+  color: var(--accent-gold);
+}
+
+:global([data-theme="light"]) .glassAccentImages {
+  opacity: 0.10;
+}
+
+:global([data-theme="light"]) .glassEnhanced:hover .glassAccentImages {
+  opacity: 0.20;
+}
+
+:global([data-theme="light"]) .glassAccentImg {
+  filter: saturate(0.4) brightness(0.9) blur(0.5px);
+}
