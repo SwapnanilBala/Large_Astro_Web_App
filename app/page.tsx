@@ -586,10 +586,6 @@ export default function Home() {
           </span>
         </div>
 
-        <div className="cosmic-divider anim-fade-in" style={{ animationDelay: "0.55s" }}>
-          <span className="cosmic-divider-icon"><GiStarSattelites /></span>
-        </div>
-
         <form ref={formRef} className={`intake-form anim-fade-up ${styles.form}`} onSubmit={submitProfile} style={{ animationDelay: "0.5s" }}>
           <span
             className={styles.draftSavedIndicator}
