@@ -521,7 +521,7 @@ export default function Home() {
 
   return (
     <PageTransition>
-    <main className="home-shell">
+    <div className="home-shell">
       <CursorSparkle />
       <StarField />
       <NoiseOverlay />
@@ -750,8 +750,11 @@ export default function Home() {
           >
             Draft saved
           </span>
+          <div className={styles.bentoGrid}>
           {/* ── Name Card ── */}
+          <div className={styles.bentoHero}>
           <div data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+            <span className={styles.orbitNumber}>1</span>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
               <GiCrystalBall className="section-icon" style={{ fontSize: "1.2rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formName")}</span>
@@ -765,9 +768,11 @@ export default function Home() {
               />
             </label>
           </div>
+          </div>
 
           {/* ── Birth Date Card ── */}
           <div data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua}`}>
+            <span className={styles.orbitNumber}>2</span>
             <div className={styles.fieldCardAccent}>
               <img src="/zodiac/cancer.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
@@ -786,6 +791,7 @@ export default function Home() {
 
           {/* ── Birth Time Card ── */}
           <div data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral}`}>
+            <span className={styles.orbitNumber}>3</span>
             <div className={styles.fieldCardAccent}>
               <img src="/zodiac/leo.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
@@ -803,7 +809,9 @@ export default function Home() {
           </div>
 
           {/* ── Country Card ── */}
+          <div className={styles.bentoWide}>
           <div data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet}`}>
+            <span className={styles.orbitNumber}>4</span>
             <div className={styles.fieldCardAccent}>
               <img src="/zodiac/sagittarius.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
@@ -820,9 +828,11 @@ export default function Home() {
               />
             </label>
           </div>
+          </div>
 
           {/* ── State Card ── */}
           <div data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose}`}>
+            <span className={styles.orbitNumber}>5</span>
             <div className={styles.fieldCardAccent}>
               <img src="/zodiac/capricorn.png" alt="" className={styles.fieldCardAccentImg} />
             </div>
@@ -843,6 +853,7 @@ export default function Home() {
 
           {/* ── City Card ── */}
           <div data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+            <span className={styles.orbitNumber}>6</span>
             <div className={styles.fieldCardAccent}>
               <img src="/zodiac/pisces.jpg" alt="" className={styles.fieldCardAccentImg} />
             </div>
@@ -861,6 +872,7 @@ export default function Home() {
               />
             </label>
           </div>
+          </div>{/* end bentoGrid */}
 
           {geoStatus !== "idle" && (
             <p className={`geo-status ${geoStatus}`}>
@@ -948,7 +960,7 @@ export default function Home() {
         </form>
       </section>
       </div>{/* /heroWrapper */}
-    </main>
+    </div>
     </PageTransition>
   );
 }
