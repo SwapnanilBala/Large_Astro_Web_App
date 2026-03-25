@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import type { ReactNode } from "react";
 
 type PageTransitionProps = {
@@ -8,16 +7,8 @@ type PageTransitionProps = {
   className?: string;
 };
 
+/* Simple wrapper — no Framer Motion animation on mount.
+   This eliminates the y-axis bounce that caused jitter on mobile. */
 export default function PageTransition({ children, className }: PageTransitionProps) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      style={{ willChange: "opacity, transform" }}
-      className={className}
-    >
-      {children}
-    </motion.div>
-  );
+  return <div className={className}>{children}</div>;
 }

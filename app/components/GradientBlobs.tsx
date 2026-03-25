@@ -1,52 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 
 const BLOBS = [
   {
     color: "rgba(62, 205, 165, 0.15)",
     colorLight: "rgba(62, 205, 165, 0.25)",
     size: 700,
-    x: ["5%", "15%", "8%"],
-    y: ["10%", "30%", "15%"],
-    duration: 25,
+    left: "5%",
+    top: "10%",
   },
   {
     color: "rgba(240, 183, 84, 0.12)",
     colorLight: "rgba(240, 183, 84, 0.20)",
     size: 600,
-    x: ["70%", "60%", "75%"],
-    y: ["5%", "20%", "10%"],
-    duration: 30,
+    left: "60%",
+    top: "5%",
   },
   {
     color: "rgba(140, 100, 220, 0.10)",
     colorLight: "rgba(180, 150, 240, 0.18)",
     size: 550,
-    x: ["40%", "50%", "35%"],
-    y: ["60%", "75%", "65%"],
-    duration: 22,
+    left: "35%",
+    top: "60%",
   },
   {
     color: "rgba(240, 112, 104, 0.08)",
     colorLight: "rgba(240, 150, 140, 0.15)",
     size: 500,
-    x: ["80%", "70%", "85%"],
-    y: ["70%", "55%", "75%"],
-    duration: 28,
+    left: "70%",
+    top: "65%",
   },
 ];
 
+/* Lightweight gradient blobs — pure CSS, no Framer Motion, no animation.
+   Static positioning eliminates GPU thrashing on mobile. */
 export default function GradientBlobs() {
-  const [reducedMotion, setReducedMotion] = useState(false);
   const [isLight, setIsLight] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
-    mq.addEventListener("change", handler);
+    setIsMobile(window.innerWidth < 768);
 
     const checkTheme = () => {
       setIsLight(document.documentElement.getAttribute("data-theme") === "light");
@@ -55,11 +49,11 @@ export default function GradientBlobs() {
     const obs = new MutationObserver(checkTheme);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-    return () => {
-      mq.removeEventListener("change", handler);
-      obs.disconnect();
-    };
+    return () => obs.disconnect();
   }, []);
+
+  /* On mobile: only render 2 blobs with smaller size and less blur */
+  const visibleBlobs = isMobile ? BLOBS.slice(0, 2) : BLOBS;
 
   return (
     <div
@@ -72,32 +66,19 @@ export default function GradientBlobs() {
         overflow: "hidden",
       }}
     >
-      {BLOBS.map((blob, i) => (
-        <motion.div
+      {visibleBlobs.map((blob, i) => (
+        <div
           key={i}
-          initial={{ x: blob.x[0], y: blob.y[0] }}
-          animate={
-            reducedMotion
-              ? {}
-              : {
-                  x: blob.x,
-                  y: blob.y,
-                }
-          }
-          transition={{
-            duration: blob.duration,
-            repeat: Infinity,
-            repeatType: "mirror",
-            ease: "easeInOut",
-          }}
           style={{
             position: "absolute",
-            width: blob.size,
-            height: blob.size,
+            width: isMobile ? blob.size * 0.6 : blob.size,
+            height: isMobile ? blob.size * 0.6 : blob.size,
+            left: blob.left,
+            top: blob.top,
             borderRadius: "50%",
             background: `radial-gradient(circle, ${isLight ? blob.colorLight : blob.color} 0%, transparent 70%)`,
-            filter: "blur(100px)",
-            willChange: "transform",
+            filter: isMobile ? "blur(60px)" : "blur(100px)",
+            transform: "translateZ(0)",
           }}
         />
       ))}
