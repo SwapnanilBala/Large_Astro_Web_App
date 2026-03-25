@@ -5,28 +5,28 @@ import { useEffect, useState } from "react";
 const BLOBS = [
   {
     color: "rgba(62, 205, 165, 0.15)",
-    colorLight: "rgba(62, 205, 165, 0.25)",
+    colorLight: "rgba(91, 47, 160, 0.12)",
     size: 700,
     left: "5%",
     top: "10%",
   },
   {
     color: "rgba(240, 183, 84, 0.12)",
-    colorLight: "rgba(240, 183, 84, 0.20)",
+    colorLight: "rgba(196, 127, 10, 0.10)",
     size: 600,
     left: "60%",
     top: "5%",
   },
   {
     color: "rgba(140, 100, 220, 0.10)",
-    colorLight: "rgba(180, 150, 240, 0.18)",
+    colorLight: "rgba(123, 69, 192, 0.10)",
     size: 550,
     left: "35%",
     top: "60%",
   },
   {
     color: "rgba(240, 112, 104, 0.08)",
-    colorLight: "rgba(240, 150, 140, 0.15)",
+    colorLight: "rgba(184, 64, 58, 0.08)",
     size: 500,
     left: "70%",
     top: "65%",
