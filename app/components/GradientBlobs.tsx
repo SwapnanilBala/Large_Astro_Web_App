@@ -64,6 +64,7 @@ export default function GradientBlobs() {
         zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
+        opacity: 0.3,
       }}
     >
       {visibleBlobs.map((blob, i) => (

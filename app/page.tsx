@@ -29,12 +29,6 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "city",
 ];
 
-const ZODIAC_BACKDROP = [
-  "/zodiac/aries.jpg", "/zodiac/taurus.jpg", "/zodiac/gemini.jpg",
-  "/zodiac/cancer.jpg", "/zodiac/leo.jpg", "/zodiac/virgo.jpg",
-  "/zodiac/libra.jpg", "/zodiac/scorpio.jpg", "/zodiac/sagittarius.jpg",
-  "/zodiac/capricorn.png", "/zodiac/aquarius.png", "/zodiac/pisces.jpg",
-];
 
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
@@ -73,7 +67,6 @@ export default function Home() {
     return phrases.length > 0 ? phrases : ["Written in the Stars"];
   }, [t]);
   const [taglineIndex, setTaglineIndex] = useState(0);
-  const [activeZodiacIdx, setActiveZodiacIdx] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -81,13 +74,6 @@ export default function Home() {
     }, 4000);
     return () => clearInterval(interval);
   }, [mysticalPhrases.length]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveZodiacIdx((prev) => (prev + 1) % ZODIAC_BACKDROP.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, []);
 
   const headingText = t("home.heading");
 
@@ -509,19 +495,6 @@ export default function Home() {
         <h1 className={styles.heroHeading}>
           {headingText}
         </h1>
-        {/* ── Zodiac Backdrop — one-at-a-time centered cycle ── */}
-        <div className={styles.zodiacBackdrop} aria-hidden="true">
-          {ZODIAC_BACKDROP.map((src, i) => (
-            <img
-              key={src}
-              src={src}
-              alt=""
-              className={`${styles.zodiacBackdropSign} ${i === activeZodiacIdx ? styles.zodiacBackdropActive : ""}`}
-              loading="lazy"
-            />
-          ))}
-        </div>
-
         {/* ── Mystical Rotating Tagline (centered between heading & form) ── */}
         <div className={`${styles.mysticalTagline} ${styles.mysticalTaglineCentered}`}>
           <span key={taglineIndex} className={styles.mysticalTaglineInner}>
