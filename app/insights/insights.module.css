@@ -268,8 +268,8 @@
 .engineSwitcher select {
   font-size: 0.85rem;
   padding: 0.3rem 0.5rem;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   color: var(--ink-main);
 }
@@ -328,8 +328,8 @@
 .cardPlanets :global(.planet-card--compact) {
   padding: 0;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   overflow: hidden;
   max-height: 56px;
   transition:
@@ -565,8 +565,8 @@
 
 /* ── Rule Card ── */
 .ruleCard {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   transition: border-color 0.2s ease, transform 0.15s ease;
@@ -643,7 +643,6 @@
 .ruleBasis {
   font-size: 0.82rem;
   color: var(--ink-soft);
-  opacity: 0.8;
   display: block;
 }
 
@@ -652,7 +651,7 @@
   position: relative;
   margin-top: 0.6rem;
   height: 4px;
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.10);
   border-radius: 4px;
   overflow: visible;
 }
@@ -685,8 +684,8 @@
 
 /* ── Theme Summary Cards ── */
 .themeSummary {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 12px;
   padding: 1rem 1.25rem;
   margin-bottom: 1rem;
@@ -836,8 +835,8 @@
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--ink-soft);
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -894,8 +893,8 @@
 }
 
 .domainCard {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 14px;
   padding: 1.5rem;
 }
@@ -966,7 +965,7 @@
   color: var(--ink-soft);
   line-height: 1.6;
   padding: 0.75rem 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.06);
   border-radius: 10px;
   margin: 0.5rem 0;
 }
@@ -994,8 +993,8 @@
   font-size: 0.88rem;
   font-weight: 600;
   text-decoration: none;
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(12px);
   color: var(--ink-main);
   cursor: pointer;

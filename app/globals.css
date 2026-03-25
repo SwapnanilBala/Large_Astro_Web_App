@@ -1,11 +1,11 @@
 :root {
   --bg-night: #0F1117;
   --bg-deep: #161922;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-soft: rgba(255, 255, 255, 0.04);
-  --surface-strong: rgba(255, 255, 255, 0.10);
-  --line-soft: rgba(255, 255, 255, 0.08);
-  --line-strong: rgba(255, 255, 255, 0.14);
+  --surface: rgba(255, 255, 255, 0.09);
+  --surface-soft: rgba(255, 255, 255, 0.06);
+  --surface-strong: rgba(255, 255, 255, 0.13);
+  --line-soft: rgba(255, 255, 255, 0.12);
+  --line-strong: rgba(255, 255, 255, 0.18);
   --ink-main: #EAEDF3;
   --ink-soft: #8B8FA3;
   --accent-gold: #F0B754;
@@ -395,20 +395,20 @@ html[data-theme="light"] .insights-shell::before {
 
 .glass-section--aqua {
   background:
-    linear-gradient(135deg, rgba(94, 194, 184, 0.045), rgba(94, 194, 184, 0.01)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(135deg, rgba(94, 194, 184, 0.08), rgba(94, 194, 184, 0.03)),
+    rgba(255, 255, 255, 0.04);
 }
 
 .glass-section--gold {
   background:
-    linear-gradient(135deg, rgba(212, 164, 86, 0.045), rgba(212, 164, 86, 0.01)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(135deg, rgba(212, 164, 86, 0.08), rgba(212, 164, 86, 0.03)),
+    rgba(255, 255, 255, 0.04);
 }
 
 .glass-section--violet {
   background:
-    linear-gradient(135deg, rgba(180, 140, 255, 0.045), rgba(180, 140, 255, 0.01)),
-    rgba(255, 255, 255, 0.02);
+    linear-gradient(135deg, rgba(180, 140, 255, 0.08), rgba(180, 140, 255, 0.03)),
+    rgba(255, 255, 255, 0.04);
 }
 
 .kicker {
@@ -749,8 +749,8 @@ button:focus-visible,
 .planet-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -831,7 +831,7 @@ html[data-theme="light"] .rules-header h2 {
 .rule-card {
   border-radius: 16px;
   border: 1px solid var(--line-soft);
-  background: rgba(6, 26, 41, 0.78);
+  background: rgba(6, 26, 41, 0.85);
   padding: 0.86rem;
 }
 
@@ -864,7 +864,7 @@ html[data-theme="light"] .rules-header h2 {
 }
 
 .rule-card small {
-  color: #93b1c5;
+  color: var(--ink-soft);
 }
 
 .rule-high {
@@ -903,7 +903,7 @@ html[data-theme="light"] .rules-header h2 {
 .planet-card {
   border-radius: 14px;
   border: 1px solid var(--line-soft);
-  background: rgba(5, 25, 39, 0.82);
+  background: rgba(5, 25, 39, 0.88);
   padding: 0.74rem;
 }
 
@@ -1490,8 +1490,8 @@ label:has(.autocomplete-wrapper.is-open) {
 .nakshatra-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -1513,7 +1513,7 @@ label:has(.autocomplete-wrapper.is-open) {
 .nakshatra-card {
   border-radius: 16px;
   border: 1px solid var(--line-soft);
-  background: rgba(6, 26, 41, 0.78);
+  background: rgba(6, 26, 41, 0.85);
   padding: 0.95rem;
   transition: transform 240ms ease, box-shadow 240ms ease;
 }
@@ -1564,8 +1564,8 @@ label:has(.autocomplete-wrapper.is-open) {
 .dasha-audit {
   margin: 0.95rem 0 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(108, 225, 212, 0.18);
-  background: rgba(4, 20, 32, 0.72);
+  border: 1px solid rgba(108, 225, 212, 0.22);
+  background: rgba(4, 20, 32, 0.82);
   padding: 0.95rem;
 }
 
@@ -1627,7 +1627,7 @@ label:has(.autocomplete-wrapper.is-open) {
   gap: 0.22rem;
   border-radius: 14px;
   border: 1px solid var(--line-soft);
-  background: rgba(6, 26, 41, 0.74);
+  background: rgba(6, 26, 41, 0.84);
   padding: 0.8rem;
 }
 
@@ -1967,8 +1967,8 @@ label:has(.autocomplete-wrapper.is-open) {
   gap: 0.5rem 1rem;
   padding: 0.65rem 1rem;
   border-radius: 10px;
-  border: 1px solid rgba(108, 225, 212, 0.2);
-  background: rgba(6, 24, 38, 0.55);
+  border: 1px solid rgba(108, 225, 212, 0.25);
+  background: rgba(6, 24, 38, 0.72);
   margin-top: 0.2rem;
 }
 
@@ -2244,8 +2244,8 @@ html[data-theme="light"] .dasha-active-card {
 .aspects-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -2267,7 +2267,7 @@ html[data-theme="light"] .dasha-active-card {
 .aspect-card {
   border-radius: 14px;
   border: 1px solid var(--line-soft);
-  background: rgba(5, 25, 39, 0.82);
+  background: rgba(5, 25, 39, 0.88);
   padding: 0.74rem;
   transition: transform 240ms ease, box-shadow 240ms ease;
 }
@@ -2337,8 +2337,8 @@ html[data-theme="light"] .dasha-active-card {
 .navamsa-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -2628,8 +2628,8 @@ html[data-theme="light"] .dasha-active-card {
 .transits-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -2672,7 +2672,7 @@ html[data-theme="light"] .dasha-active-card {
 .transit-card {
   border-radius: 12px;
   border: 1px solid var(--line-soft);
-  background: rgba(5, 25, 39, 0.82);
+  background: rgba(5, 25, 39, 0.88);
   padding: 0.6rem 0.74rem;
   transition: transform 240ms ease, box-shadow 240ms ease;
 }
@@ -3255,8 +3255,8 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .forecast-panel {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 .forecast-intro {
@@ -3278,10 +3278,10 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .forecast-card {
   margin-top: 1.1rem;
   border-radius: 22px;
-  border: 1px solid rgba(108, 225, 212, 0.2);
+  border: 1px solid rgba(108, 225, 212, 0.25);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(4, 24, 38, 0.52);
+    linear-gradient(145deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04)),
+    rgba(4, 24, 38, 0.68);
   padding: 1.1rem;
 }
 
