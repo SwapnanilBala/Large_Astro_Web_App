@@ -149,8 +149,8 @@
 
 .section {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.10);
   padding: 1.15rem;
   backdrop-filter: blur(12px);
 }
@@ -218,9 +218,10 @@
   padding: 0.25rem 0.55rem;
   border-radius: 12px;
   font-size: 0.78rem;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--ink-main);
+  opacity: 0.8;
 }
 
 /* ── Solar Return Detail ── */
@@ -230,7 +231,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 0.35rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
   font-size: 0.85rem;
 }
 
@@ -239,7 +240,7 @@
 }
 
 .detailLabel {
-  color: var(--ink-soft);
+  color: var(--accent-aqua);
   font-weight: 500;
 }
 
@@ -252,9 +253,10 @@
 
 .summaryText {
   font-size: 0.88rem;
-  color: var(--ink-soft);
+  color: var(--ink-main);
   line-height: 1.6;
   margin: 0 0 0.6rem;
+  opacity: 0.85;
 }
 
 .summaryList {
@@ -268,7 +270,8 @@
   padding-left: 1rem;
   position: relative;
   font-size: 0.85rem;
-  color: var(--ink-soft);
+  color: var(--ink-main);
+  opacity: 0.85;
   line-height: 1.55;
 }
 
@@ -350,7 +353,8 @@
 
 .interpretation p {
   font-size: 0.9rem;
-  color: var(--ink-soft);
+  color: var(--ink-main);
+  opacity: 0.85;
   line-height: 1.65;
   margin: 0;
 }
