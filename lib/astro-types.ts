@@ -238,6 +238,25 @@ export type ForecastReading = {
   challenging_transits: ForecastAspectInsight[];
 };
 
+export type LuckyElementsInfo = {
+  primary_colors: string[];
+  secondary_colors: string[];
+  lucky_numbers: number[];
+  primary_gemstone: string;
+  secondary_gemstone: string;
+  lucky_day: string;
+  secondary_day: string;
+  primary_metal: string;
+  secondary_metal: string;
+  auspicious_directions: string[];
+  basis: {
+    ascendant_lord: string;
+    moon_sign_lord: string;
+    ninth_house_lord: string;
+    nakshatra_lord: string | null;
+  };
+};
+
 export type ChartApiResponse = {
   generated_at_utc: string;
   client: {
@@ -272,6 +291,7 @@ export type ChartApiResponse = {
     life_domain_insights?: LifeDomainInsight[];
     shadbala?: ShadbalaResult[];
     yogas?: YogaDetectionResult[];
+    lucky_elements?: LuckyElementsInfo;
   };
   engine: {
     engine_id: string;

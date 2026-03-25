@@ -67,6 +67,7 @@ const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, load
 const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const ShadbalaPanel = dynamic(() => import("./shadbala-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const YogasPanel = dynamic(() => import("./yogas-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -1064,6 +1065,15 @@ export default function InsightsContent({
             />
           )}
         </AuthGate>
+
+        {/* ─── Lucky Elements ─── */}
+        {payload.chart.lucky_elements && (
+          <LazyPanel>
+            <PanelErrorBoundary panelName="Lucky Elements">
+              <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
+            </PanelErrorBoundary>
+          </LazyPanel>
+        )}
 
         {/* ─── Footer Actions ─── */}
         <motion.div

@@ -35,6 +35,7 @@ import {
   type EnginePreset,
 } from "./engine-registry";
 import type { BirthDetailsInput } from "./compatibility-service";
+import { computeLuckyElements } from "./lucky-elements-engine";
 import { ServerCache, makeCacheKey } from "../server-cache";
 
 // --------------------------------------------------------------------------
@@ -125,6 +126,7 @@ export interface ChartResponse {
     life_domain_insights?: LifeDomainInsight[] | null;
     shadbala?: ShadbalaResult[] | null;
     yogas?: YogaDetectionResult[] | null;
+    lucky_elements?: import("@/lib/astro-types").LuckyElementsInfo | null;
   };
   engine: {
     engine_id: string;
@@ -788,6 +790,14 @@ export function buildChart(
     };
   }
 
+  // Lucky elements (always computed, not premium-gated)
+  const luckyElements = computeLuckyElements(
+    core.ascendant.sign,
+    core.planets,
+    core.houses,
+    nakshatraInfo?.lord ?? null,
+  );
+
   // Locked features
   const lockedFeatures: string[] = [];
   if (!includePremium) lockedFeatures.push(...PREMIUM_FEATURES);
@@ -823,6 +833,7 @@ export function buildChart(
       life_domain_insights: lifeDomainInsights,
       shadbala: shadbalInfo,
       yogas: yogasInfo,
+      lucky_elements: luckyElements,
     },
     engine: {
       engine_id: preset.engine_id,
