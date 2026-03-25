@@ -2,9 +2,17 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "Ma Carte",
+    "pricing": "Tarifs",
+    "workspace": "Espace de travail",
+    "access": "Accès",
+    "guest": "invité",
+    "menu": "Menu",
+    "register": "S'inscrire",
+    "signIn": "Se Connecter",
     "signOut": "Déconnexion",
     "signInPrompt": "Déjà un compte ?",
-    "signIn": "Se Connecter"
+    "alreadyUser": "Déjà utilisateur ?",
+    "close": "Fermer"
   },
   "home": {
     "kicker": "Moteur d'Intelligence Védique",
@@ -113,7 +121,8 @@
     "compatibilityCtaButton": "Explorer la Compatibilité",
     "planetKicker": "Positions Swiss Ephemeris",
     "planetHeading": "Aperçu Planétaire",
-    "house": "Maison"
+    "house": "Maison",
+    "loading": "Chargement..."
   },
   "dasha": {
     "kicker": "SYSTÈME DE TEMPS VÉDIQUE",
@@ -181,6 +190,43 @@
     "heading": "Vérification de Compatibilité",
     "lead": "Entrez les détails de naissance de votre partenaire pour générer un rapport de compatibilité védique.",
     "comingSoon": "Le moteur de compatibilité complet arrive bientôt. Pour l'instant, explorez les thèmes relationnels dans votre carte natale.",
-    "backToChart": "Retour à la Carte"
+    "backToChart": "Retour à la Carte",
+    "resolving": "Résolution des coordonnées et du fuseau horaire historique...",
+    "locationError": "Impossible de résoudre automatiquement la position.",
+    "incompleteProfiles": "Les deux profils de naissance nécessitent une date, une heure, un lieu et un fuseau horaire complets.",
+    "generating": "Génération de l'analyse de compatibilité...",
+    "error": "Une erreur est survenue. Veuillez réessayer."
+  },
+  "pricing": {
+    "kicker": "Tarifs",
+    "heading": "Accès ouvert et labels de compte",
+    "activePlan": "Plan actif",
+    "accountLabel": "Le label de votre compte est",
+    "browsingAsGuest": "Vous naviguez actuellement en tant qu'invité. Toutes les fonctionnalités de lecture de cartes sont débloquées.",
+    "featureMatrixKicker": "Matrice des fonctionnalités",
+    "featureMatrixHeading": "État d'accès actuel",
+    "guestName": "Invité",
+    "proName": "Pro",
+    "ultimateName": "Ultimate",
+    "guestDesc": "Le mode invité démarre ici par défaut",
+    "proDesc": "Créez un compte uniquement si vous souhaitez un stockage synchronisé de l'espace de travail",
+    "ultimateDesc": "Toutes les fonctionnalités de lecture de cartes sont déjà débloquées",
+    "included": "Inclus",
+    "accountRequired": "Compte requis",
+    "comingSoon": "Bientôt disponible"
+  },
+  "workspace": {
+    "loading": "Chargement de votre espace de travail astrologique sauvegardé...",
+    "exportPreparing": "Préparation de l'export...",
+    "exportButton": "Exporter l'espace de travail",
+    "unknownCity": "Ville inconnue",
+    "saving": "Enregistrement...",
+    "saveNotes": "Enregistrer les notes",
+    "saved": "Enregistré",
+    "saveFailed": "Échec de l'enregistrement",
+    "restore": "Restaurer",
+    "archive": "Archiver",
+    "noCharts": "Aucune carte sauvegardée",
+    "noChartsDesc": "Générez une carte depuis la page d'accueil pour la voir ici"
   }
 }
