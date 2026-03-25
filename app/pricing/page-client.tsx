@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslation } from "@/lib/i18n-context";
 import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
 import ScrollReveal from "../components/ScrollReveal";
@@ -107,6 +108,7 @@ function normalizePlan(tier: string | undefined): PlanId | "guest" {
 
 export default function PricingPageClient({ returnTo = "" }: PricingPageClientProps) {
   const { isAuthenticated, user } = useAuth();
+  const { t } = useTranslation();
 
   const currentPlan = useMemo(() => normalizePlan(user?.subscription_tier), [user?.subscription_tier]);
 
@@ -117,15 +119,15 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
       <div className="ambient ambient-right" />
       <BackButton href="/" />
       <section className="dashboard-shell">
-        <p className="kicker">Pricing</p>
-        <h1>Open access and account labels</h1>
+        <p className="kicker">{t("pricing.kicker")}</p>
+        <h1>{t("pricing.heading")}</h1>
         <p className="lead">
           All chart features are open to every visitor, and account-backed workspace data now lives in
           Supabase instead of the old backend database layer.
         </p>
 
         <div className={styles.activePlan}>
-          <span className="access-pill access-pill--premium">Active plan</span>
+          <span className="access-pill access-pill--premium">{t("pricing.activePlan")}</span>
           <p>
             {isAuthenticated
               ? `Your account label is ${currentPlan === "guest" ? "guest" : currentPlan}.`
@@ -180,22 +182,22 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
         <ScrollReveal delay={400}>
           <section className={`rules-panel ${styles.matrixPanel}`}>
             <div className="rules-header">
-              <p className="kicker">Feature Matrix</p>
-              <h2>Current access state</h2>
+              <p className="kicker">{t("pricing.featureMatrixKicker")}</p>
+              <h2>{t("pricing.featureMatrixHeading")}</h2>
             </div>
             <div className={styles.matrix}>
               <div className={styles.matrixRowHeader}>
                 <span>Feature</span>
-                <span>Guest</span>
-                <span>Pro</span>
-                <span>Ultimate</span>
+                <span>{t("pricing.guestName")}</span>
+                <span>{t("pricing.proName")}</span>
+                <span>{t("pricing.ultimateName")}</span>
               </div>
               {FEATURE_MATRIX.map((row) => (
                 <div key={row.label} className={styles.matrixRow}>
                   <span>{row.label}</span>
-                  <span>{row.plans.basic}</span>
-                  <span>{row.plans.pro}</span>
-                  <span>{row.plans.ultimate}</span>
+                  <span>{row.plans.basic === "Included" ? t("pricing.included") : t("pricing.accountRequired")}</span>
+                  <span>{row.plans.pro === "Included" ? t("pricing.included") : t("pricing.accountRequired")}</span>
+                  <span>{row.plans.ultimate === "Included" ? t("pricing.included") : t("pricing.accountRequired")}</span>
                 </div>
               ))}
             </div>

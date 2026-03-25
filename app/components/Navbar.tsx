@@ -147,10 +147,10 @@ export default function Navbar() {
             {isAuthenticated && user ? (
               <div className="user-badge">
                 <Link href="/pricing" className="navbar-chart-link">
-                  Pricing
+                  {t("navbar.pricing")}
                 </Link>
                 <Link href="/workspace" className="navbar-chart-link">
-                  Workspace
+                  {t("navbar.workspace")}
                 </Link>
                 {lastChartUrl && (
                   <Link href={lastChartUrl} className="navbar-chart-link">
@@ -168,9 +168,9 @@ export default function Navbar() {
             ) : (
               <>
                 <Link href="/pricing" className="navbar-chart-link">
-                  Access
+                  {t("navbar.access")}
                 </Link>
-                <span className="navbar-tier navbar-tier--core">guest</span>
+                <span className="navbar-tier navbar-tier--core">{t("navbar.guest")}</span>
                 <Link href="/login" className="navbar-signin-link">
                   {t("navbar.signInPrompt")} <span>{t("navbar.signIn")}</span>
                 </Link>
@@ -205,7 +205,7 @@ export default function Navbar() {
         aria-label="Mobile navigation"
       >
         <div className="drawer-header">
-          <span className="drawer-title">Menu</span>
+          <span className="drawer-title">{t("navbar.menu")}</span>
           <button
             className="drawer-close-btn"
             onClick={closeDrawer}
@@ -218,10 +218,10 @@ export default function Navbar() {
 
         <nav className="drawer-nav">
           <Link href="/pricing" className="drawer-link" onClick={closeDrawer}>
-            Pricing
+            {t("navbar.pricing")}
           </Link>
           <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
-            Workspace
+            {t("navbar.workspace")}
           </Link>
           {lastChartUrl && (
             <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
@@ -257,7 +257,7 @@ export default function Navbar() {
               {t("navbar.signIn")}
             </Link>
             <Link href="/register" className="drawer-link" onClick={closeDrawer}>
-              Register
+              {t("navbar.register")}
             </Link>
           </div>
         )}

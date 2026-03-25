@@ -14,7 +14,8 @@ import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels
 function PanelSkeleton() {
-  return <div className={styles.card} style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>Loading…</div>;
+  const { t } = useTranslation();
+  return <div className={styles.card} style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>{t("insights.loading")}</div>;
 }
 
 /* ─── Intersection Observer Lazy Panel ─── */

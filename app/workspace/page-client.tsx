@@ -5,6 +5,7 @@ import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
 import BackButton from "../components/BackButton";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
 import styles from "./workspace.module.css";
 import {
@@ -83,6 +84,7 @@ function matchesSearch<T extends SavedChartRecord | SavedComparisonRecord>(
 
 export default function WorkspacePageClient() {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { t } = useTranslation();
   const { pushToast } = useToast();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("active");
@@ -362,7 +364,7 @@ export default function WorkspacePageClient() {
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Workspace</p>
-          <h1>Loading your saved astrology workspace...</h1>
+          <h1>{t("workspace.loading")}</h1>
         </section>
       </main>
     );
@@ -421,7 +423,7 @@ export default function WorkspacePageClient() {
               Manage plan
             </Link>
             <button type="button" onClick={exportWorkspace} disabled={isExporting}>
-              {isExporting ? "Preparing export..." : "Export workspace"}
+              {isExporting ? t("workspace.exportPreparing") : t("workspace.exportButton")}
             </button>
           </div>
         </div>
@@ -493,7 +495,7 @@ export default function WorkspacePageClient() {
                         <div>
                           <h3>{chart.name}</h3>
                           <p>
-                            {chart.city || chart.town || "Unknown city"} • {chart.ascendant_sign} Lagna
+                            {chart.city || chart.town || t("workspace.unknownCity")} • {chart.ascendant_sign} Lagna
                           </p>
                         </div>
                         <div className={styles.chipRow}>
@@ -515,20 +517,20 @@ export default function WorkspacePageClient() {
                       />
                       <div className={styles.cardActions}>
                         <button type="button" onClick={() => saveChartNotes(chart.saved_chart_id)}>
-                          {state === "saving" ? "Saving..." : "Save notes"}
+                          {state === "saving" ? t("workspace.saving") : t("workspace.saveNotes")}
                         </button>
                         <button type="button" onClick={() => void copyLink(chartPath, "Chart link copied.")}>
                           Copy link
                         </button>
                         <button type="button" onClick={() => void toggleChartArchive(chart)}>
-                          {chart.archived_at ? "Restore" : "Archive"}
+                          {chart.archived_at ? t("workspace.restore") : t("workspace.archive")}
                         </button>
                         <button type="button" className="danger-btn" onClick={() => void deleteChart(chart)}>
                           Delete
                         </button>
                         <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
-                          {state === "saved" && "Saved"}
-                          {state === "error" && "Save failed"}
+                          {state === "saved" && t("workspace.saved")}
+                          {state === "error" && t("workspace.saveFailed")}
                         </span>
                       </div>
                     </article>
@@ -583,7 +585,7 @@ export default function WorkspacePageClient() {
                           type="button"
                           onClick={() => saveComparisonNotes(comparison.saved_comparison_id)}
                         >
-                          {state === "saving" ? "Saving..." : "Save notes"}
+                          {state === "saving" ? t("workspace.saving") : t("workspace.saveNotes")}
                         </button>
                         <button
                           type="button"
@@ -603,7 +605,7 @@ export default function WorkspacePageClient() {
                           Share
                         </button>
                         <button type="button" onClick={() => void toggleComparisonArchive(comparison)}>
-                          {comparison.archived_at ? "Restore" : "Archive"}
+                          {comparison.archived_at ? t("workspace.restore") : t("workspace.archive")}
                         </button>
                         <button
                           type="button"
@@ -613,8 +615,8 @@ export default function WorkspacePageClient() {
                           Delete
                         </button>
                         <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
-                          {state === "saved" && "Saved"}
-                          {state === "error" && "Save failed"}
+                          {state === "saved" && t("workspace.saved")}
+                          {state === "error" && t("workspace.saveFailed")}
                         </span>
                       </div>
                     </article>

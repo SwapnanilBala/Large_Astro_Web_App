@@ -10,6 +10,7 @@ import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
 import { useAuth } from "@/lib/auth-context";
+import { useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
 import { useToast } from "@/lib/toast-context";
 import { saveComparison } from "@/lib/workspace-store";
@@ -179,6 +180,7 @@ function profileFromParams(
 }
 
 function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardProps) {
+  const { t } = useTranslation();
   const signBorderColor = accentColor === "aqua"
     ? "rgba(100,200,255,0.5)"
     : "rgba(255,100,150,0.5)";
@@ -354,12 +356,12 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
 
       {geoStatus !== "idle" && (
         <p className={`geo-status ${geoStatus}`}>
-          {geoStatus === "loading" && "Resolving coordinates and historical timezone..."}
+          {geoStatus === "loading" && t("compatibility.resolving")}
           {geoStatus === "found" &&
             `Location resolved: ${Number(profile.latitude).toFixed(4)}, ${Number(profile.longitude).toFixed(4)}${
               profile.timeZoneId ? ` • ${profile.timeZoneId}` : ""
             }`}
-          {geoStatus === "not-found" && "Location could not be resolved automatically."}
+          {geoStatus === "not-found" && t("compatibility.locationError")}
         </p>
       )}
 
@@ -412,6 +414,7 @@ export default function CompatibilityPageClient({
   initialSearchParams,
 }: CompatibilityPageClientProps) {
   const { isAuthenticated, user } = useAuth();
+  const { t } = useTranslation();
   const { pushToast } = useToast();
   const [primary, setPrimary] = useState<ProfileQueryInput>(() =>
     profileFromParams(initialSearchParams, "")
@@ -432,7 +435,7 @@ export default function CompatibilityPageClient({
 
   const submitCompatibility = useCallback(async (saveResult: boolean) => {
     if (!canSubmit) {
-      setError("Both birth profiles need complete date, time, location, and timezone data.");
+      setError(t("compatibility.incompleteProfiles"));
       return;
     }
 
