@@ -2,9 +2,17 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "My Chart",
+    "pricing": "Pricing",
+    "workspace": "Workspace",
+    "access": "Access",
+    "guest": "guest",
+    "menu": "Menu",
+    "register": "Register",
+    "signIn": "Sign In",
     "signOut": "Sign Out",
     "signInPrompt": "Already a user?",
-    "signIn": "Sign In"
+    "alreadyUser": "Already a user?",
+    "close": "Close"
   },
   "home": {
     "kicker": "Astro Intelligence Studio",
@@ -118,7 +126,8 @@
     "compatibilityCtaButton": "Explore Compatibility",
     "planetKicker": "Swiss Ephemeris Placements",
     "planetHeading": "Planetary Snapshot",
-    "house": "House"
+    "house": "House",
+    "loading": "Loading..."
   },
   "dasha": {
     "kicker": "VEDIC TIMING SYSTEM",
@@ -186,7 +195,44 @@
     "heading": "Compatibility Check",
     "lead": "Enter your partner's birth details to generate a Vedic compatibility report.",
     "comingSoon": "Full compatibility engine coming soon. For now, explore the relationship themes in your natal chart.",
-    "backToChart": "Back to Chart"
+    "backToChart": "Back to Chart",
+    "resolving": "Resolving coordinates and historical timezone...",
+    "locationError": "Location could not be resolved automatically.",
+    "incompleteProfiles": "Both birth profiles need complete date, time, location, and timezone data.",
+    "generating": "Generating compatibility analysis...",
+    "error": "Something went wrong. Please try again."
+  },
+  "pricing": {
+    "kicker": "Pricing",
+    "heading": "Open access and account labels",
+    "activePlan": "Active plan",
+    "accountLabel": "Your account label is",
+    "browsingAsGuest": "You are currently browsing as guest. All chart-reading features are unlocked.",
+    "featureMatrixKicker": "Feature Matrix",
+    "featureMatrixHeading": "Current access state",
+    "guestName": "Guest",
+    "proName": "Pro",
+    "ultimateName": "Ultimate",
+    "guestDesc": "Guest mode starts here by default",
+    "proDesc": "Create an account only if you want synced workspace storage",
+    "ultimateDesc": "All chart-reading features are already unlocked",
+    "included": "Included",
+    "accountRequired": "Account required",
+    "comingSoon": "Coming soon"
+  },
+  "workspace": {
+    "loading": "Loading your saved astrology workspace...",
+    "exportPreparing": "Preparing export...",
+    "exportButton": "Export workspace",
+    "unknownCity": "Unknown city",
+    "saving": "Saving...",
+    "saveNotes": "Save notes",
+    "saved": "Saved",
+    "saveFailed": "Save failed",
+    "restore": "Restore",
+    "archive": "Archive",
+    "noCharts": "No saved charts yet",
+    "noChartsDesc": "Generate a chart from the home page to see it here"
   },
   "bottomNav": {
     "home": "Home",
