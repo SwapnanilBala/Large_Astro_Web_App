@@ -158,8 +158,24 @@
 
 .gemItem {
   display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.gemHeader {
+  display: flex;
   align-items: center;
   gap: 0.5rem;
+}
+
+.gemBenefit {
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  padding-left: 0.2rem;
+  border-left: 2px solid rgba(200, 155, 60, 0.25);
+  padding-left: 0.55rem;
+  margin-top: 0.1rem;
 }
 
 .gemLabel {

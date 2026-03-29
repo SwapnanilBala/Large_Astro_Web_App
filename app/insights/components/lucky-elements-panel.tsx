@@ -5,6 +5,20 @@ import type { LuckyElementsInfo } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import styles from "./lucky-elements-panel.module.css";
 
+/* ── Gemstone → translation key for life-benefit description ── */
+
+const GEMSTONE_BENEFIT_KEY: Record<string, string> = {
+  "Ruby":             "insights.gemBenefit_Ruby",
+  "Pearl":            "insights.gemBenefit_Pearl",
+  "Red Coral":        "insights.gemBenefit_RedCoral",
+  "Emerald":          "insights.gemBenefit_Emerald",
+  "Yellow Sapphire":  "insights.gemBenefit_YellowSapphire",
+  "Diamond":          "insights.gemBenefit_Diamond",
+  "Blue Sapphire":    "insights.gemBenefit_BlueSapphire",
+  "Hessonite Garnet": "insights.gemBenefit_HessoniteGarnet",
+  "Cat's Eye":        "insights.gemBenefit_CatsEye",
+};
+
 /* ── Vedic color name → CSS hex for rendering swatches ── */
 
 const CSS_COLOR_MAP: Record<string, string> = {
@@ -86,12 +100,22 @@ function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
           <h4 className={styles.sectionTitle}>{t("insights.luckyElementsGemstones")}</h4>
           <div className={styles.gemRow}>
             <div className={styles.gemItem}>
-              <span className={styles.gemLabel}>{t("insights.luckyElementsPrimary")}</span>
-              <span className={styles.gemValue}>{le.primary_gemstone}</span>
+              <div className={styles.gemHeader}>
+                <span className={styles.gemLabel}>{t("insights.luckyElementsPrimary")}</span>
+                <span className={styles.gemValue}>{le.primary_gemstone}</span>
+              </div>
+              <p className={styles.gemBenefit}>
+                {t(GEMSTONE_BENEFIT_KEY[le.primary_gemstone] ?? "insights.gemBenefit_Ruby")}
+              </p>
             </div>
             <div className={styles.gemItem}>
-              <span className={styles.gemLabel}>{t("insights.luckyElementsSecondary")}</span>
-              <span className={styles.gemValue}>{le.secondary_gemstone}</span>
+              <div className={styles.gemHeader}>
+                <span className={styles.gemLabel}>{t("insights.luckyElementsSecondary")}</span>
+                <span className={styles.gemValue}>{le.secondary_gemstone}</span>
+              </div>
+              <p className={styles.gemBenefit}>
+                {t(GEMSTONE_BENEFIT_KEY[le.secondary_gemstone] ?? "insights.gemBenefit_Ruby")}
+              </p>
             </div>
           </div>
         </div>
