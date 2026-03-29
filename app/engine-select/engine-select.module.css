@@ -49,7 +49,7 @@
 
 .kicker {
   font-family: var(--font-body), sans-serif;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -59,7 +59,7 @@
 
 .heading {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-size: clamp(2.1rem, 4vw, 2.7rem);
   font-weight: 700;
   color: #EAEDF3;
   margin: 0 0 0.75rem;
@@ -71,7 +71,7 @@
 }
 
 .lead {
-  font-size: 1.15rem;
+  font-size: 1.45rem;
   color: #8B8FA3;
   line-height: 1.65;
   max-width: 620px;
@@ -160,7 +160,7 @@
 
 .cardLabel {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   font-weight: 700;
   color: #EAEDF3;
   margin: 0;
@@ -174,7 +174,7 @@
 
 .cardDefaultTag {
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: 1.12rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -193,7 +193,7 @@
 }
 
 .cardBadge {
-  font-size: 0.92rem;
+  font-size: 1.22rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -214,7 +214,7 @@
 }
 
 .cardDesc {
-  font-size: 1.08rem;
+  font-size: 1.38rem;
   color: #8B8FA3;
   line-height: 1.6;
   margin: 0;
@@ -232,14 +232,14 @@
 
 .houseSectionTitle {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #EAEDF3;
   margin: 0 0 0.35rem;
 }
 
 .houseSectionLead {
-  font-size: 1.02rem;
+  font-size: 1.32rem;
   color: #8B8FA3;
   line-height: 1.55;
   margin: 0 0 1rem;
@@ -261,7 +261,7 @@
   padding: 0.45rem 0.9rem;
   border-radius: 8px;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.98rem;
+  font-size: 1.28rem;
   font-weight: 600;
   letter-spacing: 0.3px;
   color: #8B8FA3;
@@ -342,7 +342,7 @@
   padding: 1rem 2rem;
   border-radius: 12px;
   font-family: var(--font-body), sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #0F1117;
   background: linear-gradient(110deg, #C89B3C, #d4aa50, #C89B3C, #a07828);
@@ -482,6 +482,6 @@
   }
 
   .cardLabel {
-    font-size: 1.25rem;
+    font-size: 1.55rem;
   }
 }

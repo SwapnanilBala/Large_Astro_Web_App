@@ -16,7 +16,7 @@
 
 .kicker {
   font-family: var(--font-body), sans-serif;
-  font-size: 1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -26,7 +26,7 @@
 
 .title {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-size: clamp(2.1rem, 4vw, 2.9rem);
   font-weight: 700;
   color: var(--ink-main);
   margin: 0 0 0.75rem;
@@ -38,7 +38,7 @@
 }
 
 .lead {
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   color: var(--ink-soft);
   line-height: 1.65;
   max-width: 680px;
@@ -47,7 +47,7 @@
 
 .heading {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(1.3rem, 2.5vw, 1.7rem);
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
   font-weight: 600;
   margin: 0;
   line-height: 1.3;
@@ -151,7 +151,7 @@
 
 .cardMetric h3 {
   font-family: var(--font-body), sans-serif;
-  font-size: 0.98rem;
+  font-size: 1.28rem;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--ink-soft);
@@ -160,14 +160,14 @@
 }
 
 .metricIcon {
-  font-size: 1.8rem;
+  font-size: 2.1rem;
   line-height: 1;
   margin-bottom: 0.25rem;
 }
 
 .metricValue {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.7rem;
+  font-size: 2rem;
   font-weight: 700;
   color: var(--ink-main);
   margin: 0;
@@ -175,7 +175,7 @@
 }
 
 .cardMetric small {
-  font-size: 1.02rem;
+  font-size: 1.32rem;
   color: var(--ink-soft);
 }
 
@@ -224,7 +224,7 @@
   display: inline-block;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
-  font-size: 0.98rem;
+  font-size: 1.28rem;
   font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
@@ -246,19 +246,19 @@
 
 .accessTier {
   color: var(--ink-soft);
-  font-size: 1.05rem;
+  font-size: 1.35rem;
 }
 
 .accessLocked {
   color: var(--accent-coral);
-  font-size: 1rem;
+  font-size: 1.3rem;
   opacity: 0.8;
 }
 
 /* ── Engine Switcher ── */
 .engineSwitcher {
   margin-top: 0.5rem;
-  font-size: 1rem;
+  font-size: 1.3rem;
   color: var(--ink-soft);
   display: flex;
   flex-direction: column;
@@ -266,7 +266,7 @@
 }
 
 .engineSwitcher select {
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   padding: 0.3rem 0.5rem;
   background: rgba(255, 255, 255, 0.09);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -372,7 +372,7 @@
 
 /* Large planet glyph */
 .cardPlanets :global(.planet-card__glyph) {
-  font-size: 1.7rem;
+  font-size: 2rem;
   line-height: 1;
   flex-shrink: 0;
   width: 1.75rem;
@@ -398,7 +398,7 @@
 
 .cardPlanets :global(.planet-card__title-group h3) {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.12rem;
+  font-size: 1.42rem;
   font-weight: 600;
   margin: 0;
   line-height: 1.2;
@@ -406,14 +406,14 @@
 }
 
 .cardPlanets :global(.planet-card__sign) {
-  font-size: 1.02rem;
+  font-size: 1.32rem;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
 /* Chevron indicator */
 .cardPlanets :global(.planet-card__chevron) {
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   color: var(--ink-soft);
   flex-shrink: 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
@@ -449,7 +449,7 @@
 }
 
 .cardPlanets :global(.planet-card__detail-label) {
-  font-size: 0.95rem;
+  font-size: 1.25rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -457,13 +457,13 @@
 }
 
 .cardPlanets :global(.planet-card__detail-value) {
-  font-size: 1.02rem;
+  font-size: 1.32rem;
   color: var(--ink-main);
   font-weight: 500;
 }
 
 .cardPlanets :global(.planet-card__dignity) {
-  font-size: 0.98rem;
+  font-size: 1.28rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -528,7 +528,7 @@
 
 /* ── Section Intro ── */
 .sectionIntro {
-  font-size: 1.15rem;
+  font-size: 1.45rem;
   color: var(--ink-soft);
   line-height: 1.6;
   margin: 0 0 1.25rem;
@@ -598,7 +598,7 @@
 
 .ruleHeader h3 {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   font-weight: 600;
   color: var(--ink-main);
   margin: 0;
@@ -606,7 +606,7 @@
 }
 
 .priorityBadge {
-  font-size: 0.88rem;
+  font-size: 1.18rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -634,14 +634,14 @@
 }
 
 .ruleInsight {
-  font-size: 1.14rem;
+  font-size: 1.44rem;
   color: var(--ink-main);
   line-height: 1.6;
   margin: 0 0 0.4rem;
 }
 
 .ruleBasis {
-  font-size: 1.02rem;
+  font-size: 1.32rem;
   color: var(--ink-soft);
   display: block;
 }
@@ -667,7 +667,7 @@
   position: absolute;
   right: 0;
   top: -16px;
-  font-size: 0.92rem;
+  font-size: 1.22rem;
   color: var(--ink-soft);
 }
 
@@ -677,7 +677,7 @@
   background: rgba(240, 112, 104, 0.08);
   border-left: 2px solid var(--accent-coral);
   border-radius: 0 8px 8px 0;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   color: var(--accent-coral);
   line-height: 1.5;
 }
@@ -693,13 +693,13 @@
 
 .themeSummary h4 {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.12rem;
+  font-size: 1.42rem;
   color: var(--accent-gold);
   margin: 0 0 0.4rem;
 }
 
 .themeSummary p {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   color: var(--ink-soft);
   margin: 0.2rem 0;
   line-height: 1.5;
@@ -718,7 +718,7 @@
   border: 1px solid rgba(200, 155, 60, 0.25);
   border-radius: 24px;
   color: var(--accent-gold);
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
@@ -793,20 +793,20 @@
 }
 
 .lockedIcon {
-  font-size: 2.2rem;
+  font-size: 2.5rem;
   margin-bottom: 0.75rem;
   opacity: 0.5;
 }
 
 .lockedPreview h3 {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   color: var(--ink-main);
   margin: 0 0 0.5rem;
 }
 
 .lockedPreview p {
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   color: var(--ink-soft);
   line-height: 1.6;
   max-width: 400px;
@@ -814,7 +814,7 @@
 
 /* ── Domain Deep Dives ── */
 .domainSelectLabel {
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   color: var(--ink-soft);
   margin-bottom: 0.6rem;
   font-weight: 500;
@@ -832,7 +832,7 @@
   cursor: pointer;
   padding: 0.5rem 1.1rem;
   border-radius: 24px;
-  font-size: 1.05rem;
+  font-size: 1.35rem;
   font-weight: 500;
   color: var(--ink-soft);
   background: rgba(255, 243, 210, 0.04);
@@ -909,13 +909,13 @@
 
 .domainHeader h3 {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.75rem;
   color: var(--ink-main);
   margin: 0.25rem 0 0;
 }
 
 .domainOverview {
-  font-size: 1.15rem;
+  font-size: 1.45rem;
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 0 0 1.25rem;
@@ -930,7 +930,7 @@
 
 .domainCol h4 {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.4rem;
   color: var(--accent-gold);
   margin: 0 0 0.5rem;
   font-weight: 600;
@@ -943,7 +943,7 @@
 }
 
 .domainCol li {
-  font-size: 1.08rem;
+  font-size: 1.38rem;
   color: var(--ink-soft);
   line-height: 1.55;
   padding: 0.25rem 0;
@@ -961,7 +961,7 @@
 
 .domainGuidance,
 .domainLongGame {
-  font-size: 1.12rem;
+  font-size: 1.42rem;
   color: var(--ink-soft);
   line-height: 1.6;
   padding: 0.75rem 1rem;
@@ -990,7 +990,7 @@
   gap: 0.4rem;
   padding: 0.6rem 1.25rem;
   border-radius: 24px;
-  font-size: 1.08rem;
+  font-size: 1.38rem;
   font-weight: 600;
   text-decoration: none;
   border: 1px solid rgba(200, 155, 60, 0.14);
