@@ -19,9 +19,9 @@
 .panel {
   width: min(960px, 100%);
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.10);
   background:
-    linear-gradient(130deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)),
+    linear-gradient(130deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.04)),
     #161922;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -53,7 +53,7 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: #F0B754;
+  color: #C89B3C;
   margin: 0 0 0.5rem;
 }
 
@@ -64,7 +64,7 @@
   color: #EAEDF3;
   margin: 0 0 0.75rem;
   line-height: 1.2;
-  background: linear-gradient(135deg, #EAEDF3 40%, #F0B754);
+  background: linear-gradient(135deg, #EAEDF3 40%, #C89B3C);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -95,8 +95,8 @@
   gap: 0.65rem;
   padding: 1.5rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 243, 210, 0.04);
+  border: 1.5px solid rgba(200, 155, 60, 0.10);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   transition:
@@ -107,32 +107,32 @@
 }
 
 .card:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  border-color: rgba(200, 155, 60, 0.40);
+  box-shadow: 0 0 20px rgba(200, 155, 60, 0.15), 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 
 .card:focus-visible {
-  outline: 2px solid #3ECDA5;
+  outline: 2px solid #C89B3C;
   outline-offset: 3px;
 }
 
 .cardSelected {
-  border-color: rgba(62, 205, 165, 0.45);
+  border-color: rgba(200, 155, 60, 0.40);
   background:
-    linear-gradient(135deg, rgba(62, 205, 165, 0.10), rgba(240, 183, 84, 0.06)),
-    rgba(255, 255, 255, 0.08);
+    linear-gradient(135deg, rgba(200, 155, 60, 0.10), rgba(200, 155, 60, 0.05)),
+    rgba(255, 243, 210, 0.04);
   box-shadow:
-    0 0 24px rgba(62, 205, 165, 0.10),
+    0 0 20px rgba(200, 155, 60, 0.15),
     0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 0 30px rgba(62, 205, 165, 0.03);
+    inset 0 0 30px rgba(200, 155, 60, 0.03);
 }
 
 .cardSelected:hover {
-  border-color: rgba(62, 205, 165, 0.55);
+  border-color: rgba(200, 155, 60, 0.55);
   box-shadow:
-    0 0 30px rgba(62, 205, 165, 0.14),
+    0 0 28px rgba(200, 155, 60, 0.20),
     0 8px 32px rgba(0, 0, 0, 0.25),
-    inset 0 0 30px rgba(62, 205, 165, 0.04);
+    inset 0 0 30px rgba(200, 155, 60, 0.04);
 }
 
 .cardCheck {
@@ -145,17 +145,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(200, 155, 60, 0.10);
+  background: rgba(255, 243, 210, 0.04);
   color: transparent;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cardCheckVisible {
-  border-color: #3ECDA5;
-  background: linear-gradient(135deg, #3ECDA5, #2eb892);
+  border-color: #C89B3C;
+  background: linear-gradient(135deg, #C89B3C, #a07828);
   color: #0F1117;
-  box-shadow: 0 0 12px rgba(62, 205, 165, 0.3);
+  box-shadow: 0 0 12px rgba(200, 155, 60, 0.30);
 }
 
 .cardLabel {
@@ -178,9 +178,9 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #3ECDA5;
-  background: rgba(62, 205, 165, 0.12);
-  border: 1px solid rgba(62, 205, 165, 0.2);
+  color: #C89B3C;
+  background: rgba(200, 155, 60, 0.12);
+  border: 1px solid rgba(200, 155, 60, 0.20);
   padding: 0.15rem 0.5rem;
   border-radius: 8px;
   white-space: nowrap;
@@ -202,15 +202,15 @@
 }
 
 .cardBadgeAyanamsha {
-  background: rgba(240, 183, 84, 0.12);
-  color: #F0B754;
-  border: 1px solid rgba(240, 183, 84, 0.2);
+  background: rgba(200, 155, 60, 0.12);
+  color: #C89B3C;
+  border: 1px solid rgba(200, 155, 60, 0.20);
 }
 
 .cardBadgeHouse {
-  background: rgba(62, 205, 165, 0.10);
-  color: #3ECDA5;
-  border: 1px solid rgba(62, 205, 165, 0.15);
+  background: rgba(26, 123, 110, 0.10);
+  color: rgba(26, 123, 110, 1);
+  border: 1px solid rgba(26, 123, 110, 0.20);
 }
 
 .cardDesc {
@@ -226,8 +226,8 @@
   margin-bottom: 2rem;
   padding: 1.5rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 243, 210, 0.04);
+  border: 1px solid rgba(200, 155, 60, 0.10);
 }
 
 .houseSectionTitle {
@@ -265,8 +265,8 @@
   font-weight: 600;
   letter-spacing: 0.3px;
   color: #8B8FA3;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1.5px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 243, 210, 0.04);
+  border: 1.5px solid rgba(200, 155, 60, 0.10);
   transition:
     border-color 0.3s ease,
     background 0.3s ease,
@@ -275,24 +275,24 @@
 }
 
 .houseChip:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(200, 155, 60, 0.30);
   color: #EAEDF3;
 }
 
 .houseChip:focus-visible {
-  outline: 2px solid #3ECDA5;
+  outline: 2px solid #C89B3C;
   outline-offset: 2px;
 }
 
 .houseChipActive {
-  border-color: rgba(62, 205, 165, 0.4);
-  background: rgba(62, 205, 165, 0.10);
-  color: #3ECDA5;
-  box-shadow: 0 0 12px rgba(62, 205, 165, 0.08);
+  border-color: rgba(200, 155, 60, 0.40);
+  background: rgba(200, 155, 60, 0.10);
+  color: #C89B3C;
+  box-shadow: 0 0 12px rgba(200, 155, 60, 0.08);
 }
 
 .houseChipActive:hover {
-  border-color: rgba(62, 205, 165, 0.5);
+  border-color: rgba(200, 155, 60, 0.55);
 }
 
 .houseChipDisabled {
@@ -320,9 +320,9 @@
 }
 
 :global(html[data-theme="light"]) .houseChipActive {
-  border-color: rgba(62, 205, 165, 0.35);
-  background: rgba(62, 205, 165, 0.08);
-  color: #2a9a80;
+  border-color: rgba(200, 155, 60, 0.35);
+  background: rgba(200, 155, 60, 0.08);
+  color: #8a6820;
 }
 
 .footer {
@@ -345,7 +345,7 @@
   font-size: 1rem;
   font-weight: 700;
   color: #0F1117;
-  background: linear-gradient(110deg, #3ECDA5, #5ad8b8, #3ECDA5, #2eb892);
+  background: linear-gradient(110deg, #C89B3C, #d4aa50, #C89B3C, #a07828);
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   transition:
@@ -359,9 +359,9 @@
 .cta:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow:
-    0 28px 52px rgba(62, 205, 165, 0.28),
-    0 0 40px rgba(62, 205, 165, 0.15),
-    0 0 80px rgba(240, 183, 84, 0.1);
+    0 28px 52px rgba(200, 155, 60, 0.28),
+    0 0 40px rgba(200, 155, 60, 0.20),
+    0 0 80px rgba(200, 155, 60, 0.10);
   filter: saturate(1.1) brightness(1.05);
 }
 
@@ -369,7 +369,7 @@
   transform: translateY(0) scale(0.97);
   transition: transform 80ms ease-out;
   box-shadow:
-    0 8px 20px rgba(62, 205, 165, 0.2),
+    0 8px 20px rgba(200, 155, 60, 0.20),
     inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -380,7 +380,7 @@
 }
 
 .cta:focus-visible {
-  outline: 2px solid #F0B754;
+  outline: 2px solid #C89B3C;
   outline-offset: 3px;
 }
 
@@ -421,7 +421,7 @@
 }
 
 :global(html[data-theme="light"]) .heading {
-  background: linear-gradient(135deg, #1D2030 40%, #3ECDA5);
+  background: linear-gradient(135deg, #1D2030 40%, #C89B3C);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -438,9 +438,9 @@
 }
 
 :global(html[data-theme="light"]) .cardSelected {
-  border-color: rgba(62, 205, 165, 0.35);
-  background: linear-gradient(135deg, rgba(62, 205, 165, 0.08), rgba(240, 183, 84, 0.05));
-  box-shadow: 0 0 20px rgba(62, 205, 165, 0.08);
+  border-color: rgba(200, 155, 60, 0.35);
+  background: linear-gradient(135deg, rgba(200, 155, 60, 0.08), rgba(200, 155, 60, 0.04));
+  box-shadow: 0 0 20px rgba(200, 155, 60, 0.10);
 }
 
 :global(html[data-theme="light"]) .cardCheck {
@@ -449,13 +449,13 @@
 }
 
 :global(html[data-theme="light"]) .cardCheckVisible {
-  border-color: #2a9a80;
-  background: linear-gradient(135deg, #3ECDA5, #2eb892);
+  border-color: #8a6820;
+  background: linear-gradient(135deg, #C89B3C, #a07828);
   color: #fff;
 }
 
 :global(html[data-theme="light"]) .cta {
-  background: linear-gradient(110deg, #3ECDA5, #2eb892, #3ECDA5, #269e7d);
+  background: linear-gradient(110deg, #C89B3C, #a07828, #C89B3C, #8a6820);
   background-size: 300% 100%;
   color: #fff;
 }

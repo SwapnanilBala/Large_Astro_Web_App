@@ -50,9 +50,9 @@
 
 .card {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.10);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)),
+    linear-gradient(135deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.04)),
     #161922;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -70,14 +70,14 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.06), transparent 60%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(62, 205, 165, 0.04));
+    radial-gradient(360px 120px at 0% 0%, rgba(255, 243, 210, 0.04), transparent 60%),
+    linear-gradient(135deg, rgba(255, 243, 210, 0.02), transparent 45%, rgba(200, 155, 60, 0.04));
   opacity: 0.9;
 }
 
 @media (hover: hover) {
   .card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(200, 155, 60, 0.14);
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
     transform: translateY(-2px);
   }
@@ -132,7 +132,7 @@
 
 .saveStateSaved {
   composes: saveState;
-  color: #3ECDA5;
+  color: #C89B3C;
 }
 
 .saveStateError {

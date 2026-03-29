@@ -9,9 +9,9 @@
 
 .card {
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.10);
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)),
+    linear-gradient(145deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.04)),
     #161922;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -29,14 +29,14 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.06), transparent 60%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(62, 205, 165, 0.04));
+    radial-gradient(360px 120px at 0% 0%, rgba(255, 243, 210, 0.04), transparent 60%),
+    linear-gradient(135deg, rgba(255, 243, 210, 0.02), transparent 45%, rgba(200, 155, 60, 0.04));
   opacity: 0.9;
 }
 
 @media (hover: hover) {
   .card:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(200, 155, 60, 0.14);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
     transform: translateY(-2px);
   }
@@ -44,10 +44,10 @@
 
 .cardActive {
   composes: card;
-  border-color: rgba(62, 205, 165, 0.38);
+  border-color: rgba(200, 155, 60, 0.40);
   box-shadow:
-    inset 0 0 0 1px rgba(62, 205, 165, 0.18),
-    0 16px 44px rgba(62, 205, 165, 0.08);
+    inset 0 0 0 1px rgba(200, 155, 60, 0.18),
+    0 16px 44px rgba(200, 155, 60, 0.10);
 }
 
 .activePlan {
@@ -64,19 +64,19 @@
 }
 
 .cardBasic {
-  box-shadow: inset 0 0 0 1px rgba(62, 205, 165, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(200, 155, 60, 0.08);
 }
 
 .cardPro {
-  box-shadow: inset 0 0 0 1px rgba(240, 183, 84, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(200, 155, 60, 0.12);
 }
 
 .cardUltimate {
   background:
-    radial-gradient(500px 180px at 100% 0%, rgba(62, 205, 165, 0.12), transparent 72%),
-    radial-gradient(400px 160px at 0% 100%, rgba(240, 183, 84, 0.08), transparent 72%),
+    radial-gradient(500px 180px at 100% 0%, rgba(200, 155, 60, 0.10), transparent 72%),
+    radial-gradient(400px 160px at 0% 100%, rgba(200, 155, 60, 0.06), transparent 72%),
     #161922;
-  box-shadow: inset 0 0 0 1px rgba(240, 112, 104, 0.1);
+  box-shadow: inset 0 0 0 1px rgba(200, 155, 60, 0.18);
 }
 
 .cardHeader {
@@ -113,8 +113,8 @@
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 999px;
-  background: linear-gradient(135deg, #F0B754, #3ECDA5);
-  box-shadow: 0 0 12px rgba(62, 205, 165, 0.18);
+  background: linear-gradient(135deg, #C89B3C, #a07828);
+  box-shadow: 0 0 12px rgba(200, 155, 60, 0.20);
 }
 
 .codeLabel {
@@ -123,7 +123,7 @@
 
 .success {
   margin: 0;
-  color: #3ECDA5;
+  color: #C89B3C;
   font-size: 0.9rem;
 }
 
@@ -142,10 +142,10 @@
   gap: 0.75rem;
   align-items: center;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.10);
   padding: 0.85rem 1rem;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02)),
+    linear-gradient(135deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.02)),
     #1D2030;
   transition: border-color 220ms ease, transform 220ms ease, box-shadow 220ms ease;
   position: relative;
@@ -158,14 +158,14 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.06), transparent 60%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(62, 205, 165, 0.04));
+    radial-gradient(360px 120px at 0% 0%, rgba(255, 243, 210, 0.04), transparent 60%),
+    linear-gradient(135deg, rgba(255, 243, 210, 0.02), transparent 45%, rgba(200, 155, 60, 0.04));
   opacity: 0.9;
 }
 
 @media (hover: hover) {
   .matrixRow:hover {
-    border-color: rgba(255, 255, 255, 0.15);
+    border-color: rgba(200, 155, 60, 0.14);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.22);
     transform: translateY(-2px);
   }
@@ -173,8 +173,8 @@
 
 .matrixRowHeader {
   composes: matrixRow;
-  background: rgba(62, 205, 165, 0.08);
-  border-color: rgba(62, 205, 165, 0.18);
+  background: rgba(200, 155, 60, 0.06);
+  border-color: rgba(200, 155, 60, 0.18);
   text-transform: uppercase;
   letter-spacing: 0.06rem;
   font-size: 0.78rem;
