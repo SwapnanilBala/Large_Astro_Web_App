@@ -31,6 +31,7 @@
   color: var(--ink-main);
   margin: 0 0 0.75rem;
   line-height: 1.2;
+  text-align: center;
   background: linear-gradient(135deg, #EAEDF3 40%, #F0B754);
   -webkit-background-clip: text;
   background-clip: text;
@@ -1129,6 +1130,8 @@
 
 :global(html[data-theme="light"]) .collapsibleTrigger {
   color: var(--ink-main);
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 :global(html[data-theme="light"]) .actionBtn {
