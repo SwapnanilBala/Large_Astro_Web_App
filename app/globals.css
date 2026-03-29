@@ -281,7 +281,7 @@ h2 { color: var(--accent-gold); }
 h3 {
   letter-spacing: 0.04em;
   color: var(--ink-soft);
-  font-size: 1.125rem;
+  font-size: 1.33rem;
 }
 
 .home-shell,
@@ -415,14 +415,14 @@ html[data-theme="light"] .insights-shell::before {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--accent-gold);
   font-weight: 700;
 }
 
 h1 {
   margin: 0.55rem 0 0.8rem;
-  font-size: clamp(2rem, 4.6vw, 3.8rem);
+  font-size: clamp(2.2rem, 4.6vw, 4rem);
   line-height: 1.04;
   background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 55%, #7B5DC0 100%);
   background-size: 200% 200%;
@@ -440,7 +440,7 @@ h1 {
   margin: 0;
   max-width: 72ch;
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 400;
   line-height: 1.6;
   padding: 1rem 1.1rem;
@@ -465,7 +465,7 @@ h1 {
 label {
   display: grid;
   gap: 0.44rem;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--ink-main);
   letter-spacing: 0.01em;
   font-weight: 600;
@@ -479,7 +479,7 @@ input {
   color: var(--ink-main);
   font-family: var(--font-body), 'Inter', sans-serif;
   padding: 0.94rem 1rem;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   line-height: 1.45;
   box-shadow: var(--field-shadow);
   backdrop-filter: none;
@@ -495,7 +495,7 @@ textarea {
   color: var(--ink-main);
   font-family: var(--font-body), 'Inter', sans-serif;
   padding: 0.94rem 1rem;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   line-height: 1.45;
   box-shadow: var(--field-shadow);
   backdrop-filter: none;
@@ -608,7 +608,7 @@ button {
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: none;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   box-shadow: 0 0 12px rgba(200, 155, 60, 0.08), inset 0 1px 0 rgba(200, 155, 60, 0.07);
   transition: all 0.2s ease;
   position: relative;
@@ -693,7 +693,7 @@ button:focus-visible,
 
 .metric-card h3 {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.07rem;
@@ -703,19 +703,19 @@ button:focus-visible,
 }
 
 .metric-icon {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   opacity: 0.7;
 }
 
 .metric-card p {
   margin: 0.35rem 0 0.25rem;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--ink-main);
 }
 
 .metric-card small {
   color: var(--ink-soft);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
 }
 
 .metric-card--hero {
@@ -724,7 +724,7 @@ button:focus-visible,
 }
 
 .metric-card--hero p {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
 }
 
 .metric-card--score-ring {
@@ -800,7 +800,7 @@ button:focus-visible,
 
 .rules-header h2 {
   margin: 0.45rem 0 0;
-  font-size: clamp(1.4rem, 2.3vw, 2rem);
+  font-size: clamp(1.6rem, 2.3vw, 2.2rem);
   background: linear-gradient(135deg, #e2d9ff, #a78bfa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -845,14 +845,14 @@ html[data-theme="light"] .rules-header h2 {
 
 .rule-card h3 {
   margin: 0;
-  font-size: 1.08rem;
+  font-size: 1.28rem;
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 600;
 }
 
 .rule-card span {
   text-transform: uppercase;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   letter-spacing: 0.09rem;
   padding: 0.15rem 0.5rem;
   border-radius: 999px;
@@ -910,7 +910,7 @@ html[data-theme="light"] .rules-header h2 {
 
 .planet-card h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .planet-card p {
@@ -939,12 +939,12 @@ html[data-theme="light"] .rules-header h2 {
 }
 
 .planet-card--compact h3 {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
 }
 
 .planet-card--compact p {
   margin: 0.2rem 0;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
 }
 
 .ghost-link {
@@ -1002,7 +1002,7 @@ code {
   align-items: center;
   gap: 0.5rem;
   color: var(--accent-gold);
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   vertical-align: middle;
   filter: drop-shadow(0 0 6px rgba(242, 194, 108, 0.35));
 }
@@ -1027,7 +1027,7 @@ code {
 }
 
 .cosmic-divider-icon {
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--accent-gold);
 }
 
@@ -1398,13 +1398,13 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .autocomplete-item-name {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: var(--ink-main);
 }
 
 .autocomplete-item-detail {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1426,7 +1426,7 @@ label:has(.autocomplete-wrapper.is-open) {
   border-radius: 10px;
   padding: 0.7rem 1rem;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -1455,7 +1455,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .toggle-arrow {
   transition: transform 200ms ease;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
 }
 
 .toggle-arrow.expanded {
@@ -1465,7 +1465,7 @@ label:has(.autocomplete-wrapper.is-open) {
 /* ── Geocoding Status ── */
 
 .geo-status {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--ink-soft);
   margin-top: 0.2rem;
   margin-bottom: 0;
@@ -1526,7 +1526,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .nakshatra-card h3 {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.07rem;
@@ -1534,14 +1534,14 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .nakshatra-name {
   margin: 0.48rem 0 0.34rem;
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   font-family: var(--font-display), system-ui, sans-serif;
   color: var(--accent-gold);
 }
 
 .nakshatra-period-label {
   margin: 0.48rem 0 0.34rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--ink-main);
   line-height: 1.5;
 }
@@ -1554,7 +1554,7 @@ label:has(.autocomplete-wrapper.is-open) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem 1.2rem;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
 }
 
@@ -1579,7 +1579,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-audit-kicker {
   margin: 0;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   letter-spacing: 0.08rem;
   text-transform: uppercase;
   color: var(--accent-aqua);
@@ -1587,7 +1587,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-audit-header h3 {
   margin: 0.22rem 0 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--ink-main);
 }
 
@@ -1597,7 +1597,7 @@ label:has(.autocomplete-wrapper.is-open) {
   background: rgba(242, 194, 108, 0.1);
   color: var(--accent-gold);
   padding: 0.45rem 0.8rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   cursor: pointer;
@@ -1611,7 +1611,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-audit-note {
   margin: 0.8rem 0 0.9rem;
-  font-size: 0.84rem;
+  font-size: 1.04rem;
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -1633,7 +1633,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-audit-label {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.07rem;
   text-transform: uppercase;
@@ -1642,13 +1642,13 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-audit-card strong {
   color: var(--ink-main);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   line-height: 1.45;
 }
 
 .dasha-audit-card small {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 1rem;
   line-height: 1.5;
 }
 
@@ -1658,7 +1658,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-timeline-section h3 {
   margin: 0 0 0.6rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.07rem;
@@ -1702,7 +1702,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-label {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   color: var(--ink-main);
@@ -1726,7 +1726,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-timeline-hint {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: var(--ink-soft);
   opacity: 0.5;
   margin: -0.3rem 0 0.5rem;
@@ -1755,7 +1755,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-breadcrumb-arrow {
   color: var(--ink-soft);
-  font-size: 1rem;
+  font-size: 1.2rem;
   opacity: 0.5;
   margin: 0 0.1rem;
 }
@@ -1763,7 +1763,7 @@ label:has(.autocomplete-wrapper.is-open) {
 .dasha-breadcrumb-item {
   all: unset;
   cursor: pointer;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
   color: var(--ink-soft);
   padding: 0.15rem 0.4rem;
@@ -1801,7 +1801,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-combo-label {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.08rem;
   text-transform: uppercase;
@@ -1820,7 +1820,7 @@ label:has(.autocomplete-wrapper.is-open) {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 600;
   padding: 0.15rem 0.5rem;
   border-radius: 20px;
@@ -1833,7 +1833,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-combo-effect {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   line-height: 1.55;
   color: var(--ink-main);
   margin: 0 0 0.55rem;
@@ -1846,7 +1846,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-combo-theme-tag {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 500;
   padding: 0.15rem 0.55rem;
   border-radius: 12px;
@@ -1864,7 +1864,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-level-label {
   display: inline-block;
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   font-weight: 700;
   letter-spacing: 0.06rem;
   text-transform: uppercase;
@@ -1923,7 +1923,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .dasha-gantt-label {
-  font-size: 0.66rem;
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.03rem;
   color: #fff;
@@ -1953,7 +1953,7 @@ label:has(.autocomplete-wrapper.is-open) {
   top: -1.25rem;
   left: 50%;
   transform: translateX(-50%);
-  font-size: 0.58rem;
+  font-size: 0.78rem;
   font-weight: 800;
   letter-spacing: 0.06rem;
   color: #fff;
@@ -1975,12 +1975,12 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .dasha-active-card-planet {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
 }
 
 .dasha-active-card-badge {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -1995,7 +1995,7 @@ label:has(.autocomplete-wrapper.is-open) {
   display: flex;
   flex-wrap: wrap;
   gap: 0.3rem 1rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
   margin-left: auto;
 }
@@ -2034,7 +2034,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .dasha-sub-date-label {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   color: var(--ink-soft);
   opacity: 0.7;
   white-space: nowrap;
@@ -2048,7 +2048,7 @@ html[data-theme="light"] .dasha-active-card {
   gap: 0.6rem;
   padding: 0.8rem 0;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 1.02rem;
 }
 
 .dasha-loading-spinner {
@@ -2069,14 +2069,14 @@ html[data-theme="light"] .dasha-active-card {
 
 .dasha-popup-drill-hint {
   margin: 0.5rem 0 0;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--accent-aqua);
   opacity: 0.7;
   font-style: italic;
 }
 
 .dasha-popup-level-badge {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: 0.03rem;
   text-transform: uppercase;
@@ -2116,7 +2116,7 @@ html[data-theme="light"] .dasha-active-card {
     0 12px 40px rgba(0, 0, 0, 0.5),
     0 0 20px rgba(178, 130, 255, 0.08);
   color: var(--ink-main);
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   line-height: 1.55;
 }
 
@@ -2127,7 +2127,7 @@ html[data-theme="light"] .dasha-active-card {
   background: none !important;
   border: none;
   color: var(--ink-soft);
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   cursor: pointer;
   padding: 0.2rem;
   line-height: 1;
@@ -2152,20 +2152,20 @@ html[data-theme="light"] .dasha-active-card {
 
 .dasha-popup-planet {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: var(--accent-gold);
 }
 
 .dasha-popup-theme {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--accent-aqua);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
 
 .dasha-popup-badge {
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2176,7 +2176,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .dasha-popup-dates {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
   margin-bottom: 0.65rem;
 }
@@ -2189,7 +2189,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .dasha-keyword-chip {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   padding: 0.18rem 0.55rem;
   border-radius: 999px;
   border: 1px solid rgba(108, 225, 212, 0.2);
@@ -2199,7 +2199,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .dasha-popup-text {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   line-height: 1.6;
   color: var(--ink-main);
   opacity: 0.9;
@@ -2215,14 +2215,14 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .dasha-popup-house-header {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0 0 0.3rem;
 }
 
 .dasha-popup-house-text {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   line-height: 1.55;
   color: var(--ink-soft);
   margin: 0;
@@ -2232,11 +2232,11 @@ html[data-theme="light"] .dasha-active-card {
   .dasha-popup {
     width: 300px;
     padding: 1rem;
-    font-size: 0.8rem;
+    font-size: 1rem;
   }
 
   .dasha-popup-planet {
-    font-size: 1.15rem;
+    font-size: 1.35rem;
   }
 }
 
@@ -2280,7 +2280,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .aspect-card h3 {
   margin: 0 0 0.5rem;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: var(--ink-main);
 }
 
@@ -2295,7 +2295,7 @@ html[data-theme="light"] .dasha-active-card {
   display: inline-block;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -2328,7 +2328,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .aspect-orb {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
   font-weight: 600;
 }
@@ -2380,7 +2380,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .navamsa-row--header {
   background: rgba(6, 26, 41, 0.9);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.1rem;
   text-transform: uppercase;
@@ -2393,12 +2393,12 @@ html[data-theme="light"] .dasha-active-card {
 
 .navamsa-planet {
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--ink-main);
 }
 
 .navamsa-sign {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-main);
   display: flex;
   align-items: center;
@@ -2407,7 +2407,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .navamsa-arrow {
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
 }
 
@@ -2424,7 +2424,7 @@ html[data-theme="light"] .dasha-active-card {
   display: inline-block;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -2469,7 +2469,7 @@ html[data-theme="light"] .dasha-active-card {
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(5, 25, 39, 0.6);
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   cursor: pointer;
   transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
 }
@@ -2489,11 +2489,11 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-tab-label {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
 }
 
 .divisional-tab-name {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
 }
 
 .divisional-theme-card {
@@ -2509,7 +2509,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-theme-badge {
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--accent-aqua);
   padding: 0.2rem 0.5rem;
   border-radius: 6px;
@@ -2519,7 +2519,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-theme-text {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--ink-main);
 }
 
@@ -2551,7 +2551,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-row--header {
   background: rgba(6, 26, 41, 0.9);
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.1rem;
   text-transform: uppercase;
@@ -2567,21 +2567,21 @@ html[data-theme="light"] .dasha-active-card {
   align-items: center;
   gap: 0.4rem;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--ink-main);
 }
 
 .divisional-planet-glyph {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--accent-aqua);
 }
 
 .divisional-planet-name {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .divisional-sign {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-main);
   display: flex;
   align-items: center;
@@ -2590,7 +2590,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-arrow {
   text-align: center;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
 }
 
@@ -2607,7 +2607,7 @@ html[data-theme="light"] .dasha-active-card {
   display: inline-block;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
-  font-size: 0.62rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -2618,7 +2618,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .divisional-hint {
   margin-top: 0.75rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
   text-align: center;
   font-style: italic;
@@ -2646,7 +2646,7 @@ html[data-theme="light"] .dasha-active-card {
 .transits-timestamp {
   display: block;
   margin-top: 0.3rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
 }
 
@@ -2658,7 +2658,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .transits-col h3 {
   margin: 0 0 0.6rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.07rem;
@@ -2685,14 +2685,14 @@ html[data-theme="light"] .dasha-active-card {
 
 .transit-card h4 {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-family: var(--font-display), system-ui, sans-serif;
   color: var(--accent-aqua);
 }
 
 .transit-card p {
   margin: 0.2rem 0;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-main);
 }
 
@@ -2733,7 +2733,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .transit-aspect-text {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-main);
 }
 
@@ -2742,13 +2742,13 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .transit-aspect-orb {
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--ink-soft);
 }
 
 .transits-empty {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
   font-style: italic;
 }
@@ -2775,7 +2775,7 @@ html[data-theme="light"] .dasha-active-card {
 .ashtakavarga-total {
   display: block;
   margin-top: 0.3rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
 }
 
@@ -2792,7 +2792,7 @@ html[data-theme="light"] .dasha-active-card {
   border: 1px solid var(--line-soft);
   background: rgba(5, 25, 39, 0.6);
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: background 180ms ease, color 180ms ease, border-color 180ms ease;
@@ -2855,19 +2855,19 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 .ashtakavarga-glyph {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   line-height: 1;
 }
 
 .ashtakavarga-sign-name {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
 .ashtakavarga-bindu {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--ink-main);
 }
@@ -2876,7 +2876,7 @@ html[data-theme="light"] .dasha-active-card {
   position: absolute;
   top: -0.35rem;
   right: -0.35rem;
-  font-size: 0.6rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -2896,7 +2896,7 @@ html[data-theme="light"] .dasha-active-card {
 
 .ashtakavarga-summary-group h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2914,7 +2914,7 @@ html[data-theme="light"] .dasha-active-card {
   gap: 0.3rem;
   padding: 0.25rem 0.6rem;
   border-radius: 8px;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
 }
 
@@ -2938,7 +2938,7 @@ html[data-theme="light"] .dasha-active-card {
     gap: 0.3rem;
   }
   .ashtakavarga-tab {
-    font-size: 0.72rem;
+    font-size: 0.92rem;
     padding: 0.3rem 0.55rem;
   }
 }
@@ -3022,7 +3022,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .planet-interpretation-label {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -3031,7 +3031,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .planet-interpretation-text {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: 1.04rem;
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -3059,7 +3059,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   margin: 0.5rem 0 0;
   padding-top: 0.5rem;
   border-top: 1px solid var(--line-soft);
-  font-size: 0.83rem;
+  font-size: 1.03rem;
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -3097,7 +3097,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .navamsa-insight-label {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -3106,7 +3106,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .navamsa-insight-text {
   margin: 0;
-  font-size: 0.83rem;
+  font-size: 1.03rem;
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -3127,7 +3127,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   color: var(--ink-main);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   letter-spacing: 0.02rem;
   box-shadow:
     0 16px 32px rgba(108, 225, 212, 0.12),
@@ -3143,7 +3143,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .recalculate-icon {
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   display: inline-flex;
   transition: transform 300ms ease;
 }
@@ -3157,7 +3157,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .section-intro {
   margin: 0 0 1rem;
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.6;
   max-width: 72ch;
   padding: 0.92rem 1rem;
@@ -3196,7 +3196,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .domain-reading-header h3 {
   margin: 0.3rem 0 0;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
 }
 
 .domain-reading-overview,
@@ -3241,7 +3241,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .domain-reading-column h4 {
   margin: 0 0 0.7rem;
   color: var(--accent-gold);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.06rem;
 }
@@ -3295,7 +3295,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .forecast-card-header h3 {
   margin: 0.35rem 0 0;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
 }
 
 .forecast-overview {
@@ -3322,7 +3322,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .forecast-transit-column h4 {
   margin: 0 0 0.7rem;
   color: var(--accent-gold);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.06rem;
 }
@@ -3361,7 +3361,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .forecast-transit-card span {
   margin-top: 0.25rem;
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: 0.98rem;
 }
 
 .forecast-transit-card p,
@@ -3411,7 +3411,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .career-summary-card h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
   color: var(--accent-gold);
@@ -3420,13 +3420,13 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .career-summary-sign {
   margin: 0.2rem 0;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   color: var(--ink-main);
 }
 
 .career-summary-planets {
   margin: 0.2rem 0 0;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--ink-soft);
 }
 
@@ -3442,7 +3442,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .love-summary-card h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
   color: #ff82b4;
@@ -3451,13 +3451,13 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .love-summary-sign {
   margin: 0.2rem 0;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   color: var(--ink-main);
 }
 
 .love-summary-planets {
   margin: 0.2rem 0 0;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--ink-soft);
 }
 
@@ -3476,7 +3476,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .compatibility-cta h3 {
   margin: 0 0 0.5rem;
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   background: linear-gradient(135deg, #ff82b4, var(--accent-gold));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -3486,7 +3486,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .compatibility-cta p {
   margin: 0 0 0.85rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .compatibility-cta-button {
@@ -3499,7 +3499,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   color: var(--ink-main);
   text-decoration: none;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   box-shadow:
     0 16px 30px rgba(255, 130, 180, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
@@ -3523,7 +3523,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .dasha-current-summary h4 {
   margin: 0 0 0.35rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
   color: var(--accent-gold);
@@ -3531,7 +3531,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .dasha-current-summary p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--ink-soft);
   line-height: 1.6;
 }
@@ -3548,14 +3548,14 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .dasha-progress-label {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   text-transform: uppercase;
   letter-spacing: 0.06rem;
   color: var(--ink-soft);
 }
 
 .dasha-progress-remaining {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: var(--accent-aqua);
   font-weight: 600;
 }
@@ -3578,20 +3578,20 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .aspect-symbol {
   margin: 0 0.4rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--accent-gold);
   opacity: 0.7;
 }
 
 .aspect-angle {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--ink-soft);
   font-style: italic;
 }
 
 .aspect-brief {
   margin: 0.5rem 0 0;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   line-height: 1.5;
   font-style: italic;
@@ -3623,7 +3623,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .navamsa-summary-card h4 {
   margin: 0 0 0.4rem;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   text-transform: uppercase;
   letter-spacing: 0.08rem;
   color: #c9a8ff;
@@ -3632,20 +3632,20 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .navamsa-summary-vargottama {
   margin: 0.2rem 0;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: var(--ink-main);
 }
 
 .navamsa-summary-explanation {
   margin: 0.3rem 0 0;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
   line-height: 1.55;
 }
 
 .navamsa-click-hint {
   margin: 0.6rem 0 0;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   color: var(--ink-soft);
   opacity: 0.7;
   font-style: italic;
@@ -3661,14 +3661,14 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .navamsa-planet-glyph {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .navamsa-planet-name {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 /* CSS-only tooltip */
@@ -3682,7 +3682,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   color: #fff;
   padding: 4px 8px;
   border-radius: 6px;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   white-space: nowrap;
   pointer-events: none;
   z-index: 10;
@@ -3709,7 +3709,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  font-size: 0.65rem;
+  font-size: 0.85rem;
   font-weight: 500;
   color: var(--ink-soft);
   letter-spacing: 0.02rem;
@@ -3717,7 +3717,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .navamsa-dignity-dot {
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   line-height: 1;
 }
 
@@ -3850,20 +3850,20 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .auth-gate-lock {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   margin: 0 0 0.5rem;
 }
 
 .auth-gate-content h3 {
   margin: 0 0 0.5rem;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: var(--accent-gold);
 }
 
 .auth-gate-desc {
   margin: 0 0 1.2rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   line-height: 1.5;
 }
 
@@ -3881,7 +3881,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   padding: 0.7rem 1.4rem;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   text-decoration: none;
   transition: transform 200ms ease, box-shadow 200ms ease;
   cursor: pointer;
@@ -3931,13 +3931,13 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   background: var(--surface-soft);
   border: 1px solid var(--line-soft);
   backdrop-filter: blur(16px);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
 }
 
 .user-badge strong {
   color: var(--accent-gold);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
 }
 
 .logout-btn {
@@ -3945,7 +3945,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   border: none;
   color: var(--accent-coral);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   padding: 0.2rem 0.4rem;
   margin: 0;
   font-weight: 600;
@@ -3965,7 +3965,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 .navbar-chart-link {
   color: #F0B754;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   text-decoration: none;
   padding: 0.5rem 1.1rem;
   border-radius: 999px;
@@ -4037,7 +4037,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 .navbar-brand {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.35rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: var(--ink-main);
   text-decoration: none;
@@ -4061,7 +4061,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   background: var(--surface-soft) !important;
   border: 1px solid var(--line-soft) !important;
   color: var(--accent-gold) !important;
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   width: 2.5rem;
   height: 2.5rem;
   min-height: auto !important;
@@ -4111,7 +4111,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   background: var(--surface) !important;
   border: 1px solid var(--line-soft) !important;
   color: var(--ink-soft) !important;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   width: 2.5rem;
@@ -4172,7 +4172,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   border-radius: 10px;
   background: transparent !important;
   color: var(--ink-main);
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 180ms ease;
@@ -4200,7 +4200,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 .lang-option-code {
   font-weight: 700;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   letter-spacing: 0.06em;
   color: #F0B754;
   min-width: 1.8rem;
@@ -4218,7 +4218,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   color: #8B8FA3;
   text-decoration: none;
   padding: 0.55rem 1.2rem;
@@ -4270,7 +4270,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   right: 0.9rem;
   top: 50%;
   transform: translateY(-50%);
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   pointer-events: none;
   transition: opacity 260ms ease, transform 320ms ease, filter 260ms ease;
   opacity: 0.5;
@@ -4357,7 +4357,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   border-radius: 999px;
   border: 1px solid var(--line-soft);
   background: var(--surface-soft);
-  font-size: 0.76rem;
+  font-size: 0.96rem;
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
@@ -4508,7 +4508,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 /* -- Toast icon ----------------------------------------------------- */
 .toast-icon {
   flex-shrink: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -4516,7 +4516,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 /* -- Toast message -------------------------------------------------- */
 .toast-message {
   flex: 1;
-  font-size: 0.875rem;
+  font-size: 1.08rem;
   line-height: 1.45;
   color: #eef7ff;
 }
@@ -4531,7 +4531,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   background: transparent !important;
   box-shadow: none !important;
   color: rgba(185, 208, 225, 0.7) !important;
-  font-size: 1.25rem;
+  font-size: 1.45rem;
   line-height: 1;
   cursor: pointer;
   transition: color 0.15s ease;
@@ -4562,7 +4562,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   align-items: center;
   padding: 0.3rem 0.7rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06rem;
@@ -4744,7 +4744,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 /* Loading message with fade transition */
 .skel-message {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--ink-soft);
   letter-spacing: 0.03em;
   text-align: center;
@@ -4923,7 +4923,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   border-radius: 12px;
   background: linear-gradient(110deg, rgba(242, 194, 108, 0.15), rgba(242, 194, 108, 0.05));
   color: var(--accent-gold);
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 200ms ease;
@@ -4936,7 +4936,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 }
 
 .skel-retry-icon {
-  font-size: 1.15em;
+  font-size: 1.35em;
   display: inline-block;
   transition: transform 300ms ease;
 }
@@ -5181,7 +5181,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 }
 
 .error-icon {
-  font-size: 3rem;
+  font-size: 3.2rem;
   margin-bottom: 1rem;
   opacity: 0.85;
   animation: errorIconFloat 3s ease-in-out infinite alternate;
@@ -5194,7 +5194,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .error-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(1.3rem, 3.5vw, 1.75rem);
+  font-size: clamp(1.5rem, 3.5vw, 1.95rem);
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0 0 0.75rem;
@@ -5203,7 +5203,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .error-description {
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.65;
   color: var(--ink-soft);
   margin: 0 0 1.5rem;
@@ -5216,7 +5216,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 }
 
 .error-details summary {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--accent-aqua);
   cursor: pointer;
   user-select: none;
@@ -5236,7 +5236,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--line-soft);
   font-family: "Fira Code", "Cascadia Code", monospace;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   color: var(--accent-coral);
   line-height: 1.5;
   white-space: pre-wrap;
@@ -5246,7 +5246,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 }
 
 .error-digest {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
   opacity: 0.6;
   margin: 0.5rem 0 0;
@@ -5267,7 +5267,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   padding: 0.75rem 1.75rem;
   border-radius: 0.625rem;
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -5401,7 +5401,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-code {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(4rem, 10vw, 6rem);
+  font-size: clamp(4.2rem, 10vw, 6.2rem);
   font-weight: 700;
   margin: 0;
   line-height: 1;
@@ -5414,7 +5414,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(1.4rem, 4vw, 2rem);
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0.5rem 0 1rem;
@@ -5423,7 +5423,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-description {
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.65;
   color: var(--ink-soft);
   margin: 0 0 2rem;
@@ -5464,7 +5464,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   color: var(--btn-text);
   border: 1px solid var(--accent-gold);
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 600;
   text-decoration: none;
   cursor: pointer;
@@ -5541,7 +5541,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .root-loader-text {
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
   margin: 0;
   letter-spacing: 0.04em;
@@ -5644,7 +5644,7 @@ a:focus-visible {
   color: var(--btn-text);
   font-family: var(--font-body), sans-serif;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   border-radius: 0 0 8px 8px;
   text-decoration: none;
   transition: top 0.15s ease;
@@ -5760,7 +5760,7 @@ a:focus-visible {
 
 .drawer-title {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: var(--ink-main);
   letter-spacing: 0.03em;
@@ -5770,7 +5770,7 @@ a:focus-visible {
   background: var(--surface-soft) !important;
   border: 1px solid rgba(255, 255, 255, 0.3) !important;
   color: #8B8FA3 !important;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   width: 2rem;
   height: 2rem;
   min-height: auto !important;
@@ -5811,7 +5811,7 @@ a:focus-visible {
   border-radius: 12px;
   color: var(--ink-soft);
   text-decoration: none;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   font-weight: 500;
   transition: background 200ms ease, color 200ms ease;
 }
@@ -5844,7 +5844,7 @@ a:focus-visible {
 
 .drawer-username {
   color: var(--ink-main);
-  font-size: 0.95rem;
+  font-size: 1.15rem;
 }
 
 .drawer-signout-btn {
@@ -5856,7 +5856,7 @@ a:focus-visible {
   background: rgba(255, 143, 126, 0.1) !important;
   border: 1px solid rgba(255, 143, 126, 0.25) !important;
   color: var(--accent-coral) !important;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   font-weight: 500;
   cursor: pointer;
   transition: background 200ms ease, border-color 200ms ease;
@@ -5980,7 +5980,7 @@ a:focus-visible {
   gap: 4px;
   padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-family: var(--font-body), sans-serif;
   letter-spacing: 0.5px;
   color: var(--ink-soft);
@@ -6228,7 +6228,7 @@ html[data-theme="light"] .input-glow-gold :is(input, select, textarea):focus {
   gap: 0.5rem;
   padding: 0.55rem 1.1rem 0.55rem 0.85rem;
   font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--accent-gold);
@@ -6296,7 +6296,7 @@ html[data-theme="light"] .back-btn:hover {
     top: 4.5rem;
     left: 0.75rem;
     padding: 0.45rem 0.85rem 0.45rem 0.65rem;
-    font-size: 0.82rem;
+    font-size: 1.02rem;
   }
 }
 
@@ -6379,7 +6379,7 @@ html[data-theme="light"] .back-btn:hover {
 }
 
 .chart-history-welcome-icon {
-  font-size: 1.8rem;
+  font-size: 2rem;
   color: var(--accent-gold);
   margin-bottom: 0.5rem;
   opacity: 0.7;
@@ -6387,14 +6387,14 @@ html[data-theme="light"] .back-btn:hover {
 
 .chart-history-welcome-heading {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0 0 0.5rem;
 }
 
 .chart-history-welcome-text {
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   line-height: 1.6;
   color: var(--ink-soft);
   margin: 0;
@@ -6421,7 +6421,7 @@ html[data-theme="light"] .back-btn:hover {
   text-align: left;
   color: var(--ink-main);
   font-family: inherit;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
   letter-spacing: normal;
   font-weight: 400;
@@ -6447,18 +6447,18 @@ html[data-theme="light"] .back-btn:hover {
 .chart-history-name {
   font-weight: 600;
   color: var(--accent-gold);
-  font-size: 0.92rem;
+  font-size: 1.12rem;
 }
 
 .chart-history-meta {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 1rem;
 }
 
 .chart-history-date {
   color: var(--ink-soft);
   opacity: 0.7;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
 }
 
 .chart-history-hero {
@@ -6475,7 +6475,7 @@ html[data-theme="light"] .back-btn:hover {
   text-align: left;
   color: var(--ink-main);
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 400;
   letter-spacing: normal;
   background-image: none;
@@ -6526,7 +6526,7 @@ html[data-theme="light"] .back-btn:hover {
 
 .chart-history-hero-name {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--accent-gold);
   letter-spacing: 0.01em;
@@ -6534,13 +6534,13 @@ html[data-theme="light"] .back-btn:hover {
 
 .chart-history-hero-meta {
   color: var(--ink-soft);
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   letter-spacing: 0.01em;
 }
 
 .chart-history-hero-cta {
   font-weight: 600;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--accent-aqua);
   white-space: nowrap;
   padding: 0.45rem 1rem;
@@ -6574,7 +6574,7 @@ html[data-theme="light"] .back-btn:hover {
 
 .chart-history-divider span {
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   font-style: italic;
   white-space: nowrap;
   letter-spacing: 0.02em;
@@ -6605,7 +6605,7 @@ html[data-theme="light"] .chart-history-card {
   }
 
   .chart-history-hero-name {
-    font-size: 1.1rem;
+    font-size: 1.3rem;
   }
 
   .chart-history-hero-cta {
@@ -6714,15 +6714,15 @@ html[data-theme="light"] .chart-history-card {
   box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   text-align: center;
 }
-.error-icon { font-size: 3rem; margin-bottom: 1rem; }
+.error-icon { font-size: 3.2rem; margin-bottom: 1rem; }
 .error-title {
-  font-size: 1.5rem;
+  font-size: 1.7rem;
   font-weight: 700;
   color: var(--accent-gold, #f5c842);
   margin-bottom: 0.75rem;
 }
 .error-description {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   line-height: 1.6;
   color: rgba(255,255,255,0.65);
   margin-bottom: 1.5rem;
@@ -6730,7 +6730,7 @@ html[data-theme="light"] .chart-history-card {
 .error-details {
   text-align: left;
   margin-bottom: 1.5rem;
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: rgba(255,255,255,0.4);
 }
 .error-details summary { cursor: pointer; margin-bottom: 0.5rem; }
@@ -6739,17 +6739,17 @@ html[data-theme="light"] .chart-history-card {
   border-radius: 8px;
   padding: 0.75rem;
   font-family: monospace;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   word-break: break-word;
   white-space: pre-wrap;
   color: #f87171;
 }
-.error-digest { font-size: 0.7rem; margin-top: 0.5rem; opacity: 0.5; }
+.error-digest { font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.5; }
 .error-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 .error-btn {
   padding: 0.6rem 1.5rem;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   font-weight: 500;
   cursor: pointer;
   text-decoration: none;
@@ -6904,7 +6904,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-kicker {
   display: inline-block;
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -6917,7 +6917,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-heading {
   margin: 0.5rem 0 0;
-  font-size: 1.45rem;
+  font-size: 1.65rem;
   font-weight: 700;
   color: var(--ink-main);
   display: flex;
@@ -6926,7 +6926,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-intro {
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.6;
   margin: 0 0 1.2rem;
 }
@@ -6949,7 +6949,7 @@ html[data-theme="light"] .chart-history-card {
   border-radius: 10px;
   background: var(--surface);
   color: var(--ink-main);
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   font-weight: 600;
   cursor: pointer;
   transition: border-color 0.25s, box-shadow 0.25s, transform 0.2s;
@@ -6971,7 +6971,7 @@ html[data-theme="light"] .chart-history-card {
 .palm-tips li {
   position: relative;
   padding-left: 1.2rem;
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   margin-bottom: 0.4rem;
   line-height: 1.5;
@@ -6982,7 +6982,7 @@ html[data-theme="light"] .chart-history-card {
   position: absolute;
   left: 0;
   color: var(--accent-gold);
-  font-size: 0.7rem;
+  font-size: 0.9rem;
 }
 
 /* ── Camera phase ── */
@@ -7018,7 +7018,7 @@ html[data-theme="light"] .chart-history-card {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   font-weight: 600;
   color: var(--accent-coral);
   margin-bottom: 0.6rem;
@@ -7073,7 +7073,7 @@ html[data-theme="light"] .chart-history-card {
   position: absolute;
   right: 0;
   top: -18px;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   color: var(--ink-soft);
 }
 
@@ -7151,7 +7151,7 @@ html[data-theme="light"] .chart-history-card {
   border-radius: 12px;
   background: linear-gradient(110deg, var(--accent-gold), #e8a838, var(--accent-aqua)) !important;
   color: var(--btn-text) !important;
-  font-size: 1rem;
+  font-size: 1.2rem;
   font-weight: 700;
   cursor: pointer;
   margin-top: 0.5rem;
@@ -7184,7 +7184,7 @@ html[data-theme="light"] .chart-history-card {
 }
 
 .palm-loading-text {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   color: var(--ink-main);
   font-weight: 600;
 }
@@ -7257,7 +7257,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-summary-card h3 {
   margin: 0 0 0.5rem;
-  font-size: 1rem;
+  font-size: 1.2rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -7266,12 +7266,12 @@ html[data-theme="light"] .chart-history-card {
 .palm-summary-card p {
   margin: 0;
   color: var(--ink-main);
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.65;
 }
 
 .palm-hand-note {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   margin: 0;
 }
@@ -7316,12 +7316,12 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-line-header h4 {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   color: var(--ink-main);
 }
 
 .palm-strength {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -7336,14 +7336,14 @@ html[data-theme="light"] .chart-history-card {
 .palm-strength--absent { color: #888; border: 1px solid rgba(136, 136, 136, 0.3); }
 
 .palm-line-desc {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   margin: 0 0 0.35rem;
   line-height: 1.5;
 }
 
 .palm-line-interp {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-main);
   margin: 0;
   line-height: 1.5;
@@ -7360,7 +7360,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-section-card h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -7368,7 +7368,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-section-card p {
   margin: 0.4rem 0 0;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-main);
   line-height: 1.6;
 }
@@ -7388,7 +7388,7 @@ html[data-theme="light"] .chart-history-card {
 }
 
 .palm-chip {
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 600;
   padding: 3px 10px;
   border-radius: 16px;
@@ -7408,7 +7408,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-guidance h3 {
   margin: 0 0 0.5rem;
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   color: var(--accent-gold);
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -7416,7 +7416,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-guidance p {
   margin: 0;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   color: var(--ink-main);
   line-height: 1.65;
 }
@@ -7430,7 +7430,7 @@ html[data-theme="light"] .chart-history-card {
   background: rgba(255, 143, 126, 0.1);
   border: 1px solid rgba(255, 143, 126, 0.25);
   color: var(--accent-coral);
-  font-size: 0.85rem;
+  font-size: 1.05rem;
 }
 
 .palm-error--config {
@@ -7444,17 +7444,17 @@ html[data-theme="light"] .chart-history-card {
 }
 
 .palm-error--config strong {
-  font-size: 0.9rem;
+  font-size: 1.1rem;
 }
 
 .palm-error-detail {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--ink-soft);
   line-height: 1.55;
 }
 
 .palm-error-detail code {
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   padding: 1px 5px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.08);
@@ -7490,7 +7490,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-trajectory-hero h3 {
   margin: 0 0 1rem;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -7525,7 +7525,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-trajectory-label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -7535,7 +7535,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-trajectory-item p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-main);
   line-height: 1.6;
 }
@@ -7560,7 +7560,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-subsection h4 {
   margin: 0 0 0.3rem;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -7569,7 +7569,7 @@ html[data-theme="light"] .chart-history-card {
 
 .palm-subsection p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-main);
   line-height: 1.6;
 }
@@ -7972,7 +7972,7 @@ html[data-theme="light"] .accent-card {
 
 .shadbala-intro {
   color: var(--ink-soft);
-  font-size: 0.92rem;
+  font-size: 1.12rem;
   line-height: 1.6;
   margin: 0 0 1.25rem;
   max-width: 700px;
@@ -7999,7 +7999,7 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-summary-label {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--ink-soft);
@@ -8007,7 +8007,7 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-summary-planet {
-  font-size: 1.15rem;
+  font-size: 1.35rem;
   font-weight: 700;
   color: var(--ink-main);
 }
@@ -8021,7 +8021,7 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-summary-value {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
 }
 
@@ -8054,7 +8054,7 @@ html[data-theme="light"] .accent-card {
   cursor: pointer;
   box-sizing: border-box;
   font-family: inherit;
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   color: var(--ink-main);
 }
 
@@ -8067,7 +8067,7 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-planet-symbol {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   opacity: 0.7;
 }
 
@@ -8100,14 +8100,14 @@ html[data-theme="light"] .accent-card {
   min-width: 48px;
   text-align: right;
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 1.08rem;
   font-variant-numeric: tabular-nums;
 }
 
 .shadbala-ratio-badge {
   min-width: 42px;
   text-align: center;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 700;
   padding: 0.15rem 0.45rem;
   border-radius: 6px;
@@ -8129,7 +8129,7 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-chevron {
-  font-size: 0.7rem;
+  font-size: 0.9rem;
   transition: transform 0.2s;
   color: var(--ink-soft);
 }
@@ -8163,13 +8163,13 @@ html[data-theme="light"] .accent-card {
 }
 
 .shadbala-comp-name {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   font-weight: 600;
   color: var(--ink-main);
 }
 
 .shadbala-comp-desc {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   color: var(--ink-soft);
   line-height: 1.3;
 }
@@ -8192,7 +8192,7 @@ html[data-theme="light"] .accent-card {
 .shadbala-comp-value {
   min-width: 40px;
   text-align: right;
-  font-size: 0.8rem;
+  font-size: 1rem;
   font-weight: 600;
   color: var(--ink-soft);
   font-variant-numeric: tabular-nums;
@@ -8207,13 +8207,13 @@ html[data-theme="light"] .accent-card {
   margin-top: 0.75rem;
   padding-top: 0.6rem;
   border-top: 1px solid var(--line-soft);
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 
 .shadbala-strength-label {
   font-weight: 700;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   padding: 0.15rem 0.55rem;
   border-radius: 6px;
 }
@@ -8278,7 +8278,7 @@ html[data-theme="light"] .shadbala-row-header {
 }
 
 .yogas-intro {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 0 0 1.25rem;
@@ -8299,7 +8299,7 @@ html[data-theme="light"] .shadbala-row-header {
   gap: 0.4rem;
   padding: 0.4rem 0.85rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.98rem;
   font-weight: 600;
   letter-spacing: 0.03rem;
   text-transform: uppercase;
@@ -8330,7 +8330,7 @@ html[data-theme="light"] .shadbala-row-header {
   height: 1.25rem;
   padding: 0 0.3rem;
   border-radius: 999px;
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   font-weight: 700;
   background: rgba(255, 255, 255, 0.1);
   color: var(--ink-soft);
@@ -8397,14 +8397,14 @@ html[data-theme="light"] .shadbala-row-header {
 
 .yoga-card-name {
   margin: 0;
-  font-size: 1.05rem;
+  font-size: 1.25rem;
   font-weight: 700;
   color: var(--ink-main);
   line-height: 1.3;
 }
 
 .yoga-card-sanskrit {
-  font-size: 0.82rem;
+  font-size: 1.02rem;
   color: var(--accent-gold);
   opacity: 0.85;
   font-style: italic;
@@ -8442,7 +8442,7 @@ html[data-theme="light"] .shadbala-row-header {
 }
 
 .yoga-strength-label {
-  font-size: 0.68rem;
+  font-size: 0.88rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.04rem;
@@ -8464,7 +8464,7 @@ html[data-theme="light"] .shadbala-row-header {
   gap: 0.25rem;
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: 0.92rem;
   font-weight: 600;
   letter-spacing: 0.03rem;
   background: rgba(255, 255, 255, 0.06);
@@ -8473,20 +8473,20 @@ html[data-theme="light"] .shadbala-row-header {
 }
 
 .yoga-planet-glyph {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   line-height: 1;
 }
 
 /* ── Card Body Text ── */
 .yoga-card-description {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-soft);
   line-height: 1.55;
   margin: 0 0 0.5rem;
 }
 
 .yoga-card-effects {
-  font-size: 0.85rem;
+  font-size: 1.05rem;
   color: var(--ink-main);
   line-height: 1.55;
   margin: 0 0 0.5rem;
@@ -8494,7 +8494,7 @@ html[data-theme="light"] .shadbala-row-header {
 }
 
 .yoga-card-cancellation {
-  font-size: 0.8rem;
+  font-size: 1rem;
   color: var(--accent-coral);
   line-height: 1.5;
   margin: 0.5rem 0 0;
@@ -8509,7 +8509,7 @@ html[data-theme="light"] .shadbala-row-header {
   text-align: center;
   padding: 2rem 1rem;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 1.1rem;
   opacity: 0.7;
 }
 
@@ -8524,7 +8524,7 @@ html[data-theme="light"] .shadbala-row-header {
   }
 
   .yogas-tab {
-    font-size: 0.7rem;
+    font-size: 0.9rem;
     padding: 0.3rem 0.6rem;
   }
 }
@@ -8577,12 +8577,12 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Tablet (≤768px) ── */
 @media (max-width: 768px) {
   body {
-    font-size: 15px;
+    font-size: 18px;
   }
 
-  h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); }
-  h2 { font-size: clamp(1.3rem, 4vw, 1.6rem); }
-  h3 { font-size: clamp(1.1rem, 3.5vw, 1.3rem); }
+  h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+  h2 { font-size: clamp(1.5rem, 4vw, 1.8rem); }
+  h3 { font-size: clamp(1.3rem, 3.5vw, 1.5rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8605,14 +8605,14 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   input, select, textarea {
-    font-size: 16px !important; /* Prevents iOS zoom on focus */
+    font-size: 19px !important; /* Prevents iOS zoom on focus */
     padding: 10px 12px;
     border-radius: 10px;
   }
 
   button:not(.theme-toggle-btn):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn) {
     padding: 10px 18px;
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     border-radius: 10px;
   }
 
@@ -8621,7 +8621,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   .navbar-brand {
-    font-size: 0.95rem;
+    font-size: 1.15rem;
   }
 
   .cosmic-divider {
@@ -8632,13 +8632,13 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Phone (≤600px) ── */
 @media (max-width: 600px) {
   body {
-    font-size: 14px;
+    font-size: 17px;
     line-height: 1.55;
   }
 
-  h1 { font-size: clamp(1.4rem, 6vw, 1.8rem); }
-  h2 { font-size: clamp(1.15rem, 5vw, 1.4rem); }
-  h3 { font-size: clamp(1rem, 4vw, 1.15rem); }
+  h1 { font-size: clamp(1.6rem, 6vw, 2rem); }
+  h2 { font-size: clamp(1.35rem, 5vw, 1.6rem); }
+  h3 { font-size: clamp(1.2rem, 4vw, 1.35rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8669,7 +8669,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   button:not(.theme-toggle-btn):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn) {
     padding: 9px 14px;
-    font-size: 0.82rem;
+    font-size: 1.02rem;
     border-radius: 8px;
     width: 100%;
   }
@@ -8679,7 +8679,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   .navbar-brand {
-    font-size: 0.85rem;
+    font-size: 1.05rem;
     letter-spacing: 0.01em;
   }
 
@@ -8696,7 +8696,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   .kicker {
-    font-size: 0.65rem;
+    font-size: 0.85rem;
     letter-spacing: 0.08em;
   }
 }
@@ -8704,10 +8704,10 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Small phone (≤480px) ── */
 @media (max-width: 480px) {
   body {
-    font-size: 13.5px;
+    font-size: 16.5px;
   }
 
-  h1 { font-size: clamp(1.2rem, 6.5vw, 1.6rem); }
+  h1 { font-size: clamp(1.4rem, 6.5vw, 1.8rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8723,7 +8723,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   input, select, textarea {
     padding: 8px 9px;
-    font-size: 16px !important;
+    font-size: 19px !important;
   }
 }
 
@@ -8814,7 +8814,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   color: var(--ink-main) !important;
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif !important;
   font-weight: 600 !important;
-  font-size: 0.95rem !important;
+  font-size: 1.15rem !important;
   margin-bottom: 6px !important;
 }
 
@@ -8843,7 +8843,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
 .react-datepicker__day-name {
   color: var(--ink-soft) !important;
-  font-size: 0.7rem !important;
+  font-size: 0.9rem !important;
   font-weight: 600 !important;
   text-transform: uppercase !important;
   letter-spacing: 0.04em !important;
@@ -8869,7 +8869,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   line-height: 34px !important;
   margin: 1px 0 !important;
   border-radius: 10px !important;
-  font-size: 0.82rem !important;
+  font-size: 1.02rem !important;
   font-weight: 500 !important;
   transition: all 0.15s ease !important;
 }
@@ -8925,7 +8925,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   border: 1px solid rgba(255, 255, 255, 0.10) !important;
   border-radius: 8px !important;
   padding: 4px 8px !important;
-  font-size: 0.82rem !important;
+  font-size: 1.02rem !important;
   font-family: var(--font-body), 'Inter', sans-serif !important;
   cursor: pointer;
   outline: none;
@@ -8965,7 +8965,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   color: var(--ink-main) !important;
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif !important;
   font-weight: 600 !important;
-  font-size: 0.9rem !important;
+  font-size: 1.1rem !important;
 }
 
 .react-datepicker__time-list {
@@ -8975,7 +8975,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
 .react-datepicker__time-list-item {
   color: var(--ink-main) !important;
-  font-size: 0.85rem !important;
+  font-size: 1.05rem !important;
   padding: 8px 16px !important;
   border-radius: 8px !important;
   margin: 1px 4px !important;
@@ -9086,12 +9086,12 @@ html[data-theme="light"] .react-datepicker__header--time {
     width: 30px !important;
     height: 30px !important;
     line-height: 30px !important;
-    font-size: 0.78rem !important;
+    font-size: 0.98rem !important;
   }
 
   .react-datepicker__day-name {
     width: 30px !important;
-    font-size: 0.65rem !important;
+    font-size: 0.85rem !important;
   }
 
   .react-datepicker--time-only {
