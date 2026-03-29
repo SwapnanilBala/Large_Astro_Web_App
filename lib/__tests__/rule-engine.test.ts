@@ -347,15 +347,15 @@ describe("rule-engine", () => {
   // ---------------------------------------------------------------------------
 
   describe("generateLifeDomainInsights()", () => {
-    it("returns 6 life domain insights", () => {
+    it("returns 7 life domain insights", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
       const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
 
-      expect(insights).toHaveLength(6);
+      expect(insights).toHaveLength(7);
     });
 
-    it("covers all 6 domain keys", () => {
+    it("covers all 7 domain keys", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
       const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
@@ -363,7 +363,7 @@ describe("rule-engine", () => {
       const keys = insights.map((i) => i.key);
       expect(keys).toEqual(
         expect.arrayContaining([
-          "love_life", "career", "family", "inheritance", "influence", "life_cycle",
+          "love_life", "career", "family", "inheritance", "influence", "life_cycle", "travel_destinations",
         ])
       );
     });

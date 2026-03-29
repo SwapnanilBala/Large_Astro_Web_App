@@ -198,7 +198,7 @@ describe("chart-service", () => {
       it("includeUltimate=true includes life_domain_insights", () => {
         const chart = buildChart(BIRTH, { includePremium: true, includeUltimate: true });
         expect(chart.chart.life_domain_insights).not.toBeNull();
-        expect(chart.chart.life_domain_insights!.length).toBe(6);
+        expect(chart.chart.life_domain_insights!.length).toBe(7);
       });
 
       it("includeUltimate=false locks life_domain_readings", () => {
