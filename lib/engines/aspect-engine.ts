@@ -105,6 +105,7 @@ export function calculateAspects(
   // Vedic special aspects (graha-drishti)
   if (includeVedic) {
     const vedicOrb = 10;
+    const seenVedicPairs = new Set<string>();
 
     for (const caster of planets) {
       const houseOffsets = VEDIC_SPECIAL_ASPECTS[caster.name];
@@ -117,7 +118,7 @@ export function calculateAspects(
           if (receiver.name === caster.name) continue;
 
           const pairKey = [caster.name, receiver.name].sort().join("|");
-          if (seenPairs.has(pairKey)) continue;
+          if (seenVedicPairs.has(pairKey)) continue;
 
           const orb = angleBetween(receiver.longitude, targetLon);
           if (orb <= vedicOrb) {
@@ -132,7 +133,7 @@ export function calculateAspects(
               applying,
               vedic: true,
             });
-            seenPairs.add(pairKey);
+            seenVedicPairs.add(pairKey);
           }
         }
       }
