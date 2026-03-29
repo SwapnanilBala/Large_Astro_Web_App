@@ -37,15 +37,15 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   filter:
-    drop-shadow(0 0 50px rgba(62, 205, 165, 0.20))
-    drop-shadow(0 0 100px rgba(62, 205, 165, 0.06));
+    drop-shadow(0 0 50px rgba(200, 155, 60, 0.18))
+    drop-shadow(0 0 100px rgba(200, 155, 60, 0.06));
 }
 
 /* ── Hero Tag ── */
 .heroTag {
   display: inline-block;
-  background: rgba(62, 205, 165, 0.10);
-  border: 1px solid rgba(62, 205, 165, 0.20);
+  background: rgba(200, 155, 60, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.18);
   color: var(--ink-soft);
   border-radius: 12px;
   padding: 0.35em 1em;
@@ -55,7 +55,7 @@
 
 /* ── Hero Title ── */
 .heroTitle {
-  text-shadow: 0 0 40px rgba(62, 205, 165, 0.08);
+  text-shadow: 0 0 40px rgba(200, 155, 60, 0.08);
 }
 
 /* ── Intake Panel (home-specific overrides) ───── */
@@ -240,14 +240,14 @@
 }
 
 /* Card accent colors — glassmorphism border-left accents */
-.fieldCardGold { border-left: 3px solid rgba(240, 183, 84, 0.4); }
-.fieldCardAqua { border-left: 3px solid rgba(62, 205, 165, 0.4); }
+.fieldCardGold { border-left: 3px solid rgba(200, 155, 60, 0.4); }
+.fieldCardAqua { border-left: 3px solid rgba(26, 123, 110, 0.4); }
 .fieldCardCoral { border-left: 3px solid rgba(240, 112, 104, 0.4); }
 .fieldCardViolet { border-left: 3px solid rgba(140, 100, 220, 0.4); }
 .fieldCardRose { border-left: 3px solid rgba(240, 150, 170, 0.4); }
 
-.fieldCardGold:hover { border-left-color: #F0B754; box-shadow: 0 8px 32px rgba(240, 183, 84, 0.10); }
-.fieldCardAqua:hover { border-left-color: #3ECDA5; box-shadow: 0 8px 32px rgba(62, 205, 165, 0.10); }
+.fieldCardGold:hover { border-left-color: #C89B3C; box-shadow: 0 8px 32px rgba(200, 155, 60, 0.10); }
+.fieldCardAqua:hover { border-left-color: #1A7B6E; box-shadow: 0 8px 32px rgba(26, 123, 110, 0.10); }
 .fieldCardCoral:hover { border-left-color: #F07068; box-shadow: 0 8px 32px rgba(240, 112, 104, 0.10); }
 .fieldCardViolet:hover { border-left-color: #8C64DC; box-shadow: 0 8px 32px rgba(140, 100, 220, 0.10); }
 .fieldCardRose:hover { border-left-color: #F096AA; box-shadow: 0 8px 32px rgba(240, 150, 170, 0.10); }
@@ -326,8 +326,8 @@
 }
 
 .fieldLabel :global(.section-icon) {
-  color: var(--accent-aqua);
-  filter: drop-shadow(0 0 6px rgba(62, 205, 165, 0.3));
+  color: var(--accent-gold);
+  filter: drop-shadow(0 0 6px rgba(200, 155, 60, 0.3));
 }
 
 .fieldLabelText {
@@ -405,10 +405,10 @@
   outline: none;
   border-color: var(--accent-gold);
   box-shadow:
-    0 0 0 3px rgba(62, 205, 165, 0.18),
-    0 0 18px rgba(62, 205, 165, 0.1),
+    0 0 0 3px rgba(200, 155, 60, 0.18),
+    0 0 18px rgba(200, 155, 60, 0.1),
     inset 0 1px 2px rgba(0, 0, 0, 0.1);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%233ECDA5' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23C89B3C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: calc(100% - 1rem) center;
   background-size: 1rem 1rem;
@@ -483,13 +483,13 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, var(--accent-aqua) 50%, transparent 80%);
+  background: linear-gradient(90deg, rgba(255,255,255,0.08) 0%, var(--accent-gold) 50%, transparent 80%);
   opacity: 0.5;
 }
 
 .sectionHeading :global(.section-icon) {
-  -webkit-text-fill-color: var(--accent-aqua);
-  filter: drop-shadow(0 0 6px rgba(62, 205, 165, 0.3));
+  -webkit-text-fill-color: var(--accent-gold);
+  filter: drop-shadow(0 0 6px rgba(200, 155, 60, 0.3));
   position: relative;
   z-index: 1;
 }
@@ -500,7 +500,7 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(62, 205, 165, 0.3), transparent 70%);
+  background: radial-gradient(circle, rgba(200, 155, 60, 0.3), transparent 70%);
   z-index: -1;
   filter: blur(4px);
   pointer-events: none;
@@ -522,7 +522,7 @@
 
 /* Energy charge: dynamic opacity & glow driven by --charge-level */
 .submitChargeWrapper button[type="submit"] {
-  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-gold));
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   position: relative;
@@ -539,8 +539,8 @@
     saturate(calc(0.5 + var(--charge-level, 0) * 0.5))
     brightness(calc(0.85 + var(--charge-level, 0) * 0.15));
   box-shadow:
-    0 0 calc(var(--charge-level, 0) * 20px) rgba(62, 205, 165, calc(var(--charge-level, 0) * 0.25)),
-    0 0 calc(var(--charge-level, 0) * 40px) rgba(62, 205, 165, calc(var(--charge-level, 0) * 0.1));
+    0 0 calc(var(--charge-level, 0) * 20px) rgba(200, 155, 60, calc(var(--charge-level, 0) * 0.25)),
+    0 0 calc(var(--charge-level, 0) * 40px) rgba(200, 155, 60, calc(var(--charge-level, 0) * 0.1));
 }
 
 /* Fully charged: pulse glow animation */
@@ -551,20 +551,20 @@
 @keyframes chargeGlow {
   0%, 100% {
     box-shadow:
-      0 0 20px rgba(62, 205, 165, 0.25),
-      0 0 40px rgba(62, 205, 165, 0.1),
-      0 4px 20px rgba(62, 205, 165, 0.15);
+      0 0 20px rgba(200, 155, 60, 0.25),
+      0 0 40px rgba(200, 155, 60, 0.1),
+      0 4px 20px rgba(200, 155, 60, 0.15);
   }
   50% {
     box-shadow:
-      0 0 30px rgba(62, 205, 165, 0.4),
-      0 0 60px rgba(62, 205, 165, 0.2),
-      0 8px 35px rgba(62, 205, 165, 0.25);
+      0 0 30px rgba(200, 155, 60, 0.4),
+      0 0 60px rgba(200, 155, 60, 0.2),
+      0 8px 35px rgba(200, 155, 60, 0.25);
   }
 }
 
 .form > button[type="submit"] {
-  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-gold));
   background-size: 300% 100%;
   animation: submitGradientShift 4s ease infinite;
   position: relative;
@@ -625,8 +625,8 @@
 .form > button[type="submit"]:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
   box-shadow:
-    0 15px 40px rgba(62, 205, 165, 0.20),
-    0 0 15px rgba(62, 205, 165, 0.30);
+    0 15px 40px rgba(200, 155, 60, 0.20),
+    0 0 15px rgba(200, 155, 60, 0.30);
   filter: saturate(1.1) brightness(1.05);
 }
 
@@ -635,7 +635,7 @@
   transform: translateY(0) scale(0.97);
   transition: transform 80ms ease-out;
   box-shadow:
-    0 4px 12px rgba(62, 205, 165, 0.2),
+    0 4px 12px rgba(200, 155, 60, 0.2),
     inset 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -653,8 +653,8 @@
   border-radius: 24px;
   padding: 1.5px;
   background: conic-gradient(from var(--panel-border-angle, 0deg),
-    #3ECDA5,
-    #F0B754,
+    #1A7B6E,
+    #C89B3C,
     transparent);
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
@@ -698,10 +698,10 @@
   position: absolute;
   font-size: 0.7rem;
   font-weight: 300;
-  color: rgba(62, 205, 165, 0.3);
+  color: rgba(200, 155, 60, 0.3);
   pointer-events: none;
   line-height: 1;
-  text-shadow: 0 0 8px rgba(62, 205, 165, 0.2);
+  text-shadow: 0 0 8px rgba(200, 155, 60, 0.2);
   z-index: 0;
 }
 
@@ -713,8 +713,8 @@
 .panel .form::after {
   bottom: -0.5rem;
   left: 0.5rem;
-  color: rgba(240, 183, 84, 0.3);
-  text-shadow: 0 0 8px rgba(240, 183, 84, 0.2);
+  color: rgba(200, 155, 60, 0.3);
+  text-shadow: 0 0 8px rgba(200, 155, 60, 0.2);
 }
 
 .form {
@@ -777,36 +777,36 @@
 }
 
 :global([data-theme="light"]) .sectionHeading::after {
-  background: linear-gradient(90deg, rgba(0,0,0,0.08) 0%, var(--accent-aqua) 50%, transparent 80%);
+  background: linear-gradient(90deg, rgba(0,0,0,0.08) 0%, var(--accent-gold) 50%, transparent 80%);
 }
 
 :global([data-theme="light"]) .panel::after {
   background: conic-gradient(from var(--panel-border-angle, 0deg),
-    rgba(62, 205, 165, 0.20),
-    rgba(240, 183, 84, 0.15),
-    rgba(62, 205, 165, 0.10),
+    rgba(26, 123, 110, 0.20),
+    rgba(200, 155, 60, 0.15),
+    rgba(26, 123, 110, 0.10),
     transparent);
 }
 
 :global([data-theme="light"]) .panel {
   box-shadow:
-    0 0 25px rgba(62, 205, 165, 0.05),
-    0 0 50px rgba(240, 183, 84, 0.03);
+    0 0 25px rgba(200, 155, 60, 0.05),
+    0 0 50px rgba(200, 155, 60, 0.03);
 }
 
 :global([data-theme="light"]) .panel .form::before {
-  color: rgba(62, 205, 165, 0.25);
-  text-shadow: 0 0 6px rgba(62, 205, 165, 0.15);
+  color: rgba(200, 155, 60, 0.25);
+  text-shadow: 0 0 6px rgba(200, 155, 60, 0.15);
 }
 
 :global([data-theme="light"]) .panel .form::after {
-  color: rgba(240, 183, 84, 0.25);
-  text-shadow: 0 0 6px rgba(240, 183, 84, 0.15);
+  color: rgba(200, 155, 60, 0.25);
+  text-shadow: 0 0 6px rgba(200, 155, 60, 0.15);
 }
 
 :global([data-theme="light"]) .form > button[type="submit"],
 :global([data-theme="light"]) .submitChargeWrapper button[type="submit"] {
-  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-gold));
   background-size: 300% 100%;
 }
 
@@ -832,12 +832,12 @@
 }
 
 .constellationBg line {
-  stroke: rgba(62, 205, 165, 0.2);
+  stroke: rgba(200, 155, 60, 0.2);
   stroke-width: 0.5;
 }
 
 .constellationBg circle {
-  fill: rgba(62, 205, 165, 0.5);
+  fill: rgba(200, 155, 60, 0.5);
 }
 
 /* Subtle pulsing glow on constellation nodes */
@@ -923,7 +923,7 @@
 
 .mysticalTaglineInner {
   display: inline-block;
-  background: linear-gradient(90deg, #3ECDA5, #F0B754);
+  background: linear-gradient(90deg, #1A7B6E, #C89B3C);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -971,7 +971,7 @@
 .auroraLayer:nth-child(1) {
   background: radial-gradient(
     ellipse 80% 50% at 30% 40%,
-    rgba(62, 205, 165, 0.02),
+    rgba(26, 123, 110, 0.02),
     transparent 70%
   );
   animation: auroraPulse1 8s ease-in-out infinite;
@@ -980,7 +980,7 @@
 .auroraLayer:nth-child(2) {
   background: radial-gradient(
     ellipse 60% 50% at 70% 30%,
-    rgba(240, 183, 84, 0.015),
+    rgba(200, 155, 60, 0.015),
     transparent 70%
   );
   animation: auroraPulse2 10s ease-in-out infinite 2s;
@@ -1189,9 +1189,9 @@
 
 .zodiacStripItem:hover .zodiacStripImg {
   transform: scale(1.18) translateY(-4px);
-  border-color: var(--accent-aqua);
+  border-color: var(--accent-gold);
   box-shadow:
-    0 0 16px rgba(62, 205, 165, 0.20),
+    0 0 16px rgba(200, 155, 60, 0.20),
     0 8px 20px rgba(0, 0, 0, 0.20);
   filter: saturate(1.15) brightness(1.08);
 }
@@ -1291,7 +1291,7 @@
   width: 0;
   height: 2px;
   border-radius: 2px;
-  background: linear-gradient(90deg, rgba(255,255,255,0.08), var(--accent-aqua), rgba(255,255,255,0.08));
+  background: linear-gradient(90deg, rgba(255,255,255,0.08), var(--accent-gold), rgba(255,255,255,0.08));
   transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
   filter: blur(1px);
   opacity: 0.6;

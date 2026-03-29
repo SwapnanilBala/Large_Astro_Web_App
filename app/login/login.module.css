@@ -24,8 +24,8 @@
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(400px 140px at 0% 0%, rgba(62, 205, 165, 0.06), transparent 60%),
-    radial-gradient(300px 100px at 100% 100%, rgba(240, 183, 84, 0.04), transparent 60%);
+    radial-gradient(400px 140px at 0% 0%, rgba(26, 123, 110, 0.06), transparent 60%),
+    radial-gradient(300px 100px at 100% 100%, rgba(200, 155, 60, 0.04), transparent 60%);
   opacity: 0.8;
 }
 
@@ -156,7 +156,7 @@
 
 .submitBtn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(62, 205, 165, 0.25);
+  box-shadow: 0 8px 24px rgba(200, 155, 60, 0.25);
   filter: brightness(1.05);
 }
 
