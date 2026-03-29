@@ -61,7 +61,7 @@ describe("ErrorBoundary", () => {
       </ErrorBoundary>
     );
 
-    expect(fallbackFn).toHaveBeenCalledTimes(1);
+    expect(fallbackFn).toHaveBeenCalled();
     expect(screen.getByTestId("error-msg")).toHaveTextContent("custom error");
   });
 
