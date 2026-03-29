@@ -236,6 +236,106 @@ html[data-theme="light"] .drawer-link:hover {
   color: #7B45C0;
 }
 
+/* Nakshatra & Dasha light mode overrides */
+html[data-theme="light"] .nakshatra-card {
+  background: rgba(255, 255, 255, 0.70);
+  border-color: rgba(30, 30, 50, 0.10);
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .nakshatra-lord {
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .dasha-audit {
+  background: rgba(255, 255, 255, 0.70);
+  border-color: rgba(30, 30, 50, 0.10);
+}
+
+html[data-theme="light"] .dasha-audit-card {
+  background: rgba(255, 255, 255, 0.70);
+  border-color: rgba(30, 30, 50, 0.10);
+}
+
+html[data-theme="light"] .dasha-audit-card strong {
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .dasha-audit-card small {
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .dasha-bar {
+  background: rgba(100, 80, 40, 0.12);
+  border-color: rgba(100, 80, 40, 0.20);
+  border-right-color: rgba(100, 80, 40, 0.15);
+}
+
+html[data-theme="light"] .dasha-bar--active,
+html[data-theme="light"] .dasha-bar--current {
+  background: rgba(26, 123, 110, 0.15);
+  border-color: var(--accent-aqua);
+}
+
+html[data-theme="light"] .dasha-bar-label {
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .dasha-bar-dates {
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .dasha-gantt-track {
+  background: rgba(100, 80, 40, 0.10);
+}
+
+html[data-theme="light"] .dasha-gantt-label {
+  color: var(--ink-main);
+  text-shadow: none;
+}
+
+html[data-theme="light"] .dasha-popup {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(30, 30, 50, 0.12);
+  color: var(--ink-main);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+html[data-theme="light"] .dasha-popup p,
+html[data-theme="light"] .dasha-popup strong,
+html[data-theme="light"] .dasha-popup span {
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .nakshatra-details,
+html[data-theme="light"] .nakshatra-details strong {
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .dasha-active-card {
+  background: rgba(255, 255, 255, 0.80);
+  border-color: rgba(200, 155, 60, 0.25);
+  color: var(--ink-main);
+}
+
+html[data-theme="light"] .dasha-timeline-hint {
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .dasha-combo-theme-tag {
+  background: rgba(30, 30, 50, 0.06);
+  border-color: rgba(30, 30, 50, 0.12);
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .dasha-progress-track {
+  background: rgba(30, 30, 50, 0.10);
+}
+
+html[data-theme="light"] .dasha-current-summary {
+  border-top-color: rgba(30, 30, 50, 0.10);
+}
+
 * {
   box-sizing: border-box;
 }
