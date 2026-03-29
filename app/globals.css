@@ -1,30 +1,30 @@
 :root {
-  --bg-night: #0F1117;
-  --bg-deep: #161922;
-  --surface: rgba(255, 255, 255, 0.09);
-  --surface-soft: rgba(255, 255, 255, 0.06);
-  --surface-strong: rgba(255, 255, 255, 0.13);
-  --line-soft: rgba(255, 255, 255, 0.12);
-  --line-strong: rgba(255, 255, 255, 0.18);
-  --ink-main: #EAEDF3;
-  --ink-soft: #8B8FA3;
-  --accent-gold: #F0B754;
-  --accent-aqua: #3ECDA5;
-  --accent-coral: #F07068;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 3px rgba(0, 0, 0, 0.12);
-  --btn-text: #FFFFFF;
-  --field-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  --field-glow: 0 0 0 3px rgba(62, 205, 165, 0.20), 0 8px 20px rgba(62, 205, 165, 0.06);
-  --field-glow-warm: 0 0 0 3px rgba(240, 183, 84, 0.18), 0 8px 20px rgba(240, 183, 84, 0.06);
-  --primary: #3ECDA5;
-  --secondary: #F0B754;
-  --accent: #F07068;
-  --accent-light: #F5D89A;
-  --text-primary: #EAEDF3;
-  --text-secondary: #8B8FA3;
-  --border: rgba(255, 255, 255, 0.08);
-  --glow: rgba(62, 205, 165, 0.15);
-  --success: #3ECDA5;
+  --bg-night: #0D0C14;
+  --bg-deep: #090810;
+  --surface: rgba(255, 243, 210, 0.04);
+  --surface-soft: rgba(255, 243, 210, 0.025);
+  --surface-strong: rgba(255, 243, 210, 0.07);
+  --line-soft: rgba(200, 155, 60, 0.15);
+  --line-strong: rgba(200, 155, 60, 0.30);
+  --ink-main: #EDE0C4;
+  --ink-soft: #9A8B70;
+  --accent-gold: #C89B3C;
+  --accent-aqua: #1A7B6E;
+  --accent-coral: #C96B2A;
+  --shadow-card: 0 4px 28px rgba(0, 0, 0, 0.50), 0 0 0 1px rgba(200, 155, 60, 0.08);
+  --btn-text: #E8C87A;
+  --field-shadow: 0 1px 3px rgba(0, 0, 0, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  --field-glow: 0 0 0 3px rgba(200, 155, 60, 0.22), 0 8px 20px rgba(200, 155, 60, 0.08);
+  --field-glow-warm: 0 0 0 3px rgba(200, 155, 60, 0.24), 0 8px 20px rgba(200, 155, 60, 0.08);
+  --primary: #1A7B6E;
+  --secondary: #C89B3C;
+  --accent: #5A3FA0;
+  --accent-light: #E8C98A;
+  --text-primary: #EDE0C4;
+  --text-secondary: #9A8B70;
+  --border: rgba(200, 155, 60, 0.10);
+  --glow: rgba(200, 155, 60, 0.15);
+  --success: #1A7B6E;
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;
   --app-viewport-scale: 1;
@@ -46,7 +46,7 @@ html[data-theme="light"] body {
   --ink-soft: #55556A;
   --accent-gold: #B87308;
   --accent-aqua: #18785A;
-  --accent-coral: #B8403A;
+  --accent-coral: #A05020;
   --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --btn-text: #FFFFFF;
   --field-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
@@ -250,7 +250,7 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   transition: background-color 0.35s ease, color 0.35s ease;
-  background: #0F1117;
+  background: #0D0C14;
   overflow-x: hidden;
 }
 
@@ -265,7 +265,7 @@ body::before {
 }
 
 ::selection {
-  background: rgba(62, 205, 165, 0.28);
+  background: rgba(200, 155, 60, 0.25);
   color: var(--ink-main);
 }
 
@@ -395,7 +395,7 @@ html[data-theme="light"] .insights-shell::before {
 
 .glass-section--aqua {
   background:
-    linear-gradient(135deg, rgba(94, 194, 184, 0.08), rgba(94, 194, 184, 0.03)),
+    linear-gradient(135deg, rgba(26, 123, 110, 0.08), rgba(26, 123, 110, 0.03)),
     rgba(255, 255, 255, 0.04);
 }
 
@@ -416,7 +416,7 @@ html[data-theme="light"] .insights-shell::before {
   text-transform: uppercase;
   letter-spacing: 0.2rem;
   font-size: 0.72rem;
-  color: var(--accent-aqua);
+  color: var(--accent-gold);
   font-weight: 700;
 }
 
@@ -424,7 +424,7 @@ h1 {
   margin: 0.55rem 0 0.8rem;
   font-size: clamp(2rem, 4.6vw, 3.8rem);
   line-height: 1.04;
-  background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 50%, var(--accent-aqua) 100%);
+  background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 55%, #7B5DC0 100%);
   background-size: 200% 200%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -458,7 +458,7 @@ h1 {
   position: absolute;
   inset: auto 1rem 0.7rem 1rem;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(240, 183, 84, 0.4), rgba(62, 205, 165, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(200, 155, 60, 0.45), rgba(90, 63, 160, 0.25), transparent);
   opacity: 0.55;
 }
 
@@ -523,7 +523,7 @@ select {
 textarea {
   min-height: 132px;
   resize: vertical;
-  caret-color: var(--accent-aqua);
+  caret-color: var(--accent-gold);
 }
 
 select:focus,
@@ -551,7 +551,7 @@ textarea:hover {
 
 input:focus {
   outline: none;
-  border-color: var(--accent-aqua);
+  border-color: rgba(200, 155, 60, 0.60);
   box-shadow: var(--field-glow);
   transform: translateY(-1px);
   background:
@@ -593,15 +593,15 @@ input[type="time"] {
 /* Submit button: extra top spacing */
 button {
   margin-top: 0.44rem;
-  border: none;
+  border: 1px solid rgba(200, 155, 60, 0.35);
   min-height: 3.2rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
   cursor: pointer;
-  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
-  color: var(--btn-text);
+  background: linear-gradient(135deg, #1C1338 0%, #2A1D4E 60%, #1A0E28 100%);
+  color: #D4AA5C;
   border-radius: 12px;
   padding: 12px 24px;
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
@@ -609,7 +609,7 @@ button {
   letter-spacing: 0.01em;
   text-transform: none;
   font-size: 0.9rem;
-  box-shadow: none;
+  box-shadow: 0 0 12px rgba(200, 155, 60, 0.08), inset 0 1px 0 rgba(200, 155, 60, 0.07);
   transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
@@ -633,8 +633,9 @@ button:hover:not(:disabled)::after {
 
 button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(62, 205, 165, 0.25);
+  box-shadow: 0 0 24px rgba(200, 155, 60, 0.28), 0 8px 24px rgba(0, 0, 0, 0.40);
   filter: brightness(1.05);
+  color: #E8C87A;
 }
 
 button:active:not(:disabled) {
@@ -749,11 +750,11 @@ button:focus-visible,
 .planet-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(200, 155, 60, 0.05);
   padding: 1.5rem;
   position: relative;
   overflow: hidden;
@@ -763,8 +764,8 @@ button:focus-visible,
 .lagna-panel:hover,
 .rules-panel:hover,
 .planet-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: rgba(200, 155, 60, 0.28);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
 
 .lagna-panel::after,
@@ -778,8 +779,8 @@ button:focus-visible,
   inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(360px 120px at 0% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(108, 225, 212, 0.05));
+    radial-gradient(360px 120px at 0% 0%, rgba(200, 155, 60, 0.05), transparent 60%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent 45%, rgba(200, 155, 60, 0.03));
   opacity: 0.9;
 }
 
@@ -831,7 +832,7 @@ html[data-theme="light"] .rules-header h2 {
 .rule-card {
   border-radius: 16px;
   border: 1px solid var(--line-soft);
-  background: rgba(6, 26, 41, 0.85);
+  background: rgba(13, 10, 22, 0.88);
   padding: 0.86rem;
 }
 
@@ -903,7 +904,7 @@ html[data-theme="light"] .rules-header h2 {
 .planet-card {
   border-radius: 14px;
   border: 1px solid var(--line-soft);
-  background: rgba(5, 25, 39, 0.88);
+  background: rgba(11, 9, 20, 0.90);
   padding: 0.74rem;
 }
 
@@ -968,7 +969,7 @@ html[data-theme="light"] .rules-header h2 {
   border-color: rgba(242, 194, 108, 0.5);
   box-shadow:
     0 16px 32px rgba(242, 194, 108, 0.14),
-    0 0 20px rgba(108, 225, 212, 0.08);
+    0 0 20px rgba(200, 155, 60, 0.10);
   transform: translateY(-2px);
 }
 
@@ -1490,18 +1491,18 @@ label:has(.autocomplete-wrapper.is-open) {
 .nakshatra-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(200, 155, 60, 0.05);
   padding: 1.5rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .nakshatra-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: rgba(200, 155, 60, 0.28);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
 
 .nakshatra-grid {
@@ -2244,18 +2245,18 @@ html[data-theme="light"] .dasha-active-card {
 .aspects-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(200, 155, 60, 0.05);
   padding: 1.5rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .aspects-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: rgba(200, 155, 60, 0.28);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
 
 .aspect-grid {
@@ -2337,18 +2338,18 @@ html[data-theme="light"] .dasha-active-card {
 .navamsa-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(200, 155, 60, 0.05);
   padding: 1.5rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .navamsa-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: rgba(200, 155, 60, 0.28);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
 
 .navamsa-table {
@@ -2628,18 +2629,18 @@ html[data-theme="light"] .dasha-active-card {
 .transits-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.50), inset 0 1px 0 rgba(200, 155, 60, 0.05);
   padding: 1.5rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .transits-panel:hover {
-  border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(100, 200, 255, 0.05);
+  border-color: rgba(200, 155, 60, 0.28);
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
 
 .transits-timestamp {
@@ -3255,8 +3256,8 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .forecast-panel {
-  border-color: rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
 }
 
 .forecast-intro {
@@ -8874,7 +8875,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 }
 
 .react-datepicker__day:hover {
-  background: rgba(62, 205, 165, 0.15) !important;
+  background: rgba(200, 155, 60, 0.15) !important;
   color: var(--ink-main) !important;
   border-radius: 10px !important;
 }
@@ -8885,7 +8886,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   background: linear-gradient(135deg, var(--accent-aqua), #2BA882) !important;
   color: #fff !important;
   font-weight: 600 !important;
-  box-shadow: 0 2px 8px rgba(62, 205, 165, 0.30) !important;
+  box-shadow: 0 2px 8px rgba(200, 155, 60, 0.30) !important;
 }
 
 .react-datepicker__day--selected:hover {
@@ -8935,7 +8936,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 .react-datepicker__month-select:focus,
 .react-datepicker__year-select:focus {
   border-color: var(--accent-aqua) !important;
-  box-shadow: 0 0 0 2px rgba(62, 205, 165, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(200, 155, 60, 0.15) !important;
 }
 
 .react-datepicker__month-select option,
