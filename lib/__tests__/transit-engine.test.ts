@@ -161,12 +161,12 @@ describe("transit-engine", () => {
 
     it("returns empty array when no aspects within orb", () => {
       const farNatal: PlanetPosition[] = [
-        { name: "Sun", longitude: 45, sign: "Taurus", degree_in_sign: 15, house: 1 },
+        { name: "Sun", longitude: 0, sign: "Aries", degree_in_sign: 0, house: 1 },
       ];
       const farTransit: TransitPosition[] = [
-        { name: "Moon", longitude: 100, sign: "Cancer", degree_in_sign: 10 },
+        { name: "Moon", longitude: 35, sign: "Taurus", degree_in_sign: 5 },
       ];
-      // 45 to 100 = 55 degrees; not near any standard aspect angle within 8 deg orb
+      // 0 to 35 = 35 degrees; not near any standard aspect angle (0,60,90,120,180) within 8 deg orb
       const aspects = computeTransitAspects(farNatal, farTransit);
       expect(aspects).toHaveLength(0);
     });
