@@ -5,8 +5,8 @@
 .panel {
   margin-top: 1.2rem;
   border-radius: 16px;
-  border: 1px solid var(--line-soft, rgba(255, 255, 255, 0.12));
-  background: var(--surface, rgba(255, 255, 255, 0.09));
+  border: 1px solid var(--line-soft, rgba(200, 155, 60, 0.14));
+  background: var(--surface, rgba(255, 243, 210, 0.04));
   padding: 1.5rem;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -15,10 +15,10 @@
 }
 
 .panel:hover {
-  border-color: var(--line-strong, rgba(255, 255, 255, 0.14));
+  border-color: var(--line-strong, rgba(200, 155, 60, 0.22));
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 0 20px rgba(240, 183, 84, 0.04);
+    inset 0 1px 0 rgba(200, 155, 60, 0.04),
+    0 0 20px rgba(200, 155, 60, 0.06);
 }
 
 .header {
@@ -67,8 +67,8 @@
 
 .section {
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   padding: 1.15rem;
   backdrop-filter: blur(12px);
 }
@@ -111,8 +111,8 @@
   gap: 0.4rem;
   padding: 0.3rem 0.65rem 0.3rem 0.3rem;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--ink-main);
@@ -122,7 +122,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.18);
+  border: 2px solid rgba(200, 155, 60, 0.20);
   flex-shrink: 0;
 }
 
@@ -141,8 +141,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 2px solid rgba(240, 183, 84, 0.35);
-  background: rgba(240, 183, 84, 0.08);
+  border: 2px solid rgba(200, 155, 60, 0.35);
+  background: rgba(200, 155, 60, 0.08);
   color: var(--accent-gold);
   font-weight: 700;
   font-size: 1.1rem;
@@ -184,7 +184,7 @@
   justify-content: space-between;
   align-items: baseline;
   padding: 0.4rem 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom: 1px solid rgba(200, 155, 60, 0.10);
   font-size: 0.85rem;
 }
 
@@ -193,7 +193,7 @@
 }
 
 .detailLabel {
-  color: var(--accent-aqua);
+  color: var(--accent-gold);
   font-weight: 500;
 }
 
@@ -218,9 +218,9 @@
   border-radius: 20px;
   font-size: 0.82rem;
   font-weight: 600;
-  border: 1px solid rgba(62, 205, 165, 0.3);
-  background: rgba(62, 205, 165, 0.08);
-  color: var(--accent-aqua);
+  border: 1px solid rgba(200, 155, 60, 0.3);
+  background: rgba(200, 155, 60, 0.08);
+  color: var(--accent-gold);
 }
 
 /* ── Basis Footer ── */
@@ -228,7 +228,7 @@
 .basis {
   margin-top: 1rem;
   padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(200, 155, 60, 0.10);
   font-size: 0.78rem;
   color: var(--ink-soft);
   line-height: 1.6;
@@ -246,8 +246,8 @@
   gap: 0.2rem;
   padding: 0.15rem 0.45rem;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 243, 210, 0.04);
+  border: 1px solid rgba(200, 155, 60, 0.10);
   margin: 0.15rem 0.2rem;
   font-weight: 500;
 }
