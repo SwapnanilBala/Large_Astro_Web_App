@@ -434,7 +434,7 @@ export default function InsightsContent({
               }}
             />
             <div>
-              <p style={{ margin: 0, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>Ascendant Sign</p>
+              <p style={{ margin: 0, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>{t("insights.ascendantSign")}</p>
               <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
             </div>
           </div>
@@ -516,8 +516,8 @@ export default function InsightsContent({
                   : styles.accessPillLimited}
             >
               {lockedFeatures.size === 0
-                ? "All features unlocked"
-                : "Limited response"}
+                ? t("insights.allFeatures")
+                : t("insights.limitedResponse")}
             </span>
             <small className={styles.accessTier}>
               Tier: <strong>{payload.access.subscription_tier}</strong>
@@ -566,8 +566,8 @@ export default function InsightsContent({
 
         {/* ─── Forecasts & Timing (Collapsible) ─── */}
         <CollapsibleSection
-          kicker="Timing & Electional"
-          title="Forecasts & Muhurta"
+          kicker={t("insights.timingKicker")}
+          title={t("insights.timingHeading")}
           defaultOpen={true}
           className={styles.cardRules}
         >
@@ -704,8 +704,8 @@ export default function InsightsContent({
 
         {/* ─── Advanced Modules Grid (Collapsible) ─── */}
         <CollapsibleSection
-          kicker="Advanced Analysis"
-          title="Advanced Vedic Modules"
+          kicker={t("insights.advancedKicker")}
+          title={t("insights.advancedHeading")}
           defaultOpen={false}
           className={styles.cardRules}
         >
@@ -923,8 +923,8 @@ export default function InsightsContent({
 
         {/* ── Palm Reading (Collapsible) ── */}
         <CollapsibleSection
-          kicker="Palmistry"
-          title="Palm Reading Analysis"
+          kicker={t("insights.palmKicker")}
+          title={t("insights.palmHeading")}
           defaultOpen={false}
           className={styles.cardRules}
         >

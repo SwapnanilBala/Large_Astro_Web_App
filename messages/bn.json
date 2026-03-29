@@ -141,7 +141,16 @@
     "luckyElementsAscLord": "লগ্নেশ",
     "luckyElementsMoonLord": "চন্দ্র রাশি স্বামী",
     "luckyElementsNinthLord": "নবম ভাব স্বামী",
-    "luckyElementsNakLord": "নক্ষত্র স্বামী"
+    "luckyElementsNakLord": "নক্ষত্র স্বামী",
+    "timingKicker": "সময় এবং নির্বাচনী",
+    "timingHeading": "পূর্বাভাস এবং মুহূর্ত",
+    "advancedKicker": "উন্নত বিশ্লেষণ",
+    "advancedHeading": "উন্নত বৈদিক মডিউল",
+    "palmKicker": "হস্তরেখা বিদ্যা",
+    "palmHeading": "হস্তরেখা বিশ্লেষণ",
+    "allFeatures": "সমস্ত বৈশিষ্ট্য আনলক",
+    "limitedResponse": "সীমিত প্রতিক্রিয়া",
+    "ascendantSign": "লগ্ন রাশি"
   },
   "dasha": {
     "kicker": "বৈদিক সময় ব্যবস্থা",

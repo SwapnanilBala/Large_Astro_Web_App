@@ -146,7 +146,16 @@
     "luckyElementsAscLord": "Ascendant Lord",
     "luckyElementsMoonLord": "Moon Sign Lord",
     "luckyElementsNinthLord": "9th House Lord",
-    "luckyElementsNakLord": "Nakshatra Lord"
+    "luckyElementsNakLord": "Nakshatra Lord",
+    "timingKicker": "Timing & Electional",
+    "timingHeading": "Forecasts & Muhurta",
+    "advancedKicker": "Advanced Analysis",
+    "advancedHeading": "Advanced Vedic Modules",
+    "palmKicker": "Palmistry",
+    "palmHeading": "Palm Reading Analysis",
+    "allFeatures": "All features unlocked",
+    "limitedResponse": "Limited response",
+    "ascendantSign": "Ascendant Sign"
   },
   "dasha": {
     "kicker": "VEDIC TIMING SYSTEM",

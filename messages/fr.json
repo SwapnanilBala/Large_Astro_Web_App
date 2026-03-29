@@ -141,7 +141,16 @@
     "luckyElementsAscLord": "Seigneur de l'Ascendant",
     "luckyElementsMoonLord": "Seigneur du Signe Lunaire",
     "luckyElementsNinthLord": "Seigneur de la 9e Maison",
-    "luckyElementsNakLord": "Seigneur du Nakshatra"
+    "luckyElementsNakLord": "Seigneur du Nakshatra",
+    "timingKicker": "Timing & Électional",
+    "timingHeading": "Prévisions & Muhurta",
+    "advancedKicker": "Analyse Avancée",
+    "advancedHeading": "Modules Védiques Avancés",
+    "palmKicker": "Chiromancie",
+    "palmHeading": "Analyse de Lecture de Paume",
+    "allFeatures": "Toutes les fonctionnalités débloquées",
+    "limitedResponse": "Réponse limitée",
+    "ascendantSign": "Signe Ascendant"
   },
   "dasha": {
     "kicker": "SYSTÈME DE TEMPS VÉDIQUE",

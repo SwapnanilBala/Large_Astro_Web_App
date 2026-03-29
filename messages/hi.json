@@ -141,7 +141,16 @@
     "luckyElementsAscLord": "लग्नेश",
     "luckyElementsMoonLord": "चंद्र राशि स्वामी",
     "luckyElementsNinthLord": "नवम भाव स्वामी",
-    "luckyElementsNakLord": "नक्षत्र स्वामी"
+    "luckyElementsNakLord": "नक्षत्र स्वामी",
+    "timingKicker": "समय और इलेक्शनल",
+    "timingHeading": "भविष्यवाणी और मुहूर्त",
+    "advancedKicker": "उन्नत विश्लेषण",
+    "advancedHeading": "उन्नत वैदिक मॉड्यूल",
+    "palmKicker": "हस्तरेखा",
+    "palmHeading": "हस्त रेखा विश्लेषण",
+    "allFeatures": "सभी सुविधाएँ अनलॉक हैं",
+    "limitedResponse": "सीमित प्रतिक्रिया",
+    "ascendantSign": "लग्न राशि"
   },
   "dasha": {
     "kicker": "वैदिक समय प्रणाली",
