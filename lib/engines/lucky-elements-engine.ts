@@ -38,6 +38,21 @@ const PLANET_LUCKY: Record<string, PlanetAttributes> = {
   Ketu:    { colors: ["Grey", "Earthy"],            number: 7, gemstone: "Cat's Eye",        day: "Tuesday",   metal: "Iron",     direction: "Northeast" },
 };
 
+/**
+ * Yogakaraka: a planet that owns both a kendra house (1,4,7,10) AND a
+ * trikona house (1,5,9) for the given lagna. It is considered the single
+ * most auspicious planet and its gemstone / day / metal should be primary.
+ * Only six lagnas have a yogakaraka planet other than the lagna lord itself.
+ */
+const YOGAKARAKA_BY_LAGNA: Record<string, string> = {
+  Taurus:    "Saturn",  // rules 9th (Capricorn) + 10th (Aquarius) — trikona + kendra
+  Cancer:    "Mars",    // rules 5th (Scorpio)   + 10th (Aries)    — trikona + kendra
+  Leo:       "Mars",    // rules 4th (Scorpio)   + 9th  (Aries)    — kendra  + trikona
+  Libra:     "Saturn",  // rules 4th (Capricorn) + 5th  (Aquarius) — kendra  + trikona
+  Capricorn: "Venus",   // rules 5th (Taurus)    + 10th (Libra)    — trikona + kendra
+  Aquarius:  "Venus",   // rules 4th (Taurus)    + 9th  (Libra)    — kendra  + trikona
+};
+
 /* ── Helpers ── */
 
 function findPlanet(planets: PlanetPosition[], name: string): PlanetPosition | undefined {
@@ -61,6 +76,31 @@ function attrFor(planet: string): PlanetAttributes {
   return PLANET_LUCKY[planet] ?? PLANET_LUCKY.Sun;
 }
 
+/** Return the first gemstone from `candidates` not already in `taken`. */
+function pickGem(candidates: PlanetAttributes[], taken: string[]): string {
+  for (const attr of candidates) {
+    if (!taken.includes(attr.gemstone)) return attr.gemstone;
+  }
+  // All candidates share the same gem — return the first as fallback
+  return candidates[0]?.gemstone ?? "Pearl";
+}
+
+/** Return the first day from `candidates` not equal to `exclude`. */
+function pickDay(candidates: PlanetAttributes[], exclude: string): string {
+  for (const attr of candidates) {
+    if (attr.day !== exclude) return attr.day;
+  }
+  return candidates[0]?.day ?? "Monday";
+}
+
+/** Return the first metal from `candidates` not equal to `exclude`. */
+function pickMetal(candidates: PlanetAttributes[], exclude: string): string {
+  for (const attr of candidates) {
+    if (attr.metal !== exclude) return attr.metal;
+  }
+  return candidates[0]?.metal ?? "Silver";
+}
+
 /* ── Main computation ── */
 
 export function computeLuckyElements(
@@ -69,61 +109,97 @@ export function computeLuckyElements(
   houses: HousePlacement[],
   nakshatraLord?: string | null,
 ): LuckyElementsInfo {
-  // 1. Ascendant lord → primary lucky factors
+  // 1. Ascendant lord → structural foundation
   const ascLord = SIGN_RULERS[ascendantSign] ?? "Sun";
   const ascAttr = attrFor(ascLord);
 
-  // 2. Moon sign lord → secondary / emotional factors
+  // 2. Moon sign lord → emotional / receptive layer
   const moon = findPlanet(planets, "Moon");
   const moonSign = moon?.sign ?? ascendantSign;
   const moonLord = SIGN_RULERS[moonSign] ?? "Moon";
   const moonAttr = attrFor(moonLord);
 
-  // 3. 9th house lord → fortune factors
+  // 3. 9th house lord → fortune / dharma layer
   const ninthSign = findHouseSign(houses, 9) ?? ascendantSign;
   const ninthLord = SIGN_RULERS[ninthSign] ?? "Jupiter";
   const ninthAttr = attrFor(ninthLord);
 
-  // 4. Nakshatra lord (optional extra influence)
+  // 4. Nakshatra lord → subtle / lunar mansion influence
   const nakLord = nakshatraLord && PLANET_LUCKY[nakshatraLord] ? nakshatraLord : null;
   const nakAttr = nakLord ? attrFor(nakLord) : null;
 
-  // Combine
+  // 5. Yogakaraka → the single most auspicious planet for this lagna (if any)
+  const yogakaraka = YOGAKARAKA_BY_LAGNA[ascendantSign] ?? null;
+  const yogaAttr = yogakaraka ? attrFor(yogakaraka) : null;
+
+  // ── Gemstones ──────────────────────────────────────────────────────────────
+  // When a yogakaraka exists, its gem is primary (highest benefic for the lagna).
+  // The ascendant lord's gem then becomes secondary.
+  // Without a yogakaraka, ascendant lord is primary; cascade 9th → moon → nak
+  // to find a genuinely distinct secondary.
+  const primaryGemstone = yogaAttr ? yogaAttr.gemstone : ascAttr.gemstone;
+
+  const gemCandidates: PlanetAttributes[] = yogaAttr
+    ? [ascAttr, ninthAttr, moonAttr, ...(nakAttr ? [nakAttr] : [])]
+    : [ninthAttr, moonAttr, ...(nakAttr ? [nakAttr] : [])];
+  const secondaryGemstone = pickGem(gemCandidates, [primaryGemstone]);
+
+  // ── Colors ─────────────────────────────────────────────────────────────────
+  // Primary: ascendant lord always (structural base of the chart).
   const primaryColors = ascAttr.colors;
+
+  // Secondary: moon lord + 9th lord + nakshatra lord, deduped against primary.
+  // Nakshatra lord was previously omitted — now included.
   const secondaryColors = uniqueStrings([
     ...moonAttr.colors,
     ...ninthAttr.colors,
+    ...(nakAttr ? nakAttr.colors : []),
+    ...(yogaAttr ? yogaAttr.colors : []),
   ].filter((c) => !primaryColors.includes(c)));
 
+  // ── Numbers ─────────────────────────────────────────────────────────────────
   const luckyNumbers = uniqueNumbers([
     ascAttr.number,
     moonAttr.number,
     ninthAttr.number,
     ...(nakAttr ? [nakAttr.number] : []),
+    ...(yogaAttr ? [yogaAttr.number] : []),
   ]);
 
+  // ── Day & Metal ──────────────────────────────────────────────────────────────
+  // The yogakaraka (if present) governs the primary day/metal; otherwise asc lord.
+  const primaryDayAttr = yogaAttr ?? ascAttr;
+  const luckyDay = primaryDayAttr.day;
+  const secondaryDay = pickDay([ascAttr, moonAttr, ninthAttr], luckyDay);
+
+  const primaryMetal = primaryDayAttr.metal;
+  const secondaryMetal = pickMetal([ascAttr, moonAttr, ninthAttr], primaryMetal);
+
+  // ── Directions ───────────────────────────────────────────────────────────────
   const directions = uniqueStrings([
     ascAttr.direction,
     ninthAttr.direction,
     ...(nakAttr ? [nakAttr.direction] : []),
+    ...(yogaAttr ? [yogaAttr.direction] : []),
   ]);
 
   return {
     primary_colors: primaryColors,
-    secondary_colors: secondaryColors.slice(0, 3),
+    secondary_colors: secondaryColors.slice(0, 4),
     lucky_numbers: luckyNumbers,
-    primary_gemstone: ascAttr.gemstone,
-    secondary_gemstone: ninthAttr.gemstone !== ascAttr.gemstone ? ninthAttr.gemstone : moonAttr.gemstone,
-    lucky_day: ascAttr.day,
-    secondary_day: moonAttr.day !== ascAttr.day ? moonAttr.day : ninthAttr.day,
-    primary_metal: ascAttr.metal,
-    secondary_metal: ninthAttr.metal !== ascAttr.metal ? ninthAttr.metal : moonAttr.metal,
+    primary_gemstone: primaryGemstone,
+    secondary_gemstone: secondaryGemstone,
+    lucky_day: luckyDay,
+    secondary_day: secondaryDay,
+    primary_metal: primaryMetal,
+    secondary_metal: secondaryMetal,
     auspicious_directions: directions,
     basis: {
       ascendant_lord: ascLord,
       moon_sign_lord: moonLord,
       ninth_house_lord: ninthLord,
       nakshatra_lord: nakLord,
+      yogakaraka_lord: yogakaraka,
     },
   };
 }

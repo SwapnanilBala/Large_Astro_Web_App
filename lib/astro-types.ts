@@ -254,6 +254,7 @@ export type LuckyElementsInfo = {
     moon_sign_lord: string;
     ninth_house_lord: string;
     nakshatra_lord: string | null;
+    yogakaraka_lord: string | null;
   };
 };
 

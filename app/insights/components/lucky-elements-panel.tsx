@@ -137,6 +137,9 @@ function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
         {le.basis.nakshatra_lord && (
           <span className={styles.basisPlanet}>{t("insights.luckyElementsNakLord")}: {le.basis.nakshatra_lord}</span>
         )}
+        {le.basis.yogakaraka_lord && (
+          <span className={styles.basisPlanet} data-yogakaraka="true">{t("insights.luckyElementsYogakaraka")}: {le.basis.yogakaraka_lord}</span>
+        )}
       </div>
     </section>
   );

@@ -252,6 +252,14 @@
   font-weight: 500;
 }
 
+/* Yogakaraka badge — gold-accented to signal its special status */
+.basisPlanet[data-yogakaraka="true"] {
+  background: rgba(200, 155, 60, 0.12);
+  border-color: rgba(200, 155, 60, 0.45);
+  color: #C89B3C;
+  font-weight: 700;
+}
+
 /* ── Light mode overrides ── */
 
 :global(html[data-theme="light"]) .panel {
