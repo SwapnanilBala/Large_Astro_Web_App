@@ -21,13 +21,12 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
 
-  /* Hydrate from localStorage on mount */
+  /* Hydrate from localStorage on mount — always apply the attribute */
   useEffect(() => {
     const stored = localStorage.getItem("astro_theme") as Theme | null;
-    if (stored === "light" || stored === "dark") {
-      setTheme(stored);
-      document.documentElement.setAttribute("data-theme", stored);
-    }
+    const resolved = stored === "light" || stored === "dark" ? stored : "dark";
+    setTheme(resolved);
+    document.documentElement.setAttribute("data-theme", resolved);
   }, []);
 
   const toggleTheme = useCallback(() => {

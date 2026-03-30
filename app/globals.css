@@ -25,6 +25,7 @@
   --border: rgba(200, 155, 60, 0.10);
   --glow: rgba(200, 155, 60, 0.15);
   --success: #1A7B6E;
+  --accent-teal: #1A7B6E;
   --app-viewport-width: 100vw;
   --app-viewport-height: 100vh;
   --app-viewport-scale: 1;
@@ -350,7 +351,7 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   transition: background-color 0.35s ease, color 0.35s ease;
-  background: #0D0C14;
+  background: var(--bg-night, #0D0C14);
   overflow-x: hidden;
 }
 
@@ -4104,20 +4105,20 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   pointer-events: none;
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  background-color: rgba(15, 17, 23, 0.80);
-  border-bottom: 1px solid var(--line-soft);
-  box-shadow: none;
+  background-color: rgba(15, 17, 23, 0.70);
+  border-bottom: 1px solid rgba(200, 155, 60, 0.08);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.10);
   transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease,
     background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
 }
 
 .site-navbar.navbar-scrolled {
   pointer-events: auto;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  background-color: rgba(15, 17, 23, 0.92);
-  border-bottom: 1px solid var(--line-soft);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  background-color: rgba(15, 17, 23, 0.88);
+  border-bottom: 1px solid rgba(200, 155, 60, 0.12);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 0 rgba(200, 155, 60, 0.06);
 }
 
 /* Light theme navbar glass */
@@ -5411,6 +5412,26 @@ html[data-theme="light"] .skel-retry-btn:hover {
   overflow: hidden;
 }
 
+/* Nebula glow backdrop */
+.not-found-page::before {
+  content: "";
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(ellipse, rgba(200, 155, 60, 0.06) 0%, rgba(26, 123, 110, 0.04) 40%, transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  animation: nebulaBreath 8s ease-in-out infinite alternate;
+}
+
+@keyframes nebulaBreath {
+  0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
+  100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+}
+
 /* Star particles */
 .not-found-stars {
   position: absolute;
@@ -5501,15 +5522,44 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-code {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(4.5rem, 10vw, 6.5rem);
-  font-weight: 700;
+  font-size: clamp(5rem, 12vw, 8rem);
+  font-weight: 800;
   margin: 0;
   line-height: 1;
-  background: linear-gradient(135deg, var(--accent-gold), var(--accent-aqua));
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-aqua), var(--accent-gold));
+  background-size: 200% 100%;
+  animation: notFoundGradient 4s ease infinite;
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  opacity: 0.7;
+  position: relative;
+  filter: drop-shadow(0 0 30px rgba(200, 155, 60, 0.25));
+}
+
+@keyframes notFoundGradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Orbiting dot around the 404 */
+.not-found-code::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 120%;
+  height: 120%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 50%;
+  animation: notFoundOrbit 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes notFoundOrbit {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .not-found-title {
@@ -5575,6 +5625,34 @@ html[data-theme="light"] .skel-retry-btn:hover {
 .not-found-home-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 30px rgba(242, 194, 108, 0.35);
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE TRANSITIONS — Lightweight CSS-only
+   ═══════════════════════════════════════════════ */
+
+.page-transition-enter {
+  animation: pageEnter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes pageEnter {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(6px) scale(0.995);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter {
+    animation: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════

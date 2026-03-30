@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+/* Constellation star-field background — no external deps */
 export default function GradientBlobs() {
   const [isLight, setIsLight] = useState(false);
 

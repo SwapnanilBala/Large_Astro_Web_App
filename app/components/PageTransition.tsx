@@ -7,8 +7,13 @@ type PageTransitionProps = {
   className?: string;
 };
 
-/* Simple wrapper — no Framer Motion animation on mount.
-   This eliminates the y-axis bounce that caused jitter on mobile. */
+/* Lightweight CSS-only fade-in transition.
+   Uses a class-based animation instead of Framer Motion
+   to avoid the y-axis bounce / jitter issues on mobile. */
 export default function PageTransition({ children, className }: PageTransitionProps) {
-  return <div className={className}>{children}</div>;
+  return (
+    <div className={`page-transition-enter ${className ?? ""}`}>
+      {children}
+    </div>
+  );
 }
