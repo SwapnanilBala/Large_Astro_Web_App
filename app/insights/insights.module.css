@@ -373,10 +373,10 @@
 
 /* Large planet glyph */
 .cardPlanets :global(.planet-card__glyph) {
-  font-size: 2rem;
+  font-size: 1.6rem;
   line-height: 1;
   flex-shrink: 0;
-  width: 1.75rem;
+  width: 1.5rem;
   text-align: center;
   filter: drop-shadow(0 0 4px currentColor);
   transition: filter 0.25s ease;
@@ -399,7 +399,7 @@
 
 .cardPlanets :global(.planet-card__title-group h3) {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.42rem;
+  font-size: 1.18rem;
   font-weight: 600;
   margin: 0;
   line-height: 1.2;
@@ -407,14 +407,14 @@
 }
 
 .cardPlanets :global(.planet-card__sign) {
-  font-size: 1.32rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
 /* Chevron indicator */
 .cardPlanets :global(.planet-card__chevron) {
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   color: var(--ink-soft);
   flex-shrink: 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
@@ -450,7 +450,7 @@
 }
 
 .cardPlanets :global(.planet-card__detail-label) {
-  font-size: 1.25rem;
+  font-size: 1.02rem;
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -458,13 +458,13 @@
 }
 
 .cardPlanets :global(.planet-card__detail-value) {
-  font-size: 1.32rem;
+  font-size: 1.1rem;
   color: var(--ink-main);
   font-weight: 500;
 }
 
 .cardPlanets :global(.planet-card__dignity) {
-  font-size: 1.28rem;
+  font-size: 1.05rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
