@@ -382,7 +382,7 @@ h2 { color: var(--accent-gold); }
 h3 {
   letter-spacing: 0.04em;
   color: var(--ink-soft);
-  font-size: 1.63rem;
+  font-size: 1.4rem;
 }
 
 .home-shell,
@@ -516,14 +516,14 @@ html[data-theme="light"] .insights-shell::before {
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 0.2rem;
-  font-size: 1.22rem;
+  font-size: 1.08rem;
   color: var(--accent-gold);
   font-weight: 700;
 }
 
 h1 {
   margin: 0.55rem 0 0.8rem;
-  font-size: clamp(2.5rem, 4.6vw, 4.3rem);
+  font-size: clamp(2.2rem, 4vw, 3.6rem);
   line-height: 1.04;
   background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 55%, #7B5DC0 100%);
   background-size: 200% 200%;
@@ -541,7 +541,7 @@ h1 {
   margin: 0;
   max-width: 72ch;
   color: var(--ink-soft);
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 400;
   line-height: 1.6;
   padding: 1rem 1.1rem;
@@ -794,7 +794,7 @@ button:focus-visible,
 
 .metric-card h3 {
   margin: 0;
-  font-size: 1.28rem;
+  font-size: 1.12rem;
   color: var(--accent-aqua);
   text-transform: uppercase;
   letter-spacing: 0.07rem;
@@ -901,7 +901,7 @@ button:focus-visible,
 
 .rules-header h2 {
   margin: 0.45rem 0 0;
-  font-size: clamp(1.9rem, 2.3vw, 2.5rem);
+  font-size: clamp(1.65rem, 2vw, 2.15rem);
   background: linear-gradient(135deg, #e2d9ff, #a78bfa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -946,7 +946,7 @@ html[data-theme="light"] .rules-header h2 {
 
 .rule-card h3 {
   margin: 0;
-  font-size: 1.58rem;
+  font-size: 1.35rem;
   font-family: var(--font-display), system-ui, sans-serif;
   font-weight: 600;
 }
@@ -1011,7 +1011,7 @@ html[data-theme="light"] .rules-header h2 {
 
 .planet-card h3 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.28rem;
 }
 
 .planet-card p {
@@ -3957,7 +3957,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
 .auth-gate-content h3 {
   margin: 0 0 0.5rem;
-  font-size: 1.9rem;
+  font-size: 1.65rem;
   color: var(--accent-gold);
 }
 

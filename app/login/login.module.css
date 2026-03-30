@@ -48,7 +48,7 @@
 
 .heading {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(2.3rem, 4vw, 3.1rem);
+  font-size: clamp(2rem, 3.5vw, 2.7rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink-main);
