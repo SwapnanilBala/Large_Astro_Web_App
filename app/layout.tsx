@@ -14,13 +14,17 @@ import { ToastProvider } from "@/lib/toast-context";
 const displayFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
-  weight: ["400", "500", "600", "700", "800"]
+  weight: ["500", "600", "700"],
+  display: "swap",
+  preload: true,
 });
 
 const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "600", "700"]
+  weight: ["400", "500", "600"],
+  display: "swap",
+  preload: true,
 });
 
 export const metadata: Metadata = {
@@ -31,6 +35,13 @@ export const metadata: Metadata = {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "Lagna Atelier",
+  },
+  icons: {
+    icon: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  other: {
+    "mobile-web-app-capable": "yes",
   },
 };
 

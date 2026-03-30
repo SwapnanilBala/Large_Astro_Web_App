@@ -21,10 +21,17 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("dark");
 
-  /* Hydrate from localStorage on mount — always apply the attribute */
+  /* Hydrate from localStorage on mount — auto-detect system preference if no stored value */
   useEffect(() => {
     const stored = localStorage.getItem("astro_theme") as Theme | null;
-    const resolved = stored === "light" || stored === "dark" ? stored : "dark";
+    let resolved: Theme;
+    if (stored === "light" || stored === "dark") {
+      resolved = stored;
+    } else {
+      // Auto-detect system color scheme on first visit
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      resolved = prefersDark ? "dark" : "light";
+    }
     setTheme(resolved);
     document.documentElement.setAttribute("data-theme", resolved);
   }, []);

@@ -15,6 +15,8 @@ import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
 import FormCelebration from "./components/FormCelebration";
+import Image from "next/image";
+import { hapticSuccess } from "@/lib/haptics";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -304,6 +306,7 @@ export default function Home() {
 
   const handleSubmitClick = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
+      hapticSuccess();
       spawnParticles(e.clientX, e.clientY);
       spawnRipple(e.clientX, e.clientY);
     },
@@ -534,7 +537,7 @@ export default function Home() {
           <div data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua}`}>
             <span className={styles.orbitNumber}>2</span>
             <div className={styles.fieldCardAccent}>
-              <img src="/zodiac/cancer.jpg" alt="" className={styles.fieldCardAccentImg} />
+              <Image src="/zodiac/cancer.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
               <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
@@ -568,7 +571,7 @@ export default function Home() {
           <div data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral}`}>
             <span className={styles.orbitNumber}>3</span>
             <div className={styles.fieldCardAccent}>
-              <img src="/zodiac/leo.jpg" alt="" className={styles.fieldCardAccentImg} />
+              <Image src="/zodiac/leo.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
               <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
@@ -629,7 +632,7 @@ export default function Home() {
           <div data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet}`}>
             <span className={styles.orbitNumber}>4</span>
             <div className={styles.fieldCardAccent}>
-              <img src="/zodiac/sagittarius.jpg" alt="" className={styles.fieldCardAccentImg} />
+              <Image src="/zodiac/sagittarius.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
               <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
@@ -650,7 +653,7 @@ export default function Home() {
           <div data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose}`}>
             <span className={styles.orbitNumber}>5</span>
             <div className={styles.fieldCardAccent}>
-              <img src="/zodiac/capricorn.png" alt="" className={styles.fieldCardAccentImg} />
+              <Image src="/zodiac/capricorn.png" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
               <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
@@ -671,7 +674,7 @@ export default function Home() {
           <div data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
             <span className={styles.orbitNumber}>6</span>
             <div className={styles.fieldCardAccent}>
-              <img src="/zodiac/pisces.jpg" alt="" className={styles.fieldCardAccentImg} />
+              <Image src="/zodiac/pisces.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
               <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />

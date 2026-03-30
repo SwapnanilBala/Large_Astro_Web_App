@@ -4,13 +4,28 @@
   "description": "Swiss Ephemeris astrology intelligence workspace",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#041420",
-  "theme_color": "#041420",
+  "orientation": "any",
+  "background_color": "#0D0C14",
+  "theme_color": "#0D0C14",
+  "categories": ["lifestyle", "utilities"],
   "icons": [
     {
-      "src": "/favicon.ico",
-      "sizes": "64x64",
-      "type": "image/x-icon"
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
     }
-  ]
+  ],
+  "screenshots": [],
+  "prefer_related_applications": false
 }

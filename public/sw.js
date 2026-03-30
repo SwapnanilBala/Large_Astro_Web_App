@@ -1,7 +1,7 @@
-const CACHE_NAME = 'lagna-v1';
-const STATIC_ASSETS = ['/'];
+const CACHE_NAME = 'lagna-v2';
+const STATIC_ASSETS = ['/', '/offline.html'];
 
-// Install: pre-cache the shell
+// Install: pre-cache the shell + offline page
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
@@ -60,7 +60,28 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for navigation and everything else
+  // Network-first for navigation — with offline fallback page
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          // Cache successful navigation responses for offline use
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match(event.request).then((cached) =>
+            cached || caches.match('/offline.html')
+          )
+        )
+    );
+    return;
+  }
+
+  // Network-first for everything else
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );

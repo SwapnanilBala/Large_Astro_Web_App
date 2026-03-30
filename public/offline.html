@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Lagna Atelier - Offline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: #0D0C14;
+      color: #EDE0C4;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+    .card {
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      padding: 3rem 2rem;
+      border-radius: 24px;
+      background: rgba(255, 243, 210, 0.04);
+      border: 1px solid rgba(200, 155, 60, 0.15);
+      backdrop-filter: blur(24px);
+    }
+    .icon { font-size: 3.5rem; margin-bottom: 1rem; opacity: 0.7; }
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #C89B3C;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      font-size: 1.1rem;
+      color: #9A8B70;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+    .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 14px 28px;
+      border-radius: 14px;
+      border: 1px solid rgba(200, 155, 60, 0.25);
+      background: linear-gradient(135deg, #1A7B6E, #2D8E7A, #C89B3C);
+      color: #EAEDF3;
+      font-size: 1.1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      text-decoration: none;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .retry-btn:active { transform: scale(0.96); }
+    .stars {
+      position: fixed; inset: 0; pointer-events: none; z-index: -1;
+    }
+    .star {
+      position: absolute;
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: #C89B3C;
+      animation: twinkle 3s ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      0% { opacity: 0.1; } 50% { opacity: 0.8; } 100% { opacity: 0.15; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stars" aria-hidden="true">
+    <span class="star" style="left:10%;top:15%;animation-delay:0s"></span>
+    <span class="star" style="left:30%;top:8%;animation-delay:0.8s"></span>
+    <span class="star" style="left:55%;top:20%;animation-delay:1.5s"></span>
+    <span class="star" style="left:75%;top:12%;animation-delay:0.3s"></span>
+    <span class="star" style="left:90%;top:25%;animation-delay:2s"></span>
+    <span class="star" style="left:20%;top:80%;animation-delay:1s"></span>
+    <span class="star" style="left:50%;top:85%;animation-delay:2.5s"></span>
+    <span class="star" style="left:80%;top:75%;animation-delay:0.5s"></span>
+  </div>
+  <div class="card">
+    <div class="icon">&#x2604;</div>
+    <h1>Cosmic Drift</h1>
+    <p>The celestial connection has been temporarily disrupted. Please check your network and try again.</p>
+    <a href="/" class="retry-btn" onclick="location.reload(); return false;">
+      Reconnect
+    </a>
+  </div>
+</body>
+</html>
