@@ -48,7 +48,7 @@
 
 .heading {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(2rem, 3.5vw, 2.7rem);
+  font-size: clamp(1.75rem, 3vw, 2.35rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink-main);
@@ -59,7 +59,7 @@
 }
 
 .lead {
-  font-size: 1.45rem;
+  font-size: 1.28rem;
   color: var(--ink-soft);
   margin: 0.8rem 0 0;
   line-height: 1.5;
@@ -86,14 +86,14 @@
 }
 
 .labelIcon {
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   opacity: 0.6;
   line-height: 1;
 }
 
 .labelText {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.24rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -108,7 +108,7 @@
   border: 1px solid var(--line-soft);
   background: var(--surface-soft);
   color: var(--ink-main);
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-family: var(--font-body), 'Inter', sans-serif;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   outline: none;
@@ -133,7 +133,7 @@
   background: rgba(240, 112, 104, 0.10);
   border: 1px solid rgba(240, 112, 104, 0.25);
   color: var(--accent-coral);
-  font-size: 1.38rem;
+  font-size: 1.22rem;
   line-height: 1.4;
 }
 
@@ -149,7 +149,7 @@
   animation: authGradientShift 5s ease infinite;
   color: #EAEDF3;
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -219,7 +219,7 @@
 }
 
 .dividerText {
-  font-size: 1.28rem;
+  font-size: 1.14rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -236,7 +236,7 @@
   justify-content: center;
   gap: 0.4rem;
   text-align: center;
-  font-size: 1.42rem;
+  font-size: 1.25rem;
   color: var(--ink-soft);
 }
 
@@ -262,7 +262,7 @@
   }
 
   .heading {
-    font-size: clamp(2rem, 5vw, 2.5rem);
+    font-size: clamp(1.75rem, 4.5vw, 2.2rem);
   }
 
   .form {
@@ -278,7 +278,7 @@
   }
 
   .heading {
-    font-size: 1.9rem;
+    font-size: 1.65rem;
   }
 
   .fieldInput {
