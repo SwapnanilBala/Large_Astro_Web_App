@@ -151,7 +151,7 @@
 
 .cardHeader h2 {
   margin: 0.35rem 0 0;
-  font-size: 2.5rem;
+  font-size: 2.15rem;
   line-height: 1;
 }
 
@@ -187,7 +187,7 @@
 .success {
   margin: 0;
   color: #C89B3C;
-  font-size: 1.4rem;
+  font-size: 1.24rem;
 }
 
 .matrixPanel {
@@ -240,7 +240,7 @@
   border-color: rgba(200, 155, 60, 0.18);
   text-transform: uppercase;
   letter-spacing: 0.06rem;
-  font-size: 1.28rem;
+  font-size: 1.14rem;
   font-weight: 700;
 }
 

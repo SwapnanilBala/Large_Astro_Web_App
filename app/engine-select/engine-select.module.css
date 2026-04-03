@@ -59,7 +59,7 @@
 
 .heading {
   font-family: var(--font-heading), sans-serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.3rem);
+  font-size: clamp(1.55rem, 3vw, 2rem);
   font-weight: 700;
   color: #EAEDF3;
   margin: 0 0 0.75rem;
@@ -71,7 +71,7 @@
 }
 
 .lead {
-  font-size: 1.45rem;
+  font-size: 1.28rem;
   color: #8B8FA3;
   line-height: 1.65;
   max-width: 620px;
@@ -160,7 +160,7 @@
 
 .cardLabel {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.7rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #EAEDF3;
   margin: 0;
@@ -214,7 +214,7 @@
 }
 
 .cardDesc {
-  font-size: 1.38rem;
+  font-size: 1.22rem;
   color: #8B8FA3;
   line-height: 1.6;
   margin: 0;
@@ -232,14 +232,14 @@
 
 .houseSectionTitle {
   font-family: var(--font-heading), sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 700;
   color: #EAEDF3;
   margin: 0 0 0.35rem;
 }
 
 .houseSectionLead {
-  font-size: 1.32rem;
+  font-size: 1.18rem;
   color: #8B8FA3;
   line-height: 1.55;
   margin: 0 0 1rem;
@@ -342,7 +342,7 @@
   padding: 1rem 2rem;
   border-radius: 12px;
   font-family: var(--font-body), sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 700;
   color: #0F1117;
   background: linear-gradient(110deg, #C89B3C, #d4aa50, #C89B3C, #a07828);
@@ -482,6 +482,6 @@
   }
 
   .cardLabel {
-    font-size: 1.55rem;
+    font-size: 1.38rem;
   }
 }
