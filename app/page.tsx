@@ -17,6 +17,7 @@ import ZodiacWheel from "./components/ZodiacWheel";
 import FormCelebration from "./components/FormCelebration";
 import Image from "next/image";
 import { hapticSuccess } from "@/lib/haptics";
+import OnboardingCinematic from "./components/OnboardingCinematic";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -382,6 +383,7 @@ export default function Home() {
 
   return (
     <div className="home-shell">
+      <OnboardingCinematic />
       <FormCelebration isComplete={canSubmit} />
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
