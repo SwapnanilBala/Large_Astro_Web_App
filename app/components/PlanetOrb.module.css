@@ -1,0 +1,246 @@
+/* ═══════════════════════════════════════════════
+   PlanetOrb – Animated glowing planet avatars
+   ═══════════════════════════════════════════════ */
+
+/* ─── Wrapper (orb + optional label) ─── */
+.wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Orb base ─── */
+.orb {
+  position: relative;
+  border-radius: 50%;
+  cursor: default;
+  flex-shrink: 0;
+  animation: planetPulse 3s ease-in-out infinite alternate;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.orb:hover {
+  transform: scale(1.15);
+}
+
+/* Noise/texture overlay for realism */
+.orb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: cover;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  border-radius: 50%;
+}
+
+/* Inner highlight for 3D depth */
+.orb::before {
+  content: "";
+  position: absolute;
+  top: 12%;
+  left: 18%;
+  width: 30%;
+  height: 30%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.45) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  pointer-events: none;
+}
+
+/* ─── Size variants ─── */
+.sm {
+  width: 24px;
+  height: 24px;
+}
+
+.md {
+  width: 36px;
+  height: 36px;
+}
+
+.lg {
+  width: 48px;
+  height: 48px;
+}
+
+.xl {
+  width: 64px;
+  height: 64px;
+}
+
+/* ─── Planet color schemes ─── */
+
+/* Sun */
+.sun {
+  background: radial-gradient(circle at 40% 40%, #FFD700, #FF8C00);
+  box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.45),
+              0 0 24px 8px rgba(255, 140, 0, 0.2);
+}
+.sun:hover {
+  box-shadow: 0 0 18px 6px rgba(255, 215, 0, 0.65),
+              0 0 36px 12px rgba(255, 140, 0, 0.35);
+}
+
+/* Moon */
+.moon {
+  background: radial-gradient(circle at 40% 40%, #E8E8F0, #B8B8D0);
+  box-shadow: 0 0 12px 4px rgba(232, 232, 240, 0.4),
+              0 0 24px 8px rgba(184, 184, 208, 0.2);
+}
+.moon:hover {
+  box-shadow: 0 0 18px 6px rgba(232, 232, 240, 0.6),
+              0 0 36px 12px rgba(184, 184, 208, 0.35);
+}
+
+/* Mars */
+.mars {
+  background: radial-gradient(circle at 40% 40%, #FF4444, #CC0000);
+  box-shadow: 0 0 12px 4px rgba(255, 68, 68, 0.45),
+              0 0 24px 8px rgba(204, 0, 0, 0.2);
+}
+.mars:hover {
+  box-shadow: 0 0 18px 6px rgba(255, 68, 68, 0.65),
+              0 0 36px 12px rgba(204, 0, 0, 0.35);
+}
+
+/* Mercury */
+.mercury {
+  background: radial-gradient(circle at 40% 40%, #50C878, #2E8B57);
+  box-shadow: 0 0 12px 4px rgba(80, 200, 120, 0.4),
+              0 0 24px 8px rgba(46, 139, 87, 0.2);
+}
+.mercury:hover {
+  box-shadow: 0 0 18px 6px rgba(80, 200, 120, 0.6),
+              0 0 36px 12px rgba(46, 139, 87, 0.35);
+}
+
+/* Jupiter */
+.jupiter {
+  background: radial-gradient(circle at 40% 40%, #FFB347, #FF8C00);
+  box-shadow: 0 0 12px 4px rgba(255, 179, 71, 0.45),
+              0 0 24px 8px rgba(255, 140, 0, 0.2);
+}
+.jupiter:hover {
+  box-shadow: 0 0 18px 6px rgba(255, 179, 71, 0.65),
+              0 0 36px 12px rgba(255, 140, 0, 0.35);
+}
+
+/* Venus */
+.venus {
+  background: radial-gradient(circle at 40% 40%, #FF69B4, #FF1493);
+  box-shadow: 0 0 12px 4px rgba(255, 105, 180, 0.45),
+              0 0 24px 8px rgba(255, 20, 147, 0.2);
+}
+.venus:hover {
+  box-shadow: 0 0 18px 6px rgba(255, 105, 180, 0.65),
+              0 0 36px 12px rgba(255, 20, 147, 0.35);
+}
+
+/* Saturn */
+.saturn {
+  background: radial-gradient(circle at 40% 40%, #708090, #2F4F4F);
+  box-shadow: 0 0 12px 4px rgba(112, 128, 144, 0.4),
+              0 0 24px 8px rgba(47, 79, 79, 0.2);
+}
+.saturn:hover {
+  box-shadow: 0 0 18px 6px rgba(112, 128, 144, 0.6),
+              0 0 36px 12px rgba(47, 79, 79, 0.35);
+}
+
+/* Rahu – deep purple with shadow effect */
+.rahu {
+  background: radial-gradient(circle at 40% 40%, #4B0082, #800080);
+  box-shadow: 0 0 12px 4px rgba(75, 0, 130, 0.5),
+              0 0 24px 8px rgba(128, 0, 128, 0.25),
+              inset 0 0 8px 2px rgba(0, 0, 0, 0.35);
+}
+.rahu:hover {
+  box-shadow: 0 0 18px 6px rgba(75, 0, 130, 0.7),
+              0 0 36px 12px rgba(128, 0, 128, 0.4),
+              inset 0 0 8px 2px rgba(0, 0, 0, 0.35);
+}
+
+/* Ketu – smoky red */
+.ketu {
+  background: radial-gradient(circle at 40% 40%, #8B0000, #DC143C);
+  box-shadow: 0 0 12px 4px rgba(139, 0, 0, 0.45),
+              0 0 24px 8px rgba(220, 20, 60, 0.2);
+}
+.ketu:hover {
+  box-shadow: 0 0 18px 6px rgba(139, 0, 0, 0.65),
+              0 0 36px 12px rgba(220, 20, 60, 0.35);
+}
+
+/* ─── Label ─── */
+.label {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(237, 224, 196, 0.7);
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.sm + .label,
+.wrapper:has(.sm) .label {
+  font-size: 0.5rem;
+}
+
+/* ─── Row layout ─── */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+/* Stagger entrance */
+.rowItem {
+  opacity: 0;
+  animation: orbEnter 0.45s ease-out forwards;
+}
+
+/* ─── Keyframes ─── */
+@keyframes planetPulse {
+  0% {
+    filter: brightness(1);
+  }
+  100% {
+    filter: brightness(1.18);
+  }
+}
+
+@keyframes orbEnter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ─── Reduced motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .orb {
+    animation: none;
+    transition: none;
+  }
+  .orb:hover {
+    transform: none;
+  }
+  .rowItem {
+    animation: none;
+    opacity: 1;
+  }
+}

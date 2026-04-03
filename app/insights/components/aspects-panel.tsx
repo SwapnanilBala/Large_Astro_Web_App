@@ -4,6 +4,10 @@ import { memo } from "react";
 import type { AspectInfo } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { ASPECT_SYMBOLS, getAspectBriefInterpretation } from "./aspect-interpretations";
+import PlanetOrb from "@/app/components/PlanetOrb";
+import type { PlanetName } from "@/app/components/PlanetOrb";
+
+const VALID_PLANETS = new Set<string>(["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"]);
 
 type AspectsPanelProps = {
   aspects: AspectInfo[];
@@ -42,11 +46,17 @@ function AspectsPanel({ aspects }: AspectsPanelProps) {
             className={`aspect-card aspect-card--${aspect.aspect_type.toLowerCase()}`}
             role="listitem"
           >
-            <h3>
+            <h3 style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              {VALID_PLANETS.has(aspect.planet1) && (
+                <PlanetOrb planet={aspect.planet1 as PlanetName} size="sm" />
+              )}
               {aspect.planet1}
               <span className="aspect-symbol">
                 {ASPECT_SYMBOLS[aspect.aspect_type.toLowerCase()] ?? "\u2194"}
               </span>
+              {VALID_PLANETS.has(aspect.planet2) && (
+                <PlanetOrb planet={aspect.planet2 as PlanetName} size="sm" />
+              )}
               {aspect.planet2}
             </h3>
             <div className="aspect-card-body">
