@@ -521,7 +521,7 @@ export default function Home() {
           <div data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
             <span className={styles.orbitNumber}>1</span>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
-              <GiCrystalBall className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiCrystalBall className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formName")}</span>
               <input
                 type="text"
@@ -542,7 +542,7 @@ export default function Home() {
               <Image src="/zodiac/cancer.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiSunrise className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formBirthDate")}</span>
               <DatePicker
                 selected={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
@@ -576,7 +576,7 @@ export default function Home() {
               <Image src="/zodiac/leo.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiSunrise className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formBirthTime")}</span>
               <DatePicker
                 selected={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
@@ -637,7 +637,7 @@ export default function Home() {
               <Image src="/zodiac/sagittarius.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formCountry")}</span>
               <AutocompleteInput
                 value={draft.country}
@@ -658,7 +658,7 @@ export default function Home() {
               <Image src="/zodiac/capricorn.png" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formState")}</span>
               <AutocompleteInput
                 value={draft.state}
@@ -679,7 +679,7 @@ export default function Home() {
               <Image src="/zodiac/pisces.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
             </div>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.2rem" }} />
+              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
               <span className={styles.fieldLabelText}>{t("home.formCity")}</span>
               <AutocompleteInput
                 value={draft.city}

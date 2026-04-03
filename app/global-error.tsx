@@ -34,14 +34,14 @@ export default function GlobalError({
           }}
         >
           <div
-            style={{ fontSize: "3rem", marginBottom: "1rem", opacity: 0.7 }}
+            style={{ fontSize: "2.6rem", marginBottom: "1rem", opacity: 0.7 }}
             aria-hidden="true"
           >
             &#x2728;
           </div>
           <h1
             style={{
-              fontSize: "1.5rem",
+              fontSize: "1.32rem",
               fontWeight: 600,
               color: "#f2c26c",
               margin: "0 0 0.75rem",

@@ -97,7 +97,7 @@ function CompatibilityRing({ score }: { score: number }) {
           position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column',
           alignItems: 'center', justifyContent: 'center',
         }}>
-          <span style={{ fontSize: '2rem', fontWeight: 700, color, lineHeight: 1 }}>
+          <span style={{ fontSize: '1.75rem', fontWeight: 700, color, lineHeight: 1 }}>
             {Math.round(score)}
           </span>
           <span style={{

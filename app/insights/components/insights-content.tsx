@@ -443,7 +443,7 @@ export default function InsightsContent({
             />
             <div>
               <p style={{ margin: 0, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>{t("insights.ascendantSign")}</p>
-              <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
+              <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
             </div>
           </div>
 
