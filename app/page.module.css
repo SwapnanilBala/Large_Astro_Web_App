@@ -32,7 +32,7 @@
 /* text-shadow won't show on clip-text elements; use filter drop-shadow instead */
 
 .heroHeading {
-  font-size: clamp(2.3rem, 4.8vw, 3.8rem);
+  font-size: clamp(2rem, 4.2vw, 3.3rem);
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.15;
@@ -49,7 +49,7 @@
   color: var(--ink-soft);
   border-radius: 12px;
   padding: 0.35em 1em;
-  font-size: 1.35rem;
+  font-size: 1.2rem;
   letter-spacing: 0.04em;
 }
 
@@ -143,7 +143,7 @@
 }
 
 .spacerSymbol {
-  font-size: clamp(1.5rem, 2vw, 1.9rem);
+  font-size: clamp(1.3rem, 1.8vw, 1.65rem);
   color: var(--accent-gold);
   opacity: 0.12;
   letter-spacing: 0.05em;
@@ -164,7 +164,7 @@
 
 .spacerQuote {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: clamp(1.35rem, 1.6vw, 1.6rem);
+  font-size: clamp(1.2rem, 1.4vw, 1.4rem);
   font-style: italic;
   font-weight: 400;
   color: var(--ink-soft);
@@ -189,11 +189,11 @@
   }
 
   .spacerSymbol {
-    font-size: 1.35rem;
+    font-size: 1.2rem;
   }
 
   .spacerQuote {
-    font-size: 1.28rem;
+    font-size: 1.12rem;
     max-width: 280px;
   }
 }
@@ -303,7 +303,7 @@
 }
 
 .bentoHero .fieldCard .fieldInput {
-  font-size: clamp(1.7rem, 2vw, 1.9rem) !important;
+  font-size: clamp(1.5rem, 1.8vw, 1.65rem) !important;
 }
 
 .bentoHero .orbitNumber {
@@ -375,7 +375,7 @@
 
 .fieldLabelText {
   font-family: var(--font-display), 'Sora', sans-serif;
-  font-size: clamp(1.6rem, 2vw, 1.85rem);
+  font-size: clamp(1.4rem, 1.8vw, 1.6rem);
   font-weight: 700;
   letter-spacing: 0.04em;
   background: linear-gradient(135deg, #EAEDF3 0%, #8B8FA3 100%);
@@ -388,7 +388,7 @@
 .fieldInput,
 .fieldCard input,
 .fieldCard :global(.autocomplete-input) {
-  font-size: clamp(1.55rem, 1.8vw, 1.7rem) !important;
+  font-size: clamp(1.35rem, 1.6vw, 1.5rem) !important;
   font-weight: 600 !important;
   padding: 1.1rem 1.2rem !important;
   font-family: var(--font-body), "Sora", sans-serif !important;
@@ -398,7 +398,7 @@
 
 .fieldCard input::placeholder {
   font-weight: 400 !important;
-  font-size: clamp(1.45rem, 1.5vw, 1.55rem) !important;
+  font-size: clamp(1.28rem, 1.3vw, 1.38rem) !important;
 }
 
 /* ── Light Theme ── */
@@ -505,7 +505,7 @@
 
 .sectionHeading {
   margin: 1.4rem 0 0.5rem;
-  font-size: clamp(1.55rem, 2.2vw, 2rem);
+  font-size: clamp(1.35rem, 1.9vw, 1.75rem);
   font-family: var(--font-display), 'Sora', sans-serif;
   background-image: linear-gradient(135deg, var(--accent-gold), var(--accent-aqua));
   -webkit-background-clip: text;
@@ -621,7 +621,7 @@
   border-radius: 14px;
   border: 1px solid rgba(200, 155, 60, 0.25);
   padding: 16px 24px;
-  font-size: 1.5rem;
+  font-size: 1.32rem;
   font-weight: 600;
   box-shadow:
     0 4px 20px rgba(200, 155, 60, 0.20),
@@ -956,7 +956,7 @@
   height: 2em;
   overflow: hidden;
   margin: 0.4rem 0 0.2rem;
-  font-size: clamp(1.35rem, 1.5vw, 1.55rem);
+  font-size: clamp(1.2rem, 1.3vw, 1.38rem);
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -968,7 +968,7 @@
   width: 100%;
   margin: 1rem auto 0.8rem;
   height: 2.4em;
-  font-size: clamp(1.6rem, 2.2vw, 2.05rem);
+  font-size: clamp(1.4rem, 1.9vw, 1.8rem);
   letter-spacing: 0.08em;
   font-weight: 500;
 }
@@ -1414,7 +1414,7 @@
   }
 
   .heroHeading {
-    font-size: clamp(1.75rem, 4.5vw, 2.3rem);
+    font-size: clamp(1.55rem, 4vw, 2rem);
   }
 
   .bentoGrid {
@@ -1433,7 +1433,7 @@
   }
 
   .mysticalTaglineCentered {
-    font-size: clamp(1.4rem, 2.5vw, 1.7rem);
+    font-size: clamp(1.25rem, 2.2vw, 1.5rem);
     margin: 0.6rem auto 0.5rem;
   }
 
@@ -1449,7 +1449,7 @@
 
 @media (max-width: 480px) {
   .heroHeading {
-    font-size: clamp(1.5rem, 5.5vw, 1.85rem);
+    font-size: clamp(1.32rem, 5vw, 1.6rem);
   }
 
   .fieldCard {
@@ -1458,6 +1458,6 @@
   }
 
   .mysticalTaglineCentered {
-    font-size: clamp(1.3rem, 3vw, 1.5rem);
+    font-size: clamp(1.15rem, 2.6vw, 1.32rem);
   }
 }
