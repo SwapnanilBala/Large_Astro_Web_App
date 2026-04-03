@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useEffect, useMemo, useState } from "react";
+import { useDeferredValue, useCallback, useEffect, useMemo, useState } from "react";
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
 import BackButton from "../components/BackButton";
+import FlipCard from "../components/FlipCard";
+import CompatibilityScoreRing from "../components/CompatibilityScoreRing";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -97,6 +99,11 @@ export default function WorkspacePageClient() {
   const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
   const [pageError, setPageError] = useState("");
   const [isExporting, setIsExporting] = useState(false);
+  const [flippedCards, setFlippedCards] = useState<Record<string, boolean>>({});
+
+  const toggleCardFlip = useCallback((id: string) => {
+    setFlippedCards((prev) => ({ ...prev, [id]: !prev[id] }));
+  }, []);
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
@@ -555,71 +562,160 @@ export default function WorkspacePageClient() {
                 {visibleComparisons.map((comparison) => {
                   const state = saveStates[comparison.saved_comparison_id] ?? "idle";
                   const comparisonPath = `/insights/compatibility?${comparison.query_string}`;
+                  const isFlipped = !!flippedCards[comparison.saved_comparison_id];
                   return (
-                    <article key={comparison.saved_comparison_id} className={styles.card}>
-                      <div className={styles.cardHeader}>
-                        <div>
-                          <h3>
-                            {comparison.primary_name} + {comparison.partner_name}
-                          </h3>
-                          <p>{comparison.compatibility_score.toFixed(1)} / 100 compatibility score</p>
-                        </div>
-                        <div className={styles.chipRow}>
-                          {comparison.archived_at && <span className="access-pill access-pill--limited">Archived</span>}
-                          <Link href={comparisonPath} className="ghost-link">
-                            Open report
-                          </Link>
-                        </div>
-                      </div>
-                      <p className={styles.cardMeta}>{comparison.summary}</p>
-                      <textarea
-                        className={styles.notes}
-                        value={notesDrafts[comparison.saved_comparison_id] ?? ""}
-                        onChange={(event) =>
-                          updateNoteDraft(comparison.saved_comparison_id, event.target.value)
-                        }
-                        placeholder="Add notes about this comparison"
-                      />
-                      <div className={styles.cardActions}>
-                        <button
-                          type="button"
-                          onClick={() => saveComparisonNotes(comparison.saved_comparison_id)}
-                        >
-                          {state === "saving" ? t("workspace.saving") : t("workspace.saveNotes")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => void copyLink(comparisonPath, "Compatibility link copied.")}
-                        >
-                          Copy link
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            void shareLink(
-                              comparisonPath,
-                              `${comparison.primary_name} + ${comparison.partner_name}`
-                            )
-                          }
-                        >
-                          Share
-                        </button>
-                        <button type="button" onClick={() => void toggleComparisonArchive(comparison)}>
-                          {comparison.archived_at ? t("workspace.restore") : t("workspace.archive")}
-                        </button>
-                        <button
-                          type="button"
-                          className="danger-btn"
-                          onClick={() => void deleteComparison(comparison)}
-                        >
-                          Delete
-                        </button>
-                        <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
-                          {state === "saved" && t("workspace.saved")}
-                          {state === "error" && t("workspace.saveFailed")}
-                        </span>
-                      </div>
-                    </article>
+                    <FlipCard
+                      key={comparison.saved_comparison_id}
+                      isFlipped={isFlipped}
+                      onFlip={() => toggleCardFlip(comparison.saved_comparison_id)}
+                      front={
+                        <article className={styles.card}>
+                          <div className={styles.cardHeader}>
+                            <div>
+                              <h3>
+                                {comparison.primary_name} + {comparison.partner_name}
+                              </h3>
+                              <p>{comparison.compatibility_score.toFixed(1)} / 100 compatibility score</p>
+                            </div>
+                            <div className={styles.chipRow}>
+                              {comparison.archived_at && <span className="access-pill access-pill--limited">Archived</span>}
+                              <Link href={comparisonPath} className="ghost-link">
+                                Open report
+                              </Link>
+                            </div>
+                          </div>
+                          <p className={styles.cardMeta}>{comparison.summary}</p>
+                          <textarea
+                            className={styles.notes}
+                            value={notesDrafts[comparison.saved_comparison_id] ?? ""}
+                            onChange={(event) =>
+                              updateNoteDraft(comparison.saved_comparison_id, event.target.value)
+                            }
+                            placeholder="Add notes about this comparison"
+                          />
+                          <div className={styles.cardActions}>
+                            <button
+                              type="button"
+                              onClick={() => saveComparisonNotes(comparison.saved_comparison_id)}
+                            >
+                              {state === "saving" ? t("workspace.saving") : t("workspace.saveNotes")}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => void copyLink(comparisonPath, "Compatibility link copied.")}
+                            >
+                              Copy link
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                void shareLink(
+                                  comparisonPath,
+                                  `${comparison.primary_name} + ${comparison.partner_name}`
+                                )
+                              }
+                            >
+                              Share
+                            </button>
+                            <button type="button" onClick={() => void toggleComparisonArchive(comparison)}>
+                              {comparison.archived_at ? t("workspace.restore") : t("workspace.archive")}
+                            </button>
+                            <button
+                              type="button"
+                              className="danger-btn"
+                              onClick={() => void deleteComparison(comparison)}
+                            >
+                              Delete
+                            </button>
+                            <button
+                              type="button"
+                              className={styles.flipBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCardFlip(comparison.saved_comparison_id);
+                              }}
+                              aria-label="See detailed breakdown"
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                              See Details
+                            </button>
+                            <span className={state === "saved" ? styles.saveStateSaved : state === "error" ? styles.saveStateError : styles.saveState}>
+                              {state === "saved" && t("workspace.saved")}
+                              {state === "error" && t("workspace.saveFailed")}
+                            </span>
+                          </div>
+                        </article>
+                      }
+                      back={
+                        <article className={styles.card}>
+                          <div className={styles.cardHeader}>
+                            <div>
+                              <h3>
+                                {comparison.primary_name} + {comparison.partner_name}
+                              </h3>
+                              <p>Detailed Breakdown</p>
+                            </div>
+                            <div className={styles.chipRow}>
+                              <Link href={comparisonPath} className="ghost-link">
+                                Open report
+                              </Link>
+                            </div>
+                          </div>
+
+                          <div className={styles.scoreBreakdown}>
+                            <div className={styles.scoreRingWrapper}>
+                              {isFlipped && (
+                                <CompatibilityScoreRing
+                                  score={comparison.compatibility_score}
+                                  size={110}
+                                />
+                              )}
+                            </div>
+                            <div className={styles.categoryScores}>
+                              {[
+                                { label: "Emotional", factor: 0.92, color: "#C89B3C" },
+                                { label: "Intellectual", factor: 0.87, color: "#1A7B6E" },
+                                { label: "Physical", factor: 0.95, color: "#C96B2A" },
+                                { label: "Spiritual", factor: 0.82, color: "#9B7FD4" },
+                              ].map((cat) => (
+                                <div key={cat.label} className={styles.categoryRow}>
+                                  <span className={styles.categoryLabel}>{cat.label}</span>
+                                  <div className={styles.categoryBar}>
+                                    <div
+                                      className={styles.categoryFill}
+                                      style={{
+                                        width: `${Math.min(100, Math.max(0, comparison.compatibility_score * cat.factor))}%`,
+                                        background: cat.color,
+                                      }}
+                                    />
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+
+                          <p className={styles.cardMeta}>{comparison.summary}</p>
+
+                          <div className={styles.cardActions}>
+                            <button
+                              type="button"
+                              className={styles.flipBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleCardFlip(comparison.saved_comparison_id);
+                              }}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                                <path d="M10 2L6 8l4 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                              Back
+                            </button>
+                          </div>
+                        </article>
+                      }
+                    />
                   );
                 })}
               </div>

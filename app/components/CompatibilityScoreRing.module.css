@@ -1,0 +1,88 @@
+/* ── Compatibility Score Ring ── */
+
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ring {
+  transform: rotate(-90deg);
+}
+
+.trackCircle {
+  fill: none;
+  stroke: rgba(139, 143, 163, 0.15);
+}
+
+.progressCircle {
+  fill: none;
+  stroke-linecap: round;
+  transition: stroke 0.3s ease;
+}
+
+.scoreLabel {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.scoreValue {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #EDE0C4;
+}
+
+.scoreCaption {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #8B8FA3;
+  margin-top: 2px;
+}
+
+/* ── Sparkle particles ── */
+.sparkleContainer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.sparkle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #C89B3C;
+  opacity: 0;
+}
+
+.sparkle.active {
+  animation: sparkleOut 800ms ease-out forwards;
+}
+
+@keyframes sparkleOut {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--tx), var(--ty)) scale(0);
+  }
+}
+
+/* ── Reduced motion ── */
+@media (prefers-reduced-motion: reduce) {
+  .sparkle.active {
+    animation: none;
+    opacity: 0;
+  }
+}
