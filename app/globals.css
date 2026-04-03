@@ -523,7 +523,7 @@ html[data-theme="light"] .insights-shell::before {
 
 h1 {
   margin: 0.55rem 0 0.8rem;
-  font-size: clamp(2.2rem, 4vw, 3.6rem);
+  font-size: clamp(1.9rem, 3.5vw, 3.1rem);
   line-height: 1.04;
   background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 55%, #7B5DC0 100%);
   background-size: 200% 200%;
@@ -901,7 +901,7 @@ button:focus-visible,
 
 .rules-header h2 {
   margin: 0.45rem 0 0;
-  font-size: clamp(1.65rem, 2vw, 2.15rem);
+  font-size: clamp(1.45rem, 1.8vw, 1.9rem);
   background: linear-gradient(135deg, #e2d9ff, #a78bfa);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -1635,7 +1635,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .nakshatra-name {
   margin: 0.48rem 0 0.34rem;
-  font-size: 2.1rem;
+  font-size: 1.85rem;
   font-family: var(--font-display), system-ui, sans-serif;
   color: var(--accent-gold);
 }
@@ -3951,7 +3951,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .auth-gate-lock {
-  font-size: 2.9rem;
+  font-size: 2.5rem;
   margin: 0 0 0.5rem;
 }
 
@@ -5282,7 +5282,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 }
 
 .error-icon {
-  font-size: 3.5rem;
+  font-size: 3rem;
   margin-bottom: 1rem;
   opacity: 0.85;
   animation: errorIconFloat 3s ease-in-out infinite alternate;
@@ -5295,7 +5295,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .error-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(1.8rem, 3.5vw, 2.25rem);
+  font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0 0 0.75rem;
@@ -5522,7 +5522,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-code {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(5rem, 12vw, 8rem);
+  font-size: clamp(4.2rem, 10vw, 6.8rem);
   font-weight: 800;
   margin: 0;
   line-height: 1;
@@ -5564,7 +5564,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 .not-found-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
-  font-size: clamp(1.9rem, 4vw, 2.5rem);
+  font-size: clamp(1.65rem, 3.5vw, 2.2rem);
   font-weight: 600;
   color: var(--accent-gold);
   margin: 0.5rem 0 1rem;
@@ -6540,7 +6540,7 @@ html[data-theme="light"] .back-btn:hover {
 }
 
 .chart-history-welcome-icon {
-  font-size: 2.3rem;
+  font-size: 2rem;
   color: var(--accent-gold);
   margin-bottom: 0.5rem;
   opacity: 0.7;
@@ -6875,9 +6875,9 @@ html[data-theme="light"] .chart-history-card {
   box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   text-align: center;
 }
-.error-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+.error-icon { font-size: 3rem; margin-bottom: 1rem; }
 .error-title {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: var(--accent-gold, #f5c842);
   margin-bottom: 0.75rem;
@@ -8738,12 +8738,12 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Tablet (≤768px) ── */
 @media (max-width: 768px) {
   body {
-    font-size: 22px;
+    font-size: 19px;
   }
 
-  h1 { font-size: clamp(2.1rem, 5vw, 2.7rem); }
-  h2 { font-size: clamp(1.8rem, 4vw, 2.1rem); }
-  h3 { font-size: clamp(1.6rem, 3.5vw, 1.8rem); }
+  h1 { font-size: clamp(1.85rem, 4.5vw, 2.35rem); }
+  h2 { font-size: clamp(1.55rem, 3.5vw, 1.85rem); }
+  h3 { font-size: clamp(1.4rem, 3vw, 1.6rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8766,14 +8766,14 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   input, select, textarea {
-    font-size: 23px !important; /* Prevents iOS zoom on focus */
+    font-size: 20px !important; /* Prevents iOS zoom on focus */
     padding: 10px 12px;
     border-radius: 10px;
   }
 
   button:not(.theme-toggle-btn):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn) {
     padding: 10px 18px;
-    font-size: 1.35rem;
+    font-size: 1.2rem;
     border-radius: 10px;
   }
 
@@ -8782,7 +8782,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   .navbar-brand {
-    font-size: 1.45rem;
+    font-size: 1.3rem;
   }
 
   .cosmic-divider {
@@ -8793,13 +8793,13 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Phone (≤600px) ── */
 @media (max-width: 600px) {
   body {
-    font-size: 21px;
+    font-size: 18px;
     line-height: 1.55;
   }
 
-  h1 { font-size: clamp(1.9rem, 6vw, 2.3rem); }
-  h2 { font-size: clamp(1.65rem, 5vw, 1.9rem); }
-  h3 { font-size: clamp(1.5rem, 4vw, 1.65rem); }
+  h1 { font-size: clamp(1.65rem, 5.5vw, 2rem); }
+  h2 { font-size: clamp(1.45rem, 4.5vw, 1.65rem); }
+  h3 { font-size: clamp(1.3rem, 3.5vw, 1.45rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8857,7 +8857,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   }
 
   .kicker {
-    font-size: 1.15rem;
+    font-size: 1.05rem;
     letter-spacing: 0.08em;
   }
 }
@@ -8865,10 +8865,10 @@ html[data-theme="light"] .yoga-card-cancellation {
 /* ── Small phone (≤480px) ── */
 @media (max-width: 480px) {
   body {
-    font-size: 20.5px;
+    font-size: 17.5px;
   }
 
-  h1 { font-size: clamp(1.7rem, 6.5vw, 2.1rem); }
+  h1 { font-size: clamp(1.5rem, 6vw, 1.85rem); }
 
   .intake-panel,
   .dashboard-shell {
@@ -8884,7 +8884,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   input, select, textarea {
     padding: 8px 9px;
-    font-size: 23px !important;
+    font-size: 20px !important;
   }
 }
 
