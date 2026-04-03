@@ -1,0 +1,53 @@
+/* ═══════════════════════════════════════════════
+   Cosmic Orbs — floating parallax decorations
+   ═══════════════════════════════════════════════ */
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(40px);
+  opacity: 0.18;
+  will-change: transform;
+}
+
+/* ── Gold orb ── */
+.orbGold {
+  width: 120px;
+  height: 120px;
+  top: 12%;
+  right: 8%;
+  background: radial-gradient(circle, #C89B3C 0%, transparent 70%);
+}
+
+/* ── Aqua orb ── */
+.orbAqua {
+  width: 90px;
+  height: 90px;
+  bottom: 18%;
+  left: 6%;
+  background: radial-gradient(circle, #1A7B6E 0%, transparent 70%);
+}
+
+/* ── Coral orb ── */
+.orbCoral {
+  width: 70px;
+  height: 70px;
+  top: 55%;
+  right: 14%;
+  background: radial-gradient(circle, #C96B2A 0%, transparent 70%);
+}
+
+/* ── Disable on mobile and reduced-motion ── */
+@media (max-width: 767px), (prefers-reduced-motion: reduce) {
+  .container {
+    display: none;
+  }
+}

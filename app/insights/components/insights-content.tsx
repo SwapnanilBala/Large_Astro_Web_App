@@ -10,6 +10,9 @@ import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
+import ParallaxContainer from "@/app/components/ParallaxContainer";
+import ParallaxLayer from "@/app/components/ParallaxLayer";
+import CosmicOrbs from "@/app/components/CosmicOrbs";
 import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels
@@ -390,7 +393,7 @@ export default function InsightsContent({
   };
 
   return (
-    <>
+    <ParallaxContainer>
       <ChartHistorySaver
         name={payload.client.name}
         city={payload.client.city}
@@ -398,9 +401,12 @@ export default function InsightsContent({
         ascendantSign={payload.chart.ascendant.sign}
         queryString={historyQs}
       />
+      {/* Floating cosmic orbs with parallax */}
+      <CosmicOrbs />
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
 
+      <ParallaxLayer depth={0.05}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
         {/* ─── Hero Header ─── */}
         <motion.div
@@ -1114,6 +1120,7 @@ export default function InsightsContent({
           </Link>
         </motion.div>
       </section>
-    </>
+      </ParallaxLayer>
+    </ParallaxContainer>
   );
 }
