@@ -72,6 +72,8 @@ import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
+import PlanetOrbRow from "@/app/components/PlanetOrbRow";
+import type { PlanetName } from "@/app/components/PlanetOrb";
 
 type InsightsContentProps = {
   payload: ChartApiResponse;
@@ -438,6 +440,17 @@ export default function InsightsContent({
               <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
             </div>
           </div>
+
+          {/* Planet orbs row – key planets from this chart */}
+          {payload.chart.planets && payload.chart.planets.length > 0 && (
+            <div style={{ marginTop: "1rem" }}>
+              <PlanetOrbRow
+                planets={payload.chart.planets.map((p) => p.name as PlanetName)}
+                size="sm"
+                showLabels
+              />
+            </div>
+          )}
         </motion.div>
 
         {/* ─── Top Metrics Bento Row ─── */}

@@ -3,6 +3,8 @@
 import { useState, memo } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import PlanetOrb from "@/app/components/PlanetOrb";
+import type { PlanetName } from "@/app/components/PlanetOrb";
 
 const PLANET_COLORS: Record<string, string> = {
   Sun: "#f5a623",
@@ -101,13 +103,10 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
             >
               {/* ── Compact row (always visible) ── */}
               <div className="planet-card__header">
-                <span
-                  className="planet-card__glyph"
-                  style={{ color }}
-                  aria-hidden="true"
-                >
-                  {glyph}
-                </span>
+                <PlanetOrb
+                  planet={planet.name as PlanetName}
+                  size="sm"
+                />
 
                 <div className="planet-card__title-group">
                   <h3 style={{ color }}>{planet.name}</h3>
