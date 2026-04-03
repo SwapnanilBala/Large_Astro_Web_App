@@ -56,7 +56,7 @@
 }
 
 .brandName {
-  font-size: clamp(2rem, 6vw, 3.5rem);
+  font-size: clamp(1.75rem, 5vw, 3rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -70,7 +70,7 @@
 }
 
 .tagline {
-  font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+  font-size: clamp(0.75rem, 2.2vw, 1.0rem);
   color: #EDE0C4;
   letter-spacing: 0.15em;
   text-transform: uppercase;
