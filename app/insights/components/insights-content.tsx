@@ -234,6 +234,39 @@ function LockedFeaturePreview({
   );
 }
 
+/* ─── Constellation Section Divider ─── */
+function ConstellationDivider() {
+  return (
+    <div className={styles.constellationDivider} aria-hidden="true">
+      <svg viewBox="0 0 400 48" fill="none">
+        <circle className={styles.constellationDot} cx="40" cy="24" r="2" />
+        <circle className={styles.constellationDot} cx="120" cy="16" r="1.5" />
+        <circle className={styles.constellationDot} cx="200" cy="28" r="2.5" />
+        <circle className={styles.constellationDot} cx="280" cy="18" r="1.5" />
+        <circle className={styles.constellationDot} cx="360" cy="26" r="2" />
+        <line className={styles.constellationLine} x1="42" y1="24" x2="118" y2="16" />
+        <line className={styles.constellationLine} x1="122" y1="16" x2="198" y2="28" />
+        <line className={styles.constellationLine} x1="202" y1="28" x2="278" y2="18" />
+        <line className={styles.constellationLine} x1="282" y1="18" x2="358" y2="26" />
+      </svg>
+    </div>
+  );
+}
+
+/* ─── Domain Icon Map ─── */
+const DOMAIN_ICONS: Record<string, string> = {
+  love_life: "\u2661",
+  career: "\u2726",
+  health: "\u2695",
+  family: "\u2302",
+  finance: "\u2666",
+  education: "\u2710",
+  spirituality: "\u2638",
+  influence: "\u2605",
+  inheritance: "\u229B",
+  cycles: "\u21BB",
+};
+
 /* ─── Animated Counter for Metric Values ─── */
 function AnimatedCounter({
   value,
@@ -252,9 +285,10 @@ function AnimatedCounter({
   useEffect(() => {
     const controls = fmAnimate(motionVal, value, {
       type: "spring",
-      stiffness: 80,
-      damping: 20,
-      mass: 0.8,
+      stiffness: 60,
+      damping: 15,
+      mass: 0.6,
+      bounce: 0.3,
     });
     const unsubscribe = motionVal.on("change", (latest) => {
       if (displayRef.current) {
@@ -468,7 +502,7 @@ export default function InsightsContent({
         >
           {/* Lagna Card */}
           <motion.article
-            className={`${styles.cardMetric} ${styles.cardGold}`}
+            className={`${styles.cardMetric} ${styles.cardGold} ${styles.cardDepthFront}`}
             variants={bentoItem}
           >
             <ZodiacSignImage
@@ -495,7 +529,7 @@ export default function InsightsContent({
 
           {/* Engine Card */}
           <motion.article
-            className={`${styles.cardMetric} ${styles.cardAqua}`}
+            className={`${styles.cardMetric} ${styles.cardAqua} ${styles.cardDepthFront}`}
             variants={bentoItem}
           >
             <div className={styles.metricIcon}>&#x2699;</div>
@@ -549,6 +583,8 @@ export default function InsightsContent({
           </motion.article>
         </motion.div>
 
+        <ConstellationDivider />
+
         {/* ─── Main Bento Grid ─── */}
         <motion.div
           className={styles.gridMain}
@@ -559,7 +595,7 @@ export default function InsightsContent({
         >
           {/* Birth Chart — Large card spanning 2 columns */}
           <motion.div
-            className={styles.cardChart}
+            className={`${styles.cardChart} ${styles.chartStarfield} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
           >
             <PanelErrorBoundary panelName="Lagna Chart">
@@ -574,7 +610,7 @@ export default function InsightsContent({
 
           {/* Planetary Snapshots — Side card */}
           <motion.div
-            className={styles.cardPlanets}
+            className={`${styles.cardPlanets} ${styles.cardDepthFront}`}
             variants={bentoItemFromRight}
           >
             <PanelErrorBoundary panelName="Planetary Snapshots">
@@ -582,6 +618,8 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
         </motion.div>
+
+        <ConstellationDivider />
 
         {/* ─── Forecasts & Timing (Collapsible) ─── */}
         <CollapsibleSection
@@ -638,6 +676,8 @@ export default function InsightsContent({
             ))}
           </div>
         </CollapsibleSection>
+
+        <ConstellationDivider />
 
         {/* ─── Career & Love in Bento Grid ─── */}
         {(careerRules.length > 0 || loveRules.length > 0) && (
@@ -721,6 +761,8 @@ export default function InsightsContent({
           </div>
         )}
 
+        <ConstellationDivider />
+
         {/* ─── Advanced Modules Grid (Collapsible) ─── */}
         <CollapsibleSection
           kicker={t("insights.advancedKicker")}
@@ -731,7 +773,7 @@ export default function InsightsContent({
         <div className={styles.gridAdvanced}>
           {/* Nakshatra & Dasha */}
           <motion.div
-            className={`${styles.cardDasha} ${styles.cardFullWidth}`}
+            className={`${styles.cardDasha} ${styles.cardFullWidth} ${styles.cardDashaActive}`}
             initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -763,7 +805,7 @@ export default function InsightsContent({
 
           {/* Aspects */}
           <motion.div
-            className={styles.cardAspects}
+            className={`${styles.cardAspects} ${styles.cardDepthMid}`}
             initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -790,7 +832,7 @@ export default function InsightsContent({
 
           {/* Navamsa */}
           <motion.div
-            className={styles.cardNavamsa}
+            className={`${styles.cardNavamsa} ${styles.chartStarfield}`}
             initial={shouldReduceMotion ? false : { opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -883,7 +925,7 @@ export default function InsightsContent({
 
           {/* Transits */}
           <motion.div
-            className={`${styles.cardTransits} ${styles.cardFullWidth}`}
+            className={`${styles.cardTransits} ${styles.cardFullWidth} ${styles.cardDepthMid}`}
             initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -910,7 +952,7 @@ export default function InsightsContent({
 
           {/* Ashtakavarga */}
           <motion.div
-            className={`${styles.cardAshtakavarga} ${styles.cardFullWidth}`}
+            className={`${styles.cardAshtakavarga} ${styles.cardFullWidth} ${styles.cardDepthBack}`}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-60px" }}
@@ -993,6 +1035,9 @@ export default function InsightsContent({
                     className={domain.key === selectedDomainKey ? styles.domainChipActive : styles.domainChip}
                     onClick={() => setSelectedDomainKey(domain.key)}
                   >
+                    {DOMAIN_ICONS[domain.key] && (
+                      <span className={styles.domainChipIcon}>{DOMAIN_ICONS[domain.key]}</span>
+                    )}
                     {domain.label}
                   </button>
                 ))}
