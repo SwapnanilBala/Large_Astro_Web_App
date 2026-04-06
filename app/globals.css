@@ -3423,6 +3423,10 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   padding: 0.95rem 1rem;
 }
 
+.forecast-column .domain-reading-list {
+  font-size: 1.12rem;
+}
+
 .forecast-column h4,
 .forecast-transit-column h4 {
   margin: 0 0 0.7rem;
