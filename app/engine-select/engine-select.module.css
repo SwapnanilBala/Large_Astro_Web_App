@@ -48,17 +48,17 @@
 }
 
 .kicker {
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   font-size: 1.12rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 3px;
+  letter-spacing: 0.15em;
   color: #C89B3C;
   margin: 0 0 0.5rem;
 }
 
 .heading {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.55rem, 3vw, 2rem);
   font-weight: 700;
   color: #EAEDF3;
@@ -159,7 +159,7 @@
 }
 
 .cardLabel {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: #EAEDF3;
@@ -218,6 +218,7 @@
   color: #8B8FA3;
   line-height: 1.6;
   margin: 0;
+  font-weight: 300;
 }
 
 /* ── House System Selector ── */
@@ -231,7 +232,7 @@
 }
 
 .houseSectionTitle {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.32rem;
   font-weight: 700;
   color: #EAEDF3;

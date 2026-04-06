@@ -45,17 +45,17 @@
 }
 
 .kicker {
-  font-family: var(--font-body), sans-serif;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
+  letter-spacing: 0.18em;
+  color: var(--accent-gold);
   margin: 0 0 0.5rem;
 }
 
 .title {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.55rem, 3vw, 2.15rem);
   font-weight: 700;
   color: var(--ink-main);
@@ -69,15 +69,15 @@
 }
 
 .lead {
-  font-size: 1.2rem;
+  font-size: 1.32rem;
   color: var(--ink-soft);
-  line-height: 1.65;
+  line-height: 1.7;
   max-width: 680px;
   margin: 0 auto;
 }
 
 .heading {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.25rem, 2vw, 1.55rem);
   font-weight: 600;
   margin: 0;
@@ -224,7 +224,7 @@
 }
 
 .metricValue {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.52rem;
   font-weight: 700;
   color: var(--ink-main);
@@ -455,7 +455,7 @@
 }
 
 .cardPlanets :global(.planet-card__title-group h3) {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.18rem;
   font-weight: 600;
   margin: 0;
@@ -684,7 +684,7 @@
 }
 
 .ruleHeader h3 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.35rem;
   font-weight: 600;
   color: var(--ink-main);
@@ -779,7 +779,7 @@
 }
 
 .themeSummary h4 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.4rem;
@@ -886,7 +886,7 @@
 }
 
 .lockedPreview h3 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.35rem;
   color: var(--ink-main);
   margin: 0 0 0.5rem;
@@ -1011,7 +1011,7 @@
 }
 
 .domainHeader h3 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.32rem;
   color: var(--ink-main);
   margin: 0.25rem 0 0;
@@ -1032,7 +1032,7 @@
 }
 
 .domainCol h4 {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.5rem;

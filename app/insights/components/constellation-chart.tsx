@@ -473,7 +473,7 @@ export default function ConstellationChart({
                   fontSize="14"
                   textAnchor="middle"
                   dominantBaseline="central"
-                  style={{ fontFamily: "var(--font-heading), serif" }}
+                  style={{ fontFamily: "var(--font-display), serif" }}
                 >
                   {SIGN_SYMBOLS[sign]}
                 </text>
@@ -609,7 +609,7 @@ export default function ConstellationChart({
                 textAnchor="middle"
                 dominantBaseline="central"
                 style={{
-                  fontFamily: "var(--font-heading), serif",
+                  fontFamily: "var(--font-display), serif",
                   transition: "font-size 0.2s ease",
                   pointerEvents: "none",
                 }}
@@ -654,7 +654,7 @@ export default function ConstellationChart({
             fontWeight="bold"
             textAnchor="middle"
             dominantBaseline="central"
-            style={{ fontFamily: "var(--font-heading), serif" }}
+            style={{ fontFamily: "var(--font-display), serif" }}
           >
             {SIGN_SYMBOLS[ascendantSign] ?? ""} {ascendantSign}
           </text>
@@ -704,7 +704,7 @@ export default function ConstellationChart({
                       fontWeight="bold"
                       textAnchor="middle"
                       dominantBaseline="central"
-                      style={{ fontFamily: "var(--font-heading), serif" }}
+                      style={{ fontFamily: "var(--font-display), serif" }}
                     >
                       {PLANET_SYMBOLS[tooltip.planet] ?? ""} {tooltip.planet}
                       {tooltip.isRetrograde ? " (R)" : ""}

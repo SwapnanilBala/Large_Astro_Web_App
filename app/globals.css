@@ -348,6 +348,9 @@ body {
   font-family: var(--font-body), 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--ink-main);
   line-height: 1.6;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   transition: background-color 0.35s ease, color 0.35s ease;
@@ -375,6 +378,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--ink-main);
   letter-spacing: 0.01em;
   line-height: 1.1;
+  font-optical-sizing: auto;
 }
 
 h2 { color: var(--accent-gold); }
@@ -947,7 +951,7 @@ html[data-theme="light"] .rules-header h2 {
 .rule-card h3 {
   margin: 0;
   font-size: 1.35rem;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   font-weight: 600;
 }
 
@@ -1636,7 +1640,7 @@ label:has(.autocomplete-wrapper.is-open) {
 .nakshatra-name {
   margin: 0.48rem 0 0.34rem;
   font-size: 1.85rem;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   color: var(--accent-gold);
 }
 
@@ -2787,7 +2791,7 @@ html[data-theme="light"] .dasha-active-card {
 .transit-card h4 {
   margin: 0;
   font-size: 1.35rem;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   color: var(--accent-aqua);
 }
 
@@ -6477,7 +6481,7 @@ html[data-theme="light"] .back-btn:hover {
 
 .floating-quote {
   position: absolute;
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-accent), 'Cormorant Garamond', 'Georgia', serif;
   font-style: italic;
   font-weight: 500;
   color: var(--accent-gold);

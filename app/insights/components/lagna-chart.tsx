@@ -532,7 +532,7 @@ export default function LagnaChart({
                 textAnchor="middle"
                 dominantBaseline="central"
                 style={{
-                  fontFamily: "var(--font-heading), serif",
+                  fontFamily: "var(--font-display), serif",
                   pointerEvents: "none",
                 }}
               >
@@ -645,7 +645,7 @@ export default function LagnaChart({
             fontWeight="bold"
             textAnchor="middle"
             dominantBaseline="central"
-            style={{ fontFamily: "var(--font-heading), serif" }}
+            style={{ fontFamily: "var(--font-display), serif" }}
           >
             {SIGN_SYMBOLS[ascendantSign] ?? ""} {ascendantSign}
           </text>
@@ -694,7 +694,7 @@ export default function LagnaChart({
                 fontWeight="bold"
                 textAnchor="middle"
                 dominantBaseline="central"
-                style={{ fontFamily: "var(--font-heading), serif" }}
+                style={{ fontFamily: "var(--font-display), serif" }}
               >
                 {getPlanetGlyph(tooltip.planet)} {tooltip.planet}
               </text>

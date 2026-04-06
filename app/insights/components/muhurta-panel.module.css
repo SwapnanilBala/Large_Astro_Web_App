@@ -27,7 +27,7 @@
 }
 
 .heading {
-  font-family: var(--font-heading), sans-serif;
+  font-family: var(--font-display), sans-serif;
   font-size: clamp(1.23rem, 1.94vw, 1.55rem);
   font-weight: 700;
   color: var(--ink-main);

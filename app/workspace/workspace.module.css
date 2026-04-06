@@ -92,7 +92,9 @@
 
 .cardHeader h3 {
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .cardHeader p,
@@ -128,6 +130,8 @@
 .saveState {
   font-size: 1.15rem;
   color: #8B8FA3;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
 
 .saveStateSaved {
@@ -151,8 +155,8 @@
   border: 1px solid rgba(200, 155, 60, 0.25);
   background: rgba(200, 155, 60, 0.08);
   color: #C89B3C;
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s, border-color 0.2s;
 }

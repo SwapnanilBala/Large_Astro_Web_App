@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Inter } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, Cormorant_Garamond } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import GradientBlobs from "./components/GradientBlobs";
@@ -25,6 +25,14 @@ const bodyFont = Inter({
   weight: ["400", "500", "600"],
   display: "swap",
   preload: true,
+});
+
+const accentFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-accent",
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -59,7 +67,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${displayFont.variable} ${bodyFont.variable}`}>
+      <body className={`${displayFont.variable} ${bodyFont.variable} ${accentFont.variable}`}>
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>
