@@ -362,8 +362,9 @@
 .cardPlanets {
   composes: card;
   grid-column: 2;
-  overflow-y: auto;
-  max-height: 560px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .cardPlanets :global(.planet-panel) {
@@ -371,6 +372,10 @@
   padding: 0;
   border: none;
   background: none;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 }
 
 .cardPlanets :global(.planet-panel)::after {
@@ -381,6 +386,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 /* ── Planet Card: base compact state ── */
