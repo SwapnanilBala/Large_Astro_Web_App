@@ -181,7 +181,7 @@
 
 /* ─── Label ─── */
 .label {
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -192,7 +192,7 @@
 
 .sm + .label,
 .wrapper:has(.sm) .label {
-  font-size: 0.5rem;
+  font-size: 0.55rem;
 }
 
 /* ─── Row layout ─── */
@@ -200,7 +200,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px;
+  gap: 18px;
 }
 
 /* Stagger entrance */

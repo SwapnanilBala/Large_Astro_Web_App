@@ -476,17 +476,17 @@ export default function InsightsContent({
               }}
             />
             <div>
-              <p style={{ margin: 0, fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>{t("insights.ascendantSign")}</p>
-              <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
+              <p style={{ margin: 0, fontSize: "0.84rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>{t("insights.ascendantSign")}</p>
+              <p style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
             </div>
           </div>
 
           {/* Planet orbs row – key planets from this chart */}
           {payload.chart.planets && payload.chart.planets.length > 0 && (
-            <div style={{ marginTop: "1rem" }}>
+            <div style={{ marginTop: "1.25rem" }}>
               <PlanetOrbRow
                 planets={payload.chart.planets.map((p) => p.name as PlanetName)}
-                size="sm"
+                size="md"
                 showLabels
               />
             </div>
