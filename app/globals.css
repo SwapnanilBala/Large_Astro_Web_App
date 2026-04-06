@@ -9081,35 +9081,58 @@ html[data-theme="light"] .yoga-card-cancellation {
 .react-datepicker__month-dropdown-container,
 .react-datepicker__year-dropdown-container {
   margin: 0 4px !important;
+  position: relative;
 }
 
 .react-datepicker__month-dropdown-container select,
 .react-datepicker__year-dropdown-container select,
 .react-datepicker__month-select,
 .react-datepicker__year-select {
-  background: rgba(255, 255, 255, 0.06) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.10), rgba(255, 255, 255, 0.04)) !important;
+  backdrop-filter: blur(8px) !important;
   color: var(--ink-main) !important;
-  border: 1px solid rgba(255, 255, 255, 0.10) !important;
-  border-radius: 8px !important;
-  padding: 4px 8px !important;
-  font-size: 1.32rem !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 10px !important;
+  padding: 6px 28px 6px 10px !important;
+  font-size: 1.28rem !important;
+  font-weight: 500 !important;
   font-family: var(--font-body), 'Inter', sans-serif !important;
+  letter-spacing: 0.01em !important;
   cursor: pointer;
   outline: none;
   -webkit-appearance: none;
   appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236CE1D4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 11px !important;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.react-datepicker__month-select:hover,
+.react-datepicker__year-select:hover {
+  border-color: rgba(108, 225, 212, 0.35) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.06)) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%236CE1D4' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 11px !important;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22), 0 0 0 1px rgba(108, 225, 212, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 .react-datepicker__month-select:focus,
 .react-datepicker__year-select:focus {
   border-color: var(--accent-aqua) !important;
-  box-shadow: 0 0 0 2px rgba(200, 155, 60, 0.15) !important;
+  box-shadow: 0 0 0 2px rgba(108, 225, 212, 0.18), 0 2px 12px rgba(0, 0, 0, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
 }
 
 .react-datepicker__month-select option,
 .react-datepicker__year-select option {
-  background: #161922 !important;
+  background: #1a1d2a !important;
   color: var(--ink-main) !important;
+  padding: 6px 10px !important;
+  font-size: 1.22rem !important;
 }
 
 /* ── Time-only picker ── */
@@ -9223,9 +9246,24 @@ html[data-theme="light"] .react-datepicker__day--outside-month {
 
 html[data-theme="light"] .react-datepicker__month-select,
 html[data-theme="light"] .react-datepicker__year-select {
-  background: rgba(0, 0, 0, 0.04) !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02)) !important;
   color: var(--ink-main) !important;
-  border: 1px solid rgba(0, 0, 0, 0.10) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23D45048' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 11px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+}
+
+html[data-theme="light"] .react-datepicker__month-select:hover,
+html[data-theme="light"] .react-datepicker__year-select:hover {
+  border-color: rgba(212, 80, 72, 0.30) !important;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.03)) !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23D45048' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 8px center !important;
+  background-size: 11px !important;
 }
 
 html[data-theme="light"] .react-datepicker__month-select option,
