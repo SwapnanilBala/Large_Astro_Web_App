@@ -36,6 +36,7 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.15;
+  text-align: center;
   text-shadow: 0 0 40px rgba(200, 155, 60, 0.15);
   filter:
     drop-shadow(0 0 50px rgba(200, 155, 60, 0.18))
@@ -58,6 +59,11 @@
 /* ── Hero Title ── */
 .heroTitle {
   text-shadow: 0 0 40px rgba(200, 155, 60, 0.08);
+}
+
+/* ── Center kicker within this page's panel ── */
+.panel :global(.kicker) {
+  text-align: center;
 }
 
 /* ── Intake Panel (home-specific overrides) ───── */
