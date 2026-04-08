@@ -9149,6 +9149,11 @@ html[data-theme="light"] .yoga-card-cancellation {
   background: transparent !important;
 }
 
+.react-datepicker__time-container .react-datepicker__time .react-datepicker__time-box {
+  width: 100% !important;
+  overflow-x: visible !important;
+}
+
 .react-datepicker__header--time {
   background: rgba(255, 255, 255, 0.04) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
@@ -9195,11 +9200,11 @@ html[data-theme="light"] .yoga-card-cancellation {
 
 /* ── Time-only: make the container compact ── */
 .react-datepicker--time-only {
-  min-width: 180px !important;
+  min-width: 220px !important;
 }
 
 .react-datepicker--time-only .react-datepicker__time-container {
-  width: 180px !important;
+  width: 220px !important;
 }
 
 /* ── Scrollbar in time list ── */
@@ -9304,11 +9309,11 @@ html[data-theme="light"] .react-datepicker__header--time {
   }
 
   .react-datepicker--time-only {
-    min-width: 160px !important;
+    min-width: 200px !important;
   }
 
   .react-datepicker--time-only .react-datepicker__time-container {
-    width: 160px !important;
+    width: 200px !important;
   }
 }
 
