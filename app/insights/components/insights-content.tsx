@@ -446,30 +446,31 @@ export default function InsightsContent({
             {t("insights.headingSuffix")}
           </h1>
           <p className={styles.lead}>{payload.chart.summary}</p>
+          {/* Access Status (moved from metrics row) */}
           <div style={{
             display: "flex",
             alignItems: "center",
-            gap: "1rem",
+            gap: "0.75rem",
             marginTop: "1.25rem",
-            padding: "0.75rem 1.25rem",
+            padding: "0.6rem 1.25rem",
             background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "12px",
             backdropFilter: "blur(8px)",
             width: "fit-content",
           }}>
-            <ZodiacSignImage
-              sign={payload.chart.ascendant.sign}
-              size={52}
-              style={{
-                border: "2px solid rgba(255,200,80,0.5)",
-                boxShadow: "0 0 16px rgba(255,200,80,0.3)",
-              }}
-            />
-            <div>
-              <p style={{ margin: 0, fontSize: "0.84rem", textTransform: "uppercase", letterSpacing: "0.1em", color: "rgba(255,255,255,0.5)" }}>{t("insights.ascendantSign")}</p>
-              <p style={{ margin: 0, fontSize: "1.15rem", fontWeight: 700, color: "#f5c842" }}>{payload.chart.ascendant.sign}</p>
-            </div>
+            <span
+              className={payload.access.premium_features_enabled
+                  ? styles.accessPillPremium
+                  : styles.accessPillLimited}
+            >
+              {lockedFeatures.size === 0
+                ? t("insights.allFeatures")
+                : t("insights.limitedResponse")}
+            </span>
+            <small className={styles.accessTier}>
+              Tier: <strong>{payload.access.subscription_tier}</strong>
+            </small>
           </div>
 
           {/* Planet orbs row – key planets from this chart */}
@@ -549,28 +550,24 @@ export default function InsightsContent({
             )}
           </motion.article>
 
-          {/* Access Card */}
+          {/* Ascendant Sign Card (moved from hero) */}
           <motion.article
-            className={styles.cardStatus}
+            className={`${styles.cardMetric} ${styles.cardGold} ${styles.cardDepthFront}`}
             variants={bentoItem}
           >
-            <span
-              className={payload.access.premium_features_enabled
-                  ? styles.accessPillPremium
-                  : styles.accessPillLimited}
-            >
-              {lockedFeatures.size === 0
-                ? t("insights.allFeatures")
-                : t("insights.limitedResponse")}
-            </span>
-            <small className={styles.accessTier}>
-              Tier: <strong>{payload.access.subscription_tier}</strong>
-            </small>
-            {lockedFeatures.size > 0 && (
-              <small className={styles.accessLocked}>
-                Locked: {Array.from(lockedFeatures).join(", ")}
-              </small>
-            )}
+            <ZodiacSignImage
+              sign={payload.chart.ascendant.sign}
+              size={52}
+              style={{
+                border: "2px solid rgba(255,200,80,0.5)",
+                boxShadow: "0 0 16px rgba(255,200,80,0.3)",
+                marginBottom: "0.35rem",
+              }}
+            />
+            <h3>{t("insights.ascendantSign")}</h3>
+            <p className={styles.metricValue}>
+              {payload.chart.ascendant.sign}
+            </p>
           </motion.article>
         </motion.div>
 
