@@ -93,9 +93,11 @@ const J2000 = 2451545.0;
 // between the reference epoch and the target date.
 //
 // Sources / reference points:
-//   Lahiri        – Indian Astronomical Ephemeris: 23°15'00" on 21 Mar 1956
+//   Lahiri        – Indian Astronomical Ephemeris: 23°15'04" on 21 Mar 1956
 //   Raman         – B.V. Raman's value: 22°27'37.76" on 21 Mar 1956
-//   Krishnamurti  – KP system: 23°45'00" at J1900.0 (JD 2415020.0)
+//   Krishnamurti  – KP system: 22°22'25.44" at J1900.0 (JD 2415020.0)
+//                   (derived so that KP ayanamsha ≈ 23°46'25" at J2000.0,
+//                   matching the standard Krishnamurti Paddhati tables)
 // --------------------------------------------------------------------------
 
 interface AyanamsaRef {
@@ -107,7 +109,7 @@ interface AyanamsaRef {
 
 const AYANAMSA_REF: Record<string, AyanamsaRef> = {
   SE_SIDM_LAHIRI: {
-    value_deg: 23 + 15 / 60 + 0 / 3600, // 23°15'00"
+    value_deg: 23 + 15 / 60 + 4 / 3600, // 23°15'04"
     jd_epoch: 2435190.5,                  // 21 March 1956 0h UT
   },
   SE_SIDM_RAMAN: {
@@ -115,8 +117,8 @@ const AYANAMSA_REF: Record<string, AyanamsaRef> = {
     jd_epoch: 2435190.5,                      // 21 March 1956 0h UT
   },
   SE_SIDM_KRISHNAMURTI: {
-    value_deg: 23 + 45 / 60, // 23°45'00"
-    jd_epoch: 2415020.0,     // J1900.0 (31 Dec 1899 12h TT)
+    value_deg: 22 + 22 / 60 + 25.44 / 3600, // 22°22'25.44"
+    jd_epoch: 2415020.0,                      // J1900.0 (31 Dec 1899 12h TT)
   },
 };
 
