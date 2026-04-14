@@ -1,0 +1,91 @@
+/* ═══════════════════════════════════════════════
+   ADVANCED & PALM ANALYSIS — CSS Module
+   ═══════════════════════════════════════════════ */
+
+.advancedShell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── Back Link ── */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+  width: fit-content;
+}
+
+.backLink:hover {
+  color: var(--accent-gold);
+  border-color: rgba(200, 155, 60, 0.25);
+  background: rgba(200, 155, 60, 0.06);
+  transform: translateX(-2px);
+}
+
+.backLink svg {
+  transition: transform 0.25s ease;
+}
+
+.backLink:hover svg {
+  transform: translateX(-3px);
+}
+
+/* ── Hero Header ── */
+.hero {
+  text-align: center;
+  padding: 2rem 1rem 1.5rem;
+}
+
+.heroKicker {
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-gold);
+  margin: 0 0 0.5rem;
+}
+
+.heroTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  font-weight: 700;
+  margin: 0 0 0.75rem;
+  line-height: 1.25;
+  background: linear-gradient(135deg, #EAEDF3 40%, #F0B754);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.heroLead {
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+  line-height: 1.7;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+/* ── Light Theme ── */
+:global(html[data-theme="light"]) .backLink {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: var(--ink-soft);
+}
+
+:global(html[data-theme="light"]) .backLink:hover {
+  color: var(--accent-gold);
+  border-color: rgba(200, 155, 60, 0.3);
+  background: rgba(200, 155, 60, 0.06);
+}
