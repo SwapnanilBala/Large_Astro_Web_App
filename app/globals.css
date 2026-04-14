@@ -3376,9 +3376,26 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   align-items: flex-end;
 }
 
+.forecast-date-row {
+  display: flex;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+}
+
 .forecast-date-field {
-  min-width: min(280px, 100%);
-  max-width: 320px;
+  min-width: min(240px, 100%);
+  max-width: 280px;
+}
+
+.forecast-period-header {
+  margin-top: 1.2rem;
+  margin-bottom: 0.2rem;
+}
+
+.forecast-period-header h3 {
+  font-size: 1.55rem;
+  color: var(--accent-gold);
+  margin: 0;
 }
 
 .forecast-card {
@@ -3501,6 +3518,14 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   .forecast-form {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .forecast-date-row {
+    flex-direction: column;
+  }
+
+  .forecast-date-field {
+    max-width: 100%;
   }
 
   .forecast-card-header {
