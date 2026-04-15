@@ -47,6 +47,36 @@ function getLifetimeImplications(yogaName: string, category: string): string {
   );
 }
 
+function calculateManifestationPercentage(strength: StrengthGroup, category: string): number {
+  const basePercentages: Record<StrengthGroup, number> = {
+    strong: 85,
+    moderate: 65,
+    weak: 40,
+  };
+
+  const categoryBoost: Record<string, number> = {
+    mahapurusha: 15,
+    wealth: 12,
+    benefic: 10,
+    challenging: -5,
+    viparita: 8,
+    nabhasa: 5,
+  };
+
+  const base = basePercentages[strength];
+  const boost = categoryBoost[category] || 0;
+  return Math.min(99, Math.max(20, base + boost));
+}
+
+function getActivationTimeWindow(strength: StrengthGroup): string {
+  const windows: Record<StrengthGroup, string> = {
+    strong: "Lifetime (especially 25-60 years)",
+    moderate: "Mid to late life (30-65 years)",
+    weak: "Periodic / situational (triggered during transits)",
+  };
+  return windows[strength];
+}
+
 function StrengthBadge({ strength }: { strength: StrengthGroup }) {
   const colors: Record<StrengthGroup, { bg: string; text: string }> = {
     strong: {
@@ -138,7 +168,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           <h4
             style={{
               margin: "0 0 0.25rem 0",
-              fontSize: "1.1rem",
+              fontSize: "1.4rem",
               fontWeight: 700,
               color: "#fff",
               fontFamily: '"Plus Jakarta Sans", sans-serif',
@@ -150,7 +180,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
             <p
               style={{
                 margin: 0,
-                fontSize: "0.85rem",
+                fontSize: "0.95rem",
                 color: "rgba(200, 155, 60, 0.7)",
                 fontStyle: "italic",
                 fontFamily: '"Cormorant Garamond", serif',
@@ -161,6 +191,36 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           )}
         </div>
         <StrengthBadge strength={yoga.strength} />
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "0.75rem",
+          marginBottom: "0.75rem",
+          padding: "0.75rem",
+          background: "rgba(200, 155, 60, 0.08)",
+          border: "1px solid rgba(200, 155, 60, 0.15)",
+          borderRadius: "8px",
+        }}
+      >
+        <div>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "rgba(200, 155, 60, 0.7)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+            Manifestation Chance
+          </p>
+          <p style={{ margin: 0, fontSize: "1.35rem", fontWeight: 700, color: "rgba(255, 215, 100, 0.95)" }}>
+            {calculateManifestationPercentage(yoga.strength, yoga.category)}%
+          </p>
+        </div>
+        <div>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "rgba(138, 146, 169, 0.7)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+            Activation Window
+          </p>
+          <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600, color: "rgba(180, 190, 210, 0.9)" }}>
+            {getActivationTimeWindow(yoga.strength)}
+          </p>
+        </div>
       </div>
 
       <div
@@ -198,9 +258,9 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
         <p
           style={{
             margin: "0 0 0.5rem 0",
-            fontSize: "0.9rem",
+            fontSize: "1.05rem",
             color: "rgba(255, 255, 255, 0.75)",
-            lineHeight: 1.5,
+            lineHeight: 1.6,
           }}
         >
           <strong>Classical meaning:</strong> {yoga.description}
@@ -208,9 +268,9 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
         <p
           style={{
             margin: "0 0 0.5rem 0",
-            fontSize: "0.9rem",
+            fontSize: "1.05rem",
             color: "rgba(255, 255, 255, 0.7)",
-            lineHeight: 1.5,
+            lineHeight: 1.6,
           }}
         >
           <strong>Life effects:</strong> {yoga.effects}
@@ -219,9 +279,9 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           <p
             style={{
               margin: 0,
-              fontSize: "0.85rem",
+              fontSize: "0.95rem",
               color: "rgba(200, 155, 60, 0.8)",
-              lineHeight: 1.4,
+              lineHeight: 1.5,
             }}
           >
             <strong>⚠ Cancellation:</strong> {yoga.cancellation}
@@ -240,9 +300,9 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
         <p
           style={{
             margin: 0,
-            fontSize: "0.85rem",
+            fontSize: "1rem",
             color: "rgba(255, 220, 140, 0.9)",
-            lineHeight: 1.5,
+            lineHeight: 1.6,
           }}
         >
           <strong>✨ Lifetime implication:</strong> {yoga.lifetimeImplications}
@@ -339,10 +399,10 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
       <p
         style={{
           margin: 0,
-          fontSize: "1rem",
+          fontSize: "1.2rem",
           color: "rgba(255, 255, 255, 0.7)",
-          lineHeight: 1.6,
-          maxWidth: "800px",
+          lineHeight: 1.7,
+          maxWidth: "900px",
         }}
       >
         Yogas are classical planetary combinations that shape your lifetime

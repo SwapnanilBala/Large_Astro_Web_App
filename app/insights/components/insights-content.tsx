@@ -447,36 +447,10 @@ export default function InsightsContent({
             {t("insights.headingSuffix")}
           </h1>
           <p className={styles.lead}>{payload.chart.summary}</p>
-          {/* Access Status (moved from metrics row) */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.75rem",
-            marginTop: "1.25rem",
-            padding: "0.6rem 1.25rem",
-            background: "rgba(255,255,255,0.04)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: "12px",
-            backdropFilter: "blur(8px)",
-            width: "fit-content",
-          }}>
-            <span
-              className={payload.access.premium_features_enabled
-                  ? styles.accessPillPremium
-                  : styles.accessPillLimited}
-            >
-              {lockedFeatures.size === 0
-                ? t("insights.allFeatures")
-                : t("insights.limitedResponse")}
-            </span>
-            <small className={styles.accessTier}>
-              Tier: <strong>{payload.access.subscription_tier}</strong>
-            </small>
-          </div>
 
-          {/* Planet orbs row – key planets from this chart */}
+          {/* Planet orbs row – key planets from this chart, centered */}
           {payload.chart.planets && payload.chart.planets.length > 0 && (
-            <div style={{ marginTop: "1.25rem" }}>
+            <div style={{ marginTop: "1.25rem", display: "flex", justifyContent: "center" }}>
               <PlanetOrbRow
                 planets={payload.chart.planets.map((p) => p.name as PlanetName)}
                 size="md"

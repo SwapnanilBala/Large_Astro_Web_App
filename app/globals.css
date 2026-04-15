@@ -3424,6 +3424,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   margin: 1rem 0 0;
   color: var(--ink-soft);
   line-height: 1.74;
+  font-size: 1.15rem;
 }
 
 .forecast-grid {
@@ -3441,7 +3442,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 .forecast-column .domain-reading-list {
-  font-size: 1.12rem;
+  font-size: 1.25rem;
 }
 
 .forecast-column h4,
