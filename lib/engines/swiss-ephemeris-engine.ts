@@ -93,7 +93,9 @@ const J2000 = 2451545.0;
 // between the reference epoch and the target date.
 //
 // Sources / reference points:
-//   Lahiri        – Indian Astronomical Ephemeris: 23°15'04" on 21 Mar 1956
+//   Lahiri        – Indian Astronomical Ephemeris / Rashtriya Panchang:
+//                   23°51'11" at J2000.0 (JD 2451545.0), calibrated so that
+//                   Spica (Chitra) sits at 0° Libra (180° sidereal longitude).
 //   Raman         – B.V. Raman's value: 22°27'37.76" on 21 Mar 1956
 //   Krishnamurti  – KP system: 22°22'25.44" at J1900.0 (JD 2415020.0)
 //                   (derived so that KP ayanamsha ≈ 23°46'25" at J2000.0,
@@ -109,8 +111,8 @@ interface AyanamsaRef {
 
 const AYANAMSA_REF: Record<string, AyanamsaRef> = {
   SE_SIDM_LAHIRI: {
-    value_deg: 23 + 15 / 60 + 4 / 3600, // 23°15'04"
-    jd_epoch: 2435190.5,                  // 21 March 1956 0h UT
+    value_deg: 23 + 51 / 60 + 11 / 3600, // 23°51'11" (IAE / Rashtriya Panchang)
+    jd_epoch: 2451545.0,                   // J2000.0 (1 Jan 2000 12h TT)
   },
   SE_SIDM_RAMAN: {
     value_deg: 22 + 27 / 60 + 37.76 / 3600, // 22°27'37.76"
@@ -340,10 +342,15 @@ function computeAscendantLongitude(
   const lst = degToRad(normalize(gmst + longitude));
   const lat = degToRad(latitude);
 
-  // Ascendant formula
+  // Ascendant formula (Meeus)
+  //   tan(λ) = −cos(RAMC) / [sin(RAMC)·cos(ε) + tan(φ)·sin(ε)]
+  //
+  // atan2 yields two solutions 180° apart (ASC and DSC). The numerator and
+  // denominator signs produced by this form correspond to the Descendant, so
+  // we add 180° to obtain the Ascendant.
   const y = -Math.cos(lst);
   const x = Math.sin(lst) * Math.cos(obliquity) + Math.tan(lat) * Math.sin(obliquity);
-  let asc = radToDeg(Math.atan2(y, x));
+  let asc = radToDeg(Math.atan2(y, x)) + 180;
   return normalize(asc);
 }
 

@@ -82,6 +82,20 @@ describe("swiss-ephemeris-engine", () => {
       expect(SIGNS).toContain(result.ascendant.sign);
     });
 
+    it("ascendant matches known chart (Gandhi — Libra lagna)", () => {
+      // Mahatma Gandhi: 2 Oct 1869, LMT ~07:11:33, Porbandar (21.6417°N, 69.6293°E)
+      // LMT offset = 69.6293° / 15 = 4h 38m 31s → UTC = 02:33:02
+      // Known Lahiri ascendant: Libra (universally accepted in Vedic astrology)
+      const gandhi: BirthInput = {
+        utc_year: 1869, utc_month: 10, utc_day: 2,
+        utc_hour: 2, utc_minute: 33, utc_second: 2,
+        latitude: 21.6417, longitude: 69.6293,
+        engine_id: "lahiri_classic",
+      };
+      const result = calculate(gandhi);
+      expect(result.ascendant.sign).toBe("Libra");
+    });
+
     it("Ketu is exactly 180 degrees from Rahu", () => {
       const result = calculate(birth);
       const rahu = result.planets.find((p) => p.name === "Rahu")!;
