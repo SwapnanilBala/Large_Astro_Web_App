@@ -90,7 +90,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('/background.webp') center / cover no-repeat;
+  background: url('/backdrop.png') center / cover no-repeat;
   opacity: 0.06;
   z-index: -1;
   border-radius: 24px;
