@@ -62,6 +62,7 @@ const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { s
 const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -664,6 +665,25 @@ export default function InsightsContent({
             ))}
           </div>
         </CollapsibleSection>
+
+        <ConstellationDivider />
+
+        {/* ─── Yoga Lifetime Summary ─── */}
+        {payload.chart.yogas && payload.chart.yogas.length > 0 && (
+          <motion.section
+            className={styles.cardRules}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+          >
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Yoga Lifetime Summary">
+                <YogaLifetimeSummary yogas={payload.chart.yogas} />
+              </PanelErrorBoundary>
+            </LazyPanel>
+          </motion.section>
+        )}
 
         <ConstellationDivider />
 
