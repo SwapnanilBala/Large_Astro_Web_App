@@ -14,6 +14,7 @@ import PageTransition from "./components/PageTransition";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import ZodiacWheel from "./components/ZodiacWheel";
+import ZodiacPortraitPanel from "./components/ZodiacPortraitPanel";
 import FormCelebration from "./components/FormCelebration";
 import Image from "next/image";
 import { hapticSuccess } from "@/lib/haptics";
@@ -70,6 +71,7 @@ export default function Home() {
     return phrases.length > 0 ? phrases : ["Written in the Stars"];
   }, [t]);
   const [taglineIndex, setTaglineIndex] = useState(0);
+  const [hoveredSign, setHoveredSign] = useState<string | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -489,7 +491,8 @@ export default function Home() {
         </div>
 
         <div ref={wheelRef} className={styles.parallaxWheel}>
-          <ZodiacWheel />
+          <ZodiacWheel onHoveredChange={setHoveredSign} />
+          <ZodiacPortraitPanel sign={hoveredSign} />
         </div>
 
       <section ref={panelRef} className={`intake-panel ${styles.panel}`}>

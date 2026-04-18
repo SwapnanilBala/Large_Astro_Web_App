@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
+import { GLYPH_MAP } from "./ZodiacGlyph";
 
 /* ─────────────────────────────────────────────────────────
    ZodiacWheel — slow-rotating decorative SVG background
@@ -11,21 +12,6 @@ import { useState, useEffect, useRef, type ReactNode } from "react";
    - Hover-to-highlight with tooltip
    - activeSigns prop for permanent glow on specific signs
    ───────────────────────────────────────────────────────── */
-
-const ZODIAC_IMAGES = [
-  "/zodiac/aries.jpg",
-  "/zodiac/taurus.jpg",
-  "/zodiac/gemini.jpg",
-  "/zodiac/cancer.jpg",
-  "/zodiac/leo.jpg",
-  "/zodiac/virgo.jpg",
-  "/zodiac/libra.jpg",
-  "/zodiac/scorpio.jpg",
-  "/zodiac/sagittarius.jpg",
-  "/zodiac/capricorn.png",
-  "/zodiac/aquarius.png",
-  "/zodiac/pisces.jpg",
-];
 
 const ZODIAC_NAMES = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -69,10 +55,17 @@ function segmentPath(index: number): string {
 interface ZodiacWheelProps {
   /** Sign names (e.g. "Aries") to permanently highlight with a pulsing glow */
   activeSigns?: string[];
+  /** Called with the sign name when a segment is hovered, or null on leave */
+  onHoveredChange?: (sign: string | null) => void;
 }
 
-export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
+export default function ZodiacWheel({ activeSigns = [], onHoveredChange }: ZodiacWheelProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!onHoveredChange) return;
+    onHoveredChange(hoveredIndex === null ? null : ZODIAC_NAMES[hoveredIndex]);
+  }, [hoveredIndex, onHoveredChange]);
   const [visibleSegments, setVisibleSegments] = useState<Set<number>>(new Set());
   const [ringsVisible, setRingsVisible] = useState(false);
   const [entranceComplete, setEntranceComplete] = useState(false);
@@ -161,18 +154,14 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
     const glyphAngle = angle + 15;
     const gp = polarToCartesian(CX, CY, R_GLYPH, glyphAngle);
 
-    // Determine image opacity and filter per state
-    let imgOpacity = 0.55;
-    let imgFilter = "saturate(0.7) brightness(0.9)";
+    // Determine glyph opacity per state (no filter — glyph already has gold gradient)
+    let glyphOpacity = 0.78;
     if (isHovered) {
-      imgOpacity = 1.0;
-      imgFilter = "saturate(1.0) brightness(1.1)";
+      glyphOpacity = 1.0;
     } else if (isDimmed) {
-      imgOpacity = 0.35;
-      imgFilter = "saturate(0.5) brightness(0.7)";
+      glyphOpacity = 0.40;
     } else if (isActive) {
-      imgOpacity = 0.85;
-      imgFilter = "saturate(0.9) brightness(1.0)";
+      glyphOpacity = 0.95;
     }
 
     // Glow filter reference for active signs
@@ -231,21 +220,28 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
           />
         )}
 
-        {/* The actual sign image, clipped to a circle */}
-        <image
-          href={ZODIAC_IMAGES[i]}
-          x={gp.x - 18}
-          y={gp.y - 18}
-          width="36"
-          height="36"
-          clipPath={`url(#clip-${ZODIAC_NAMES[i]})`}
-          opacity={imgOpacity}
-          style={{
-            filter: imgFilter,
-            transition: "opacity 300ms ease, filter 300ms ease",
-          }}
-          pointerEvents="none"
-        />
+        {/* Gold zodiac glyph — crisp at any size, replaces photographic image */}
+        <g transform={`rotate(${counterAngle}, ${gp.x}, ${gp.y})`} pointerEvents="none">
+          <text
+            x={gp.x}
+            y={gp.y + 9}
+            textAnchor="middle"
+            fontSize={isHovered ? 28 : 24}
+            fontFamily="'Segoe UI Symbol', 'Apple Symbols', 'Noto Sans Symbols 2', 'DejaVu Sans', serif"
+            fontWeight="500"
+            fill={isHovered ? "url(#glyph-grad-hover)" : isActive ? "url(#glyph-grad-active)" : "url(#glyph-grad-idle)"}
+            stroke="rgba(20, 12, 30, 0.55)"
+            strokeWidth="0.6"
+            paintOrder="stroke fill"
+            opacity={glyphOpacity}
+            filter={isActive ? "url(#active-glow)" : undefined}
+            style={{
+              transition: "opacity 300ms ease, font-size 300ms ease",
+            }}
+          >
+            {GLYPH_MAP[ZODIAC_NAMES[i]]}
+          </text>
+        </g>
       </g>
     );
 
@@ -345,6 +341,20 @@ export default function ZodiacWheel({ activeSigns = [] }: ZodiacWheelProps) {
               </clipPath>
             );
           })}
+
+          {/* Gold glyph gradients (idle / active / hover) */}
+          <linearGradient id="glyph-grad-idle" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#E8C87A" />
+            <stop offset="100%" stopColor="#B88430" />
+          </linearGradient>
+          <linearGradient id="glyph-grad-active" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FFE3A6" />
+            <stop offset="100%" stopColor="#E8B040" />
+          </linearGradient>
+          <linearGradient id="glyph-grad-hover" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stopColor="#FFF1C7" />
+            <stop offset="100%" stopColor="#F2C65F" />
+          </linearGradient>
 
           {/* SVG glow filter for active signs (gold accent #F0B754) */}
           <filter id="active-glow" x="-50%" y="-50%" width="200%" height="200%">
