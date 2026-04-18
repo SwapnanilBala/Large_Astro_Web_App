@@ -36,44 +36,45 @@
    ═══════════════════════════════════════════════ */
 html[data-theme="light"],
 html[data-theme="light"] body {
-  --bg-night: #F5F3F7;
-  --bg-deep: #ECEAF0;
-  --surface: rgba(255, 255, 255, 0.82);
-  --surface-soft: rgba(255, 255, 255, 0.65);
-  --surface-strong: rgba(255, 255, 255, 0.92);
-  --line-soft: rgba(30, 30, 50, 0.09);
-  --line-strong: rgba(30, 30, 50, 0.16);
-  --ink-main: #1C1C28;
-  --ink-soft: #55556A;
-  --accent-gold: #B87308;
-  --accent-aqua: #18785A;
-  --accent-coral: #A05020;
-  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  /* Dimmed warm cream palette — less retina-searing than near-white */
+  --bg-night: #E6DFCC;
+  --bg-deep: #D6CEB6;
+  --surface: rgba(255, 252, 242, 0.70);
+  --surface-soft: rgba(255, 252, 242, 0.52);
+  --surface-strong: rgba(255, 252, 242, 0.88);
+  --line-soft: rgba(50, 40, 25, 0.14);
+  --line-strong: rgba(50, 40, 25, 0.24);
+  --ink-main: #14121C;
+  --ink-soft: #4A4258;
+  --accent-gold: #8F5A06;
+  --accent-aqua: #0F6B4F;
+  --accent-coral: #8A3E18;
+  --shadow-card: 0 4px 24px rgba(40, 30, 15, 0.10), 0 1px 2px rgba(40, 30, 15, 0.06);
   --btn-text: #FFFFFF;
-  --field-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  --field-glow: 0 0 0 3px rgba(91, 47, 160, 0.18);
-  --field-glow-warm: 0 0 0 3px rgba(184, 115, 8, 0.18);
+  --field-shadow: 0 1px 3px rgba(40, 30, 15, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  --field-glow: 0 0 0 3px rgba(91, 47, 160, 0.22);
+  --field-glow-warm: 0 0 0 3px rgba(143, 90, 6, 0.22);
   --primary: #5B2FA0;
-  --secondary: #B87308;
-  --accent: #B8403A;
-  --accent-light: #E8D4A0;
-  --text-primary: #1C1C28;
-  --text-secondary: #55556A;
-  --border: rgba(30, 30, 50, 0.10);
-  --glow: rgba(91, 47, 160, 0.12);
-  --success: #18785A;
-  color: #1C1C28;
+  --secondary: #8F5A06;
+  --accent: #9A331F;
+  --accent-light: #D4B77A;
+  --text-primary: #14121C;
+  --text-secondary: #4A4258;
+  --border: rgba(50, 40, 25, 0.15);
+  --glow: rgba(91, 47, 160, 0.14);
+  --success: #0F6B4F;
+  color: #14121C;
 }
 
 html[data-theme="light"] body {
-  background: #F5F3F8;
+  background: #E6DFCC;
 }
 
 html[data-theme="light"] body::before {
   background-image: linear-gradient(
-      to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px
+      to right, rgba(40, 30, 15, 0.05) 1px, transparent 1px
     ),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    linear-gradient(to bottom, rgba(40, 30, 15, 0.05) 1px, transparent 1px);
 }
 
 /* Force text color on wrapper elements (SSR body color inheritance workaround) */
@@ -108,14 +109,82 @@ html[data-theme="light"] .ambient-center {
   opacity: 0;
 }
 
-/* Buttons: gradient for light mode */
-html[data-theme="light"] button:not(.logout-btn):not(.theme-toggle-btn):not(.dasha-popup-close):not(.chart-history-hero):not(.chart-history-card):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn):not(.drawer-signout-btn) {
-  background: linear-gradient(135deg, #5B2FA0, #7B45C0);
+/* Buttons: purple gradient for light mode with matching rim + halo treatment */
+html[data-theme="light"] button:not(.logout-btn):not(.theme-toggle-btn):not(.dasha-popup-close):not(.chart-history-hero):not(.chart-history-card):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn):not(.drawer-signout-btn):not(.btn-ghost):not(.collapsible-toggle) {
+  background-image:
+    radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.45) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 82% 68%, rgba(255, 255, 255, 0.38) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0.30) 0.4px, transparent 1px),
+    radial-gradient(circle at 30% 78%, rgba(255, 255, 255, 0.26) 0.4px, transparent 1px),
+    linear-gradient(135deg, #5B2FA0 0%, #7B45C0 60%, #4A2488 100%);
+  color: #FFFFFF;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.20),
+    0 0 14px rgba(91, 47, 160, 0.18),
+    0 2px 8px rgba(0, 0, 0, 0.12);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.30);
+}
+
+html[data-theme="light"] button:hover:not(:disabled):not(.logout-btn):not(.theme-toggle-btn):not(.dasha-popup-close):not(.chart-history-hero):not(.chart-history-card):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn):not(.drawer-signout-btn):not(.btn-ghost):not(.collapsible-toggle) {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+    inset 0 1px 0 rgba(255, 255, 255, 0.40),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.24),
+    0 0 24px rgba(123, 69, 192, 0.35),
+    0 10px 26px rgba(91, 47, 160, 0.30);
   color: #FFFFFF;
 }
 
-html[data-theme="light"] button:hover:not(:disabled):not(.logout-btn):not(.theme-toggle-btn):not(.dasha-popup-close):not(.chart-history-hero):not(.chart-history-card):not(.lang-toggle):not(.lang-option):not(.navbar-hamburger):not(.drawer-close-btn):not(.drawer-signout-btn) {
-  box-shadow: 0 8px 24px rgba(91, 47, 160, 0.25);
+/* Halo ring tint recolor for light mode (purple instead of gold) */
+html[data-theme="light"] button:not(.btn-ghost)::after {
+  background:
+    conic-gradient(from 0deg, transparent 0deg, rgba(184, 128, 240, 0.28) 60deg, transparent 120deg, transparent 240deg, rgba(184, 128, 240, 0.22) 300deg, transparent 360deg),
+    linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.18) 50%, transparent 65%);
+}
+html[data-theme="light"] button:not(.btn-ghost)::before {
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.45) 0%, rgba(184, 128, 240, 0.20) 40%, transparent 68%);
+}
+
+/* Ghost variant in light mode — purple outline */
+html[data-theme="light"] button.btn-ghost,
+html[data-theme="light"] .btn-ghost {
+  background-image: none;
+  background-color: transparent;
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px rgba(91, 47, 160, 0.40);
+  text-shadow: none;
+}
+html[data-theme="light"] button.btn-ghost:hover:not(:disabled),
+html[data-theme="light"] .btn-ghost:hover:not(:disabled) {
+  background-color: rgba(91, 47, 160, 0.08);
+  color: #3E1F7A;
+  box-shadow: inset 0 0 0 1px rgba(91, 47, 160, 0.60), 0 0 14px rgba(91, 47, 160, 0.18);
+}
+
+/* Breathing glow recolor in light mode */
+html[data-theme="light"] button.btn-cta,
+html[data-theme="light"] .btn-cta {
+  animation: btn-breathing-light 4.2s ease-in-out infinite;
+}
+@keyframes btn-breathing-light {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.22),
+      inset 0 1px 0 rgba(255, 255, 255, 0.30),
+      inset 0 -10px 22px rgba(0, 0, 0, 0.20),
+      0 0 14px rgba(91, 47, 160, 0.18),
+      0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.38),
+      inset 0 1px 0 rgba(255, 255, 255, 0.40),
+      inset 0 -10px 22px rgba(0, 0, 0, 0.22),
+      0 0 22px rgba(123, 69, 192, 0.30),
+      0 4px 14px rgba(91, 47, 160, 0.20);
+  }
 }
 
 /* Input fields in light mode */
@@ -695,63 +764,218 @@ input[type="time"] {
   margin-bottom: 1.5rem;
 }
 
-/* Submit button: extra top spacing */
+/* ═══════════════════════════════════════════════
+   BUTTON SYSTEM — size tokens, rim, halo, ripple
+   ═══════════════════════════════════════════════ */
+:root {
+  --btn-pad-y-sm: 8px;
+  --btn-pad-x-sm: 16px;
+  --btn-font-sm: 1.05rem;
+  --btn-min-h-sm: 2.4rem;
+
+  --btn-pad-y-md: 12px;
+  --btn-pad-x-md: 24px;
+  --btn-font-md: 1.4rem;
+  --btn-min-h-md: 3.2rem;
+
+  --btn-pad-y-lg: 16px;
+  --btn-pad-x-lg: 32px;
+  --btn-font-lg: 1.6rem;
+  --btn-min-h-lg: 3.8rem;
+}
+
 button {
+  /* Default to medium sizing — override via .btn-sm / .btn-lg */
+  --btn-pad-y: var(--btn-pad-y-md);
+  --btn-pad-x: var(--btn-pad-x-md);
+  --btn-font: var(--btn-font-md);
+  --btn-min-h: var(--btn-min-h-md);
+
   margin-top: 0.44rem;
-  border: 1px solid rgba(200, 155, 60, 0.35);
-  min-height: 3.2rem;
+  border: none;
+  min-height: var(--btn-min-h);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
   cursor: pointer;
-  background: linear-gradient(135deg, #1C1338 0%, #2A1D4E 60%, #1A0E28 100%);
-  color: #D4AA5C;
+  /* Micro-stars (tiny white dots) sprinkled over cosmic gradient */
+  background-image:
+    radial-gradient(circle at 18% 30%, rgba(255, 240, 200, 0.55) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 82% 68%, rgba(255, 240, 200, 0.45) 0.6px, transparent 1.4px),
+    radial-gradient(circle at 62% 22%, rgba(255, 240, 200, 0.35) 0.4px, transparent 1px),
+    radial-gradient(circle at 30% 78%, rgba(255, 240, 200, 0.30) 0.4px, transparent 1px),
+    linear-gradient(135deg, #1C1338 0%, #2A1D4E 60%, #1A0E28 100%);
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%;
+  color: #E8C87A;
   border-radius: 12px;
-  padding: 12px 24px;
+  padding: var(--btn-pad-y) var(--btn-pad-x);
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: none;
-  font-size: 1.4rem;
-  box-shadow: 0 0 12px rgba(200, 155, 60, 0.08), inset 0 1px 0 rgba(200, 155, 60, 0.07);
-  transition: all 0.2s ease;
+  font-size: var(--btn-font);
+  /* Dual-layer engraved gold rim + soft outer glow */
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 155, 60, 0.42),
+    inset 0 1px 0 rgba(255, 220, 150, 0.18),
+    inset 0 -10px 22px rgba(0, 0, 0, 0.36),
+    0 0 14px rgba(200, 155, 60, 0.10),
+    0 2px 8px rgba(0, 0, 0, 0.35);
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.45), 0 0 12px rgba(232, 200, 122, 0.30);
+  transition:
+    transform 220ms cubic-bezier(.2, .9, .3, 1.2),
+    box-shadow 300ms ease,
+    filter 200ms ease,
+    color 200ms ease;
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
 
-button::after {
+/* Size variants via CSS custom properties */
+button.btn-sm,
+.btn-sm {
+  --btn-pad-y: var(--btn-pad-y-sm);
+  --btn-pad-x: var(--btn-pad-x-sm);
+  --btn-font: var(--btn-font-sm);
+  --btn-min-h: var(--btn-min-h-sm);
+}
+button.btn-lg,
+.btn-lg {
+  --btn-pad-y: var(--btn-pad-y-lg);
+  --btn-pad-x: var(--btn-pad-x-lg);
+  --btn-font: var(--btn-font-lg);
+  --btn-min-h: var(--btn-min-h-lg);
+}
+
+/* Gradient-text opt-in: wrap button text in <span class="btn-gradient-text">…</span> */
+.btn-gradient-text {
+  background: linear-gradient(180deg, #F2D489 0%, #E8C87A 45%, #C89B3C 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
+}
+
+/* Ripple (CSS-only, centered expand) — ::before */
+button::before {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.07) 50%, transparent 65%);
-  background-size: 200% 100%;
-  background-position: 200% 0;
-  transition: background-position 900ms ease;
+  border-radius: inherit;
+  background: radial-gradient(circle at center, rgba(232, 200, 122, 0.38) 0%, rgba(232, 200, 122, 0.12) 40%, transparent 68%);
+  opacity: 0;
+  transform: scale(0.3);
   pointer-events: none;
+  z-index: 0;
+}
+button:active:not(:disabled)::before {
+  animation: btn-ripple 480ms ease-out;
+}
+@keyframes btn-ripple {
+  0%   { opacity: 0.75; transform: scale(0.25); }
+  100% { opacity: 0;    transform: scale(2.6);  }
 }
 
+/* Shimmer sweep + rotating halo on hover — ::after */
+button::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  background:
+    conic-gradient(from 0deg, transparent 0deg, rgba(232, 200, 122, 0.22) 60deg, transparent 120deg, transparent 240deg, rgba(232, 200, 122, 0.18) 300deg, transparent 360deg),
+    linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.10) 50%, transparent 65%);
+  background-size: 200% 200%, 200% 100%;
+  background-position: 0 0, 200% 0;
+  opacity: 0;
+  filter: blur(8px);
+  transition: background-position 900ms ease, opacity 300ms ease;
+  pointer-events: none;
+  z-index: -1;
+}
 button:hover:not(:disabled)::after {
-  background-position: -200% 0;
+  opacity: 1;
+  background-position: 200% 200%, -200% 0;
+  animation: btn-halo-spin 6s linear infinite;
+}
+@keyframes btn-halo-spin {
+  0%   { filter: blur(8px) hue-rotate(0deg); }
+  100% { filter: blur(8px) hue-rotate(360deg); }
 }
 
 button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 0 24px rgba(200, 155, 60, 0.28), 0 8px 24px rgba(0, 0, 0, 0.40);
-  filter: brightness(1.05);
-  color: #E8C87A;
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 200, 122, 0.60),
+    inset 0 1px 0 rgba(255, 230, 170, 0.28),
+    inset 0 -10px 24px rgba(0, 0, 0, 0.42),
+    0 0 22px rgba(200, 155, 60, 0.35),
+    0 10px 28px rgba(0, 0, 0, 0.45);
+  filter: brightness(1.06);
+  color: #F2D489;
 }
 
 button:active:not(:disabled) {
   transform: translateY(0px) scale(0.96);
-  transition: transform 50ms ease-out;
+  transition: transform 60ms ease-out;
 }
 
 button:disabled {
   opacity: 0.56;
   cursor: not-allowed;
   filter: grayscale(24%);
+}
+
+/* Primary CTA: idle breathing glow — opt-in to avoid visual noise */
+button.btn-cta,
+.btn-cta {
+  animation: btn-breathing 4.2s ease-in-out infinite;
+}
+@keyframes btn-breathing {
+  0%, 100% {
+    box-shadow:
+      inset 0 0 0 1px rgba(200, 155, 60, 0.42),
+      inset 0 1px 0 rgba(255, 220, 150, 0.18),
+      inset 0 -10px 22px rgba(0, 0, 0, 0.36),
+      0 0 14px rgba(200, 155, 60, 0.08),
+      0 2px 8px rgba(0, 0, 0, 0.35);
+  }
+  50% {
+    box-shadow:
+      inset 0 0 0 1px rgba(232, 200, 122, 0.52),
+      inset 0 1px 0 rgba(255, 220, 150, 0.24),
+      inset 0 -10px 22px rgba(0, 0, 0, 0.36),
+      0 0 20px rgba(200, 155, 60, 0.22),
+      0 4px 14px rgba(0, 0, 0, 0.38);
+  }
+}
+
+/* Ghost / secondary variant — subordinate actions (Cancel, Back, etc.) */
+button.btn-ghost,
+.btn-ghost {
+  background-image: none;
+  background-color: transparent;
+  color: var(--accent-gold);
+  box-shadow:
+    inset 0 0 0 1px rgba(200, 155, 60, 0.38),
+    0 0 0 rgba(0, 0, 0, 0);
+  text-shadow: none;
+}
+button.btn-ghost:hover:not(:disabled),
+.btn-ghost:hover:not(:disabled) {
+  background-color: rgba(200, 155, 60, 0.08);
+  color: #F2D489;
+  box-shadow:
+    inset 0 0 0 1px rgba(232, 200, 122, 0.58),
+    0 0 16px rgba(200, 155, 60, 0.18);
+  transform: translateY(-1px);
+  filter: none;
+}
+button.btn-ghost::after,
+.btn-ghost::after {
+  display: none;
 }
 
 input:focus-visible,
@@ -1556,6 +1780,11 @@ label:has(.autocomplete-wrapper.is-open) {
 .collapsible-toggle:disabled {
   opacity: 1;
   filter: none;
+}
+
+.collapsible-toggle::before,
+.collapsible-toggle::after {
+  display: none !important;
 }
 
 .toggle-arrow {
