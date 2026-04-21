@@ -18,6 +18,7 @@
   /* Extra padding so the 600px wheel has breathing room */
   padding: 0;
   z-index: 1;
+  margin-top: 2.5rem; /* Move hero box downward */
 }
 
 /* ── Parallax wheel wrapper ──────────────────── */
