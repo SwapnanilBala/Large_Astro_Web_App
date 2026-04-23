@@ -5,6 +5,9 @@
 
 .datePickerWrapper {
   position: relative;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
   background: var(--bg-glass);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
@@ -12,7 +15,10 @@
   border-radius: var(--radius-lg);
   padding: var(--space-md);
   transition: all var(--transition-smooth);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .datePickerWrapper:hover {

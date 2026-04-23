@@ -755,7 +755,7 @@ export default function Home() {
                   loading={isSubmitting}
                   icon={<HiOutlineSparkles />}
                 >
-                  {t("home.generateButton")}
+                  Reveal my Destiny
                 </PremiumButton>
               </div>
             </div>
