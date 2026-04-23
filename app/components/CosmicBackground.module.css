@@ -1,0 +1,28 @@
+.cosmicBackground {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 0.6;
+  }
+}
+
+.cosmicBackground {
+  animation: fadeIn 1s ease-out;
+}
+
+/* Responsive particle density */
+@media (max-width: 768px) {
+  .cosmicBackground {
+    opacity: 0.4;
+  }
+}

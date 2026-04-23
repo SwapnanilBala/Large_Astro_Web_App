@@ -24,6 +24,13 @@ import BirthChartTeaser from "./components/BirthChartTeaser";
 import CosmicTrailCursor from "./components/CosmicTrailCursor";
 import { useFieldStarBurst } from "./components/FieldStarBurst";
 import { useTextScramble } from "./components/TextScramble";
+import CosmicBackground from "./components/CosmicBackground";
+import GlassCard from "./components/GlassCard";
+import PremiumInput from "./components/PremiumInput";
+import PremiumButton from "./components/PremiumButton";
+import PremiumDatePicker from "./components/PremiumDatePicker";
+import PremiumDropdown from "./components/PremiumDropdown";
+import PremiumToggle from "./components/PremiumToggle";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -473,17 +480,10 @@ export default function Home() {
   return (
     <div className={`home-shell ${styles.pageShell}`}>
       <OnboardingCinematic />
+      <CosmicBackground />
       <CosmicTrailCursor />
       <FormCelebration isComplete={canSubmit} />
       <BurstContainer />
-      {/* ── Aurora Effect (top of page) ── */}
-      <div className={styles.auroraEffect}>
-        <div className={styles.auroraLayer} />
-        <div className={styles.auroraLayer} />
-        <div className={styles.auroraLayer} />
-      </div>
-
-      {/* Ambient background handled by GradientBlobs in layout */}
 
       {/* ── Floating Cosmic Particles ── */}
       <div className={styles.cosmicParticles}>
@@ -607,191 +607,159 @@ export default function Home() {
           >
             Draft saved
           </span>
-          <div className={styles.bentoGrid}>
-          {/* ── Name Card ── */}
-          <div className={styles.bentoHero}>
-          <div ref={nameRef} data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
-            <PlanetaryAffinity fieldType="name" isActive={draft.name.trim().length > 0} />
-            <span className={styles.orbitNumber}>1</span>
-            <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
-              <GiCrystalBall className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formName")}</span>
-              <input
-                type="text"
-                value={draft.name}
-                onChange={updateField("name")}
-                placeholder={t("home.formNamePlaceholder")}
-                className={styles.fieldInput}
-                required
-              />
-            </label>
-          </div>
-          </div>
+          
+          <GlassCard variant="elevated" glow="gold" className={styles.premiumFormCard}>
+            <div className={styles.premiumFormContent}>
+              {/* ── Name Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="name" isActive={draft.name.trim().length > 0} />
+                <PremiumInput
+                  label={t("home.formName")}
+                  value={draft.name}
+                  onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
+                  placeholder={t("home.formNamePlaceholder")}
+                  icon={<GiCrystalBall />}
+                  required
+                />
+              </div>
 
-          {/* ── Birth Date Card ── */}
-          <div ref={birthDateRef} data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua} ${unlockedStage >= 1 ? styles.fieldUnlocked : styles.fieldLocked}`}>
-            <PlanetaryAffinity fieldType="birthDate" isActive={draft.birthDate.trim().length > 0} />
-            <span className={styles.orbitNumber}>2</span>
-            <div className={styles.fieldCardAccent}>
-              <Image src="/zodiac/cancer.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
-            </div>
-            <label className={`${styles.fieldLabel} input-glow-aqua${validatedFields.has("birthDate") ? " input-validated" : ""}`}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formBirthDate")}</span>
-              <DatePicker
-                selected={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
-                onChange={(date: Date | null) => {
-                  if (date) {
-                    const yyyy = date.getFullYear();
-                    const mm = String(date.getMonth() + 1).padStart(2, "0");
-                    const dd = String(date.getDate()).padStart(2, "0");
-                    setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
-                  }
-                }}
-                dateFormat="dd MMM yyyy"
-                showMonthDropdown
-                showYearDropdown
-                dropdownMode="select"
-                placeholderText="Select birth date"
-                className={styles.fieldInput}
-                calendarClassName={styles.glassCalendar}
-                popperPlacement="bottom-start"
-                required
-                maxDate={new Date()}
-                showPopperArrow={false}
-              />
-            </label>
-          </div>
+              {/* ── Birth Date Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="birthDate" isActive={draft.birthDate.trim().length > 0} />
+                <PremiumDatePicker
+                  label={t("home.formBirthDate")}
+                  value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      const yyyy = date.getFullYear();
+                      const mm = String(date.getMonth() + 1).padStart(2, "0");
+                      const dd = String(date.getDate()).padStart(2, "0");
+                      setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
+                    }
+                  }}
+                  placeholder="Select birth date"
+                  icon={<GiSunrise />}
+                  dateFormat="dd MMM yyyy"
+                  required
+                  maxDate={new Date()}
+                />
+              </div>
 
-          {/* ── Birth Time Card ── */}
-          <div ref={birthTimeRef} data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral} ${unlockedStage >= 2 ? styles.fieldUnlocked : styles.fieldLocked}`}>
-            <PlanetaryAffinity fieldType="birthTime" isActive={draft.birthTime.trim().length > 0} />
-            <span className={styles.orbitNumber}>3</span>
-            <div className={styles.fieldCardAccent}>
-              <Image src="/zodiac/leo.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
-            </div>
-            <label className={`${styles.fieldLabel} input-glow-coral${validatedFields.has("birthTime") ? " input-validated" : ""}`}>
-              <GiSunrise className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formBirthTime")}</span>
-              <DatePicker
-                selected={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
-                onChange={(date: Date | null) => {
-                  if (date) {
-                    const hh = String(date.getHours()).padStart(2, "0");
-                    const mm = String(date.getMinutes()).padStart(2, "0");
-                    setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
-                  }
-                }}
-                showTimeSelect
-                showTimeSelectOnly
-                timeIntervals={15}
-                timeCaption="Time"
-                dateFormat="h:mm aa"
-                placeholderText="Select birth time"
-                className={styles.fieldInput}
-                calendarClassName={styles.glassCalendar}
-                popperPlacement="bottom-start"
-                required
-                showPopperArrow={false}
-              />
-            </label>
-          </div>
+              {/* ── Birth Time Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="birthTime" isActive={draft.birthTime.trim().length > 0} />
+                <PremiumDatePicker
+                  label={t("home.formBirthTime")}
+                  value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
+                  onChange={(date: Date | null) => {
+                    if (date) {
+                      const hh = String(date.getHours()).padStart(2, "0");
+                      const mm = String(date.getMinutes()).padStart(2, "0");
+                      setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                    }
+                  }}
+                  placeholder="Select birth time"
+                  icon={<GiSunrise />}
+                  showTimeSelect
+                  showTimeSelectOnly
+                  timeIntervals={15}
+                  timeCaption="Time"
+                  dateFormat="h:mm aa"
+                  required
+                />
+              </div>
 
-          {/* ── Section Divider with quote ── */}
-          <div className={styles.sectionSpacer} aria-hidden="true">
-            <div className={styles.spacerSymbolRow}>
-              <span className={styles.spacerSymbol}>♈</span>
-              <span className={styles.spacerSymbol}>♉</span>
-              <span className={styles.spacerSymbol}>♊</span>
-              <span className={styles.spacerLine} />
-              <span className={styles.spacerSymbol}>♋</span>
-              <span className={styles.spacerSymbol}>♌</span>
-              <span className={styles.spacerSymbol}>♍</span>
-            </div>
-            <p className={styles.spacerQuote}>
-              {t("home.mysticalPhrase1") !== "home.mysticalPhrase1"
-                ? t("home.mysticalPhrase1")
-                : "The stars incline, they do not compel"}
-            </p>
-            <div className={styles.spacerSymbolRow}>
-              <span className={styles.spacerSymbol}>♎</span>
-              <span className={styles.spacerSymbol}>♏</span>
-              <span className={styles.spacerSymbol}>♐</span>
-              <span className={styles.spacerLine} />
-              <span className={styles.spacerSymbol}>♑</span>
-              <span className={styles.spacerSymbol}>♒</span>
-              <span className={styles.spacerSymbol}>♓</span>
-            </div>
-          </div>
+              {/* ── Country Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="country" isActive={draft.country.trim().length > 0} />
+                <div className={styles.autocompleteWrapper}>
+                  <AutocompleteInput
+                    value={draft.country}
+                    onChange={handleCountryChange}
+                    onSelect={handleCountrySelect}
+                    placeholder={t("home.formCountryPlaceholder")}
+                    suggestType="country"
+                    required
+                  />
+                </div>
+              </div>
 
-          {/* ── Country Card ── */}
-          <div className={styles.bentoWide}>
-          <div ref={countryRef} data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet} ${unlockedStage >= 3 ? styles.fieldUnlocked : styles.fieldLocked}`}>
-            <PlanetaryAffinity fieldType="country" isActive={draft.country.trim().length > 0} />
-            <span className={styles.orbitNumber}>4</span>
-            <div className={styles.fieldCardAccent}>
-              <Image src="/zodiac/sagittarius.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
-            </div>
-            <label className={`${styles.fieldLabel} input-glow-violet${validatedFields.has("country") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formCountry")}</span>
-              <AutocompleteInput
-                value={draft.country}
-                onChange={handleCountryChange}
-                onSelect={handleCountrySelect}
-                placeholder={t("home.formCountryPlaceholder")}
-                suggestType="country"
-                required
-              />
-            </label>
-          </div>
-          </div>
+              {/* ── State Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="state" isActive={draft.state.trim().length > 0} />
+                <div className={styles.autocompleteWrapper}>
+                  <AutocompleteInput
+                    value={draft.state}
+                    onChange={handleStateChange}
+                    onSelect={handleStateSelect}
+                    placeholder={t("home.formStatePlaceholder")}
+                    suggestType="state"
+                    contextCountry={draft.country}
+                    required
+                  />
+                </div>
+              </div>
 
-          {/* ── State Card ── */}
-          <div ref={stateRef} data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose} ${unlockedStage >= 4 ? styles.fieldUnlocked : styles.fieldLocked}`}>
-            <PlanetaryAffinity fieldType="state" isActive={draft.state.trim().length > 0} />
-            <span className={styles.orbitNumber}>5</span>
-            <div className={styles.fieldCardAccent}>
-              <Image src="/zodiac/capricorn.png" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
-            </div>
-            <label className={`${styles.fieldLabel} input-glow-rose${validatedFields.has("state") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formState")}</span>
-              <AutocompleteInput
-                value={draft.state}
-                onChange={handleStateChange}
-                onSelect={handleStateSelect}
-                placeholder={t("home.formStatePlaceholder")}
-                suggestType="state"
-                contextCountry={draft.country}
-                required
-              />
-            </label>
-          </div>
+              {/* ── City Field ── */}
+              <div className={styles.premiumField}>
+                <PlanetaryAffinity fieldType="city" isActive={draft.city.trim().length > 0} />
+                <div className={styles.autocompleteWrapper}>
+                  <AutocompleteInput
+                    value={draft.city}
+                    onChange={setField("city")}
+                    onSelect={setField("city")}
+                    placeholder={t("home.formCityPlaceholder")}
+                    suggestType="city"
+                    contextCountry={draft.country}
+                    contextState={draft.state}
+                    required
+                  />
+                </div>
+              </div>
 
-          {/* ── City Card ── */}
-          <div ref={cityRef} data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold} ${unlockedStage >= 5 ? styles.fieldUnlocked : styles.fieldLocked}`}>
-            <PlanetaryAffinity fieldType="city" isActive={draft.city.trim().length > 0} />
-            <span className={styles.orbitNumber}>6</span>
-            <div className={styles.fieldCardAccent}>
-              <Image src="/zodiac/pisces.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
+              {/* ── Lat/Lon Toggle ── */}
+              <div className={styles.premiumField}>
+                <PremiumToggle
+                  label="Enter coordinates manually"
+                  checked={latLonExpanded}
+                  onChange={setLatLonExpanded}
+                />
+              </div>
+
+              {latLonExpanded && (
+                <div className={styles.latLonFields}>
+                  <PremiumInput
+                    label="Latitude"
+                    value={draft.latitude}
+                    onChange={(value) => setField("latitude")(value)}
+                    placeholder="e.g. 40.7128"
+                    required
+                  />
+                  <PremiumInput
+                    label="Longitude"
+                    value={draft.longitude}
+                    onChange={(value) => setField("longitude")(value)}
+                    placeholder="e.g. -74.0060"
+                    required
+                  />
+                </div>
+              )}
+
+              {/* ── Submit Button ── */}
+              <div className={styles.premiumSubmit}>
+                <PremiumButton
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={isSubmitting}
+                  icon={<HiOutlineSparkles />}
+                >
+                  {t("home.generateButton")}
+                </PremiumButton>
+              </div>
             </div>
-            <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("city") ? " input-validated" : ""}`}>
-              <GiCompass className="section-icon" style={{ fontSize: "1.05rem" }} />
-              <span className={styles.fieldLabelText}>{t("home.formCity")}</span>
-              <AutocompleteInput
-                value={draft.city}
-                onChange={setField("city")}
-                onSelect={setField("city")}
-                placeholder={t("home.formCityPlaceholder")}
-                suggestType="city"
-                contextCountry={draft.country}
-                contextState={draft.state}
-                required
-              />
-            </label>
-          </div>
-          </div>{/* end bentoGrid */}
+          </GlassCard>
 
           {/* ── Birth Chart Teaser Cards ── */}
           <BirthChartTeaser

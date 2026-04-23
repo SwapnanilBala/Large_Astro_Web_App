@@ -1,0 +1,82 @@
+.premiumToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-bottom: var(--space-lg);
+}
+
+.toggleButton {
+  position: relative;
+  width: 48px;
+  height: 26px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 0;
+  background: transparent;
+  transition: all var(--transition-base);
+}
+
+.toggleTrack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-smooth);
+  box-shadow: var(--shadow-sm);
+}
+
+.premiumToggle.checked .toggleTrack {
+  background: var(--gradient-gold);
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+.toggleThumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: var(--text-primary);
+  border-radius: var(--radius-full);
+  transition: all var(--transition-smooth);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.premiumToggle.checked .toggleThumb {
+  left: calc(100% - 21px);
+  background: var(--bg-deep);
+}
+
+.toggleButton:hover .toggleTrack {
+  border-color: var(--border-medium);
+}
+
+.premiumToggle.checked .toggleButton:hover .toggleTrack {
+  box-shadow: var(--shadow-gold), var(--glow-gold);
+}
+
+.toggleButton:active .toggleThumb {
+  width: 16px;
+}
+
+.toggleLabel {
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-base);
+}
+
+.premiumToggle.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.premiumToggle.disabled .toggleButton,
+.premiumToggle.disabled .toggleLabel {
+  cursor: not-allowed;
+}

@@ -1,0 +1,191 @@
+.premiumButton {
+  position: relative;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  padding: 0;
+  background: transparent;
+  font-family: inherit;
+  transition: all var(--transition-smooth);
+  overflow: hidden;
+}
+
+.buttonContent {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md) var(--space-xl);
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  transition: all var(--transition-smooth);
+}
+
+/* Size variants */
+.premiumButton.sm .buttonContent {
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 0.875rem;
+}
+
+.premiumButton.lg .buttonContent {
+  padding: var(--space-lg) var(--space-2xl);
+  font-size: 1.125rem;
+}
+
+/* Primary variant */
+.premiumButton.primary .buttonContent {
+  background: var(--gradient-gold);
+  color: var(--bg-deep);
+  box-shadow: var(--shadow-gold);
+}
+
+.premiumButton.primary:hover .buttonContent {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-gold), var(--glow-gold);
+}
+
+.premiumButton.primary:active .buttonContent {
+  transform: translateY(0);
+}
+
+/* Secondary variant */
+.premiumButton.secondary .buttonContent {
+  background: var(--bg-glass);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  color: var(--accent-gold);
+  border: 1px solid var(--border-medium);
+  box-shadow: var(--shadow-sm);
+}
+
+.premiumButton.secondary:hover .buttonContent {
+  background: var(--bg-glass-strong);
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-gold);
+  transform: translateY(-2px);
+}
+
+/* Ghost variant */
+.premiumButton.ghost .buttonContent {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid transparent;
+}
+
+.premiumButton.ghost:hover .buttonContent {
+  background: var(--surface-hover);
+  border-color: var(--border-medium);
+}
+
+/* Full width */
+.premiumButton.fullWidth {
+  width: 100%;
+}
+
+.premiumButton.fullWidth .buttonContent {
+  width: 100%;
+}
+
+/* Disabled state */
+.premiumButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.premiumButton:disabled .buttonContent {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Loading state */
+.premiumButton.loading {
+  cursor: wait;
+}
+
+.premiumButton.loading .buttonContent {
+  opacity: 0.8;
+}
+
+.buttonIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1em;
+}
+
+.buttonText {
+  position: relative;
+  z-index: 1;
+}
+
+.loadingText {
+  position: relative;
+  z-index: 1;
+}
+
+/* Glow effect */
+.buttonGlow {
+  position: absolute;
+  inset: -2px;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 165, 116, 0.3), transparent 60%);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  filter: blur(12px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.premiumButton:hover .buttonGlow {
+  opacity: 1;
+}
+
+/* Shine effect */
+.buttonShine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left var(--transition-slow);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.premiumButton:hover .buttonShine {
+  left: 100%;
+}
+
+/* Ripple effect */
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+.premiumButton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transform: scale(0);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+  pointer-events: none;
+}
+
+.premiumButton:active::after {
+  opacity: 1;
+  transform: scale(2);
+  transition: 0s;
+}
