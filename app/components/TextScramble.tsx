@@ -26,6 +26,7 @@ export function useTextScramble(
   const { duration = 1200, staggerPerChar = 40 } = options ?? {};
 
   const [scrambledText, setScrambledText] = useState(text);
+  const hasStarted = useRef(false);
   const rafRef = useRef<number | null>(null);
   const startTimeRef = useRef<number | null>(null);
 
@@ -56,7 +57,7 @@ export function useTextScramble(
           result.push(chars[i]);
         } else if (charElapsed < 0) {
           // This character hasn't started scrambling yet
-          result.push(getRandomGlyph());
+          result.push(chars[i]); // Keep original text
           allResolved = false;
         } else {
           // This character is still scrambling
@@ -86,9 +87,22 @@ export function useTextScramble(
       return;
     }
 
-    // Reset and start animation
-    startTimeRef.current = null;
-    rafRef.current = requestAnimationFrame(animate);
+    // Only scramble if not already started
+    if (hasStarted.current) {
+      setScrambledText(text);
+      return;
+    }
+    
+    hasStarted.current = true;
+    
+    // Start with actual text, then scramble briefly
+    setScrambledText(text);
+    
+    // Brief delay before scrambling starts
+    setTimeout(() => {
+      startTimeRef.current = null;
+      rafRef.current = requestAnimationFrame(animate);
+    }, 300);
 
     return () => {
       if (rafRef.current !== null) {

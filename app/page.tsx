@@ -471,7 +471,7 @@ export default function Home() {
   };
 
   return (
-    <div className="home-shell">
+    <div className={`home-shell ${styles.pageShell}`}>
       <OnboardingCinematic />
       <CosmicTrailCursor />
       <FormCelebration isComplete={canSubmit} />

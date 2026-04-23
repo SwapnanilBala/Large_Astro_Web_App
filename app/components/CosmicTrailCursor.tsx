@@ -132,23 +132,38 @@ export default function CosmicTrailCursor() {
       return;
     }
 
-    const handleMouseMove = (e: MouseEvent) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      spawnTrailParticle(e.clientX, e.clientY);
-    };
+    // Delay startup to reduce initial page shake
+    const startDelay = setTimeout(() => {
+      const handleMouseMove = (e: MouseEvent) => {
+        mousePos.current = { x: e.clientX, y: e.clientY };
+        spawnTrailParticle(e.clientX, e.clientY);
+      };
 
-    window.addEventListener("mousemove", handleMouseMove, { passive: true });
-    rafRef.current = requestAnimationFrame(updateParticles);
+      window.addEventListener("mousemove", handleMouseMove, { passive: true });
+      rafRef.current = requestAnimationFrame(updateParticles);
+      
+      // Store cleanup function for delayed start
+      const cleanup = () => {
+        window.removeEventListener("mousemove", handleMouseMove);
+        if (rafRef.current) {
+          cancelAnimationFrame(rafRef.current);
+        }
+        // Cleanup DOM
+        const container = containerRef.current;
+        if (container) {
+          container.innerHTML = "";
+        }
+      };
+      
+      // Store cleanup for useEffect return
+      (startDelay as any).cleanup = cleanup;
+    }, 800); // 800ms delay
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current);
-      }
-      // Cleanup DOM
-      const container = containerRef.current;
-      if (container) {
-        container.innerHTML = "";
+      clearTimeout(startDelay);
+      // If cleanup function was stored, call it
+      if ((startDelay as any).cleanup) {
+        (startDelay as any).cleanup();
       }
     };
   }, [spawnTrailParticle, updateParticles]);

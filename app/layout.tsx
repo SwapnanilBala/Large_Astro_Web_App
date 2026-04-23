@@ -15,16 +15,18 @@ const displayFont = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-display",
   weight: ["500", "600", "700"],
-  display: "swap",
+  display: "optional",
   preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
 });
 
 const bodyFont = Inter({
   subsets: ["latin"],
   variable: "--font-body",
   weight: ["400", "500", "600"],
-  display: "swap",
+  display: "optional",
   preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
 });
 
 const accentFont = Cormorant_Garamond({
