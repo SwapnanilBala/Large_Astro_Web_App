@@ -34,8 +34,35 @@
 .autocompleteWrapper {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+.autocompleteWrapper input {
+  width: 100%;
+  background: rgba(15, 15, 25, 0.8);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) var(--space-lg);
+  font-size: 1rem;
+  color: #ffffff;
+  outline: none;
+  transition: all var(--transition-smooth);
+  box-shadow: 
+    0 4px 6px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.autocompleteWrapper input:focus {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-gold), var(--glow-gold);
+}
+
+.autocompleteWrapper input::placeholder {
+  color: var(--text-tertiary);
 }
 
 .latLonFields {
@@ -43,7 +70,7 @@
   grid-template-columns: 1fr 1fr;
   gap: var(--space-md);
   animation: slideDown 0.3s ease-out;
-  max-width: 400px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 

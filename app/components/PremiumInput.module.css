@@ -6,9 +6,9 @@
 .inputWrapper {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 1200px;
   margin: 0 auto;
-  background: var(--bg-glass);
+  background: rgba(15, 15, 25, 0.8);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
   border: 1px solid var(--border-soft);
