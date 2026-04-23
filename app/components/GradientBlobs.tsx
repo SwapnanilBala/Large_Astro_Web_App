@@ -1,11 +1,60 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 
-/* Constellation star-field background — simplified on mobile for GPU savings */
+/* 
+ * Constellation star-field background with time-of-day color shifting
+ * Night: Deep purple/indigo (0-5h, 20-24h)
+ * Dawn: Soft coral/gold (5-8h)  
+ * Day: Aqua/teal (8-17h)
+ * Dusk: Rose/violet (17-20h)
+ */
+
+interface TimeOfDay {
+  phase: "night" | "dawn" | "day" | "dusk";
+  accentColor: string;
+  secondaryColor: string;
+  glowOpacity: number;
+}
+
+function getTimeOfDay(): TimeOfDay {
+  const hour = new Date().getHours();
+  
+  if (hour >= 5 && hour < 8) {
+    return {
+      phase: "dawn",
+      accentColor: "#E8A87C", // Coral/gold
+      secondaryColor: "#F2C26C",
+      glowOpacity: 0.15,
+    };
+  } else if (hour >= 8 && hour < 17) {
+    return {
+      phase: "day",
+      accentColor: "#1A7B6E", // Aqua/teal
+      secondaryColor: "#6CE1D4",
+      glowOpacity: 0.12,
+    };
+  } else if (hour >= 17 && hour < 20) {
+    return {
+      phase: "dusk",
+      accentColor: "#B85C8A", // Rose/violet
+      secondaryColor: "#8C64DC",
+      glowOpacity: 0.15,
+    };
+  } else {
+    return {
+      phase: "night",
+      accentColor: "#4A3B7A", // Deep purple/indigo
+      secondaryColor: "#1A7B6E",
+      glowOpacity: 0.18,
+    };
+  }
+}
+
 export default function GradientBlobs() {
   const [isLight, setIsLight] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(getTimeOfDay());
 
   useEffect(() => {
     const checkTheme = () => {
@@ -14,6 +63,11 @@ export default function GradientBlobs() {
     checkTheme();
     const obs = new MutationObserver(checkTheme);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+    
+    // Update time of day
+    const updateTimeOfDay = () => setTimeOfDay(getTimeOfDay());
+    updateTimeOfDay();
+    const timeInterval = setInterval(updateTimeOfDay, 60000); // Check every minute
 
     // Detect mobile via pointer capability (more reliable than width)
     const mql = window.matchMedia("(pointer: coarse)");
@@ -24,8 +78,12 @@ export default function GradientBlobs() {
     return () => {
       obs.disconnect();
       mql.removeEventListener("change", handleChange);
+      clearInterval(timeInterval);
     };
   }, []);
+
+  const accentFill = useMemo(() => timeOfDay.accentColor, [timeOfDay]);
+  const secondaryFill = useMemo(() => timeOfDay.secondaryColor, [timeOfDay]);
 
   // On mobile: render a much simpler background (just a few dots, no constellations)
   if (isMobile) {
@@ -39,6 +97,9 @@ export default function GradientBlobs() {
           pointerEvents: "none",
           overflow: "hidden",
           opacity: isLight ? 0.3 : 0.7,
+          background: isLight 
+            ? `radial-gradient(ellipse at 50% 0%, ${accentFill}15 0%, transparent 60%)`
+            : `radial-gradient(ellipse at 50% 0%, ${accentFill}20 0%, transparent 50%)`,
         }}
       >
         <svg
@@ -47,25 +108,25 @@ export default function GradientBlobs() {
           preserveAspectRatio="xMidYMid slice"
           style={{ width: "100%", height: "100%", opacity: isLight ? 0.04 : 0.06 }}
         >
-          {/* Minimal scatter stars for mobile — 18 dots instead of 200+ */}
-          <circle cx="40" cy="60" r="1" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="120" cy="140" r="1.2" fill="#C89B3C" opacity="0.5"/>
-          <circle cx="250" cy="80" r="1" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="340" cy="200" r="1.2" fill="#1A7B6E" opacity="0.5"/>
-          <circle cx="80" cy="320" r="1" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="200" cy="260" r="1.2" fill="#C89B3C" opacity="0.5"/>
-          <circle cx="310" cy="380" r="1" fill="#1A7B6E" opacity="0.5"/>
-          <circle cx="60" cy="480" r="1.2" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="180" cy="440" r="1" fill="#C89B3C" opacity="0.5"/>
-          <circle cx="350" cy="520" r="1.2" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="100" cy="600" r="1" fill="#1A7B6E" opacity="0.5"/>
-          <circle cx="280" cy="640" r="1.2" fill="#C89B3C" opacity="0.5"/>
-          <circle cx="50" cy="720" r="1" fill="#C89B3C" opacity="0.6"/>
-          <circle cx="220" cy="760" r="1.2" fill="#C89B3C" opacity="0.5"/>
-          <circle cx="360" cy="700" r="1" fill="#1A7B6E" opacity="0.5"/>
-          <circle cx="150" cy="180" r="1" fill="#C89B3C" opacity="0.4"/>
-          <circle cx="300" cy="550" r="1" fill="#C89B3C" opacity="0.4"/>
-          <circle cx="240" cy="400" r="1.2" fill="#C89B3C" opacity="0.4"/>
+          {/* Minimal scatter stars for mobile — 18 dots with time-of-day colors */}
+          <circle cx="40" cy="60" r="1" fill={accentFill} opacity="0.6"/>
+          <circle cx="120" cy="140" r="1.2" fill={accentFill} opacity="0.5"/>
+          <circle cx="250" cy="80" r="1" fill={secondaryFill} opacity="0.6"/>
+          <circle cx="340" cy="200" r="1.2" fill={accentFill} opacity="0.5"/>
+          <circle cx="80" cy="320" r="1" fill={secondaryFill} opacity="0.6"/>
+          <circle cx="200" cy="260" r="1.2" fill={accentFill} opacity="0.5"/>
+          <circle cx="310" cy="380" r="1" fill={secondaryFill} opacity="0.5"/>
+          <circle cx="60" cy="480" r="1.2" fill={accentFill} opacity="0.6"/>
+          <circle cx="180" cy="440" r="1" fill={accentFill} opacity="0.5"/>
+          <circle cx="350" cy="520" r="1.2" fill={secondaryFill} opacity="0.6"/>
+          <circle cx="100" cy="600" r="1" fill={accentFill} opacity="0.5"/>
+          <circle cx="280" cy="640" r="1.2" fill={accentFill} opacity="0.5"/>
+          <circle cx="50" cy="720" r="1" fill={secondaryFill} opacity="0.6"/>
+          <circle cx="220" cy="760" r="1.2" fill={accentFill} opacity="0.5"/>
+          <circle cx="360" cy="700" r="1" fill={accentFill} opacity="0.5"/>
+          <circle cx="150" cy="180" r="1" fill={secondaryFill} opacity="0.4"/>
+          <circle cx="300" cy="550" r="1" fill={accentFill} opacity="0.4"/>
+          <circle cx="240" cy="400" r="1.2" fill={secondaryFill} opacity="0.4"/>
         </svg>
       </div>
     );
@@ -81,6 +142,12 @@ export default function GradientBlobs() {
         pointerEvents: "none",
         overflow: "hidden",
         opacity: isLight ? 0.4 : 1,
+        background: isLight 
+          ? `radial-gradient(ellipse at 20% 10%, ${accentFill}12 0%, transparent 50%),
+             radial-gradient(ellipse at 80% 90%, ${secondaryFill}10 0%, transparent 40%)`
+          : `radial-gradient(ellipse at 20% 10%, ${accentFill}18 0%, transparent 40%),
+             radial-gradient(ellipse at 80% 90%, ${secondaryFill}12 0%, transparent 35%)`,
+        transition: "background 2s ease",
       }}
     >
       <svg

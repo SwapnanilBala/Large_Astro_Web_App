@@ -19,6 +19,11 @@ import FormCelebration from "./components/FormCelebration";
 import Image from "next/image";
 import { hapticSuccess } from "@/lib/haptics";
 import OnboardingCinematic from "./components/OnboardingCinematic";
+import PlanetaryAffinity from "./components/PlanetaryAffinity";
+import BirthChartTeaser from "./components/BirthChartTeaser";
+import CosmicTrailCursor from "./components/CosmicTrailCursor";
+import { useFieldStarBurst } from "./components/FieldStarBurst";
+import { useTextScramble } from "./components/TextScramble";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -53,11 +58,57 @@ export default function Home() {
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
 
+  // Sequential field unlock state
+  const [unlockedStage, setUnlockedStage] = useState(0);
+  const [completedFields, setCompletedFields] = useState<Set<string>>(new Set());
+  
+  // Field refs for star burst animations
+  const nameRef = useRef<HTMLDivElement>(null);
+  const birthDateRef = useRef<HTMLDivElement>(null);
+  const birthTimeRef = useRef<HTMLDivElement>(null);
+  const countryRef = useRef<HTMLDivElement>(null);
+  const stateRef = useRef<HTMLDivElement>(null);
+  const cityRef = useRef<HTMLDivElement>(null);
+  
+  // Star burst hook
+  const { BurstContainer, burstAt } = useFieldStarBurst();
+  
+  // Text scramble for heading
+  const [headingScrambleActive, setHeadingScrambleActive] = useState(true);
+  
+  // Text scramble for heading - declared here, used after headingText is defined
+  const headingText = t("home.heading");
+  const scrambledHeading = useTextScramble(headingText, headingScrambleActive, { duration: 1500 });
+
   /* ── Scroll-reveal & validation shimmer ── */
   const formRef = useRef<HTMLFormElement>(null);
   const prevDraftRef = useRef<ProfileQueryInput>(withClientTimezoneDefault());
   const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
   const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+
+  // Sequential unlock effect based on filled fields
+  useEffect(() => {
+    const stageFields = [
+      ["name"], // Stage 0: Name only
+      ["name", "birthDate"], // Stage 1: + Date
+      ["name", "birthDate", "birthTime"], // Stage 2: + Time
+      ["name", "birthDate", "birthTime", "country"], // Stage 3: + Country
+      ["name", "birthDate", "birthTime", "country", "state"], // Stage 4: + State
+      ["name", "birthDate", "birthTime", "country", "state", "city"], // Stage 5: + City
+    ];
+    
+    const filledFields = stageFields[unlockedStage].filter(
+      field => draft[field as keyof ProfileQueryInput].trim().length > 0
+    );
+    
+    // Check if current stage is complete
+    if (filledFields.length === stageFields[unlockedStage].length && unlockedStage < 5) {
+      // Small delay for visual effect
+      setTimeout(() => {
+        setUnlockedStage(prev => prev + 1);
+      }, 300);
+    }
+  }, [draft, unlockedStage]);
 
   /* ── Mystical tagline rotation ── */
   const mysticalPhrases = useMemo(() => {
@@ -80,7 +131,11 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [mysticalPhrases.length]);
 
-  const headingText = t("home.heading");
+  // Deactivate heading scramble after animation
+  useEffect(() => {
+    const timer = setTimeout(() => setHeadingScrambleActive(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
   /* ── Panel & wheel refs (no scroll transforms — clean render) ── */
   const wheelRef = useRef<HTMLDivElement>(null);
@@ -109,6 +164,38 @@ export default function Home() {
         newlyValid.forEach((f) => next.add(f));
         return next;
       });
+      
+      // Mark fields as completed for star burst
+      newlyValid.forEach(field => {
+        if (!completedFields.has(field)) {
+          setCompletedFields(prev => new Set([...prev, field]));
+          
+          // Trigger star burst at field position
+          const fieldRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
+            name: nameRef,
+            birthDate: birthDateRef,
+            birthTime: birthTimeRef,
+            country: countryRef,
+            state: stateRef,
+            city: cityRef,
+          };
+          
+          const fieldColorMap: Record<string, "gold" | "aqua" | "coral" | "violet" | "rose"> = {
+            name: "gold",
+            birthDate: "aqua",
+            birthTime: "coral",
+            country: "violet",
+            state: "rose",
+            city: "gold",
+          };
+          
+          const ref = fieldRefs[field];
+          if (ref?.current) {
+            const rect = ref.current.getBoundingClientRect();
+            burstAt(rect.left + rect.width / 2, rect.top + rect.height / 2, fieldColorMap[field]);
+          }
+        }
+      });
 
       // Remove shimmer class after animation completes
       for (const f of newlyValid) {
@@ -129,7 +216,7 @@ export default function Home() {
     }
 
     prevDraftRef.current = { ...draft };
-  }, [draft]);
+  }, [draft, completedFields, burstAt]);
 
   useEffect(() => {
     const clientOffset = String(-new Date().getTimezoneOffset());
@@ -386,7 +473,9 @@ export default function Home() {
   return (
     <div className="home-shell">
       <OnboardingCinematic />
+      <CosmicTrailCursor />
       <FormCelebration isComplete={canSubmit} />
+      <BurstContainer />
       {/* ── Aurora Effect (top of page) ── */}
       <div className={styles.auroraEffect}>
         <div className={styles.auroraLayer} />
@@ -501,7 +590,7 @@ export default function Home() {
           {t("home.kicker")}
         </p>
         <h1 className={styles.heroHeading}>
-          {headingText}
+          {scrambledHeading}
         </h1>
         {/* ── Mystical Rotating Tagline (centered between heading & form) ── */}
         <div className={`${styles.mysticalTagline} ${styles.mysticalTaglineCentered}`}>
@@ -521,7 +610,8 @@ export default function Home() {
           <div className={styles.bentoGrid}>
           {/* ── Name Card ── */}
           <div className={styles.bentoHero}>
-          <div data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+          <div ref={nameRef} data-field-reveal="0" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+            <PlanetaryAffinity fieldType="name" isActive={draft.name.trim().length > 0} />
             <span className={styles.orbitNumber}>1</span>
             <label className={`${styles.fieldLabel} input-glow-gold${validatedFields.has("name") ? " input-validated" : ""}`}>
               <GiCrystalBall className="section-icon" style={{ fontSize: "1.05rem" }} />
@@ -539,7 +629,8 @@ export default function Home() {
           </div>
 
           {/* ── Birth Date Card ── */}
-          <div data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua}`}>
+          <div ref={birthDateRef} data-field-reveal="1" className={`${styles.fieldCard} ${styles.fieldCardAqua} ${unlockedStage >= 1 ? styles.fieldUnlocked : styles.fieldLocked}`}>
+            <PlanetaryAffinity fieldType="birthDate" isActive={draft.birthDate.trim().length > 0} />
             <span className={styles.orbitNumber}>2</span>
             <div className={styles.fieldCardAccent}>
               <Image src="/zodiac/cancer.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
@@ -573,7 +664,8 @@ export default function Home() {
           </div>
 
           {/* ── Birth Time Card ── */}
-          <div data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral}`}>
+          <div ref={birthTimeRef} data-field-reveal="2" className={`${styles.fieldCard} ${styles.fieldCardCoral} ${unlockedStage >= 2 ? styles.fieldUnlocked : styles.fieldLocked}`}>
+            <PlanetaryAffinity fieldType="birthTime" isActive={draft.birthTime.trim().length > 0} />
             <span className={styles.orbitNumber}>3</span>
             <div className={styles.fieldCardAccent}>
               <Image src="/zodiac/leo.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
@@ -634,7 +726,8 @@ export default function Home() {
 
           {/* ── Country Card ── */}
           <div className={styles.bentoWide}>
-          <div data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet}`}>
+          <div ref={countryRef} data-field-reveal="3" className={`${styles.fieldCard} ${styles.fieldCardViolet} ${unlockedStage >= 3 ? styles.fieldUnlocked : styles.fieldLocked}`}>
+            <PlanetaryAffinity fieldType="country" isActive={draft.country.trim().length > 0} />
             <span className={styles.orbitNumber}>4</span>
             <div className={styles.fieldCardAccent}>
               <Image src="/zodiac/sagittarius.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
@@ -655,7 +748,8 @@ export default function Home() {
           </div>
 
           {/* ── State Card ── */}
-          <div data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose}`}>
+          <div ref={stateRef} data-field-reveal="4" className={`${styles.fieldCard} ${styles.fieldCardRose} ${unlockedStage >= 4 ? styles.fieldUnlocked : styles.fieldLocked}`}>
+            <PlanetaryAffinity fieldType="state" isActive={draft.state.trim().length > 0} />
             <span className={styles.orbitNumber}>5</span>
             <div className={styles.fieldCardAccent}>
               <Image src="/zodiac/capricorn.png" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
@@ -676,7 +770,8 @@ export default function Home() {
           </div>
 
           {/* ── City Card ── */}
-          <div data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold}`}>
+          <div ref={cityRef} data-field-reveal="5" className={`${styles.fieldCard} ${styles.fieldCardGold} ${unlockedStage >= 5 ? styles.fieldUnlocked : styles.fieldLocked}`}>
+            <PlanetaryAffinity fieldType="city" isActive={draft.city.trim().length > 0} />
             <span className={styles.orbitNumber}>6</span>
             <div className={styles.fieldCardAccent}>
               <Image src="/zodiac/pisces.jpg" alt="" width={48} height={48} className={styles.fieldCardAccentImg} loading="lazy" />
@@ -697,6 +792,16 @@ export default function Home() {
             </label>
           </div>
           </div>{/* end bentoGrid */}
+
+          {/* ── Birth Chart Teaser Cards ── */}
+          <BirthChartTeaser
+            name={draft.name}
+            birthDate={draft.birthDate}
+            birthTime={draft.birthTime}
+            country={draft.country}
+            state={draft.state}
+            city={draft.city}
+          />
 
           {geoStatus !== "idle" && (
             <p className={`geo-status ${geoStatus}`}>
