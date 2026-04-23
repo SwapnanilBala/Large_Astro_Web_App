@@ -63,12 +63,13 @@
   padding: var(--space-md) var(--space-lg);
   padding-left: calc(var(--space-lg) + 2rem);
   font-size: 1rem;
-  color: var(--text-primary);
+  color: #ffffff;
   background: transparent;
   border: none;
   outline: none;
   font-family: inherit;
   transition: all var(--transition-base);
+  caret-color: var(--accent-gold);
   cursor: pointer;
 }
 

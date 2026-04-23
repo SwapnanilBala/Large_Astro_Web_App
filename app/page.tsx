@@ -612,7 +612,6 @@ export default function Home() {
             <div className={styles.premiumFormContent}>
               {/* ── Name Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="name" isActive={draft.name.trim().length > 0} />
                 <PremiumInput
                   label={t("home.formName")}
                   value={draft.name}
@@ -625,7 +624,6 @@ export default function Home() {
 
               {/* ── Birth Date Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="birthDate" isActive={draft.birthDate.trim().length > 0} />
                 <PremiumDatePicker
                   label={t("home.formBirthDate")}
                   value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
@@ -647,7 +645,6 @@ export default function Home() {
 
               {/* ── Birth Time Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="birthTime" isActive={draft.birthTime.trim().length > 0} />
                 <PremiumDatePicker
                   label={t("home.formBirthTime")}
                   value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
@@ -671,7 +668,6 @@ export default function Home() {
 
               {/* ── Country Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="country" isActive={draft.country.trim().length > 0} />
                 <div className={styles.autocompleteWrapper}>
                   <AutocompleteInput
                     value={draft.country}
@@ -686,7 +682,6 @@ export default function Home() {
 
               {/* ── State Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="state" isActive={draft.state.trim().length > 0} />
                 <div className={styles.autocompleteWrapper}>
                   <AutocompleteInput
                     value={draft.state}
@@ -702,7 +697,6 @@ export default function Home() {
 
               {/* ── City Field ── */}
               <div className={styles.premiumField}>
-                <PlanetaryAffinity fieldType="city" isActive={draft.city.trim().length > 0} />
                 <div className={styles.autocompleteWrapper}>
                   <AutocompleteInput
                     value={draft.city}
