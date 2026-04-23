@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans, Inter, Cormorant_Garamond, Newsreader } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import GradientBlobs from "./components/GradientBlobs";
@@ -10,41 +9,6 @@ import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ToastProvider } from "@/lib/toast-context";
-
-const displayFont = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  variable: "--font-display",
-  weight: ["500", "600", "700"],
-  display: "optional",
-  preload: true,
-  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
-});
-
-const bodyFont = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-  weight: ["400", "500", "600"],
-  display: "optional",
-  preload: true,
-  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'sans-serif'],
-});
-
-const accentFont = Cormorant_Garamond({
-  subsets: ["latin"],
-  variable: "--font-accent",
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-  preload: false,
-});
-
-const newsreaderFont = Newsreader({
-  subsets: ["latin"],
-  variable: "--font-newsreader",
-  weight: ["300", "400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-  preload: false,
-});
 
 export const metadata: Metadata = {
   title: "Lagna Atelier",
@@ -78,7 +42,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${displayFont.variable} ${bodyFont.variable} ${accentFont.variable} ${newsreaderFont.variable}`}>
+      <body>
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>

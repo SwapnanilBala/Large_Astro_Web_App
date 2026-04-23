@@ -33,7 +33,7 @@
 /* text-shadow won't show on clip-text elements; use filter drop-shadow instead */
 
 .heroHeading {
-  font-family: var(--font-display), 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   font-size: clamp(2rem, 4.2vw, 3.3rem);
   font-weight: 800;
   letter-spacing: -0.02em;
