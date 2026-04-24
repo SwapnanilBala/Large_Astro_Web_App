@@ -669,6 +669,7 @@ export default function Home() {
               {/* ── Country Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
+                  <label>{t("home.formCountry")}</label>
                   <AutocompleteInput
                     value={draft.country}
                     onChange={handleCountryChange}
@@ -683,6 +684,7 @@ export default function Home() {
               {/* ── State Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
+                  <label>{t("home.formState")}</label>
                   <AutocompleteInput
                     value={draft.state}
                     onChange={handleStateChange}
@@ -698,6 +700,7 @@ export default function Home() {
               {/* ── City Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
+                  <label>{t("home.formCity")}</label>
                   <AutocompleteInput
                     value={draft.city}
                     onChange={setField("city")}

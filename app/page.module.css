@@ -36,19 +36,12 @@
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-}
-
-.autocompleteWrapper input {
-  width: 100%;
   background: rgba(15, 15, 25, 0.8);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
-  padding: var(--space-md) var(--space-lg);
-  font-size: 1rem;
-  color: #ffffff;
-  outline: none;
+  padding: var(--space-md);
   transition: all var(--transition-smooth);
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.3),
@@ -56,13 +49,60 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.autocompleteWrapper input:focus {
+.autocompleteWrapper:hover {
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-md);
+}
+
+.autocompleteWrapper:focus-within {
   border-color: var(--accent-gold);
   box-shadow: var(--shadow-gold), var(--glow-gold);
+  background: var(--bg-glass-strong);
+}
+
+.autocompleteWrapper input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: var(--space-md) var(--space-lg);
+  font-size: 1rem;
+  color: #ffffff;
+  font-family: inherit;
+  transition: all var(--transition-base);
+  caret-color: var(--accent-gold);
 }
 
 .autocompleteWrapper input::placeholder {
+  color: transparent;
+}
+
+.autocompleteWrapper input:focus::placeholder {
   color: var(--text-tertiary);
+}
+
+/* Floating label for autocomplete */
+.autocompleteWrapper label {
+  position: absolute;
+  left: var(--space-lg);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-secondary);
+  font-size: 1rem;
+  pointer-events: none;
+  transition: all var(--transition-smooth);
+  transform-origin: left center;
+  background: var(--bg-deep);
+  padding: 0 var(--space-xs);
+  border-radius: var(--radius-sm);
+}
+
+.autocompleteWrapper:focus-within label,
+.autocompleteWrapper input:not(:placeholder-shown) + label {
+  top: 0;
+  left: var(--space-md);
+  transform: translateY(-50%) scale(0.85);
+  color: var(--accent-gold);
 }
 
 .latLonFields {

@@ -54,7 +54,7 @@ export default function PremiumDatePicker({
   };
 
   return (
-    <div className={`${styles.premiumDatePicker} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+    <div className={`${styles.premiumDatePicker} ${icon ? styles.hasIcon : ""} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
       <div className={styles.datePickerWrapper} ref={calendarRef}>
         {icon && <div className={styles.datePickerIcon}>{icon}</div>}
         <DatePicker

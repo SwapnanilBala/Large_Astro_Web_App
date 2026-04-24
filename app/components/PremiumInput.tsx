@@ -49,7 +49,7 @@ export default function PremiumInput({
   };
 
   return (
-    <div className={`${styles.premiumInput} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+    <div className={`${styles.premiumInput} ${icon ? styles.hasIcon : ""} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
       <div className={styles.inputWrapper}>
         {icon && <div className={styles.inputIcon}>{icon}</div>}
         <input
