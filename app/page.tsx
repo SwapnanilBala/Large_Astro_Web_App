@@ -588,7 +588,7 @@ export default function Home() {
           <HiOutlineSparkles />
           <span>Swiss Ephemeris</span>
         </div>
-        <h1 className={styles.pageTitle}>Professional Chart Intake</h1>
+        <h1 className={styles.pageTitle}>Reveal My Destiny</h1>
         <p className={styles.pageSubtitle}>The Universe Speaks — Discover Your Cosmic Blueprint</p>
         
         {/* Progress indicator */}
