@@ -13,7 +13,7 @@
 /* === HEADER SECTION === */
 .intakeHeader {
   text-align: center;
-  padding: 2rem 1rem 1rem;
+  padding: 5rem 1rem 1rem;
   position: relative;
   z-index: 10;
 }
@@ -555,15 +555,18 @@
 /* ── Hero Wrapper — positions zodiac wheel + panel ── */
 
 .heroWrapper {
-  position: relative;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
-  /* Extra padding so the 600px wheel has breathing room */
   padding: 0;
-  z-index: 1;
-  margin-top: 2.5rem; /* Move hero box downward */
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.25;
 }
 
 /* ── Parallax wheel wrapper ──────────────────── */
