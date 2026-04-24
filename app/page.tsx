@@ -666,6 +666,13 @@ export default function Home() {
                 />
               </div>
 
+              {/* ── Section Divider ── */}
+              <div className={styles.sectionDivider}>
+                <div className={styles.dividerLine}></div>
+                <span className={styles.dividerText}>Location</span>
+                <div className={styles.dividerLine}></div>
+              </div>
+
               {/* ── Country Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>

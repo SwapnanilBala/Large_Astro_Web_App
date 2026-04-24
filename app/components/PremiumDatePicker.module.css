@@ -1,24 +1,23 @@
 .premiumDatePicker {
   position: relative;
-  margin-bottom: var(--space-lg);
+  margin-bottom: 0;
 }
 
 .datePickerWrapper {
   position: relative;
   width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: rgba(15, 15, 25, 0.8);
+  background: rgba(15, 15, 25, 0.85);
   backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
   border: 1px solid var(--border-soft);
-  border-radius: var(--radius-lg);
-  padding: var(--space-md);
+  border-radius: 12px;
+  padding: 1rem;
   transition: all var(--transition-smooth);
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.3),
     0 8px 20px rgba(0, 0, 0, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  min-height: 56px;
 }
 
 .datePickerWrapper:hover {
@@ -39,7 +38,7 @@
 
 .datePickerIcon {
   position: absolute;
-  left: var(--space-md);
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--accent-gold);
@@ -60,8 +59,8 @@
 
 .datePickerInput {
   width: 100%;
-  padding: var(--space-md) var(--space-lg);
-  padding-left: calc(var(--space-lg) + 2rem);
+  padding: 0.75rem 1rem;
+  padding-left: 3rem;
   font-size: 1rem;
   color: #ffffff;
   background: transparent;
@@ -71,6 +70,7 @@
   transition: all var(--transition-base);
   caret-color: var(--accent-gold);
   cursor: pointer;
+  line-height: 1.5;
 }
 
 .datePickerInput::placeholder {
@@ -83,7 +83,7 @@
 
 .floatingLabel {
   position: absolute;
-  left: var(--space-lg);
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
@@ -91,25 +91,29 @@
   pointer-events: none;
   transition: all var(--transition-smooth);
   transform-origin: left center;
+  background: rgba(15, 15, 25, 0.9);
+  padding: 0 0.25rem;
+  border-radius: 4px;
+  line-height: 1;
   z-index: 1;
 }
 
 .premiumDatePicker.hasIcon .floatingLabel {
-  left: calc(var(--space-lg) + 2rem);
+  left: 3rem;
 }
 
 .floatingLabel.floating {
   top: 0;
-  left: var(--space-md);
+  left: 0.75rem;
   transform: translateY(-50%) scale(0.85);
   color: var(--accent-gold);
-  background: var(--bg-deep);
-  padding: 0 var(--space-xs);
-  border-radius: var(--radius-sm);
+  background: rgba(15, 15, 25, 0.9);
+  padding: 0 0.25rem;
+  border-radius: 4px;
 }
 
 .premiumDatePicker.hasIcon .floatingLabel.floating {
-  left: calc(var(--space-md) + 2rem);
+  left: 2.75rem;
 }
 
 .premiumDatePicker.focused .floatingLabel {
