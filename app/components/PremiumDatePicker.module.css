@@ -199,8 +199,8 @@
 
 .calendarPopup :global(.react-datepicker__year-option),
 .calendarPopup :global(.react-datepicker__month-option) {
-  padding: 0.55rem 1.5rem;
-  margin: 0.25rem 0;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem 0;
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
   font-size: 0.9375rem;
