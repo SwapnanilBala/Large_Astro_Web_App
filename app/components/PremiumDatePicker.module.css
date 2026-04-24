@@ -191,20 +191,20 @@
   border-radius: var(--radius-md);
   padding: 0.5rem;
   margin-top: 0.5rem;
-  max-height: 200px;
+  max-height: 250px;
   overflow-y: auto;
-  position: absolute;
-  z-index: 10;
+  z-index: 50;
 }
 
 .calendarPopup :global(.react-datepicker__year-option),
 .calendarPopup :global(.react-datepicker__month-option) {
-  padding: 0.5rem 1rem;
-  margin: 0.5rem 0;
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
   border-radius: var(--radius-sm);
   transition: all 0.2s ease;
-  font-size: 0.9375rem;
+  font-size: 1rem;
   white-space: nowrap;
+  line-height: 1.4;
 }
 
 .calendarPopup :global(.react-datepicker__year-option:hover),
