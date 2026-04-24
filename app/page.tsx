@@ -478,12 +478,10 @@ export default function Home() {
   };
 
   return (
-    <div className={`home-shell ${styles.pageShell}`}>
+    <div className={styles.professionalIntake}>
       <OnboardingCinematic />
       <CosmicBackground />
-      <CosmicTrailCursor />
       <FormCelebration isComplete={canSubmit} />
-      <BurstContainer />
 
       {/* ── Floating Cosmic Particles ── */}
       <div className={styles.cosmicParticles}>
@@ -519,7 +517,6 @@ export default function Home() {
       </div>
 
 
-      <ChartHistory userName={user?.display_name} />
 
       {/* ── Hero wrapper: positions wheel behind the panel ── */}
       <div className={styles.heroWrapper}>
@@ -583,33 +580,34 @@ export default function Home() {
           <ZodiacWheel onHoveredChange={setHoveredSign} />
           <ZodiacPortraitPanel sign={hoveredSign} />
         </div>
+      </div>{/* /heroWrapper */}
 
-      <section ref={panelRef} className={`intake-panel ${styles.panel}`}>
-        <p className="kicker">
-          <HiOutlineSparkles className="section-icon" />
-          {t("home.kicker")}
-        </p>
-        <h1 className={styles.heroHeading}>
-          {scrambledHeading}
-        </h1>
-        {/* ── Mystical Rotating Tagline (centered between heading & form) ── */}
-        <div className={`${styles.mysticalTagline} ${styles.mysticalTaglineCentered}`}>
-          <span key={taglineIndex} className={styles.mysticalTaglineInner}>
-            {mysticalPhrases[taglineIndex]}
-          </span>
+      {/* === HEADER SECTION === */}
+      <header className={styles.intakeHeader}>
+        <div className={styles.brandBadge}>
+          <HiOutlineSparkles />
+          <span>Swiss Ephemeris</span>
         </div>
+        <h1 className={styles.pageTitle}>Professional Chart Intake</h1>
+        <p className={styles.pageSubtitle}>The Universe Speaks — Discover Your Cosmic Blueprint</p>
+        
+        {/* Progress indicator */}
+        <div className={styles.formProgress}>
+          <div 
+            className={styles.progressFill} 
+            style={{ width: `${chargeLevel * 100}%` }}
+          />
+        </div>
+      </header>
 
-        <form ref={formRef} className={`intake-form ${styles.form}`} onSubmit={submitProfile}>
-          <span
-            className={styles.draftSavedIndicator}
-            style={{ opacity: draftSaved ? 1 : 0 }}
-            aria-live="polite"
-          >
-            Draft saved
-          </span>
+      {/* === MAIN CONTENT === */}
+      <main className={styles.mainContent}>
+        <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
           
-          <GlassCard variant="elevated" glow="gold" className={styles.premiumFormCard}>
-            <div className={styles.premiumFormContent}>
+          <div className={styles.formLayout}>
+            {/* LEFT COLUMN: Form Fields */}
+            <div className={styles.formColumn}>
+              <div className={styles.formSectionCard}>
               {/* ── Name Field ── */}
               <div className={styles.premiumField}>
                 <PremiumInput
@@ -749,118 +747,101 @@ export default function Home() {
                 </div>
               )}
 
-              {/* ── Submit Button ── */}
-              <div className={styles.premiumSubmit}>
-                <PremiumButton
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  loading={isSubmitting}
-                  icon={<HiOutlineSparkles />}
-                >
-                  Reveal my Destiny
-                </PremiumButton>
-              </div>
-            </div>
-          </GlassCard>
+              </div>{/* /formSectionCard */}
+            </div>{/* /formColumn */}
 
-          {/* ── Birth Chart Teaser Cards ── */}
-          <BirthChartTeaser
-            name={draft.name}
-            birthDate={draft.birthDate}
-            birthTime={draft.birthTime}
-            country={draft.country}
-            state={draft.state}
-            city={draft.city}
-          />
-
-          {geoStatus !== "idle" && (
-            <p className={`geo-status ${geoStatus}`}>
-              {geoStatus === "loading" && t("home.geoLoading")}
-              {geoStatus === "found" && t("home.geoFound", { lat: Number(draft.latitude).toFixed(4), lon: Number(draft.longitude).toFixed(4) })}
-              {geoStatus === "not-found" && t("home.geoNotFound")}
-            </p>
-          )}
-
-          <div data-field-reveal="6" className="collapsible-section">
-            <button
-              type="button"
-              className="collapsible-toggle"
-              onClick={() => setLatLonExpanded((prev) => !prev)}
-            >
-              {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
-              <span className={`toggle-arrow ${latLonExpanded ? "expanded" : ""}`}>&#9662;</span>
-            </button>
-
-            {latLonExpanded && (
-              <div className="input-grid three-col" style={{ marginTop: "0.6rem" }}>
-                <label className="input-glow-aqua">
-                  {t("home.formTimezone")}
-                  <input
-                    type="number"
-                    value={draft.timezoneOffsetMinutes}
-                    onChange={updateField("timezoneOffsetMinutes")}
-                    placeholder="e.g. 330, -300"
-                    min={-720}
-                    max={840}
-                    required
-                  />
-                  {draft.timeZoneId && (
-                    <small style={{ display: "block", marginTop: "0.35rem", opacity: 0.78 }}>
-                      {draft.timeZoneId}
-                    </small>
+            {/* RIGHT COLUMN: Chart Preview */}
+            <aside className={styles.previewColumn}>
+              <div className={styles.previewCard}>
+                <h3 className={styles.previewTitle}>
+                  <GiStarSattelites /> Chart Preview
+                </h3>
+                
+                <div className={styles.previewData}>
+                  {draft.name && (
+                    <div className={styles.previewRow}>
+                      <span className={styles.previewLabel}>Client</span>
+                      <span className={styles.previewValue}>{draft.name}</span>
+                    </div>
                   )}
-                </label>
-                <label className="input-glow-coral">
-                  {t("home.formLatitude")}
-                  <input
-                    type="number"
-                    value={draft.latitude}
-                    onChange={updateField("latitude")}
-                    placeholder="e.g. 28.6139"
-                    min={-90}
-                    max={90}
-                    step="0.0001"
-                    required
-                  />
-                </label>
-                <label className="input-glow-violet">
-                  {t("home.formLongitude")}
-                  <input
-                    type="number"
-                    value={draft.longitude}
-                    onChange={updateField("longitude")}
-                    placeholder="e.g. 77.2090"
-                    min={-180}
-                    max={180}
-                    step="0.0001"
-                    required
-                  />
-                </label>
-              </div>
-            )}
-            </div>
+                  {draft.birthDate && (
+                    <div className={styles.previewRow}>
+                      <span className={styles.previewLabel}>Birth Date</span>
+                      <span className={styles.previewValue}>{draft.birthDate}</span>
+                    </div>
+                  )}
+                  {draft.birthTime && (
+                    <div className={styles.previewRow}>
+                      <span className={styles.previewLabel}>Birth Time</span>
+                      <span className={styles.previewValue}>{draft.birthTime}</span>
+                    </div>
+                  )}
+                  {(draft.country || draft.state || draft.city) && (
+                    <div className={styles.previewRow}>
+                      <span className={styles.previewLabel}>Location</span>
+                      <span className={styles.previewValue}>
+                        {[draft.city, draft.state, draft.country].filter(Boolean).join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
 
-          {/* ── Cosmic Charge Submit Button ── */}
-          <div
-            ref={submitWrapperRef}
-            data-field-reveal="7"
-            className={styles.submitChargeWrapper}
-            onClick={handleSubmitClick}
-            style={{ "--charge-level": chargeLevel } as React.CSSProperties}
-          >
-            <button
+                {geoStatus === "found" && (
+                  <div className={styles.coordinatesDisplay}>
+                    <button 
+                      type="button"
+                      className={styles.coordsToggle}
+                      onClick={() => setLatLonExpanded(!latLonExpanded)}
+                    >
+                      <GiCompass /> Show Precise Lat & Lon
+                    </button>
+                    {latLonExpanded && (
+                      <div className={styles.coordsGrid}>
+                        <span>Lat: {Number(draft.latitude).toFixed(4)}</span>
+                        <span>Lon: {Number(draft.longitude).toFixed(4)}</span>
+                        {draft.timeZoneId && <span>TZ: {draft.timeZoneId}</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Draft saved indicator */}
+              {draftSaved && (
+                <div className={styles.draftIndicator}>
+                  Draft saved
+                </div>
+              )}
+            </aside>
+          </div>{/* /formLayout */}
+
+          {/* PRIMARY CTA */}
+          <div className={styles.primaryAction}>
+            <PremiumButton
               type="submit"
-              disabled={!canSubmit || isSubmitting}
-              className={chargeLevel >= 1 ? styles.fullyCharged : undefined}
+              variant="primary"
+              size="lg"
+              fullWidth
+              loading={isSubmitting}
+              disabled={!canSubmit}
+              icon={<GiCrystalBall />}
             >
-              {isSubmitting ? t("home.submitting") : t("home.submit")}
-            </button>
+              {isSubmitting ? "Generating..." : "Generate Chart Intelligence"}
+            </PremiumButton>
+            {!canSubmit && (
+              <p className={styles.actionHint}>
+                Complete all fields to generate your chart
+              </p>
+            )}
           </div>
+
         </form>
-      </section>
-      </div>{/* /heroWrapper */}
+      </main>
+
+      {/* === FOOTER === */}
+      <footer className={styles.intakeFooter}>
+        <ChartHistory userName={user?.display_name} />
+      </footer>
     </div>
   );
 }
