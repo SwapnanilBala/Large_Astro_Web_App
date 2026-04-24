@@ -110,6 +110,7 @@
   box-shadow: 
     0 4px 6px rgba(0, 0, 0, 0.3),
     0 20px 40px rgba(0, 0, 0, 0.2);
+  overflow: visible;
 }
 
 .premiumField {
@@ -205,30 +206,53 @@
   }
 }
 
-/* Override: make toggle smaller and more interactive */
-.premiumField .premiumToggle {
-  margin-bottom: 0;
+/* Override: make coordinates toggle visually distinct */
+.coordsToggleWrapper {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: rgba(200, 155, 60, 0.06);
+  border: 1px dashed rgba(200, 155, 60, 0.25);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.coordsToggleWrapper:hover {
+  background: rgba(200, 155, 60, 0.1);
+  border-color: rgba(200, 155, 60, 0.4);
+}
+
+.coordsToggleWrapper:active {
+  transform: scale(0.99);
+}
+
+.coordsToggleText {
+  display: flex;
+  align-items: center;
   gap: 0.5rem;
-}
-
-.premiumField .toggleButton {
-  width: 36px;
-  height: 20px;
-}
-
-.premiumField .toggleThumb {
-  width: 14px;
-  height: 14px;
-}
-
-.premiumField .toggleLabel {
   font-size: 0.8125rem;
-  opacity: 0.7;
+  color: var(--accent-gold);
+  opacity: 0.8;
   transition: opacity 0.2s ease;
 }
 
-.premiumField .toggleButton:hover + .toggleLabel,
-.premiumField .toggleLabel:hover {
+.coordsToggleWrapper:hover .coordsToggleText {
+  opacity: 1;
+}
+
+.coordsToggleArrow {
+  font-size: 0.75rem;
+  color: var(--accent-gold);
+  opacity: 0.6;
+  transition: transform 0.25s ease, opacity 0.2s ease;
+}
+
+.coordsToggleArrow.expanded {
+  transform: rotate(180deg);
   opacity: 1;
 }
 

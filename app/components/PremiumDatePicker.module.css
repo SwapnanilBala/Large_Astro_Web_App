@@ -28,7 +28,6 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   transition: all 0.2s ease;
-  overflow: hidden;
 }
 
 .datePickerWrapper:hover {
@@ -146,7 +145,16 @@
 }
 
 .popper {
-  z-index: 100;
+  z-index: 9999 !important;
+}
+
+.premiumDatePicker {
+  position: relative;
+  z-index: 10;
+}
+
+.premiumDatePicker.focused {
+  z-index: 20;
 }
 
 .errorMessage {

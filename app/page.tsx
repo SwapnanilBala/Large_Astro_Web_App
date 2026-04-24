@@ -717,12 +717,18 @@ export default function Home() {
               </div>
 
               {/* ── Lat/Lon Toggle ── */}
-              <div className={styles.premiumField}>
-                <PremiumToggle
-                  label="Enter coordinates manually"
-                  checked={latLonExpanded}
-                  onChange={setLatLonExpanded}
-                />
+              <div 
+                className={styles.coordsToggleWrapper}
+                onClick={() => setLatLonExpanded(!latLonExpanded)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setLatLonExpanded(!latLonExpanded); }}
+              >
+                <span className={styles.coordsToggleText}>
+                  <GiCompass />
+                  Enter coordinates manually
+                </span>
+                <span className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ''}`}>&#9662;</span>
               </div>
 
               {latLonExpanded && (
