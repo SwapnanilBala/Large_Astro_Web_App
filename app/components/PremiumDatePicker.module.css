@@ -104,28 +104,35 @@
   -webkit-backdrop-filter: var(--blur-xl);
   color: var(--text-primary);
   font-family: inherit;
+  padding: 1rem;
 }
 
 .calendarPopup :global(.react-datepicker__header) {
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border-soft);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1rem;
+  margin: -1rem -1rem 1rem -1rem;
 }
 
 .calendarPopup :global(.react-datepicker__current-month) {
   color: var(--accent-gold);
   font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .calendarPopup :global(.react-datepicker__day-name) {
   color: var(--text-secondary);
   font-weight: 500;
+  padding: 0.5rem 0;
 }
 
 .calendarPopup :global(.react-datepicker__day) {
   color: var(--text-primary);
   border-radius: var(--radius-sm);
   transition: all var(--transition-fast);
+  padding: 0.5rem;
+  margin: 0.25rem;
 }
 
 .calendarPopup :global(.react-datepicker__day:hover) {
@@ -144,8 +151,77 @@
   color: var(--accent-gold);
 }
 
+/* Year/Month dropdown styling */
+.calendarPopup :global(.react-datepicker__year-dropdown),
+.calendarPopup :global(.react-datepicker__month-dropdown) {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.calendarPopup :global(.react-datepicker__year-option),
+.calendarPopup :global(.react-datepicker__month-option) {
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.calendarPopup :global(.react-datepicker__year-option:hover),
+.calendarPopup :global(.react-datepicker__month-option:hover) {
+  background: var(--surface-hover);
+  color: var(--accent-gold);
+}
+
+.calendarPopup :global(.react-datepicker__year-option--selected),
+.calendarPopup :global(.react-datepicker__month-option--selected) {
+  background: var(--gradient-gold);
+  color: var(--bg-deep);
+  font-weight: 600;
+}
+
+/* Time dropdown styling */
+.calendarPopup :global(.react-datepicker__time-list) {
+  padding: 0.5rem;
+}
+
+.calendarPopup :global(.react-datepicker__time-list-item) {
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.calendarPopup :global(.react-datepicker__time-list-item:hover) {
+  background: var(--surface-hover);
+  color: var(--accent-gold);
+}
+
+.calendarPopup :global(.react-datepicker__time-list-item--selected) {
+  background: var(--gradient-gold);
+  color: var(--bg-deep);
+  font-weight: 600;
+}
+
+.calendarPopup :global(.react-datepicker__time-container) {
+  border-top: 1px solid var(--border-soft);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
 .popper {
   z-index: 9999 !important;
+}
+
+/* Increase spacing in time dropdown header */
+.calendarPopup :global(.react-datepicker__time-header) {
+  padding: 0.5rem 0;
+}
+
+.calendarPopup :global(.react-datepicker__time-interval) {
+  padding: 0.5rem;
 }
 
 .premiumDatePicker {

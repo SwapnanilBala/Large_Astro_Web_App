@@ -636,6 +636,10 @@ export default function Home() {
                   dateFormat="dd MMM yyyy"
                   required
                   maxDate={new Date()}
+                  minDate={new Date(1900, 0, 1)}
+                  showYearDropdown
+                  showMonthDropdown
+                  yearDropdownItemNumber={100}
                 />
               </div>
 

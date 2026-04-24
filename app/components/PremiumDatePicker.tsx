@@ -20,6 +20,10 @@ interface PremiumDatePickerProps {
   maxDate?: Date;
   timeIntervals?: number;
   timeCaption?: string;
+  showYearDropdown?: boolean;
+  showMonthDropdown?: boolean;
+  yearDropdownItemNumber?: number;
+  minDate?: Date;
 }
 
 export default function PremiumDatePicker({
@@ -37,6 +41,10 @@ export default function PremiumDatePicker({
   maxDate,
   timeIntervals = 15,
   timeCaption = "Time",
+  showYearDropdown = false,
+  showMonthDropdown = false,
+  yearDropdownItemNumber = 100,
+  minDate,
 }: PremiumDatePickerProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
@@ -72,8 +80,12 @@ export default function PremiumDatePicker({
           dateFormat={dateFormat}
           required={required}
           maxDate={maxDate}
+          minDate={minDate}
           timeIntervals={timeIntervals}
           timeCaption={timeCaption}
+          showYearDropdown={showYearDropdown}
+          showMonthDropdown={showMonthDropdown}
+          yearDropdownItemNumber={yearDropdownItemNumber}
           className={styles.datePickerInput}
           calendarClassName={styles.calendarPopup}
           popperClassName={styles.popper}
