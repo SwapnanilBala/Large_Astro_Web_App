@@ -54,9 +54,12 @@ export default function PremiumDatePicker({
   };
 
   return (
-    <div className={`${styles.premiumDatePicker} ${icon ? styles.hasIcon : ""} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+    <div className={`${styles.premiumDatePicker} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+      <label className={styles.fieldLabel}>
+        {label}
+        {required && <span className={styles.requiredDot}>*</span>}
+      </label>
       <div className={styles.datePickerWrapper} ref={calendarRef}>
-        {icon && <div className={styles.datePickerIcon}>{icon}</div>}
         <DatePicker
           selected={value}
           onChange={handleChange}
@@ -76,9 +79,6 @@ export default function PremiumDatePicker({
           popperClassName={styles.popper}
           wrapperClassName={styles.datePickerWrapperInner}
         />
-        <label className={`${styles.floatingLabel} ${isFocused || isFilled ? styles.floating : ""}`}>
-          {label}
-        </label>
         <div className={styles.datePickerBorder} />
         <div className={styles.datePickerGlow} />
       </div>

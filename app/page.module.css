@@ -147,94 +147,92 @@
 .autocompleteWrapper {
   position: relative;
   width: 100%;
-  background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: var(--blur-lg);
-  -webkit-backdrop-filter: var(--blur-lg);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  padding: 1rem;
-  transition: all var(--transition-smooth);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 8px 20px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  min-height: 56px;
 }
 
-.autocompleteWrapper:hover {
-  border-color: var(--border-medium);
-  box-shadow: var(--shadow-md);
+.autocompleteWrapper label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
 }
 
-.autocompleteWrapper:focus-within {
-  border-color: var(--accent-gold);
-  box-shadow: var(--shadow-gold), var(--glow-gold);
-  background: var(--bg-glass-strong);
-}
-
-.autocompleteWrapper input {
+.autocompleteWrapper :global(input) {
   width: 100%;
-  background: transparent;
-  border: none;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
   outline: none;
   padding: 0.75rem 1rem;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   color: #ffffff;
   font-family: inherit;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
   caret-color: var(--accent-gold);
   line-height: 1.5;
 }
 
-.autocompleteWrapper input::placeholder {
-  color: transparent;
+.autocompleteWrapper :global(input::placeholder) {
+  color: rgba(255, 255, 255, 0.3);
 }
 
-.autocompleteWrapper input:focus::placeholder {
-  color: var(--text-tertiary);
+.autocompleteWrapper :global(input:hover) {
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Floating label for autocomplete */
-.autocompleteWrapper label {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  font-size: 1rem;
-  pointer-events: none;
-  transition: all var(--transition-smooth);
-  transform-origin: left center;
-  background: rgba(15, 15, 25, 0.9);
-  padding: 0 0.25rem;
-  border-radius: 4px;
-  line-height: 1;
+.autocompleteWrapper :global(input:focus) {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 1px var(--accent-gold), 0 0 20px rgba(200, 155, 60, 0.1);
 }
 
-.autocompleteWrapper:focus-within label,
-.autocompleteWrapper input:not(:placeholder-shown) + label {
-  top: 0;
-  left: 0.75rem;
-  transform: translateY(-50%) scale(0.85);
-  color: var(--accent-gold);
+/* Extra spacing between birth date and birth time */
+.fieldSpacingLg {
+  margin-top: 0.5rem;
 }
 
+/* Lat/Lon fields grid */
 .latLonFields {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-md);
+  gap: 1rem;
   animation: slideDown 0.3s ease-out;
-  max-width: 1200px;
-  margin: 0 auto;
 }
 
-.sectionDivider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: 1rem 0;
-  opacity: 0.6;
+@media (max-width: 480px) {
+  .latLonFields {
+    grid-template-columns: 1fr;
+  }
 }
+
+/* Override: make toggle smaller and more interactive */
+.premiumField .premiumToggle {
+  margin-bottom: 0;
+  gap: 0.5rem;
+}
+
+.premiumField .toggleButton {
+  width: 36px;
+  height: 20px;
+}
+
+.premiumField .toggleThumb {
+  width: 14px;
+  height: 14px;
+}
+
+.premiumField .toggleLabel {
+  font-size: 0.8125rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.premiumField .toggleButton:hover + .toggleLabel,
+.premiumField .toggleLabel:hover {
+  opacity: 1;
+}
+
+/* Section Divider */
 
 .dividerLine {
   flex: 1;

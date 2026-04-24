@@ -26,6 +26,7 @@ export default function PremiumInput({
   error,
   disabled = false,
   autoFocus = false,
+  required = false,
 }: PremiumInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
@@ -49,9 +50,12 @@ export default function PremiumInput({
   };
 
   return (
-    <div className={`${styles.premiumInput} ${icon ? styles.hasIcon : ""} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+    <div className={`${styles.premiumInput} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+      <label className={styles.fieldLabel}>
+        {label}
+        {required && <span className={styles.requiredDot}>*</span>}
+      </label>
       <div className={styles.inputWrapper}>
-        {icon && <div className={styles.inputIcon}>{icon}</div>}
         <input
           ref={inputRef}
           type={type}
@@ -63,9 +67,6 @@ export default function PremiumInput({
           disabled={disabled}
           className={styles.inputField}
         />
-        <label className={`${styles.floatingLabel} ${isFocused || isFilled ? styles.floating : ""}`}>
-          {label}
-        </label>
         <div className={styles.inputBorder} />
         <div className={styles.inputGlow} />
       </div>

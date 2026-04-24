@@ -1,56 +1,48 @@
 .premiumDatePicker {
   position: relative;
-  margin-bottom: 0;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 0.5rem;
+  letter-spacing: 0.02em;
+  transition: color var(--transition-base);
+}
+
+.premiumDatePicker.focused .fieldLabel {
+  color: var(--accent-gold);
+}
+
+.requiredDot {
+  color: var(--accent-gold);
+  margin-left: 0.25rem;
 }
 
 .datePickerWrapper {
   position: relative;
   width: 100%;
-  background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: var(--blur-lg);
-  -webkit-backdrop-filter: var(--blur-lg);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  padding: 1rem;
-  transition: all var(--transition-smooth);
-  box-shadow: 
-    0 4px 6px rgba(0, 0, 0, 0.3),
-    0 8px 20px rgba(0, 0, 0, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
-  min-height: 56px;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  overflow: hidden;
 }
 
 .datePickerWrapper:hover {
-  border-color: var(--border-medium);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .premiumDatePicker.focused .datePickerWrapper {
   border-color: var(--accent-gold);
-  box-shadow: var(--shadow-gold), var(--glow-gold);
-  background: var(--bg-glass-strong);
+  box-shadow: 0 0 0 1px var(--accent-gold), 0 0 20px rgba(200, 155, 60, 0.1);
 }
 
 .premiumDatePicker.error .datePickerWrapper {
   border-color: #E84545;
-  box-shadow: 0 4px 24px rgba(232, 69, 69, 0.15);
-}
-
-.datePickerIcon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--accent-gold);
-  font-size: 1.25rem;
-  pointer-events: none;
-  transition: all var(--transition-base);
-  z-index: 2;
-}
-
-.premiumDatePicker.focused .datePickerIcon {
-  color: var(--accent-gold-light);
-  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 0 0 1px #E84545;
 }
 
 .datePickerWrapperInner {
@@ -60,8 +52,7 @@
 .datePickerInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  padding-left: 3rem;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   color: #ffffff;
   background: transparent;
   border: none;
@@ -74,76 +65,26 @@
 }
 
 .datePickerInput::placeholder {
-  color: transparent;
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .datePickerInput:focus::placeholder {
-  color: var(--text-tertiary);
-}
-
-.floatingLabel {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-secondary);
-  font-size: 1rem;
-  pointer-events: none;
-  transition: all var(--transition-smooth);
-  transform-origin: left center;
-  background: rgba(15, 15, 25, 0.9);
-  padding: 0 0.25rem;
-  border-radius: 4px;
-  line-height: 1;
-  z-index: 1;
-}
-
-.premiumDatePicker.hasIcon .floatingLabel {
-  left: 3rem;
-}
-
-.floatingLabel.floating {
-  top: 0;
-  left: 0.75rem;
-  transform: translateY(-50%) scale(0.85);
-  color: var(--accent-gold);
-  background: rgba(15, 15, 25, 0.9);
-  padding: 0 0.25rem;
-  border-radius: 4px;
-}
-
-.premiumDatePicker.hasIcon .floatingLabel.floating {
-  left: 2.75rem;
-}
-
-.premiumDatePicker.focused .floatingLabel {
-  color: var(--accent-gold-light);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .datePickerBorder {
   position: absolute;
   inset: 0;
-  border-radius: var(--radius-lg);
+  border-radius: 10px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity var(--transition-base);
-  background: linear-gradient(135deg, var(--accent-gold) 0%, var(--accent-purple) 100%);
-  padding: 1px;
-  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  mask-composite: exclude;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-}
-
-.premiumDatePicker.focused .datePickerBorder {
-  opacity: 1;
 }
 
 .datePickerGlow {
   position: absolute;
   inset: -2px;
-  border-radius: var(--radius-xl);
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 165, 116, 0.15), transparent 50%);
+  border-radius: 12px;
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 165, 116, 0.1), transparent 50%);
   opacity: 0;
   transition: opacity var(--transition-base);
   pointer-events: none;

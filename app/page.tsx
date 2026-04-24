@@ -615,7 +615,6 @@ export default function Home() {
                   value={draft.name}
                   onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
                   placeholder={t("home.formNamePlaceholder")}
-                  icon={<GiCrystalBall />}
                   required
                 />
               </div>
@@ -634,7 +633,6 @@ export default function Home() {
                     }
                   }}
                   placeholder="Select birth date"
-                  icon={<GiSunrise />}
                   dateFormat="dd MMM yyyy"
                   required
                   maxDate={new Date()}
@@ -642,7 +640,7 @@ export default function Home() {
               </div>
 
               {/* ── Birth Time Field ── */}
-              <div className={styles.premiumField}>
+              <div className={`${styles.premiumField} ${styles.fieldSpacingLg}`}>
                 <PremiumDatePicker
                   label={t("home.formBirthTime")}
                   value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
@@ -654,7 +652,6 @@ export default function Home() {
                     }
                   }}
                   placeholder="Select birth time"
-                  icon={<GiSunrise />}
                   showTimeSelect
                   showTimeSelectOnly
                   timeIntervals={15}

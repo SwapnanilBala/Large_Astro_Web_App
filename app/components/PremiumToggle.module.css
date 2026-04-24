@@ -1,74 +1,92 @@
 .premiumToggle {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-md);
-  margin-bottom: var(--space-lg);
+  gap: 0.5rem;
+  margin-bottom: 0;
 }
 
 .toggleButton {
   position: relative;
-  width: 48px;
-  height: 26px;
+  width: 36px;
+  height: 20px;
   border: none;
   outline: none;
   cursor: pointer;
   padding: 0;
   background: transparent;
-  transition: all var(--transition-base);
+  transition: all 0.2s ease;
+  border-radius: 10px;
+}
+
+.toggleButton:hover {
+  transform: scale(1.05);
+}
+
+.toggleButton:active {
+  transform: scale(0.95);
 }
 
 .toggleTrack {
   position: relative;
   width: 100%;
   height: 100%;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-soft);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-smooth);
-  box-shadow: var(--shadow-sm);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  transition: all 0.2s ease;
 }
 
 .premiumToggle.checked .toggleTrack {
-  background: var(--gradient-gold);
+  background: rgba(200, 155, 60, 0.3);
   border-color: var(--accent-gold);
-  box-shadow: var(--shadow-gold);
+  box-shadow: 0 0 8px rgba(200, 155, 60, 0.2);
 }
 
 .toggleThumb {
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 18px;
-  height: 18px;
-  background: var(--text-primary);
-  border-radius: var(--radius-full);
-  transition: all var(--transition-smooth);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  top: 2px;
+  left: 2px;
+  width: 14px;
+  height: 14px;
+  background: var(--text-secondary);
+  border-radius: 50%;
+  transition: all 0.2s ease;
 }
 
 .premiumToggle.checked .toggleThumb {
-  left: calc(100% - 21px);
-  background: var(--bg-deep);
+  left: calc(100% - 16px);
+  background: var(--accent-gold);
 }
 
 .toggleButton:hover .toggleTrack {
-  border-color: var(--border-medium);
+  border-color: rgba(255, 255, 255, 0.3);
 }
 
 .premiumToggle.checked .toggleButton:hover .toggleTrack {
-  box-shadow: var(--shadow-gold), var(--glow-gold);
+  box-shadow: 0 0 12px rgba(200, 155, 60, 0.3);
 }
 
 .toggleButton:active .toggleThumb {
-  width: 16px;
+  width: 12px;
 }
 
 .toggleLabel {
-  color: var(--text-primary);
-  font-size: 0.9375rem;
-  font-weight: 500;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 400;
   cursor: pointer;
-  transition: color var(--transition-base);
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.premiumToggle:hover .toggleLabel {
+  color: var(--text-primary);
+  opacity: 1;
+}
+
+.premiumToggle.checked .toggleLabel {
+  color: var(--accent-gold);
+  opacity: 1;
 }
 
 .premiumToggle.disabled {
