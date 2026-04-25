@@ -44,12 +44,45 @@
 }
 
 .pageTitle {
+  font-family: var(--font-display), serif;
   font-size: clamp(2.75rem, 6.5vw, 4.75rem);
   font-weight: 700;
-  color: var(--text-primary);
   margin: 0 0 1rem;
   letter-spacing: -0.02em;
   line-height: 1.1;
+  background: linear-gradient(
+    90deg,
+    #c89b3c 0%,
+    #f2c26c 25%,
+    #f8e3a8 50%,
+    #f2c26c 75%,
+    #c89b3c 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: pageTitleShimmer 7s ease-in-out infinite;
+}
+
+@keyframes pageTitleShimmer {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pageTitle {
+    animation: none;
+  }
 }
 
 .pageSubtitle {
