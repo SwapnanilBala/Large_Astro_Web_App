@@ -1,6 +1,14 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
+import { Cinzel } from "next/font/google";
 import "./globals.css";
+
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+  variable: "--font-display",
+});
 import GradientBlobs from "./components/GradientBlobs";
 import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
@@ -41,7 +49,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={cinzel.variable}>
       <body>
         <a href="#main-content" className="skip-nav">
           Skip to main content
