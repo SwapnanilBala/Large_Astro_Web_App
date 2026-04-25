@@ -60,22 +60,83 @@
   max-width: 36rem;
 }
 
-/* Progress Bar */
-.formProgress {
+/* Progress Dots — one per required field */
+.progressDots {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.625rem;
   max-width: 420px;
   width: 100%;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
   margin: 0 auto;
-  overflow: hidden;
 }
 
-.progressFill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent-gold), var(--accent-gold-light));
-  border-radius: 3px;
-  transition: width 0.5s ease;
+.progressDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--text-secondary);
+  opacity: 0.45;
+  transition: background 0.4s ease, border-color 0.4s ease,
+    box-shadow 0.4s ease, opacity 0.4s ease, transform 0.4s ease;
+}
+
+.progressDotFilled {
+  background: var(--accent-gold);
+  border-color: var(--accent-gold);
+  opacity: 1;
+  box-shadow: 0 0 8px rgba(200, 155, 60, 0.65),
+    0 0 16px rgba(200, 155, 60, 0.35);
+  transform: scale(1.05);
+}
+
+/* Scroll-to-begin cue */
+.scrollCue {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0.75;
+  animation: scrollCueBounce 1.6s ease-in-out infinite;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.scrollCue svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.scrollCueHidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+@keyframes scrollCueBounce {
+  0%, 100% {
+    transform: translate(-50%, 0);
+  }
+  50% {
+    transform: translate(-50%, 7px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scrollCue {
+    animation: none;
+  }
+  .progressDot {
+    transition: none;
+  }
 }
 
 /* === MAIN CONTENT === */
@@ -485,6 +546,22 @@
 
   .pageSubtitle {
     font-size: 1rem;
+  }
+
+  .progressDots {
+    gap: 0.5rem;
+    max-width: 280px;
+  }
+
+  .progressDot {
+    width: 8px;
+    height: 8px;
+    border-width: 1.25px;
+  }
+
+  .scrollCue {
+    bottom: 1.25rem;
+    font-size: 0.75rem;
   }
 }
 
