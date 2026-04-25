@@ -619,54 +619,55 @@ export default function Home() {
                 />
               </div>
 
-              {/* ── Birth Date Field ── */}
-              <div className={styles.premiumField}>
-                <PremiumDatePicker
-                  label={t("home.formBirthDate")}
-                  value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
-                  onChange={(date: Date | null) => {
-                    if (date) {
-                      const yyyy = date.getFullYear();
-                      const mm = String(date.getMonth() + 1).padStart(2, "0");
-                      const dd = String(date.getDate()).padStart(2, "0");
-                      setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
-                    }
-                  }}
-                  placeholder="Select birth date"
-                  dateFormat="dd MMM yyyy"
-                  required
-                  maxDate={new Date()}
-                  minDate={new Date(1900, 0, 1)}
-                  showYearDropdown
-                  showMonthDropdown
-                  yearDropdownItemNumber={100}
-                />
-              </div>
+              {/* ── Birth Date + Birth Time Row ── */}
+              <div className={styles.dateTimeRow}>
+                <div className={styles.premiumField}>
+                  <PremiumDatePicker
+                    label={t("home.formBirthDate")}
+                    value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
+                    onChange={(date: Date | null) => {
+                      if (date) {
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, "0");
+                        const dd = String(date.getDate()).padStart(2, "0");
+                        setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
+                      }
+                    }}
+                    placeholder="Select birth date"
+                    dateFormat="dd MMM yyyy"
+                    required
+                    maxDate={new Date()}
+                    minDate={new Date(1900, 0, 1)}
+                    showYearDropdown
+                    showMonthDropdown
+                    yearDropdownItemNumber={100}
+                  />
+                </div>
 
-              {/* ── Birth Time Field ── */}
-              <div className={`${styles.premiumField} ${styles.fieldSpacingLg}`}>
-                <PremiumDatePicker
-                  label={t("home.formBirthTime")}
-                  value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
-                  onChange={(date: Date | null) => {
-                    if (date) {
-                      const hh = String(date.getHours()).padStart(2, "0");
-                      const mm = String(date.getMinutes()).padStart(2, "0");
-                      setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
-                    }
-                  }}
-                  placeholder="Select birth time"
-                  showTimeSelect
-                  showTimeSelectOnly
-                  timeIntervals={15}
-                  timeCaption="Time"
-                  dateFormat="h:mm aa"
-                  required
-                />
+                <div className={styles.premiumField}>
+                  <PremiumDatePicker
+                    label={t("home.formBirthTime")}
+                    value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
+                    onChange={(date: Date | null) => {
+                      if (date) {
+                        const hh = String(date.getHours()).padStart(2, "0");
+                        const mm = String(date.getMinutes()).padStart(2, "0");
+                        setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                      }
+                    }}
+                    placeholder="Select birth time"
+                    showTimeSelect
+                    showTimeSelectOnly
+                    timeIntervals={15}
+                    timeCaption="Time"
+                    dateFormat="h:mm aa"
+                    required
+                  />
+                </div>
               </div>
 
               {/* ── Section Divider ── */}
-              <div className={styles.sectionDivider}>
+              <div className={`${styles.sectionDivider} ${styles.sectionDividerSpaced}`}>
                 <div className={styles.dividerLine}></div>
                 <span className={styles.dividerText}>Location</span>
                 <div className={styles.dividerLine}></div>
