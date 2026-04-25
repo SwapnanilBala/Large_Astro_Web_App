@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
-import { HiOutlineSparkles } from "react-icons/hi2";
+import { HiOutlineSparkles, HiOutlineChevronDown } from "react-icons/hi2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
@@ -68,6 +68,18 @@ export default function Home() {
   // Sequential field unlock state
   const [unlockedStage, setUnlockedStage] = useState(0);
   const [completedFields, setCompletedFields] = useState<Set<string>>(new Set());
+
+  // Scroll cue visibility (fades after user scrolls past 100px)
+  const [scrolled, setScrolled] = useState<boolean>(false);
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 100);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, []);
   
   // Field refs for star burst animations
   const nameRef = useRef<HTMLDivElement>(null);
@@ -591,12 +603,28 @@ export default function Home() {
         <h1 className={styles.pageTitle}>Reveal My Destiny</h1>
         <p className={styles.pageSubtitle}>The Universe Speaks — Discover Your Cosmic Blueprint</p>
         
-        {/* Progress indicator */}
-        <div className={styles.formProgress}>
-          <div 
-            className={styles.progressFill} 
-            style={{ width: `${chargeLevel * 100}%` }}
-          />
+        {/* Progress indicator — 9 dots, one per required field */}
+        <div className={styles.progressDots} role="progressbar" aria-label="Form completion progress">
+          {requiredFields.map((field) => {
+            const value = draft[field];
+            const filled = typeof value === "string" && value.trim().length > 0;
+            return (
+              <span
+                key={field}
+                className={`${styles.progressDot} ${filled ? styles.progressDotFilled : ""}`}
+                aria-hidden="true"
+              />
+            );
+          })}
+        </div>
+
+        {/* Scroll-to-begin cue */}
+        <div
+          className={`${styles.scrollCue} ${scrolled ? styles.scrollCueHidden : ""}`}
+          aria-hidden="true"
+        >
+          <span>Scroll to begin</span>
+          <HiOutlineChevronDown />
         </div>
       </header>
 
