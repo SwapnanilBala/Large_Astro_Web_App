@@ -32,35 +32,61 @@ export default function AutocompleteInput({
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const abortRef = useRef<AbortController | null>(null);
+  const requestSeq = useRef(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!value || value.length < 1) {
+    const query = value.trim();
+
+    if (timer.current) clearTimeout(timer.current);
+    abortRef.current?.abort();
+
+    if (!query || query.length < 2) {
+      requestSeq.current += 1;
       setSuggestions([]);
       setIsOpen(false);
       return;
     }
 
-    if (timer.current) clearTimeout(timer.current);
-
     timer.current = setTimeout(async () => {
+      const currentRequest = requestSeq.current + 1;
+      requestSeq.current = currentRequest;
+      const controller = new AbortController();
+      abortRef.current = controller;
+
       try {
-        const params = new URLSearchParams({ q: value, type: suggestType });
+        const params = new URLSearchParams({ q: query, type: suggestType });
         if (contextCountry) params.set("country", contextCountry);
         if (contextState) params.set("state", contextState);
-        const res = await fetch(`/api/suggest?${params.toString()}`);
-        const data: Suggestion[] = await res.json();
+        const res = await fetch(`/api/suggest?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        const payload = await res.json();
+        const data: Suggestion[] = Array.isArray(payload) ? payload : [];
+
+        if (controller.signal.aborted || requestSeq.current !== currentRequest) return;
+
         setSuggestions(data);
         setIsOpen(data.length > 0);
         setActiveIndex(-1);
-      } catch {
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        if (requestSeq.current !== currentRequest) return;
+
         setSuggestions([]);
         setIsOpen(false);
+      } finally {
+        if (abortRef.current === controller) {
+          abortRef.current = null;
+        }
       }
     }, 150);
 
     return () => {
       if (timer.current) clearTimeout(timer.current);
+      abortRef.current?.abort();
     };
   }, [value, suggestType, contextCountry, contextState]);
 

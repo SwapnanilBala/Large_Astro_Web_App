@@ -87,6 +87,36 @@ const featureMap: Record<string, string> = {
   city: "city",
 };
 
+type Suggestion = {
+  name: string;
+  displayName: string;
+};
+
+function normalizeLocationName(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function scoreStateSuggestion(query: string, suggestion: Suggestion) {
+  const normalizedQuery = normalizeLocationName(query);
+  const normalizedName = normalizeLocationName(suggestion.name);
+  const normalizedDisplay = normalizeLocationName(suggestion.displayName);
+  const queryTokens = normalizedQuery.split(" ").filter(Boolean);
+
+  if (!normalizedName || !normalizedQuery) return -1;
+  if (normalizedName === normalizedQuery) return 100;
+  if (normalizedName.startsWith(normalizedQuery)) return 90;
+  if (normalizedName.includes(normalizedQuery)) return 80;
+  if (queryTokens.every((token) => normalizedName.includes(token))) return 70;
+  if (queryTokens.every((token) => normalizedDisplay.includes(token))) return 50;
+
+  return -1;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = request.nextUrl;
@@ -152,7 +182,7 @@ export async function GET(request: NextRequest) {
     const nominatimUrl = new URL("https://nominatim.openstreetmap.org/search");
     nominatimUrl.searchParams.set("q", fullQuery);
     nominatimUrl.searchParams.set("format", "json");
-    nominatimUrl.searchParams.set("limit", "5");
+    nominatimUrl.searchParams.set("limit", type === "state" ? "8" : "5");
     nominatimUrl.searchParams.set("addressdetails", "1");
 
     if (featureMap[type]) {
@@ -191,7 +221,7 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json();
 
-    const suggestions = data.map(
+    const suggestions: Suggestion[] = data.map(
       (item: { display_name?: string; name?: string; address?: Record<string, string> }) => {
         let name = item.name ?? "";
 
@@ -210,12 +240,23 @@ export async function GET(request: NextRequest) {
       }
     );
 
+    const rankedSuggestions: Suggestion[] = type === "state"
+      ? suggestions
+          .map((suggestion) => ({
+            ...suggestion,
+            score: scoreStateSuggestion(query, suggestion),
+          }))
+          .filter((suggestion) => suggestion.score >= 0)
+          .sort((a, b) => b.score - a.score)
+          .map(({ score: _score, ...suggestion }) => suggestion)
+      : suggestions;
+
     const uniqueNames = new Set<string>();
-    const unique = suggestions.filter((s: { name: string }) => {
+    const unique = rankedSuggestions.filter((s) => {
       if (!s.name || uniqueNames.has(s.name)) return false;
       uniqueNames.add(s.name);
       return true;
-    });
+    }).slice(0, 5);
 
     serverCaches.suggest.set(cacheKey, unique);
 
