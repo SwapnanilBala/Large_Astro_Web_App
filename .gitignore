@@ -19,6 +19,7 @@ pnpm-debug.log*
 # Claude Code
 .claude/worktrees/
 .claude/settings.local.json
+AGENTS.md
 
 # Images dropped in root
 WhatsApp Image*
