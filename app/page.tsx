@@ -1070,6 +1070,8 @@ export default function Home() {
                     name={draft.name}
                     birthDate={draft.birthDate}
                     birthTime={draft.birthTime}
+                    engineId={draft.engineId}
+                    timezoneOffsetMinutes={draft.timezoneOffsetMinutes}
                     country={draft.country}
                     state={draft.state}
                     city={draft.city}

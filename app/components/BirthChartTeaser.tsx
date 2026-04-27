@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import styles from "./BirthChartTeaser.module.css";
 import {
   GiAries,
@@ -21,6 +21,8 @@ interface BirthChartTeaserProps {
   name?: string;
   birthDate?: string;
   birthTime?: string;
+  engineId?: string;
+  timezoneOffsetMinutes?: string;
   country?: string;
   state?: string;
   city?: string;
@@ -29,19 +31,21 @@ interface BirthChartTeaserProps {
 }
 
 const ZODIAC_SIGNS = [
-  { name: "Aries", icon: GiAries, element: "Fire", dates: "Mar 21 - Apr 19" },
-  { name: "Taurus", icon: GiTaurus, element: "Earth", dates: "Apr 20 - May 20" },
-  { name: "Gemini", icon: GiGemini, element: "Air", dates: "May 21 - Jun 20" },
-  { name: "Cancer", icon: GiCancer, element: "Water", dates: "Jun 21 - Jul 22" },
-  { name: "Leo", icon: GiLeo, element: "Fire", dates: "Jul 23 - Aug 22" },
-  { name: "Virgo", icon: GiVirgo, element: "Earth", dates: "Aug 23 - Sep 22" },
-  { name: "Libra", icon: GiLibra, element: "Air", dates: "Sep 23 - Oct 22" },
-  { name: "Scorpio", icon: GiScorpio, element: "Water", dates: "Oct 23 - Nov 21" },
-  { name: "Sagittarius", icon: GiSagittarius, element: "Fire", dates: "Nov 22 - Dec 21" },
-  { name: "Capricorn", icon: GiCapricorn, element: "Earth", dates: "Dec 22 - Jan 19" },
-  { name: "Aquarius", icon: GiAquarius, element: "Air", dates: "Jan 20 - Feb 18" },
-  { name: "Pisces", icon: GiPisces, element: "Water", dates: "Feb 19 - Mar 20" },
+  { name: "Aries", icon: GiAries, element: "Fire" },
+  { name: "Taurus", icon: GiTaurus, element: "Earth" },
+  { name: "Gemini", icon: GiGemini, element: "Air" },
+  { name: "Cancer", icon: GiCancer, element: "Water" },
+  { name: "Leo", icon: GiLeo, element: "Fire" },
+  { name: "Virgo", icon: GiVirgo, element: "Earth" },
+  { name: "Libra", icon: GiLibra, element: "Air" },
+  { name: "Scorpio", icon: GiScorpio, element: "Water" },
+  { name: "Sagittarius", icon: GiSagittarius, element: "Fire" },
+  { name: "Capricorn", icon: GiCapricorn, element: "Earth" },
+  { name: "Aquarius", icon: GiAquarius, element: "Air" },
+  { name: "Pisces", icon: GiPisces, element: "Water" },
 ];
+
+const ZODIAC_SIGN_BY_NAME = new Map(ZODIAC_SIGNS.map((sign) => [sign.name, sign]));
 
 const ELEMENT_COLORS: Record<string, string> = {
   Fire: "#F07068",
@@ -59,25 +63,10 @@ const COARSE_TIME_OPTIONS = [
 
 const HOUSE_TICKS = Array.from({ length: 12 }, (_, index) => index);
 
-function getSunSign(dateStr?: string) {
-  if (!dateStr) return null;
-  const date = new Date(dateStr + "T00:00:00");
-  const month = date.getMonth();
-  const day = date.getDate();
-
-  if ((month === 2 && day >= 21) || (month === 3 && day <= 19)) return ZODIAC_SIGNS[0];
-  if ((month === 3 && day >= 20) || (month === 4 && day <= 20)) return ZODIAC_SIGNS[1];
-  if ((month === 4 && day >= 21) || (month === 5 && day <= 20)) return ZODIAC_SIGNS[2];
-  if ((month === 5 && day >= 21) || (month === 6 && day <= 22)) return ZODIAC_SIGNS[3];
-  if ((month === 6 && day >= 23) || (month === 7 && day <= 22)) return ZODIAC_SIGNS[4];
-  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return ZODIAC_SIGNS[5];
-  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return ZODIAC_SIGNS[6];
-  if ((month === 9 && day >= 23) || (month === 10 && day <= 21)) return ZODIAC_SIGNS[7];
-  if ((month === 10 && day >= 22) || (month === 11 && day <= 21)) return ZODIAC_SIGNS[8];
-  if ((month === 11 && day >= 22) || (month === 0 && day <= 19)) return ZODIAC_SIGNS[9];
-  if ((month === 0 && day >= 20) || (month === 1 && day <= 18)) return ZODIAC_SIGNS[10];
-  return ZODIAC_SIGNS[11];
-}
+type SunSignPreview = (typeof ZODIAC_SIGNS)[number] & {
+  degree: number;
+  isExact: boolean;
+};
 
 function getFilledFieldsCount(props: BirthChartTeaserProps) {
   return [
@@ -109,6 +98,8 @@ export default function BirthChartTeaser({
   name,
   birthDate,
   birthTime,
+  engineId,
+  timezoneOffsetMinutes,
   country,
   state,
   city,
@@ -120,7 +111,8 @@ export default function BirthChartTeaser({
     [name, birthDate, birthTime, country, state, city]
   );
 
-  const sunSign = useMemo(() => getSunSign(birthDate), [birthDate]);
+  const [sunSign, setSunSign] = useState<SunSignPreview | null>(null);
+  const [isSunSignLoading, setIsSunSignLoading] = useState(false);
   const hasName = Boolean(name?.trim());
   const hasDate = Boolean(birthDate?.trim());
   const hasExactTime = Boolean(birthTime?.trim());
@@ -132,6 +124,49 @@ export default function BirthChartTeaser({
   const chartConfidence = getConfidenceLabel(hasExactTime, unknownTime, coarseTime);
   const SunIcon = sunSign?.icon;
 
+  useEffect(() => {
+    if (!birthDate?.trim()) {
+      setSunSign(null);
+      setIsSunSignLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const params = new URLSearchParams({
+      birth_date: birthDate.trim(),
+      birth_time: birthTime?.trim() || "12:00",
+      engine_id: engineId?.trim() || "lahiri_classic",
+      timezone_offset_minutes: timezoneOffsetMinutes?.trim() || "0",
+    });
+
+    setIsSunSignLoading(true);
+    fetch(`/api/chart/sun-sign?${params.toString()}`, { signal: controller.signal })
+      .then((response) => {
+        if (!response.ok) throw new Error("Sun sign lookup failed");
+        return response.json() as Promise<{ sign: string; degree_in_sign: number }>;
+      })
+      .then((sun) => {
+        const sign = ZODIAC_SIGN_BY_NAME.get(sun.sign);
+        setSunSign(
+          sign
+            ? {
+                ...sign,
+                degree: sun.degree_in_sign,
+                isExact: Boolean(birthTime?.trim()),
+              }
+            : null
+        );
+      })
+      .catch((error) => {
+        if ((error as Error).name !== "AbortError") setSunSign(null);
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setIsSunSignLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [birthDate, birthTime, engineId, timezoneOffsetMinutes]);
+
   const astrolabeMarkers = [
     { label: "SUN", angle: -55, radius: 33, active: hasDate, className: styles.sunMarker },
     { label: "MOON", angle: 34, radius: 28, active: hasName && hasDate, className: styles.moonMarker },
@@ -142,8 +177,12 @@ export default function BirthChartTeaser({
   const infoRows = [
     {
       label: "Sun Sign",
-      value: sunSign?.name ?? "Waiting for date",
-      meta: sunSign ? `${sunSign.element} / ${sunSign.dates}` : "Unlocks from birth date",
+      value: isSunSignLoading ? "Calculating..." : sunSign?.name ?? "Waiting for date",
+      meta: sunSign
+        ? `${sunSign.element} / ${sunSign.degree.toFixed(1)} deg sidereal ${sunSign.isExact ? "Sun" : "estimate"}`
+        : isSunSignLoading
+          ? "Reading chart engine"
+        : "Unlocks from birth date",
       active: hasDate,
       accent: sunSign ? ELEMENT_COLORS[sunSign.element] : "#C89B3C",
       icon: SunIcon ? <SunIcon /> : "SUN",
