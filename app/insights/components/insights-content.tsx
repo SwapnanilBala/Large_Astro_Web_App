@@ -784,9 +784,7 @@ export default function InsightsContent({
                 heading="Life domain deep dives"
               />
               <p className={styles.sectionIntro}>
-                Choose a life area and read a more focused interpretation built
-                from the relevant house, its lord, supporting house pattern,
-                activation timing, and the chart&apos;s dominant element.
+                Choose a life area for a compact house, lord, and timing read.
               </p>
 
               <p className={styles.domainSelectLabel}>Select a focus area</p>
@@ -836,40 +834,29 @@ export default function InsightsContent({
 
                   <div className={styles.domainGrid}>
                     <section className={styles.domainCol}>
-                      <h4>What supports this area</h4>
+                      <h4>Support</h4>
                       <ul>
-                        {selectedDomainInsight.strengths.map((item) => (
+                        {selectedDomainInsight.strengths.slice(0, 2).map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
                     </section>
-                    <section className={styles.domainCol}>
-                      <h4>What to watch</h4>
-                      <ul>
-                        {selectedDomainInsight.watchouts.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </section>
-                  </div>
-
-                  <div className={styles.domainGrid}>
-                    <section className={styles.domainCol}>
-                      <h4>Timing triggers</h4>
-                      <ul>
-                        {selectedDomainInsight.timing_triggers.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </section>
-                    <section className={styles.domainCol}>
-                      <h4>Supporting patterns</h4>
-                      <ul>
-                        {selectedDomainInsight.supporting_patterns.map(
-                          (item) => (
+                    {selectedDomainInsight.watchouts.length > 0 && (
+                      <section className={styles.domainCol}>
+                        <h4>Watch</h4>
+                        <ul>
+                          {selectedDomainInsight.watchouts.slice(0, 2).map((item) => (
                             <li key={item}>{item}</li>
-                          )
-                        )}
+                          ))}
+                        </ul>
+                      </section>
+                    )}
+                    <section className={styles.domainCol}>
+                      <h4>Timing</h4>
+                      <ul>
+                        {selectedDomainInsight.timing_triggers.slice(0, 2).map((item) => (
+                          <li key={item}>{item}</li>
+                        ))}
                       </ul>
                     </section>
                   </div>
@@ -877,10 +864,6 @@ export default function InsightsContent({
                   <p className={styles.domainGuidance}>
                     <strong>Guidance:</strong>{" "}
                     {selectedDomainInsight.guidance}
-                  </p>
-                  <p className={styles.domainLongGame}>
-                    <strong>Long game:</strong>{" "}
-                    {selectedDomainInsight.long_game}
                   </p>
                 </motion.article>
               </AnimatePresence>

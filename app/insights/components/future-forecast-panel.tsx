@@ -54,6 +54,16 @@ type RangeForecasts = {
   end: ForecastReading;
 };
 
+function compactItems(items: string[], limit = 2) {
+  return items.slice(0, limit);
+}
+
+function compactTransitText(value: string) {
+  const firstSentence = value.split(".")[0]?.trim();
+  if (!firstSentence) return value;
+  return firstSentence.length > 120 ? `${firstSentence.slice(0, 117)}...` : firstSentence;
+}
+
 function ForecastCard({ forecast, label }: { forecast: ForecastReading; label: string }) {
   return (
     <article className="forecast-card">
@@ -69,31 +79,29 @@ function ForecastCard({ forecast, label }: { forecast: ForecastReading; label: s
         </span>
       </div>
 
-      <p className="forecast-overview">{forecast.overview}</p>
-
       <div className="forecast-grid">
         <section className="forecast-column">
-          <h4>Where the focus goes</h4>
+          <h4>Focus</h4>
           <ul className="domain-reading-list">
-            {forecast.focus_areas.map((item) => (
+            {compactItems(forecast.focus_areas).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         </section>
 
         <section className="forecast-column">
-          <h4>Openings to use well</h4>
+          <h4>Openings</h4>
           <ul className="domain-reading-list">
-            {forecast.opportunities.map((item) => (
+            {compactItems(forecast.opportunities).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         </section>
 
         <section className="forecast-column">
-          <h4>What to be careful about</h4>
+          <h4>Cautions</h4>
           <ul className="domain-reading-list">
-            {forecast.cautions.map((item) => (
+            {compactItems(forecast.cautions).map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
@@ -102,39 +110,39 @@ function ForecastCard({ forecast, label }: { forecast: ForecastReading; label: s
 
       <div className="forecast-transits-grid">
         <section className="forecast-transit-column">
-          <h4>Supportive transit signals</h4>
+          <h4>Supportive signal</h4>
           <div className="forecast-transit-list">
             {forecast.supportive_transits.length > 0 ? (
-              forecast.supportive_transits.map((item) => (
+              forecast.supportive_transits.slice(0, 1).map((item) => (
                 <article key={`${item.transit_planet}-${item.natal_planet}-${item.aspect_type}`} className="forecast-transit-card forecast-transit-card--supportive">
                   <strong>
                     {item.transit_planet} {item.aspect_type} {item.natal_planet}
                   </strong>
                   <span>{item.orb.toFixed(2)}° orb</span>
-                  <p>{item.interpretation}</p>
+                  <p>{compactTransitText(item.interpretation)}</p>
                 </article>
               ))
             ) : (
-              <p className="forecast-transit-empty">No especially supportive transit pattern stands out for that date.</p>
+              <p className="forecast-transit-empty">No standout support.</p>
             )}
           </div>
         </section>
 
         <section className="forecast-transit-column">
-          <h4>Pressure points to respect</h4>
+          <h4>Pressure point</h4>
           <div className="forecast-transit-list">
             {forecast.challenging_transits.length > 0 ? (
-              forecast.challenging_transits.map((item) => (
+              forecast.challenging_transits.slice(0, 1).map((item) => (
                 <article key={`${item.transit_planet}-${item.natal_planet}-${item.aspect_type}`} className="forecast-transit-card forecast-transit-card--challenging">
                   <strong>
                     {item.transit_planet} {item.aspect_type} {item.natal_planet}
                   </strong>
                   <span>{item.orb.toFixed(2)}° orb</span>
-                  <p>{item.interpretation}</p>
+                  <p>{compactTransitText(item.interpretation)}</p>
                 </article>
               ))
             ) : (
-              <p className="forecast-transit-empty">No strong friction transit dominates that date.</p>
+              <p className="forecast-transit-empty">No dominant friction.</p>
             )}
           </div>
         </section>
@@ -165,7 +173,11 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
 
       const controller = new AbortController();
       abortControllerRef.current = controller;
-      const timeoutId = setTimeout(() => controller.abort(), FORECAST_TIMEOUT_MS);
+      let didTimeout = false;
+      const timeoutId = setTimeout(() => {
+        didTimeout = true;
+        controller.abort();
+      }, FORECAST_TIMEOUT_MS);
 
       try {
         const [startResponse, endResponse] = await Promise.all([
@@ -188,17 +200,22 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
         ]);
 
         setForecasts({ start: startData, end: endData });
+        setError("");
+        setIsTimeout(false);
       } catch (fetchError) {
         clearTimeout(timeoutId);
-        setForecasts(null);
 
         if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
-          setIsTimeout(true);
-          setError(
-            `Request timed out after ${Math.round(FORECAST_TIMEOUT_MS / 1000)} seconds. ` +
-              "The server may be busy. Please try again."
-          );
+          if (didTimeout) {
+            setForecasts(null);
+            setIsTimeout(true);
+            setError(
+              `Request timed out after ${Math.round(FORECAST_TIMEOUT_MS / 1000)} seconds. ` +
+                "The server may be busy. Please try again."
+            );
+          }
         } else {
+          setForecasts(null);
           setError(
             fetchError instanceof Error ? fetchError.message : "Could not load forecast."
           );
@@ -234,8 +251,7 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
         <h2>Future Date Forecast</h2>
       </div>
       <p className="section-intro forecast-intro">
-        Set a date range and the engine will read the active dasha layers and key transits for both
-        endpoints, giving you a window into how that stretch is likely to unfold.
+        Pick two dates to compare the active dasha layer and strongest transit signals.
       </p>
 
       <form
@@ -292,11 +308,10 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
         <>
           <div className="forecast-period-header">
             <h3>
-              Period Overview &mdash; {formatFriendlyDate(forecasts.start.target_date)} to{" "}
+              Period: {formatFriendlyDate(forecasts.start.target_date)} to{" "}
               {formatFriendlyDate(forecasts.end.target_date)}
             </h3>
           </div>
-          <ForecastCard forecast={forecasts.start} label="Period Start" />
           <ForecastCard forecast={forecasts.end} label="Period End" />
         </>
       )}

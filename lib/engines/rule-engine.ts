@@ -337,20 +337,20 @@ function buildDomainStrengths(
   anchorPlanet: PlanetPosition
 ): string[] {
   const strengths: string[] = [
-    `${primaryHouse.sign} on the ${ordinal(primaryHouse.house_number)} house gives this area a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} tone.`,
-    `${primaryLord.name} rules the area and operates from house ${primaryLord.house}, tying outcomes to ${HOUSE_THEMES[primaryLord.house]}.`,
+    `${primaryHouse.sign} shapes this area with a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} tone.`,
+    `${primaryLord.name} in house ${primaryLord.house} points results toward ${HOUSE_THEMES[primaryLord.house]}.`,
   ];
   if (primaryHouse.planets.length > 0) {
     strengths.push(
-      `Planetary activation in the primary house (${primaryHouse.planets.join(", ")}) makes this domain easier to notice and work with consciously.`
+      `${primaryHouse.planets.join(", ")} make this topic more visible.`
     );
   } else {
     strengths.push(
-      `The secondary support house in ${secondaryHouse.sign} helps reinforce this topic through ${HOUSE_THEMES[secondaryHouse.house_number]}.`
+      `${secondaryHouse.sign} adds support through ${HOUSE_THEMES[secondaryHouse.house_number]}.`
     );
   }
   strengths.push(dignitySummary(anchorPlanet));
-  return strengths.slice(0, 3);
+  return strengths.slice(0, 2);
 }
 
 function buildDomainWatchouts(
@@ -361,22 +361,22 @@ function buildDomainWatchouts(
   const watchouts: string[] = [];
   if ([6, 8, 12].includes(primaryLord.house)) {
     watchouts.push(
-      `The lord of this area sits in house ${primaryLord.house}, so delays, hidden work, or emotionally expensive lessons may come before results stabilize.`
+      `House ${primaryLord.house} can bring delays, hidden work, or emotional cost before results stabilize.`
     );
   }
   if (planetDignity(primaryLord) === "debilitated") {
     watchouts.push(
-      `${primaryLord.name} is debilitated, so confidence in this area may lag behind potential unless routines and mentorship are strong.`
+      `${primaryLord.name} is debilitated, so routines and mentorship matter.`
     );
   }
   if (planetDignity(anchorPlanet) === "debilitated") {
     watchouts.push(
-      `${anchorPlanet.name} is strained by dignity, which can create mixed signals between instinct and timing.`
+      `${anchorPlanet.name} can create mixed signals between instinct and timing.`
     );
   }
   if (primaryHouse.planets.length === 0) {
     watchouts.push(
-      "Because the primary house is unoccupied, results depend more on long-term consistency than on dramatic turning points."
+      "With no direct occupants, steady follow-through matters more than dramatic turns."
     );
   }
   return watchouts.slice(0, 2);
@@ -389,9 +389,8 @@ function domainGuidance(
   label: string
 ): string {
   return (
-    `For ${label.toLowerCase()}, lean into your ${domElement.toLowerCase()} dominance: ` +
-    `${ELEMENT_GUIDANCE[domElement]} The clearest gains come when you deliberately strengthen ` +
-    `${primaryLord.name}-style habits and keep returning to ${HOUSE_THEMES[primaryHouse.house_number]} as a long-term practice.`
+    `For ${label.toLowerCase()}, use your ${domElement.toLowerCase()} style and strengthen ` +
+    `${primaryLord.name}-led habits around ${HOUSE_THEMES[primaryHouse.house_number]}.`
   );
 }
 
@@ -402,15 +401,15 @@ function domainTimingTriggers(
   anchorPlanet: PlanetPosition
 ): string[] {
   const triggers: string[] = [
-    `${primaryLord.name} periods and major transits tend to move ${config.label.toLowerCase()} more quickly, because that planet rules your ${ordinal(primaryHouse.house_number)} house.`,
-    `${anchorPlanet.name} activations change the tone of this area through ${HOUSE_THEMES[anchorPlanet.house]}, so timing often feels personal rather than abstract.`,
+    `${primaryLord.name} periods and major transits move this area fastest.`,
+    `${anchorPlanet.name} activations color timing through ${HOUSE_THEMES[anchorPlanet.house]}.`,
   ];
   if (primaryHouse.planets.length > 0) {
     triggers.push(
-      `When ${primaryHouse.planets.join(", ")} are activated by dasha or transit, this domain becomes louder and harder to ignore.`
+      `${primaryHouse.planets.join(", ")} activations make this topic louder.`
     );
   }
-  return triggers.slice(0, 3);
+  return triggers.slice(0, 2);
 }
 
 function domainSupportingPatterns(
@@ -420,11 +419,11 @@ function domainSupportingPatterns(
   anchorPlanet: PlanetPosition
 ): string[] {
   return [
-    `The primary pattern runs through ${primaryHouse.sign} on the ${ordinal(primaryHouse.house_number)} house, so the area tends to express in a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} way.`,
-    `The secondary support comes from the ${ordinal(secondaryHouse.house_number)} house in ${secondaryHouse.sign}, which adds ${HOUSE_THEMES[secondaryHouse.house_number]} to the background story.`,
-    `${anchorPlanet.name} sits in house ${anchorPlanet.house}, so instinctive decisions here are filtered through ${HOUSE_THEMES[anchorPlanet.house]}.`,
+    `${primaryHouse.sign} sets the main tone.`,
+    `${secondaryHouse.sign} adds support through house ${secondaryHouse.house_number}.`,
+    `${anchorPlanet.name} filters instinct through house ${anchorPlanet.house}.`,
     dignitySummary(primaryLord),
-  ].slice(0, 4);
+  ].slice(0, 2);
 }
 
 function domainLongGame(
@@ -434,9 +433,8 @@ function domainLongGame(
   domElement: string
 ): string {
   return (
-    `The long game in ${label.toLowerCase()} is not speed but coherence. Because ${primaryLord.name} carries the main load ` +
-    `from house ${primaryLord.house}, results improve when your decisions keep returning to ` +
-    `${HOUSE_THEMES[primaryHouse.house_number]} and are paced according to your ${domElement.toLowerCase()} temperament.`
+    `${label} improves when ${primaryLord.name}-led choices stay paced and consistent around ` +
+    `${HOUSE_THEMES[primaryHouse.house_number]}.`
   );
 }
 
@@ -462,17 +460,11 @@ function buildLifeDomainInsight(
   confidence = Math.max(0.66, Math.min(0.91, Math.round(confidence * 100) / 100));
 
   const headline =
-    `${config.label} runs through ${primaryHouse.sign} ${ordinal(primaryHouse.house_number)}-house themes, ` +
-    `with ${primaryLord.name} steering results from house ${primaryLord.house}.`;
+    `${config.label}: ${primaryHouse.sign} house ${primaryHouse.house_number}, led by ${primaryLord.name}.`;
 
   const overview =
-    `This domain is primarily read through your ${ordinal(primaryHouse.house_number)} house in ${primaryHouse.sign}, ` +
-    `so ${config.summary_focus} tend to unfold in a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} way. ` +
-    `${primaryLord.name} rules that house and sits in the ${ordinal(primaryLord.house)} house in ${primaryLord.sign}, ` +
-    `which ties outcomes to ${HOUSE_THEMES[primaryLord.house]}. ` +
-    `The secondary support comes from your ${ordinal(secondaryHouse.house_number)} house in ${secondaryHouse.sign}, ` +
-    `adding a ${SIGN_STYLE_PHRASES[secondaryHouse.sign]} background pattern. ` +
-    `${planetListSentence(primaryHouse.planets)} ${dignitySummary(primaryLord)}`;
+    `${primaryHouse.sign} sets a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} tone for ${config.summary_focus}. ` +
+    `${primaryLord.name} in house ${primaryLord.house} links outcomes to ${HOUSE_THEMES[primaryLord.house]}.`;
 
   return {
     key: key as LifeDomainInsight["key"],

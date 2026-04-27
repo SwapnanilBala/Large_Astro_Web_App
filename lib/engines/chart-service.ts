@@ -957,12 +957,12 @@ export function buildForecast(
 
   const supportiveTransits = transitAspects
     .filter((a) => aspectTone(a.transit_planet, a.aspect_type) === "supportive")
-    .slice(0, 3)
+    .slice(0, 1)
     .map(toForecastAspect);
 
   const challengingTransits = transitAspects
     .filter((a) => aspectTone(a.transit_planet, a.aspect_type) === "challenging")
-    .slice(0, 3)
+    .slice(0, 1)
     .map(toForecastAspect);
 
   const currentDashaPlanet = core.planets.find(
@@ -978,24 +978,15 @@ export function buildForecast(
     `${dashaInfo.current_dasha} Mahadasha keeps the long-range focus on ${HOUSE_THEMES[currentDashaPlanet.house]} via natal house ${currentDashaPlanet.house}.`,
     `${dashaInfo.current_antardasha} Antardasha sharpens the near-term story around ${HOUSE_THEMES[currentAntardashaPlanet.house]} via natal house ${currentAntardashaPlanet.house}.`,
   ];
-  if (supportiveTransits.length > 0) focusAreas.push(supportiveTransits[0].interpretation);
-  if (challengingTransits.length > 0) focusAreas.push(challengingTransits[0].interpretation);
-
   const opportunities: string[] = [
     dashaTheme.opportunity,
     antardashaTheme.opportunity,
   ];
-  if (supportiveTransits.length > 0) {
-    opportunities.push(...supportiveTransits.slice(0, 2).map((t) => t.interpretation));
-  }
 
   const cautions: string[] = [
     dashaTheme.caution,
     antardashaTheme.caution,
   ];
-  if (challengingTransits.length > 0) {
-    cautions.push(...challengingTransits.slice(0, 2).map((t) => t.interpretation));
-  }
 
   const headline = `${targetDateStr} falls in ${dashaInfo.current_dasha} / ${dashaInfo.current_antardasha}, a period centered on ${antardashaTheme.focus}.`;
   const overview =
@@ -1010,9 +1001,9 @@ export function buildForecast(
     headline,
     overview,
     dasha: dashaInfo,
-    focus_areas: focusAreas.slice(0, 4),
-    opportunities: opportunities.slice(0, 4),
-    cautions: cautions.slice(0, 4),
+    focus_areas: focusAreas.slice(0, 2),
+    opportunities: opportunities.slice(0, 2),
+    cautions: cautions.slice(0, 2),
     supportive_transits: supportiveTransits,
     challenging_transits: challengingTransits,
   };

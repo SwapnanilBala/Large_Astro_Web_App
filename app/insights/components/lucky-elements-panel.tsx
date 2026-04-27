@@ -55,6 +55,18 @@ function ColorSwatch({ color }: { color: string }) {
   );
 }
 
+function TextChipList({ items }: { items: string[] }) {
+  return (
+    <div className={styles.cautionChipRow}>
+      {items.map((item) => (
+        <span key={item} className={styles.cautionChip}>
+          {item}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
   const { t } = useTranslation();
   const le = luckyElements;
@@ -66,6 +78,28 @@ function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
         <h2 className={styles.heading}>{t("insights.luckyElementsHeading")}</h2>
       </div>
       <p className={styles.intro}>{t("insights.luckyElementsIntro")}</p>
+
+      <div className={styles.cautionBlock}>
+        <h3 className={styles.cautionHeading}>Unlucky Colors, Items & Bad Omens</h3>
+        <div className={styles.cautionGrid}>
+          <section className={styles.cautionSection}>
+            <h4 className={styles.cautionTitle}>Colors to avoid</h4>
+            <div className={styles.colorRow}>
+              {le.unlucky_colors.map((color) => (
+                <ColorSwatch key={color} color={color} />
+              ))}
+            </div>
+          </section>
+          <section className={styles.cautionSection}>
+            <h4 className={styles.cautionTitle}>Items</h4>
+            <TextChipList items={le.unlucky_items} />
+          </section>
+          <section className={styles.cautionSection}>
+            <h4 className={styles.cautionTitle}>Bad omens</h4>
+            <TextChipList items={le.bad_omens} />
+          </section>
+        </div>
+      </div>
 
       <div className={styles.sectionGrid}>
         {/* ── Colors ── */}

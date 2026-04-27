@@ -38,6 +38,54 @@ const PLANET_LUCKY: Record<string, PlanetAttributes> = {
   Ketu:    { colors: ["Grey", "Earthy"],            number: 7, gemstone: "Cat's Eye",        day: "Tuesday",   metal: "Iron",     direction: "Northeast" },
 };
 
+const PLANET_CAUTIONS: Record<string, { colors: string[]; items: string[]; omens: string[] }> = {
+  Sun: {
+    colors: ["Dull Black", "Ash Grey"],
+    items: ["Cracked mirrors", "faded gold"],
+    omens: ["Repeated authority clashes before starting"],
+  },
+  Moon: {
+    colors: ["Murky Brown", "Clouded Grey"],
+    items: ["Stagnant water", "chipped silver"],
+    omens: ["Unsettled sleep or repeated water spills"],
+  },
+  Mars: {
+    colors: ["Rust Red", "Harsh Neon"],
+    items: ["Broken blades", "burnt tools"],
+    omens: ["Arguments, cuts, or sparks before departure"],
+  },
+  Mercury: {
+    colors: ["Dusty Green", "Mixed Mud"],
+    items: ["Torn papers", "faulty pens"],
+    omens: ["Misplaced documents or repeated message errors"],
+  },
+  Jupiter: {
+    colors: ["Sallow Yellow", "Muddy Gold"],
+    items: ["Empty wallets", "damaged books"],
+    omens: ["Broken promises from advisers or teachers"],
+  },
+  Venus: {
+    colors: ["Washed Pink", "Stained White"],
+    items: ["Wilted flowers", "scratched perfume bottles"],
+    omens: ["Spoiled sweets or repeated social awkwardness"],
+  },
+  Saturn: {
+    colors: ["Flat Black", "Cold Blue"],
+    items: ["Rusty iron", "worn shoes"],
+    omens: ["Blocked paths, delays, or broken machinery"],
+  },
+  Rahu: {
+    colors: ["Smoky Black", "Electric Purple"],
+    items: ["Synthetic stones", "frayed cords"],
+    omens: ["Confusing shortcuts or sudden misinformation"],
+  },
+  Ketu: {
+    colors: ["Dust Grey", "Pale Brown"],
+    items: ["Frayed cloth", "broken beads"],
+    omens: ["Sudden detachment, lost keys, or repeated silence"],
+  },
+};
+
 /**
  * Yogakaraka: a planet that owns both a kendra house (1,4,7,10) AND a
  * trikona house (1,5,9) for the given lagna. It is considered the single
@@ -76,6 +124,10 @@ function attrFor(planet: string): PlanetAttributes {
   return PLANET_LUCKY[planet] ?? PLANET_LUCKY.Sun;
 }
 
+function cautionFor(planet: string) {
+  return PLANET_CAUTIONS[planet] ?? PLANET_CAUTIONS.Sun;
+}
+
 /** Return the first gemstone from `candidates` not already in `taken`. */
 function pickGem(candidates: PlanetAttributes[], taken: string[]): string {
   for (const attr of candidates) {
@@ -99,6 +151,22 @@ function pickMetal(candidates: PlanetAttributes[], exclude: string): string {
     if (attr.metal !== exclude) return attr.metal;
   }
   return candidates[0]?.metal ?? "Silver";
+}
+
+function challengingLords(
+  houses: HousePlacement[],
+  ascLord: string,
+  yogakaraka: string | null
+): string[] {
+  return uniqueStrings(
+    [6, 8, 12]
+      .map((houseNumber) => {
+        const sign = findHouseSign(houses, houseNumber);
+        return sign ? SIGN_RULERS[sign] : null;
+      })
+      .filter((planet): planet is string => Boolean(planet))
+      .filter((planet) => planet !== ascLord && planet !== yogakaraka)
+  );
 }
 
 /* ── Main computation ── */
@@ -183,6 +251,13 @@ export function computeLuckyElements(
     ...(yogaAttr ? [yogaAttr.direction] : []),
   ]);
 
+  const cautionPlanets = challengingLords(houses, ascLord, yogakaraka);
+  const cautionSources = cautionPlanets.length > 0 ? cautionPlanets : ["Saturn", "Rahu", "Ketu"];
+  const cautionAttrs = cautionSources.map(cautionFor);
+  const unluckyColors = uniqueStrings(cautionAttrs.flatMap((attr) => attr.colors)).slice(0, 4);
+  const unluckyItems = uniqueStrings(cautionAttrs.flatMap((attr) => attr.items)).slice(0, 4);
+  const badOmens = uniqueStrings(cautionAttrs.flatMap((attr) => attr.omens)).slice(0, 3);
+
   return {
     primary_colors: primaryColors,
     secondary_colors: secondaryColors.slice(0, 4),
@@ -194,6 +269,9 @@ export function computeLuckyElements(
     primary_metal: primaryMetal,
     secondary_metal: secondaryMetal,
     auspicious_directions: directions,
+    unlucky_colors: unluckyColors,
+    unlucky_items: unluckyItems,
+    bad_omens: badOmens,
     basis: {
       ascendant_lord: ascLord,
       moon_sign_lord: moonLord,

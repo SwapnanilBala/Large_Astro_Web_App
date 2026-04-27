@@ -249,6 +249,9 @@ export type LuckyElementsInfo = {
   primary_metal: string;
   secondary_metal: string;
   auspicious_directions: string[];
+  unlucky_colors: string[];
+  unlucky_items: string[];
+  bad_omens: string[];
   basis: {
     ascendant_lord: string;
     moon_sign_lord: string;
