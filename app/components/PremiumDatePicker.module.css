@@ -320,3 +320,179 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* Premium themed calendar header controls */
+.calendarPopup :global(.react-datepicker__header) {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(212, 165, 116, 0.18), transparent 42%),
+    linear-gradient(145deg, rgba(13, 17, 25, 0.96), rgba(26, 26, 37, 0.94)) !important;
+  border-bottom: 1px solid rgba(232, 200, 154, 0.18) !important;
+  padding: 1.15rem 4.15rem 1rem !important;
+}
+
+.calendarPopup :global(.react-datepicker__header__dropdown) {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.7rem !important;
+  min-height: 2.9rem !important;
+}
+
+.calendarPopup :global(.react-datepicker__month-dropdown-container),
+.calendarPopup :global(.react-datepicker__year-dropdown-container) {
+  margin: 0 !important;
+}
+
+.calendarPopup :global(.react-datepicker__month-select),
+.calendarPopup :global(.react-datepicker__year-select) {
+  min-width: 8.2rem !important;
+  height: 2.65rem !important;
+  padding: 0 2.35rem 0 1rem !important;
+  border: 1px solid rgba(232, 200, 154, 0.28) !important;
+  border-radius: 999px !important;
+  color: rgba(245, 240, 230, 0.94) !important;
+  background:
+    linear-gradient(135deg, rgba(212, 165, 116, 0.14), rgba(74, 171, 158, 0.08)),
+    rgba(255, 255, 255, 0.045) !important;
+  background-image:
+    linear-gradient(135deg, rgba(212, 165, 116, 0.14), rgba(74, 171, 158, 0.08)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23E8C89A' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat, no-repeat !important;
+  background-position: center, right 0.95rem center !important;
+  background-size: auto, 12px 8px !important;
+  box-shadow:
+    0 12px 24px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  font-size: clamp(1rem, 0.45vw + 0.9rem, 1.14rem) !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.02em !important;
+  text-align: left !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease !important;
+}
+
+.calendarPopup :global(.react-datepicker__month-select:hover),
+.calendarPopup :global(.react-datepicker__year-select:hover) {
+  border-color: rgba(232, 200, 154, 0.54) !important;
+  background:
+    linear-gradient(135deg, rgba(212, 165, 116, 0.20), rgba(74, 171, 158, 0.12)),
+    rgba(255, 255, 255, 0.065) !important;
+  background-image:
+    linear-gradient(135deg, rgba(212, 165, 116, 0.20), rgba(74, 171, 158, 0.12)),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23F8E3A8' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat, no-repeat !important;
+  background-position: center, right 0.95rem center !important;
+  background-size: auto, 12px 8px !important;
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.26),
+    0 0 22px rgba(212, 165, 116, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  transform: translateY(-1px);
+}
+
+.calendarPopup :global(.react-datepicker__month-select:focus),
+.calendarPopup :global(.react-datepicker__year-select:focus) {
+  border-color: var(--accent-gold) !important;
+  box-shadow:
+    0 0 0 3px rgba(212, 165, 116, 0.18),
+    0 14px 28px rgba(0, 0, 0, 0.26) !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation) {
+  top: 1.18rem !important;
+  display: grid !important;
+  place-items: center !important;
+  width: 2.65rem !important;
+  height: 2.65rem !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(74, 171, 158, 0.28) !important;
+  border-radius: 999px !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.16), transparent 34%),
+    linear-gradient(145deg, rgba(74, 171, 158, 0.16), rgba(212, 165, 116, 0.08)) !important;
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation--previous) {
+  left: 1rem !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation--next) {
+  right: 1rem !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation:hover) {
+  border-color: rgba(232, 200, 154, 0.56) !important;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18), transparent 34%),
+    linear-gradient(145deg, rgba(212, 165, 116, 0.18), rgba(74, 171, 158, 0.14)) !important;
+  box-shadow:
+    0 14px 28px rgba(0, 0, 0, 0.28),
+    0 0 20px rgba(212, 165, 116, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  transform: translateY(-1px);
+}
+
+.calendarPopup :global(.react-datepicker__navigation-icon) {
+  position: static !important;
+  display: block !important;
+  width: 0.8rem !important;
+  height: 0.8rem !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation-icon::before) {
+  top: 0 !important;
+  width: 0.62rem !important;
+  height: 0.62rem !important;
+  border-color: var(--accent-gold-light, #E8C89A) !important;
+  border-width: 2px 2px 0 0 !important;
+}
+
+.calendarPopup :global(.react-datepicker__navigation:hover .react-datepicker__navigation-icon::before) {
+  border-color: #f8e3a8 !important;
+}
+
+@media (max-width: 520px) {
+  .calendarPopup :global(.react-datepicker__header) {
+    padding: 1rem 3.55rem 0.9rem !important;
+  }
+
+  .calendarPopup :global(.react-datepicker__header__dropdown) {
+    gap: 0.45rem !important;
+  }
+
+  .calendarPopup :global(.react-datepicker__month-select),
+  .calendarPopup :global(.react-datepicker__year-select) {
+    min-width: 6.6rem !important;
+    height: 2.45rem !important;
+    padding-left: 0.8rem !important;
+    padding-right: 2rem !important;
+    font-size: 0.98rem !important;
+  }
+
+  .calendarPopup :global(.react-datepicker__navigation) {
+    width: 2.35rem !important;
+    height: 2.35rem !important;
+  }
+
+  .calendarPopup :global(.react-datepicker__navigation--previous) {
+    left: 0.75rem !important;
+  }
+
+  .calendarPopup :global(.react-datepicker__navigation--next) {
+    right: 0.75rem !important;
+  }
+}
