@@ -519,6 +519,9 @@
 }
 
 .previewCard {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   background: rgba(15, 15, 25, 0.85);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -529,6 +532,80 @@
     0 20px 40px rgba(0, 0, 0, 0.2);
 }
 
+.previewCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  padding: 1px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from 215deg,
+    rgba(74, 171, 158, 0.08),
+    rgba(232, 200, 154, 0.78),
+    rgba(108, 225, 212, 0.45),
+    rgba(123, 107, 168, 0.26),
+    rgba(74, 171, 158, 0.08)
+  );
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+}
+
+.previewCard::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.032) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.026) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent 86%);
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.95), transparent 86%);
+  pointer-events: none;
+}
+
+.previewCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.previewHeader {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.85rem 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding: 0.95rem 1rem 1.05rem;
+  border: 1px solid rgba(232, 200, 154, 0.16);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(232, 200, 154, 0.10), rgba(74, 171, 158, 0.07)),
+    rgba(2, 6, 12, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 14px 28px rgba(0, 0, 0, 0.20);
+}
+
+.previewTitleGroup {
+  min-width: 0;
+}
+
+.previewKicker {
+  display: block;
+  margin-bottom: 0.22rem;
+  color: rgba(108, 225, 212, 0.82);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
 .previewTitle {
   display: flex;
   align-items: center;
@@ -536,9 +613,118 @@
   font-size: 1rem;
   font-weight: 600;
   color: var(--accent-gold);
-  margin: 0 0 1rem;
-  padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0;
+}
+
+.previewMeta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45rem;
+}
+
+.previewProgressReadout,
+.previewStatusPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.previewProgressReadout {
+  padding: 0 0.62rem;
+  color: rgba(245, 240, 230, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.previewStatusPill {
+  padding: 0 0.75rem;
+  color: rgba(108, 225, 212, 0.92);
+  border: 1px solid rgba(108, 225, 212, 0.24);
+  background: rgba(74, 171, 158, 0.11);
+}
+
+.previewStatusPillReady {
+  color: #0a0a0f;
+  border-color: rgba(248, 227, 168, 0.82);
+  background: linear-gradient(135deg, #f8e3a8, var(--accent-gold));
+  box-shadow: 0 0 22px rgba(212, 165, 116, 0.20);
+}
+
+.previewProgressTrack {
+  grid-column: 1 / -1;
+  position: relative;
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.previewProgressFill {
+  display: block;
+  width: var(--preview-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-gold), #6ce1d4, var(--accent-gold));
+  background-size: 180% 100%;
+  box-shadow:
+    0 0 16px rgba(242, 194, 108, 0.26),
+    0 0 18px rgba(108, 225, 212, 0.20);
+  transition: width 0.45s ease;
+  animation: previewProgressSheen 2.8s linear infinite;
+}
+
+.previewTeaserFrame {
+  position: relative;
+}
+
+.previewTeaserFrame > div {
+  margin: 0;
+  padding: 1rem;
+  border-color: rgba(232, 200, 154, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.018)),
+    rgba(0, 0, 0, 0.16);
+}
+
+.previewTeaserFrame > div > div:first-child {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .previewHeader {
+    grid-template-columns: 1fr;
+  }
+
+  .previewMeta {
+    justify-content: flex-start;
+  }
+
+  .previewProgressReadout,
+  .previewStatusPill {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .previewProgressFill {
+    animation: none;
+    transition: none;
+  }
+}
+
+@keyframes previewProgressSheen {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 180% 50%;
+  }
 }
 
 .previewData {
@@ -2747,20 +2933,46 @@
 
 .previewCard {
   position: relative;
+  isolation: isolate;
   overflow: hidden;
   border-radius: 26px;
-  padding: clamp(1.55rem, 2.2vw, 2.25rem);
-  border-color: rgba(74, 171, 158, 0.22);
+  padding: clamp(1.1rem, 1.8vw, 1.45rem);
+  border-color: rgba(232, 200, 154, 0.18);
   background:
-    radial-gradient(circle at 18% 10%, rgba(74, 171, 158, 0.16), transparent 34%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
     linear-gradient(155deg, rgba(17, 18, 28, 0.92), rgba(8, 10, 16, 0.88));
+  background-size: 46px 46px, 46px 46px, auto;
   box-shadow:
     0 30px 72px rgba(0, 0, 0, 0.38),
-    0 0 48px rgba(42, 139, 126, 0.08);
+    0 0 0 1px rgba(255, 255, 255, 0.055) inset,
+    0 0 42px rgba(42, 139, 126, 0.07);
+}
+
+.previewHeader {
+  border-radius: 20px;
+  padding: clamp(1rem, 1.5vw, 1.25rem);
+  margin-bottom: clamp(0.8rem, 1.3vw, 1.1rem);
 }
 
 .previewTitle {
-  font-size: clamp(1.16rem, 0.75vw + 1rem, 1.45rem);
+  color: #f8e3a8;
+  font-size: clamp(1.24rem, 0.9vw + 1rem, 1.58rem);
+  letter-spacing: -0.01em;
+}
+
+.previewKicker {
+  font-size: clamp(0.72rem, 0.24vw + 0.68rem, 0.82rem);
+}
+
+.previewProgressReadout,
+.previewStatusPill {
+  min-height: 2rem;
+  font-size: clamp(0.74rem, 0.2vw + 0.7rem, 0.84rem);
+}
+
+.previewTeaserFrame > div {
+  border-radius: 20px;
 }
 
 .primaryAction {

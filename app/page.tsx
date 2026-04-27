@@ -349,12 +349,32 @@ export default function Home() {
     return requiredFields.every((field) => draft[field].trim().length > 0);
   }, [draft]);
 
-  /* ── Cosmic charge level (0-1) based on visible form fields ── */
-  const chargeLevel = useMemo(() => {
-    const chargeKeys: Array<keyof ProfileQueryInput> = ["name", "birthDate", "birthTime", "country", "state", "city"];
-    const filled = chargeKeys.filter((f) => draft[f].trim().length > 0).length;
-    return filled / chargeKeys.length;
-  }, [draft]);
+  /* Preview completion follows the teaser fields without changing submit validation. */
+  const previewCompletion = useMemo(() => {
+    const locationFilled = ["country", "state", "city"].filter(
+      (field) => draft[field as keyof ProfileQueryInput].trim().length > 0,
+    ).length;
+    const timeFilled = draft.birthTime.trim().length > 0 || (unknownTime && coarseTime.trim().length > 0);
+    const filled =
+      Number(draft.name.trim().length > 0) +
+      Number(draft.birthDate.trim().length > 0) +
+      Number(timeFilled) +
+      locationFilled;
+
+    return {
+      filled,
+      total: 6,
+      percent: Math.round((filled / 6) * 100),
+    };
+  }, [coarseTime, draft, unknownTime]);
+
+  const previewStatus = useMemo(() => {
+    if (canSubmit) return "Full chart ready";
+    if (geoStatus === "found") return "Coordinates locked";
+    if (unknownTime && coarseTime.trim().length > 0) return "Estimate mode";
+    if (previewCompletion.filled === 0) return "Awaiting first detail";
+    return "Building confidence";
+  }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, unknownTime]);
 
   const submitWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -997,21 +1017,53 @@ export default function Home() {
 
             {/* RIGHT COLUMN: Chart Preview */}
             <aside className={styles.previewColumn}>
-              <div className={styles.previewCard}>
-                <h3 className={styles.previewTitle}>
-                  <GiStarSattelites /> Chart Preview
-                </h3>
+              <div
+                className={styles.previewCard}
+                style={{ "--preview-progress": `${previewCompletion.percent}%` } as React.CSSProperties}
+              >
+                <div className={styles.previewHeader}>
+                  <div className={styles.previewTitleGroup}>
+                    <span className={styles.previewKicker}>Live sky build</span>
+                    <h3 className={styles.previewTitle}>
+                      <GiStarSattelites /> Chart Preview
+                    </h3>
+                  </div>
+                  <div className={styles.previewMeta}>
+                    <span className={styles.previewProgressReadout}>
+                      {previewCompletion.filled}/{previewCompletion.total}
+                    </span>
+                    <span
+                      className={`${styles.previewStatusPill} ${
+                        canSubmit ? styles.previewStatusPillReady : ""
+                      }`}
+                    >
+                      {previewStatus}
+                    </span>
+                  </div>
+                  <div
+                    className={styles.previewProgressTrack}
+                    role="progressbar"
+                    aria-label="Chart preview completion"
+                    aria-valuemin={0}
+                    aria-valuemax={previewCompletion.total}
+                    aria-valuenow={previewCompletion.filled}
+                  >
+                    <span className={styles.previewProgressFill} />
+                  </div>
+                </div>
                 {/* Use BirthChartTeaser for enhanced preview */}
-                <BirthChartTeaser
-                  name={draft.name}
-                  birthDate={draft.birthDate}
-                  birthTime={draft.birthTime}
-                  country={draft.country}
-                  state={draft.state}
-                  city={draft.city}
-                  unknownTime={unknownTime}
-                  coarseTime={coarseTime}
-                />
+                <div className={styles.previewTeaserFrame}>
+                  <BirthChartTeaser
+                    name={draft.name}
+                    birthDate={draft.birthDate}
+                    birthTime={draft.birthTime}
+                    country={draft.country}
+                    state={draft.state}
+                    city={draft.city}
+                    unknownTime={unknownTime}
+                    coarseTime={coarseTime}
+                  />
+                </div>
 
                 {geoStatus === "found" && (
                   <div className={styles.coordinatesDisplay}>
