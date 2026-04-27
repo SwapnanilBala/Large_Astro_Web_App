@@ -52,6 +52,14 @@ const COARSE_TIME_OPTIONS = [
 ];
 
 
+const INTAKE_DRAFT_STORAGE_KEY = "astro_intake_draft";
+
+type StoredIntakeDraft = {
+  draft: ProfileQueryInput;
+  unknownTime: boolean;
+  coarseTime: string;
+};
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
@@ -254,14 +262,20 @@ export default function Home() {
   /* ── Restore draft from localStorage on mount (runs after timezone default) ── */
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("astro_intake_draft");
+      const stored = localStorage.getItem(INTAKE_DRAFT_STORAGE_KEY);
       if (!stored) return;
       const parsed = JSON.parse(stored) as Record<string, unknown>;
+      const savedDraft =
+        parsed.draft && typeof parsed.draft === "object"
+          ? (parsed.draft as Record<string, unknown>)
+          : parsed;
       // Validate shape: every key in profileInitialState must be a string
       const keys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
-      const isValid = keys.every((k) => typeof parsed[k] === "string");
+      const isValid = keys.every((k) => typeof savedDraft[k] === "string");
       if (!isValid) return;
-      setDraft(parsed as unknown as ProfileQueryInput);
+      setDraft(savedDraft as unknown as ProfileQueryInput);
+      if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
+      if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
     } catch {
       // localStorage may throw in private browsing or if data is corrupt
     }
@@ -279,10 +293,15 @@ export default function Home() {
         ];
         const hasContent = userFields.some((f) => draft[f].trim().length > 0);
         if (!hasContent) {
-          localStorage.removeItem("astro_intake_draft");
+          localStorage.removeItem(INTAKE_DRAFT_STORAGE_KEY);
           return;
         }
-        localStorage.setItem("astro_intake_draft", JSON.stringify(draft));
+        const storedDraft: StoredIntakeDraft = {
+          draft,
+          unknownTime,
+          coarseTime,
+        };
+        localStorage.setItem(INTAKE_DRAFT_STORAGE_KEY, JSON.stringify(storedDraft));
         setDraftSaved(true);
         if (draftSavedDisplayTimer.current) clearTimeout(draftSavedDisplayTimer.current);
         draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
@@ -294,7 +313,7 @@ export default function Home() {
     return () => {
       if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
     };
-  }, [draft]);
+  }, [coarseTime, draft, unknownTime]);
 
   const draftCountry = draft.country;
   const draftState = draft.state;
@@ -616,12 +635,6 @@ export default function Home() {
     Object.entries(draft).forEach(([key, value]) => {
       params.set(key, value.trim());
     });
-
-    try {
-      localStorage.removeItem("astro_intake_draft");
-    } catch {
-      // localStorage may throw in private browsing
-    }
 
     router.push(`/engine-select?${params.toString()}`);
   };
@@ -1102,10 +1115,11 @@ export default function Home() {
               size="lg"
               fullWidth
               loading={isSubmitting}
+              loadingLabel="Unraveling..."
               disabled={!canSubmit}
               icon={<GiCrystalBall />}
             >
-              {isSubmitting ? "Generating..." : "Generate Chart Intelligence"}
+              Unravel My Future
             </PremiumButton>
             {!canSubmit && (
               <p className={styles.actionHint}>

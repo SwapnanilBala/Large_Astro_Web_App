@@ -11,6 +11,7 @@ interface PremiumButtonProps {
   size?: "sm" | "md" | "lg";
   disabled?: boolean;
   loading?: boolean;
+  loadingLabel?: string;
   icon?: React.ReactNode;
   fullWidth?: boolean;
 }
@@ -23,6 +24,7 @@ export default function PremiumButton({
   size = "md",
   disabled = false,
   loading = false,
+  loadingLabel = "Processing...",
   icon,
   fullWidth = false,
 }: PremiumButtonProps) {
@@ -36,7 +38,7 @@ export default function PremiumButton({
       <div className={styles.buttonContent}>
         {icon && <span className={styles.buttonIcon}>{icon}</span>}
         {loading ? (
-          <span className={styles.loadingText}>Processing...</span>
+          <span className={styles.loadingText}>{loadingLabel}</span>
         ) : (
           <span className={styles.buttonText}>{children}</span>
         )}
