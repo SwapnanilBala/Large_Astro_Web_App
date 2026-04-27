@@ -402,53 +402,40 @@
 }
 
 .calendarPopup :global(.react-datepicker__navigation) {
-  top: 1.58rem !important;
+  top: 3.2rem !important;
   display: grid !important;
   place-items: center !important;
-  width: 1.58rem !important;
-  height: 1.58rem !important;
-  min-width: 1.58rem !important;
-  min-height: 1.58rem !important;
-  max-width: 1.58rem !important;
-  max-height: 1.58rem !important;
+  width: 1.35rem !important;
+  height: 2.65rem !important;
+  min-width: 1.35rem !important;
+  min-height: 2.65rem !important;
+  max-width: 1.35rem !important;
+  max-height: 2.65rem !important;
   padding: 0 !important;
-  overflow: hidden !important;
+  overflow: visible !important;
   text-indent: 0 !important;
   font-size: 0 !important;
   line-height: 0 !important;
-  border: 1px solid rgba(74, 171, 158, 0.28) !important;
-  border-radius: 999px !important;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.20), transparent 34%),
-    linear-gradient(145deg, rgba(9, 14, 24, 0.96), rgba(22, 31, 40, 0.92)) !important;
-  box-shadow:
-    0 8px 18px rgba(0, 0, 0, 0.22),
-    0 0 0 1px rgba(232, 200, 154, 0.08) inset,
-    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  border: 0 !important;
+  border-radius: 0.45rem !important;
+  background: transparent !important;
+  box-shadow: none !important;
   transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
+    color 0.2s ease,
     transform 0.2s ease,
     background 0.2s ease !important;
 }
 
 .calendarPopup :global(.react-datepicker__navigation--previous) {
-  left: 1rem !important;
+  left: 1.3rem !important;
 }
 
 .calendarPopup :global(.react-datepicker__navigation--next) {
-  right: 1rem !important;
+  right: 1.3rem !important;
 }
 
 .calendarPopup :global(.react-datepicker__navigation:hover) {
-  border-color: rgba(232, 200, 154, 0.56) !important;
-  background:
-    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.18), transparent 34%),
-    linear-gradient(145deg, rgba(212, 165, 116, 0.18), rgba(74, 171, 158, 0.14)) !important;
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.28),
-    0 0 20px rgba(212, 165, 116, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10) !important;
+  background: rgba(232, 200, 154, 0.08) !important;
   transform: translateY(-1px);
 }
 
@@ -459,12 +446,14 @@
 .calendarPopup :global(.react-datepicker__navigation::before) {
   content: "" !important;
   display: block !important;
-  width: 0.42rem !important;
-  height: 0.42rem !important;
+  width: 0.58rem !important;
+  height: 0.58rem !important;
   border-color: #f8e3a8 !important;
-  border-width: 2px 2px 0 0 !important;
+  border-width: 2.5px 2.5px 0 0 !important;
   border-style: solid !important;
-  filter: drop-shadow(0 0 4px rgba(248, 227, 168, 0.5));
+  filter:
+    drop-shadow(0 0 5px rgba(248, 227, 168, 0.52))
+    drop-shadow(0 0 10px rgba(108, 225, 212, 0.18));
 }
 
 .calendarPopup :global(.react-datepicker__navigation--previous::before) {
@@ -500,12 +489,13 @@
   }
 
   .calendarPopup :global(.react-datepicker__navigation) {
-    width: 1.48rem !important;
-    height: 1.48rem !important;
-    min-width: 1.48rem !important;
-    min-height: 1.48rem !important;
-    max-width: 1.48rem !important;
-    max-height: 1.48rem !important;
+    top: 3.1rem !important;
+    width: 1.25rem !important;
+    height: 2.45rem !important;
+    min-width: 1.25rem !important;
+    min-height: 2.45rem !important;
+    max-width: 1.25rem !important;
+    max-height: 2.45rem !important;
   }
 
   .calendarPopup :global(.react-datepicker__navigation--previous) {
