@@ -36,13 +36,20 @@ import styles from "./page.module.css";
 const requiredFields: Array<keyof ProfileQueryInput> = [
   "name",
   "birthDate",
-  "birthTime",
+  // "birthTime", // Will handle requiredness conditionally
   "timezoneOffsetMinutes",
   "latitude",
   "longitude",
   "country",
   "state",
   "city",
+];
+// Coarse time options for unknown birth time
+const COARSE_TIME_OPTIONS = [
+  { value: "morning", label: "Morning (5am–11am)" },
+  { value: "afternoon", label: "Afternoon (11am–4pm)" },
+  { value: "evening", label: "Evening (4pm–9pm)" },
+  { value: "unknown", label: "Unknown" },
 ];
 
 
@@ -53,6 +60,8 @@ const withClientTimezoneDefault = (): ProfileQueryInput => ({
 });
 
 export default function Home() {
+  const [unknownTime, setUnknownTime] = useState(false);
+  const [coarseTime, setCoarseTime] = useState("");
   const { user } = useAuth();
   const { t } = useTranslation();
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
@@ -64,6 +73,10 @@ export default function Home() {
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
+
+  // Smart fill state
+  const [smartFillText, setSmartFillText] = useState("");
+  const [smartFillExpanded, setSmartFillExpanded] = useState(false);
 
   // Sequential field unlock state
   const [unlockedStage, setUnlockedStage] = useState(0);
@@ -647,6 +660,7 @@ export default function Home() {
                 />
               </div>
 
+
               {/* ── Birth Date + Birth Time Row ── */}
               <div className={styles.dateTimeRow}>
                 <div className={styles.premiumField}>
@@ -673,24 +687,45 @@ export default function Home() {
                 </div>
 
                 <div className={styles.premiumField}>
-                  <PremiumDatePicker
-                    label={t("home.formBirthTime")}
-                    value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
-                    onChange={(date: Date | null) => {
-                      if (date) {
-                        const hh = String(date.getHours()).padStart(2, "0");
-                        const mm = String(date.getMinutes()).padStart(2, "0");
-                        setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
-                      }
-                    }}
-                    placeholder="Select birth time"
-                    showTimeSelect
-                    showTimeSelectOnly
-                    timeIntervals={15}
-                    timeCaption="Time"
-                    dateFormat="h:mm aa"
-                    required
-                  />
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    <PremiumToggle
+                      label="I don't know my exact birth time"
+                      checked={unknownTime}
+                      onChange={(checked) => {
+                        setUnknownTime(checked);
+                        if (!checked) setCoarseTime("");
+                        setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
+                      }}
+                    />
+                  </div>
+                  {!unknownTime ? (
+                    <PremiumDatePicker
+                      label={t("home.formBirthTime")}
+                      value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
+                      onChange={(date: Date | null) => {
+                        if (date) {
+                          const hh = String(date.getHours()).padStart(2, "0");
+                          const mm = String(date.getMinutes()).padStart(2, "0");
+                          setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                        }
+                      }}
+                      placeholder="Select birth time"
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={15}
+                      timeCaption="Time"
+                      dateFormat="h:mm aa"
+                      required={!unknownTime}
+                    />
+                  ) : (
+                    <PremiumDropdown
+                      label="Coarse Birth Time"
+                      value={coarseTime}
+                      onChange={(val) => setCoarseTime(val)}
+                      options={COARSE_TIME_OPTIONS}
+                      placeholder="Select time of day"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -786,41 +821,24 @@ export default function Home() {
               </div>{/* /formSectionCard */}
             </div>{/* /formColumn */}
 
+
             {/* RIGHT COLUMN: Chart Preview */}
             <aside className={styles.previewColumn}>
               <div className={styles.previewCard}>
                 <h3 className={styles.previewTitle}>
                   <GiStarSattelites /> Chart Preview
                 </h3>
-                
-                <div className={styles.previewData}>
-                  {draft.name && (
-                    <div className={styles.previewRow}>
-                      <span className={styles.previewLabel}>Client</span>
-                      <span className={styles.previewValue}>{draft.name}</span>
-                    </div>
-                  )}
-                  {draft.birthDate && (
-                    <div className={styles.previewRow}>
-                      <span className={styles.previewLabel}>Birth Date</span>
-                      <span className={styles.previewValue}>{draft.birthDate}</span>
-                    </div>
-                  )}
-                  {draft.birthTime && (
-                    <div className={styles.previewRow}>
-                      <span className={styles.previewLabel}>Birth Time</span>
-                      <span className={styles.previewValue}>{draft.birthTime}</span>
-                    </div>
-                  )}
-                  {(draft.country || draft.state || draft.city) && (
-                    <div className={styles.previewRow}>
-                      <span className={styles.previewLabel}>Location</span>
-                      <span className={styles.previewValue}>
-                        {[draft.city, draft.state, draft.country].filter(Boolean).join(", ")}
-                      </span>
-                    </div>
-                  )}
-                </div>
+                {/* Use BirthChartTeaser for enhanced preview */}
+                <BirthChartTeaser
+                  name={draft.name}
+                  birthDate={draft.birthDate}
+                  birthTime={draft.birthTime}
+                  country={draft.country}
+                  state={draft.state}
+                  city={draft.city}
+                  unknownTime={unknownTime}
+                  coarseTime={coarseTime}
+                />
 
                 {geoStatus === "found" && (
                   <div className={styles.coordinatesDisplay}>

@@ -11,6 +11,8 @@ interface BirthChartTeaserProps {
   country?: string;
   state?: string;
   city?: string;
+  unknownTime?: boolean;
+  coarseTime?: string;
 }
 
 const ZODIAC_SIGNS = [
@@ -73,6 +75,8 @@ export default function BirthChartTeaser({
   country,
   state,
   city,
+  unknownTime,
+  coarseTime,
 }: BirthChartTeaserProps) {
   const filledCount = useMemo(() => 
     getFilledFieldsCount({ name, birthDate, birthTime, country, state, city }), 
@@ -82,6 +86,10 @@ export default function BirthChartTeaser({
   const sunSign = useMemo(() => getSunSign(birthDate), [birthDate]);
   const hasBasicInfo = name?.trim() && birthDate?.trim();
   const hasLocation = country?.trim() || state?.trim() || city?.trim();
+
+
+  // Show 'Solar chart' confidence if unknownTime is set
+  const chartConfidence = unknownTime ? "Solar chart" : undefined;
 
   if (filledCount < 2) return null;
 
@@ -96,6 +104,16 @@ export default function BirthChartTeaser({
             style={{ width: `${(filledCount / 6) * 100}%` }}
           />
         </div>
+        {chartConfidence && (
+          <div className={styles.chartConfidence}>
+            <span>{chartConfidence}</span>
+            {coarseTime && (
+              <span style={{ marginLeft: 8, fontStyle: "italic", fontSize: "0.95em" }}>
+                ({COARSE_TIME_OPTIONS.find(opt => opt.value === coarseTime)?.label || ""})
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className={styles.teaserGrid}>
