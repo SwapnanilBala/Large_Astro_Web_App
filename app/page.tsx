@@ -29,7 +29,6 @@ import GlassCard from "./components/GlassCard";
 import PremiumInput from "./components/PremiumInput";
 import PremiumButton from "./components/PremiumButton";
 import PremiumDatePicker from "./components/PremiumDatePicker";
-import PremiumDropdown from "./components/PremiumDropdown";
 import PremiumToggle from "./components/PremiumToggle";
 import styles from "./page.module.css";
 
@@ -865,13 +864,27 @@ export default function Home() {
                       required={!unknownTime}
                     />
                   ) : (
-                    <PremiumDropdown
-                      label="Coarse Birth Time"
-                      value={coarseTime}
-                      onChange={(val) => setCoarseTime(val)}
-                      options={COARSE_TIME_OPTIONS}
-                      placeholder="Select time of day"
-                    />
+                    <div className={styles.approxTimePanel}>
+                      <div className={styles.approxTimeHeader}>
+                        <span className={styles.approxTimeLabel}>Approximate birth time</span>
+                        <span className={styles.approxTimeHint}>Choose the closest window</span>
+                      </div>
+                      <div className={styles.approxTimeOptions}>
+                        {COARSE_TIME_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={`${styles.approxTimeOption} ${
+                              coarseTime === option.value ? styles.approxTimeOptionSelected : ""
+                            }`}
+                            onClick={() => setCoarseTime(option.value)}
+                            aria-pressed={coarseTime === option.value}
+                          >
+                            {option.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
