@@ -228,6 +228,107 @@
   margin-bottom: 0;
 }
 
+/* Smart Fill Field */
+.smartFillWrapper {
+  margin-bottom: 1.5rem;
+}
+
+.smartFillToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(200, 155, 60, 0.08);
+  border: 1px dashed rgba(200, 155, 60, 0.3);
+  border-radius: 10px;
+  color: var(--accent-gold);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.smartFillToggle:hover {
+  background: rgba(200, 155, 60, 0.12);
+  border-color: rgba(200, 155, 60, 0.5);
+}
+
+.smartFillToggle svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.smartFillArrow {
+  margin-left: auto;
+  transition: transform 0.25s ease;
+}
+
+.smartFillArrow.expanded {
+  transform: rotate(180deg);
+}
+
+.smartFillContent {
+  margin-top: 0.75rem;
+  padding: 1rem;
+  background: rgba(15, 15, 25, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.smartFillTextarea {
+  width: 100%;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 0.875rem;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.smartFillTextarea:focus {
+  border-color: var(--accent-gold);
+}
+
+.smartFillTextarea::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.smartFillHint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+.smartFillButton {
+  margin-top: 0.75rem;
+  padding: 0.625rem 1.25rem;
+  background: linear-gradient(135deg, rgba(200, 155, 60, 0.2), rgba(200, 155, 60, 0.1));
+  border: 1px solid rgba(200, 155, 60, 0.4);
+  border-radius: 8px;
+  color: var(--accent-gold);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.smartFillButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(200, 155, 60, 0.3), rgba(200, 155, 60, 0.2));
+  border-color: rgba(200, 155, 60, 0.6);
+}
+
+.smartFillButton:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* Section dividers */
 .sectionDivider {
   display: flex;
@@ -536,10 +637,82 @@
   opacity: 0.7;
 }
 
+.trustMicrocopy {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  opacity: 0.6;
+  letter-spacing: 0.02em;
+}
+
 /* === FOOTER === */
 .intakeFooter {
   padding: 2rem 1rem;
   text-align: center;
+}
+
+/* === Mobile Sticky Submit Bar === */
+.mobileStickyBar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: rgba(15, 15, 25, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  animation: slideUp 0.3s ease-out;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.stickyProgress {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.stickyProgressText {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.stickyProgressBar {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.stickyProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-gold), #f2c26c);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+@media (min-width: 769px) {
+  .mobileStickyBar {
+    display: none;
+  }
 }
 
 /* === RESPONSIVE === */

@@ -78,15 +78,20 @@ export default function Home() {
   const [smartFillText, setSmartFillText] = useState("");
   const [smartFillExpanded, setSmartFillExpanded] = useState(false);
 
-  // Sequential field unlock state
-  const [unlockedStage, setUnlockedStage] = useState(0);
+  // Sequential field highlight state (soft unlock - all fields visible, next step highlighted)
+  const [highlightedField, setHighlightedField] = useState<string>("name");
   const [completedFields, setCompletedFields] = useState<Set<string>>(new Set());
 
   // Scroll cue visibility (fades after user scrolls past 100px)
   const [scrolled, setScrolled] = useState<boolean>(false);
+  // Mobile sticky bar visibility (shows when scrolled past form on mobile)
+  const [showStickyBar, setShowStickyBar] = useState<boolean>(false);
+  
   useEffect(() => {
     const onScroll = () => {
       setScrolled(window.scrollY > 100);
+      // Show sticky bar on mobile when scrolled past 300px
+      setShowStickyBar(window.scrollY > 300 && window.innerWidth < 768);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
@@ -118,29 +123,21 @@ export default function Home() {
   const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
   const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
-  // Sequential unlock effect based on filled fields
+  // Soft unlock effect - highlight next field based on completion
   useEffect(() => {
-    const stageFields = [
-      ["name"], // Stage 0: Name only
-      ["name", "birthDate"], // Stage 1: + Date
-      ["name", "birthDate", "birthTime"], // Stage 2: + Time
-      ["name", "birthDate", "birthTime", "country"], // Stage 3: + Country
-      ["name", "birthDate", "birthTime", "country", "state"], // Stage 4: + State
-      ["name", "birthDate", "birthTime", "country", "state", "city"], // Stage 5: + City
-    ];
+    const fieldOrder = ["name", "birthDate", "birthTime", "country", "state", "city"];
     
-    const filledFields = stageFields[unlockedStage].filter(
-      field => draft[field as keyof ProfileQueryInput].trim().length > 0
-    );
-    
-    // Check if current stage is complete
-    if (filledFields.length === stageFields[unlockedStage].length && unlockedStage < 5) {
-      // Small delay for visual effect
-      setTimeout(() => {
-        setUnlockedStage(prev => prev + 1);
-      }, 300);
+    // Find the first unfilled field to highlight
+    for (const field of fieldOrder) {
+      if (draft[field as keyof ProfileQueryInput].trim().length === 0) {
+        setHighlightedField(field);
+        return;
+      }
     }
-  }, [draft, unlockedStage]);
+    
+    // All fields filled, no highlight needed
+    setHighlightedField("");
+  }, [draft]);
 
   /* ── Mystical tagline rotation ── */
   const mysticalPhrases = useMemo(() => {
@@ -448,6 +445,114 @@ export default function Home() {
     setDraft((previous) => ({ ...previous, [field]: value }));
   };
 
+  // Smart fill parser - handles various formats
+  const parseSmartFill = (text: string) => {
+    const parts = text.split(',').map(p => p.trim());
+    if (parts.length < 3) return null;
+
+    let parsed: Partial<ProfileQueryInput> = {};
+    let partIndex = 0;
+
+    // Extract name (first part)
+    if (parts[partIndex]) {
+      parsed.name = parts[partIndex];
+      partIndex++;
+    }
+
+    // Extract date (various formats: "14 Mar 1995", "March 14 1995", "1995-03-14")
+    if (parts[partIndex]) {
+      const dateStr = parts[partIndex];
+      const dateMatch = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/) || 
+                       dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/) ||
+                       dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      
+      if (dateMatch) {
+        const months: Record<string, string> = {
+          jan: '01', january: '01',
+          feb: '02', february: '02',
+          mar: '03', march: '03',
+          apr: '04', april: '04',
+          may: '05',
+          jun: '06', june: '06',
+          jul: '07', july: '07',
+          aug: '08', august: '08',
+          sep: '09', september: '09',
+          oct: '10', october: '10',
+          nov: '11', november: '11',
+          dec: '12', december: '12'
+        };
+        
+        let year, month, day;
+        if (dateStr.match(/\d{4}-\d{1,2}-\d{1,2}/)) {
+          [year, month, day] = [dateMatch[1], dateMatch[2].padStart(2, '0'), dateMatch[3].padStart(2, '0')];
+        } else {
+          const [, dOrM, mOrD, y] = dateMatch;
+          if (parseInt(dOrM) > 31) {
+            // First part is month name
+            const monthNum = months[mOrD.toLowerCase()] || mOrD.padStart(2, '0');
+            [year, month, day] = [y, monthNum, dOrM.padStart(2, '0')];
+          } else {
+            // First part is day
+            const monthNum = months[mOrD.toLowerCase()] || mOrD.padStart(2, '0');
+            [year, month, day] = [y, monthNum, dOrM.padStart(2, '0')];
+          }
+        }
+        parsed.birthDate = `${year}-${month}-${day}`;
+        partIndex++;
+      }
+    }
+
+    // Extract time (various formats: "3:45 PM", "15:45", "3.45pm")
+    if (parts[partIndex]) {
+      const timeStr = parts[partIndex];
+      const timeMatch = timeStr.match(/(\d{1,2})[:.](\d{2})\s*(am|pm)?/i);
+      
+      if (timeMatch) {
+        let [, hours, minutes, meridiem] = timeMatch;
+        let h = parseInt(hours);
+        const m = minutes;
+        
+        if (meridiem?.toLowerCase() === 'pm' && h !== 12) {
+          h += 12;
+        } else if (meridiem?.toLowerCase() === 'am' && h === 12) {
+          h = 0;
+        }
+        
+        parsed.birthTime = `${String(h).padStart(2, '0')}:${m}`;
+        partIndex++;
+      }
+    }
+
+    // Extract location (remaining parts combined)
+    if (parts[partIndex]) {
+      const locationParts = parts.slice(partIndex);
+      // Try to parse as "City, State Country" or "City, Country"
+      if (locationParts.length >= 2) {
+        parsed.city = locationParts[0];
+        parsed.state = locationParts[1];
+        if (locationParts[2]) {
+          parsed.country = locationParts[2];
+        } else {
+          parsed.country = locationParts[1];
+          parsed.state = "";
+        }
+      } else {
+        parsed.city = locationParts[0];
+      }
+    }
+
+    return parsed;
+  };
+
+  const handleSmartFill = () => {
+    const parsed = parseSmartFill(smartFillText);
+    if (parsed) {
+      setDraft(prev => ({ ...prev, ...parsed }));
+      setSmartFillText("");
+      setSmartFillExpanded(false);
+    }
+  };
+
   const clearGeoResults = () => {
     setDraft((prev) => ({
       ...prev,
@@ -649,6 +754,42 @@ export default function Home() {
             {/* LEFT COLUMN: Form Fields */}
             <div className={styles.formColumn}>
               <div className={styles.formSectionCard}>
+              {/* ── Smart Fill Field ── */}
+              <div className={styles.smartFillWrapper}>
+                <button
+                  type="button"
+                  className={styles.smartFillToggle}
+                  onClick={() => setSmartFillExpanded(!smartFillExpanded)}
+                >
+                  <HiOutlineSparkles />
+                  <span>Quick Fill (Paste client data)</span>
+                  <HiOutlineChevronDown className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ''}`} />
+                </button>
+                
+                {smartFillExpanded && (
+                  <div className={styles.smartFillContent}>
+                    <textarea
+                      value={smartFillText}
+                      onChange={(e) => setSmartFillText(e.target.value)}
+                      placeholder='Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY'
+                      className={styles.smartFillTextarea}
+                      rows={2}
+                    />
+                    <div className={styles.smartFillHint}>
+                      Format: Name, Date, Time, Location (comma-separated)
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleSmartFill}
+                      className={styles.smartFillButton}
+                      disabled={smartFillText.trim().length < 10}
+                    >
+                      Fill Form
+                    </button>
+                  </div>
+                )}
+              </div>
+
               {/* ── Name Field ── */}
               <div className={styles.premiumField}>
                 <PremiumInput
@@ -887,6 +1028,9 @@ export default function Home() {
                 Complete all fields to generate your chart
               </p>
             )}
+            <p className={styles.trustMicrocopy}>
+              🔒 Encrypted · Never shared · ~60 seconds
+            </p>
           </div>
 
         </form>
@@ -896,6 +1040,42 @@ export default function Home() {
       <footer className={styles.intakeFooter}>
         <ChartHistory userName={user?.display_name} />
       </footer>
+
+      {/* Mobile Sticky Submit Bar */}
+      {showStickyBar && (
+        <div className={styles.mobileStickyBar}>
+          <div className={styles.stickyProgress}>
+            <span className={styles.stickyProgressText}>
+              {requiredFields.filter(f => draft[f].trim().length > 0).length}/{requiredFields.length} complete
+            </span>
+            <div className={styles.stickyProgressBar}>
+              <div 
+                className={styles.stickyProgressFill}
+                style={{ 
+                  width: `${(requiredFields.filter(f => draft[f].trim().length > 0).length / requiredFields.length) * 100}%` 
+                }}
+              />
+            </div>
+          </div>
+          <PremiumButton
+            type="button"
+            variant="primary"
+            size="md"
+            onClick={() => {
+              const form = formRef.current;
+              if (form && canSubmit) {
+                form.requestSubmit();
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            disabled={!canSubmit}
+            icon={<GiCrystalBall />}
+          >
+            Continue
+          </PremiumButton>
+        </div>
+      )}
     </div>
   );
 }
