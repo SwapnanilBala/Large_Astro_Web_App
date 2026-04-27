@@ -749,11 +749,28 @@ export default function Home() {
       {/* === MAIN CONTENT === */}
       <main className={styles.mainContent}>
         <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
-          
+          <div className={styles.formIntro}>
+            <span className={styles.formEyebrow}>Client birth intake</span>
+            <h2 className={styles.formTitle}>Map the exact sky they arrived under.</h2>
+            <p className={styles.formCopy}>
+              Enter the core birth details and we will tune the chart preview as each coordinate locks into place.
+            </p>
+          </div>
+
           <div className={styles.formLayout}>
             {/* LEFT COLUMN: Form Fields */}
             <div className={styles.formColumn}>
               <div className={styles.formSectionCard}>
+                <div className={styles.cardAura} aria-hidden="true" />
+                <div className={styles.cardHeader}>
+                  <div>
+                    <span className={styles.cardKicker}>Precision profile</span>
+                    <h3 className={styles.cardTitle}>Birth Details</h3>
+                  </div>
+                  <div className={styles.cardSeal} aria-hidden="true">
+                    <GiCrystalBall />
+                  </div>
+                </div>
               {/* ── Smart Fill Field ── */}
               <div className={styles.smartFillWrapper}>
                 <button

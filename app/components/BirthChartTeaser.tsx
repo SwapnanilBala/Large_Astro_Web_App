@@ -37,6 +37,13 @@ const ELEMENT_COLORS: Record<string, string> = {
   Water: "#8C64DC",
 };
 
+const COARSE_TIME_OPTIONS = [
+  { value: "morning", label: "Morning (5am-11am)" },
+  { value: "afternoon", label: "Afternoon (11am-4pm)" },
+  { value: "evening", label: "Evening (4pm-9pm)" },
+  { value: "unknown", label: "Unknown" },
+];
+
 function getSunSign(dateStr?: string) {
   if (!dateStr) return null;
   const date = new Date(dateStr + "T00:00:00");
