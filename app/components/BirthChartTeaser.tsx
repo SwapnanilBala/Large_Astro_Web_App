@@ -1,8 +1,21 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import styles from "./BirthChartTeaser.module.css";
-import { GiAries, GiTaurus, GiGemini, GiCancer, GiLeo, GiVirgo, GiLibra, GiScorpio, GiSagittarius, GiCapricorn, GiAquarius, GiPisces } from "react-icons/gi";
+import {
+  GiAries,
+  GiAquarius,
+  GiCancer,
+  GiCapricorn,
+  GiGemini,
+  GiLeo,
+  GiLibra,
+  GiPisces,
+  GiSagittarius,
+  GiScorpio,
+  GiTaurus,
+  GiVirgo,
+} from "react-icons/gi";
 
 interface BirthChartTeaserProps {
   name?: string;
@@ -44,24 +57,26 @@ const COARSE_TIME_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
+const HOUSE_TICKS = Array.from({ length: 12 }, (_, index) => index);
+
 function getSunSign(dateStr?: string) {
   if (!dateStr) return null;
   const date = new Date(dateStr + "T00:00:00");
   const month = date.getMonth();
   const day = date.getDate();
 
-  if ((month === 2 && day >= 21) || (month === 3 && day <= 19)) return ZODIAC_SIGNS[0]; // Aries
-  if ((month === 3 && day >= 20) || (month === 4 && day <= 20)) return ZODIAC_SIGNS[1]; // Taurus
-  if ((month === 4 && day >= 21) || (month === 5 && day <= 20)) return ZODIAC_SIGNS[2]; // Gemini
-  if ((month === 5 && day >= 21) || (month === 6 && day <= 22)) return ZODIAC_SIGNS[3]; // Cancer
-  if ((month === 6 && day >= 23) || (month === 7 && day <= 22)) return ZODIAC_SIGNS[4]; // Leo
-  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return ZODIAC_SIGNS[5]; // Virgo
-  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return ZODIAC_SIGNS[6]; // Libra
-  if ((month === 9 && day >= 23) || (month === 10 && day <= 21)) return ZODIAC_SIGNS[7]; // Scorpio
-  if ((month === 10 && day >= 22) || (month === 11 && day <= 21)) return ZODIAC_SIGNS[8]; // Sagittarius
-  if ((month === 11 && day >= 22) || (month === 0 && day <= 19)) return ZODIAC_SIGNS[9]; // Capricorn
-  if ((month === 0 && day >= 20) || (month === 1 && day <= 18)) return ZODIAC_SIGNS[10]; // Aquarius
-  return ZODIAC_SIGNS[11]; // Pisces
+  if ((month === 2 && day >= 21) || (month === 3 && day <= 19)) return ZODIAC_SIGNS[0];
+  if ((month === 3 && day >= 20) || (month === 4 && day <= 20)) return ZODIAC_SIGNS[1];
+  if ((month === 4 && day >= 21) || (month === 5 && day <= 20)) return ZODIAC_SIGNS[2];
+  if ((month === 5 && day >= 21) || (month === 6 && day <= 22)) return ZODIAC_SIGNS[3];
+  if ((month === 6 && day >= 23) || (month === 7 && day <= 22)) return ZODIAC_SIGNS[4];
+  if ((month === 7 && day >= 23) || (month === 8 && day <= 22)) return ZODIAC_SIGNS[5];
+  if ((month === 8 && day >= 23) || (month === 9 && day <= 22)) return ZODIAC_SIGNS[6];
+  if ((month === 9 && day >= 23) || (month === 10 && day <= 21)) return ZODIAC_SIGNS[7];
+  if ((month === 10 && day >= 22) || (month === 11 && day <= 21)) return ZODIAC_SIGNS[8];
+  if ((month === 11 && day >= 22) || (month === 0 && day <= 19)) return ZODIAC_SIGNS[9];
+  if ((month === 0 && day >= 20) || (month === 1 && day <= 18)) return ZODIAC_SIGNS[10];
+  return ZODIAC_SIGNS[11];
 }
 
 function getFilledFieldsCount(props: BirthChartTeaserProps) {
@@ -75,6 +90,21 @@ function getFilledFieldsCount(props: BirthChartTeaserProps) {
   ].filter(Boolean).length;
 }
 
+function getDisplayName(name?: string) {
+  const trimmedName = name?.trim();
+  if (!trimmedName) return "Awaiting name";
+  return trimmedName.length > 16 ? `${trimmedName.slice(0, 14)}...` : trimmedName;
+}
+
+function getConfidenceLabel(hasExactTime: boolean, unknownTime?: boolean, coarseTime?: string) {
+  if (hasExactTime) return "Exact time";
+  if (unknownTime || coarseTime === "unknown") return "Solar chart";
+  if (coarseTime) {
+    return COARSE_TIME_OPTIONS.find((option) => option.value === coarseTime)?.label ?? "Coarse time";
+  }
+  return "Awaiting time";
+}
+
 export default function BirthChartTeaser({
   name,
   birthDate,
@@ -85,100 +115,154 @@ export default function BirthChartTeaser({
   unknownTime,
   coarseTime,
 }: BirthChartTeaserProps) {
-  const filledCount = useMemo(() => 
-    getFilledFieldsCount({ name, birthDate, birthTime, country, state, city }), 
+  const filledCount = useMemo(
+    () => getFilledFieldsCount({ name, birthDate, birthTime, country, state, city }),
     [name, birthDate, birthTime, country, state, city]
   );
 
   const sunSign = useMemo(() => getSunSign(birthDate), [birthDate]);
-  const hasBasicInfo = name?.trim() && birthDate?.trim();
-  const hasLocation = country?.trim() || state?.trim() || city?.trim();
+  const hasName = Boolean(name?.trim());
+  const hasDate = Boolean(birthDate?.trim());
+  const hasExactTime = Boolean(birthTime?.trim());
+  const hasTimeSignal = hasExactTime || Boolean(unknownTime) || Boolean(coarseTime);
+  const hasLocation = Boolean(country?.trim() || state?.trim() || city?.trim());
+  const completedUnlocks = [hasName, hasDate, hasTimeSignal, hasLocation].filter(Boolean).length;
+  const readiness = Math.round((filledCount / 6) * 100);
+  const isNearComplete = filledCount >= 5;
+  const chartConfidence = getConfidenceLabel(hasExactTime, unknownTime, coarseTime);
+  const SunIcon = sunSign?.icon;
 
+  const astrolabeMarkers = [
+    { label: "SUN", angle: -55, radius: 33, active: hasDate, className: styles.sunMarker },
+    { label: "MOON", angle: 34, radius: 28, active: hasName && hasDate, className: styles.moonMarker },
+    { label: "ASC", angle: 132, radius: 36, active: hasLocation, className: styles.ascMarker },
+    { label: "MC", angle: 226, radius: 24, active: hasTimeSignal, className: styles.houseMarker },
+  ];
 
-  // Show 'Solar chart' confidence if unknownTime is set
-  const chartConfidence = unknownTime ? "Solar chart" : undefined;
+  const infoRows = [
+    {
+      label: "Sun Sign",
+      value: sunSign?.name ?? "Waiting for date",
+      meta: sunSign ? `${sunSign.element} / ${sunSign.dates}` : "Unlocks from birth date",
+      active: hasDate,
+      accent: sunSign ? ELEMENT_COLORS[sunSign.element] : "#C89B3C",
+      icon: SunIcon ? <SunIcon /> : "SUN",
+    },
+    {
+      label: "Moon",
+      value: hasName && hasDate ? "Orbital layer queued" : "Pending",
+      meta: hasTimeSignal ? "Refines with time signal" : "Needs date and time context",
+      active: hasName && hasDate,
+      accent: "#6CE1D4",
+      icon: "MOON",
+    },
+    {
+      label: "Ascendant",
+      value: hasLocation ? "Location locked" : "Awaiting place",
+      meta: "Rising point uses birthplace",
+      active: hasLocation,
+      accent: "#8C64DC",
+      icon: "ASC",
+    },
+    {
+      label: "Houses",
+      value: hasTimeSignal ? "12 sectors awake" : "Dormant",
+      meta: hasExactTime ? "Exact timing active" : chartConfidence,
+      active: hasTimeSignal,
+      accent: "#F07068",
+      icon: "HOUSES",
+    },
+  ];
 
-  if (filledCount < 2) return null;
+  const containerClassName = [
+    styles.teaserContainer,
+    completedUnlocks === 0 ? styles.isDormant : "",
+    isNearComplete ? styles.isReady : "",
+  ].filter(Boolean).join(" ");
 
   return (
-    <div className={styles.teaserContainer}>
+    <div className={containerClassName}>
       <div className={styles.teaserHeader}>
-        <span className={styles.teaserSparkle}>✦</span>
-        <span className={styles.teaserTitle}>Chart Preview</span>
-        <div className={styles.progressBar}>
-          <div 
-            className={styles.progressFill} 
-            style={{ width: `${(filledCount / 6) * 100}%` }}
-          />
+        <div>
+          <span className={styles.teaserKicker}>Living astrolabe</span>
+          <span className={styles.teaserTitle}>Chart Preview</span>
         </div>
-        {chartConfidence && (
-          <div className={styles.chartConfidence}>
-            <span>{chartConfidence}</span>
-            {coarseTime && (
-              <span style={{ marginLeft: 8, fontStyle: "italic", fontSize: "0.95em" }}>
-                ({COARSE_TIME_OPTIONS.find(opt => opt.value === coarseTime)?.label || ""})
+        <div className={styles.headerStatus}>
+          <span className={styles.chartConfidence}>{chartConfidence}</span>
+          <div className={styles.progressBar} aria-label={`${readiness}% chart readiness`}>
+            <div className={styles.progressFill} style={{ width: `${readiness}%` }} />
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.teaserBody}>
+        <div className={styles.astrolabeWrap} aria-hidden="true">
+          <div className={styles.astrolabe}>
+            <div className={styles.outerRing} />
+            <div className={styles.houseRing} />
+            <div className={styles.innerOrbit} />
+            {HOUSE_TICKS.map((tick) => (
+              <span
+                key={tick}
+                className={[
+                  styles.houseTick,
+                  tick < completedUnlocks * 3 ? styles.houseTickActive : "",
+                ].filter(Boolean).join(" ")}
+                style={{ "--angle": `${tick * 30}deg` } as CSSProperties}
+              />
+            ))}
+            {astrolabeMarkers.map((marker) => (
+              <span
+                key={marker.label}
+                className={[
+                  styles.planetMarker,
+                  marker.className,
+                  marker.active ? styles.planetMarkerActive : "",
+                ].filter(Boolean).join(" ")}
+                style={{
+                  "--angle": `${marker.angle}deg`,
+                  "--radius": `${marker.radius}%`,
+                } as CSSProperties}
+              >
+                {marker.label}
               </span>
-            )}
-          </div>
-        )}
-      </div>
-
-      <div className={styles.teaserGrid}>
-        {sunSign && (
-          <div 
-            className={styles.teaserCard}
-            style={{ borderColor: `${ELEMENT_COLORS[sunSign.element]}40` }}
-          >
-            <div className={styles.cardIcon} style={{ color: ELEMENT_COLORS[sunSign.element] }}>
-              <sunSign.icon />
-            </div>
-            <div className={styles.cardContent}>
-              <span className={styles.cardLabel}>Sun Sign</span>
-              <span className={styles.cardValue}>{sunSign.name}</span>
-              <span className={styles.cardMeta}>{sunSign.element} • {sunSign.dates}</span>
+            ))}
+            <div className={styles.centerSeal}>
+              <span className={styles.centerName}>{getDisplayName(name)}</span>
+              <span className={styles.centerMeta}>
+                {isNearComplete ? "Ready" : `${filledCount}/6 fields`}
+              </span>
             </div>
           </div>
-        )}
-
-        {hasBasicInfo && (
-          <div className={styles.teaserCard} style={{ borderColor: "rgba(200, 155, 60, 0.25)" }}>
-            <div className={styles.cardIcon} style={{ color: "#6CE1D4" }}>☽</div>
-            <div className={styles.cardContent}>
-              <span className={styles.cardLabel}>Moon</span>
-              <span className={styles.cardValueHint}>Calculating...</span>
-              <span className={styles.cardMeta}>Based on time & location</span>
-            </div>
-          </div>
-        )}
-
-        {hasLocation && (
-          <div className={styles.teaserCard} style={{ borderColor: "rgba(140, 100, 220, 0.25)" }}>
-            <div className={styles.cardIcon} style={{ color: "#8C64DC" }}>☌</div>
-            <div className={styles.cardContent}>
-              <span className={styles.cardLabel}>Ascendant</span>
-              <span className={styles.cardValueHint}>Revealing...</span>
-              <span className={styles.cardMeta}>Rising sign at birth</span>
-            </div>
-          </div>
-        )}
-
-        {birthTime?.trim() && (
-          <div className={styles.teaserCard} style={{ borderColor: "rgba(240, 112, 104, 0.25)" }}>
-            <div className={styles.cardIcon} style={{ color: "#F07068" }}>♁</div>
-            <div className={styles.cardContent}>
-              <span className={styles.cardLabel}>Houses</span>
-              <span className={styles.cardValueHint}>12 sectors</span>
-              <span className={styles.cardMeta}>Life domains await</span>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {filledCount >= 5 && (
-        <div className={styles.teaserGlow}>
-          <span className={styles.teaserReady}>Your chart is nearly ready...</span>
         </div>
-      )}
+
+        <div className={styles.teaserRows}>
+          {infoRows.map((row) => (
+            <div
+              key={row.label}
+              className={[
+                styles.teaserRow,
+                row.active ? styles.rowActive : styles.rowPending,
+              ].filter(Boolean).join(" ")}
+              style={{ "--accent": row.accent } as CSSProperties}
+            >
+              <span className={styles.rowIcon}>{row.icon}</span>
+              <span className={styles.rowMain}>
+                <span className={styles.rowLabel}>{row.label}</span>
+                <span className={styles.rowValue}>{row.value}</span>
+              </span>
+              <span className={styles.rowMeta}>{row.meta}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className={styles.teaserFooter}>
+        <span className={styles.readinessText}>
+          {isNearComplete ? "Chart atmosphere is nearly formed" : "Add details to wake the chart"}
+        </span>
+        <span className={styles.readinessValue}>{readiness}% ready</span>
+      </div>
     </div>
   );
 }
