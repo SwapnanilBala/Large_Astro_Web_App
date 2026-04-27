@@ -845,17 +845,6 @@ export default function Home() {
                 </div>
 
                 <div className={styles.premiumField}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <PremiumToggle
-                      label="I don't know my exact birth time"
-                      checked={unknownTime}
-                      onChange={(checked) => {
-                        setUnknownTime(checked);
-                        if (!checked) setCoarseTime("");
-                        setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
-                      }}
-                    />
-                  </div>
                   {!unknownTime ? (
                     <PremiumDatePicker
                       label={t("home.formBirthTime")}
@@ -885,6 +874,19 @@ export default function Home() {
                     />
                   )}
                 </div>
+              </div>
+
+              {/* ── Unknown birth time option ── */}
+              <div className={styles.unknownTimeOption}>
+                <PremiumToggle
+                  label="I don't know my exact birth time"
+                  checked={unknownTime}
+                  onChange={(checked) => {
+                    setUnknownTime(checked);
+                    if (!checked) setCoarseTime("");
+                    setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
+                  }}
+                />
               </div>
 
               {/* ── Section Divider ── */}

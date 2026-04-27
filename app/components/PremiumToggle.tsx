@@ -17,19 +17,15 @@ export default function PremiumToggle({
   disabled = false,
 }: PremiumToggleProps) {
   return (
-    <div className={`${styles.premiumToggle} ${disabled ? styles.disabled : ""}`}>
-      <button
-        type="button"
-        onClick={() => onChange(!checked)}
-        disabled={disabled}
-        className={`${styles.toggleButton} ${checked ? styles.checked : ""}`}
-        aria-pressed={checked}
-      >
-        <div className={styles.toggleTrack}>
-          <div className={styles.toggleThumb} />
-        </div>
-      </button>
-      <label className={styles.toggleLabel}>{label}</label>
-    </div>
+    <button
+      type="button"
+      onClick={() => onChange(!checked)}
+      disabled={disabled}
+      className={`${styles.premiumToggle} ${checked ? styles.checked : ""} ${disabled ? styles.disabled : ""}`}
+      aria-pressed={checked}
+    >
+      <span className={styles.toggleGlyph} aria-hidden="true" />
+      <span className={styles.toggleLabel}>{label}</span>
+    </button>
   );
 }

@@ -2848,3 +2848,34 @@
     font-size: 1.05rem !important;
   }
 }
+
+.dateTimeRow {
+  align-items: start;
+}
+
+.unknownTimeOption {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -0.35rem;
+  margin-bottom: clamp(1.65rem, 2.5vw, 2.35rem);
+}
+
+.unknownTimeOption :global(button) {
+  max-width: 100%;
+}
+
+.unknownTimeOption + .sectionDividerSpaced {
+  margin-top: 0;
+}
+
+@media (max-width: 600px) {
+  .unknownTimeOption {
+    justify-content: stretch;
+    margin-top: 0.25rem;
+  }
+
+  .unknownTimeOption :global(button) {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
