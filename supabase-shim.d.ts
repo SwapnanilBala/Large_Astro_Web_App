@@ -2,6 +2,7 @@ declare module "@supabase/supabase-js" {
   export type SupabaseUser = {
     id: string;
     email?: string | null;
+    app_metadata?: Record<string, unknown>;
     user_metadata?: Record<string, unknown>;
   };
 

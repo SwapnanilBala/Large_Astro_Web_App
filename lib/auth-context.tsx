@@ -40,14 +40,21 @@ function toAppUser(user: SupabaseUser | null): User | null {
   }
 
   const metadata = user.user_metadata ?? {};
+  const appMetadata = user.app_metadata ?? {};
   const displayName =
     typeof metadata.display_name === "string" && metadata.display_name.trim().length > 0
       ? metadata.display_name
       : user.email.split("@")[0] ?? "Guest";
-  const subscriptionTier =
+  const appTier =
+    typeof appMetadata.subscription_tier === "string" && appMetadata.subscription_tier.trim().length > 0
+      ? appMetadata.subscription_tier
+      : null;
+  const profileTier =
     typeof metadata.subscription_tier === "string" && metadata.subscription_tier.trim().length > 0
       ? metadata.subscription_tier
-      : "guest";
+      : null;
+  const subscriptionTier =
+    appTier ?? profileTier ?? "guest";
 
   return {
     user_id: user.id,

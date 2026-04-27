@@ -17,6 +17,9 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
 }
 
 const OPENAI_TIMEOUT_MS = 30_000;
+const MAX_JSON_BODY_BYTES = 7 * 1024 * 1024;
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const PREMIUM_TIERS = new Set(["pro", "ultimate", "admin", "premium", "premium_trial"]);
 
 // ---------------------------------------------------------------------------
 // System prompt
@@ -109,12 +112,96 @@ const VALID_MEDIA_TYPES = new Set([
   "image/webp",
 ]);
 
+type SupabaseUserResponse = {
+  id?: unknown;
+  app_metadata?: Record<string, unknown>;
+  user_metadata?: Record<string, unknown>;
+};
+
+function getBearerToken(request: NextRequest) {
+  const authorization = request.headers.get("authorization") ?? "";
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  return match?.[1]?.trim() ?? "";
+}
+
+async function verifyPalmReadingAccess(request: NextRequest) {
+  const token = getBearerToken(request);
+  if (!token) {
+    throw new ApiError(
+      ErrorCode.UNAUTHORIZED,
+      "Sign in to use palm reading.",
+    );
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY?.trim();
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new ApiError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      "Palm reading service is temporarily unavailable.",
+      { statusCode: 503 },
+    );
+  }
+
+  const userResponse = await fetch(`${supabaseUrl}/auth/v1/user`, {
+    headers: {
+      apikey: supabaseAnonKey,
+      Authorization: `Bearer ${token}`,
+    },
+    cache: "no-store",
+  });
+  if (!userResponse.ok) {
+    throw new ApiError(
+      ErrorCode.UNAUTHORIZED,
+      "Your session expired. Please sign in again.",
+    );
+  }
+
+  const data = (await userResponse.json()) as SupabaseUserResponse;
+  if (typeof data.id !== "string" || !data.id) {
+    throw new ApiError(
+      ErrorCode.UNAUTHORIZED,
+      "Your session expired. Please sign in again.",
+    );
+  }
+
+  const tier =
+    typeof data.app_metadata?.subscription_tier === "string"
+      ? data.app_metadata.subscription_tier
+      : "guest";
+  if (!PREMIUM_TIERS.has(tier)) {
+    throw new ApiError(
+      ErrorCode.FORBIDDEN,
+      "Palm reading requires an active premium plan.",
+    );
+  }
+
+  return { userId: data.id, tier };
+}
+
+function estimateBase64Bytes(base64: string) {
+  const normalized = base64.replace(/\s/g, "");
+  const padding = normalized.endsWith("==") ? 2 : normalized.endsWith("=") ? 1 : 0;
+  return Math.floor((normalized.length * 3) / 4) - padding;
+}
+
 // ---------------------------------------------------------------------------
 // POST /api/palm-reading
 // ---------------------------------------------------------------------------
 
 export async function POST(request: NextRequest) {
   try {
+    const contentLength = Number(request.headers.get("content-length") ?? "0");
+    if (contentLength > MAX_JSON_BODY_BYTES) {
+      throw new ApiError(
+        ErrorCode.VALIDATION_FAILED,
+        "Palm image is too large. Please upload an image under 5MB.",
+        { statusCode: 413 },
+      );
+    }
+
+    await verifyPalmReadingAccess(request);
+
     // -- Parse body --
     const body = await request.json();
     const { image, mediaType } = body as {
@@ -141,11 +228,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (estimateBase64Bytes(image) > MAX_IMAGE_BYTES) {
+      throw new ApiError(
+        ErrorCode.VALIDATION_FAILED,
+        "Palm image is too large. Please upload an image under 5MB.",
+        { statusCode: 413 },
+      );
+    }
+
     // -- Check API key --
     if (!process.env.OPENAI_API_KEY) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "OPENAI_API_KEY not configured. Add it to .env.local",
+        "Palm reading service is temporarily unavailable.",
+        { statusCode: 503 },
       );
     }
 
@@ -227,6 +323,15 @@ export async function POST(request: NextRequest) {
         "Palm reading timed out",
       );
     }
-    return errorResponse(error, "Palm reading failed");
+    if (error instanceof ApiError) {
+      return errorResponse(error, "Palm reading failed");
+    }
+    return errorResponse(
+      new ApiError(
+        ErrorCode.INTERNAL,
+        "Palm reading failed. Please try again.",
+      ),
+      "Palm reading failed",
+    );
   }
 }

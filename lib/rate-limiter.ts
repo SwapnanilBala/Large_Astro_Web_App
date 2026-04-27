@@ -20,6 +20,7 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart": { limit: 30, windowMs: 60_000 },
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },
+  "/api/palm-reading": { limit: 5, windowMs: 60_000 },
   "/api/suggest": { limit: 60, windowMs: 60_000 },
 };
 

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth-context";
 
 /* ────────────────────────────────────────────────
    Types
@@ -78,11 +79,15 @@ const LINE_LABELS: Record<string, string> = {
   fate_line: "Fate Line",
 };
 
+const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
+
 /* ────────────────────────────────────────────────
    Component
    ──────────────────────────────────────────────── */
 
 export default function PalmReadingPanel() {
+  const { token, isAuthenticated, isPremium } = useAuth();
+
   /* ── state ── */
   const [phase, setPhase] = useState<Phase>("idle");
   const [imageData, setImageData] = useState<string | null>(null);
@@ -283,6 +288,10 @@ export default function PalmReadingPanel() {
 
     const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
     const base64 = dataUrl.split(",")[1];
+    if (Math.floor((base64.length * 3) / 4) > MAX_PALM_IMAGE_BYTES) {
+      setError("Palm image is too large. Please capture a closer, lower-resolution image under 5MB.");
+      return;
+    }
 
     setImageData(base64);
     setImagePreview(dataUrl);
@@ -296,6 +305,11 @@ export default function PalmReadingPanel() {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
+
+    if (file.size > MAX_PALM_IMAGE_BYTES) {
+      setError("Palm image is too large. Please upload an image under 5MB.");
+      return;
+    }
 
     const mt = file.type as typeof mediaType;
     if (!["image/jpeg", "image/png", "image/webp"].includes(mt)) {
@@ -318,17 +332,30 @@ export default function PalmReadingPanel() {
   /* ── API call ── */
   const analyzePalm = async () => {
     if (!imageData) return;
+    if (!isAuthenticated || !token) {
+      setError("Sign in to use palm reading.");
+      return;
+    }
+    if (!isPremium) {
+      setError("Palm reading requires an active premium plan.");
+      return;
+    }
+
     setPhase("analyzing");
     setError(null);
     try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
       const res = await fetch("/api/palm-reading", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ image: imageData, mediaType }),
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error?.message || "Analysis failed");
+        throw new Error(err.error?.message || err.detail || "Analysis failed");
       }
       setReading(await res.json());
       setPhase("results");
@@ -363,9 +390,6 @@ export default function PalmReadingPanel() {
     : handScore > 0.7
       ? "palm-status palm-status--clear"
       : "palm-status palm-status--detected";
-
-  /* ── error helpers ── */
-  const isApiKeyError = error?.toLowerCase().includes("openai_api_key") || error?.toLowerCase().includes("not configured");
 
   /* ── stagger animation variants ── */
   const containerVariants = {
@@ -433,19 +457,8 @@ export default function PalmReadingPanel() {
             <li>Keep your fingers slightly spread apart</li>
           </ul>
           {error && (
-            <div className={isApiKeyError ? "palm-error palm-error--config" : "palm-error"}>
-              {isApiKeyError ? (
-                <>
-                  <strong>OpenAI API key not configured.</strong>
-                  <span className="palm-error-detail">
-                    If deployed, add <code>OPENAI_API_KEY</code> to your Vercel Environment Variables
-                    (Settings &rarr; Environment Variables). For local development, add it to your{" "}
-                    <code>.env.local</code> file.
-                  </span>
-                </>
-              ) : (
-                error
-              )}
+            <div className="palm-error">
+              {error}
             </div>
           )}
         </div>
@@ -505,19 +518,8 @@ export default function PalmReadingPanel() {
             Analyze My Palm
           </button>
           {error && (
-            <div className={isApiKeyError ? "palm-error palm-error--config" : "palm-error"}>
-              {isApiKeyError ? (
-                <>
-                  <strong>OpenAI API key not configured.</strong>
-                  <span className="palm-error-detail">
-                    If deployed, add <code>OPENAI_API_KEY</code> to your Vercel Environment Variables
-                    (Settings &rarr; Environment Variables). For local development, add it to your{" "}
-                    <code>.env.local</code> file.
-                  </span>
-                </>
-              ) : (
-                error
-              )}
+            <div className="palm-error">
+              {error}
             </div>
           )}
         </div>

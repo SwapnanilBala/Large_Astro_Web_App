@@ -12,6 +12,8 @@ import { NextResponse } from "next/server";
 // ---------------------------------------------------------------------------
 
 export enum ErrorCode {
+  UNAUTHORIZED = "UNAUTHORIZED",
+  FORBIDDEN = "FORBIDDEN",
   VALIDATION_FAILED = "VALIDATION_FAILED",
   RATE_LIMITED = "RATE_LIMITED",
   COMPUTATION_FAILED = "COMPUTATION_FAILED",
@@ -22,6 +24,8 @@ export enum ErrorCode {
 
 /** Map error codes to default HTTP status codes. */
 const DEFAULT_STATUS: Record<ErrorCode, number> = {
+  [ErrorCode.UNAUTHORIZED]: 401,
+  [ErrorCode.FORBIDDEN]: 403,
   [ErrorCode.VALIDATION_FAILED]: 400,
   [ErrorCode.RATE_LIMITED]: 429,
   [ErrorCode.COMPUTATION_FAILED]: 503,
