@@ -2651,8 +2651,8 @@
 }
 
 .mainContent {
-  width: min(100%, 1500px);
-  max-width: 1500px;
+  width: min(100%, 1580px);
+  max-width: 1580px;
   padding: clamp(1.25rem, 2vw, 2.75rem);
 }
 
@@ -2694,8 +2694,8 @@
 }
 
 .formLayout {
-  grid-template-columns: minmax(0, 1fr) minmax(340px, 410px);
-  gap: clamp(1.75rem, 2.7vw, 3.25rem);
+  grid-template-columns: minmax(0, 1fr) minmax(420px, 480px);
+  gap: clamp(1.5rem, 2.4vw, 3rem);
 }
 
 .formSectionCard {
@@ -2986,7 +2986,7 @@
   font-size: clamp(1.08rem, 0.65vw + 0.98rem, 1.32rem) !important;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: 1180px) {
   .formLayout {
     grid-template-columns: 1fr;
   }
