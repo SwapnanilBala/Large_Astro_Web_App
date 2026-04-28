@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
+import { resolvePostAuthDestination } from "@/lib/post-auth-redirect";
 import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
 import styles from "../login/login.module.css";
@@ -15,7 +16,7 @@ type RegisterPageClientProps = {
 };
 
 export default function RegisterPageClient({ returnTo }: RegisterPageClientProps) {
-  const { register, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
+  const { register, loginWithGoogle, isAuthenticated, isLoading, user } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
@@ -27,14 +28,16 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
   const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
-  const destination = returnTo ? decodeURIComponent(returnTo) : "/";
+  const destination = returnTo ?? "/";
 
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       setRedirecting(true);
-      router.push(destination);
+      void resolvePostAuthDestination(user?.user_id, destination).then((resolvedDestination) => {
+        router.push(resolvedDestination);
+      });
     }
-  }, [isAuthenticated, isLoading, destination, router]);
+  }, [isAuthenticated, isLoading, destination, router, user?.user_id]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +53,8 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
     setLoading(false);
     if (result.ok) {
       setRedirecting(true);
-      router.push(destination);
+      const resolvedDestination = await resolvePostAuthDestination(result.userId, destination);
+      router.push(resolvedDestination);
     } else {
       setError(result.error ?? "Registration failed");
     }

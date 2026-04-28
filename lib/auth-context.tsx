@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session, User as SupabaseUser } from "@supabase/supabase-js";
+import { buildAuthCallbackUrl } from "@/lib/post-auth-redirect";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 
 type User = {
@@ -17,13 +18,13 @@ type AuthContextValue = {
   isAuthenticated: boolean;
   isPremium: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
-  loginWithGoogle: (returnTo?: string) => Promise<{ ok: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ ok: boolean; error?: string; userId?: string }>;
+  loginWithGoogle: (returnTo?: string) => Promise<{ ok: boolean; error?: string; userId?: string }>;
   register: (
     email: string,
     password: string,
     displayName: string
-  ) => Promise<{ ok: boolean; error?: string }>;
+  ) => Promise<{ ok: boolean; error?: string; userId?: string }>;
   redeemPlanCode: (
     code: string,
     expectedPlan?: "basic" | "pro" | "ultimate"
@@ -122,7 +123,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       setToken(data.session?.access_token ?? null);
       setUser(toAppUser(data.user));
-      return { ok: true };
+      return { ok: true, userId: data.user?.id };
     } catch {
       return { ok: false, error: "Could not reach Supabase authentication." };
     }
@@ -139,16 +140,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const destination = new URL(returnTo || "/", window.location.origin);
-      const redirectTo =
-        destination.origin === window.location.origin
-          ? destination.toString()
-          : window.location.origin;
-
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo,
+          redirectTo: buildAuthCallbackUrl(returnTo),
         },
       });
 
@@ -186,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       setToken(data.session?.access_token ?? null);
       setUser(toAppUser(data.user));
-      return { ok: true };
+      return { ok: true, userId: data.user?.id };
     } catch {
       return { ok: false, error: "Could not reach Supabase authentication." };
     }
