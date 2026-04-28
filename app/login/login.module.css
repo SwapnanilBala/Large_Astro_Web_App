@@ -228,6 +228,73 @@
   opacity: 0.5;
 }
 
+.googleBtn {
+  width: 100%;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 13px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.06);
+  color: var(--ink-main);
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.googleBtn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(200, 155, 60, 0.36);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06)),
+    rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.18),
+    0 0 20px rgba(200, 155, 60, 0.12);
+}
+
+.googleBtn:active {
+  transform: translateY(0) scale(0.99);
+}
+
+.googleBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.googleBtn + .switchText {
+  margin-top: 1.2rem;
+}
+
+.googleIcon {
+  flex: 0 0 auto;
+  font-size: 1.55rem;
+}
+
+:global(html[data-theme="light"]) .googleBtn {
+  border-color: rgba(17, 24, 39, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88)),
+    #fff;
+  box-shadow:
+    0 10px 26px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
 /* ── Switch Text ── */
 .switchText {
   margin: 0;

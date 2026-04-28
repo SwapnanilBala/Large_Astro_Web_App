@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import PageTransition from "../components/PageTransition";
@@ -14,7 +15,7 @@ type RegisterPageClientProps = {
 };
 
 export default function RegisterPageClient({ returnTo }: RegisterPageClientProps) {
-  const { register, isAuthenticated, isLoading } = useAuth();
+  const { register, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const [displayName, setDisplayName] = useState("");
@@ -23,6 +24,7 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
   const destination = returnTo ? decodeURIComponent(returnTo) : "/";
@@ -51,6 +53,16 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
       router.push(destination);
     } else {
       setError(result.error ?? "Registration failed");
+    }
+  };
+
+  const handleGoogleSignup = async () => {
+    setError("");
+    setGoogleLoading(true);
+    const result = await loginWithGoogle(destination);
+    if (!result.ok) {
+      setGoogleLoading(false);
+      setError(result.error ?? "Google sign-up failed");
     }
   };
 
@@ -149,11 +161,27 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
+          <button type="submit" className={styles.submitBtn} disabled={loading || googleLoading}>
             {loading ? t("register.submitting") : t("register.submit")}
           </button>
 
         </form>
+
+        <div className={styles.divider}>
+          <span className={styles.dividerLine} />
+          <span className={styles.dividerText}>or</span>
+          <span className={styles.dividerLine} />
+        </div>
+
+        <button
+          type="button"
+          className={styles.googleBtn}
+          onClick={handleGoogleSignup}
+          disabled={loading || googleLoading}
+        >
+          <FcGoogle className={styles.googleIcon} aria-hidden="true" />
+          <span>{googleLoading ? "Opening Google..." : "Continue with Google"}</span>
+        </button>
 
         {/* ── Switch to Sign In ── */}
         <p className={styles.switchText}>

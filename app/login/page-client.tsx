@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { FcGoogle } from "react-icons/fc";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import PageTransition from "../components/PageTransition";
@@ -14,13 +15,14 @@ type LoginPageClientProps = {
 };
 
 export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, loginWithGoogle, isAuthenticated, isLoading } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
   const destination = returnTo ? decodeURIComponent(returnTo) : "/";
@@ -43,6 +45,16 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
       router.push(destination);
     } else {
       setError(result.error ?? "Login failed");
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError("");
+    setGoogleLoading(true);
+    const result = await loginWithGoogle(destination);
+    if (!result.ok) {
+      setGoogleLoading(false);
+      setError(result.error ?? "Google sign-in failed");
     }
   };
 
@@ -109,7 +121,7 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
 
           {error && <p className={styles.error}>{error}</p>}
 
-          <button type="submit" className={styles.submitBtn} disabled={loading}>
+          <button type="submit" className={styles.submitBtn} disabled={loading || googleLoading}>
             {loading ? t("login.submitting") : t("login.submit")}
           </button>
         </form>
@@ -119,6 +131,16 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
           <span className={styles.dividerText}>or</span>
           <span className={styles.dividerLine} />
         </div>
+
+        <button
+          type="button"
+          className={styles.googleBtn}
+          onClick={handleGoogleLogin}
+          disabled={loading || googleLoading}
+        >
+          <FcGoogle className={styles.googleIcon} aria-hidden="true" />
+          <span>{googleLoading ? "Opening Google..." : "Continue with Google"}</span>
+        </button>
 
         <p className={styles.switchText}>
           {t("login.switchText")}{" "}

@@ -37,6 +37,18 @@ declare module "@supabase/supabase-js" {
         };
         error: { message: string } | null;
       }>;
+      signInWithOAuth(args: {
+        provider: "google";
+        options?: {
+          redirectTo?: string;
+        };
+      }): Promise<{
+        data: {
+          provider?: string | null;
+          url?: string | null;
+        };
+        error: { message: string } | null;
+      }>;
       signUp(args: {
         email: string;
         password: string;

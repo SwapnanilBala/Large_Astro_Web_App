@@ -18,6 +18,7 @@ type AuthContextValue = {
   isPremium: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
+  loginWithGoogle: (returnTo?: string) => Promise<{ ok: boolean; error?: string }>;
   register: (
     email: string,
     password: string,
@@ -41,10 +42,16 @@ function toAppUser(user: SupabaseUser | null): User | null {
 
   const metadata = user.user_metadata ?? {};
   const appMetadata = user.app_metadata ?? {};
+  const providerName =
+    typeof metadata.full_name === "string" && metadata.full_name.trim().length > 0
+      ? metadata.full_name
+      : typeof metadata.name === "string" && metadata.name.trim().length > 0
+        ? metadata.name
+        : null;
   const displayName =
     typeof metadata.display_name === "string" && metadata.display_name.trim().length > 0
       ? metadata.display_name
-      : user.email.split("@")[0] ?? "Guest";
+      : providerName ?? user.email.split("@")[0] ?? "Guest";
   const appTier =
     typeof appMetadata.subscription_tier === "string" && appMetadata.subscription_tier.trim().length > 0
       ? appMetadata.subscription_tier
@@ -118,6 +125,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { ok: true };
     } catch {
       return { ok: false, error: "Could not reach Supabase authentication." };
+    }
+  }, []);
+
+  const loginWithGoogle = useCallback(async (returnTo?: string) => {
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) {
+      return { ok: false, error: "Supabase is not configured yet." };
+    }
+
+    if (typeof window === "undefined") {
+      return { ok: false, error: "Google sign-in is only available in the browser." };
+    }
+
+    try {
+      const destination = new URL(returnTo || "/", window.location.origin);
+      const redirectTo =
+        destination.origin === window.location.origin
+          ? destination.toString()
+          : window.location.origin;
+
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo,
+        },
+      });
+
+      if (error) {
+        return { ok: false, error: error.message };
+      }
+
+      return { ok: true };
+    } catch {
+      return { ok: false, error: "Could not start Google authentication." };
     }
   }, []);
 
@@ -200,6 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isPremium: !!user && PREMIUM_TIERS.has(user.subscription_tier),
         isLoading,
         login,
+        loginWithGoogle,
         register,
         redeemPlanCode,
         logout,
