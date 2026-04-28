@@ -286,6 +286,24 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
         </button>
       </form>
 
+      <div className="forecast-timeline" aria-label="Timing timeline">
+        <div className="forecast-timeline-item">
+          <span>Now</span>
+          <strong>Input chart</strong>
+          <small>Birth pattern baseline</small>
+        </div>
+        <div className="forecast-timeline-item">
+          <span>Start</span>
+          <strong>{formatFriendlyDate(startDate)}</strong>
+          <small>{forecasts ? `${forecasts.start.dasha.current_dasha} / ${forecasts.start.dasha.current_antardasha}` : "Pending read"}</small>
+        </div>
+        <div className="forecast-timeline-item forecast-timeline-item--active">
+          <span>End</span>
+          <strong>{formatFriendlyDate(endDate)}</strong>
+          <small>{forecasts ? `${forecasts.end.dasha.current_dasha} / ${forecasts.end.dasha.current_antardasha}` : "Target window"}</small>
+        </div>
+      </div>
+
       {error && (
         <div className="forecast-error">
           <p className="error-note">

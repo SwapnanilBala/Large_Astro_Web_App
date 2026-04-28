@@ -3714,6 +3714,65 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   max-width: 280px;
 }
 
+.forecast-timeline {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.forecast-timeline::before {
+  content: "";
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: 19px;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(108, 225, 212, 0.35), rgba(200, 155, 60, 0.35), rgba(240, 112, 104, 0.3));
+  pointer-events: none;
+}
+
+.forecast-timeline-item {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.25rem;
+  border-radius: 16px;
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  background: rgba(4, 24, 38, 0.5);
+  padding: 0.8rem;
+}
+
+.forecast-timeline-item span {
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(108, 225, 212, 0.3);
+  background: rgba(108, 225, 212, 0.12);
+  color: var(--accent-teal);
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 0.35rem 0.5rem;
+  text-transform: uppercase;
+}
+
+.forecast-timeline-item strong {
+  color: var(--ink-main);
+  font-size: 1.08rem;
+}
+
+.forecast-timeline-item small {
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+}
+
+.forecast-timeline-item--active {
+  border-color: rgba(200, 155, 60, 0.34);
+  background: rgba(200, 155, 60, 0.08);
+}
+
 .forecast-period-header {
   margin-top: 1.2rem;
   margin-bottom: 0.2rem;
@@ -3836,6 +3895,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 @media (max-width: 980px) {
   .forecast-grid,
   .forecast-transits-grid,
+  .forecast-timeline,
   .domain-reading-grid,
   .metrics-grid--hero {
     grid-template-columns: 1fr;

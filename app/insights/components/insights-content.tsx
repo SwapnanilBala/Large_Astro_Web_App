@@ -109,12 +109,14 @@ function SectionHeader({
 
 /* ─── Collapsible Section Wrapper ─── */
 function CollapsibleSection({
+  id,
   title,
   kicker,
   defaultOpen = true,
   children,
   className = "",
 }: {
+  id?: string;
   title: string;
   kicker: string;
   defaultOpen?: boolean;
@@ -126,6 +128,7 @@ function CollapsibleSection({
 
   return (
     <motion.section
+      id={id}
       className={`${styles.collapsible} ${className}`}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
@@ -164,6 +167,143 @@ function CollapsibleSection({
         )}
       </AnimatePresence>
     </motion.section>
+  );
+}
+
+const SECTION_ANCHORS = [
+  { id: "chart-map", label: "Map" },
+  { id: "timing", label: "Timing" },
+  { id: "core", label: "Core" },
+  { id: "themes", label: "Themes" },
+  { id: "ultimate", label: "Ultimate" },
+  { id: "fortune", label: "Fortune" },
+];
+
+function SectionAnchorNav() {
+  return (
+    <nav className={styles.anchorNav} aria-label="Results page sections">
+      {SECTION_ANCHORS.map((anchor) => (
+        <a key={anchor.id} href={`#${anchor.id}`} className={styles.anchorLink}>
+          {anchor.label}
+        </a>
+      ))}
+    </nav>
+  );
+}
+
+function getElementCounts(planets: ChartApiResponse["chart"]["planets"]) {
+  const signElements: Record<string, string> = {
+    Aries: "Fire",
+    Leo: "Fire",
+    Sagittarius: "Fire",
+    Taurus: "Earth",
+    Virgo: "Earth",
+    Capricorn: "Earth",
+    Gemini: "Air",
+    Libra: "Air",
+    Aquarius: "Air",
+    Cancer: "Water",
+    Scorpio: "Water",
+    Pisces: "Water",
+  };
+
+  return planets
+    .filter((planet) => ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"].includes(planet.name))
+    .reduce<Record<string, number>>((counts, planet) => {
+      const element = signElements[planet.sign] ?? "Fire";
+      counts[element] = (counts[element] ?? 0) + 1;
+      return counts;
+    }, {});
+}
+
+function ChartStrengthMap({ payload }: { payload: ChartApiResponse }) {
+  const shadbala = payload.chart.shadbala ?? [];
+  const strongest = [...shadbala]
+    .sort((left, right) => right.strengthRatio - left.strengthRatio)
+    .slice(0, 3);
+  const watchPlanets = [...shadbala]
+    .sort((left, right) => left.strengthRatio - right.strengthRatio)
+    .slice(0, 3);
+  const elementCounts = getElementCounts(payload.chart.planets);
+  const dominantElement =
+    Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? "Mixed";
+  const activeHouses = payload.chart.houses
+    .filter((house) => house.planets.length > 0)
+    .sort((left, right) => right.planets.length - left.planets.length)
+    .slice(0, 4);
+
+  return (
+    <section id="chart-map" className={styles.strengthMap}>
+      <div className={styles.strengthMapHeader}>
+        <div>
+          <p className={styles.kicker}>Chart Strength Map</p>
+          <h2 className={styles.heading}>Fast scan of pressure, support, and emphasis</h2>
+        </div>
+        <span className={styles.strengthElement}>{dominantElement}</span>
+      </div>
+
+      <div className={styles.strengthGrid}>
+        <div className={styles.strengthPanel}>
+          <h3>Strongest Planets</h3>
+          <div className={styles.strengthList}>
+            {strongest.map((planet) => (
+              <div key={planet.planet} className={styles.strengthRow}>
+                <span>{planet.planet}</span>
+                <div className={styles.strengthTrack}>
+                  <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
+                </div>
+                <strong>{Math.round(planet.strengthRatio * 100)}%</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.strengthPanel}>
+          <h3>Needs Care</h3>
+          <div className={styles.strengthList}>
+            {watchPlanets.map((planet) => (
+              <div key={planet.planet} className={styles.strengthRow}>
+                <span>{planet.planet}</span>
+                <div className={`${styles.strengthTrack} ${styles.strengthTrackWarm}`}>
+                  <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
+                </div>
+                <strong>{Math.round(planet.strengthRatio * 100)}%</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className={styles.strengthPanel}>
+          <h3>Active Houses</h3>
+          <div className={styles.housePills}>
+            {activeHouses.map((house) => (
+              <span key={house.house_number}>
+                H{house.house_number} {house.sign}: {house.planets.join(", ")}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function ActionGuidanceChips({ payload }: { payload: ChartApiResponse }) {
+  const highRules = payload.chart.deterministic_rules.filter((rule) => rule.priority === "high");
+  const currentDasha = payload.chart.dasha?.current_dasha;
+  const chips = [
+    currentDasha ? `Use ${currentDasha} timing consciously` : "Use timing consciously",
+    highRules[0]?.category === "career" ? "Prioritize work structure" : "Act on the clearest high-priority theme",
+    highRules.some((rule) => rule.category === "love") ? "Keep relationship choices deliberate" : "Keep decisions deliberate",
+    payload.chart.lucky_elements?.lucky_day ? `Plan key actions on ${payload.chart.lucky_elements.lucky_day}` : "Pick clean timing windows",
+  ];
+
+  return (
+    <section className={styles.guidanceChips} aria-label="Action-oriented guidance">
+      {chips.map((chip) => (
+        <span key={chip}>{chip}</span>
+      ))}
+    </section>
   );
 }
 
@@ -434,6 +574,7 @@ export default function InsightsContent({
 
       <ParallaxLayer depth={0.05}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
+        <SectionAnchorNav />
         {/* ─── Hero Header ─── */}
         <motion.div
           className={styles.hero}
@@ -461,6 +602,8 @@ export default function InsightsContent({
         </motion.div>
 
         {/* ─── Top Metrics Bento Row ─── */}
+        <ActionGuidanceChips payload={payload} />
+
         <motion.div
           className={styles.gridHero}
           variants={bentoContainer}
@@ -585,7 +728,10 @@ export default function InsightsContent({
         <ConstellationDivider />
 
         {/* ─── Forecasts & Timing (Collapsible) ─── */}
+        <ChartStrengthMap payload={payload} />
+
         <CollapsibleSection
+          id="timing"
           kicker={t("insights.timingKicker")}
           title={t("insights.timingHeading")}
           defaultOpen={true}
@@ -620,8 +766,10 @@ export default function InsightsContent({
 
         {/* ─── Core Rules Section ─── */}
         <CollapsibleSection
+          id="core"
           kicker={t("insights.coreKicker")}
           title={t("insights.coreHeading")}
+          defaultOpen={false}
           className={styles.cardRules}
         >
           <p className={styles.sectionIntro}>
@@ -663,11 +811,12 @@ export default function InsightsContent({
 
         {/* ─── Career & Love in Bento Grid ─── */}
         {(careerRules.length > 0 || loveRules.length > 0) && (
-          <div className={styles.gridThemes}>
+          <div id="themes" className={styles.gridThemes}>
             {careerRules.length > 0 && (
               <CollapsibleSection
                 kicker={t("insights.careerKicker")}
                 title={t("insights.careerHeading")}
+                defaultOpen={false}
                 className={styles.cardCareer}
               >
                 <p className={styles.sectionIntro}>
@@ -704,6 +853,7 @@ export default function InsightsContent({
               <CollapsibleSection
                 kicker={t("insights.loveKicker")}
                 title={t("insights.loveHeading")}
+                defaultOpen={false}
                 className={styles.cardLove}
               >
                 <p className={styles.sectionIntro}>
@@ -773,6 +923,7 @@ export default function InsightsContent({
         >
           {selectedDomainInsight ? (
             <motion.section
+              id="ultimate"
               className={styles.cardDomains}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -878,11 +1029,13 @@ export default function InsightsContent({
 
         {/* ─── Lucky Elements ─── */}
         {payload.chart.lucky_elements && (
+          <div id="fortune">
           <LazyPanel>
             <PanelErrorBoundary panelName="Lucky Elements">
               <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
             </PanelErrorBoundary>
           </LazyPanel>
+          </div>
         )}
 
         {/* ─── Footer Actions ─── */}
