@@ -44,6 +44,9 @@ export default async function EngineSelectPage({
   const town = getSingle(rawParams.town);
   const timeZoneId = getSingle(rawParams.timeZoneId);
   const defaultEngineId = getSingle(rawParams.engineId) || "lahiri_classic";
+  const birthTimeAccuracy = getSingle(rawParams.birthTimeAccuracy);
+  const birthTimeSource = getSingle(rawParams.birthTimeSource);
+  const birthTimeFallback = getSingle(rawParams.birthTimeFallback);
 
   const hasAllInputs = requiredParams.every(
     (param) => params[param].trim().length > 0
@@ -71,6 +74,9 @@ export default async function EngineSelectPage({
   const forwardParams: Record<string, string> = { ...params };
   if (town) forwardParams.town = town;
   if (timeZoneId) forwardParams.timeZoneId = timeZoneId;
+  if (birthTimeAccuracy) forwardParams.birthTimeAccuracy = birthTimeAccuracy;
+  if (birthTimeSource) forwardParams.birthTimeSource = birthTimeSource;
+  if (birthTimeFallback) forwardParams.birthTimeFallback = birthTimeFallback;
 
   return (
     <div className={styles.shell}>

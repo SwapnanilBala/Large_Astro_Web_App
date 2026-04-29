@@ -50,6 +50,25 @@ const birthTimeField = z
     { message: "birth_time contains an invalid hour, minute, or second" },
   );
 
+const birthTimeAccuracyField = z
+  .enum(["exact", "morning", "afternoon", "evening", "unknown"])
+  .default("exact");
+
+const birthTimeSourceField = z
+  .enum(["exact", "fallback"])
+  .default("exact");
+
+const booleanStringField = z
+  .preprocess(
+    (value) => {
+      if (value === "true") return true;
+      if (value === "false") return false;
+      return value;
+    },
+    z.boolean(),
+  )
+  .default(false);
+
 const engineIdField = z
   .string()
   .refine((v) => !v || validEngineIds.includes(v), {
@@ -108,6 +127,9 @@ export const BirthInputSchema = z.object({
   city: z.string().default(""),
   town: z.string().default(""),
   time_zone_id: z.string().default(""),
+  birth_time_accuracy: birthTimeAccuracyField,
+  birth_time_source: birthTimeSourceField,
+  birth_time_fallback: booleanStringField,
 });
 
 export type BirthInput = z.infer<typeof BirthInputSchema>;

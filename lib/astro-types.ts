@@ -11,6 +11,9 @@ export type ProfileQueryInput = {
   city: string;
   town: string;
   timeZoneId: string;
+  birthTimeAccuracy: string;
+  birthTimeSource: string;
+  birthTimeFallback: string;
 };
 
 export type DeterministicRule = {
@@ -448,5 +451,8 @@ export const profileInitialState: ProfileQueryInput = {
   state: "",
   city: "",
   town: "",
-  timeZoneId: ""
+  timeZoneId: "",
+  birthTimeAccuracy: "",
+  birthTimeSource: "",
+  birthTimeFallback: ""
 };

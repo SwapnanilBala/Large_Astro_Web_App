@@ -51,6 +51,18 @@ const COARSE_TIME_OPTIONS = [
   { value: "unknown", label: "Unknown" },
 ];
 
+const COARSE_TIME_FALLBACKS: Record<string, string> = {
+  morning: "08:00",
+  afternoon: "13:30",
+  evening: "18:30",
+  unknown: "12:00",
+};
+
+const hasCoarseTimeFallback = (value: string) =>
+  Object.prototype.hasOwnProperty.call(COARSE_TIME_FALLBACKS, value);
+
+const getBirthTimeFallback = (value: string) =>
+  COARSE_TIME_FALLBACKS[value] ?? COARSE_TIME_FALLBACKS.unknown;
 
 const INTAKE_DRAFT_STORAGE_KEY = "astro_intake_draft";
 
@@ -136,6 +148,17 @@ export default function Home() {
     
     // Find the first unfilled field to highlight
     for (const field of fieldOrder) {
+      if (field === "birthTime") {
+        const hasUsableBirthTime = unknownTime
+          ? hasCoarseTimeFallback(coarseTime)
+          : draft.birthTime.trim().length > 0;
+        if (!hasUsableBirthTime) {
+          setHighlightedField(field);
+          return;
+        }
+        continue;
+      }
+
       if (draft[field as keyof ProfileQueryInput].trim().length === 0) {
         setHighlightedField(field);
         return;
@@ -144,7 +167,7 @@ export default function Home() {
     
     // All fields filled, no highlight needed
     setHighlightedField("");
-  }, [draft]);
+  }, [coarseTime, draft, unknownTime]);
 
   /* ── Mystical tagline rotation ── */
   const mysticalPhrases = useMemo(() => {
@@ -269,11 +292,11 @@ export default function Home() {
         parsed.draft && typeof parsed.draft === "object"
           ? (parsed.draft as Record<string, unknown>)
           : parsed;
-      // Validate shape: every key in profileInitialState must be a string
+      // Merge with current defaults so older saved drafts survive new metadata fields.
       const keys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
-      const isValid = keys.every((k) => typeof savedDraft[k] === "string");
+      const isValid = keys.every((k) => savedDraft[k] === undefined || typeof savedDraft[k] === "string");
       if (!isValid) return;
-      setDraft(savedDraft as unknown as ProfileQueryInput);
+      setDraft({ ...profileInitialState, ...savedDraft } as ProfileQueryInput);
       if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
       if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
     } catch {
@@ -320,6 +343,10 @@ export default function Home() {
   const draftCity = draft.city;
   const draftBirthDate = draft.birthDate;
   const draftBirthTime = draft.birthTime;
+  const effectiveBirthTime =
+    unknownTime && hasCoarseTimeFallback(coarseTime)
+      ? getBirthTimeFallback(coarseTime)
+      : draftBirthTime;
 
   useEffect(() => {
     if (!draftCountry.trim() && !draftCity.trim()) return;
@@ -334,7 +361,7 @@ export default function Home() {
         if (draftState.trim()) params.set("state", draftState.trim());
         if (draftCountry.trim()) params.set("country", draftCountry.trim());
         if (draftBirthDate.trim()) params.set("birthDate", draftBirthDate.trim());
-        if (draftBirthTime.trim()) params.set("birthTime", draftBirthTime.trim());
+        if (effectiveBirthTime.trim()) params.set("birthTime", effectiveBirthTime.trim());
 
         const res = await fetch(`/api/geocode?${params.toString()}`);
         const data = await res.json();
@@ -362,18 +389,22 @@ export default function Home() {
     return () => {
       if (geoTimer.current) clearTimeout(geoTimer.current);
     };
-  }, [draftBirthDate, draftBirthTime, draftCity, draftCountry, draftState]);
+  }, [draftBirthDate, draftCity, draftCountry, draftState, effectiveBirthTime]);
 
   const canSubmit = useMemo(() => {
-    return requiredFields.every((field) => draft[field].trim().length > 0);
-  }, [draft]);
+    const hasRequiredProfile = requiredFields.every((field) => draft[field].trim().length > 0);
+    const hasUsableBirthTime = unknownTime
+      ? hasCoarseTimeFallback(coarseTime)
+      : draft.birthTime.trim().length > 0;
+    return hasRequiredProfile && hasUsableBirthTime;
+  }, [coarseTime, draft, unknownTime]);
 
   /* Preview completion follows the teaser fields without changing submit validation. */
   const previewCompletion = useMemo(() => {
     const locationFilled = ["country", "state", "city"].filter(
       (field) => draft[field as keyof ProfileQueryInput].trim().length > 0,
     ).length;
-    const timeFilled = draft.birthTime.trim().length > 0 || (unknownTime && coarseTime.trim().length > 0);
+    const timeFilled = draft.birthTime.trim().length > 0 || (unknownTime && hasCoarseTimeFallback(coarseTime));
     const filled =
       Number(draft.name.trim().length > 0) +
       Number(draft.birthDate.trim().length > 0) +
@@ -390,7 +421,7 @@ export default function Home() {
   const previewStatus = useMemo(() => {
     if (canSubmit) return "Full chart ready";
     if (geoStatus === "found") return "Coordinates locked";
-    if (unknownTime && coarseTime.trim().length > 0) return "Estimate mode";
+    if (unknownTime && hasCoarseTimeFallback(coarseTime)) return "Estimate mode";
     if (previewCompletion.filled === 0) return "Awaiting first detail";
     return "Building confidence";
   }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, unknownTime]);
@@ -632,9 +663,21 @@ export default function Home() {
     setIsSubmitting(true);
     const params = new URLSearchParams();
 
+    const birthTimeAccuracy = unknownTime
+      ? hasCoarseTimeFallback(coarseTime)
+        ? coarseTime
+        : "unknown"
+      : "exact";
+    const birthTimeForSubmit = unknownTime ? getBirthTimeFallback(birthTimeAccuracy) : draft.birthTime.trim();
+
     Object.entries(draft).forEach(([key, value]) => {
       params.set(key, value.trim());
     });
+
+    params.set("birthTime", birthTimeForSubmit);
+    params.set("birthTimeAccuracy", birthTimeAccuracy);
+    params.set("birthTimeSource", unknownTime ? "fallback" : "exact");
+    params.set("birthTimeFallback", unknownTime ? "true" : "false");
 
     router.push(`/engine-select?${params.toString()}`);
   };
