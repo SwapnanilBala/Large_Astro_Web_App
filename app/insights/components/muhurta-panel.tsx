@@ -1,6 +1,10 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
+import {
+  appendChartApiSearchParams,
+  appendProfileLocationApiSearchParams,
+} from "@/lib/chart-query";
 import styles from "./muhurta-panel.module.css";
 
 // --------------------------------------------------------------------------
@@ -160,19 +164,13 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
     const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
     try {
-      // Extract latitude/longitude/timezone from the parent query string
-      const params = new URLSearchParams(queryString);
-      const lat = params.get("latitude") ?? "0";
-      const lng = params.get("longitude") ?? "0";
-      const tz = params.get("timezoneOffsetMinutes") ?? "0";
-
       const url = new URL("/api/muhurta", window.location.origin);
-      url.searchParams.set("activity", activity);
-      url.searchParams.set("start_date", startDate);
-      url.searchParams.set("end_date", endDate);
-      url.searchParams.set("latitude", lat);
-      url.searchParams.set("longitude", lng);
-      url.searchParams.set("timezone_offset_minutes", tz);
+      appendChartApiSearchParams(url.searchParams, {
+        activity,
+        start_date: startDate,
+        end_date: endDate,
+      });
+      appendProfileLocationApiSearchParams(url.searchParams, queryString);
 
       const response = await fetch(url.toString(), { signal: controller.signal });
       clearTimeout(timeoutId);

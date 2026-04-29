@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
+import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import styles from "./varshaphal-panel.module.css";
 
 type VarshaphalPanelProps = {
@@ -12,23 +13,9 @@ type VarshaphalPanelProps = {
 const TIMEOUT_MS = 45_000;
 
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
-  const params = new URLSearchParams(queryString);
-  const url = new URL("/api/varshaphal", window.location.origin);
-
-  url.searchParams.set("name", params.get("name") ?? "");
-  url.searchParams.set("birth_date", params.get("birthDate") ?? "");
-  url.searchParams.set("birth_time", params.get("birthTime") ?? "");
-  url.searchParams.set("engine_id", params.get("engineId") ?? "lahiri_classic");
-  url.searchParams.set("timezone_offset_minutes", params.get("timezoneOffsetMinutes") ?? "0");
-  url.searchParams.set("latitude", params.get("latitude") ?? "0");
-  url.searchParams.set("longitude", params.get("longitude") ?? "0");
-  url.searchParams.set("country", params.get("country") ?? "");
-  url.searchParams.set("state", params.get("state") ?? "");
-  url.searchParams.set("city", params.get("city") ?? "");
-  url.searchParams.set("town", params.get("town") ?? "");
-  url.searchParams.set("time_zone_id", params.get("timeZoneId") ?? "");
-  url.searchParams.set("target_year", String(targetYear));
-  return url.toString();
+  return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
+    target_year: targetYear,
+  });
 }
 
 function formatReturnMoment(iso: string): string {
