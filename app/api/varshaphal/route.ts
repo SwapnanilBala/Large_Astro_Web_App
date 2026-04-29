@@ -37,6 +37,9 @@ export async function GET(request: NextRequest) {
       city: sp.get("city") ?? "",
       town: sp.get("town") ?? "",
       time_zone_id: sp.get("time_zone_id") ?? "",
+      birth_time_accuracy: sp.get("birth_time_accuracy") ?? "",
+      birth_time_source: sp.get("birth_time_source") ?? "",
+      birth_time_fallback: sp.get("birth_time_fallback") ?? "",
       target_year: sp.get("target_year") ?? "",
     });
 

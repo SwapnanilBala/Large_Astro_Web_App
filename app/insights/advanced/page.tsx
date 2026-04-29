@@ -41,6 +41,9 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   const town = getSingle(rawParams.town);
   const timeZoneId = getSingle(rawParams.timeZoneId);
   const engineId = getSingle(rawParams.engineId) || "lahiri_classic";
+  const birthTimeAccuracy = getSingle(rawParams.birthTimeAccuracy);
+  const birthTimeSource = getSingle(rawParams.birthTimeSource);
+  const birthTimeFallback = getSingle(rawParams.birthTimeFallback);
 
   const hasAllInputs = requiredParams.every((param) => params[param].trim().length > 0);
 
@@ -69,6 +72,9 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
     town,
     timeZoneId,
     engineId,
+    birthTimeAccuracy,
+    birthTimeSource,
+    birthTimeFallback,
   };
 
   return (

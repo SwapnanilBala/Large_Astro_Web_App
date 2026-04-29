@@ -116,6 +116,20 @@
   outline: none;
 }
 
+.anchorLinkActive {
+  color: var(--ink-main);
+  border-color: rgba(200, 155, 60, 0.42);
+  background:
+    linear-gradient(135deg, rgba(200, 155, 60, 0.18), rgba(108, 225, 212, 0.11));
+  box-shadow:
+    0 0 0 1px rgba(200, 155, 60, 0.08) inset,
+    0 6px 16px rgba(0, 0, 0, 0.16);
+}
+
+.anchorTarget {
+  scroll-margin-top: 140px;
+}
+
 .guidanceChips {
   display: flex;
   flex-wrap: wrap;
@@ -133,6 +147,120 @@
   font-size: 1.02rem;
   font-weight: 650;
   padding: 0.48rem 0.72rem;
+}
+
+.takeaways {
+  display: grid;
+  gap: 0.8rem;
+  margin: 0.1rem 0 0.2rem;
+}
+
+.takeawaysHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.takeawaysHeader .kicker {
+  margin: 0;
+}
+
+.takeawaysTitle {
+  font-family: var(--font-display), sans-serif;
+  color: var(--ink-main);
+  font-size: 1.35rem;
+  line-height: 1.25;
+  margin: 0;
+}
+
+.takeawaysGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.takeawayCard {
+  composes: card;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-content: start;
+  gap: 0.65rem 0.85rem;
+  min-height: 176px;
+  padding: 1rem;
+}
+
+.takeawayCard h3 {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.16rem;
+  line-height: 1.25;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.takeawayGold {
+  border-top: 2px solid var(--accent-gold);
+}
+
+.takeawayTeal {
+  border-top: 2px solid var(--accent-teal);
+}
+
+.takeawayCoral {
+  border-top: 2px solid var(--accent-coral);
+}
+
+.takeawayNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.15rem;
+  height: 2.15rem;
+  border-radius: 50%;
+  border: 1px solid rgba(200, 155, 60, 0.22);
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.takeawayLabel {
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.2;
+  margin: 0 0 0.28rem;
+  text-transform: uppercase;
+}
+
+.takeawayBody {
+  grid-column: 1 / -1;
+  color: var(--ink-soft);
+  display: -webkit-box;
+  font-size: 1.04rem;
+  line-height: 1.52;
+  margin: 0;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+.takeawayMeta {
+  grid-column: 1 / -1;
+  align-self: end;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.35;
+  opacity: 0.82;
+  overflow-wrap: anywhere;
 }
 
 .strengthMap {
@@ -1587,6 +1715,22 @@
   border-color: rgba(0, 0, 0, 0.08);
 }
 
+:global(html[data-theme="light"]) .anchorLinkActive {
+  background: linear-gradient(135deg, rgba(200, 155, 60, 0.18), rgba(26, 123, 110, 0.08));
+  border-color: rgba(200, 155, 60, 0.38);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .takeawayCard {
+  background: rgba(255, 255, 255, 0.64);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .takeawayNumber {
+  background: rgba(200, 155, 60, 0.13);
+  border-color: rgba(200, 155, 60, 0.28);
+}
+
 :global(html[data-theme="light"]) .strengthPanel {
   background: rgba(255, 255, 255, 0.52);
   border-color: rgba(0, 0, 0, 0.08);
@@ -1708,6 +1852,24 @@
     border-radius: 18px;
   }
 
+  .anchorTarget {
+    scroll-margin-top: 124px;
+  }
+
+  .takeawaysHeader {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .takeawaysGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .takeawayCard {
+    min-height: 0;
+  }
+
   .strengthGrid {
     grid-template-columns: 1fr;
   }
@@ -1752,10 +1914,26 @@
     justify-content: flex-start;
     overflow-x: auto;
     flex-wrap: nowrap;
+    margin-inline: -0.25rem;
+    scrollbar-width: thin;
   }
 
   .anchorLink {
     white-space: nowrap;
+  }
+
+  .anchorTarget {
+    scroll-margin-top: 116px;
+  }
+
+  .takeawayCard {
+    grid-template-columns: 1.9rem 1fr;
+    padding: 0.9rem;
+  }
+
+  .takeawayNumber {
+    width: 1.9rem;
+    height: 1.9rem;
   }
 
   .strengthMapHeader {
@@ -1835,5 +2013,10 @@
 
   .domainChipActive {
     transform: none;
+  }
+
+  .anchorLink,
+  .takeawayCard {
+    transition: none;
   }
 }

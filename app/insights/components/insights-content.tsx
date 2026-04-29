@@ -115,6 +115,7 @@ function CollapsibleSection({
   defaultOpen = true,
   children,
   className = "",
+  persistKey,
 }: {
   id?: string;
   title: string;
@@ -122,14 +123,76 @@ function CollapsibleSection({
   defaultOpen?: boolean;
   children: React.ReactNode;
   className?: string;
+  persistKey?: string;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+  const [hasRestored, setHasRestored] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+  const contentIdBase =
+    (id ?? persistKey ?? title)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "section";
+  const contentId = `${contentIdBase}-content`;
+
+  useEffect(() => {
+    const isDeepLinked =
+      Boolean(id) && window.location.hash.replace("#", "") === id;
+
+    if (isDeepLinked) {
+      setIsOpen(true);
+      setHasRestored(true);
+      return;
+    }
+
+    if (!persistKey) {
+      setHasRestored(true);
+      return;
+    }
+
+    try {
+      const storedState = window.localStorage.getItem(persistKey);
+      if (storedState === "open") {
+        setIsOpen(true);
+      } else if (storedState === "closed") {
+        setIsOpen(false);
+      }
+    } catch {
+      // Ignore storage failures so results still render in private contexts.
+    } finally {
+      setHasRestored(true);
+    }
+  }, [defaultOpen, id, persistKey]);
+
+  useEffect(() => {
+    if (!id) return;
+
+    const openDeepLinkedSection = () => {
+      if (window.location.hash.replace("#", "") === id) {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener("hashchange", openDeepLinkedSection);
+    return () => {
+      window.removeEventListener("hashchange", openDeepLinkedSection);
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!persistKey || !hasRestored) return;
+
+    try {
+      window.localStorage.setItem(persistKey, isOpen ? "open" : "closed");
+    } catch {
+      // State persistence is a convenience, not a rendering requirement.
+    }
+  }, [hasRestored, isOpen, persistKey]);
 
   return (
     <motion.section
       id={id}
-      className={`${styles.collapsible} ${className}`}
+      className={`${styles.collapsible} ${id ? styles.anchorTarget : ""} ${className}`}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -140,6 +203,7 @@ function CollapsibleSection({
         className={styles.collapsibleTrigger}
         onClick={() => setIsOpen((prev) => !prev)}
         aria-expanded={isOpen}
+        aria-controls={contentId}
       >
         <div>
           <span className={styles.kicker}>{kicker}</span>
@@ -156,6 +220,7 @@ function CollapsibleSection({
       <AnimatePresence initial={false}>
         {isOpen && (
           <motion.div
+            id={contentId}
             initial={shouldReduceMotion ? false : { height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -180,13 +245,107 @@ const SECTION_ANCHORS = [
 ];
 
 function SectionAnchorNav() {
+  const [activeAnchorId, setActiveAnchorId] = useState(SECTION_ANCHORS[0].id);
+  const [availableAnchorIds, setAvailableAnchorIds] = useState(
+    SECTION_ANCHORS.map((anchor) => anchor.id)
+  );
+
+  useEffect(() => {
+    const getAvailableAnchorIds = () =>
+      SECTION_ANCHORS.map((anchor) => anchor.id).filter((id) =>
+        document.getElementById(id)
+      );
+
+    const resolveActiveAnchor = () => {
+      const anchorIds = getAvailableAnchorIds();
+      if (anchorIds.length === 0) return;
+
+      setAvailableAnchorIds(anchorIds);
+
+      const hashId = window.location.hash.replace("#", "");
+      if (anchorIds.includes(hashId)) {
+        setActiveAnchorId(hashId);
+        return;
+      }
+
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 8
+      ) {
+        setActiveAnchorId(anchorIds[anchorIds.length - 1]);
+        return;
+      }
+
+      const markerY = Math.min(window.innerHeight * 0.32, 220);
+      let currentId = anchorIds[0];
+
+      for (const anchorId of anchorIds) {
+        const section = document.getElementById(anchorId);
+        if (!section) continue;
+
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= markerY && rect.bottom > markerY) {
+          currentId = anchorId;
+          break;
+        }
+
+        if (rect.top <= markerY) {
+          currentId = anchorId;
+        }
+      }
+
+      setActiveAnchorId(currentId);
+    };
+
+    let animationFrame: number | null = null;
+    const queueActiveResolve = () => {
+      if (animationFrame !== null) return;
+      animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = null;
+        resolveActiveAnchor();
+      });
+    };
+
+    const handleHashChange = () => {
+      const hashId = window.location.hash.replace("#", "");
+      if (getAvailableAnchorIds().includes(hashId)) {
+        setActiveAnchorId(hashId);
+      }
+    };
+
+    resolveActiveAnchor();
+    window.addEventListener("scroll", queueActiveResolve, { passive: true });
+    window.addEventListener("resize", queueActiveResolve);
+    window.addEventListener("hashchange", handleHashChange);
+
+    return () => {
+      if (animationFrame !== null) {
+        window.cancelAnimationFrame(animationFrame);
+      }
+      window.removeEventListener("scroll", queueActiveResolve);
+      window.removeEventListener("resize", queueActiveResolve);
+      window.removeEventListener("hashchange", handleHashChange);
+    };
+  }, []);
+
   return (
     <nav className={styles.anchorNav} aria-label="Results page sections">
-      {SECTION_ANCHORS.map((anchor) => (
-        <a key={anchor.id} href={`#${anchor.id}`} className={styles.anchorLink}>
-          {anchor.label}
-        </a>
-      ))}
+      {SECTION_ANCHORS.filter((anchor) =>
+        availableAnchorIds.includes(anchor.id)
+      ).map((anchor) => {
+        const isActive = anchor.id === activeAnchorId;
+        return (
+          <a
+            key={anchor.id}
+            href={`#${anchor.id}`}
+            className={`${styles.anchorLink} ${isActive ? styles.anchorLinkActive : ""}`}
+            aria-current={isActive ? "location" : undefined}
+            onClick={() => setActiveAnchorId(anchor.id)}
+          >
+            {anchor.label}
+          </a>
+        );
+      })}
     </nav>
   );
 }
@@ -233,7 +392,7 @@ function ChartStrengthMap({ payload }: { payload: ChartApiResponse }) {
     .slice(0, 4);
 
   return (
-    <section id="chart-map" className={styles.strengthMap}>
+    <section id="chart-map" className={`${styles.strengthMap} ${styles.anchorTarget}`}>
       <div className={styles.strengthMapHeader}>
         <div>
           <p className={styles.kicker}>Chart Strength Map</p>
@@ -308,6 +467,137 @@ function ActionGuidanceChips({ payload }: { payload: ChartApiResponse }) {
 }
 
 /* ─── Rule Card (Animated) ─── */
+/* Top Takeaways */
+type TopTakeaway = {
+  label: string;
+  title: string;
+  body: string;
+  meta?: string;
+  tone: "gold" | "teal" | "coral";
+};
+
+function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
+  const priorityRank = { high: 0, medium: 1, low: 2 };
+  const sortedRules = [...payload.chart.deterministic_rules].sort(
+    (left, right) =>
+      priorityRank[left.priority] - priorityRank[right.priority]
+  );
+  const primaryRule = sortedRules[0];
+  const dasha = payload.chart.dasha;
+  const topDomain = [...(payload.chart.life_domain_insights ?? [])].sort(
+    (left, right) => right.confidence_score - left.confidence_score
+  )[0];
+  const strongestPlanet = [...(payload.chart.shadbala ?? [])].sort(
+    (left, right) => right.strengthRatio - left.strengthRatio
+  )[0];
+  const takeaways: TopTakeaway[] = [];
+
+  if (primaryRule) {
+    takeaways.push({
+      label: primaryRule.priority === "high" ? "Highest signal" : "Chart signal",
+      title: primaryRule.title,
+      body: primaryRule.insight,
+      meta: primaryRule.basis,
+      tone: "gold",
+    });
+  }
+
+  if (dasha) {
+    takeaways.push({
+      label: "Current timing",
+      title: `${dasha.current_dasha} dasha is active`,
+      body: dasha.current_antardasha
+        ? `${dasha.current_antardasha} antardasha narrows the period into more immediate choices and responses.`
+        : "Use the current dasha as the main timing lens for near-term decisions.",
+      meta: dasha.current_dasha_end
+        ? `Runs through ${dasha.current_dasha_end}`
+        : undefined,
+      tone: "teal",
+    });
+  }
+
+  if (topDomain) {
+    takeaways.push({
+      label: topDomain.label,
+      title: topDomain.headline,
+      body: topDomain.guidance || topDomain.overview,
+      meta: `${Math.round(topDomain.confidence_score * 100)}% confidence`,
+      tone: "coral",
+    });
+  }
+
+  if (strongestPlanet && takeaways.length < 3) {
+    takeaways.push({
+      label: "Strongest planet",
+      title: `${strongestPlanet.planet} leads the strength map`,
+      body: "This planet is one of the cleaner sources of support to lean on when the chart feels noisy.",
+      meta: `${Math.round(strongestPlanet.strengthRatio * 100)}% strength`,
+      tone: "teal",
+    });
+  }
+
+  if (takeaways.length < 3) {
+    takeaways.push({
+      label: "Chart orientation",
+      title: `${payload.chart.ascendant.sign} rising sets the approach`,
+      body: payload.chart.summary,
+      meta: `${payload.chart.ascendant.degree_in_sign.toFixed(2)} deg in sign`,
+      tone: "gold",
+    });
+  }
+
+  return takeaways.slice(0, 3);
+}
+
+function getTakeawayToneClass(tone: TopTakeaway["tone"]) {
+  if (tone === "teal") return styles.takeawayTeal;
+  if (tone === "coral") return styles.takeawayCoral;
+  return styles.takeawayGold;
+}
+
+function TopTakeawaysModule({ payload }: { payload: ChartApiResponse }) {
+  const shouldReduceMotion = useReducedMotion();
+  const takeaways = buildTopTakeaways(payload);
+
+  return (
+    <motion.section
+      className={styles.takeaways}
+      aria-labelledby="top-takeaways-heading"
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 190, damping: 22 }}
+    >
+      <div className={styles.takeawaysHeader}>
+        <p className={styles.kicker}>Top 3 Takeaways</p>
+        <h2 id="top-takeaways-heading" className={styles.takeawaysTitle}>
+          What deserves attention first
+        </h2>
+      </div>
+      <div className={styles.takeawaysGrid}>
+        {takeaways.map((takeaway, index) => (
+          <article
+            key={`${takeaway.label}-${takeaway.title}`}
+            className={`${styles.takeawayCard} ${getTakeawayToneClass(takeaway.tone)}`}
+          >
+            <span className={styles.takeawayNumber}>
+              {String(index + 1).padStart(2, "0")}
+            </span>
+            <div>
+              <p className={styles.takeawayLabel}>{takeaway.label}</p>
+              <h3>{takeaway.title}</h3>
+            </div>
+            <p className={styles.takeawayBody}>{takeaway.body}</p>
+            {takeaway.meta && (
+              <small className={styles.takeawayMeta}>{takeaway.meta}</small>
+            )}
+          </article>
+        ))}
+      </div>
+    </motion.section>
+  );
+}
+
+/* Rule Card (Animated) */
 function RuleCard({ rule, index }: RuleCardProps) {
   const shouldReduceMotion = useReducedMotion();
   return (
@@ -459,6 +749,7 @@ export default function InsightsContent({
   const [isRouting, startRouting] = useTransition();
   const lockedFeatures = new Set(payload.access.locked_features);
   const compatibilityHref = `/insights/compatibility?${historyQs}`;
+  const sectionStateScope = `insights:section-state:${historyQs}`;
   const domainInsights = payload.chart.life_domain_insights ?? [];
   const availableEngines = payload.engine.available_engines ?? [];
   const [selectedDomainKey, setSelectedDomainKey] = useState<
@@ -603,6 +894,7 @@ export default function InsightsContent({
 
         {/* ─── Top Metrics Bento Row ─── */}
         <ActionGuidanceChips payload={payload} />
+        <TopTakeawaysModule payload={payload} />
 
         <motion.div
           className={styles.gridHero}
@@ -736,6 +1028,7 @@ export default function InsightsContent({
           title={t("insights.timingHeading")}
           defaultOpen={true}
           className={styles.cardRules}
+          persistKey={`${sectionStateScope}:timing`}
         >
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <div className={styles.cardForecast}>
@@ -771,6 +1064,7 @@ export default function InsightsContent({
           title={t("insights.coreHeading")}
           defaultOpen={false}
           className={styles.cardRules}
+          persistKey={`${sectionStateScope}:core`}
         >
           <p className={styles.sectionIntro}>
             This section pulls together the backbone of the chart: your lagna
@@ -811,13 +1105,14 @@ export default function InsightsContent({
 
         {/* ─── Career & Love in Bento Grid ─── */}
         {(careerRules.length > 0 || loveRules.length > 0) && (
-          <div id="themes" className={styles.gridThemes}>
+          <div id="themes" className={`${styles.gridThemes} ${styles.anchorTarget}`}>
             {careerRules.length > 0 && (
               <CollapsibleSection
                 kicker={t("insights.careerKicker")}
                 title={t("insights.careerHeading")}
                 defaultOpen={false}
                 className={styles.cardCareer}
+                persistKey={`${sectionStateScope}:career`}
               >
                 <p className={styles.sectionIntro}>
                   {t("insights.careerIntro")}
@@ -855,6 +1150,7 @@ export default function InsightsContent({
                 title={t("insights.loveHeading")}
                 defaultOpen={false}
                 className={styles.cardLove}
+                persistKey={`${sectionStateScope}:love`}
               >
                 <p className={styles.sectionIntro}>
                   {t("insights.loveIntro")}
@@ -924,7 +1220,7 @@ export default function InsightsContent({
           {selectedDomainInsight ? (
             <motion.section
               id="ultimate"
-              className={styles.cardDomains}
+              className={`${styles.cardDomains} ${styles.anchorTarget}`}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
@@ -1029,7 +1325,7 @@ export default function InsightsContent({
 
         {/* ─── Lucky Elements ─── */}
         {payload.chart.lucky_elements && (
-          <div id="fortune">
+          <div id="fortune" className={styles.anchorTarget}>
           <LazyPanel>
             <PanelErrorBoundary panelName="Lucky Elements">
               <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />

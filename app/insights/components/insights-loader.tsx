@@ -10,6 +10,7 @@ import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { useAuth } from "@/lib/auth-context";
 import { saveAuthenticatedReading, saveGuestReading } from "@/lib/reading-store";
+import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 
 const REQUEST_TIMEOUT_MS = 55_000;
 
@@ -26,28 +27,21 @@ type ChartParams = {
   town: string;
   timeZoneId: string;
   engineId: string;
+  birthTimeAccuracy: string;
+  birthTimeSource: string;
+  birthTimeFallback: string;
 };
 
 type InsightsLoaderProps = {
   chartParams: ChartParams;
+  initialPayload?: ChartApiResponse | null;
+  initialError?: string;
 };
 
 function buildChartApiUrl(params: ChartParams): string {
-  const url = new URL("/api/chart", window.location.origin);
-  url.searchParams.set("name", params.name);
-  url.searchParams.set("birth_date", params.birthDate);
-  url.searchParams.set("birth_time", params.birthTime);
-  url.searchParams.set("engine_id", params.engineId || "lahiri_classic");
-  url.searchParams.set("timezone_offset_minutes", params.timezoneOffsetMinutes);
-  url.searchParams.set("latitude", params.latitude);
-  url.searchParams.set("longitude", params.longitude);
-  url.searchParams.set("country", params.country);
-  url.searchParams.set("state", params.state);
-  url.searchParams.set("city", params.city);
-  url.searchParams.set("town", params.town);
-  url.searchParams.set("time_zone_id", params.timeZoneId);
-  url.searchParams.set("include_transits", "true");
-  return url.toString();
+  return buildBirthProfileApiUrl("/api/chart", window.location.origin, params, {
+    include_transits: true,
+  });
 }
 
 function buildHistoryQs(params: ChartParams): string {
@@ -65,6 +59,9 @@ function buildHistoryQs(params: ChartParams): string {
   };
   if (params.town) qs.town = params.town;
   if (params.timeZoneId) qs.timeZoneId = params.timeZoneId;
+  if (params.birthTimeAccuracy) qs.birthTimeAccuracy = params.birthTimeAccuracy;
+  if (params.birthTimeSource) qs.birthTimeSource = params.birthTimeSource;
+  if (params.birthTimeFallback) qs.birthTimeFallback = params.birthTimeFallback;
   return new URLSearchParams(qs).toString();
 }
 
@@ -84,10 +81,14 @@ async function persistReading(
   }
 }
 
-export default function InsightsLoader({ chartParams }: InsightsLoaderProps) {
-  const [payload, setPayload] = useState<ChartApiResponse | null>(null);
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+export default function InsightsLoader({
+  chartParams,
+  initialPayload = null,
+  initialError = "",
+}: InsightsLoaderProps) {
+  const [payload, setPayload] = useState<ChartApiResponse | null>(initialPayload);
+  const [error, setError] = useState<string>(initialError);
+  const [isLoading, setIsLoading] = useState(!initialPayload && !initialError);
   const { user } = useAuth();
   const persistedRef = useRef(false);
 
@@ -148,11 +149,26 @@ export default function InsightsLoader({ chartParams }: InsightsLoaderProps) {
     } finally {
       setIsLoading(false);
     }
-  }, [chartParams]);
+  }, [chartParams, user?.user_id]);
 
   useEffect(() => {
-    void fetchChart();
-  }, [fetchChart]);
+    setPayload(initialPayload);
+    setError(initialError);
+    setIsLoading(!initialPayload && !initialError);
+    persistedRef.current = false;
+
+    if (initialPayload) {
+      const chartUrl = buildChartApiUrl(chartParams);
+      chartCache.set(ChartCache.makeKey(chartUrl), initialPayload);
+      persistedRef.current = true;
+      void persistReading(chartParams, initialPayload, user?.user_id);
+      return;
+    }
+
+    if (!initialError) {
+      void fetchChart();
+    }
+  }, [chartParams, fetchChart, initialError, initialPayload, user?.user_id]);
 
   const historyQs = payload ? buildHistoryQs(chartParams) : "";
 
@@ -186,8 +202,8 @@ export default function InsightsLoader({ chartParams }: InsightsLoaderProps) {
             <p className="kicker">Chart Error</p>
             <h1>Chart calculation could not be completed.</h1>
             <p className="lead">
-              The chart engine encountered an error. Please check that the <code>swisseph</code> npm
-              package is installed and your input data is valid, then try again.
+              The chart engine could not finish this request. Please review the birth details,
+              location, and selected engine, then try again.
             </p>
             <p className="error-note">Error: {error || "No data received"}</p>
             <div className="skel-error-actions">

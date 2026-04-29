@@ -10,6 +10,7 @@ import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { useAuth } from "@/lib/auth-context";
 import { saveAuthenticatedReading, saveGuestReading } from "@/lib/reading-store";
+import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 
 const REQUEST_TIMEOUT_MS = 55_000;
 
@@ -26,6 +27,9 @@ type ChartParams = {
   town: string;
   timeZoneId: string;
   engineId: string;
+  birthTimeAccuracy: string;
+  birthTimeSource: string;
+  birthTimeFallback: string;
 };
 
 type AdvancedLoaderProps = {
@@ -33,21 +37,9 @@ type AdvancedLoaderProps = {
 };
 
 function buildChartApiUrl(params: ChartParams): string {
-  const url = new URL("/api/chart", window.location.origin);
-  url.searchParams.set("name", params.name);
-  url.searchParams.set("birth_date", params.birthDate);
-  url.searchParams.set("birth_time", params.birthTime);
-  url.searchParams.set("engine_id", params.engineId || "lahiri_classic");
-  url.searchParams.set("timezone_offset_minutes", params.timezoneOffsetMinutes);
-  url.searchParams.set("latitude", params.latitude);
-  url.searchParams.set("longitude", params.longitude);
-  url.searchParams.set("country", params.country);
-  url.searchParams.set("state", params.state);
-  url.searchParams.set("city", params.city);
-  url.searchParams.set("town", params.town);
-  url.searchParams.set("time_zone_id", params.timeZoneId);
-  url.searchParams.set("include_transits", "true");
-  return url.toString();
+  return buildBirthProfileApiUrl("/api/chart", window.location.origin, params, {
+    include_transits: true,
+  });
 }
 
 function buildHistoryQs(params: ChartParams): string {
@@ -65,6 +57,9 @@ function buildHistoryQs(params: ChartParams): string {
   };
   if (params.town) qs.town = params.town;
   if (params.timeZoneId) qs.timeZoneId = params.timeZoneId;
+  if (params.birthTimeAccuracy) qs.birthTimeAccuracy = params.birthTimeAccuracy;
+  if (params.birthTimeSource) qs.birthTimeSource = params.birthTimeSource;
+  if (params.birthTimeFallback) qs.birthTimeFallback = params.birthTimeFallback;
   return new URLSearchParams(qs).toString();
 }
 

@@ -13,6 +13,9 @@ type ProfileApiQuery = {
   city: string;
   town: string;
   time_zone_id: string;
+  birth_time_accuracy: string;
+  birth_time_source: string;
+  birth_time_fallback: string;
 };
 
 type ProfileApiQuerySource = ProfileQueryInput | URLSearchParams | string;
@@ -31,6 +34,9 @@ export const profileQueryKeys = [
   "city",
   "town",
   "timeZoneId",
+  "birthTimeAccuracy",
+  "birthTimeSource",
+  "birthTimeFallback",
 ] as const satisfies ReadonlyArray<keyof ProfileQueryInput>;
 
 const profileApiQueryFields = [
@@ -46,6 +52,9 @@ const profileApiQueryFields = [
   ["city", "city", ""],
   ["town", "town", ""],
   ["timeZoneId", "time_zone_id", ""],
+  ["birthTimeAccuracy", "birth_time_accuracy", ""],
+  ["birthTimeSource", "birth_time_source", ""],
+  ["birthTimeFallback", "birth_time_fallback", ""],
 ] as const satisfies ReadonlyArray<
   readonly [keyof ProfileQueryInput, keyof ProfileApiQuery, string]
 >;

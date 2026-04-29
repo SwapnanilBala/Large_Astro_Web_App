@@ -51,16 +51,23 @@ const birthTimeField = z
   );
 
 const birthTimeAccuracyField = z
-  .enum(["exact", "morning", "afternoon", "evening", "unknown"])
+  .preprocess(
+    (value) => (value === "" || value === null || value === undefined ? "exact" : value),
+    z.enum(["exact", "morning", "afternoon", "evening", "unknown"]),
+  )
   .default("exact");
 
 const birthTimeSourceField = z
-  .enum(["exact", "fallback"])
+  .preprocess(
+    (value) => (value === "" || value === null || value === undefined ? "exact" : value),
+    z.enum(["exact", "fallback"]),
+  )
   .default("exact");
 
 const booleanStringField = z
   .preprocess(
     (value) => {
+      if (value === "" || value === null || value === undefined) return false;
       if (value === "true") return true;
       if (value === "false") return false;
       return value;
