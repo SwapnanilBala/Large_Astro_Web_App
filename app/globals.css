@@ -7998,6 +7998,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-summary-card h3 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
   color: var(--accent-aqua);
@@ -8006,6 +8007,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-summary-card p {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   margin: 0;
   color: var(--ink-main);
   font-size: 1.42rem;
@@ -8013,6 +8015,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-hand-note {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-soft);
   margin: 0;
@@ -8057,6 +8060,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-line-header h4 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0;
   font-size: 1.42rem;
   color: var(--ink-main);
@@ -8078,6 +8082,7 @@ html[data-theme="light"] .zpp-corner-br {
 .palm-strength--absent { color: #888; border: 1px solid rgba(136, 136, 136, 0.3); }
 
 .palm-line-desc {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-soft);
   margin: 0 0 0.35rem;
@@ -8085,6 +8090,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-line-interp {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-main);
   margin: 0;
@@ -8101,6 +8107,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-section-card h3 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0 0 0.5rem;
   font-size: 1.42rem;
   color: var(--accent-aqua);
@@ -8109,6 +8116,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-section-card p {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   margin: 0.4rem 0 0;
   font-size: 1.35rem;
   color: var(--ink-main);
@@ -8149,6 +8157,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-guidance h3 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0 0 0.5rem;
   font-size: 1.42rem;
   color: var(--accent-gold);
@@ -8157,6 +8166,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-guidance p {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   margin: 0;
   font-size: 1.38rem;
   color: var(--ink-main);
@@ -8231,6 +8241,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-trajectory-hero h3 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0 0 1rem;
   font-size: 1.55rem;
   color: var(--accent-aqua);
@@ -8276,6 +8287,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-trajectory-item p {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   margin: 0;
   font-size: 1.35rem;
   color: var(--ink-main);
@@ -8301,6 +8313,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-subsection h4 {
+  font-family: var(--font-display), Georgia, serif;
   margin: 0 0 0.3rem;
   font-size: 1.28rem;
   font-weight: 600;
@@ -8310,6 +8323,7 @@ html[data-theme="light"] .zpp-corner-br {
 }
 
 .palm-subsection p {
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
   margin: 0;
   font-size: 1.35rem;
   color: var(--ink-main);

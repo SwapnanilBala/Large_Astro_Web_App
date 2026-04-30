@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Cinzel } from "next/font/google";
+import { Cinzel, Newsreader } from "next/font/google";
 import "./globals.css";
 
 const cinzel = Cinzel({
@@ -8,6 +8,14 @@ const cinzel = Cinzel({
   weight: ["400", "500", "600", "700"],
   display: "swap",
   variable: "--font-display",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
+  variable: "--font-newsreader",
 });
 import GradientBlobs from "./components/GradientBlobs";
 import Navbar from "./components/Navbar";
@@ -49,7 +57,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cinzel.variable}>
+    <html lang="en" className={`${cinzel.variable} ${newsreader.variable}`}>
       <body>
         <a href="#main-content" className="skip-nav">
           Skip to main content
