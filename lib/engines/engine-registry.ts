@@ -24,6 +24,13 @@ export interface HouseSystemInfo {
   description: string;
 }
 
+type AyanamshaInfo = {
+  key: string;
+  label: string;
+  sidereal_mode_name: string;
+  classicDescription: string;
+};
+
 export const HOUSE_SYSTEMS: HouseSystemInfo[] = [
   {
     code: "whole_sign",
@@ -63,58 +70,69 @@ export const HOUSE_SYSTEMS: HouseSystemInfo[] = [
   },
 ];
 
-export const ENGINE_PRESETS: Record<string, EnginePreset> = {
-  lahiri_classic: {
-    engine_id: "lahiri_classic",
-    label: "Lahiri Classic",
-    ayanamsha: "Lahiri",
-    house_system: "Whole Sign",
-    house_system_code: "whole_sign",
-    description:
+const AYANAMSHAS: AyanamshaInfo[] = [
+  {
+    key: "lahiri",
+    label: "Lahiri",
+    sidereal_mode_name: "SE_SIDM_LAHIRI",
+    classicDescription:
       "Balanced Vedic default using Lahiri ayanamsha with whole-sign houses.",
-    sidereal_mode_name: "SE_SIDM_LAHIRI",
   },
-  lahiri_placidus: {
-    engine_id: "lahiri_placidus",
-    label: "Lahiri Placidus",
-    ayanamsha: "Lahiri",
-    house_system: "Placidus",
-    house_system_code: "placidus",
-    description:
-      "Lahiri ayanamsha with Placidus houses for practitioners blending Vedic and Western techniques.",
-    sidereal_mode_name: "SE_SIDM_LAHIRI",
-  },
-  raman_classic: {
-    engine_id: "raman_classic",
-    label: "Raman Classic",
-    ayanamsha: "Raman",
-    house_system: "Whole Sign",
-    house_system_code: "whole_sign",
-    description:
-      "Alternative sidereal frame often used for comparative Vedic timing checks.",
+  {
+    key: "raman",
+    label: "Raman",
     sidereal_mode_name: "SE_SIDM_RAMAN",
+    classicDescription:
+      "Alternative sidereal frame often used for comparative Vedic timing checks.",
   },
-  krishnamurti_classic: {
-    engine_id: "krishnamurti_classic",
-    label: "Krishnamurti Classic",
-    ayanamsha: "Krishnamurti",
-    house_system: "Whole Sign",
-    house_system_code: "whole_sign",
-    description:
+  {
+    key: "krishnamurti",
+    label: "Krishnamurti",
+    sidereal_mode_name: "SE_SIDM_KRISHNAMURTI",
+    classicDescription:
       "KP-oriented ayanamsha option for clients who compare multiple calculation traditions.",
-    sidereal_mode_name: "SE_SIDM_KRISHNAMURTI",
   },
-  krishnamurti_placidus: {
-    engine_id: "krishnamurti_placidus",
-    label: "Krishnamurti Placidus",
-    ayanamsha: "Krishnamurti",
-    house_system: "Placidus",
-    house_system_code: "placidus",
-    description:
-      "KP system with Placidus houses, the traditional KP house division method.",
-    sidereal_mode_name: "SE_SIDM_KRISHNAMURTI",
+];
+
+function engineIdFor(ayanamshaKey: string, houseSystemCode: string) {
+  return `${ayanamshaKey}_${houseSystemCode === "whole_sign" ? "classic" : houseSystemCode}`;
+}
+
+function descriptionFor(ayanamsha: AyanamshaInfo, houseSystem: HouseSystemInfo) {
+  if (houseSystem.code === "whole_sign") {
+    return ayanamsha.classicDescription;
+  }
+
+  if (ayanamsha.key === "lahiri" && houseSystem.code === "placidus") {
+    return "Lahiri ayanamsha with Placidus houses for practitioners blending Vedic and Western techniques.";
+  }
+
+  if (ayanamsha.key === "krishnamurti" && houseSystem.code === "placidus") {
+    return "KP system with Placidus houses, the traditional KP house division method.";
+  }
+
+  return `${ayanamsha.label} ayanamsha paired with ${houseSystem.label} houses for comparative chart analysis.`;
+}
+
+export const ENGINE_PRESETS: Record<string, EnginePreset> = AYANAMSHAS.reduce(
+  (presets, ayanamsha) => {
+    for (const houseSystem of HOUSE_SYSTEMS) {
+      const engine_id = engineIdFor(ayanamsha.key, houseSystem.code);
+      presets[engine_id] = {
+        engine_id,
+        label: `${ayanamsha.label} ${houseSystem.code === "whole_sign" ? "Classic" : houseSystem.label}`,
+        ayanamsha: ayanamsha.label,
+        house_system: houseSystem.label,
+        house_system_code: houseSystem.code,
+        description: descriptionFor(ayanamsha, houseSystem),
+        sidereal_mode_name: ayanamsha.sidereal_mode_name,
+      };
+    }
+
+    return presets;
   },
-};
+  {} as Record<string, EnginePreset>
+);
 
 export const DEFAULT_ENGINE_ID = "lahiri_classic";
 

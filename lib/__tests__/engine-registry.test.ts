@@ -4,6 +4,7 @@ import {
   listEnginePresets,
   presetToMetadata,
   ENGINE_PRESETS,
+  HOUSE_SYSTEMS,
   DEFAULT_ENGINE_ID,
   type EnginePreset,
   type EnginePresetInfo,
@@ -53,6 +54,19 @@ describe("engine-registry", () => {
       expect(ENGINE_PRESETS).toHaveProperty("lahiri_placidus");
       expect(ENGINE_PRESETS.lahiri_placidus.house_system).toBe("Placidus");
       expect(ENGINE_PRESETS.lahiri_placidus.house_system_code).toBe("placidus");
+    });
+
+    it("has every house system for each ayanamsha", () => {
+      const ayanamshaKeys = ["lahiri", "raman", "krishnamurti"];
+      const expectedSuffixes = HOUSE_SYSTEMS.map((system) =>
+        system.code === "whole_sign" ? "classic" : system.code
+      );
+
+      for (const ayanamshaKey of ayanamshaKeys) {
+        for (const suffix of expectedSuffixes) {
+          expect(ENGINE_PRESETS).toHaveProperty(`${ayanamshaKey}_${suffix}`);
+        }
+      }
     });
 
     it("each preset has a valid sidereal mode name", () => {
@@ -131,6 +145,9 @@ describe("engine-registry", () => {
       expect(ids).toContain("raman_classic");
       expect(ids).toContain("krishnamurti_classic");
       expect(ids).toContain("krishnamurti_placidus");
+      expect(ids).toContain("lahiri_koch");
+      expect(ids).toContain("raman_campanus");
+      expect(ids).toContain("krishnamurti_regiomontanus");
     });
 
     it("each item is a full EnginePreset", () => {
