@@ -70,6 +70,106 @@ import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import PlanetOrbRow from "@/app/components/PlanetOrbRow";
 import type { PlanetName } from "@/app/components/PlanetOrb";
 
+type HeroPlanetMetadata = {
+  planet: PlanetName;
+  sign?: string;
+  house?: number;
+  dignity?: string;
+  shadbalaStrength?: number;
+  strengthPercent?: number;
+  isCurrentDashaLord: boolean;
+  tooltip: string;
+};
+
+type FuturePlanetOrbRowProps = React.ComponentProps<typeof PlanetOrbRow> & {
+  planetMetadata?: HeroPlanetMetadata[];
+  activePlanet?: PlanetName;
+  currentDashaLord?: PlanetName;
+};
+
+const PLANET_NAMES: PlanetName[] = [
+  "Sun",
+  "Moon",
+  "Mars",
+  "Mercury",
+  "Jupiter",
+  "Venus",
+  "Saturn",
+  "Rahu",
+  "Ketu",
+];
+
+const PLANET_NAME_SET = new Set<string>(PLANET_NAMES);
+const HeroPlanetOrbRow = PlanetOrbRow as React.ComponentType<FuturePlanetOrbRowProps>;
+
+function toPlanetName(name?: string | null): PlanetName | null {
+  if (!name) return null;
+  return PLANET_NAME_SET.has(name) ? (name as PlanetName) : null;
+}
+
+function formatDignity(dignity?: string) {
+  if (!dignity) return undefined;
+  return dignity
+    .split(/[_\s-]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function buildHeroPlanetMetadata(payload: ChartApiResponse) {
+  const currentDashaLord = toPlanetName(payload.chart.dasha?.current_dasha);
+  const shadbalaByPlanet = new Map(
+    (payload.chart.shadbala ?? []).map((planet) => [planet.planet, planet])
+  );
+  const navamsaByPlanet = new Map(
+    (payload.chart.navamsa ?? []).map((planet) => [planet.name, planet])
+  );
+  const seenPlanets = new Set<PlanetName>();
+  const metadata: HeroPlanetMetadata[] = [];
+
+  for (const planet of payload.chart.planets) {
+    const planetName = toPlanetName(planet.name);
+    if (!planetName || seenPlanets.has(planetName)) continue;
+
+    seenPlanets.add(planetName);
+    const shadbala = shadbalaByPlanet.get(planet.name);
+    const dignity = formatDignity(navamsaByPlanet.get(planet.name)?.dignity);
+    const house =
+      planet.house ??
+      payload.chart.houses.find((housePlacement) =>
+        housePlacement.planets.includes(planet.name)
+      )?.house_number;
+    const strengthPercent =
+      typeof shadbala?.strengthRatio === "number"
+        ? Math.round(shadbala.strengthRatio * 100)
+        : undefined;
+    const details = [
+      planet.sign,
+      house ? `House ${house}` : undefined,
+      dignity,
+      strengthPercent !== undefined ? `${strengthPercent}% strength` : undefined,
+      currentDashaLord === planetName ? "Current dasha lord" : undefined,
+    ].filter(Boolean);
+
+    metadata.push({
+      planet: planetName,
+      sign: planet.sign,
+      house,
+      dignity,
+      shadbalaStrength: shadbala?.strengthRatio,
+      strengthPercent,
+      isCurrentDashaLord: currentDashaLord === planetName,
+      tooltip: `${planetName}${details.length > 0 ? ` - ${details.join(" - ")}` : ""}`,
+    });
+  }
+
+  return {
+    planets: metadata.map((planet) => planet.planet),
+    metadata,
+    currentDashaLord,
+  };
+}
+
 type InsightsContentProps = {
   payload: ChartApiResponse;
   birthDate: string;
@@ -778,6 +878,7 @@ export default function InsightsContent({
   const selectedDomainInsight =
     domainInsights.find((domain) => domain.key === selectedDomainKey) ??
     domainInsights[0];
+  const heroPlanetStrip = buildHeroPlanetMetadata(payload);
 
   const copyCurrentChartLink = async () => {
     try {
@@ -881,14 +982,33 @@ export default function InsightsContent({
           <p className={styles.lead}>{payload.chart.summary}</p>
 
           {/* Planet orbs row – key planets from this chart, centered */}
-          {payload.chart.planets && payload.chart.planets.length > 0 && (
-            <div style={{ marginTop: "1.25rem", display: "flex", justifyContent: "center" }}>
-              <PlanetOrbRow
-                planets={payload.chart.planets.map((p) => p.name as PlanetName)}
-                size="md"
-                showLabels
-              />
-            </div>
+          {heroPlanetStrip.planets.length > 0 && (
+            <section className={styles.heroPlanetStrip} aria-labelledby="hero-planet-strip-heading">
+              <div className={styles.heroPlanetStripHeader}>
+                <p className={styles.heroPlanetKicker}>Natal Signature</p>
+                <h2 id="hero-planet-strip-heading" className={styles.heroPlanetTitle}>
+                  Planetary field
+                </h2>
+                {heroPlanetStrip.currentDashaLord && (
+                  <span className={styles.heroDashaPill}>
+                    {heroPlanetStrip.currentDashaLord} dasha
+                  </span>
+                )}
+              </div>
+              <div className={styles.heroPlanetRail}>
+                <div className={styles.heroPlanetScroller}>
+                  <HeroPlanetOrbRow
+                    planets={heroPlanetStrip.planets}
+                    planetMetadata={heroPlanetStrip.metadata}
+                    activePlanet={heroPlanetStrip.currentDashaLord ?? undefined}
+                    currentDashaLord={heroPlanetStrip.currentDashaLord ?? undefined}
+                    size="md"
+                    showLabels
+                    className={styles.heroPlanetRow}
+                  />
+                </div>
+              </div>
+            </section>
           )}
         </motion.div>
 

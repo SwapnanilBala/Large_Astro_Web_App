@@ -78,6 +78,138 @@
   margin: 0 auto;
 }
 
+.heroPlanetStrip {
+  position: relative;
+  isolation: isolate;
+  width: min(100%, 940px);
+  margin: 1.35rem auto 0;
+}
+
+.heroPlanetStrip::before {
+  content: "";
+  position: absolute;
+  inset: 1.85rem 9% auto;
+  height: 4.75rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(ellipse at center, rgba(108, 225, 212, 0.14), transparent 68%),
+    radial-gradient(ellipse at 30% 50%, rgba(240, 112, 104, 0.1), transparent 58%);
+  filter: blur(16px);
+  opacity: 0.84;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.heroPlanetStripHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+  min-height: 1.7rem;
+}
+
+.heroPlanetKicker {
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.heroPlanetTitle {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.98rem;
+  font-weight: 750;
+  line-height: 1;
+  margin: 0;
+}
+
+.heroDashaPill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  border: 1px solid rgba(200, 155, 60, 0.28);
+  border-radius: 999px;
+  background: rgba(200, 155, 60, 0.11);
+  box-shadow: 0 0 18px rgba(200, 155, 60, 0.08);
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0.32rem 0.62rem;
+  text-transform: uppercase;
+}
+
+.heroPlanetRail {
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(200, 155, 60, 0.14);
+  border-bottom: 1px solid rgba(108, 225, 212, 0.12);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(8, 12, 24, 0), rgba(255, 243, 210, 0.045) 18%, rgba(108, 225, 212, 0.035) 50%, rgba(255, 243, 210, 0.045) 82%, rgba(8, 12, 24, 0)),
+    rgba(8, 12, 24, 0.18);
+}
+
+.heroPlanetRail::before {
+  content: "";
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 50%;
+  height: 56%;
+  border-top: 1px solid rgba(200, 155, 60, 0.24);
+  border-radius: 50%;
+  transform: translateY(-12%);
+  pointer-events: none;
+}
+
+.heroPlanetScroller {
+  position: relative;
+  z-index: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.74rem 1.4rem 0.58rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+.heroPlanetRow {
+  width: max-content;
+  min-width: min(100%, 720px);
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.heroPlanetRow > * {
+  flex: 0 0 auto;
+}
+
+.heroPlanetRow > *:nth-child(1),
+.heroPlanetRow > *:nth-child(9) {
+  transform: translateY(0.42rem);
+}
+
+.heroPlanetRow > *:nth-child(2),
+.heroPlanetRow > *:nth-child(8) {
+  transform: translateY(0.16rem);
+}
+
+.heroPlanetRow > *:nth-child(4),
+.heroPlanetRow > *:nth-child(6) {
+  transform: translateY(-0.12rem);
+}
+
+.heroPlanetRow > *:nth-child(5) {
+  transform: translateY(-0.24rem);
+}
+
 .anchorNav {
   position: sticky;
   top: 72px;
@@ -1716,6 +1848,24 @@
   -webkit-text-fill-color: transparent;
 }
 
+:global(html[data-theme="light"]) .heroPlanetRail {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(200, 155, 60, 0.08) 18%, rgba(26, 123, 110, 0.055) 50%, rgba(200, 155, 60, 0.08) 82%, rgba(255, 255, 255, 0)),
+    rgba(255, 255, 255, 0.36);
+  border-bottom-color: rgba(26, 123, 110, 0.16);
+  border-top-color: rgba(200, 155, 60, 0.18);
+}
+
+:global(html[data-theme="light"]) .heroPlanetRail::before {
+  border-top-color: rgba(200, 155, 60, 0.28);
+}
+
+:global(html[data-theme="light"]) .heroDashaPill {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(200, 155, 60, 0.34);
+  box-shadow: 0 0 16px rgba(200, 155, 60, 0.06);
+}
+
 :global(html[data-theme="light"]) .anchorNav {
   background: rgba(255, 255, 255, 0.78);
   border-color: rgba(0, 0, 0, 0.08);
@@ -1916,6 +2066,30 @@
     padding: 1.5rem 0.5rem 0.5rem;
   }
 
+  .heroPlanetStrip {
+    margin-top: 1.05rem;
+  }
+
+  .heroPlanetStripHeader {
+    flex-wrap: wrap;
+    row-gap: 0.4rem;
+  }
+
+  .heroPlanetRail {
+    border-radius: 22px;
+  }
+
+  .heroPlanetScroller {
+    margin-inline: -0.35rem;
+    padding: 0.72rem 0.95rem 0.62rem;
+    mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  }
+
+  .heroPlanetRow {
+    justify-content: flex-start;
+    min-width: max-content;
+  }
+
   .anchorNav {
     justify-content: flex-start;
     overflow-x: auto;
@@ -2024,5 +2198,9 @@
   .anchorLink,
   .takeawayCard {
     transition: none;
+  }
+
+  .heroPlanetRow > * {
+    transform: none !important;
   }
 }
