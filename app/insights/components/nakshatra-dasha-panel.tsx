@@ -250,6 +250,19 @@ type PopupData = {
   years?: number;
 };
 
+type DashaViewMode = "timeline" | "lens" | "table";
+
+type DashaDisplayPeriod = {
+  planet: string;
+  start_date: string;
+  end_date: string;
+  level: number;
+  years?: number;
+  lords?: string[];
+  sequence_start_date?: string;
+  sequence_end_date?: string;
+};
+
 type NakshatraDashaPanelProps = {
   nakshatra: NakshatraInfo;
   dasha: DashaInfo;
@@ -270,6 +283,7 @@ export default function NakshatraDashaPanel({
   const [drillPath, setDrillPath] = useState<DrillStep[]>([]);
   const [subPeriodCache, setSubPeriodCache] = useState<Record<string, SubPeriodInfo[]>>({});
   const [loadingLevel, setLoadingLevel] = useState<number | null>(null);
+  const [viewMode, setViewMode] = useState<DashaViewMode>("timeline");
   const popupRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -380,6 +394,7 @@ export default function NakshatraDashaPanel({
         ...prev,
         { level: currentLevel, planet, startDate, endDate, sequenceStartDate, sequenceEndDate },
       ]);
+      setViewMode("lens");
       setPopup(null);
     }
   };
@@ -388,8 +403,10 @@ export default function NakshatraDashaPanel({
   const handleBreadcrumbClick = (index: number) => {
     if (index < 0) {
       setDrillPath([]);
+      setViewMode("timeline");
     } else {
       setDrillPath((prev) => prev.slice(0, index + 1));
+      setViewMode("lens");
     }
     setPopup(null);
   };
@@ -480,6 +497,17 @@ export default function NakshatraDashaPanel({
     });
   };
 
+  const formatPeriodDuration = (startDate: string, endDate: string) => {
+    const days = Math.max(1, Math.round(daysBetween(startDate, endDate)));
+    if (days >= 730) {
+      return `${(days / 365.25).toFixed(1)} years`;
+    }
+    if (days >= 60) {
+      return `${Math.round(days / 30.44)} months`;
+    }
+    return `${days} days`;
+  };
+
   const formatAuditTimestamp = (value: string) => {
     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
     if (!match) return value.replace("T", " ");
@@ -544,12 +572,88 @@ export default function NakshatraDashaPanel({
   const currentSubPeriods = getCurrentSubPeriods();
   const currentDrillLevel = drillPath.length > 0 ? drillPath[drillPath.length - 1].level + 1 : 1;
   const combinationInsight = getCombinationInsight();
+  const currentProgress = getAntardashaProgress();
+  const selectedParent = drillPath.length > 0 ? drillPath[drillPath.length - 1] : null;
+  const displayLevel = currentSubPeriods ? currentDrillLevel : 1;
+  const displayPeriods: DashaDisplayPeriod[] = currentSubPeriods
+    ? currentSubPeriods
+    : dasha.periods.map((period) => ({ ...period, level: 1 }));
+  const visiblePeriods = displayPeriods.slice(0, viewMode === "lens" ? 9 : displayPeriods.length);
+  const activeStack = [
+    {
+      label: LEVEL_LABELS[1],
+      planet: dasha.current_dasha,
+      startDate: dasha.current_dasha_start,
+      endDate: dasha.current_dasha_end,
+    },
+    {
+      label: LEVEL_LABELS[2],
+      planet: dasha.current_antardasha,
+      startDate: dasha.current_antardasha_start,
+      endDate: dasha.current_antardasha_end,
+    },
+    dasha.current_pratyantar
+      ? {
+          label: LEVEL_LABELS[3],
+          planet: dasha.current_pratyantar,
+          startDate: dasha.current_pratyantar_start ?? "",
+          endDate: dasha.current_pratyantar_end ?? "",
+        }
+      : null,
+  ].filter(Boolean) as Array<{
+    label: string;
+    planet: string;
+    startDate: string;
+    endDate: string;
+  }>;
 
   return (
     <section className="nakshatra-panel">
       <div className="rules-header">
         <p className="kicker">{t("dasha.kicker")}</p>
         <h2>{t("dasha.heading")}</h2>
+      </div>
+
+      <section className="dasha-command-hero">
+        <div className="dasha-command-copy">
+          <p className="dasha-command-kicker">Current life chapter</p>
+          <h3>
+            {dasha.current_dasha} <span>to</span> {dasha.current_antardasha}
+            {dasha.current_pratyantar ? <span> to {dasha.current_pratyantar}</span> : null}
+          </h3>
+          {getCurrentPeriodSummary() && (
+            <p className="dasha-command-summary">{getCurrentPeriodSummary()}</p>
+          )}
+        </div>
+
+        <div className="dasha-command-meter" aria-label="Current antardasha progress">
+          <div className="dasha-command-meter-ring">
+            <span>{Math.round(currentProgress.progressPercent)}%</span>
+            <small>complete</small>
+          </div>
+          <div className="dasha-command-meter-copy">
+            <strong>{currentProgress.remainingDays.toLocaleString()} days remaining</strong>
+            <span>{formatDate(dasha.current_antardasha_start)} - {formatDate(dasha.current_antardasha_end)}</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="dasha-active-stack" aria-label="Active dasha stack">
+        {activeStack.map((step) => {
+          const color = DASHA_COLORS[step.planet] ?? "#6ce1d4";
+          return (
+            <article key={`${step.label}-${step.planet}`} className="dasha-active-stack-card">
+              <span className="dasha-active-stack-level">{step.label}</span>
+              <strong style={{ color }}>{step.planet}</strong>
+              <small>
+                {step.startDate && step.endDate
+                  ? `${formatDate(step.startDate)} - ${formatDate(step.endDate)}`
+                  : "Timing details loading"}
+              </small>
+              <p>{DASHA_LORD_THEMES[step.planet]?.theme ?? "Active timing influence"}</p>
+            </article>
+          );
+        })}
       </div>
 
       {audit && (
@@ -711,6 +815,19 @@ export default function NakshatraDashaPanel({
         <h3>{t("dasha.timeline")}</h3>
         <p className="dasha-timeline-hint">{t("dasha.drillHint")}</p>
 
+        <div className="dasha-view-switcher" aria-label="Dasha timeline views">
+          {(["timeline", "lens", "table"] as DashaViewMode[]).map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              className={`dasha-view-button${viewMode === mode ? " dasha-view-button--active" : ""}`}
+              onClick={() => setViewMode(mode)}
+            >
+              {mode === "timeline" ? "Timeline" : mode === "lens" ? "Lens" : "Table"}
+            </button>
+          ))}
+        </div>
+
         {/* ── Breadcrumb Navigation ── */}
         {drillPath.length > 0 && (
           <nav className="dasha-breadcrumb anim-fade-in">
@@ -763,7 +880,7 @@ export default function NakshatraDashaPanel({
         )}
 
         {/* ── Level 1: Maha Dasha Gantt Timeline ── */}
-        {drillPath.length === 0 && (() => {
+        {viewMode === "timeline" && drillPath.length === 0 && (() => {
           /* Compute total span in days from first start → last end */
           const allStarts = dasha.periods.map((p) => new Date(p.start_date + "T00:00:00").getTime());
           const allEnds   = dasha.periods.map((p) => new Date(p.end_date   + "T00:00:00").getTime());
@@ -904,7 +1021,7 @@ export default function NakshatraDashaPanel({
         })()}
 
         {/* ── Sub-Period Drill-Down Levels ── */}
-        {currentSubPeriods && currentSubPeriods.length > 0 && (
+        {viewMode === "timeline" && currentSubPeriods && currentSubPeriods.length > 0 && (
           <div className="dasha-level-section anim-fade-in">
             <span className="dasha-level-label" style={{ color: LEVEL_COLORS[currentDrillLevel] || LEVEL_COLORS[5] }}>
               {LEVEL_LABELS[currentDrillLevel] || `Level ${currentDrillLevel}`}
@@ -998,6 +1115,105 @@ export default function NakshatraDashaPanel({
         )}
 
         {/* ── Loading Spinner ── */}
+        {viewMode === "lens" && (
+          <section className="dasha-lens-panel anim-fade-in">
+            <div className="dasha-lens-header">
+              <div>
+                <span className="dasha-level-label" style={{ color: LEVEL_COLORS[displayLevel] || LEVEL_COLORS[5] }}>
+                  {LEVEL_LABELS[displayLevel] || `Level ${displayLevel}`}
+                </span>
+                <h4>
+                  {selectedParent
+                    ? `${selectedParent.planet} sub-period lens`
+                    : "Maha Dasha chapter lens"}
+                </h4>
+              </div>
+              {selectedParent && (
+                <p>
+                  {formatDate(selectedParent.startDate)} - {formatDate(selectedParent.endDate)}
+                </p>
+              )}
+            </div>
+
+            <div className="dasha-lens-grid">
+              {visiblePeriods.map((period, index) => {
+                const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
+                const color = DASHA_COLORS[period.planet] ?? "#6ce1d4";
+                const theme = DASHA_LORD_THEMES[period.planet]?.theme ?? "Sub-period influence";
+                const duration = period.years
+                  ? `${period.years.toFixed(2)} years`
+                  : formatPeriodDuration(period.start_date, period.end_date);
+
+                return (
+                  <article
+                    key={`${period.planet}-${period.start_date}-${index}`}
+                    className={`dasha-lens-card${isCurrent ? " dasha-lens-card--current" : ""}`}
+                    style={{ borderTopColor: color }}
+                  >
+                    <div className="dasha-lens-card-top">
+                      <span>{String(index + 1).padStart(2, "0")}</span>
+                      {isCurrent && <strong>Active now</strong>}
+                    </div>
+                    <h5 style={{ color }}>{period.planet}</h5>
+                    <p>{theme}</p>
+                    <small>{formatDate(period.start_date)} - {formatDate(period.end_date)}</small>
+                    <small>{duration}</small>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {viewMode === "table" && (
+          <section className="dasha-table-panel anim-fade-in">
+            <div className="dasha-table-header">
+              <span className="dasha-level-label" style={{ color: LEVEL_COLORS[displayLevel] || LEVEL_COLORS[5] }}>
+                {LEVEL_LABELS[displayLevel] || `Level ${displayLevel}`}
+              </span>
+              <p>
+                {selectedParent
+                  ? `Sub-periods inside ${selectedParent.planet}`
+                  : "Full Maha Dasha sequence"}
+              </p>
+            </div>
+            <div className="dasha-table-scroll">
+              <table className="dasha-period-table">
+                <thead>
+                  <tr>
+                    <th>Lord</th>
+                    <th>Theme</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Duration</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayPeriods.map((period, index) => {
+                    const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
+                    const color = DASHA_COLORS[period.planet] ?? "#6ce1d4";
+                    return (
+                      <tr key={`${period.planet}-${period.start_date}-${index}`} className={isCurrent ? "dasha-period-row--current" : ""}>
+                        <td>
+                          <span className="dasha-period-planet" style={{ color }}>
+                            {period.planet}
+                          </span>
+                        </td>
+                        <td>{DASHA_LORD_THEMES[period.planet]?.theme ?? "Timing influence"}</td>
+                        <td>{formatDate(period.start_date)}</td>
+                        <td>{formatDate(period.end_date)}</td>
+                        <td>{period.years ? `${period.years.toFixed(2)} years` : formatPeriodDuration(period.start_date, period.end_date)}</td>
+                        <td>{isCurrent ? "Active now" : "Upcoming / past"}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
+
         {loadingLevel !== null && (
           <div className="dasha-loading anim-fade-in">
             <span className="dasha-loading-spinner" />

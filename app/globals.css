@@ -405,6 +405,30 @@ html[data-theme="light"] .dasha-audit-card {
   border-color: rgba(30, 30, 50, 0.10);
 }
 
+html[data-theme="light"] .dasha-command-hero,
+html[data-theme="light"] .dasha-lens-panel,
+html[data-theme="light"] .dasha-table-panel {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(30, 30, 50, 0.10);
+}
+
+html[data-theme="light"] .dasha-active-stack-card,
+html[data-theme="light"] .dasha-lens-card {
+  background: rgba(255, 255, 255, 0.55);
+  border-color: rgba(30, 30, 50, 0.08);
+}
+
+html[data-theme="light"] .dasha-view-switcher,
+html[data-theme="light"] .dasha-table-scroll {
+  background: rgba(255, 255, 255, 0.38);
+  border-color: rgba(30, 30, 50, 0.10);
+}
+
+html[data-theme="light"] .dasha-period-table th,
+html[data-theme="light"] .dasha-period-table td {
+  border-bottom-color: rgba(30, 30, 50, 0.08);
+}
+
 html[data-theme="light"] .dasha-audit-card strong {
   color: var(--ink-main);
 }
@@ -2084,6 +2108,156 @@ label:has(.autocomplete-wrapper.is-open) {
   line-height: 1.5;
 }
 
+.dasha-command-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.6fr);
+  gap: 1rem;
+  align-items: stretch;
+  margin: 1rem 0;
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, rgba(108, 225, 212, 0.1), rgba(242, 194, 108, 0.07)),
+    rgba(6, 24, 38, 0.72);
+  padding: 1.1rem;
+}
+
+.dasha-command-copy {
+  min-width: 0;
+}
+
+.dasha-command-kicker {
+  margin: 0 0 0.35rem;
+  color: var(--accent-aqua);
+  font-size: 1.08rem;
+  font-weight: 800;
+  letter-spacing: 0.1rem;
+  text-transform: uppercase;
+}
+
+.dasha-command-copy h3 {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  line-height: 1.12;
+}
+
+.dasha-command-copy h3 span {
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 0.72em;
+  font-weight: 500;
+}
+
+.dasha-command-summary {
+  margin: 0.7rem 0 0;
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.28rem;
+  line-height: 1.58;
+}
+
+.dasha-command-meter {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  justify-content: flex-end;
+  min-width: 0;
+}
+
+.dasha-command-meter-ring {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 112px;
+  height: 112px;
+  border: 1px solid rgba(242, 194, 108, 0.24);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(6, 24, 38, 0.94) 0 54%, transparent 55%),
+    conic-gradient(var(--accent-gold), var(--accent-aqua), rgba(255, 255, 255, 0.1));
+  box-shadow: 0 0 30px rgba(108, 225, 212, 0.08);
+}
+
+.dasha-command-meter-ring span {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.dasha-command-meter-ring small {
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.03rem;
+  margin-top: -1.55rem;
+}
+
+.dasha-command-meter-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.dasha-command-meter-copy strong {
+  color: var(--accent-gold);
+  font-size: 1.22rem;
+  line-height: 1.3;
+}
+
+.dasha-command-meter-copy span {
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  line-height: 1.35;
+}
+
+.dasha-active-stack {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.dasha-active-stack-card {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 0.85rem;
+}
+
+.dasha-active-stack-level {
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  font-weight: 800;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+}
+
+.dasha-active-stack-card strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.4rem;
+  line-height: 1.15;
+}
+
+.dasha-active-stack-card small {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.dasha-active-stack-card p {
+  color: var(--ink-main);
+  font-size: 1.05rem;
+  line-height: 1.45;
+  margin: 0.2rem 0 0;
+}
+
 .dasha-timeline-section {
   margin-top: 1.2rem;
 }
@@ -2163,6 +2337,41 @@ label:has(.autocomplete-wrapper.is-open) {
   opacity: 0.5;
   margin: -0.3rem 0 0.5rem;
   font-style: italic;
+}
+
+.dasha-view-switcher {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0 0.8rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0.25rem;
+}
+
+.dasha-view-button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 1.08rem;
+  font-weight: 800;
+  min-height: 2rem;
+  padding: 0.36rem 0.82rem;
+}
+
+.dasha-view-button:hover,
+.dasha-view-button:focus-visible {
+  color: var(--ink-main);
+  outline: none;
+}
+
+.dasha-view-button--active {
+  background: linear-gradient(135deg, rgba(242, 194, 108, 0.18), rgba(108, 225, 212, 0.12)) !important;
+  color: var(--ink-main);
 }
 
 /* ── Dasha Breadcrumb Navigation ── */
@@ -2473,6 +2682,154 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 /* ── Dasha Loading Spinner ── */
+
+.dasha-lens-panel,
+.dasha-table-panel {
+  border: 1px solid rgba(108, 225, 212, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+  padding: 1rem;
+}
+
+.dasha-lens-header,
+.dasha-table-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.dasha-lens-header h4 {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  line-height: 1.2;
+}
+
+.dasha-lens-header p,
+.dasha-table-header p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.dasha-lens-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.75rem;
+}
+
+.dasha-lens-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  min-height: 190px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 3px solid var(--accent-aqua);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
+    rgba(6, 24, 38, 0.48);
+  padding: 0.85rem;
+}
+
+.dasha-lens-card--current {
+  border-color: rgba(242, 194, 108, 0.3);
+  box-shadow: 0 0 24px rgba(242, 194, 108, 0.08);
+}
+
+.dasha-lens-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.dasha-lens-card-top span,
+.dasha-lens-card-top strong {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+}
+
+.dasha-lens-card-top strong {
+  color: var(--accent-gold);
+}
+
+.dasha-lens-card h5 {
+  margin: 0.1rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  line-height: 1.15;
+}
+
+.dasha-lens-card p {
+  color: var(--ink-main);
+  font-size: 1.04rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.dasha-lens-card small {
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.dasha-table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+}
+
+.dasha-period-table {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: collapse;
+}
+
+.dasha-period-table th,
+.dasha-period-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.65rem 0.75rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dasha-period-table th {
+  color: var(--accent-aqua);
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
+}
+
+.dasha-period-table td {
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.dasha-period-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.dasha-period-planet {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.dasha-period-row--current {
+  background: rgba(242, 194, 108, 0.08);
+}
 
 .dasha-loading {
   display: flex;
@@ -4284,6 +4641,33 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 }
 
 @media (max-width: 680px) {
+  .dasha-command-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .dasha-command-meter {
+    justify-content: flex-start;
+  }
+
+  .dasha-command-meter-ring {
+    width: 96px;
+    height: 96px;
+  }
+
+  .dasha-lens-header,
+  .dasha-table-header {
+    flex-direction: column;
+  }
+
+  .dasha-view-switcher {
+    width: 100%;
+  }
+
+  .dasha-view-button {
+    flex: 1 1 0;
+    text-align: center;
+  }
+
   .dasha-audit-header {
     flex-direction: column;
   }
