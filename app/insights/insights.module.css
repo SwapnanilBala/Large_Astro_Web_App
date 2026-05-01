@@ -752,6 +752,31 @@
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   color: var(--ink-main);
+  color-scheme: dark;
+  cursor: pointer;
+}
+
+.engineSwitcher select:focus-visible {
+  border-color: rgba(240, 183, 84, 0.68);
+  box-shadow:
+    0 0 0 3px rgba(240, 183, 84, 0.16),
+    0 0 18px rgba(240, 183, 84, 0.1);
+  outline: none;
+}
+
+.engineSwitcher select:disabled {
+  cursor: wait;
+  opacity: 0.68;
+}
+
+.engineSwitcher select option {
+  background-color: #111827;
+  color: #f8f2df;
+}
+
+.engineSwitcher select option:checked {
+  background-color: #2f2414;
+  color: #ffd98a;
 }
 
 /* ── Chart Card (Large) ── */
@@ -1875,6 +1900,23 @@
   background: linear-gradient(135deg, rgba(200, 155, 60, 0.18), rgba(26, 123, 110, 0.08));
   border-color: rgba(200, 155, 60, 0.38);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .engineSwitcher select {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(20, 28, 42, 0.16);
+  color: var(--ink-main);
+  color-scheme: light;
+}
+
+:global(html[data-theme="light"]) .engineSwitcher select option {
+  background-color: #ffffff;
+  color: #172033;
+}
+
+:global(html[data-theme="light"]) .engineSwitcher select option:checked {
+  background-color: #fff2cf;
+  color: #76521b;
 }
 
 :global(html[data-theme="light"]) .takeawayCard {
