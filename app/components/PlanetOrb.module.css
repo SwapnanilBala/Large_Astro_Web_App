@@ -1,61 +1,130 @@
-/* ═══════════════════════════════════════════════
-   PlanetOrb – Animated glowing planet avatars
-   ═══════════════════════════════════════════════ */
+/* PlanetOrb: textured CSS-only planet avatars and orbital rows. */
 
-/* ─── Wrapper (orb + optional label) ─── */
 .wrapper {
+  position: relative;
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
+  isolation: isolate;
 }
 
-/* ─── Orb base ─── */
 .orb {
+  --planet-strength-scale: 1;
+  --planet-strength-brightness: 1;
+  --planet-strength-opacity: 1;
+  --planet-shadow: 0 0 14px rgba(255, 229, 170, 0.26);
+  --planet-hover-shadow: var(--planet-shadow);
+
   position: relative;
-  border-radius: 50%;
-  cursor: default;
+  display: inline-flex;
+  align-items: stretch;
+  justify-content: stretch;
   flex-shrink: 0;
-  animation: planetPulse 3s ease-in-out infinite alternate;
-  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-radius: 999px;
+  cursor: default;
+  opacity: var(--planet-strength-opacity);
+  filter: brightness(var(--planet-strength-brightness));
+  transform: translateY(0) scale(var(--planet-strength-scale));
+  transform-origin: center;
+  transition:
+    filter 220ms ease,
+    opacity 220ms ease,
+    transform 220ms ease,
+    box-shadow 220ms ease;
+  animation: planetPulse 3.8s ease-in-out infinite alternate;
+  box-shadow:
+    inset -10px -12px 18px rgba(2, 4, 12, 0.42),
+    inset 7px 7px 12px rgba(255, 255, 255, 0.08),
+    var(--planet-shadow);
+  outline: none;
+  isolation: isolate;
 }
 
-.orb:hover {
-  transform: scale(1.15);
+.orb:hover,
+.orb:focus-visible {
+  filter: brightness(calc(var(--planet-strength-brightness) + 0.12))
+    saturate(1.08);
+  transform: translateY(-2px) scale(calc(var(--planet-strength-scale) * 1.11));
+  box-shadow:
+    inset -10px -12px 18px rgba(2, 4, 12, 0.42),
+    inset 7px 7px 12px rgba(255, 255, 255, 0.08),
+    var(--planet-hover-shadow);
 }
 
-/* Noise/texture overlay for realism */
-.orb::after {
+.orb:focus-visible {
+  outline: 2px solid rgba(255, 223, 157, 0.86);
+  outline-offset: 5px;
+}
+
+.surface {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  background: var(--planet-surface);
+}
+
+.surface::before {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: 50%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 64 64' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: cover;
-  opacity: 0.12;
-  mix-blend-mode: overlay;
+  border-radius: inherit;
+  background:
+    radial-gradient(
+      circle at 34% 28%,
+      rgba(255, 255, 255, 0.5) 0 8%,
+      rgba(255, 255, 255, 0.2) 9% 18%,
+      transparent 36%
+    ),
+    radial-gradient(circle at 72% 76%, rgba(0, 0, 0, 0.28), transparent 38%);
+  mix-blend-mode: screen;
+  opacity: 0.58;
   pointer-events: none;
-  border-radius: 50%;
 }
 
-/* Inner highlight for 3D depth */
-.orb::before {
+.surface::after {
   content: "";
   position: absolute;
-  top: 12%;
-  left: 18%;
-  width: 30%;
-  height: 30%;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(255, 255, 255, 0.45) 0%,
-    rgba(255, 255, 255, 0) 70%
-  );
+  inset: 0;
+  border-radius: inherit;
+  background:
+    var(--planet-detail, transparent),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 72 72' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='72' height='72' filter='url(%23n)' opacity='.46'/%3E%3C/svg%3E");
+  background-size: cover;
+  mix-blend-mode: soft-light;
+  opacity: var(--planet-detail-opacity, 0.36);
   pointer-events: none;
 }
 
-/* ─── Size variants ─── */
+.active {
+  --planet-shadow:
+    0 0 0 1px rgba(255, 238, 176, 0.82),
+    0 0 18px rgba(250, 205, 94, 0.58),
+    0 0 34px rgba(244, 167, 68, 0.28);
+  --planet-hover-shadow:
+    0 0 0 1px rgba(255, 242, 194, 0.95),
+    0 0 24px rgba(255, 218, 118, 0.72),
+    0 0 46px rgba(244, 167, 68, 0.38);
+  animation: activePulse 2.7s ease-in-out infinite;
+}
+
+.active::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+  z-index: -2;
+  border: 1px solid rgba(255, 219, 130, 0.48);
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 211, 118, 0.18),
+    rgba(255, 211, 118, 0) 64%
+  );
+  box-shadow: 0 0 22px rgba(255, 194, 89, 0.28);
+  pointer-events: none;
+}
+
 .sm {
   width: 24px;
   height: 24px;
@@ -76,171 +145,416 @@
   height: 64px;
 }
 
-/* ─── Planet color schemes ─── */
-
-/* Sun */
 .sun {
-  background: radial-gradient(circle at 40% 40%, #FFD700, #FF8C00);
-  box-shadow: 0 0 12px 4px rgba(255, 215, 0, 0.45),
-              0 0 24px 8px rgba(255, 140, 0, 0.2);
-}
-.sun:hover {
-  box-shadow: 0 0 18px 6px rgba(255, 215, 0, 0.65),
-              0 0 36px 12px rgba(255, 140, 0, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 36% 28%, #fff4a3 0 10%, transparent 23%),
+    radial-gradient(circle at 52% 48%, #ffc64d 0, #f58d22 54%, #b64b12 100%);
+  --planet-detail:
+    radial-gradient(circle at 66% 44%, rgba(255, 247, 179, 0.36) 0 9%, transparent 11%),
+    conic-gradient(
+      from 18deg,
+      rgba(255, 248, 171, 0.12),
+      rgba(255, 111, 39, 0.24),
+      rgba(255, 218, 87, 0.16),
+      rgba(174, 63, 16, 0.2),
+      rgba(255, 248, 171, 0.12)
+    );
+  --planet-detail-opacity: 0.74;
+  --planet-shadow:
+    0 0 15px rgba(255, 196, 72, 0.52),
+    0 0 32px rgba(255, 116, 39, 0.24);
+  --planet-hover-shadow:
+    0 0 20px rgba(255, 212, 102, 0.68),
+    0 0 44px rgba(255, 116, 39, 0.34);
 }
 
-/* Moon */
 .moon {
-  background: radial-gradient(circle at 40% 40%, #E8E8F0, #B8B8D0);
-  box-shadow: 0 0 12px 4px rgba(232, 232, 240, 0.4),
-              0 0 24px 8px rgba(184, 184, 208, 0.2);
-}
-.moon:hover {
-  box-shadow: 0 0 18px 6px rgba(232, 232, 240, 0.6),
-              0 0 36px 12px rgba(184, 184, 208, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 37% 32%, #fffef5 0, #d7d8df 42%, #8f94a6 100%);
+  --planet-detail:
+    radial-gradient(circle at 62% 32%, rgba(72, 78, 94, 0.34) 0 8%, transparent 9%),
+    radial-gradient(circle at 35% 62%, rgba(92, 97, 109, 0.28) 0 10%, transparent 11%),
+    radial-gradient(circle at 72% 68%, rgba(255, 255, 255, 0.22) 0 6%, transparent 7%),
+    radial-gradient(circle at 24% 42%, rgba(63, 67, 77, 0.24) 0 6%, transparent 7%);
+  --planet-detail-opacity: 0.86;
+  --planet-shadow:
+    0 0 12px rgba(226, 231, 245, 0.42),
+    0 0 25px rgba(147, 157, 184, 0.24);
+  --planet-hover-shadow:
+    0 0 17px rgba(242, 246, 255, 0.62),
+    0 0 36px rgba(147, 157, 184, 0.34);
 }
 
-/* Mars */
 .mars {
-  background: radial-gradient(circle at 40% 40%, #FF4444, #CC0000);
-  box-shadow: 0 0 12px 4px rgba(255, 68, 68, 0.45),
-              0 0 24px 8px rgba(204, 0, 0, 0.2);
-}
-.mars:hover {
-  box-shadow: 0 0 18px 6px rgba(255, 68, 68, 0.65),
-              0 0 36px 12px rgba(204, 0, 0, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 35% 31%, #ffb06d 0, #c65332 45%, #682116 100%);
+  --planet-detail:
+    linear-gradient(166deg, transparent 0 30%, rgba(88, 27, 14, 0.34) 31% 37%, transparent 40%),
+    radial-gradient(circle at 61% 58%, rgba(95, 29, 18, 0.46) 0 12%, transparent 13%),
+    radial-gradient(circle at 36% 70%, rgba(247, 169, 93, 0.18) 0 10%, transparent 12%);
+  --planet-detail-opacity: 0.78;
+  --planet-shadow:
+    0 0 14px rgba(238, 89, 51, 0.45),
+    0 0 29px rgba(159, 42, 26, 0.22);
+  --planet-hover-shadow:
+    0 0 19px rgba(255, 112, 68, 0.62),
+    0 0 39px rgba(159, 42, 26, 0.34);
 }
 
-/* Mercury */
 .mercury {
-  background: radial-gradient(circle at 40% 40%, #50C878, #2E8B57);
-  box-shadow: 0 0 12px 4px rgba(80, 200, 120, 0.4),
-              0 0 24px 8px rgba(46, 139, 87, 0.2);
-}
-.mercury:hover {
-  box-shadow: 0 0 18px 6px rgba(80, 200, 120, 0.6),
-              0 0 36px 12px rgba(46, 139, 87, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 35% 30%, #b7f0c9 0, #55af77 43%, #1f6045 100%);
+  --planet-detail:
+    radial-gradient(circle at 63% 36%, rgba(13, 58, 41, 0.28) 0 9%, transparent 10%),
+    radial-gradient(circle at 34% 65%, rgba(210, 255, 225, 0.18) 0 11%, transparent 12%),
+    linear-gradient(138deg, transparent 0 36%, rgba(20, 77, 53, 0.24) 37% 44%, transparent 45%);
+  --planet-detail-opacity: 0.66;
+  --planet-shadow:
+    0 0 13px rgba(84, 199, 127, 0.38),
+    0 0 26px rgba(29, 116, 80, 0.22);
+  --planet-hover-shadow:
+    0 0 18px rgba(117, 224, 153, 0.56),
+    0 0 35px rgba(29, 116, 80, 0.32);
 }
 
-/* Jupiter */
 .jupiter {
-  background: radial-gradient(circle at 40% 40%, #FFB347, #FF8C00);
-  box-shadow: 0 0 12px 4px rgba(255, 179, 71, 0.45),
-              0 0 24px 8px rgba(255, 140, 0, 0.2);
-}
-.jupiter:hover {
-  box-shadow: 0 0 18px 6px rgba(255, 179, 71, 0.65),
-              0 0 36px 12px rgba(255, 140, 0, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 36% 28%, rgba(255, 229, 169, 0.95) 0 8%, transparent 20%),
+    linear-gradient(
+      180deg,
+      #7d4a2b 0 9%,
+      #e6b06e 10% 20%,
+      #f5d092 21% 31%,
+      #9d6041 32% 43%,
+      #f0c17d 44% 55%,
+      #72422d 56% 68%,
+      #d99a61 69% 80%,
+      #f2d19b 81% 100%
+    );
+  --planet-detail:
+    radial-gradient(ellipse at 68% 57%, rgba(137, 50, 34, 0.78) 0 11%, rgba(235, 174, 108, 0.46) 12% 17%, transparent 18%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.14), transparent 26% 74%, rgba(62, 30, 22, 0.16));
+  --planet-detail-opacity: 0.92;
+  --planet-shadow:
+    0 0 15px rgba(235, 163, 83, 0.46),
+    0 0 31px rgba(121, 71, 44, 0.24);
+  --planet-hover-shadow:
+    0 0 20px rgba(255, 190, 103, 0.62),
+    0 0 42px rgba(121, 71, 44, 0.36);
 }
 
-/* Venus */
 .venus {
-  background: radial-gradient(circle at 40% 40%, #FF69B4, #FF1493);
-  box-shadow: 0 0 12px 4px rgba(255, 105, 180, 0.45),
-              0 0 24px 8px rgba(255, 20, 147, 0.2);
-}
-.venus:hover {
-  box-shadow: 0 0 18px 6px rgba(255, 105, 180, 0.65),
-              0 0 36px 12px rgba(255, 20, 147, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 35% 30%, #ffd1de 0, #ef7da4 45%, #973d72 100%);
+  --planet-detail:
+    linear-gradient(150deg, transparent 0 18%, rgba(255, 220, 231, 0.22) 19% 31%, transparent 32%),
+    linear-gradient(22deg, transparent 0 48%, rgba(107, 38, 82, 0.23) 49% 56%, transparent 57%),
+    radial-gradient(circle at 62% 40%, rgba(255, 244, 218, 0.18) 0 12%, transparent 13%);
+  --planet-detail-opacity: 0.72;
+  --planet-shadow:
+    0 0 14px rgba(239, 125, 164, 0.45),
+    0 0 28px rgba(151, 61, 114, 0.22);
+  --planet-hover-shadow:
+    0 0 19px rgba(255, 163, 194, 0.62),
+    0 0 38px rgba(151, 61, 114, 0.34);
 }
 
-/* Saturn */
 .saturn {
-  background: radial-gradient(circle at 40% 40%, #708090, #2F4F4F);
-  box-shadow: 0 0 12px 4px rgba(112, 128, 144, 0.4),
-              0 0 24px 8px rgba(47, 79, 79, 0.2);
-}
-.saturn:hover {
-  box-shadow: 0 0 18px 6px rgba(112, 128, 144, 0.6),
-              0 0 36px 12px rgba(47, 79, 79, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 35% 30%, #d9d0aa 0, #9a917a 48%, #48505d 100%);
+  --planet-detail:
+    linear-gradient(
+      180deg,
+      transparent 0 21%,
+      rgba(255, 240, 189, 0.25) 22% 28%,
+      transparent 29% 42%,
+      rgba(72, 80, 93, 0.34) 43% 50%,
+      transparent 51% 70%,
+      rgba(255, 240, 189, 0.18) 71% 77%,
+      transparent 78%
+    );
+  --planet-detail-opacity: 0.8;
+  --planet-shadow:
+    0 0 13px rgba(194, 185, 143, 0.36),
+    0 0 28px rgba(77, 87, 104, 0.24);
+  --planet-hover-shadow:
+    0 0 18px rgba(222, 210, 159, 0.54),
+    0 0 38px rgba(77, 87, 104, 0.34);
 }
 
-/* Rahu – deep purple with shadow effect */
+.saturn::before {
+  content: "";
+  position: absolute;
+  top: 31%;
+  left: -38%;
+  z-index: -1;
+  width: 176%;
+  height: 43%;
+  border: max(1px, 0.08em) solid rgba(226, 206, 150, 0.78);
+  border-right-color: rgba(134, 122, 100, 0.42);
+  border-bottom-color: rgba(245, 224, 169, 0.44);
+  border-radius: 999px;
+  transform: rotate(-16deg);
+  box-shadow: 0 0 10px rgba(226, 206, 150, 0.16);
+  pointer-events: none;
+}
+
 .rahu {
-  background: radial-gradient(circle at 40% 40%, #4B0082, #800080);
-  box-shadow: 0 0 12px 4px rgba(75, 0, 130, 0.5),
-              0 0 24px 8px rgba(128, 0, 128, 0.25),
-              inset 0 0 8px 2px rgba(0, 0, 0, 0.35);
-}
-.rahu:hover {
-  box-shadow: 0 0 18px 6px rgba(75, 0, 130, 0.7),
-              0 0 36px 12px rgba(128, 0, 128, 0.4),
-              inset 0 0 8px 2px rgba(0, 0, 0, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 58% 44%, #11131b 0 18%, transparent 19%),
+    radial-gradient(circle at 36% 30%, #8173c9 0, #47306f 42%, #17111f 100%);
+  --planet-detail:
+    conic-gradient(
+      from 210deg,
+      rgba(23, 17, 31, 0.74),
+      rgba(137, 115, 201, 0.25),
+      rgba(17, 19, 27, 0.82),
+      rgba(71, 48, 111, 0.24),
+      rgba(23, 17, 31, 0.74)
+    );
+  --planet-detail-opacity: 0.9;
+  --planet-shadow:
+    0 0 14px rgba(119, 99, 181, 0.42),
+    0 0 30px rgba(23, 17, 31, 0.4);
+  --planet-hover-shadow:
+    0 0 19px rgba(146, 127, 219, 0.62),
+    0 0 41px rgba(23, 17, 31, 0.52);
 }
 
-/* Ketu – smoky red */
+.rahu::before {
+  content: "";
+  position: absolute;
+  inset: -26%;
+  z-index: -1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(103, 86, 157, 0.22), transparent 62%),
+    conic-gradient(from 40deg, transparent, rgba(114, 96, 166, 0.22), transparent 34%);
+  filter: blur(3px);
+  pointer-events: none;
+}
+
 .ketu {
-  background: radial-gradient(circle at 40% 40%, #8B0000, #DC143C);
-  box-shadow: 0 0 12px 4px rgba(139, 0, 0, 0.45),
-              0 0 24px 8px rgba(220, 20, 60, 0.2);
-}
-.ketu:hover {
-  box-shadow: 0 0 18px 6px rgba(139, 0, 0, 0.65),
-              0 0 36px 12px rgba(220, 20, 60, 0.35);
+  --planet-surface:
+    radial-gradient(circle at 42% 40%, #2b0c0e 0 24%, transparent 25%),
+    radial-gradient(circle at 34% 30%, #f09176 0, #963a38 44%, #281116 100%);
+  --planet-detail:
+    conic-gradient(
+      from 26deg,
+      rgba(239, 145, 118, 0.14),
+      rgba(43, 12, 14, 0.54),
+      rgba(178, 65, 58, 0.2),
+      rgba(40, 17, 22, 0.72),
+      rgba(239, 145, 118, 0.14)
+    ),
+    linear-gradient(135deg, transparent 0 44%, rgba(255, 195, 146, 0.14) 45% 51%, transparent 52%);
+  --planet-detail-opacity: 0.88;
+  --planet-shadow:
+    0 0 14px rgba(198, 72, 64, 0.42),
+    0 0 30px rgba(40, 17, 22, 0.36);
+  --planet-hover-shadow:
+    0 0 19px rgba(240, 116, 91, 0.6),
+    0 0 41px rgba(40, 17, 22, 0.5);
 }
 
-/* ─── Label ─── */
+.ketu::before {
+  content: "";
+  position: absolute;
+  inset: -22%;
+  z-index: -1;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(196, 73, 63, 0.2), transparent 60%),
+    conic-gradient(from 120deg, rgba(219, 83, 69, 0.2), transparent 32%, rgba(255, 176, 112, 0.14), transparent 70%);
+  filter: blur(4px);
+  pointer-events: none;
+}
+
 .label {
   font-size: 0.65rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(237, 224, 196, 0.7);
-  white-space: nowrap;
   line-height: 1;
+  letter-spacing: 0.06em;
+  color: rgba(237, 224, 196, 0.74);
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
-.sm + .label,
 .wrapper:has(.sm) .label {
   font-size: 0.55rem;
 }
 
-/* ─── Row layout ─── */
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 18px;
-}
-
-/* Stagger entrance */
-.rowItem {
+.tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 12px);
+  z-index: 10;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 32px));
+  padding: 8px 10px;
+  border: 1px solid rgba(255, 231, 183, 0.18);
+  border-radius: 8px;
+  background: rgba(20, 17, 29, 0.92);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  color: rgba(255, 244, 222, 0.92);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: left;
+  white-space: normal;
   opacity: 0;
-  animation: orbEnter 0.45s ease-out forwards;
+  pointer-events: none;
+  transform: translate(-50%, 6px);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
 }
 
-/* ─── Keyframes ─── */
+.tooltip::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 9px;
+  height: 9px;
+  border-right: 1px solid rgba(255, 231, 183, 0.16);
+  border-bottom: 1px solid rgba(255, 231, 183, 0.16);
+  background: rgba(20, 17, 29, 0.92);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.wrapper:hover .tooltip,
+.wrapper:focus-within .tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.row {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: clamp(14px, 3vw, 26px);
+  max-width: 100%;
+  min-height: 92px;
+  padding: 24px clamp(10px, 2vw, 18px) 18px;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(231, 199, 134, 0.36) transparent;
+  isolation: isolate;
+}
+
+.row::-webkit-scrollbar {
+  height: 6px;
+}
+
+.row::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(231, 199, 134, 0.34);
+}
+
+.row:has(.tooltip) {
+  min-height: 126px;
+  padding-top: 58px;
+}
+
+.withRail::before {
+  content: "";
+  position: absolute;
+  left: clamp(14px, 5vw, 48px);
+  right: clamp(14px, 5vw, 48px);
+  top: 52%;
+  z-index: -1;
+  height: 48px;
+  border-top: 1px solid rgba(236, 203, 139, 0.24);
+  border-radius: 50% 50% 0 0;
+  background:
+    radial-gradient(ellipse at center, rgba(236, 203, 139, 0.1), transparent 62%),
+    linear-gradient(90deg, transparent, rgba(236, 203, 139, 0.18), transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  pointer-events: none;
+}
+
+.rowItem {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: max-content;
+  opacity: 0;
+  transform: translateY(var(--orb-arc-y, 0));
+  animation: orbEnter 480ms ease-out forwards;
+}
+
+.arc .rowItem:nth-child(even) {
+  padding-top: 6px;
+}
+
 @keyframes planetPulse {
-  0% {
-    filter: brightness(1);
+  from {
+    filter: brightness(var(--planet-strength-brightness));
   }
+  to {
+    filter: brightness(calc(var(--planet-strength-brightness) + 0.08));
+  }
+}
+
+@keyframes activePulse {
+  0%,
   100% {
-    filter: brightness(1.18);
+    filter: brightness(calc(var(--planet-strength-brightness) + 0.04));
+  }
+  50% {
+    filter: brightness(calc(var(--planet-strength-brightness) + 0.18));
   }
 }
 
 @keyframes orbEnter {
   from {
     opacity: 0;
-    transform: translateY(10px) scale(0.8);
+    transform: translateY(calc(var(--orb-arc-y, 0px) + 12px)) scale(0.86);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(var(--orb-arc-y, 0px)) scale(1);
   }
 }
 
-/* ─── Reduced motion ─── */
+@media (max-width: 640px) {
+  .row {
+    min-height: 86px;
+    padding-inline: 12px;
+    scroll-padding-inline: 12px;
+  }
+
+  .withRail::before {
+    left: 18px;
+    right: 18px;
+    height: 36px;
+  }
+
+  .tooltip {
+    max-width: min(220px, calc(100vw - 28px));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .orb {
+  .orb,
+  .active,
+  .rowItem,
+  .tooltip {
     animation: none;
     transition: none;
   }
-  .orb:hover {
-    transform: none;
+
+  .orb:hover,
+  .orb:focus-visible {
+    transform: scale(var(--planet-strength-scale));
   }
+
   .rowItem {
-    animation: none;
     opacity: 1;
   }
 }
