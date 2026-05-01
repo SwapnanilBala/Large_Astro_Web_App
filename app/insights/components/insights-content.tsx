@@ -63,6 +63,7 @@ const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, load
 const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
+const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -340,6 +341,7 @@ const SECTION_ANCHORS = [
   { id: "timing", label: "Timing" },
   { id: "core", label: "Core" },
   { id: "themes", label: "Themes" },
+  { id: "karma", label: "Karma" },
   { id: "ultimate", label: "Ultimate" },
   { id: "fortune", label: "Fortune" },
 ];
@@ -1308,6 +1310,23 @@ export default function InsightsContent({
             )}
           </div>
         )}
+
+        <ConstellationDivider />
+
+        <CollapsibleSection
+          id="karma"
+          kicker="Past-Life Pattern"
+          title="Karma, fate, and vocation"
+          defaultOpen={true}
+          className={styles.cardKarma}
+          persistKey={`${sectionStateScope}:karma`}
+        >
+          <LazyPanel>
+            <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
+              <PastLifeInsightsPanel payload={payload} />
+            </PanelErrorBoundary>
+          </LazyPanel>
+        </CollapsibleSection>
 
         <ConstellationDivider />
 

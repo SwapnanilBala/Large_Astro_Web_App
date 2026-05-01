@@ -1813,6 +1813,121 @@
   composes: card;
 }
 
+.cardKarma {
+  align-self: center;
+  width: min(100%, calc(100vw - 2rem));
+}
+
+/* Past-life / karmic pattern panel */
+.pastLifePanel {
+  display: grid;
+  gap: 1rem;
+}
+
+.pastLifeSignalBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.25rem;
+}
+
+.pastLifeSignalBar span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.15rem;
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.07);
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  padding: 0.35rem 0.7rem;
+}
+
+.pastLifeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+}
+
+.pastLifeCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-height: 260px;
+  min-width: 0;
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 243, 210, 0.055), rgba(108, 225, 212, 0.035)),
+    rgba(255, 255, 255, 0.025);
+  padding: 1.1rem;
+}
+
+.pastLifeCard h3 {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.22rem;
+  line-height: 1.28;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pastLifeCard p {
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-size: 1.18rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.pastLifeCard small {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.45;
+  opacity: 0.78;
+  padding-top: 0.75rem;
+  overflow-wrap: anywhere;
+}
+
+.pastLifeLabel {
+  color: var(--accent-gold) !important;
+  font-family: var(--font-display), sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em;
+  line-height: 1.2 !important;
+  text-transform: uppercase;
+}
+
+.pastLifeCardGold {
+  border-top: 2px solid var(--accent-gold);
+}
+
+.pastLifeCardTeal {
+  border-top: 2px solid var(--accent-teal);
+}
+
+.pastLifeCardCoral {
+  border-top: 2px solid var(--accent-coral);
+}
+
+.pastLifeNote {
+  border-left: 3px solid rgba(200, 155, 60, 0.45);
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-size: 1.08rem;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.1rem 0 0.1rem 0.85rem;
+}
+
 /* ═══════════════════════════════════════════════
    Light Theme Overrides
    ═══════════════════════════════════════════════ */
@@ -1922,6 +2037,20 @@
 :global(html[data-theme="light"]) .takeawayCard {
   background: rgba(255, 255, 255, 0.64);
   border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .pastLifeCard {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .pastLifeSignalBar span {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(24, 120, 90, 0.18);
+}
+
+:global(html[data-theme="light"]) .pastLifeCard small {
+  border-top-color: rgba(0, 0, 0, 0.08);
 }
 
 :global(html[data-theme="light"]) .takeawayNumber {
@@ -2072,6 +2201,10 @@
     grid-template-columns: 1fr;
   }
 
+  .pastLifeGrid {
+    grid-template-columns: 1fr;
+  }
+
   .cardChart {
     grid-column: 1;
   }
@@ -2165,6 +2298,10 @@
   .strengthRow {
     grid-template-columns: 1fr;
     align-items: stretch;
+  }
+
+  .pastLifeCard {
+    min-height: 0;
   }
 
   .actions {
