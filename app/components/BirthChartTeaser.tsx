@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./BirthChartTeaser.module.css";
 import {
   GiAries,
@@ -55,10 +56,10 @@ const ELEMENT_COLORS: Record<string, string> = {
 };
 
 const COARSE_TIME_OPTIONS = [
-  { value: "morning", label: "Morning (5am-11am)" },
-  { value: "afternoon", label: "Afternoon (11am-4pm)" },
-  { value: "evening", label: "Evening (4pm-9pm)" },
-  { value: "unknown", label: "Unknown" },
+  { value: "morning", labelKey: "home.coarseMorning" },
+  { value: "afternoon", labelKey: "home.coarseAfternoon" },
+  { value: "evening", labelKey: "home.coarseEvening" },
+  { value: "unknown", labelKey: "home.coarseUnknown" },
 ];
 
 const HOUSE_TICKS = Array.from({ length: 12 }, (_, index) => index);
@@ -79,19 +80,25 @@ function getFilledFieldsCount(props: BirthChartTeaserProps) {
   ].filter(Boolean).length;
 }
 
-function getDisplayName(name?: string) {
+function getDisplayName(name: string | undefined, awaitingName: string) {
   const trimmedName = name?.trim();
-  if (!trimmedName) return "Awaiting name";
+  if (!trimmedName) return awaitingName;
   return trimmedName.length > 16 ? `${trimmedName.slice(0, 14)}...` : trimmedName;
 }
 
-function getConfidenceLabel(hasExactTime: boolean, unknownTime?: boolean, coarseTime?: string) {
-  if (hasExactTime) return "Exact time";
-  if (unknownTime || coarseTime === "unknown") return "Solar chart";
+function getConfidenceLabel(
+  hasExactTime: boolean,
+  unknownTime: boolean | undefined,
+  coarseTime: string | undefined,
+  t: (key: string, params?: Record<string, string>) => string
+) {
+  if (hasExactTime) return t("birthChartTeaser.exactTime");
+  if (unknownTime || coarseTime === "unknown") return t("birthChartTeaser.solarChart");
   if (coarseTime) {
-    return COARSE_TIME_OPTIONS.find((option) => option.value === coarseTime)?.label ?? "Coarse time";
+    const option = COARSE_TIME_OPTIONS.find((item) => item.value === coarseTime);
+    return option ? t(option.labelKey) : t("birthChartTeaser.coarseTime");
   }
-  return "Awaiting time";
+  return t("birthChartTeaser.awaitingTime");
 }
 
 export default function BirthChartTeaser({
@@ -106,6 +113,7 @@ export default function BirthChartTeaser({
   unknownTime,
   coarseTime,
 }: BirthChartTeaserProps) {
+  const { t } = useTranslation();
   const filledCount = useMemo(
     () => getFilledFieldsCount({ name, birthDate, birthTime, country, state, city }),
     [name, birthDate, birthTime, country, state, city]
@@ -121,8 +129,10 @@ export default function BirthChartTeaser({
   const completedUnlocks = [hasName, hasDate, hasTimeSignal, hasLocation].filter(Boolean).length;
   const readiness = Math.round((filledCount / 6) * 100);
   const isNearComplete = filledCount >= 5;
-  const chartConfidence = getConfidenceLabel(hasExactTime, unknownTime, coarseTime);
+  const chartConfidence = getConfidenceLabel(hasExactTime, unknownTime, coarseTime, t);
   const SunIcon = sunSign?.icon;
+  const displaySunSign = sunSign ? t(`zodiacSigns.${sunSign.name.toLowerCase()}`) : null;
+  const displaySunElement = sunSign ? t(`zodiacElements.${sunSign.element.toLowerCase()}`) : null;
 
   useEffect(() => {
     if (!birthDate?.trim()) {
@@ -176,37 +186,41 @@ export default function BirthChartTeaser({
 
   const infoRows = [
     {
-      label: "Sun Sign",
-      value: isSunSignLoading ? "Calculating..." : sunSign?.name ?? "Waiting for date",
+      label: t("birthChartTeaser.sunSign"),
+      value: isSunSignLoading ? t("birthChartTeaser.calculating") : displaySunSign ?? t("birthChartTeaser.waitingForDate"),
       meta: sunSign
-        ? `${sunSign.element} / ${sunSign.degree.toFixed(1)} deg sidereal ${sunSign.isExact ? "Sun" : "estimate"}`
+        ? t("birthChartTeaser.sunMeta", {
+            element: displaySunElement ?? sunSign.element,
+            degree: sunSign.degree.toFixed(1),
+            kind: sunSign.isExact ? t("birthChartTeaser.sunKindExact") : t("birthChartTeaser.sunKindEstimate"),
+          })
         : isSunSignLoading
-          ? "Reading chart engine"
-        : "Unlocks from birth date",
+          ? t("birthChartTeaser.readingChartEngine")
+        : t("birthChartTeaser.unlocksFromBirthDate"),
       active: hasDate,
       accent: sunSign ? ELEMENT_COLORS[sunSign.element] : "#C89B3C",
       icon: SunIcon ? <SunIcon /> : "SUN",
     },
     {
-      label: "Moon",
-      value: hasName && hasDate ? "Orbital layer queued" : "Pending",
-      meta: hasTimeSignal ? "Refines with time signal" : "Needs date and time context",
+      label: t("birthChartTeaser.moon"),
+      value: hasName && hasDate ? t("birthChartTeaser.orbitalLayerQueued") : t("birthChartTeaser.pending"),
+      meta: hasTimeSignal ? t("birthChartTeaser.refinesWithTimeSignal") : t("birthChartTeaser.needsDateAndTime"),
       active: hasName && hasDate,
       accent: "#6CE1D4",
       icon: "MOON",
     },
     {
-      label: "Ascendant",
-      value: hasLocation ? "Location locked" : "Awaiting place",
-      meta: "Rising point uses birthplace",
+      label: t("birthChartTeaser.ascendant"),
+      value: hasLocation ? t("birthChartTeaser.locationLocked") : t("birthChartTeaser.awaitingPlace"),
+      meta: t("birthChartTeaser.risingPointUsesBirthplace"),
       active: hasLocation,
       accent: "#8C64DC",
       icon: "ASC",
     },
     {
-      label: "Houses",
-      value: hasTimeSignal ? "12 sectors awake" : "Dormant",
-      meta: hasExactTime ? "Exact timing active" : chartConfidence,
+      label: t("birthChartTeaser.houses"),
+      value: hasTimeSignal ? t("birthChartTeaser.sectorsAwake") : t("birthChartTeaser.dormant"),
+      meta: hasExactTime ? t("birthChartTeaser.exactTimingActive") : chartConfidence,
       active: hasTimeSignal,
       accent: "#F07068",
       icon: "HOUSES",
@@ -223,12 +237,15 @@ export default function BirthChartTeaser({
     <div className={containerClassName}>
       <div className={styles.teaserHeader}>
         <div>
-          <span className={styles.teaserKicker}>Living astrolabe</span>
-          <span className={styles.teaserTitle}>Chart Preview</span>
+          <span className={styles.teaserKicker}>{t("birthChartTeaser.kicker")}</span>
+          <span className={styles.teaserTitle}>{t("home.chartPreview")}</span>
         </div>
         <div className={styles.headerStatus}>
           <span className={styles.chartConfidence}>{chartConfidence}</span>
-          <div className={styles.progressBar} aria-label={`${readiness}% chart readiness`}>
+          <div
+            className={styles.progressBar}
+            aria-label={t("birthChartTeaser.readinessAria", { percent: String(readiness) })}
+          >
             <div className={styles.progressFill} style={{ width: `${readiness}%` }} />
           </div>
         </div>
@@ -267,9 +284,11 @@ export default function BirthChartTeaser({
               </span>
             ))}
             <div className={styles.centerSeal}>
-              <span className={styles.centerName}>{getDisplayName(name)}</span>
+              <span className={styles.centerName}>{getDisplayName(name, t("birthChartTeaser.awaitingName"))}</span>
               <span className={styles.centerMeta}>
-                {isNearComplete ? "Ready" : `${filledCount}/6 fields`}
+                {isNearComplete
+                  ? t("birthChartTeaser.ready")
+                  : t("birthChartTeaser.fields", { filled: String(filledCount), total: "6" })}
               </span>
             </div>
           </div>
@@ -298,9 +317,11 @@ export default function BirthChartTeaser({
 
       <div className={styles.teaserFooter}>
         <span className={styles.readinessText}>
-          {isNearComplete ? "Chart atmosphere is nearly formed" : "Add details to wake the chart"}
+          {isNearComplete ? t("birthChartTeaser.nearlyFormed") : t("birthChartTeaser.addDetails")}
         </span>
-        <span className={styles.readinessValue}>{readiness}% ready</span>
+        <span className={styles.readinessValue}>
+          {t("birthChartTeaser.readyPercent", { percent: String(readiness) })}
+        </span>
       </div>
     </div>
   );

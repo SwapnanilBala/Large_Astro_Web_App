@@ -45,10 +45,10 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
 ];
 // Coarse time options for unknown birth time
 const COARSE_TIME_OPTIONS = [
-  { value: "morning", label: "Morning (5am–11am)" },
-  { value: "afternoon", label: "Afternoon (11am–4pm)" },
-  { value: "evening", label: "Evening (4pm–9pm)" },
-  { value: "unknown", label: "Unknown" },
+  { value: "morning", labelKey: "home.coarseMorning" },
+  { value: "afternoon", labelKey: "home.coarseAfternoon" },
+  { value: "evening", labelKey: "home.coarseEvening" },
+  { value: "unknown", labelKey: "home.coarseUnknown" },
 ];
 
 const COARSE_TIME_FALLBACKS: Record<string, string> = {
@@ -419,12 +419,12 @@ export default function Home() {
   }, [coarseTime, draft, unknownTime]);
 
   const previewStatus = useMemo(() => {
-    if (canSubmit) return "Full chart ready";
-    if (geoStatus === "found") return "Coordinates locked";
-    if (unknownTime && hasCoarseTimeFallback(coarseTime)) return "Estimate mode";
-    if (previewCompletion.filled === 0) return "Awaiting first detail";
-    return "Building confidence";
-  }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, unknownTime]);
+    if (canSubmit) return t("home.previewStatusReady");
+    if (geoStatus === "found") return t("home.previewStatusCoordinates");
+    if (unknownTime && hasCoarseTimeFallback(coarseTime)) return t("home.previewStatusEstimate");
+    if (previewCompletion.filled === 0) return t("home.previewStatusAwaiting");
+    return t("home.previewStatusBuilding");
+  }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, t, unknownTime]);
 
   const submitWrapperRef = useRef<HTMLDivElement>(null);
 
@@ -791,13 +791,13 @@ export default function Home() {
       <header className={styles.intakeHeader}>
         <div className={styles.brandBadge}>
           <HiOutlineSparkles />
-          <span>Swiss Ephemeris</span>
+          <span>{t("home.heroBadge")}</span>
         </div>
-        <h1 className={styles.pageTitle}>Reveal My Destiny</h1>
-        <p className={styles.pageSubtitle}>The Universe Speaks — Discover Your Cosmic Blueprint</p>
+        <h1 className={styles.pageTitle}>{t("home.heroTitle")}</h1>
+        <p className={styles.pageSubtitle}>{t("home.heroSubtitle")}</p>
         
         {/* Progress indicator — 9 dots, one per required field */}
-        <div className={styles.progressDots} role="progressbar" aria-label="Form completion progress">
+        <div className={styles.progressDots} role="progressbar" aria-label={t("home.formProgressAria")}>
           {requiredFields.map((field) => {
             const value = draft[field];
             const filled = typeof value === "string" && value.trim().length > 0;
@@ -816,7 +816,7 @@ export default function Home() {
           className={`${styles.scrollCue} ${scrolled ? styles.scrollCueHidden : ""}`}
           aria-hidden="true"
         >
-          <span>Scroll to begin</span>
+          <span>{t("home.scrollCue")}</span>
           <HiOutlineChevronDown />
         </div>
       </header>
@@ -825,10 +825,10 @@ export default function Home() {
       <main className={styles.mainContent}>
         <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formIntro}>
-            <span className={styles.formEyebrow}>Client birth intake</span>
-            <h2 className={styles.formTitle}>Map the exact sky they arrived under.</h2>
+            <span className={styles.formEyebrow}>{t("home.formEyebrow")}</span>
+            <h2 className={styles.formTitle}>{t("home.formTitle")}</h2>
             <p className={styles.formCopy}>
-              Enter the core birth details and we will tune the chart preview as each coordinate locks into place.
+              {t("home.formCopy")}
             </p>
           </div>
 
@@ -839,8 +839,8 @@ export default function Home() {
                 <div className={styles.cardAura} aria-hidden="true" />
                 <div className={styles.cardHeader}>
                   <div>
-                    <span className={styles.cardKicker}>Precision profile</span>
-                    <h3 className={styles.cardTitle}>Birth Details</h3>
+                    <span className={styles.cardKicker}>{t("home.cardKicker")}</span>
+                    <h3 className={styles.cardTitle}>{t("home.birthDetails")}</h3>
                   </div>
                   <div className={styles.cardSeal} aria-hidden="true">
                     <GiCrystalBall />
@@ -854,7 +854,7 @@ export default function Home() {
                   onClick={() => setSmartFillExpanded(!smartFillExpanded)}
                 >
                   <HiOutlineSparkles />
-                  <span>Quick Fill (Paste client data)</span>
+                  <span>{t("home.smartFillToggle")}</span>
                   <HiOutlineChevronDown className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ''}`} />
                 </button>
                 
@@ -863,12 +863,12 @@ export default function Home() {
                     <textarea
                       value={smartFillText}
                       onChange={(e) => setSmartFillText(e.target.value)}
-                      placeholder='Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY'
+                      placeholder={t("home.smartFillPlaceholder")}
                       className={styles.smartFillTextarea}
                       rows={2}
                     />
                     <div className={styles.smartFillHint}>
-                      Format: Name, Date, Time, Location (comma-separated)
+                      {t("home.smartFillHint")}
                     </div>
                     <button
                       type="button"
@@ -876,7 +876,7 @@ export default function Home() {
                       className={styles.smartFillButton}
                       disabled={smartFillText.trim().length < 10}
                     >
-                      Fill Form
+                      {t("home.smartFillButton")}
                     </button>
                   </div>
                 )}
@@ -908,7 +908,7 @@ export default function Home() {
                         setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
                       }
                     }}
-                    placeholder="Select birth date"
+                    placeholder={t("home.birthDatePlaceholder")}
                     dateFormat="dd MMM yyyy"
                     required
                     maxDate={new Date()}
@@ -931,19 +931,19 @@ export default function Home() {
                           setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
                         }
                       }}
-                      placeholder="Select birth time"
+                      placeholder={t("home.birthTimePlaceholder")}
                       showTimeSelect
                       showTimeSelectOnly
                       timeIntervals={15}
-                      timeCaption="Time"
+                      timeCaption={t("home.timeCaption")}
                       dateFormat="h:mm aa"
                       required={!unknownTime}
                     />
                   ) : (
                     <div className={styles.approxTimePanel}>
                       <div className={styles.approxTimeHeader}>
-                        <span className={styles.approxTimeLabel}>Approximate birth time</span>
-                        <span className={styles.approxTimeHint}>Choose the closest window</span>
+                        <span className={styles.approxTimeLabel}>{t("home.approxTimeLabel")}</span>
+                        <span className={styles.approxTimeHint}>{t("home.approxTimeHint")}</span>
                       </div>
                       <div className={styles.approxTimeOptions}>
                         {COARSE_TIME_OPTIONS.map((option) => (
@@ -956,7 +956,7 @@ export default function Home() {
                             onClick={() => setCoarseTime(option.value)}
                             aria-pressed={coarseTime === option.value}
                           >
-                            {option.label}
+                            {t(option.labelKey)}
                           </button>
                         ))}
                       </div>
@@ -968,7 +968,7 @@ export default function Home() {
               {/* ── Unknown birth time option ── */}
               <div className={styles.unknownTimeOption}>
                 <PremiumToggle
-                  label="I don't know my exact birth time"
+                  label={t("home.unknownTimeLabel")}
                   checked={unknownTime}
                   onChange={(checked) => {
                     setUnknownTime(checked);
@@ -981,7 +981,7 @@ export default function Home() {
               {/* ── Section Divider ── */}
               <div className={`${styles.sectionDivider} ${styles.sectionDividerSpaced}`}>
                 <div className={styles.dividerLine}></div>
-                <span className={styles.dividerText}>Location</span>
+                <span className={styles.dividerText}>{t("home.birthLocation")}</span>
                 <div className={styles.dividerLine}></div>
               </div>
 
@@ -1043,7 +1043,7 @@ export default function Home() {
               >
                 <span className={styles.coordsToggleText}>
                   <GiCompass />
-                  Enter coordinates manually
+                  {t("home.enterCoordinates")}
                 </span>
                 <span className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ''}`}>&#9662;</span>
               </div>
@@ -1051,14 +1051,14 @@ export default function Home() {
               {latLonExpanded && (
                 <div className={styles.latLonFields}>
                   <PremiumInput
-                    label="Latitude"
+                    label={t("home.formLatitude")}
                     value={draft.latitude}
                     onChange={(value) => setField("latitude")(value)}
                     placeholder="e.g. 40.7128"
                     required
                   />
                   <PremiumInput
-                    label="Longitude"
+                    label={t("home.formLongitude")}
                     value={draft.longitude}
                     onChange={(value) => setField("longitude")(value)}
                     placeholder="e.g. -74.0060"
@@ -1079,9 +1079,9 @@ export default function Home() {
               >
                 <div className={styles.previewHeader}>
                   <div className={styles.previewTitleGroup}>
-                    <span className={styles.previewKicker}>Live sky build</span>
+                    <span className={styles.previewKicker}>{t("home.previewKicker")}</span>
                     <h3 className={styles.previewTitle}>
-                      <GiStarSattelites /> Chart Preview
+                      <GiStarSattelites /> {t("home.chartPreview")}
                     </h3>
                   </div>
                   <div className={styles.previewMeta}>
@@ -1099,7 +1099,7 @@ export default function Home() {
                   <div
                     className={styles.previewProgressTrack}
                     role="progressbar"
-                    aria-label="Chart preview completion"
+                    aria-label={t("home.previewProgressAria")}
                     aria-valuemin={0}
                     aria-valuemax={previewCompletion.total}
                     aria-valuenow={previewCompletion.filled}
@@ -1130,7 +1130,7 @@ export default function Home() {
                       className={styles.coordsToggle}
                       onClick={() => setLatLonExpanded(!latLonExpanded)}
                     >
-                      <GiCompass /> Show Precise Lat & Lon
+                      <GiCompass /> {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
                     </button>
                     {latLonExpanded && (
                       <div className={styles.coordsGrid}>
@@ -1146,7 +1146,7 @@ export default function Home() {
               {/* Draft saved indicator */}
               {draftSaved && (
                 <div className={styles.draftIndicator}>
-                  Draft saved
+                  {t("home.draftSaved")}
                 </div>
               )}
             </aside>
@@ -1160,19 +1160,19 @@ export default function Home() {
               size="lg"
               fullWidth
               loading={isSubmitting}
-              loadingLabel="Unraveling..."
+              loadingLabel={t("home.ctaLoading")}
               disabled={!canSubmit}
               icon={<GiCrystalBall />}
             >
-              Unravel My Future
+              {t("home.cta")}
             </PremiumButton>
             {!canSubmit && (
               <p className={styles.actionHint}>
-                Complete all fields to generate your chart
+                {t("home.actionHint")}
               </p>
             )}
             <p className={styles.trustMicrocopy}>
-              🔒 Encrypted · Never shared · ~60 seconds
+              {t("home.trustMicrocopy")}
             </p>
           </div>
 
@@ -1189,7 +1189,10 @@ export default function Home() {
         <div className={styles.mobileStickyBar}>
           <div className={styles.stickyProgress}>
             <span className={styles.stickyProgressText}>
-              {requiredFields.filter(f => draft[f].trim().length > 0).length}/{requiredFields.length} complete
+              {t("home.stickyComplete", {
+                count: String(requiredFields.filter(f => draft[f].trim().length > 0).length),
+                total: String(requiredFields.length),
+              })}
             </span>
             <div className={styles.stickyProgressBar}>
               <div 
@@ -1215,7 +1218,7 @@ export default function Home() {
             disabled={!canSubmit}
             icon={<GiCrystalBall />}
           >
-            Continue
+            {t("home.stickyContinue")}
           </PremiumButton>
         </div>
       )}

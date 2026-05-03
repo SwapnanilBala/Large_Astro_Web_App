@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useTranslation } from "@/lib/i18n-context";
 import { ZODIAC_IMAGE_MAP } from "./ZodiacSignImage";
 
 const SIGN_DATES: Record<string, string> = {
@@ -38,8 +39,11 @@ type Props = {
 };
 
 export default function ZodiacPortraitPanel({ sign, className, style }: Props) {
+  const { t } = useTranslation();
   const active = sign && ZODIAC_IMAGE_MAP[sign] ? sign : null;
   const src = active ? ZODIAC_IMAGE_MAP[active] : null;
+  const activeKey = active?.toLowerCase();
+  const rulerKey = active ? SIGN_RULER[active].toLowerCase() : null;
 
   return (
     <div
@@ -70,11 +74,17 @@ export default function ZodiacPortraitPanel({ sign, className, style }: Props) {
         </div>
 
         <div className="zpp-info">
-          <h3 className="zpp-name">{active ?? ""}</h3>
+          <h3 className="zpp-name">{activeKey ? t(`zodiacSigns.${activeKey}`) : ""}</h3>
           <p className="zpp-dates">{active ? SIGN_DATES[active] : ""}</p>
           <div className="zpp-meta">
-            <span className="zpp-chip">{active ? SIGN_ELEMENT[active] : ""}</span>
-            <span className="zpp-chip">{active ? `Ruled by ${SIGN_RULER[active]}` : ""}</span>
+            <span className="zpp-chip">
+              {active ? t(`zodiacElements.${SIGN_ELEMENT[active].toLowerCase()}`) : ""}
+            </span>
+            <span className="zpp-chip">
+              {rulerKey
+                ? t("zodiacPortrait.ruledBy", { planet: t(`planetNames.${rulerKey}`) })
+                : ""}
+            </span>
           </div>
         </div>
       </div>

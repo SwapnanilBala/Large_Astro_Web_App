@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion, useAnimation, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./OnboardingCinematic.module.css";
 
 /* ─────────────────────────────────────────────────────────
@@ -54,6 +55,7 @@ function generateStars(count: number): Star[] {
 }
 
 export default function OnboardingCinematic() {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [phase, setPhase] = useState<
     "stars-in" | "spiral" | "brand" | "tagline" | "fade-out" | "done"
@@ -194,7 +196,7 @@ export default function OnboardingCinematic() {
       className={`${styles.overlay} ${fadingOut ? styles.fadeOut : ""}`}
       onClick={skip}
       role="presentation"
-      aria-label="Onboarding intro animation. Click or press Escape to skip."
+      aria-label={t("onboarding.ariaLabel")}
     >
       {/* ── Star field ── */}
       <div className={styles.starField}>
@@ -279,14 +281,14 @@ export default function OnboardingCinematic() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
             >
-              Your Cosmic Blueprint, Decoded
+              {t("onboarding.tagline")}
             </motion.p>
           )}
         </AnimatePresence>
       </div>
 
       {/* Skip hint */}
-      <span className={styles.skipHint}>Click or press Esc to skip</span>
+      <span className={styles.skipHint}>{t("onboarding.skipHint")}</span>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, type ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n-context";
 import { GLYPH_MAP } from "./ZodiacGlyph";
 
 /* ─────────────────────────────────────────────────────────
@@ -60,6 +61,7 @@ interface ZodiacWheelProps {
 }
 
 export default function ZodiacWheel({ activeSigns = [], onHoveredChange }: ZodiacWheelProps) {
+  const { t } = useTranslation();
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useEffect(() => {
@@ -291,7 +293,7 @@ export default function ZodiacWheel({ activeSigns = [], onHoveredChange }: Zodia
           fontFamily="inherit"
           fontWeight="500"
         >
-          {ZODIAC_NAMES[hoveredIndex]}
+          {t(`zodiacSigns.${ZODIAC_NAMES[hoveredIndex].toLowerCase()}`)}
         </text>
       </g>
     );
