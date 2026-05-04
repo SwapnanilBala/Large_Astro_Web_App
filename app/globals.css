@@ -597,6 +597,11 @@ h3 {
   overflow: hidden;
 }
 
+.insights-shell > * {
+  width: 100%;
+  min-width: 0;
+}
+
 /* Backdrop image for results/insights pages */
 .insights-shell::before {
   content: '';

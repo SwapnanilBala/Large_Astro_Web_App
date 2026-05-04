@@ -9,6 +9,7 @@ import { FiChevronDown, FiCopy, FiRefreshCw, FiGrid } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
+import NorthIndianChartSummary from "@/app/insights/components/north-indian-chart-summary";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
@@ -953,7 +954,7 @@ export default function InsightsContent({
   };
 
   return (
-    <ParallaxContainer>
+    <ParallaxContainer className={styles.parallaxShell}>
       <ChartHistorySaver
         name={payload.client.name}
         city={payload.client.city}
@@ -966,7 +967,7 @@ export default function InsightsContent({
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
 
-      <ParallaxLayer depth={0.05}>
+      <ParallaxLayer depth={0.05} className={styles.parallaxLayer}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
         <SectionAnchorNav />
         {/* ─── Hero Header ─── */}
@@ -1124,6 +1125,20 @@ export default function InsightsContent({
                 houses={payload.chart.houses}
                 planets={payload.chart.planets}
                 currentDashaLord={payload.chart.dasha?.current_dasha}
+              />
+            </PanelErrorBoundary>
+          </motion.div>
+
+          {/* North Indian calculation summary */}
+          <motion.div
+            className={`${styles.cardNorthIndian} ${styles.cardDepthFront}`}
+            variants={bentoItemFromRight}
+          >
+            <PanelErrorBoundary panelName="North Indian Chart Summary">
+              <NorthIndianChartSummary
+                ascendantSign={payload.chart.ascendant.sign}
+                houses={payload.chart.houses}
+                planets={payload.chart.planets}
               />
             </PanelErrorBoundary>
           </motion.div>

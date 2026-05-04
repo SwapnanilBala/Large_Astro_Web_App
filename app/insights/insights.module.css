@@ -263,6 +263,12 @@
   scroll-margin-top: 140px;
 }
 
+.parallaxShell,
+.parallaxLayer {
+  width: 100%;
+  min-width: 0;
+}
+
 .guidanceChips {
   display: flex;
   flex-wrap: wrap;
@@ -515,6 +521,11 @@
 .grid {
   display: grid;
   gap: clamp(1.15rem, 1.8vw, 1.65rem);
+  min-width: 0;
+}
+
+.grid > * {
+  min-width: 0;
 }
 
 .gridHero {
@@ -541,6 +552,8 @@
 /* ── Glassmorphism Card ── */
 .card {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
   background: var(--surface, rgba(255, 255, 255, 0.06));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -784,6 +797,7 @@
 .cardChart {
   composes: card;
   grid-column: 1;
+  grid-row: span 2;
   padding: 0;
   overflow: hidden;
 }
@@ -836,6 +850,164 @@
   flex: 1;
   overflow-y: auto;
   min-height: 0;
+}
+
+/* ── North Indian Calculation Summary ── */
+.cardNorthIndian {
+  composes: card;
+  grid-column: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.northIndianPanel {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.northIndianPanel :global(.rules-header) {
+  margin-bottom: 0.95rem;
+}
+
+.northIndianPanel :global(.section-intro) {
+  margin-bottom: 1.15rem;
+  font-size: clamp(1.18rem, 1.4vw, 1.34rem);
+}
+
+.northIndianFormula {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-bottom: 1rem;
+}
+
+.northIndianFormula span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  border-radius: 12px;
+  border: 1px solid rgba(108, 225, 212, 0.16);
+  background: rgba(108, 225, 212, 0.06);
+  padding: 0.7rem;
+  color: var(--ink-main);
+  font-size: 1.18rem;
+  line-height: 1.35;
+}
+
+.northIndianFormula strong {
+  color: var(--accent-aqua);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.northIndianHouseGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.northIndianHouse {
+  min-width: 0;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  background: rgba(255, 243, 210, 0.04);
+  padding: 0.62rem 0.55rem;
+}
+
+.northIndianHouseAsc {
+  border-color: rgba(242, 194, 108, 0.45);
+  background: rgba(242, 194, 108, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(242, 194, 108, 0.08);
+}
+
+.northIndianHouseNumber {
+  display: block;
+  color: var(--accent-gold);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.northIndianHouse strong {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.34rem;
+  line-height: 1.1;
+}
+
+.northIndianHouse small {
+  display: block;
+  margin-top: 0.18rem;
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+  font-size: 0.96rem;
+  line-height: 1.2;
+}
+
+.northIndianHouse p {
+  margin: 0.38rem 0 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+  font-size: 1.04rem;
+  line-height: 1.35;
+}
+
+.northIndianGroups {
+  display: grid;
+  gap: 0.46rem;
+  margin-top: 1rem;
+}
+
+.northIndianGroups h3 {
+  margin: 0 0 0.15rem;
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.28rem, 1.55vw, 1.48rem);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.northIndianGroupRow {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.65fr) minmax(0, 1fr);
+  gap: 0.6rem;
+  align-items: start;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0.56rem 0.65rem;
+}
+
+.northIndianGroupRow span {
+  color: var(--ink-main);
+  font-size: 1.08rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.northIndianGroupRow small {
+  display: block;
+  margin-top: 0.1rem;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  font-weight: 500;
+}
+
+.northIndianGroupRow strong {
+  overflow-wrap: anywhere;
+  color: var(--ink-soft);
+  font-size: 1.04rem;
+  font-weight: 500;
+  line-height: 1.4;
 }
 
 /* ── Planet Card: base compact state ── */
@@ -2175,6 +2347,13 @@
     grid-template-columns: 1fr;
   }
 
+  .cardChart,
+  .cardNorthIndian,
+  .cardPlanets {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
   .anchorNav {
     top: 64px;
     border-radius: 18px;
@@ -2236,6 +2415,18 @@
   .card {
     padding: 1rem;
     border-radius: 12px;
+  }
+
+  .northIndianFormula {
+    grid-template-columns: 1fr;
+  }
+
+  .northIndianHouseGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .northIndianGroupRow {
+    grid-template-columns: 1fr;
   }
 
   .hero {
