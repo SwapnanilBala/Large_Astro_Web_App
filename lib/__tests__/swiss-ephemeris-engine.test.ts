@@ -96,6 +96,89 @@ describe("swiss-ephemeris-engine", () => {
       expect(result.ascendant.sign).toBe("Libra");
     });
 
+    it("matches Swiss Ephemeris Lahiri ascendant regressions", () => {
+      const cases: Array<{
+        label: string;
+        birth: BirthInput;
+        expectedLongitude: number;
+        expectedSign: string;
+      }> = [
+        {
+          label: "Delhi",
+          birth: {
+            utc_year: 1990,
+            utc_month: 6,
+            utc_day: 15,
+            utc_hour: 12,
+            utc_minute: 0,
+            utc_second: 0,
+            latitude: 28.6139,
+            longitude: 77.209,
+            engine_id: "lahiri_classic",
+          },
+          expectedLongitude: 217.425,
+          expectedSign: "Scorpio",
+        },
+        {
+          label: "Gandhi",
+          birth: {
+            utc_year: 1869,
+            utc_month: 10,
+            utc_day: 2,
+            utc_hour: 2,
+            utc_minute: 33,
+            utc_second: 2,
+            latitude: 21.6417,
+            longitude: 69.6293,
+            engine_id: "lahiri_classic",
+          },
+          expectedLongitude: 184.5168,
+          expectedSign: "Libra",
+        },
+        {
+          label: "New York",
+          birth: {
+            utc_year: 2000,
+            utc_month: 1,
+            utc_day: 1,
+            utc_hour: 17,
+            utc_minute: 0,
+            utc_second: 0,
+            latitude: 40.7128,
+            longitude: -74.006,
+            engine_id: "lahiri_classic",
+          },
+          expectedLongitude: 356.1074,
+          expectedSign: "Pisces",
+        },
+        {
+          label: "Quito",
+          birth: {
+            utc_year: 2024,
+            utc_month: 3,
+            utc_day: 20,
+            utc_hour: 12,
+            utc_minute: 0,
+            utc_second: 0,
+            latitude: -0.18,
+            longitude: -78.47,
+            engine_id: "lahiri_classic",
+          },
+          expectedLongitude: 346.7137,
+          expectedSign: "Pisces",
+        },
+      ];
+
+      for (const { label, birth, expectedLongitude, expectedSign } of cases) {
+        const result = calculate(birth);
+        expect(result.ascendant.sign, label).toBe(expectedSign);
+        expect(
+          Math.abs(result.ascendant.longitude - expectedLongitude),
+          label
+        ).toBeLessThan(0.02);
+      }
+    });
+
     it("Ketu is exactly 180 degrees from Rahu", () => {
       const result = calculate(birth);
       const rahu = result.planets.find((p) => p.name === "Rahu")!;
