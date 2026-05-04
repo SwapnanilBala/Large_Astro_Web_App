@@ -549,9 +549,10 @@ h1, h2, h3, h4, h5, h6 {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   color: var(--text-primary);
   letter-spacing: -0.02em;
-  line-height: 1.2;
+  line-height: 1.3;
   font-weight: 600;
   font-optical-sizing: auto;
+  overflow-wrap: anywhere;
 }
 
 h1 {
@@ -578,6 +579,7 @@ h3 {
   letter-spacing: 0.04em;
   color: var(--ink-soft);
   font-size: 1.4rem;
+  line-height: 1.36;
 }
 
 .home-shell,
@@ -677,7 +679,7 @@ html[data-theme="light"] .insights-shell::before {
   border: 1px solid var(--line-soft);
   border-radius: 20px;
   padding: clamp(1.2rem, 2.5vw, 2rem);
-  margin-bottom: 0.75rem;
+  margin-bottom: clamp(1rem, 1.8vw, 1.45rem);
   box-shadow: var(--shadow-card);
   position: relative;
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
@@ -714,6 +716,8 @@ html[data-theme="light"] .insights-shell::before {
   font-size: 1.08rem;
   color: var(--accent-gold);
   font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
 }
 
 h1 {
