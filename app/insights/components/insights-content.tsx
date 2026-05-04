@@ -9,7 +9,7 @@ import { FiChevronDown, FiCopy, FiRefreshCw, FiGrid } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
-import NorthIndianChartSummary from "@/app/insights/components/north-indian-chart-summary";
+import LahiriPlacidusLagnaChart from "@/app/insights/components/lahiri-placidus-lagna-chart";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
@@ -1129,20 +1129,6 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
 
-          {/* North Indian calculation summary */}
-          <motion.div
-            className={`${styles.cardNorthIndian} ${styles.cardDepthFront}`}
-            variants={bentoItemFromRight}
-          >
-            <PanelErrorBoundary panelName="North Indian Chart Summary">
-              <NorthIndianChartSummary
-                ascendantSign={payload.chart.ascendant.sign}
-                houses={payload.chart.houses}
-                planets={payload.chart.planets}
-              />
-            </PanelErrorBoundary>
-          </motion.div>
-
           {/* Planetary Snapshots — Side card */}
           <motion.div
             className={`${styles.cardPlanets} ${styles.cardDepthFront}`}
@@ -1150,6 +1136,16 @@ export default function InsightsContent({
           >
             <PanelErrorBoundary panelName="Planetary Snapshots">
               <PlanetarySnapshots planets={payload.chart.planets} />
+            </PanelErrorBoundary>
+          </motion.div>
+
+          {/* Lahiri Placidus North Indian Lagna chart */}
+          <motion.div
+            className={`${styles.cardLahiriPlacidus} ${styles.cardDepthFront}`}
+            variants={bentoItemFromLeft}
+          >
+            <PanelErrorBoundary panelName="Lahiri Placidus Lagna Chart">
+              <LahiriPlacidusLagnaChart queryString={historyQs} />
             </PanelErrorBoundary>
           </motion.div>
         </motion.div>
