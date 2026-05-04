@@ -85,6 +85,72 @@
     "stickyComplete": "{count}/{total} complete",
     "stickyContinue": "Continue"
   },
+  "engineSelect": {
+    "kicker": "Calculation Framework",
+    "heading": "Choose a Tradition, Then a Style",
+    "lead": "Instead of showing every calculation engine at once, pick the sidereal tradition first. Each tradition explains where it comes from, then lets you choose the house style inside it.",
+    "guidanceStep1": "1. Choose the ayanamsha tradition",
+    "guidanceStep2": "2. Pick the house style from its dropdown",
+    "guidanceStep3": "3. Generate the chart with that method",
+    "recommended": "Recommended",
+    "styleLabel": "Chart style",
+    "selectedKicker": "Selected method",
+    "summaryAyanamsha": "Ayanamsha",
+    "summaryStyle": "House style",
+    "summaryImpact": "What changes",
+    "summaryImpactText": "The ayanamsha shifts sidereal planet degrees; the house style changes how life areas are divided around the ascendant.",
+    "computing": "Computing Chart...",
+    "generate": "Generate Chart Intelligence ->",
+    "groups": {
+      "lahiri": {
+        "label": "Lahiri",
+        "origin": "Indian national standard",
+        "description": "The most widely used modern Vedic ayanamsha. It is a calm default for natal readings, dashas, and broad client-facing reports.",
+        "method": "Lahiri anchors the sidereal zodiac to the traditional Chitra/Spica reference used in mainstream Indian panchang and ephemeris work.",
+        "summary": "Mainstream Vedic reference, best for general chart interpretation."
+      },
+      "raman": {
+        "label": "Raman",
+        "origin": "B. V. Raman lineage",
+        "description": "A comparative Vedic frame associated with Dr. B. V. Raman's school. It is useful when a practitioner wants a slightly different sidereal correction.",
+        "method": "Raman uses a separate precession offset from Lahiri, so planets and cusps can shift subtly near sign or house boundaries.",
+        "summary": "Comparative Vedic reference for practitioners checking alternate timing traditions."
+      },
+      "krishnamurti": {
+        "label": "Krishnamurti",
+        "origin": "KP astrology tradition",
+        "description": "The Krishnamurti Paddhati approach supports fine-grained predictive work, especially when paired with Placidus houses.",
+        "method": "KP combines its own ayanamsha with house cusps and sub-lord analysis, making it popular for event-focused readings.",
+        "summary": "KP-oriented reference for detailed prediction and event analysis."
+      }
+    },
+    "styles": {
+      "whole_sign": {
+        "label": "Classic Whole Sign",
+        "description": "Each sign becomes one complete house from the ascendant sign. This is the cleanest Vedic default."
+      },
+      "equal": {
+        "label": "Equal Houses",
+        "description": "Each house is exactly 30 degrees from the ascendant degree. It keeps house sizes uniform."
+      },
+      "placidus": {
+        "label": "Placidus",
+        "description": "A time-based quadrant system popular in Western astrology and central to many KP workflows."
+      },
+      "koch": {
+        "label": "Koch",
+        "description": "A birthplace-based quadrant system that emphasizes the ascendant's local rising motion."
+      },
+      "campanus": {
+        "label": "Campanus",
+        "description": "Divides the prime vertical into equal arcs, giving a spatial view of house division."
+      },
+      "regiomontanus": {
+        "label": "Regiomontanus",
+        "description": "Uses equal divisions of the celestial equator, historically important in medieval astrology."
+      }
+    }
+  },
   "login": {
     "kicker": "Welcome Back",
     "heading": "Sign In",

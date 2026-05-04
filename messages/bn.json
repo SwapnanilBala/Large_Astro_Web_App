@@ -80,6 +80,72 @@
     "stickyComplete": "{count}/{total} সম্পূর্ণ",
     "stickyContinue": "চালিয়ে যান"
   },
+  "engineSelect": {
+    "kicker": "গণনার কাঠামো",
+    "heading": "আগে ঐতিহ্য, তারপর স্টাইল বেছে নিন",
+    "lead": "সব ইঞ্জিন একসাথে দেখানোর বদলে আগে সিডেরিয়াল ঐতিহ্য বেছে নিন। প্রতিটি ঐতিহ্য তার উৎস ব্যাখ্যা করে, তারপর তার ভিতরে ঘর বিভাজনের স্টাইল বেছে নেওয়া যায়।",
+    "guidanceStep1": "1. অয়নাংশ ঐতিহ্য বেছে নিন",
+    "guidanceStep2": "2. ড্রপডাউন থেকে ঘর স্টাইল বেছে নিন",
+    "guidanceStep3": "3. সেই পদ্ধতিতে চার্ট তৈরি করুন",
+    "recommended": "প্রস্তাবিত",
+    "styleLabel": "চার্ট স্টাইল",
+    "selectedKicker": "নির্বাচিত পদ্ধতি",
+    "summaryAyanamsha": "অয়নাংশ",
+    "summaryStyle": "ঘর স্টাইল",
+    "summaryImpact": "কি বদলায়",
+    "summaryImpactText": "অয়নাংশ গ্রহের সিডেরিয়াল ডিগ্রি সরায়; ঘর স্টাইল লগ্নের চারপাশে জীবনক্ষেত্রের বিভাজন বদলায়।",
+    "computing": "চার্ট গণনা হচ্ছে...",
+    "generate": "চার্ট ইন্টেলিজেন্স তৈরি করুন ->",
+    "groups": {
+      "lahiri": {
+        "label": "লাহিড়ী",
+        "origin": "ভারতের জাতীয় মান",
+        "description": "আধুনিক বৈদিক জ্যোতিষে সবচেয়ে বেশি ব্যবহৃত অয়নাংশ। জন্মছক, দশা এবং ক্লায়েন্ট রিপোর্টের জন্য স্থির ডিফল্ট।",
+        "method": "লাহিড়ী সিডেরিয়াল রাশিচক্রকে ঐতিহ্যগত চিত্রা/স্পিকা রেফারেন্সে স্থির করে, যা ভারতীয় পঞ্জিকা ও ephemeris কাজে ব্যবহৃত হয়।",
+        "summary": "সাধারণ চার্ট ব্যাখ্যার জন্য মূল বৈদিক রেফারেন্স।"
+      },
+      "raman": {
+        "label": "রমন",
+        "origin": "বি. ভি. রমন পরম্পরা",
+        "description": "ড. বি. ভি. রমনের স্কুলের সঙ্গে যুক্ত তুলনামূলক বৈদিক ফ্রেম। অন্য সিডেরিয়াল correction যাচাই করতে সহায়ক।",
+        "method": "রমন লাহিড়ী থেকে আলাদা precession offset ব্যবহার করে, তাই সীমার কাছে গ্রহ ও cusp সামান্য সরে যেতে পারে।",
+        "summary": "বিকল্প timing ঐতিহ্য যাচাইয়ের জন্য তুলনামূলক বৈদিক রেফারেন্স।"
+      },
+      "krishnamurti": {
+        "label": "কৃষ্ণমূর্তি",
+        "origin": "KP জ্যোতিষ ঐতিহ্য",
+        "description": "কৃষ্ণমূর্তি পদ্ধতি সূক্ষ্ম predictive কাজে সহায়ক, বিশেষ করে Placidus houses-এর সঙ্গে।",
+        "method": "KP নিজস্ব অয়নাংশ, house cusps এবং sub-lord analysis মিলিয়ে event-focused reading-এ জনপ্রিয়।",
+        "summary": "বিস্তারিত prediction ও event analysis-এর জন্য KP রেফারেন্স।"
+      }
+    },
+    "styles": {
+      "whole_sign": {
+        "label": "ক্লাসিক Whole Sign",
+        "description": "লগ্ন রাশি থেকে প্রতিটি রাশি একটি সম্পূর্ণ ঘর হয়। এটি সবচেয়ে পরিষ্কার বৈদিক ডিফল্ট।"
+      },
+      "equal": {
+        "label": "Equal Houses",
+        "description": "প্রতিটি ঘর লগ্ন ডিগ্রি থেকে ঠিক 30 ডিগ্রি। এতে ঘরের আকার সমান থাকে।"
+      },
+      "placidus": {
+        "label": "Placidus",
+        "description": "সময়-ভিত্তিক quadrant system, পশ্চিমী জ্যোতিষে জনপ্রিয় এবং অনেক KP workflow-তে গুরুত্বপূর্ণ।"
+      },
+      "koch": {
+        "label": "Koch",
+        "description": "জন্মস্থান-ভিত্তিক quadrant system, যা লগ্নের স্থানীয় rising motion-কে গুরুত্ব দেয়।"
+      },
+      "campanus": {
+        "label": "Campanus",
+        "description": "prime vertical-কে সমান arcs-এ ভাগ করে, ঘর বিভাজনের spatial দৃষ্টিভঙ্গি দেয়।"
+      },
+      "regiomontanus": {
+        "label": "Regiomontanus",
+        "description": "celestial equator-এর সমান divisions ব্যবহার করে; medieval astrology-তে ঐতিহাসিকভাবে গুরুত্বপূর্ণ।"
+      }
+    }
+  },
   "login": {
     "kicker": "স্বাগতম",
     "heading": "সাইন ইন",

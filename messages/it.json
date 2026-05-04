@@ -80,6 +80,72 @@
     "stickyComplete": "{count}/{total} completo",
     "stickyContinue": "Continua"
   },
+  "engineSelect": {
+    "kicker": "Schema di calcolo",
+    "heading": "Scegli una tradizione, poi uno stile",
+    "lead": "Invece di mostrare tutti i motori insieme, scegli prima la tradizione siderale. Ogni tradizione spiega la propria origine e poi offre uno stile di case.",
+    "guidanceStep1": "1. Scegli la tradizione ayanamsha",
+    "guidanceStep2": "2. Seleziona lo stile di case dal menu",
+    "guidanceStep3": "3. Genera la carta con quel metodo",
+    "recommended": "Consigliato",
+    "styleLabel": "Stile carta",
+    "selectedKicker": "Metodo selezionato",
+    "summaryAyanamsha": "Ayanamsha",
+    "summaryStyle": "Stile di case",
+    "summaryImpact": "Cosa cambia",
+    "summaryImpactText": "L'ayanamsha sposta i gradi siderali dei pianeti; lo stile di case cambia come le aree della vita vengono divise attorno all'ascendente.",
+    "computing": "Calcolo della carta...",
+    "generate": "Genera intelligenza della carta ->",
+    "groups": {
+      "lahiri": {
+        "label": "Lahiri",
+        "origin": "Standard nazionale indiano",
+        "description": "L'ayanamsha vedico moderno più usato. È una scelta equilibrata per temi natali, dasha e report per clienti.",
+        "method": "Lahiri ancora lo zodiaco siderale al riferimento tradizionale Chitra/Spica usato in panchang ed effemeridi indiane.",
+        "summary": "Riferimento vedico principale, ideale per interpretazioni generali."
+      },
+      "raman": {
+        "label": "Raman",
+        "origin": "Linea di B. V. Raman",
+        "description": "Un quadro vedico comparativo associato alla scuola del Dr. B. V. Raman. Utile per controllare una diversa correzione siderale.",
+        "method": "Raman usa uno scarto di precessione diverso da Lahiri, quindi pianeti e cuspidi possono spostarsi vicino ai confini.",
+        "summary": "Riferimento vedico comparativo per verificare tradizioni di timing alternative."
+      },
+      "krishnamurti": {
+        "label": "Krishnamurti",
+        "origin": "Tradizione astrologica KP",
+        "description": "Krishnamurti Paddhati supporta un lavoro predittivo dettagliato, soprattutto con case Placidus.",
+        "method": "KP combina il proprio ayanamsha con cuspidi di casa e analisi dei sub-lord, utile per letture orientate agli eventi.",
+        "summary": "Riferimento KP per predizione dettagliata e analisi degli eventi."
+      }
+    },
+    "styles": {
+      "whole_sign": {
+        "label": "Whole Sign classico",
+        "description": "Ogni segno diventa una casa completa dal segno ascendente. È il default vedico più chiaro."
+      },
+      "equal": {
+        "label": "Case uguali",
+        "description": "Ogni casa misura esattamente 30 gradi dal grado ascendente. Mantiene dimensioni uniformi."
+      },
+      "placidus": {
+        "label": "Placidus",
+        "description": "Sistema a quadranti basato sul tempo, popolare in astrologia occidentale e centrale in molti flussi KP."
+      },
+      "koch": {
+        "label": "Koch",
+        "description": "Sistema a quadranti basato sul luogo di nascita che evidenzia il moto locale dell'ascendente."
+      },
+      "campanus": {
+        "label": "Campanus",
+        "description": "Divide il primo verticale in archi uguali, offrendo una lettura spaziale delle case."
+      },
+      "regiomontanus": {
+        "label": "Regiomontanus",
+        "description": "Usa divisioni uguali dell'equatore celeste, storicamente importante nell'astrologia medievale."
+      }
+    }
+  },
   "login": {
     "kicker": "Bentornato",
     "heading": "Accedi",

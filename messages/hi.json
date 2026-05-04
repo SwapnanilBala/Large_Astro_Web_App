@@ -80,6 +80,72 @@
     "stickyComplete": "{count}/{total} पूर्ण",
     "stickyContinue": "जारी रखें"
   },
+  "engineSelect": {
+    "kicker": "गणना फ्रेमवर्क",
+    "heading": "पहले परंपरा चुनें, फिर शैली",
+    "lead": "सभी इंजनों को एक साथ दिखाने के बजाय पहले सिडेरियल परंपरा चुनें। हर परंपरा अपना स्रोत बताती है और फिर उसके भीतर घरों की शैली चुनी जा सकती है।",
+    "guidanceStep1": "1. अयनांश परंपरा चुनें",
+    "guidanceStep2": "2. ड्रॉपडाउन से घर शैली चुनें",
+    "guidanceStep3": "3. उसी विधि से चार्ट बनाएं",
+    "recommended": "अनुशंसित",
+    "styleLabel": "चार्ट शैली",
+    "selectedKicker": "चुनी गई विधि",
+    "summaryAyanamsha": "अयनांश",
+    "summaryStyle": "घर शैली",
+    "summaryImpact": "क्या बदलता है",
+    "summaryImpactText": "अयनांश ग्रहों के सिडेरियल अंशों को समायोजित करता है; घर शैली लग्न के आसपास जीवन क्षेत्रों का विभाजन बदलती है।",
+    "computing": "चार्ट की गणना हो रही है...",
+    "generate": "चार्ट इंटेलिजेंस बनाएं ->",
+    "groups": {
+      "lahiri": {
+        "label": "लाहिड़ी",
+        "origin": "भारतीय राष्ट्रीय मानक",
+        "description": "आधुनिक वैदिक ज्योतिष में सबसे अधिक उपयोग होने वाला अयनांश। जन्म कुंडली, दशा और क्लाइंट रिपोर्ट के लिए संतुलित डिफॉल्ट।",
+        "method": "लाहिड़ी सिडेरियल राशि चक्र को पारंपरिक चित्रा/स्पिका संदर्भ से जोड़ता है, जिसका उपयोग भारतीय पंचांग और एफेमेरिस में होता है।",
+        "summary": "सामान्य चार्ट व्याख्या के लिए मुख्य वैदिक संदर्भ।"
+      },
+      "raman": {
+        "label": "रमन",
+        "origin": "बी. वी. रमन परंपरा",
+        "description": "डॉ. बी. वी. रमन की परंपरा से जुड़ा तुलनात्मक वैदिक फ्रेम। दूसरी सिडेरियल correction जांचने के लिए उपयोगी।",
+        "method": "रमन, लाहिड़ी से अलग precession offset इस्तेमाल करता है, इसलिए सीमा के पास ग्रह और cusp हल्के बदल सकते हैं।",
+        "summary": "वैकल्पिक timing परंपराओं की तुलना के लिए वैदिक संदर्भ।"
+      },
+      "krishnamurti": {
+        "label": "कृष्णमूर्ति",
+        "origin": "KP ज्योतिष परंपरा",
+        "description": "कृष्णमूर्ति पद्धति सूक्ष्म predictive काम में सहायक है, खासकर Placidus houses के साथ।",
+        "method": "KP अपना अयनांश, house cusps और sub-lord analysis जोड़ता है, इसलिए event-focused reading में लोकप्रिय है।",
+        "summary": "विस्तृत prediction और event analysis के लिए KP संदर्भ।"
+      }
+    },
+    "styles": {
+      "whole_sign": {
+        "label": "क्लासिक Whole Sign",
+        "description": "लग्न राशि से हर राशि एक पूरा घर बनती है। यह सबसे सरल वैदिक डिफॉल्ट है।"
+      },
+      "equal": {
+        "label": "Equal Houses",
+        "description": "हर घर लग्न अंश से ठीक 30 डिग्री का होता है। इससे घरों का आकार समान रहता है।"
+      },
+      "placidus": {
+        "label": "Placidus",
+        "description": "समय-आधारित quadrant system, पश्चिमी ज्योतिष में लोकप्रिय और कई KP workflows में मुख्य।"
+      },
+      "koch": {
+        "label": "Koch",
+        "description": "जन्मस्थान-आधारित quadrant system जो लग्न की स्थानीय rising motion पर जोर देता है।"
+      },
+      "campanus": {
+        "label": "Campanus",
+        "description": "prime vertical को बराबर arcs में बांटता है और houses को spatial दृष्टि से देखता है।"
+      },
+      "regiomontanus": {
+        "label": "Regiomontanus",
+        "description": "celestial equator की बराबर divisions पर आधारित, medieval astrology में ऐतिहासिक रूप से महत्वपूर्ण।"
+      }
+    }
+  },
   "login": {
     "kicker": "वापस स्वागत है",
     "heading": "साइन इन",

@@ -80,6 +80,72 @@
     "stickyComplete": "{count}/{total} complete",
     "stickyContinue": "Continuer"
   },
+  "engineSelect": {
+    "kicker": "Cadre de calcul",
+    "heading": "Choisissez une tradition, puis un style",
+    "lead": "Au lieu d'afficher tous les moteurs en même temps, choisissez d'abord la tradition sidérale. Chaque tradition explique son origine, puis propose un style de maisons.",
+    "guidanceStep1": "1. Choisissez la tradition d'ayanamsha",
+    "guidanceStep2": "2. Sélectionnez le style de maisons",
+    "guidanceStep3": "3. Générez la carte avec cette méthode",
+    "recommended": "Recommandé",
+    "styleLabel": "Style de carte",
+    "selectedKicker": "Méthode sélectionnée",
+    "summaryAyanamsha": "Ayanamsha",
+    "summaryStyle": "Style de maisons",
+    "summaryImpact": "Ce qui change",
+    "summaryImpactText": "L'ayanamsha décale les degrés sidéraux des planètes; le style de maisons change la division des domaines de vie autour de l'ascendant.",
+    "computing": "Calcul de la carte...",
+    "generate": "Générer l'analyse de carte ->",
+    "groups": {
+      "lahiri": {
+        "label": "Lahiri",
+        "origin": "Standard national indien",
+        "description": "L'ayanamsha védique moderne le plus utilisé. C'est un choix stable pour les thèmes natals, les dashas et les rapports client.",
+        "method": "Lahiri ancre le zodiaque sidéral à la référence traditionnelle Chitra/Spica utilisée dans les panchangs et éphémérides indiens.",
+        "summary": "Référence védique principale, idéale pour l'interprétation générale."
+      },
+      "raman": {
+        "label": "Raman",
+        "origin": "Lignée de B. V. Raman",
+        "description": "Un cadre védique comparatif associé à l'école du Dr B. V. Raman. Utile pour vérifier une autre correction sidérale.",
+        "method": "Raman utilise un décalage de précession distinct de Lahiri, ce qui peut déplacer subtilement planètes et cuspides près des limites.",
+        "summary": "Référence védique comparative pour vérifier d'autres traditions de timing."
+      },
+      "krishnamurti": {
+        "label": "Krishnamurti",
+        "origin": "Tradition astrologique KP",
+        "description": "Krishnamurti Paddhati soutient un travail prédictif détaillé, surtout avec les maisons Placidus.",
+        "method": "KP combine son propre ayanamsha avec les cuspides de maisons et l'analyse des sous-seigneurs, très utile pour les événements.",
+        "summary": "Référence KP pour la prédiction détaillée et l'analyse événementielle."
+      }
+    },
+    "styles": {
+      "whole_sign": {
+        "label": "Whole Sign classique",
+        "description": "Chaque signe devient une maison complète à partir du signe ascendant. C'est le réglage védique le plus simple."
+      },
+      "equal": {
+        "label": "Maisons égales",
+        "description": "Chaque maison mesure exactement 30 degrés depuis le degré ascendant. Les tailles restent uniformes."
+      },
+      "placidus": {
+        "label": "Placidus",
+        "description": "Système quadrant basé sur le temps, populaire en astrologie occidentale et central dans de nombreux usages KP."
+      },
+      "koch": {
+        "label": "Koch",
+        "description": "Système quadrant basé sur le lieu de naissance, centré sur le mouvement local de l'ascendant."
+      },
+      "campanus": {
+        "label": "Campanus",
+        "description": "Divise le premier vertical en arcs égaux pour une lecture spatiale des maisons."
+      },
+      "regiomontanus": {
+        "label": "Regiomontanus",
+        "description": "Utilise des divisions égales de l'équateur céleste, historiquement important en astrologie médiévale."
+      }
+    }
+  },
   "login": {
     "kicker": "Bon Retour",
     "heading": "Se Connecter",

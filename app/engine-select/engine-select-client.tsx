@@ -1,13 +1,14 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { FiCheck } from "react-icons/fi";
 import {
   listEnginePresets,
-  HOUSE_SYSTEMS,
   DEFAULT_ENGINE_ID,
+  type EnginePreset,
 } from "@/lib/engines/engine-registry";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./engine-select.module.css";
 
 type EngineSelectClientProps = {
@@ -16,44 +17,56 @@ type EngineSelectClientProps = {
 };
 
 const engines = listEnginePresets();
-const houseSystems = HOUSE_SYSTEMS;
+const ayanamshaOrder = ["lahiri", "raman", "krishnamurti"] as const;
+
+type AyanamshaKey = (typeof ayanamshaOrder)[number];
+
+function ayanamshaKeyFor(engine: EnginePreset | undefined): AyanamshaKey {
+  if (!engine) return "lahiri";
+  if (engine.engine_id.startsWith("raman_")) return "raman";
+  if (engine.engine_id.startsWith("krishnamurti_")) return "krishnamurti";
+  return "lahiri";
+}
 
 export default function EngineSelectClient({
   profileParams,
   defaultEngineId,
 }: EngineSelectClientProps) {
   const router = useRouter();
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState(
     defaultEngineId || DEFAULT_ENGINE_ID
   );
   const [isPending, startTransition] = useTransition();
 
-  // Derive the currently-selected engine's house system code for the
-  // house system selector highlight
   const selectedEngine = engines.find((e) => e.engine_id === selectedId);
-  const selectedHouseCode = selectedEngine?.house_system_code ?? "whole_sign";
+  const selectedAyanamshaKey = ayanamshaKeyFor(selectedEngine);
+
+  const engineGroups = useMemo(
+    () =>
+      ayanamshaOrder.map((key) => {
+        const groupEngines = engines.filter((engine) =>
+          engine.engine_id.startsWith(`${key}_`)
+        );
+        const defaultEngine =
+          groupEngines.find((engine) => engine.house_system_code === "whole_sign") ??
+          groupEngines[0];
+
+        return {
+          key,
+          engines: groupEngines,
+          defaultEngine,
+        };
+      }),
+    []
+  );
 
   const handleSelectEngine = (engineId: string) => {
     setSelectedId(engineId);
   };
 
-  const handleSelectHouseSystem = (houseCode: string) => {
-    // When user picks a house system, try to find a preset that matches
-    // the current ayanamsha + new house system. If none exists, stay on
-    // the current preset (the house system badge will just reflect the
-    // engine preset's built-in house system).
-    if (!selectedEngine) return;
-
-    const match = engines.find(
-      (e) =>
-        e.ayanamsha === selectedEngine.ayanamsha &&
-        e.house_system_code === houseCode
-    );
-    if (match) {
-      setSelectedId(match.engine_id);
-    }
-    // If no matching preset exists for this ayanamsha+house combo,
-    // we don't change the engine (the preset defines the pairing).
+  const handleStyleChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSelectedId(event.target.value);
   };
 
   const handleGenerate = () => {
@@ -64,103 +77,132 @@ export default function EngineSelectClient({
     });
   };
 
+  const selectedHouseLabel = selectedEngine
+    ? t(`engineSelect.styles.${selectedEngine.house_system_code}.label`)
+    : "";
+  const selectedGroupLabel = t(`engineSelect.groups.${selectedAyanamshaKey}.label`);
+
   return (
     <section className={styles.panel}>
       {/* --- Hero --- */}
       <div className={`${styles.hero} ${styles.animHero}`}>
-        <p className={styles.kicker}>Calculation Framework</p>
-        <h1 className={styles.heading}>Choose Your Engine</h1>
+        <p className={styles.kicker}>{t("engineSelect.kicker")}</p>
+        <h1 className={styles.heading}>{t("engineSelect.heading")}</h1>
         <p className={styles.lead}>
-          Each engine uses a different ayanamsha correction to align the sidereal
-          zodiac with the fixed stars. The choice affects degree positions,
-          sign boundaries, and timing analysis. Lahiri is the standard Indian
-          government reference; Raman and Krishnamurti serve practitioners who
-          cross-reference multiple traditions.
+          {t("engineSelect.lead")}
         </p>
       </div>
 
-      {/* --- Engine Cards Grid --- */}
-      <div className={styles.grid}>
-        {engines.map((engine, index) => {
-          const isSelected = engine.engine_id === selectedId;
-          const isDefault = engine.engine_id === DEFAULT_ENGINE_ID;
+      <div className={styles.guidanceStrip}>
+        <span>{t("engineSelect.guidanceStep1")}</span>
+        <span>{t("engineSelect.guidanceStep2")}</span>
+        <span>{t("engineSelect.guidanceStep3")}</span>
+      </div>
+
+      {/* --- Tradition Groups --- */}
+      <div className={styles.engineGroups}>
+        {engineGroups.map((group, index) => {
+          const activeEngine =
+            group.engines.find((engine) => engine.engine_id === selectedId) ??
+            group.defaultEngine;
+          const isGroupSelected = group.key === selectedAyanamshaKey;
+          const isRecommended = group.defaultEngine?.engine_id === DEFAULT_ENGINE_ID;
 
           return (
-            <button
-              key={engine.engine_id}
-              type="button"
-              className={`${styles.card} ${styles.animCard}${isSelected ? ` ${styles.cardSelected}` : ""}`}
+            <article
+              key={group.key}
+              className={`${styles.engineGroup} ${styles.animCard}${isGroupSelected ? ` ${styles.engineGroupSelected}` : ""}`}
               style={{ animationDelay: `${0.15 + index * 0.1}s` }}
-              onClick={() => handleSelectEngine(engine.engine_id)}
-              aria-pressed={isSelected}
             >
-              {/* Checkmark */}
-              <span
-                className={`${styles.cardCheck}${isSelected ? ` ${styles.cardCheckVisible}` : ""}`}
+              <button
+                type="button"
+                className={styles.groupSelectButton}
+                onClick={() => activeEngine && handleSelectEngine(activeEngine.engine_id)}
+                aria-pressed={isGroupSelected}
               >
-                <FiCheck size={16} strokeWidth={3} />
-              </span>
+                <span
+                  className={`${styles.cardCheck}${isGroupSelected ? ` ${styles.cardCheckVisible}` : ""}`}
+                  aria-hidden="true"
+                >
+                  <FiCheck size={16} strokeWidth={3} />
+                </span>
 
-              {/* Engine Name */}
-              <h2 className={styles.cardLabel}>
-                {engine.label}
-                {isDefault && (
-                  <span className={styles.cardDefaultTag}>
-                    Recommended
+                <span className={styles.groupText}>
+                  <span className={styles.groupMeta}>
+                    {t(`engineSelect.groups.${group.key}.origin`)}
                   </span>
-                )}
-              </h2>
-
-              {/* Badges */}
-              <div className={styles.cardBadges}>
-                <span className={`${styles.cardBadge} ${styles.cardBadgeAyanamsha}`}>
-                  {engine.ayanamsha}
+                  <span className={styles.groupTitleRow}>
+                    <span className={styles.groupTitle}>
+                      {t(`engineSelect.groups.${group.key}.label`)}
+                    </span>
+                    {isRecommended && (
+                      <span className={styles.cardDefaultTag}>
+                        {t("engineSelect.recommended")}
+                      </span>
+                    )}
+                  </span>
                 </span>
-                <span className={`${styles.cardBadge} ${styles.cardBadgeHouse}`}>
-                  {engine.house_system}
-                </span>
-              </div>
+              </button>
 
-              {/* Description */}
-              <p className={styles.cardDesc}>{engine.description}</p>
-            </button>
+              <p className={styles.groupDescription}>
+                {t(`engineSelect.groups.${group.key}.description`)}
+              </p>
+              <p className={styles.groupOrigin}>
+                {t(`engineSelect.groups.${group.key}.method`)}
+              </p>
+
+              <label className={styles.styleLabel} htmlFor={`engine-style-${group.key}`}>
+                {t("engineSelect.styleLabel")}
+              </label>
+              <select
+                id={`engine-style-${group.key}`}
+                className={styles.styleSelect}
+                value={activeEngine?.engine_id ?? ""}
+                onChange={handleStyleChange}
+              >
+                {group.engines.map((engine) => (
+                  <option key={engine.engine_id} value={engine.engine_id}>
+                    {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                  </option>
+                ))}
+              </select>
+
+              <p className={styles.styleHint}>
+                {activeEngine
+                  ? t(`engineSelect.styles.${activeEngine.house_system_code}.description`)
+                  : ""}
+              </p>
+            </article>
           );
         })}
       </div>
 
-      {/* --- House System Selector --- */}
-      <div className={`${styles.houseSection} ${styles.animCard}`} style={{ animationDelay: "0.45s" }}>
-        <h3 className={styles.houseSectionTitle}>House System</h3>
-        <p className={styles.houseSectionLead}>
-          The house system determines how the sky is divided into twelve sectors.
-          Whole Sign is the Vedic default; Placidus is the most popular Western choice.
-        </p>
-        <div className={styles.houseGrid}>
-          {houseSystems.map((hs) => {
-            const isActive = hs.code === selectedHouseCode;
-            // Check if there's a preset available for this house system
-            // with the currently selected ayanamsha
-            const hasPreset = engines.some(
-              (e) =>
-                e.ayanamsha === selectedEngine?.ayanamsha &&
-                e.house_system_code === hs.code
-            );
-
-            return (
-              <button
-                key={hs.code}
-                type="button"
-                className={`${styles.houseChip}${isActive ? ` ${styles.houseChipActive}` : ""}${!hasPreset ? ` ${styles.houseChipDisabled}` : ""}`}
-                onClick={() => hasPreset && handleSelectHouseSystem(hs.code)}
-                disabled={!hasPreset}
-                title={hasPreset ? hs.description : `Not available with ${selectedEngine?.ayanamsha ?? "this"} ayanamsha`}
-                aria-pressed={isActive}
-              >
-                <span className={styles.houseChipLabel}>{hs.label}</span>
-              </button>
-            );
-          })}
+      {/* --- Selected Method Summary --- */}
+      <div className={`${styles.summarySection} ${styles.animCard}`} style={{ animationDelay: "0.45s" }}>
+        <div>
+          <p className={styles.summaryKicker}>{t("engineSelect.selectedKicker")}</p>
+          <h3 className={styles.summaryTitle}>
+            {selectedGroupLabel} - {selectedHouseLabel}
+          </h3>
         </div>
+        <dl className={styles.summaryList}>
+          <div>
+            <dt>{t("engineSelect.summaryAyanamsha")}</dt>
+            <dd>{t(`engineSelect.groups.${selectedAyanamshaKey}.summary`)}</dd>
+          </div>
+          <div>
+            <dt>{t("engineSelect.summaryStyle")}</dt>
+            <dd>
+              {selectedEngine
+                ? t(`engineSelect.styles.${selectedEngine.house_system_code}.description`)
+                : ""}
+            </dd>
+          </div>
+          <div>
+            <dt>{t("engineSelect.summaryImpact")}</dt>
+            <dd>{t("engineSelect.summaryImpactText")}</dd>
+          </div>
+        </dl>
       </div>
 
       {/* --- CTA Button --- */}
@@ -172,9 +214,9 @@ export default function EngineSelectClient({
           disabled={isPending}
         >
           {isPending ? (
-            <>Computing Chart&hellip;</>
+            <>{t("engineSelect.computing")}</>
           ) : (
-            <>Generate Chart Intelligence &rarr;</>
+            <>{t("engineSelect.generate")}</>
           )}
         </button>
       </div>
