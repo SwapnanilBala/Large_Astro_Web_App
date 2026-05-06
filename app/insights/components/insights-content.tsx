@@ -778,19 +778,123 @@ function ConstellationDivider() {
   );
 }
 
+type LifeDomainKey = LifeDomainInsight["key"];
+
+type DomainReadCopy = {
+  description: string;
+  clarity: string;
+  decisionRule: string;
+  boundaryRule: string;
+};
+
 /* ─── Domain Icon Map ─── */
-const DOMAIN_ICONS: Record<string, string> = {
+const DOMAIN_ICONS: Record<LifeDomainKey, string> = {
   love_life: "\u2661",
   career: "\u2726",
-  health: "\u2695",
   family: "\u2302",
-  finance: "\u2666",
-  education: "\u2710",
-  spirituality: "\u2638",
-  influence: "\u2605",
   inheritance: "\u229B",
-  cycles: "\u21BB",
+  influence: "\u2605",
+  life_cycle: "\u21BB",
+  travel_destinations: "\u2708",
 };
+
+const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
+  love_life: {
+    description:
+      "Separates attraction, partnership durability, emotional availability, and the timing that makes connection easier to sustain.",
+    clarity:
+      "Do not judge love from Venus alone. Read the 7th house for partnership, the 5th for romance, the house lord for delivery, and timing triggers for when the pattern becomes visible.",
+    decisionRule:
+      "A relationship signal is stronger when support, watchout, and timing notes repeat the same theme.",
+    boundaryRule:
+      "If the watchout contradicts the support, treat the watchout as the condition that must be managed before the support pays off.",
+  },
+  career: {
+    description:
+      "Distinguishes vocation, workload, authority, public reputation, service pressure, and the route through which professional recognition is built.",
+    clarity:
+      "Do not read career from the 10th house alone. Weigh the 10th sign, its lord, the 6th house work pattern, and Saturn's discipline filter together.",
+    decisionRule:
+      "Career moves are cleaner when the timing trigger reinforces both the 10th-house promise and the lord's placement.",
+    boundaryRule:
+      "If pressure houses are involved, advancement may require systems, mentors, and repeatable proof before visibility arrives.",
+  },
+  family: {
+    description:
+      "Clarifies home life, inherited emotional patterns, family support, private stability, and the habits that make belonging feel reliable.",
+    clarity:
+      "Read the 4th house for emotional ground, the 2nd for lineage and speech, the Moon for felt safety, and the house lord for where repair happens.",
+    decisionRule:
+      "Family guidance is strongest when the support pattern names the same need as the long-game statement.",
+    boundaryRule:
+      "When the watchout is active, protect steadiness first; resolution works better after the emotional baseline is restored.",
+  },
+  inheritance: {
+    description:
+      "Frames shared resources, legacy, debt, hidden obligations, family assets, and the maturity needed around resource transitions.",
+    clarity:
+      "Read the 8th house for transferred resources, the 2nd for stored value, Jupiter for stewardship, and the lord placement for the route of responsibility.",
+    decisionRule:
+      "Treat inheritance signals as practical planning prompts when they repeat across support, watchout, and timing sections.",
+    boundaryRule:
+      "If the watchout names hidden cost or delay, prioritize documentation, transparency, and patient sequencing.",
+  },
+  influence: {
+    description:
+      "Looks at public impact, allies, social reach, authority, reputation, and the conditions that help your voice move people.",
+    clarity:
+      "Read the 11th house for networks, the 10th for public standing, the Sun for visibility, and the lord for where influence is earned.",
+    decisionRule:
+      "Influence grows fastest when timing triggers amplify an existing support pattern rather than forcing visibility too early.",
+    boundaryRule:
+      "If the watchout names diffusion or delay, narrow the audience and make the message easier to repeat.",
+  },
+  life_cycle: {
+    description:
+      "Connects identity, reinvention, recovery cycles, resilience, and the periods where life asks for a cleaner version of self-direction.",
+    clarity:
+      "Read the 1st house for identity, the 8th for transformation, the Moon for adaptation, and the lord placement for the terrain of change.",
+    decisionRule:
+      "A life-cycle signal deserves priority when timing notes and long-game guidance both point toward the same kind of maturity.",
+    boundaryRule:
+      "If the watchout is active, slow the pace and make the next step smaller, clearer, and easier to sustain.",
+  },
+  travel_destinations: {
+    description:
+      "Clarifies long-distance travel, short journeys, relocation pull, foreign links, pilgrimage themes, and what makes a place feel meaningful.",
+    clarity:
+      "Read the 9th house for distance and meaning, the 3rd for movement and logistics, Jupiter for expansion, and the lord placement for travel purpose.",
+    decisionRule:
+      "Travel signals become practical when timing triggers support both opportunity and preparation.",
+    boundaryRule:
+      "If watchouts name friction, treat planning, documents, health, and timing buffers as part of the reading rather than afterthoughts.",
+  },
+};
+
+function buildDomainRules(domain: LifeDomainInsight) {
+  return [
+    {
+      label: "House rule",
+      body: `${domain.headline} Use this as the baseline before judging specific events.`,
+    },
+    {
+      label: "Evidence rule",
+      body:
+        domain.supporting_patterns[0] ??
+        "Give more weight to patterns that repeat across houses, lord placements, and timing indicators.",
+    },
+    {
+      label: "Timing rule",
+      body:
+        domain.timing_triggers[0] ??
+        "Use timing triggers as activation windows, not as isolated promises.",
+    },
+    {
+      label: "Action rule",
+      body: domain.guidance,
+    },
+  ];
+}
 
 /* ─── Animated Counter for Metric Values ─── */
 function AnimatedCounter({
@@ -881,6 +985,12 @@ export default function InsightsContent({
   const selectedDomainInsight =
     domainInsights.find((domain) => domain.key === selectedDomainKey) ??
     domainInsights[0];
+  const selectedDomainCopy = selectedDomainInsight
+    ? DOMAIN_READ_COPY[selectedDomainInsight.key]
+    : undefined;
+  const selectedDomainRules = selectedDomainInsight
+    ? buildDomainRules(selectedDomainInsight)
+    : [];
   const heroPlanetStrip = buildHeroPlanetMetadata(payload);
 
   const copyCurrentChartLink = async () => {
@@ -1381,7 +1491,7 @@ export default function InsightsContent({
                 heading="Life domain deep dives"
               />
               <p className={styles.sectionIntro}>
-                Choose a life area for a compact house, lord, and timing read.
+                Choose a life area for a full house, lord, timing, evidence, and rule-based read.
               </p>
 
               <p className={styles.domainSelectLabel}>Select a focus area</p>
@@ -1429,11 +1539,44 @@ export default function InsightsContent({
                     {selectedDomainInsight.overview}
                   </p>
 
+                  {selectedDomainCopy && (
+                    <div className={styles.domainClarityBlock}>
+                      <p className={styles.domainDeepDescription}>
+                        {selectedDomainCopy.description}
+                      </p>
+                      <div className={styles.domainStatementGrid}>
+                        <section className={styles.domainStatement}>
+                          <h4>Clarity statement</h4>
+                          <p>{selectedDomainCopy.clarity}</p>
+                        </section>
+                        <section className={styles.domainStatement}>
+                          <h4>Decision rule</h4>
+                          <p>{selectedDomainCopy.decisionRule}</p>
+                        </section>
+                        <section className={styles.domainStatement}>
+                          <h4>Boundary rule</h4>
+                          <p>{selectedDomainCopy.boundaryRule}</p>
+                        </section>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={styles.domainRulesPanel}>
+                    <h4>How this domain is being read</h4>
+                    <ol>
+                      {selectedDomainRules.map((rule) => (
+                        <li key={rule.label}>
+                          <strong>{rule.label}:</strong> {rule.body}
+                        </li>
+                      ))}
+                    </ol>
+                  </div>
+
                   <div className={styles.domainGrid}>
                     <section className={styles.domainCol}>
                       <h4>Support</h4>
                       <ul>
-                        {selectedDomainInsight.strengths.slice(0, 2).map((item) => (
+                        {selectedDomainInsight.strengths.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
@@ -1442,7 +1585,7 @@ export default function InsightsContent({
                       <section className={styles.domainCol}>
                         <h4>Watch</h4>
                         <ul>
-                          {selectedDomainInsight.watchouts.slice(0, 2).map((item) => (
+                          {selectedDomainInsight.watchouts.map((item) => (
                             <li key={item}>{item}</li>
                           ))}
                         </ul>
@@ -1451,16 +1594,30 @@ export default function InsightsContent({
                     <section className={styles.domainCol}>
                       <h4>Timing</h4>
                       <ul>
-                        {selectedDomainInsight.timing_triggers.slice(0, 2).map((item) => (
+                        {selectedDomainInsight.timing_triggers.map((item) => (
                           <li key={item}>{item}</li>
                         ))}
                       </ul>
                     </section>
+                    {selectedDomainInsight.supporting_patterns.length > 0 && (
+                      <section className={styles.domainCol}>
+                        <h4>Evidence</h4>
+                        <ul>
+                          {selectedDomainInsight.supporting_patterns.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
                   </div>
 
                   <p className={styles.domainGuidance}>
                     <strong>Guidance:</strong>{" "}
                     {selectedDomainInsight.guidance}
+                  </p>
+                  <p className={styles.domainLongGame}>
+                    <strong>Long game:</strong>{" "}
+                    {selectedDomainInsight.long_game}
                   </p>
                 </motion.article>
               </AnimatePresence>

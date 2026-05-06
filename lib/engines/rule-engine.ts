@@ -350,7 +350,7 @@ function buildDomainStrengths(
     );
   }
   strengths.push(dignitySummary(anchorPlanet));
-  return strengths.slice(0, 2);
+  return strengths.slice(0, 3);
 }
 
 function buildDomainWatchouts(
@@ -403,13 +403,14 @@ function domainTimingTriggers(
   const triggers: string[] = [
     `${primaryLord.name} periods and major transits move this area fastest.`,
     `${anchorPlanet.name} activations color timing through ${HOUSE_THEMES[anchorPlanet.house]}.`,
+    `Transits over house ${config.primary_house}, house ${config.secondary_house}, or ${primaryHouse.sign} should be treated as confirmation windows rather than standalone promises.`,
   ];
   if (primaryHouse.planets.length > 0) {
     triggers.push(
       `${primaryHouse.planets.join(", ")} activations make this topic louder.`
     );
   }
-  return triggers.slice(0, 2);
+  return triggers.slice(0, 3);
 }
 
 function domainSupportingPatterns(
@@ -423,7 +424,7 @@ function domainSupportingPatterns(
     `${secondaryHouse.sign} adds support through house ${secondaryHouse.house_number}.`,
     `${anchorPlanet.name} filters instinct through house ${anchorPlanet.house}.`,
     dignitySummary(primaryLord),
-  ].slice(0, 2);
+  ];
 }
 
 function domainLongGame(
@@ -433,8 +434,8 @@ function domainLongGame(
   domElement: string
 ): string {
   return (
-    `${label} improves when ${primaryLord.name}-led choices stay paced and consistent around ` +
-    `${HOUSE_THEMES[primaryHouse.house_number]}.`
+    `${label} improves when ${primaryLord.name}-led choices stay paced, measurable, and consistent around ` +
+    `${HOUSE_THEMES[primaryHouse.house_number]}. Use repeated evidence from the house lord, anchor planet, and timing triggers before treating a single event as decisive.`
   );
 }
 
@@ -464,7 +465,8 @@ function buildLifeDomainInsight(
 
   const overview =
     `${primaryHouse.sign} sets a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} tone for ${config.summary_focus}. ` +
-    `${primaryLord.name} in house ${primaryLord.house} links outcomes to ${HOUSE_THEMES[primaryLord.house]}.`;
+    `${primaryLord.name} in house ${primaryLord.house} links outcomes to ${HOUSE_THEMES[primaryLord.house]}. ` +
+    `The practical read is to separate the promise of house ${config.primary_house} from the delivery route of ${primaryLord.name}, then use ${anchorPlanet.name} as the instinctive filter.`;
 
   return {
     key: key as LifeDomainInsight["key"],
