@@ -1926,6 +1926,15 @@
   pointer-events: none;
 }
 
+.constellationDividerCompact {
+  height: 32px;
+  margin: -0.15rem 0 0;
+}
+
+.constellationDivider.constellationDividerCompact svg {
+  height: 32px;
+}
+
 .constellationDivider svg {
   width: 100%;
   max-width: 400px;

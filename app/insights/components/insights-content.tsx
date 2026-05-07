@@ -9,7 +9,6 @@ import { FiChevronDown, FiCopy, FiRefreshCw, FiGrid } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
-import LahiriPlacidusLagnaChart from "@/app/insights/components/lahiri-placidus-lagna-chart";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
@@ -760,9 +759,12 @@ function LockedFeaturePreview({
 }
 
 /* ─── Constellation Section Divider ─── */
-function ConstellationDivider() {
+function ConstellationDivider({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={styles.constellationDivider} aria-hidden="true">
+    <div
+      className={`${styles.constellationDivider} ${compact ? styles.constellationDividerCompact : ""}`}
+      aria-hidden="true"
+    >
       <svg viewBox="0 0 400 48" fill="none">
         <circle className={styles.constellationDot} cx="40" cy="24" r="2" />
         <circle className={styles.constellationDot} cx="120" cy="16" r="1.5" />
@@ -1249,18 +1251,9 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
 
-          {/* Lahiri Placidus North Indian Lagna chart */}
-          <motion.div
-            className={`${styles.cardLahiriPlacidus} ${styles.cardDepthFront}`}
-            variants={bentoItemFromLeft}
-          >
-            <PanelErrorBoundary panelName="Lahiri Placidus Lagna Chart">
-              <LahiriPlacidusLagnaChart queryString={historyQs} />
-            </PanelErrorBoundary>
-          </motion.div>
         </motion.div>
 
-        <ConstellationDivider />
+        <ConstellationDivider compact />
 
         {/* ─── Forecasts & Timing (Collapsible) ─── */}
         <ChartStrengthMap payload={payload} />
