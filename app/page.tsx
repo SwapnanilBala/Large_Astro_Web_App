@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
-import { HiOutlineSparkles, HiOutlineChevronDown } from "react-icons/hi2";
+import { HiOutlineClock, HiOutlineSparkles, HiOutlineChevronDown } from "react-icons/hi2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
@@ -65,6 +65,8 @@ const getBirthTimeFallback = (value: string) =>
   COARSE_TIME_FALLBACKS[value] ?? COARSE_TIME_FALLBACKS.unknown;
 
 const INTAKE_DRAFT_STORAGE_KEY = "astro_intake_draft";
+const BIRTH_DETAILS_HISTORY_STORAGE_KEY = "astro_birth_details_history";
+const BIRTH_DETAILS_HISTORY_LIMIT = 5;
 
 type StoredIntakeDraft = {
   draft: ProfileQueryInput;
@@ -72,11 +74,97 @@ type StoredIntakeDraft = {
   coarseTime: string;
 };
 
+type BirthDetailsHistoryEntry = StoredIntakeDraft & {
+  id: string;
+  savedAt: string;
+};
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
   timeZoneId: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : ""
 });
+
+const profileKeys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
+
+function normalizeProfileDraft(value: unknown): ProfileQueryInput | null {
+  if (!value || typeof value !== "object") return null;
+
+  const source = value as Record<string, unknown>;
+  const isValid = profileKeys.every(
+    (key) => source[key] === undefined || typeof source[key] === "string",
+  );
+  if (!isValid) return null;
+
+  return { ...profileInitialState, ...source } as ProfileQueryInput;
+}
+
+function buildHistoryKey(entry: StoredIntakeDraft) {
+  const birthTime = entry.unknownTime
+    ? getBirthTimeFallback(entry.coarseTime || "unknown")
+    : entry.draft.birthTime;
+
+  return [
+    entry.draft.name,
+    entry.draft.birthDate,
+    birthTime,
+    entry.unknownTime ? entry.coarseTime : "exact",
+    entry.draft.country,
+    entry.draft.state,
+    entry.draft.city,
+    entry.draft.latitude,
+    entry.draft.longitude,
+  ]
+    .map((value) => value.trim().toLowerCase())
+    .join("|");
+}
+
+function createHistoryId() {
+  return globalThis.crypto?.randomUUID?.() ?? `history-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function parseBirthDetailsHistory(): BirthDetailsHistoryEntry[] {
+  try {
+    const stored = localStorage.getItem(BIRTH_DETAILS_HISTORY_STORAGE_KEY);
+    if (!stored) return [];
+
+    const parsed = JSON.parse(stored);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed
+      .map((item): BirthDetailsHistoryEntry | null => {
+        if (!item || typeof item !== "object") return null;
+
+        const source = item as Record<string, unknown>;
+        const draft = normalizeProfileDraft(source.draft);
+        if (!draft) return null;
+
+        return {
+          id: typeof source.id === "string" ? source.id : createHistoryId(),
+          savedAt: typeof source.savedAt === "string" ? source.savedAt : new Date().toISOString(),
+          draft,
+          unknownTime: typeof source.unknownTime === "boolean" ? source.unknownTime : false,
+          coarseTime: typeof source.coarseTime === "string" ? source.coarseTime : "",
+        };
+      })
+      .filter((entry): entry is BirthDetailsHistoryEntry => entry !== null)
+      .slice(0, BIRTH_DETAILS_HISTORY_LIMIT);
+  } catch {
+    return [];
+  }
+}
+
+function formatHistoryDate(value: string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
 
 export default function Home() {
   const [unknownTime, setUnknownTime] = useState(false);
@@ -87,6 +175,8 @@ export default function Home() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latLonExpanded, setLatLonExpanded] = useState(false);
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
+  const [birthDetailsHistory, setBirthDetailsHistory] = useState<BirthDetailsHistoryEntry[]>([]);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [draftSaved, setDraftSaved] = useState(false);
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -304,6 +394,10 @@ export default function Home() {
     }
   }, []);
 
+  useEffect(() => {
+    setBirthDetailsHistory(parseBirthDetailsHistory());
+  }, []);
+
   /* ── Auto-save draft to localStorage (debounced 500ms) ── */
   useEffect(() => {
     if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
@@ -514,6 +608,37 @@ export default function Home() {
     setDraft((previous) => ({ ...previous, [field]: value }));
   };
 
+  const saveBirthDetailsHistory = useCallback((entry: StoredIntakeDraft) => {
+    try {
+      const currentHistory = parseBirthDetailsHistory();
+      const entryKey = buildHistoryKey(entry);
+      const nextEntry: BirthDetailsHistoryEntry = {
+        ...entry,
+        id: createHistoryId(),
+        savedAt: new Date().toISOString(),
+      };
+      const nextHistory = [
+        nextEntry,
+        ...currentHistory.filter((item) => buildHistoryKey(item) !== entryKey),
+      ].slice(0, BIRTH_DETAILS_HISTORY_LIMIT);
+
+      localStorage.setItem(BIRTH_DETAILS_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+      setBirthDetailsHistory(nextHistory);
+    } catch {
+      // History is a convenience; chart generation should still continue.
+    }
+  }, []);
+
+  const restoreBirthDetailsHistory = useCallback((entry: BirthDetailsHistoryEntry) => {
+    setDraft({ ...profileInitialState, ...entry.draft });
+    setUnknownTime(entry.unknownTime);
+    setCoarseTime(entry.coarseTime);
+    setHistoryExpanded(false);
+    setDraftSaved(true);
+    if (draftSavedDisplayTimer.current) clearTimeout(draftSavedDisplayTimer.current);
+    draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
+  }, []);
+
   // Smart fill parser - handles various formats
   const parseSmartFill = (text: string) => {
     const parts = text.split(',').map(p => p.trim());
@@ -678,6 +803,15 @@ export default function Home() {
     params.set("birthTimeAccuracy", birthTimeAccuracy);
     params.set("birthTimeSource", unknownTime ? "fallback" : "exact");
     params.set("birthTimeFallback", unknownTime ? "true" : "false");
+
+    saveBirthDetailsHistory({
+      draft: {
+        ...draft,
+        birthTime: unknownTime ? "" : draft.birthTime,
+      },
+      unknownTime,
+      coarseTime,
+    });
 
     router.push(`/engine-select?${params.toString()}`);
   };
@@ -883,6 +1017,67 @@ export default function Home() {
               </div>
 
               {/* ── Name Field ── */}
+              {/* Recent birth details */}
+              <div className={styles.birthHistoryWrapper}>
+                <button
+                  type="button"
+                  className={styles.birthHistoryToggle}
+                  onClick={() => setHistoryExpanded((expanded) => !expanded)}
+                  aria-expanded={historyExpanded}
+                  aria-controls="birth-details-history-panel"
+                >
+                  <HiOutlineClock />
+                  <span>{t("home.birthHistoryToggle")}</span>
+                  {birthDetailsHistory.length > 0 && (
+                    <span className={styles.birthHistoryCount}>
+                      {t("home.birthHistoryCount", { count: String(birthDetailsHistory.length) })}
+                    </span>
+                  )}
+                  <HiOutlineChevronDown className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`} />
+                </button>
+
+                {historyExpanded && (
+                  <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
+                    {birthDetailsHistory.length > 0 ? (
+                      <div className={styles.birthHistoryList}>
+                        {birthDetailsHistory.map((entry) => {
+                          const location = [entry.draft.city, entry.draft.state, entry.draft.country]
+                            .filter((part) => part.trim().length > 0)
+                            .join(", ");
+                          const coarseTimeKey = entry.coarseTime
+                            ? `home.coarse${entry.coarseTime.charAt(0).toUpperCase()}${entry.coarseTime.slice(1)}`
+                            : "home.coarseUnknown";
+                          const timeLabel = entry.unknownTime
+                            ? t("home.birthHistoryApproxTime", { time: t(coarseTimeKey) })
+                            : entry.draft.birthTime;
+
+                          return (
+                            <button
+                              key={entry.id}
+                              type="button"
+                              className={styles.birthHistoryItem}
+                              onClick={() => restoreBirthDetailsHistory(entry)}
+                            >
+                              <span className={styles.birthHistoryName}>
+                                {entry.draft.name || t("home.birthHistoryUnnamed")}
+                              </span>
+                              <span className={styles.birthHistoryMeta}>
+                                {[entry.draft.birthDate, timeLabel, location].filter(Boolean).join(" - ")}
+                              </span>
+                              <span className={styles.birthHistorySavedAt}>
+                                {formatHistoryDate(entry.savedAt)}
+                              </span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <p className={styles.birthHistoryEmpty}>{t("home.birthHistoryEmpty")}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className={styles.premiumField}>
                 <PremiumInput
                   label={t("home.formName")}
