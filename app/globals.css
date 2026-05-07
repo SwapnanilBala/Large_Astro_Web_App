@@ -9538,6 +9538,14 @@ html[data-theme="light"] .shadbala-row-header {
   margin-bottom: 0.75rem;
 }
 
+.yoga-card-metrics {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
 .yoga-card-titles {
   display: flex;
   flex-direction: column;
@@ -9597,6 +9605,20 @@ html[data-theme="light"] .shadbala-row-header {
   letter-spacing: 0.04rem;
   color: var(--ink-soft);
   margin-left: 0.2rem;
+}
+
+.yoga-occurrence {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(108, 225, 212, 0.28);
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--accent-aqua);
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 /* ── Planet Chips ── */
@@ -9710,6 +9732,12 @@ html[data-theme="light"] .yoga-planet-chip {
 
 html[data-theme="light"] .yoga-strength-dot {
   background: rgba(0, 0, 0, 0.08);
+}
+
+html[data-theme="light"] .yoga-occurrence {
+  background: rgba(17, 126, 124, 0.08);
+  border-color: rgba(17, 126, 124, 0.22);
+  color: #117e7c;
 }
 
 html[data-theme="light"] .yoga-card-cancellation {

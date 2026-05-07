@@ -47,27 +47,6 @@ function getLifetimeImplications(yogaName: string, category: string): string {
   );
 }
 
-function calculateManifestationPercentage(strength: StrengthGroup, category: string): number {
-  const basePercentages: Record<StrengthGroup, number> = {
-    strong: 85,
-    moderate: 65,
-    weak: 40,
-  };
-
-  const categoryBoost: Record<string, number> = {
-    mahapurusha: 15,
-    wealth: 12,
-    benefic: 10,
-    challenging: -5,
-    viparita: 8,
-    nabhasa: 5,
-  };
-
-  const base = basePercentages[strength];
-  const boost = categoryBoost[category] || 0;
-  return Math.min(99, Math.max(20, base + boost));
-}
-
 function getActivationTimeWindow(strength: StrengthGroup): string {
   const windows: Record<StrengthGroup, string> = {
     strong: "Lifetime (especially 25-60 years)",
@@ -210,7 +189,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
             Manifestation Chance
           </p>
           <p style={{ margin: 0, fontSize: "1.35rem", fontWeight: 700, color: "rgba(255, 215, 100, 0.95)" }}>
-            {calculateManifestationPercentage(yoga.strength, yoga.category)}%
+            {yoga.occurrence_chance}%
           </p>
         </div>
         <div>

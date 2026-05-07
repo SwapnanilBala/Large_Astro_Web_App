@@ -85,7 +85,12 @@ function YogaCard({ yoga }: { yoga: YogaDetectionResult }) {
           <h3 className="yoga-card-name">{yoga.name}</h3>
           <span className="yoga-card-sanskrit">{yoga.sanskrit}</span>
         </div>
-        <StrengthIndicator strength={yoga.strength} />
+        <div className="yoga-card-metrics">
+          <StrengthIndicator strength={yoga.strength} />
+          <span className="yoga-occurrence">
+            {yoga.occurrence_chance}% chance
+          </span>
+        </div>
       </header>
 
       <div className="yoga-card-planets">
