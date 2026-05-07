@@ -72,6 +72,13 @@ export const HOUSE_SYSTEMS: HouseSystemInfo[] = [
 
 const AYANAMSHAS: AyanamshaInfo[] = [
   {
+    key: "fagan_bradley",
+    label: "Fagan-Bradley",
+    sidereal_mode_name: "SE_SIDM_FAGAN_BRADLEY",
+    classicDescription:
+      "Western sidereal ayanamsha used by the Fagan-Bradley tradition with whole-sign houses.",
+  },
+  {
     key: "lahiri",
     label: "Lahiri",
     sidereal_mode_name: "SE_SIDM_LAHIRI",
@@ -91,6 +98,20 @@ const AYANAMSHAS: AyanamshaInfo[] = [
     sidereal_mode_name: "SE_SIDM_KRISHNAMURTI",
     classicDescription:
       "KP-oriented ayanamsha option for clients who compare multiple calculation traditions.",
+  },
+  {
+    key: "pushyapaksha",
+    label: "Pushyapaksha",
+    sidereal_mode_name: "SE_SIDM_TRUE_PUSHYA",
+    classicDescription:
+      "Pushya-star anchored sidereal option using delta Cancri with whole-sign houses.",
+  },
+  {
+    key: "yukteshwar",
+    label: "Yukteshwar",
+    sidereal_mode_name: "SE_SIDM_YUKTESHWAR",
+    classicDescription:
+      "Sri Yukteshwar-inspired ayanamsha option for comparative sidereal chart analysis.",
   },
 ];
 

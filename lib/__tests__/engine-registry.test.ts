@@ -24,6 +24,12 @@ describe("engine-registry", () => {
       expect(ENGINE_PRESETS).toHaveProperty("krishnamurti_classic");
     });
 
+    it("has the additional requested ayanamsha presets", () => {
+      expect(ENGINE_PRESETS).toHaveProperty("fagan_bradley_classic");
+      expect(ENGINE_PRESETS).toHaveProperty("pushyapaksha_classic");
+      expect(ENGINE_PRESETS).toHaveProperty("yukteshwar_classic");
+    });
+
     it("each preset has all required fields", () => {
       for (const [id, preset] of Object.entries(ENGINE_PRESETS)) {
         expect(preset).toHaveProperty("engine_id");
@@ -57,7 +63,14 @@ describe("engine-registry", () => {
     });
 
     it("has every house system for each ayanamsha", () => {
-      const ayanamshaKeys = ["lahiri", "raman", "krishnamurti"];
+      const ayanamshaKeys = [
+        "fagan_bradley",
+        "lahiri",
+        "raman",
+        "krishnamurti",
+        "pushyapaksha",
+        "yukteshwar",
+      ];
       const expectedSuffixes = HOUSE_SYSTEMS.map((system) =>
         system.code === "whole_sign" ? "classic" : system.code
       );
@@ -70,7 +83,14 @@ describe("engine-registry", () => {
     });
 
     it("each preset has a valid sidereal mode name", () => {
-      const validModes = ["SE_SIDM_LAHIRI", "SE_SIDM_RAMAN", "SE_SIDM_KRISHNAMURTI"];
+      const validModes = [
+        "SE_SIDM_FAGAN_BRADLEY",
+        "SE_SIDM_LAHIRI",
+        "SE_SIDM_RAMAN",
+        "SE_SIDM_KRISHNAMURTI",
+        "SE_SIDM_TRUE_PUSHYA",
+        "SE_SIDM_YUKTESHWAR",
+      ];
       for (const preset of Object.values(ENGINE_PRESETS)) {
         expect(validModes).toContain(preset.sidereal_mode_name);
       }
@@ -124,6 +144,13 @@ describe("engine-registry", () => {
       expect(preset.sidereal_mode_name).toBe("SE_SIDM_KRISHNAMURTI");
     });
 
+    it("returns correct preset for pushyapaksha_classic", () => {
+      const preset = getEnginePreset("pushyapaksha_classic");
+      expect(preset.engine_id).toBe("pushyapaksha_classic");
+      expect(preset.ayanamsha).toBe("Pushyapaksha");
+      expect(preset.sidereal_mode_name).toBe("SE_SIDM_TRUE_PUSHYA");
+    });
+
     it("falls back to default for invalid engine_id", () => {
       const preset = getEnginePreset("nonexistent_engine");
       expect(preset.engine_id).toBe("lahiri_classic");
@@ -145,6 +172,9 @@ describe("engine-registry", () => {
       expect(ids).toContain("raman_classic");
       expect(ids).toContain("krishnamurti_classic");
       expect(ids).toContain("krishnamurti_placidus");
+      expect(ids).toContain("fagan_bradley_placidus");
+      expect(ids).toContain("pushyapaksha_placidus");
+      expect(ids).toContain("yukteshwar_placidus");
       expect(ids).toContain("lahiri_koch");
       expect(ids).toContain("raman_campanus");
       expect(ids).toContain("krishnamurti_regiomontanus");
