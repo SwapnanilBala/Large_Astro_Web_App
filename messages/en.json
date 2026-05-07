@@ -127,6 +127,27 @@
         "description": "The Krishnamurti Paddhati approach supports fine-grained predictive work, especially when paired with Placidus houses.",
         "method": "KP combines its own ayanamsha with house cusps and sub-lord analysis, making it popular for event-focused readings.",
         "summary": "KP-oriented reference for detailed prediction and event analysis."
+      },
+      "fagan_bradley": {
+        "label": "Fagan-Bradley",
+        "origin": "Western sidereal standard",
+        "description": "A Western sidereal ayanamsha used for tropical-to-sidereal comparisons and historically grounded sidereal chart work.",
+        "method": "Fagan-Bradley follows the Swiss Ephemeris reference value of 24.042044444 degrees at JD 2433282.42346.",
+        "summary": "Western sidereal reference for comparative chart analysis."
+      },
+      "pushyapaksha": {
+        "label": "Pushyapaksha",
+        "origin": "Pushya star anchor",
+        "description": "A fixed-star ayanamsha that anchors Pushya through delta Cancri, useful when the reading needs a star-based sidereal frame.",
+        "method": "Pushyapaksha follows the True Pushya rule: Asellus Australis / delta Cancri is set to 16 degrees Cancer.",
+        "summary": "Star-anchored reference using delta Cancri at 16 degrees Cancer."
+      },
+      "yukteshwar": {
+        "label": "Yukteshwar",
+        "origin": "Sri Yukteshwar tradition",
+        "description": "A comparative sidereal option inspired by Sri Yukteshwar, useful when clients or practitioners request this lineage.",
+        "method": "Yukteshwar follows the Swiss Ephemeris reference value 360 - 338.917778 degrees at J1900.0.",
+        "summary": "Sri Yukteshwar-inspired reference for alternate sidereal comparison."
       }
     },
     "styles": {

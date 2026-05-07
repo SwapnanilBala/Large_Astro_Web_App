@@ -17,7 +17,14 @@ type EngineSelectClientProps = {
 };
 
 const engines = listEnginePresets();
-const ayanamshaOrder = ["lahiri", "raman", "krishnamurti"] as const;
+const ayanamshaOrder = [
+  "lahiri",
+  "raman",
+  "krishnamurti",
+  "fagan_bradley",
+  "pushyapaksha",
+  "yukteshwar",
+] as const;
 
 type AyanamshaKey = (typeof ayanamshaOrder)[number];
 
@@ -25,6 +32,9 @@ function ayanamshaKeyFor(engine: EnginePreset | undefined): AyanamshaKey {
   if (!engine) return "lahiri";
   if (engine.engine_id.startsWith("raman_")) return "raman";
   if (engine.engine_id.startsWith("krishnamurti_")) return "krishnamurti";
+  if (engine.engine_id.startsWith("fagan_bradley_")) return "fagan_bradley";
+  if (engine.engine_id.startsWith("pushyapaksha_")) return "pushyapaksha";
+  if (engine.engine_id.startsWith("yukteshwar_")) return "yukteshwar";
   return "lahiri";
 }
 

@@ -122,6 +122,27 @@
         "description": "Krishnamurti Paddhati soutient un travail prédictif détaillé, surtout avec les maisons Placidus.",
         "method": "KP combine son propre ayanamsha avec les cuspides de maisons et l'analyse des sous-seigneurs, très utile pour les événements.",
         "summary": "Référence KP pour la prédiction détaillée et l'analyse événementielle."
+      },
+      "fagan_bradley": {
+        "label": "Fagan-Bradley",
+        "origin": "Standard sid?ral occidental",
+        "description": "Ayanamsha sid?ral occidental pour comparer tropical et sid?ral, utile dans les cartes sid?rales historiques.",
+        "method": "Fagan-Bradley suit la valeur Swiss Ephemeris de 24.042044444 degr?s au JD 2433282.42346.",
+        "summary": "R?f?rence sid?rale occidentale pour analyse comparative."
+      },
+      "pushyapaksha": {
+        "label": "Pushyapaksha",
+        "origin": "Ancrage de l??toile Pushya",
+        "description": "Ayanamsha ? ?toile fixe qui ancre Pushya via delta Cancri pour une lecture sid?rale fond?e sur une ?toile.",
+        "method": "Pushyapaksha suit la r?gle True Pushya: Asellus Australis / delta Cancri est plac? ? 16 degr?s du Cancer.",
+        "summary": "R?f?rence stellaire avec delta Cancri ? 16 degr?s du Cancer."
+      },
+      "yukteshwar": {
+        "label": "Yukteshwar",
+        "origin": "Tradition de Sri Yukteshwar",
+        "description": "Option sid?rale comparative inspir?e de Sri Yukteshwar pour les clients ou praticiens qui demandent cette lign?e.",
+        "method": "Yukteshwar suit la valeur Swiss Ephemeris: 360 - 338.917778 degr?s ? J1900.0.",
+        "summary": "R?f?rence inspir?e de Sri Yukteshwar pour comparaison sid?rale alternative."
       }
     },
     "styles": {

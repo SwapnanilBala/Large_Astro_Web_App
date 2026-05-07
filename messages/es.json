@@ -122,6 +122,27 @@
         "description": "Krishnamurti Paddhati apoya trabajo predictivo detallado, especialmente con casas Placidus.",
         "method": "KP combina su propio ayanamsha con cúspides de casas y análisis de subseñores, útil para lecturas enfocadas en eventos.",
         "summary": "Referencia KP para predicción detallada y análisis de eventos."
+      },
+      "fagan_bradley": {
+        "label": "Fagan-Bradley",
+        "origin": "Est?ndar sideral occidental",
+        "description": "Un ayanamsha sideral occidental para comparar tropical y sideral, ?til en cartas siderales hist?ricas.",
+        "method": "Fagan-Bradley sigue el valor de Swiss Ephemeris: 24.042044444 grados en JD 2433282.42346.",
+        "summary": "Referencia sideral occidental para an?lisis comparativo."
+      },
+      "pushyapaksha": {
+        "label": "Pushyapaksha",
+        "origin": "Ancla de la estrella Pushya",
+        "description": "Ayanamsha de estrella fija que ancla Pushya mediante delta Cancri para lecturas con marco sideral estelar.",
+        "method": "Pushyapaksha sigue la regla True Pushya: Asellus Australis / delta Cancri se fija en 16 grados de C?ncer.",
+        "summary": "Referencia estelar con delta Cancri a 16 grados de C?ncer."
+      },
+      "yukteshwar": {
+        "label": "Yukteshwar",
+        "origin": "Tradici?n de Sri Yukteshwar",
+        "description": "Opci?n sideral comparativa inspirada en Sri Yukteshwar para clientes o practicantes que solicitan este linaje.",
+        "method": "Yukteshwar sigue el valor de Swiss Ephemeris: 360 - 338.917778 grados en J1900.0.",
+        "summary": "Referencia inspirada en Sri Yukteshwar para comparaci?n sideral alternativa."
       }
     },
     "styles": {
