@@ -222,6 +222,21 @@ describe("swiss-ephemeris-engine", () => {
       expect(lahiri.planets[0].longitude).not.toBeCloseTo(raman.planets[0].longitude, 0);
     });
 
+    it("supports the requested ayanamsha engines end to end", () => {
+      const engineIds = [
+        "fagan_bradley_classic",
+        "pushyapaksha_classic",
+        "yukteshwar_classic",
+      ];
+
+      for (const engine_id of engineIds) {
+        const result = calculate({ ...birth, engine_id });
+        expect(result.planets).toHaveLength(9);
+        expect(result.houses).toHaveLength(12);
+        expect(SIGNS).toContain(result.ascendant.sign);
+      }
+    });
+
     it("julian day is a plausible number", () => {
       const result = calculate(birth);
       // J2000.0 = 2451545.0, any modern date should be near that
