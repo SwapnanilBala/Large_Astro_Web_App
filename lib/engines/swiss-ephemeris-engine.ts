@@ -83,6 +83,8 @@ const PLANET_BODIES: Record<string, Astronomy.Body> = {
 
 // J2000.0 epoch as Julian Day
 const J2000 = 2451545.0;
+const UNIX_EPOCH_JD = 2440587.5;
+const MILLISECONDS_PER_DAY = 86400000;
 
 // --------------------------------------------------------------------------
 // Ayanamsha reference values per sidereal mode
@@ -93,6 +95,8 @@ const J2000 = 2451545.0;
 // between the reference epoch and the target date.
 //
 // Sources / reference points:
+//   Fagan-Bradley - Swiss Ephemeris SE_SIDM_FAGAN_BRADLEY:
+//                   24.042044444 deg at JD 2433282.42346.
 //   Lahiri        – Indian Astronomical Ephemeris / Rashtriya Panchang:
 //                   23°51'11" at J2000.0 (JD 2451545.0), calibrated so that
 //                   Spica (Chitra) sits at 0° Libra (180° sidereal longitude).
@@ -100,6 +104,12 @@ const J2000 = 2451545.0;
 //   Krishnamurti  – KP system: 22°22'25.44" at J1900.0 (JD 2415020.0)
 //                   (derived so that KP ayanamsha ≈ 23°46'25" at J2000.0,
 //                   matching the standard Krishnamurti Paddhati tables)
+//   Yukteshwar    - Swiss Ephemeris SE_SIDM_YUKTESHWAR:
+//                   360 - 338.917778 deg at J1900.0.
+//
+// Pushyapaksha is handled separately below because Swiss Ephemeris defines
+// SE_SIDM_TRUE_PUSHYA from the fixed star delta Cancri (Asellus Australis),
+// not from a static reference epoch.
 // --------------------------------------------------------------------------
 
 interface AyanamsaRef {
@@ -110,6 +120,10 @@ interface AyanamsaRef {
 }
 
 const AYANAMSA_REF: Record<string, AyanamsaRef> = {
+  SE_SIDM_FAGAN_BRADLEY: {
+    value_deg: 24.042044444,
+    jd_epoch: 2433282.42346,
+  },
   SE_SIDM_LAHIRI: {
     value_deg: 23 + 51 / 60 + 11 / 3600, // 23°51'11" (IAE / Rashtriya Panchang)
     jd_epoch: 2451545.0,                   // J2000.0 (1 Jan 2000 12h TT)
@@ -122,6 +136,20 @@ const AYANAMSA_REF: Record<string, AyanamsaRef> = {
     value_deg: 22 + 22 / 60 + 25.44 / 3600, // 22°22'25.44"
     jd_epoch: 2415020.0,                      // J1900.0 (31 Dec 1899 12h TT)
   },
+  SE_SIDM_YUKTESHWAR: {
+    value_deg: 360 - 338.917778,
+    jd_epoch: 2415020.0,
+  },
+};
+
+// Swiss Ephemeris SE_SIDM_TRUE_PUSHYA anchors Pushya / Asellus Australis
+// (delta Cancri, deCnc) at 16 deg Cancer = 106 deg sidereal longitude.
+const TRUE_PUSHYA_TARGET_LONGITUDE = 106;
+const PUSHYA_DELTA_CNC = {
+  raHours: 8 + 44 / 60 + 41.09921 / 3600,
+  decDeg: 18 + 9 / 60 + 15.5034 / 3600,
+  pmRaMasPerYear: -17.67,
+  pmDecMasPerYear: -229.26,
 };
 
 // --------------------------------------------------------------------------
@@ -156,6 +184,22 @@ function degToRad(deg: number): number {
 
 function radToDeg(rad: number): number {
   return (rad * 180) / Math.PI;
+}
+
+function astroTimeFromJulianDay(jd_ut: number): Astronomy.AstroTime {
+  return Astronomy.MakeTime(new Date((jd_ut - UNIX_EPOCH_JD) * MILLISECONDS_PER_DAY));
+}
+
+function vectorFromEquatorial(raDeg: number, decDeg: number, time: Astronomy.AstroTime): Astronomy.Vector {
+  const ra = degToRad(raDeg);
+  const dec = degToRad(decDeg);
+  const cosDec = Math.cos(dec);
+  return new Astronomy.Vector(
+    cosDec * Math.cos(ra),
+    cosDec * Math.sin(ra),
+    Math.sin(dec),
+    time
+  );
 }
 
 // --------------------------------------------------------------------------
@@ -233,7 +277,29 @@ function precessionIAU2006(T: number): number {
 // general-precession polynomial evaluated above.
 // --------------------------------------------------------------------------
 
+function computeTruePushyaAyanamsa(jd_ut: number): number {
+  const yearsFromJ2000 = (jd_ut - J2000) / 365.25;
+  const ra0Deg = PUSHYA_DELTA_CNC.raHours * 15;
+  const dec0Deg = PUSHYA_DELTA_CNC.decDeg;
+  const raPmDegPerYear =
+    (PUSHYA_DELTA_CNC.pmRaMasPerYear / 1000 / 3600) / Math.cos(degToRad(dec0Deg));
+  const decPmDegPerYear = PUSHYA_DELTA_CNC.pmDecMasPerYear / 1000 / 3600;
+
+  const starVector = vectorFromEquatorial(
+    ra0Deg + raPmDegPerYear * yearsFromJ2000,
+    dec0Deg + decPmDegPerYear * yearsFromJ2000,
+    astroTimeFromJulianDay(jd_ut)
+  );
+  const ecliptic = Astronomy.Ecliptic(starVector);
+
+  return normalize(ecliptic.elon - TRUE_PUSHYA_TARGET_LONGITUDE);
+}
+
 function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
+  if (siderealModeName === "SE_SIDM_TRUE_PUSHYA") {
+    return computeTruePushyaAyanamsa(jd_ut);
+  }
+
   const ref = AYANAMSA_REF[siderealModeName] ?? AYANAMSA_REF.SE_SIDM_LAHIRI;
 
   const T_target = (jd_ut - J2000) / 36525.0;
