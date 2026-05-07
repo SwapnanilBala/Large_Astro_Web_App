@@ -234,7 +234,7 @@ function detectMahapurusha(
   description: string,
   effects: string,
   chart: YogaChartInput
-): YogaDetectionResult | null {
+): YogaCandidateResult | null {
   const planet = findPlanet(chart.planets, planetName);
   if (!planet) return null;
 
