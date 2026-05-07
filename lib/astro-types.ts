@@ -183,6 +183,7 @@ export type YogaDetectionResult = {
   category: "mahapurusha" | "wealth" | "benefic" | "challenging" | "viparita" | "nabhasa";
   present: boolean;
   strength: "strong" | "moderate" | "weak";
+  occurrence_chance: number;
   involved_planets: string[];
   description: string;
   effects: string;

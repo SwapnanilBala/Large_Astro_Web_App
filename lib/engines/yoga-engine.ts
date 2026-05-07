@@ -18,11 +18,14 @@ export interface YogaDetectionResult {
   category: "mahapurusha" | "wealth" | "benefic" | "challenging" | "viparita" | "nabhasa";
   present: boolean;
   strength: "strong" | "moderate" | "weak";
+  occurrence_chance: number;
   involved_planets: string[];
   description: string;
   effects: string;
   cancellation?: string;
 }
+
+type YogaCandidateResult = Omit<YogaDetectionResult, "occurrence_chance"> | YogaDetectionResult;
 
 interface YogaDefinition {
   id: string;
@@ -31,7 +34,7 @@ interface YogaDefinition {
   category: YogaDetectionResult["category"];
   description: string;
   effects: string;
-  detect: (chart: YogaChartInput) => YogaDetectionResult | null;
+  detect: (chart: YogaChartInput) => YogaCandidateResult | null;
 }
 
 // --------------------------------------------------------------------------
@@ -70,6 +73,7 @@ const PLANET_DEBILITATIONS: Record<string, string> = {
 };
 
 const NATURAL_BENEFICS = ["Jupiter", "Venus", "Mercury"];
+const YOGA_OCCURRENCE_THRESHOLD = 30;
 
 // --------------------------------------------------------------------------
 // Helper functions
@@ -145,6 +149,35 @@ function overallStrength(strengths: Array<"strong" | "moderate" | "weak">): "str
   if (strengths.includes("strong") && !strengths.includes("weak")) return "strong";
   if (strengths.includes("weak") && !strengths.includes("strong")) return "weak";
   return "moderate";
+}
+
+function calculateOccurrenceChance(yoga: Omit<YogaDetectionResult, "occurrence_chance">): number {
+  const strengthBase: Record<YogaDetectionResult["strength"], number> = {
+    strong: 88,
+    moderate: 65,
+    weak: 40,
+  };
+  const categoryAdjustment: Record<YogaDetectionResult["category"], number> = {
+    mahapurusha: 8,
+    wealth: 5,
+    benefic: 4,
+    challenging: -5,
+    viparita: 6,
+    nabhasa: 2,
+  };
+  const cancellationPenalty = yoga.cancellation ? 25 : 0;
+  const raw = strengthBase[yoga.strength] + categoryAdjustment[yoga.category] - cancellationPenalty;
+  return Math.min(99, Math.max(0, Math.round(raw)));
+}
+
+function withOccurrenceChance(
+  yoga: YogaCandidateResult
+): YogaDetectionResult {
+  if ("occurrence_chance" in yoga) return yoga;
+  return {
+    ...yoga,
+    occurrence_chance: calculateOccurrenceChance(yoga),
+  };
 }
 
 // --------------------------------------------------------------------------
@@ -946,8 +979,13 @@ export function detectYogas(chart: YogaChartInput): YogaDetectionResult[] {
   for (const definition of YOGA_DEFINITIONS) {
     try {
       const result = definition.detect(chart);
-      if (result && result.present) {
-        results.push(result);
+      const scoredResult = result ? withOccurrenceChance(result) : null;
+      if (
+        scoredResult &&
+        scoredResult.present &&
+        scoredResult.occurrence_chance >= YOGA_OCCURRENCE_THRESHOLD
+      ) {
+        results.push(scoredResult);
       }
     } catch {
       // Skip any yoga that fails detection gracefully
