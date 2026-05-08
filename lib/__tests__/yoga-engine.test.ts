@@ -32,10 +32,10 @@ function buildChart(): YogaChartInput {
 }
 
 describe("yoga-engine", () => {
-  it("defines exactly 50 unique yogas", () => {
+  it("defines exactly 100 unique yogas", () => {
     const ids = YOGA_DEFINITIONS.map((definition) => definition.id);
-    expect(YOGA_DEFINITIONS).toHaveLength(50);
-    expect(new Set(ids)).toHaveLength(50);
+    expect(YOGA_DEFINITIONS).toHaveLength(100);
+    expect(new Set(ids)).toHaveLength(100);
   });
 
   it("adds occurrence chance to every detected yoga", () => {

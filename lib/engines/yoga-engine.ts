@@ -22,6 +22,9 @@ export interface YogaDetectionResult {
   involved_planets: string[];
   description: string;
   effects: string;
+  activation_timing?: string;
+  key_traits?: string[];
+  detailed_description?: string;
   cancellation?: string;
 }
 
@@ -222,6 +225,47 @@ function withOccurrenceChance(
   };
 }
 
+function richYogaDetail(
+  name: string,
+  effects: string,
+  involvedPlanets: string[],
+  activationTiming: string,
+  traits: string[]
+): string {
+  const planetText = involvedPlanets.length > 0
+    ? ` It is carried by ${involvedPlanets.join(", ")}, so the result depends on how those planets are supported by dasha, transit, and practical choices.`
+    : "";
+  return `${name} is strongest when the chart's promise is reinforced by timing and repeated life circumstances.${planetText} ${effects} Watch for it to show most clearly during ${activationTiming.toLowerCase()}. Core traits: ${traits.join(", ")}.`;
+}
+
+function generatedYogaResult(
+  recipe: GeneratedYogaRecipe,
+  strength: YogaDetectionResult["strength"],
+  involvedPlanets: string[],
+  description: string
+): YogaCandidateResult {
+  return {
+    yoga_id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    present: true,
+    strength,
+    involved_planets: [...new Set(involvedPlanets)],
+    description,
+    effects: recipe.effects,
+    activation_timing: recipe.activation_timing,
+    key_traits: recipe.key_traits,
+    detailed_description: richYogaDetail(
+      recipe.name,
+      recipe.effects,
+      [...new Set(involvedPlanets)],
+      recipe.activation_timing,
+      recipe.key_traits
+    ),
+  };
+}
+
 // --------------------------------------------------------------------------
 // Mahapurusha Yoga helper
 // --------------------------------------------------------------------------
@@ -257,6 +301,168 @@ function detectMahapurusha(
   }
 
   return null;
+}
+
+type GeneratedYogaRecipe = {
+  id: string;
+  name: string;
+  sanskrit: string;
+  category: YogaDetectionResult["category"];
+  description: string;
+  effects: string;
+  activation_timing: string;
+  key_traits: string[];
+};
+
+type HouseLordPlacementRecipe = GeneratedYogaRecipe & {
+  fromHouse: number;
+  targetHouses: number[];
+};
+
+type MutualHouseLordRecipe = GeneratedYogaRecipe & {
+  houseA: number;
+  houseB: number;
+};
+
+type PlanetHouseRecipe = GeneratedYogaRecipe & {
+  planet: string;
+  targetHouses: number[];
+};
+
+type RelativePlanetRecipe = GeneratedYogaRecipe & {
+  basePlanet: string;
+  allowedPlanets: string[];
+  relativeHouses: number[];
+  minCount: number;
+};
+
+type ConjunctionRecipe = GeneratedYogaRecipe & {
+  planets: string[];
+};
+
+function houseList(houses: number[]): string {
+  return houses.map((house) => `${house}`).join("/");
+}
+
+function createHouseLordPlacementYoga(recipe: HouseLordPlacementRecipe): YogaDefinition {
+  return {
+    id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    description: recipe.description,
+    effects: recipe.effects,
+    detect: (chart) => {
+      const lord = houseLordPlanet(recipe.fromHouse, chart);
+      if (!lord.planet || !recipe.targetHouses.includes(lord.planet.house)) return null;
+      return generatedYogaResult(
+        recipe,
+        planetStrength(lord.lordName, lord.planet.sign),
+        [lord.lordName],
+        `The ${recipe.fromHouse}th lord (${lord.lordName}) is placed in house ${lord.planet.house}, matching the ${houseList(recipe.targetHouses)} house condition.`
+      );
+    },
+  };
+}
+
+function createMutualHouseLordYoga(recipe: MutualHouseLordRecipe): YogaDefinition {
+  return {
+    id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    description: recipe.description,
+    effects: recipe.effects,
+    detect: (chart) => {
+      const lordA = houseLordPlanet(recipe.houseA, chart);
+      const lordB = houseLordPlanet(recipe.houseB, chart);
+      if (!lordA.planet || !lordB.planet) return null;
+      const exchanged = lordA.planet.house === recipe.houseB && lordB.planet.house === recipe.houseA;
+      if (!exchanged) return null;
+      return generatedYogaResult(
+        recipe,
+        overallStrength([
+          planetStrength(lordA.lordName, lordA.planet.sign),
+          planetStrength(lordB.lordName, lordB.planet.sign),
+        ]),
+        [lordA.lordName, lordB.lordName],
+        `The ${recipe.houseA}th lord (${lordA.lordName}) and ${recipe.houseB}th lord (${lordB.lordName}) exchange houses.`
+      );
+    },
+  };
+}
+
+function createPlanetHouseYoga(recipe: PlanetHouseRecipe): YogaDefinition {
+  return {
+    id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    description: recipe.description,
+    effects: recipe.effects,
+    detect: (chart) => {
+      const planet = findPlanet(chart.planets, recipe.planet);
+      if (!planet || !recipe.targetHouses.includes(planet.house)) return null;
+      return generatedYogaResult(
+        recipe,
+        planetStrength(recipe.planet, planet.sign),
+        [recipe.planet],
+        `${recipe.planet} is placed in house ${planet.house}, matching the ${houseList(recipe.targetHouses)} house condition.`
+      );
+    },
+  };
+}
+
+function createRelativePlanetYoga(recipe: RelativePlanetRecipe): YogaDefinition {
+  return {
+    id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    description: recipe.description,
+    effects: recipe.effects,
+    detect: (chart) => {
+      const base = findPlanet(chart.planets, recipe.basePlanet);
+      if (!base) return null;
+      const planets = planetsInRelativeHouses(
+        base.sign,
+        recipe.relativeHouses,
+        chart.planets,
+        recipe.allowedPlanets
+      ).filter((planet) => planet.name !== recipe.basePlanet);
+      if (planets.length < recipe.minCount) return null;
+      return generatedYogaResult(
+        recipe,
+        planets.length >= recipe.minCount + 1 ? "strong" : "moderate",
+        [recipe.basePlanet, ...uniquePlanetNames(planets)],
+        `${uniquePlanetNames(planets).join(", ")} occupy the ${houseList(recipe.relativeHouses)} signs from ${recipe.basePlanet}.`
+      );
+    },
+  };
+}
+
+function createConjunctionYoga(recipe: ConjunctionRecipe): YogaDefinition {
+  return {
+    id: recipe.id,
+    name: recipe.name,
+    sanskrit: recipe.sanskrit,
+    category: recipe.category,
+    description: recipe.description,
+    effects: recipe.effects,
+    detect: (chart) => {
+      const planets = recipe.planets.map((planet) => findPlanet(chart.planets, planet));
+      if (planets.some((planet) => !planet)) return null;
+      const presentPlanets = planets as PlanetPosition[];
+      const sign = presentPlanets[0].sign;
+      if (!presentPlanets.every((planet) => planet.sign === sign)) return null;
+      return generatedYogaResult(
+        recipe,
+        overallStrength(presentPlanets.map((planet) => planetStrength(planet.name, planet.sign))),
+        recipe.planets,
+        `${recipe.planets.join(", ")} are conjunct in ${sign}.`
+      );
+    },
+  };
 }
 
 // --------------------------------------------------------------------------
@@ -1085,6 +1291,79 @@ const ADDITIONAL_YOGA_DEFINITIONS: YogaDefinition[] = [
   },
 ];
 
+const HOUSE_LORD_PLACEMENT_YOGA_RECIPES: HouseLordPlacementRecipe[] = [
+  { id: "lagna_lord_kendra", name: "Lagna Lord Kendra Yoga", sanskrit: "Lagna Lord Kendra Yoga", category: "benefic", fromHouse: 1, targetHouses: [1, 4, 7, 10], description: "The ascendant lord occupies a kendra house.", effects: "Supports confidence, vitality, personal visibility, and steadier life direction.", activation_timing: "Ascendant lord dashas, major identity decisions, and transits to the 1st/10th houses", key_traits: ["self-possession", "visibility", "initiative"] },
+  { id: "lagna_lord_trikona", name: "Lagna Lord Trikona Yoga", sanskrit: "Lagna Lord Trikona Yoga", category: "benefic", fromHouse: 1, targetHouses: [1, 5, 9], description: "The ascendant lord occupies a trikona house.", effects: "Links identity with luck, intelligence, faith, and purposeful growth.", activation_timing: "Ascendant lord dashas and years when education, children, mentors, or travel become central", key_traits: ["purpose", "learning", "good fortune"] },
+  { id: "dhana_lord_kendra", name: "Dhana Lord Kendra Yoga", sanskrit: "Dhana Lord Kendra Yoga", category: "wealth", fromHouse: 2, targetHouses: [1, 4, 7, 10], description: "The 2nd lord occupies an angular house.", effects: "Strengthens earning capacity, stored resources, family support, and visible financial responsibility.", activation_timing: "2nd lord dashas, salary negotiations, asset decisions, and family-resource milestones", key_traits: ["earning", "stewardship", "stability"] },
+  { id: "dhana_lord_trikona", name: "Dhana Lord Trikona Yoga", sanskrit: "Dhana Lord Trikona Yoga", category: "wealth", fromHouse: 2, targetHouses: [1, 5, 9], description: "The 2nd lord occupies a trinal house.", effects: "Connects wealth with merit, learning, counsel, and fortunate timing.", activation_timing: "2nd lord dashas and periods involving study, investment, teaching, or advisory work", key_traits: ["wealth sense", "judgment", "patience"] },
+  { id: "parakrama_lord_upachaya", name: "Parakrama Upachaya Yoga", sanskrit: "Parakrama Upachaya Yoga", category: "benefic", fromHouse: 3, targetHouses: [3, 6, 10, 11], description: "The 3rd lord occupies an upachaya house.", effects: "Builds courage, skill, communication, and gains through repeated effort.", activation_timing: "3rd lord dashas, entrepreneurial pushes, skill-building seasons, and competitive cycles", key_traits: ["courage", "practice", "adaptability"] },
+  { id: "sukha_lord_kendra", name: "Sukha Kendra Yoga", sanskrit: "Sukha Kendra Yoga", category: "benefic", fromHouse: 4, targetHouses: [1, 4, 7, 10], description: "The 4th lord occupies a kendra house.", effects: "Supports home stability, education, property themes, and emotional grounding.", activation_timing: "4th lord dashas, home moves, education phases, and family-foundation decisions", key_traits: ["grounding", "belonging", "inner steadiness"] },
+  { id: "vidya_lord_trikona", name: "Vidya Trikona Yoga", sanskrit: "Vidya Trikona Yoga", category: "benefic", fromHouse: 5, targetHouses: [1, 5, 9], description: "The 5th lord occupies a trinal house.", effects: "Enhances intelligence, creativity, counsel, children, mantra, and merit.", activation_timing: "5th lord dashas, creative launches, romance periods, education, and child-related milestones", key_traits: ["creativity", "discernment", "merit"] },
+  { id: "vidya_lord_kendra", name: "Vidya Kendra Yoga", sanskrit: "Vidya Kendra Yoga", category: "benefic", fromHouse: 5, targetHouses: [1, 4, 7, 10], description: "The 5th lord occupies an angular house.", effects: "Makes creativity and intelligence visible through public roles, teaching, or leadership.", activation_timing: "5th lord dashas and periods when creative work needs public structure", key_traits: ["creative authority", "guidance", "expression"] },
+  { id: "shatru_lord_upachaya", name: "Shatru Vijaya Yoga", sanskrit: "Shatru Vijaya Yoga", category: "viparita", fromHouse: 6, targetHouses: [3, 6, 10, 11], description: "The 6th lord occupies an upachaya house.", effects: "Turns pressure, competition, service, and problem-solving into growth.", activation_timing: "6th lord dashas, demanding work cycles, health resets, and litigation or competition periods", key_traits: ["resilience", "discipline", "problem-solving"] },
+  { id: "yuvati_lord_kendra", name: "Yuvati Kendra Yoga", sanskrit: "Yuvati Kendra Yoga", category: "benefic", fromHouse: 7, targetHouses: [1, 4, 7, 10], description: "The 7th lord occupies a kendra house.", effects: "Strengthens partnership visibility, contracts, negotiation, and public cooperation.", activation_timing: "7th lord dashas, marriage/partnership choices, client-facing work, and alliance cycles", key_traits: ["partnership", "diplomacy", "mutuality"] },
+  { id: "randhra_lord_dusthana", name: "Randhra Transformation Yoga", sanskrit: "Randhra Transformation Yoga", category: "viparita", fromHouse: 8, targetHouses: [6, 8, 12], description: "The 8th lord occupies a dusthana house.", effects: "Can convert crisis, research, inheritance, or hidden pressure into resilience and insight.", activation_timing: "8th lord dashas, deep research phases, inheritance transitions, and major psychological turning points", key_traits: ["depth", "recovery", "investigation"] },
+  { id: "bhagya_lord_trikona", name: "Bhagya Trikona Yoga", sanskrit: "Bhagya Trikona Yoga", category: "wealth", fromHouse: 9, targetHouses: [1, 5, 9], description: "The 9th lord occupies a trinal house.", effects: "Strengthens fortune, teachers, ethics, blessings, travel, and higher learning.", activation_timing: "9th lord dashas, mentor encounters, pilgrimage, publishing, legal, or higher-study windows", key_traits: ["luck", "wisdom", "faith"] },
+  { id: "bhagya_lord_kendra", name: "Bhagya Kendra Yoga", sanskrit: "Bhagya Kendra Yoga", category: "wealth", fromHouse: 9, targetHouses: [1, 4, 7, 10], description: "The 9th lord occupies an angular house.", effects: "Makes dharma, education, guidance, and fortune visible in worldly life.", activation_timing: "9th lord dashas and years when teaching, travel, law, or public ethics shape decisions", key_traits: ["dharma", "recognition", "guidance"] },
+  { id: "karma_lord_kendra", name: "Karma Kendra Yoga", sanskrit: "Karma Kendra Yoga", category: "wealth", fromHouse: 10, targetHouses: [1, 4, 7, 10], description: "The 10th lord occupies a kendra house.", effects: "Strengthens career direction, authority, reputation, and visible responsibility.", activation_timing: "10th lord dashas, promotions, public launches, leadership transitions, and Saturn/Jupiter transits to career houses", key_traits: ["career focus", "authority", "visibility"] },
+  { id: "karma_lord_trikona", name: "Karma Trikona Yoga", sanskrit: "Karma Trikona Yoga", category: "wealth", fromHouse: 10, targetHouses: [1, 5, 9], description: "The 10th lord occupies a trinal house.", effects: "Links vocation with talent, merit, education, and fortunate sponsorship.", activation_timing: "10th lord dashas and windows when career intersects with teaching, creativity, or long-range purpose", key_traits: ["vocation", "purpose", "recognition"] },
+  { id: "labha_lord_upachaya", name: "Labha Upachaya Yoga", sanskrit: "Labha Upachaya Yoga", category: "wealth", fromHouse: 11, targetHouses: [3, 6, 10, 11], description: "The 11th lord occupies an upachaya house.", effects: "Improves networks, gains, audience growth, patrons, and results from persistence.", activation_timing: "11th lord dashas, community-building phases, launches, and income expansion cycles", key_traits: ["gains", "networks", "momentum"] },
+  { id: "vyaya_lord_dusthana", name: "Vyaya Release Yoga", sanskrit: "Vyaya Release Yoga", category: "viparita", fromHouse: 12, targetHouses: [6, 8, 12], description: "The 12th lord occupies a dusthana house.", effects: "Can redirect loss, retreat, foreign ties, or isolation into healing and spiritual clarity.", activation_timing: "12th lord dashas, retreat periods, foreign travel, therapy, and closure cycles", key_traits: ["release", "reflection", "spiritual repair"] },
+  { id: "dharma_support_yoga", name: "Dharma Support Yoga", sanskrit: "Dharma Support Yoga", category: "benefic", fromHouse: 9, targetHouses: [2, 5, 11], description: "The 9th lord supports wealth, merit, or gains houses.", effects: "Connects fortune with learning, resources, audience, and inherited blessings.", activation_timing: "9th lord dashas and windows involving mentors, publishing, grants, patrons, or travel", key_traits: ["blessing", "learning", "support"] },
+  { id: "artha_support_yoga", name: "Artha Support Yoga", sanskrit: "Artha Support Yoga", category: "wealth", fromHouse: 10, targetHouses: [2, 6, 10, 11], description: "The 10th lord supports practical artha houses.", effects: "Makes work, money, service, and gains reinforce one another.", activation_timing: "10th lord dashas, job changes, business cycles, and income-structure decisions", key_traits: ["productivity", "status", "earning"] },
+  { id: "moksha_support_yoga", name: "Moksha Support Yoga", sanskrit: "Moksha Support Yoga", category: "benefic", fromHouse: 12, targetHouses: [4, 8, 12], description: "The 12th lord supports moksha houses.", effects: "Deepens intuition, private restoration, research, retreat, and inner release.", activation_timing: "12th lord dashas, solitude, retreat, occult study, dreamwork, and healing phases", key_traits: ["intuition", "closure", "depth"] },
+];
+
+const MUTUAL_HOUSE_LORD_YOGA_RECIPES: MutualHouseLordRecipe[] = [
+  { id: "lagna_dhana_parivartana", name: "Lagna-Dhana Parivartana Yoga", sanskrit: "Lagna-Dhana Parivartana Yoga", category: "wealth", houseA: 1, houseB: 2, description: "The 1st and 2nd lords exchange houses.", effects: "Connects identity with earning, speech, family resources, and personal agency.", activation_timing: "1st or 2nd lord dashas and major financial self-definition periods", key_traits: ["self-worth", "earning", "voice"] },
+  { id: "dharma_karma_parivartana", name: "Dharma-Karma Parivartana Yoga", sanskrit: "Dharma-Karma Parivartana Yoga", category: "wealth", houseA: 9, houseB: 10, description: "The 9th and 10th lords exchange houses.", effects: "Powerfully links purpose, teachers, reputation, and career action.", activation_timing: "9th/10th lord dashas, career turns, mentor-backed openings, and public responsibility cycles", key_traits: ["purpose", "career", "recognition"] },
+  { id: "vidya_bhagya_parivartana", name: "Vidya-Bhagya Parivartana Yoga", sanskrit: "Vidya-Bhagya Parivartana Yoga", category: "benefic", houseA: 5, houseB: 9, description: "The 5th and 9th lords exchange houses.", effects: "Strengthens learning, merit, teaching, creativity, children, and blessings.", activation_timing: "5th/9th lord dashas, education, creative work, mentorship, and child-related milestones", key_traits: ["wisdom", "creativity", "fortune"] },
+  { id: "karma_labha_parivartana", name: "Karma-Labha Parivartana Yoga", sanskrit: "Karma-Labha Parivartana Yoga", category: "wealth", houseA: 10, houseB: 11, description: "The 10th and 11th lords exchange houses.", effects: "Connects career authority with income, communities, patrons, and long-range gains.", activation_timing: "10th/11th lord dashas, launches, promotions, public networks, and audience growth", key_traits: ["career gains", "networks", "authority"] },
+  { id: "sukha_yuvati_parivartana", name: "Sukha-Yuvati Parivartana Yoga", sanskrit: "Sukha-Yuvati Parivartana Yoga", category: "benefic", houseA: 4, houseB: 7, description: "The 4th and 7th lords exchange houses.", effects: "Links emotional foundation with partnership, home, public agreements, and belonging.", activation_timing: "4th/7th lord dashas, home decisions, marriage, cohabitation, and partnership agreements", key_traits: ["partnership", "home", "emotional balance"] },
+  { id: "dhana_labha_parivartana", name: "Dhana-Labha Parivartana Yoga", sanskrit: "Dhana-Labha Parivartana Yoga", category: "wealth", houseA: 2, houseB: 11, description: "The 2nd and 11th lords exchange houses.", effects: "Strengthens wealth accumulation, income channels, networks, and financial planning.", activation_timing: "2nd/11th lord dashas, investment decisions, community income, and compensation cycles", key_traits: ["income", "assets", "networks"] },
+  { id: "parakrama_karma_parivartana", name: "Parakrama-Karma Parivartana Yoga", sanskrit: "Parakrama-Karma Parivartana Yoga", category: "benefic", houseA: 3, houseB: 10, description: "The 3rd and 10th lords exchange houses.", effects: "Turns skills, communication, writing, and courage into visible professional action.", activation_timing: "3rd/10th lord dashas, media work, entrepreneurial pushes, and public communication cycles", key_traits: ["skill", "communication", "ambition"] },
+  { id: "shatru_vyaya_parivartana", name: "Shatru-Vyaya Parivartana Yoga", sanskrit: "Shatru-Vyaya Parivartana Yoga", category: "viparita", houseA: 6, houseB: 12, description: "The 6th and 12th lords exchange houses.", effects: "Can transform service, illness, expense, retreat, and opposition into liberation from old burdens.", activation_timing: "6th/12th lord dashas, health resets, conflict resolution, retreat, and closure periods", key_traits: ["repair", "discipline", "release"] },
+];
+
+const PLANET_HOUSE_YOGA_RECIPES: PlanetHouseRecipe[] = [
+  { id: "surya_kendra_prabha", name: "Surya Kendra Prabha Yoga", sanskrit: "Surya Kendra Prabha Yoga", category: "benefic", planet: "Sun", targetHouses: [1, 4, 7, 10], description: "Sun occupies a kendra house.", effects: "Strengthens leadership, visibility, confidence, and public identity.", activation_timing: "Sun dashas, solar returns, leadership invitations, and public visibility periods", key_traits: ["leadership", "clarity", "presence"] },
+  { id: "chandra_kendra_saumya", name: "Chandra Kendra Saumya Yoga", sanskrit: "Chandra Kendra Saumya Yoga", category: "benefic", planet: "Moon", targetHouses: [1, 4, 7, 10], description: "Moon occupies a kendra house.", effects: "Improves emotional visibility, responsiveness, support networks, and public relatability.", activation_timing: "Moon dashas, family cycles, public-facing care roles, and major home decisions", key_traits: ["care", "receptivity", "belonging"] },
+  { id: "budha_upachaya_yoga", name: "Budha Upachaya Yoga", sanskrit: "Budha Upachaya Yoga", category: "benefic", planet: "Mercury", targetHouses: [3, 6, 10, 11], description: "Mercury occupies an upachaya house.", effects: "Develops analysis, trade, writing, speech, technology, and strategic problem-solving.", activation_timing: "Mercury dashas, learning curves, launches, negotiation cycles, and technical work", key_traits: ["analysis", "communication", "commerce"] },
+  { id: "shukra_kendra_saundarya", name: "Shukra Kendra Saundarya Yoga", sanskrit: "Shukra Kendra Saundarya Yoga", category: "benefic", planet: "Venus", targetHouses: [1, 4, 7, 10], description: "Venus occupies a kendra house.", effects: "Supports beauty, art, ease, diplomacy, relationships, and tasteful public presentation.", activation_timing: "Venus dashas, relationship decisions, design work, art launches, and social openings", key_traits: ["harmony", "beauty", "magnetism"] },
+  { id: "mangala_upachaya_yoga", name: "Mangala Upachaya Yoga", sanskrit: "Mangala Upachaya Yoga", category: "benefic", planet: "Mars", targetHouses: [3, 6, 10, 11], description: "Mars occupies an upachaya house.", effects: "Builds courage, competitive strength, technical grit, and action under pressure.", activation_timing: "Mars dashas, athletic or technical pushes, conflict cycles, and ambitious work sprints", key_traits: ["drive", "competition", "execution"] },
+  { id: "guru_trikona_kripa", name: "Guru Trikona Kripa Yoga", sanskrit: "Guru Trikona Kripa Yoga", category: "benefic", planet: "Jupiter", targetHouses: [1, 5, 9], description: "Jupiter occupies a trinal house.", effects: "Strengthens wisdom, teaching, faith, protection, children, and long-range blessings.", activation_timing: "Jupiter dashas, education, teaching, travel, legal matters, and mentor-backed expansion", key_traits: ["wisdom", "faith", "protection"] },
+  { id: "shani_upachaya_yoga", name: "Shani Upachaya Yoga", sanskrit: "Shani Upachaya Yoga", category: "benefic", planet: "Saturn", targetHouses: [3, 6, 10, 11], description: "Saturn occupies an upachaya house.", effects: "Builds endurance, systems, maturity, durable gains, and authority through time.", activation_timing: "Saturn dashas, Saturn returns, promotions earned through pressure, and long work cycles", key_traits: ["discipline", "endurance", "structure"] },
+  { id: "rahu_upachaya_yoga", name: "Rahu Upachaya Yoga", sanskrit: "Rahu Upachaya Yoga", category: "benefic", planet: "Rahu", targetHouses: [3, 6, 10, 11], description: "Rahu occupies an upachaya house.", effects: "Amplifies ambition, unconventional growth, technology, competition, and worldly gains.", activation_timing: "Rahu dashas, foreign/tech opportunities, sudden visibility, and high-risk growth phases", key_traits: ["ambition", "innovation", "reinvention"] },
+  { id: "ketu_moksha_yoga", name: "Ketu Moksha Yoga", sanskrit: "Ketu Moksha Yoga", category: "benefic", planet: "Ketu", targetHouses: [4, 8, 12], description: "Ketu occupies a moksha house.", effects: "Deepens detachment, intuition, research, spiritual memory, and hidden mastery.", activation_timing: "Ketu dashas, retreat, meditation, research, closure, and inner-life turning points", key_traits: ["detachment", "insight", "spiritual memory"] },
+  { id: "chandra_trikona_soma", name: "Chandra Trikona Soma Yoga", sanskrit: "Chandra Trikona Soma Yoga", category: "benefic", planet: "Moon", targetHouses: [1, 5, 9], description: "Moon occupies a trinal house.", effects: "Supports emotional intelligence, creativity, nurturing merit, and ease with learning.", activation_timing: "Moon dashas, creative periods, family blessings, education, and devotional practices", key_traits: ["empathy", "memory", "imagination"] },
+];
+
+const RELATIVE_PLANET_YOGA_RECIPES: RelativePlanetRecipe[] = [
+  { id: "chandra_benefic_trine", name: "Chandra Benefic Trine Yoga", sanskrit: "Chandra Benefic Trine Yoga", category: "benefic", basePlanet: "Moon", allowedPlanets: NATURAL_BENEFICS, relativeHouses: [5, 9], minCount: 1, description: "A benefic occupies the 5th or 9th sign from the Moon.", effects: "Supports emotional hope, education, children, counsel, and fortunate mental patterns.", activation_timing: "Moon dashas, benefic dashas, family/education cycles, and Jupiter transits to the Moon", key_traits: ["hope", "learning", "emotional support"] },
+  { id: "chandra_benefic_kendra", name: "Chandra Benefic Kendra Yoga", sanskrit: "Chandra Benefic Kendra Yoga", category: "benefic", basePlanet: "Moon", allowedPlanets: NATURAL_BENEFICS, relativeHouses: [1, 4, 7, 10], minCount: 1, description: "A benefic occupies a kendra from the Moon.", effects: "Stabilizes the mind through support, counsel, relationships, and visible opportunities.", activation_timing: "Moon or benefic dashas and transits to lunar kendras", key_traits: ["support", "stability", "receptivity"] },
+  { id: "surya_benefic_trine", name: "Surya Benefic Trine Yoga", sanskrit: "Surya Benefic Trine Yoga", category: "benefic", basePlanet: "Sun", allowedPlanets: NATURAL_BENEFICS, relativeHouses: [5, 9], minCount: 1, description: "A benefic occupies the 5th or 9th sign from the Sun.", effects: "Refines leadership with wisdom, grace, counsel, and ethical visibility.", activation_timing: "Sun or benefic dashas, public leadership openings, and solar return emphasis", key_traits: ["noble conduct", "confidence", "grace"] },
+  { id: "surya_malefic_upachaya", name: "Surya Malefic Upachaya Yoga", sanskrit: "Surya Malefic Upachaya Yoga", category: "benefic", basePlanet: "Sun", allowedPlanets: NATURAL_MALEFICS, relativeHouses: [3, 6, 10, 11], minCount: 1, description: "A natural malefic occupies an upachaya sign from the Sun.", effects: "Turns pressure into grit, leadership stamina, competition, and visible achievement.", activation_timing: "Sun or malefic dashas, competitive career periods, and authority tests", key_traits: ["stamina", "courage", "pressure-handling"] },
+  { id: "moon_protected_by_jupiter_venus", name: "Moon Protected Yoga", sanskrit: "Moon Protected Yoga", category: "benefic", basePlanet: "Moon", allowedPlanets: ["Jupiter", "Venus"], relativeHouses: [1, 5, 7, 9], minCount: 1, description: "Jupiter or Venus supports the Moon by conjunction, opposition, or trinal relation.", effects: "Softens emotional volatility and improves support, kindness, counsel, and recovery.", activation_timing: "Moon, Jupiter, or Venus dashas and relationship/family healing periods", key_traits: ["kindness", "recovery", "support"] },
+  { id: "lagna_benefic_flank", name: "Lagna Benefic Flank Yoga", sanskrit: "Lagna Benefic Flank Yoga", category: "benefic", basePlanet: "Sun", allowedPlanets: NATURAL_BENEFICS, relativeHouses: [2, 12], minCount: 1, description: "A benefic flanks the solar identity axis from the 2nd or 12th sign.", effects: "Adds support through speech, resources, retreat, diplomacy, and private preparation.", activation_timing: "Benefic dashas, financial decisions, retreat phases, and public-preparation windows", key_traits: ["preparation", "support", "speech"] },
+  { id: "chandra_malefic_upachaya", name: "Chandra Malefic Upachaya Yoga", sanskrit: "Chandra Malefic Upachaya Yoga", category: "benefic", basePlanet: "Moon", allowedPlanets: NATURAL_MALEFICS, relativeHouses: [3, 6, 10, 11], minCount: 1, description: "A natural malefic occupies an upachaya sign from the Moon.", effects: "Builds emotional toughness, work capacity, and resilience through pressure.", activation_timing: "Moon or malefic dashas, hard work cycles, health discipline, and public accountability periods", key_traits: ["resilience", "work ethic", "emotional stamina"] },
+];
+
+const CONJUNCTION_YOGA_RECIPES: ConjunctionRecipe[] = [
+  { id: "budha_shukra_yoga", name: "Budha-Shukra Yoga", sanskrit: "Budha-Shukra Yoga", category: "benefic", planets: ["Mercury", "Venus"], description: "Mercury and Venus are conjunct.", effects: "Combines language, taste, design, persuasion, commerce, and artistic intelligence.", activation_timing: "Mercury or Venus dashas, creative launches, negotiations, media work, and relationship decisions", key_traits: ["eloquence", "design", "persuasion"] },
+  { id: "surya_mangala_yoga", name: "Surya-Mangala Yoga", sanskrit: "Surya-Mangala Yoga", category: "benefic", planets: ["Sun", "Mars"], description: "Sun and Mars are conjunct.", effects: "Creates forceful initiative, leadership, technical courage, and decisive action.", activation_timing: "Sun or Mars dashas, leadership tests, competition, and urgent execution windows", key_traits: ["decisiveness", "drive", "command"] },
+  { id: "guru_shukra_yoga", name: "Guru-Shukra Yoga", sanskrit: "Guru-Shukra Yoga", category: "benefic", planets: ["Jupiter", "Venus"], description: "Jupiter and Venus are conjunct.", effects: "Blends wisdom and beauty, supporting teaching, art, devotion, prosperity, and counsel.", activation_timing: "Jupiter or Venus dashas, education, marriage, creative patronage, and devotional periods", key_traits: ["grace", "wisdom", "abundance"] },
+  { id: "shani_budha_yoga", name: "Shani-Budha Yoga", sanskrit: "Shani-Budha Yoga", category: "benefic", planets: ["Saturn", "Mercury"], description: "Saturn and Mercury are conjunct.", effects: "Builds disciplined thinking, systems design, research skill, careful speech, and technical reliability.", activation_timing: "Saturn or Mercury dashas, study, systems work, contracts, and long technical projects", key_traits: ["precision", "systems", "patience"] },
+  { id: "rahu_budha_yoga", name: "Rahu-Budha Yoga", sanskrit: "Rahu-Budha Yoga", category: "benefic", planets: ["Rahu", "Mercury"], description: "Rahu and Mercury are conjunct.", effects: "Amplifies unconventional intelligence, technology, media, analysis, and adaptive strategy.", activation_timing: "Rahu or Mercury dashas, technology openings, media visibility, foreign networks, and rapid learning cycles", key_traits: ["innovation", "strategy", "adaptability"] },
+];
+
+const GENERATED_YOGA_DEFINITIONS: YogaDefinition[] = [
+  ...HOUSE_LORD_PLACEMENT_YOGA_RECIPES.map(createHouseLordPlacementYoga),
+  ...MUTUAL_HOUSE_LORD_YOGA_RECIPES.map(createMutualHouseLordYoga),
+  ...PLANET_HOUSE_YOGA_RECIPES.map(createPlanetHouseYoga),
+  ...RELATIVE_PLANET_YOGA_RECIPES.map(createRelativePlanetYoga),
+  ...CONJUNCTION_YOGA_RECIPES.map(createConjunctionYoga),
+];
+
 const YOGA_DEFINITIONS: YogaDefinition[] = [
   // ── Pancha Mahapurusha Yogas ──
   {
@@ -1831,6 +2110,7 @@ const YOGA_DEFINITIONS: YogaDefinition[] = [
       return null;
     },
   },
+  ...GENERATED_YOGA_DEFINITIONS,
   ...ADDITIONAL_YOGA_DEFINITIONS,
 ];
 
@@ -1857,9 +2137,13 @@ export function detectYogas(chart: YogaChartInput): YogaDetectionResult[] {
     }
   }
 
-  // Sort: strong first, then moderate, then weak
+  // Sort: strong first, then moderate, then highest probability within each band.
   const strengthOrder: Record<string, number> = { strong: 0, moderate: 1, weak: 2 };
-  results.sort((a, b) => strengthOrder[a.strength] - strengthOrder[b.strength]);
+  results.sort((a, b) => {
+    const strengthDelta = strengthOrder[a.strength] - strengthOrder[b.strength];
+    if (strengthDelta !== 0) return strengthDelta;
+    return b.occurrence_chance - a.occurrence_chance;
+  });
 
   return results;
 }

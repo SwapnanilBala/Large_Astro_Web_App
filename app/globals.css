@@ -9529,6 +9529,13 @@ html[data-theme="light"] .shadbala-row-header {
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28), 0 0 20px rgba(255, 143, 126, 0.08);
 }
 
+.yoga-card--priority {
+  border-color: rgba(242, 194, 108, 0.35);
+  background:
+    linear-gradient(135deg, rgba(242, 194, 108, 0.07), rgba(108, 225, 212, 0.035)),
+    rgba(5, 25, 39, 0.86);
+}
+
 /* ── Card Header ── */
 .yoga-card-header {
   display: flex;
@@ -9550,6 +9557,28 @@ html[data-theme="light"] .shadbala-row-header {
   display: flex;
   flex-direction: column;
   gap: 0.15rem;
+}
+
+.yoga-card-rank-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.yoga-priority-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.65rem;
+  border: 1px solid rgba(242, 194, 108, 0.34);
+  border-radius: 999px;
+  background: rgba(242, 194, 108, 0.12);
+  color: var(--accent-gold);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  text-transform: uppercase;
 }
 
 .yoga-card-name {
@@ -9664,6 +9693,62 @@ html[data-theme="light"] .shadbala-row-header {
   font-weight: 500;
 }
 
+.yoga-card-deep-read {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0.75rem 0 0.55rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(242, 194, 108, 0.16);
+  border-radius: 10px;
+  background: rgba(242, 194, 108, 0.055);
+}
+
+.yoga-card-detail {
+  color: var(--ink-main);
+  font-size: 1.22rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.yoga-card-activation {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.yoga-card-activation span {
+  color: var(--accent-aqua);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.yoga-card-activation p {
+  color: var(--ink-soft);
+  font-size: 1.12rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.yoga-card-traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.yoga-card-traits span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  border: 1px solid rgba(108, 225, 212, 0.2);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.07);
+  color: var(--ink-main);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.22rem 0.6rem;
+}
+
 .yoga-card-cancellation {
   font-size: 1.3rem;
   color: var(--accent-coral);
@@ -9706,6 +9791,13 @@ html[data-theme="light"] .yoga-card {
   border-color: var(--line-soft);
 }
 
+html[data-theme="light"] .yoga-card--priority {
+  background:
+    linear-gradient(135deg, rgba(138, 100, 32, 0.08), rgba(17, 126, 124, 0.04)),
+    rgba(255, 248, 242, 0.95);
+  border-color: rgba(138, 100, 32, 0.28);
+}
+
 html[data-theme="light"] .yoga-card--benefic {
   border-left-color: var(--accent-gold);
 }
@@ -9738,6 +9830,16 @@ html[data-theme="light"] .yoga-occurrence {
   background: rgba(17, 126, 124, 0.08);
   border-color: rgba(17, 126, 124, 0.22);
   color: #117e7c;
+}
+
+html[data-theme="light"] .yoga-card-deep-read {
+  background: rgba(138, 100, 32, 0.06);
+  border-color: rgba(138, 100, 32, 0.14);
+}
+
+html[data-theme="light"] .yoga-card-traits span {
+  background: rgba(17, 126, 124, 0.06);
+  border-color: rgba(17, 126, 124, 0.16);
 }
 
 html[data-theme="light"] .yoga-card-cancellation {

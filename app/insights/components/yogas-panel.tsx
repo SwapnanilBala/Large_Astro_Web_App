@@ -64,13 +64,36 @@ function StrengthIndicator({ strength }: { strength: "strong" | "moderate" | "we
   );
 }
 
+function fallbackActivationTiming(yoga: YogaDetectionResult): string {
+  if (yoga.activation_timing) return yoga.activation_timing;
+  if (yoga.strength === "strong") return "Most active during involved planet dashas and major transits to the yoga houses.";
+  if (yoga.strength === "moderate") return "Most noticeable when the involved planets are emphasized by dasha or transit.";
+  return "Usually situational, becoming visible during short transit triggers or focused life choices.";
+}
+
+function fallbackTraits(yoga: YogaDetectionResult): string[] {
+  if (yoga.key_traits?.length) return yoga.key_traits;
+  const categoryTraits: Record<YogaDetectionResult["category"], string[]> = {
+    mahapurusha: ["command", "life direction", "visible strength"],
+    wealth: ["resources", "status", "opportunity"],
+    benefic: ["support", "growth", "ease"],
+    challenging: ["discipline", "repair", "self-awareness"],
+    viparita: ["resilience", "reversal", "recovery"],
+    nabhasa: ["patterning", "temperament", "life structure"],
+  };
+  return categoryTraits[yoga.category];
+}
+
 // --------------------------------------------------------------------------
 // Yoga card
 // --------------------------------------------------------------------------
 
-function YogaCard({ yoga }: { yoga: YogaDetectionResult }) {
+function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
   const isBenefic = ["mahapurusha", "wealth", "benefic", "viparita"].includes(yoga.category);
   const isChallenging = yoga.category === "challenging";
+  const isPriority = rank <= 10;
+  const activationTiming = fallbackActivationTiming(yoga);
+  const traits = fallbackTraits(yoga);
 
   const borderClass = isBenefic
     ? "yoga-card--benefic"
@@ -79,10 +102,15 @@ function YogaCard({ yoga }: { yoga: YogaDetectionResult }) {
       : "";
 
   return (
-    <article className={`yoga-card ${borderClass}`}>
+    <article className={`yoga-card ${borderClass} ${isPriority ? "yoga-card--priority" : ""}`}>
       <header className="yoga-card-header">
         <div className="yoga-card-titles">
-          <h3 className="yoga-card-name">{yoga.name}</h3>
+          <div className="yoga-card-rank-row">
+            {isPriority && (
+              <span className="yoga-priority-badge">Top {rank}</span>
+            )}
+            <h3 className="yoga-card-name">{yoga.name}</h3>
+          </div>
           <span className="yoga-card-sanskrit">{yoga.sanskrit}</span>
         </div>
         <div className="yoga-card-metrics">
@@ -105,6 +133,24 @@ function YogaCard({ yoga }: { yoga: YogaDetectionResult }) {
       <p className="yoga-card-description">{yoga.description}</p>
       <p className="yoga-card-effects">{yoga.effects}</p>
 
+      {isPriority && (
+        <div className="yoga-card-deep-read">
+          <p className="yoga-card-detail">
+            {yoga.detailed_description ??
+              `${yoga.name} is one of the strongest detected combinations in this chart, so its effects deserve more weight than the lighter matches below.`}
+          </p>
+          <div className="yoga-card-activation">
+            <span>Activation timing</span>
+            <p>{activationTiming}</p>
+          </div>
+          <div className="yoga-card-traits" aria-label={`${yoga.name} traits`}>
+            {traits.map((trait) => (
+              <span key={trait}>{trait}</span>
+            ))}
+          </div>
+        </div>
+      )}
+
       {yoga.cancellation && (
         <p className="yoga-card-cancellation">{yoga.cancellation}</p>
       )}
@@ -122,11 +168,25 @@ type YogasPanelProps = {
 
 function YogasPanel({ yogas }: YogasPanelProps) {
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("all");
+  const rankedYogas = [...yogas].sort((a, b) => {
+    if (b.occurrence_chance !== a.occurrence_chance) {
+      return b.occurrence_chance - a.occurrence_chance;
+    }
+    const strengthOrder: Record<YogaDetectionResult["strength"], number> = {
+      strong: 0,
+      moderate: 1,
+      weak: 2,
+    };
+    return strengthOrder[a.strength] - strengthOrder[b.strength];
+  });
+  const rankByYogaId = new Map(
+    rankedYogas.map((yoga, index) => [yoga.yoga_id, index + 1])
+  );
 
   const filtered =
     activeCategory === "all"
-      ? yogas
-      : yogas.filter((y) => y.category === activeCategory);
+      ? rankedYogas
+      : rankedYogas.filter((y) => y.category === activeCategory);
 
   // Count per category
   const counts: Record<CategoryKey, number> = {
@@ -178,7 +238,11 @@ function YogasPanel({ yogas }: YogasPanelProps) {
       {filtered.length > 0 ? (
         <div className="yogas-grid" role="list" aria-label="Detected yogas">
           {filtered.map((yoga) => (
-            <YogaCard key={yoga.yoga_id} yoga={yoga} />
+            <YogaCard
+              key={yoga.yoga_id}
+              yoga={yoga}
+              rank={rankByYogaId.get(yoga.yoga_id) ?? filtered.length}
+            />
           ))}
         </div>
       ) : (

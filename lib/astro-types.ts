@@ -187,6 +187,9 @@ export type YogaDetectionResult = {
   involved_planets: string[];
   description: string;
   effects: string;
+  activation_timing?: string;
+  key_traits?: string[];
+  detailed_description?: string;
   cancellation?: string;
 };
 
