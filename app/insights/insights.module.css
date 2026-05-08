@@ -2058,7 +2058,7 @@
   background: rgba(108, 225, 212, 0.07);
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.92rem;
+  font-size: 1rem;
   font-weight: 700;
   padding: 0.35rem 0.7rem;
 }
@@ -2086,7 +2086,7 @@
 .pastLifeCard h3 {
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 1.22rem;
+  font-size: 1.42rem;
   line-height: 1.28;
   margin: 0;
   overflow-wrap: anywhere;
@@ -2095,7 +2095,7 @@
 .pastLifeCard p {
   color: var(--ink-soft);
   font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
-  font-size: 1.18rem;
+  font-size: 1.32rem;
   line-height: 1.6;
   margin: 0;
   overflow-wrap: anywhere;
@@ -2106,7 +2106,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.85rem;
+  font-size: 0.98rem;
   font-weight: 700;
   line-height: 1.45;
   opacity: 0.78;
@@ -2117,7 +2117,7 @@
 .pastLifeLabel {
   color: var(--accent-gold) !important;
   font-family: var(--font-display), sans-serif !important;
-  font-size: 0.78rem !important;
+  font-size: 0.9rem !important;
   font-weight: 800 !important;
   letter-spacing: 0.08em;
   line-height: 1.2 !important;
@@ -2140,7 +2140,7 @@
   border-left: 3px solid rgba(200, 155, 60, 0.45);
   color: var(--ink-soft);
   font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
-  font-size: 1.08rem;
+  font-size: 1.2rem;
   line-height: 1.6;
   margin: 0;
   padding: 0.1rem 0 0.1rem 0.85rem;
