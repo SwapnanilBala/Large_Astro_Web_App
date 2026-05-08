@@ -1574,6 +1574,120 @@
 }
 
 /* ── Domain Deep Dives ── */
+.domainPriorityPanel {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.25rem;
+  align-items: flex-start;
+  margin: 0 0 1.25rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(200, 155, 60, 0.09), rgba(26, 123, 110, 0.06)),
+    rgba(13, 10, 22, 0.82);
+}
+
+.domainPriorityPanel h3 {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.55rem;
+  line-height: 1.25;
+  margin: 0.15rem 0 0.45rem;
+}
+
+.domainPriorityPanel p {
+  color: var(--ink-soft);
+  font-size: 1.22rem;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.domainPriorityScore {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-width: 4.5rem;
+  min-height: 4.5rem;
+  border: 1px solid rgba(200, 155, 60, 0.28);
+  border-radius: 50%;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.domainScoreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+
+.domainScoreCard {
+  appearance: none;
+  cursor: pointer;
+  min-width: 0;
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.035);
+  color: var(--ink-soft);
+  padding: 0.85rem;
+  text-align: left;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.domainScoreCard:hover {
+  border-color: rgba(200, 155, 60, 0.28);
+  background: rgba(255, 243, 210, 0.055);
+  transform: translateY(-1px);
+}
+
+.domainScoreCardActive {
+  composes: domainScoreCard;
+  border-color: rgba(200, 155, 60, 0.42);
+  background:
+    linear-gradient(135deg, rgba(200, 155, 60, 0.12), rgba(26, 123, 110, 0.07)),
+    rgba(255, 243, 210, 0.04);
+}
+
+.domainScoreIcon {
+  display: block;
+  color: var(--accent-gold);
+  font-size: 1.3rem;
+  line-height: 1;
+  margin-bottom: 0.45rem;
+}
+
+.domainScoreLabel {
+  display: block;
+  color: var(--ink-main);
+  font-size: 0.95rem;
+  font-weight: 750;
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+
+.domainScoreCard strong,
+.domainScoreCardActive strong {
+  display: block;
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  margin-bottom: 0.25rem;
+}
+
+.domainScoreTone {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
 .domainSelectLabel {
   font-size: 1.35rem;
   color: var(--ink-soft);
@@ -1669,6 +1783,42 @@
   outline-offset: 2px;
 }
 
+.domainModeTabs {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+  padding: 0.3rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(13, 10, 22, 0.72);
+}
+
+.domainModeTab {
+  appearance: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  font-weight: 750;
+  padding: 0.45rem 0.85rem;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease;
+}
+
+.domainModeTab:hover {
+  color: var(--ink-main);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.domainModeTabActive {
+  composes: domainModeTab;
+  color: var(--accent-gold);
+  border-color: rgba(200, 155, 60, 0.3);
+  background: rgba(200, 155, 60, 0.12);
+}
+
 .domainCard {
   background: rgba(13, 10, 22, 0.90);
   border: 1px solid rgba(200, 155, 60, 0.10);
@@ -1696,6 +1846,40 @@
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 0 0 1.25rem;
+}
+
+.domainTimingWindows {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+}
+
+.domainTimingWindows section {
+  min-width: 0;
+  border: 1px solid rgba(26, 123, 110, 0.16);
+  border-radius: 10px;
+  background: rgba(26, 123, 110, 0.045);
+  padding: 0.85rem;
+}
+
+.domainTimingWindows h4,
+.domainActionPanel h4 {
+  color: var(--accent-teal);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1.25;
+  margin: 0 0 0.45rem;
+  text-transform: uppercase;
+}
+
+.domainTimingWindows p {
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  line-height: 1.5;
+  margin: 0;
 }
 
 .domainClarityBlock {
@@ -1820,6 +2004,55 @@
 .domainGuidance strong,
 .domainLongGame strong {
   color: var(--accent-gold);
+}
+
+.domainActionPanel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.domainActionPanel section {
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.035);
+  padding: 1rem;
+}
+
+.domainActionPanel p {
+  color: var(--ink-soft);
+  font-size: 1.24rem;
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 780px) {
+  .domainPriorityPanel,
+  .domainHeader {
+    flex-direction: column;
+  }
+
+  .domainPriorityScore {
+    min-width: 3.75rem;
+    min-height: 3.75rem;
+    font-size: 1.15rem;
+  }
+
+  .domainTimingWindows,
+  .domainStatementGrid,
+  .domainGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .domainModeTabs {
+    width: 100%;
+    border-radius: 12px;
+  }
+
+  .domainModeTab,
+  .domainModeTabActive {
+    flex: 1 1 8rem;
+    justify-content: center;
+  }
 }
 
 /* ── Footer Actions ── */

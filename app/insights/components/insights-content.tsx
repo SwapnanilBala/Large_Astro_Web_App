@@ -781,6 +781,7 @@ function ConstellationDivider({ compact = false }: { compact?: boolean }) {
 }
 
 type LifeDomainKey = LifeDomainInsight["key"];
+type DomainViewMode = "brief" | "detailed" | "action";
 
 type DomainReadCopy = {
   description: string;
@@ -898,6 +899,50 @@ function buildDomainRules(domain: LifeDomainInsight) {
   ];
 }
 
+function getDomainScore(domain: LifeDomainInsight) {
+  return Math.round(domain.confidence_score * 100);
+}
+
+function getDomainScoreTone(score: number) {
+  if (score >= 80) return "Dominant";
+  if (score >= 65) return "Active";
+  if (score >= 50) return "Developing";
+  return "Subtle";
+}
+
+function getDomainTimingWindows(
+  domain: LifeDomainInsight,
+  currentDasha?: string,
+  currentAntardasha?: string
+) {
+  const currentTiming = domain.timing_triggers[0];
+  const nextTiming = domain.timing_triggers[1] ?? domain.timing_triggers[0];
+  const caution = domain.watchouts[0];
+
+  return [
+    {
+      label: "Current activation",
+      value:
+        currentTiming ??
+        (currentDasha
+          ? `${currentDasha}${currentAntardasha ? ` / ${currentAntardasha}` : ""} is the active timing lens.`
+          : "Watch for repeated signals before treating this domain as active."),
+    },
+    {
+      label: "Next favorable window",
+      value:
+        nextTiming ??
+        "The next clean opening comes when support and guidance repeat the same theme.",
+    },
+    {
+      label: "Caution window",
+      value:
+        caution ??
+        "Avoid forcing outcomes when the evidence is mixed or timing feels noisy.",
+    },
+  ];
+}
+
 /* ─── Animated Counter for Metric Values ─── */
 function AnimatedCounter({
   value,
@@ -964,6 +1009,7 @@ export default function InsightsContent({
   const [selectedDomainKey, setSelectedDomainKey] = useState<
     LifeDomainInsight["key"]
   >(domainInsights[0]?.key ?? "love_life");
+  const [domainViewMode, setDomainViewMode] = useState<DomainViewMode>("brief");
 
   const coreRules = [...payload.chart.deterministic_rules]
     .filter((rule) => !rule.category || rule.category === "core")
@@ -992,6 +1038,17 @@ export default function InsightsContent({
     : undefined;
   const selectedDomainRules = selectedDomainInsight
     ? buildDomainRules(selectedDomainInsight)
+    : [];
+  const rankedDomainInsights = [...domainInsights].sort(
+    (left, right) => right.confidence_score - left.confidence_score
+  );
+  const topDomainInsight = rankedDomainInsights[0];
+  const selectedDomainTimingWindows = selectedDomainInsight
+    ? getDomainTimingWindows(
+        selectedDomainInsight,
+        payload.chart.dasha?.current_dasha,
+        payload.chart.dasha?.current_antardasha
+      )
     : [];
   const heroPlanetStrip = buildHeroPlanetMetadata(payload);
 
@@ -1487,9 +1544,41 @@ export default function InsightsContent({
                 Choose a life area for a full house, lord, timing, evidence, and rule-based read.
               </p>
 
+              {topDomainInsight && (
+                <section className={styles.domainPriorityPanel}>
+                  <div>
+                    <p className={styles.kicker}>Most active right now</p>
+                    <h3>{topDomainInsight.label}</h3>
+                    <p>{topDomainInsight.guidance || topDomainInsight.overview}</p>
+                  </div>
+                  <span className={styles.domainPriorityScore}>
+                    {getDomainScore(topDomainInsight)}%
+                  </span>
+                </section>
+              )}
+
+              <div className={styles.domainScoreGrid} aria-label="Life domain scores">
+                {rankedDomainInsights.map((domain) => {
+                  const score = getDomainScore(domain);
+                  return (
+                    <button
+                      key={domain.key}
+                      type="button"
+                      className={domain.key === selectedDomainKey ? styles.domainScoreCardActive : styles.domainScoreCard}
+                      onClick={() => setSelectedDomainKey(domain.key)}
+                    >
+                      <span className={styles.domainScoreIcon}>{DOMAIN_ICONS[domain.key]}</span>
+                      <span className={styles.domainScoreLabel}>{domain.label}</span>
+                      <strong>{score}%</strong>
+                      <span className={styles.domainScoreTone}>{getDomainScoreTone(score)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
               <p className={styles.domainSelectLabel}>Select a focus area</p>
               <div className={styles.domainChips}>
-                {domainInsights.map((domain) => (
+                {rankedDomainInsights.map((domain) => (
                   <button
                     key={domain.key}
                     type="button"
@@ -1504,9 +1593,24 @@ export default function InsightsContent({
                 ))}
               </div>
 
+              <div className={styles.domainModeTabs} role="tablist" aria-label="Domain reading depth">
+                {(["brief", "detailed", "action"] as DomainViewMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    role="tab"
+                    aria-selected={domainViewMode === mode}
+                    className={domainViewMode === mode ? styles.domainModeTabActive : styles.domainModeTab}
+                    onClick={() => setDomainViewMode(mode)}
+                  >
+                    {mode === "brief" ? "Brief" : mode === "detailed" ? "Detailed" : "Action Plan"}
+                  </button>
+                ))}
+              </div>
+
               <AnimatePresence mode="wait">
                 <motion.article
-                  key={selectedDomainInsight.key}
+                  key={`${selectedDomainInsight.key}-${domainViewMode}`}
                   className={styles.domainCard}
                   initial={shouldReduceMotion ? false : { opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -1532,7 +1636,39 @@ export default function InsightsContent({
                     {selectedDomainInsight.overview}
                   </p>
 
-                  {selectedDomainCopy && (
+                  <div className={styles.domainTimingWindows}>
+                    {selectedDomainTimingWindows.map((window) => (
+                      <section key={window.label}>
+                        <h4>{window.label}</h4>
+                        <p>{window.value}</p>
+                      </section>
+                    ))}
+                  </div>
+
+                  {domainViewMode === "brief" && (
+                    <div className={styles.domainGrid}>
+                      <section className={styles.domainCol}>
+                        <h4>Top support</h4>
+                        <ul>
+                          {selectedDomainInsight.strengths.slice(0, 3).map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      {selectedDomainInsight.watchouts.length > 0 && (
+                        <section className={styles.domainCol}>
+                          <h4>Top watchout</h4>
+                          <ul>
+                            {selectedDomainInsight.watchouts.slice(0, 2).map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                    </div>
+                  )}
+
+                  {domainViewMode === "detailed" && selectedDomainCopy && (
                     <div className={styles.domainClarityBlock}>
                       <p className={styles.domainDeepDescription}>
                         {selectedDomainCopy.description}
@@ -1554,7 +1690,8 @@ export default function InsightsContent({
                     </div>
                   )}
 
-                  <div className={styles.domainRulesPanel}>
+                  {domainViewMode === "detailed" && (
+                    <div className={styles.domainRulesPanel}>
                     <h4>How this domain is being read</h4>
                     <ol>
                       {selectedDomainRules.map((rule) => (
@@ -1563,9 +1700,11 @@ export default function InsightsContent({
                         </li>
                       ))}
                     </ol>
-                  </div>
+                    </div>
+                  )}
 
-                  <div className={styles.domainGrid}>
+                  {domainViewMode === "detailed" && (
+                    <div className={styles.domainGrid}>
                     <section className={styles.domainCol}>
                       <h4>Support</h4>
                       <ul>
@@ -1602,16 +1741,41 @@ export default function InsightsContent({
                         </ul>
                       </section>
                     )}
-                  </div>
+                    </div>
+                  )}
 
-                  <p className={styles.domainGuidance}>
-                    <strong>Guidance:</strong>{" "}
-                    {selectedDomainInsight.guidance}
-                  </p>
-                  <p className={styles.domainLongGame}>
-                    <strong>Long game:</strong>{" "}
-                    {selectedDomainInsight.long_game}
-                  </p>
+                  {domainViewMode === "action" && (
+                    <div className={styles.domainActionPanel}>
+                      <section>
+                        <h4>Do next</h4>
+                        <p>{selectedDomainInsight.guidance}</p>
+                      </section>
+                      <section>
+                        <h4>Keep in mind</h4>
+                        <p>{selectedDomainInsight.long_game}</p>
+                      </section>
+                      <section>
+                        <h4>Decision filter</h4>
+                        <p>
+                          {selectedDomainCopy?.decisionRule ??
+                            "Move when the support, timing, and evidence point in the same direction."}
+                        </p>
+                      </section>
+                    </div>
+                  )}
+
+                  {domainViewMode !== "action" && (
+                    <>
+                      <p className={styles.domainGuidance}>
+                        <strong>Guidance:</strong>{" "}
+                        {selectedDomainInsight.guidance}
+                      </p>
+                      <p className={styles.domainLongGame}>
+                        <strong>Long game:</strong>{" "}
+                        {selectedDomainInsight.long_game}
+                      </p>
+                    </>
+                  )}
                 </motion.article>
               </AnimatePresence>
             </motion.section>
