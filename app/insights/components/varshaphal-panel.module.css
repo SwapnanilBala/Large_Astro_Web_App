@@ -339,6 +339,73 @@
   margin-top: 0.45rem;
 }
 
+.seasonGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.seasonCard {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(8, 12, 24, 0.2);
+  padding: 0.9rem;
+}
+
+.seasonTopline {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.65rem;
+}
+
+.seasonTopline span {
+  color: var(--accent-gold);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.seasonTopline strong {
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  line-height: 1.15;
+  text-align: right;
+}
+
+.seasonCard p {
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.seasonCard small {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  margin-top: 0.75rem;
+}
+
+.seasonCardGrowth {
+  border-color: rgba(108, 225, 212, 0.25);
+  background: rgba(26, 123, 110, 0.1);
+}
+
+.seasonCardPeak {
+  border-color: rgba(200, 155, 60, 0.36);
+  background: rgba(200, 155, 60, 0.12);
+}
+
+.seasonCardReview {
+  border-color: rgba(240, 112, 104, 0.24);
+  background: rgba(240, 112, 104, 0.08);
+}
+
 .sectionGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -352,6 +419,10 @@
   }
 
   .themeStats {
+    grid-template-columns: 1fr;
+  }
+
+  .seasonGrid {
     grid-template-columns: 1fr;
   }
 

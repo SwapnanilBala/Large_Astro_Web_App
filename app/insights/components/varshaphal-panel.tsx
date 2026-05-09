@@ -36,6 +36,14 @@ type TimelineMonth = {
   tone: TimelineTone;
 };
 
+type SeasonalForecast = {
+  label: string;
+  phase: string;
+  focus: string;
+  guidance: string;
+  tone: TimelineTone;
+};
+
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
     target_year: targetYear,
@@ -139,6 +147,49 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
           <small>{data.muntha.sign}</small>
         </div>
       </div>
+    </div>
+  );
+}
+
+function buildSeasonalForecasts(data: VarshaphalResult): SeasonalForecast[] {
+  const timeline = buildYearTimeline(data);
+  const strongestInfluence = data.yearSummary.strongInfluences[0] ?? data.yearSummary.ascendantComparison;
+  const focusArea = data.yearSummary.focusAreas[0] ?? data.yearSummary.emotionalTone;
+  const quarters = [
+    { label: "Q1", phase: "Setup", months: timeline.slice(0, 3), guidance: "Set the rhythm and choose what deserves attention first." },
+    { label: "Q2", phase: "Momentum", months: timeline.slice(3, 6), guidance: "Move visible priorities forward while support is easier to gather." },
+    { label: "Q3", phase: "Pressure Test", months: timeline.slice(6, 9), guidance: "Simplify commitments and correct what has drifted off course." },
+    { label: "Q4", phase: "Harvest", months: timeline.slice(9, 12), guidance: "Collect results, close loops, and prepare the next yearly cycle." },
+  ];
+
+  return quarters.map((quarter, index) => {
+    const peakMonth = quarter.months.find((month) => month.tone === "peak" || month.tone === "growth") ?? quarter.months[0];
+    return {
+      label: quarter.label,
+      phase: quarter.phase,
+      focus: index % 2 === 0 ? focusArea : strongestInfluence,
+      guidance: `${peakMonth.month}: ${peakMonth.title}. ${quarter.guidance}`,
+      tone: peakMonth.tone,
+    };
+  });
+}
+
+function SeasonalForecastCards({ data }: { data: VarshaphalResult }) {
+  return (
+    <div className={styles.seasonGrid}>
+      {buildSeasonalForecasts(data).map((season) => (
+        <article
+          key={season.label}
+          className={`${styles.seasonCard} ${styles[`seasonCard${season.tone[0].toUpperCase()}${season.tone.slice(1)}`]}`}
+        >
+          <div className={styles.seasonTopline}>
+            <span>{season.label}</span>
+            <strong>{season.phase}</strong>
+          </div>
+          <p>{season.focus}</p>
+          <small>{season.guidance}</small>
+        </article>
+      ))}
     </div>
   );
 }
@@ -401,6 +452,11 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             </div>
           </div>
           {/* ── Profection Section ── */}
+          <div className={styles.sectionFull}>
+            <h3 className={styles.sectionTitle}>Seasonal Forecast</h3>
+            <SeasonalForecastCards data={data} />
+          </div>
+
           <div className={styles.sectionGrid}>
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>Annual Profection</h3>
