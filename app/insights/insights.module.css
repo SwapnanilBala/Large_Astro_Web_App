@@ -2392,6 +2392,151 @@
   padding: 0.1rem 0 0.1rem 0.85rem;
 }
 
+/* ─── Major Life Shifts ─── */
+
+.lifeShiftsPanel {
+  display: grid;
+  gap: 1rem;
+}
+
+.lifeShiftsTimeline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr));
+  gap: 1rem;
+}
+
+.lifeShiftCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-height: 280px;
+  min-width: 0;
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 14px;
+  background:
+    linear-gradient(135deg, rgba(255, 243, 210, 0.055), rgba(108, 225, 212, 0.035)),
+    rgba(255, 255, 255, 0.025);
+  padding: 1.1rem;
+  position: relative;
+}
+
+.lifeShiftHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.lifeShiftIndex {
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+.lifeShiftStatus {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(108, 225, 212, 0.28);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.6rem;
+  text-transform: uppercase;
+}
+
+.lifeShiftCardPast {
+  border-top: 2px solid rgba(200, 155, 60, 0.55);
+  opacity: 0.92;
+}
+
+.lifeShiftCardActive {
+  border-top: 2px solid var(--accent-coral);
+  box-shadow: 0 0 0 1px rgba(255, 138, 110, 0.18) inset;
+}
+
+.lifeShiftCardActive .lifeShiftStatus {
+  border-color: rgba(255, 138, 110, 0.45);
+  background: rgba(255, 138, 110, 0.12);
+}
+
+.lifeShiftCardUpcoming {
+  border-top: 2px solid var(--accent-teal);
+}
+
+.lifeShiftLabel {
+  color: var(--accent-gold) !important;
+  font-family: var(--font-display), sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  letter-spacing: 0.08em;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  text-transform: uppercase;
+}
+
+.lifeShiftCard h3 {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.42rem;
+  line-height: 1.28;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lifeShiftCard p {
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-size: 1.28rem;
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.lifeShiftWindow {
+  font-family: var(--font-display), sans-serif !important;
+  font-size: 1rem !important;
+  line-height: 1.55 !important;
+  color: var(--ink-main) !important;
+  border-left: 2px solid rgba(108, 225, 212, 0.35);
+  padding-left: 0.7rem;
+}
+
+.lifeShiftWindow strong {
+  color: var(--accent-gold);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lifeShiftCard small {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.45;
+  opacity: 0.78;
+  padding-top: 0.7rem;
+  overflow-wrap: anywhere;
+}
+
+.lifeShiftsNote {
+  border-left: 3px solid rgba(108, 225, 212, 0.45);
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-size: 1.18rem;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.1rem 0 0.1rem 0.85rem;
+}
+
 /* ═══════════════════════════════════════════════
    Light Theme Overrides
    ═══════════════════════════════════════════════ */
@@ -2515,6 +2660,20 @@
 
 :global(html[data-theme="light"]) .pastLifeCard small {
   border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .lifeShiftCard {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .lifeShiftCard small {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+:global(html[data-theme="light"]) .lifeShiftStatus {
+  background: rgba(255, 255, 255, 0.62);
+  border-color: rgba(24, 120, 90, 0.18);
 }
 
 :global(html[data-theme="light"]) .takeawayNumber {
@@ -2789,6 +2948,10 @@
   }
 
   .pastLifeCard {
+    min-height: 0;
+  }
+
+  .lifeShiftCard {
     min-height: 0;
   }
 

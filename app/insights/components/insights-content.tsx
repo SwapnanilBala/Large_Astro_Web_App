@@ -64,6 +64,7 @@ const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
@@ -1495,6 +1496,23 @@ export default function InsightsContent({
           <LazyPanel>
             <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
               <PastLifeInsightsPanel payload={payload} />
+            </PanelErrorBoundary>
+          </LazyPanel>
+        </CollapsibleSection>
+
+        <ConstellationDivider />
+
+        <CollapsibleSection
+          id="life-shifts"
+          kicker="Major Life Shifts"
+          title="Five windows where your life pivots"
+          defaultOpen={true}
+          className={styles.cardKarma}
+          persistKey={`${sectionStateScope}:life-shifts`}
+        >
+          <LazyPanel>
+            <PanelErrorBoundary panelName="Major Life Shifts">
+              <MajorShiftsPanel payload={payload} />
             </PanelErrorBoundary>
           </LazyPanel>
         </CollapsibleSection>
