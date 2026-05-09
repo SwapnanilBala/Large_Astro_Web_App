@@ -44,6 +44,12 @@ type SeasonalForecast = {
   tone: TimelineTone;
 };
 
+type TimingWindow = {
+  month: string;
+  title: string;
+  note: string;
+};
+
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
     target_year: targetYear,
@@ -190,6 +196,73 @@ function SeasonalForecastCards({ data }: { data: VarshaphalResult }) {
           <small>{season.guidance}</small>
         </article>
       ))}
+    </div>
+  );
+}
+
+function buildTimingWindows(data: VarshaphalResult): { best: TimingWindow[]; watch: TimingWindow[] } {
+  const timeline = buildYearTimeline(data);
+  const best = timeline
+    .filter((month) => month.tone === "peak" || month.tone === "growth")
+    .slice(0, 4)
+    .map((month) => ({
+      month: month.month,
+      title: month.title,
+      note: month.tone === "peak"
+        ? `Launch or reset around the solar return signature: ${data.returnChart.ascendant.sign} rising.`
+        : month.note,
+    }));
+
+  const watch = timeline
+    .filter((month) => month.tone === "review")
+    .slice(0, 3)
+    .map((month) => ({
+      month: month.month,
+      title: month.title,
+      note: `${month.note} Avoid forcing outcomes before the signal is clear.`,
+    }));
+
+  if (watch.length < 3) {
+    watch.push({
+      month: timeline[11].month,
+      title: "Close loops",
+      note: "Review unfinished commitments before the next solar return cycle starts.",
+    });
+  }
+
+  return { best, watch };
+}
+
+function TimingWindows({ data }: { data: VarshaphalResult }) {
+  const windows = buildTimingWindows(data);
+  return (
+    <div className={styles.windowsGrid}>
+      <div className={styles.windowColumn}>
+        <div className={styles.windowColumnHeader}>
+          <span className={styles.windowSignalBest} aria-hidden="true" />
+          <h3>Best Windows</h3>
+        </div>
+        {windows.best.map((window) => (
+          <article key={`${window.month}-${window.title}`} className={styles.windowCard}>
+            <span>{window.month}</span>
+            <strong>{window.title}</strong>
+            <p>{window.note}</p>
+          </article>
+        ))}
+      </div>
+      <div className={styles.windowColumn}>
+        <div className={styles.windowColumnHeader}>
+          <span className={styles.windowSignalWatch} aria-hidden="true" />
+          <h3>Watch Windows</h3>
+        </div>
+        {windows.watch.map((window) => (
+          <article key={`${window.month}-${window.title}`} className={`${styles.windowCard} ${styles.windowCardWatch}`}>
+            <span>{window.month}</span>
+            <strong>{window.title}</strong>
+            <p>{window.note}</p>
+          </article>
+        ))}
+      </div>
     </div>
   );
 }
@@ -456,6 +529,8 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             <h3 className={styles.sectionTitle}>Seasonal Forecast</h3>
             <SeasonalForecastCards data={data} />
           </div>
+
+          <TimingWindows data={data} />
 
           <div className={styles.sectionGrid}>
             <div className={styles.section}>

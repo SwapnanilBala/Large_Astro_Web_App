@@ -406,6 +406,93 @@
   background: rgba(240, 112, 104, 0.08);
 }
 
+.windowsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.windowColumn {
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 16px;
+  background: rgba(255, 243, 210, 0.035);
+  padding: 1rem;
+}
+
+.windowColumnHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.8rem;
+}
+
+.windowColumnHeader h3 {
+  color: var(--ink-main);
+  font-size: 1.05rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.windowSignalBest,
+.windowSignalWatch {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  flex: 0 0 auto;
+}
+
+.windowSignalBest {
+  background: var(--accent-teal);
+  box-shadow: 0 0 16px rgba(108, 225, 212, 0.4);
+}
+
+.windowSignalWatch {
+  background: var(--accent-coral);
+  box-shadow: 0 0 16px rgba(240, 112, 104, 0.35);
+}
+
+.windowCard {
+  border-top: 1px solid rgba(108, 225, 212, 0.16);
+  padding: 0.78rem 0 0.65rem;
+}
+
+.windowCard:first-of-type {
+  border-top: none;
+  padding-top: 0;
+}
+
+.windowCard span {
+  display: inline-flex;
+  min-width: 2.6rem;
+  color: var(--accent-teal);
+  font-size: 0.76rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.windowCard strong {
+  color: var(--ink-main);
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.windowCard p {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.45;
+  margin: 0.35rem 0 0;
+}
+
+.windowCardWatch {
+  border-top-color: rgba(240, 112, 104, 0.16);
+}
+
+.windowCardWatch span {
+  color: var(--accent-coral);
+}
+
 .sectionGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -423,6 +510,10 @@
   }
 
   .seasonGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .windowsGrid {
     grid-template-columns: 1fr;
   }
 
