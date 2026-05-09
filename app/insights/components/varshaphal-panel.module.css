@@ -134,6 +134,137 @@
 
 /* ── Section Cards ── */
 
+.timelineCard {
+  margin-bottom: 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(200, 155, 60, 0.16);
+  background:
+    linear-gradient(135deg, rgba(200, 155, 60, 0.08), rgba(26, 123, 110, 0.05)),
+    rgba(255, 243, 210, 0.035);
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.timelineHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.eyebrow {
+  display: block;
+  color: var(--accent-gold);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.timelineTitle {
+  color: var(--ink-main);
+  font-size: clamp(1.25rem, 1.8vw, 1.55rem);
+  line-height: 1.2;
+  margin: 0.35rem 0 0;
+}
+
+.timelineBadge {
+  flex: 0 0 auto;
+  border: 1px solid rgba(108, 225, 212, 0.22);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--ink-main);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 0.55rem 0.7rem;
+}
+
+.timelineTrack {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(120px, 1fr));
+  gap: 0.55rem;
+  overflow-x: auto;
+  padding: 0.15rem 0.1rem 0.35rem;
+  scrollbar-width: thin;
+}
+
+.timelineMonth {
+  position: relative;
+  min-height: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(8, 12, 24, 0.24);
+  padding: 0.8rem 0.7rem 0.75rem;
+}
+
+.timelineDot {
+  display: block;
+  width: 0.58rem;
+  height: 0.58rem;
+  border-radius: 50%;
+  background: var(--ink-soft);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.14);
+  margin-bottom: 0.65rem;
+}
+
+.timelineMonthLabel {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.timelineMonth strong {
+  display: block;
+  color: var(--ink-main);
+  font-size: 1rem;
+  line-height: 1.2;
+  margin-top: 0.45rem;
+}
+
+.timelineMonth p {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.42;
+  margin: 0.45rem 0 0;
+}
+
+.timelineMonthGrowth {
+  border-color: rgba(108, 225, 212, 0.26);
+  background: rgba(26, 123, 110, 0.12);
+}
+
+.timelineMonthGrowth .timelineDot {
+  background: var(--accent-teal);
+  box-shadow: 0 0 16px rgba(108, 225, 212, 0.36);
+}
+
+.timelineMonthPeak {
+  border-color: rgba(200, 155, 60, 0.42);
+  background: rgba(200, 155, 60, 0.13);
+}
+
+.timelineMonthPeak .timelineDot {
+  background: var(--accent-gold);
+  box-shadow: 0 0 18px rgba(200, 155, 60, 0.44);
+}
+
+.timelineMonthReview {
+  border-color: rgba(240, 112, 104, 0.26);
+  background: rgba(240, 112, 104, 0.09);
+}
+
+.timelineMonthReview .timelineDot {
+  background: var(--accent-coral);
+  box-shadow: 0 0 16px rgba(240, 112, 104, 0.34);
+}
+
 .sectionGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

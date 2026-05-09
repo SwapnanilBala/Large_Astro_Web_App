@@ -11,6 +11,30 @@ type VarshaphalPanelProps = {
 };
 
 const TIMEOUT_MS = 45_000;
+const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const HOUSE_TIMELINE_LABELS: Record<number, string> = {
+  1: "Identity",
+  2: "Money",
+  3: "Voice",
+  4: "Home",
+  5: "Joy",
+  6: "Routines",
+  7: "Bonds",
+  8: "Change",
+  9: "Vision",
+  10: "Career",
+  11: "Allies",
+  12: "Closure",
+};
+
+type TimelineTone = "setup" | "growth" | "peak" | "review";
+
+type TimelineMonth = {
+  month: string;
+  title: string;
+  note: string;
+  tone: TimelineTone;
+};
 
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
@@ -31,6 +55,59 @@ function formatReturnMoment(iso: string): string {
   } catch {
     return iso;
   }
+}
+
+function wrapMonth(index: number): number {
+  return ((index % 12) + 12) % 12;
+}
+
+function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
+  const returnMonth = wrapMonth(new Date(data.solarReturnMoment).getMonth());
+  const activatedHouse = data.profection.activatedHouse;
+  const munthaHouse = data.muntha.house;
+  const actionMonths = new Set(
+    [activatedHouse, munthaHouse, 10].map((house) => wrapMonth(returnMonth + house - 1))
+  );
+
+  return MONTH_LABELS.map((month, index) => {
+    const distanceFromReturn = wrapMonth(index - returnMonth);
+    const house = ((activatedHouse + distanceFromReturn - 1) % 12) + 1;
+    const houseTheme = HOUSE_TIMELINE_LABELS[house] ?? "Focus";
+
+    if (index === returnMonth) {
+      return {
+        month,
+        title: "Solar return",
+        note: `${data.returnChart.ascendant.sign} rises; reset the year's operating rhythm.`,
+        tone: "peak",
+      };
+    }
+
+    if (index === wrapMonth(returnMonth + 3) || index === wrapMonth(returnMonth + 9)) {
+      return {
+        month,
+        title: "Course correct",
+        note: `${houseTheme} themes ask for adjustment before the next push.`,
+        tone: "review",
+      };
+    }
+
+    if (actionMonths.has(index)) {
+      return {
+        month,
+        title: "Visible movement",
+        note: `${houseTheme} matters become easier to act on and measure.`,
+        tone: "growth",
+      };
+    }
+
+    return {
+      month,
+      title: houseTheme,
+      note: `Work the house ${house} thread through steady, practical choices.`,
+      tone: "setup",
+    };
+  });
 }
 
 /** Generate year options from birth year to current + 5. */
@@ -264,6 +341,30 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
 
       {data && (
         <>
+          <div className={styles.timelineCard}>
+            <div className={styles.timelineHeader}>
+              <div>
+                <span className={styles.eyebrow}>Year Timeline</span>
+                <h3 className={styles.timelineTitle}>{data.year} Annual Arc</h3>
+              </div>
+              <span className={styles.timelineBadge}>
+                Return {formatReturnMoment(data.solarReturnMoment).split(",")[0]}
+              </span>
+            </div>
+            <div className={styles.timelineTrack}>
+              {buildYearTimeline(data).map((item) => (
+                <article
+                  key={item.month}
+                  className={`${styles.timelineMonth} ${styles[`timelineMonth${item.tone[0].toUpperCase()}${item.tone.slice(1)}`]}`}
+                >
+                  <span className={styles.timelineDot} aria-hidden="true" />
+                  <span className={styles.timelineMonthLabel}>{item.month}</span>
+                  <strong>{item.title}</strong>
+                  <p>{item.note}</p>
+                </article>
+              ))}
+            </div>
+          </div>
           {/* ── Profection Section ── */}
           <div className={styles.sectionGrid}>
             <div className={styles.section}>
