@@ -644,6 +644,19 @@
   padding: 1.25rem 1.5rem;
 }
 
+.gridHero .cardMetric {
+  transform: translateZ(0);
+  will-change: box-shadow, border-color;
+}
+
+.gridHero .cardMetric:hover {
+  transform: translateZ(0);
+}
+
+.gridHero .cardMetric:hover::before {
+  animation: none;
+}
+
 .cardMetric h3 {
   font-family: var(--font-body), sans-serif;
   font-size: 1.14rem;

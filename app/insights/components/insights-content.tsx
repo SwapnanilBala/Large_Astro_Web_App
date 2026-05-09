@@ -1136,7 +1136,7 @@ export default function InsightsContent({
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
 
-      <ParallaxLayer depth={0.05} className={styles.parallaxLayer}>
+      <ParallaxLayer depth={0} className={styles.parallaxLayer}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
         <SectionAnchorNav />
         {/* ─── Hero Header ─── */}
