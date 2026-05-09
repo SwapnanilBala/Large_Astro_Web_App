@@ -110,6 +110,39 @@ function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
   });
 }
 
+function getAnnualTheme(data: VarshaphalResult): string {
+  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase();
+  return `${data.varshesh.planet} leads a house ${data.profection.activatedHouse} year, pulling ${themes || "personal timing"} into the foreground.`;
+}
+
+function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
+  return (
+    <div className={styles.themeHero}>
+      <div className={styles.themeHeroCopy}>
+        <span className={styles.eyebrow}>Annual Signature</span>
+        <h3>{getAnnualTheme(data)}</h3>
+        <p>{data.yearSummary.yearLordInterpretation}</p>
+      </div>
+      <div className={styles.themeStats} aria-label={`${data.year} annual timing highlights`}>
+        <div className={styles.themeStat}>
+          <span>Year Lord</span>
+          <strong>{data.varshesh.planet}</strong>
+        </div>
+        <div className={styles.themeStat}>
+          <span>Activated House</span>
+          <strong>H{data.profection.activatedHouse}</strong>
+          <small>{data.profection.activatedSign}</small>
+        </div>
+        <div className={styles.themeStat}>
+          <span>Muntha</span>
+          <strong>H{data.muntha.house}</strong>
+          <small>{data.muntha.sign}</small>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Generate year options from birth year to current + 5. */
 function yearRange(birthDate: string): number[] {
   const [birthYear] = birthDate.split("-").map(Number);
@@ -341,6 +374,8 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
 
       {data && (
         <>
+          <AnnualThemeHero data={data} />
+
           <div className={styles.timelineCard}>
             <div className={styles.timelineHeader}>
               <div>
