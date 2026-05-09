@@ -50,6 +50,13 @@ type TimingWindow = {
   note: string;
 };
 
+type WeatherMeter = {
+  label: string;
+  score: number;
+  trend: "rising" | "steady" | "review";
+  note: string;
+};
+
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
     target_year: targetYear,
@@ -260,6 +267,67 @@ function TimingWindows({ data }: { data: VarshaphalResult }) {
             <span>{window.month}</span>
             <strong>{window.title}</strong>
             <p>{window.note}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function clampScore(score: number): number {
+  return Math.max(35, Math.min(96, score));
+}
+
+function scoreDomain(data: VarshaphalResult, houses: number[], planets: string[]): number {
+  let score = 52;
+  if (houses.includes(data.profection.activatedHouse)) score += 18;
+  if (houses.includes(data.muntha.house)) score += 14;
+  score += data.returnChart.planets.filter((planet) => houses.includes(planet.house)).length * 4;
+  score += data.returnChart.planets.filter((planet) => planets.includes(planet.name)).length * 3;
+  if (planets.includes(data.varshesh.planet)) score += 8;
+  return clampScore(score);
+}
+
+function buildWeatherMeters(data: VarshaphalResult): WeatherMeter[] {
+  const configs = [
+    { label: "Career", houses: [10, 6, 11], planets: ["Sun", "Saturn", "Mars"], note: "Visibility, responsibility, and execution power." },
+    { label: "Money", houses: [2, 8, 11], planets: ["Venus", "Jupiter", "Mercury"], note: "Resources, gains, shared assets, and trade." },
+    { label: "Relationships", houses: [5, 7], planets: ["Venus", "Moon", "Jupiter"], note: "Partnership clarity, romance, and emotional exchange." },
+    { label: "Health", houses: [1, 6, 12], planets: ["Moon", "Mars", "Saturn"], note: "Energy management, routines, and recovery needs." },
+    { label: "Inner Growth", houses: [4, 8, 9, 12], planets: ["Moon", "Jupiter", "Saturn", "Ketu"], note: "Reflection, faith, transformation, and closure." },
+  ];
+
+  return configs.map((config) => {
+    const score = scoreDomain(data, config.houses, config.planets);
+    return {
+      label: config.label,
+      score,
+      trend: score >= 76 ? "rising" : score >= 58 ? "steady" : "review",
+      note: config.note,
+    };
+  });
+}
+
+function PlanetaryWeatherMeters({ data }: { data: VarshaphalResult }) {
+  return (
+    <div className={styles.weatherPanel}>
+      <div className={styles.weatherHeader}>
+        <span className={styles.eyebrow}>Planetary Weather</span>
+        <h3>Domain Meters</h3>
+      </div>
+      <div className={styles.weatherGrid}>
+        {buildWeatherMeters(data).map((meter) => (
+          <article key={meter.label} className={styles.weatherMeter}>
+            <div className={styles.weatherMeterTop}>
+              <strong>{meter.label}</strong>
+              <span className={styles[`weatherTrend${meter.trend[0].toUpperCase()}${meter.trend.slice(1)}`]}>
+                {meter.trend}
+              </span>
+            </div>
+            <div className={styles.weatherTrack} aria-label={`${meter.label} score ${meter.score} percent`}>
+              <span style={{ width: `${meter.score}%` }} />
+            </div>
+            <p>{meter.note}</p>
           </article>
         ))}
       </div>
@@ -580,6 +648,8 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           </div>
 
           <TimingWindows data={data} />
+
+          <PlanetaryWeatherMeters data={data} />
 
           <div className={styles.sectionGrid}>
             <div className={styles.section}>

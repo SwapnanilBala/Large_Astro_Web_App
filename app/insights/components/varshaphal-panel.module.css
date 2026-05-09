@@ -568,6 +568,106 @@
   color: var(--accent-coral);
 }
 
+.weatherPanel {
+  margin-bottom: 1.5rem;
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(8, 12, 24, 0.12), rgba(255, 243, 210, 0.035));
+  padding: 1rem;
+}
+
+.weatherHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.85rem;
+}
+
+.weatherHeader h3 {
+  color: var(--ink-main);
+  font-size: 1.1rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.weatherGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.weatherMeter {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: rgba(8, 12, 24, 0.22);
+  padding: 0.85rem;
+}
+
+.weatherMeterTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.weatherMeterTop strong {
+  color: var(--ink-main);
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.weatherTrendRising,
+.weatherTrendSteady,
+.weatherTrendReview {
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  padding: 0.32rem 0.42rem;
+  text-transform: uppercase;
+}
+
+.weatherTrendRising {
+  background: rgba(108, 225, 212, 0.13);
+  color: var(--accent-teal);
+}
+
+.weatherTrendSteady {
+  background: rgba(200, 155, 60, 0.13);
+  color: var(--accent-gold);
+}
+
+.weatherTrendReview {
+  background: rgba(240, 112, 104, 0.12);
+  color: var(--accent-coral);
+}
+
+.weatherTrack {
+  height: 0.5rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0.8rem 0 0.65rem;
+  overflow: hidden;
+}
+
+.weatherTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold));
+}
+
+.weatherMeter p {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  line-height: 1.42;
+  margin: 0;
+}
+
 .sectionGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -589,6 +689,14 @@
   }
 
   .windowsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .weatherHeader {
+    display: block;
+  }
+
+  .weatherGrid {
     grid-template-columns: 1fr;
   }
 
