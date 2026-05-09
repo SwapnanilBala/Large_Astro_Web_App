@@ -390,6 +390,8 @@ function ProfectionWheel({
 export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPanelProps) {
   const currentYear = new Date().getFullYear();
   const years = yearRange(birthDate);
+  const minYear = years[0] ?? currentYear;
+  const maxYear = years[years.length - 1] ?? currentYear;
 
   const [targetYear, setTargetYear] = useState(currentYear);
   const [data, setData] = useState<VarshaphalResult | null>(null);
@@ -444,6 +446,18 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queryString]);
 
+  const chooseYear = (year: number) => {
+    const nextYear = Math.min(maxYear, Math.max(minYear, year));
+    setTargetYear(nextYear);
+    void loadData(nextYear);
+  };
+
+  const quickYears = Array.from(
+    new Set([targetYear - 1, targetYear, targetYear + 1, currentYear, currentYear + 1])
+  )
+    .filter((year) => year >= minYear && year <= maxYear)
+    .sort((a, b) => a - b);
+
   // Build house->sign map for the wheel
   const houseSignMap: Record<number, string> = {};
   if (data) {
@@ -471,11 +485,46 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           void loadData(targetYear);
         }}
       >
+        <div className={styles.yearStepper} aria-label="Annual timing year controls">
+          <button
+            type="button"
+            className={styles.yearStepBtn}
+            onClick={() => chooseYear(targetYear - 1)}
+            disabled={isLoading || targetYear <= minYear}
+            aria-label="Previous year"
+          >
+            Prev
+          </button>
+          <div className={styles.yearQuickList}>
+            {quickYears.map((year) => (
+              <button
+                key={year}
+                type="button"
+                className={year === targetYear ? styles.yearQuickActive : styles.yearQuick}
+                onClick={() => chooseYear(year)}
+                disabled={isLoading}
+              >
+                {year}
+                {year === currentYear && <span>Now</span>}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            className={styles.yearStepBtn}
+            onClick={() => chooseYear(targetYear + 1)}
+            disabled={isLoading || targetYear >= maxYear}
+            aria-label="Next year"
+          >
+            Next
+          </button>
+        </div>
         <label className={styles.yearField}>
-          Year
+          Jump to year
           <select
             value={targetYear}
-            onChange={(e) => setTargetYear(Number(e.target.value))}
+            onChange={(e) => chooseYear(Number(e.target.value))}
+            disabled={isLoading}
           >
             {years.map((y) => (
               <option key={y} value={y}>

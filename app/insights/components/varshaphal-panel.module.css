@@ -60,6 +60,81 @@
   margin-bottom: 1.5rem;
 }
 
+.yearStepper {
+  display: flex;
+  flex: 1 1 520px;
+  align-items: stretch;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.yearQuickList {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow-x: auto;
+  padding-bottom: 0.1rem;
+  scrollbar-width: thin;
+}
+
+.yearStepBtn,
+.yearQuick,
+.yearQuickActive {
+  border: 1px solid rgba(200, 155, 60, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 243, 210, 0.04);
+  color: var(--ink-main);
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 2.8rem;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.yearStepBtn {
+  flex: 0 0 auto;
+  padding: 0 0.85rem;
+}
+
+.yearQuick,
+.yearQuickActive {
+  flex: 0 0 auto;
+  min-width: 4.6rem;
+  padding: 0.45rem 0.8rem;
+}
+
+.yearQuick span,
+.yearQuickActive span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.65rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  margin-top: 0.22rem;
+  text-transform: uppercase;
+}
+
+.yearQuickActive {
+  border-color: rgba(200, 155, 60, 0.45);
+  background: rgba(200, 155, 60, 0.16);
+  color: var(--accent-gold);
+  box-shadow: 0 0 18px rgba(200, 155, 60, 0.1);
+}
+
+.yearStepBtn:hover:not(:disabled),
+.yearQuick:hover:not(:disabled) {
+  border-color: rgba(108, 225, 212, 0.32);
+  background: rgba(108, 225, 212, 0.08);
+}
+
+.yearStepBtn:disabled,
+.yearQuick:disabled,
+.yearQuickActive:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
+}
+
 .yearField {
   display: flex;
   flex-direction: column;
