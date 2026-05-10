@@ -58,6 +58,7 @@ function LazyPanel({
 }
 
 const LagnaChart = dynamic(() => import("./lagna-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
+const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
@@ -340,6 +341,7 @@ function CollapsibleSection({
 const SECTION_ANCHORS = [
   { id: "chart-map", label: "Map" },
   { id: "timing", label: "Timing" },
+  { id: "vimshottari-dashas", label: "Dashas" },
   { id: "core", label: "Core" },
   { id: "themes", label: "Themes" },
   { id: "karma", label: "Karma" },
@@ -1350,6 +1352,38 @@ export default function InsightsContent({
             </div>
           </div>
         </CollapsibleSection>
+
+        {/* ─── Vimshottari Dashas Section ─── */}
+        {payload.chart.nakshatra && payload.chart.dasha && (
+          <>
+            <ConstellationDivider />
+
+            <CollapsibleSection
+              id="vimshottari-dashas"
+              kicker="Vimshottari Dashas"
+              title="Life periods and sub-period branches"
+              defaultOpen={true}
+              className={`${styles.cardRules} ${styles.cardDasha}`}
+              persistKey={`${sectionStateScope}:vimshottari-dashas`}
+            >
+              <LazyPanel>
+                <PanelErrorBoundary panelName="Vimshottari Dashas">
+                  <AuthGate
+                    featureLabel="Vimshottari Dashas"
+                    isLocked={lockedFeatures.has("nakshatra_dasha")}
+                  >
+                    <NakshatraDashaPanel
+                      nakshatra={payload.chart.nakshatra}
+                      dasha={payload.chart.dasha}
+                      audit={payload.chart.calculation_audit}
+                      planets={payload.chart.planets}
+                    />
+                  </AuthGate>
+                </PanelErrorBoundary>
+              </LazyPanel>
+            </CollapsibleSection>
+          </>
+        )}
 
         {/* ─── Core Rules Section ─── */}
         <CollapsibleSection

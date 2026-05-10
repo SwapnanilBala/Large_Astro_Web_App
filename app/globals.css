@@ -2745,6 +2745,22 @@ html[data-theme="light"] .dasha-active-card {
     linear-gradient(135deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.025)),
     rgba(6, 24, 38, 0.48);
   padding: 0.85rem;
+  cursor: default;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.dasha-lens-card[role="button"] {
+  cursor: pointer;
+}
+
+.dasha-lens-card[role="button"]:hover,
+.dasha-lens-card[role="button"]:focus-visible {
+  border-color: rgba(108, 225, 212, 0.36);
+  background:
+    linear-gradient(135deg, rgba(108, 225, 212, 0.1), rgba(255, 255, 255, 0.025)),
+    rgba(6, 24, 38, 0.58);
+  outline: none;
+  transform: translateY(-2px);
 }
 
 .dasha-lens-card--current {
@@ -2786,10 +2802,29 @@ html[data-theme="light"] .dasha-active-card {
   margin: 0;
 }
 
+.dasha-subtle-details {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.1rem 0;
+}
+
+.dasha-subtle-details small {
+  color: rgba(236, 243, 255, 0.78);
+  line-height: 1.45;
+}
+
 .dasha-lens-card small {
   color: var(--ink-soft);
   font-size: 0.96rem;
   line-height: 1.35;
+}
+
+.dasha-lens-drill {
+  margin-top: auto;
+  color: var(--accent-aqua) !important;
+  font-weight: 800;
+  letter-spacing: 0.08rem;
+  text-transform: uppercase;
 }
 
 .dasha-table-scroll {

@@ -508,6 +508,33 @@ export default function NakshatraDashaPanel({
     return `${days} days`;
   };
 
+  const getPeriodLords = (period: DashaDisplayPeriod) => {
+    if (period.lords && period.lords.length > 0) return period.lords;
+    if (selectedParent) return [...drillPath.map((step) => step.planet), period.planet];
+    return [period.planet];
+  };
+
+  const getSubtlePeriodDetails = (period: DashaDisplayPeriod) => {
+    const lords = getPeriodLords(period);
+    const mahaLord = lords[0] ?? period.planet;
+    const activeLord = period.planet;
+    const theme = DASHA_LORD_THEMES[activeLord];
+    const placement = planets?.find((planet) => planet.name === activeLord);
+    const housePhrase = placement
+      ? `Natal house ${placement.house} adds ${HOUSE_MODIFIER[placement.house]?.toLowerCase() ?? "a chart-specific emphasis."}`
+      : "Use this branch as a timing lens for choices that need finer judgment.";
+    const combo =
+      lords.length > 1
+        ? DASHA_COMBO_EFFECTS[`${mahaLord}-${activeLord}`]
+        : theme?.general;
+
+    return [
+      theme ? `${theme.theme}: ${theme.keywords.slice(0, 3).join(", ")}.` : null,
+      combo,
+      housePhrase,
+    ].filter(Boolean);
+  };
+
   const formatAuditTimestamp = (value: string) => {
     const match = value.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
     if (!match) return value.replace("T", " ");
@@ -812,8 +839,10 @@ export default function NakshatraDashaPanel({
       </div>
 
       <div className="dasha-timeline-section" ref={timelineRef} style={{ position: "relative" }}>
-        <h3>{t("dasha.timeline")}</h3>
-        <p className="dasha-timeline-hint">{t("dasha.drillHint")}</p>
+        <h3>Vimshottari Dasha Timeline</h3>
+        <p className="dasha-timeline-hint">
+          Click a dasha to open Antardasha, then keep selecting branches for Pratyantar, Sookshma, and Prana timing.
+        </p>
 
         <div className="dasha-view-switcher" aria-label="Dasha timeline views">
           {(["timeline", "lens", "table"] as DashaViewMode[]).map((mode) => (
@@ -1149,6 +1178,33 @@ export default function NakshatraDashaPanel({
                     key={`${period.planet}-${period.start_date}-${index}`}
                     className={`dasha-lens-card${isCurrent ? " dasha-lens-card--current" : ""}`}
                     style={{ borderTopColor: color }}
+                    role={period.level < 5 ? "button" : undefined}
+                    tabIndex={period.level < 5 ? 0 : undefined}
+                    onClick={() => {
+                      if (period.level >= 5) return;
+                      void handleDrillDown(
+                        period.planet,
+                        period.start_date,
+                        period.end_date,
+                        period.level,
+                        period.lords ?? drillPath.map((step) => step.planet),
+                        period.sequence_start_date,
+                        period.sequence_end_date
+                      );
+                    }}
+                    onKeyDown={(event) => {
+                      if (period.level >= 5 || (event.key !== "Enter" && event.key !== " ")) return;
+                      event.preventDefault();
+                      void handleDrillDown(
+                        period.planet,
+                        period.start_date,
+                        period.end_date,
+                        period.level,
+                        period.lords ?? drillPath.map((step) => step.planet),
+                        period.sequence_start_date,
+                        period.sequence_end_date
+                      );
+                    }}
                   >
                     <div className="dasha-lens-card-top">
                       <span>{String(index + 1).padStart(2, "0")}</span>
@@ -1156,8 +1212,16 @@ export default function NakshatraDashaPanel({
                     </div>
                     <h5 style={{ color }}>{period.planet}</h5>
                     <p>{theme}</p>
+                    <div className="dasha-subtle-details">
+                      {getSubtlePeriodDetails(period).map((detail) => (
+                        <small key={detail}>{detail}</small>
+                      ))}
+                    </div>
                     <small>{formatDate(period.start_date)} - {formatDate(period.end_date)}</small>
                     <small>{duration}</small>
+                    {period.level < 5 && (
+                      <small className="dasha-lens-drill">Open next branch</small>
+                    )}
                   </article>
                 );
               })}
