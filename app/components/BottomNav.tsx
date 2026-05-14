@@ -9,7 +9,7 @@ const NAV_ITEMS = [
   { href: '/', labelKey: 'bottomNav.home', icon: '\u2299' },
   { href: '/insights', labelKey: 'bottomNav.insights', icon: '\u2726' },
   { href: '/workspace', labelKey: 'bottomNav.saved', icon: '\u2661' },
-  { href: '/pricing', labelKey: 'bottomNav.plans', icon: '\u25C8' },
+  { href: '/calendar', labelKey: 'bottomNav.calendar', icon: '\u25C8' },
 ];
 
 /** Minimum horizontal swipe distance (px) to trigger navigation */

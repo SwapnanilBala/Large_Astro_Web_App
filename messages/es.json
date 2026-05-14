@@ -12,7 +12,8 @@
     "signOut": "Cerrar Sesión",
     "signInPrompt": "¿Ya tienes cuenta?",
     "alreadyUser": "¿Ya tienes cuenta?",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "calendar": "Calendar"
   },
   "home": {
     "kicker": "Motor de Inteligencia Védica",
@@ -472,5 +473,8 @@
     "mars": "Marte",
     "jupiter": "Jupiter",
     "saturn": "Saturno"
+  },
+  "bottomNav": {
+    "calendar": "Calendar"
   }
 }
