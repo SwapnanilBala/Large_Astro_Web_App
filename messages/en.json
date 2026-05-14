@@ -12,7 +12,8 @@
     "signOut": "Sign Out",
     "signInPrompt": "Already a user?",
     "alreadyUser": "Already a user?",
-    "close": "Close"
+    "close": "Close",
+    "calendar": "Calendar"
   },
   "home": {
     "kicker": "Astro Intelligence Studio",
@@ -430,7 +431,8 @@
     "home": "Home",
     "insights": "Insights",
     "saved": "Saved",
-    "plans": "Plans"
+    "plans": "Plans",
+    "calendar": "Calendar"
   },
   "errorBoundary": {
     "heading": "Something went wrong",

@@ -12,7 +12,8 @@
     "signOut": "लॉग आउट",
     "signInPrompt": "पहले से खाता है?",
     "alreadyUser": "पहले से उपयोगकर्ता?",
-    "close": "बंद करें"
+    "close": "बंद करें",
+    "calendar": "Calendar"
   },
   "home": {
     "kicker": "वैदिक बुद्धिमत्ता इंजन",
@@ -472,5 +473,8 @@
     "mars": "मंगल",
     "jupiter": "बृहस्पति",
     "saturn": "शनि"
+  },
+  "bottomNav": {
+    "calendar": "Calendar"
   }
 }

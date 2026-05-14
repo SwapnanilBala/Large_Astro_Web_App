@@ -152,6 +152,9 @@ export default function Navbar() {
                 <Link href="/workspace" className="navbar-chart-link">
                   {t("navbar.workspace")}
                 </Link>
+                <Link href="/calendar" className="navbar-chart-link">
+                  {t("navbar.calendar")}
+                </Link>
                 {lastChartUrl && (
                   <Link href={lastChartUrl} className="navbar-chart-link">
                     {t("navbar.myChart")}
@@ -222,6 +225,9 @@ export default function Navbar() {
           </Link>
           <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
             {t("navbar.workspace")}
+          </Link>
+          <Link href="/calendar" className="drawer-link" onClick={closeDrawer}>
+            {t("navbar.calendar")}
           </Link>
           {lastChartUrl && (
             <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>

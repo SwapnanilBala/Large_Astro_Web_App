@@ -12,7 +12,8 @@
     "signOut": "লগ আউট",
     "signInPrompt": "ইতিমধ্যে অ্যাকাউন্ট আছে?",
     "alreadyUser": "ইতিমধ্যে ব্যবহারকারী?",
-    "close": "বন্ধ করুন"
+    "close": "বন্ধ করুন",
+    "calendar": "Calendar"
   },
   "home": {
     "kicker": "বৈদিক বুদ্ধিমত্তা ইঞ্জিন",
@@ -472,5 +473,8 @@
     "mars": "মঙ্গল",
     "jupiter": "বৃহস্পতি",
     "saturn": "শনি"
+  },
+  "bottomNav": {
+    "calendar": "Calendar"
   }
 }
