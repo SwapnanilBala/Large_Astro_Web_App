@@ -1,0 +1,114 @@
+/* ═══════════════════════════════════════════════
+   PALM ANNOTATION OVERLAY
+   ═══════════════════════════════════════════════ */
+
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  border: 1px solid rgba(200, 155, 60, 0.28);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(10, 12, 20, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.32),
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Lines */
+.line {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#palm-line-shadow);
+  transition: opacity 200ms ease;
+}
+
+.lineDraw {
+  stroke-dasharray: var(--draw-length, 1000);
+  stroke-dashoffset: var(--draw-length, 1000);
+  animation: palmDrawOn 900ms ease-out forwards;
+  animation-delay: var(--draw-delay, 0ms);
+}
+
+@keyframes palmDrawOn {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Control point dots */
+.dot {
+  opacity: 0;
+  animation: palmDotIn 220ms ease-out forwards;
+  animation-delay: var(--dot-delay, 0ms);
+}
+
+@keyframes palmDotIn {
+  to {
+    opacity: 0.55;
+  }
+}
+
+/* Labels */
+.labelGroup {
+  opacity: 0;
+  animation: palmLabelIn 360ms ease-out forwards;
+  animation-delay: var(--label-delay, 0ms);
+}
+
+@keyframes palmLabelIn {
+  to {
+    opacity: 1;
+  }
+}
+
+.labelPill {
+  stroke-width: 1;
+}
+
+.labelText {
+  font-family: var(--font-body, system-ui), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  fill: rgba(255, 250, 240, 0.96);
+  text-anchor: middle;
+  dominant-baseline: middle;
+  pointer-events: none;
+}
+
+/* Reduced motion: render everything immediately */
+@media (prefers-reduced-motion: reduce) {
+  .lineDraw {
+    animation: none;
+    stroke-dasharray: none;
+    stroke-dashoffset: 0;
+  }
+
+  .dot {
+    animation: none;
+    opacity: 0.55;
+  }
+
+  .labelGroup {
+    animation: none;
+    opacity: 1;
+  }
+}
