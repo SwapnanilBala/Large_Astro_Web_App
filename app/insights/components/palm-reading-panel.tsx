@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
+import { AlertTriangle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import PalmAnnotation from "./PalmAnnotation";
 
 /* ────────────────────────────────────────────────
    Types
@@ -12,6 +14,72 @@ type LineReading = {
   description: string;
   interpretation: string;
   strength: "strong" | "moderate" | "faint" | "absent";
+};
+
+type LineKey = "heart_line" | "head_line" | "life_line" | "fate_line";
+
+type LineCoord = { x: number; y: number };
+
+type LineConfidenceEntry = {
+  visibility: "clear" | "partial" | "faint" | "not_detected";
+  confidence: number; // 0-1
+};
+
+type ImageQuality = {
+  rating: "excellent" | "good" | "marginal" | "poor";
+  issues: string[];
+  reliable_for_reading: boolean;
+  notes: string;
+};
+
+type JyotishCorrelationItem = {
+  palm_indicator: string;
+  chart_factor: string;
+  reinforcement: "strong" | "moderate" | "contradictory" | "neutral";
+  reading: string;
+};
+
+type JyotishCorrelation = {
+  summary: string;
+  correlations: JyotishCorrelationItem[];
+};
+
+type DashaRelevanceIndicator = {
+  indicator: string;
+  relevance_to_dasha: string;
+  timing_note?: string;
+};
+
+type DashaRelevance = {
+  active_period_summary: string;
+  relevant_palm_indicators: DashaRelevanceIndicator[];
+};
+
+type SanskritTerm = {
+  term: string;
+  meaning: string;
+  observation: string;
+};
+
+type ClassicalFrameworkNotes = {
+  framework: string;
+  sanskrit_terms: SanskritTerm[];
+  classical_text_references: string[];
+};
+
+export type JyotishContext = {
+  ascendant?: { sign: string; degree: number; nakshatra: string };
+  moonSign?: string;
+  moonNakshatra?: string;
+  sunSign?: string;
+  currentMahadasha?: { lord: string; remaining_years: number };
+  currentAntardasha?: { lord: string; remaining_months: number };
+  keyPlacements?: Array<{
+    planet: string;
+    sign: string;
+    house: number;
+    nakshatra: string;
+  }>;
 };
 
 type LifeTrajectory = {
@@ -57,6 +125,14 @@ type PalmReading = {
   fingers: { observation: string; interpretation: string };
   special_markings: { observed: string[]; interpretation: string };
   guidance: string;
+
+  /* ── NEW optional fields ── */
+  image_quality?: ImageQuality;
+  line_confidence?: Partial<Record<LineKey, LineConfidenceEntry>>;
+  line_coordinates?: Partial<Record<LineKey, LineCoord[]>>;
+  jyotish_correlation?: JyotishCorrelation;
+  dasha_relevance?: DashaRelevance;
+  classical_framework_notes?: ClassicalFrameworkNotes;
 };
 
 type Phase = "idle" | "camera" | "captured" | "analyzing" | "results";
@@ -81,11 +157,57 @@ const LINE_LABELS: Record<string, string> = {
 
 const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
 
+const REVEAL_DELAY_MS = 700;
+
+const REVEAL_SEQUENCE = [
+  "image_quality_warning",
+  "summary",
+  "annotated_image",
+  "lines",
+  "trajectory",
+  "jyotish_correlation",
+  "dasha_relevance",
+  "career",
+  "relationships",
+  "health",
+  "mounts",
+  "fingers",
+  "markings",
+  "classical_framework",
+  "guidance",
+] as const;
+type RevealSection = (typeof REVEAL_SEQUENCE)[number];
+
+const VISIBILITY_BADGE_COLORS: Record<LineConfidenceEntry["visibility"], string> = {
+  clear: "var(--accent-aqua)",
+  partial: "var(--accent-gold)",
+  faint: "var(--accent-coral)",
+  not_detected: "#888",
+};
+
+const VISIBILITY_LABEL: Record<LineConfidenceEntry["visibility"], string> = {
+  clear: "Clear",
+  partial: "Partial",
+  faint: "Faint",
+  not_detected: "Not detected",
+};
+
+const REINFORCEMENT_COLORS: Record<JyotishCorrelationItem["reinforcement"], string> = {
+  strong: "var(--accent-gold)",
+  moderate: "var(--accent-aqua)",
+  contradictory: "var(--accent-coral)",
+  neutral: "#888",
+};
+
 /* ────────────────────────────────────────────────
    Component
    ──────────────────────────────────────────────── */
 
-export default function PalmReadingPanel() {
+type PalmReadingPanelProps = {
+  jyotishContext?: JyotishContext;
+};
+
+export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelProps = {}) {
   const { token, isAuthenticated, isPremium } = useAuth();
 
   /* ── state ── */
@@ -97,6 +219,12 @@ export default function PalmReadingPanel() {
   const [error, setError] = useState<string | null>(null);
   const [handDetected, setHandDetected] = useState(false);
   const [handScore, setHandScore] = useState(0);
+  const [classicalMode, setClassicalMode] = useState(false);
+  const [imageQualityDismissed, setImageQualityDismissed] = useState(false);
+  const [revealedSections, setRevealedSections] = useState<Set<RevealSection>>(new Set());
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const revealTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
   /* ── refs ── */
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -348,16 +476,22 @@ export default function PalmReadingPanel() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
+      const body: Record<string, unknown> = { image: imageData, mediaType };
+      if (classicalMode) body.classicalMode = true;
+      if (jyotishContext) body.jyotishContext = jyotishContext;
       const res = await fetch("/api/palm-reading", {
         method: "POST",
         headers,
-        body: JSON.stringify({ image: imageData, mediaType }),
+        body: JSON.stringify(body),
       });
       if (!res.ok) {
         const err = await res.json();
         throw new Error(err.error?.message || err.detail || "Analysis failed");
       }
       setReading(await res.json());
+      setSaveState("idle");
+      setSaveError(null);
+      setImageQualityDismissed(false);
       setPhase("results");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong");
@@ -366,6 +500,11 @@ export default function PalmReadingPanel() {
   };
 
   /* ── reset ── */
+  const clearRevealTimers = useCallback(() => {
+    revealTimersRef.current.forEach((t) => clearTimeout(t));
+    revealTimersRef.current = [];
+  }, []);
+
   const resetAll = () => {
     stopCamera();
     setPhase("idle");
@@ -375,7 +514,124 @@ export default function PalmReadingPanel() {
     setError(null);
     setHandDetected(false);
     setHandScore(0);
+    setRevealedSections(new Set());
+    setSaveState("idle");
+    setSaveError(null);
+    setImageQualityDismissed(false);
+    clearRevealTimers();
     lastLandmarksRef.current = null;
+  };
+
+  /* ── which reveal sections actually apply to this reading? ── */
+  const applicableSections = useMemo<RevealSection[]>(() => {
+    if (!reading) return [];
+    const out: RevealSection[] = [];
+    const showImageWarning =
+      reading.image_quality &&
+      (reading.image_quality.reliable_for_reading === false ||
+        reading.image_quality.rating === "marginal");
+    if (showImageWarning) out.push("image_quality_warning");
+    out.push("summary");
+    if (
+      reading.line_coordinates &&
+      Object.values(reading.line_coordinates).some(
+        (pts) => Array.isArray(pts) && pts.length > 0,
+      )
+    ) {
+      out.push("annotated_image");
+    }
+    out.push("lines");
+    if (reading.life_trajectory) out.push("trajectory");
+    if (reading.jyotish_correlation) out.push("jyotish_correlation");
+    if (reading.dasha_relevance) out.push("dasha_relevance");
+    if (reading.career_and_purpose) out.push("career");
+    if (reading.relationships_and_emotional) out.push("relationships");
+    if (reading.health_and_vitality) out.push("health");
+    if (reading.mounts) out.push("mounts");
+    if (reading.fingers) out.push("fingers");
+    if (reading.special_markings) out.push("markings");
+    if (reading.classical_framework_notes) out.push("classical_framework");
+    out.push("guidance");
+    return out;
+  }, [reading]);
+
+  /* ── progressive reveal effect ── */
+  useEffect(() => {
+    if (phase !== "results" || !reading) return;
+    clearRevealTimers();
+
+    // Detect prefers-reduced-motion at effect time (SSR-safe).
+    let reduced = false;
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      try {
+        reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      } catch {
+        reduced = false;
+      }
+    }
+
+    if (reduced) {
+      setRevealedSections(new Set(applicableSections));
+      return;
+    }
+
+    // Reveal first section immediately, then stagger the rest.
+    setRevealedSections(new Set(applicableSections.slice(0, 1)));
+    for (let i = 1; i < applicableSections.length; i++) {
+      const t = setTimeout(() => {
+        setRevealedSections((prev) => {
+          const next = new Set(prev);
+          next.add(applicableSections[i]);
+          return next;
+        });
+      }, i * REVEAL_DELAY_MS);
+      revealTimersRef.current.push(t);
+    }
+
+    return () => clearRevealTimers();
+  }, [phase, reading, applicableSections, clearRevealTimers]);
+
+  const skipAnimations = useCallback(() => {
+    clearRevealTimers();
+    setRevealedSections(new Set(applicableSections));
+  }, [applicableSections, clearRevealTimers]);
+
+  /* ── save reading ── */
+  const saveReading = async () => {
+    if (!reading || !imagePreview) return;
+    if (saveState === "saving" || saveState === "saved") return;
+    if (!isAuthenticated || !token) {
+      setSaveError("Sign in to save readings.");
+      setSaveState("error");
+      return;
+    }
+    setSaveState("saving");
+    setSaveError(null);
+    try {
+      const res = await fetch("/api/palm-readings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          image_data_url: imagePreview,
+          reading,
+          jyotish_context: jyotishContext ?? null,
+          classical_mode: classicalMode,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(
+          (err && (err.error?.message || err.detail)) || "Failed to save reading",
+        );
+      }
+      setSaveState("saved");
+    } catch (e) {
+      setSaveError(e instanceof Error ? e.message : "Failed to save reading");
+      setSaveState("error");
+    }
   };
 
   /* ── status helpers ── */
@@ -434,6 +690,28 @@ export default function PalmReadingPanel() {
             Use your camera or upload an image of your palm for an AI-powered analysis of your palm lines,
             mounts, and special markings. Get personalized insights based on ancient palmistry traditions.
           </p>
+
+          {/* Classical mode toggle */}
+          <label className="palm-toggle">
+            <span className="palm-toggle-text">
+              <span className="palm-toggle-title">Hasta Samudrika Shastra mode</span>
+              <span className="palm-toggle-subtitle">Classical Vedic palmistry only</span>
+            </span>
+            <span
+              className={`palm-toggle-switch ${classicalMode ? "is-on" : ""}`}
+              role="switch"
+              aria-checked={classicalMode}
+            >
+              <input
+                type="checkbox"
+                checked={classicalMode}
+                onChange={(e) => setClassicalMode(e.target.checked)}
+                className="palm-toggle-input"
+              />
+              <span className="palm-toggle-thumb" />
+            </span>
+          </label>
+
           <div className="palm-actions">
             <button className="palm-btn-camera" onClick={startCamera}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -558,178 +836,509 @@ export default function PalmReadingPanel() {
       )}
 
       {/* ═══ RESULTS ═══ */}
-      {phase === "results" && reading && (
-        <motion.div
-          className="palm-results"
-          variants={containerVariants}
-          initial="hidden"
-          animate="show"
-        >
-          <div className="palm-results-top">
-            <button className="palm-btn-camera" onClick={resetAll}>New Reading</button>
-            {imagePreview && (
-              <div className="palm-preview palm-preview--small">
-                <img src={imagePreview} alt="Your palm" />
+      {phase === "results" && reading && (() => {
+        const sectionVariants = {
+          hidden: { opacity: 0, y: 18 },
+          show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
+        };
+        const isRevealed = (id: RevealSection) => revealedSections.has(id);
+        const allRevealed = revealedSections.size >= applicableSections.length;
+        const iq = reading.image_quality;
+        const showHardWarning =
+          !!iq && iq.reliable_for_reading === false && !imageQualityDismissed;
+        const showSoftWarning =
+          !!iq && iq.reliable_for_reading !== false && iq.rating === "marginal";
+        const lineKeys: LineKey[] = ["heart_line", "head_line", "life_line", "fate_line"];
+        const lineCoords = reading.line_coordinates ?? {};
+        const hasAnyCoords = lineKeys.some(
+          (k) => Array.isArray(lineCoords[k]) && (lineCoords[k] as LineCoord[]).length > 0,
+        );
+        return (
+          <div className="palm-results">
+            <div className="palm-results-top">
+              <button className="palm-btn-camera" onClick={resetAll}>New Reading</button>
+              <button
+                className="palm-save-btn"
+                onClick={saveReading}
+                disabled={saveState === "saving" || saveState === "saved"}
+                title={saveState === "saved" ? "Already saved" : "Save this reading to your account"}
+              >
+                {saveState === "saving"
+                  ? "Saving…"
+                  : saveState === "saved"
+                  ? "Saved ✓"
+                  : "Save reading"}
+              </button>
+              {!allRevealed && (
+                <button
+                  className="palm-skip-btn"
+                  onClick={skipAnimations}
+                  type="button"
+                >
+                  Skip animations
+                </button>
+              )}
+              {imagePreview && (
+                <div className="palm-preview palm-preview--small">
+                  <img src={imagePreview} alt="Your palm" />
+                </div>
+              )}
+            </div>
+            {saveState === "saved" && (
+              <div className="palm-save-toast">
+                Saved to your readings{" "}
+                <a href="/insights/palm-history" className="palm-save-link">
+                  View history &#8599;
+                </a>
               </div>
             )}
-          </div>
+            {saveState === "error" && saveError && (
+              <div className="palm-error" role="alert">
+                {saveError}
+              </div>
+            )}
 
-          {/* Overall Summary */}
-          <motion.div className="palm-summary-card" variants={itemVariants}>
-            <h3>Overall Summary</h3>
-            <p>{reading.overall_summary}</p>
-          </motion.div>
-
-          {/* Dominant Hand Note */}
-          <motion.p className="palm-hand-note" variants={itemVariants}>
-            <em>{reading.dominant_hand_note}</em>
-          </motion.p>
-
-          {/* Lines Grid */}
-          <motion.div className="palm-lines-grid" variants={itemVariants}>
-            {(Object.entries(reading.lines) as [string, LineReading][]).map(([key, line]) => (
+            {/* Image quality warning (hard) */}
+            {isRevealed("image_quality_warning") && showHardWarning && iq && (
               <motion.div
-                key={key}
-                className="palm-line-card"
-                style={{ borderLeftColor: STRENGTH_COLORS[line.strength] }}
-                variants={itemVariants}
+                className="palm-image-warning palm-image-warning--hard"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+                role="alert"
               >
-                <div className="palm-line-header">
-                  <h4>{LINE_LABELS[key] || key}</h4>
-                  <span
-                    className={`palm-strength palm-strength--${line.strength}`}
+                <div className="palm-image-warning-head">
+                  <AlertTriangle size={20} aria-hidden="true" />
+                  <span className="palm-image-warning-title">
+                    Image quality may affect accuracy
+                  </span>
+                  <button
+                    type="button"
+                    className="palm-image-warning-dismiss"
+                    onClick={() => setImageQualityDismissed(true)}
+                    aria-label="Dismiss warning"
                   >
-                    {line.strength}
+                    &times;
+                  </button>
+                </div>
+                {iq.notes && <p className="palm-image-warning-notes">{iq.notes}</p>}
+                {Array.isArray(iq.issues) && iq.issues.length > 0 && (
+                  <ul className="palm-image-warning-list">
+                    {iq.issues.map((issue, i) => (
+                      <li key={`${issue}-${i}`}>{issue}</li>
+                    ))}
+                  </ul>
+                )}
+              </motion.div>
+            )}
+            {/* Image quality warning (soft / marginal) */}
+            {isRevealed("image_quality_warning") && showSoftWarning && iq && (
+              <motion.div
+                className="palm-image-warning palm-image-warning--soft"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <div className="palm-image-warning-head">
+                  <AlertTriangle size={18} aria-hidden="true" />
+                  <span className="palm-image-warning-title">
+                    Image is marginal — interpret with care
                   </span>
                 </div>
-                <p className="palm-line-desc">{line.description}</p>
-                <p className="palm-line-interp">{line.interpretation}</p>
+                {iq.notes && <p className="palm-image-warning-notes">{iq.notes}</p>}
               </motion.div>
-            ))}
-          </motion.div>
+            )}
 
-          {/* Life Trajectory — Hero Card */}
-          {reading.life_trajectory && (
-            <motion.div className="palm-trajectory-hero" variants={itemVariants}>
-              <h3>Life Trajectory</h3>
-              <div className="palm-trajectory-grid">
-                <div className="palm-trajectory-item">
-                  <span className="palm-trajectory-label">Current Phase</span>
-                  <p>{reading.life_trajectory.current_phase}</p>
+            {/* Overall Summary */}
+            {isRevealed("summary") && (
+              <motion.div
+                className="palm-summary-card"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Overall Summary</h3>
+                <p>{reading.overall_summary}</p>
+                {reading.dominant_hand_note && (
+                  <p className="palm-hand-note">
+                    <em>{reading.dominant_hand_note}</em>
+                  </p>
+                )}
+              </motion.div>
+            )}
+
+            {/* Annotated Image */}
+            {isRevealed("annotated_image") && hasAnyCoords && imagePreview && (
+              <motion.div
+                className="palm-section-card palm-section-card--annotated"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Annotated Palm</h3>
+                <PalmAnnotation
+                  imageDataUrl={imagePreview}
+                  coordinates={lineCoords}
+                  showLabels={true}
+                  highlightLine={null}
+                />
+              </motion.div>
+            )}
+
+            {/* Lines Grid */}
+            {isRevealed("lines") && reading.lines && (
+              <motion.div
+                className="palm-lines-grid"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                {(Object.entries(reading.lines) as [string, LineReading][]).map(
+                  ([key, line]) => {
+                    const conf =
+                      reading.line_confidence?.[key as LineKey];
+                    const visibility = conf?.visibility;
+                    const pct =
+                      conf && typeof conf.confidence === "number"
+                        ? Math.round(Math.max(0, Math.min(1, conf.confidence)) * 100)
+                        : null;
+                    return (
+                      <div
+                        key={key}
+                        className="palm-line-card"
+                        style={{ borderLeftColor: STRENGTH_COLORS[line.strength] }}
+                      >
+                        <div className="palm-line-header">
+                          <h4>{LINE_LABELS[key] || key}</h4>
+                          <span className={`palm-strength palm-strength--${line.strength}`}>
+                            {line.strength}
+                          </span>
+                        </div>
+                        {visibility && (
+                          <div
+                            className={`palm-line-confidence palm-line-confidence--${visibility}`}
+                            style={{ color: VISIBILITY_BADGE_COLORS[visibility] }}
+                          >
+                            <span
+                              className="palm-line-confidence-dot"
+                              style={{ background: VISIBILITY_BADGE_COLORS[visibility] }}
+                            />
+                            {VISIBILITY_LABEL[visibility]}
+                            {visibility !== "not_detected" && pct !== null && ` (${pct}%)`}
+                          </div>
+                        )}
+                        <p className="palm-line-desc">{line.description}</p>
+                        <p className="palm-line-interp">{line.interpretation}</p>
+                      </div>
+                    );
+                  },
+                )}
+              </motion.div>
+            )}
+
+            {/* Life Trajectory */}
+            {isRevealed("trajectory") && reading.life_trajectory && (
+              <motion.div
+                className="palm-trajectory-hero"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Life Trajectory</h3>
+                <div className="palm-trajectory-grid">
+                  <div className="palm-trajectory-item">
+                    <span className="palm-trajectory-label">Current Phase</span>
+                    <p>{reading.life_trajectory.current_phase}</p>
+                  </div>
+                  <div className="palm-trajectory-item">
+                    <span className="palm-trajectory-label">Near Future</span>
+                    <p>{reading.life_trajectory.near_future}</p>
+                  </div>
+                  <div className="palm-trajectory-item">
+                    <span className="palm-trajectory-label">Long-Term Path</span>
+                    <p>{reading.life_trajectory.long_term_path}</p>
+                  </div>
+                  <div className="palm-trajectory-item palm-trajectory-item--challenge">
+                    <span className="palm-trajectory-label">Challenges</span>
+                    <p>{reading.life_trajectory.challenges}</p>
+                  </div>
+                  <div className="palm-trajectory-item palm-trajectory-item--opportunity">
+                    <span className="palm-trajectory-label">Opportunities</span>
+                    <p>{reading.life_trajectory.opportunities}</p>
+                  </div>
                 </div>
-                <div className="palm-trajectory-item">
-                  <span className="palm-trajectory-label">Near Future</span>
-                  <p>{reading.life_trajectory.near_future}</p>
+              </motion.div>
+            )}
+
+            {/* Jyotish Correlation */}
+            {isRevealed("jyotish_correlation") && reading.jyotish_correlation && (
+              <motion.div
+                className="palm-section-card palm-section-card--jyotish"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Chart &times; Palm Synthesis</h3>
+                {reading.jyotish_correlation.summary && (
+                  <p className="palm-section-lead">
+                    {reading.jyotish_correlation.summary}
+                  </p>
+                )}
+                {Array.isArray(reading.jyotish_correlation.correlations) &&
+                  reading.jyotish_correlation.correlations.length > 0 && (
+                    <ul className="palm-correlation-list">
+                      {reading.jyotish_correlation.correlations.map((c, i) => (
+                        <li key={i} className="palm-correlation-item">
+                          <div className="palm-correlation-row">
+                            <span className="palm-correlation-palm">
+                              {c.palm_indicator}
+                            </span>
+                            <span className="palm-correlation-link">&harr;</span>
+                            <span className="palm-correlation-chart">
+                              {c.chart_factor}
+                            </span>
+                            <span
+                              className={`palm-reinforcement palm-reinforcement--${c.reinforcement}`}
+                              style={{
+                                background: REINFORCEMENT_COLORS[c.reinforcement] + "22",
+                                color: REINFORCEMENT_COLORS[c.reinforcement],
+                                borderColor: REINFORCEMENT_COLORS[c.reinforcement],
+                              }}
+                            >
+                              {c.reinforcement}
+                            </span>
+                          </div>
+                          {c.reading && (
+                            <p className="palm-correlation-reading">{c.reading}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+              </motion.div>
+            )}
+
+            {/* Dasha Relevance */}
+            {isRevealed("dasha_relevance") && reading.dasha_relevance && (
+              <motion.div
+                className="palm-section-card palm-section-card--dasha"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Active Dasha Lens</h3>
+                {reading.dasha_relevance.active_period_summary && (
+                  <p className="palm-section-lead">
+                    {reading.dasha_relevance.active_period_summary}
+                  </p>
+                )}
+                {Array.isArray(reading.dasha_relevance.relevant_palm_indicators) &&
+                  reading.dasha_relevance.relevant_palm_indicators.length > 0 && (
+                    <ul className="palm-dasha-list">
+                      {reading.dasha_relevance.relevant_palm_indicators.map(
+                        (item, i) => (
+                          <li key={i} className="palm-dasha-item">
+                            <h4 className="palm-dasha-indicator">{item.indicator}</h4>
+                            <p>{item.relevance_to_dasha}</p>
+                            {item.timing_note && (
+                              <p className="palm-dasha-timing">
+                                <em>{item.timing_note}</em>
+                              </p>
+                            )}
+                          </li>
+                        ),
+                      )}
+                    </ul>
+                  )}
+              </motion.div>
+            )}
+
+            {/* Career & Purpose */}
+            {isRevealed("career") && reading.career_and_purpose && (
+              <motion.div
+                className="palm-section-card palm-section-card--career"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Career &amp; Life Purpose</h3>
+                <div className="palm-subsection">
+                  <h4>Natural Talents</h4>
+                  <p>{reading.career_and_purpose.natural_talents}</p>
                 </div>
-                <div className="palm-trajectory-item">
-                  <span className="palm-trajectory-label">Long-Term Path</span>
-                  <p>{reading.life_trajectory.long_term_path}</p>
+                <div className="palm-subsection">
+                  <h4>Career Direction</h4>
+                  <p>{reading.career_and_purpose.career_direction}</p>
                 </div>
-                <div className="palm-trajectory-item palm-trajectory-item--challenge">
-                  <span className="palm-trajectory-label">Challenges</span>
-                  <p>{reading.life_trajectory.challenges}</p>
+                <div className="palm-subsection">
+                  <h4>Purpose Alignment</h4>
+                  <p>{reading.career_and_purpose.purpose_alignment}</p>
                 </div>
-                <div className="palm-trajectory-item palm-trajectory-item--opportunity">
-                  <span className="palm-trajectory-label">Opportunities</span>
-                  <p>{reading.life_trajectory.opportunities}</p>
+              </motion.div>
+            )}
+
+            {/* Relationships & Emotional */}
+            {isRevealed("relationships") && reading.relationships_and_emotional && (
+              <motion.div
+                className="palm-section-card palm-section-card--relationships"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Relationships &amp; Emotional Landscape</h3>
+                <div className="palm-subsection">
+                  <h4>Emotional State</h4>
+                  <p>{reading.relationships_and_emotional.emotional_state}</p>
                 </div>
-              </div>
-            </motion.div>
-          )}
+                <div className="palm-subsection">
+                  <h4>Relationship Dynamics</h4>
+                  <p>{reading.relationships_and_emotional.relationship_dynamics}</p>
+                </div>
+                <div className="palm-subsection">
+                  <h4>Connection Style</h4>
+                  <p>{reading.relationships_and_emotional.connection_style}</p>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Career & Purpose */}
-          {reading.career_and_purpose && (
-            <motion.div className="palm-section-card palm-section-card--career" variants={itemVariants}>
-              <h3>Career &amp; Life Purpose</h3>
-              <div className="palm-subsection">
-                <h4>Natural Talents</h4>
-                <p>{reading.career_and_purpose.natural_talents}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Career Direction</h4>
-                <p>{reading.career_and_purpose.career_direction}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Purpose Alignment</h4>
-                <p>{reading.career_and_purpose.purpose_alignment}</p>
-              </div>
-            </motion.div>
-          )}
+            {/* Health & Vitality */}
+            {isRevealed("health") && reading.health_and_vitality && (
+              <motion.div
+                className="palm-section-card palm-section-card--health"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Health &amp; Vitality</h3>
+                <div className="palm-subsection">
+                  <h4>Energy Levels</h4>
+                  <p>{reading.health_and_vitality.energy_levels}</p>
+                </div>
+                <div className="palm-subsection">
+                  <h4>Stress Indicators</h4>
+                  <p>{reading.health_and_vitality.stress_indicators}</p>
+                </div>
+                <div className="palm-subsection">
+                  <h4>Wellness Advice</h4>
+                  <p>{reading.health_and_vitality.wellness_advice}</p>
+                </div>
+              </motion.div>
+            )}
 
-          {/* Relationships & Emotional */}
-          {reading.relationships_and_emotional && (
-            <motion.div className="palm-section-card palm-section-card--relationships" variants={itemVariants}>
-              <h3>Relationships &amp; Emotional Landscape</h3>
-              <div className="palm-subsection">
-                <h4>Emotional State</h4>
-                <p>{reading.relationships_and_emotional.emotional_state}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Relationship Dynamics</h4>
-                <p>{reading.relationships_and_emotional.relationship_dynamics}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Connection Style</h4>
-                <p>{reading.relationships_and_emotional.connection_style}</p>
-              </div>
-            </motion.div>
-          )}
+            {/* Mounts */}
+            {isRevealed("mounts") && reading.mounts && (
+              <motion.div
+                className="palm-section-card"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Mounts</h3>
+                {Array.isArray(reading.mounts.prominent) && reading.mounts.prominent.length > 0 && (
+                  <div className="palm-chips">
+                    {reading.mounts.prominent.map((m) => (
+                      <span key={m} className="palm-chip">{m}</span>
+                    ))}
+                  </div>
+                )}
+                {reading.mounts.interpretation && <p>{reading.mounts.interpretation}</p>}
+              </motion.div>
+            )}
 
-          {/* Health & Vitality */}
-          {reading.health_and_vitality && (
-            <motion.div className="palm-section-card palm-section-card--health" variants={itemVariants}>
-              <h3>Health &amp; Vitality</h3>
-              <div className="palm-subsection">
-                <h4>Energy Levels</h4>
-                <p>{reading.health_and_vitality.energy_levels}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Stress Indicators</h4>
-                <p>{reading.health_and_vitality.stress_indicators}</p>
-              </div>
-              <div className="palm-subsection">
-                <h4>Wellness Advice</h4>
-                <p>{reading.health_and_vitality.wellness_advice}</p>
-              </div>
-            </motion.div>
-          )}
+            {/* Fingers */}
+            {isRevealed("fingers") && reading.fingers && (
+              <motion.div
+                className="palm-section-card"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Fingers</h3>
+                {reading.fingers.observation && (
+                  <p className="palm-observation">{reading.fingers.observation}</p>
+                )}
+                {reading.fingers.interpretation && <p>{reading.fingers.interpretation}</p>}
+              </motion.div>
+            )}
 
-          {/* Mounts */}
-          <motion.div className="palm-section-card" variants={itemVariants}>
-            <h3>Mounts</h3>
-            <div className="palm-chips">
-              {reading.mounts.prominent.map((m) => (
-                <span key={m} className="palm-chip">{m}</span>
-              ))}
-            </div>
-            <p>{reading.mounts.interpretation}</p>
-          </motion.div>
+            {/* Special Markings */}
+            {isRevealed("markings") && reading.special_markings && (
+              <motion.div
+                className="palm-section-card"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Special Markings</h3>
+                {Array.isArray(reading.special_markings.observed) &&
+                  reading.special_markings.observed.length > 0 && (
+                    <div className="palm-chips">
+                      {reading.special_markings.observed.map((m) => (
+                        <span key={m} className="palm-chip">{m}</span>
+                      ))}
+                    </div>
+                  )}
+                {reading.special_markings.interpretation && (
+                  <p>{reading.special_markings.interpretation}</p>
+                )}
+              </motion.div>
+            )}
 
-          {/* Fingers */}
-          <motion.div className="palm-section-card" variants={itemVariants}>
-            <h3>Fingers</h3>
-            <p className="palm-observation">{reading.fingers.observation}</p>
-            <p>{reading.fingers.interpretation}</p>
-          </motion.div>
+            {/* Classical framework notes */}
+            {isRevealed("classical_framework") && reading.classical_framework_notes && (
+              <motion.div
+                className="palm-section-card palm-section-card--classical"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Hasta Samudrika Shastra Framework</h3>
+                {Array.isArray(reading.classical_framework_notes.sanskrit_terms) &&
+                  reading.classical_framework_notes.sanskrit_terms.length > 0 && (
+                    <ul className="palm-sanskrit-list">
+                      {reading.classical_framework_notes.sanskrit_terms.map((t, i) => (
+                        <li key={`${t.term}-${i}`} className="palm-sanskrit-item">
+                          <span className="palm-sanskrit-term">{t.term}</span>
+                          <span className="palm-sanskrit-meaning">{t.meaning}</span>
+                          {t.observation && (
+                            <p className="palm-sanskrit-observation">{t.observation}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                {Array.isArray(
+                  reading.classical_framework_notes.classical_text_references,
+                ) &&
+                  reading.classical_framework_notes.classical_text_references.length > 0 && (
+                    <div className="palm-classical-refs">
+                      {reading.classical_framework_notes.classical_text_references.map(
+                        (ref, i) => (
+                          <span key={`${ref}-${i}`} className="palm-chip palm-chip--ref">
+                            {ref}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  )}
+              </motion.div>
+            )}
 
-          {/* Special Markings */}
-          <motion.div className="palm-section-card" variants={itemVariants}>
-            <h3>Special Markings</h3>
-            <div className="palm-chips">
-              {reading.special_markings.observed.map((m) => (
-                <span key={m} className="palm-chip">{m}</span>
-              ))}
-            </div>
-            <p>{reading.special_markings.interpretation}</p>
-          </motion.div>
-
-          {/* Guidance */}
-          <motion.div className="palm-guidance" variants={itemVariants}>
-            <h3>Guidance</h3>
-            <p>{reading.guidance}</p>
-          </motion.div>
-        </motion.div>
-      )}
+            {/* Guidance */}
+            {isRevealed("guidance") && reading.guidance && (
+              <motion.div
+                className="palm-guidance"
+                variants={sectionVariants}
+                initial="hidden"
+                animate="show"
+              >
+                <h3>Guidance</h3>
+                <p>{reading.guidance}</p>
+              </motion.div>
+            )}
+          </div>
+        );
+      })()}
     </section>
   );
 }

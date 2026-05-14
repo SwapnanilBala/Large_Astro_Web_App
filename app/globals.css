@@ -8808,6 +8808,396 @@ html[data-theme="light"] .palm-error-detail code {
 }
 
 /* ═══════════════════════════════════════════════
+   PALM READING — extended UI (toggles, save, warnings,
+   line confidence, jyotish/dasha, classical sections)
+   ═══════════════════════════════════════════════ */
+
+/* ── Hasta Samudrika Shastra mode toggle ── */
+.palm-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1.05rem;
+  margin: 0.6rem 0 1rem;
+  border-radius: 14px;
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  background: rgba(200, 155, 60, 0.05);
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.palm-toggle:hover {
+  border-color: rgba(200, 155, 60, 0.35);
+  background: rgba(200, 155, 60, 0.08);
+}
+.palm-toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+.palm-toggle-title {
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink-main);
+}
+.palm-toggle-subtitle {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+.palm-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(200, 155, 60, 0.25);
+  transition: background 0.22s ease, border-color 0.22s ease;
+}
+.palm-toggle-switch.is-on {
+  background: linear-gradient(135deg, #1A7B6E, #C89B3C);
+  border-color: rgba(200, 155, 60, 0.55);
+}
+.palm-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.palm-toggle-input:focus-visible + .palm-toggle-thumb {
+  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.35);
+}
+.palm-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #F5F0E6;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: left 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.palm-toggle-switch.is-on .palm-toggle-thumb {
+  left: 22px;
+}
+
+/* ── Save reading button + toast + skip-animations ── */
+.palm-save-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 155, 60, 0.30);
+  background: rgba(200, 155, 60, 0.06);
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.18s ease, background 0.18s ease, opacity 0.18s ease;
+}
+.palm-save-btn:hover:not(:disabled) {
+  border-color: rgba(200, 155, 60, 0.55);
+  background: rgba(200, 155, 60, 0.12);
+}
+.palm-save-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.palm-skip-btn {
+  margin-left: auto;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+.palm-skip-btn:hover {
+  color: var(--ink-main);
+  border-color: rgba(255, 255, 255, 0.10);
+}
+.palm-save-toast {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.9rem;
+  margin: 0.6rem 0 0.4rem;
+  border-radius: 10px;
+  background: rgba(42, 139, 126, 0.12);
+  border: 1px solid rgba(42, 139, 126, 0.30);
+  color: var(--ink-main);
+  font-size: 0.9rem;
+}
+.palm-save-link {
+  color: var(--accent-aqua);
+  text-decoration: none;
+  font-weight: 500;
+}
+.palm-save-link:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ── Image quality warnings ── */
+.palm-image-warning {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.95rem 1.1rem;
+  margin: 0.6rem 0 1rem;
+  border-radius: 12px;
+}
+.palm-image-warning--hard {
+  background: rgba(240, 112, 104, 0.10);
+  border: 1px solid rgba(240, 112, 104, 0.40);
+  color: var(--accent-coral);
+}
+.palm-image-warning--soft {
+  background: rgba(200, 155, 60, 0.08);
+  border: 1px solid rgba(200, 155, 60, 0.32);
+  color: var(--accent-gold);
+}
+.palm-image-warning-head {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.palm-image-warning-title {
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  flex: 1;
+}
+.palm-image-warning-dismiss {
+  margin-left: auto;
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 0.2rem 0.45rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+.palm-image-warning-dismiss:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.06);
+}
+.palm-image-warning-notes {
+  margin: 0;
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.palm-image-warning-list {
+  margin: 0.2rem 0 0 1.2rem;
+  padding: 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+/* ── Per-line confidence badge ── */
+.palm-line-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.palm-line-confidence-dot {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* ── Annotated image hero ── */
+.palm-section-card--annotated {
+  text-align: center;
+}
+.palm-section-card--annotated h3 {
+  color: var(--accent-gold);
+}
+
+/* ── Section lead paragraph (used in jyotish/dasha cards) ── */
+.palm-section-lead {
+  margin: 0 0 0.8rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* ── Jyotish correlation card ── */
+.palm-section-card--jyotish h3 { color: var(--accent-gold); }
+.palm-correlation-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.palm-correlation-item {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+.palm-correlation-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+.palm-correlation-palm,
+.palm-correlation-chart {
+  font-size: 0.92rem;
+  color: var(--ink-main);
+  font-weight: 500;
+  flex: 1 1 40%;
+  min-width: 0;
+}
+.palm-correlation-link {
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  flex: 0 0 auto;
+}
+.palm-correlation-reading {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}
+.palm-reinforcement {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.16rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-width: 1px;
+  border-style: solid;
+  flex: 0 0 auto;
+}
+
+/* ── Dasha relevance card ── */
+.palm-section-card--dasha h3 { color: var(--accent-aqua); }
+.palm-dasha-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+}
+.palm-dasha-item {
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(42, 139, 126, 0.06);
+  border: 1px solid rgba(42, 139, 126, 0.18);
+}
+.palm-dasha-indicator {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink-main);
+}
+.palm-dasha-timing {
+  margin: 0.35rem 0 0;
+  font-style: italic;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+
+/* ── Classical (Hasta Samudrika Shastra) section ── */
+.palm-section-card--classical h3 { color: var(--accent-gold); }
+.palm-sanskrit-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+.palm-sanskrit-item {
+  padding: 0.65rem 0.85rem;
+  border-radius: 10px;
+  background: rgba(200, 155, 60, 0.05);
+  border: 1px solid rgba(200, 155, 60, 0.18);
+}
+.palm-sanskrit-term {
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent-gold);
+  margin-right: 0.45rem;
+}
+.palm-sanskrit-meaning {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+.palm-sanskrit-observation {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ink-main);
+  line-height: 1.55;
+}
+.palm-classical-refs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+}
+.palm-chip--ref {
+  background: rgba(200, 155, 60, 0.10);
+  border: 1px solid rgba(200, 155, 60, 0.28);
+  color: var(--accent-gold);
+  font-size: 0.78rem;
+}
+
+/* ── Captured/preview variants ── */
+.palm-preview--dimmed { opacity: 0.55; }
+.palm-preview--small { max-width: 220px; margin: 0 auto 0.6rem; }
+
+/* ── Light theme overrides for new palm classes ── */
+html[data-theme="light"] .palm-toggle { background: rgba(200, 155, 60, 0.07); }
+html[data-theme="light"] .palm-correlation-item,
+html[data-theme="light"] .palm-line-confidence-dot {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.10);
+}
+html[data-theme="light"] .palm-toggle-thumb {
+  background: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════
    MICRO-INTERACTIONS & HOVER FEEDBACK
    ═══════════════════════════════════════════════ */
 

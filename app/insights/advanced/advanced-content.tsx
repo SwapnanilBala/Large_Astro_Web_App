@@ -15,6 +15,113 @@ import advStyles from "./advanced.module.css";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 
+/* ─── JyotishContext extraction (for palm-reading Jyotish correlation) ─── */
+type JyotishContext = {
+  ascendant?: { sign: string; degree: number; nakshatra: string };
+  moonSign?: string;
+  moonNakshatra?: string;
+  sunSign?: string;
+  currentMahadasha?: { lord: string; remaining_years: number };
+  currentAntardasha?: { lord: string; remaining_months: number };
+  keyPlacements?: Array<{
+    planet: string;
+    sign: string;
+    house: number;
+    nakshatra: string;
+  }>;
+};
+
+const NAKSHATRA_NAMES_FOR_PALM: string[] = [
+  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
+  "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni",
+  "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha",
+  "Jyeshtha", "Moola", "Purva Ashadha", "Uttara Ashadha", "Shravana",
+  "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
+];
+const NAKSHATRA_SPAN_FOR_PALM = 13.333333333;
+function nakshatraNameFromLongitude(longitude: number): string {
+  if (typeof longitude !== "number" || !isFinite(longitude)) return "";
+  const norm = ((longitude % 360) + 360) % 360;
+  const idx = Math.floor(norm / NAKSHATRA_SPAN_FOR_PALM);
+  return NAKSHATRA_NAMES_FOR_PALM[idx] ?? "";
+}
+
+const PALM_KEY_PLANETS = new Set([
+  "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu",
+]);
+
+function buildJyotishContext(payload: ChartApiResponse): JyotishContext | undefined {
+  try {
+    const chart = payload.chart;
+    if (!chart) return undefined;
+
+    const ctx: JyotishContext = {};
+
+    // Ascendant
+    if (chart.ascendant && typeof chart.ascendant.longitude === "number") {
+      ctx.ascendant = {
+        sign: chart.ascendant.sign,
+        degree: chart.ascendant.degree_in_sign,
+        nakshatra: nakshatraNameFromLongitude(chart.ascendant.longitude),
+      };
+    }
+
+    // Moon / Sun signs and Moon nakshatra
+    const planets = chart.planets ?? [];
+    const moon = planets.find((p) => p.name === "Moon");
+    const sun = planets.find((p) => p.name === "Sun");
+    if (moon) {
+      ctx.moonSign = moon.sign;
+      ctx.moonNakshatra =
+        chart.nakshatra?.name ?? nakshatraNameFromLongitude(moon.longitude);
+    }
+    if (sun) ctx.sunSign = sun.sign;
+
+    // Dasha → mahadasha & antardasha (compute remaining time from end dates)
+    const dasha = chart.dasha;
+    if (dasha) {
+      const now = Date.now();
+      if (dasha.current_dasha && dasha.current_dasha_end) {
+        const endMs = new Date(dasha.current_dasha_end).getTime();
+        const remainingYears = isFinite(endMs)
+          ? Math.max(0, (endMs - now) / (365.25 * 24 * 3600 * 1000))
+          : 0;
+        ctx.currentMahadasha = {
+          lord: dasha.current_dasha,
+          remaining_years: Math.round(remainingYears * 100) / 100,
+        };
+      }
+      if (dasha.current_antardasha && dasha.current_antardasha_end) {
+        const endMs = new Date(dasha.current_antardasha_end).getTime();
+        const remainingMonths = isFinite(endMs)
+          ? Math.max(0, (endMs - now) / (30.4375 * 24 * 3600 * 1000))
+          : 0;
+        ctx.currentAntardasha = {
+          lord: dasha.current_antardasha,
+          remaining_months: Math.round(remainingMonths * 10) / 10,
+        };
+      }
+    }
+
+    // Key placements for the 9 main planets
+    const keyPlacements: NonNullable<JyotishContext["keyPlacements"]> = [];
+    for (const p of planets) {
+      if (!PALM_KEY_PLANETS.has(p.name)) continue;
+      keyPlacements.push({
+        planet: p.name,
+        sign: p.sign,
+        house: p.house,
+        nakshatra: nakshatraNameFromLongitude(p.longitude),
+      });
+    }
+    if (keyPlacements.length > 0) ctx.keyPlacements = keyPlacements;
+
+    return ctx;
+  } catch {
+    return undefined;
+  }
+}
+
 /* ─── Lightweight skeleton for lazy-loaded panels ─── */
 function PanelSkeleton() {
   const { t } = useTranslation();
@@ -174,6 +281,7 @@ export default function AdvancedContent({
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const lockedFeatures = new Set(payload.access.locked_features);
+  const jyotishContext = buildJyotishContext(payload);
 
   return (
     <ParallaxContainer>
@@ -446,7 +554,7 @@ export default function AdvancedContent({
                   isLocked={lockedFeatures.has("palm_reading")}
                   requiredTier="premium"
                 >
-                  <PalmReadingPanel />
+                  <PalmReadingPanel jyotishContext={jyotishContext} />
                 </AuthGate>
               </PanelErrorBoundary>
             </LazyPanel>
