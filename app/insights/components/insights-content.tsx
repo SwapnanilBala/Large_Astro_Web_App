@@ -627,7 +627,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: topDomain.label,
       title: topDomain.headline,
       body: topDomain.guidance || topDomain.overview,
-      meta: `${Math.round(topDomain.confidence_score * 100)}% confidence`,
+      meta: `${Math.round(topDomain.confidence_score * 100)}% signal strength`,
       tone: "coral",
     });
   }
@@ -1232,8 +1232,8 @@ function getDomainScore(domain: LifeDomainInsight) {
 
 function getDomainScoreTone(score: number) {
   if (score >= 80) return "Dominant";
-  if (score >= 65) return "Active";
-  if (score >= 50) return "Developing";
+  if (score >= 65) return "Strong";
+  if (score >= 50) return "Active";
   return "Subtle";
 }
 
@@ -1928,13 +1928,16 @@ export default function InsightsContent({
                     <h3>{topDomainInsight.label}</h3>
                     <p>{topDomainInsight.guidance || topDomainInsight.overview}</p>
                   </div>
-                  <span className={styles.domainPriorityScore}>
-                    {getDomainScore(topDomainInsight)}%
+                  <span
+                    className={styles.domainPriorityScore}
+                    aria-label={`${topDomainInsight.label} signal strength ${getDomainScore(topDomainInsight)} percent`}
+                  >
+                    Signal Strength {getDomainScore(topDomainInsight)}%
                   </span>
                 </section>
               )}
 
-              <div className={styles.domainScoreGrid} aria-label="Life domain scores">
+              <div className={styles.domainScoreGrid} aria-label="Life domain signal strengths">
                 {rankedDomainInsights.map((domain) => {
                   const score = getDomainScore(domain);
                   return (
@@ -1943,11 +1946,12 @@ export default function InsightsContent({
                       type="button"
                       className={domain.key === selectedDomainKey ? styles.domainScoreCardActive : styles.domainScoreCard}
                       onClick={() => setSelectedDomainKey(domain.key)}
+                      aria-label={`${domain.label} signal strength ${score} percent, ${getDomainScoreTone(score)}`}
                     >
                       <span className={styles.domainScoreIcon}>{DOMAIN_ICONS[domain.key]}</span>
                       <span className={styles.domainScoreLabel}>{domain.label}</span>
                       <strong>{score}%</strong>
-                      <span className={styles.domainScoreTone}>{getDomainScoreTone(score)}</span>
+                      <span className={styles.domainScoreTone}>Signal Strength: {getDomainScoreTone(score)}</span>
                     </button>
                   );
                 })}
@@ -2002,10 +2006,11 @@ export default function InsightsContent({
                       <h3>{selectedDomainInsight.headline}</h3>
                     </div>
                     <span className={styles.accessPillPremium}>
+                      Signal Strength{" "}
                       {Math.round(
                         selectedDomainInsight.confidence_score * 100
                       )}
-                      % confidence
+                      %
                     </span>
                   </div>
 
