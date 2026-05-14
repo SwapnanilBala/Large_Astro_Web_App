@@ -17,6 +17,7 @@ type RateLimitConfig = {
 const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart/forecast": { limit: 20, windowMs: 60_000 },
   "/api/chart/dasha-subperiods": { limit: 40, windowMs: 60_000 },
+  "/api/chart/follow-up-question": { limit: 4, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },
@@ -57,13 +58,27 @@ function ensureCleanupTimer() {
   // This is fine because the middleware module lives for the lifetime of the worker.
 }
 
+function normalizeIpHeader(value: string | null) {
+  const candidate = value?.split(",")[0]?.trim() ?? "";
+  return candidate.replace(/[^0-9a-fA-F:.%]/g, "").slice(0, 80);
+}
+
 function getClientIp(request: Request): string {
   const headers = request.headers;
-  const forwarded = headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
+  const candidates = [
+    headers.get("cf-connecting-ip"),
+    headers.get("x-real-ip"),
+    headers.get("x-forwarded-for"),
+  ];
+
+  for (const candidate of candidates) {
+    const ip = normalizeIpHeader(candidate);
+    if (ip) {
+      return ip;
+    }
   }
-  return headers.get("x-real-ip") ?? "unknown";
+
+  return "unknown";
 }
 
 function matchRoute(pathname: string): string | null {

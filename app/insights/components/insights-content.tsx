@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useMotionValue, animate as fmAnimate, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { FiChevronDown, FiCopy, FiRefreshCw, FiGrid } from "react-icons/fi";
+import { FiAlertTriangle, FiCheckCircle, FiChevronDown, FiCopy, FiGrid, FiRefreshCw, FiSend } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
@@ -13,6 +13,7 @@ import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
 import CosmicOrbs from "@/app/components/CosmicOrbs";
+import { useAuth } from "@/lib/auth-context";
 import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels
@@ -626,7 +627,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: topDomain.label,
       title: topDomain.headline,
       body: topDomain.guidance || topDomain.overview,
-      meta: `${Math.round(topDomain.confidence_score * 100)}% confidence`,
+      meta: `${Math.round(topDomain.confidence_score * 100)}% signal strength`,
       tone: "coral",
     });
   }
@@ -744,7 +745,330 @@ function RuleCard({ rule, index }: RuleCardProps) {
   );
 }
 
+/* One-hour chart follow-up */
+type ChartQuestionResponse = {
+  answer: string;
+  focus: string;
+  cautions: string[];
+  used_context: string[];
+  question: string;
+  question_id: string;
+  remaining_uses: number;
+  cooldown_until?: string;
+  retry_after_seconds?: number;
+  ip_tracked?: boolean;
+};
+
+const CLIENT_QUESTION_MAX_CHARS = 320;
+const CLIENT_QUESTION_MIN_CHARS = 8;
+const CLIENT_QUESTION_COOLDOWN_MS = 60 * 60 * 1000;
+
+type QuestionCooldownDetails = {
+  cooldownUntil?: string;
+  retryAfterSeconds?: number;
+};
+
+function makeStableQuestionHash(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = Math.imul(31, hash) + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function getQuestionErrorMessage(payload: unknown) {
+  if (payload && typeof payload === "object") {
+    const value = payload as {
+      error?: { message?: unknown };
+      detail?: unknown;
+    };
+    if (typeof value.error?.message === "string") return value.error.message;
+    if (typeof value.detail === "string") return value.detail;
+  }
+  return "The question could not be answered.";
+}
+
+function getQuestionCooldownDetails(payload: unknown): QuestionCooldownDetails {
+  if (!payload || typeof payload !== "object") return {};
+
+  const details = (payload as {
+    error?: { details?: Record<string, unknown> };
+  }).error?.details;
+  if (!details) return {};
+
+  return {
+    cooldownUntil:
+      typeof details.cooldown_until === "string"
+        ? details.cooldown_until
+        : undefined,
+    retryAfterSeconds:
+      typeof details.retry_after_seconds === "number"
+        ? details.retry_after_seconds
+        : undefined,
+  };
+}
+
+function getFallbackCooldownUntil(details?: QuestionCooldownDetails) {
+  if (details?.cooldownUntil) {
+    return details.cooldownUntil;
+  }
+  if (typeof details?.retryAfterSeconds === "number") {
+    return new Date(Date.now() + details.retryAfterSeconds * 1000).toISOString();
+  }
+  return new Date(Date.now() + CLIENT_QUESTION_COOLDOWN_MS).toISOString();
+}
+
+function formatClientCooldown(milliseconds: number) {
+  const minutes = Math.ceil(milliseconds / 60_000);
+  if (minutes <= 1) return "about 1 minute";
+  if (minutes < 60) return `${minutes} minutes`;
+  return "about 1 hour";
+}
+
+function OneTimeChartQuestion({
+  payload,
+  historyQs,
+}: {
+  payload: ChartApiResponse;
+  historyQs: string;
+}) {
+  const { token } = useAuth();
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<ChartQuestionResponse | null>(null);
+  const [questionUsed, setQuestionUsed] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const storageKey = `chart-question:${makeStableQuestionHash(
+    `${historyQs}|${payload.engine.engine_id}|${payload.chart.ascendant.sign}`,
+  )}`;
+  const remainingChars = CLIENT_QUESTION_MAX_CHARS - question.length;
+  const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : 0;
+  const isCoolingDown = Number.isFinite(cooldownUntilMs) && cooldownUntilMs > currentTime;
+  const cooldownLabel = isCoolingDown
+    ? formatClientCooldown(cooldownUntilMs - currentTime)
+    : "";
+
+  useEffect(() => {
+    setQuestion("");
+    setAnswer(null);
+    setQuestionUsed(false);
+    setCooldownUntil(null);
+    setError(null);
+    setCurrentTime(Date.now());
+
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as {
+        used?: unknown;
+        answer?: ChartQuestionResponse;
+        cooldown_until?: unknown;
+      };
+      const storedCooldownUntil =
+        typeof parsed.cooldown_until === "string"
+          ? parsed.cooldown_until
+          : parsed.answer?.cooldown_until;
+      const storedCooldownMs = storedCooldownUntil ? Date.parse(storedCooldownUntil) : 0;
+      if (!Number.isFinite(storedCooldownMs) || storedCooldownMs <= Date.now()) {
+        window.localStorage.removeItem(storageKey);
+        return;
+      }
+      if (parsed.answer?.answer) {
+        setAnswer(parsed.answer);
+        setQuestion(parsed.answer.question ?? "");
+      }
+      setCooldownUntil(storedCooldownUntil ?? null);
+      setQuestionUsed(parsed.used === true || Boolean(parsed.answer));
+    } catch {
+      // Local persistence is a convenience; the server still enforces use.
+    }
+  }, [storageKey]);
+
+  useEffect(() => {
+    if (!isCoolingDown) return;
+    const interval = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, [isCoolingDown]);
+
+  useEffect(() => {
+    if (!cooldownUntil || isCoolingDown) return;
+    setQuestionUsed(false);
+    setAnswer(null);
+    setCooldownUntil(null);
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // Ignore storage failures in private browsing or restricted contexts.
+    }
+  }, [cooldownUntil, isCoolingDown, storageKey]);
+
+  const markQuestionUsed = (
+    nextAnswer?: ChartQuestionResponse,
+    nextCooldownUntil?: string,
+  ) => {
+    const resolvedCooldownUntil =
+      nextAnswer?.cooldown_until ?? nextCooldownUntil ?? getFallbackCooldownUntil();
+    setQuestionUsed(true);
+    setCooldownUntil(resolvedCooldownUntil);
+    setCurrentTime(Date.now());
+    if (nextAnswer) {
+      setAnswer(nextAnswer);
+    }
+    try {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          used: true,
+          answer: nextAnswer,
+          cooldown_until: resolvedCooldownUntil,
+        }),
+      );
+    } catch {
+      // Ignore storage failures in private browsing or restricted contexts.
+    }
+  };
+
+  const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedQuestion = question.replace(/\s+/g, " ").trim();
+    if (normalizedQuestion.length < CLIENT_QUESTION_MIN_CHARS) {
+      setError("Ask one specific question with a little more detail.");
+      return;
+    }
+    if (questionUsed || isCoolingDown || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/chart/follow-up-question?${historyQs}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ question: normalizedQuestion }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 429) {
+          const cooldownDetails = getQuestionCooldownDetails(data);
+          if (cooldownDetails.cooldownUntil || cooldownDetails.retryAfterSeconds) {
+            markQuestionUsed(undefined, getFallbackCooldownUntil(cooldownDetails));
+          }
+        }
+        throw new Error(getQuestionErrorMessage(data));
+      }
+
+      markQuestionUsed(data as ChartQuestionResponse);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The question could not be answered.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      className={styles.chartQuestionPanel}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+    >
+      <div className={styles.chartQuestionHeader}>
+        <span className={styles.chartQuestionBadge}>
+          {questionUsed || isCoolingDown ? <FiCheckCircle size={16} /> : <FiSend size={16} />}
+          One per hour
+        </span>
+        <h3>Ask one specific question</h3>
+        <p>
+          Use it for the point that still feels unresolved after the core chart analysis.
+        </p>
+      </div>
+
+      {answer ? (
+        <div className={styles.chartQuestionAnswer}>
+          <span className={styles.chartQuestionFocus}>{answer.focus}</span>
+          <p>{answer.answer}</p>
+          {answer.used_context.length > 0 && (
+            <div className={styles.chartQuestionChips} aria-label="Chart signals used">
+              {answer.used_context.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          )}
+          {answer.cautions.length > 0 && (
+            <div className={styles.chartQuestionCaution}>
+              <FiAlertTriangle size={16} />
+              <span>{answer.cautions.join(" ")}</span>
+            </div>
+          )}
+          {isCoolingDown && (
+            <div className={styles.chartQuestionUsed}>
+              <FiCheckCircle size={18} />
+              <span>Next question available in {cooldownLabel}.</span>
+            </div>
+          )}
+        </div>
+      ) : questionUsed ? (
+        <div className={styles.chartQuestionUsed}>
+          <FiCheckCircle size={18} />
+          <span>Another follow-up will be available in {cooldownLabel || "about 1 hour"}.</span>
+        </div>
+      ) : (
+        <form className={styles.chartQuestionForm} onSubmit={submitQuestion}>
+          <label htmlFor="chart-follow-up-question">Question</label>
+          <textarea
+            id="chart-follow-up-question"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            maxLength={CLIENT_QUESTION_MAX_CHARS}
+            placeholder="What should I understand about career timing this year?"
+            disabled={isSubmitting || isCoolingDown}
+          />
+          <div className={styles.chartQuestionFooter}>
+            <span className={remainingChars < 40 ? styles.chartQuestionCountWarn : ""}>
+              {remainingChars} left
+            </span>
+            <button
+              type="submit"
+              disabled={
+                isSubmitting ||
+                isCoolingDown ||
+                question.trim().length < CLIENT_QUESTION_MIN_CHARS
+              }
+            >
+              <FiSend size={16} />
+              {isSubmitting ? "Asking..." : "Ask this hour"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {error && (
+        <div className={styles.chartQuestionError}>
+          <FiAlertTriangle size={16} />
+          <span>{error}</span>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 /* ─── Locked Feature Preview ─── */
+
 function LockedFeaturePreview({
   title,
   description,
@@ -908,8 +1232,8 @@ function getDomainScore(domain: LifeDomainInsight) {
 
 function getDomainScoreTone(score: number) {
   if (score >= 80) return "Dominant";
-  if (score >= 65) return "Active";
-  if (score >= 50) return "Developing";
+  if (score >= 65) return "Strong";
+  if (score >= 50) return "Active";
   return "Subtle";
 }
 
@@ -1390,7 +1714,7 @@ export default function InsightsContent({
           id="core"
           kicker={t("insights.coreKicker")}
           title={t("insights.coreHeading")}
-          defaultOpen={false}
+          defaultOpen={true}
           className={styles.cardRules}
           persistKey={`${sectionStateScope}:core`}
         >
@@ -1408,6 +1732,7 @@ export default function InsightsContent({
               />
             ))}
           </div>
+          <OneTimeChartQuestion payload={payload} historyQs={historyQs} />
         </CollapsibleSection>
 
         <ConstellationDivider />
@@ -1603,13 +1928,16 @@ export default function InsightsContent({
                     <h3>{topDomainInsight.label}</h3>
                     <p>{topDomainInsight.guidance || topDomainInsight.overview}</p>
                   </div>
-                  <span className={styles.domainPriorityScore}>
-                    {getDomainScore(topDomainInsight)}%
+                  <span
+                    className={styles.domainPriorityScore}
+                    aria-label={`${topDomainInsight.label} signal strength ${getDomainScore(topDomainInsight)} percent`}
+                  >
+                    Signal Strength {getDomainScore(topDomainInsight)}%
                   </span>
                 </section>
               )}
 
-              <div className={styles.domainScoreGrid} aria-label="Life domain scores">
+              <div className={styles.domainScoreGrid} aria-label="Life domain signal strengths">
                 {rankedDomainInsights.map((domain) => {
                   const score = getDomainScore(domain);
                   return (
@@ -1618,11 +1946,12 @@ export default function InsightsContent({
                       type="button"
                       className={domain.key === selectedDomainKey ? styles.domainScoreCardActive : styles.domainScoreCard}
                       onClick={() => setSelectedDomainKey(domain.key)}
+                      aria-label={`${domain.label} signal strength ${score} percent, ${getDomainScoreTone(score)}`}
                     >
                       <span className={styles.domainScoreIcon}>{DOMAIN_ICONS[domain.key]}</span>
                       <span className={styles.domainScoreLabel}>{domain.label}</span>
                       <strong>{score}%</strong>
-                      <span className={styles.domainScoreTone}>{getDomainScoreTone(score)}</span>
+                      <span className={styles.domainScoreTone}>Signal Strength: {getDomainScoreTone(score)}</span>
                     </button>
                   );
                 })}
@@ -1677,10 +2006,11 @@ export default function InsightsContent({
                       <h3>{selectedDomainInsight.headline}</h3>
                     </div>
                     <span className={styles.accessPillPremium}>
+                      Signal Strength{" "}
                       {Math.round(
                         selectedDomainInsight.confidence_score * 100
                       )}
-                      % confidence
+                      %
                     </span>
                   </div>
 
