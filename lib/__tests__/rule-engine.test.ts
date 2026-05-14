@@ -27,12 +27,15 @@ function buildTestPlanets(): PlanetPosition[] {
 }
 
 function buildTestHouses(ascSign: string): HousePlacement[] {
+  return buildHousesFromPlanets(ascSign, buildTestPlanets());
+}
+
+function buildHousesFromPlanets(ascSign: string, planets: PlanetPosition[]): HousePlacement[] {
   const signs = [
     "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
     "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
   ];
   const ascIdx = signs.indexOf(ascSign);
-  const planets = buildTestPlanets();
   const houses: HousePlacement[] = [];
   for (let h = 1; h <= 12; h++) {
     const houseSign = signs[(ascIdx + h - 1) % 12];
@@ -43,6 +46,15 @@ function buildTestHouses(ascSign: string): HousePlacement[] {
 }
 
 const ASC_SIGN = "Taurus";
+
+function getInsight(
+  insights: LifeDomainInsight[],
+  key: LifeDomainInsight["key"]
+): LifeDomainInsight {
+  const insight = insights.find((i) => i.key === key);
+  expect(insight).toBeDefined();
+  return insight!;
+}
 
 // ---------------------------------------------------------------------------
 // Tests
@@ -395,15 +407,108 @@ describe("rule-engine", () => {
       }
     });
 
-    it("confidence_score is between 0.66 and 0.91", () => {
+    it("confidence_score stays within intended life-domain bounds", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
       const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
 
       for (const insight of insights) {
-        expect(insight.confidence_score).toBeGreaterThanOrEqual(0.66);
-        expect(insight.confidence_score).toBeLessThanOrEqual(0.91);
+        expect(insight.confidence_score).toBeGreaterThanOrEqual(0.55);
+        expect(insight.confidence_score).toBeLessThanOrEqual(0.94);
       }
+    });
+
+    it("does not flatten every occupied chart domain to the same score", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      const uniqueScores = new Set(insights.map((i) => i.confidence_score));
+
+      expect(uniqueScores.size).toBeGreaterThan(1);
+    });
+
+    it("strengthens a domain when its primary house is occupied", () => {
+      const planets = buildTestPlanets();
+      const unoccupiedHouses = buildHousesFromPlanets(ASC_SIGN, planets);
+      const occupiedHouses = unoccupiedHouses.map((house) =>
+        house.house_number === 10
+          ? { ...house, planets: ["Saturn"] }
+          : house
+      );
+
+      const unoccupiedCareer = getInsight(
+        generateLifeDomainInsights(ASC_SIGN, planets, unoccupiedHouses),
+        "career"
+      );
+      const occupiedCareer = getInsight(
+        generateLifeDomainInsights(ASC_SIGN, planets, occupiedHouses),
+        "career"
+      );
+
+      expect(occupiedCareer.confidence_score).toBeGreaterThan(
+        unoccupiedCareer.confidence_score
+      );
+    });
+
+    it("raises a domain score when its primary lord is stronger", () => {
+      const debilitatedLordPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Mars" ? { ...planet, sign: "Cancer" } : planet
+      );
+      const strongLordPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Mars" ? { ...planet, sign: "Scorpio" } : planet
+      );
+
+      const debilitatedLove = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          debilitatedLordPlanets,
+          buildHousesFromPlanets(ASC_SIGN, debilitatedLordPlanets)
+        ),
+        "love_life"
+      );
+      const strongLove = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          strongLordPlanets,
+          buildHousesFromPlanets(ASC_SIGN, strongLordPlanets)
+        ),
+        "love_life"
+      );
+
+      expect(strongLove.confidence_score).toBeGreaterThan(
+        debilitatedLove.confidence_score
+      );
+    });
+
+    it("lowers a domain score when its anchor planet is debilitated", () => {
+      const strongAnchorPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Venus" ? { ...planet, sign: "Libra" } : planet
+      );
+      const debilitatedAnchorPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Venus" ? { ...planet, sign: "Virgo" } : planet
+      );
+
+      const strongLove = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          strongAnchorPlanets,
+          buildHousesFromPlanets(ASC_SIGN, strongAnchorPlanets)
+        ),
+        "love_life"
+      );
+      const debilitatedLove = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          debilitatedAnchorPlanets,
+          buildHousesFromPlanets(ASC_SIGN, debilitatedAnchorPlanets)
+        ),
+        "love_life"
+      );
+
+      expect(debilitatedLove.confidence_score).toBeLessThan(
+        strongLove.confidence_score
+      );
     });
 
     it("strengths has at most 3 items", () => {
