@@ -10,13 +10,15 @@ import { useTranslation } from "@/lib/i18n-context";
 import { resolvePostAuthDestination } from "@/lib/post-auth-redirect";
 import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
+import AuthAmbient from "./AuthAmbient";
 import styles from "./login.module.css";
 
 type LoginPageClientProps = {
   returnTo?: string;
+  skyLine?: string;
 };
 
-export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
+export default function LoginPageClient({ returnTo, skyLine }: LoginPageClientProps) {
   const { login, loginWithGoogle, isAuthenticated, isLoading, user } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
@@ -27,6 +29,7 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
+  const [settling, setSettling] = useState(false);
 
   const destination = returnTo ?? "/";
 
@@ -46,8 +49,11 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
     const result = await login(email, password);
     setLoading(false);
     if (result.ok) {
-      setRedirecting(true);
+      setSettling(true);
       const resolvedDestination = await resolvePostAuthDestination(result.userId, destination);
+      // Brief shimmer choreography before navigating away
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      setRedirecting(true);
       router.push(resolvedDestination);
     } else {
       setError(result.error ?? "Login failed");
@@ -69,9 +75,8 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
   if (isLoading || redirecting) {
     return (
       <PageTransition>
-      <main className="home-shell">
-        <div className="ambient ambient-left" />
-        <div className="ambient ambient-right" />
+      <main className="home-shell" style={{ position: "relative" }}>
+        <AuthAmbient />
         <section className={styles.panel} style={{ textAlign: "center" }}>
           <p className="kicker">{t("login.redirecting")}</p>
         </section>
@@ -82,12 +87,13 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
 
   return (
     <PageTransition>
-    <main className="home-shell">
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
+    <main className="home-shell" style={{ position: "relative" }}>
+      <AuthAmbient />
       <BackButton href="/" />
-      <section className={styles.panel}>
+      <section className={`${styles.panel} ${settling ? styles.panelSettling : ""}`}>
+        {settling && <span className={styles.shimmerSweep} aria-hidden="true" />}
         <div className={styles.header}>
+          {skyLine && <p className={styles.skyLine}>✦ {skyLine} ✦</p>}
           <p className="kicker">{t("login.kicker")}</p>
           <h1 className={styles.heading}>{t("login.heading")}</h1>
           <p className={styles.lead}>{t("login.lead")}</p>
