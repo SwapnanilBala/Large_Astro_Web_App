@@ -326,6 +326,69 @@ function dominantElement(planets: PlanetPosition[]): { element: string; count: n
   return { element: maxEl, count: maxCount };
 }
 
+function roundedConfidence(value: number): number {
+  return Math.round(value * 100) / 100;
+}
+
+function boundedDomainScore(value: number): number {
+  return roundedConfidence(Math.max(0.55, Math.min(0.94, value)));
+}
+
+function dignitySignal(planet: PlanetPosition, strongBoost: number, ownSignBoost: number, debilityDrag: number): number {
+  const dignity = planetDignity(planet);
+  if (dignity === "exalted") return strongBoost;
+  if (dignity === "own_sign") return ownSignBoost;
+  if (dignity === "debilitated") return debilityDrag;
+  return 0;
+}
+
+function housePlacementSignal(houseNumber: number): number {
+  let signal = 0;
+  if ([1, 4, 7, 10].includes(houseNumber)) signal += 0.05;
+  if ([1, 5, 9].includes(houseNumber)) signal += 0.04;
+  if ([3, 6, 10, 11].includes(houseNumber)) signal += 0.02;
+  if ([6, 8, 12].includes(houseNumber)) signal -= 0.04;
+  return signal;
+}
+
+function planetRulesHouse(planetName: string, house: HousePlacement): boolean {
+  return SIGN_RULERS[house.sign] === planetName;
+}
+
+function anchorHouseRelevanceSignal(
+  anchorPlanet: PlanetPosition,
+  primaryHouse: HousePlacement,
+  secondaryHouse: HousePlacement
+): number {
+  let signal = 0;
+  if (anchorPlanet.house === primaryHouse.house_number) signal += 0.04;
+  if (anchorPlanet.house === secondaryHouse.house_number) signal += 0.03;
+  if (planetRulesHouse(anchorPlanet.name, primaryHouse)) signal += 0.025;
+  if (planetRulesHouse(anchorPlanet.name, secondaryHouse)) signal += 0.015;
+  return signal;
+}
+
+function calculateDomainSignalScore(
+  primaryHouse: HousePlacement,
+  secondaryHouse: HousePlacement,
+  primaryLord: PlanetPosition,
+  anchorPlanet: PlanetPosition
+): number {
+  const primaryOccupancySignal = Math.min(primaryHouse.planets.length, 3) * 0.025;
+  const secondaryOccupancySignal = Math.min(secondaryHouse.planets.length, 2) * 0.015;
+
+  const signal =
+    0.64 +
+    primaryOccupancySignal +
+    secondaryOccupancySignal +
+    housePlacementSignal(primaryLord.house) +
+    dignitySignal(primaryLord, 0.065, 0.045, -0.05) +
+    dignitySignal(anchorPlanet, 0.045, 0.03, -0.035) +
+    anchorHouseRelevanceSignal(anchorPlanet, primaryHouse, secondaryHouse);
+
+  return boundedDomainScore(signal);
+}
+
 // --------------------------------------------------------------------------
 // Life domain insight builder
 // --------------------------------------------------------------------------
@@ -452,13 +515,12 @@ function buildLifeDomainInsight(
   const primaryLord = planetByName(planets, primaryLordName);
   const anchorPlanet = planetByName(planets, config.anchor_planet);
 
-  let confidence = 0.72;
-  if (primaryHouse.planets.length > 0) confidence += 0.05;
-  if (["exalted", "own_sign"].includes(planetDignity(primaryLord))) confidence += 0.06;
-  if (["exalted", "own_sign"].includes(planetDignity(anchorPlanet))) confidence += 0.04;
-  if (planetDignity(primaryLord) === "debilitated") confidence -= 0.03;
-  if (planetDignity(anchorPlanet) === "debilitated") confidence -= 0.02;
-  confidence = Math.max(0.66, Math.min(0.91, Math.round(confidence * 100) / 100));
+  const confidence = calculateDomainSignalScore(
+    primaryHouse,
+    secondaryHouse,
+    primaryLord,
+    anchorPlanet
+  );
 
   const headline =
     `${config.label}: ${primaryHouse.sign} house ${primaryHouse.house_number}, led by ${primaryLord.name}.`;
