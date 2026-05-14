@@ -245,6 +245,91 @@ export type ForecastReading = {
   challenging_transits: ForecastAspectInsight[];
 };
 
+export type CalendarPlannerIntent =
+  | "action"
+  | "rest"
+  | "communication"
+  | "relationships"
+  | "money"
+  | "study"
+  | "travel";
+
+export type CalendarPlannerIntentAdvice = {
+  intent: CalendarPlannerIntent;
+  score: number;
+  quality: "excellent" | "good" | "fair" | "poor";
+  summary: string;
+  reasons: string[];
+};
+
+export type CalendarPlannerWindow = {
+  intent: CalendarPlannerIntent;
+  start: string;
+  end: string;
+  score: number;
+  quality: "excellent" | "good" | "fair" | "poor";
+  recommendation: string;
+};
+
+export type CalendarPlannerWatchout = {
+  date: string;
+  severity: "low" | "medium" | "high";
+  score: number;
+  reasons: string[];
+};
+
+export type CalendarPlannerDashaContext = {
+  week_start: string;
+  week_end: string;
+  current_dasha: string;
+  current_antardasha: string;
+  current_dasha_start: string;
+  current_dasha_end: string;
+  current_antardasha_start: string;
+  current_antardasha_end: string;
+  pressure: "low" | "medium" | "high";
+  summary: string;
+};
+
+export type CalendarPlannerDay = {
+  date: string;
+  headline: string;
+  overview: string;
+  intents: CalendarPlannerIntentAdvice[];
+  watchout?: CalendarPlannerWatchout;
+  muhurta_windows: CalendarPlannerWindow[];
+  dasha: {
+    current_dasha: string;
+    current_antardasha: string;
+    pressure: "low" | "medium" | "high";
+  };
+};
+
+export type CalendarPlannerResponse = {
+  generated_at_utc: string;
+  client: {
+    name: string;
+    latitude: number;
+    longitude: number;
+    timezone_offset_minutes: number;
+    country?: string;
+    state?: string;
+    city?: string;
+    town?: string;
+    time_zone_id?: string;
+  };
+  search_window: {
+    start_date: string;
+    end_date: string;
+    day_count: number;
+  };
+  requested_intent?: CalendarPlannerIntent;
+  intents: CalendarPlannerIntent[];
+  weekly_dasha_context: CalendarPlannerDashaContext[];
+  watchouts: CalendarPlannerWatchout[];
+  days: CalendarPlannerDay[];
+};
+
 export type LuckyElementsInfo = {
   primary_colors: string[];
   secondary_colors: string[];
