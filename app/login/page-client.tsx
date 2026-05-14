@@ -11,6 +11,7 @@ import { resolvePostAuthDestination } from "@/lib/post-auth-redirect";
 import PageTransition from "../components/PageTransition";
 import BackButton from "../components/BackButton";
 import AuthAmbient from "./AuthAmbient";
+import ZodiacFloater from "./ZodiacFloater";
 import styles from "./login.module.css";
 
 type LoginPageClientProps = {
@@ -89,6 +90,7 @@ export default function LoginPageClient({ returnTo, skyLine }: LoginPageClientPr
     <PageTransition>
     <main className="home-shell" style={{ position: "relative" }}>
       <AuthAmbient />
+      <ZodiacFloater />
       <BackButton href="/" />
       <section className={`${styles.panel} ${settling ? styles.panelSettling : ""}`}>
         {settling && <span className={styles.shimmerSweep} aria-hidden="true" />}
