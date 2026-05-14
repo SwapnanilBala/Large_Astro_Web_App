@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
+import { User, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { resolvePostAuthDestination } from "@/lib/post-auth-redirect";
@@ -23,6 +24,8 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -105,62 +108,102 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
         <form className={styles.form} onSubmit={handleSubmit}>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelText}>{t("register.displayName")}</span>
-            </label>
-            <input
-              type="text"
-              placeholder={t("register.displayNamePlaceholder")}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className={`${styles.fieldInput} input-glow-gold`}
-              required
-              minLength={2}
-            />
+            <div className={styles.fieldWrap}>
+              <User className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="register-display-name"
+                type="text"
+                placeholder=" "
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                className={`${styles.fieldInput} input-glow-gold`}
+                required
+                minLength={2}
+              />
+              <label htmlFor="register-display-name" className={styles.floatingLabel}>
+                {t("register.displayName")}
+              </label>
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelText}>{t("register.email")}</span>
-            </label>
-            <input
-              type="email"
-              placeholder={t("register.emailPlaceholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={`${styles.fieldInput} input-glow-aqua`}
-              required
-            />
+            <div className={styles.fieldWrap}>
+              <Mail className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="register-email"
+                type="email"
+                placeholder=" "
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={`${styles.fieldInput} input-glow-aqua`}
+                required
+              />
+              <label htmlFor="register-email" className={styles.floatingLabel}>
+                {t("register.email")}
+              </label>
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelText}>{t("register.password")}</span>
-            </label>
-            <input
-              type="password"
-              placeholder={t("register.passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={`${styles.fieldInput} input-glow-coral`}
-              required
-              minLength={6}
-            />
+            <div className={styles.fieldWrap}>
+              <Lock className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="register-password"
+                type={showPassword ? "text" : "password"}
+                placeholder=" "
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${styles.fieldInput} ${styles.fieldInputWithToggle} input-glow-coral`}
+                required
+                minLength={6}
+              />
+              <label htmlFor="register-password" className={styles.floatingLabel}>
+                {t("register.password")}
+              </label>
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} aria-hidden="true" />
+                ) : (
+                  <Eye size={18} aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelText}>{t("register.confirmPassword")}</span>
-            </label>
-            <input
-              type="password"
-              placeholder={t("register.confirmPasswordPlaceholder")}
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={`${styles.fieldInput} input-glow-violet`}
-              required
-              minLength={6}
-            />
+            <div className={styles.fieldWrap}>
+              <Lock className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="register-confirm-password"
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder=" "
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={`${styles.fieldInput} ${styles.fieldInputWithToggle} input-glow-violet`}
+                required
+                minLength={6}
+              />
+              <label htmlFor="register-confirm-password" className={styles.floatingLabel}>
+                {t("register.confirmPassword")}
+              </label>
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowConfirmPassword((v) => !v)}
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff size={18} aria-hidden="true" />
+                ) : (
+                  <Eye size={18} aria-hidden="true" />
+                )}
+              </button>
+            </div>
           </div>
 
           {error && <p className={styles.error}>{error}</p>}

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { FcGoogle } from "react-icons/fc";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { resolvePostAuthDestination } from "@/lib/post-auth-redirect";
@@ -21,6 +22,7 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -93,34 +95,55 @@ export default function LoginPageClient({ returnTo }: LoginPageClientProps) {
 
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelIcon}>✉</span>
-              <span className={styles.labelText}>{t("login.email")}</span>
-            </label>
-            <input
-              type="email"
-              placeholder={t("login.emailPlaceholder")}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={styles.fieldInput}
-              required
-            />
+            <div className={styles.fieldWrap}>
+              <Mail className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="login-email"
+                type="email"
+                placeholder=" "
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={styles.fieldInput}
+                required
+              />
+              <label htmlFor="login-email" className={styles.floatingLabel}>
+                {t("login.email")}
+              </label>
+            </div>
           </div>
 
           <div className={styles.fieldGroup}>
-            <label className={styles.fieldLabel}>
-              <span className={styles.labelIcon}>🔒</span>
-              <span className={styles.labelText}>{t("login.password")}</span>
-            </label>
-            <input
-              type="password"
-              placeholder={t("login.passwordPlaceholder")}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={styles.fieldInput}
-              required
-              minLength={6}
-            />
+            <div className={styles.fieldWrap}>
+              <Lock className={styles.fieldIcon} size={18} aria-hidden="true" />
+              <input
+                id="login-password"
+                type={showPassword ? "text" : "password"}
+                placeholder=" "
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={`${styles.fieldInput} ${styles.fieldInputWithToggle}`}
+                required
+                minLength={6}
+              />
+              <label htmlFor="login-password" className={styles.floatingLabel}>
+                {t("login.password")}
+              </label>
+              <button
+                type="button"
+                className={styles.passwordToggle}
+                onClick={() => setShowPassword((v) => !v)}
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? (
+                  <EyeOff size={18} aria-hidden="true" />
+                ) : (
+                  <Eye size={18} aria-hidden="true" />
+                )}
+              </button>
+            </div>
+            <Link href="/forgot-password" className={styles.forgotLink}>
+              Forgot password?
+            </Link>
           </div>
 
           {error && <p className={styles.error}>{error}</p>}

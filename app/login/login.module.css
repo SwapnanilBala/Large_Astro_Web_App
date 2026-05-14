@@ -5,7 +5,7 @@
 .panel {
   width: min(520px, calc(100% - 2rem));
   border-radius: 24px;
-  border: 1px solid var(--line-soft);
+  border: 1px solid transparent;
   background: var(--surface);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -16,6 +16,33 @@
   z-index: 1;
   position: relative;
   overflow: hidden;
+}
+
+/* Jewel-tone gradient border via pseudo-element so backdrop-filter blur on
+   .panel still composites correctly. The pseudo sits behind the panel content
+   at inset: -1px, with a 1px-larger radius so its edge reads as a 1px border. */
+.panel::before {
+  /* Sits inside the panel (overflow: hidden clips inset:-1px), so use inset:0
+     and rely on the 1px transparent border + mask trick to draw the rim. */
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(200, 155, 60, 0.45),
+    rgba(42, 139, 126, 0.30),
+    rgba(200, 155, 60, 0.10)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.3s ease, opacity 0.3s ease;
 }
 
 .panel::after {
@@ -31,8 +58,16 @@
 
 @media (hover: hover) {
   .panel:hover {
-    border-color: var(--line-strong);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+  }
+
+  .panel:hover::before {
+    background: linear-gradient(
+      135deg,
+      rgba(200, 155, 60, 0.65),
+      rgba(42, 139, 126, 0.42),
+      rgba(200, 155, 60, 0.18)
+    );
   }
 }
 
@@ -56,7 +91,33 @@
   line-height: 1.2;
   text-align: center;
   width: fit-content;
-  -webkit-text-stroke: 0.3px rgba(200, 155, 60, 0.3);
+  background: linear-gradient(
+    100deg,
+    #C89B3C 0%,
+    #F2E2B6 35%,
+    #EFD994 50%,
+    #F2E2B6 65%,
+    #C89B3C 100%
+  );
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.6s ease;
+}
+
+@media (hover: hover) {
+  .panel:hover .heading {
+    animation: authHeadingShimmer 6s ease-in-out infinite;
+  }
+}
+
+@keyframes authHeadingShimmer {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .lead {
@@ -104,7 +165,7 @@
 
 .fieldInput {
   width: 100%;
-  padding: 14px 16px;
+  padding: 18px 16px 14px 44px;
   border-radius: 14px;
   border: 1px solid var(--line-soft);
   background: var(--surface-soft);
@@ -116,14 +177,121 @@
 }
 
 .fieldInput::placeholder {
-  color: var(--ink-soft);
-  opacity: 0.5;
+  color: transparent;
 }
 
 .fieldInput:focus {
   border-color: rgba(200, 155, 60, 0.60);
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.12);
+  box-shadow:
+    0 0 0 2px rgba(200, 155, 60, 0.18),
+    0 0 0 5px rgba(42, 139, 126, 0.10);
   background: var(--surface);
+}
+
+.fieldInputWithToggle {
+  padding-right: 48px;
+}
+
+/* ── Floating Label Field ── */
+.fieldWrap {
+  position: relative;
+  display: block;
+}
+
+.fieldIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(200, 155, 60, 0.7);
+  pointer-events: none;
+  transition: color 0.2s ease, opacity 0.2s ease;
+  z-index: 2;
+}
+
+.fieldWrap:focus-within .fieldIcon {
+  color: rgba(200, 155, 60, 1);
+}
+
+.floatingLabel {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  opacity: 0.7;
+  pointer-events: none;
+  background: transparent;
+  padding: 0 6px;
+  transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease, opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
+  z-index: 2;
+}
+
+.fieldWrap:focus-within .floatingLabel,
+.fieldInput:not(:placeholder-shown) + .floatingLabel {
+  top: 0;
+  transform: translateY(-50%) scale(0.92);
+  left: 32px;
+  font-size: 0.82rem;
+  color: rgba(200, 155, 60, 1);
+  opacity: 1;
+  background: var(--bg-deep);
+}
+
+/* ── Password Show/Hide Toggle ── */
+.passwordToggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(200, 155, 60, 0.75);
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  z-index: 3;
+}
+
+.passwordToggle:hover {
+  color: rgba(200, 155, 60, 1);
+  background: rgba(200, 155, 60, 0.08);
+}
+
+.passwordToggle:focus-visible {
+  outline: none;
+  border-color: rgba(200, 155, 60, 0.55);
+  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.15);
+}
+
+/* ── Forgot Password Link ── */
+.forgotLink {
+  align-self: flex-end;
+  margin-top: 0.45rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: color 0.18s ease, text-decoration-color 0.18s ease;
+}
+
+.forgotLink:hover {
+  color: #C89B3C;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
 }
 
 /* ── Error ── */
@@ -147,7 +315,7 @@
   background-image: linear-gradient(135deg, #1A7B6E, #2D8E7A, #C89B3C);
   background-color: #1A7B6E;
   background-size: 200% 100%;
-  animation: authGradientShift 5s ease infinite;
+  background-position: 0% 50%;
   color: #EAEDF3;
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
   font-size: 1.32rem;
@@ -183,6 +351,7 @@
     0 12px 32px rgba(200, 155, 60, 0.28),
     0 0 20px rgba(200, 155, 60, 0.15);
   border-color: rgba(200, 155, 60, 0.35);
+  animation: authGradientShift 12s ease-in-out infinite;
 }
 
 .submitBtn:active {
@@ -220,12 +389,22 @@
 }
 
 .dividerText {
-  font-size: 1.14rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-  color: var(--ink-soft);
-  opacity: 0.5;
+  /* Hide the inner "or" text and replace it with a constellation glyph
+     rendered via ::before, so the JSX stays untouched. */
+  font-size: 0;
+  color: transparent;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
+.dividerText::before {
+  content: "\2022 \00B7 \2022"; /* • · • */
+  font-size: 1.05rem;
+  letter-spacing: 0.4em;
+  color: rgba(200, 155, 60, 0.6);
+  font-weight: 600;
+  line-height: 1;
 }
 
 .googleBtn {
@@ -290,9 +469,20 @@
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88)),
     #fff;
+  color: #1f2937;
   box-shadow:
     0 10px 26px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+:global(html[data-theme="light"]) .googleBtn:hover {
+  border-color: rgba(200, 155, 60, 0.55);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(252, 247, 235, 0.95)),
+    #fff;
+  box-shadow:
+    0 14px 32px rgba(15, 23, 42, 0.10),
+    0 0 18px rgba(200, 155, 60, 0.18);
 }
 
 /* ── Switch Text ── */
@@ -346,12 +536,33 @@
   }
 
   .heading {
-    font-size: 1.65rem;
+    font-size: 1.85rem;
+  }
+
+  .divider {
+    margin: 1.7rem 0;
   }
 
   .fieldInput {
-    padding: 12px 14px;
+    padding: 16px 14px 12px 42px;
     border-radius: 12px;
+  }
+
+  .fieldInputWithToggle {
+    padding-right: 46px;
+  }
+
+  .fieldIcon {
+    left: 12px;
+  }
+
+  .floatingLabel {
+    left: 38px;
+  }
+
+  .fieldWrap:focus-within .floatingLabel,
+  .fieldInput:not(:placeholder-shown) + .floatingLabel {
+    left: 30px;
   }
 
   .submitBtn {
