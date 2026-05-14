@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useMotionValue, animate as fmAnimate, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { FiChevronDown, FiCopy, FiRefreshCw, FiGrid } from "react-icons/fi";
+import { FiAlertTriangle, FiCheckCircle, FiChevronDown, FiCopy, FiGrid, FiRefreshCw, FiSend } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
@@ -13,6 +13,7 @@ import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
 import CosmicOrbs from "@/app/components/CosmicOrbs";
+import { useAuth } from "@/lib/auth-context";
 import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels
@@ -744,7 +745,225 @@ function RuleCard({ rule, index }: RuleCardProps) {
   );
 }
 
+/* One-time chart follow-up */
+type ChartQuestionResponse = {
+  answer: string;
+  focus: string;
+  cautions: string[];
+  used_context: string[];
+  question: string;
+  question_id: string;
+  remaining_uses: number;
+};
+
+const CLIENT_QUESTION_MAX_CHARS = 320;
+const CLIENT_QUESTION_MIN_CHARS = 8;
+
+function makeStableQuestionHash(value: string) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = Math.imul(31, hash) + value.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(36);
+}
+
+function getQuestionErrorMessage(payload: unknown) {
+  if (payload && typeof payload === "object") {
+    const value = payload as {
+      error?: { message?: unknown };
+      detail?: unknown;
+    };
+    if (typeof value.error?.message === "string") return value.error.message;
+    if (typeof value.detail === "string") return value.detail;
+  }
+  return "The question could not be answered.";
+}
+
+function OneTimeChartQuestion({
+  payload,
+  historyQs,
+}: {
+  payload: ChartApiResponse;
+  historyQs: string;
+}) {
+  const { token } = useAuth();
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState<ChartQuestionResponse | null>(null);
+  const [questionUsed, setQuestionUsed] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const storageKey = `chart-question:${makeStableQuestionHash(
+    `${historyQs}|${payload.engine.engine_id}|${payload.chart.ascendant.sign}`,
+  )}`;
+  const remainingChars = CLIENT_QUESTION_MAX_CHARS - question.length;
+
+  useEffect(() => {
+    setQuestion("");
+    setAnswer(null);
+    setQuestionUsed(false);
+    setError(null);
+
+    try {
+      const stored = window.localStorage.getItem(storageKey);
+      if (!stored) return;
+      const parsed = JSON.parse(stored) as {
+        used?: unknown;
+        answer?: ChartQuestionResponse;
+      };
+      if (parsed.answer?.answer) {
+        setAnswer(parsed.answer);
+        setQuestion(parsed.answer.question ?? "");
+      }
+      setQuestionUsed(parsed.used === true || Boolean(parsed.answer));
+    } catch {
+      // Local persistence is a convenience; the server still enforces use.
+    }
+  }, [storageKey]);
+
+  const markQuestionUsed = (nextAnswer?: ChartQuestionResponse) => {
+    setQuestionUsed(true);
+    if (nextAnswer) {
+      setAnswer(nextAnswer);
+    }
+    try {
+      window.localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          used: true,
+          answer: nextAnswer,
+        }),
+      );
+    } catch {
+      // Ignore storage failures in private browsing or restricted contexts.
+    }
+  };
+
+  const submitQuestion = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalizedQuestion = question.replace(/\s+/g, " ").trim();
+    if (normalizedQuestion.length < CLIENT_QUESTION_MIN_CHARS) {
+      setError("Ask one specific question with a little more detail.");
+      return;
+    }
+    if (questionUsed || isSubmitting) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      if (token) {
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      const response = await fetch(`/api/chart/follow-up-question?${historyQs}`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ question: normalizedQuestion }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        if (response.status === 409) {
+          markQuestionUsed();
+        }
+        throw new Error(getQuestionErrorMessage(data));
+      }
+
+      markQuestionUsed(data as ChartQuestionResponse);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "The question could not be answered.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      className={styles.chartQuestionPanel}
+      initial={{ opacity: 0, y: 12 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-30px" }}
+      transition={{ type: "spring", stiffness: 200, damping: 20 }}
+    >
+      <div className={styles.chartQuestionHeader}>
+        <span className={styles.chartQuestionBadge}>
+          {questionUsed ? <FiCheckCircle size={16} /> : <FiSend size={16} />}
+          One follow-up
+        </span>
+        <h3>Ask one specific question</h3>
+        <p>
+          Use it for the point that still feels unresolved after the core chart analysis.
+        </p>
+      </div>
+
+      {answer ? (
+        <div className={styles.chartQuestionAnswer}>
+          <span className={styles.chartQuestionFocus}>{answer.focus}</span>
+          <p>{answer.answer}</p>
+          {answer.used_context.length > 0 && (
+            <div className={styles.chartQuestionChips} aria-label="Chart signals used">
+              {answer.used_context.map((item) => (
+                <span key={item}>{item}</span>
+              ))}
+            </div>
+          )}
+          {answer.cautions.length > 0 && (
+            <div className={styles.chartQuestionCaution}>
+              <FiAlertTriangle size={16} />
+              <span>{answer.cautions.join(" ")}</span>
+            </div>
+          )}
+        </div>
+      ) : questionUsed ? (
+        <div className={styles.chartQuestionUsed}>
+          <FiCheckCircle size={18} />
+          <span>This chart's one-time question has already been used.</span>
+        </div>
+      ) : (
+        <form className={styles.chartQuestionForm} onSubmit={submitQuestion}>
+          <label htmlFor="chart-follow-up-question">Question</label>
+          <textarea
+            id="chart-follow-up-question"
+            value={question}
+            onChange={(event) => setQuestion(event.target.value)}
+            maxLength={CLIENT_QUESTION_MAX_CHARS}
+            placeholder="What should I understand about career timing this year?"
+            disabled={isSubmitting}
+          />
+          <div className={styles.chartQuestionFooter}>
+            <span className={remainingChars < 40 ? styles.chartQuestionCountWarn : ""}>
+              {remainingChars} left
+            </span>
+            <button
+              type="submit"
+              disabled={isSubmitting || question.trim().length < CLIENT_QUESTION_MIN_CHARS}
+            >
+              <FiSend size={16} />
+              {isSubmitting ? "Asking..." : "Ask once"}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {error && (
+        <div className={styles.chartQuestionError}>
+          <FiAlertTriangle size={16} />
+          <span>{error}</span>
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
 /* ─── Locked Feature Preview ─── */
+
 function LockedFeaturePreview({
   title,
   description,
@@ -1390,7 +1609,7 @@ export default function InsightsContent({
           id="core"
           kicker={t("insights.coreKicker")}
           title={t("insights.coreHeading")}
-          defaultOpen={false}
+          defaultOpen={true}
           className={styles.cardRules}
           persistKey={`${sectionStateScope}:core`}
         >
@@ -1408,6 +1627,7 @@ export default function InsightsContent({
               />
             ))}
           </div>
+          <OneTimeChartQuestion payload={payload} historyQs={historyQs} />
         </CollapsibleSection>
 
         <ConstellationDivider />
