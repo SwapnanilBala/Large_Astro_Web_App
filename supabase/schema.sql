@@ -214,3 +214,28 @@ create policy "guest readings select auth"
 on public.guest_readings
 for select
 using (auth.uid() is not null);
+
+-- =========================================================================
+-- CHART FOLLOW-UP QUESTION USAGE (server-only cooldown enforcement)
+-- =========================================================================
+
+create table if not exists public.chart_follow_up_question_usage (
+  usage_id uuid primary key default gen_random_uuid(),
+  user_id uuid references auth.users(id) on delete cascade,
+  client_ip text not null default 'unknown',
+  ip_hash text not null,
+  chart_hash text not null,
+  question_hash text not null,
+  asked_at timestamptz not null default now()
+);
+
+create index if not exists chart_follow_up_question_usage_user_asked_idx
+  on public.chart_follow_up_question_usage (user_id, asked_at desc);
+
+create index if not exists chart_follow_up_question_usage_ip_asked_idx
+  on public.chart_follow_up_question_usage (ip_hash, asked_at desc);
+
+create index if not exists chart_follow_up_question_usage_chart_asked_idx
+  on public.chart_follow_up_question_usage (chart_hash, asked_at desc);
+
+alter table public.chart_follow_up_question_usage enable row level security;

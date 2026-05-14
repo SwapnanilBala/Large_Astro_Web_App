@@ -745,7 +745,7 @@ function RuleCard({ rule, index }: RuleCardProps) {
   );
 }
 
-/* One-time chart follow-up */
+/* One-hour chart follow-up */
 type ChartQuestionResponse = {
   answer: string;
   focus: string;
@@ -754,10 +754,19 @@ type ChartQuestionResponse = {
   question: string;
   question_id: string;
   remaining_uses: number;
+  cooldown_until?: string;
+  retry_after_seconds?: number;
+  ip_tracked?: boolean;
 };
 
 const CLIENT_QUESTION_MAX_CHARS = 320;
 const CLIENT_QUESTION_MIN_CHARS = 8;
+const CLIENT_QUESTION_COOLDOWN_MS = 60 * 60 * 1000;
+
+type QuestionCooldownDetails = {
+  cooldownUntil?: string;
+  retryAfterSeconds?: number;
+};
 
 function makeStableQuestionHash(value: string) {
   let hash = 0;
@@ -780,6 +789,43 @@ function getQuestionErrorMessage(payload: unknown) {
   return "The question could not be answered.";
 }
 
+function getQuestionCooldownDetails(payload: unknown): QuestionCooldownDetails {
+  if (!payload || typeof payload !== "object") return {};
+
+  const details = (payload as {
+    error?: { details?: Record<string, unknown> };
+  }).error?.details;
+  if (!details) return {};
+
+  return {
+    cooldownUntil:
+      typeof details.cooldown_until === "string"
+        ? details.cooldown_until
+        : undefined,
+    retryAfterSeconds:
+      typeof details.retry_after_seconds === "number"
+        ? details.retry_after_seconds
+        : undefined,
+  };
+}
+
+function getFallbackCooldownUntil(details?: QuestionCooldownDetails) {
+  if (details?.cooldownUntil) {
+    return details.cooldownUntil;
+  }
+  if (typeof details?.retryAfterSeconds === "number") {
+    return new Date(Date.now() + details.retryAfterSeconds * 1000).toISOString();
+  }
+  return new Date(Date.now() + CLIENT_QUESTION_COOLDOWN_MS).toISOString();
+}
+
+function formatClientCooldown(milliseconds: number) {
+  const minutes = Math.ceil(milliseconds / 60_000);
+  if (minutes <= 1) return "about 1 minute";
+  if (minutes < 60) return `${minutes} minutes`;
+  return "about 1 hour";
+}
+
 function OneTimeChartQuestion({
   payload,
   historyQs,
@@ -791,18 +837,27 @@ function OneTimeChartQuestion({
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState<ChartQuestionResponse | null>(null);
   const [questionUsed, setQuestionUsed] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState<string | null>(null);
+  const [currentTime, setCurrentTime] = useState(Date.now());
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const storageKey = `chart-question:${makeStableQuestionHash(
     `${historyQs}|${payload.engine.engine_id}|${payload.chart.ascendant.sign}`,
   )}`;
   const remainingChars = CLIENT_QUESTION_MAX_CHARS - question.length;
+  const cooldownUntilMs = cooldownUntil ? Date.parse(cooldownUntil) : 0;
+  const isCoolingDown = Number.isFinite(cooldownUntilMs) && cooldownUntilMs > currentTime;
+  const cooldownLabel = isCoolingDown
+    ? formatClientCooldown(cooldownUntilMs - currentTime)
+    : "";
 
   useEffect(() => {
     setQuestion("");
     setAnswer(null);
     setQuestionUsed(false);
+    setCooldownUntil(null);
     setError(null);
+    setCurrentTime(Date.now());
 
     try {
       const stored = window.localStorage.getItem(storageKey);
@@ -810,19 +865,55 @@ function OneTimeChartQuestion({
       const parsed = JSON.parse(stored) as {
         used?: unknown;
         answer?: ChartQuestionResponse;
+        cooldown_until?: unknown;
       };
+      const storedCooldownUntil =
+        typeof parsed.cooldown_until === "string"
+          ? parsed.cooldown_until
+          : parsed.answer?.cooldown_until;
+      const storedCooldownMs = storedCooldownUntil ? Date.parse(storedCooldownUntil) : 0;
+      if (!Number.isFinite(storedCooldownMs) || storedCooldownMs <= Date.now()) {
+        window.localStorage.removeItem(storageKey);
+        return;
+      }
       if (parsed.answer?.answer) {
         setAnswer(parsed.answer);
         setQuestion(parsed.answer.question ?? "");
       }
+      setCooldownUntil(storedCooldownUntil ?? null);
       setQuestionUsed(parsed.used === true || Boolean(parsed.answer));
     } catch {
       // Local persistence is a convenience; the server still enforces use.
     }
   }, [storageKey]);
 
-  const markQuestionUsed = (nextAnswer?: ChartQuestionResponse) => {
+  useEffect(() => {
+    if (!isCoolingDown) return;
+    const interval = window.setInterval(() => setCurrentTime(Date.now()), 30_000);
+    return () => window.clearInterval(interval);
+  }, [isCoolingDown]);
+
+  useEffect(() => {
+    if (!cooldownUntil || isCoolingDown) return;
+    setQuestionUsed(false);
+    setAnswer(null);
+    setCooldownUntil(null);
+    try {
+      window.localStorage.removeItem(storageKey);
+    } catch {
+      // Ignore storage failures in private browsing or restricted contexts.
+    }
+  }, [cooldownUntil, isCoolingDown, storageKey]);
+
+  const markQuestionUsed = (
+    nextAnswer?: ChartQuestionResponse,
+    nextCooldownUntil?: string,
+  ) => {
+    const resolvedCooldownUntil =
+      nextAnswer?.cooldown_until ?? nextCooldownUntil ?? getFallbackCooldownUntil();
     setQuestionUsed(true);
+    setCooldownUntil(resolvedCooldownUntil);
+    setCurrentTime(Date.now());
     if (nextAnswer) {
       setAnswer(nextAnswer);
     }
@@ -832,6 +923,7 @@ function OneTimeChartQuestion({
         JSON.stringify({
           used: true,
           answer: nextAnswer,
+          cooldown_until: resolvedCooldownUntil,
         }),
       );
     } catch {
@@ -847,7 +939,7 @@ function OneTimeChartQuestion({
       setError("Ask one specific question with a little more detail.");
       return;
     }
-    if (questionUsed || isSubmitting) {
+    if (questionUsed || isCoolingDown || isSubmitting) {
       return;
     }
 
@@ -870,8 +962,11 @@ function OneTimeChartQuestion({
       const data = await response.json();
 
       if (!response.ok) {
-        if (response.status === 409) {
-          markQuestionUsed();
+        if (response.status === 429) {
+          const cooldownDetails = getQuestionCooldownDetails(data);
+          if (cooldownDetails.cooldownUntil || cooldownDetails.retryAfterSeconds) {
+            markQuestionUsed(undefined, getFallbackCooldownUntil(cooldownDetails));
+          }
         }
         throw new Error(getQuestionErrorMessage(data));
       }
@@ -894,8 +989,8 @@ function OneTimeChartQuestion({
     >
       <div className={styles.chartQuestionHeader}>
         <span className={styles.chartQuestionBadge}>
-          {questionUsed ? <FiCheckCircle size={16} /> : <FiSend size={16} />}
-          One follow-up
+          {questionUsed || isCoolingDown ? <FiCheckCircle size={16} /> : <FiSend size={16} />}
+          One per hour
         </span>
         <h3>Ask one specific question</h3>
         <p>
@@ -920,11 +1015,17 @@ function OneTimeChartQuestion({
               <span>{answer.cautions.join(" ")}</span>
             </div>
           )}
+          {isCoolingDown && (
+            <div className={styles.chartQuestionUsed}>
+              <FiCheckCircle size={18} />
+              <span>Next question available in {cooldownLabel}.</span>
+            </div>
+          )}
         </div>
       ) : questionUsed ? (
         <div className={styles.chartQuestionUsed}>
           <FiCheckCircle size={18} />
-          <span>This chart's one-time question has already been used.</span>
+          <span>Another follow-up will be available in {cooldownLabel || "about 1 hour"}.</span>
         </div>
       ) : (
         <form className={styles.chartQuestionForm} onSubmit={submitQuestion}>
@@ -935,7 +1036,7 @@ function OneTimeChartQuestion({
             onChange={(event) => setQuestion(event.target.value)}
             maxLength={CLIENT_QUESTION_MAX_CHARS}
             placeholder="What should I understand about career timing this year?"
-            disabled={isSubmitting}
+            disabled={isSubmitting || isCoolingDown}
           />
           <div className={styles.chartQuestionFooter}>
             <span className={remainingChars < 40 ? styles.chartQuestionCountWarn : ""}>
@@ -943,10 +1044,14 @@ function OneTimeChartQuestion({
             </span>
             <button
               type="submit"
-              disabled={isSubmitting || question.trim().length < CLIENT_QUESTION_MIN_CHARS}
+              disabled={
+                isSubmitting ||
+                isCoolingDown ||
+                question.trim().length < CLIENT_QUESTION_MIN_CHARS
+              }
             >
               <FiSend size={16} />
-              {isSubmitting ? "Asking..." : "Ask once"}
+              {isSubmitting ? "Asking..." : "Ask this hour"}
             </button>
           </div>
         </form>
