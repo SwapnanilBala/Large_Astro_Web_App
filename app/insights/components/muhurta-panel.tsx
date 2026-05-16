@@ -168,6 +168,71 @@ function formatScore(score: number): string {
   return String(score);
 }
 
+function pad2(n: number): string {
+  return String(n).padStart(2, "0");
+}
+
+/** Floating (wall-clock) ICS stamp matching the times shown in the UI. */
+function icsLocalStamp(d: Date): string {
+  return (
+    `${d.getFullYear()}${pad2(d.getMonth() + 1)}${pad2(d.getDate())}` +
+    `T${pad2(d.getHours())}${pad2(d.getMinutes())}00`
+  );
+}
+
+function icsUtcStamp(d: Date): string {
+  return (
+    `${d.getUTCFullYear()}${pad2(d.getUTCMonth() + 1)}${pad2(d.getUTCDate())}` +
+    `T${pad2(d.getUTCHours())}${pad2(d.getUTCMinutes())}${pad2(d.getUTCSeconds())}Z`
+  );
+}
+
+function escapeIcs(text: string): string {
+  return text
+    .replace(/\\/g, "\\\\")
+    .replace(/;/g, "\\;")
+    .replace(/,/g, "\\,")
+    .replace(/\r?\n/g, "\\n");
+}
+
+function buildIcs(w: MuhurtaWindow, activityLabel: string): string {
+  const start = new Date(w.start);
+  const end = new Date(w.end);
+  const uid = `muhurta-${start.getTime()}-${Math.round(w.score)}@astro-insights`;
+  const summary = `Auspicious window — ${activityLabel} (${w.score}/100 ${w.quality})`;
+  const description = `${w.recommendation}\n\n${w.factors
+    .map((f) => `${f.name}: ${f.value} — ${f.quality}`)
+    .join("\n")}`;
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Astro Insights//Muhurta//EN",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${icsUtcStamp(new Date())}`,
+    `DTSTART:${icsLocalStamp(start)}`,
+    `DTEND:${icsLocalStamp(end)}`,
+    `SUMMARY:${escapeIcs(summary)}`,
+    `DESCRIPTION:${escapeIcs(description)}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+function downloadIcs(w: MuhurtaWindow, activityLabel: string): void {
+  const blob = new Blob([buildIcs(w, activityLabel)], {
+    type: "text/calendar;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `muhurta-${activityLabel.toLowerCase().replace(/\s+/g, "-")}-${w.start.slice(0, 10)}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 interface DayGroup {
   label: string;
   sortTs: number;
@@ -206,7 +271,31 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const [result, setResult] = useState<MuhurtaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  const copyWindow = useCallback(
+    async (w: MuhurtaWindow, key: string, activityLabel: string) => {
+      const text = [
+        `${activityLabel} — ${formatWindowDate(w.start)}`,
+        `${formatWindowTime(w.start)}–${formatWindowTime(w.end)} · ${w.score}/100 (${w.quality})`,
+        "",
+        ...w.factors.map(
+          (f) => `${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`,
+        ),
+        "",
+        w.recommendation,
+      ].join("\n");
+      try {
+        await navigator.clipboard.writeText(text);
+        setCopiedKey(key);
+        setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 2000);
+      } catch {
+        /* clipboard unavailable — silently ignore */
+      }
+    },
+    [],
+  );
 
   const handlePreset = (days: number) => {
     setStartDate(todayStr());
@@ -407,9 +496,10 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
               </h4>
               {group.windows.map((w, idx) => {
                 const isBest = w === result.windows[0];
+                const key = `${w.start}-${w.score}-${idx}`;
                 return (
                   <article
-                    key={`${w.start}-${idx}`}
+                    key={key}
                     className={`${styles.windowCard} ${isBest ? styles.windowCardBest : ""}`}
                   >
                     {isBest && (
@@ -447,6 +537,25 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                     </div>
 
                     <p className={styles.recommendation}>{w.recommendation}</p>
+
+                    <div className={styles.windowActions}>
+                      <button
+                        type="button"
+                        className={styles.actionBtn}
+                        onClick={() => downloadIcs(w, result.activity_label)}
+                      >
+                        Add to calendar
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.actionBtn}
+                        onClick={() =>
+                          void copyWindow(w, key, result.activity_label)
+                        }
+                      >
+                        {copiedKey === key ? "Copied ✓" : "Copy"}
+                      </button>
+                    </div>
                   </article>
                 );
               })}

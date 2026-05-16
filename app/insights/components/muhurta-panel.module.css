@@ -450,6 +450,34 @@
   border-top: 1px solid rgba(200, 155, 60, 0.10);
 }
 
+/* ── Window Actions ── */
+
+.windowActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.actionBtn {
+  background: rgba(255, 243, 210, 0.04);
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  border-radius: 10px;
+  padding: 0.4rem 0.85rem;
+  color: var(--ink-soft);
+  font-size: 1.05rem;
+  font-weight: 600;
+  font-family: var(--font-body), sans-serif;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+}
+
+.actionBtn:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: rgba(200, 155, 60, 0.08);
+}
+
 /* ── Loading Spinner ── */
 
 .loading {
