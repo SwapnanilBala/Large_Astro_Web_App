@@ -4,6 +4,7 @@ import { useState, useCallback, useRef } from "react";
 import {
   appendChartApiSearchParams,
   appendProfileLocationApiSearchParams,
+  parseProfileQueryString,
 } from "@/lib/chart-query";
 import styles from "./muhurta-panel.module.css";
 
@@ -177,6 +178,24 @@ function formatScore(score: number): string {
 
 function pad2(n: number): string {
   return String(n).padStart(2, "0");
+}
+
+function formatTzOffset(minutes: number): string {
+  if (!Number.isFinite(minutes) || minutes === 0) return "UTC";
+  const sign = minutes > 0 ? "+" : "−";
+  const abs = Math.abs(minutes);
+  return `UTC${sign}${Math.floor(abs / 60)}:${pad2(abs % 60)}`;
+}
+
+function buildLocationLabel(queryString: string): string {
+  const profile = parseProfileQueryString(queryString);
+  const place = [profile.town || profile.city, profile.country]
+    .map((p) => p?.trim())
+    .filter(Boolean)
+    .join(", ");
+  const tz = formatTzOffset(Number(profile.timezoneOffsetMinutes || "0"));
+  const where = place || "your saved location";
+  return `Times shown for ${where} · ${tz}`;
 }
 
 /** Floating (wall-clock) ICS stamp matching the times shown in the UI. */
@@ -477,6 +496,10 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             Scanning Panchanga factors across your date range...
           </p>
         </div>
+      )}
+
+      {!isLoading && result && (
+        <p className={styles.locationNote}>{buildLocationLabel(queryString)}</p>
       )}
 
       {!isLoading && result && result.windows.length === 0 && (
