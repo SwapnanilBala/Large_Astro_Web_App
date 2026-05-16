@@ -305,37 +305,100 @@
 /* ── Factors Grid ── */
 
 .factors {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 0.5rem;
   margin-bottom: 0.75rem;
 }
 
 .factorChip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   background: rgba(255, 243, 210, 0.04);
   border: 1px solid rgba(200, 155, 60, 0.14);
-  border-radius: 12px;
-  padding: 0.25rem 0.6rem;
+  border-left-width: 3px;
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
   font-size: 1.12rem;
   color: var(--ink-soft);
+}
+
+.factorSign {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+}
+
+.factorBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.factorTop {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
 }
 
 .factorName {
   font-weight: 600;
   color: var(--accent-gold);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.factorScore {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: 1.05rem;
+  color: var(--ink-soft);
+}
+
+.factorValue {
+  color: var(--ink-main);
+  font-size: 1.12rem;
+  overflow-wrap: anywhere;
+}
+
+.factorQuality {
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  opacity: 0.85;
 }
 
 .factorPositive {
   composes: factorChip;
-  border-color: rgba(26, 123, 110, 0.20);
+  border-color: rgba(26, 123, 110, 0.30);
+  border-left-color: #1a7b6e;
+  background: rgba(26, 123, 110, 0.07);
+}
+
+.factorPositive .factorSign,
+.factorPositive .factorScore {
+  color: #1a7b6e;
 }
 
 .factorNegative {
   composes: factorChip;
-  border-color: rgba(240, 112, 104, 0.12);
+  border-color: rgba(240, 112, 104, 0.30);
+  border-left-color: #F07068;
+  background: rgba(240, 112, 104, 0.07);
+}
+
+.factorNegative .factorSign,
+.factorNegative .factorScore {
+  color: #F07068;
+}
+
+.factorChip:not(.factorPositive):not(.factorNegative) {
+  border-left-color: rgba(200, 155, 60, 0.35);
 }
 
 /* ── Recommendation ── */

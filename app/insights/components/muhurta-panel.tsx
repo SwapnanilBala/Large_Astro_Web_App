@@ -120,6 +120,17 @@ function factorClass(score: number): string {
   return styles.factorChip;
 }
 
+function factorSign(score: number): string {
+  if (score > 0) return "▲";
+  if (score < 0) return "▼";
+  return "•";
+}
+
+function formatScore(score: number): string {
+  if (score > 0) return `+${score}`;
+  return String(score);
+}
+
 // --------------------------------------------------------------------------
 // Component
 // --------------------------------------------------------------------------
@@ -339,9 +350,23 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
               <div className={styles.factors}>
                 {w.factors.map((f) => (
-                  <span key={f.name} className={factorClass(f.score)}>
-                    <span className={styles.factorName}>{f.name}:</span> {f.value}
-                  </span>
+                  <div
+                    key={f.name}
+                    className={factorClass(f.score)}
+                    title={`${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`}
+                  >
+                    <span className={styles.factorSign} aria-hidden="true">
+                      {factorSign(f.score)}
+                    </span>
+                    <span className={styles.factorBody}>
+                      <span className={styles.factorTop}>
+                        <span className={styles.factorName}>{f.name}</span>
+                        <span className={styles.factorScore}>{formatScore(f.score)}</span>
+                      </span>
+                      <span className={styles.factorValue}>{f.value}</span>
+                      <span className={styles.factorQuality}>{f.quality}</span>
+                    </span>
+                  </div>
                 ))}
               </div>
 
