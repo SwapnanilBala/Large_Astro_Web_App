@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import {
   appendChartApiSearchParams,
   appendProfileLocationApiSearchParams,
@@ -75,6 +75,14 @@ const PRESETS = [
 ] as const;
 const MIN_SCORE_FLOOR = 60;
 const MIN_SCORE_CEIL = 95;
+const STORAGE_KEY = "muhurta-prefs-v1";
+
+interface StoredPrefs {
+  activity?: string;
+  preset?: number;
+  minScore?: number;
+  daytimeOnly?: boolean;
+}
 
 function isDaytime(isoStr: string): boolean {
   const h = new Date(isoStr).getHours();
@@ -398,6 +406,50 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       setIsLoading(false);
     }
   }, [activity, startDate, endDate, queryString]);
+
+  const hydrated = useRef(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const p = JSON.parse(raw) as StoredPrefs;
+      if (p.activity && ACTIVITIES.some((a) => a.value === p.activity)) {
+        setActivity(p.activity);
+      }
+      if (typeof p.minScore === "number") {
+        setMinScore(
+          Math.min(MIN_SCORE_CEIL, Math.max(MIN_SCORE_FLOOR, p.minScore)),
+        );
+      }
+      if (typeof p.daytimeOnly === "boolean") setDaytimeOnly(p.daytimeOnly);
+      if (p.preset && PRESETS.some((pr) => pr.days === p.preset)) {
+        setStartDate(todayStr());
+        setEndDate(futureStr(p.preset));
+        setActivePreset(p.preset);
+      }
+    } catch {
+      /* ignore unreadable prefs */
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated.current) {
+      hydrated.current = true;
+      return;
+    }
+    try {
+      const prefs: StoredPrefs = {
+        activity,
+        preset: activePreset,
+        minScore,
+        daytimeOnly,
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    } catch {
+      /* storage unavailable — ignore */
+    }
+  }, [activity, activePreset, minScore, daytimeOnly]);
 
   const visibleWindows =
     result?.windows.filter(
