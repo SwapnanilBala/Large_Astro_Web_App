@@ -11,6 +11,7 @@ interface PremiumDatePickerProps {
   onChange: (date: Date | null) => void;
   placeholder?: string;
   icon?: React.ReactNode;
+  completed?: boolean;
   error?: string;
   disabled?: boolean;
   showTimeSelect?: boolean;
@@ -32,6 +33,7 @@ export default function PremiumDatePicker({
   onChange,
   placeholder = "",
   icon,
+  completed,
   error,
   disabled = false,
   showTimeSelect = false,
@@ -61,13 +63,31 @@ export default function PremiumDatePicker({
     setIsFilled(date !== null);
   };
 
+  const isComplete = (completed ?? isFilled) && !error && !disabled;
+  const inputClasses = [
+    styles.datePickerInput,
+    icon ? styles.withIcon : "",
+    isComplete ? styles.withSuccess : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
-    <div className={`${styles.premiumDatePicker} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""}`}>
+    <div
+      className={`${styles.premiumDatePicker} ${isFocused ? styles.focused : ""} ${error ? styles.error : ""} ${
+        isComplete ? styles.complete : ""
+      } ${disabled ? styles.disabled : ""}`}
+    >
       <label className={styles.fieldLabel}>
         {label}
         {required && <span className={styles.requiredDot}>*</span>}
       </label>
       <div className={styles.datePickerWrapper} ref={calendarRef}>
+        {icon && (
+          <span className={styles.leadingIcon} aria-hidden="true">
+            {icon}
+          </span>
+        )}
         <DatePicker
           selected={value}
           onChange={handleChange}
@@ -86,11 +106,21 @@ export default function PremiumDatePicker({
           showYearDropdown={showYearDropdown}
           showMonthDropdown={showMonthDropdown}
           yearDropdownItemNumber={yearDropdownItemNumber}
-          className={styles.datePickerInput}
+          className={inputClasses}
           calendarClassName={styles.calendarPopup}
           popperClassName={styles.popper}
           wrapperClassName={styles.datePickerWrapperInner}
         />
+        <span
+          className={styles.successBadge}
+          aria-hidden={!isComplete}
+          aria-label={isComplete ? `${label} complete` : undefined}
+          role={isComplete ? "status" : undefined}
+        >
+          <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
+            <path d="M6.7 11.3 3.4 8l1.2-1.2 2.1 2.1 4.7-4.7L12.6 5z" />
+          </svg>
+        </span>
         <div className={styles.datePickerBorder} />
         <div className={styles.datePickerGlow} />
       </div>
