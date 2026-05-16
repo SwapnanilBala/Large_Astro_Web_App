@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { findMuhurta } from "@/lib/engines/muhurta-engine";
+import { findMuhurta, getRahukaala, getYamaghantaka } from "@/lib/engines/muhurta-engine";
 import type { MuhurtaActivity } from "@/lib/engines/muhurta-engine";
 import { MuhurtaInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 
 const CACHE_HEADER = "private, max-age=3600";
+const MAX_AVOID_DAYS = 31;
+
+/** Inclusive list of YYYY-MM-DD strings from start to end, capped. */
+function eachDay(startStr: string, endStr: string): string[] {
+  const days: string[] = [];
+  const start = new Date(`${startStr}T00:00:00Z`);
+  const end = new Date(`${endStr}T00:00:00Z`);
+  const cursor = new Date(start);
+  while (cursor.getTime() <= end.getTime() && days.length < MAX_AVOID_DAYS) {
+    days.push(cursor.toISOString().slice(0, 10));
+    cursor.setUTCDate(cursor.getUTCDate() + 1);
+  }
+  return days;
+}
 
 // --------------------------------------------------------------------------
 // GET /api/muhurta
@@ -69,12 +83,28 @@ export async function GET(request: NextRequest) {
       timezone_offset_minutes,
     );
 
+    // Inauspicious periods (Rahukaala / Yamaghantaka) per day, shifted into
+    // the location wall-clock so they line up with the window times.
+    const shift = (d: Date) =>
+      new Date(d.getTime() + timezone_offset_minutes * 60_000).toISOString();
+    const avoid_periods = eachDay(start_date, end_date).map((dayStr) => {
+      const dayUtcNoon = new Date(`${dayStr}T12:00:00Z`);
+      const rahu = getRahukaala(dayUtcNoon, latitude, timezone_offset_minutes);
+      const yama = getYamaghantaka(dayUtcNoon, latitude, timezone_offset_minutes);
+      return {
+        date: dayStr,
+        rahukaala: { start: shift(rahu.start), end: shift(rahu.end) },
+        yamaghantaka: { start: shift(yama.start), end: shift(yama.end) },
+      };
+    });
+
     const result = {
       activity,
       activity_label: activity.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
       search_window: { start_date, end_date },
       timezone_offset_minutes,
       windows,
+      avoid_periods,
       computed_at_utc: new Date().toISOString(),
     };
 

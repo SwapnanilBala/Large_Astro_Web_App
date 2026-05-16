@@ -27,12 +27,19 @@ interface MuhurtaWindow {
   recommendation: string;
 }
 
+interface AvoidPeriod {
+  date: string;
+  rahukaala: { start: string; end: string };
+  yamaghantaka: { start: string; end: string };
+}
+
 interface MuhurtaResponse {
   activity: string;
   activity_label: string;
   search_window: { start_date: string; end_date: string };
   timezone_offset_minutes: number;
   windows: MuhurtaWindow[];
+  avoid_periods: AvoidPeriod[];
   computed_at_utc: string;
 }
 
@@ -561,6 +568,35 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
               })}
             </div>
           ))}
+        </div>
+      )}
+
+      {!isLoading && result && result.avoid_periods.length > 0 && (
+        <div className={styles.avoidSection}>
+          <h3 className={styles.avoidHeading}>
+            <span aria-hidden="true">⚠</span> Inauspicious periods to avoid
+          </h3>
+          <p className={styles.avoidIntro}>
+            Daylight Rahukaala and Yamaghantaka for each day in range —
+            steer clear of these even outside the windows above.
+          </p>
+          <div className={styles.avoidGrid}>
+            {result.avoid_periods.map((d) => (
+              <div key={d.date} className={styles.avoidDay}>
+                <p className={styles.avoidDate}>{formatWindowDate(d.date)}</p>
+                <div className={styles.avoidPills}>
+                  <span className={styles.avoidPill}>
+                    <span className={styles.avoidPillLabel}>Rahukaala</span>
+                    {formatWindowTime(d.rahukaala.start)} – {formatWindowTime(d.rahukaala.end)}
+                  </span>
+                  <span className={styles.avoidPill}>
+                    <span className={styles.avoidPillLabel}>Yamaghantaka</span>
+                    {formatWindowTime(d.yamaghantaka.start)} – {formatWindowTime(d.yamaghantaka.end)}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </section>
