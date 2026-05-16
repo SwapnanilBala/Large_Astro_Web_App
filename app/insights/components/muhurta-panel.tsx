@@ -335,7 +335,13 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             Found {result.windows.length} auspicious window{result.windows.length !== 1 ? "s" : ""}
           </p>
           {result.windows.map((w, idx) => (
-            <article key={`${w.start}-${idx}`} className={styles.windowCard}>
+            <article
+              key={`${w.start}-${idx}`}
+              className={`${styles.windowCard} ${idx === 0 ? styles.windowCardBest : ""}`}
+            >
+              {idx === 0 && (
+                <span className={styles.bestRibbon}>★ Best window</span>
+              )}
               <div className={styles.windowHeader}>
                 <div>
                   <p className={styles.windowTime}>

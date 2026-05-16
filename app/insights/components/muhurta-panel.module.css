@@ -239,6 +239,26 @@
   transform: translateY(-2px);
 }
 
+.windowCardBest {
+  position: relative;
+  border-color: rgba(200, 155, 60, 0.45);
+  background: rgba(200, 155, 60, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(200, 155, 60, 0.25) inset;
+}
+
+.bestRibbon {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #C89B3C 0%, #a87c2a 100%);
+  color: #0F1117;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
 .windowHeader {
   display: flex;
   justify-content: space-between;
