@@ -302,46 +302,42 @@
   margin: 0;
 }
 
-/* ── Score Badge ── */
+/* ── Score Dial ── */
 
-.scoreBadge {
-  display: inline-flex;
+.scoreDial {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.75rem;
-  border-radius: 20px;
-  font-size: 1.35rem;
-  font-weight: 700;
-  white-space: nowrap;
+  gap: 0.15rem;
   flex-shrink: 0;
 }
 
-.scoreExcellent {
-  composes: scoreBadge;
-  background: rgba(26, 123, 110, 0.15);
-  color: #1a7b6e;
-  border: 1px solid rgba(26, 123, 110, 0.25);
+.dialTrack {
+  fill: none;
+  stroke: rgba(200, 155, 60, 0.16);
+  stroke-width: 4;
 }
 
-.scoreGood {
-  composes: scoreBadge;
-  background: rgba(200, 155, 60, 0.12);
-  color: var(--accent-gold);
-  border: 1px solid rgba(200, 155, 60, 0.2);
+.dialValue {
+  fill: none;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease;
 }
 
-.scoreFair {
-  composes: scoreBadge;
-  background: rgba(255, 243, 210, 0.04);
-  color: var(--ink-soft);
-  border: 1px solid rgba(200, 155, 60, 0.10);
+.dialText {
+  font-family: var(--font-display), sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
 }
 
-.scorePoor {
-  composes: scoreBadge;
-  background: rgba(240, 112, 104, 0.08);
-  color: #F07068;
-  border: 1px solid rgba(240, 112, 104, 0.15);
+.dialQuality {
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 /* ── Factors Grid ── */

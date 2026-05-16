@@ -104,14 +104,51 @@ function formatWindowDate(isoStr: string): string {
   });
 }
 
-function scoreClass(quality: MuhurtaWindow["quality"]): string {
+function qualityColor(quality: MuhurtaWindow["quality"]): string {
   switch (quality) {
-    case "excellent": return styles.scoreExcellent;
-    case "good": return styles.scoreGood;
-    case "fair": return styles.scoreFair;
-    case "poor": return styles.scorePoor;
-    default: return styles.scoreFair;
+    case "excellent": return "#1a7b6e";
+    case "good": return "#C89B3C";
+    case "fair": return "#b9a98a";
+    case "poor": return "#F07068";
+    default: return "#b9a98a";
   }
+}
+
+const DIAL_RADIUS = 20;
+const DIAL_CIRCUMFERENCE = 2 * Math.PI * DIAL_RADIUS;
+
+function ScoreDial({ score, quality }: { score: number; quality: MuhurtaWindow["quality"] }) {
+  const color = qualityColor(quality);
+  const offset = DIAL_CIRCUMFERENCE * (1 - Math.max(0, Math.min(100, score)) / 100);
+  return (
+    <div
+      className={styles.scoreDial}
+      role="img"
+      aria-label={`Score ${score} out of 100, ${quality}`}
+    >
+      <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
+        <circle className={styles.dialTrack} cx="24" cy="24" r={DIAL_RADIUS} />
+        <circle
+          className={styles.dialValue}
+          cx="24"
+          cy="24"
+          r={DIAL_RADIUS}
+          style={{
+            stroke: color,
+            strokeDasharray: DIAL_CIRCUMFERENCE,
+            strokeDashoffset: offset,
+          }}
+          transform="rotate(-90 24 24)"
+        />
+        <text className={styles.dialText} x="24" y="24" style={{ fill: color }}>
+          {score}
+        </text>
+      </svg>
+      <span className={styles.dialQuality} style={{ color }}>
+        {quality}
+      </span>
+    </div>
+  );
 }
 
 function factorClass(score: number): string {
@@ -384,9 +421,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                           {formatWindowTime(w.start)} &mdash; {formatWindowTime(w.end)}
                         </p>
                       </div>
-                      <span className={scoreClass(w.quality)}>
-                        {w.score}/100 &middot; {w.quality}
-                      </span>
+                      <ScoreDial score={w.score} quality={w.quality} />
                     </div>
 
                     <div className={styles.factors}>
