@@ -75,6 +75,52 @@
   font-weight: 600;
 }
 
+/* ── Results Collapse Toggle ── */
+
+.resultsToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(200, 155, 60, 0.06);
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  border-radius: 12px;
+  color: var(--ink-main);
+  font-family: var(--font-body), sans-serif;
+  font-size: 1.18rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.resultsToggle:hover {
+  border-color: var(--accent-gold);
+  background: rgba(200, 155, 60, 0.1);
+}
+
+.resultsToggleText {
+  text-align: left;
+}
+
+.resultsChevron {
+  flex-shrink: 0;
+  font-size: 1.1rem;
+  color: var(--accent-gold);
+  transition: transform 0.25s ease;
+}
+
+.resultsChevron[data-open="false"] {
+  transform: rotate(-90deg);
+}
+
+.resultsBody {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 /* ── Results Summary ── */
 
 .resultsSummary {

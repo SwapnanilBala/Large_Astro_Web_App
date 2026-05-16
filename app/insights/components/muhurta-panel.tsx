@@ -316,6 +316,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [minScore, setMinScore] = useState(MIN_SCORE_FLOOR);
   const [daytimeOnly, setDaytimeOnly] = useState(false);
+  const [resultsOpen, setResultsOpen] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
 
   const copyWindow = useCallback(
@@ -389,6 +390,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       const data = (await response.json()) as MuhurtaResponse;
       setResult(data);
+      setResultsOpen(true);
     } catch (fetchError) {
       clearTimeout(timeoutId);
       setResult(null);
@@ -578,7 +580,28 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       {!isLoading && result && result.windows.length > 0 && (
         <div className={styles.results}>
-          <div className={styles.filterRow}>
+          <button
+            type="button"
+            className={styles.resultsToggle}
+            aria-expanded={resultsOpen}
+            onClick={() => setResultsOpen((o) => !o)}
+          >
+            <span className={styles.resultsToggleText}>
+              Results: {visibleWindows.length} of {result.windows.length} window
+              {result.windows.length !== 1 ? "s" : ""} shown
+            </span>
+            <span
+              className={styles.resultsChevron}
+              data-open={resultsOpen}
+              aria-hidden="true"
+            >
+              ▾
+            </span>
+          </button>
+
+          {resultsOpen && (
+            <div className={styles.resultsBody}>
+              <div className={styles.filterRow}>
             <label className={styles.filterField}>
               <span className={styles.filterLabel}>
                 Min score: {minScore}
@@ -692,6 +715,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
               })}
             </div>
           ))}
+            </div>
+          )}
         </div>
       )}
 
