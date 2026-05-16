@@ -4,7 +4,16 @@ import type { ChangeEvent, FormEvent } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
-import { HiOutlineClock, HiOutlineSparkles, HiOutlineChevronDown } from "react-icons/hi2";
+import {
+  HiOutlineCalendarDays,
+  HiOutlineCheckCircle,
+  HiOutlineChevronDown,
+  HiOutlineClock,
+  HiOutlineExclamationCircle,
+  HiOutlineMapPin,
+  HiOutlineSparkles,
+  HiOutlineUser,
+} from "react-icons/hi2";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
@@ -30,6 +39,7 @@ import PremiumInput from "./components/PremiumInput";
 import PremiumButton from "./components/PremiumButton";
 import PremiumDatePicker from "./components/PremiumDatePicker";
 import PremiumToggle from "./components/PremiumToggle";
+import IntakeProgressConstellation from "./components/IntakeProgressConstellation";
 import styles from "./page.module.css";
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -49,6 +59,12 @@ const COARSE_TIME_OPTIONS = [
   { value: "afternoon", labelKey: "home.coarseAfternoon" },
   { value: "evening", labelKey: "home.coarseEvening" },
   { value: "unknown", labelKey: "home.coarseUnknown" },
+];
+
+const SMART_FILL_EXAMPLE_KEYS = [
+  "home.smartFillExample1",
+  "home.smartFillExample2",
+  "home.smartFillExample3",
 ];
 
 const COARSE_TIME_FALLBACKS: Record<string, string> = {
@@ -520,6 +536,121 @@ export default function Home() {
     return t("home.previewStatusBuilding");
   }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, t, unknownTime]);
 
+  const hasName = draft.name.trim().length > 0;
+  const hasBirthDate = draft.birthDate.trim().length > 0;
+  const hasBirthTimeSignal = unknownTime
+    ? hasCoarseTimeFallback(coarseTime)
+    : draft.birthTime.trim().length > 0;
+  const hasCountry = draft.country.trim().length > 0;
+  const hasState = draft.state.trim().length > 0;
+  const hasCity = draft.city.trim().length > 0;
+  const hasLatitude = draft.latitude.trim().length > 0;
+  const hasLongitude = draft.longitude.trim().length > 0;
+  const hasLocation = hasCountry && hasState && hasCity && hasLatitude && hasLongitude;
+
+  const missingFieldLabels = useMemo(() => {
+    const missing: string[] = [];
+    if (!hasName) missing.push(t("home.formName"));
+    if (!hasBirthDate) missing.push(t("home.formBirthDate"));
+    if (!hasBirthTimeSignal) missing.push(t("home.formBirthTime"));
+    if (!hasCountry) missing.push(t("home.formCountry"));
+    if (!hasState) missing.push(t("home.formState"));
+    if (!hasCity) missing.push(t("home.formCity"));
+    if (!hasLatitude) missing.push(t("home.formLatitude"));
+    if (!hasLongitude) missing.push(t("home.formLongitude"));
+    return missing;
+  }, [
+    hasBirthDate,
+    hasBirthTimeSignal,
+    hasCity,
+    hasCountry,
+    hasLatitude,
+    hasLongitude,
+    hasName,
+    hasState,
+    t,
+  ]);
+
+  const actionHintText = useMemo(() => {
+    if (canSubmit) return "";
+    const nextMissing = missingFieldLabels.slice(0, 2).join(", ");
+    return nextMissing ? t("home.actionHintMissing", { fields: nextMissing }) : t("home.actionHint");
+  }, [canSubmit, missingFieldLabels, t]);
+
+  const smartFillExamples = useMemo(
+    () => SMART_FILL_EXAMPLE_KEYS.map((key) => t(key)),
+    [t],
+  );
+
+  const intakeSteps = useMemo(() => {
+    const birthMomentComplete = hasBirthDate && hasBirthTimeSignal;
+    const stepStates = [
+      {
+        id: "identity",
+        label: t("home.stepIdentityLabel"),
+        detail: t("home.stepIdentityDetail"),
+        complete: hasName,
+        missing: !hasName ? t("home.formName") : undefined,
+      },
+      {
+        id: "birth",
+        label: t("home.stepBirthMomentLabel"),
+        detail: t("home.stepBirthMomentDetail"),
+        complete: birthMomentComplete,
+        missing: !birthMomentComplete
+          ? [!hasBirthDate ? t("home.formBirthDate") : "", !hasBirthTimeSignal ? t("home.formBirthTime") : ""]
+              .filter(Boolean)
+              .join(", ")
+          : undefined,
+      },
+      {
+        id: "location",
+        label: t("home.stepLocationLabel"),
+        detail: t("home.stepLocationDetail"),
+        complete: hasLocation,
+        meta: geoStatus === "found" ? t("home.previewStatusCoordinates") : undefined,
+        missing: !hasLocation
+          ? [
+              !hasCountry ? t("home.formCountry") : "",
+              !hasState ? t("home.formState") : "",
+              !hasCity ? t("home.formCity") : "",
+              !hasLatitude || !hasLongitude ? t("home.enterCoordinates") : "",
+            ]
+              .filter(Boolean)
+              .join(", ")
+          : undefined,
+      },
+      {
+        id: "ready",
+        label: t("home.stepChartReadyLabel"),
+        detail: t("home.stepChartReadyDetail"),
+        complete: canSubmit,
+        meta: `${previewCompletion.filled}/${previewCompletion.total}`,
+        missing: !canSubmit ? t("home.previewStatusBuilding") : undefined,
+      },
+    ];
+    const activeIndex = stepStates.findIndex((step) => !step.complete);
+    return stepStates.map((step, index) => ({
+      ...step,
+      active: activeIndex === -1 ? index === stepStates.length - 1 : index === activeIndex,
+    }));
+  }, [
+    canSubmit,
+    geoStatus,
+    hasBirthDate,
+    hasBirthTimeSignal,
+    hasCity,
+    hasCountry,
+    hasLatitude,
+    hasLocation,
+    hasLongitude,
+    hasName,
+    hasState,
+    previewCompletion.filled,
+    previewCompletion.total,
+    t,
+  ]);
+
   const submitWrapperRef = useRef<HTMLDivElement>(null);
 
   /* ── Particle burst on click ── */
@@ -824,7 +955,7 @@ export default function Home() {
 
       {/* ── Floating Cosmic Particles ── */}
       <div className={styles.cosmicParticles}>
-        {Array.from({ length: 24 }, (_, i) => {
+        {Array.from({ length: 16 }, (_, i) => {
           const size = 1.5 + (i % 3) * 1;
           const left = ((i * 17 + 7) % 100);
           const bottom = -((i * 13) % 20);
@@ -930,19 +1061,17 @@ export default function Home() {
         <h1 className={styles.pageTitle}>{t("home.heroTitle")}</h1>
         <p className={styles.pageSubtitle}>{t("home.heroSubtitle")}</p>
         
-        {/* Progress indicator — 9 dots, one per required field */}
-        <div className={styles.progressDots} role="progressbar" aria-label={t("home.formProgressAria")}>
-          {requiredFields.map((field) => {
-            const value = draft[field];
-            const filled = typeof value === "string" && value.trim().length > 0;
-            return (
-              <span
-                key={field}
-                className={`${styles.progressDot} ${filled ? styles.progressDotFilled : ""}`}
-                aria-hidden="true"
-              />
-            );
-          })}
+        {/* Progress indicator */}
+        <IntakeProgressConstellation
+          steps={intakeSteps}
+          ariaLabel={t("home.formProgressAria")}
+          className={styles.heroProgressConstellation}
+        />
+
+        <div className={styles.formPeek} aria-hidden="true">
+          <span />
+          <span />
+          <span />
         </div>
 
         {/* Scroll-to-begin cue */}
@@ -964,6 +1093,13 @@ export default function Home() {
             <p className={styles.formCopy}>
               {t("home.formCopy")}
             </p>
+          </div>
+
+          <div className={styles.progressDock}>
+            <IntakeProgressConstellation
+              steps={intakeSteps}
+              ariaLabel={t("home.formProgressAria")}
+            />
           </div>
 
           <div className={styles.formLayout}>
@@ -1004,6 +1140,18 @@ export default function Home() {
                     <div className={styles.smartFillHint}>
                       {t("home.smartFillHint")}
                     </div>
+                    <div className={styles.smartFillExamples}>
+                      {smartFillExamples.map((example) => (
+                        <button
+                          key={example}
+                          type="button"
+                          className={styles.smartFillExampleChip}
+                          onClick={() => setSmartFillText(example)}
+                        >
+                          {example}
+                        </button>
+                      ))}
+                    </div>
                     <button
                       type="button"
                       onClick={handleSmartFill}
@@ -1035,6 +1183,23 @@ export default function Home() {
                   )}
                   <HiOutlineChevronDown className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`} />
                 </button>
+
+                {birthDetailsHistory.length > 0 && (
+                  <div className={styles.birthHistoryChips} aria-label={t("home.birthHistoryRecentLabel")}>
+                    <span className={styles.birthHistoryChipLabel}>{t("home.birthHistoryRecentLabel")}</span>
+                    {birthDetailsHistory.slice(0, 3).map((entry) => (
+                      <button
+                        key={`chip-${entry.id}`}
+                        type="button"
+                        className={styles.birthHistoryChip}
+                        onClick={() => restoreBirthDetailsHistory(entry)}
+                      >
+                        <span>{entry.draft.name || t("home.birthHistoryUnnamed")}</span>
+                        <small>{[entry.draft.birthDate, entry.draft.city].filter(Boolean).join(" - ")}</small>
+                      </button>
+                    ))}
+                  </div>
+                )}
 
                 {historyExpanded && (
                   <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
@@ -1084,6 +1249,8 @@ export default function Home() {
                   value={draft.name}
                   onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
                   placeholder={t("home.formNamePlaceholder")}
+                  icon={<HiOutlineUser />}
+                  completed={hasName}
                   required
                 />
               </div>
@@ -1105,6 +1272,8 @@ export default function Home() {
                     }}
                     placeholder={t("home.birthDatePlaceholder")}
                     dateFormat="dd MMM yyyy"
+                    icon={<HiOutlineCalendarDays />}
+                    completed={hasBirthDate}
                     required
                     maxDate={new Date()}
                     minDate={new Date(1900, 0, 1)}
@@ -1132,6 +1301,8 @@ export default function Home() {
                       timeIntervals={15}
                       timeCaption={t("home.timeCaption")}
                       dateFormat="h:mm aa"
+                      icon={<HiOutlineClock />}
+                      completed={hasBirthTimeSignal}
                       required={!unknownTime}
                     />
                   ) : (
@@ -1184,14 +1355,24 @@ export default function Home() {
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
                   <label>{t("home.formCountry")}</label>
-                  <AutocompleteInput
-                    value={draft.country}
-                    onChange={handleCountryChange}
-                    onSelect={handleCountrySelect}
-                    placeholder={t("home.formCountryPlaceholder")}
-                    suggestType="country"
-                    required
-                  />
+                  <div className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}>
+                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                      <HiOutlineMapPin />
+                    </span>
+                    <AutocompleteInput
+                      value={draft.country}
+                      onChange={handleCountryChange}
+                      onSelect={handleCountrySelect}
+                      placeholder={t("home.formCountryPlaceholder")}
+                      suggestType="country"
+                      required
+                    />
+                    {hasCountry && (
+                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formCountry")} complete`} role="status">
+                        <HiOutlineCheckCircle />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1199,15 +1380,25 @@ export default function Home() {
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
                   <label>{t("home.formState")}</label>
-                  <AutocompleteInput
-                    value={draft.state}
-                    onChange={handleStateChange}
-                    onSelect={handleStateSelect}
-                    placeholder={t("home.formStatePlaceholder")}
-                    suggestType="state"
-                    contextCountry={draft.country}
-                    required
-                  />
+                  <div className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}>
+                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                      <HiOutlineMapPin />
+                    </span>
+                    <AutocompleteInput
+                      value={draft.state}
+                      onChange={handleStateChange}
+                      onSelect={handleStateSelect}
+                      placeholder={t("home.formStatePlaceholder")}
+                      suggestType="state"
+                      contextCountry={draft.country}
+                      required
+                    />
+                    {hasState && (
+                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formState")} complete`} role="status">
+                        <HiOutlineCheckCircle />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1215,16 +1406,26 @@ export default function Home() {
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
                   <label>{t("home.formCity")}</label>
-                  <AutocompleteInput
-                    value={draft.city}
-                    onChange={setField("city")}
-                    onSelect={setField("city")}
-                    placeholder={t("home.formCityPlaceholder")}
-                    suggestType="city"
-                    contextCountry={draft.country}
-                    contextState={draft.state}
-                    required
-                  />
+                  <div className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}>
+                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                      <HiOutlineMapPin />
+                    </span>
+                    <AutocompleteInput
+                      value={draft.city}
+                      onChange={setField("city")}
+                      onSelect={setField("city")}
+                      placeholder={t("home.formCityPlaceholder")}
+                      suggestType="city"
+                      contextCountry={draft.country}
+                      contextState={draft.state}
+                      required
+                    />
+                    {hasCity && (
+                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formCity")} complete`} role="status">
+                        <HiOutlineCheckCircle />
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -1250,6 +1451,8 @@ export default function Home() {
                     value={draft.latitude}
                     onChange={(value) => setField("latitude")(value)}
                     placeholder="e.g. 40.7128"
+                    icon={<GiCompass />}
+                    completed={hasLatitude}
                     required
                   />
                   <PremiumInput
@@ -1257,6 +1460,8 @@ export default function Home() {
                     value={draft.longitude}
                     onChange={(value) => setField("longitude")(value)}
                     placeholder="e.g. -74.0060"
+                    icon={<GiCompass />}
+                    completed={hasLongitude}
                     required
                   />
                 </div>
@@ -1363,7 +1568,8 @@ export default function Home() {
             </PremiumButton>
             {!canSubmit && (
               <p className={styles.actionHint}>
-                {t("home.actionHint")}
+                <HiOutlineExclamationCircle aria-hidden="true" />
+                {actionHintText}
               </p>
             )}
             <p className={styles.trustMicrocopy}>
@@ -1385,15 +1591,15 @@ export default function Home() {
           <div className={styles.stickyProgress}>
             <span className={styles.stickyProgressText}>
               {t("home.stickyComplete", {
-                count: String(requiredFields.filter(f => draft[f].trim().length > 0).length),
-                total: String(requiredFields.length),
+                count: String(previewCompletion.filled),
+                total: String(previewCompletion.total),
               })}
             </span>
             <div className={styles.stickyProgressBar}>
               <div 
                 className={styles.stickyProgressFill}
                 style={{ 
-                  width: `${(requiredFields.filter(f => draft[f].trim().length > 0).length / requiredFields.length) * 100}%` 
+                  width: `${previewCompletion.percent}%`
                 }}
               />
             </div>

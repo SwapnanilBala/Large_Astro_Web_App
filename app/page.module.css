@@ -3398,3 +3398,271 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Intake page visual refinements */
+.intakeHeader {
+  min-height: 84vh;
+  padding-bottom: clamp(4rem, 8vw, 7rem);
+}
+
+.heroWrapper {
+  opacity: 0.17;
+}
+
+.constellationBg {
+  opacity: 0.22;
+}
+
+.cosmicParticles {
+  opacity: 0.55;
+}
+
+.heroProgressConstellation {
+  width: min(100%, 900px);
+  margin: clamp(1.35rem, 2.2vw, 2rem) auto 0;
+}
+
+.formPeek {
+  position: absolute;
+  bottom: -2.2rem;
+  left: 50%;
+  display: grid;
+  width: min(78vw, 520px);
+  gap: 0.55rem;
+  padding: 1.1rem;
+  pointer-events: none;
+  background:
+    linear-gradient(135deg, rgba(232, 200, 154, 0.14), rgba(74, 171, 158, 0.08)),
+    rgba(10, 12, 18, 0.74);
+  border: 1px solid rgba(232, 200, 154, 0.18);
+  border-radius: 24px 24px 0 0;
+  box-shadow:
+    0 -12px 36px rgba(212, 165, 116, 0.08),
+    0 22px 60px rgba(0, 0, 0, 0.34);
+  transform: translateX(-50%);
+}
+
+.formPeek span {
+  display: block;
+  height: 0.72rem;
+  border-radius: 999px;
+  background: rgba(245, 240, 230, 0.12);
+}
+
+.formPeek span:nth-child(1) {
+  width: 52%;
+  background: rgba(232, 200, 154, 0.32);
+}
+
+.formPeek span:nth-child(2) {
+  width: 100%;
+}
+
+.formPeek span:nth-child(3) {
+  width: 72%;
+  background: rgba(74, 171, 158, 0.22);
+}
+
+.mainContent {
+  margin-top: clamp(-4.5rem, -5vw, -2rem);
+}
+
+.progressDock {
+  position: sticky;
+  top: 0.75rem;
+  z-index: 30;
+  width: min(100%, 980px);
+  margin: 0 auto clamp(1.35rem, 2.4vw, 2.2rem);
+}
+
+.progressDock > :global(nav) {
+  border-color: rgba(232, 200, 154, 0.18);
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.28),
+    0 0 28px rgba(74, 171, 158, 0.08);
+}
+
+.smartFillExamples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.smartFillExampleChip,
+.birthHistoryChip {
+  border: 1px solid rgba(232, 200, 154, 0.18);
+  border-radius: 999px;
+  color: rgba(245, 240, 230, 0.84);
+  background: rgba(255, 255, 255, 0.045);
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.smartFillExampleChip {
+  padding: 0.48rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: left;
+}
+
+.smartFillExampleChip:hover,
+.birthHistoryChip:hover {
+  border-color: rgba(108, 225, 212, 0.42);
+  background: rgba(74, 171, 158, 0.10);
+  transform: translateY(-1px);
+}
+
+.birthHistoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 0.75rem;
+}
+
+.birthHistoryChipLabel {
+  color: rgba(108, 225, 212, 0.78);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.birthHistoryChip {
+  display: inline-grid;
+  gap: 0.12rem;
+  max-width: 15rem;
+  padding: 0.52rem 0.78rem;
+  text-align: left;
+}
+
+.birthHistoryChip span,
+.birthHistoryChip small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.birthHistoryChip span {
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.birthHistoryChip small {
+  color: rgba(245, 240, 230, 0.56);
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.autocompleteFrame {
+  position: relative;
+}
+
+.fieldLeadingIcon,
+.fieldCompleteBadge {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+.fieldLeadingIcon {
+  left: 1rem;
+  color: rgba(232, 200, 154, 0.68);
+}
+
+.fieldCompleteBadge {
+  right: 0.9rem;
+  color: #11342e;
+  background: linear-gradient(135deg, rgba(248, 227, 168, 0.98), rgba(74, 171, 158, 0.9));
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(74, 171, 158, 0.16);
+}
+
+.fieldLeadingIcon svg,
+.fieldCompleteBadge svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.autocompleteFrame :global(.autocomplete-wrapper) {
+  width: 100%;
+}
+
+.autocompleteFrame :global(input) {
+  padding-left: 2.95rem !important;
+}
+
+.autocompleteFrameComplete :global(input) {
+  padding-right: 2.95rem !important;
+  border-color: rgba(232, 200, 154, 0.38);
+}
+
+.actionHint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.actionHint svg {
+  flex: 0 0 auto;
+  color: rgba(232, 200, 154, 0.82);
+}
+
+@media (max-width: 1320px) {
+  .progressDock {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .intakeHeader {
+    min-height: 76vh;
+    padding-bottom: 3.8rem;
+  }
+
+  .mainContent {
+    margin-top: -1.5rem;
+  }
+
+  .heroProgressConstellation {
+    width: min(100%, 94vw);
+  }
+
+  .formPeek {
+    width: min(86vw, 420px);
+    bottom: -1.5rem;
+  }
+
+  .progressDock {
+    display: none;
+  }
+
+  .cosmicParticles {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .heroProgressConstellation {
+    display: none;
+  }
+
+  .formPeek {
+    bottom: -1.1rem;
+  }
+
+  .smartFillExampleChip,
+  .birthHistoryChip {
+    width: 100%;
+  }
+}
