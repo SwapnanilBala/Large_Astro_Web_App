@@ -235,6 +235,58 @@
   opacity: 0.8;
 }
 
+/* ── Result Filters ── */
+
+.filterRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.25rem 2rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.75rem;
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 243, 210, 0.03);
+}
+
+.filterField {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+  min-width: 180px;
+}
+
+.filterLabel {
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-soft);
+}
+
+.slider {
+  width: 100%;
+  accent-color: var(--accent-gold);
+  cursor: pointer;
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.12rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.filterToggle input {
+  accent-color: var(--accent-gold);
+  width: 1.05rem;
+  height: 1.05rem;
+  cursor: pointer;
+}
+
 /* ── Avoid Periods ── */
 
 .avoidSection {

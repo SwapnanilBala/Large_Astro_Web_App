@@ -66,12 +66,20 @@ const ACTIVITIES = [
 ];
 
 const TIMEOUT_MS = 60_000;
-const MAX_RANGE_DAYS = 14;
+const MAX_RANGE_DAYS = 30;
 const PRESETS = [
   { label: "3 Days", days: 3 },
   { label: "7 Days", days: 7 },
   { label: "14 Days", days: 14 },
+  { label: "30 Days", days: 30 },
 ] as const;
+const MIN_SCORE_FLOOR = 60;
+const MIN_SCORE_CEIL = 95;
+
+function isDaytime(isoStr: string): boolean {
+  const h = new Date(isoStr).getHours();
+  return h >= 6 && h < 18;
+}
 
 // --------------------------------------------------------------------------
 // Helpers
@@ -298,6 +306,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const [minScore, setMinScore] = useState(MIN_SCORE_FLOOR);
+  const [daytimeOnly, setDaytimeOnly] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const copyWindow = useCallback(
@@ -388,6 +398,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       setIsLoading(false);
     }
   }, [activity, startDate, endDate, queryString]);
+
+  const visibleWindows =
+    result?.windows.filter(
+      (w) => w.score >= minScore && (!daytimeOnly || isDaytime(w.start)),
+    ) ?? [];
 
   return (
     <section className={styles.panel}>
@@ -511,12 +526,46 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       {!isLoading && result && result.windows.length > 0 && (
         <div className={styles.results}>
+          <div className={styles.filterRow}>
+            <label className={styles.filterField}>
+              <span className={styles.filterLabel}>
+                Min score: {minScore}
+              </span>
+              <input
+                type="range"
+                min={MIN_SCORE_FLOOR}
+                max={MIN_SCORE_CEIL}
+                step={5}
+                value={minScore}
+                onChange={(e) => setMinScore(Number(e.target.value))}
+                className={styles.slider}
+              />
+            </label>
+            <label className={styles.filterToggle}>
+              <input
+                type="checkbox"
+                checked={daytimeOnly}
+                onChange={(e) => setDaytimeOnly(e.target.checked)}
+              />
+              <span>Daytime only (6 AM\u20136 PM)</span>
+            </label>
+          </div>
+
           <p className={styles.resultsSummary}>
             {formatWindowDate(result.search_window.start_date)} &mdash; {formatWindowDate(result.search_window.end_date)}
             {" \u00b7 "}
-            Found {result.windows.length} auspicious window{result.windows.length !== 1 ? "s" : ""}
+            Showing {visibleWindows.length} of {result.windows.length} window
+            {result.windows.length !== 1 ? "s" : ""}
           </p>
-          {groupWindowsByDay(result.windows).map((group) => (
+
+          {visibleWindows.length === 0 && (
+            <p className={styles.empty}>
+              No windows match the current filters. Lower the minimum score
+              {daytimeOnly ? " or allow non-daytime windows" : ""}.
+            </p>
+          )}
+
+          {groupWindowsByDay(visibleWindows).map((group) => (
             <div key={group.label} className={styles.dayGroup}>
               <h4 className={styles.dayHeading}>
                 <span>{group.label}</span>
