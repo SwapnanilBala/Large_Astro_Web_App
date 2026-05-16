@@ -131,6 +131,32 @@ function formatScore(score: number): string {
   return String(score);
 }
 
+interface DayGroup {
+  label: string;
+  sortTs: number;
+  windows: MuhurtaWindow[];
+}
+
+function groupWindowsByDay(windows: MuhurtaWindow[]): DayGroup[] {
+  const groups = new Map<string, DayGroup>();
+  for (const w of windows) {
+    const label = formatWindowDate(w.start);
+    const ts = new Date(w.start).getTime();
+    const existing = groups.get(label);
+    if (existing) {
+      existing.windows.push(w);
+      existing.sortTs = Math.min(existing.sortTs, ts);
+    } else {
+      groups.set(label, { label, sortTs: ts, windows: [w] });
+    }
+  }
+  const ordered = [...groups.values()].sort((a, b) => a.sortTs - b.sortTs);
+  for (const g of ordered) {
+    g.windows.sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime());
+  }
+  return ordered;
+}
+
 // --------------------------------------------------------------------------
 // Component
 // --------------------------------------------------------------------------
@@ -334,50 +360,62 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             {" \u00b7 "}
             Found {result.windows.length} auspicious window{result.windows.length !== 1 ? "s" : ""}
           </p>
-          {result.windows.map((w, idx) => (
-            <article
-              key={`${w.start}-${idx}`}
-              className={`${styles.windowCard} ${idx === 0 ? styles.windowCardBest : ""}`}
-            >
-              {idx === 0 && (
-                <span className={styles.bestRibbon}>★ Best window</span>
-              )}
-              <div className={styles.windowHeader}>
-                <div>
-                  <p className={styles.windowTime}>
-                    {formatWindowTime(w.start)} &mdash; {formatWindowTime(w.end)}
-                  </p>
-                  <p className={styles.windowDate}>{formatWindowDate(w.start)}</p>
-                </div>
-                <span className={scoreClass(w.quality)}>
-                  {w.score}/100 &middot; {w.quality}
+          {groupWindowsByDay(result.windows).map((group) => (
+            <div key={group.label} className={styles.dayGroup}>
+              <h4 className={styles.dayHeading}>
+                <span>{group.label}</span>
+                <span className={styles.dayCount}>
+                  {group.windows.length} window{group.windows.length !== 1 ? "s" : ""}
                 </span>
-              </div>
-
-              <div className={styles.factors}>
-                {w.factors.map((f) => (
-                  <div
-                    key={f.name}
-                    className={factorClass(f.score)}
-                    title={`${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`}
+              </h4>
+              {group.windows.map((w, idx) => {
+                const isBest = w === result.windows[0];
+                return (
+                  <article
+                    key={`${w.start}-${idx}`}
+                    className={`${styles.windowCard} ${isBest ? styles.windowCardBest : ""}`}
                   >
-                    <span className={styles.factorSign} aria-hidden="true">
-                      {factorSign(f.score)}
-                    </span>
-                    <span className={styles.factorBody}>
-                      <span className={styles.factorTop}>
-                        <span className={styles.factorName}>{f.name}</span>
-                        <span className={styles.factorScore}>{formatScore(f.score)}</span>
+                    {isBest && (
+                      <span className={styles.bestRibbon}>★ Best window</span>
+                    )}
+                    <div className={styles.windowHeader}>
+                      <div>
+                        <p className={styles.windowTime}>
+                          {formatWindowTime(w.start)} &mdash; {formatWindowTime(w.end)}
+                        </p>
+                      </div>
+                      <span className={scoreClass(w.quality)}>
+                        {w.score}/100 &middot; {w.quality}
                       </span>
-                      <span className={styles.factorValue}>{f.value}</span>
-                      <span className={styles.factorQuality}>{f.quality}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
+                    </div>
 
-              <p className={styles.recommendation}>{w.recommendation}</p>
-            </article>
+                    <div className={styles.factors}>
+                      {w.factors.map((f) => (
+                        <div
+                          key={f.name}
+                          className={factorClass(f.score)}
+                          title={`${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`}
+                        >
+                          <span className={styles.factorSign} aria-hidden="true">
+                            {factorSign(f.score)}
+                          </span>
+                          <span className={styles.factorBody}>
+                            <span className={styles.factorTop}>
+                              <span className={styles.factorName}>{f.name}</span>
+                              <span className={styles.factorScore}>{formatScore(f.score)}</span>
+                            </span>
+                            <span className={styles.factorValue}>{f.value}</span>
+                            <span className={styles.factorQuality}>{f.quality}</span>
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <p className={styles.recommendation}>{w.recommendation}</p>
+                  </article>
+                );
+              })}
+            </div>
           ))}
         </div>
       )}
