@@ -63,6 +63,12 @@ const COARSE_TIME_OPTIONS = [
 ];
 
 const HOUSE_TICKS = Array.from({ length: 12 }, (_, index) => index);
+const UNLOCK_RINGS = [
+  { label: "identity", radius: 48, layer: "I" },
+  { label: "luminary", radius: 39, layer: "II" },
+  { label: "angles", radius: 30, layer: "III" },
+  { label: "place", radius: 21, layer: "IV" },
+] as const;
 
 type SunSignPreview = (typeof ZODIAC_SIGNS)[number] & {
   degree: number;
@@ -129,6 +135,7 @@ export default function BirthChartTeaser({
   const completedUnlocks = [hasName, hasDate, hasTimeSignal, hasLocation].filter(Boolean).length;
   const readiness = Math.round((filledCount / 6) * 100);
   const isNearComplete = filledCount >= 5;
+  const previewState = completedUnlocks === 0 ? "dormant" : isNearComplete ? "ready" : "partial";
   const chartConfidence = getConfidenceLabel(hasExactTime, unknownTime, coarseTime, t);
   const SunIcon = sunSign?.icon;
   const displaySunSign = sunSign ? t(`zodiacSigns.${sunSign.name.toLowerCase()}`) : null;
@@ -184,6 +191,13 @@ export default function BirthChartTeaser({
     { label: "MC", angle: 226, radius: 24, active: hasTimeSignal, className: styles.houseMarker },
   ];
 
+  const unlockRingStates = {
+    identity: hasName,
+    luminary: hasDate,
+    angles: hasTimeSignal,
+    place: hasLocation,
+  };
+
   const infoRows = [
     {
       label: t("birthChartTeaser.sunSign"),
@@ -227,9 +241,21 @@ export default function BirthChartTeaser({
     },
   ];
 
+  const unlockRail = [
+    {
+      label: t("birthChartTeaser.sunSign"),
+      active: hasDate,
+      accent: sunSign ? ELEMENT_COLORS[sunSign.element] : "#F07068",
+    },
+    { label: t("birthChartTeaser.moon"), active: hasName && hasDate, accent: "#6CE1D4" },
+    { label: t("birthChartTeaser.ascendant"), active: hasLocation, accent: "#8C64DC" },
+    { label: t("birthChartTeaser.houses"), active: hasTimeSignal, accent: "#C89B3C" },
+  ];
+
   const containerClassName = [
     styles.teaserContainer,
-    completedUnlocks === 0 ? styles.isDormant : "",
+    previewState === "dormant" ? styles.isDormant : "",
+    previewState === "partial" ? styles.isPartial : "",
     isNearComplete ? styles.isReady : "",
   ].filter(Boolean).join(" ");
 
@@ -257,6 +283,18 @@ export default function BirthChartTeaser({
             <div className={styles.outerRing} />
             <div className={styles.houseRing} />
             <div className={styles.innerOrbit} />
+            {UNLOCK_RINGS.map((ring) => (
+              <span
+                key={ring.label}
+                className={[
+                  styles.unlockRing,
+                  unlockRingStates[ring.label] ? styles.unlockRingActive : "",
+                ].filter(Boolean).join(" ")}
+                style={{ "--ring-size": `${ring.radius * 2}%` } as CSSProperties}
+              >
+                <span className={styles.unlockRingLabel}>{ring.layer}</span>
+              </span>
+            ))}
             {HOUSE_TICKS.map((tick) => (
               <span
                 key={tick}
@@ -291,6 +329,21 @@ export default function BirthChartTeaser({
                   : t("birthChartTeaser.fields", { filled: String(filledCount), total: "6" })}
               </span>
             </div>
+          </div>
+          <div className={styles.unlockRail}>
+            {unlockRail.map((item, index) => (
+              <span
+                key={item.label}
+                className={[
+                  styles.unlockStep,
+                  item.active ? styles.unlockStepActive : "",
+                ].filter(Boolean).join(" ")}
+                style={{ "--accent": item.accent } as CSSProperties}
+              >
+                <span className={styles.unlockStepDot}>{index + 1}</span>
+                <span className={styles.unlockStepLabel}>{item.label}</span>
+              </span>
+            ))}
           </div>
         </div>
 

@@ -31,8 +31,22 @@
   filter: saturate(0.76);
 }
 
+.isDormant .outerRing,
+.isDormant .houseRing,
+.isDormant .innerOrbit {
+  opacity: 0.48;
+}
+
+.isPartial {
+  border-color: rgba(108, 225, 212, 0.24);
+}
+
 .isReady {
   border-color: rgba(200, 155, 60, 0.42);
+  background:
+    radial-gradient(circle at 22% 22%, rgba(108, 225, 212, 0.17), transparent 30%),
+    radial-gradient(circle at 78% 8%, rgba(200, 155, 60, 0.22), transparent 26%),
+    linear-gradient(135deg, rgba(18, 27, 45, 0.94), rgba(23, 38, 48, 0.82));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 20px 46px rgba(200, 155, 60, 0.13);
 }
 
@@ -121,6 +135,7 @@
 
 .astrolabeWrap {
   display: grid;
+  gap: 0.7rem;
   place-items: center;
   min-width: 0;
 }
@@ -157,6 +172,47 @@
   border: 1px solid rgba(108, 225, 212, 0.22);
 }
 
+.unlockRing {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--ring-size);
+  aspect-ratio: 1;
+  pointer-events: none;
+  border: 1px solid rgba(234, 237, 243, 0.1);
+  border-radius: 50%;
+  opacity: 0.7;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.24s ease, box-shadow 0.24s ease, opacity 0.24s ease;
+}
+
+.unlockRingActive {
+  border-color: rgba(200, 155, 60, 0.44);
+  box-shadow: inset 0 0 12px rgba(200, 155, 60, 0.08), 0 0 16px rgba(108, 225, 212, 0.08);
+  opacity: 1;
+}
+
+.unlockRingLabel {
+  position: absolute;
+  top: 50%;
+  right: -0.2rem;
+  padding: 0.1rem 0.24rem;
+  font-size: 0.43rem;
+  font-weight: 800;
+  line-height: 1;
+  color: rgba(234, 237, 243, 0.38);
+  text-transform: uppercase;
+  background: rgba(11, 16, 27, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  transform: translate(50%, -50%);
+}
+
+.unlockRingActive .unlockRingLabel {
+  color: rgba(234, 237, 243, 0.82);
+  border-color: rgba(200, 155, 60, 0.24);
+}
+
 .houseTick {
   position: absolute;
   top: 50%;
@@ -190,15 +246,30 @@
   background: rgba(11, 16, 27, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
   transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1));
   transition: color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
+}
+
+.planetMarker::after {
+  position: absolute;
+  inset: -0.34rem;
+  pointer-events: none;
+  content: "";
+  border: 1px solid transparent;
+  border-radius: 50%;
 }
 
 .planetMarkerActive {
   color: #101521;
   background: var(--marker-color, #C89B3C);
   border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 0 18px var(--marker-glow, rgba(200, 155, 60, 0.42));
+  box-shadow: 0 0 18px var(--marker-glow, rgba(200, 155, 60, 0.42)), inset 0 0 0 2px rgba(255, 255, 255, 0.22);
+}
+
+.planetMarkerActive::after {
+  border-color: color-mix(in srgb, var(--marker-color, #C89B3C) 42%, transparent);
+  box-shadow: 0 0 15px var(--marker-glow, rgba(200, 155, 60, 0.42));
 }
 
 .sunMarker {
@@ -233,6 +304,7 @@
   background: radial-gradient(circle, rgba(234, 237, 243, 0.13), rgba(234, 237, 243, 0.04));
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 50%;
+  box-shadow: inset 0 0 18px rgba(0, 0, 0, 0.18);
 }
 
 .centerName {
@@ -258,6 +330,62 @@
   display: grid;
   gap: 0.52rem;
   min-width: 0;
+}
+
+.unlockRail {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(100%, 220px);
+  gap: 0.22rem;
+}
+
+.unlockStep {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.22rem;
+  min-width: 0;
+  opacity: 0.56;
+}
+
+.unlockStepDot {
+  display: grid;
+  width: 1.05rem;
+  height: 1.05rem;
+  place-items: center;
+  font-size: 0.52rem;
+  font-weight: 900;
+  color: rgba(234, 237, 243, 0.48);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.unlockStepLabel {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 0.5rem;
+  font-weight: 800;
+  line-height: 1;
+  color: rgba(234, 237, 243, 0.54);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.unlockStepActive {
+  opacity: 1;
+}
+
+.unlockStepActive .unlockStepDot {
+  color: #101521;
+  background: var(--accent);
+  border-color: rgba(255, 255, 255, 0.42);
+  box-shadow: 0 0 11px color-mix(in srgb, var(--accent) 38%, transparent);
+}
+
+.unlockStepActive .unlockStepLabel {
+  color: rgba(234, 237, 243, 0.86);
 }
 
 .teaserRow {
@@ -353,10 +481,15 @@
 @media (max-width: 760px) {
   .teaserBody {
     grid-template-columns: 1fr;
+    gap: 0.85rem;
   }
 
   .astrolabe {
     width: min(70vw, 188px);
+  }
+
+  .unlockRail {
+    width: min(100%, 320px);
   }
 }
 
@@ -387,12 +520,27 @@
 
   .teaserRow {
     grid-template-columns: 2.24rem minmax(0, 1fr);
+    min-height: 0;
   }
 
   .rowMeta {
     grid-column: 2;
     text-align: left;
     white-space: normal;
+  }
+
+  .unlockRingLabel {
+    display: none;
+  }
+
+  .unlockRail {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.36rem;
+  }
+
+  .unlockStep {
+    flex-direction: row;
+    justify-content: center;
   }
 }
 
@@ -401,7 +549,8 @@
   .houseRing,
   .progressFill,
   .houseTick,
-  .planetMarker {
+  .planetMarker,
+  .unlockRing {
     animation: none;
     transition: none;
   }
