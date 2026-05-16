@@ -7235,6 +7235,9 @@ html[data-theme="light"] .input-glow-gold :is(input, select, textarea):focus {
   top: 5.5rem;
   left: 2rem;
   z-index: 90;
+  /* Override `.insights-shell > * { width: 100% }`, which otherwise
+     stretches this fixed button across the full viewport. */
+  width: fit-content;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
