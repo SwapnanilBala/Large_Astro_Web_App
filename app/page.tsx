@@ -61,10 +61,19 @@ const COARSE_TIME_OPTIONS = [
   { value: "unknown", labelKey: "home.coarseUnknown" },
 ];
 
-const SMART_FILL_EXAMPLE_KEYS = [
-  "home.smartFillExample1",
-  "home.smartFillExample2",
-  "home.smartFillExample3",
+const SMART_FILL_EXAMPLES = [
+  {
+    key: "home.smartFillExample1",
+    fallback: "Aarya Patel, 14 Mar 1995, 3:45 PM, Mumbai, Maharashtra, India",
+  },
+  {
+    key: "home.smartFillExample2",
+    fallback: "Jordan Lee, 02 Aug 1989, 11:20 AM, Brooklyn, New York, United States",
+  },
+  {
+    key: "home.smartFillExample3",
+    fallback: "Maya, 8 Nov 2001, 8:15 AM, Paris, Ile-de-France, France",
+  },
 ];
 
 const COARSE_TIME_FALLBACKS: Record<string, string> = {
@@ -536,6 +545,14 @@ export default function Home() {
     return t("home.previewStatusBuilding");
   }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, t, unknownTime]);
 
+  const tWithFallback = useCallback(
+    (key: string, fallback: string, params?: Record<string, string>) => {
+      const translated = t(key, params);
+      return translated === key ? fallback : translated;
+    },
+    [t],
+  );
+
   const hasName = draft.name.trim().length > 0;
   const hasBirthDate = draft.birthDate.trim().length > 0;
   const hasBirthTimeSignal = unknownTime
@@ -574,28 +591,32 @@ export default function Home() {
   const actionHintText = useMemo(() => {
     if (canSubmit) return "";
     const nextMissing = missingFieldLabels.slice(0, 2).join(", ");
-    return nextMissing ? t("home.actionHintMissing", { fields: nextMissing }) : t("home.actionHint");
-  }, [canSubmit, missingFieldLabels, t]);
+    return nextMissing
+      ? tWithFallback("home.actionHintMissing", `Add ${nextMissing} to continue.`, { fields: nextMissing })
+      : t("home.actionHint");
+  }, [canSubmit, missingFieldLabels, t, tWithFallback]);
 
   const smartFillExamples = useMemo(
-    () => SMART_FILL_EXAMPLE_KEYS.map((key) => t(key)),
-    [t],
+    () => SMART_FILL_EXAMPLES.map((example) => tWithFallback(example.key, example.fallback)),
+    [tWithFallback],
   );
+
+  const birthHistoryRecentLabel = tWithFallback("home.birthHistoryRecentLabel", "Recent");
 
   const intakeSteps = useMemo(() => {
     const birthMomentComplete = hasBirthDate && hasBirthTimeSignal;
     const stepStates = [
       {
         id: "identity",
-        label: t("home.stepIdentityLabel"),
-        detail: t("home.stepIdentityDetail"),
+        label: tWithFallback("home.stepIdentityLabel", "Identity"),
+        detail: tWithFallback("home.stepIdentityDetail", "Name anchors the reading"),
         complete: hasName,
         missing: !hasName ? t("home.formName") : undefined,
       },
       {
         id: "birth",
-        label: t("home.stepBirthMomentLabel"),
-        detail: t("home.stepBirthMomentDetail"),
+        label: tWithFallback("home.stepBirthMomentLabel", "Birth moment"),
+        detail: tWithFallback("home.stepBirthMomentDetail", "Date and time tune the sky"),
         complete: birthMomentComplete,
         missing: !birthMomentComplete
           ? [!hasBirthDate ? t("home.formBirthDate") : "", !hasBirthTimeSignal ? t("home.formBirthTime") : ""]
@@ -605,8 +626,8 @@ export default function Home() {
       },
       {
         id: "location",
-        label: t("home.stepLocationLabel"),
-        detail: t("home.stepLocationDetail"),
+        label: tWithFallback("home.stepLocationLabel", "Location"),
+        detail: tWithFallback("home.stepLocationDetail", "Place locks coordinates"),
         complete: hasLocation,
         meta: geoStatus === "found" ? t("home.previewStatusCoordinates") : undefined,
         missing: !hasLocation
@@ -622,8 +643,8 @@ export default function Home() {
       },
       {
         id: "ready",
-        label: t("home.stepChartReadyLabel"),
-        detail: t("home.stepChartReadyDetail"),
+        label: tWithFallback("home.stepChartReadyLabel", "Chart ready"),
+        detail: tWithFallback("home.stepChartReadyDetail", "All signals aligned"),
         complete: canSubmit,
         meta: `${previewCompletion.filled}/${previewCompletion.total}`,
         missing: !canSubmit ? t("home.previewStatusBuilding") : undefined,
@@ -649,6 +670,7 @@ export default function Home() {
     previewCompletion.filled,
     previewCompletion.total,
     t,
+    tWithFallback,
   ]);
 
   const submitWrapperRef = useRef<HTMLDivElement>(null);
@@ -1185,8 +1207,8 @@ export default function Home() {
                 </button>
 
                 {birthDetailsHistory.length > 0 && (
-                  <div className={styles.birthHistoryChips} aria-label={t("home.birthHistoryRecentLabel")}>
-                    <span className={styles.birthHistoryChipLabel}>{t("home.birthHistoryRecentLabel")}</span>
+                  <div className={styles.birthHistoryChips} aria-label={birthHistoryRecentLabel}>
+                    <span className={styles.birthHistoryChipLabel}>{birthHistoryRecentLabel}</span>
                     {birthDetailsHistory.slice(0, 3).map((entry) => (
                       <button
                         key={`chip-${entry.id}`}
