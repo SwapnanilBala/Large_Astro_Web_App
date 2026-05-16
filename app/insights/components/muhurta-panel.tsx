@@ -289,6 +289,17 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         </div>
       )}
 
+      {!isLoading && !result && !error && (
+        <div className={styles.firstRun}>
+          <span className={styles.firstRunIcon} aria-hidden="true">✦</span>
+          <span>
+            Pick an activity and date range above, then{" "}
+            <strong>Find Auspicious Times</strong> to see ranked windows with a
+            full Panchanga breakdown for each.
+          </span>
+        </div>
+      )}
+
       {isLoading && (
         <div className={styles.loading}>
           <div className={styles.spinner} />

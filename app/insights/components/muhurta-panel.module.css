@@ -18,25 +18,25 @@
 
 .kicker {
   font-family: var(--font-body), sans-serif;
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--ink-soft);
-  margin: 0 0 0.5rem;
+  letter-spacing: 0.12em;
+  color: var(--accent-gold);
+  margin: 0 0 0.4rem;
 }
 
 .heading {
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.45rem, 2.2vw, 1.8rem);
+  font-size: clamp(1.6rem, 2.4vw, 2.05rem);
   font-weight: 700;
   color: var(--ink-main);
   margin: 0;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .intro {
-  font-size: 1.5rem;
+  font-size: 1.28rem;
   color: var(--ink-soft);
   line-height: 1.6;
   margin: 0 0 1.5rem;
@@ -78,7 +78,7 @@
 /* ── Results Summary ── */
 
 .resultsSummary {
-  font-size: 1.38rem;
+  font-size: 1.2rem;
   color: var(--ink-soft);
   text-align: center;
   margin: 0 0 0.5rem;
@@ -105,7 +105,7 @@
 }
 
 .fieldLabel {
-  font-size: 1.35rem;
+  font-size: 1.05rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -193,7 +193,28 @@
   text-align: center;
   padding: 2rem 1rem;
   color: var(--ink-soft);
+  font-size: 1.28rem;
+}
+
+/* ── First-run hint (before any search) ── */
+
+.firstRun {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px dashed rgba(200, 155, 60, 0.22);
+  border-radius: 12px;
+  background: rgba(200, 155, 60, 0.04);
+  color: var(--ink-soft);
+  font-size: 1.2rem;
+  line-height: 1.5;
+}
+
+.firstRunIcon {
   font-size: 1.5rem;
+  flex-shrink: 0;
+  opacity: 0.8;
 }
 
 /* ── Results List ── */
@@ -234,7 +255,7 @@
 }
 
 .windowDate {
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   color: var(--ink-soft);
   margin: 0.15rem 0 0;
 }
@@ -298,7 +319,7 @@
   border: 1px solid rgba(200, 155, 60, 0.14);
   border-radius: 12px;
   padding: 0.25rem 0.6rem;
-  font-size: 1.35rem;
+  font-size: 1.12rem;
   color: var(--ink-soft);
 }
 
@@ -320,7 +341,7 @@
 /* ── Recommendation ── */
 
 .recommendation {
-  font-size: 1.4rem;
+  font-size: 1.22rem;
   color: var(--ink-soft);
   line-height: 1.55;
   margin: 0;
