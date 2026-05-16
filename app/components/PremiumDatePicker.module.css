@@ -16,6 +16,10 @@
   color: var(--accent-gold);
 }
 
+.premiumDatePicker.complete .fieldLabel {
+  color: rgba(232, 200, 154, 0.9);
+}
+
 .requiredDot {
   color: var(--accent-gold);
   margin-left: 0.25rem;
@@ -28,6 +32,62 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   transition: all 0.2s ease;
+}
+
+.leadingIcon,
+.successBadge {
+  position: absolute;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.leadingIcon {
+  left: 0.95rem;
+  color: rgba(232, 200, 154, 0.68);
+  transition: color var(--transition-base), opacity var(--transition-base);
+}
+
+.leadingIcon svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.premiumDatePicker.focused .leadingIcon {
+  color: var(--accent-gold);
+}
+
+.successBadge {
+  right: 0.85rem;
+  color: #11342e;
+  background:
+    linear-gradient(135deg, rgba(248, 227, 168, 0.98), rgba(74, 171, 158, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  box-shadow: 0 0 18px rgba(74, 171, 158, 0.16);
+  opacity: 0;
+  transform: translateY(-50%) scale(0.88);
+  transition: opacity var(--transition-base), transform var(--transition-base);
+}
+
+.successBadge svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  fill: currentColor;
+}
+
+.premiumDatePicker.complete .successBadge {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.premiumDatePicker.error .successBadge {
+  opacity: 0;
 }
 
 .datePickerWrapper:hover {
@@ -46,6 +106,8 @@
 
 .datePickerWrapperInner {
   position: relative;
+  display: block;
+  width: 100%;
 }
 
 .datePickerInput {
@@ -61,6 +123,14 @@
   caret-color: var(--accent-gold);
   cursor: pointer;
   line-height: 1.5;
+}
+
+.datePickerInput.withIcon {
+  padding-left: 2.85rem;
+}
+
+.datePickerInput.withSuccess {
+  padding-right: 2.85rem;
 }
 
 .datePickerInput::placeholder {
@@ -319,6 +389,10 @@
 .premiumDatePicker .datePickerInput:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.premiumDatePicker.disabled .leadingIcon {
+  opacity: 0.45;
 }
 
 /* Premium themed calendar header controls */
