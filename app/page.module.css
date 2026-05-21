@@ -10,6 +10,14 @@
   overflow-x: hidden;
 }
 
+:global(.site-navbar.navbar-scrolled) {
+  background-color: rgba(15, 17, 23, 0.98);
+}
+
+:global(html[data-theme="light"] .site-navbar.navbar-scrolled) {
+  background-color: rgba(245, 243, 247, 0.98);
+}
+
 /* === HEADER SECTION === */
 .intakeHeader {
   text-align: center;
@@ -2789,6 +2797,9 @@
 }
 
 .formIntro {
+  display: grid;
+  justify-items: center;
+  gap: clamp(0.9rem, 1.4vw, 1.45rem);
   max-width: 880px;
   margin: 0 auto clamp(1.8rem, 3vw, 3rem);
   text-align: center;
@@ -2799,7 +2810,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: clamp(0.85rem, 1.4vw, 1.35rem);
+  margin-bottom: 0;
   color: var(--accent-teal-light, #4AAB9E);
   font-size: clamp(0.98rem, 0.45vw, 1.1rem);
   font-weight: 800;
@@ -2820,7 +2831,7 @@
 
 .formCopy {
   max-width: 680px;
-  margin: clamp(1.1rem, 1.8vw, 1.55rem) auto 0;
+  margin: 0 auto;
   color: rgba(245, 240, 230, 0.74);
   font-size: clamp(1.12rem, 1.1vw, 1.38rem);
   line-height: 1.82;
@@ -3464,7 +3475,7 @@
 }
 
 .mainContent {
-  margin-top: clamp(-4.5rem, -5vw, -2rem);
+  margin-top: clamp(3rem, 6vw, 5.5rem);
 }
 
 .progressDock {
@@ -3631,7 +3642,7 @@
   }
 
   .mainContent {
-    margin-top: -1.5rem;
+    margin-top: clamp(2.5rem, 8vw, 4.25rem);
   }
 
   .heroProgressConstellation {
