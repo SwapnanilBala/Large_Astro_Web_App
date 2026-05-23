@@ -120,6 +120,14 @@ type BirthDetailsHistoryEntry = StoredIntakeDraft & {
   savedAt: string;
 };
 
+type GeocodeApiResponse = {
+  found?: boolean;
+  lat?: number;
+  lon?: number;
+  timezoneOffsetMinutes?: number;
+  timeZoneId?: string;
+};
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
@@ -239,6 +247,8 @@ export default function Home() {
   const [birthDetailsHistory, setBirthDetailsHistory] = useState<BirthDetailsHistoryEntry[]>([]);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const geoAbortController = useRef<AbortController | null>(null);
+  const geocodeCache = useRef(new Map<string, GeocodeApiResponse>());
   const [draftSaved, setDraftSaved] = useState(false);
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -510,19 +520,16 @@ export default function Home() {
     if (geoTimer.current) clearTimeout(geoTimer.current);
 
     geoTimer.current = setTimeout(async () => {
-      setGeoStatus("loading");
-      try {
-        const params = new URLSearchParams();
-        if (draftCity.trim()) params.set("city", draftCity.trim());
-        if (draftState.trim()) params.set("state", draftState.trim());
-        if (draftCountry.trim()) params.set("country", draftCountry.trim());
-        if (draftBirthDate.trim()) params.set("birthDate", draftBirthDate.trim());
-        if (effectiveBirthTime.trim()) params.set("birthTime", effectiveBirthTime.trim());
+      const params = new URLSearchParams();
+      if (draftCity.trim()) params.set("city", draftCity.trim());
+      if (draftState.trim()) params.set("state", draftState.trim());
+      if (draftCountry.trim()) params.set("country", draftCountry.trim());
+      if (draftBirthDate.trim()) params.set("birthDate", draftBirthDate.trim());
+      if (effectiveBirthTime.trim()) params.set("birthTime", effectiveBirthTime.trim());
 
-        const res = await fetch(`/api/geocode?${params.toString()}`);
-        const data = await res.json();
-
-        if (data.found) {
+      const cacheKey = params.toString();
+      const applyGeocodeResult = (data: GeocodeApiResponse) => {
+        if (data.found && typeof data.lat === "number" && typeof data.lon === "number") {
           setDraft((prev) => ({
             ...prev,
             latitude: String(data.lat),
@@ -537,13 +544,41 @@ export default function Home() {
         } else {
           setGeoStatus("not-found");
         }
+      };
+
+      const cached = geocodeCache.current.get(cacheKey);
+      if (cached) {
+        applyGeocodeResult(cached);
+        return;
+      }
+
+      geoAbortController.current?.abort();
+      const controller = new AbortController();
+      geoAbortController.current = controller;
+      setGeoStatus("loading");
+
+      try {
+        const res = await fetch(`/api/geocode?${cacheKey}`, { signal: controller.signal });
+        const data = await res.json() as GeocodeApiResponse;
+
+        if (controller.signal.aborted) return;
+
+        geocodeCache.current.set(cacheKey, data);
+        if (geocodeCache.current.size > 20) {
+          const oldestKey = geocodeCache.current.keys().next().value;
+          if (oldestKey) geocodeCache.current.delete(oldestKey);
+        }
+
+        applyGeocodeResult(data);
       } catch {
+        if (controller.signal.aborted) return;
         setGeoStatus("not-found");
       }
     }, 800);
 
     return () => {
       if (geoTimer.current) clearTimeout(geoTimer.current);
+      geoAbortController.current?.abort();
     };
   }, [draftBirthDate, draftCity, draftCountry, draftState, effectiveBirthTime]);
 

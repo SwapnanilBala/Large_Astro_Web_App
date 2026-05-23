@@ -75,6 +75,8 @@ type SunSignPreview = (typeof ZODIAC_SIGNS)[number] & {
   isExact: boolean;
 };
 
+const sunSignPreviewCache = new Map<string, SunSignPreview | null>();
+
 function getFilledFieldsCount(props: BirthChartTeaserProps) {
   return [
     props.name?.trim(),
@@ -155,27 +157,39 @@ export default function BirthChartTeaser({
       engine_id: engineId?.trim() || "lahiri_classic",
       timezone_offset_minutes: timezoneOffsetMinutes?.trim() || "0",
     });
+    const cacheKey = params.toString();
+    if (sunSignPreviewCache.has(cacheKey)) {
+      setSunSign(sunSignPreviewCache.get(cacheKey) ?? null);
+      setIsSunSignLoading(false);
+      return;
+    }
 
     setIsSunSignLoading(true);
-    fetch(`/api/chart/sun-sign?${params.toString()}`, { signal: controller.signal })
+    fetch(`/api/chart/sun-sign?${cacheKey}`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Sun sign lookup failed");
         return response.json() as Promise<{ sign: string; degree_in_sign: number }>;
       })
       .then((sun) => {
         const sign = ZODIAC_SIGN_BY_NAME.get(sun.sign);
-        setSunSign(
-          sign
-            ? {
-                ...sign,
-                degree: sun.degree_in_sign,
-                isExact: Boolean(birthTime?.trim()),
-              }
-            : null
-        );
+        const preview = sign
+          ? {
+              ...sign,
+              degree: sun.degree_in_sign,
+              isExact: Boolean(birthTime?.trim()),
+            }
+          : null;
+        sunSignPreviewCache.set(cacheKey, preview);
+        if (sunSignPreviewCache.size > 24) {
+          const oldestKey = sunSignPreviewCache.keys().next().value;
+          if (oldestKey) sunSignPreviewCache.delete(oldestKey);
+        }
+        setSunSign(preview);
       })
       .catch((error) => {
-        if ((error as Error).name !== "AbortError") setSunSign(null);
+        if ((error as Error).name !== "AbortError") {
+          setSunSign(null);
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setIsSunSignLoading(false);
