@@ -268,7 +268,7 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
             />
           </label>
         </div>
-        <button type="submit" disabled={isLoading}>
+        <button type="submit" className="forecast-submit-btn" disabled={isLoading}>
           {isLoading ? "Reading period..." : "Read that period"}
         </button>
       </form>

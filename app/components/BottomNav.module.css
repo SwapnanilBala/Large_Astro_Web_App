@@ -110,6 +110,9 @@
 @media (max-width: 768px) {
   .bottomNav {
     display: grid;
+    background: rgba(13, 12, 20, 0.94);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 

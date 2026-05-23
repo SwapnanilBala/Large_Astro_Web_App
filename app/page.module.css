@@ -3637,12 +3637,14 @@
 
 @media (max-width: 768px) {
   .intakeHeader {
-    min-height: 76vh;
-    padding-bottom: 3.8rem;
+    min-height: auto;
+    padding-top: clamp(5.25rem, 18vw, 6.5rem);
+    padding-bottom: clamp(1.5rem, 6vw, 2.4rem);
   }
 
   .mainContent {
     margin-top: clamp(2.5rem, 8vw, 4.25rem);
+    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
   }
 
   .heroProgressConstellation {
@@ -3650,8 +3652,7 @@
   }
 
   .formPeek {
-    width: min(86vw, 420px);
-    bottom: -1.5rem;
+    display: none;
   }
 
   .progressDock {
@@ -3660,6 +3661,23 @@
 
   .cosmicParticles {
     display: none;
+  }
+
+  .scrollCue {
+    display: none;
+  }
+
+  .formSectionCard {
+    background: rgba(15, 15, 25, 0.96);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .mobileStickyBar {
+    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    background: rgba(15, 15, 25, 0.98);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
   }
 }
 
