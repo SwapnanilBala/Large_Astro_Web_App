@@ -608,7 +608,7 @@ h3 {
   position: fixed;
   inset: 0;
   z-index: 0;
-  background: url('/backdrop.png') center center / cover no-repeat;
+  background: url('/backdrop-1280.webp') center center / cover no-repeat;
   opacity: 0.08;
   pointer-events: none;
 }

@@ -1,18 +1,18 @@
 import Image from "next/image";
 
 const ZODIAC_IMAGE_MAP: Record<string, string> = {
-  Aries:       "/zodiac/aries.jpg",
-  Taurus:      "/zodiac/taurus.jpg",
-  Gemini:      "/zodiac/gemini.jpg",
-  Cancer:      "/zodiac/cancer.jpg",
-  Leo:         "/zodiac/leo.jpg",
-  Virgo:       "/zodiac/virgo.jpg",
-  Libra:       "/zodiac/libra.jpg",
-  Scorpio:     "/zodiac/scorpio.jpg",
-  Sagittarius: "/zodiac/sagittarius.jpg",
-  Capricorn:   "/zodiac/capricorn.png",
-  Aquarius:    "/zodiac/aquarius.png",
-  Pisces:      "/zodiac/pisces.jpg",
+  Aries:       "/zodiac/optimized/aries.webp",
+  Taurus:      "/zodiac/optimized/taurus.webp",
+  Gemini:      "/zodiac/optimized/gemini.webp",
+  Cancer:      "/zodiac/optimized/cancer.webp",
+  Leo:         "/zodiac/optimized/leo.webp",
+  Virgo:       "/zodiac/optimized/virgo.webp",
+  Libra:       "/zodiac/optimized/libra.webp",
+  Scorpio:     "/zodiac/optimized/scorpio.webp",
+  Sagittarius: "/zodiac/optimized/sagittarius.webp",
+  Capricorn:   "/zodiac/optimized/capricorn.webp",
+  Aquarius:    "/zodiac/optimized/aquarius.webp",
+  Pisces:      "/zodiac/optimized/pisces.webp",
 };
 
 type Props = {
@@ -32,6 +32,8 @@ export default function ZodiacSignImage({ sign, size = 48, className, style }: P
       width={size}
       height={size}
       className={className}
+      sizes={`${size}px`}
+      loading="lazy"
       style={{ borderRadius: "50%", objectFit: "cover", ...style }}
     />
   );

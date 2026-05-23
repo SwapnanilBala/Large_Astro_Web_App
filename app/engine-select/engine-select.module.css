@@ -35,7 +35,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: url('/background.webp') center / cover no-repeat;
+  background: url('/background-1280.webp') center / cover no-repeat;
   opacity: 0.04;
   z-index: -1;
   border-radius: 20px;

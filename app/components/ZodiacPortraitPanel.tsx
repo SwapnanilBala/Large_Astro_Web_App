@@ -67,6 +67,8 @@ export default function ZodiacPortraitPanel({ sign, className, style }: Props) {
               width={240}
               height={240}
               className="zpp-photo"
+              sizes="240px"
+              loading="lazy"
               priority={false}
             />
           )}

@@ -1294,7 +1294,7 @@
   inset: 0;
   background: 
     linear-gradient(180deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.1) 100%),
-    url('/backdrop.png') center / cover no-repeat;
+    url('/backdrop-1280.webp') center / cover no-repeat;
   opacity: 0.08;
   z-index: -1;
   border-radius: 24px;
