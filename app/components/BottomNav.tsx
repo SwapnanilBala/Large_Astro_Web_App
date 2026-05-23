@@ -40,6 +40,9 @@ export default function BottomNav() {
   }, [currentIndex, router]);
 
   useEffect(() => {
+    const mobileQuery = window.matchMedia('(pointer: coarse), (max-width: 768px)');
+    if (!mobileQuery.matches) return;
+
     const handleTouchStart = (e: TouchEvent) => {
       const touch = e.touches[0];
       touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };

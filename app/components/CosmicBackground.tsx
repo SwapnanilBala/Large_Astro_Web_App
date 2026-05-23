@@ -1,20 +1,25 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import styles from "./CosmicBackground.module.css";
 
 export default function CosmicBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const pointerRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    let animationFrameId: number;
+    let animationFrameId = 0;
+    let isVisible = document.visibilityState === "visible";
+    let logicalWidth = window.innerWidth;
+    let logicalHeight = window.innerHeight;
     let particles: Array<{
       x: number;
       y: number;
@@ -26,19 +31,25 @@ export default function CosmicBackground() {
     }> = [];
 
     const resizeCanvas = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      logicalWidth = window.innerWidth;
+      logicalHeight = window.innerHeight;
+      canvas.width = Math.floor(logicalWidth * dpr);
+      canvas.height = Math.floor(logicalHeight * dpr);
+      canvas.style.width = `${logicalWidth}px`;
+      canvas.style.height = `${logicalHeight}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       initParticles();
     };
 
     const initParticles = () => {
       particles = [];
-      const particleCount = Math.min(200, Math.floor((canvas.width * canvas.height) / 10000));
+      const particleCount = Math.min(140, Math.floor((logicalWidth * logicalHeight) / 12000));
       
       for (let i = 0; i < particleCount; i++) {
         particles.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
+          x: Math.random() * logicalWidth,
+          y: Math.random() * logicalHeight,
           size: Math.random() * 2 + 0.5,
           speedX: (Math.random() - 0.5) * 0.2,
           speedY: (Math.random() - 0.5) * 0.2,
@@ -49,19 +60,22 @@ export default function CosmicBackground() {
     };
 
     const animate = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!isVisible) return;
+
+      ctx.clearRect(0, 0, logicalWidth, logicalHeight);
       
       // Draw gradient background
+      const pointer = pointerRef.current;
       const gradient = ctx.createRadialGradient(
-        mousePos.x, mousePos.y, 0,
-        mousePos.x, mousePos.y, Math.max(canvas.width, canvas.height)
+        pointer.x, pointer.y, 0,
+        pointer.x, pointer.y, Math.max(logicalWidth, logicalHeight)
       );
       gradient.addColorStop(0, "rgba(212, 165, 116, 0.03)");
       gradient.addColorStop(0.5, "rgba(123, 107, 168, 0.02)");
       gradient.addColorStop(1, "rgba(42, 139, 126, 0.01)");
       
       ctx.fillStyle = gradient;
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
       // Draw constellation lines
       ctx.strokeStyle = "rgba(212, 165, 116, 0.05)";
@@ -96,10 +110,10 @@ export default function CosmicBackground() {
         p.y += p.speedY;
         
         // Wrap around edges
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
+        if (p.x < 0) p.x = logicalWidth;
+        if (p.x > logicalWidth) p.x = 0;
+        if (p.y < 0) p.y = logicalHeight;
+        if (p.y > logicalHeight) p.y = 0;
         
         // Twinkle effect
         p.twinkle += 0.02;
@@ -122,21 +136,33 @@ export default function CosmicBackground() {
     };
 
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      pointerRef.current = { x: e.clientX, y: e.clientY };
+    };
+
+    const handleVisibilityChange = () => {
+      isVisible = document.visibilityState === "visible";
+      if (isVisible) {
+        animationFrameId = requestAnimationFrame(animate);
+      } else {
+        cancelAnimationFrame(animationFrameId);
+      }
     };
 
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     
     resizeCanvas();
+    pointerRef.current = { x: logicalWidth / 2, y: logicalHeight / 2 };
     animate();
 
     return () => {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
     };
-  }, [mousePos]);
+  }, []);
 
   return (
     <canvas

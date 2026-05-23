@@ -208,7 +208,7 @@ function formatHistoryDate(value: string) {
 }
 
 function useMobileExperience() {
-  const [isMobileExperience, setIsMobileExperience] = useState(false);
+  const [isMobileExperience, setIsMobileExperience] = useState(true);
 
   useEffect(() => {
     const query = window.matchMedia("(pointer: coarse), (max-width: 767px)");
@@ -1535,7 +1535,7 @@ export default function Home() {
 
 
             {/* RIGHT COLUMN: Chart Preview */}
-            <aside className={styles.previewColumn}>
+            {!isMobileExperience && <aside className={styles.previewColumn}>
               <div
                 className={styles.previewCard}
                 style={{ "--preview-progress": `${previewCompletion.percent}%` } as React.CSSProperties}
@@ -1612,7 +1612,7 @@ export default function Home() {
                   {t("home.draftSaved")}
                 </div>
               )}
-            </aside>
+            </aside>}
           </div>{/* /formLayout */}
 
           {/* PRIMARY CTA */}
