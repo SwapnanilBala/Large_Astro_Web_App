@@ -3717,3 +3717,86 @@
     display: none;
   }
 }
+
+@media (max-width: 768px) {
+  .intakeHeader {
+    padding-top: calc(4.25rem + env(safe-area-inset-top));
+    padding-bottom: 0.9rem;
+  }
+
+  .brandBadge {
+    margin-bottom: 0.75rem;
+    padding: 0.45rem 0.8rem;
+    font-size: 0.86rem;
+    line-height: 1.35;
+  }
+
+  .pageTitle {
+    margin-bottom: 0.65rem;
+    font-size: clamp(2.05rem, 10vw, 2.85rem);
+    line-height: 1.08;
+    letter-spacing: 0;
+  }
+
+  .pageSubtitle {
+    max-width: 20rem;
+    margin-bottom: 0;
+    font-size: 0.98rem;
+    line-height: 1.45;
+  }
+
+  .mainContent {
+    margin-top: 0.75rem;
+    padding-top: 0.5rem;
+  }
+
+  .formSectionCard {
+    border-radius: 18px;
+  }
+
+  .cardHeader {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .cardKicker {
+    margin-bottom: 0.25rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+  }
+
+  .cardTitle {
+    font-size: clamp(1.35rem, 7vw, 1.85rem);
+    line-height: 1.1;
+    letter-spacing: 0;
+  }
+
+  .cardSeal {
+    display: none;
+  }
+
+  .smartFillWrapper {
+    margin-bottom: 0.8rem;
+  }
+
+  .smartFillToggle {
+    min-height: 2.75rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 14px;
+    font-size: 0.94rem;
+    line-height: 1.25;
+  }
+
+  .premiumField {
+    margin-bottom: 0.85rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .smartFillWrapper {
+    display: none;
+  }
+}
