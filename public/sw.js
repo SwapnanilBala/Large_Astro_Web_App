@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lagna-v2';
+const CACHE_NAME = 'lagna-v3';
 const STATIC_ASSETS = ['/', '/offline.html'];
 
 // Install: pre-cache the shell + offline page
