@@ -3695,3 +3695,25 @@
     width: 100%;
   }
 }
+
+@media (max-width: 768px) {
+  .formIntro {
+    display: none;
+  }
+
+  .formLayout {
+    gap: 1rem;
+  }
+
+  .formSectionCard {
+    padding: clamp(1rem, 4vw, 1.4rem);
+  }
+
+  .cardHeader {
+    margin-bottom: 0.9rem;
+  }
+
+  .birthHistoryChips {
+    display: none;
+  }
+}
