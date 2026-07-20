@@ -20,6 +20,7 @@ export default function CosmicBackground() {
     let isVisible = document.visibilityState === "visible";
     let logicalWidth = window.innerWidth;
     let logicalHeight = window.innerHeight;
+    let driftT = Math.random() * Math.PI * 2;
     let particles: Array<{
       x: number;
       y: number;
@@ -63,22 +64,38 @@ export default function CosmicBackground() {
       if (!isVisible) return;
 
       ctx.clearRect(0, 0, logicalWidth, logicalHeight);
-      
-      // Draw gradient background
+
+      // Slow autonomous drift so the background stays alive even without
+      // mouse/touch input (e.g. on mobile, where there's no hover).
+      driftT += 0.0018;
+      const driftX = logicalWidth * (0.5 + 0.3 * Math.cos(driftT));
+      const driftY = logicalHeight * (0.5 + 0.24 * Math.sin(driftT * 0.85));
+
+      const driftGlow = ctx.createRadialGradient(
+        driftX, driftY, 0,
+        driftX, driftY, Math.max(logicalWidth, logicalHeight) * 0.7
+      );
+      driftGlow.addColorStop(0, "rgba(108, 225, 212, 0.07)");
+      driftGlow.addColorStop(0.5, "rgba(123, 107, 168, 0.04)");
+      driftGlow.addColorStop(1, "rgba(42, 139, 126, 0)");
+      ctx.fillStyle = driftGlow;
+      ctx.fillRect(0, 0, logicalWidth, logicalHeight);
+
+      // Draw gradient background (follows pointer/touch on top of the drift)
       const pointer = pointerRef.current;
       const gradient = ctx.createRadialGradient(
         pointer.x, pointer.y, 0,
         pointer.x, pointer.y, Math.max(logicalWidth, logicalHeight)
       );
-      gradient.addColorStop(0, "rgba(212, 165, 116, 0.03)");
-      gradient.addColorStop(0.5, "rgba(123, 107, 168, 0.02)");
-      gradient.addColorStop(1, "rgba(42, 139, 126, 0.01)");
-      
+      gradient.addColorStop(0, "rgba(212, 165, 116, 0.07)");
+      gradient.addColorStop(0.5, "rgba(123, 107, 168, 0.04)");
+      gradient.addColorStop(1, "rgba(42, 139, 126, 0.02)");
+
       ctx.fillStyle = gradient;
       ctx.fillRect(0, 0, logicalWidth, logicalHeight);
 
       // Draw constellation lines
-      ctx.strokeStyle = "rgba(212, 165, 116, 0.05)";
+      ctx.strokeStyle = "rgba(212, 165, 116, 0.09)";
       ctx.lineWidth = 0.5;
       
       for (let i = 0; i < particles.length; i++) {
@@ -139,6 +156,12 @@ export default function CosmicBackground() {
       pointerRef.current = { x: e.clientX, y: e.clientY };
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      pointerRef.current = { x: touch.clientX, y: touch.clientY };
+    };
+
     const handleVisibilityChange = () => {
       isVisible = document.visibilityState === "visible";
       if (isVisible) {
@@ -150,8 +173,9 @@ export default function CosmicBackground() {
 
     window.addEventListener("resize", resizeCanvas);
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
     document.addEventListener("visibilitychange", handleVisibilityChange);
-    
+
     resizeCanvas();
     pointerRef.current = { x: logicalWidth / 2, y: logicalHeight / 2 };
     animate();
@@ -159,6 +183,7 @@ export default function CosmicBackground() {
     return () => {
       window.removeEventListener("resize", resizeCanvas);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       cancelAnimationFrame(animationFrameId);
     };

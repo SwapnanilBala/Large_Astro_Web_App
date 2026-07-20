@@ -3491,15 +3491,27 @@
   font-size: clamp(1.55rem, 5vw, 2.05rem);
 }
 
+.quickActionsRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
 .smartFillWrapper,
 .birthHistoryWrapper {
-  display: inline-block;
-  margin: 0 0.55rem 1rem 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 13rem;
+  min-width: 0;
+  margin: 0;
 }
 
 .smartFillToggle,
 .birthHistoryToggle {
   display: inline-flex;
+  align-self: flex-start;
   width: auto;
   min-height: 2.35rem;
   padding: 0.5rem 0.75rem;
@@ -3509,9 +3521,8 @@
 
 .smartFillContent,
 .birthHistoryPanel {
-  position: absolute;
-  z-index: 10;
-  width: min(34rem, calc(100vw - 3rem));
+  position: static;
+  width: 100%;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.34);
 }
 

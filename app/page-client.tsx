@@ -850,12 +850,8 @@ export default function Home() {
 
   return (
     <div className={styles.professionalIntake}>
-      {!isMobileExperience && (
-        <>
-          <OnboardingCinematic />
-          <CosmicBackground />
-        </>
-      )}
+      {!isMobileExperience && <OnboardingCinematic />}
+      <CosmicBackground />
       <FormCelebration isComplete={canSubmit} />
 
       {/* ── Floating Cosmic Particles ── */}
@@ -985,6 +981,7 @@ export default function Home() {
                 </div>
               {intakeStep === 1 && (
                 <>
+              <div className={styles.quickActionsRow}>
               {/* ── Smart Fill Field ── */}
               <div className={styles.smartFillWrapper}>
                 <button
@@ -1093,6 +1090,7 @@ export default function Home() {
                     )}
                   </div>
                 )}
+              </div>
               </div>
 
               <div className={styles.premiumField}>
