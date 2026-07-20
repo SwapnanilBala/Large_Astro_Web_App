@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkRateLimit } from "@/lib/rate-limiter";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const result = checkRateLimit(request);
 
   // No rate-limit config for this route — pass through

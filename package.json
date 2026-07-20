@@ -9,7 +9,7 @@
     "dev": "next dev -p 7001",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint app lib proxy.ts eslint.config.mjs vitest.config.ts vitest.setup.ts next.config.ts",
     "test": "vitest run",
     "test:watch": "vitest --watch"
   },

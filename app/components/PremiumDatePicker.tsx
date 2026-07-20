@@ -5,6 +5,20 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "./PremiumDatePicker.module.css";
 
+export function parseLocalIsoDate(value: string): Date | null {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(year, month - 1, day);
+
+  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+    ? date
+    : null;
+}
+
 interface PremiumDatePickerProps {
   label: string;
   value: Date | null;
@@ -63,6 +77,19 @@ export default function PremiumDatePicker({
     setIsFilled(date !== null);
   };
 
+  const handleRawChange = (
+    event?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>,
+  ) => {
+    const target = event?.target;
+    if (!(target instanceof HTMLInputElement)) return;
+
+    const date = parseLocalIsoDate(target.value);
+    if (!date) return;
+
+    event?.preventDefault();
+    handleChange(date);
+  };
+
   const isComplete = (completed ?? isFilled) && !error && !disabled;
   const inputClasses = [
     styles.datePickerInput,
@@ -91,6 +118,7 @@ export default function PremiumDatePicker({
         <DatePicker
           selected={value}
           onChange={handleChange}
+          onChangeRaw={handleRawChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
           placeholderText={placeholder}

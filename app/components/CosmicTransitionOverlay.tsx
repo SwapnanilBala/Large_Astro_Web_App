@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { motion, useAnimationControls } from "framer-motion";
 
 const PARTICLE_COUNT = 28;
@@ -42,7 +42,7 @@ function generateParticles(): Particle[] {
  * during page transitions. Renders as a fixed overlay with pointer-events: none.
  */
 export default function CosmicTransitionOverlay({ isActive }: { isActive: boolean }) {
-  const particlesRef = useRef<Particle[]>(generateParticles());
+  const [particles, setParticles] = useState<Particle[]>([]);
   const controls = useAnimationControls();
 
   const runAnimation = useCallback(async () => {
@@ -54,10 +54,15 @@ export default function CosmicTransitionOverlay({ isActive }: { isActive: boolea
 
   useEffect(() => {
     if (isActive) {
-      particlesRef.current = generateParticles();
-      runAnimation();
+      setParticles(generateParticles());
     }
-  }, [isActive, runAnimation]);
+  }, [isActive]);
+
+  useEffect(() => {
+    if (isActive && particles.length > 0) {
+      void runAnimation();
+    }
+  }, [isActive, particles, runAnimation]);
 
   return (
     <div
@@ -70,7 +75,7 @@ export default function CosmicTransitionOverlay({ isActive }: { isActive: boolea
         overflow: "hidden",
       }}
     >
-      {particlesRef.current.map((p) => (
+      {particles.map((p) => (
         <motion.span
           key={p.id}
           initial={{
