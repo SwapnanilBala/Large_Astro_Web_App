@@ -4,7 +4,7 @@ import type { ChangeEvent, FormEvent } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { GiCrystalBall, GiSunrise, GiCompass, GiStarSattelites } from "react-icons/gi";
+import { GiCrystalBall, GiCompass, GiStarSattelites } from "react-icons/gi";
 import {
   HiOutlineCalendarDays,
   HiOutlineCheckCircle,
@@ -15,8 +15,6 @@ import {
   HiOutlineSparkles,
   HiOutlineUser,
 } from "react-icons/hi2";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
@@ -24,13 +22,10 @@ import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
 import FormCelebration from "./components/FormCelebration";
 import { hapticSuccess } from "@/lib/haptics";
-import { useFieldStarBurst } from "./components/FieldStarBurst";
-import { useTextScramble } from "./components/TextScramble";
 import PremiumInput from "./components/PremiumInput";
 import PremiumButton from "./components/PremiumButton";
 import PremiumDatePicker from "./components/PremiumDatePicker";
 import PremiumToggle from "./components/PremiumToggle";
-import IntakeProgressConstellation from "./components/IntakeProgressConstellation";
 import styles from "./page.module.css";
 
 const OnboardingCinematic = dynamic(() => import("./components/OnboardingCinematic"), {
@@ -215,27 +210,8 @@ function formatHistoryDate(value: string) {
   }).format(date);
 }
 
-function useMobileExperience() {
-  const [isMobileExperience, setIsMobileExperience] = useState(true);
-
-  useEffect(() => {
-    const query = window.matchMedia("(pointer: coarse), (max-width: 767px)");
-    const update = () => setIsMobileExperience(query.matches || window.innerWidth < 768);
-
-    update();
-    query.addEventListener("change", update);
-    window.addEventListener("resize", update, { passive: true });
-
-    return () => {
-      query.removeEventListener("change", update);
-      window.removeEventListener("resize", update);
-    };
-  }, []);
-
-  return isMobileExperience;
-}
-
 export default function Home() {
+  const [intakeStep, setIntakeStep] = useState<1 | 2>(1);
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
   const { user } = useAuth();
@@ -253,191 +229,15 @@ export default function Home() {
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
-  const isMobileExperience = useMobileExperience();
+  // The detailed visual treatment belongs after intake; keep this task-focused.
+  const isMobileExperience = true;
+  const wheelRef = useRef<HTMLDivElement>(null);
+  const [hoveredSign, setHoveredSign] = useState<string | null>(null);
 
   // Smart fill state
   const [smartFillText, setSmartFillText] = useState("");
   const [smartFillExpanded, setSmartFillExpanded] = useState(false);
 
-  // Sequential field highlight state (soft unlock - all fields visible, next step highlighted)
-  const [highlightedField, setHighlightedField] = useState<string>("name");
-  const [completedFields, setCompletedFields] = useState<Set<string>>(new Set());
-
-  // Scroll cue visibility (fades after user scrolls past 100px)
-  const [scrolled, setScrolled] = useState<boolean>(false);
-  // Mobile sticky bar visibility (shows when scrolled past form on mobile)
-  const [showStickyBar, setShowStickyBar] = useState<boolean>(false);
-  
-  useEffect(() => {
-    const onScroll = () => {
-      setScrolled(window.scrollY > 100);
-      // Show sticky bar on mobile when scrolled past 300px
-      setShowStickyBar(window.scrollY > 300 && window.innerWidth < 768);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-    };
-  }, []);
-  
-  // Field refs for star burst animations
-  const nameRef = useRef<HTMLDivElement>(null);
-  const birthDateRef = useRef<HTMLDivElement>(null);
-  const birthTimeRef = useRef<HTMLDivElement>(null);
-  const countryRef = useRef<HTMLDivElement>(null);
-  const stateRef = useRef<HTMLDivElement>(null);
-  const cityRef = useRef<HTMLDivElement>(null);
-  
-  // Star burst hook
-  const { BurstContainer, burstAt } = useFieldStarBurst();
-  
-  // Text scramble for heading
-  const [headingScrambleActive, setHeadingScrambleActive] = useState(true);
-  
-  // Text scramble for heading - declared here, used after headingText is defined
-  const headingText = t("home.heading");
-  const scrambledHeading = useTextScramble(headingText, headingScrambleActive, { duration: 1500 });
-
-  /* ── Scroll-reveal & validation shimmer ── */
-  const formRef = useRef<HTMLFormElement>(null);
-  const prevDraftRef = useRef<ProfileQueryInput>(withClientTimezoneDefault());
-  const [validatedFields, setValidatedFields] = useState<Set<string>>(new Set());
-  const shimmerTimers = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
-
-  // Soft unlock effect - highlight next field based on completion
-  useEffect(() => {
-    const fieldOrder = ["name", "birthDate", "birthTime", "country", "state", "city"];
-    
-    // Find the first unfilled field to highlight
-    for (const field of fieldOrder) {
-      if (field === "birthTime") {
-        const hasUsableBirthTime = unknownTime
-          ? hasCoarseTimeFallback(coarseTime)
-          : draft.birthTime.trim().length > 0;
-        if (!hasUsableBirthTime) {
-          setHighlightedField(field);
-          return;
-        }
-        continue;
-      }
-
-      if (draft[field as keyof ProfileQueryInput].trim().length === 0) {
-        setHighlightedField(field);
-        return;
-      }
-    }
-    
-    // All fields filled, no highlight needed
-    setHighlightedField("");
-  }, [coarseTime, draft, unknownTime]);
-
-  /* ── Mystical tagline rotation ── */
-  const mysticalPhrases = useMemo(() => {
-    const phrases: string[] = [];
-    for (let i = 1; ; i++) {
-      const key = `home.mysticalPhrase${i}`;
-      const val = t(key);
-      if (val === key) break;   // t() returns the key when missing
-      phrases.push(val);
-    }
-    return phrases.length > 0 ? phrases : ["Written in the Stars"];
-  }, [t]);
-  const [taglineIndex, setTaglineIndex] = useState(0);
-  const [hoveredSign, setHoveredSign] = useState<string | null>(null);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTaglineIndex((prev) => (prev + 1) % mysticalPhrases.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [mysticalPhrases.length]);
-
-  // Deactivate heading scramble after animation
-  useEffect(() => {
-    const timer = setTimeout(() => setHeadingScrambleActive(false), 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  /* ── Panel & wheel refs (no scroll transforms — clean render) ── */
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLElement>(null);
-
-  /* Field reveal removed — was causing layout bounce on load
-     (fields started at translateY(20px) then jumped to 0) */
-
-  /* ── Validation shimmer: detect empty -> non-empty transitions ── */
-  useEffect(() => {
-    const prev = prevDraftRef.current;
-    const fieldsToCheck: Array<keyof ProfileQueryInput> = [
-      "name", "birthDate", "birthTime", "country", "state", "city",
-    ];
-
-    const newlyValid: string[] = [];
-    for (const f of fieldsToCheck) {
-      if (prev[f].trim() === "" && draft[f].trim() !== "") {
-        newlyValid.push(f);
-      }
-    }
-
-    if (newlyValid.length > 0) {
-      setValidatedFields((s) => {
-        const next = new Set(s);
-        newlyValid.forEach((f) => next.add(f));
-        return next;
-      });
-      
-      // Mark fields as completed for star burst
-      newlyValid.forEach(field => {
-        if (!completedFields.has(field)) {
-          setCompletedFields(prev => new Set([...prev, field]));
-          
-          // Trigger star burst at field position
-          const fieldRefs: Record<string, React.RefObject<HTMLDivElement | null>> = {
-            name: nameRef,
-            birthDate: birthDateRef,
-            birthTime: birthTimeRef,
-            country: countryRef,
-            state: stateRef,
-            city: cityRef,
-          };
-          
-          const fieldColorMap: Record<string, "gold" | "aqua" | "coral" | "violet" | "rose"> = {
-            name: "gold",
-            birthDate: "aqua",
-            birthTime: "coral",
-            country: "violet",
-            state: "rose",
-            city: "gold",
-          };
-          
-          const ref = fieldRefs[field];
-          if (ref?.current) {
-            const rect = ref.current.getBoundingClientRect();
-            burstAt(rect.left + rect.width / 2, rect.top + rect.height / 2, fieldColorMap[field]);
-          }
-        }
-      });
-
-      // Remove shimmer class after animation completes
-      for (const f of newlyValid) {
-        const existing = shimmerTimers.current.get(f);
-        if (existing) clearTimeout(existing);
-        shimmerTimers.current.set(
-          f,
-          setTimeout(() => {
-            setValidatedFields((s) => {
-              const next = new Set(s);
-              next.delete(f);
-              return next;
-            });
-            shimmerTimers.current.delete(f);
-          }, 650)
-        );
-      }
-    }
-
-    prevDraftRef.current = { ...draft };
-  }, [draft, completedFields, burstAt]);
 
   useEffect(() => {
     const clientOffset = String(-new Date().getTimezoneOffset());
@@ -636,6 +436,7 @@ export default function Home() {
   const hasLatitude = draft.latitude.trim().length > 0;
   const hasLongitude = draft.longitude.trim().length > 0;
   const hasLocation = hasCountry && hasState && hasCity && hasLatitude && hasLongitude;
+  const canContinue = hasName && hasBirthDate && hasBirthTimeSignal;
 
   const missingFieldLabels = useMemo(() => {
     const missing: string[] = [];
@@ -1006,6 +807,12 @@ export default function Home() {
 
   const submitProfile = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    if (intakeStep === 1) {
+      if (canContinue) setIntakeStep(2);
+      return;
+    }
+
     if (!canSubmit || isSubmitting) {
       return;
     }
@@ -1150,56 +957,19 @@ export default function Home() {
         </div>
       </div>}{/* /heroWrapper */}
 
-      {/* === HEADER SECTION === */}
-      <header className={styles.intakeHeader}>
-        <div className={styles.brandBadge}>
-          <HiOutlineSparkles />
-          <span>{t("home.heroBadge")}</span>
-        </div>
-        <h1 className={styles.pageTitle}>{t("home.heroTitle")}</h1>
-        <p className={styles.pageSubtitle}>{t("home.heroSubtitle")}</p>
-        
-        {/* Progress indicator */}
-        <IntakeProgressConstellation
-          steps={intakeSteps}
-          ariaLabel={t("home.formProgressAria")}
-          className={styles.heroProgressConstellation}
-        />
-
-        <div className={styles.formPeek} aria-hidden="true">
-          <span />
-          <span />
-          <span />
-        </div>
-
-        {/* Scroll-to-begin cue */}
-        <div
-          className={`${styles.scrollCue} ${scrolled ? styles.scrollCueHidden : ""}`}
-          aria-hidden="true"
-        >
-          <span>{t("home.scrollCue")}</span>
-          <HiOutlineChevronDown />
-        </div>
+      <header className={styles.streamlinedHeader}>
+        <span className={styles.stepLabel}>Step {intakeStep} of 2</span>
+        <h1>{intakeStep === 1 ? "Create your Vedic birth chart" : "Where were they born?"}</h1>
+        <p>
+          {intakeStep === 1
+            ? "Start with the essentials. Location details come next."
+            : "Search for the birthplace and we’ll calculate the precise coordinates for you."}
+        </p>
       </header>
 
       {/* === MAIN CONTENT === */}
       <main className={styles.mainContent}>
-        <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
-          <div className={styles.formIntro}>
-            <span className={styles.formEyebrow}>{t("home.formEyebrow")}</span>
-            <h2 className={styles.formTitle}>{t("home.formTitle")}</h2>
-            <p className={styles.formCopy}>
-              {t("home.formCopy")}
-            </p>
-          </div>
-
-          <div className={styles.progressDock}>
-            <IntakeProgressConstellation
-              steps={intakeSteps}
-              ariaLabel={t("home.formProgressAria")}
-            />
-          </div>
-
+        <form className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formLayout}>
             {/* LEFT COLUMN: Form Fields */}
             <div className={styles.formColumn}>
@@ -1207,13 +977,14 @@ export default function Home() {
                 <div className={styles.cardAura} aria-hidden="true" />
                 <div className={styles.cardHeader}>
                   <div>
-                    <span className={styles.cardKicker}>{t("home.cardKicker")}</span>
-                    <h3 className={styles.cardTitle}>{t("home.birthDetails")}</h3>
-                  </div>
-                  <div className={styles.cardSeal} aria-hidden="true">
-                    <GiCrystalBall />
+                    <span className={styles.cardKicker}>Birth chart intake</span>
+                    <h2 className={styles.cardTitle}>
+                      {intakeStep === 1 ? t("home.birthDetails") : t("home.birthLocation")}
+                    </h2>
                   </div>
                 </div>
+              {intakeStep === 1 && (
+                <>
               {/* ── Smart Fill Field ── */}
               <div className={styles.smartFillWrapper}>
                 <button
@@ -1281,23 +1052,6 @@ export default function Home() {
                   )}
                   <HiOutlineChevronDown className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`} />
                 </button>
-
-                {birthDetailsHistory.length > 0 && (
-                  <div className={styles.birthHistoryChips} aria-label={birthHistoryRecentLabel}>
-                    <span className={styles.birthHistoryChipLabel}>{birthHistoryRecentLabel}</span>
-                    {birthDetailsHistory.slice(0, 3).map((entry) => (
-                      <button
-                        key={`chip-${entry.id}`}
-                        type="button"
-                        className={styles.birthHistoryChip}
-                        onClick={() => restoreBirthDetailsHistory(entry)}
-                      >
-                        <span>{entry.draft.name || t("home.birthHistoryUnnamed")}</span>
-                        <small>{[entry.draft.birthDate, entry.draft.city].filter(Boolean).join(" - ")}</small>
-                      </button>
-                    ))}
-                  </div>
-                )}
 
                 {historyExpanded && (
                   <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
@@ -1441,9 +1195,13 @@ export default function Home() {
                   }}
                 />
               </div>
+                </>
+              )}
 
               {/* ── Section Divider ── */}
-              <div className={`${styles.sectionDivider} ${styles.sectionDividerSpaced}`}>
+              {intakeStep === 2 && (
+                <>
+              <div className={styles.sectionDivider}>
                 <div className={styles.dividerLine}></div>
                 <span className={styles.dividerText}>{t("home.birthLocation")}</span>
                 <div className={styles.dividerLine}></div>
@@ -1564,6 +1322,8 @@ export default function Home() {
                   />
                 </div>
               )}
+                </>
+              )}
 
               </div>{/* /formSectionCard */}
             </div>{/* /formColumn */}
@@ -1652,22 +1412,40 @@ export default function Home() {
 
           {/* PRIMARY CTA */}
           <div className={styles.primaryAction}>
-            <PremiumButton
-              type="submit"
-              variant="primary"
-              size="lg"
-              fullWidth
-              loading={isSubmitting}
-              loadingLabel={t("home.ctaLoading")}
-              disabled={!canSubmit}
-              icon={<GiCrystalBall />}
-            >
-              {t("home.cta")}
-            </PremiumButton>
-            {!canSubmit && (
+            {intakeStep === 1 ? (
+              <PremiumButton
+                type="button"
+                variant="primary"
+                size="lg"
+                fullWidth
+                disabled={!canContinue}
+                onClick={() => setIntakeStep(2)}
+              >
+                Continue to location
+              </PremiumButton>
+            ) : (
+              <div className={styles.stepActions}>
+                <button type="button" className={styles.backButton} onClick={() => setIntakeStep(1)}>
+                  Back
+                </button>
+                <PremiumButton
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  fullWidth
+                  loading={isSubmitting}
+                  loadingLabel={t("home.ctaLoading")}
+                  disabled={!canSubmit}
+                  icon={<GiCrystalBall />}
+                >
+                  {t("home.cta")}
+                </PremiumButton>
+              </div>
+            )}
+            {((intakeStep === 1 && !canContinue) || (intakeStep === 2 && !canSubmit)) && (
               <p className={styles.actionHint}>
                 <HiOutlineExclamationCircle aria-hidden="true" />
-                {actionHintText}
+                {intakeStep === 1 ? "Add your name, birth date, and birth time to continue." : actionHintText}
               </p>
             )}
             <p className={styles.trustMicrocopy}>
@@ -1683,44 +1461,6 @@ export default function Home() {
         <ChartHistory userName={user?.display_name} />
       </footer>
 
-      {/* Mobile Sticky Submit Bar */}
-      {showStickyBar && (
-        <div className={styles.mobileStickyBar}>
-          <div className={styles.stickyProgress}>
-            <span className={styles.stickyProgressText}>
-              {t("home.stickyComplete", {
-                count: String(previewCompletion.filled),
-                total: String(previewCompletion.total),
-              })}
-            </span>
-            <div className={styles.stickyProgressBar}>
-              <div 
-                className={styles.stickyProgressFill}
-                style={{ 
-                  width: `${previewCompletion.percent}%`
-                }}
-              />
-            </div>
-          </div>
-          <PremiumButton
-            type="button"
-            variant="primary"
-            size="md"
-            onClick={() => {
-              const form = formRef.current;
-              if (form && canSubmit) {
-                form.requestSubmit();
-              } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }
-            }}
-            disabled={!canSubmit}
-            icon={<GiCrystalBall />}
-          >
-            {t("home.stickyContinue")}
-          </PremiumButton>
-        </div>
-      )}
     </div>
   );
 }
