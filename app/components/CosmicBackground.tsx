@@ -45,8 +45,11 @@ export default function CosmicBackground() {
 
     const initParticles = () => {
       particles = [];
-      const particleCount = Math.min(140, Math.floor((logicalWidth * logicalHeight) / 12000));
-      
+      const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+      const areaDivisor = isCoarsePointer ? 26000 : 12000;
+      const maxParticles = isCoarsePointer ? 60 : 140;
+      const particleCount = Math.min(maxParticles, Math.floor((logicalWidth * logicalHeight) / areaDivisor));
+
       for (let i = 0; i < particleCount; i++) {
         particles.push({
           x: Math.random() * logicalWidth,
@@ -98,22 +101,40 @@ export default function CosmicBackground() {
       ctx.strokeStyle = "rgba(212, 165, 116, 0.09)";
       ctx.lineWidth = 0.5;
       
+      const CONNECT_DIST = 150;
+      const grid: Map<string, number[]> = new Map();
+      for (let i = 0; i < particles.length; i++) {
+        const cx = Math.floor(particles[i].x / CONNECT_DIST);
+        const cy = Math.floor(particles[i].y / CONNECT_DIST);
+        const key = cx + ',' + cy;
+        const bucket = grid.get(key);
+        if (bucket) bucket.push(i); else grid.set(key, [i]);
+      }
       for (let i = 0; i < particles.length; i++) {
         const p1 = particles[i];
-        
-        // Connect nearby particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p1.x - p2.x;
-          const dy = p1.y - p2.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          
-          if (distance < 150) {
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.globalAlpha = (1 - distance / 150) * 0.3;
-            ctx.stroke();
+        const cx = Math.floor(p1.x / CONNECT_DIST);
+        const cy = Math.floor(p1.y / CONNECT_DIST);
+
+        // Connect nearby particles (only check this cell and its 8 neighbors)
+        for (let ncx = cx - 1; ncx <= cx + 1; ncx++) {
+          for (let ncy = cy - 1; ncy <= cy + 1; ncy++) {
+            const bucket = grid.get(ncx + ',' + ncy);
+            if (!bucket) continue;
+            for (const j of bucket) {
+              if (j <= i) continue;
+              const p2 = particles[j];
+              const dx = p1.x - p2.x;
+              const dy = p1.y - p2.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < CONNECT_DIST) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.globalAlpha = (1 - distance / CONNECT_DIST) * 0.3;
+                ctx.stroke();
+              }
+            }
           }
         }
       }
