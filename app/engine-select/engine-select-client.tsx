@@ -1,6 +1,12 @@
 "use client";
 
-import { useMemo, useState, useTransition, type ChangeEvent } from "react";
+import {
+  useMemo,
+  useState,
+  useTransition,
+  type CSSProperties,
+  type KeyboardEvent,
+} from "react";
 import { useRouter } from "next/navigation";
 import { FiCheck } from "react-icons/fi";
 import {
@@ -9,6 +15,7 @@ import {
   type EnginePreset,
 } from "@/lib/engines/engine-registry";
 import { useTranslation } from "@/lib/i18n-context";
+import TraditionGlyph from "@/app/components/TraditionGlyph";
 import styles from "./engine-select.module.css";
 
 type EngineSelectClientProps = {
@@ -27,6 +34,17 @@ const ayanamshaOrder = [
 ] as const;
 
 type AyanamshaKey = (typeof ayanamshaOrder)[number];
+
+/* RGB triplets (not hex) so CSS can compose them into rgba() at varying
+   opacity for backgrounds/borders/text via a single custom property. */
+const TRADITION_ACCENT_RGB: Record<AyanamshaKey, string> = {
+  lahiri: "200, 155, 60",
+  raman: "184, 105, 138",
+  krishnamurti: "42, 139, 126",
+  fagan_bradley: "92, 132, 168",
+  pushyapaksha: "122, 155, 92",
+  yukteshwar: "123, 107, 168",
+};
 
 function ayanamshaKeyFor(engine: EnginePreset | undefined): AyanamshaKey {
   if (!engine) return "lahiri";
@@ -75,8 +93,31 @@ export default function EngineSelectClient({
     setSelectedId(engineId);
   };
 
-  const handleStyleChange = (event: ChangeEvent<HTMLSelectElement>) => {
-    setSelectedId(event.target.value);
+  /* Roving-tabindex arrow-key navigation for the house-style radiogroup,
+     matching what a native <select> gives keyboard users for free. */
+  const handleChipKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    groupEngines: EnginePreset[],
+    currentIndex: number
+  ) => {
+    let nextIndex: number;
+    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+      nextIndex = (currentIndex + 1) % groupEngines.length;
+    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+      nextIndex = (currentIndex - 1 + groupEngines.length) % groupEngines.length;
+    } else if (event.key === "Home") {
+      nextIndex = 0;
+    } else if (event.key === "End") {
+      nextIndex = groupEngines.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    handleSelectEngine(groupEngines[nextIndex].engine_id);
+    const radiogroup = event.currentTarget.closest<HTMLElement>('[role="radiogroup"]');
+    const radios = radiogroup?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
+    radios?.[nextIndex]?.focus();
   };
 
   const handleGenerate = () => {
@@ -118,11 +159,17 @@ export default function EngineSelectClient({
           const isGroupSelected = group.key === selectedAyanamshaKey;
           const isRecommended = group.defaultEngine?.engine_id === DEFAULT_ENGINE_ID;
 
+          const styleGroupLabelId = `engine-style-label-${group.key}`;
+          const accentStyle = {
+            animationDelay: `${0.15 + index * 0.1}s`,
+            "--tradition-accent-rgb": TRADITION_ACCENT_RGB[group.key],
+          } as CSSProperties;
+
           return (
             <article
               key={group.key}
               className={`${styles.engineGroup} ${styles.animCard}${isGroupSelected ? ` ${styles.engineGroupSelected}` : ""}`}
-              style={{ animationDelay: `${0.15 + index * 0.1}s` }}
+              style={accentStyle}
             >
               <button
                 type="button"
@@ -138,7 +185,8 @@ export default function EngineSelectClient({
                 </span>
 
                 <span className={styles.groupText}>
-                  <span className={styles.groupMeta}>
+                  <span className={`${styles.cardBadge} ${styles.groupOriginBadge}`}>
+                    <TraditionGlyph tradition={group.key} className={styles.groupGlyph} />
                     {t(`engineSelect.groups.${group.key}.origin`)}
                   </span>
                   <span className={styles.groupTitleRow}>
@@ -161,21 +209,34 @@ export default function EngineSelectClient({
                 {t(`engineSelect.groups.${group.key}.method`)}
               </p>
 
-              <label className={styles.styleLabel} htmlFor={`engine-style-${group.key}`}>
+              <span className={styles.styleLabel} id={styleGroupLabelId}>
                 {t("engineSelect.styleLabel")}
-              </label>
-              <select
-                id={`engine-style-${group.key}`}
-                className={styles.styleSelect}
-                value={activeEngine?.engine_id ?? ""}
-                onChange={handleStyleChange}
+              </span>
+              <div
+                className={`${styles.houseGrid} ${styles.compactChips}`}
+                role="radiogroup"
+                aria-labelledby={styleGroupLabelId}
               >
-                {group.engines.map((engine) => (
-                  <option key={engine.engine_id} value={engine.engine_id}>
-                    {t(`engineSelect.styles.${engine.house_system_code}.label`)}
-                  </option>
-                ))}
-              </select>
+                {group.engines.map((engine, engineIndex) => {
+                  const isChipActive = engine.engine_id === activeEngine?.engine_id;
+                  return (
+                    <button
+                      key={engine.engine_id}
+                      type="button"
+                      role="radio"
+                      className={`${styles.houseChip}${isChipActive ? ` ${styles.houseChipActive}` : ""}`}
+                      aria-checked={isChipActive}
+                      tabIndex={isChipActive ? 0 : -1}
+                      onClick={() => handleSelectEngine(engine.engine_id)}
+                      onKeyDown={(event) => handleChipKeyDown(event, group.engines, engineIndex)}
+                    >
+                      <span className={styles.houseChipLabel}>
+                        {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
 
               <p className={styles.styleHint}>
                 {activeEngine

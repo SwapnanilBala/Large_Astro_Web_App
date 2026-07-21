@@ -20,9 +20,12 @@
   width: min(1120px, 100%);
   border-radius: 20px;
   border: 1px solid rgba(200, 155, 60, 0.10);
+  /* Translucent (not opaque #161922) so the app's globally-mounted ambient
+     GradientBlobs background shows through the glass instead of being
+     fully occluded. */
   background:
     linear-gradient(130deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.04)),
-    #161922;
+    rgba(22, 25, 34, 0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   padding: 2.5rem 2.5rem 2rem;
@@ -151,6 +154,18 @@
   border-radius: 10px;
 }
 
+/* Pre-existing bug, not introduced by this change: globals.css applies a
+   default purple "starfield" background-image + white text to every
+   <button> in light theme unless explicitly excluded. .groupSelectButton
+   (all: unset) never opted out, so the whole card-header button silently
+   rendered with a purple block behind it in light theme. Force it back
+   to transparent/inherited. */
+:global(html[data-theme="light"]) .groupSelectButton {
+  background: none !important;
+  background-image: none !important;
+  color: inherit !important;
+}
+
 .groupText,
 .groupTitleRow {
   display: flex;
@@ -168,13 +183,35 @@
   flex-wrap: wrap;
 }
 
-.groupMeta {
-  color: #C89B3C;
-  font-size: 0.92rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  line-height: 1.35;
-  text-transform: uppercase;
+/* Compound selector (not just .groupOriginBadge) so this beats both
+   .cardBadge's own later font-size/padding declarations and the global
+   `html[data-theme="light"] span, p, h1... { color: var(--ink-main) }`
+   catch-all (globals.css), which otherwise outranks a single class
+   selector on element-type specificity alone. */
+.cardBadge.groupOriginBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  width: fit-content;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.65rem;
+  color: rgb(var(--tradition-accent-rgb, 200, 155, 60));
+  background: rgba(var(--tradition-accent-rgb, 200, 155, 60), 0.12);
+  border: 1px solid rgba(var(--tradition-accent-rgb, 200, 155, 60), 0.24);
+}
+
+.groupGlyph {
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.groupGlyph svg {
+  width: 100%;
+  height: 100%;
 }
 
 .groupTitle {
@@ -517,6 +554,16 @@
   border-color: rgba(200, 155, 60, 0.55);
 }
 
+/* .houseChip:hover:not(:disabled) (above) is *more* specific — (0,3,0) vs
+   .houseChipActive:hover's (0,2,0) — since the button carries both
+   classes. Without this compound selector its color:#EAEDF3 wins outright
+   regardless of source order, flashing the active chip's gold text white
+   on hover. This CSS was unused before .houseChip became a real
+   interactive element in this change, so the conflict was dormant. */
+.houseChip.houseChipActive:hover:not(:disabled) {
+  color: #C89B3C;
+}
+
 .houseChipDisabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -526,15 +573,33 @@
   white-space: nowrap;
 }
 
+/* Denser sizing for the per-tradition chip row (six repeated instances,
+   inside a narrower card) vs. the wider standalone house-system section
+   .houseChip/.houseGrid were originally built for. */
+.compactChips {
+  gap: 0.4rem;
+}
+
+.compactChips .houseChip {
+  padding: 0.35rem 0.7rem;
+  font-size: 1.06rem;
+}
+
 :global(html[data-theme="light"]) .houseSection {
   background: rgba(240, 242, 248, 0.6);
   border-color: rgba(139, 143, 163, 0.12);
 }
 
+/* !important on background/color: globals.css applies a default purple
+   "starfield" background-image + color to every <button> in light theme
+   (html[data-theme="light"] button:not(...)) via a dozen chained :not()
+   clauses, whose specificity is far higher than a single class selector
+   can match. .houseChip only became a <button> in this redesign (it used
+   to be a <select> option), so it's newly exposed to that rule. */
 :global(html[data-theme="light"]) .houseChip {
-  background: rgba(240, 242, 248, 0.7);
+  background: rgba(240, 242, 248, 0.7) !important;
   border-color: rgba(139, 143, 163, 0.15);
-  color: var(--ink-soft);
+  color: var(--ink-soft) !important;
 }
 
 :global(html[data-theme="light"]) .houseChip:hover:not(:disabled) {
@@ -543,8 +608,8 @@
 
 :global(html[data-theme="light"]) .houseChipActive {
   border-color: rgba(200, 155, 60, 0.35);
-  background: rgba(200, 155, 60, 0.08);
-  color: #8a6820;
+  background: rgba(200, 155, 60, 0.08) !important;
+  color: #8a6820 !important;
 }
 
 :global(html[data-theme="light"]) .guidanceStrip span {
@@ -633,10 +698,13 @@
 
 .cta:hover:not(:disabled) {
   transform: translateY(-3px) scale(1.02);
+  /* !important: globals.css's light-theme button:hover:not(...) default
+     (a dozen chained :not() clauses) outranks this by specificity and
+     would otherwise replace this gold glow with its generic purple one. */
   box-shadow:
     0 28px 52px rgba(200, 155, 60, 0.28),
     0 0 40px rgba(200, 155, 60, 0.20),
-    0 0 80px rgba(200, 155, 60, 0.10);
+    0 0 80px rgba(200, 155, 60, 0.10) !important;
   filter: saturate(1.1) brightness(1.05);
 }
 
@@ -692,7 +760,7 @@
   border-color: rgba(139, 143, 163, 0.15);
   background:
     linear-gradient(130deg, rgba(255, 255, 255, 0.85), rgba(240, 242, 248, 0.9)),
-    #f0f2f8;
+    rgba(240, 242, 248, 0.86);
 }
 
 :global(html[data-theme="light"]) .heading {
@@ -729,10 +797,13 @@
   color: #fff;
 }
 
+/* !important: same global purple button-texture override as .houseChip
+   above — .cta predates this redesign and was already silently affected
+   by it in light theme before this change. */
 :global(html[data-theme="light"]) .cta {
-  background: linear-gradient(110deg, #C89B3C, #a07828, #C89B3C, #8a6820);
+  background: linear-gradient(110deg, #C89B3C, #a07828, #C89B3C, #8a6820) !important;
   background-size: 300% 100%;
-  color: #fff;
+  color: #fff !important;
 }
 
 /* ── Engine Select Responsive ── */
