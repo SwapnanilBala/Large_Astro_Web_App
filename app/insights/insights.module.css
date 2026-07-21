@@ -2321,6 +2321,15 @@
   transition: all 0.25s ease;
 }
 
+/* Mobile perf: backdrop-filter is disabled on mobile (see globals.css); this
+   button's 4%-opaque background is only legible with blur behind it, so bump
+   it on mobile to stay visible as a flat translucent pill instead. */
+@media (max-width: 768px) {
+  .actionBtn {
+    background: rgba(255, 243, 210, 0.14);
+  }
+}
+
 .actionBtn:hover {
   border-color: var(--accent-gold);
   box-shadow: 0 0 20px rgba(200, 155, 60, 0.1);

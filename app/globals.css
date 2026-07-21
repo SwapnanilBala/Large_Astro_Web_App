@@ -11674,3 +11674,44 @@ html[data-theme="light"] .palm-detail-notes {
     -webkit-backdrop-filter: blur(12px) !important;
   }
 }
+
+/* ─── Mobile perf: override more-specific !important backdrop-filter rules ───
+   The blanket `* { backdrop-filter: none !important }` rule (media query,
+   ~line 7652) loses to the selectors below on CSS specificity — when both
+   sides use !important, specificity is compared before source order breaks
+   ties, and a bare `*` has the lowest possible specificity. These repeat
+   each selector so specificity ties, and because this block comes after all
+   of them in the file, it wins the tie-break. */
+@media (max-width: 768px) {
+  .react-datepicker,
+  .react-datepicker__month-dropdown-container select,
+  .react-datepicker__year-dropdown-container select,
+  .react-datepicker__month-select,
+  .react-datepicker__year-select,
+  .site-navbar,
+  .site-navbar.navbar-scrolled,
+  .mobile-drawer {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ─── Mobile perf: keep dark-theme "frosted glass" panels legible without blur ───
+   GlassCard, the insights .card/.cardDepthFront/Mid/Back tiers, and
+   .lang-dropdown use var(--surface)/var(--surface-strong)/var(--bg-glass),
+   which in dark theme are only 3-6% opaque and rely on the backdrop-filter
+   blur disabled above to read as a visible panel at all. Bump them on
+   mobile so they stay visible as flat translucent panels instead of
+   frosted glass. --surface/--surface-strong are re-defined for light theme
+   via html[data-theme="light"] overrides (specificity 0,1,1 beats :root's
+   0,1,0), so those two are unaffected in light theme; --bg-glass has no
+   light-theme override, so this bump does apply there too, which is
+   harmless since light-theme components already used this same dark-toned
+   value at the original opacity. */
+@media (max-width: 768px) {
+  :root {
+    --surface: rgba(255, 243, 210, 0.11);
+    --surface-strong: rgba(255, 243, 210, 0.16);
+    --bg-glass: rgba(18, 18, 26, 0.82);
+  }
+}
