@@ -7643,7 +7643,16 @@ html[data-theme="light"] .chart-history-card {
 /* ─── Mobile bottom nav padding ─── */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 70px;
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
+  }
+}
+
+/* Mobile perf: backdrop-filter forces per-element GPU compositing;
+   disable on mobile where the cost is highest and least visible */
+@media (max-width: 768px) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
   }
 }
 

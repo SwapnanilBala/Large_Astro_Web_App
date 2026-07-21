@@ -161,7 +161,7 @@
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  z-index: 100;
+  z-index: 200;
   overflow: hidden;
   animation: slideDown 0.2s ease-out;
   max-height: 300px;
