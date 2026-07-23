@@ -1873,12 +1873,20 @@
 .domainScoreCard {
   appearance: none;
   cursor: pointer;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas:
+    "icon label"
+    "score tone";
+  align-items: center;
+  column-gap: 0.45rem;
+  row-gap: 0.25rem;
   min-width: 0;
   border: 1px solid rgba(200, 155, 60, 0.12);
   border-radius: 10px;
   background: rgba(255, 243, 210, 0.035);
   color: var(--ink-soft);
-  padding: 0.85rem;
+  padding: 0.7rem;
   text-align: left;
   transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
 }
@@ -1898,38 +1906,41 @@
 }
 
 .domainScoreIcon {
-  display: block;
+  grid-area: icon;
   color: var(--accent-gold);
-  font-size: 1.3rem;
+  font-size: 1.05rem;
   line-height: 1;
-  margin-bottom: 0.45rem;
 }
 
 .domainScoreLabel {
-  display: block;
+  grid-area: label;
+  min-width: 0;
   color: var(--ink-main);
-  font-size: 0.95rem;
+  font-size: 0.78rem;
   font-weight: 750;
-  line-height: 1.25;
-  margin-bottom: 0.35rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
 }
 
 .domainScoreCard strong,
 .domainScoreCardActive strong {
-  display: block;
+  grid-area: score;
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 1.45rem;
+  font-size: 1.2rem;
   line-height: 1.1;
-  margin-bottom: 0.25rem;
 }
 
 .domainScoreTone {
+  grid-area: tone;
+  min-width: 0;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: 0.62rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
   text-transform: uppercase;
+  overflow-wrap: anywhere;
 }
 
 .domainSelectLabel {
