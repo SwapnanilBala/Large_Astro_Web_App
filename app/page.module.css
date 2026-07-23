@@ -3588,6 +3588,49 @@
   .dateTimeRow {
     gap: 0.8rem;
   }
+
+  .formSectionCard {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+
+  .quickActionsRow {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .smartFillWrapper,
+  .birthHistoryWrapper {
+    width: 100%;
+  }
+
+  .smartFillToggle,
+  .birthHistoryToggle {
+    width: 100%;
+    min-height: 2.75rem;
+    justify-content: flex-start;
+  }
+
+  .coordsToggleWrapper {
+    min-height: 2.75rem;
+  }
+
+  .autocompleteFrame :global(input),
+  .smartFillTextarea {
+    font-size: 1rem;
+  }
+
+  .stepActions {
+    display: grid;
+    grid-template-columns: minmax(5rem, 0.4fr) 1fr;
+    gap: 0.6rem;
+  }
+
+  .backButton,
+  .primaryAction :global(button) {
+    min-height: 2.9rem;
+  }
 }
 
 /* Intake page visual refinements */
