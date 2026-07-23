@@ -1770,6 +1770,10 @@
   background: none;
 }
 
+.cardDasha :global(.nakshatra-panel) {
+  padding: 1.75rem;
+}
+
 .cardDasha :global(.nakshatra-panel)::after,
 .cardAspects :global(.aspects-panel)::after,
 .cardNavamsa :global(.navamsa-panel)::after,

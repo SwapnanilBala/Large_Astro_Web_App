@@ -978,7 +978,7 @@
 /* === Mobile Sticky Submit Bar === */
 .mobileStickyBar {
   position: fixed;
-  bottom: 0;
+  bottom: var(--mobile-nav-height, 0px);
   left: 0;
   right: 0;
   display: flex;
@@ -1060,7 +1060,7 @@
   }
 
   .mainContent {
-    padding: 0.75rem;
+    padding: 0.75rem var(--mobile-page-gutter, 0.75rem);
   }
 }
 
