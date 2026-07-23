@@ -7881,6 +7881,11 @@ html[data-theme="light"] .chart-history-card {
   body {
     padding-bottom: calc(var(--mobile-nav-height) + 1rem);
   }
+
+  .insights-shell {
+    align-items: start;
+    padding-bottom: calc(var(--mobile-nav-height) + 1.5rem);
+  }
 }
 
 @media (max-width: 360px) {

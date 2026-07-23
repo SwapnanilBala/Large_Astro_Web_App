@@ -3129,6 +3129,10 @@
 }
 
 @media (max-width: 600px) {
+  .dashboard {
+    gap: 1rem;
+  }
+
   .gridHero {
     grid-template-columns: 1fr;
   }
@@ -3183,6 +3187,9 @@
   }
 
   .anchorLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
     white-space: nowrap;
   }
 
@@ -3232,6 +3239,24 @@
 
   .rulesScroll {
     max-height: 450px;
+  }
+
+  .cardPlanets {
+    max-height: none;
+  }
+
+  .cardPlanets :global(.planet-grid--compact) {
+    overflow-y: visible;
+  }
+
+  .cardForecast :global(.forecast-panel),
+  .cardForecast :global(.rules-panel) {
+    padding: 1rem;
+  }
+
+  .collapsibleTrigger {
+    min-height: 2.75rem;
+    padding-bottom: 0.6rem;
   }
 }
 
