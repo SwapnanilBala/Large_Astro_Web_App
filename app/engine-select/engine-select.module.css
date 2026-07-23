@@ -835,3 +835,53 @@
     font-size: 1.38rem;
   }
 }
+
+@media (max-width: 768px) {
+  .shell {
+    justify-content: flex-start;
+    padding-bottom: calc(var(--mobile-nav-height) + 1.5rem);
+  }
+
+  .panel {
+    width: 100%;
+    margin: 0;
+  }
+
+  .hero {
+    margin-bottom: 1.4rem;
+  }
+
+  .guidanceStrip span {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .engineGroup {
+    gap: 0.85rem;
+    padding: 1.1rem;
+  }
+
+  .groupSelectButton {
+    min-height: 2.75rem;
+  }
+
+  .houseGrid {
+    gap: 0.45rem;
+  }
+
+  .houseChip,
+  .compactChips .houseChip {
+    min-height: 2.75rem;
+    padding: 0.45rem 0.7rem;
+  }
+
+  .summarySection {
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding: 1.1rem;
+  }
+
+  .cta {
+    min-height: 3rem;
+    max-width: none;
+  }
+}
