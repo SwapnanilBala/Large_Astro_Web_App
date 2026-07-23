@@ -1153,6 +1153,77 @@
   display: none;
 }
 
+.timingSection {
+  padding: 1.25rem;
+}
+
+.timingSection .collapsibleTrigger {
+  padding-bottom: 0;
+}
+
+.timingSection .heading {
+  font-size: clamp(1.25rem, 2vw, 1.55rem);
+}
+
+.timingPanels {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-top: 0.9rem;
+}
+
+.chartHighlights {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(108, 225, 212, 0.2);
+  border-radius: 8px;
+  background: rgba(108, 225, 212, 0.05);
+}
+
+.chartHighlightsHeader .kicker {
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+}
+
+.chartHighlightsTitle {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.2rem, 2vw, 1.5rem);
+  line-height: 1.3;
+}
+
+.chartHighlightsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 0.65rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chartHighlightsList li {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--accent-gold);
+}
+
+.chartHighlightsList strong {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.98rem;
+  line-height: 1.35;
+}
+
+.chartHighlightsList span {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
 /* ── Collapsible Sections ── */
 .collapsible {
   composes: card;

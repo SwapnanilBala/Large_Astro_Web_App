@@ -137,8 +137,8 @@ export async function GET(request: NextRequest) {
     }
 
     const result: Record<string, unknown> = {
-      lat: data[0].lat,
-      lon: data[0].lon,
+      lat: latitude,
+      lon: longitude,
       displayName: data[0].display_name,
       timeZoneId,
       timezoneOffsetMinutes,

@@ -466,8 +466,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       </div>
 
       <p className={styles.intro}>
-        Select an activity and date range to find the most auspicious time windows based on
-        Panchanga factors: Tithi, Nakshatra, Yoga, Karana, and weekday alignment.
+        Choose an activity and date range for ranked auspicious windows.
       </p>
 
       <div className={styles.presetRow}>
@@ -551,9 +550,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         <div className={styles.firstRun}>
           <span className={styles.firstRunIcon} aria-hidden="true">✦</span>
           <span>
-            Pick an activity and date range above, then{" "}
-            <strong>Find Auspicious Times</strong> to see ranked windows with a
-            full Panchanga breakdown for each.
+            Set an activity and date range, then <strong>find the best times.</strong>
           </span>
         </div>
       )}

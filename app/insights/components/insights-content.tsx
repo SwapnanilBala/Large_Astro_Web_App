@@ -572,6 +572,92 @@ function ActionGuidanceChips({ payload }: { payload: ChartApiResponse }) {
   );
 }
 
+type ChartHighlight = {
+  title: string;
+  detail: string;
+};
+
+function buildChartHighlights(payload: ChartApiResponse): ChartHighlight[] {
+  const highlights: ChartHighlight[] = [];
+  const strongestPlanet = [...(payload.chart.shadbala ?? [])].sort(
+    (left, right) => right.strengthRatio - left.strengthRatio,
+  )[0];
+  const strongestPlanetPlacement = strongestPlanet
+    ? payload.chart.planets.find((planet) => planet.name === strongestPlanet.planet)
+    : undefined;
+  const primaryRule = [...payload.chart.deterministic_rules]
+    .filter((rule) => rule.priority === "high")
+    .sort((left, right) => (right.confidence_score ?? 0) - (left.confidence_score ?? 0))[0];
+  const topDomain = [...(payload.chart.life_domain_insights ?? [])].sort(
+    (left, right) => right.confidence_score - left.confidence_score,
+  )[0];
+  const strongestYoga = (payload.chart.yogas ?? [])
+    .filter((yoga) => yoga.present)
+    .sort((left, right) => {
+      const strengthRank = { strong: 2, moderate: 1, weak: 0 };
+      return strengthRank[right.strength] - strengthRank[left.strength];
+    })[0];
+
+  highlights.push({
+    title: `${payload.chart.ascendant.sign} rising`,
+    detail: "Your approach to life is a defining part of the chart's signature.",
+  });
+
+  if (strongestPlanet) {
+    const placement = strongestPlanetPlacement
+      ? ` in ${strongestPlanetPlacement.sign}, house ${strongestPlanetPlacement.house}`
+      : "";
+    highlights.push({
+      title: `${strongestPlanet.planet} is a major strength`,
+      detail: `${Math.round(strongestPlanet.strengthRatio * 100)}% strength${placement}.`,
+    });
+  }
+
+  if (primaryRule) {
+    highlights.push({ title: primaryRule.title, detail: primaryRule.insight });
+  }
+
+  if (topDomain) {
+    highlights.push({
+      title: `${topDomain.label} stands out`,
+      detail: topDomain.headline,
+    });
+  }
+
+  if (strongestYoga) {
+    highlights.push({
+      title: `${strongestYoga.name} is active`,
+      detail: strongestYoga.effects,
+    });
+  }
+
+  return highlights.slice(0, 5);
+}
+
+function ChartHighlights({ payload }: { payload: ChartApiResponse }) {
+  const highlights = buildChartHighlights(payload);
+  if (highlights.length === 0) return null;
+
+  return (
+    <section className={styles.chartHighlights} aria-labelledby="chart-highlights-heading">
+      <div className={styles.chartHighlightsHeader}>
+        <p className={styles.kicker}>Your Chart Highlights</p>
+        <h2 id="chart-highlights-heading" className={styles.chartHighlightsTitle}>
+          What makes your chart distinct
+        </h2>
+      </div>
+      <ul className={styles.chartHighlightsList}>
+        {highlights.map((highlight) => (
+          <li key={`${highlight.title}-${highlight.detail}`}>
+            <strong>{highlight.title}</strong>
+            <span>{highlight.detail}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 /* ─── Rule Card (Animated) ─── */
 /* Top Takeaways */
 type TopTakeaway = {
@@ -1646,11 +1732,11 @@ export default function InsightsContent({
           id="timing"
           kicker={t("insights.timingKicker")}
           title={t("insights.timingHeading")}
-          defaultOpen={true}
-          className={styles.cardRules}
+          defaultOpen={false}
+          className={`${styles.cardRules} ${styles.timingSection}`}
           persistKey={`${sectionStateScope}:timing`}
         >
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className={styles.timingPanels}>
             <div className={styles.cardForecast}>
               <LazyPanel>
                 <PanelErrorBoundary panelName="Future Forecast">
@@ -1681,6 +1767,8 @@ export default function InsightsContent({
         {payload.chart.nakshatra && payload.chart.dasha && (
           <>
             <ConstellationDivider />
+
+            <ChartHighlights payload={payload} />
 
             <CollapsibleSection
               id="vimshottari-dashas"
