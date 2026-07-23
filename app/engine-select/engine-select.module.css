@@ -64,6 +64,7 @@
   font-family: var(--font-display), sans-serif;
   font-size: clamp(1.55rem, 3vw, 2rem);
   font-weight: 700;
+  text-align: center;
   color: #EAEDF3;
   margin: 0 0 0.75rem;
   line-height: 1.2;

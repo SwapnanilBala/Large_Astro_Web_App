@@ -58,6 +58,18 @@
     "formTitle": "যে আকাশের নিচে আগমন, সেটি মানচিত্র করুন।",
     "formCopy": "মূল জন্ম তথ্য দিন, প্রতিটি স্থানাঙ্ক নিশ্চিত হলে চার্ট প্রিভিউ সমন্বয় হবে।",
     "cardKicker": "নির্ভুল প্রোফাইল",
+    "intakeStep": "ধাপ {current} এর 2",
+    "intakeHeadingDetails": "আপনার বৈদিক জন্মকুণ্ডলী তৈরি করুন",
+    "intakeHeadingLocation": "তারা কোথায় জন্মগ্রহণ করেছিলেন?",
+    "intakeLeadDetails": "প্রয়োজনীয় তথ্য দিয়ে শুরু করুন। অবস্থানের তথ্য পরের ধাপে আসবে।",
+    "intakeLeadLocation": "জন্মস্থান খুঁজুন, আমরা আপনার জন্য নির্ভুল স্থানাঙ্ক গণনা করব।",
+    "birthChartIntake": "জন্মকুণ্ডলী তথ্য",
+    "fieldComplete": "{field} সম্পূর্ণ",
+    "latitudeShort": "অক্ষাংশ",
+    "longitudeShort": "দ্রাঘিমাংশ",
+    "timezoneShort": "সময় অঞ্চল",
+    "back": "পিছনে",
+    "continueHint": "এগিয়ে যেতে আপনার নাম, জন্মতারিখ ও জন্মসময় যোগ করুন।",
     "smartFillToggle": "দ্রুত পূরণ (ক্লায়েন্ট তথ্য পেস্ট করুন)",
     "smartFillPlaceholder": "Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY",
     "smartFillHint": "ফরম্যাট: নাম, তারিখ, সময়, স্থান (কমা দিয়ে আলাদা)",
@@ -92,6 +104,7 @@
     "birthHistoryApproxTime": "প্রায় {time}",
     "birthHistoryRecentLabel": "Recent",
     "ctaLoading": "উন্মোচন হচ্ছে...",
+    "continueToLocation": "অবস্থানে এগিয়ে যান",
     "cta": "আমার ভবিষ্যৎ উন্মোচন করুন",
     "actionHint": "চার্ট তৈরি করতে সব ঘর পূরণ করুন",
     "actionHintMissing": "Add {fields} to continue.",
@@ -138,25 +151,25 @@
         "summary": "বিস্তারিত prediction ও event analysis-এর জন্য KP রেফারেন্স।"
       },
       "fagan_bradley": {
-        "label": "Fagan-Bradley",
-        "origin": "??????? ?????????? ???",
-        "description": "??????? ?????????? ???????, tropical ? sidereal ????? ??? historical sidereal chart work-?? ???? ???????",
-        "method": "Fagan-Bradley Swiss Ephemeris-?? 24.042044444 degrees at JD 2433282.42346 reference ?????? ????",
-        "summary": "????????? chart analysis-?? ???? ??????? ?????????? reference?"
+        "label": "ফেগান-ব্র্যাডলি",
+        "origin": "পশ্চিমী সিডেরিয়াল মান",
+        "description": "একটি পশ্চিমী সিডেরিয়াল অয়নাংশ, যা tropical-to-sidereal তুলনা এবং ঐতিহাসিকভাবে প্রতিষ্ঠিত সিডেরিয়াল চার্ট কাজে ব্যবহৃত হয়।",
+        "method": "ফেগান-ব্র্যাডলি Swiss Ephemeris-এর 24.042044444 ডিগ্রি (JD 2433282.42346) রেফারেন্স মান অনুসরণ করে।",
+        "summary": "তুলনামূলক চার্ট বিশ্লেষণের জন্য পশ্চিমী সিডেরিয়াল রেফারেন্স।"
       },
       "pushyapaksha": {
-        "label": "Pushyapaksha",
-        "origin": "Pushya ??????? anchor",
-        "description": "Fixed-star ???????, ?? delta Cancri ???? Pushya anchor ???, star-based sidereal frame-?? ???? ???????",
-        "method": "Pushyapaksha True Pushya rule ?????? ???: Asellus Australis / delta Cancri-?? Cancer-?? 16 degrees-? ???? ????",
-        "summary": "delta Cancri-?? Cancer 16 degrees-? ???? star-anchored reference?"
+        "label": "পুষ্যপক্ষ",
+        "origin": "পুষ্যা নক্ষত্রের নোঙর",
+        "description": "একটি স্থির-নক্ষত্র অয়নাংশ, যা delta Cancri-এর মাধ্যমে পুষ্যাকে স্থির করে, নক্ষত্র-ভিত্তিক সিডেরিয়াল ফ্রেম প্রয়োজন হলে সহায়ক।",
+        "method": "পুষ্যপক্ষ True Pushya নিয়ম অনুসরণ করে: Asellus Australis / delta Cancri-কে কর্কটের 16 ডিগ্রিতে স্থির করা হয়।",
+        "summary": "delta Cancri-কে কর্কটের 16 ডিগ্রিতে ব্যবহার করা নক্ষত্র-ভিত্তিক রেফারেন্স।"
       },
       "yukteshwar": {
-        "label": "Yukteshwar",
-        "origin": "Sri Yukteshwar tradition",
-        "description": "Sri Yukteshwar inspired ????????? sidereal option, client ?? practitioner ?? lineage ????? ???? ?????",
-        "method": "Yukteshwar Swiss Ephemeris-?? 360 - 338.917778 degrees at J1900.0 reference ?????? ????",
-        "summary": "?????? sidereal comparison-?? ???? Sri Yukteshwar-inspired reference?"
+        "label": "যুক্তেশ্বর",
+        "origin": "শ্রী যুক্তেশ্বর ঐতিহ্য",
+        "description": "শ্রী যুক্তেশ্বর দ্বারা অনুপ্রাণিত একটি তুলনামূলক সিডেরিয়াল বিকল্প, ক্লায়েন্ট বা প্র্যাকটিশনার এই পরম্পরা চাইলে সহায়ক।",
+        "method": "যুক্তেশ্বর Swiss Ephemeris-এর 360 - 338.917778 ডিগ্রি (J1900.0) রেফারেন্স মান অনুসরণ করে।",
+        "summary": "বিকল্প সিডেরিয়াল তুলনার জন্য শ্রী যুক্তেশ্বর-অনুপ্রাণিত রেফারেন্স।"
       }
     },
     "styles": {

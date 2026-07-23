@@ -954,12 +954,12 @@ export default function Home() {
       </div>}{/* /heroWrapper */}
 
       <header className={styles.streamlinedHeader}>
-        <span className={styles.stepLabel}>Step {intakeStep} of 2</span>
-        <h1>{intakeStep === 1 ? "Create your Vedic birth chart" : "Where were they born?"}</h1>
+        <span className={styles.stepLabel}>{t("home.intakeStep", { current: String(intakeStep) })}</span>
+        <h1>{intakeStep === 1 ? t("home.intakeHeadingDetails") : t("home.intakeHeadingLocation")}</h1>
         <p>
           {intakeStep === 1
-            ? "Start with the essentials. Location details come next."
-            : "Search for the birthplace and we’ll calculate the precise coordinates for you."}
+            ? t("home.intakeLeadDetails")
+            : t("home.intakeLeadLocation")}
         </p>
       </header>
 
@@ -973,7 +973,7 @@ export default function Home() {
                 <div className={styles.cardAura} aria-hidden="true" />
                 <div className={styles.cardHeader}>
                   <div>
-                    <span className={styles.cardKicker}>Birth chart intake</span>
+                    <span className={styles.cardKicker}>{t("home.birthChartIntake")}</span>
                     <h2 className={styles.cardTitle}>
                       {intakeStep === 1 ? t("home.birthDetails") : t("home.birthLocation")}
                     </h2>
@@ -1222,7 +1222,7 @@ export default function Home() {
                       required
                     />
                     {hasCountry && (
-                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formCountry")} complete`} role="status">
+                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formCountry") })} role="status">
                         <HiOutlineCheckCircle />
                       </span>
                     )}
@@ -1248,7 +1248,7 @@ export default function Home() {
                       required
                     />
                     {hasState && (
-                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formState")} complete`} role="status">
+                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formState") })} role="status">
                         <HiOutlineCheckCircle />
                       </span>
                     )}
@@ -1275,7 +1275,7 @@ export default function Home() {
                       required
                     />
                     {hasCity && (
-                      <span className={styles.fieldCompleteBadge} aria-label={`${t("home.formCity")} complete`} role="status">
+                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formCity") })} role="status">
                         <HiOutlineCheckCircle />
                       </span>
                     )}
@@ -1390,9 +1390,9 @@ export default function Home() {
                     </button>
                     {latLonExpanded && (
                       <div className={styles.coordsGrid}>
-                        <span>Lat: {Number(draft.latitude).toFixed(4)}</span>
-                        <span>Lon: {Number(draft.longitude).toFixed(4)}</span>
-                        {draft.timeZoneId && <span>TZ: {draft.timeZoneId}</span>}
+                        <span>{t("home.latitudeShort")}: {Number(draft.latitude).toFixed(4)}</span>
+                        <span>{t("home.longitudeShort")}: {Number(draft.longitude).toFixed(4)}</span>
+                        {draft.timeZoneId && <span>{t("home.timezoneShort")}: {draft.timeZoneId}</span>}
                       </div>
                     )}
                   </div>
@@ -1419,12 +1419,12 @@ export default function Home() {
                 disabled={!canContinue}
                 onClick={() => setIntakeStep(2)}
               >
-                Continue to location
+                {t("home.continueToLocation")}
               </PremiumButton>
             ) : (
               <div className={styles.stepActions}>
                 <button type="button" className={styles.backButton} onClick={() => setIntakeStep(1)}>
-                  Back
+                  {t("home.back")}
                 </button>
                 <PremiumButton
                   type="submit"
@@ -1443,7 +1443,7 @@ export default function Home() {
             {((intakeStep === 1 && !canContinue) || (intakeStep === 2 && !canSubmit)) && (
               <p className={styles.actionHint}>
                 <HiOutlineExclamationCircle aria-hidden="true" />
-                {intakeStep === 1 ? "Add your name, birth date, and birth time to continue." : actionHintText}
+                {intakeStep === 1 ? t("home.continueHint") : actionHintText}
               </p>
             )}
             <p className={styles.trustMicrocopy}>

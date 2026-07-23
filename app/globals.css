@@ -4097,6 +4097,102 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   margin-bottom: 1.1rem;
 }
 
+.forecast-date-strip {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.55rem;
+}
+
+.forecast-date-option {
+  display: grid;
+  min-height: 72px;
+  gap: 0.25rem;
+  align-content: center;
+  justify-items: center;
+  border: 1px solid rgba(195, 231, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(4, 24, 38, 0.34);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.forecast-date-option:hover {
+  border-color: rgba(108, 225, 212, 0.42);
+  color: var(--ink-main);
+}
+
+.forecast-date-option:focus-visible,
+.forecast-filter:focus-visible,
+.forecast-calendar-button:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+.forecast-date-option span {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.forecast-date-option strong {
+  font-size: 0.95rem;
+}
+
+.forecast-date-option--selected {
+  border-color: rgba(200, 155, 60, 0.58);
+  background: rgba(200, 155, 60, 0.13);
+  color: var(--accent-gold);
+}
+
+.forecast-filter-bar {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid rgba(195, 231, 255, 0.1);
+}
+
+.forecast-filter-bar > span {
+  flex: 0 0 auto;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.forecast-filter-list {
+  display: flex;
+  gap: 0.45rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+}
+
+.forecast-filter {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border: 1px solid rgba(195, 231, 255, 0.16);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+}
+
+.forecast-filter:hover,
+.forecast-filter--active {
+  border-color: rgba(108, 225, 212, 0.45);
+  background: rgba(108, 225, 212, 0.1);
+  color: var(--accent-teal);
+}
+
+.forecast-loading {
+  margin: 1.2rem 0 0;
+  color: var(--accent-teal);
+}
+
 .forecast-form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(190px, auto);
@@ -4298,6 +4394,105 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   line-height: 1.6;
 }
 
+.forecast-filter-empty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.forecast-events {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(195, 231, 255, 0.1);
+}
+
+.forecast-events-header {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forecast-events-header .kicker {
+  margin-bottom: 0.25rem;
+}
+
+.forecast-events-header h4 {
+  margin: 0;
+  color: var(--ink-main);
+  font-size: 1.15rem;
+}
+
+.forecast-calendar-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 0.45rem;
+  align-items: center;
+  min-height: 36px;
+  border: 1px solid rgba(200, 155, 60, 0.42);
+  border-radius: 8px;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--accent-gold);
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 800;
+  padding: 0.4rem 0.7rem;
+}
+
+.forecast-calendar-button:hover {
+  background: rgba(200, 155, 60, 0.18);
+}
+
+.forecast-event-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.forecast-event {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: start;
+  border-left: 2px solid var(--accent-teal);
+  padding: 0.65rem 0 0.65rem 0.8rem;
+}
+
+.forecast-event--challenging {
+  border-left-color: #ff8f7e;
+}
+
+.forecast-event-tone {
+  margin-top: 0.1rem;
+  color: var(--accent-teal);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.forecast-event--challenging .forecast-event-tone {
+  color: #ff9e8f;
+}
+
+.forecast-event strong {
+  color: var(--ink-main);
+}
+
+.forecast-event p {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.forecast-event-orb {
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
 .forecast-transit-card--supportive {
   border-color: rgba(108, 225, 212, 0.24);
 }
@@ -4321,6 +4516,22 @@ html[data-theme="light"] .ashtakavarga-tab--active {
     grid-template-columns: 1fr;
   }
 
+  .forecast-date-strip {
+    display: flex;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .forecast-date-option {
+    flex: 0 0 84px;
+  }
+
+  .forecast-filter-bar,
+  .forecast-events-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   .forecast-date-row {
     grid-template-columns: 1fr;
   }
@@ -4331,6 +4542,14 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
   .forecast-card-header {
     flex-direction: column;
+  }
+
+  .forecast-event {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .forecast-event-orb {
+    grid-column: 2;
   }
 }
 
