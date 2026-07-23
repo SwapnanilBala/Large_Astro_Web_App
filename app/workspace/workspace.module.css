@@ -234,8 +234,59 @@
 }
 
 @media (max-width: 600px) {
+  .toolbar {
+    gap: 0.8rem;
+  }
+
+  .toolbarActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .toolbarActions > * {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    min-height: 2.75rem;
+    text-align: center;
+  }
+
+  .filterBar {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+  }
+
+  .inlineFilter {
+    min-width: 0;
+  }
+
+  .inlineFilter:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .inlineFilter select {
+    font-size: 1rem;
+    min-height: 2.75rem;
+  }
+
   .card {
     padding: 0.8rem;
     border-radius: 12px;
+  }
+
+  .cardHeader {
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .chipRow {
+    justify-content: flex-start;
+  }
+
+  .cardActions > button,
+  .cardActions > a {
+    min-height: 2.75rem;
   }
 }

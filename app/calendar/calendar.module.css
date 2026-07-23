@@ -258,7 +258,39 @@
     display: none;
   }
 
+  .controlPanel,
+  .bestDaysPanel,
+  .weekPanel,
+  .dayPanel,
+  .emptyPanel {
+    margin-top: 1rem;
+  }
+
+  .field input,
+  .field select {
+    font-size: 1rem;
+    min-height: 2.75rem;
+  }
+
   .intentTabs {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .intentTab,
+  .intentTabActive {
+    min-height: 4.5rem;
+    padding: 0.65rem;
+  }
+
+  .controlActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .controlActions > * {
+    justify-content: center;
+    min-height: 2.75rem;
+    width: 100%;
   }
 }
