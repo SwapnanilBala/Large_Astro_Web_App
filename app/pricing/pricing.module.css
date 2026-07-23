@@ -300,6 +300,47 @@
     padding: 0.8rem;
     border-radius: 12px;
   }
+
+  .matrixRowHeader {
+    display: none;
+  }
+
+  .matrixRow {
+    gap: 0.6rem;
+    padding: 0.8rem;
+  }
+
+  .matrixRow span:first-child {
+    color: var(--ink-main);
+    font-weight: 700;
+    padding-bottom: 0.45rem;
+  }
+
+  .matrixRow span:not(:first-child) {
+    align-items: baseline;
+    display: grid;
+    gap: 0.75rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .matrixRow span:not(:first-child)::before {
+    color: var(--ink-soft);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .matrixRow span:nth-child(2)::before {
+    content: "Guest";
+  }
+
+  .matrixRow span:nth-child(3)::before {
+    content: "Pro";
+  }
+
+  .matrixRow span:nth-child(4)::before {
+    content: "Ultimate";
+  }
 }
 
 @media (max-width: 480px) {
