@@ -7,9 +7,9 @@ export const metadata = {
 
 export default function PalmHistoryPage() {
   return (
-    <main className="home-shell">
+    <div className="home-shell">
       <BackButton href="/insights/advanced" />
       <PalmHistoryClient />
-    </main>
+    </div>
   );
 }

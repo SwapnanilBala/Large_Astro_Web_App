@@ -48,7 +48,10 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0F1117",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0F1117" },
+    { media: "(prefers-color-scheme: light)", color: "#E6DFCC" },
+  ],
 };
 
 export default function RootLayout({
@@ -57,7 +60,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${newsreader.variable}`}>
+    <html lang="en" className={`${cinzel.variable} ${newsreader.variable}`} suppressHydrationWarning>
+      <Script id="theme-init" strategy="beforeInteractive">
+        {`try{var t=localStorage.getItem('astro_theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark'}`}
+      </Script>
       <body>
         <a href="#main-content" className="skip-nav">
           Skip to main content
@@ -69,7 +75,7 @@ export default function RootLayout({
             <ToastProvider>
               <AuthProvider>
                 <Navbar />
-                <main id="main-content">
+                <main id="main-content" tabIndex={-1}>
                   {children}
                 </main>
                 <BottomNav />

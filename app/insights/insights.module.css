@@ -177,7 +177,11 @@
   overflow-y: hidden;
   padding: 0.74rem 1.4rem 0.58rem;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 1.4rem;
+  scroll-snap-type: x proximity;
   scrollbar-width: thin;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
@@ -190,6 +194,7 @@
 
 .heroPlanetRow > * {
   flex: 0 0 auto;
+  scroll-snap-align: center;
 }
 
 .heroPlanetRow > *:nth-child(1),
@@ -3252,7 +3257,14 @@
   .heroPlanetScroller {
     margin-inline: -0.35rem;
     padding: 0.72rem 0.95rem 0.62rem;
+    scroll-padding-inline: 0.95rem;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
     mask-image: linear-gradient(90deg, transparent, #000 14%, #000 86%, transparent);
+  }
+
+  .heroPlanetScroller::-webkit-scrollbar {
+    display: none;
   }
 
   .heroPlanetRow {
@@ -3260,18 +3272,33 @@
     min-width: max-content;
   }
 
+  .heroPlanetRow > * {
+    scroll-snap-align: start;
+  }
+
   .anchorNav {
     justify-content: flex-start;
     overflow-x: auto;
     flex-wrap: nowrap;
     margin-inline: -0.25rem;
-    scrollbar-width: thin;
+    padding-inline: 0.75rem;
+    overscroll-behavior-inline: contain;
+    scroll-padding-inline: 0.75rem;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 0.8rem, #000 calc(100% - 0.8rem), transparent);
+  }
+
+  .anchorNav::-webkit-scrollbar {
+    display: none;
   }
 
   .anchorLink {
     display: inline-flex;
     align-items: center;
     min-height: 2.75rem;
+    scroll-snap-align: start;
     white-space: nowrap;
   }
 
@@ -3320,7 +3347,9 @@
   }
 
   .rulesScroll {
-    max-height: 450px;
+    max-height: none;
+    overflow: visible;
+    padding-inline: 0;
   }
 
   .cardPlanets {

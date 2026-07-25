@@ -479,12 +479,12 @@
   top: 3.2rem !important;
   display: grid !important;
   place-items: center !important;
-  width: 1.35rem !important;
-  height: 2.65rem !important;
-  min-width: 1.35rem !important;
-  min-height: 2.65rem !important;
-  max-width: 1.35rem !important;
-  max-height: 2.65rem !important;
+  width: 2.75rem !important;
+  height: 2.75rem !important;
+  min-width: 2.75rem !important;
+  min-height: 2.75rem !important;
+  max-width: 2.75rem !important;
+  max-height: 2.75rem !important;
   padding: 0 !important;
   overflow: visible !important;
   text-indent: 0 !important;
@@ -564,12 +564,12 @@
 
   .calendarPopup :global(.react-datepicker__navigation) {
     top: 3.1rem !important;
-    width: 1.25rem !important;
-    height: 2.45rem !important;
-    min-width: 1.25rem !important;
-    min-height: 2.45rem !important;
-    max-width: 1.25rem !important;
-    max-height: 2.45rem !important;
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+    min-width: 2.75rem !important;
+    min-height: 2.75rem !important;
+    max-width: 2.75rem !important;
+    max-height: 2.75rem !important;
   }
 
   .calendarPopup :global(.react-datepicker__navigation--previous) {

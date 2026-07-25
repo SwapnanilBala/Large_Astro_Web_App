@@ -579,6 +579,7 @@
 /* Override: make coordinates toggle visually distinct */
 .coordsToggleWrapper {
   margin-top: 0.75rem;
+  width: 100%;
   padding: 0.75rem 1rem;
   background: rgba(200, 155, 60, 0.06);
   border: 1px dashed rgba(200, 155, 60, 0.25);
@@ -588,7 +589,18 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: none;
+  text-shadow: none;
   user-select: none;
+}
+
+.coordsToggleWrapper::before,
+.coordsToggleWrapper::after {
+  display: none;
 }
 
 .coordsToggleWrapper:hover {
@@ -598,6 +610,11 @@
 
 .coordsToggleWrapper:active {
   transform: scale(0.99);
+}
+
+.coordsToggleWrapper:focus-visible {
+  outline: 2px solid rgba(242, 194, 108, 0.72);
+  outline-offset: 3px;
 }
 
 .coordsToggleText {
@@ -3867,7 +3884,7 @@
 
   .mainContent {
     margin-top: clamp(2.5rem, 8vw, 4.25rem);
-    padding-bottom: calc(8rem + env(safe-area-inset-bottom));
+    padding-bottom: 2rem;
   }
 
   .heroProgressConstellation {
@@ -3897,7 +3914,7 @@
   }
 
   .mobileStickyBar {
-    bottom: calc(4.75rem + env(safe-area-inset-bottom));
+    bottom: var(--mobile-nav-height, 0px);
     background: rgba(15, 15, 25, 0.98);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
@@ -4019,7 +4036,7 @@
 }
 
 @media (max-width: 520px) {
-  .smartFillWrapper {
-    display: none;
+  .smartFillContent {
+    padding: 0.85rem;
   }
 }

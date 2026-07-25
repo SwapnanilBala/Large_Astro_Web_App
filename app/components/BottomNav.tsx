@@ -1,91 +1,130 @@
 'use client';
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
+import { Bookmark, CalendarDays, House, Sparkles } from 'lucide-react';
+import { useAuth } from '@/lib/auth-context';
 import { useTranslation } from '@/lib/i18n-context';
+import { listSavedCharts } from '@/lib/workspace-store';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
-  { href: '/', labelKey: 'bottomNav.home', icon: '\u2299' },
-  { href: '/insights', labelKey: 'bottomNav.insights', icon: '\u2726' },
-  { href: '/workspace', labelKey: 'bottomNav.saved', icon: '\u2661' },
-  { href: '/calendar', labelKey: 'bottomNav.calendar', icon: '\u25C8' },
+  { href: '/', labelKey: 'bottomNav.home', Icon: House },
+  { href: '/insights', labelKey: 'bottomNav.insights', Icon: Sparkles },
+  { href: '/workspace', labelKey: 'bottomNav.saved', Icon: Bookmark },
+  { href: '/calendar', labelKey: 'bottomNav.calendar', Icon: CalendarDays },
 ];
 
-/** Minimum horizontal swipe distance (px) to trigger navigation */
-const SWIPE_THRESHOLD = 60;
-/** Maximum vertical drift allowed during a horizontal swipe */
-const SWIPE_VERTICAL_LIMIT = 80;
+type StoredChartHistoryEntry = {
+  queryString?: unknown;
+  savedAt?: unknown;
+};
+
+function insightsUrl(queryString: unknown) {
+  if (typeof queryString !== 'string') return null;
+  const query = queryString.trim().replace(/^\?/, '');
+  return query ? `/insights?${query}` : null;
+}
+
+function latestLocalChartUrl() {
+  try {
+    const raw = window.localStorage.getItem('astro_chart_history');
+    if (!raw) return null;
+
+    const entries = JSON.parse(raw) as StoredChartHistoryEntry[];
+    if (!Array.isArray(entries)) return null;
+
+    const latest = [...entries].sort((left, right) => {
+      const leftTime = typeof left.savedAt === 'string' ? Date.parse(left.savedAt) : 0;
+      const rightTime = typeof right.savedAt === 'string' ? Date.parse(right.savedAt) : 0;
+      return rightTime - leftTime;
+    })[0];
+
+    return insightsUrl(latest?.queryString);
+  } catch {
+    return null;
+  }
+}
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const router = useRouter();
+  const { isAuthenticated, user } = useAuth();
   const { t } = useTranslation();
-  const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-
-  const currentIndex = NAV_ITEMS.findIndex(item => item.href === pathname);
-
-  const navigateBySwipe = useCallback((direction: 'left' | 'right') => {
-    if (currentIndex === -1) return;
-    const nextIndex = direction === 'left'
-      ? Math.min(currentIndex + 1, NAV_ITEMS.length - 1)
-      : Math.max(currentIndex - 1, 0);
-    if (nextIndex !== currentIndex) {
-      // Trigger haptic feedback if available
-      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        navigator.vibrate(8);
-      }
-      router.push(NAV_ITEMS[nextIndex].href);
-    }
-  }, [currentIndex, router]);
+  const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
+  const isHidden = ["/login", "/register", "/auth", "/engine-select"].some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
 
   useEffect(() => {
-    const mobileQuery = window.matchMedia('(pointer: coarse), (max-width: 768px)');
-    if (!mobileQuery.matches) return;
+    document.documentElement.toggleAttribute("data-bottom-nav-hidden", isHidden);
+    return () => {
+      document.documentElement.removeAttribute("data-bottom-nav-hidden");
+    };
+  }, [isHidden]);
 
-    const handleTouchStart = (e: TouchEvent) => {
-      const touch = e.touches[0];
-      touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+  useEffect(() => {
+    let cancelled = false;
+
+    const resolveLatestChart = async () => {
+      const localUrl = latestLocalChartUrl();
+      if (!cancelled) {
+        setLastChartUrl(localUrl);
+      }
+
+      if (localUrl || !isAuthenticated || !user) return;
+
+      try {
+        const savedCharts = await listSavedCharts(user.user_id);
+        if (!cancelled) {
+          setLastChartUrl(
+            latestLocalChartUrl() ?? insightsUrl(savedCharts[0]?.query_string)
+          );
+        }
+      } catch {
+        /* Keep the local fallback when the account workspace is unavailable. */
+      }
     };
 
-    const handleTouchEnd = (e: TouchEvent) => {
-      if (!touchStartRef.current) return;
-      const touch = e.changedTouches[0];
-      const dx = touch.clientX - touchStartRef.current.x;
-      const dy = touch.clientY - touchStartRef.current.y;
-      const elapsed = Date.now() - touchStartRef.current.time;
-      touchStartRef.current = null;
+    void resolveLatestChart();
 
-      // Must be fast enough (<500ms), horizontal enough, and long enough
-      if (elapsed > 500) return;
-      if (Math.abs(dy) > SWIPE_VERTICAL_LIMIT) return;
-      if (Math.abs(dx) < SWIPE_THRESHOLD) return;
-
-      navigateBySwipe(dx < 0 ? 'left' : 'right');
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'astro_chart_history') {
+        setLastChartUrl(latestLocalChartUrl());
+      }
     };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+    window.addEventListener('storage', handleStorage);
 
     return () => {
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchend', handleTouchEnd);
+      cancelled = true;
+      window.removeEventListener('storage', handleStorage);
     };
-  }, [navigateBySwipe]);
+  }, [isAuthenticated, pathname, user]);
+
+  if (isHidden) return null;
 
   return (
     <nav className={styles.bottomNav} aria-label="Mobile navigation">
-      {NAV_ITEMS.map(item => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={`${styles.navItem} ${pathname === item.href ? styles.active : ''}`}
-          aria-current={pathname === item.href ? 'page' : undefined}
-        >
-          <span className={styles.icon}>{item.icon}</span>
-          <span className={styles.label}>{t(item.labelKey)}</span>
-        </Link>
-      ))}
+      {NAV_ITEMS.map(item => {
+        const isActive = item.href === '/'
+          ? pathname === item.href
+          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const href = item.href === '/insights' && lastChartUrl
+          ? lastChartUrl
+          : item.href;
+        const Icon = item.Icon;
+
+        return (
+          <Link
+            key={item.href}
+            href={href}
+            className={`${styles.navItem} ${isActive ? styles.active : ''}`}
+            aria-current={isActive ? 'page' : undefined}
+          >
+            <Icon className={styles.icon} aria-hidden="true" strokeWidth={1.8} />
+            <span className={styles.label}>{t(item.labelKey)}</span>
+          </Link>
+        );
+      })}
     </nav>
   );
 }

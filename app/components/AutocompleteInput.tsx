@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 interface Suggestion {
   name: string;
@@ -8,6 +8,9 @@ interface Suggestion {
 }
 
 interface AutocompleteInputProps {
+  id?: string;
+  name?: string;
+  ariaLabelledBy?: string;
   value: string;
   onChange: (value: string) => void;
   onSelect: (value: string) => void;
@@ -19,6 +22,9 @@ interface AutocompleteInputProps {
 }
 
 export default function AutocompleteInput({
+  id,
+  name,
+  ariaLabelledBy,
   value,
   onChange,
   onSelect,
@@ -35,6 +41,10 @@ export default function AutocompleteInput({
   const abortRef = useRef<AbortController | null>(null);
   const requestSeq = useRef(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const generatedId = useId();
+  const inputId = id ?? `autocomplete-${generatedId}`;
+  const listboxId = `${inputId}-listbox`;
+  const isListboxVisible = isOpen && suggestions.length > 0;
 
   useEffect(() => {
     const query = value.trim();
@@ -94,6 +104,7 @@ export default function AutocompleteInput({
     function handleClickOutside(e: MouseEvent) {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
         setIsOpen(false);
+        setActiveIndex(-1);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -104,6 +115,7 @@ export default function AutocompleteInput({
     onSelect(name);
     setIsOpen(false);
     setSuggestions([]);
+    setActiveIndex(-1);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -120,6 +132,7 @@ export default function AutocompleteInput({
       handleSelect(suggestions[activeIndex].name);
     } else if (e.key === "Escape") {
       setIsOpen(false);
+      setActiveIndex(-1);
     }
   };
 
@@ -129,25 +142,59 @@ export default function AutocompleteInput({
       ref={wrapperRef}
     >
       <input
+        id={inputId}
+        name={name}
         type="text"
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => {
+          onChange(e.target.value);
+          setActiveIndex(-1);
+        }}
         onKeyDown={handleKeyDown}
         onFocus={() => {
           if (suggestions.length > 0) setIsOpen(true);
         }}
+        onBlur={(event) => {
+          if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {
+            setIsOpen(false);
+            setActiveIndex(-1);
+          }
+        }}
         placeholder={placeholder}
         required={required}
+        aria-required={required}
+        aria-labelledby={ariaLabelledBy}
         autoComplete="off"
+        role="combobox"
         aria-autocomplete="list"
+        aria-expanded={isListboxVisible}
+        aria-controls={listboxId}
+        aria-haspopup="listbox"
+        aria-activedescendant={
+          isListboxVisible && activeIndex >= 0
+            ? `${inputId}-option-${activeIndex}`
+            : undefined
+        }
       />
-      {isOpen && suggestions.length > 0 && (
-        <ul className="autocomplete-dropdown">
+      {isListboxVisible && (
+        <ul
+          id={listboxId}
+          className="autocomplete-dropdown"
+          role="listbox"
+          aria-labelledby={ariaLabelledBy}
+          aria-label={ariaLabelledBy ? undefined : placeholder ?? suggestType}
+        >
           {suggestions.map((s, i) => (
             <li
               key={`${s.name}-${i}`}
+              id={`${inputId}-option-${i}`}
               className={`autocomplete-item ${i === activeIndex ? "active" : ""}`}
-              onMouseDown={() => handleSelect(s.name)}
+              role="option"
+              aria-selected={i === activeIndex}
+              onMouseDown={(event) => {
+                event.preventDefault();
+                handleSelect(s.name);
+              }}
               onMouseEnter={() => setActiveIndex(i)}
             >
               <span className="autocomplete-item-name">{s.name}</span>

@@ -78,20 +78,20 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
   if (isLoading || redirecting) {
     return (
       <PageTransition>
-      <main className="home-shell">
+      <div className="home-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
         <section className={styles.panel} style={{ textAlign: "center" }}>
           <p className="kicker">{t("register.redirecting")}</p>
         </section>
-      </main>
+      </div>
       </PageTransition>
     );
   }
 
   return (
     <PageTransition>
-    <main className="home-shell">
+    <div className="home-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton href="/" />
@@ -239,7 +239,7 @@ export default function RegisterPageClient({ returnTo }: RegisterPageClientProps
         </p>
 
       </section>
-    </main>
+    </div>
     </PageTransition>
   );
 }

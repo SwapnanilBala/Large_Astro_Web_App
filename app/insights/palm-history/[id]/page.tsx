@@ -12,9 +12,9 @@ export default async function PalmReadingDetailPage({
 }) {
   const { id } = await params;
   return (
-    <main className="home-shell">
+    <div className="home-shell">
       <BackButton href="/insights/palm-history" />
       <PalmReadingDetailClient id={id} />
-    </main>
+    </div>
   );
 }

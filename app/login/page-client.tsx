@@ -76,19 +76,19 @@ export default function LoginPageClient({ returnTo, skyLine }: LoginPageClientPr
   if (isLoading || redirecting) {
     return (
       <PageTransition>
-      <main className="home-shell" style={{ position: "relative" }}>
+      <div className="home-shell" style={{ position: "relative" }}>
         <AuthAmbient />
         <section className={styles.panel} style={{ textAlign: "center" }}>
           <p className="kicker">{t("login.redirecting")}</p>
         </section>
-      </main>
+      </div>
       </PageTransition>
     );
   }
 
   return (
     <PageTransition>
-    <main className="home-shell" style={{ position: "relative" }}>
+    <div className="home-shell" style={{ position: "relative" }}>
       <AuthAmbient />
       <ZodiacFloater />
       <BackButton href="/" />
@@ -184,7 +184,7 @@ export default function LoginPageClient({ returnTo, skyLine }: LoginPageClientPr
           </Link>
         </p>
       </section>
-    </main>
+    </div>
     </PageTransition>
   );
 }

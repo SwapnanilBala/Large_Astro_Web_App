@@ -301,33 +301,35 @@ export default function PalmCompareClient({ ids }: Props) {
               No strength changes across the four major lines.
             </p>
           ) : (
-            <table className="palm-compare-table">
-              <thead>
-                <tr>
-                  <th>Line</th>
-                  <th>Reading A</th>
-                  <th>Reading B</th>
-                  <th>Change</th>
-                </tr>
-              </thead>
-              <tbody>
-                {diff.line_strength_changes.map((c) => (
-                  <tr key={c.line}>
-                    <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
-                    <td>{c.from}</td>
-                    <td>{c.to}</td>
-                    <td>
-                      <span
-                        className={`palm-compare-arrow palm-compare-arrow--${c.direction}`}
-                        aria-label={c.direction}
-                      >
-                        {arrowFor(c.direction)} {c.direction}
-                      </span>
-                    </td>
+            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label="Line strength comparison">
+              <table className="palm-compare-table">
+                <thead>
+                  <tr>
+                    <th>Line</th>
+                    <th>Reading A</th>
+                    <th>Reading B</th>
+                    <th>Change</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {diff.line_strength_changes.map((c) => (
+                    <tr key={c.line}>
+                      <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
+                      <td>{c.from}</td>
+                      <td>{c.to}</td>
+                      <td>
+                        <span
+                          className={`palm-compare-arrow palm-compare-arrow--${c.direction}`}
+                          aria-label={c.direction}
+                        >
+                          {arrowFor(c.direction)} {c.direction}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </section>
 
@@ -335,24 +337,26 @@ export default function PalmCompareClient({ ids }: Props) {
         {diff.line_visibility_changes.length > 0 && (
           <section className="palm-section-card">
             <h3>Line visibility</h3>
-            <table className="palm-compare-table">
-              <thead>
-                <tr>
-                  <th>Line</th>
-                  <th>Reading A</th>
-                  <th>Reading B</th>
-                </tr>
-              </thead>
-              <tbody>
-                {diff.line_visibility_changes.map((c) => (
-                  <tr key={c.line}>
-                    <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
-                    <td>{c.from}</td>
-                    <td>{c.to}</td>
+            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label="Line visibility comparison">
+              <table className="palm-compare-table">
+                <thead>
+                  <tr>
+                    <th>Line</th>
+                    <th>Reading A</th>
+                    <th>Reading B</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {diff.line_visibility_changes.map((c) => (
+                    <tr key={c.line}>
+                      <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
+                      <td>{c.from}</td>
+                      <td>{c.to}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
         )}
 

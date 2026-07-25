@@ -319,18 +319,18 @@ export default function CalendarPageClient() {
 
   if (isLoading) {
     return (
-      <main className="insights-shell">
+      <div className="insights-shell">
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Astro Calendar</p>
           <h1>Loading your planner...</h1>
         </section>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="insights-shell">
+    <div className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton href="/" />
@@ -567,6 +567,6 @@ export default function CalendarPageClient() {
           </>
         )}
       </section>
-    </main>
+    </div>
   );
 }

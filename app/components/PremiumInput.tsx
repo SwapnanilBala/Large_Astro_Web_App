@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useId } from "react";
 import styles from "./PremiumInput.module.css";
 
 interface PremiumInputProps {
+  id?: string;
+  name?: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -15,9 +17,13 @@ interface PremiumInputProps {
   disabled?: boolean;
   autoFocus?: boolean;
   required?: boolean;
+  autoComplete?: string;
+  inputMode?: React.InputHTMLAttributes<HTMLInputElement>["inputMode"];
 }
 
 export default function PremiumInput({
+  id,
+  name,
   label,
   value,
   onChange,
@@ -29,10 +35,15 @@ export default function PremiumInput({
   disabled = false,
   autoFocus = false,
   required = false,
+  autoComplete,
+  inputMode,
 }: PremiumInputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const generatedId = useId();
+  const inputId = id ?? `premium-input-${generatedId}`;
+  const errorId = `${inputId}-error`;
 
   useEffect(() => {
     setIsFilled(value.length > 0);
@@ -66,9 +77,9 @@ export default function PremiumInput({
         isComplete ? styles.complete : ""
       } ${disabled ? styles.disabled : ""}`}
     >
-      <label className={styles.fieldLabel}>
+      <label className={styles.fieldLabel} htmlFor={inputId}>
         {label}
-        {required && <span className={styles.requiredDot}>*</span>}
+        {required && <span className={styles.requiredDot} aria-hidden="true">*</span>}
       </label>
       <div className={styles.inputWrapper}>
         {icon && (
@@ -77,6 +88,8 @@ export default function PremiumInput({
           </span>
         )}
         <input
+          id={inputId}
+          name={name}
           ref={inputRef}
           type={type}
           value={value}
@@ -85,6 +98,12 @@ export default function PremiumInput({
           onBlur={handleBlur}
           placeholder={placeholder}
           disabled={disabled}
+          required={required}
+          aria-required={required}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? errorId : undefined}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
           className={inputClasses}
         />
         <span
@@ -100,7 +119,11 @@ export default function PremiumInput({
         <div className={styles.inputBorder} />
         <div className={styles.inputGlow} />
       </div>
-      {error && <div className={styles.errorMessage}>{error}</div>}
+      {error && (
+        <div id={errorId} className={styles.errorMessage} role="alert">
+          {error}
+        </div>
+      )}
     </div>
   );
 }

@@ -367,19 +367,19 @@ export default function WorkspacePageClient() {
 
   if (isLoading) {
     return (
-      <main className="insights-shell">
+      <div className="insights-shell">
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Workspace</p>
           <h1>{t("workspace.loading")}</h1>
         </section>
-      </main>
+      </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <main className="insights-shell">
+      <div className="insights-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
         <BackButton href="/" />
@@ -399,12 +399,12 @@ export default function WorkspacePageClient() {
             </Link>
           </div>
         </section>
-      </main>
+      </div>
     );
   }
 
   return (
-    <main className="insights-shell">
+    <div className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton href="/" />
@@ -723,6 +723,6 @@ export default function WorkspacePageClient() {
           </section>
         )}
       </section>
-    </main>
+    </div>
   );
 }

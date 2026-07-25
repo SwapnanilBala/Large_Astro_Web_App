@@ -36,7 +36,7 @@ export default function AuthCallbackClient({ nextPath = "/" }: AuthCallbackClien
 
   return (
     <PageTransition>
-      <main className="home-shell">
+      <div className="home-shell">
         <div className="ambient ambient-left" />
         <div className="ambient ambient-right" />
         <section className="dashboard-shell" style={{ textAlign: "center" }}>
@@ -44,7 +44,7 @@ export default function AuthCallbackClient({ nextPath = "/" }: AuthCallbackClien
           <h1>Preparing your astrology workspace...</h1>
           <p className="lead">We are checking whether you already have a chart ready to continue.</p>
         </section>
-      </main>
+      </div>
     </PageTransition>
   );
 }

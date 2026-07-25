@@ -237,7 +237,6 @@
 
 @media (max-width: 980px) {
   .controlGrid,
-  .summaryGrid,
   .bestDayGrid,
   .weekGrid,
   .dayGrid {
@@ -264,6 +263,21 @@
   .dayPanel,
   .emptyPanel {
     margin-top: 1rem;
+  }
+
+  .summaryGrid {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(10rem, 72vw);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
+    padding-bottom: 0.5rem;
+  }
+
+  .summaryGrid > * {
+    scroll-snap-align: start;
   }
 
   .field input,

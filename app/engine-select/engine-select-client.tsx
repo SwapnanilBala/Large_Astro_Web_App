@@ -278,6 +278,12 @@ export default function EngineSelectClient({
 
       {/* --- CTA Button --- */}
       <div className={`${styles.footer} ${styles.animFooter}`}>
+        <p className={styles.footerContext} aria-live="polite">
+          <span>{t("engineSelect.selectedKicker")}</span>
+          <strong title={`${selectedGroupLabel} - ${selectedHouseLabel}`}>
+            {selectedGroupLabel} - {selectedHouseLabel}
+          </strong>
+        </p>
         <button
           type="button"
           className={styles.cta}

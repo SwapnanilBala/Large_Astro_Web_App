@@ -964,7 +964,7 @@ export default function Home() {
       </header>
 
       {/* === MAIN CONTENT === */}
-      <main className={styles.mainContent}>
+      <div className={styles.mainContent}>
         <form className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formLayout}>
             {/* LEFT COLUMN: Form Fields */}
@@ -988,20 +988,26 @@ export default function Home() {
                   type="button"
                   className={styles.smartFillToggle}
                   onClick={() => setSmartFillExpanded(!smartFillExpanded)}
+                  aria-expanded={smartFillExpanded}
+                  aria-controls="smart-fill-panel"
                 >
-                  <HiOutlineSparkles />
+                  <HiOutlineSparkles aria-hidden="true" />
                   <span>{t("home.smartFillToggle")}</span>
-                  <HiOutlineChevronDown className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ''}`} />
+                  <HiOutlineChevronDown
+                    className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ''}`}
+                    aria-hidden="true"
+                  />
                 </button>
-                
+
                 {smartFillExpanded && (
-                  <div className={styles.smartFillContent}>
+                  <div id="smart-fill-panel" className={styles.smartFillContent}>
                     <textarea
                       value={smartFillText}
                       onChange={(e) => setSmartFillText(e.target.value)}
                       placeholder={t("home.smartFillPlaceholder")}
                       className={styles.smartFillTextarea}
                       rows={2}
+                      aria-label={t("home.smartFillToggle")}
                     />
                     <div className={styles.smartFillHint}>
                       {t("home.smartFillHint")}
@@ -1095,6 +1101,8 @@ export default function Home() {
 
               <div className={styles.premiumField}>
                 <PremiumInput
+                  id="birth-name"
+                  name="name"
                   label={t("home.formName")}
                   value={draft.name}
                   onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
@@ -1102,6 +1110,7 @@ export default function Home() {
                   icon={<HiOutlineUser />}
                   completed={hasName}
                   required
+                  autoComplete="name"
                 />
               </div>
 
@@ -1110,6 +1119,8 @@ export default function Home() {
               <div className={styles.dateTimeRow}>
                 <div className={styles.premiumField}>
                   <PremiumDatePicker
+                    id="birth-date"
+                    name="birthDate"
                     label={t("home.formBirthDate")}
                     value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
                     onChange={(date: Date | null) => {
@@ -1125,6 +1136,7 @@ export default function Home() {
                     icon={<HiOutlineCalendarDays />}
                     completed={hasBirthDate}
                     required
+                    autoComplete="bday"
                     maxDate={new Date()}
                     minDate={new Date(1900, 0, 1)}
                     showYearDropdown
@@ -1136,6 +1148,8 @@ export default function Home() {
                 <div className={styles.premiumField}>
                   {!unknownTime ? (
                     <PremiumDatePicker
+                      id="birth-time"
+                      name="birthTime"
                       label={t("home.formBirthTime")}
                       value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
                       onChange={(date: Date | null) => {
@@ -1208,12 +1222,17 @@ export default function Home() {
               {/* ── Country Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
-                  <label>{t("home.formCountry")}</label>
+                  <label id="birth-country-label" htmlFor="birth-country">
+                    {t("home.formCountry")}
+                  </label>
                   <div className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}>
                     <span className={styles.fieldLeadingIcon} aria-hidden="true">
                       <HiOutlineMapPin />
                     </span>
                     <AutocompleteInput
+                      id="birth-country"
+                      name="country"
+                      ariaLabelledBy="birth-country-label"
                       value={draft.country}
                       onChange={handleCountryChange}
                       onSelect={handleCountrySelect}
@@ -1233,12 +1252,17 @@ export default function Home() {
               {/* ── State Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
-                  <label>{t("home.formState")}</label>
+                  <label id="birth-state-label" htmlFor="birth-state">
+                    {t("home.formState")}
+                  </label>
                   <div className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}>
                     <span className={styles.fieldLeadingIcon} aria-hidden="true">
                       <HiOutlineMapPin />
                     </span>
                     <AutocompleteInput
+                      id="birth-state"
+                      name="state"
+                      ariaLabelledBy="birth-state-label"
                       value={draft.state}
                       onChange={handleStateChange}
                       onSelect={handleStateSelect}
@@ -1259,12 +1283,17 @@ export default function Home() {
               {/* ── City Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
-                  <label>{t("home.formCity")}</label>
+                  <label id="birth-city-label" htmlFor="birth-city">
+                    {t("home.formCity")}
+                  </label>
                   <div className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}>
                     <span className={styles.fieldLeadingIcon} aria-hidden="true">
                       <HiOutlineMapPin />
                     </span>
                     <AutocompleteInput
+                      id="birth-city"
+                      name="city"
+                      ariaLabelledBy="birth-city-label"
                       value={draft.city}
                       onChange={setField("city")}
                       onSelect={setField("city")}
@@ -1284,23 +1313,30 @@ export default function Home() {
               </div>
 
               {/* ── Lat/Lon Toggle ── */}
-              <div 
+              <button
+                type="button"
                 className={styles.coordsToggleWrapper}
                 onClick={() => setLatLonExpanded(!latLonExpanded)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setLatLonExpanded(!latLonExpanded); }}
+                aria-expanded={latLonExpanded}
+                aria-controls="manual-coordinate-fields"
               >
                 <span className={styles.coordsToggleText}>
-                  <GiCompass />
+                  <GiCompass aria-hidden="true" />
                   {t("home.enterCoordinates")}
                 </span>
-                <span className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ''}`}>&#9662;</span>
-              </div>
+                <span
+                  className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ''}`}
+                  aria-hidden="true"
+                >
+                  &#9662;
+                </span>
+              </button>
 
               {latLonExpanded && (
-                <div className={styles.latLonFields}>
+                <div id="manual-coordinate-fields" className={styles.latLonFields}>
                   <PremiumInput
+                    id="birth-latitude"
+                    name="latitude"
                     label={t("home.formLatitude")}
                     value={draft.latitude}
                     onChange={(value) => setField("latitude")(value)}
@@ -1308,8 +1344,11 @@ export default function Home() {
                     icon={<GiCompass />}
                     completed={hasLatitude}
                     required
+                    inputMode="decimal"
                   />
                   <PremiumInput
+                    id="birth-longitude"
+                    name="longitude"
                     label={t("home.formLongitude")}
                     value={draft.longitude}
                     onChange={(value) => setField("longitude")(value)}
@@ -1317,6 +1356,7 @@ export default function Home() {
                     icon={<GiCompass />}
                     completed={hasLongitude}
                     required
+                    inputMode="decimal"
                   />
                 </div>
               )}
@@ -1385,11 +1425,13 @@ export default function Home() {
                       type="button"
                       className={styles.coordsToggle}
                       onClick={() => setLatLonExpanded(!latLonExpanded)}
+                      aria-expanded={latLonExpanded}
+                      aria-controls="preview-coordinate-values"
                     >
                       <GiCompass /> {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
                     </button>
                     {latLonExpanded && (
-                      <div className={styles.coordsGrid}>
+                      <div id="preview-coordinate-values" className={styles.coordsGrid}>
                         <span>{t("home.latitudeShort")}: {Number(draft.latitude).toFixed(4)}</span>
                         <span>{t("home.longitudeShort")}: {Number(draft.longitude).toFixed(4)}</span>
                         {draft.timeZoneId && <span>{t("home.timezoneShort")}: {draft.timeZoneId}</span>}
@@ -1452,7 +1494,7 @@ export default function Home() {
           </div>
 
         </form>
-      </main>
+      </div>
 
       {/* === FOOTER === */}
       <footer className={styles.intakeFooter}>

@@ -522,7 +522,7 @@ export default function CompatibilityPageClient({
   }, [canSubmit, partner, result, submitCompatibility]);
 
   return (
-    <main className="insights-shell">
+    <div className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton />
@@ -689,6 +689,6 @@ export default function CompatibilityPageClient({
           </>
         )}
       </section>
-    </main>
+    </div>
   );
 }

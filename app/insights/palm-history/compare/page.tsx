@@ -12,9 +12,9 @@ export default async function PalmComparePage({
 }) {
   const { ids } = await searchParams;
   return (
-    <main className="home-shell">
+    <div className="home-shell">
       <BackButton href="/insights/palm-history" />
       <PalmCompareClient ids={ids ?? ""} />
-    </main>
+    </div>
   );
 }

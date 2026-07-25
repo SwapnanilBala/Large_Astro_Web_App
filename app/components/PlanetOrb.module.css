@@ -384,6 +384,13 @@
   font-size: 0.55rem;
 }
 
+@media (max-width: 768px) {
+  .label,
+  .wrapper:has(.sm) .label {
+    font-size: 0.75rem;
+  }
+}
+
 .tooltip {
   position: absolute;
   left: 50%;

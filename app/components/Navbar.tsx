@@ -19,34 +19,57 @@ export default function Navbar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
+  const drawerCloseRef = useRef<HTMLButtonElement>(null);
+
+  const openDrawer = useCallback(() => {
+    setLangOpen(false);
+    setDrawerOpen(true);
+  }, []);
+
+  const closeDrawer = useCallback(() => {
+    setDrawerOpen(false);
+    window.requestAnimationFrame(() => {
+      hamburgerRef.current?.focus({ preventScroll: true });
+    });
+  }, []);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const setLastChartFromLocal = () => {
+    const getLastChartFromLocal = () => {
       try {
         const raw = localStorage.getItem("astro_chart_history");
-        if (!raw) return;
+        if (!raw) return null;
         const entries: ChartHistoryEntry[] = JSON.parse(raw);
-        if (entries.length > 0) {
-          setLastChartUrl(`/insights?${entries[0].queryString}`);
-        }
+        if (!Array.isArray(entries) || entries.length === 0) return null;
+
+        const latest = [...entries].sort(
+          (left, right) =>
+            Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
+        )[0];
+        const queryString = latest?.queryString?.trim().replace(/^\?/, "");
+        return queryString ? `/insights?${queryString}` : null;
       } catch {
-        /* ignore */
+        return null;
       }
     };
 
-    setLastChartFromLocal();
-
     let isCancelled = false;
+    const localChartUrl = getLastChartFromLocal();
+    const localChartFrame = window.requestAnimationFrame(() => {
+      if (!isCancelled) setLastChartUrl(localChartUrl);
+    });
 
     const loadSavedCharts = async () => {
       try {
-        if (!user) return;
+        if (localChartUrl || !isAuthenticated || !user) return;
         const data = await listSavedCharts(user.user_id);
         if (isCancelled || data.length === 0) return;
 
-        setLastChartUrl(`/insights?${data[0].query_string}`);
+        const queryString = data[0].query_string.trim().replace(/^\?/, "");
+        if (queryString) {
+          setLastChartUrl(getLastChartFromLocal() ?? `/insights?${queryString}`);
+        }
       } catch {
         /* ignore and keep local fallback */
       }
@@ -56,8 +79,9 @@ export default function Navbar() {
 
     return () => {
       isCancelled = true;
+      window.cancelAnimationFrame(localChartFrame);
     };
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, pathname, user]);
 
   /* Track scroll position for glass effect */
   useEffect(() => {
@@ -83,10 +107,53 @@ export default function Navbar() {
 
   /* Close drawer on route change */
   useEffect(() => {
-    setDrawerOpen(false);
+    const closeFrame = window.requestAnimationFrame(() => setDrawerOpen(false));
+    return () => window.cancelAnimationFrame(closeFrame);
   }, [pathname]);
 
-  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  /* Keep focus inside the open drawer and prevent the page behind it from scrolling. */
+  useEffect(() => {
+    if (!drawerOpen) return;
+
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const focusFrame = window.requestAnimationFrame(() => drawerCloseRef.current?.focus());
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeDrawer();
+        return;
+      }
+
+      if (event.key !== "Tab" || !drawerRef.current) return;
+
+      const focusable = Array.from(
+        drawerRef.current.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!first || !last) return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousBodyOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [closeDrawer, drawerOpen]);
 
   if (isLoading) return null;
 
@@ -122,11 +189,13 @@ export default function Navbar() {
               onClick={() => setLangOpen((prev) => !prev)}
               type="button"
               aria-label="Select language"
+              aria-expanded={langOpen}
+              aria-controls="navbar-language-menu"
             >
               {language.toUpperCase()}
             </button>
             {langOpen && (
-              <div className="lang-dropdown anim-fade-in">
+              <div id="navbar-language-menu" className="lang-dropdown anim-fade-in">
                 {LANGUAGE_CODES.map((code) => (
                   <button
                     key={code}
@@ -183,10 +252,13 @@ export default function Navbar() {
 
           {/* Hamburger button - mobile only */}
           <button
+            ref={hamburgerRef}
             className="navbar-hamburger"
-            onClick={() => setDrawerOpen(true)}
+            onClick={openDrawer}
             type="button"
-            aria-label="Open navigation menu"
+            aria-label={drawerOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-expanded={drawerOpen}
+            aria-controls="mobile-navigation-drawer"
           >
             <span className="hamburger-bar" />
             <span className="hamburger-bar" />
@@ -204,12 +276,21 @@ export default function Navbar() {
 
       {/* Mobile drawer */}
       <aside
+        id="mobile-navigation-drawer"
+        ref={drawerRef}
         className={`mobile-drawer${drawerOpen ? " mobile-drawer--open" : ""}`}
-        aria-label="Mobile navigation"
+        role="dialog"
+        aria-modal={drawerOpen ? "true" : undefined}
+        aria-labelledby="mobile-navigation-title"
+        aria-hidden={!drawerOpen}
+        inert={!drawerOpen}
       >
         <div className="drawer-header">
-          <span className="drawer-title">{t("navbar.menu")}</span>
+          <span id="mobile-navigation-title" className="drawer-title">
+            {t("navbar.menu")}
+          </span>
           <button
+            ref={drawerCloseRef}
             className="drawer-close-btn"
             onClick={closeDrawer}
             type="button"
@@ -219,10 +300,18 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav className="drawer-nav">
-          <Link href="/pricing" className="drawer-link" onClick={closeDrawer}>
+        <nav aria-label={t("bottomNav.plans")}>
+          <Link
+            href="/pricing"
+            className="drawer-link"
+            onClick={closeDrawer}
+            aria-current={pathname === "/pricing" ? "page" : undefined}
+          >
             {t("navbar.pricing")}
           </Link>
+        </nav>
+
+        <nav className="drawer-nav">
           <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
             {t("navbar.workspace")}
           </Link>

@@ -114,7 +114,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
 
   return (
     <PageTransition>
-    <main className="insights-shell">
+    <div className="insights-shell">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton href="/" />
@@ -141,7 +141,13 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
           </p>
         )}
 
-        <div className={styles.grid}>
+        <div
+          className={styles.grid}
+          role="region"
+          aria-label="Pricing plan comparison"
+          aria-describedby="pricing-swipe-hint"
+          tabIndex={0}
+        >
           {PLAN_ORDER.map((plan, idx) => {
             const isCurrentPlan = currentPlan === plan.id;
 
@@ -154,6 +160,9 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
                     <div>
                       <p className="kicker">{plan.id}</p>
                       <h2>{plan.priceLabel}</h2>
+                      {plan.id === "pro" && (
+                        <span className={styles.recommendedBadge}>Recommended</span>
+                      )}
                     </div>
                     {isCurrentPlan && (
                       <span className="access-pill access-pill--premium">Already purchased</span>
@@ -178,6 +187,10 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
             );
           })}
         </div>
+        <p id="pricing-swipe-hint" className={styles.swipeHint}>
+          On smaller screens, swipe horizontally to compare all three plans.
+          <span className={styles.swipeGlyph} aria-hidden="true">↔</span>
+        </p>
 
         <ScrollReveal delay={400}>
           <section className={`rules-panel ${styles.matrixPanel}`}>
@@ -226,7 +239,7 @@ export default function PricingPageClient({ returnTo = "" }: PricingPageClientPr
           )}
         </div>
       </section>
-    </main>
+    </div>
     </PageTransition>
   );
 }

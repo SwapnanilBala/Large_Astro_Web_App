@@ -6,8 +6,10 @@ import {
   useState,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from "react";
+import englishMessages from "@/messages/en.json";
 
 /* ── Supported languages ── */
 
@@ -43,6 +45,10 @@ function flattenMessages(
   return result;
 }
 
+const ENGLISH_MESSAGES = flattenMessages(
+  englishMessages as Record<string, unknown>
+);
+
 /* ── Context type ── */
 
 type I18nContextValue = {
@@ -57,22 +63,34 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("en");
-  const [messages, setMessages] = useState<Record<string, string>>({});
+  const [messages, setMessages] =
+    useState<Record<string, string>>(ENGLISH_MESSAGES);
+  const loadRequestRef = useRef(0);
 
   /* Load translation file for a given language */
   const loadMessages = useCallback(async (lang: Language) => {
+    const requestId = ++loadRequestRef.current;
+
+    if (lang === "en") {
+      setMessages(ENGLISH_MESSAGES);
+      return;
+    }
+
+    // English remains the synchronous baseline while the selected language loads.
+    setMessages(ENGLISH_MESSAGES);
+
     try {
       const mod = await import(`@/messages/${lang}.json`);
       const flat = flattenMessages(mod.default ?? mod);
-      setMessages(flat);
+
+      if (requestId === loadRequestRef.current) {
+        setMessages({ ...ENGLISH_MESSAGES, ...flat });
+      }
     } catch (err) {
       console.error(`Failed to load translations for ${lang}:`, err);
-      // Fallback to English
-      if (lang !== "en") {
-        try {
-          const fallback = await import("@/messages/en.json");
-          setMessages(flattenMessages(fallback.default ?? fallback));
-        } catch { /* empty */ }
+
+      if (requestId === loadRequestRef.current) {
+        setMessages(ENGLISH_MESSAGES);
       }
     }
   }, []);
@@ -101,7 +119,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   /* Translation function with placeholder interpolation */
   const t = useCallback(
     (key: string, params?: Record<string, string>): string => {
-      let text = messages[key] ?? key;
+      let text = messages[key] ?? ENGLISH_MESSAGES[key] ?? key;
       if (params) {
         for (const [placeholder, value] of Object.entries(params)) {
           text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), value);
