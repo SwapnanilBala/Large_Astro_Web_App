@@ -1092,6 +1092,9 @@ export default function InsightsContent({
   const shouldReduceMotion = useReducedMotion();
   const [isRouting, startRouting] = useTransition();
   const lockedFeatures = new Set(payload.access.locked_features);
+  const advancedInsightsHref = historyQs
+    ? `/insights/advanced?${historyQs}`
+    : "/insights/advanced";
   const compatibilityHref = `/insights/compatibility?${historyQs}`;
   const sectionStateScope = `insights:section-state:${historyQs}`;
   const domainInsights = payload.chart.life_domain_insights ?? [];
@@ -1643,6 +1646,99 @@ export default function InsightsContent({
         <ConstellationDivider />
 
         {/* ─── Advanced & Palm Analysis CTA ─── */}
+        {/* Connected Insight Zone: routes surface existing readings without duplicating calculations. */}
+        <motion.section
+          id="insight-hub"
+          className={`${styles.insightHub} ${styles.anchorTarget}`}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+          aria-labelledby="insight-hub-heading"
+        >
+          <div className={styles.insightHubHeader}>
+            <div>
+              <p className={styles.kicker}>Connected Insight Zone</p>
+              <h2 id="insight-hub-heading" className={styles.insightHubTitle}>
+                Five lenses. One evolving story.
+              </h2>
+            </div>
+            <p className={styles.insightHubLead}>
+              Move from understanding your pattern to choosing your next step,
+              without repeating the same reading.
+            </p>
+          </div>
+
+          <div className={styles.insightHubGrid}>
+            <Link
+              href={`${advancedInsightsHref}#live-transits`}
+              className={styles.insightHubCard}
+              data-tone="sky"
+            >
+              <span className={styles.insightHubGlyph} aria-hidden="true">✦</span>
+              <span className={styles.insightHubCardBody}>
+                <strong>Then vs Now</strong>
+                <span>Compare the present sky with the promise carried in your natal chart.</span>
+              </span>
+              <span className={styles.insightHubAction}>Explore live transits →</span>
+            </Link>
+
+            <Link
+              href="#timing"
+              className={styles.insightHubCard}
+              data-tone="gold"
+            >
+              <span className={styles.insightHubGlyph} aria-hidden="true">⌁</span>
+              <span className={styles.insightHubCardBody}>
+                <strong>Decision Compass</strong>
+                <span>Use personalised Muhurta windows to time the decision in front of you.</span>
+              </span>
+              <span className={styles.insightHubAction}>Find a timing window →</span>
+            </Link>
+
+            <Link
+              href={`${advancedInsightsHref}#palm-reading`}
+              className={styles.insightHubCard}
+              data-tone="rose"
+            >
+              <span className={styles.insightHubGlyph} aria-hidden="true">∞</span>
+              <span className={styles.insightHubCardBody}>
+                <strong>Relationship Dynamic Map</strong>
+                <span>See how your chart and palm patterns describe connection, needs, and growth.</span>
+              </span>
+              <span className={styles.insightHubAction}>Open palm reading →</span>
+            </Link>
+
+            <Link
+              href={`${advancedInsightsHref}#palm-reading`}
+              className={styles.insightHubCard}
+              data-tone="violet"
+            >
+              <span className={styles.insightHubGlyph} aria-hidden="true">◈</span>
+              <span className={styles.insightHubCardBody}>
+                <strong>Chart Convergence</strong>
+                <span>Bring chart and palm together to spot recurring strengths in one synthesis.</span>
+              </span>
+              <span className={styles.insightHubAction}>See chart × palm →</span>
+            </Link>
+
+            <Link
+              href="#life-shifts"
+              className={`${styles.insightHubCard} ${styles.insightHubCardWide}`}
+              data-tone="green"
+            >
+              <span className={styles.insightHubGlyph} aria-hidden="true">↝</span>
+              <span className={styles.insightHubCardBody}>
+                <strong>Life Path Timeline</strong>
+                <span>Follow dasha transitions and pivotal cycles to see the chapters still unfolding.</span>
+              </span>
+              <span className={styles.insightHubAction}>View life shifts →</span>
+            </Link>
+          </div>
+        </motion.section>
+
+        <ConstellationDivider />
+
         <motion.div
           initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}

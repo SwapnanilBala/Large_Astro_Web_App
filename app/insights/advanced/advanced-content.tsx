@@ -207,12 +207,14 @@ function LockedFeaturePreview({
 
 /* ─── Collapsible Section Wrapper ─── */
 function CollapsibleSection({
+  id,
   title,
   kicker,
   defaultOpen = true,
   children,
   className = "",
 }: {
+  id?: string;
   title: string;
   kicker: string;
   defaultOpen?: boolean;
@@ -224,7 +226,8 @@ function CollapsibleSection({
 
   return (
     <motion.section
-      className={`${styles.collapsible} ${className}`}
+      id={id}
+      className={`${styles.collapsible} ${id ? styles.anchorTarget : ""} ${className}`}
       initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
@@ -483,7 +486,8 @@ export default function AdvancedContent({
 
               {/* Transits */}
               <motion.div
-                className={`${styles.cardTransits} ${styles.cardFullWidth} ${styles.cardDepthMid}`}
+                id="live-transits"
+                className={`${styles.cardTransits} ${styles.cardFullWidth} ${styles.cardDepthMid} ${styles.anchorTarget}`}
                 initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -542,6 +546,7 @@ export default function AdvancedContent({
 
           {/* ── Palm Reading (Collapsible) ── */}
           <CollapsibleSection
+            id="palm-reading"
             kicker={t("insights.palmKicker")}
             title={t("insights.palmHeading")}
             defaultOpen={true}
