@@ -1709,6 +1709,7 @@ export default function InsightsContent({
                       key={domain.key}
                       type="button"
                       className={domain.key === selectedDomainKey ? styles.domainScoreCardActive : styles.domainScoreCard}
+                      data-domain={domain.key}
                       onClick={() => setSelectedDomainKey(domain.key)}
                       aria-label={`${domain.label} signal strength ${score} percent, ${getDomainScoreTone(score)}`}
                     >

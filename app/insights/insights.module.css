@@ -1792,6 +1792,122 @@
   overflow-wrap: anywhere;
 }
 
+/* Ultimate Module — topic-specific score-card themes */
+.domainScoreCard[data-domain],
+.domainScoreCardActive[data-domain] {
+  --domain-ink: var(--ink-main);
+  --domain-muted: var(--ink-soft);
+  --domain-accent: var(--accent-gold);
+  color: var(--domain-ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.domainScoreCard[data-domain] .domainScoreIcon,
+.domainScoreCardActive[data-domain] .domainScoreIcon,
+.domainScoreCard[data-domain] strong,
+.domainScoreCardActive[data-domain] strong {
+  color: var(--domain-accent);
+}
+
+.domainScoreCard[data-domain] .domainScoreLabel,
+.domainScoreCardActive[data-domain] .domainScoreLabel {
+  color: var(--domain-ink);
+}
+
+.domainScoreCard[data-domain] .domainScoreTone,
+.domainScoreCardActive[data-domain] .domainScoreTone {
+  color: var(--domain-muted);
+}
+
+.domainScoreCard[data-domain="life_cycle"],
+.domainScoreCardActive[data-domain="life_cycle"] {
+  --domain-ink: #eefff5;
+  --domain-muted: #bbebce;
+  --domain-accent: #86efac;
+  border-color: rgba(74, 222, 128, 0.42);
+  background:
+    linear-gradient(135deg, rgba(26, 150, 95, 0.34), rgba(134, 239, 172, 0.08)),
+    rgba(8, 43, 29, 0.9);
+}
+
+.domainScoreCard[data-domain="inheritance"],
+.domainScoreCardActive[data-domain="inheritance"] {
+  --domain-ink: #fff7dd;
+  --domain-muted: #f0d795;
+  --domain-accent: #ffd36a;
+  border-color: rgba(255, 202, 91, 0.48);
+  background:
+    linear-gradient(135deg, rgba(179, 119, 24, 0.36), rgba(255, 211, 106, 0.08)),
+    rgba(48, 31, 6, 0.92);
+}
+
+.domainScoreCard[data-domain="love_life"],
+.domainScoreCardActive[data-domain="love_life"] {
+  --domain-ink: #fff0f7;
+  --domain-muted: #f8c3dc;
+  --domain-accent: #ff9dca;
+  border-color: rgba(255, 140, 194, 0.46);
+  background:
+    linear-gradient(135deg, rgba(186, 57, 122, 0.38), rgba(255, 157, 202, 0.08)),
+    rgba(59, 13, 37, 0.92);
+}
+
+.domainScoreCard[data-domain="family"],
+.domainScoreCardActive[data-domain="family"] {
+  --domain-ink: #162033;
+  --domain-muted: #34445d;
+  --domain-accent: #285b87;
+  border-color: rgba(255, 255, 255, 0.72);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(221, 235, 246, 0.86)),
+    #f8fbff;
+  box-shadow: inset 0 1px 0 #ffffff, 0 6px 18px rgba(0, 0, 0, 0.14);
+}
+
+.domainScoreCard[data-domain="travel_destinations"],
+.domainScoreCardActive[data-domain="travel_destinations"] {
+  --domain-ink: #fff5ec;
+  --domain-muted: #ffd4b7;
+  --domain-accent: #ffae6b;
+  border-color: rgba(255, 125, 69, 0.5);
+  background:
+    linear-gradient(135deg, rgba(192, 62, 27, 0.4), rgba(255, 174, 107, 0.1)),
+    rgba(66, 20, 12, 0.93);
+}
+
+.domainScoreCard[data-domain="career"],
+.domainScoreCardActive[data-domain="career"] {
+  --domain-ink: #eef8ff;
+  --domain-muted: #b8daee;
+  --domain-accent: #77d8ff;
+  border-color: rgba(91, 191, 255, 0.46);
+  background:
+    linear-gradient(135deg, rgba(20, 104, 170, 0.4), rgba(119, 216, 255, 0.08)),
+    rgba(8, 31, 58, 0.93);
+}
+
+.domainScoreCard[data-domain="influence"],
+.domainScoreCardActive[data-domain="influence"] {
+  --domain-ink: #f7efff;
+  --domain-muted: #d8c4f5;
+  --domain-accent: #cba6ff;
+  border-color: rgba(192, 139, 255, 0.48);
+  background:
+    linear-gradient(135deg, rgba(104, 53, 165, 0.42), rgba(203, 166, 255, 0.08)),
+    rgba(39, 18, 69, 0.93);
+}
+
+.domainScoreCardActive[data-domain] {
+  border-width: 1px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--domain-accent) 38%, transparent), 0 10px 24px rgba(0, 0, 0, 0.18);
+  transform: translateY(-2px);
+}
+
+.domainScoreCard[data-domain]:hover {
+  border-color: var(--domain-accent);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
 .domainSelectLabel {
   font-size: 1.35rem;
   color: var(--ink-soft);
