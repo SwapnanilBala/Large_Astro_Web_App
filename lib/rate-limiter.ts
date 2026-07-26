@@ -17,7 +17,6 @@ type RateLimitConfig = {
 const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart/forecast": { limit: 20, windowMs: 60_000 },
   "/api/chart/dasha-subperiods": { limit: 40, windowMs: 60_000 },
-  "/api/chart/follow-up-question": { limit: 4, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },

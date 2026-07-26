@@ -38,6 +38,18 @@ const PLANET_LUCKY: Record<string, PlanetAttributes> = {
   Ketu:    { colors: ["Grey", "Earthy"],            number: 7, gemstone: "Cat's Eye",        day: "Tuesday",   metal: "Iron",     direction: "Northeast" },
 };
 
+const PLANET_GEMSTONE_INTENTIONS: Record<string, string> = {
+  Sun: "Support confidence, clarity, and constructive visibility.",
+  Moon: "Support emotional steadiness, rest, and receptivity.",
+  Mars: "Support courage, momentum, and decisive action.",
+  Mercury: "Support clear communication, learning, and discernment.",
+  Jupiter: "Support wisdom, learning, and expansive opportunities.",
+  Venus: "Support harmony, creativity, and relationship grace.",
+  Saturn: "Support patience, responsibility, and durable progress.",
+  Rahu: "Support grounded ambition while resisting shortcuts.",
+  Ketu: "Support reflection, discernment, and spiritual focus.",
+};
+
 const PLANET_CAUTIONS: Record<string, { colors: string[]; items: string[]; omens: string[] }> = {
   Sun: {
     colors: ["Dull Black", "Ash Grey"],
@@ -129,12 +141,12 @@ function cautionFor(planet: string) {
 }
 
 /** Return the first gemstone from `candidates` not already in `taken`. */
-function pickGem(candidates: PlanetAttributes[], taken: string[]): string {
+function pickDistinctGemAttribute(candidates: PlanetAttributes[], taken: string[]): PlanetAttributes {
   for (const attr of candidates) {
-    if (!taken.includes(attr.gemstone)) return attr.gemstone;
+    if (!taken.includes(attr.gemstone)) return attr;
   }
   // All candidates share the same gem — return the first as fallback
-  return candidates[0]?.gemstone ?? "Pearl";
+  return candidates[0] ?? PLANET_LUCKY.Moon;
 }
 
 /** Return the first day from `candidates` not equal to `exclude`. */
@@ -171,6 +183,39 @@ function challengingLords(
 
 /* ── Main computation ── */
 
+function buildFortuneDomains(
+  planets: PlanetPosition[],
+  ninthLord: string,
+  primaryPlanet: string,
+  hasYogakaraka: boolean,
+) {
+  const getPlanetHouse = (planet: string) => findPlanet(planets, planet)?.house ?? null;
+
+  return [
+    {
+      title: "Learning & mentors",
+      focus: "Deep study, trusted guides, long-range travel, and choices that expand your perspective.",
+      key_planet: ninthLord,
+      planet_house: getPlanetHouse(ninthLord),
+      basis: "9th-house lord",
+    },
+    {
+      title: "Growth & opportunity",
+      focus: "Generosity, teaching, and taking the wider view when an opening asks for faith and preparation.",
+      key_planet: "Jupiter",
+      planet_house: getPlanetHouse("Jupiter"),
+      basis: "Jupiter’s natal placement",
+    },
+    {
+      title: "Personal momentum",
+      focus: "The practical choices that make opportunity easier to recognize and act on consistently.",
+      key_planet: primaryPlanet,
+      planet_house: getPlanetHouse(primaryPlanet),
+      basis: hasYogakaraka ? "Yogakaraka influence" : "Ascendant-lord influence",
+    },
+  ];
+}
+
 export function computeLuckyElements(
   ascendantSign: string,
   planets: PlanetPosition[],
@@ -205,12 +250,16 @@ export function computeLuckyElements(
   // The ascendant lord's gem then becomes secondary.
   // Without a yogakaraka, ascendant lord is primary; cascade 9th → moon → nak
   // to find a genuinely distinct secondary.
+  const primaryGemPlanet = yogakaraka ?? ascLord;
   const primaryGemstone = yogaAttr ? yogaAttr.gemstone : ascAttr.gemstone;
 
   const gemCandidates: PlanetAttributes[] = yogaAttr
     ? [ascAttr, ninthAttr, moonAttr, ...(nakAttr ? [nakAttr] : [])]
     : [ninthAttr, moonAttr, ...(nakAttr ? [nakAttr] : [])];
-  const secondaryGemstone = pickGem(gemCandidates, [primaryGemstone]);
+  const secondaryGemAttr = pickDistinctGemAttribute(gemCandidates, [primaryGemstone]);
+  const secondaryGemstone = secondaryGemAttr.gemstone;
+  const secondaryGemPlanet =
+    Object.entries(PLANET_LUCKY).find(([, attr]) => attr === secondaryGemAttr)?.[0] ?? ninthLord;
 
   // ── Colors ─────────────────────────────────────────────────────────────────
   // Primary: ascendant lord always (structural base of the chart).
@@ -257,6 +306,29 @@ export function computeLuckyElements(
   const unluckyColors = uniqueStrings(cautionAttrs.flatMap((attr) => attr.colors)).slice(0, 4);
   const unluckyItems = uniqueStrings(cautionAttrs.flatMap((attr) => attr.items)).slice(0, 4);
   const badOmens = uniqueStrings(cautionAttrs.flatMap((attr) => attr.omens)).slice(0, 3);
+  const gemstoneGuidance = {
+    primary: {
+      gemstone: primaryGemstone,
+      governing_planet: primaryGemPlanet,
+      recommended_day: attrFor(primaryGemPlanet).day,
+      metal: attrFor(primaryGemPlanet).metal,
+      intention: PLANET_GEMSTONE_INTENTIONS[primaryGemPlanet] ?? PLANET_GEMSTONE_INTENTIONS.Sun,
+    },
+    secondary: {
+      gemstone: secondaryGemstone,
+      governing_planet: secondaryGemPlanet,
+      recommended_day: secondaryGemAttr.day,
+      metal: secondaryGemAttr.metal,
+      intention: PLANET_GEMSTONE_INTENTIONS[secondaryGemPlanet] ?? PLANET_GEMSTONE_INTENTIONS.Moon,
+    },
+    safety_note: "Gemstone remedies are traditional spiritual practices, not guarantees. Consult a qualified Vedic astrologer before purchasing or wearing a remedial gemstone.",
+  };
+  const fortuneDomains = buildFortuneDomains(
+    planets,
+    ninthLord,
+    primaryGemPlanet,
+    Boolean(yogakaraka),
+  );
 
   return {
     primary_colors: primaryColors,
@@ -272,6 +344,8 @@ export function computeLuckyElements(
     unlucky_colors: unluckyColors,
     unlucky_items: unluckyItems,
     bad_omens: badOmens,
+    gemstone_guidance: gemstoneGuidance,
+    fortune_domains: fortuneDomains,
     basis: {
       ascendant_lord: ascLord,
       moon_sign_lord: moonLord,

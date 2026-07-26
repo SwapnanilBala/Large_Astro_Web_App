@@ -85,6 +85,159 @@ function TextChipList({ items }: { items: string[] }) {
   );
 }
 
+const WEEKDAY_INDEX: Record<string, number> = {
+  Sunday: 0,
+  Monday: 1,
+  Tuesday: 2,
+  Wednesday: 3,
+  Thursday: 4,
+  Friday: 5,
+  Saturday: 6,
+};
+
+function nextWeekday(day: string, from: Date): Date {
+  const date = new Date(from);
+  date.setHours(12, 0, 0, 0);
+  const targetDay = WEEKDAY_INDEX[day] ?? date.getDay();
+  const offset = (targetDay - date.getDay() + 7) % 7;
+  date.setDate(date.getDate() + offset);
+  return date;
+}
+
+function formatWeekAheadDate(date: Date): string {
+  return date.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+function WeekAhead({ luckyElements }: LuckyElementsPanelProps) {
+  const primaryDate = nextWeekday(luckyElements.lucky_day, new Date());
+  const secondaryDate = nextWeekday(luckyElements.secondary_day, new Date());
+  const primaryColor = luckyElements.primary_colors[0] ?? "your primary color";
+  const direction = luckyElements.auspicious_directions[0] ?? "your preferred direction";
+  const number = luckyElements.lucky_numbers[0] ?? 1;
+
+  const windows = [
+    {
+      label: "Primary opening",
+      date: formatWeekAheadDate(primaryDate),
+      title: luckyElements.lucky_day,
+      detail: `Use ${primaryColor} for the week’s most important meeting, outreach, or first step.`,
+    },
+    {
+      label: "Support window",
+      date: formatWeekAheadDate(secondaryDate),
+      title: luckyElements.secondary_day,
+      detail: `Use this day for refinement, follow-through, and conversations that benefit from patience.`,
+    },
+    {
+      label: "Daily anchor",
+      date: "Any day",
+      title: `${direction} focus`,
+      detail: `Start one intentional task facing ${direction}; let the number ${number} be a small visual reminder of your priorities.`,
+    },
+  ];
+
+  return (
+    <section className={styles.weekAhead} aria-labelledby="fortune-week-ahead-title">
+      <div className={styles.weekAheadHeader}>
+        <div>
+          <span className={styles.sectionEyebrow}>Practical fortune</span>
+          <h3 id="fortune-week-ahead-title">Week Ahead</h3>
+        </div>
+        <p>Small, chart-aligned moments to make the next seven days feel more intentional.</p>
+      </div>
+      <div className={styles.weekAheadGrid}>
+        {windows.map((window) => (
+          <article key={window.label} className={styles.weekAheadCard}>
+            <span>{window.label}</span>
+            <strong>{window.date}</strong>
+            <h4>{window.title}</h4>
+            <p>{window.detail}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function GemstoneGuidance({ luckyElements }: LuckyElementsPanelProps) {
+  const guidance = luckyElements.gemstone_guidance;
+  if (!guidance) return null;
+  const recommendations = [
+    { label: "Primary recommendation", ...guidance.primary },
+    { label: "Secondary recommendation", ...guidance.secondary },
+  ];
+
+  return (
+    <section className={styles.gemstoneGuidance} aria-labelledby="gemstone-guidance-title">
+      <div className={styles.guidanceHeader}>
+        <div>
+          <span className={styles.sectionEyebrow}>Traditional practice</span>
+          <h3 id="gemstone-guidance-title">Gemstone Guidance</h3>
+        </div>
+        <p>Use these as intention-setting references grounded in the planets that support your chart.</p>
+      </div>
+      <div className={styles.guidanceGrid}>
+        {recommendations.map((gemstone) => (
+          <article key={gemstone.label} className={styles.guidanceCard}>
+            <span className={styles.sectionEyebrow}>{gemstone.label}</span>
+            <h4>{gemstone.gemstone}</h4>
+            <p>{gemstone.intention}</p>
+            <dl>
+              <div>
+                <dt>Planet</dt>
+                <dd>{gemstone.governing_planet}</dd>
+              </div>
+              <div>
+                <dt>Wear day</dt>
+                <dd>{gemstone.recommended_day}</dd>
+              </div>
+              <div>
+                <dt>Pair with</dt>
+                <dd>{gemstone.metal}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+      <p className={styles.gemstoneSafety}>{guidance.safety_note}</p>
+    </section>
+  );
+}
+
+function FortuneDomains({ luckyElements }: LuckyElementsPanelProps) {
+  const domains = luckyElements.fortune_domains;
+  if (!domains?.length) return null;
+
+  return (
+    <section className={styles.fortuneDomains} aria-labelledby="fortune-domains-title">
+      <div className={styles.guidanceHeader}>
+        <div>
+          <span className={styles.sectionEyebrow}>Where fortune grows</span>
+          <h3 id="fortune-domains-title">Fortune Domains</h3>
+        </div>
+        <p>These are the life areas where preparation, perspective, and the right connections can compound.</p>
+      </div>
+      <div className={styles.domainGrid}>
+        {domains.map((domain) => (
+          <article key={domain.title} className={styles.domainCard}>
+            <span>{domain.basis}</span>
+            <h4>{domain.title}</h4>
+            <strong>
+              {domain.key_planet}
+              {domain.planet_house ? ` · house ${domain.planet_house}` : ""}
+            </strong>
+            <p>{domain.focus}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
   const { t } = useTranslation();
   const le = luckyElements;
@@ -96,6 +249,8 @@ function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
         <h2 className={styles.heading}>{t("insights.luckyElementsHeading")}</h2>
       </div>
       <p className={styles.intro}>{t("insights.luckyElementsIntro")}</p>
+
+      <WeekAhead luckyElements={le} />
 
       <div className={styles.cautionBlock}>
         <h3 className={styles.cautionHeading}>Unlucky Colors, Items & Bad Omens</h3>
@@ -205,6 +360,10 @@ function LuckyElementsPanel({ luckyElements }: LuckyElementsPanelProps) {
       </div>
 
       {/* ── Basis Footer ── */}
+      <GemstoneGuidance luckyElements={le} />
+
+      <FortuneDomains luckyElements={le} />
+
       <div className={styles.basis}>
         <span className={styles.basisLabel}>{t("insights.luckyElementsBasis")}:</span>
         <span className={styles.basisPlanet}>{t("insights.luckyElementsAscLord")}: {le.basis.ascendant_lord}</span>

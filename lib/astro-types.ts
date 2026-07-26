@@ -344,6 +344,30 @@ export type LuckyElementsInfo = {
   unlucky_colors: string[];
   unlucky_items: string[];
   bad_omens: string[];
+  gemstone_guidance: {
+    primary: {
+      gemstone: string;
+      governing_planet: string;
+      recommended_day: string;
+      metal: string;
+      intention: string;
+    };
+    secondary: {
+      gemstone: string;
+      governing_planet: string;
+      recommended_day: string;
+      metal: string;
+      intention: string;
+    };
+    safety_note: string;
+  };
+  fortune_domains: Array<{
+    title: string;
+    focus: string;
+    key_planet: string;
+    planet_house: number | null;
+    basis: string;
+  }>;
   basis: {
     ascendant_lord: string;
     moon_sign_lord: string;
