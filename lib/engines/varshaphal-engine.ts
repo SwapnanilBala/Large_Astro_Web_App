@@ -29,6 +29,8 @@ export interface AnnualProfection {
   lordOfYear: string;
   activatedPlanets: string[];
   themes: string[];
+  /** Natal signs are retained so the client can render the profection wheel accurately. */
+  natalHouseSigns: Record<number, string>;
 }
 
 export interface VarshaphalResult {
@@ -307,6 +309,9 @@ function computeAnnualProfection(
     .map((p) => p.name);
 
   const themes = HOUSE_THEMES[activatedHouse] ?? [];
+  const natalHouseSigns = Object.fromEntries(
+    natalHouses.map((house) => [house.house_number, house.sign]),
+  );
 
   return {
     year: age + 1, // "1st year" = age 0, etc.
@@ -316,6 +321,7 @@ function computeAnnualProfection(
     lordOfYear,
     activatedPlanets,
     themes,
+    natalHouseSigns,
   };
 }
 

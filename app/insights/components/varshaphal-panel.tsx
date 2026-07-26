@@ -138,29 +138,195 @@ function getAnnualTheme(data: VarshaphalResult): string {
 
 function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
   return (
-    <div className={styles.themeHero}>
+    <section className={styles.themeHero} aria-labelledby="annual-compass-title">
       <div className={styles.themeHeroCopy}>
-        <span className={styles.eyebrow}>Annual Signature</span>
-        <h3>{getAnnualTheme(data)}</h3>
+        <span className={styles.eyebrow}>Annual Compass</span>
+        <h3 id="annual-compass-title">{getAnnualTheme(data)}</h3>
         <p>{data.yearSummary.yearLordInterpretation}</p>
+        <span className={styles.cycleLabel}>
+          Active cycle: birthday {data.year} to birthday {data.year + 1}
+        </span>
       </div>
       <div className={styles.themeStats} aria-label={`${data.year} annual timing highlights`}>
         <div className={styles.themeStat}>
-          <span>Year Lord</span>
-          <strong>{data.varshesh.planet}</strong>
-        </div>
-        <div className={styles.themeStat}>
-          <span>Activated House</span>
+          <span>Profection</span>
           <strong>H{data.profection.activatedHouse}</strong>
-          <small>{data.profection.activatedSign}</small>
+          <small>{data.profection.activatedSign} · age {data.profection.age}</small>
         </div>
         <div className={styles.themeStat}>
           <span>Muntha</span>
           <strong>H{data.muntha.house}</strong>
           <small>{data.muntha.sign}</small>
         </div>
+        <div className={styles.themeStat}>
+          <span>Year Lord</span>
+          <strong>{data.varshesh.planet}</strong>
+          <small>{data.varshesh.reason}</small>
+        </div>
       </div>
-    </div>
+    </section>
+  );
+}
+
+function YearInFocus({ data }: { data: VarshaphalResult }) {
+  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase() || "the matters in front of you";
+
+  return (
+    <section className={styles.overviewCard} aria-labelledby="year-in-focus-title">
+      <div className={styles.overviewHeader}>
+        <div>
+          <span className={styles.eyebrow}>Your priorities</span>
+          <h3 id="year-in-focus-title">Year in Focus</h3>
+        </div>
+        <p>{data.yearSummary.ascendantComparison}</p>
+      </div>
+      <div className={styles.summaryCards}>
+        <article className={styles.summaryCard}>
+          <span>Theme</span>
+          <strong>House {data.profection.activatedHouse}: {themes}</strong>
+          <p>Your annual profection makes these the work worth returning to all year.</p>
+        </article>
+        <article className={styles.summaryCard}>
+          <span>Best use</span>
+          <strong>Follow {data.varshesh.planet}&apos;s lead</strong>
+          <p>{data.yearSummary.yearLordInterpretation}</p>
+        </article>
+        <article className={styles.summaryCard}>
+          <span>Keep in mind</span>
+          <strong>Emotional climate</strong>
+          <p>{data.yearSummary.emotionalTone}</p>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+type FocusCard = {
+  title: string;
+  source: string;
+  detail: string;
+  prompt: string;
+};
+
+function buildFocusCards(data: VarshaphalResult): FocusCard[] {
+  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase() || "this house's themes";
+  const cards: FocusCard[] = [
+    {
+      title: `House ${data.profection.activatedHouse}: ${themes}`,
+      source: "Annual Profection",
+      detail: `${data.profection.activatedSign} is activated, with ${data.profection.lordOfYear} as the Lord of the Year.`,
+      prompt: "What one recurring commitment would make this area feel more intentional?",
+    },
+    {
+      title: `Muntha in house ${data.muntha.house}`,
+      source: "Muntha",
+      detail: `${data.muntha.sign} draws the year’s attention to the themes of this return-chart house.`,
+      prompt: "Where is steady attention more useful than a dramatic change?",
+    },
+  ];
+
+  if (data.profection.activatedPlanets.length > 0) {
+    cards.push({
+      title: `${data.profection.activatedPlanets.join(" and ")} activated`,
+      source: "Natal activation",
+      detail: `These natal planets sit in ${data.profection.activatedSign}, giving the profected house extra weight.`,
+      prompt: "How can you use these planetary strengths deliberately?",
+    });
+  } else {
+    cards.push({
+      title: `${data.varshesh.planet} sets the pace`,
+      source: "Year Lord",
+      detail: data.varshesh.reason,
+      prompt: "Which decision would benefit from this planet’s qualities?",
+    });
+  }
+
+  return cards;
+}
+
+function FocusAreas({ data }: { data: VarshaphalResult }) {
+  return (
+    <section className={styles.prioritySection} aria-labelledby="focus-areas-title">
+      <div className={styles.priorityHeader}>
+        <span className={styles.eyebrow}>Where to invest your attention</span>
+        <h3 id="focus-areas-title">Focus Areas</h3>
+      </div>
+      <div className={styles.priorityGrid}>
+        {buildFocusCards(data).map((item, index) => (
+          <article key={item.source} className={styles.priorityCard}>
+            <span className={styles.priorityNumber}>{String(index + 1).padStart(2, "0")}</span>
+            <span className={styles.sourceLabel}>{item.source}</span>
+            <h4>{item.title}</h4>
+            <p>{item.detail}</p>
+            <small>{item.prompt}</small>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+type MajorForce = {
+  planet: string;
+  label: string;
+  placement: string;
+  detail: string;
+};
+
+function buildMajorForces(data: VarshaphalResult): MajorForce[] {
+  const placements = data.returnChart.planets;
+  const seen = new Set<string>();
+  const forces: MajorForce[] = [];
+  const addForce = (planet: string, label: string, detail: string) => {
+    const placement = placements.find((item) => item.name === planet);
+    if (!placement || seen.has(planet)) return;
+    seen.add(planet);
+    forces.push({
+      planet,
+      label,
+      placement: `${placement.sign} · house ${placement.house} · ${placement.degree_in_sign.toFixed(1)}°`,
+      detail,
+    });
+  };
+
+  addForce(
+    data.varshesh.planet,
+    "Year Lord",
+    `${data.varshesh.planet} directs the year’s larger choices through its solar-return placement.`,
+  );
+
+  const moon = placements.find((planet) => planet.name === "Moon");
+  if (moon) {
+    addForce("Moon", "Emotional climate", `Your Moon in house ${moon.house} colors the habits and needs that feel most immediate.`);
+  }
+
+  placements
+    .filter((planet) => [1, 4, 7, 10].includes(planet.house))
+    .forEach((planet) => {
+      addForce(planet.name, `Angular · house ${planet.house}`, "Angular placements are especially visible and tend to shape the year’s events directly.");
+    });
+
+  return forces.slice(0, 4);
+}
+
+function MajorForces({ data }: { data: VarshaphalResult }) {
+  return (
+    <section className={styles.forceSection} aria-labelledby="major-forces-title">
+      <div className={styles.priorityHeader}>
+        <span className={styles.eyebrow}>The signals that carry the most weight</span>
+        <h3 id="major-forces-title">Major Forces This Year</h3>
+      </div>
+      <div className={styles.forceGrid}>
+        {buildMajorForces(data).map((force) => (
+          <article key={force.planet} className={styles.forceCard}>
+            <span className={styles.sourceLabel}>{force.label}</span>
+            <h4>{force.planet}</h4>
+            <strong>{force.placement}</strong>
+            <p>{force.detail}</p>
+          </article>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -354,14 +520,21 @@ function yearRange(birthDate: string): number[] {
 function ProfectionWheel({
   activatedHouse,
   signs,
+  age,
 }: {
   activatedHouse: number;
   signs: Record<number, string>;
+  age: number;
 }) {
   const cx = 50;
   const cy = 50;
   const outerR = 42;
   const innerR = 18;
+  const [selectedHouse, setSelectedHouse] = useState(activatedHouse);
+
+  useEffect(() => {
+    setSelectedHouse(activatedHouse);
+  }, [activatedHouse]);
 
   const segments: React.ReactNode[] = [];
   const labels: React.ReactNode[] = [];
@@ -373,6 +546,7 @@ function ProfectionWheel({
     const midAngle = ((i + 0.5) * 30 - 90) * (Math.PI / 180);
 
     const isActive = houseNum === activatedHouse;
+    const isSelected = houseNum === selectedHouse;
 
     // Outer arc points
     const ox1 = cx + outerR * Math.cos(startAngle);
@@ -399,7 +573,23 @@ function ProfectionWheel({
       <path
         key={`seg-${houseNum}`}
         d={path}
-        className={isActive ? styles.wheelSegmentActive : styles.wheelSegment}
+        className={
+          isActive
+            ? styles.wheelSegmentActive
+            : isSelected
+              ? styles.wheelSegmentSelected
+              : styles.wheelSegment
+        }
+        role="button"
+        tabIndex={0}
+        aria-label={`House ${houseNum}, ${signs[houseNum] ?? "sign unavailable"}${isActive ? ", active now" : ""}`}
+        onClick={() => setSelectedHouse(houseNum)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            setSelectedHouse(houseNum);
+          }
+        }}
       />
     );
 
@@ -417,7 +607,7 @@ function ProfectionWheel({
         key={`lbl-${houseNum}`}
         x={lx}
         y={ly - 1.5}
-        className={isActive ? styles.wheelLabelActive : styles.wheelLabel}
+        className={isActive || isSelected ? styles.wheelLabelActive : styles.wheelLabel}
       >
         {houseNum}
       </text>
@@ -427,26 +617,99 @@ function ProfectionWheel({
         key={`sign-${houseNum}`}
         x={lx}
         y={ly + 2}
-        className={isActive ? styles.wheelLabelActive : styles.wheelLabel}
-        style={{ fontSize: isActive ? "2.8px" : "2.5px" }}
+        className={isActive || isSelected ? styles.wheelLabelActive : styles.wheelLabel}
+        style={{ fontSize: isActive || isSelected ? "2.8px" : "2.5px" }}
       >
         {abbrev}
       </text>
     );
   }
 
+  const yearsUntilSelected = (selectedHouse - activatedHouse + 12) % 12;
+  const selectedAge = age + yearsUntilSelected;
+
   return (
     <div className={styles.wheelWrapper}>
-      <svg viewBox="0 0 100 100" className={styles.wheel}>
+      <svg viewBox="0 0 100 100" className={styles.wheel} aria-describedby="profection-wheel-help">
+        <title>Interactive annual profection wheel</title>
         {segments}
         {labels}
         <text x={cx} y={cy - 2} className={styles.wheelCenter}>
-          H{activatedHouse}
+          H{selectedHouse}
         </text>
         <text x={cx} y={cy + 3} className={styles.wheelCenterSub}>
-          Active
+          {selectedHouse === activatedHouse ? "Active now" : `Age ${selectedAge}`}
         </text>
       </svg>
+      <p id="profection-wheel-help" className={styles.wheelHint}>
+        {selectedHouse === activatedHouse
+          ? `House ${activatedHouse} is active in this birthday-to-birthday cycle.`
+          : `House ${selectedHouse} returns at age ${selectedAge}. Select a house to explore the 12-year rhythm.`}
+      </p>
+    </div>
+  );
+}
+
+const RETURN_PLANET_ORDER = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
+
+function getPlacementLabels(
+  planet: VarshaphalResult["returnChart"]["planets"][number],
+  data: VarshaphalResult,
+): string[] {
+  const labels: string[] = [];
+  if (planet.name === data.varshesh.planet) labels.push("Year Lord");
+  if (planet.name === "Moon") labels.push("Emotional climate");
+  if ([1, 4, 7, 10].includes(planet.house)) labels.push(`Angular · H${planet.house}`);
+  if (planet.name === "Sun") labels.push("Solar return Sun");
+  return labels.length > 0 ? labels : ["Return placement"];
+}
+
+function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
+  const placements = data.returnChart.planets
+    .filter((planet) => RETURN_PLANET_ORDER.includes(planet.name))
+    .sort((left, right) => {
+      const leftLabels = getPlacementLabels(left, data);
+      const rightLabels = getPlacementLabels(right, data);
+      const score = (labels: string[]) =>
+        labels.includes("Year Lord") ? 0 : labels.includes("Emotional climate") ? 1 : labels.some((label) => label.startsWith("Angular")) ? 2 : labels.includes("Solar return Sun") ? 3 : 4;
+      return score(leftLabels) - score(rightLabels);
+    });
+
+  return (
+    <div className={styles.placementContent}>
+      <p className={styles.sectionIntro}>
+        The placements with the clearest connection to this year&apos;s direction come first.
+      </p>
+      <div className={styles.placementGrid}>
+        {placements.slice(0, 4).map((planet) => {
+          const labels = getPlacementLabels(planet, data);
+          return (
+            <article key={planet.name} className={styles.placementCard}>
+              <span className={styles.sourceLabel}>{labels[0]}</span>
+              <h4>{planet.name}</h4>
+              <strong>{planet.sign} · house {planet.house}</strong>
+              <p>
+                {planet.degree_in_sign.toFixed(1)}° {planet.is_retrograde ? "· retrograde" : ""}
+                {labels.length > 1 ? ` · ${labels.slice(1).join(" · ")}` : ""}
+              </p>
+            </article>
+          );
+        })}
+      </div>
+      <details className={styles.allPlacements}>
+        <summary>View all return placements</summary>
+        <div className={styles.placementTable}>
+          {placements.map((planet) => (
+            <div key={planet.name} className={styles.placementRow}>
+              <strong>{planet.name}</strong>
+              <span>{planet.sign}</span>
+              <span>H{planet.house}</span>
+              <span>{planet.degree_in_sign.toFixed(1)}°</span>
+              <span>{planet.is_retrograde ? "Retrograde" : "Direct"}</span>
+            </div>
+          ))}
+        </div>
+      </details>
     </div>
   );
 }
@@ -617,6 +880,12 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
         <>
           <AnnualThemeHero data={data} />
 
+          <YearInFocus data={data} />
+
+          <FocusAreas data={data} />
+
+          <MajorForces data={data} />
+
           <div className={styles.timelineCard}>
             <div className={styles.timelineHeader}>
               <div>
@@ -641,7 +910,6 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
               ))}
             </div>
           </div>
-          {/* ── Profection Section ── */}
           <div className={styles.sectionFull}>
             <h3 className={styles.sectionTitle}>Seasonal Forecast</h3>
             <SeasonalForecastCards data={data} />
@@ -651,63 +919,65 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
 
           <PlanetaryWeatherMeters data={data} />
 
-          <div className={styles.sectionGrid}>
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Annual Profection</h3>
-              <div className={styles.profectionRow}>
-                <span className={styles.tagGold}>
-                  Age {data.profection.age}
-                </span>
-                <span className={styles.tagGold}>
-                  House {data.profection.activatedHouse}
-                </span>
-                <span className={styles.tagAqua}>
-                  {data.profection.activatedSign}
-                </span>
-              </div>
-              <div className={styles.profectionRow}>
-                <span className={styles.tag}>
-                  Lord of Year: {data.profection.lordOfYear}
-                </span>
-              </div>
-              {data.profection.activatedPlanets.length > 0 && (
-                <div className={styles.profectionRow}>
-                  {data.profection.activatedPlanets.map((p) => (
-                    <span key={p} className={styles.tagAqua}>
-                      {p} activated
-                    </span>
-                  ))}
-                </div>
-              )}
-              <ul className={styles.themesList}>
-                {data.profection.themes.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
+          <div className={styles.exploreHeader}>
+            <span className={styles.eyebrow}>Explore the mechanics</span>
+            <h3>How this annual picture is built</h3>
+          </div>
 
-            {/* ── Profection Wheel ── */}
-            <div className={styles.section}>
+          <div className={styles.sectionGrid}>
+            <section className={styles.section}>
+              <span className={styles.eyebrow}>Annual Profection</span>
+              <h3 className={styles.sectionTitle}>Annual Profection</h3>
+              <p className={styles.sectionIntro}>
+                This birthday-to-birthday cycle activates one natal house and the planet that rules its sign.
+              </p>
+              <div className={styles.profectionFlow}>
+                <div>
+                  <span>Activated house</span>
+                  <strong>H{data.profection.activatedHouse}</strong>
+                  <small>Age {data.profection.age}</small>
+                </div>
+                <div>
+                  <span>Natal sign</span>
+                  <strong>{data.profection.activatedSign}</strong>
+                  <small>The sign on H{data.profection.activatedHouse}</small>
+                </div>
+                <div>
+                  <span>Lord of the Year</span>
+                  <strong>{data.profection.lordOfYear}</strong>
+                  <small>Directs the house&apos;s themes</small>
+                </div>
+                <div>
+                  <span>Natal activation</span>
+                  <strong>{data.profection.activatedPlanets.join(", ") || "None"}</strong>
+                  <small>Planets already in the activated sign</small>
+                </div>
+              </div>
+              <div className={styles.profectionThemes}>
+                {data.profection.themes.map((theme) => (
+                  <span key={theme}>{theme}</span>
+                ))}
+              </div>
+            </section>
+
+            <section className={styles.section}>
+              <span className={styles.eyebrow}>12-year rhythm</span>
               <h3 className={styles.sectionTitle}>Profection Wheel</h3>
               <ProfectionWheel
                 activatedHouse={data.profection.activatedHouse}
-                signs={(() => {
-                  const m: Record<number, string> = {};
-                  // Use natal houses from the return chart for display
-                  // (profection houses map to natal house signs)
-                  for (const h of data.returnChart.houses) {
-                    m[h.house_number] = h.sign;
-                  }
-                  return m;
-                })()}
+                signs={data.profection.natalHouseSigns}
+                age={data.profection.age}
               />
-            </div>
+            </section>
           </div>
 
-          {/* ── Solar Return Chart ── */}
           <div className={styles.sectionGrid}>
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Solar Return Chart</h3>
+            <section className={styles.section}>
+              <span className={styles.eyebrow}>Return chart</span>
+              <h3 className={styles.sectionTitle}>Solar Return Snapshot</h3>
+              <p className={styles.sectionIntro}>
+                Cast for the precise moment the Sun returns to its natal position.
+              </p>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Return Moment</span>
                 <span className={styles.detailValue}>
@@ -733,60 +1003,16 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                   {data.varshesh.planet}
                 </span>
               </div>
-              <div style={{ marginTop: "0.25rem" }}>
-                <small style={{ color: "var(--ink-soft)", fontSize: "0.78rem" }}>
-                  {data.varshesh.reason}
-                </small>
+              <div className={styles.returnReason}>
+                {data.varshesh.reason}
               </div>
-            </div>
+            </section>
 
-            {/* ── Key Planets in Return Chart ── */}
-            <div className={styles.section}>
+            <section className={styles.section}>
+              <span className={styles.eyebrow}>Ranked signals</span>
               <h3 className={styles.sectionTitle}>Key Return Placements</h3>
-              {data.returnChart.planets
-                .filter((p) =>
-                  ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"].includes(p.name)
-                )
-                .map((p) => (
-                  <div key={p.name} className={styles.detailRow}>
-                    <span className={styles.detailLabel}>{p.name}</span>
-                    <span className={styles.detailValue}>
-                      {p.sign} {p.degree_in_sign.toFixed(1)}° (H{p.house})
-                    </span>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* ── Year Summary ── */}
-          <div className={styles.sectionGrid}>
-            <div className={styles.sectionFull}>
-              <h3 className={styles.sectionTitle}>Year Summary</h3>
-              <p className={styles.summaryText}>
-                {data.yearSummary.ascendantComparison}
-              </p>
-              <p className={styles.summaryText}>
-                {data.yearSummary.emotionalTone}
-              </p>
-            </div>
-
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Focus Areas</h3>
-              <ul className={styles.summaryList}>
-                {data.yearSummary.focusAreas.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Strong Influences</h3>
-              <ul className={styles.summaryList}>
-                {data.yearSummary.strongInfluences.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            </div>
+              <KeyReturnPlacements data={data} />
+            </section>
           </div>
 
           {/* ── Year Lord Interpretation ── */}
