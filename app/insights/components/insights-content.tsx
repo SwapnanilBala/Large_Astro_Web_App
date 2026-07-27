@@ -10,6 +10,7 @@ import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
+import PersonalStory from "@/app/insights/components/personal-story";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
 import CosmicOrbs from "@/app/components/CosmicOrbs";
@@ -219,6 +220,7 @@ function CollapsibleSection({
   children,
   className = "",
   persistKey,
+  openForHash,
 }: {
   id?: string;
   title: string;
@@ -227,6 +229,7 @@ function CollapsibleSection({
   children: React.ReactNode;
   className?: string;
   persistKey?: string;
+  openForHash?: string;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [hasRestored, setHasRestored] = useState(false);
@@ -239,8 +242,10 @@ function CollapsibleSection({
   const contentId = `${contentIdBase}-content`;
 
   useEffect(() => {
+    const hashId = window.location.hash.replace("#", "");
     const isDeepLinked =
-      Boolean(id) && window.location.hash.replace("#", "") === id;
+      (Boolean(id) && hashId === id) ||
+      (Boolean(openForHash) && hashId === openForHash);
 
     if (isDeepLinked) {
       setIsOpen(true);
@@ -265,13 +270,14 @@ function CollapsibleSection({
     } finally {
       setHasRestored(true);
     }
-  }, [defaultOpen, id, persistKey]);
+  }, [defaultOpen, id, openForHash, persistKey]);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id && !openForHash) return;
 
     const openDeepLinkedSection = () => {
-      if (window.location.hash.replace("#", "") === id) {
+      const hashId = window.location.hash.replace("#", "");
+      if (hashId === id || hashId === openForHash) {
         setIsOpen(true);
       }
     };
@@ -280,7 +286,22 @@ function CollapsibleSection({
     return () => {
       window.removeEventListener("hashchange", openDeepLinkedSection);
     };
-  }, [id]);
+  }, [id, openForHash]);
+
+  useEffect(() => {
+    if (
+      !isOpen ||
+      !openForHash ||
+      window.location.hash.replace("#", "") !== openForHash
+    ) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(openForHash)?.scrollIntoView({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [isOpen, openForHash]);
 
   useEffect(() => {
     if (!persistKey || !hasRestored) return;
@@ -345,6 +366,7 @@ const SECTION_ANCHORS = [
   { id: "core", label: "Core" },
   { id: "themes", label: "Themes" },
   { id: "karma", label: "Karma" },
+  { id: "continue-reading", label: "Continue" },
   { id: "ultimate", label: "Ultimate" },
   { id: "fortune", label: "Fortune" },
 ];
@@ -1095,7 +1117,16 @@ export default function InsightsContent({
   const advancedInsightsHref = historyQs
     ? `/insights/advanced?${historyQs}`
     : "/insights/advanced";
-  const compatibilityHref = `/insights/compatibility?${historyQs}`;
+  const compatibilityHref = historyQs
+    ? `/insights/compatibility?${historyQs}`
+    : "/insights/compatibility";
+  const getAdvancedViewHref = (view: "transits" | "palm") => {
+    const params = new URLSearchParams(historyQs);
+    params.set("view", view);
+    return `/insights/advanced?${params.toString()}`;
+  };
+  const transitWorkspaceHref = getAdvancedViewHref("transits");
+  const palmWorkspaceHref = getAdvancedViewHref("palm");
   const sectionStateScope = `insights:section-state:${historyQs}`;
   const domainInsights = payload.chart.life_domain_insights ?? [];
   const availableEngines = payload.engine.available_engines ?? [];
@@ -1279,6 +1310,7 @@ export default function InsightsContent({
 
         {/* ─── Top Metrics Bento Row ─── */}
         <ActionGuidanceChips payload={payload} />
+        <PersonalStory payload={payload} />
         <TopTakeawaysModule payload={payload} />
 
         <motion.div
@@ -1415,6 +1447,7 @@ export default function InsightsContent({
           defaultOpen={false}
           className={`${styles.cardRules} ${styles.timingSection}`}
           persistKey={`${sectionStateScope}:timing`}
+          openForHash="muhurta"
         >
           <div className={styles.timingPanels}>
             <div className={styles.cardForecast}>
@@ -1425,7 +1458,7 @@ export default function InsightsContent({
               </LazyPanel>
             </div>
 
-            <div className={styles.cardForecast}>
+            <div id="muhurta" className={`${styles.cardForecast} ${styles.anchorTarget}`}>
               <LazyPanel>
                 <PanelErrorBoundary panelName="Muhurta">
                   <MuhurtaPanel queryString={historyQs} />
@@ -1645,118 +1678,105 @@ export default function InsightsContent({
 
         <ConstellationDivider />
 
-        {/* ─── Advanced & Palm Analysis CTA ─── */}
-        {/* Connected Insight Zone: routes surface existing readings without duplicating calculations. */}
+        {/* ─── Continue your reading ─── */}
         <motion.section
-          id="insight-hub"
-          className={`${styles.insightHub} ${styles.anchorTarget}`}
+          id="continue-reading"
+          className={`${styles.continuationHub} ${styles.anchorTarget}`}
           initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-60px" }}
           transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-          aria-labelledby="insight-hub-heading"
+          aria-labelledby="continue-reading-heading"
         >
-          <div className={styles.insightHubHeader}>
+          <div className={styles.continuationHeader}>
             <div>
-              <p className={styles.kicker}>Connected Insight Zone</p>
-              <h2 id="insight-hub-heading" className={styles.insightHubTitle}>
-                Five lenses. One evolving story.
+              <p className={styles.kicker}>Continue your reading</p>
+              <h2 id="continue-reading-heading" className={styles.continuationTitle}>
+                What would you like to explore next?
               </h2>
             </div>
-            <p className={styles.insightHubLead}>
-              Move from understanding your pattern to choosing your next step,
-              without repeating the same reading.
+            <p className={styles.continuationLead}>
+              Choose a focused next step. Every option tells you whether it keeps
+              you here, opens a workspace, or needs a palm photo.
             </p>
           </div>
 
-          <div className={styles.insightHubGrid}>
-            <Link
-              href={`${advancedInsightsHref}#live-transits`}
-              className={styles.insightHubCard}
-              data-tone="sky"
-            >
-              <span className={styles.insightHubGlyph} aria-hidden="true">✦</span>
-              <span className={styles.insightHubCardBody}>
-                <strong>Then vs Now</strong>
-                <span>Compare the present sky with the promise carried in your natal chart.</span>
-              </span>
-              <span className={styles.insightHubAction}>Explore live transits →</span>
-            </Link>
+          <div className={styles.continuationGroups}>
+            <section className={styles.continuationGroup} aria-labelledby="continue-here-heading">
+              <div className={styles.continuationGroupHeader}>
+                <h3 id="continue-here-heading" className={styles.continuationGroupTitle}>
+                  Continue here
+                </h3>
+                <p className={styles.continuationGroupHint}>Stay on this page</p>
+              </div>
+              <div className={styles.continuationActions}>
+                <Link
+                  href="#muhurta"
+                  className={`${styles.continuationAction} ${styles.continuationActionRecommended}`}
+                  data-tone="gold"
+                >
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">⌁</span>
+                  <span className={styles.continuationActionBody}>
+                    <span className={styles.continuationRecommendation}>Recommended next</span>
+                    <strong>Find a good time</strong>
+                    <span>Use your personalised timing windows for the decision in front of you.</span>
+                  </span>
+                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">→</span></span>
+                </Link>
 
-            <Link
-              href="#timing"
-              className={styles.insightHubCard}
-              data-tone="gold"
-            >
-              <span className={styles.insightHubGlyph} aria-hidden="true">⌁</span>
-              <span className={styles.insightHubCardBody}>
-                <strong>Decision Compass</strong>
-                <span>Use personalised Muhurta windows to time the decision in front of you.</span>
-              </span>
-              <span className={styles.insightHubAction}>Find a timing window →</span>
-            </Link>
+                <Link href="#life-shifts" className={styles.continuationAction} data-tone="green">
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">↝</span>
+                  <span className={styles.continuationActionBody}>
+                    <strong>Your life timeline</strong>
+                    <span>See the pivotal life windows and dasha transitions still unfolding.</span>
+                  </span>
+                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">→</span></span>
+                </Link>
+              </div>
+            </section>
 
-            <Link
-              href={`${advancedInsightsHref}#palm-reading`}
-              className={styles.insightHubCard}
-              data-tone="rose"
-            >
-              <span className={styles.insightHubGlyph} aria-hidden="true">∞</span>
-              <span className={styles.insightHubCardBody}>
-                <strong>Relationship Dynamic Map</strong>
-                <span>See how your chart and palm patterns describe connection, needs, and growth.</span>
-              </span>
-              <span className={styles.insightHubAction}>Open palm reading →</span>
-            </Link>
+            <section className={styles.continuationGroup} aria-labelledby="specialist-tools-heading">
+              <div className={styles.continuationGroupHeader}>
+                <h3 id="specialist-tools-heading" className={styles.continuationGroupTitle}>
+                  Open a specialist tool
+                </h3>
+                <p className={styles.continuationGroupHint}>Focused workspace</p>
+              </div>
+              <div className={styles.continuationActions}>
+                <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">✦</span>
+                  <span className={styles.continuationActionBody}>
+                    <strong>Current transits</strong>
+                    <span>Compare the present sky with the promise carried in your natal chart.</span>
+                  </span>
+                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">→</span></span>
+                </Link>
 
-            <Link
-              href={`${advancedInsightsHref}#palm-reading`}
-              className={styles.insightHubCard}
-              data-tone="violet"
-            >
-              <span className={styles.insightHubGlyph} aria-hidden="true">◈</span>
-              <span className={styles.insightHubCardBody}>
-                <strong>Chart Convergence</strong>
-                <span>Bring chart and palm together to spot recurring strengths in one synthesis.</span>
-              </span>
-              <span className={styles.insightHubAction}>See chart × palm →</span>
-            </Link>
+                <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">∞</span>
+                  <span className={styles.continuationActionBody}>
+                    <strong>Compare with a partner</strong>
+                    <span>Open a relationship workspace to compare two full birth profiles.</span>
+                  </span>
+                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">→</span></span>
+                </Link>
 
-            <Link
-              href="#life-shifts"
-              className={`${styles.insightHubCard} ${styles.insightHubCardWide}`}
-              data-tone="green"
-            >
-              <span className={styles.insightHubGlyph} aria-hidden="true">↝</span>
-              <span className={styles.insightHubCardBody}>
-                <strong>Life Path Timeline</strong>
-                <span>Follow dasha transitions and pivotal cycles to see the chapters still unfolding.</span>
-              </span>
-              <span className={styles.insightHubAction}>View life shifts →</span>
-            </Link>
+                <Link href={palmWorkspaceHref} className={styles.continuationAction} data-tone="violet">
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">◈</span>
+                  <span className={styles.continuationActionBody}>
+                    <strong>Chart + palm synthesis</strong>
+                    <span>Bring your palm and chart together to surface recurring strengths.</span>
+                  </span>
+                  <span className={styles.continuationRoute}>Requires a palm photo <span aria-hidden="true">→</span></span>
+                </Link>
+              </div>
+            </section>
           </div>
-        </motion.section>
 
-        <ConstellationDivider />
-
-        <motion.div
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-        >
-          <Link
-            href={`/insights/advanced?${historyQs}`}
-            className={styles.advancedCta}
-          >
-            <span className={styles.advancedCtaTitle}>
-              Advanced &amp; Palm Analysis &rarr;
-            </span>
-            <span className={styles.advancedCtaDesc}>
-              Explore Nakshatra cycles, Dasha timing, Navamsa refinements, divisional charts, planetary yogas, transit overlays, Ashtakavarga scores, Shadbala strength, and AI-powered palm reading — all in one dedicated space.
-            </span>
+          <Link href={advancedInsightsHref} className={styles.continuationBrowse}>
+            Browse all advanced tools <span aria-hidden="true">→</span>
           </Link>
-        </motion.div>
+        </motion.section>
 
         {/* ─── Life Domain Deep Dives ─── */}
         <AuthGate

@@ -11,6 +11,7 @@ import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { useAuth } from "@/lib/auth-context";
 import { saveAuthenticatedReading, saveGuestReading } from "@/lib/reading-store";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
+import type { AdvancedFocusView } from "./advanced-views";
 
 const REQUEST_TIMEOUT_MS = 55_000;
 
@@ -34,6 +35,7 @@ type ChartParams = {
 
 type AdvancedLoaderProps = {
   chartParams: ChartParams;
+  focusView: AdvancedFocusView | null;
 };
 
 function buildChartApiUrl(params: ChartParams): string {
@@ -79,7 +81,10 @@ async function persistReading(
   }
 }
 
-export default function AdvancedLoader({ chartParams }: AdvancedLoaderProps) {
+export default function AdvancedLoader({
+  chartParams,
+  focusView,
+}: AdvancedLoaderProps) {
   const [payload, setPayload] = useState<ChartApiResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
@@ -209,6 +214,7 @@ export default function AdvancedLoader({ chartParams }: AdvancedLoaderProps) {
             <AdvancedContent
               payload={payload}
               historyQs={historyQs}
+              focusView={focusView}
             />
           </ErrorBoundary>
         </motion.div>

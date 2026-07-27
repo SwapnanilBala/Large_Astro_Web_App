@@ -14,6 +14,7 @@ import styles from "../insights.module.css";
 import advStyles from "./advanced.module.css";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import type { AdvancedFocusView } from "./advanced-views";
 
 /* ─── JyotishContext extraction (for palm-reading Jyotish correlation) ─── */
 type JyotishContext = {
@@ -224,6 +225,10 @@ function CollapsibleSection({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const shouldReduceMotion = useReducedMotion();
 
+  useEffect(() => {
+    setIsOpen(defaultOpen);
+  }, [defaultOpen]);
+
   return (
     <motion.section
       id={id}
@@ -268,6 +273,123 @@ function CollapsibleSection({
   );
 }
 
+type FocusWorkspaceCopy = {
+  breadcrumb: string;
+  status: string;
+  description: string;
+};
+
+const FOCUS_WORKSPACE_COPY: Record<AdvancedFocusView, FocusWorkspaceCopy> = {
+  transits: {
+    breadcrumb: "Current transits",
+    status: "Live chart overlay",
+    description:
+      "The current sky is shown against your natal chart, so the active themes stay front and centre.",
+  },
+  palm: {
+    breadcrumb: "Chart + palm synthesis",
+    status: "A palm photo is needed",
+    description:
+      "Upload a clear palm photo to bring its patterns together with the context from your birth chart.",
+  },
+};
+
+function LiveTransitsModule({
+  payload,
+  lockedFeatures,
+  rootMargin,
+}: {
+  payload: ChartApiResponse;
+  lockedFeatures: Set<string>;
+  rootMargin?: string;
+}) {
+  return (
+    <LazyPanel rootMargin={rootMargin}>
+      <PanelErrorBoundary panelName="Live Transits">
+        <AuthGate
+          featureLabel="Live Transits"
+          isLocked={lockedFeatures.has("live_transits")}
+        >
+          {payload.transits ? (
+            <TransitsPanel transits={payload.transits} />
+          ) : (
+            <LockedFeaturePreview
+              title="Live transits"
+              description="Track the current sky against the natal chart to understand active triggers and near-term windows."
+            />
+          )}
+        </AuthGate>
+      </PanelErrorBoundary>
+    </LazyPanel>
+  );
+}
+
+function PalmReadingModule({
+  lockedFeatures,
+  jyotishContext,
+  rootMargin,
+}: {
+  lockedFeatures: Set<string>;
+  jyotishContext: JyotishContext | undefined;
+  rootMargin?: string;
+}) {
+  return (
+    <LazyPanel rootMargin={rootMargin}>
+      <PanelErrorBoundary panelName="Palm Reading">
+        <AuthGate
+          featureLabel="Palm Reading"
+          isLocked={lockedFeatures.has("palm_reading")}
+          requiredTier="premium"
+        >
+          <PalmReadingPanel jyotishContext={jyotishContext} />
+        </AuthGate>
+      </PanelErrorBoundary>
+    </LazyPanel>
+  );
+}
+
+function FocusWorkspace({
+  focusView,
+  payload,
+  lockedFeatures,
+  jyotishContext,
+}: {
+  focusView: AdvancedFocusView;
+  payload: ChartApiResponse;
+  lockedFeatures: Set<string>;
+  jyotishContext: JyotishContext | undefined;
+}) {
+  const copy = FOCUS_WORKSPACE_COPY[focusView];
+
+  return (
+    <section
+      id={`${focusView}-workspace`}
+      className={advStyles.focusWorkspace}
+      aria-label={`${copy.breadcrumb} workspace`}
+    >
+      <div className={advStyles.focusWorkspaceHeader}>
+        <span className={advStyles.focusStatus}>{copy.status}</span>
+        <p>{copy.description}</p>
+      </div>
+      <div className={advStyles.focusWorkspacePanel}>
+        {focusView === "transits" ? (
+          <LiveTransitsModule
+            payload={payload}
+            lockedFeatures={lockedFeatures}
+            rootMargin="900px"
+          />
+        ) : (
+          <PalmReadingModule
+            lockedFeatures={lockedFeatures}
+            jyotishContext={jyotishContext}
+            rootMargin="900px"
+          />
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ═══════════════════════════════════════════════
    ADVANCED CONTENT — Main Component
    ═══════════════════════════════════════════════ */
@@ -275,16 +397,23 @@ function CollapsibleSection({
 type AdvancedContentProps = {
   payload: ChartApiResponse;
   historyQs: string;
+  focusView: AdvancedFocusView | null;
 };
 
 export default function AdvancedContent({
   payload,
   historyQs,
+  focusView,
 }: AdvancedContentProps) {
   const { t } = useTranslation();
   const shouldReduceMotion = useReducedMotion();
   const lockedFeatures = new Set(payload.access.locked_features);
   const jyotishContext = buildJyotishContext(payload);
+  const insightsHref = historyQs ? `/insights?${historyQs}` : "/insights";
+  const returnToReadingHref = focusView
+    ? `${insightsHref}#continue-reading`
+    : insightsHref;
+  const focusCopy = focusView ? FOCUS_WORKSPACE_COPY[focusView] : null;
 
   return (
     <ParallaxContainer>
@@ -300,10 +429,23 @@ export default function AdvancedContent({
             animate={{ opacity: 1, x: 0 }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 22 }}
           >
-            <Link href={`/insights?${historyQs}`} className={advStyles.backLink}>
-              <FiArrowLeft size={16} />
-              Back to Insights
-            </Link>
+            {focusCopy ? (
+              <nav className={advStyles.breadcrumb} aria-label="Reading location">
+                <Link href={returnToReadingHref} className={advStyles.breadcrumbBack}>
+                  <FiArrowLeft size={16} />
+                  Your reading
+                </Link>
+                <span aria-hidden="true">/</span>
+                <span>Advanced</span>
+                <span aria-hidden="true">/</span>
+                <span aria-current="page">{focusCopy.breadcrumb}</span>
+              </nav>
+            ) : (
+              <Link href={returnToReadingHref} className={advStyles.backLink}>
+                <FiArrowLeft size={16} />
+                Back to Insights
+              </Link>
+            )}
           </motion.div>
 
           {/* ─── Hero Header ─── */}
@@ -313,22 +455,37 @@ export default function AdvancedContent({
             animate={{ opacity: 1, y: 0 }}
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 22 }}
           >
-            <p className={advStyles.heroKicker}>Deep Dive Tools</p>
+            <p className={advStyles.heroKicker}>
+              {focusCopy ? "Focused workspace" : "Deep Dive Tools"}
+            </p>
             <h1 className={advStyles.heroTitle}>
-              Advanced &amp; Palm Analysis
+              {focusCopy ? focusCopy.breadcrumb : "Advanced & Palm Analysis"}
             </h1>
             <p className={advStyles.heroLead}>
+              {focusCopy ? focusCopy.description : (
+                <>
               Nakshatra cycles, Dasha timing, Navamsa refinements, divisional charts,
               planetary yogas, transit overlays, Ashtakavarga scores, Shadbala strength,
               and AI-powered palm reading — all in one dedicated space.
+                </>
+              )}
             </p>
           </motion.div>
 
+          {focusView && (
+            <FocusWorkspace
+              focusView={focusView}
+              payload={payload}
+              lockedFeatures={lockedFeatures}
+              jyotishContext={jyotishContext}
+            />
+          )}
+
           {/* ─── Advanced Modules Grid (Collapsible) ─── */}
           <CollapsibleSection
-            kicker={t("insights.advancedKicker")}
-            title={t("insights.advancedHeading")}
-            defaultOpen={true}
+            kicker={focusView ? "More to explore" : t("insights.advancedKicker")}
+            title={focusView ? "Other advanced tools" : t("insights.advancedHeading")}
+            defaultOpen={!focusView}
             className={styles.cardRules}
           >
             <div className={styles.gridAdvanced}>
@@ -487,7 +644,8 @@ export default function AdvancedContent({
               {/* Transits */}
               <motion.div
                 id="live-transits"
-                className={`${styles.cardTransits} ${styles.cardFullWidth} ${styles.cardDepthMid} ${styles.anchorTarget}`}
+                hidden={focusView === "transits"}
+                className={`${styles.cardTransits} ${styles.cardFullWidth} ${styles.cardDepthMid} ${styles.anchorTarget} ${focusView === "transits" ? advStyles.hiddenForFocusedView : ""}`}
                 initial={shouldReduceMotion ? false : { opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, margin: "-60px" }}
@@ -549,8 +707,8 @@ export default function AdvancedContent({
             id="palm-reading"
             kicker={t("insights.palmKicker")}
             title={t("insights.palmHeading")}
-            defaultOpen={true}
-            className={styles.cardRules}
+            defaultOpen={!focusView}
+            className={`${styles.cardRules} ${focusView === "palm" ? advStyles.hiddenForFocusedView : ""}`}
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Palm Reading">
@@ -573,9 +731,9 @@ export default function AdvancedContent({
             viewport={{ once: true }}
             transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
           >
-            <Link href={`/insights?${historyQs}`} className={advStyles.backLink}>
+            <Link href={returnToReadingHref} className={advStyles.backLink}>
               <FiArrowLeft size={16} />
-              Back to Insights
+              {focusView ? "Back to your reading" : "Back to Insights"}
             </Link>
           </motion.div>
         </section>

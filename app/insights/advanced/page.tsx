@@ -2,6 +2,7 @@ import Link from "next/link";
 import AdvancedLoader from "./advanced-loader";
 import BackButton from "@/app/components/BackButton";
 import PageTransition from "@/app/components/PageTransition";
+import { getAdvancedFocusView } from "./advanced-views";
 
 export const maxDuration = 60;
 
@@ -44,6 +45,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   const birthTimeAccuracy = getSingle(rawParams.birthTimeAccuracy);
   const birthTimeSource = getSingle(rawParams.birthTimeSource);
   const birthTimeFallback = getSingle(rawParams.birthTimeFallback);
+  const focusView = getAdvancedFocusView(getSingle(rawParams.view));
 
   const hasAllInputs = requiredParams.every((param) => params[param].trim().length > 0);
 
@@ -81,7 +83,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
     <PageTransition>
     <div className="insights-shell">
       <BackButton href="/" />
-      <AdvancedLoader chartParams={chartParams} />
+      <AdvancedLoader chartParams={chartParams} focusView={focusView} />
     </div>
     </PageTransition>
   );
