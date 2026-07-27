@@ -15,6 +15,7 @@ const SIGN_GLYPHS: Record<string, string> = {
 };
 
 const BAV_PLANETS = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+const BASE_SAV_BINDU_TOTAL = 337;
 
 type Props = {
   ashtakavarga: AshtakavargaData;
@@ -44,6 +45,13 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
 
   const showingBAV = selectedPlanet !== null;
   const bavData = selectedPlanet ? ashtakavarga.bhinnashtakavarga[selectedPlanet] : null;
+  const calculatedSavTotal = ashtakavarga.sarvashtakavarga.reduce(
+    (total, bindus) => total + bindus,
+    0,
+  );
+  const hasVerifiedBaseChecksum =
+    ashtakavarga.totalBindus === BASE_SAV_BINDU_TOTAL &&
+    calculatedSavTotal === BASE_SAV_BINDU_TOTAL;
 
   return (
     <section className="ashtakavarga-panel">
@@ -53,6 +61,14 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
         <small className="ashtakavarga-total">
           Total bindus: {ashtakavarga.totalBindus}
         </small>
+        <span
+          className={`ashtakavarga-checksum${hasVerifiedBaseChecksum ? " ashtakavarga-checksum--verified" : " ashtakavarga-checksum--alert"}`}
+          role="status"
+        >
+          {hasVerifiedBaseChecksum
+            ? "Base SAV checksum verified: 337 / 337"
+            : `Checksum alert: ${calculatedSavTotal} / ${BASE_SAV_BINDU_TOTAL}`}
+        </span>
       </div>
 
       {/* Planet selector tabs */}
@@ -106,7 +122,7 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
       <div className="ashtakavarga-summary">
         {ashtakavarga.strongSigns.length > 0 && (
           <div className="ashtakavarga-summary-group">
-            <h4>Strong signs (SAV &ge; 28)</h4>
+            <h4>Higher-score signs (SAV &ge; 28)</h4>
             <div className="ashtakavarga-sign-chips">
               {ashtakavarga.strongSigns.map((sign) => (
                 <span key={sign} className="ashtakavarga-chip ashtakavarga-chip--strong">
@@ -118,7 +134,7 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
         )}
         {ashtakavarga.weakSigns.length > 0 && (
           <div className="ashtakavarga-summary-group">
-            <h4>Weak signs (SAV &le; 25)</h4>
+            <h4>Lower-score signs (SAV &le; 25)</h4>
             <div className="ashtakavarga-sign-chips">
               {ashtakavarga.weakSigns.map((sign) => (
                 <span key={sign} className="ashtakavarga-chip ashtakavarga-chip--weak">

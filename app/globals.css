@@ -3624,6 +3624,31 @@ html[data-theme="light"] .dasha-active-card {
   color: var(--ink-soft);
 }
 
+.ashtakavarga-checksum {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding: 0.24rem 0.52rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.25;
+}
+
+.ashtakavarga-checksum--verified {
+  border-color: rgba(108, 225, 212, 0.3);
+  background: rgba(108, 225, 212, 0.1);
+  color: var(--accent-aqua);
+}
+
+.ashtakavarga-checksum--alert {
+  border-color: rgba(255, 143, 126, 0.36);
+  background: rgba(255, 143, 126, 0.1);
+  color: var(--accent-coral);
+}
+
 .ashtakavarga-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -3798,6 +3823,14 @@ html[data-theme="light"] .ashtakavarga-panel:hover {
 
 html[data-theme="light"] .ashtakavarga-cell {
   background: var(--surface-soft);
+}
+
+html[data-theme="light"] .ashtakavarga-checksum--verified {
+  background: rgba(35, 107, 96, 0.1);
+}
+
+html[data-theme="light"] .ashtakavarga-checksum--alert {
+  background: rgba(198, 90, 74, 0.1);
 }
 
 html[data-theme="light"] .ashtakavarga-cell--strong {
@@ -9888,6 +9921,173 @@ html[data-theme="light"] .accent-card {
   color: var(--ink-soft);
 }
 
+/* Sign context: SAV scores sign fields, Shadbala scores planets. */
+.shadbala-sign-context {
+  margin: 1.5rem 0 0;
+  padding: clamp(1rem, 2.4vw, 1.35rem);
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  border-radius: 12px;
+  background:
+    linear-gradient(135deg, rgba(108, 225, 212, 0.07), rgba(139, 110, 232, 0.06)),
+    var(--surface-soft);
+}
+
+.shadbala-sign-context-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem 1rem;
+}
+
+.shadbala-sign-context-kicker {
+  margin: 0 0 0.2rem;
+  color: var(--accent-aqua);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.shadbala-sign-context h3 {
+  margin: 0;
+  color: var(--ink-main);
+  font-size: 1.55rem;
+  line-height: 1.25;
+}
+
+.shadbala-sign-context-source {
+  flex: 0 0 auto;
+  padding: 0.3rem 0.55rem;
+  border: 1px solid rgba(108, 225, 212, 0.2);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.shadbala-sign-context-intro {
+  max-width: 860px;
+  margin: 0.75rem 0 1rem;
+  color: var(--ink-soft);
+  font-size: 1.25rem;
+  line-height: 1.55;
+}
+
+.shadbala-sign-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.shadbala-sign-card {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: rgba(5, 12, 25, 0.22);
+}
+
+.shadbala-sign-card--strong {
+  border-color: rgba(108, 225, 212, 0.32);
+}
+
+.shadbala-sign-card--weak {
+  border-color: rgba(255, 143, 126, 0.32);
+}
+
+.shadbala-sign-card > p {
+  margin: 0 0 0.5rem;
+  color: var(--ink-soft);
+  font-size: 1.08rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.shadbala-sign-card > strong {
+  display: block;
+  margin-top: 0.55rem;
+  color: var(--ink-main);
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.shadbala-sign-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.shadbala-sign-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-height: 2rem;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink-main);
+  font-size: 1.2rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.shadbala-sign-card--strong .shadbala-sign-chip {
+  border: 1px solid rgba(108, 225, 212, 0.2);
+}
+
+.shadbala-sign-card--weak .shadbala-sign-chip {
+  border: 1px solid rgba(255, 143, 126, 0.2);
+}
+
+.shadbala-sign-planet-context {
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.shadbala-sign-planet-context-label {
+  margin: 0 0 0.5rem;
+  color: var(--ink-main);
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.shadbala-sign-planet-context-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
+.shadbala-sign-planet-context-grid p {
+  min-width: 0;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.18rem;
+  line-height: 1.5;
+}
+
+.shadbala-sign-planet-context-grid strong {
+  color: var(--ink-main);
+}
+
+.shadbala-sign-unavailable {
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.85rem;
+  border: 1px dashed rgba(242, 194, 108, 0.38);
+  border-radius: 10px;
+  color: var(--ink-soft);
+  font-size: 1.18rem;
+  line-height: 1.5;
+}
+
+.shadbala-sign-unavailable strong {
+  color: var(--ink-main);
+}
+
 /* Bar chart rows */
 .shadbala-chart {
   display: flex;
@@ -10098,6 +10298,10 @@ html[data-theme="light"] .accent-card {
 
 /* Responsive */
 @media (max-width: 600px) {
+  .shadbala-panel {
+    padding: 1rem;
+  }
+
   .shadbala-comp-label {
     min-width: 90px;
   }
@@ -10112,6 +10316,30 @@ html[data-theme="light"] .accent-card {
 
   .shadbala-summary {
     flex-direction: column;
+  }
+
+  .shadbala-sign-context-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .shadbala-sign-context-source {
+    font-size: 1rem;
+  }
+
+  .shadbala-sign-summary,
+  .shadbala-sign-planet-context-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shadbala-sign-card,
+  .shadbala-sign-unavailable {
+    padding: 0.75rem;
+  }
+
+  .shadbala-sign-chip {
+    min-height: 2.25rem;
+    font-size: 1.12rem;
   }
 }
 
@@ -10130,6 +10358,20 @@ html[data-theme="light"] .shadbala-bar-threshold {
 
 html[data-theme="light"] .shadbala-row-header {
   color: var(--ink-main);
+}
+
+html[data-theme="light"] .shadbala-sign-context {
+  background:
+    linear-gradient(135deg, rgba(26, 123, 110, 0.08), rgba(119, 90, 190, 0.05)),
+    rgba(255, 255, 255, 0.62);
+}
+
+html[data-theme="light"] .shadbala-sign-card {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+html[data-theme="light"] .shadbala-sign-chip {
+  background: rgba(0, 0, 0, 0.04);
 }
 
 /* ═══════════════════════════════════════════════

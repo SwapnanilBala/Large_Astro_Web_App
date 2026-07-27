@@ -42,7 +42,7 @@ const ASHTAKAVARGA_TABLES: Record<string, SourceContributions> = {
     Sun:       [3, 6, 7, 8, 10, 11],
     Moon:      [1, 3, 6, 7, 10, 11],
     Mars:      [2, 3, 5, 6, 9, 10, 11],
-    Mercury:   [1, 3, 5, 6, 9, 10, 11],
+    Mercury:   [1, 3, 4, 5, 7, 8, 10, 11],
     Jupiter:   [1, 4, 7, 8, 10, 11, 12],
     Venus:     [3, 4, 5, 7, 9, 10, 11],
     Saturn:    [3, 5, 6, 11],
@@ -102,6 +102,7 @@ const ASHTAKAVARGA_TABLES: Record<string, SourceContributions> = {
 
 // The 7 planets used in Ashtakavarga (Rahu/Ketu excluded)
 const BAV_PLANETS = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+const BASE_SAV_BINDU_TOTAL = 337;
 
 // --------------------------------------------------------------------------
 // Helpers
@@ -123,11 +124,31 @@ export function computeAshtakavarga(
 ): AshtakavargaResult {
   // Build lookup: planet name -> sign index
   const sourceSignIndex: Record<string, number> = {};
+  const duplicateSources = new Set<string>();
   for (const p of planets) {
     if (BAV_PLANETS.includes(p.name)) {
+      if (sourceSignIndex[p.name] !== undefined) {
+        duplicateSources.add(p.name);
+      }
       sourceSignIndex[p.name] = signIndex(p.sign);
     }
   }
+
+  if (duplicateSources.size > 0) {
+    throw new Error(
+      `Ashtakavarga requires one position per classical planet; duplicates: ${[...duplicateSources].join(", ")}`
+    );
+  }
+
+  const missingSources = BAV_PLANETS.filter(
+    (planet) => sourceSignIndex[planet] === undefined
+  );
+  if (missingSources.length > 0) {
+    throw new Error(
+      `Ashtakavarga requires positions for all seven classical planets; missing: ${missingSources.join(", ")}`
+    );
+  }
+
   sourceSignIndex["Ascendant"] = signIndex(ascendantSign);
 
   const bhinnashtakavarga: Record<string, number[]> = {};
@@ -164,6 +185,11 @@ export function computeAshtakavarga(
   }
 
   const totalBindus = sarvashtakavarga.reduce((sum, v) => sum + v, 0);
+  if (totalBindus !== BASE_SAV_BINDU_TOTAL) {
+    throw new Error(
+      `Ashtakavarga checksum failed: expected ${BASE_SAV_BINDU_TOTAL} bindus, received ${totalBindus}`
+    );
+  }
 
   const strongSigns: string[] = [];
   const weakSigns: string[] = [];

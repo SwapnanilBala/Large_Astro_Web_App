@@ -617,7 +617,11 @@ export default function AdvancedContent({
                         featureLabel="Shadbala Analysis"
                         isLocked={lockedFeatures.has("planetary_aspects")}
                       >
-                        <ShadbalaPanel shadbala={payload.chart.shadbala} />
+                        <ShadbalaPanel
+                          shadbala={payload.chart.shadbala}
+                          planets={payload.chart.planets}
+                          ashtakavarga={payload.ashtakavarga}
+                        />
                       </AuthGate>
                     </PanelErrorBoundary>
                   </LazyPanel>
