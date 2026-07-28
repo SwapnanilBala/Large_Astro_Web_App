@@ -57,7 +57,7 @@
 .chapterEyebrow {
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 800;
   letter-spacing: 0.09em;
   line-height: 1.2;
@@ -68,7 +68,7 @@
   margin-top: 0.2rem;
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 1.06rem;
+  font-size: 1.18rem;
   font-weight: 750;
   line-height: 1.2;
 }
@@ -77,7 +77,7 @@
   display: block;
   margin-top: 0.3rem;
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 500;
   line-height: 1.35;
 }
@@ -244,8 +244,8 @@
   margin: 0.75rem 0 0;
   color: var(--ink-soft);
   font-family: var(--font-newsreader), Georgia, serif;
-  font-size: 1.09rem;
-  line-height: 1.55;
+  font-size: 1.2rem;
+  line-height: 1.6;
 }
 
 .tocBar {
@@ -279,7 +279,7 @@
   padding: 0.42rem 0.75rem;
   color: var(--ink-soft);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
   background: rgba(255, 255, 255, 0.05);
@@ -296,31 +296,6 @@
 }
 
 .tocChip:focus-visible {
-  outline: 3px solid rgba(108, 225, 212, 0.8);
-  outline-offset: 2px;
-}
-
-.expandAllButton {
-  flex: 0 0 auto;
-  padding: 0.42rem 0.85rem;
-  color: var(--accent-gold);
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.74rem;
-  font-weight: 800;
-  white-space: nowrap;
-  background: transparent;
-  border: 1px solid rgba(200, 155, 60, 0.45);
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background 160ms ease, color 160ms ease;
-}
-
-.expandAllButton:hover {
-  color: #fff7e8;
-  background: rgba(200, 155, 60, 0.18);
-}
-
-.expandAllButton:focus-visible {
   outline: 3px solid rgba(108, 225, 212, 0.8);
   outline-offset: 2px;
 }
@@ -351,8 +326,8 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.7rem;
-  min-height: 4.1rem;
-  padding: 0.85rem 0.95rem;
+  min-height: 4.4rem;
+  padding: 0.9rem 0.95rem;
   cursor: pointer;
   list-style: none;
 }
@@ -370,8 +345,8 @@
   margin-top: 0.14rem;
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 1rem;
-  line-height: 1.25;
+  font-size: 1.14rem;
+  line-height: 1.3;
 }
 
 .chapterIndex {
@@ -406,8 +381,8 @@
   margin: 0;
   color: var(--ink-soft);
   font-family: var(--font-newsreader), Georgia, serif;
-  font-size: 1.05rem;
-  line-height: 1.55;
+  font-size: 1.18rem;
+  line-height: 1.6;
 }
 
 .highlightList {
@@ -422,8 +397,8 @@
   position: relative;
   padding-left: 1.1rem;
   color: var(--ink-main);
-  font-size: 0.92rem;
-  line-height: 1.42;
+  font-size: 1.05rem;
+  line-height: 1.5;
 }
 
 .highlightList li::before {
@@ -457,7 +432,7 @@
 .signalList dt {
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0.07em;
   text-transform: uppercase;
@@ -467,8 +442,8 @@
   margin: 0.2rem 0 0;
   overflow-wrap: anywhere;
   color: var(--ink-soft);
-  font-size: 0.84rem;
-  line-height: 1.35;
+  font-size: 0.95rem;
+  line-height: 1.4;
 }
 
 .drawerFooter {
@@ -484,8 +459,8 @@
   max-width: 48ch;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .footerActions {
@@ -606,7 +581,6 @@
   .pdfButton,
   .pdfButtonSecondary,
   .tocChip,
-  .expandAllButton,
   .backdrop,
   .drawer {
     transition: none;

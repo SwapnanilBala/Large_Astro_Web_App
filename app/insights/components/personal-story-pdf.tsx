@@ -9,146 +9,87 @@ export type PersonalStoryPdfProps = {
   generatedOn?: string;
 };
 
-const COLORS = {
-  ink: "#1a1207",
-  inkSoft: "#4b3f2a",
-  gold: "#8f5a06",
-  paper: "#fffdf6",
-  card: "#f7f1e1",
-  border: "#d8c9a3",
-};
-
 const styles = StyleSheet.create({
   page: {
-    paddingTop: 48,
-    paddingBottom: 56,
-    paddingHorizontal: 48,
-    backgroundColor: COLORS.paper,
-    fontSize: 11,
-    color: COLORS.inkSoft,
+    paddingTop: 52,
+    paddingBottom: 60,
+    paddingHorizontal: 52,
+    fontSize: 13,
+    color: "#000000",
     fontFamily: "Helvetica",
   },
-  coverKicker: {
-    fontSize: 10,
+  kicker: {
+    fontSize: 11,
     fontFamily: "Helvetica-Bold",
-    letterSpacing: 2,
-    color: COLORS.gold,
+    letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 10,
   },
-  coverTitle: {
-    fontSize: 28,
+  title: {
+    fontSize: 30,
     fontFamily: "Helvetica-Bold",
-    color: COLORS.ink,
     marginBottom: 14,
   },
-  coverIntro: {
-    fontSize: 12.5,
+  intro: {
+    fontSize: 14,
     lineHeight: 1.6,
-    color: COLORS.inkSoft,
+    marginBottom: 10,
+  },
+  metaLine: {
+    fontSize: 11,
+    lineHeight: 1.5,
     marginBottom: 16,
   },
-  coverMetaRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  coverMetaItem: {
-    fontSize: 9.5,
-    color: COLORS.inkSoft,
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    marginRight: 6,
-    marginBottom: 6,
+  divider: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#999999",
+    marginVertical: 20,
   },
   chapterBlock: {
-    marginBottom: 20,
-  },
-  chapterHeader: {
-    marginBottom: 8,
+    marginBottom: 22,
   },
   chapterEyebrow: {
-    fontSize: 9,
+    fontSize: 11,
     fontFamily: "Helvetica-Bold",
-    letterSpacing: 1.5,
-    color: COLORS.gold,
+    letterSpacing: 1,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   chapterTitle: {
-    fontSize: 16,
+    fontSize: 19,
     fontFamily: "Helvetica-Bold",
-    color: COLORS.ink,
-  },
-  chapterBody: {
-    fontSize: 11,
-    lineHeight: 1.6,
-    marginTop: 8,
     marginBottom: 10,
   },
-  highlightRow: {
-    flexDirection: "row",
-    marginBottom: 4,
-  },
-  highlightBullet: {
-    width: 12,
-    fontSize: 11,
-    color: COLORS.gold,
-  },
-  highlightText: {
-    flex: 1,
-    fontSize: 10.5,
-    lineHeight: 1.5,
-  },
-  signalsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 8,
-  },
-  signalBox: {
-    width: "48%",
-    backgroundColor: COLORS.card,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 8,
-    marginRight: "2%",
+  body: {
+    fontSize: 13,
+    lineHeight: 1.55,
     marginBottom: 8,
   },
-  signalLabel: {
-    fontSize: 8,
-    fontFamily: "Helvetica-Bold",
-    letterSpacing: 1,
-    color: COLORS.gold,
-    textTransform: "uppercase",
-    marginBottom: 2,
+  bulletRow: {
+    flexDirection: "row",
+    marginBottom: 5,
   },
-  signalValue: {
-    fontSize: 9.5,
-    color: COLORS.inkSoft,
+  bulletMark: {
+    width: 14,
+    fontSize: 13,
   },
-  divider: {
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.border,
-    marginVertical: 18,
+  bulletText: {
+    flex: 1,
+    fontSize: 12.5,
+    lineHeight: 1.5,
   },
   footerNote: {
-    marginTop: 12,
-    fontSize: 9,
+    marginTop: 8,
+    fontSize: 11,
     lineHeight: 1.5,
   },
   pageNumber: {
     position: "absolute",
-    bottom: 24,
-    left: 48,
-    right: 48,
+    bottom: 28,
+    left: 52,
+    right: 52,
     textAlign: "right",
-    fontSize: 8,
-    color: COLORS.inkSoft,
+    fontSize: 9,
   },
 });
 
@@ -159,48 +100,46 @@ export function PersonalStoryPdfDocument({
   ascendant,
   generatedOn,
 }: PersonalStoryPdfProps) {
+  const metaParts = [
+    clientName,
+    ascendant ? `${ascendant} ascendant` : undefined,
+    locationLabel,
+    generatedOn ? `Generated ${generatedOn}` : undefined,
+  ].filter((part): part is string => Boolean(part));
+
   return (
     <Document title={story.title}>
       <Page size="A4" style={styles.page}>
-        <Text style={styles.coverKicker}>Personal synthesis</Text>
-        <Text style={styles.coverTitle}>{story.title}</Text>
-        <Text style={styles.coverIntro}>{story.introduction}</Text>
-        <View style={styles.coverMetaRow}>
-          {clientName ? <Text style={styles.coverMetaItem}>{clientName}</Text> : null}
-          {ascendant ? <Text style={styles.coverMetaItem}>{ascendant} ascendant</Text> : null}
-          {locationLabel ? <Text style={styles.coverMetaItem}>{locationLabel}</Text> : null}
-          {generatedOn ? <Text style={styles.coverMetaItem}>Generated {generatedOn}</Text> : null}
-        </View>
+        <Text style={styles.kicker}>Personal synthesis</Text>
+        <Text style={styles.title}>{story.title}</Text>
+        <Text style={styles.intro}>{story.introduction}</Text>
+        {metaParts.length > 0 && <Text style={styles.metaLine}>{metaParts.join("   •   ")}</Text>}
 
         <View style={styles.divider} />
 
         {story.chapters.map((chapter, index) => (
           <View key={chapter.id} style={styles.chapterBlock}>
-            <View style={styles.chapterHeader}>
-              <Text style={styles.chapterEyebrow}>
-                {String(index + 1).padStart(2, "0")} · {chapter.eyebrow}
-              </Text>
-              <Text style={styles.chapterTitle}>{chapter.title}</Text>
-            </View>
-            <Text style={styles.chapterBody}>{chapter.body}</Text>
+            <Text style={styles.chapterEyebrow}>
+              {String(index + 1).padStart(2, "0")} · {chapter.eyebrow}
+            </Text>
+            <Text style={styles.chapterTitle}>{chapter.title}</Text>
+            <Text style={styles.body}>{chapter.body}</Text>
 
             {chapter.highlights.map((highlight) => (
-              <View key={highlight} style={styles.highlightRow}>
-                <Text style={styles.highlightBullet}>{"•"}</Text>
-                <Text style={styles.highlightText}>{highlight}</Text>
+              <View key={highlight} style={styles.bulletRow}>
+                <Text style={styles.bulletMark}>{"•"}</Text>
+                <Text style={styles.bulletText}>{highlight}</Text>
               </View>
             ))}
 
-            {chapter.signals.length > 0 && (
-              <View style={styles.signalsWrap}>
-                {chapter.signals.map((signal) => (
-                  <View key={`${signal.label}-${signal.value}`} style={styles.signalBox}>
-                    <Text style={styles.signalLabel}>{signal.label}</Text>
-                    <Text style={styles.signalValue}>{signal.value}</Text>
-                  </View>
-                ))}
+            {chapter.signals.map((signal) => (
+              <View key={`${signal.label}-${signal.value}`} style={styles.bulletRow}>
+                <Text style={styles.bulletMark}>{"•"}</Text>
+                <Text style={styles.bulletText}>
+                  {signal.label}: {signal.value}
+                </Text>
               </View>
-            )}
+            ))}
           </View>
         ))}
 

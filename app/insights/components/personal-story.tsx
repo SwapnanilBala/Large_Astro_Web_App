@@ -97,8 +97,8 @@ export function PersonalStoryDrawer({
   const closeRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
   const chapterRefs = useRef<Partial<Record<string, HTMLDetailsElement | null>>>({});
-  const [allExpanded, setAllExpanded] = useState(false);
   const [pdfStatus, setPdfStatus] = useState<"idle" | "generating" | "error">("idle");
+  const chapterGroupName = `story-chapters-${dialogId}`;
 
   useEffect(() => {
     if (!open) return;
@@ -161,14 +161,6 @@ export function PersonalStoryDrawer({
     element.open = true;
     element.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
-
-  const toggleAllChapters = useCallback(() => {
-    const next = !allExpanded;
-    Object.values(chapterRefs.current).forEach((element) => {
-      if (element) element.open = next;
-    });
-    setAllExpanded(next);
-  }, [allExpanded]);
 
   const handleDownloadPdf = useCallback(async () => {
     if (pdfStatus === "generating") return;
@@ -284,9 +276,6 @@ export function PersonalStoryDrawer({
               </button>
             ))}
           </div>
-          <button type="button" className={styles.expandAllButton} onClick={toggleAllChapters}>
-            {allExpanded ? "Collapse all" : "Expand all"}
-          </button>
         </div>
 
         <ol className={styles.chapterList} aria-label="Your story chapters">
@@ -297,6 +286,7 @@ export function PersonalStoryDrawer({
                   chapterRefs.current[chapter.id] = element;
                 }}
                 className={styles.chapter}
+                name={chapterGroupName}
                 open={index === 0}
               >
                 <summary className={styles.chapterSummary}>
