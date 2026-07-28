@@ -4,8 +4,8 @@
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  min-height: 4.75rem;
-  padding: 0.9rem 1rem;
+  min-height: 5.75rem;
+  padding: 1rem 1.1rem;
   color: var(--ink-main);
   text-align: left;
   cursor: pointer;
@@ -73,6 +73,15 @@
   line-height: 1.2;
 }
 
+.triggerSubLabel {
+  display: block;
+  margin-top: 0.3rem;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 .triggerArrow {
   color: var(--accent-gold);
   font-size: 1.3rem;
@@ -84,7 +93,9 @@
   z-index: 100;
   inset: 0;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(0.75rem, 3vw, 2.5rem);
   background: rgba(3, 6, 14, 0.72);
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
@@ -92,19 +103,20 @@
 }
 
 .drawer {
-  width: min(43rem, 100%);
-  min-height: 100%;
-  max-height: 100dvh;
-  padding: clamp(1.1rem, 3vw, 2rem);
+  width: min(82rem, 96vw);
+  min-height: 0;
+  max-height: min(92dvh, 66rem);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
   overflow-y: auto;
   color: var(--ink-main);
   background:
     radial-gradient(circle at 100% 0%, rgba(139, 110, 232, 0.16), transparent 29%),
     radial-gradient(circle at 0% 18%, rgba(108, 225, 212, 0.12), transparent 28%),
     linear-gradient(155deg, rgba(18, 26, 48, 0.99), rgba(7, 11, 23, 0.99));
-  border-left: 1px solid rgba(200, 155, 60, 0.35);
-  box-shadow: -22px 0 55px rgba(0, 0, 0, 0.36);
-  animation: drawerIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  border: 1px solid rgba(200, 155, 60, 0.35);
+  border-radius: 1.5rem;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.45);
+  animation: modalIn 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
   box-sizing: border-box;
 }
 
@@ -119,10 +131,78 @@
   margin: 0;
 }
 
+.headerActions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .closeButton,
-.doneButton {
+.doneButton,
+.pdfButton,
+.pdfButtonSecondary {
   border: 0;
   cursor: pointer;
+}
+
+.pdfButton,
+.pdfButtonSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1a1207;
+  font-family: var(--font-display), sans-serif;
+  font-weight: 800;
+  background: var(--accent-gold);
+  border-radius: 999px;
+  transition: filter 160ms ease, transform 160ms ease, opacity 160ms ease;
+}
+
+.pdfButton {
+  min-height: 2.6rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.pdfButtonSecondary {
+  min-height: 2.75rem;
+  padding: 0.6rem 1.15rem;
+  font-size: 0.9rem;
+}
+
+.pdfButton:hover:not(:disabled),
+.pdfButtonSecondary:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.pdfButton:disabled,
+.pdfButtonSecondary:disabled {
+  cursor: progress;
+  opacity: 0.75;
+  transform: none;
+}
+
+.pdfButton:focus-visible,
+.pdfButtonSecondary:focus-visible {
+  outline: 3px solid rgba(108, 225, 212, 0.8);
+  outline-offset: 3px;
+}
+
+.spinIcon {
+  animation: spin 0.9s linear infinite;
+}
+
+.pdfError {
+  margin: -0.5rem 0 1rem;
+  padding: 0.6rem 0.85rem;
+  color: #ffd9d9;
+  font-size: 0.85rem;
+  background: rgba(220, 60, 60, 0.14);
+  border: 1px solid rgba(220, 60, 60, 0.35);
+  border-radius: 0.65rem;
 }
 
 .closeButton {
@@ -166,6 +246,83 @@
   font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.09rem;
   line-height: 1.55;
+}
+
+.tocBar {
+  position: sticky;
+  top: -1px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  margin: 0 0 1rem;
+  background: rgba(10, 14, 27, 0.92);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.tocChips {
+  display: flex;
+  flex: 1 1 auto;
+  gap: 0.5rem;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.tocChip {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.42rem 0.75rem;
+  color: var(--ink-soft);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.74rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.tocChip:hover {
+  color: var(--ink-main);
+  background: rgba(200, 155, 60, 0.16);
+  border-color: rgba(200, 155, 60, 0.4);
+}
+
+.tocChip:focus-visible {
+  outline: 3px solid rgba(108, 225, 212, 0.8);
+  outline-offset: 2px;
+}
+
+.expandAllButton {
+  flex: 0 0 auto;
+  padding: 0.42rem 0.85rem;
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+  background: transparent;
+  border: 1px solid rgba(200, 155, 60, 0.45);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.expandAllButton:hover {
+  color: #fff7e8;
+  background: rgba(200, 155, 60, 0.18);
+}
+
+.expandAllButton:focus-visible {
+  outline: 3px solid rgba(108, 225, 212, 0.8);
+  outline-offset: 2px;
 }
 
 .chapterList {
@@ -316,6 +473,7 @@
 
 .drawerFooter {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -328,6 +486,14 @@
   color: var(--ink-soft);
   font-size: 0.8rem;
   line-height: 1.45;
+}
+
+.footerActions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .doneButton {
@@ -352,7 +518,7 @@
     radial-gradient(circle at 100% 0%, rgba(123, 107, 168, 0.12), transparent 29%),
     radial-gradient(circle at 0% 18%, rgba(15, 107, 79, 0.1), transparent 28%),
     linear-gradient(155deg, rgba(255, 253, 246, 0.99), rgba(237, 230, 211, 0.99));
-  border-left-color: rgba(143, 90, 6, 0.32);
+  border-color: rgba(143, 90, 6, 0.32);
 }
 
 :global(html[data-theme="light"]) .chapter,
@@ -360,6 +526,16 @@
 :global(html[data-theme="light"]) .closeButton {
   background: rgba(255, 255, 255, 0.48);
   border-color: rgba(50, 40, 25, 0.12);
+}
+
+:global(html[data-theme="light"]) .tocBar {
+  background: rgba(255, 253, 246, 0.92);
+  border-bottom-color: rgba(50, 40, 25, 0.12);
+}
+
+:global(html[data-theme="light"]) .tocChip {
+  background: rgba(50, 40, 25, 0.05);
+  border-color: rgba(50, 40, 25, 0.14);
 }
 
 :global(html[data-theme="light"]) .trigger {
@@ -372,17 +548,34 @@
 @media (max-width: 640px) {
   .backdrop {
     align-items: flex-end;
+    padding: 0;
   }
 
   .drawer {
     width: 100%;
     min-height: 0;
-    max-height: min(90dvh, 52rem);
+    max-height: min(92dvh, 52rem);
     padding: 1rem;
+    border: 0;
     border-top: 1px solid rgba(200, 155, 60, 0.35);
-    border-left: 0;
     border-radius: 1.25rem 1.25rem 0 0;
     animation-name: sheetIn;
+  }
+
+  .drawerHeader {
+    flex-wrap: wrap;
+  }
+
+  .pdfButton span {
+    display: none;
+  }
+
+  .tocBar {
+    top: -1rem;
+    margin-left: -1rem;
+    margin-right: -1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 
   .signalList {
@@ -390,12 +583,19 @@
   }
 
   .drawerFooter {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
   }
 
+  .footerActions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .pdfButtonSecondary,
   .doneButton {
     width: 100%;
+    justify-content: center;
   }
 }
 
@@ -403,6 +603,10 @@
   .trigger,
   .chevron,
   .doneButton,
+  .pdfButton,
+  .pdfButtonSecondary,
+  .tocChip,
+  .expandAllButton,
   .backdrop,
   .drawer {
     transition: none;
@@ -415,12 +619,17 @@
   to { opacity: 1; }
 }
 
-@keyframes drawerIn {
-  from { opacity: 0; transform: translateX(1.5rem); }
-  to { opacity: 1; transform: translateX(0); }
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes sheetIn {
   from { opacity: 0; transform: translateY(1.25rem); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }

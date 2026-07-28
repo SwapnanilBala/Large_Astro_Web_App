@@ -79,7 +79,7 @@ function makePayload(): ChartApiResponse {
         {
           key: "career",
           label: "Career",
-          headline: "Build visible responsibility around your strongest skills.",
+          headline: "Career: Build visible responsibility around your strongest skills.",
           overview: "Career patterns reward steady leadership.",
           strengths: ["Strategic execution", "Clear responsibility"],
           watchouts: ["Taking on every urgent task yourself"],
@@ -141,25 +141,35 @@ function makePayload(): ChartApiResponse {
 }
 
 describe("buildPersonalStory", () => {
-  it("builds all five requested story chapters from chart signals", () => {
+  it("builds all nine requested story chapters from chart signals", () => {
     const story = buildPersonalStory(makePayload(), { lifeShifts: LIFE_SHIFTS });
 
     expect(story.title).toBe("Avery story");
     expect(story.chapters.map((chapter) => chapter.id)).toEqual([
       "essence",
+      "marriage",
+      "family",
+      "career",
+      "wealth",
       "strengths",
       "emotional-orientation",
       "timing",
       "grounding",
     ]);
     expect(story.chapters[0].body).toContain("Aries");
-    expect(story.chapters[1].body).toContain("Career");
-    expect(story.chapters[2].body).toContain("Moon in Cancer");
-    expect(story.chapters[3].body).toContain("Jupiter");
-    expect(story.chapters[3].highlights).toContain(
+    // Marriage/family/wealth fall back to general guidance because the mock
+    // payload only supplies a "career" life-domain insight.
+    expect(story.chapters[1].body).toContain("7th house");
+    expect(story.chapters[2].body).toContain("4th house");
+    expect(story.chapters[3].body).toContain("Career patterns reward steady leadership");
+    expect(story.chapters[4].body).toContain("8th house");
+    expect(story.chapters[5].body).toContain("Career");
+    expect(story.chapters[6].body).toContain("Moon in Cancer");
+    expect(story.chapters[7].body).toContain("Jupiter");
+    expect(story.chapters[7].highlights).toContain(
       "Upcoming: Jupiter return (third) (Aug 2026 – Dec 2027)",
     );
-    expect(story.chapters[4].body).toContain("Saturn");
+    expect(story.chapters[8].body).toContain("Saturn");
   });
 
   it("remains deterministic when its life-shift inputs are supplied", () => {
@@ -180,7 +190,7 @@ describe("buildPersonalStory", () => {
 
     const story = buildPersonalStory(payload, { lifeShifts: [] });
 
-    expect(story.chapters).toHaveLength(5);
+    expect(story.chapters).toHaveLength(9);
     expect(story.chapters.every((chapter) => chapter.body.length > 0)).toBe(true);
   });
 });

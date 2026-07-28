@@ -12,6 +12,10 @@ import {
 
 export type PersonalStoryChapterId =
   | "essence"
+  | "marriage"
+  | "family"
+  | "career"
+  | "wealth"
   | "strengths"
   | "emotional-orientation"
   | "timing"
@@ -148,6 +152,31 @@ function getTopDomain(payload: ChartApiResponse): LifeDomainInsight | undefined 
   )[0];
 }
 
+function getDomainByKey(
+  payload: ChartApiResponse,
+  key: LifeDomainInsight["key"],
+): LifeDomainInsight | undefined {
+  return (payload.chart.life_domain_insights ?? []).find((domain) => domain.key === key);
+}
+
+// Marriage, family, career, and wealth each already get their own dedicated
+// chapter below, so the cross-cutting Strengths/Grounding chapters should
+// favor a different life domain when one is available, rather than repeating
+// the same headline and bullets a reader just saw in a dedicated chapter.
+const DEDICATED_DOMAIN_KEYS = new Set<LifeDomainInsight["key"]>([
+  "love_life",
+  "family",
+  "career",
+  "inheritance",
+]);
+
+function getTopUndedicatedDomain(payload: ChartApiResponse): LifeDomainInsight | undefined {
+  const domains = payload.chart.life_domain_insights ?? [];
+  const undedicated = domains.filter((domain) => !DEDICATED_DOMAIN_KEYS.has(domain.key));
+  const pool = undedicated.length > 0 ? undedicated : domains;
+  return [...pool].sort((left, right) => right.confidence_score - left.confidence_score)[0];
+}
+
 function getStrongestPlanet(payload: ChartApiResponse): ShadbalaResult | undefined {
   return [...(payload.chart.shadbala ?? [])].sort(
     (left, right) => right.strengthRatio - left.strengthRatio,
@@ -265,7 +294,7 @@ function buildEssenceChapter(payload: ChartApiResponse): PersonalStoryChapter {
 }
 
 function buildStrengthsChapter(payload: ChartApiResponse): PersonalStoryChapter {
-  const topDomain = getTopDomain(payload);
+  const topDomain = getTopUndedicatedDomain(payload);
   const strongestPlanet = getStrongestPlanet(payload);
   const strongestPlacement = getPlanet(payload.chart.planets, strongestPlanet?.planet);
   const yoga = getStrongestYoga(payload);
@@ -273,7 +302,7 @@ function buildStrengthsChapter(payload: ChartApiResponse): PersonalStoryChapter 
     ? `${strongestPlanet.planet} is one of the chart's most supported tools, adding ${PLANET_GIFTS[strongestPlanet.planet] ?? "reliable capacity"}.`
     : "The clearest strengths emerge where your chart combines natural interest with steady effort.";
   const domainSentence = topDomain
-    ? `The strongest current life-domain signal is ${topDomain.label}: ${topDomain.headline}`
+    ? `The strongest current life-domain signal is ${topDomain.headline}`
     : "Your best contribution is likely to come from work that lets you combine skill, usefulness, and a sense of meaning.";
 
   return {
@@ -294,6 +323,129 @@ function buildStrengthsChapter(payload: ChartApiResponse): PersonalStoryChapter 
       yoga ? `Supporting pattern|${yoga.name} (${yoga.strength})` : undefined,
     ]).map(toSignal),
   };
+}
+
+type LifeDomainChapterConfig = {
+  id: "marriage" | "family" | "career" | "wealth";
+  eyebrow: string;
+  domain: LifeDomainInsight | undefined;
+  /**
+   * A fixed, on-brand title rather than `domain.headline` — the generated
+   * headline is prefixed with the domain's own catalogue label (e.g.
+   * "Love Life:", "Inheritance:"), which visibly clashes with this chapter's
+   * reframed eyebrow (Marriage & partnership, Wealth & inheritance, ...).
+   */
+  title: string;
+  /**
+   * What this chapter calls the domain in its own voice (e.g. "Partnership"
+   * for the love_life domain). `domain.guidance` and `domain.long_game` are
+   * generated prose that names the domain by its raw catalogue label
+   * ("Love Life improves when...", "For love life, use your...") — verified
+   * by actually rendering a chapter and seeing "Love Life" appear under a
+   * "Marriage & partnership" heading. Any mention of the raw label is
+   * swapped for this alias so the body reads consistently with the eyebrow.
+   */
+  domainAlias: string;
+  fallbackBody: string;
+  fallbackHighlight: string;
+};
+
+function relabelDomainMentions(text: string, domainLabel: string, alias: string): string {
+  if (domainLabel.toLowerCase() === alias.toLowerCase()) return text;
+  const pattern = new RegExp(`\\b${domainLabel}\\b`, "gi");
+  return text.replace(pattern, (match) =>
+    match === match.toLowerCase() ? alias.toLowerCase() : alias,
+  );
+}
+
+function buildLifeDomainChapter(config: LifeDomainChapterConfig): PersonalStoryChapter {
+  const { id, eyebrow, domain, title, domainAlias, fallbackBody, fallbackHighlight } = config;
+
+  if (!domain) {
+    return {
+      id,
+      eyebrow,
+      title,
+      body: fallbackBody,
+      highlights: [fallbackHighlight],
+      signals: [],
+    };
+  }
+
+  const guidance = relabelDomainMentions(domain.guidance, domain.label, domainAlias);
+  const longGame = relabelDomainMentions(domain.long_game, domain.label, domainAlias);
+  const body = `${domain.overview} ${guidance} ${longGame}`.trim();
+  const placement = domain.headline.replace(/^[^:]*:\s*/, "").replace(/\.$/, "");
+
+  return {
+    id,
+    eyebrow,
+    title,
+    body,
+    highlights: withoutDuplicates([
+      domain.strengths[0],
+      domain.strengths[1],
+      domain.watchouts[0] ? `Watch for: ${domain.watchouts[0]}` : undefined,
+    ]),
+    signals: withoutDuplicates([
+      placement ? `Chart placement|${placement}` : undefined,
+      `Signal strength|${Math.round(domain.confidence_score * 100)}%`,
+      domain.timing_triggers[0] ? `Timing to watch|${domain.timing_triggers[0]}` : undefined,
+      domain.supporting_patterns[0] ? `Supporting pattern|${domain.supporting_patterns[0]}` : undefined,
+    ]).map(toSignal),
+  };
+}
+
+function buildMarriageChapter(payload: ChartApiResponse): PersonalStoryChapter {
+  return buildLifeDomainChapter({
+    id: "marriage",
+    eyebrow: "Marriage & partnership",
+    domain: getDomainByKey(payload, "love_life"),
+    title: "Partnership grows through honesty and a shared pace",
+    domainAlias: "Partnership",
+    fallbackBody:
+      "Durable partnership tends to grow from consistency, mutual respect, and honest communication more than from attraction alone. Your chart's 7th house and Venus placement sharpen exactly how that shows up once more birth detail is available — until then, treat steady, honest pacing as the load-bearing habit of any bond you build.",
+    fallbackHighlight: "Look for a partner who matches your pace, not just your interests.",
+  });
+}
+
+function buildFamilyChapter(payload: ChartApiResponse): PersonalStoryChapter {
+  return buildLifeDomainChapter({
+    id: "family",
+    eyebrow: "Family & home life",
+    domain: getDomainByKey(payload, "family"),
+    title: "Home is where your pattern resets",
+    domainAlias: "Family",
+    fallbackBody:
+      "Home tends to feel safest when routine and repair are treated as more effective than any single conversation. Your chart's 4th house and Moon placement shape exactly how that safety gets built once more detail is available — until then, protect a few small routines that reliably restore you.",
+    fallbackHighlight: "Protect a few small home routines that reliably restore you.",
+  });
+}
+
+function buildCareerChapter(payload: ChartApiResponse): PersonalStoryChapter {
+  return buildLifeDomainChapter({
+    id: "career",
+    eyebrow: "Career & vocation",
+    domain: getDomainByKey(payload, "career"),
+    title: "Build authority through repeatable outcomes",
+    domainAlias: "Career",
+    fallbackBody:
+      "Authority tends to build fastest around whichever skill you can make repeatable and visible, more than around any single opportunity. Your chart's 10th house and Saturn placement sharpen exactly how that plays out once more detail is available — until then, choose one scope you can own fully rather than many half-owned tasks.",
+    fallbackHighlight: "Choose one scope you can own fully rather than many half-owned tasks.",
+  });
+}
+
+function buildWealthChapter(payload: ChartApiResponse): PersonalStoryChapter {
+  return buildLifeDomainChapter({
+    id: "wealth",
+    eyebrow: "Wealth & inheritance",
+    domain: getDomainByKey(payload, "inheritance"),
+    title: "Build wealth through documentation and patience",
+    domainAlias: "Wealth",
+    fallbackBody:
+      "Wealth tends to compound through documentation, transparency, and patient sequencing rather than speed. Your chart's 2nd house, 8th house, and Jupiter placement sharpen exactly how that plays out once more detail is available — until then, put agreements about shared money or property in writing early.",
+    fallbackHighlight: "Put agreements about shared money or property in writing early.",
+  });
 }
 
 function buildEmotionalOrientationChapter(payload: ChartApiResponse): PersonalStoryChapter {
@@ -337,6 +489,7 @@ function buildTimingChapter(
     ? `The active long cycle is ${dasha.current_dasha}${dasha.current_antardasha && dasha.current_antardasha !== "Unknown" ? `, currently refined by ${dasha.current_antardasha}` : ""}.${dashaPlanet ? ` This places extra attention on ${houseTheme(dashaPlanet.house)}.` : ""}${dashaEnd ? ` This particular long-cycle emphasis runs through ${dashaEnd}.` : ""}`
     : "Timing is best treated as a planning lens: look for recurring conditions that support your strongest domains rather than waiting for a single perfect date.";
   const trigger = topDomain?.timing_triggers[0];
+  const triggerSentenceFragment = trigger?.toLowerCase().replace(/\.$/, "");
   const shiftLine = timingShift
     ? `${timingShift.status === "active" ? "A current pivot" : "A nearby pivot"} is ${timingShift.label.toLowerCase()} (${formatWindow(timingShift)}).`
     : undefined;
@@ -345,7 +498,7 @@ function buildTimingChapter(
     id: "timing",
     eyebrow: "Best life seasons & timing",
     title: "Use timing as a season, not a deadline",
-    body: `${timingBody}${trigger ? ` The chart's ${topDomain?.label.toLowerCase() ?? "leading"} signal is especially responsive when ${trigger.toLowerCase()}.` : ""} ${shiftLine ?? ""}`.trim(),
+    body: `${timingBody}${triggerSentenceFragment ? ` The chart's ${topDomain?.label.toLowerCase() ?? "leading"} signal is especially responsive when ${triggerSentenceFragment}.` : ""} ${shiftLine ?? ""}`.trim(),
     highlights: withoutDuplicates([
       trigger ? `Lean in when: ${trigger}` : undefined,
       ...timingHighlights,
@@ -361,7 +514,7 @@ function buildTimingChapter(
 }
 
 function buildGroundingChapter(payload: ChartApiResponse): PersonalStoryChapter {
-  const topDomain = getTopDomain(payload);
+  const topDomain = getTopUndedicatedDomain(payload);
   const tensionRule = [...payload.chart.deterministic_rules]
     .filter((rule) => Boolean(rule.tension_note?.trim()))
     .sort((left, right) => (right.confidence_score ?? 0) - (left.confidence_score ?? 0))[0];
@@ -413,10 +566,14 @@ export function buildPersonalStory(
   return {
     title: `${name} story`,
     introduction: ascendant
-      ? `A practical reading of your ${ascendant} ascendant, emotional rhythm, strongest chart support, and current timing cycles.`
-      : "A practical reading of the recurring patterns, strengths, and timing signals already present in this chart.",
+      ? `A practical reading of your ${ascendant} ascendant, partnership style, family life, career direction, wealth patterns, emotional rhythm, and current timing cycles.`
+      : "A practical reading of the recurring patterns, partnership style, family life, career direction, wealth outlook, and timing signals already present in this chart.",
     chapters: [
       buildEssenceChapter(payload),
+      buildMarriageChapter(payload),
+      buildFamilyChapter(payload),
+      buildCareerChapter(payload),
+      buildWealthChapter(payload),
       buildStrengthsChapter(payload),
       buildEmotionalOrientationChapter(payload),
       buildTimingChapter(payload, lifeShifts),
