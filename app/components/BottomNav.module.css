@@ -129,3 +129,33 @@
     -webkit-backdrop-filter: blur(10px);
   }
 }
+
+/* ═══ TĀLA-PATRA SKIN ═══
+   Frosted bar becomes an opaque leaf strip with a single ruled edge;
+   labels drop their letterspaced caps and the gold glow indicator
+   becomes a plain madder underline. */
+
+:global(html[data-skin="leaf"]) .bottomNav {
+  background: var(--bg-surface);
+  backdrop-filter: var(--skin-backdrop) !important;
+  border-top: 1px solid var(--line-strong);
+  box-shadow: none;
+}
+
+:global(html[data-skin="leaf"]) .navItem {
+  color: var(--text-tertiary);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+
+:global(html[data-skin="leaf"]) .navItem.active {
+  color: var(--accent-gold);
+  font-weight: 500;
+}
+
+:global(html[data-skin="leaf"]) .navItem.active::after {
+  background: var(--accent-gold);
+  box-shadow: none;
+  filter: none;
+}
