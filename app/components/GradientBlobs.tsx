@@ -90,6 +90,7 @@ export default function GradientBlobs() {
     return (
       <div
         aria-hidden="true"
+        className="ambient-blobs"
         style={{
           position: "fixed",
           inset: 0,
@@ -135,6 +136,7 @@ export default function GradientBlobs() {
   return (
     <div
       aria-hidden="true"
+      className="ambient-blobs"
       style={{
         position: "fixed",
         inset: 0,

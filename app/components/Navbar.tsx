@@ -11,7 +11,7 @@ import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-
 
 export default function Navbar() {
   const { user, isAuthenticated, isLoading, isPremium, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
+  const { theme, toggleTheme, skin, toggleSkin } = useTheme();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -174,6 +174,18 @@ export default function Navbar() {
             aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
             {theme === "dark" ? "\u2600" : "\u263D"}
+          </button>
+          {/* Skin A/B switch \u2014 temporary, for comparing T\u0101la-patra against
+              the current theme during the migration. Remove once leaf ships
+              as the default. */}
+          <button
+            className="theme-toggle-btn skin-toggle-btn"
+            onClick={toggleSkin}
+            type="button"
+            title={skin === "leaf" ? "T\u0101la-patra skin" : "Cosmic skin"}
+            aria-label={`Switch to ${skin === "leaf" ? "cosmic" : "T\u0101la-patra"} skin`}
+          >
+            {skin === "leaf" ? "\u{1F343}" : "\u2726"}
           </button>
           <Link href="/" className="navbar-brand">
             {t("navbar.brand")}

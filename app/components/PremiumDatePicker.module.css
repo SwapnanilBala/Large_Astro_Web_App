@@ -580,3 +580,17 @@
     right: 0.7rem !important;
   }
 }
+
+/* ═══ TĀLA-PATRA SKIN ═══
+   The mouse-tracking radial glow has no paper equivalent; the completion
+   badge becomes a flat seal rather than a gradient chip with a halo. */
+
+:global(html[data-skin="leaf"]) .successBadge {
+  background: var(--accent-teal);
+  background-image: none;
+  color: #F2E7CE;
+  border: 1px solid rgba(51, 36, 15, 0.28);
+  box-shadow: none;
+}
+
+:global(html[data-skin="leaf"]) .datePickerGlow { display: none; }
