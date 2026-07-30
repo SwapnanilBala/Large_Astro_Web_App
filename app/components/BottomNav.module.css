@@ -90,36 +90,11 @@
   opacity: 0.7;
 }
 
-/* Light theme */
-:global(html[data-theme="light"]) .bottomNav {
-  background: rgba(245, 243, 247, 0.85);
-  border-top: 1px solid rgba(30, 30, 50, 0.08);
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) .navItem {
-  color: #55556A;
-}
-
-:global(html[data-theme="light"]) .navItem.active {
-  color: #5B2FA0;
-}
-
-:global(html[data-theme="light"]) .navItem.active::after {
-  background: linear-gradient(90deg, transparent, #5B2FA0, transparent);
-  box-shadow: 0 0 8px rgba(91, 47, 160, 0.3);
-}
-
-:global(html[data-theme="light"]) .active .icon {
-  filter: drop-shadow(0 0 8px rgba(91, 47, 160, 0.4));
-}
-
 /* Only show on mobile */
 @media (min-width: 769px) {
   .bottomNav {
     display: none !important;
-  }
-}
+  }}
 
 @media (max-width: 768px) {
   .bottomNav {
@@ -127,5 +102,4 @@
     background: rgba(13, 12, 20, 0.94);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-  }
-}
+  }}

@@ -52,18 +52,10 @@ function getTimeOfDay(): TimeOfDay {
 }
 
 export default function GradientBlobs() {
-  const [isLight, setIsLight] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(getTimeOfDay());
 
   useEffect(() => {
-    const checkTheme = () => {
-      setIsLight(document.documentElement.getAttribute("data-theme") === "light");
-    };
-    checkTheme();
-    const obs = new MutationObserver(checkTheme);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    
     // Update time of day
     const updateTimeOfDay = () => setTimeOfDay(getTimeOfDay());
     updateTimeOfDay();
@@ -76,7 +68,6 @@ export default function GradientBlobs() {
     mql.addEventListener("change", handleChange);
 
     return () => {
-      obs.disconnect();
       mql.removeEventListener("change", handleChange);
       clearInterval(timeInterval);
     };
@@ -96,17 +87,15 @@ export default function GradientBlobs() {
           zIndex: 0,
           pointerEvents: "none",
           overflow: "hidden",
-          opacity: isLight ? 0.3 : 0.7,
-          background: isLight 
-            ? `radial-gradient(ellipse at 50% 0%, ${accentFill}15 0%, transparent 60%)`
-            : `radial-gradient(ellipse at 50% 0%, ${accentFill}20 0%, transparent 50%)`,
+          opacity: 0.7,
+          background: `radial-gradient(ellipse at 50% 0%, ${accentFill}20 0%, transparent 50%)`,
         }}
       >
         <svg
           viewBox="0 0 400 800"
           xmlns="http://www.w3.org/2000/svg"
           preserveAspectRatio="xMidYMid slice"
-          style={{ width: "100%", height: "100%", opacity: isLight ? 0.04 : 0.06 }}
+          style={{ width: "100%", height: "100%", opacity: 0.06 }}
         >
           {/* Minimal scatter stars for mobile — 18 dots with time-of-day colors */}
           <circle cx="40" cy="60" r="1" fill={accentFill} opacity="0.6"/>
@@ -141,11 +130,8 @@ export default function GradientBlobs() {
         zIndex: 0,
         pointerEvents: "none",
         overflow: "hidden",
-        opacity: isLight ? 0.4 : 1,
-        background: isLight 
-          ? `radial-gradient(ellipse at 20% 10%, ${accentFill}12 0%, transparent 50%),
-             radial-gradient(ellipse at 80% 90%, ${secondaryFill}10 0%, transparent 40%)`
-          : `radial-gradient(ellipse at 20% 10%, ${accentFill}18 0%, transparent 40%),
+        opacity: 1,
+        background: `radial-gradient(ellipse at 20% 10%, ${accentFill}18 0%, transparent 40%),
              radial-gradient(ellipse at 80% 90%, ${secondaryFill}12 0%, transparent 35%)`,
         transition: "background 2s ease",
       }}
@@ -154,7 +140,7 @@ export default function GradientBlobs() {
         viewBox="0 0 1440 900"
         xmlns="http://www.w3.org/2000/svg"
         preserveAspectRatio="xMidYMid slice"
-        style={{ width: "100%", height: "100%", opacity: isLight ? 0.04 : 0.08 }}
+        style={{ width: "100%", height: "100%", opacity: 0.08 }}
       >
         {/* ── Background scatter stars ── */}
         <circle cx="72"   cy="43"  r="1"   fill="#C89B3C" opacity="0.7"/>

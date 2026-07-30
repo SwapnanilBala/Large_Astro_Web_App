@@ -11,8 +11,7 @@
 @property --border-angle {
   syntax: "<angle>";
   initial-value: 0deg;
-  inherits: false;
-}
+  inherits: false;}
 
 /* ── Shimmer Sweep Keyframes ── */
 @keyframes shimmerSweep {
@@ -1354,8 +1353,7 @@
   .rulesScroll {
     grid-template-columns: 1fr;
     gap: 1rem;
-  }
-}
+  }}
 
 .ruleHigh {
   border-left: 3px solid var(--accent-gold);
@@ -1735,49 +1733,6 @@
   grid-column: 2 / span 2;
 }
 
-:global(html[data-theme="light"]) .insightHub {
-  background:
-    radial-gradient(circle at 8% 8%, rgba(26, 123, 110, 0.12), transparent 32%),
-    radial-gradient(circle at 90% 88%, rgba(119, 90, 190, 0.1), transparent 35%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(247, 245, 238, 0.82));
-  border-color: rgba(200, 155, 60, 0.28);
-  box-shadow: 0 14px 34px rgba(43, 29, 9, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-:global(html[data-theme="light"]) .insightHub::before {
-  opacity: 0.2;
-}
-
-:global(html[data-theme="light"]) .insightHubCard {
-  background: linear-gradient(145deg, rgba(var(--hub-accent), 0.13), rgba(255, 255, 255, 0.72));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-}
-
-:global(html[data-theme="light"]) .insightHubCard:hover {
-  background: linear-gradient(145deg, rgba(var(--hub-accent), 0.2), rgba(255, 255, 255, 0.9));
-  box-shadow: 0 10px 22px rgba(40, 28, 10, 0.1);
-}
-
-:global(html[data-theme="light"]) .insightHubCardBody span,
-:global(html[data-theme="light"]) .insightHubLead {
-  color: var(--ink-soft);
-  opacity: 1;
-}
-
-:global(html[data-theme="light"]) .advancedCta {
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.08), rgba(26, 123, 110, 0.06));
-  border-color: rgba(200, 155, 60, 0.15);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-}
-
-:global(html[data-theme="light"]) .advancedCta:hover {
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.12), rgba(26, 123, 110, 0.10));
-  border-color: rgba(200, 155, 60, 0.3);
-  box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.08),
-    0 0 30px rgba(200, 155, 60, 0.06);
-}
-
 /* ── Advanced Module Cards Overrides ── */
 /* Continue your reading */
 .continuationHub {
@@ -2004,34 +1959,6 @@
   color: var(--ink-main);
   text-decoration: underline;
   text-underline-offset: 0.25rem;
-}
-
-:global(html[data-theme="light"]) .continuationHub {
-  background:
-    radial-gradient(circle at 8% 8%, rgba(26, 123, 110, 0.12), transparent 32%),
-    radial-gradient(circle at 90% 88%, rgba(119, 90, 190, 0.1), transparent 35%),
-    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(247, 245, 238, 0.82));
-  border-color: rgba(200, 155, 60, 0.28);
-  box-shadow: 0 14px 34px rgba(43, 29, 9, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-:global(html[data-theme="light"]) .continuationHub::before {
-  opacity: 0.2;
-}
-
-:global(html[data-theme="light"]) .continuationGroup {
-  border-color: rgba(43, 29, 9, 0.09);
-  background: rgba(255, 255, 255, 0.36);
-}
-
-:global(html[data-theme="light"]) .continuationAction {
-  background: linear-gradient(145deg, rgba(var(--continuation-accent), 0.13), rgba(255, 255, 255, 0.72));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
-}
-
-:global(html[data-theme="light"]) .continuationAction:hover {
-  background: linear-gradient(145deg, rgba(var(--continuation-accent), 0.2), rgba(255, 255, 255, 0.9));
-  box-shadow: 0 10px 22px rgba(40, 28, 10, 0.1);
 }
 
 .cardPalm {
@@ -2724,8 +2651,7 @@
   .domainModeTabActive {
     flex: 1 1 8rem;
     justify-content: center;
-  }
-}
+  }}
 
 /* ── Footer Actions ── */
 .actions {
@@ -2759,8 +2685,7 @@
 @media (max-width: 768px) {
   .actionBtn {
     background: rgba(255, 243, 210, 0.14);
-  }
-}
+  }}
 
 .actionBtn:hover {
   border-color: var(--accent-gold);
@@ -2816,8 +2741,7 @@
 
 @keyframes dashaGlowHalo {
   0%, 100% { box-shadow: 0 0 20px rgba(200, 155, 60, 0.08), 0 0 40px rgba(200, 155, 60, 0.04); }
-  50% { box-shadow: 0 0 30px rgba(200, 155, 60, 0.15), 0 0 60px rgba(200, 155, 60, 0.08), 0 0 80px rgba(26, 123, 110, 0.04); }
-}
+  50% { box-shadow: 0 0 30px rgba(200, 155, 60, 0.15), 0 0 60px rgba(200, 155, 60, 0.08), 0 0 80px rgba(26, 123, 110, 0.04); }}
 
 .dashaLordGlyph {
   animation: dashaLordPulse 2s ease-in-out infinite;
@@ -3206,266 +3130,6 @@
 }
 
 /* ═══════════════════════════════════════════════
-   Light Theme Overrides
-   ═══════════════════════════════════════════════ */
-
-:global(html[data-theme="light"]) .card {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-:global(html[data-theme="light"]) .card:hover {
-  border-color: rgba(0, 0, 0, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 0 20px rgba(200, 155, 60, 0.04);
-}
-
-:global(html[data-theme="light"]) .heading {
-  background: linear-gradient(135deg, #1A8A6E, #C4922E);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-:global(html[data-theme="light"]) .card:hover::before {
-  background: conic-gradient(
-    from var(--border-angle, 0deg),
-    rgba(200, 155, 60, 0.25) 0%,
-    rgba(26, 123, 110, 0.15) 25%,
-    rgba(200, 155, 60, 0.0) 50%,
-    rgba(26, 123, 110, 0.15) 75%,
-    rgba(200, 155, 60, 0.25) 100%
-  );
-  animation: borderRotate 4s linear infinite;
-}
-
-:global(html[data-theme="light"]) .chartStarfield::after {
-  opacity: 0.3;
-}
-
-:global(html[data-theme="light"]) .constellationDivider .constellationDot {
-  fill: rgba(200, 155, 60, 0.6);
-}
-
-:global(html[data-theme="light"]) .constellationDivider .constellationLine {
-  stroke: rgba(200, 155, 60, 0.2);
-}
-
-:global(html[data-theme="light"]) .ruleCard {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) .title {
-  background: linear-gradient(135deg, var(--ink-main) 40%, #C4922E);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-:global(html[data-theme="light"]) .heroPlanetRail {
-  background:
-    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(200, 155, 60, 0.08) 18%, rgba(26, 123, 110, 0.055) 50%, rgba(200, 155, 60, 0.08) 82%, rgba(255, 255, 255, 0)),
-    rgba(255, 255, 255, 0.36);
-  border-bottom-color: rgba(26, 123, 110, 0.16);
-  border-top-color: rgba(200, 155, 60, 0.18);
-}
-
-:global(html[data-theme="light"]) .heroPlanetRail::before {
-  border-top-color: rgba(200, 155, 60, 0.28);
-}
-
-:global(html[data-theme="light"]) .heroDashaPill {
-  background: rgba(255, 255, 255, 0.58);
-  border-color: rgba(200, 155, 60, 0.34);
-  box-shadow: 0 0 16px rgba(200, 155, 60, 0.06);
-}
-
-:global(html[data-theme="light"]) .anchorNav {
-  background: rgba(255, 255, 255, 0.78);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .anchorLinkActive {
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.18), rgba(26, 123, 110, 0.08));
-  border-color: rgba(200, 155, 60, 0.38);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .engineSwitcher select {
-  background: rgba(255, 255, 255, 0.86);
-  border-color: rgba(20, 28, 42, 0.16);
-  color: var(--ink-main);
-  color-scheme: light;
-}
-
-:global(html[data-theme="light"]) .engineSwitcher select option {
-  background-color: #ffffff;
-  color: #172033;
-}
-
-:global(html[data-theme="light"]) .engineSwitcher select option:checked {
-  background-color: #fff2cf;
-  color: #76521b;
-}
-
-:global(html[data-theme="light"]) .takeawayCard {
-  background: rgba(255, 255, 255, 0.64);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .pastLifeCard {
-  background: rgba(255, 255, 255, 0.58);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .pastLifeSignalBar span {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(24, 120, 90, 0.18);
-}
-
-:global(html[data-theme="light"]) .pastLifeCard small {
-  border-top-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .lifeShiftCard {
-  background: rgba(255, 255, 255, 0.58);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .lifeShiftCard small {
-  border-top-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .lifeShiftStatus {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(24, 120, 90, 0.18);
-}
-
-:global(html[data-theme="light"]) .takeawayNumber {
-  background: rgba(200, 155, 60, 0.13);
-  border-color: rgba(200, 155, 60, 0.28);
-}
-
-:global(html[data-theme="light"]) .strengthPanel {
-  background: rgba(255, 255, 255, 0.52);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .guidanceChips span,
-:global(html[data-theme="light"]) .housePills span {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(24, 120, 90, 0.18);
-}
-
-:global(html[data-theme="light"]) .collapsibleTrigger {
-  color: var(--ink-main);
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-:global(html[data-theme="light"]) .actionBtn {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: var(--ink-main);
-}
-
-:global(html[data-theme="light"]) .domainChip {
-  background: rgba(255, 255, 255, 0.6);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: var(--ink-soft);
-}
-
-:global(html[data-theme="light"]) .domainChip:hover {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.14);
-}
-
-:global(html[data-theme="light"]) .domainChipActive {
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.1), rgba(26, 123, 110, 0.06));
-  border-color: rgba(200, 155, 60, 0.35);
-  color: #1A7B6E;
-  box-shadow: 0 0 16px rgba(200, 155, 60, 0.06);
-}
-
-:global(html[data-theme="light"]) .domainCard {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-:global(html[data-theme="light"]) .domainClarityBlock {
-  border-color: rgba(200, 155, 60, 0.18);
-}
-
-:global(html[data-theme="light"]) .domainRulesPanel {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(200, 155, 60, 0.2);
-}
-
-:global(html[data-theme="light"]) .themeSummary {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-:global(html[data-theme="light"]) .lockedPreview {
-  background: rgba(255, 255, 255, 0.4);
-}
-
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card--compact) {
-  background: rgba(255, 255, 255, 0.5);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card--compact):hover,
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card--expanded) {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.12);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 0 12px rgba(200, 155, 60, 0.06);
-}
-
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card__sign) {
-  color: var(--ink-soft);
-}
-
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card__detail-label) {
-  color: var(--ink-soft);
-}
-
-:global(html[data-theme="light"]) .cardPlanets :global(.planet-card__detail-value) {
-  color: var(--ink-main);
-}
-
-/* Forecast cards in light mode */
-:global(html[data-theme="light"]) :global(.forecast-card) {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(0, 0, 0, 0.10);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
-}
-
-:global(html[data-theme="light"]) :global(.forecast-column) {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) :global(.forecast-transit-column) {
-  background: rgba(255, 255, 255, 0.50);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) :global(.forecast-transit-card) {
-  background: rgba(255, 255, 255, 0.60);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) :global(.forecast-transit-card--supportive) {
-  border-color: rgba(24, 120, 90, 0.30);
-}
-
-:global(html[data-theme="light"]) :global(.forecast-transit-card--challenging) {
-  border-color: rgba(184, 64, 58, 0.30);
-}
-
-/* ═══════════════════════════════════════════════
    Responsive Breakpoints
    ═══════════════════════════════════════════════ */
 
@@ -3537,8 +3201,7 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 0.45rem;
-  }
-}
+  }}
 
 @media (max-width: 600px) {
   .dashboard {
@@ -3781,8 +3444,7 @@
   .collapsibleTrigger {
     min-height: 2.75rem;
     padding-bottom: 0.6rem;
-  }
-}
+  }}
 
 /* Touch-friendly targets */
 @media (pointer: coarse) {
@@ -3793,8 +3455,7 @@
   .actionBtn {
     min-height: 44px;
     padding: 10px 16px;
-  }
-}
+  }}
 
 /* Focus indicators */
 .actionBtn:focus-visible,
@@ -3843,5 +3504,4 @@
 
   .heroPlanetRow > * {
     transform: none !important;
-  }
-}
+  }}

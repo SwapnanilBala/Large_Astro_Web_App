@@ -120,125 +120,6 @@
   --font-mobile-label: 0.875rem;
   --font-mobile-meta: 0.75rem;
 }
-
-/* ═══════════════════════════════════════════════
-   LIGHT THEME — Pinkish Cream
-   ═══════════════════════════════════════════════ */
-html[data-theme="light"],
-html[data-theme="light"] body {
-  /* Dimmed warm cream palette — less retina-searing than near-white */
-  --bg-night: #E6DFCC;
-  --bg-deep: #D6CEB6;
-  --surface: rgba(255, 252, 242, 0.70);
-  --surface-soft: rgba(255, 252, 242, 0.52);
-  --surface-strong: rgba(255, 252, 242, 0.88);
-  --line-soft: rgba(50, 40, 25, 0.14);
-  --line-strong: rgba(50, 40, 25, 0.24);
-  --ink-main: #14121C;
-  --ink-soft: #4A4258;
-  --accent-gold: #8F5A06;
-  --accent-aqua: #0F6B4F;
-  --accent-coral: #8A3E18;
-  --shadow-card: 0 4px 24px rgba(40, 30, 15, 0.10), 0 1px 2px rgba(40, 30, 15, 0.06);
-  --btn-text: #FFFFFF;
-  --field-shadow: 0 1px 3px rgba(40, 30, 15, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.65);
-  --field-glow: 0 0 0 3px rgba(91, 47, 160, 0.22);
-  --field-glow-warm: 0 0 0 3px rgba(143, 90, 6, 0.22);
-  --button-bg-image:
-    radial-gradient(circle at 18% 30%, rgba(255, 255, 255, 0.45) 0.6px, transparent 1.4px),
-    radial-gradient(circle at 82% 68%, rgba(255, 255, 255, 0.38) 0.6px, transparent 1.4px),
-    radial-gradient(circle at 62% 22%, rgba(255, 255, 255, 0.30) 0.4px, transparent 1px),
-    radial-gradient(circle at 30% 78%, rgba(255, 255, 255, 0.26) 0.4px, transparent 1px),
-    linear-gradient(135deg, #5B2FA0 0%, #7B45C0 60%, #4A2488 100%);
-  --button-color: #FFFFFF;
-  --button-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.22),
-    inset 0 1px 0 rgba(255, 255, 255, 0.30),
-    inset 0 -10px 22px rgba(0, 0, 0, 0.20),
-    0 0 14px rgba(91, 47, 160, 0.18),
-    0 2px 8px rgba(0, 0, 0, 0.12);
-  --button-text-shadow: 0 1px 0 rgba(0, 0, 0, 0.30);
-  --button-ripple: radial-gradient(circle at center, rgba(255, 255, 255, 0.45) 0%, rgba(184, 128, 240, 0.20) 40%, transparent 68%);
-  --button-halo:
-    conic-gradient(from 0deg, transparent 0deg, rgba(184, 128, 240, 0.28) 60deg, transparent 120deg, transparent 240deg, rgba(184, 128, 240, 0.22) 300deg, transparent 360deg),
-    linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.18) 50%, transparent 65%);
-  --button-hover-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.38),
-    inset 0 1px 0 rgba(255, 255, 255, 0.40),
-    inset 0 -10px 24px rgba(0, 0, 0, 0.24),
-    0 0 24px rgba(123, 69, 192, 0.35),
-    0 10px 26px rgba(91, 47, 160, 0.30);
-  --button-hover-color: #FFFFFF;
-  --primary: #5B2FA0;
-  --secondary: #8F5A06;
-  --accent: #9A331F;
-  --accent-light: #D4B77A;
-  --text-primary: #14121C;
-  --text-secondary: #4A4258;
-  --border: rgba(50, 40, 25, 0.15);
-  --glow: rgba(91, 47, 160, 0.14);
-  --success: #0F6B4F;
-  color: #14121C;
-}
-
-html[data-theme="light"] body {
-  background: #E6DFCC;
-}
-
-html[data-theme="light"] body::before {
-  background-image: linear-gradient(
-      to right, rgba(40, 30, 15, 0.05) 1px, transparent 1px
-    ),
-    linear-gradient(to bottom, rgba(40, 30, 15, 0.05) 1px, transparent 1px);
-}
-
-/* Establish light-theme inheritance without overriding component accents. */
-html[data-theme="light"] :where(
-  main,
-  .intake-panel,
-  .dashboard-shell,
-  .insights-shell,
-  .home-shell,
-  section,
-  article
-) {
-  color: var(--ink-main);
-}
-
-/* Dim only the decorative star field; charts remain fully legible. */
-html[data-theme="light"] .star-field-canvas {
-  opacity: 0.08 !important;
-}
-
-/* Ambient blobs: hidden — GradientBlobs component handles ambient background */
-html[data-theme="light"] .ambient-left,
-html[data-theme="light"] .ambient-right,
-html[data-theme="light"] .ambient-center {
-  display: none;
-  opacity: 0;
-}
-
-/* Ghost variant in light mode — purple outline */
-html[data-theme="light"] button.btn-ghost,
-html[data-theme="light"] .btn-ghost {
-  background-image: none;
-  background-color: transparent;
-  color: var(--primary);
-  box-shadow: inset 0 0 0 1px rgba(91, 47, 160, 0.40);
-  text-shadow: none;
-}
-html[data-theme="light"] button.btn-ghost:hover:not(:disabled),
-html[data-theme="light"] .btn-ghost:hover:not(:disabled) {
-  background-color: rgba(91, 47, 160, 0.08);
-  color: #3E1F7A;
-  box-shadow: inset 0 0 0 1px rgba(91, 47, 160, 0.60), 0 0 14px rgba(91, 47, 160, 0.18);
-}
-
-/* Breathing glow recolor in light mode */
-html[data-theme="light"] button.btn-cta,
-html[data-theme="light"] .btn-cta {
-  animation: btn-breathing-light 4.2s ease-in-out infinite;
-}
 @keyframes btn-breathing-light {
   0%, 100% {
     box-shadow:
@@ -255,251 +136,7 @@ html[data-theme="light"] .btn-cta {
       inset 0 -10px 22px rgba(0, 0, 0, 0.22),
       0 0 22px rgba(123, 69, 192, 0.30),
       0 4px 14px rgba(91, 47, 160, 0.20);
-  }
-}
-
-/* Input fields in light mode */
-html[data-theme="light"] input,
-html[data-theme="light"] select,
-html[data-theme="light"] textarea {
-  background: rgba(255, 255, 255, 0.70);
-  border-color: var(--line-soft);
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] input::placeholder,
-html[data-theme="light"] textarea::placeholder {
-  color: rgba(85, 85, 106, 0.55);
-}
-
-html[data-theme="light"] input:focus,
-html[data-theme="light"] select:focus,
-html[data-theme="light"] textarea:focus {
-  border-color: var(--accent-gold);
-  box-shadow: var(--field-glow-warm);
-}
-
-/* Dasha bar overrides for light mode */
-html[data-theme="light"] .dasha-bar {
-  background: rgba(160, 120, 90, 0.15);
-  border-color: rgba(160, 120, 90, 0.25);
-}
-
-html[data-theme="light"] .dasha-bar--current {
-  background: rgba(46, 133, 120, 0.2);
-  border-color: var(--accent-aqua);
-}
-
-html[data-theme="light"] .dasha-popup {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: var(--line-strong);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-}
-
-/* Auth gate overlay in light mode */
-html[data-theme="light"] .auth-gate-overlay {
-  background: rgba(245, 243, 247, 0.7);
-  backdrop-filter: blur(12px);
-}
-
-/* Panel glassmorphism in light mode */
-html[data-theme="light"] .lagna-panel,
-html[data-theme="light"] .rules-panel,
-html[data-theme="light"] .planet-panel,
-html[data-theme="light"] .nakshatra-panel,
-html[data-theme="light"] .aspects-panel,
-html[data-theme="light"] .navamsa-panel,
-html[data-theme="light"] .divisional-panel,
-html[data-theme="light"] .transits-panel,
-html[data-theme="light"] .forecast-panel {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: var(--line-soft);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="light"] .lagna-panel:hover,
-html[data-theme="light"] .rules-panel:hover,
-html[data-theme="light"] .planet-panel:hover,
-html[data-theme="light"] .nakshatra-panel:hover,
-html[data-theme="light"] .aspects-panel:hover,
-html[data-theme="light"] .navamsa-panel:hover,
-html[data-theme="light"] .divisional-panel:hover,
-html[data-theme="light"] .transits-panel:hover,
-html[data-theme="light"] .forecast-panel:hover {
-  border-color: var(--line-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-}
-
-/* Metric cards in light mode */
-html[data-theme="light"] .metric-card {
-  background: var(--surface);
-  border-color: var(--line-soft);
-}
-
-/* Rule cards in light mode */
-html[data-theme="light"] .rule-card {
-  border-color: var(--line-soft);
-}
-
-/* Planet cards in light mode */
-html[data-theme="light"] .planet-card {
-  background: var(--surface-soft);
-  border-color: var(--line-soft);
-}
-
-/* Paper texture overlay — subtle noise grain for light theme */
-html[data-theme="light"] body::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 9999;
-  opacity: 0.03;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
-}
-
-/* Soft shadows for cards and panels in light theme */
-html[data-theme="light"] .lagna-panel,
-html[data-theme="light"] .planet-card,
-html[data-theme="light"] .rule-card,
-html[data-theme="light"] .metric-card,
-html[data-theme="light"] .dasha-audit-card,
-html[data-theme="light"] .dasha-active-card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
-}
-
-/* Slightly more vibrant gold for interactive element hovers in light theme */
-html[data-theme="light"] a:hover,
-html[data-theme="light"] .nav-link:hover,
-html[data-theme="light"] .drawer-link:hover {
-  color: #7B45C0;
-}
-
-/* Nakshatra & Dasha light mode overrides */
-html[data-theme="light"] .nakshatra-card {
-  background: rgba(255, 255, 255, 0.70);
-  border-color: rgba(30, 30, 50, 0.10);
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .nakshatra-lord {
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .dasha-audit {
-  background: rgba(255, 255, 255, 0.70);
-  border-color: rgba(30, 30, 50, 0.10);
-}
-
-html[data-theme="light"] .dasha-audit-card {
-  background: rgba(255, 255, 255, 0.70);
-  border-color: rgba(30, 30, 50, 0.10);
-}
-
-html[data-theme="light"] .dasha-command-hero,
-html[data-theme="light"] .dasha-lens-panel,
-html[data-theme="light"] .dasha-table-panel {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(30, 30, 50, 0.10);
-}
-
-html[data-theme="light"] .dasha-active-stack-card,
-html[data-theme="light"] .dasha-lens-card {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(30, 30, 50, 0.08);
-}
-
-html[data-theme="light"] .dasha-view-switcher,
-html[data-theme="light"] .dasha-table-scroll {
-  background: rgba(255, 255, 255, 0.38);
-  border-color: rgba(30, 30, 50, 0.10);
-}
-
-html[data-theme="light"] .dasha-period-table th,
-html[data-theme="light"] .dasha-period-table td {
-  border-bottom-color: rgba(30, 30, 50, 0.08);
-}
-
-html[data-theme="light"] .dasha-audit-card strong {
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .dasha-audit-card small {
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .dasha-bar {
-  background: rgba(100, 80, 40, 0.12);
-  border-color: rgba(100, 80, 40, 0.20);
-  border-right-color: rgba(100, 80, 40, 0.15);
-}
-
-html[data-theme="light"] .dasha-bar--active,
-html[data-theme="light"] .dasha-bar--current {
-  background: rgba(26, 123, 110, 0.15);
-  border-color: var(--accent-aqua);
-}
-
-html[data-theme="light"] .dasha-bar-label {
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .dasha-bar-dates {
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .dasha-gantt-track {
-  background: rgba(100, 80, 40, 0.10);
-}
-
-html[data-theme="light"] .dasha-gantt-label {
-  color: var(--ink-main);
-  text-shadow: none;
-}
-
-html[data-theme="light"] .dasha-popup {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: rgba(30, 30, 50, 0.12);
-  color: var(--ink-main);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-}
-
-html[data-theme="light"] .dasha-popup p,
-html[data-theme="light"] .dasha-popup strong,
-html[data-theme="light"] .dasha-popup span {
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .nakshatra-details,
-html[data-theme="light"] .nakshatra-details strong {
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .dasha-active-card {
-  background: rgba(255, 255, 255, 0.80);
-  border-color: rgba(200, 155, 60, 0.25);
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .dasha-timeline-hint {
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .dasha-combo-theme-tag {
-  background: rgba(30, 30, 50, 0.06);
-  border-color: rgba(30, 30, 50, 0.12);
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .dasha-progress-track {
-  background: rgba(30, 30, 50, 0.10);
-}
-
-html[data-theme="light"] .dasha-current-summary {
-  border-top-color: rgba(30, 30, 50, 0.10);
-}
+  }}
 
 * {
   box-sizing: border-box;
@@ -604,12 +241,6 @@ h3 {
   background: url('/backdrop-1280.webp') center center / cover no-repeat;
   opacity: 0.08;
   pointer-events: none;
-}
-
-html[data-theme="light"] .insights-shell::before {
-  opacity: 0.05;
-  filter: brightness(0.9) saturate(0.7);
-  mix-blend-mode: multiply;
 }
 
 .ambient {
@@ -1016,8 +647,7 @@ button:active:where(:not(:disabled))::before {
 }
 @keyframes btn-ripple {
   0%   { opacity: 0.75; transform: scale(0.25); }
-  100% { opacity: 0;    transform: scale(2.6);  }
-}
+  100% { opacity: 0;    transform: scale(2.6);  }}
 
 /* Shimmer sweep + rotating halo on hover — ::after */
 button::after {
@@ -1040,8 +670,7 @@ button:hover:where(:not(:disabled))::after {
 }
 @keyframes btn-halo-spin {
   0%   { filter: blur(8px) hue-rotate(0deg); }
-  100% { filter: blur(8px) hue-rotate(360deg); }
-}
+  100% { filter: blur(8px) hue-rotate(360deg); }}
 
 button:hover:where(:not(:disabled)) {
   transform: translateY(-2px);
@@ -1082,8 +711,7 @@ button.btn-cta,
       inset 0 -10px 22px rgba(0, 0, 0, 0.36),
       0 0 20px rgba(200, 155, 60, 0.22),
       0 4px 14px rgba(0, 0, 0, 0.38);
-  }
-}
+  }}
 
 /* Ghost / secondary variant — subordinate actions (Cancel, Back, etc.) */
 button.btn-ghost,
@@ -1253,8 +881,7 @@ button:focus-visible,
     border-color: rgba(195, 231, 255, 0.3);
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.18);
     transform: translateY(-2px);
-  }
-}
+  }}
 
 .rules-header {
   margin-bottom: 0.85rem;
@@ -1264,13 +891,6 @@ button:focus-visible,
   margin: 0.45rem 0 0;
   font-size: clamp(1.45rem, 1.8vw, 1.9rem);
   background: linear-gradient(135deg, #e2d9ff, #a78bfa);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-html[data-theme="light"] .rules-header h2 {
-  background: linear-gradient(135deg, #4a3570, #7c5cbf);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1599,18 +1219,15 @@ label:focus-within::before {
   }
   to {
     opacity: 1;
-  }
-}
+  }}
 
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  to   { opacity: 1; transform: translateY(0); }}
 
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+  to   { opacity: 1; transform: translateY(0); }}
 
 @keyframes slideInLeft {
   from {
@@ -1620,8 +1237,7 @@ label:focus-within::before {
   to {
     opacity: 1;
     transform: translateX(0);
-  }
-}
+  }}
 
 @keyframes drift {
   0%,
@@ -1630,8 +1246,7 @@ label:focus-within::before {
   }
   50% {
     transform: translateY(-14px) translateX(8px);
-  }
-}
+  }}
 
 @keyframes driftCenter {
   0%,
@@ -1643,8 +1258,7 @@ label:focus-within::before {
   }
   66% {
     transform: translateY(6px) translateX(-8px);
-  }
-}
+  }}
 
 @keyframes orbColorShiftLeft {
   0% {
@@ -1661,8 +1275,7 @@ label:focus-within::before {
   }
   100% {
     background: radial-gradient(circle, rgba(108, 225, 212, 0.24), transparent 68%);
-  }
-}
+  }}
 
 @keyframes orbColorShiftRight {
   0% {
@@ -1679,13 +1292,11 @@ label:focus-within::before {
   }
   100% {
     background: radial-gradient(circle, rgba(242, 194, 108, 0.2), transparent 68%);
-  }
-}
+  }}
 
 @keyframes orbBreath {
   0%, 100% { transform: scale(1); filter: blur(10px); }
-  50% { transform: scale(1.12); filter: blur(14px); }
-}
+  50% { transform: scale(1.12); filter: blur(14px); }}
 
 @keyframes rise {
   from {
@@ -1693,8 +1304,7 @@ label:focus-within::before {
   }
   to {
     transform: translateY(0) scale(1);
-  }
-}
+  }}
 
 @keyframes shimmerTitle {
   0%,
@@ -1703,8 +1313,7 @@ label:focus-within::before {
   }
   50% {
     background-position: 100% 50%;
-  }
-}
+  }}
 
 @keyframes spinSlow {
   from {
@@ -1712,8 +1321,7 @@ label:focus-within::before {
   }
   to {
     transform: rotate(360deg);
-  }
-}
+  }}
 
 /* ── Input Color Accents ── */
 
@@ -2660,25 +2268,6 @@ label:has(.autocomplete-wrapper.is-open) {
   font-weight: 600;
 }
 
-html[data-theme="light"] .dasha-gantt-track {
-  background: rgba(230, 220, 210, 0.5);
-}
-
-html[data-theme="light"] .dasha-gantt-needle {
-  background: #3d2c1e;
-  box-shadow: 0 0 6px rgba(61, 44, 30, 0.4);
-}
-
-html[data-theme="light"] .dasha-gantt-needle-label {
-  color: #3d2c1e;
-  text-shadow: none;
-}
-
-html[data-theme="light"] .dasha-active-card {
-  background: rgba(255, 250, 246, 0.7);
-  border-color: rgba(160, 120, 90, 0.2);
-}
-
 .dasha-sub-dates {
   display: flex;
   flex-wrap: wrap;
@@ -2904,8 +2493,7 @@ html[data-theme="light"] .dasha-active-card {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
-}
+  to { transform: rotate(360deg); }}
 
 /* ── Dasha Drill Hint in Popup ── */
 
@@ -3082,8 +2670,7 @@ html[data-theme="light"] .dasha-active-card {
 
   .dasha-popup-planet {
     font-size: 1.65rem;
-  }
-}
+  }}
 
 /* ── Aspects Panel ── */
 
@@ -3810,49 +3397,7 @@ html[data-theme="light"] .dasha-active-card {
   .ashtakavarga-tab {
     font-size: 1.22rem;
     padding: 0.3rem 0.55rem;
-  }
-}
-
-/* Light theme overrides */
-html[data-theme="light"] .ashtakavarga-panel,
-html[data-theme="light"] .ashtakavarga-panel:hover {
-  background: var(--surface);
-  border-color: var(--line-soft);
-  box-shadow: var(--shadow-card);
-}
-
-html[data-theme="light"] .ashtakavarga-cell {
-  background: var(--surface-soft);
-}
-
-html[data-theme="light"] .ashtakavarga-checksum--verified {
-  background: rgba(35, 107, 96, 0.1);
-}
-
-html[data-theme="light"] .ashtakavarga-checksum--alert {
-  background: rgba(198, 90, 74, 0.1);
-}
-
-html[data-theme="light"] .ashtakavarga-cell--strong {
-  background: rgba(35, 107, 96, 0.08);
-  border-color: rgba(35, 107, 96, 0.3);
-}
-
-html[data-theme="light"] .ashtakavarga-cell--weak {
-  background: rgba(198, 90, 74, 0.08);
-  border-color: rgba(198, 90, 74, 0.3);
-}
-
-html[data-theme="light"] .ashtakavarga-tab {
-  background: var(--surface-soft);
-  color: var(--ink-soft);
-}
-
-html[data-theme="light"] .ashtakavarga-tab--active {
-  background: rgba(138, 100, 32, 0.12);
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
-}
+  }}
 
 /* ── Planet Card Expandable Interpretations ── */
 
@@ -4553,8 +4098,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   .domain-reading-grid,
   .metrics-grid--hero {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 @media (max-width: 680px) {
   .forecast-form {
@@ -4595,8 +4139,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
   .forecast-event-orb {
     grid-column: 2;
-  }
-}
+  }}
 
 /* ── Career Summary Card ── */
 
@@ -4933,8 +4476,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
   .aspect-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
+  }}
 
 @media (max-width: 880px) {
   .three-col,
@@ -4957,8 +4499,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
   .transits-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
+  }}
 
 @media (max-width: 680px) {
   .dasha-command-hero {
@@ -5020,8 +4561,7 @@ html[data-theme="light"] .ashtakavarga-tab--active {
 
   .transits-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 /* ── Career & Love Section Accents ── */
 
@@ -5248,17 +4788,6 @@ html[data-theme="light"] .ashtakavarga-tab--active {
   background-color: rgba(15, 17, 23, 0.88);
   border-bottom: 1px solid rgba(200, 155, 60, 0.12);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 0 rgba(200, 155, 60, 0.06);
-}
-
-/* Light theme navbar glass */
-html[data-theme="light"] .site-navbar {
-  background-color: rgba(245, 243, 247, 0.88);
-}
-
-html[data-theme="light"] .site-navbar.navbar-scrolled {
-  background-color: rgba(245, 243, 247, 0.95);
-  border-bottom: 1px solid rgba(30, 30, 50, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
 }
 
 .site-navbar > * {
@@ -5530,13 +5059,11 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes datetimePulse-aqua {
   0%, 100% { transform: translateY(-50%) scale(1); filter: drop-shadow(0 0 6px rgba(108, 225, 212, 0.45)); }
-  50%      { transform: translateY(-50%) scale(1.12); filter: drop-shadow(0 0 12px rgba(108, 225, 212, 0.65)); }
-}
+  50%      { transform: translateY(-50%) scale(1.12); filter: drop-shadow(0 0 12px rgba(108, 225, 212, 0.65)); }}
 
 @keyframes datetimePulse-coral {
   0%, 100% { transform: translateY(-50%) scale(1); filter: drop-shadow(0 0 6px rgba(255, 143, 126, 0.45)); }
-  50%      { transform: translateY(-50%) scale(1.12); filter: drop-shadow(0 0 12px rgba(255, 143, 126, 0.65)); }
-}
+  50%      { transform: translateY(-50%) scale(1.12); filter: drop-shadow(0 0 12px rgba(255, 143, 126, 0.65)); }}
 
 .datetime-field::before {
   content: "";
@@ -5582,9 +5109,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
       max(0.75rem, env(safe-area-inset-right))
       0.5rem
       max(0.75rem, env(safe-area-inset-left));
-  }
-
-}
+  }}
 
 .access-pill {
   display: inline-flex;
@@ -5656,8 +5181,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   to {
     transform: translateX(110%);
     opacity: 0;
-  }
-}
+  }}
 
 @keyframes toastProgress {
   from {
@@ -5666,8 +5190,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
   to {
     width: 0%;
-  }
-}
+  }}
 
 /* -- Toast stack container ------------------------------------------ */
 .toast-stack {
@@ -5823,8 +5346,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
   .domain-reading-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 
 /* ═══════════════════════════════════════════════
@@ -5848,8 +5370,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelShimmer {
   0% { background-position: 200% 0; }
-  100% { background-position: -100% 0; }
-}
+  100% { background-position: -100% 0; }}
 
 /* --- Shell wrapper --- */
 .skel-shell {
@@ -5881,8 +5402,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelTwinkle {
   0%, 100% { opacity: 0; transform: scale(0.5); }
-  50% { opacity: 0.8; transform: scale(1.2); }
-}
+  50% { opacity: 0.8; transform: scale(1.2); }}
 
 /* --- Loading hero (spinner + message) --- */
 .skel-loading-hero {
@@ -5976,8 +5496,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelOrbitSpin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+  to { transform: rotate(360deg); }}
 
 /* Loading message with fade transition */
 .skel-message {
@@ -5991,8 +5510,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelFadeIn {
   from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  to { opacity: 1; transform: translateY(0); }}
 
 /* Progress track */
 .skel-progress-track {
@@ -6017,8 +5535,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   60% { width: 55%; }
   80% { width: 72%; }
   95% { width: 88%; }
-  100% { width: 95%; }
-}
+  100% { width: 95%; }}
 
 /* --- Header group skeleton --- */
 .skel-header-group {
@@ -6096,8 +5613,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelWheelPulse {
   0%, 100% { opacity: 0.4; transform: scale(0.98); }
-  50% { opacity: 1; transform: scale(1.02); }
-}
+  50% { opacity: 1; transform: scale(1.02); }}
 
 /* --- Rules section skeleton --- */
 .skel-rules-section {
@@ -6140,8 +5656,7 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 @keyframes skelCardAppear {
   from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  to { opacity: 1; transform: translateY(0); }}
 
 /* --- Error state --- */
 .skel-error-actions {
@@ -6183,49 +5698,6 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
   transform: rotate(180deg);
 }
 
-/* --- Light theme overrides --- */
-html[data-theme="light"] .skel-bar {
-  background: linear-gradient(
-    110deg,
-    rgba(160, 120, 90, 0.08) 0%,
-    rgba(160, 120, 90, 0.14) 40%,
-    rgba(184, 135, 62, 0.12) 50%,
-    rgba(160, 120, 90, 0.14) 60%,
-    rgba(160, 120, 90, 0.08) 100%
-  );
-  background-size: 300% 100%;
-  animation: skelShimmer 2s ease-in-out infinite;
-}
-
-html[data-theme="light"] .skel-star {
-  background: var(--accent-gold);
-}
-
-html[data-theme="light"] .skel-lead-block {
-  border-color: rgba(160, 120, 90, 0.1);
-  background: rgba(245, 235, 225, 0.3);
-}
-
-html[data-theme="light"] .skel-metric-card {
-  border-color: rgba(160, 120, 90, 0.1);
-  background: rgba(245, 235, 225, 0.4);
-}
-
-html[data-theme="light"] .skel-rule-card {
-  border-color: rgba(160, 120, 90, 0.08);
-  background: rgba(245, 235, 225, 0.35);
-}
-
-html[data-theme="light"] .skel-retry-btn {
-  background: linear-gradient(110deg, rgba(184, 135, 62, 0.12), rgba(184, 135, 62, 0.04));
-  color: #7a5e2a;
-  border-color: #b8873e;
-}
-
-html[data-theme="light"] .skel-retry-btn:hover {
-  background: linear-gradient(110deg, rgba(184, 135, 62, 0.2), rgba(184, 135, 62, 0.08));
-}
-
 /* --- Responsive --- */
 @media (max-width: 600px) {
   .skel-orbital-spinner {
@@ -6243,8 +5715,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
   .skel-rules-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 
 /* ═══════════════════════════════════════════════
@@ -6302,15 +5773,6 @@ html[data-theme="light"] .skel-retry-btn:hover {
   animation: skelPulse 1.8s ease-in-out infinite;
 }
 
-/* --- Light theme variants --- */
-[data-theme="light"] .skel-circle,
-[data-theme="light"] .skel-text,
-[data-theme="light"] .skel-text-short,
-[data-theme="light"] .skel-heading,
-[data-theme="light"] .skel-chart {
-  background: rgba(0, 0, 0, 0.06);
-}
-
 
 /* ═══════════════════════════════════════════════
    ERROR PAGE STYLES
@@ -6358,8 +5820,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 @keyframes errorStarPulse {
   0% { opacity: 0.15; transform: scale(0.8); }
   50% { opacity: 1; transform: scale(1.3); }
-  100% { opacity: 0.25; transform: scale(1); }
-}
+  100% { opacity: 0.25; transform: scale(1); }}
 
 /* Constellation SVG decoration */
 .error-constellation {
@@ -6388,8 +5849,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes constellationDraw {
   0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 20; }
-}
+  100% { stroke-dashoffset: 20; }}
 
 /* Main error card */
 .error-card {
@@ -6415,8 +5875,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
-  }
-}
+  }}
 
 .error-icon {
   font-size: 3rem;
@@ -6427,8 +5886,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes errorIconFloat {
   0% { transform: translateY(0); }
-  100% { transform: translateY(-6px); }
-}
+  100% { transform: translateY(-6px); }}
 
 .error-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
@@ -6566,8 +6024,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes nebulaBreath {
   0% { opacity: 0.4; transform: translate(-50%, -50%) scale(0.9); }
-  100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
-}
+  100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }}
 
 /* Star particles */
 .not-found-stars {
@@ -6599,8 +6056,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 @keyframes notFoundTwinkle {
   0% { opacity: 0.1; transform: scale(0.6); }
   50% { opacity: 0.9; transform: scale(1.4); }
-  100% { opacity: 0.2; transform: scale(0.8); }
-}
+  100% { opacity: 0.2; transform: scale(0.8); }}
 
 /* Floating planet */
 .not-found-planet {
@@ -6638,8 +6094,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes planetFloat {
   0% { transform: translateY(0) rotate(0deg); }
-  100% { transform: translateY(-18px) rotate(3deg); }
-}
+  100% { transform: translateY(-18px) rotate(3deg); }}
 
 /* Content card */
 .not-found-content {
@@ -6676,8 +6131,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 @keyframes notFoundGradient {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  100% { background-position: 0% 50%; }}
 
 /* Orbiting dot around the 404 */
 .not-found-code::after {
@@ -6696,8 +6150,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes notFoundOrbit {
   from { transform: translate(-50%, -50%) rotate(0deg); }
-  to { transform: translate(-50%, -50%) rotate(360deg); }
-}
+  to { transform: translate(-50%, -50%) rotate(360deg); }}
 
 .not-found-title {
   font-family: var(--font-display), "Plus Jakarta Sans", system-ui, sans-serif;
@@ -6829,13 +6282,11 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes rootOrbitSpin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+  to { transform: rotate(360deg); }}
 
 @keyframes rootCorePulse {
   0% { transform: translate(-50%, -50%) scale(0.9); opacity: 0.7; }
-  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }
-}
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; }}
 
 .root-loader-text {
   font-family: var(--font-body), "Sora", system-ui, sans-serif;
@@ -6848,8 +6299,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
 
 @keyframes rootTextPulse {
   0% { opacity: 0.5; }
-  100% { opacity: 1; }
-}
+  100% { opacity: 1; }}
 
 /* ═══════════════════════════════════════════════
    RESPONSIVE — ERROR & NOT-FOUND
@@ -6884,8 +6334,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   .not-found-planet-ring {
     width: 85px;
     height: 20px;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    ACCESSIBILITY — Touch Target Sizing (WCAG 2.5.8)
@@ -6914,8 +6363,7 @@ html[data-theme="light"] .skel-retry-btn:hover {
   .logout-btn {
     min-height: 44px;
     min-width: 44px;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    ACCESSIBILITY — Focus Indicators
@@ -7196,8 +6644,7 @@ a:focus-visible {
   .drawer-nav,
   .drawer-divider {
     display: none;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    CONSTELLATION CHART
@@ -7232,8 +6679,7 @@ a:focus-visible {
   }
   100% {
     opacity: 0.4;
-  }
-}
+  }}
 
 /* Planet dot pulse animation */
 .constellation-planet-dot {
@@ -7248,8 +6694,7 @@ a:focus-visible {
   }
   50% {
     filter: brightness(1.3);
-  }
-}
+  }}
 
 /* Planet glow */
 .constellation-planet-glow {
@@ -7301,20 +6746,6 @@ a:focus-visible {
   color: var(--accent-gold);
 }
 
-/* Light theme adjustments */
-html[data-theme="light"] .constellation-panel .constellation-svg rect:first-child {
-  opacity: 0.95;
-}
-
-html[data-theme="light"] .constellation-star {
-  opacity: 0.15;
-}
-
-html[data-theme="light"] .constellation-chart-toggle {
-  background: rgba(245, 235, 225, 0.9);
-  border-color: rgba(160, 120, 90, 0.2);
-}
-
 /* ═══════════════════════════════════════════════════════════════════════════
    FORM VISUAL UPGRADE — Cosmic Inputs
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -7351,8 +6782,7 @@ html[data-theme="light"] .constellation-chart-toggle {
 @keyframes borderShimmer {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  100% { background-position: 0% 50%; }}
 
 /* Filled state color shift for date/time inputs */
 .datetime-field input:not([value=""]):valid {
@@ -7395,28 +6825,23 @@ html[data-theme="light"] .constellation-chart-toggle {
 
 @keyframes pulseLeftGold {
   0%, 100% { border-left-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(242, 194, 108, 0.18), 0 0 18px rgba(242, 194, 108, 0.1), inset 0 2px 8px rgba(0,0,0,0.12); }
-  50% { border-left-color: #ffe0a0; box-shadow: 0 0 0 4px rgba(242, 194, 108, 0.28), 0 0 24px rgba(242, 194, 108, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }
-}
+  50% { border-left-color: #ffe0a0; box-shadow: 0 0 0 4px rgba(242, 194, 108, 0.28), 0 0 24px rgba(242, 194, 108, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }}
 
 @keyframes pulseLeftAqua {
   0%, 100% { border-left-color: var(--accent-aqua); box-shadow: 0 0 0 3px rgba(108, 225, 212, 0.18), 0 0 18px rgba(108, 225, 212, 0.1), inset 0 2px 8px rgba(0,0,0,0.12); }
-  50% { border-left-color: #a0f5ea; box-shadow: 0 0 0 4px rgba(108, 225, 212, 0.28), 0 0 24px rgba(108, 225, 212, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }
-}
+  50% { border-left-color: #a0f5ea; box-shadow: 0 0 0 4px rgba(108, 225, 212, 0.28), 0 0 24px rgba(108, 225, 212, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }}
 
 @keyframes pulseLeftCoral {
   0%, 100% { border-left-color: var(--accent-coral); box-shadow: 0 0 0 3px rgba(255, 143, 126, 0.18), 0 0 18px rgba(255, 143, 126, 0.1), inset 0 2px 8px rgba(0,0,0,0.12); }
-  50% { border-left-color: #ffb5a8; box-shadow: 0 0 0 4px rgba(255, 143, 126, 0.28), 0 0 24px rgba(255, 143, 126, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }
-}
+  50% { border-left-color: #ffb5a8; box-shadow: 0 0 0 4px rgba(255, 143, 126, 0.28), 0 0 24px rgba(255, 143, 126, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }}
 
 @keyframes pulseLeftViolet {
   0%, 100% { border-left-color: #b282ff; box-shadow: 0 0 0 3px rgba(178, 130, 255, 0.18), 0 0 18px rgba(178, 130, 255, 0.1), inset 0 2px 8px rgba(0,0,0,0.12); }
-  50% { border-left-color: #cba8ff; box-shadow: 0 0 0 4px rgba(178, 130, 255, 0.28), 0 0 24px rgba(178, 130, 255, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }
-}
+  50% { border-left-color: #cba8ff; box-shadow: 0 0 0 4px rgba(178, 130, 255, 0.28), 0 0 24px rgba(178, 130, 255, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }}
 
 @keyframes pulseLeftRose {
   0%, 100% { border-left-color: #ff82b4; box-shadow: 0 0 0 3px rgba(255, 130, 180, 0.18), 0 0 18px rgba(255, 130, 180, 0.1), inset 0 2px 8px rgba(0,0,0,0.12); }
-  50% { border-left-color: #ffa8cc; box-shadow: 0 0 0 4px rgba(255, 130, 180, 0.28), 0 0 24px rgba(255, 130, 180, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }
-}
+  50% { border-left-color: #ffa8cc; box-shadow: 0 0 0 4px rgba(255, 130, 180, 0.28), 0 0 24px rgba(255, 130, 180, 0.18), inset 0 2px 8px rgba(0,0,0,0.12); }}
 
 
 /* ── 7. Autocomplete Dropdown — Blur-in + Glow Highlight ── */
@@ -7436,8 +6861,7 @@ html[data-theme="light"] .constellation-chart-toggle {
     opacity: 1;
     filter: blur(0);
     transform: translateY(0) scaleY(1);
-  }
-}
+  }}
 
 /* Left border accent on hover items */
 .autocomplete-item {
@@ -7470,52 +6894,11 @@ html[data-theme="light"] .constellation-chart-toggle {
 
 @keyframes autocompleteShimmer {
   0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
-}
-
-/* ── 10. Light Theme Adjustments ── */
-
-html[data-theme="light"] .datetime-field input:not([value=""]):valid {
-  border-color: rgba(46, 133, 120, 0.35);
-  background:
-    linear-gradient(180deg, rgba(46, 133, 120, 0.04), rgba(255, 255, 255, 0.02)),
-    var(--surface-soft);
-}
-
-html[data-theme="light"] .input-glow-coral .datetime-field input:not([value=""]):valid {
-  border-color: rgba(198, 90, 74, 0.35);
-  background:
-    linear-gradient(180deg, rgba(198, 90, 74, 0.04), rgba(255, 255, 255, 0.02)),
-    var(--surface-soft);
-}
-
-html[data-theme="light"] .autocomplete-item:hover,
-html[data-theme="light"] .autocomplete-item.active {
-  border-left-color: var(--accent-aqua);
-  box-shadow: inset 4px 0 12px rgba(46, 133, 120, 0.06), 0 0 14px rgba(46, 133, 120, 0.04);
-}
-
-html[data-theme="light"] .input-glow-gold > select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238a6420' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: calc(100% - 1rem) center;
-  background-size: 1rem 1rem;
-}
-
-html[data-theme="light"] .datetime-field:focus-within::after {
-  background: linear-gradient(135deg, rgba(138, 100, 32, 0.45), rgba(46, 133, 120, 0.45), rgba(138, 100, 32, 0.45));
-  background-size: 300% 300%;
-}
-
-/* Light theme pulse adjustments — softer glow */
-html[data-theme="light"] .input-glow-gold :is(input, select, textarea):focus {
-  animation: pulseLeftGoldLight 2s ease-in-out infinite;
-}
+  100% { background-position: -200% 0; }}
 
 @keyframes pulseLeftGoldLight {
   0%, 100% { border-left-color: var(--accent-gold); box-shadow: 0 0 0 3px rgba(138, 100, 32, 0.14), 0 0 14px rgba(138, 100, 32, 0.08), inset 0 2px 6px rgba(0,0,0,0.06); }
-  50% { border-left-color: #b8873e; box-shadow: 0 0 0 4px rgba(138, 100, 32, 0.22), 0 0 20px rgba(138, 100, 32, 0.12), inset 0 2px 6px rgba(0,0,0,0.06); }
-}
+  50% { border-left-color: #b8873e; box-shadow: 0 0 0 4px rgba(138, 100, 32, 0.22), 0 0 20px rgba(138, 100, 32, 0.12), inset 0 2px 6px rgba(0,0,0,0.06); }}
 
 /* ═══════════════════════════════════════════════
    BACK BUTTON
@@ -7580,22 +6963,6 @@ html[data-theme="light"] .input-glow-gold :is(input, select, textarea):focus {
   outline-offset: 2px;
 }
 
-/* Light theme */
-html[data-theme="light"] .back-btn {
-  background: rgba(255, 255, 255, 0.75);
-  border-color: rgba(138, 100, 32, 0.2);
-  color: var(--accent-gold);
-  box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.08),
-    0 0 8px rgba(138, 100, 32, 0.05);
-}
-
-html[data-theme="light"] .back-btn:hover {
-  background: rgba(138, 100, 32, 0.08);
-  border-color: rgba(138, 100, 32, 0.35);
-  color: #5a3e0a;
-}
-
 /* Mobile: tighter positioning */
 @media (max-width: 680px) {
   .back-btn {
@@ -7603,8 +6970,7 @@ html[data-theme="light"] .back-btn:hover {
     left: 0.75rem;
     padding: 0.45rem 0.85rem 0.45rem 0.65rem;
     font-size: 1.32rem;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    FLOATING QUOTES
@@ -7651,13 +7017,11 @@ html[data-theme="light"] .back-btn:hover {
   0%   { opacity: 0; transform: translate(0, 0) scale(0.95); }
   8%   { opacity: var(--depth-opacity); transform: translate(0, 0) scale(1); }
   90%  { opacity: var(--depth-opacity); }
-  100% { opacity: 0; transform: translate(var(--drift-x), var(--drift-y)) scale(1); }
-}
+  100% { opacity: 0; transform: translate(var(--drift-x), var(--drift-y)) scale(1); }}
 
 @keyframes floatQuoteExit {
   0%   { opacity: var(--depth-opacity); }
-  100% { opacity: 0; transform: translate(var(--drift-x), var(--drift-y)) scale(0.9); }
-}
+  100% { opacity: 0; transform: translate(var(--drift-x), var(--drift-y)) scale(0.9); }}
 
 /* ═══════════════════════════════════════════════
    CHART HISTORY
@@ -7886,17 +7250,6 @@ html[data-theme="light"] .back-btn:hover {
   letter-spacing: 0.02em;
 }
 
-/* Chart history light theme */
-html[data-theme="light"] .chart-history-hero {
-  background: var(--surface);
-  border-color: var(--line-soft);
-}
-
-html[data-theme="light"] .chart-history-card {
-  background: var(--surface-soft);
-  border-color: var(--line-soft);
-}
-
 /* Chart history responsive */
 @media (max-width: 680px) {
   .chart-history-grid {
@@ -7916,8 +7269,7 @@ html[data-theme="light"] .chart-history-card {
 
   .chart-history-hero-cta {
     align-self: flex-end;
-  }
-}
+  }}
 
 /* ─── Mobile bottom nav padding ─── */
 @media (max-width: 768px) {
@@ -7936,14 +7288,12 @@ html[data-theme="light"] .chart-history-card {
 
   .insights-shell {
     align-items: start;
-  }
-}
+  }}
 
 @media (max-width: 360px) {
   :root {
     --mobile-page-gutter: 0.875rem;
-  }
-}
+  }}
 
 /* Mobile perf: backdrop-filter forces per-element GPU compositing;
    disable on mobile where the cost is highest and least visible */
@@ -7951,8 +7301,7 @@ html[data-theme="light"] .chart-history-card {
   * {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-  }
-}
+  }}
 
 /* ─── Accessibility: Reduced Motion ─── */
 @media (prefers-reduced-motion: reduce) {
@@ -7963,8 +7312,7 @@ html[data-theme="light"] .chart-history-card {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
-  }
-}
+  }}
 
 
 /* ── Zodiac Wheel ───────────────────────────────────────────── */
@@ -8092,8 +7440,7 @@ html[data-theme="light"] .chart-history-card {
 }
 @keyframes zppFadeIn {
   from { opacity: 0; transform: scale(1.04); }
-  to   { opacity: 1; transform: scale(1); }
-}
+  to   { opacity: 1; transform: scale(1); }}
 .zpp-photo-vignette {
   position: absolute;
   inset: 0;
@@ -8139,41 +7486,9 @@ html[data-theme="light"] .chart-history-card {
   letter-spacing: 0.02em;
 }
 
-/* Light theme overrides */
-html[data-theme="light"] .zpp-frame {
-  background:
-    radial-gradient(circle at 50% 0%, rgba(91, 47, 160, 0.12), transparent 60%),
-    linear-gradient(180deg, rgba(255, 252, 242, 0.96) 0%, rgba(240, 232, 212, 0.96) 100%);
-  box-shadow:
-    inset 0 0 0 1px rgba(143, 90, 6, 0.40),
-    inset 0 1px 0 rgba(255, 220, 150, 0.60),
-    inset 0 -16px 30px rgba(90, 60, 20, 0.08),
-    0 0 0 4px rgba(230, 223, 204, 0.85),
-    0 0 0 5px rgba(143, 90, 6, 0.30);
-}
-html[data-theme="light"] .zpp-name {
-  color: #6B3E06;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-html[data-theme="light"] .zpp-dates { color: rgba(74, 66, 88, 0.82); }
-html[data-theme="light"] .zpp-chip {
-  color: rgba(30, 22, 10, 0.85);
-  background: rgba(143, 90, 6, 0.08);
-  border-color: rgba(143, 90, 6, 0.35);
-}
-html[data-theme="light"] .zodiac-portrait-panel { filter: drop-shadow(0 16px 32px rgba(40, 30, 15, 0.18)); }
-html[data-theme="light"] .zpp-corner-tl,
-html[data-theme="light"] .zpp-corner-tr,
-html[data-theme="light"] .zpp-corner-bl,
-html[data-theme="light"] .zpp-corner-br {
-  border-color: rgba(143, 90, 6, 0.75);
-  filter: drop-shadow(0 0 3px rgba(143, 90, 6, 0.40));
-}
-
 @media (max-width: 720px) {
   .zodiac-portrait-panel { width: 220px; }
-  .zpp-name { font-size: 1.35rem; }
-}
+  .zpp-name { font-size: 1.35rem; }}
 
 /* ── Insights Error Page (app/insights/error.tsx) ──────────────── */
 .error-page {
@@ -8333,13 +7648,11 @@ html[data-theme="light"] .zpp-corner-br {
 
 @keyframes cursorBlink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
+  50% { opacity: 0; }}
 
 @keyframes cursorFadeOut {
   from { opacity: 1; }
-  to { opacity: 0; }
-}
+  to { opacity: 0; }}
 
 /* ═══════════════════════════════════════════════
    COSMIC CHARGE — Particle Burst & Ripple
@@ -8366,8 +7679,7 @@ html[data-theme="light"] .zpp-corner-br {
     width: 200px;
     height: 200px;
     opacity: 0;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    PALM READING PANEL
@@ -8542,8 +7854,7 @@ html[data-theme="light"] .zpp-corner-br {
 
 @keyframes palmPulse {
   0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.7); }
-}
+  50% { opacity: 0.4; transform: scale(0.7); }}
 
 .palm-confidence {
   position: relative;
@@ -8672,8 +7983,7 @@ html[data-theme="light"] .zpp-corner-br {
 
 @keyframes palmHandPulse {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.1); opacity: 0.6; }
-}
+  50% { transform: scale(1.1); opacity: 0.6; }}
 
 .palm-loading-text {
   font-size: 1.6rem;
@@ -8690,8 +8000,7 @@ html[data-theme="light"] .zpp-corner-br {
   0% { content: ""; }
   25% { content: "."; }
   50% { content: ".."; }
-  75% { content: "..."; }
-}
+  75% { content: "..."; }}
 
 .palm-skeleton {
   margin-top: 1.5rem;
@@ -8717,8 +8026,7 @@ html[data-theme="light"] .zpp-corner-br {
 
 @keyframes palmSkelShimmer {
   0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.15; }
-}
+  50% { opacity: 0.15; }}
 
 /* ── Results ── */
 
@@ -8785,8 +8093,7 @@ html[data-theme="light"] .zpp-corner-br {
   }
   .palm-skel-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .palm-line-card {
   border-radius: 12px;
@@ -9008,8 +8315,7 @@ html[data-theme="light"] .zpp-corner-br {
 @media (max-width: 600px) {
   .palm-trajectory-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .palm-trajectory-item {
   padding: 0.8rem;
@@ -9078,55 +8384,6 @@ html[data-theme="light"] .zpp-corner-br {
   font-size: 1.35rem;
   color: var(--ink-main);
   line-height: 1.6;
-}
-
-/* ── Light mode overrides ── */
-
-html[data-theme="light"] .palm-panel {
-  background: rgba(255, 255, 255, 0.55);
-  border-color: rgba(160, 120, 90, 0.12);
-  box-shadow: 0 8px 32px rgba(120, 80, 40, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-html[data-theme="light"] .palm-panel:hover {
-  border-color: rgba(160, 120, 90, 0.22);
-  box-shadow: 0 8px 40px rgba(120, 80, 40, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 0 20px rgba(140, 100, 60, 0.05);
-}
-
-html[data-theme="light"] .palm-line-card,
-html[data-theme="light"] .palm-section-card {
-  background: var(--surface-soft);
-  border-color: var(--line-soft);
-}
-
-html[data-theme="light"] .palm-summary-card {
-  background-image: linear-gradient(rgba(255, 250, 246, 0.95), rgba(255, 250, 246, 0.95)),
-    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
-}
-
-html[data-theme="light"] .palm-skel-block {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-html[data-theme="light"] .palm-capture-btn {
-  border-color: var(--ink-main);
-}
-
-html[data-theme="light"] .palm-trajectory-hero {
-  background-image: linear-gradient(rgba(255, 250, 246, 0.95), rgba(255, 250, 246, 0.95)),
-    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold), var(--accent-coral));
-}
-
-html[data-theme="light"] .palm-trajectory-item {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-html[data-theme="light"] .palm-subsection {
-  border-top-color: rgba(0, 0, 0, 0.06);
-}
-
-html[data-theme="light"] .palm-error-detail code {
-  background: rgba(0, 0, 0, 0.06);
 }
 
 /* ═══════════════════════════════════════════════
@@ -9508,17 +8765,6 @@ html[data-theme="light"] .palm-error-detail code {
 .palm-preview--dimmed { opacity: 0.55; }
 .palm-preview--small { max-width: 220px; margin: 0 auto 0.6rem; }
 
-/* ── Light theme overrides for new palm classes ── */
-html[data-theme="light"] .palm-toggle { background: rgba(200, 155, 60, 0.07); }
-html[data-theme="light"] .palm-correlation-item,
-html[data-theme="light"] .palm-line-confidence-dot {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.10);
-}
-html[data-theme="light"] .palm-toggle-thumb {
-  background: #ffffff;
-}
-
 /* ═══════════════════════════════════════════════
    MICRO-INTERACTIONS & HOVER FEEDBACK
    ═══════════════════════════════════════════════ */
@@ -9665,8 +8911,7 @@ html[data-theme="light"] .palm-toggle-thumb {
     box-shadow:
       0 24px 48px rgba(0, 0, 0, 0.2),
       0 0 18px rgba(108, 225, 212, 0.05);
-  }
-}
+  }}
 
 /* ── 3. Input Focus Glow ─────────────────────── */
 /* Animated gold ring glow on form input focus */
@@ -9697,27 +8942,6 @@ textarea:focus-visible {
     0 0 0 3px rgba(242, 194, 108, 0.35),
     0 0 18px rgba(242, 194, 108, 0.15),
     var(--field-shadow);
-}
-
-/* Light theme adjustments for input focus glow */
-html[data-theme="light"] input:focus,
-html[data-theme="light"] select:focus,
-html[data-theme="light"] textarea:focus {
-  box-shadow:
-    0 0 0 3px rgba(138, 100, 32, 0.25),
-    0 0 14px rgba(138, 100, 32, 0.08),
-    var(--field-shadow);
-  border-color: var(--accent-gold);
-}
-
-html[data-theme="light"] input:focus-visible,
-html[data-theme="light"] select:focus-visible,
-html[data-theme="light"] textarea:focus-visible {
-  box-shadow:
-    0 0 0 3px rgba(138, 100, 32, 0.25),
-    0 0 14px rgba(138, 100, 32, 0.08),
-    var(--field-shadow);
-  border-color: var(--accent-gold);
 }
 
 /* ══════════════════════════════════════════════════════
@@ -9768,34 +8992,6 @@ html[data-theme="light"] textarea:focus-visible {
     0 0 60px rgba(242, 194, 108, 0.08);
 }
 
-/* ── Light theme variants ── */
-
-html[data-theme="light"] .surface-card {
-  background: rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="light"] .elevated-card {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(160, 120, 90, 0.15);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
-    0 0 40px rgba(160, 120, 90, 0.04);
-}
-
-html[data-theme="light"] .accent-card {
-  background: rgba(255, 255, 255, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(160, 120, 90, 0.25);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08),
-    0 0 60px rgba(160, 120, 90, 0.06);
-}
-
 /* ═══════════════════════════════════════════════
    TYPOGRAPHY UTILITIES
    ═══════════════════════════════════════════════ */
@@ -9840,8 +9036,7 @@ html[data-theme="light"] .accent-card {
     opacity: 1;
     transform: none;
     transition: none;
-  }
-}
+  }}
 
 /* ── Cursor Sparkle Trail ──────────────────────────────────── */
 .sparkle-particle {
@@ -9855,8 +9050,7 @@ html[data-theme="light"] .accent-card {
 
 @keyframes sparkleFadeUp {
   0% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-20px) scale(0.3); }
-}
+  100% { opacity: 0; transform: translateY(-20px) scale(0.3); }}
 
 /* ═══════════════════════════════════════════════
    SHADBALA PANEL
@@ -10340,39 +9534,7 @@ html[data-theme="light"] .accent-card {
   .shadbala-sign-chip {
     min-height: 2.25rem;
     font-size: 1.12rem;
-  }
-}
-
-/* Light theme overrides */
-html[data-theme="light"] .shadbala-bar-container {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-html[data-theme="light"] .shadbala-comp-bar-container {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-html[data-theme="light"] .shadbala-bar-threshold {
-  background: rgba(0, 0, 0, 0.2);
-}
-
-html[data-theme="light"] .shadbala-row-header {
-  color: var(--ink-main);
-}
-
-html[data-theme="light"] .shadbala-sign-context {
-  background:
-    linear-gradient(135deg, rgba(26, 123, 110, 0.08), rgba(119, 90, 190, 0.05)),
-    rgba(255, 255, 255, 0.62);
-}
-
-html[data-theme="light"] .shadbala-sign-card {
-  background: rgba(255, 255, 255, 0.58);
-}
-
-html[data-theme="light"] .shadbala-sign-chip {
-  background: rgba(0, 0, 0, 0.04);
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    YOGAS PANEL
@@ -10738,70 +9900,7 @@ html[data-theme="light"] .shadbala-sign-chip {
   .yogas-tab {
     font-size: 1.2rem;
     padding: 0.3rem 0.6rem;
-  }
-}
-
-/* ── Light Theme ── */
-html[data-theme="light"] .yoga-card {
-  background: rgba(255, 248, 242, 0.9);
-  border-color: var(--line-soft);
-}
-
-html[data-theme="light"] .yoga-card--priority {
-  background:
-    linear-gradient(135deg, rgba(138, 100, 32, 0.08), rgba(17, 126, 124, 0.04)),
-    rgba(255, 248, 242, 0.95);
-  border-color: rgba(138, 100, 32, 0.28);
-}
-
-html[data-theme="light"] .yoga-card--benefic {
-  border-left-color: var(--accent-gold);
-}
-
-html[data-theme="light"] .yoga-card--challenging {
-  border-left-color: var(--accent-coral);
-}
-
-html[data-theme="light"] .yogas-tab {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="light"] .yogas-tab--active {
-  background: rgba(138, 100, 32, 0.1);
-  border-color: rgba(138, 100, 32, 0.3);
-  color: var(--accent-gold);
-}
-
-html[data-theme="light"] .yoga-planet-chip {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="light"] .yoga-strength-dot {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-html[data-theme="light"] .yoga-occurrence {
-  background: rgba(17, 126, 124, 0.08);
-  border-color: rgba(17, 126, 124, 0.22);
-  color: #117e7c;
-}
-
-html[data-theme="light"] .yoga-card-deep-read {
-  background: rgba(138, 100, 32, 0.06);
-  border-color: rgba(138, 100, 32, 0.14);
-}
-
-html[data-theme="light"] .yoga-card-traits span {
-  background: rgba(17, 126, 124, 0.06);
-  border-color: rgba(17, 126, 124, 0.16);
-}
-
-html[data-theme="light"] .yoga-card-cancellation {
-  background: rgba(198, 90, 74, 0.06);
-  border-left-color: rgba(198, 90, 74, 0.3);
-}
+  }}
 
 /* ═══════════════════════════════════════════════════════════════════
    MOBILE RESPONSIVE SCALING SYSTEM
@@ -10896,8 +9995,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   .cosmic-divider {
     margin: 0.6rem 0;
-  }
-}
+  }}
 
 /* ── Phone (≤600px) ── */
 @media (max-width: 600px) {
@@ -10966,8 +10064,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   .kicker {
     font-size: var(--font-mobile-meta);
     letter-spacing: 0.12em;
-  }
-}
+  }}
 
 /* ── Small phone (≤480px) ── */
 @media (max-width: 480px) {
@@ -10992,8 +10089,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   input, select, textarea {
     padding: 8px 9px;
     font-size: 16px !important;
-  }
-}
+  }}
 
 /* ── Landscape phone ── */
 @media (max-width: 900px) and (orientation: landscape) {
@@ -11006,8 +10102,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   .home-shell {
     padding-inline: 1rem;
-  }
-}
+  }}
 
 /* ── Safe areas (notch devices) ── */
 @supports (padding-top: env(safe-area-inset-top)) {
@@ -11022,9 +10117,7 @@ html[data-theme="light"] .yoga-card-cancellation {
     .dashboard-shell {
       padding-left: max(0.75rem, env(safe-area-inset-left));
       padding-right: max(0.75rem, env(safe-area-inset-right));
-    }
-  }
-}
+    }}}
 
 /* ── Touch target sizing for mobile ── */
 @media (pointer: coarse) {
@@ -11040,8 +10133,7 @@ html[data-theme="light"] .yoga-card-cancellation {
 
   select {
     min-height: 44px;
-  }
-}
+  }}
 
 /* Dense chart surfaces keep their columns readable and advertise horizontal use. */
 @media (max-width: 768px) {
@@ -11111,8 +10203,7 @@ html[data-theme="light"] .yoga-card-cancellation {
   .navamsa-vargottama-label,
   .divisional-same-label {
     font-size: 0.7rem;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════════════════════════
    REACT-DATEPICKER — Glassmorphism Theme Override
@@ -11401,63 +10492,6 @@ html[data-theme="light"] .yoga-card-cancellation {
   display: block !important;
 }
 
-/* ── Light theme overrides ── */
-html[data-theme="light"] .react-datepicker {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10), 0 0 1px rgba(0, 0, 0, 0.06) !important;
-}
-
-html[data-theme="light"] .react-datepicker__header {
-  background: rgba(0, 0, 0, 0.02) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-}
-
-html[data-theme="light"] .react-datepicker__day:hover {
-  background: rgba(26, 158, 120, 0.10) !important;
-}
-
-html[data-theme="light"] .react-datepicker__day--outside-month {
-  color: rgba(107, 107, 118, 0.35) !important;
-}
-
-html[data-theme="light"] .react-datepicker__month-select,
-html[data-theme="light"] .react-datepicker__year-select {
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.04), rgba(0, 0, 0, 0.02)) !important;
-  color: var(--ink-main) !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23D45048' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 8px center !important;
-  background-size: 11px !important;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
-}
-
-html[data-theme="light"] .react-datepicker__month-select:hover,
-html[data-theme="light"] .react-datepicker__year-select:hover {
-  border-color: rgba(212, 80, 72, 0.30) !important;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.06), rgba(0, 0, 0, 0.03)) !important;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23D45048' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E") !important;
-  background-repeat: no-repeat !important;
-  background-position: right 8px center !important;
-  background-size: 11px !important;
-}
-
-html[data-theme="light"] .react-datepicker__month-select option,
-html[data-theme="light"] .react-datepicker__year-select option {
-  background: #F8F7F4 !important;
-  color: #2D2B2E !important;
-}
-
-html[data-theme="light"] .react-datepicker__time-list-item:hover {
-  background: rgba(212, 80, 72, 0.08) !important;
-}
-
-html[data-theme="light"] .react-datepicker__header--time {
-  background: rgba(0, 0, 0, 0.02) !important;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
-}
-
 /* ── Mobile responsiveness ── */
 @media (max-width: 600px) {
   .react-datepicker {
@@ -11482,8 +10516,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 
   .react-datepicker--time-only .react-datepicker__time-container {
     width: 200px !important;
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    MOBILE BOTTOM SHEET — Datepicker on touch devices
@@ -11504,8 +10537,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 
   @keyframes bottomSheetSlideUp {
     from { transform: translateY(100%); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-  }
+    to { transform: translateY(0); opacity: 1; }}
 
   .react-datepicker {
     width: 100% !important;
@@ -11591,13 +10623,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 
   .autocomplete-item-detail {
     font-size: var(--font-mobile-label);
-  }
-
-  /* Light theme handle bar */
-  html[data-theme="light"] .react-datepicker__header::before {
-    background: rgba(0, 0, 0, 0.15);
-  }
-}
+  }}
 
 /* ═══════════════════════════════════════════════
    PALM HISTORY — list, detail, compare
@@ -12027,8 +11053,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 @media (max-width: 900px) {
   .palm-compare-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .palm-compare-side {
   display: flex;
@@ -12177,8 +11202,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 @media (max-width: 700px) {
   .palm-compare-delta-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .palm-compare-marking-list {
   border-radius: 12px;
@@ -12237,8 +11261,7 @@ html[data-theme="light"] .react-datepicker__header--time {
 @media (max-width: 700px) {
   .palm-compare-summary-grid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .palm-compare-quote {
   margin: 0;
@@ -12265,26 +11288,6 @@ html[data-theme="light"] .react-datepicker__header--time {
   color: var(--accent-gold);
 }
 
-/* Light theme adjustments */
-html[data-theme="light"] .palm-history-card,
-html[data-theme="light"] .palm-history-toolbar,
-html[data-theme="light"] .palm-compare-side {
-  background: rgba(255, 252, 242, 0.7);
-  border-color: rgba(143, 90, 6, 0.22);
-}
-
-html[data-theme="light"] .palm-compare-quote {
-  background: rgba(255, 252, 242, 0.55);
-  border-left-color: var(--accent-gold);
-}
-
-html[data-theme="light"] .palm-detail-title-input,
-html[data-theme="light"] .palm-detail-notes {
-  background: rgba(255, 252, 242, 0.7);
-  color: var(--ink-main);
-  border-color: rgba(143, 90, 6, 0.30);
-}
-
 @media (max-width: 768px), (pointer: coarse) {
   .site-navbar {
     background: rgba(13, 12, 20, 0.94);
@@ -12298,16 +11301,10 @@ html[data-theme="light"] .palm-detail-notes {
     -webkit-backdrop-filter: blur(8px) !important;
   }
 
-  html[data-theme="light"] .site-navbar,
-  html[data-theme="light"] .site-navbar.navbar-scrolled {
-    background: rgba(245, 243, 247, 0.96);
-  }
-
   .mobile-drawer {
     backdrop-filter: blur(12px) !important;
     -webkit-backdrop-filter: blur(12px) !important;
-  }
-}
+  }}
 
 /* ─── Mobile perf: override more-specific !important backdrop-filter rules ───
    The blanket `* { backdrop-filter: none !important }` rule (media query,
@@ -12327,25 +11324,18 @@ html[data-theme="light"] .palm-detail-notes {
   .mobile-drawer {
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-  }
-}
+  }}
 
-/* ─── Mobile perf: keep dark-theme "frosted glass" panels legible without blur ───
+/* ─── Mobile perf: keep "frosted glass" panels legible without blur ───
    GlassCard, the insights .card/.cardDepthFront/Mid/Back tiers, and
    .lang-dropdown use var(--surface)/var(--surface-strong)/var(--bg-glass),
-   which in dark theme are only 3-6% opaque and rely on the backdrop-filter
-   blur disabled above to read as a visible panel at all. Bump them on
-   mobile so they stay visible as flat translucent panels instead of
-   frosted glass. --surface/--surface-strong are re-defined for light theme
-   via html[data-theme="light"] overrides (specificity 0,1,1 beats :root's
-   0,1,0), so those two are unaffected in light theme; --bg-glass has no
-   light-theme override, so this bump does apply there too, which is
-   harmless since light-theme components already used this same dark-toned
-   value at the original opacity. */
+   which are only 3-6% opaque and rely on the backdrop-filter blur
+   disabled above to read as a visible panel at all. Bump them on mobile
+   so they stay visible as flat translucent panels instead of frosted
+   glass. */
 @media (max-width: 768px) {
   :root {
     --surface: rgba(255, 243, 210, 0.11);
     --surface-strong: rgba(255, 243, 210, 0.16);
     --bg-glass: rgba(18, 18, 26, 0.82);
-  }
-}
+  }}

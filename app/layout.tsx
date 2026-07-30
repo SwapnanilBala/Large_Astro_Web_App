@@ -22,7 +22,6 @@ import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
 import ViewportScaler from "./components/ViewportScaler";
 import { AuthProvider } from "@/lib/auth-context";
-import { ThemeProvider } from "@/lib/theme-context";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ToastProvider } from "@/lib/toast-context";
 
@@ -48,10 +47,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#0F1117" },
-    { media: "(prefers-color-scheme: light)", color: "#E6DFCC" },
-  ],
+  themeColor: "#0F1117",
 };
 
 export default function RootLayout({
@@ -60,29 +56,29 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${cinzel.variable} ${newsreader.variable}`} suppressHydrationWarning>
-      <Script id="theme-init" strategy="beforeInteractive">
-        {`try{var t=localStorage.getItem('astro_theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark'}`}
-      </Script>
+    <html
+      lang="en"
+      data-theme="dark"
+      style={{ colorScheme: "dark" }}
+      className={`${cinzel.variable} ${newsreader.variable}`}
+    >
       <body>
         <a href="#main-content" className="skip-nav">
           Skip to main content
         </a>
         <ViewportScaler />
         <GradientBlobs />
-        <ThemeProvider>
-          <LanguageProvider>
-            <ToastProvider>
-              <AuthProvider>
-                <Navbar />
-                <main id="main-content" tabIndex={-1}>
-                  {children}
-                </main>
-                <BottomNav />
-              </AuthProvider>
-            </ToastProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        <LanguageProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <Navbar />
+              <main id="main-content" tabIndex={-1}>
+                {children}
+              </main>
+              <BottomNav />
+            </AuthProvider>
+          </ToastProvider>
+        </LanguageProvider>
         {process.env.NODE_ENV === "production" && (
           <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`}

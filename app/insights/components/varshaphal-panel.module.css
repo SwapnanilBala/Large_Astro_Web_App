@@ -868,8 +868,7 @@
 
   .placementRow span:last-child {
     display: none;
-  }
-}
+  }}
 
 .section {
   border-radius: 16px;
@@ -1256,43 +1255,4 @@
 
 .interpretation strong {
   color: var(--accent-gold);
-}
-
-/* ── Light mode overrides ── */
-
-:global(html[data-theme="light"]) .panel {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-:global(html[data-theme="light"]) .panel:hover {
-  border-color: rgba(0, 0, 0, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9),
-    0 0 20px rgba(200, 155, 60, 0.06);
-}
-
-:global(html[data-theme="light"]) .section {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) .wheelSegment {
-  fill: rgba(0, 0, 0, 0.02);
-  stroke: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .wheelSegmentActive {
-  fill: rgba(200, 155, 60, 0.1);
-  stroke: var(--accent-gold);
-}
-
-:global(html[data-theme="light"]) .wheelLabel {
-  fill: var(--ink-soft);
-}
-
-:global(html[data-theme="light"]) .wheelLabelActive {
-  fill: var(--accent-gold);
 }

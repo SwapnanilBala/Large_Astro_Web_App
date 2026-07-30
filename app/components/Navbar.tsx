@@ -4,14 +4,12 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/lib/auth-context";
-import { useTheme } from "@/lib/theme-context";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { listSavedCharts } from "@/lib/workspace-store";
 import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
 
 export default function Navbar() {
   const { user, isAuthenticated, isLoading, isPremium, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -165,16 +163,8 @@ export default function Navbar() {
   return (
     <>
       <nav className={`site-navbar${scrolled ? " navbar-scrolled" : ""}`}>
-        {/* -- Left side: theme toggle + brand -- */}
+        {/* -- Left side: brand -- */}
         <div className="navbar-left">
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            type="button"
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-          >
-            {theme === "dark" ? "\u2600" : "\u263D"}
-          </button>
           <Link href="/" className="navbar-brand">
             {t("navbar.brand")}
           </Link>

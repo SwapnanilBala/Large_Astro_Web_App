@@ -488,38 +488,6 @@
   transform: translateY(-1px);
 }
 
-:global(html[data-theme="light"]) .drawer {
-  background:
-    radial-gradient(circle at 100% 0%, rgba(123, 107, 168, 0.12), transparent 29%),
-    radial-gradient(circle at 0% 18%, rgba(15, 107, 79, 0.1), transparent 28%),
-    linear-gradient(155deg, rgba(255, 253, 246, 0.99), rgba(237, 230, 211, 0.99));
-  border-color: rgba(143, 90, 6, 0.32);
-}
-
-:global(html[data-theme="light"]) .chapter,
-:global(html[data-theme="light"]) .signalList div,
-:global(html[data-theme="light"]) .closeButton {
-  background: rgba(255, 255, 255, 0.48);
-  border-color: rgba(50, 40, 25, 0.12);
-}
-
-:global(html[data-theme="light"]) .tocBar {
-  background: rgba(255, 253, 246, 0.92);
-  border-bottom-color: rgba(50, 40, 25, 0.12);
-}
-
-:global(html[data-theme="light"]) .tocChip {
-  background: rgba(50, 40, 25, 0.05);
-  border-color: rgba(50, 40, 25, 0.14);
-}
-
-:global(html[data-theme="light"]) .trigger {
-  background:
-    radial-gradient(circle at 12% 0%, rgba(15, 107, 79, 0.12), transparent 34%),
-    linear-gradient(135deg, rgba(143, 90, 6, 0.12), rgba(15, 107, 79, 0.09));
-  border-color: rgba(143, 90, 6, 0.3);
-}
-
 @media (max-width: 640px) {
   .backdrop {
     align-items: flex-end;
@@ -571,8 +539,7 @@
   .doneButton {
     width: 100%;
     justify-content: center;
-  }
-}
+  }}
 
 @media (prefers-reduced-motion: reduce) {
   .trigger,
@@ -585,25 +552,20 @@
   .drawer {
     transition: none;
     animation: none;
-  }
-}
+  }}
 
 @keyframes backdropIn {
   from { opacity: 0; }
-  to { opacity: 1; }
-}
+  to { opacity: 1; }}
 
 @keyframes modalIn {
   from { opacity: 0; transform: translateY(0.75rem) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
+  to { opacity: 1; transform: translateY(0) scale(1); }}
 
 @keyframes sheetIn {
   from { opacity: 0; transform: translateY(1.25rem); }
-  to { opacity: 1; transform: translateY(0); }
-}
+  to { opacity: 1; transform: translateY(0); }}
 
 @keyframes spin {
   from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
+  to { transform: rotate(360deg); }}

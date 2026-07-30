@@ -240,8 +240,7 @@
   .domainGrid,
   .guidanceGrid {
     grid-template-columns: 1fr;
-  }
-}
+  }}
 
 .section {
   border-radius: 16px;
@@ -454,72 +453,6 @@
   font-weight: 700;
 }
 
-/* ── Light mode overrides ── */
-
-:global(html[data-theme="light"]) .panel {
-  background: rgba(255, 255, 255, 0.65);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
-}
-
-:global(html[data-theme="light"]) .panel:hover {
-  border-color: rgba(0, 0, 0, 0.14);
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-:global(html[data-theme="light"]) .section {
-  background: rgba(255, 255, 255, 0.45);
-  border-color: rgba(0, 0, 0, 0.06);
-}
-
-:global(html[data-theme="light"]) .weekAhead,
-:global(html[data-theme="light"]) .gemstoneGuidance,
-:global(html[data-theme="light"]) .fortuneDomains {
-  background: rgba(255, 255, 255, 0.52);
-  border-color: rgba(0, 0, 0, 0.07);
-}
-
-:global(html[data-theme="light"]) .weekAheadCard,
-:global(html[data-theme="light"]) .domainCard,
-:global(html[data-theme="light"]) .guidanceCard {
-  background: rgba(255, 255, 255, 0.62);
-  border-color: rgba(0, 0, 0, 0.07);
-}
-
-:global(html[data-theme="light"]) .colorSwatch {
-  border-color: rgba(0, 0, 0, 0.10);
-  background: rgba(255, 255, 255, 0.5);
-}
-
-:global(html[data-theme="light"]) .colorDot {
-  border-color: rgba(0, 0, 0, 0.12);
-}
-
-:global(html[data-theme="light"]) .numberBadge {
-  border-color: rgba(184, 115, 8, 0.35);
-  background: rgba(184, 115, 8, 0.08);
-}
-
-:global(html[data-theme="light"]) .directionTag {
-  border-color: rgba(24, 120, 90, 0.3);
-  background: rgba(24, 120, 90, 0.06);
-}
-
-:global(html[data-theme="light"]) .basisPlanet {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .detailRow {
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-
-:global(html[data-theme="light"]) .basis {
-  border-top-color: rgba(0, 0, 0, 0.08);
-}
-
 .cautionBlock {
   border-radius: 14px;
   border: 1px solid rgba(240, 112, 104, 0.24);
@@ -575,14 +508,4 @@
 @media (max-width: 900px) {
   .cautionGrid {
     grid-template-columns: 1fr;
-  }
-}
-
-:global(html[data-theme="light"]) .cautionBlock {
-  background: rgba(240, 112, 104, 0.08);
-  border-color: rgba(160, 50, 44, 0.22);
-}
-
-:global(html[data-theme="light"]) .cautionChip {
-  background: rgba(255, 255, 255, 0.55);
-}
+  }}

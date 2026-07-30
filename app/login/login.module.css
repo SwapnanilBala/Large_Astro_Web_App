@@ -68,12 +68,7 @@
       rgba(42, 139, 126, 0.42),
       rgba(200, 155, 60, 0.18)
     );
-  }
-}
-
-:global(html[data-theme="light"]) .panel {
-  color: var(--ink-main);
-}
+  }}
 
 /* ── Header Section ── */
 .header {
@@ -124,15 +119,13 @@
 @keyframes panelSettle {
   0%   { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08); }
   60%  { box-shadow: 0 16px 60px rgba(200, 155, 60, 0.28), 0 0 24px rgba(200, 155, 60, 0.18); }
-  100% { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08); }
-}
+  100% { box-shadow: 0 12px 48px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08); }}
 
 @keyframes shimmerSweep {
   0%   { background-position: -50% 0; opacity: 0; }
   20%  { opacity: 1; }
   80%  { opacity: 1; }
-  100% { background-position: 150% 0; opacity: 0; }
-}
+  100% { background-position: 150% 0; opacity: 0; }}
 
 @media (prefers-reduced-motion: reduce) {
   .panelSettling,
@@ -141,8 +134,7 @@
   }
   .shimmerSweep {
     display: none;
-  }
-}
+  }}
 
 .heading {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
@@ -174,14 +166,12 @@
 @media (hover: hover) {
   .panel:hover .heading {
     animation: authHeadingShimmer 6s ease-in-out infinite;
-  }
-}
+  }}
 
 @keyframes authHeadingShimmer {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  100% { background-position: 0% 50%; }}
 
 .lead {
   font-size: 1.24rem;
@@ -434,8 +424,7 @@
 @keyframes authGradientShift {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  100% { background-position: 0% 50%; }}
 
 /* ── Divider ── */
 .divider {
@@ -527,27 +516,6 @@
   font-size: 1.55rem;
 }
 
-:global(html[data-theme="light"]) .googleBtn {
-  border-color: rgba(17, 24, 39, 0.12);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 252, 0.88)),
-    #fff;
-  color: #1f2937;
-  box-shadow:
-    0 10px 26px rgba(15, 23, 42, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-}
-
-:global(html[data-theme="light"]) .googleBtn:hover {
-  border-color: rgba(200, 155, 60, 0.55);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(252, 247, 235, 0.95)),
-    #fff;
-  box-shadow:
-    0 14px 32px rgba(15, 23, 42, 0.10),
-    0 0 18px rgba(200, 155, 60, 0.18);
-}
-
 /* ── Switch Text ── */
 .switchText {
   margin: 0;
@@ -588,8 +556,7 @@
 
   .form {
     gap: 1.2rem;
-  }
-}
+  }}
 
 @media (max-width: 480px) {
   .panel {
@@ -636,5 +603,4 @@
   .submitBtn {
     padding: 13px 20px;
     border-radius: 12px;
-  }
-}
+  }}
