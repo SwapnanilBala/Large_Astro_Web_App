@@ -111,35 +111,3 @@
   cursor: not-allowed;
   transform: none;
 }
-
-/* ═══ TĀLA-PATRA SKIN ═══
-   A pill with a 30px gold halo becomes a ruled box that darkens when set. */
-
-:global(html[data-skin="leaf"]) .premiumToggle {
-  border: 1px solid var(--line-strong);
-  border-radius: 3px;
-  background: transparent;
-  background-image: none;
-  color: var(--ink-soft);
-  box-shadow: none;
-}
-
-:global(html[data-skin="leaf"]) .premiumToggle:hover {
-  color: var(--ink-main);
-  border-color: var(--accent-gold);
-  transform: none;
-  box-shadow: none;
-}
-
-:global(html[data-skin="leaf"]) .premiumToggle:focus-visible {
-  border-color: var(--accent-gold);
-  box-shadow: var(--field-glow-warm);
-}
-
-:global(html[data-skin="leaf"]) .premiumToggle.checked {
-  color: var(--accent-gold);
-  border-color: var(--accent-gold);
-  background: rgba(140, 59, 18, 0.08);
-  background-image: none;
-  box-shadow: none;
-}

@@ -26,8 +26,3 @@
     opacity: 0.65;
   }
 }
-
-/* ═══ TĀLA-PATRA SKIN ═══ Star canvas has no paper equivalent. */
-:global(html[data-skin="leaf"]) .cosmicBackground {
-  display: none;
-}

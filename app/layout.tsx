@@ -1,22 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import {
-  Cinzel,
-  Newsreader,
-  Spectral,
-  Tiro_Devanagari_Sanskrit,
-  IBM_Plex_Mono,
-} from "next/font/google";
+import { Cinzel, Newsreader } from "next/font/google";
 import "./globals.css";
 
-/* Raw typeface handles only. Each skin binds these to the semantic
- * --font-display / --font-body / --font-sanskrit / --font-mono roles
- * in globals.css, so no component references a typeface by name. */
 const cinzel = Cinzel({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
-  variable: "--font-cinzel",
+  variable: "--font-display",
 });
 
 const newsreader = Newsreader({
@@ -26,38 +17,6 @@ const newsreader = Newsreader({
   display: "swap",
   variable: "--font-newsreader",
 });
-
-/* Tāla-patra: Spectral carries Latin text, Tiro Devanagari Sanskrit carries
- * Sanskrit terms, IBM Plex Mono carries degrees and ephemeris figures. */
-const spectral = Spectral({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  display: "swap",
-  variable: "--font-spectral",
-});
-
-const tiroDevanagari = Tiro_Devanagari_Sanskrit({
-  subsets: ["devanagari", "latin"],
-  weight: ["400"],
-  display: "swap",
-  variable: "--font-tiro",
-});
-
-const plexMono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  weight: ["400", "500"],
-  display: "swap",
-  variable: "--font-plex-mono",
-});
-
-const fontVariables = [
-  cinzel.variable,
-  newsreader.variable,
-  spectral.variable,
-  tiroDevanagari.variable,
-  plexMono.variable,
-].join(" ");
 import GradientBlobs from "./components/GradientBlobs";
 import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
@@ -101,9 +60,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={fontVariables} suppressHydrationWarning>
+    <html lang="en" className={`${cinzel.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <Script id="theme-init" strategy="beforeInteractive">
-        {`try{var t=localStorage.getItem('astro_theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark'}try{var s=localStorage.getItem('astro_skin');document.documentElement.setAttribute('data-skin',s==='leaf'?'leaf':'cosmic')}catch(e){document.documentElement.setAttribute('data-skin','cosmic')}`}
+        {`try{var t=localStorage.getItem('astro_theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t);document.documentElement.style.colorScheme=t}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark'}`}
       </Script>
       <body>
         <a href="#main-content" className="skip-nav">
