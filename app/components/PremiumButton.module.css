@@ -206,6 +206,7 @@
   font-weight: 500;
   letter-spacing: 0.005em;
   backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 :global(html[data-skin="leaf"]) .premiumButton.primary .buttonContent {

@@ -594,18 +594,3 @@
 }
 
 :global(html[data-skin="leaf"]) .datePickerGlow { display: none; }
-
-:global(html[data-skin="leaf"]) .datePickerWrapper {
-  background: var(--surface-strong);
-  border: 1px solid var(--line-strong);
-  border-radius: 3px;
-}
-
-:global(html[data-skin="leaf"]) .datePickerInput {
-  color: var(--ink-main);
-  caret-color: var(--accent-gold);
-}
-
-:global(html[data-skin="leaf"]) .datePickerInput::placeholder {
-  color: var(--text-muted);
-}
