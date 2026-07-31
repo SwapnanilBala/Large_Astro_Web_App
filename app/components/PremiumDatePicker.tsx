@@ -252,7 +252,10 @@ export default function PremiumDatePicker({
    * react-datepicker's own habit of clearing the field on an unparseable
    * blur — by then our copy of what the user typed is already recorded. */
   const commitRef = useRef(commitTypedText);
-  commitRef.current = commitTypedText;
+
+  useEffect(() => {
+    commitRef.current = commitTypedText;
+  });
 
   useEffect(() => {
     const input = calendarRef.current?.querySelector("input");

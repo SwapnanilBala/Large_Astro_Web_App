@@ -28,10 +28,6 @@ import PremiumDatePicker from "./components/PremiumDatePicker";
 import PremiumToggle from "./components/PremiumToggle";
 import styles from "./page.module.css";
 
-const OnboardingCinematic = dynamic(() => import("./components/OnboardingCinematic"), {
-  ssr: false,
-  loading: () => null,
-});
 
 const CosmicBackground = dynamic(() => import("./components/CosmicBackground"), {
   ssr: false,
@@ -230,7 +226,6 @@ export default function Home() {
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
   // The detailed visual treatment belongs after intake; keep this task-focused.
-  const isMobileExperience = true;
   const wheelRef = useRef<HTMLDivElement>(null);
   const [hoveredSign, setHoveredSign] = useState<string | null>(null);
 
@@ -865,108 +860,14 @@ export default function Home() {
 
   return (
     <div className={styles.professionalIntake}>
-      {!isMobileExperience && <OnboardingCinematic />}
       <CosmicBackground />
       <FormCelebration isComplete={canSubmit} />
 
       {/* ── Floating Cosmic Particles ── */}
-      {!isMobileExperience && <div className={styles.cosmicParticles}>
-        {Array.from({ length: 16 }, (_, i) => {
-          const size = 1.5 + (i % 3) * 1;
-          const left = ((i * 17 + 7) % 100);
-          const bottom = -((i * 13) % 20);
-          const duration = 12 + (i % 7) * 3;
-          const delay = (i * 1.3) % 14;
-          const isGold = i % 3 === 0;
-          const color = isGold
-            ? "rgba(242, 194, 108, 0.6)"
-            : i % 3 === 1
-            ? "rgba(108, 225, 212, 0.5)"
-            : "rgba(255, 255, 255, 0.4)";
-          return (
-            <span
-              key={i}
-              className={styles.cosmicParticle}
-              style={{
-                width: `${size}px`,
-                height: `${size}px`,
-                left: `${left}%`,
-                bottom: `${bottom}%`,
-                background: color,
-                boxShadow: `0 0 ${size * 2}px ${color}`,
-                animationDuration: `${duration}s`,
-                animationDelay: `${delay}s`,
-              }}
-            />
-          );
-        })}
-      </div>}
 
 
 
       {/* ── Hero wrapper: positions wheel behind the panel ── */}
-      {!isMobileExperience && <div className={styles.heroWrapper}>
-        {/* ── Animated Constellation Background ── */}
-        <div className={styles.constellationBg}>
-          <svg viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-            {/* Constellation lines */}
-            <line x1="120" y1="150" x2="250" y2="200" />
-            <line x1="250" y1="200" x2="310" y2="120" />
-            <line x1="310" y1="120" x2="420" y2="180" />
-            <line x1="420" y1="180" x2="380" y2="300" />
-            <line x1="250" y1="200" x2="380" y2="300" />
-            <line x1="500" y1="100" x2="600" y2="170" />
-            <line x1="600" y1="170" x2="650" y2="280" />
-            <line x1="650" y1="280" x2="550" y2="340" />
-            <line x1="550" y1="340" x2="500" y2="100" />
-            <line x1="200" y1="450" x2="300" y2="500" />
-            <line x1="300" y1="500" x2="280" y2="620" />
-            <line x1="280" y1="620" x2="150" y2="580" />
-            <line x1="150" y1="580" x2="200" y2="450" />
-            <line x1="500" y1="480" x2="620" y2="520" />
-            <line x1="620" y1="520" x2="680" y2="450" />
-            <line x1="680" y1="450" x2="720" y2="580" />
-            <line x1="620" y1="520" x2="720" y2="580" />
-            <line x1="100" y1="350" x2="180" y2="400" />
-            <line x1="180" y1="400" x2="200" y2="450" />
-            <line x1="650" y1="280" x2="680" y2="450" />
-            <line x1="380" y1="300" x2="350" y2="420" />
-            <line x1="350" y1="420" x2="500" y2="480" />
-            <line x1="420" y1="650" x2="500" y2="700" />
-            <line x1="500" y1="700" x2="580" y2="680" />
-            <line x1="420" y1="650" x2="280" y2="620" />
-            {/* Constellation nodes */}
-            <circle className={styles.constellationNode} cx="120" cy="150" r="2" />
-            <circle className={styles.constellationNode} cx="250" cy="200" r="1.5" />
-            <circle className={styles.constellationNode} cx="310" cy="120" r="2" />
-            <circle className={styles.constellationNode} cx="420" cy="180" r="1.5" />
-            <circle className={styles.constellationNode} cx="380" cy="300" r="2" />
-            <circle className={styles.constellationNode} cx="500" cy="100" r="1.5" />
-            <circle className={styles.constellationNode} cx="600" cy="170" r="2" />
-            <circle className={styles.constellationNode} cx="650" cy="280" r="1.5" />
-            <circle className={styles.constellationNode} cx="550" cy="340" r="2" />
-            <circle className={styles.constellationNode} cx="200" cy="450" r="1.5" />
-            <circle className={styles.constellationNode} cx="300" cy="500" r="2" />
-            <circle className={styles.constellationNode} cx="280" cy="620" r="1.5" />
-            <circle className={styles.constellationNode} cx="150" cy="580" r="2" />
-            <circle className={styles.constellationNode} cx="500" cy="480" r="1.5" />
-            <circle className={styles.constellationNode} cx="620" cy="520" r="2" />
-            <circle className={styles.constellationNode} cx="680" cy="450" r="1.5" />
-            <circle className={styles.constellationNode} cx="720" cy="580" r="2" />
-            <circle className={styles.constellationNode} cx="100" cy="350" r="1.5" />
-            <circle className={styles.constellationNode} cx="180" cy="400" r="2" />
-            <circle className={styles.constellationNode} cx="350" cy="420" r="1.5" />
-            <circle className={styles.constellationNode} cx="420" cy="650" r="2" />
-            <circle className={styles.constellationNode} cx="500" cy="700" r="1.5" />
-            <circle className={styles.constellationNode} cx="580" cy="680" r="2" />
-          </svg>
-        </div>
-
-        <div ref={wheelRef} className={styles.parallaxWheel}>
-          <ZodiacWheel onHoveredChange={setHoveredSign} />
-          <ZodiacPortraitPanel sign={hoveredSign} />
-        </div>
-      </div>}{/* /heroWrapper */}
 
       <header className={styles.streamlinedHeader}>
         <span className={styles.stepLabel}>{t("home.intakeStep", { current: String(intakeStep) })}</span>
@@ -1393,86 +1294,6 @@ export default function Home() {
 
 
             {/* RIGHT COLUMN: Chart Preview */}
-            {!isMobileExperience && <aside className={styles.previewColumn}>
-              <div
-                className={styles.previewCard}
-                style={{ "--preview-progress": `${previewCompletion.percent}%` } as React.CSSProperties}
-              >
-                <div className={styles.previewHeader}>
-                  <div className={styles.previewTitleGroup}>
-                    <span className={styles.previewKicker}>{t("home.previewKicker")}</span>
-                    <h3 className={styles.previewTitle}>
-                      <GiStarSattelites /> {t("home.chartPreview")}
-                    </h3>
-                  </div>
-                  <div className={styles.previewMeta}>
-                    <span className={styles.previewProgressReadout}>
-                      {previewCompletion.filled}/{previewCompletion.total}
-                    </span>
-                    <span
-                      className={`${styles.previewStatusPill} ${
-                        canSubmit ? styles.previewStatusPillReady : ""
-                      }`}
-                    >
-                      {previewStatus}
-                    </span>
-                  </div>
-                  <div
-                    className={styles.previewProgressTrack}
-                    role="progressbar"
-                    aria-label={t("home.previewProgressAria")}
-                    aria-valuemin={0}
-                    aria-valuemax={previewCompletion.total}
-                    aria-valuenow={previewCompletion.filled}
-                  >
-                    <span className={styles.previewProgressFill} />
-                  </div>
-                </div>
-                {/* Use BirthChartTeaser for enhanced preview */}
-                <div className={styles.previewTeaserFrame}>
-                  <BirthChartTeaser
-                    name={draft.name}
-                    birthDate={draft.birthDate}
-                    birthTime={draft.birthTime}
-                    engineId={draft.engineId}
-                    timezoneOffsetMinutes={draft.timezoneOffsetMinutes}
-                    country={draft.country}
-                    state={draft.state}
-                    city={draft.city}
-                    unknownTime={unknownTime}
-                    coarseTime={coarseTime}
-                  />
-                </div>
-
-                {geoStatus === "found" && (
-                  <div className={styles.coordinatesDisplay}>
-                    <button 
-                      type="button"
-                      className={styles.coordsToggle}
-                      onClick={() => setLatLonExpanded(!latLonExpanded)}
-                      aria-expanded={latLonExpanded}
-                      aria-controls="preview-coordinate-values"
-                    >
-                      <GiCompass /> {latLonExpanded ? t("home.hideLatLon") : t("home.showLatLon")}
-                    </button>
-                    {latLonExpanded && (
-                      <div id="preview-coordinate-values" className={styles.coordsGrid}>
-                        <span>{t("home.latitudeShort")}: {Number(draft.latitude).toFixed(4)}</span>
-                        <span>{t("home.longitudeShort")}: {Number(draft.longitude).toFixed(4)}</span>
-                        {draft.timeZoneId && <span>{t("home.timezoneShort")}: {draft.timeZoneId}</span>}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Draft saved indicator */}
-              {draftSaved && (
-                <div className={styles.draftIndicator}>
-                  {t("home.draftSaved")}
-                </div>
-              )}
-            </aside>}
           </div>{/* /formLayout */}
 
           {/* PRIMARY CTA */}
