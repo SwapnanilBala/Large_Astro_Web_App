@@ -469,6 +469,21 @@ export default function Home() {
       : t("home.actionHint");
   }, [canSubmit, missingFieldLabels, t, tWithFallback]);
 
+  /* Step one names only the fields step one is actually waiting on. The
+   * previous copy listed all three every time, so a user missing just the
+   * birth time still had to work out which one was blocking them. */
+  const stepOneHintText = useMemo(() => {
+    if (canContinue) return "";
+    const missing: string[] = [];
+    if (!hasName) missing.push(t("home.formName"));
+    if (!hasBirthDate) missing.push(t("home.formBirthDate"));
+    if (!hasBirthTimeSignal) missing.push(t("home.formBirthTime"));
+    const fields = missing.join(", ");
+    return fields
+      ? tWithFallback("home.actionHintMissing", `Add ${fields} to continue.`, { fields })
+      : t("home.continueHint");
+  }, [canContinue, hasBirthDate, hasBirthTimeSignal, hasName, t, tWithFallback]);
+
   const smartFillExamples = useMemo(
     () => SMART_FILL_EXAMPLES.map((example) => tWithFallback(example.key, example.fallback)),
     [tWithFallback],
@@ -981,6 +996,125 @@ export default function Home() {
                 </div>
               {intakeStep === 1 && (
                 <>
+
+              <div className={styles.premiumField}>
+                <PremiumInput
+                  id="birth-name"
+                  name="name"
+                  label={t("home.formName")}
+                  value={draft.name}
+                  onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
+                  placeholder={t("home.formNamePlaceholder")}
+                  icon={<HiOutlineUser />}
+                  completed={hasName}
+                  required
+                  autoComplete="name"
+                />
+              </div>
+
+
+              {/* ── Birth Date + Birth Time Row ── */}
+              <div className={styles.dateTimeRow}>
+                <div className={styles.premiumField}>
+                  <PremiumDatePicker
+                    id="birth-date"
+                    name="birthDate"
+                    label={t("home.formBirthDate")}
+                    value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
+                    onChange={(date: Date | null) => {
+                      if (date) {
+                        const yyyy = date.getFullYear();
+                        const mm = String(date.getMonth() + 1).padStart(2, "0");
+                        const dd = String(date.getDate()).padStart(2, "0");
+                        setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
+                      }
+                    }}
+                    placeholder={t("home.birthDatePlaceholder")}
+                    formatHint={tWithFallback(
+                      "home.birthDateFormatHint",
+                      "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
+                    )}
+                    dateFormat="dd MMM yyyy"
+                    icon={<HiOutlineCalendarDays />}
+                    completed={hasBirthDate}
+                    required
+                    autoComplete="bday"
+                    maxDate={new Date()}
+                    minDate={new Date(1900, 0, 1)}
+                    showYearDropdown
+                    showMonthDropdown
+                    yearDropdownItemNumber={100}
+                  />
+                </div>
+
+                <div className={styles.premiumField}>
+                  {!unknownTime ? (
+                    <PremiumDatePicker
+                      id="birth-time"
+                      name="birthTime"
+                      label={t("home.formBirthTime")}
+                      value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
+                      onChange={(date: Date | null) => {
+                        if (date) {
+                          const hh = String(date.getHours()).padStart(2, "0");
+                          const mm = String(date.getMinutes()).padStart(2, "0");
+                          setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                        }
+                      }}
+                      placeholder={t("home.birthTimePlaceholder")}
+                      formatHint={tWithFallback(
+                        "home.birthTimeFormatHint",
+                        "Enter a time like 14:30 or 2:30 PM.",
+                      )}
+                      showTimeSelect
+                      showTimeSelectOnly
+                      timeIntervals={5}
+                      timeCaption={t("home.timeCaption")}
+                      dateFormat="h:mm aa"
+                      icon={<HiOutlineClock />}
+                      completed={hasBirthTimeSignal}
+                      required={!unknownTime}
+                    />
+                  ) : (
+                    <div className={styles.approxTimePanel}>
+                      <div className={styles.approxTimeHeader}>
+                        <span className={styles.approxTimeLabel}>{t("home.approxTimeLabel")}</span>
+                        <span className={styles.approxTimeHint}>{t("home.approxTimeHint")}</span>
+                      </div>
+                      <div className={styles.approxTimeOptions}>
+                        {COARSE_TIME_OPTIONS.map((option) => (
+                          <button
+                            key={option.value}
+                            type="button"
+                            className={`${styles.approxTimeOption} ${
+                              coarseTime === option.value ? styles.approxTimeOptionSelected : ""
+                            }`}
+                            onClick={() => setCoarseTime(option.value)}
+                            aria-pressed={coarseTime === option.value}
+                          >
+                            {t(option.labelKey)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* ── Unknown birth time option ── */}
+              <div className={styles.unknownTimeOption}>
+                <PremiumToggle
+                  label={t("home.unknownTimeLabel")}
+                  checked={unknownTime}
+                  onChange={(checked) => {
+                    setUnknownTime(checked);
+                    if (!checked) setCoarseTime("");
+                    setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
+                  }}
+                />
+              </div>
+
+              {/* ── Quick actions: secondary to the primary path, so they sit below it ── */}
               <div className={styles.quickActionsRow}>
               {/* ── Smart Fill Field ── */}
               <div className={styles.smartFillWrapper}>
@@ -1097,115 +1231,6 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              </div>
-
-              <div className={styles.premiumField}>
-                <PremiumInput
-                  id="birth-name"
-                  name="name"
-                  label={t("home.formName")}
-                  value={draft.name}
-                  onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
-                  placeholder={t("home.formNamePlaceholder")}
-                  icon={<HiOutlineUser />}
-                  completed={hasName}
-                  required
-                  autoComplete="name"
-                />
-              </div>
-
-
-              {/* ── Birth Date + Birth Time Row ── */}
-              <div className={styles.dateTimeRow}>
-                <div className={styles.premiumField}>
-                  <PremiumDatePicker
-                    id="birth-date"
-                    name="birthDate"
-                    label={t("home.formBirthDate")}
-                    value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
-                    onChange={(date: Date | null) => {
-                      if (date) {
-                        const yyyy = date.getFullYear();
-                        const mm = String(date.getMonth() + 1).padStart(2, "0");
-                        const dd = String(date.getDate()).padStart(2, "0");
-                        setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
-                      }
-                    }}
-                    placeholder={t("home.birthDatePlaceholder")}
-                    dateFormat="dd MMM yyyy"
-                    icon={<HiOutlineCalendarDays />}
-                    completed={hasBirthDate}
-                    required
-                    autoComplete="bday"
-                    maxDate={new Date()}
-                    minDate={new Date(1900, 0, 1)}
-                    showYearDropdown
-                    showMonthDropdown
-                    yearDropdownItemNumber={100}
-                  />
-                </div>
-
-                <div className={styles.premiumField}>
-                  {!unknownTime ? (
-                    <PremiumDatePicker
-                      id="birth-time"
-                      name="birthTime"
-                      label={t("home.formBirthTime")}
-                      value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
-                      onChange={(date: Date | null) => {
-                        if (date) {
-                          const hh = String(date.getHours()).padStart(2, "0");
-                          const mm = String(date.getMinutes()).padStart(2, "0");
-                          setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
-                        }
-                      }}
-                      placeholder={t("home.birthTimePlaceholder")}
-                      showTimeSelect
-                      showTimeSelectOnly
-                      timeIntervals={15}
-                      timeCaption={t("home.timeCaption")}
-                      dateFormat="h:mm aa"
-                      icon={<HiOutlineClock />}
-                      completed={hasBirthTimeSignal}
-                      required={!unknownTime}
-                    />
-                  ) : (
-                    <div className={styles.approxTimePanel}>
-                      <div className={styles.approxTimeHeader}>
-                        <span className={styles.approxTimeLabel}>{t("home.approxTimeLabel")}</span>
-                        <span className={styles.approxTimeHint}>{t("home.approxTimeHint")}</span>
-                      </div>
-                      <div className={styles.approxTimeOptions}>
-                        {COARSE_TIME_OPTIONS.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            className={`${styles.approxTimeOption} ${
-                              coarseTime === option.value ? styles.approxTimeOptionSelected : ""
-                            }`}
-                            onClick={() => setCoarseTime(option.value)}
-                            aria-pressed={coarseTime === option.value}
-                          >
-                            {t(option.labelKey)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* ── Unknown birth time option ── */}
-              <div className={styles.unknownTimeOption}>
-                <PremiumToggle
-                  label={t("home.unknownTimeLabel")}
-                  checked={unknownTime}
-                  onChange={(checked) => {
-                    setUnknownTime(checked);
-                    if (!checked) setCoarseTime("");
-                    setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
-                  }}
-                />
               </div>
                 </>
               )}
@@ -1459,6 +1484,7 @@ export default function Home() {
                 size="lg"
                 fullWidth
                 disabled={!canContinue}
+                describedBy={!canContinue ? "intake-action-hint" : undefined}
                 onClick={() => setIntakeStep(2)}
               >
                 {t("home.continueToLocation")}
@@ -1476,6 +1502,7 @@ export default function Home() {
                   loading={isSubmitting}
                   loadingLabel={t("home.ctaLoading")}
                   disabled={!canSubmit}
+                  describedBy={!canSubmit ? "intake-action-hint" : undefined}
                   icon={<GiCrystalBall />}
                 >
                   {t("home.cta")}
@@ -1483,9 +1510,9 @@ export default function Home() {
               </div>
             )}
             {((intakeStep === 1 && !canContinue) || (intakeStep === 2 && !canSubmit)) && (
-              <p className={styles.actionHint}>
+              <p id="intake-action-hint" className={styles.actionHint} aria-live="polite">
                 <HiOutlineExclamationCircle aria-hidden="true" />
-                {intakeStep === 1 ? t("home.continueHint") : actionHintText}
+                {intakeStep === 1 ? stepOneHintText : actionHintText}
               </p>
             )}
             <p className={styles.trustMicrocopy}>

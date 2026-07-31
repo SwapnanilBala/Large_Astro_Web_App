@@ -14,6 +14,8 @@ interface PremiumButtonProps {
   loadingLabel?: string;
   icon?: React.ReactNode;
   fullWidth?: boolean;
+  /** Points at the element explaining why the button is unavailable. */
+  describedBy?: string;
 }
 
 export default function PremiumButton({
@@ -27,12 +29,14 @@ export default function PremiumButton({
   loadingLabel = "Processing...",
   icon,
   fullWidth = false,
+  describedBy,
 }: PremiumButtonProps) {
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      aria-describedby={describedBy}
       className={`${styles.premiumButton} ${styles[variant]} ${styles[size]} ${fullWidth ? styles.fullWidth : ""} ${loading ? styles.loading : ""}`}
     >
       <div className={styles.buttonContent}>

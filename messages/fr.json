@@ -108,7 +108,7 @@
     "cta": "Reveler mon avenir",
     "actionHint": "Completez tous les champs pour generer votre carte",
     "actionHintMissing": "Ajoutez {fields} pour continuer.",
-    "trustMicrocopy": "Chiffre - Jamais partage - ~60 secondes",
+    "trustMicrocopy": "Chiffre · Jamais partage · ~60 secondes",
     "stickyComplete": "{count}/{total} complete",
     "stickyContinue": "Continuer"
   },

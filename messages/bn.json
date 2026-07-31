@@ -108,7 +108,7 @@
     "cta": "আমার ভবিষ্যৎ উন্মোচন করুন",
     "actionHint": "চার্ট তৈরি করতে সব ঘর পূরণ করুন",
     "actionHintMissing": "Add {fields} to continue.",
-    "trustMicrocopy": "এনক্রিপ্টেড - কখনও শেয়ার নয় - ~60 সেকেন্ড",
+    "trustMicrocopy": "এনক্রিপ্টেড · কখনও শেয়ার নয় · ~60 সেকেন্ড",
     "stickyComplete": "{count}/{total} সম্পূর্ণ",
     "stickyContinue": "চালিয়ে যান"
   },

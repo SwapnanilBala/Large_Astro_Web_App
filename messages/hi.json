@@ -108,7 +108,7 @@
     "cta": "मेरा भविष्य प्रकट करें",
     "actionHint": "चार्ट बनाने के लिए सभी फील्ड पूरे करें",
     "actionHintMissing": "Add {fields} to continue.",
-    "trustMicrocopy": "एन्क्रिप्टेड - कभी साझा नहीं - ~60 सेकंड",
+    "trustMicrocopy": "एन्क्रिप्टेड · कभी साझा नहीं · ~60 सेकंड",
     "stickyComplete": "{count}/{total} पूर्ण",
     "stickyContinue": "जारी रखें"
   },

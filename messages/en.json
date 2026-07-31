@@ -82,8 +82,8 @@
     "smartFillExample1": "Aarya Patel, 14 Mar 1995, 3:45 PM, Mumbai, Maharashtra, India",
     "smartFillExample2": "Jordan Lee, 02 Aug 1989, 11:20 AM, Brooklyn, New York, United States",
     "smartFillExample3": "Maya, 8 Nov 2001, 8:15 AM, Paris, Ile-de-France, France",
-    "birthDatePlaceholder": "Select birth date",
-    "birthTimePlaceholder": "Select birth time",
+    "birthDatePlaceholder": "DD / MM / YYYY",
+    "birthTimePlaceholder": "HH:MM",
     "timeCaption": "Time",
     "approxTimeLabel": "Approximate birth time",
     "approxTimeHint": "Choose the closest window",
@@ -113,9 +113,11 @@
     "cta": "Unravel My Future",
     "actionHint": "Complete all fields to generate your chart",
     "actionHintMissing": "Add {fields} to continue.",
-    "trustMicrocopy": "Encrypted - Never shared - ~60 seconds",
+    "trustMicrocopy": "Encrypted · Never shared · ~60 seconds",
     "stickyComplete": "{count}/{total} complete",
-    "stickyContinue": "Continue"
+    "stickyContinue": "Continue",
+    "birthDateFormatHint": "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
+    "birthTimeFormatHint": "Enter a time like 14:30 or 2:30 PM."
   },
   "engineSelect": {
     "kicker": "Calculation Framework",

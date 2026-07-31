@@ -108,7 +108,7 @@
     "cta": "Svela il mio futuro",
     "actionHint": "Completa tutti i campi per generare la carta",
     "actionHintMissing": "Aggiungi {fields} per continuare.",
-    "trustMicrocopy": "Cifrato - Mai condiviso - ~60 secondi",
+    "trustMicrocopy": "Cifrato · Mai condiviso · ~60 secondi",
     "stickyComplete": "{count}/{total} completo",
     "stickyContinue": "Continua"
   },
