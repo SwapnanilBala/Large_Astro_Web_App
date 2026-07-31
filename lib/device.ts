@@ -16,14 +16,14 @@ export const MOBILE_PREFIX = "/m";
 /**
  * Master switch for device-based redirecting.
  *
- * OFF until the /m routes actually exist — with it on and the routes missing,
- * every phone visiting "/" would be redirected straight into a 404. Flip to
- * true in the same change that lands app/m/page.tsx and app/m/insights.
+ * On now that app/m/page.tsx and app/m/insights exist. Turning it off is the
+ * one-line rollback if the mobile tree misbehaves in production — every route
+ * keeps working, phones just get the shared tree again.
  *
  * resolveRoute deliberately ignores this flag so it stays a pure, testable
  * mapping; the middleware is what consults it.
  */
-export const MOBILE_ROUTING_ENABLED = false;
+export const MOBILE_ROUTING_ENABLED = true;
 
 /** Query parameter and cookie a visitor uses to override device detection. */
 export const VIEW_OVERRIDE_PARAM = "view";
