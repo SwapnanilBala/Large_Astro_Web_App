@@ -10426,9 +10426,19 @@ textarea:focus-visible {
   font-size: 1.4rem !important;
 }
 
+/* react-datepicker ships this element as content-box, so the 4px padding
+   was added *outside* the 220px time-box instead of inside it — an 8px
+   horizontal overflow. That, plus the 4px scrollbar eating the right gap,
+   left rows inset 8px on the left and 4px on the right, which is what made
+   the selected row's highlight read as off-centre.
+   border-box contains it; stable both-edges reserves the scrollbar gutter
+   on both sides so the row stays centred whether or not it is scrolling. */
 .react-datepicker__time-list {
-  padding: 4px !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  padding: 4px 0 !important;
   height: 220px !important;
+  scrollbar-gutter: stable both-edges;
 }
 
 .react-datepicker__time-list-item {
@@ -10436,7 +10446,7 @@ textarea:focus-visible {
   font-size: 1.35rem !important;
   padding: 8px 16px !important;
   border-radius: 8px !important;
-  margin: 1px 4px !important;
+  margin: 1px 6px !important;
   transition: all 0.15s ease !important;
   font-family: var(--font-body), 'Inter', sans-serif !important;
 }
