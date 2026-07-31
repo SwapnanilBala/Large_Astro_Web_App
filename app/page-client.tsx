@@ -16,6 +16,11 @@ import {
   HiOutlineUser,
 } from "react-icons/hi2";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
+import {
+  COARSE_TIME_OPTIONS,
+  getBirthTimeFallback,
+  hasCoarseTimeFallback,
+} from "@/lib/birth-time";
 import { useAuth } from "@/lib/auth-context";
 import { useTranslation } from "@/lib/i18n-context";
 import AutocompleteInput from "./components/AutocompleteInput";
@@ -61,13 +66,6 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "city",
 ];
 // Coarse time options for unknown birth time
-const COARSE_TIME_OPTIONS = [
-  { value: "morning", labelKey: "home.coarseMorning" },
-  { value: "afternoon", labelKey: "home.coarseAfternoon" },
-  { value: "evening", labelKey: "home.coarseEvening" },
-  { value: "unknown", labelKey: "home.coarseUnknown" },
-];
-
 const SMART_FILL_EXAMPLES = [
   {
     key: "home.smartFillExample1",
@@ -82,19 +80,6 @@ const SMART_FILL_EXAMPLES = [
     fallback: "Maya, 8 Nov 2001, 8:15 AM, Paris, Ile-de-France, France",
   },
 ];
-
-const COARSE_TIME_FALLBACKS: Record<string, string> = {
-  morning: "08:00",
-  afternoon: "13:30",
-  evening: "18:30",
-  unknown: "12:00",
-};
-
-const hasCoarseTimeFallback = (value: string) =>
-  Object.prototype.hasOwnProperty.call(COARSE_TIME_FALLBACKS, value);
-
-const getBirthTimeFallback = (value: string) =>
-  COARSE_TIME_FALLBACKS[value] ?? COARSE_TIME_FALLBACKS.unknown;
 
 const INTAKE_DRAFT_STORAGE_KEY = "astro_intake_draft";
 const BIRTH_DETAILS_HISTORY_STORAGE_KEY = "astro_birth_details_history";
