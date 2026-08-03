@@ -104,6 +104,17 @@ type GeocodeApiResponse = {
   timeZoneId?: string;
 };
 
+/* Annotated rather than inferred: only some steps carry meta/missing, and an
+ * inferred union would make those properties unreachable at the call site. */
+type IntakeStepState = {
+  id: string;
+  label: string;
+  detail: string;
+  complete: boolean;
+  meta?: string;
+  missing?: string;
+};
+
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
   ...profileInitialState,
   timezoneOffsetMinutes: "0",
@@ -473,7 +484,7 @@ export default function Home() {
 
   const intakeSteps = useMemo(() => {
     const birthMomentComplete = hasBirthDate && hasBirthTimeSignal;
-    const stepStates = [
+    const stepStates: IntakeStepState[] = [
       {
         id: "identity",
         label: tWithFallback("home.stepIdentityLabel", "Identity"),
@@ -883,6 +894,7 @@ export default function Home() {
               {intakeStep === 1 && (
                 <>
 
+              <div className={styles.fieldGrid}>
               <div className={styles.premiumField}>
                 <PremiumInput
                   id="birth-name"
@@ -986,6 +998,7 @@ export default function Home() {
                   )}
                 </div>
               </div>
+              </div>{/* /fieldGrid */}
 
               {/* ── Unknown birth time option ── */}
               <div className={styles.unknownTimeOption}>
@@ -1130,6 +1143,7 @@ export default function Home() {
                 <div className={styles.dividerLine}></div>
               </div>
 
+              <div className={styles.fieldGrid}>
               {/* ── Country Field ── */}
               <div className={styles.premiumField}>
                 <div className={styles.autocompleteWrapper}>
@@ -1223,6 +1237,8 @@ export default function Home() {
                 </div>
               </div>
 
+              </div>{/* /fieldGrid */}
+
               {/* ── Lat/Lon Toggle ── */}
               <button
                 type="button"
@@ -1275,11 +1291,6 @@ export default function Home() {
               )}
 
               </div>{/* /formSectionCard */}
-            </div>{/* /formColumn */}
-
-
-            {/* RIGHT COLUMN: Chart Preview */}
-          </div>{/* /formLayout */}
 
           {/* PRIMARY CTA */}
           <div className={styles.primaryAction}>
@@ -1325,6 +1336,77 @@ export default function Home() {
               {t("home.trustMicrocopy")}
             </p>
           </div>
+            </div>{/* /formColumn */}
+
+            {/* RIGHT COLUMN: Chart Preview */}
+            <aside className={styles.previewColumn} aria-label={t("home.chartPreview")}>
+              <div className={styles.previewCard}>
+                <div className={styles.previewHeader}>
+                  <span className={styles.previewKicker}>{t("home.previewKicker")}</span>
+                  <span className={styles.previewStatus}>{previewStatus}</span>
+                </div>
+
+                <div
+                  className={styles.previewMeter}
+                  role="progressbar"
+                  aria-label={t("home.previewProgressAria")}
+                  aria-valuenow={previewCompletion.percent}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <span
+                    className={styles.previewMeterFill}
+                    style={{ width: `${previewCompletion.percent}%` }}
+                  />
+                </div>
+                <p className={styles.previewCount}>
+                  {t("home.stickyComplete", {
+                    count: String(previewCompletion.filled),
+                    total: String(previewCompletion.total),
+                  })}
+                </p>
+
+                <BirthChartTeaser
+                  name={draft.name}
+                  birthDate={draft.birthDate}
+                  birthTime={draft.birthTime}
+                  timezoneOffsetMinutes={draft.timezoneOffsetMinutes}
+                  country={draft.country}
+                  state={draft.state}
+                  city={draft.city}
+                  unknownTime={unknownTime}
+                  coarseTime={coarseTime}
+                />
+
+                <ol className={styles.progressRail}>
+                  {intakeSteps.map((step) => (
+                    <li
+                      key={step.id}
+                      className={[
+                        styles.railStep,
+                        step.complete ? styles.railStepComplete : "",
+                        step.active ? styles.railStepActive : "",
+                      ]
+                        .filter(Boolean)
+                        .join(" ")}
+                      aria-current={step.active ? "step" : undefined}
+                    >
+                      <span className={styles.railMarker} aria-hidden="true">
+                        {step.complete ? <HiOutlineCheckCircle /> : null}
+                      </span>
+                      <span className={styles.railBody}>
+                        <span className={styles.railLabel}>
+                          {step.label}
+                          {step.meta ? <span className={styles.railMeta}>{step.meta}</span> : null}
+                        </span>
+                        <span className={styles.railDetail}>{step.missing ?? step.detail}</span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </aside>
+          </div>{/* /formLayout */}
 
         </form>
       </div>

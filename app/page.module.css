@@ -2009,3 +2009,247 @@
   .smartFillContent {
     padding: 0.85rem;
   }}
+
+/* ═══════════════════════════════════════════════
+   WIDE LAYOUT — split atelier
+
+   The "Focused two-step intake" block above caps the shell at 42rem and
+   collapses .formLayout to a single block, which centres everything in a
+   narrow column. This section is last in source order so it wins, and it
+   spends the width instead: full-bleed shell, left-aligned header, fields
+   flowing into columns, and the preview column .formLayout always reserved.
+
+   The 120rem cap only engages past 1920px — below that the page is
+   edge-to-edge, which is the point.
+   ═══════════════════════════════════════════════ */
+
+.professionalIntake {
+  --intake-gutter: clamp(1rem, 4vw, 4rem);
+  --intake-cap: 120rem;
+}
+
+.streamlinedHeader {
+  width: 100%;
+  max-width: var(--intake-cap);
+  margin: 0 auto;
+  padding: clamp(5.5rem, 10vh, 7.5rem) var(--intake-gutter) 1.75rem;
+  text-align: left;
+}
+
+.streamlinedHeader p {
+  max-width: 44rem;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.mainContent {
+  width: 100%;
+  max-width: var(--intake-cap);
+  margin: 0 auto;
+  padding: 0 var(--intake-gutter) 4rem;
+}
+
+.formLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 30rem);
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: start;
+}
+
+/* === Fields flow across the width instead of stretching === */
+.fieldGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0 clamp(1.15rem, 1.8vw, 1.65rem);
+  align-items: start;
+}
+
+.fieldGrid > .premiumField,
+.fieldGrid > .dateTimeRow > .premiumField {
+  margin-bottom: clamp(1rem, 1.6vw, 1.35rem);
+}
+
+/* Date and time join the parent grid directly, so name / date / time read as
+   three equal columns rather than one field beside a nested pair. */
+.fieldGrid > .dateTimeRow {
+  display: contents;
+}
+
+/* === RIGHT COLUMN: chart preview === */
+.previewColumn {
+  position: sticky;
+  top: clamp(5.5rem, 9vh, 7rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.previewCard {
+  padding: clamp(1.15rem, 2vw, 1.6rem);
+  border: 1px solid rgba(232, 200, 154, 0.16);
+  border-radius: 20px;
+  background: rgba(15, 15, 25, 0.92);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.24);
+}
+
+.previewHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.previewKicker {
+  color: var(--accent-gold-light, #e8c89a);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.previewStatus {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.previewMeter {
+  margin-top: 0.85rem;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.previewMeterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(232, 200, 154, 0.92), rgba(108, 225, 212, 0.92));
+  transition: width 0.4s ease;
+}
+
+.previewCount {
+  margin: 0.5rem 0 0;
+  color: var(--text-tertiary, #6b6560);
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+}
+
+/* === Progress rail === */
+.progressRail {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.railStep {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr);
+  gap: 0.65rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.railStep:first-child {
+  border-top: none;
+}
+
+.railMarker {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: #11342e;
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.railStepComplete .railMarker {
+  border-color: transparent;
+  background: linear-gradient(135deg, rgba(248, 227, 168, 0.98), rgba(74, 171, 158, 0.9));
+}
+
+.railStepActive .railMarker {
+  border-color: rgba(232, 200, 154, 0.55);
+  box-shadow: 0 0 0 3px rgba(232, 200, 154, 0.1);
+}
+
+.railMarker svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.railBody {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.railLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.railStepComplete .railLabel,
+.railStepActive .railLabel {
+  color: var(--text-primary, #fff);
+}
+
+.railMeta {
+  color: var(--accent-gold-light, #e8c89a);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.railDetail {
+  color: var(--text-tertiary, #6b6560);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+/* === CTA sits under the form, not across the whole page ===
+   margin-inline is reset explicitly: the earlier rule uses `margin: … auto 0`,
+   which would keep centring the button inside the left column. */
+.primaryAction {
+  width: min(100%, 30rem);
+  max-width: none;
+  margin-top: 1.25rem;
+  margin-inline: 0;
+  text-align: left;
+}
+
+/* Below the split threshold the preview stacks under the form and the
+   shell behaves as it did before. */
+@media (max-width: 1180px) {
+  .formLayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .previewColumn {
+    position: static;
+  }
+
+  .primaryAction {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .streamlinedHeader {
+    padding-top: 5.5rem;
+  }
+
+  .fieldGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
