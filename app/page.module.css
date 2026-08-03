@@ -2025,7 +2025,10 @@
 
 .professionalIntake {
   --intake-gutter: clamp(1rem, 4vw, 4rem);
-  --intake-cap: 88rem;
+  /* 90rem, not 88: widening the preview column to stop the teaser clipping
+     took 32px off the question column, and this gives it back rather than
+     letting the preview win the space. */
+  --intake-cap: 90rem;
 }
 
 .streamlinedHeader {
