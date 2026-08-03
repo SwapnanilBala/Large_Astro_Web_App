@@ -452,10 +452,13 @@ export default function Home() {
   );
 
   /* ── One question at a time ──
-   * The chart needs six answers, asked in the order the sky gets assembled:
-   * who, when, where. Only one is on screen at a time, so nothing competes
-   * with the question actually being asked. Enter advances, Shift+Enter steps
-   * back.
+   * Four questions, phrased the way a person would ask them, in the order the
+   * sky gets assembled: who, when, where. Country, state and city are one
+   * question rather than three — they are a single cascading answer to "where
+   * were you born", and splitting them made three near-identical screens.
+   *
+   * Only one question is on screen at a time, so nothing competes with what is
+   * actually being asked. Enter advances, Shift+Enter steps back.
    */
   const questions = useMemo(
     () => [
@@ -469,7 +472,7 @@ export default function Home() {
       },
       {
         id: "birthDate" as const,
-        tabLabel: tWithFallback("home.stepTabBirthDate", "Date"),
+        tabLabel: tWithFallback("home.stepTabBirthDate", "Birth date"),
         answered: hasBirthDate,
         label: t("home.formBirthDate"),
         heading: tWithFallback("home.askBirthDate", "When were you born?"),
@@ -480,40 +483,24 @@ export default function Home() {
       },
       {
         id: "birthTime" as const,
-        tabLabel: tWithFallback("home.stepTabBirthTime", "Time"),
+        tabLabel: tWithFallback("home.stepTabBirthTime", "Birth time"),
         answered: hasBirthTimeSignal,
         label: t("home.formBirthTime"),
-        heading: tWithFallback("home.askBirthTime", "What time of day?"),
+        heading: tWithFallback("home.askBirthTime", "What time were you born?"),
         helper: tWithFallback(
           "home.askBirthTimeHelper",
           "An exact time sets the houses. If you do not know it, give a rough part of the day instead.",
         ),
       },
       {
-        id: "country" as const,
-        tabLabel: tWithFallback("home.stepTabCountry", "Country"),
-        answered: hasCountry,
-        label: t("home.formCountry"),
-        heading: tWithFallback("home.askCountry", "Which country?"),
-        helper: tWithFallback("home.askCountryHelper", "Where the birth happened, not where you live now."),
-      },
-      {
-        id: "state" as const,
-        tabLabel: tWithFallback("home.stepTabState", "State"),
-        answered: hasState,
-        label: t("home.formState"),
-        heading: tWithFallback("home.askState", "Which state or region?"),
-        helper: tWithFallback("home.askStateHelper", "This narrows the search for the city."),
-      },
-      {
-        id: "city" as const,
-        tabLabel: tWithFallback("home.stepTabCity", "City"),
-        answered: hasCity,
-        label: t("home.formCity"),
-        heading: tWithFallback("home.askCity", "Which city or town?"),
+        id: "place" as const,
+        tabLabel: tWithFallback("home.stepTabPlace", "Birthplace"),
+        answered: hasCountry && hasState && hasCity,
+        label: [t("home.formCountry"), t("home.formState"), t("home.formCity")].join(", "),
+        heading: tWithFallback("home.askPlace", "Where were you born?"),
         helper: tWithFallback(
-          "home.askCityHelper",
-          "This is what locks the coordinates and the time zone.",
+          "home.askPlaceHelper",
+          "The place of birth, not where you live now — this is what locks the coordinates and the time zone.",
         ),
       },
     ],
@@ -1201,121 +1188,122 @@ export default function Home() {
                     </>
                   )}
 
-                  {activeQuestion.id === "country" && (
-                    <div className={styles.premiumField}>
-                      <div className={styles.autocompleteWrapper}>
-                        <label id="birth-country-label" htmlFor="birth-country">
-                          {t("home.formCountry")}
-                        </label>
-                        <div
-                          className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}
-                        >
-                          <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                            <HiOutlineMapPin />
-                          </span>
-                          <AutocompleteInput
-                            id="birth-country"
-                            name="country"
-                            ariaLabelledBy="birth-country-label"
-                            value={draft.country}
-                            onChange={handleCountryChange}
-                            onSelect={handleCountrySelect}
-                            placeholder={t("home.formCountryPlaceholder")}
-                            suggestType="country"
-                            required
-                          />
-                          {hasCountry && (
-                            <span
-                              className={styles.fieldCompleteBadge}
-                              aria-label={t("home.fieldComplete", { field: t("home.formCountry") })}
-                              role="status"
-                            >
-                              <HiOutlineCheckCircle />
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeQuestion.id === "state" && (
-                    <div className={styles.premiumField}>
-                      <div className={styles.autocompleteWrapper}>
-                        <label id="birth-state-label" htmlFor="birth-state">
-                          {t("home.formState")}
-                        </label>
-                        <div
-                          className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}
-                        >
-                          <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                            <HiOutlineMapPin />
-                          </span>
-                          <AutocompleteInput
-                            id="birth-state"
-                            name="state"
-                            ariaLabelledBy="birth-state-label"
-                            value={draft.state}
-                            onChange={handleStateChange}
-                            onSelect={handleStateSelect}
-                            placeholder={t("home.formStatePlaceholder")}
-                            suggestType="state"
-                            contextCountry={draft.country}
-                            required
-                          />
-                          {hasState && (
-                            <span
-                              className={styles.fieldCompleteBadge}
-                              aria-label={t("home.fieldComplete", { field: t("home.formState") })}
-                              role="status"
-                            >
-                              <HiOutlineCheckCircle />
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {activeQuestion.id === "city" && (
+                  {activeQuestion.id === "place" && (
                     <>
-                      <div className={styles.premiumField}>
-                        <div className={styles.autocompleteWrapper}>
-                          <label id="birth-city-label" htmlFor="birth-city">
-                            {t("home.formCity")}
-                          </label>
-                          <div
-                            className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}
-                          >
-                            <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                              <HiOutlineMapPin />
-                            </span>
-                            <AutocompleteInput
-                              id="birth-city"
-                              name="city"
-                              ariaLabelledBy="birth-city-label"
-                              value={draft.city}
-                              onChange={setField("city")}
-                              onSelect={setField("city")}
-                              placeholder={t("home.formCityPlaceholder")}
-                              suggestType="city"
-                              contextCountry={draft.country}
-                              contextState={draft.state}
-                              required
-                            />
-                            {hasCity && (
-                              <span
-                                className={styles.fieldCompleteBadge}
-                                aria-label={t("home.fieldComplete", { field: t("home.formCity") })}
-                                role="status"
-                              >
-                                <HiOutlineCheckCircle />
+                      {/* One cascading answer: country narrows the state list,
+                          state narrows the city list, and the city fixes the
+                          coordinates. Side by side so the chain is visible. */}
+                      <div className={styles.placeGrid}>
+                        <div className={styles.premiumField}>
+                          <div className={styles.autocompleteWrapper}>
+                            <label id="birth-country-label" htmlFor="birth-country">
+                              {t("home.formCountry")}
+                            </label>
+                            <div
+                              className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}
+                            >
+                              <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                                <HiOutlineMapPin />
                               </span>
-                            )}
+                              <AutocompleteInput
+                                id="birth-country"
+                                name="country"
+                                ariaLabelledBy="birth-country-label"
+                                value={draft.country}
+                                onChange={handleCountryChange}
+                                onSelect={handleCountrySelect}
+                                placeholder={t("home.formCountryPlaceholder")}
+                                suggestType="country"
+                                required
+                              />
+                              {hasCountry && (
+                                <span
+                                  className={styles.fieldCompleteBadge}
+                                  aria-label={t("home.fieldComplete", { field: t("home.formCountry") })}
+                                  role="status"
+                                >
+                                  <HiOutlineCheckCircle />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.premiumField}>
+                          <div className={styles.autocompleteWrapper}>
+                            <label id="birth-state-label" htmlFor="birth-state">
+                              {t("home.formState")}
+                            </label>
+                            <div
+                              className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}
+                            >
+                              <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                                <HiOutlineMapPin />
+                              </span>
+                              <AutocompleteInput
+                                id="birth-state"
+                                name="state"
+                                ariaLabelledBy="birth-state-label"
+                                value={draft.state}
+                                onChange={handleStateChange}
+                                onSelect={handleStateSelect}
+                                placeholder={t("home.formStatePlaceholder")}
+                                suggestType="state"
+                                contextCountry={draft.country}
+                                required
+                              />
+                              {hasState && (
+                                <span
+                                  className={styles.fieldCompleteBadge}
+                                  aria-label={t("home.fieldComplete", { field: t("home.formState") })}
+                                  role="status"
+                                >
+                                  <HiOutlineCheckCircle />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={styles.premiumField}>
+                          <div className={styles.autocompleteWrapper}>
+                            <label id="birth-city-label" htmlFor="birth-city">
+                              {t("home.formCity")}
+                            </label>
+                            <div
+                              className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}
+                            >
+                              <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                                <HiOutlineMapPin />
+                              </span>
+                              <AutocompleteInput
+                                id="birth-city"
+                                name="city"
+                                ariaLabelledBy="birth-city-label"
+                                value={draft.city}
+                                onChange={setField("city")}
+                                onSelect={setField("city")}
+                                placeholder={t("home.formCityPlaceholder")}
+                                suggestType="city"
+                                contextCountry={draft.country}
+                                contextState={draft.state}
+                                required
+                              />
+                              {hasCity && (
+                                <span
+                                  className={styles.fieldCompleteBadge}
+                                  aria-label={t("home.fieldComplete", { field: t("home.formCity") })}
+                                  role="status"
+                                >
+                                  <HiOutlineCheckCircle />
+                                </span>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
 
-                      {/* ── Lat/Lon escape hatch: only the last question needs it ── */}
+                      {/* ── Lat/Lon escape hatch, for when the geocoder misses ── */}
                       <button
                         type="button"
                         className={styles.coordsToggleWrapper}

@@ -2260,17 +2260,17 @@
 .questionDot {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.6rem;
   width: 100%;
-  min-height: 2.75rem;
+  min-height: 3.6rem;
   margin-top: 0;
-  padding: 0.4rem 0.6rem;
+  padding: 0.7rem 0.95rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
   color: var(--text-tertiary, #6b6560);
   font: inherit;
-  font-size: 0.78rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
@@ -2280,18 +2280,18 @@
 .questionDotIndex {
   display: grid;
   flex: 0 0 auto;
-  width: 1.35rem;
-  height: 1.35rem;
+  width: 1.75rem;
+  height: 1.75rem;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: 0.84rem;
   line-height: 1;
 }
 
 .questionDotIndex svg {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 1.05rem;
+  height: 1.05rem;
 }
 
 .questionDotLabel {
@@ -2364,10 +2364,27 @@
 }
 
 /* One field on screen, so it gets room to breathe without running the full
-   width of the column — long inputs are harder to scan, not easier. */
+   width of the column — long inputs are harder to scan, not easier. The
+   birthplace question is the exception and takes the full column, since it
+   carries three fields. */
 .questionBody {
   width: min(100%, 34rem);
   min-height: 8.5rem;
+}
+
+.questionBody:has(.placeGrid) {
+  width: 100%;
+}
+
+.placeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0 clamp(1rem, 1.6vw, 1.5rem);
+  align-items: start;
+}
+
+.placeGrid > .premiumField {
+  margin-bottom: clamp(0.9rem, 1.4vw, 1.2rem);
 }
 
 .questionBody .premiumField:last-child {
