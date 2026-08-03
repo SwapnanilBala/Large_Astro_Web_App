@@ -2051,7 +2051,12 @@
 
 .formLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(20rem, 26rem);
+  /* The preview column is sized by its contents, not by taste: BirthChartTeaser
+     lays its body out as astrolabe + info columns and only stacks them at a
+     760px *viewport* breakpoint, which never fires for a narrow column on a
+     wide screen. Below roughly 32rem the astrolabe, the centre name and the
+     unlock labels all clip. */
+  grid-template-columns: minmax(0, 1fr) minmax(22rem, 34rem);
   gap: clamp(1.5rem, 3vw, 3rem);
   align-items: start;
 }
