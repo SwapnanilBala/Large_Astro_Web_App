@@ -454,7 +454,8 @@ export default function Home() {
   /* ── One question at a time ──
    * The chart needs six answers, asked in the order the sky gets assembled:
    * who, when, where. Only one is on screen at a time, so nothing competes
-   * with the question actually being asked. Enter advances, Escape steps back.
+   * with the question actually being asked. Enter advances, Shift+Enter steps
+   * back.
    */
   const questions = useMemo(
     () => [
@@ -1010,7 +1011,7 @@ export default function Home() {
         <p>
           {tWithFallback(
             "home.intakeLeadStepped",
-            "One question at a time. Press Enter to continue, Escape to step back.",
+            "One question at a time. Press Enter to continue, Shift + Enter to step back.",
           )}
         </p>
       </header>

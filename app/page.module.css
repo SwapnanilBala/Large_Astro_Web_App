@@ -2056,25 +2056,6 @@
   align-items: start;
 }
 
-/* === Fields flow across the width instead of stretching === */
-.fieldGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 0 clamp(1.15rem, 1.8vw, 1.65rem);
-  align-items: start;
-}
-
-.fieldGrid > .premiumField,
-.fieldGrid > .dateTimeRow > .premiumField {
-  margin-bottom: clamp(1rem, 1.6vw, 1.35rem);
-}
-
-/* Date and time join the parent grid directly, so name / date / time read as
-   three equal columns rather than one field beside a nested pair. */
-.fieldGrid > .dateTimeRow {
-  display: contents;
-}
-
 /* === RIGHT COLUMN: chart preview === */
 .previewColumn {
   position: sticky;
@@ -2247,10 +2228,6 @@
 @media (max-width: 600px) {
   .streamlinedHeader {
     padding-top: 5.5rem;
-  }
-
-  .fieldGrid {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
