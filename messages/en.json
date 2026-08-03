@@ -134,7 +134,13 @@
     "askState": "Which state or region?",
     "askStateHelper": "This narrows the search for the city.",
     "askCity": "Which city or town?",
-    "askCityHelper": "This is what locks the coordinates and the time zone."
+    "askCityHelper": "This is what locks the coordinates and the time zone.",
+    "stepTabName": "Name",
+    "stepTabBirthDate": "Date",
+    "stepTabBirthTime": "Time",
+    "stepTabCountry": "Country",
+    "stepTabState": "State",
+    "stepTabCity": "City"
   },
   "engineSelect": {
     "kicker": "Calculation Framework",

@@ -461,6 +461,7 @@ export default function Home() {
     () => [
       {
         id: "name" as const,
+        tabLabel: tWithFallback("home.stepTabName", "Name"),
         answered: hasName,
         label: t("home.formName"),
         heading: tWithFallback("home.askName", "What should we call you?"),
@@ -468,6 +469,7 @@ export default function Home() {
       },
       {
         id: "birthDate" as const,
+        tabLabel: tWithFallback("home.stepTabBirthDate", "Date"),
         answered: hasBirthDate,
         label: t("home.formBirthDate"),
         heading: tWithFallback("home.askBirthDate", "When were you born?"),
@@ -478,6 +480,7 @@ export default function Home() {
       },
       {
         id: "birthTime" as const,
+        tabLabel: tWithFallback("home.stepTabBirthTime", "Time"),
         answered: hasBirthTimeSignal,
         label: t("home.formBirthTime"),
         heading: tWithFallback("home.askBirthTime", "What time of day?"),
@@ -488,6 +491,7 @@ export default function Home() {
       },
       {
         id: "country" as const,
+        tabLabel: tWithFallback("home.stepTabCountry", "Country"),
         answered: hasCountry,
         label: t("home.formCountry"),
         heading: tWithFallback("home.askCountry", "Which country?"),
@@ -495,6 +499,7 @@ export default function Home() {
       },
       {
         id: "state" as const,
+        tabLabel: tWithFallback("home.stepTabState", "State"),
         answered: hasState,
         label: t("home.formState"),
         heading: tWithFallback("home.askState", "Which state or region?"),
@@ -502,6 +507,7 @@ export default function Home() {
       },
       {
         id: "city" as const,
+        tabLabel: tWithFallback("home.stepTabCity", "City"),
         answered: hasCity,
         label: t("home.formCity"),
         heading: tWithFallback("home.askCity", "Which city or town?"),
@@ -1044,7 +1050,14 @@ export default function Home() {
                           disabled={!reachable}
                           aria-current={index === questionIndex ? "step" : undefined}
                           aria-label={`${index + 1}. ${question.label}`}
-                        />
+                        >
+                          <span className={styles.questionDotIndex} aria-hidden="true">
+                            {question.answered ? <HiOutlineCheckCircle /> : index + 1}
+                          </span>
+                          <span className={styles.questionDotLabel} aria-hidden="true">
+                            {question.tabLabel}
+                          </span>
+                        </button>
                       </li>
                     );
                   })}
