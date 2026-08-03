@@ -1,10 +1,10 @@
 "use client";
 
-import type { ChangeEvent, FormEvent } from "react";
+import type { FormEvent, KeyboardEvent } from "react";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
-import { GiCrystalBall, GiCompass, GiStarSattelites } from "react-icons/gi";
+import { GiCrystalBall, GiCompass } from "react-icons/gi";
 import {
   HiOutlineCalendarDays,
   HiOutlineCheckCircle,
@@ -35,16 +35,6 @@ import styles from "./page.module.css";
 
 
 const CosmicBackground = dynamic(() => import("./components/CosmicBackground"), {
-  ssr: false,
-  loading: () => null,
-});
-
-const ZodiacWheel = dynamic(() => import("./components/ZodiacWheel"), {
-  ssr: false,
-  loading: () => null,
-});
-
-const ZodiacPortraitPanel = dynamic(() => import("./components/ZodiacPortraitPanel"), {
   ssr: false,
   loading: () => null,
 });
@@ -203,7 +193,7 @@ function formatHistoryDate(value: string) {
 }
 
 export default function Home() {
-  const [intakeStep, setIntakeStep] = useState<1 | 2>(1);
+  const [questionIndex, setQuestionIndex] = useState(0);
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
   const { user } = useAuth();
@@ -221,9 +211,6 @@ export default function Home() {
   const draftSaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const draftSavedDisplayTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const router = useRouter();
-  // The detailed visual treatment belongs after intake; keep this task-focused.
-  const wheelRef = useRef<HTMLDivElement>(null);
-  const [hoveredSign, setHoveredSign] = useState<string | null>(null);
 
   // Smart fill state
   const [smartFillText, setSmartFillText] = useState("");
@@ -427,7 +414,6 @@ export default function Home() {
   const hasLatitude = draft.latitude.trim().length > 0;
   const hasLongitude = draft.longitude.trim().length > 0;
   const hasLocation = hasCountry && hasState && hasCity && hasLatitude && hasLongitude;
-  const canContinue = hasName && hasBirthDate && hasBirthTimeSignal;
 
   const missingFieldLabels = useMemo(() => {
     const missing: string[] = [];
@@ -460,27 +446,111 @@ export default function Home() {
       : t("home.actionHint");
   }, [canSubmit, missingFieldLabels, t, tWithFallback]);
 
-  /* Step one names only the fields step one is actually waiting on. The
-   * previous copy listed all three every time, so a user missing just the
-   * birth time still had to work out which one was blocking them. */
-  const stepOneHintText = useMemo(() => {
-    if (canContinue) return "";
-    const missing: string[] = [];
-    if (!hasName) missing.push(t("home.formName"));
-    if (!hasBirthDate) missing.push(t("home.formBirthDate"));
-    if (!hasBirthTimeSignal) missing.push(t("home.formBirthTime"));
-    const fields = missing.join(", ");
-    return fields
-      ? tWithFallback("home.actionHintMissing", `Add ${fields} to continue.`, { fields })
-      : t("home.continueHint");
-  }, [canContinue, hasBirthDate, hasBirthTimeSignal, hasName, t, tWithFallback]);
-
   const smartFillExamples = useMemo(
     () => SMART_FILL_EXAMPLES.map((example) => tWithFallback(example.key, example.fallback)),
     [tWithFallback],
   );
 
-  const birthHistoryRecentLabel = tWithFallback("home.birthHistoryRecentLabel", "Recent");
+  /* ── One question at a time ──
+   * The chart needs six answers, asked in the order the sky gets assembled:
+   * who, when, where. Only one is on screen at a time, so nothing competes
+   * with the question actually being asked. Enter advances, Escape steps back.
+   */
+  const questions = useMemo(
+    () => [
+      {
+        id: "name" as const,
+        answered: hasName,
+        label: t("home.formName"),
+        heading: tWithFallback("home.askName", "What should we call you?"),
+        helper: tWithFallback("home.askNameHelper", "The name this reading is written for."),
+      },
+      {
+        id: "birthDate" as const,
+        answered: hasBirthDate,
+        label: t("home.formBirthDate"),
+        heading: tWithFallback("home.askBirthDate", "When were you born?"),
+        helper: tWithFallback(
+          "home.askBirthDateHelper",
+          "The calendar date, as it was where you were born.",
+        ),
+      },
+      {
+        id: "birthTime" as const,
+        answered: hasBirthTimeSignal,
+        label: t("home.formBirthTime"),
+        heading: tWithFallback("home.askBirthTime", "What time of day?"),
+        helper: tWithFallback(
+          "home.askBirthTimeHelper",
+          "An exact time sets the houses. If you do not know it, give a rough part of the day instead.",
+        ),
+      },
+      {
+        id: "country" as const,
+        answered: hasCountry,
+        label: t("home.formCountry"),
+        heading: tWithFallback("home.askCountry", "Which country?"),
+        helper: tWithFallback("home.askCountryHelper", "Where the birth happened, not where you live now."),
+      },
+      {
+        id: "state" as const,
+        answered: hasState,
+        label: t("home.formState"),
+        heading: tWithFallback("home.askState", "Which state or region?"),
+        helper: tWithFallback("home.askStateHelper", "This narrows the search for the city."),
+      },
+      {
+        id: "city" as const,
+        answered: hasCity,
+        label: t("home.formCity"),
+        heading: tWithFallback("home.askCity", "Which city or town?"),
+        helper: tWithFallback(
+          "home.askCityHelper",
+          "This is what locks the coordinates and the time zone.",
+        ),
+      },
+    ],
+    [hasBirthDate, hasBirthTimeSignal, hasCity, hasCountry, hasName, hasState, t, tWithFallback],
+  );
+
+  const activeQuestion = questions[questionIndex] ?? questions[0];
+  const isLastQuestion = questionIndex === questions.length - 1;
+
+  /* A dot is reachable once every question before it has an answer, so the
+   * flow can be re-entered anywhere already satisfied without letting anyone
+   * skip past a blank. */
+  const isQuestionReachable = useCallback(
+    (index: number) =>
+      index <= questionIndex || questions.slice(0, index).every((question) => question.answered),
+    [questionIndex, questions],
+  );
+
+  const goToQuestion = useCallback(
+    (index: number) => {
+      if (index < 0 || index >= questions.length || !isQuestionReachable(index)) return;
+      setQuestionIndex(index);
+    },
+    [isQuestionReachable, questions.length],
+  );
+
+  const formRef = useRef<HTMLFormElement>(null);
+
+  const goBack = useCallback(() => {
+    setQuestionIndex((index) => Math.max(index - 1, 0));
+  }, []);
+
+  /* Move focus to the new question's field so the keyboard path never needs a
+   * mouse. Skipped on first paint: stealing focus on load scrolls the page out
+   * from under anyone who arrived reading rather than typing. */
+  const questionBodyRef = useRef<HTMLDivElement>(null);
+  const hasNavigated = useRef(false);
+  useEffect(() => {
+    if (!hasNavigated.current) {
+      hasNavigated.current = true;
+      return;
+    }
+    questionBodyRef.current?.querySelector<HTMLElement>("input, textarea, button")?.focus();
+  }, [questionIndex]);
 
   const intakeSteps = useMemo(() => {
     const birthMomentComplete = hasBirthDate && hasBirthTimeSignal;
@@ -627,15 +697,6 @@ export default function Home() {
     [spawnParticles, spawnRipple],
   );
 
-  const updateField =
-    (field: keyof ProfileQueryInput) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      setDraft((previous) => ({
-        ...previous,
-        [field]: event.target.value
-      }));
-    };
-
   const setField = (field: keyof ProfileQueryInput) => (value: string) => {
     setDraft((previous) => ({ ...previous, [field]: value }));
   };
@@ -676,7 +737,7 @@ export default function Home() {
     const parts = text.split(',').map(p => p.trim());
     if (parts.length < 3) return null;
 
-    let parsed: Partial<ProfileQueryInput> = {};
+    const parsed: Partial<ProfileQueryInput> = {};
     let partIndex = 0;
 
     // Extract name (first part)
@@ -734,7 +795,7 @@ export default function Home() {
       const timeMatch = timeStr.match(/(\d{1,2})[:.](\d{2})\s*(am|pm)?/i);
       
       if (timeMatch) {
-        let [, hours, minutes, meridiem] = timeMatch;
+        const [, hours, minutes, meridiem] = timeMatch;
         let h = parseInt(hours);
         const m = minutes;
         
@@ -811,11 +872,11 @@ export default function Home() {
     clearGeoResults();
   };
 
-  const submitProfile = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    if (intakeStep === 1) {
-      if (canContinue) setIntakeStep(2);
+  /* The Next button, the final submit, and the Enter key all land here: every
+   * question but the last advances instead of submitting. */
+  const advanceOrSubmit = () => {
+    if (!isLastQuestion) {
+      if (activeQuestion.answered) setQuestionIndex((index) => index + 1);
       return;
     }
 
@@ -854,6 +915,79 @@ export default function Home() {
     router.push(`/engine-select?${params.toString()}`);
   };
 
+  const submitProfile = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    advanceOrSubmit();
+  };
+
+  /* Keyboard navigation is driven explicitly rather than left to implicit form
+   * submission, and it listens on the document rather than the form.
+   *
+   * Two reasons. The date and time pickers call preventDefault on Enter to
+   * commit their own selection, which swallows the browser's implicit submit.
+   * And once they commit they drop focus to <body> — outside the form — so a
+   * form-scoped listener never sees the next keystroke and the flow dead-ends
+   * on exactly the two questions a keyboard user most wants to fly through.
+   *
+   * While a picker or suggestion list is open it keeps Enter for itself; once
+   * closed, Enter drives the flow. Shift+Enter steps back.
+   *
+   * Escape is deliberately not a back key. Pickers, suggestion lists and the
+   * browser all want it, and binding it here made one press both close the
+   * suggestion list and skip back a question. */
+  const keyHandlerRef = useRef<(event: globalThis.KeyboardEvent) => void>(() => {});
+  useEffect(() => {
+    keyHandlerRef.current = (event) => {
+      if (event.key !== "Enter") return;
+
+      const form = formRef.current;
+      const target = event.target as HTMLElement | null;
+      if (!form) return;
+
+      /* Buttons, textareas and links keep their own Enter. Anything outside the
+       * intake is none of our business; a bare <body> target is the picker
+       * having just handed focus back.
+       *
+       * The exception is a toggle button already in its pressed state — the
+       * coarse birth-time options. Re-pressing one is a no-op, so a second
+       * Enter there means "continue", which is what the on-screen hint
+       * promises. */
+      if (target) {
+        const tagName = target.tagName;
+        const isSettledToggle = target.getAttribute("aria-pressed") === "true";
+        if (tagName === "TEXTAREA" || tagName === "A" || target.isContentEditable) return;
+        if (tagName === "BUTTON" && !isSettledToggle) return;
+        if (target !== document.body && !form.contains(target)) return;
+      }
+
+      /* Defer only to a control that will genuinely consume Enter. An open
+       * picker always will. A suggestion list only does so while an option is
+       * highlighted — and it reopens right after a selection, so treating "list
+       * visible" as "list owns Enter" would strand the location questions with
+       * no keyboard way forward. */
+      const overlayOwnsEnter = Boolean(
+        document.querySelector('.react-datepicker') ||
+          document.querySelector('[role="option"][aria-selected="true"]'),
+      );
+
+      if (event.shiftKey) {
+        event.preventDefault();
+        goBack();
+        return;
+      }
+
+      if (overlayOwnsEnter) return;
+      event.preventDefault();
+      advanceOrSubmit();
+    };
+  });
+
+  useEffect(() => {
+    const listener = (event: globalThis.KeyboardEvent) => keyHandlerRef.current(event);
+    document.addEventListener("keydown", listener);
+    return () => document.removeEventListener("keydown", listener);
+  }, []);
+
   return (
     <div className={styles.professionalIntake}>
       <CosmicBackground />
@@ -866,476 +1000,554 @@ export default function Home() {
       {/* ── Hero wrapper: positions wheel behind the panel ── */}
 
       <header className={styles.streamlinedHeader}>
-        <span className={styles.stepLabel}>{t("home.intakeStep", { current: String(intakeStep) })}</span>
-        <h1>{intakeStep === 1 ? t("home.intakeHeadingDetails") : t("home.intakeHeadingLocation")}</h1>
+        <span className={styles.stepLabel}>
+          {tWithFallback("home.questionCounter", `Question ${questionIndex + 1} of ${questions.length}`, {
+            current: String(questionIndex + 1),
+            total: String(questions.length),
+          })}
+        </span>
+        <h1>{t("home.intakeHeadingDetails")}</h1>
         <p>
-          {intakeStep === 1
-            ? t("home.intakeLeadDetails")
-            : t("home.intakeLeadLocation")}
+          {tWithFallback(
+            "home.intakeLeadStepped",
+            "One question at a time. Press Enter to continue, Escape to step back.",
+          )}
         </p>
       </header>
 
       {/* === MAIN CONTENT === */}
       <div className={styles.mainContent}>
-        <form className={styles.intakeForm} onSubmit={submitProfile}>
+        <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formLayout}>
-            {/* LEFT COLUMN: Form Fields */}
+            {/* LEFT COLUMN: one question */}
             <div className={styles.formColumn}>
               <div className={styles.formSectionCard}>
                 <div className={styles.cardAura} aria-hidden="true" />
-                <div className={styles.cardHeader}>
-                  <div>
-                    <span className={styles.cardKicker}>{t("home.birthChartIntake")}</span>
-                    <h2 className={styles.cardTitle}>
-                      {intakeStep === 1 ? t("home.birthDetails") : t("home.birthLocation")}
-                    </h2>
-                  </div>
-                </div>
-              {intakeStep === 1 && (
-                <>
 
-              <div className={styles.fieldGrid}>
-              <div className={styles.premiumField}>
-                <PremiumInput
-                  id="birth-name"
-                  name="name"
-                  label={t("home.formName")}
-                  value={draft.name}
-                  onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
-                  placeholder={t("home.formNamePlaceholder")}
-                  icon={<HiOutlineUser />}
-                  completed={hasName}
-                  required
-                  autoComplete="name"
-                />
-              </div>
-
-
-              {/* ── Birth Date + Birth Time Row ── */}
-              <div className={styles.dateTimeRow}>
-                <div className={styles.premiumField}>
-                  <PremiumDatePicker
-                    id="birth-date"
-                    name="birthDate"
-                    label={t("home.formBirthDate")}
-                    value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
-                    onChange={(date: Date | null) => {
-                      if (date) {
-                        const yyyy = date.getFullYear();
-                        const mm = String(date.getMonth() + 1).padStart(2, "0");
-                        const dd = String(date.getDate()).padStart(2, "0");
-                        setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
-                      }
-                    }}
-                    placeholder={t("home.birthDatePlaceholder")}
-                    formatHint={tWithFallback(
-                      "home.birthDateFormatHint",
-                      "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
-                    )}
-                    dateFormat="dd MMM yyyy"
-                    icon={<HiOutlineCalendarDays />}
-                    completed={hasBirthDate}
-                    required
-                    autoComplete="bday"
-                    maxDate={new Date()}
-                    minDate={new Date(1900, 0, 1)}
-                    showYearDropdown
-                    showMonthDropdown
-                    yearDropdownItemNumber={100}
-                  />
-                </div>
-
-                <div className={styles.premiumField}>
-                  {!unknownTime ? (
-                    <PremiumDatePicker
-                      id="birth-time"
-                      name="birthTime"
-                      label={t("home.formBirthTime")}
-                      value={draft.birthTime ? (() => { const [h, m] = draft.birthTime.split(":"); const d = new Date(); d.setHours(Number(h), Number(m), 0, 0); return d; })() : null}
-                      onChange={(date: Date | null) => {
-                        if (date) {
-                          const hh = String(date.getHours()).padStart(2, "0");
-                          const mm = String(date.getMinutes()).padStart(2, "0");
-                          setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
-                        }
-                      }}
-                      placeholder={t("home.birthTimePlaceholder")}
-                      formatHint={tWithFallback(
-                        "home.birthTimeFormatHint",
-                        "Enter a time like 14:30 or 2:30 PM.",
-                      )}
-                      showTimeSelect
-                      showTimeSelectOnly
-                      timeIntervals={5}
-                      timeCaption={t("home.timeCaption")}
-                      dateFormat="h:mm aa"
-                      icon={<HiOutlineClock />}
-                      completed={hasBirthTimeSignal}
-                      required={!unknownTime}
-                    />
-                  ) : (
-                    <div className={styles.approxTimePanel}>
-                      <div className={styles.approxTimeHeader}>
-                        <span className={styles.approxTimeLabel}>{t("home.approxTimeLabel")}</span>
-                        <span className={styles.approxTimeHint}>{t("home.approxTimeHint")}</span>
-                      </div>
-                      <div className={styles.approxTimeOptions}>
-                        {COARSE_TIME_OPTIONS.map((option) => (
-                          <button
-                            key={option.value}
-                            type="button"
-                            className={`${styles.approxTimeOption} ${
-                              coarseTime === option.value ? styles.approxTimeOptionSelected : ""
-                            }`}
-                            onClick={() => setCoarseTime(option.value)}
-                            aria-pressed={coarseTime === option.value}
-                          >
-                            {t(option.labelKey)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-              </div>{/* /fieldGrid */}
-
-              {/* ── Unknown birth time option ── */}
-              <div className={styles.unknownTimeOption}>
-                <PremiumToggle
-                  label={t("home.unknownTimeLabel")}
-                  checked={unknownTime}
-                  onChange={(checked) => {
-                    setUnknownTime(checked);
-                    if (!checked) setCoarseTime("");
-                    setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
-                  }}
-                />
-              </div>
-
-              {/* ── Quick actions: secondary to the primary path, so they sit below it ── */}
-              <div className={styles.quickActionsRow}>
-              {/* ── Smart Fill Field ── */}
-              <div className={styles.smartFillWrapper}>
-                <button
-                  type="button"
-                  className={styles.smartFillToggle}
-                  onClick={() => setSmartFillExpanded(!smartFillExpanded)}
-                  aria-expanded={smartFillExpanded}
-                  aria-controls="smart-fill-panel"
-                >
-                  <HiOutlineSparkles aria-hidden="true" />
-                  <span>{t("home.smartFillToggle")}</span>
-                  <HiOutlineChevronDown
-                    className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ''}`}
-                    aria-hidden="true"
-                  />
-                </button>
-
-                {smartFillExpanded && (
-                  <div id="smart-fill-panel" className={styles.smartFillContent}>
-                    <textarea
-                      value={smartFillText}
-                      onChange={(e) => setSmartFillText(e.target.value)}
-                      placeholder={t("home.smartFillPlaceholder")}
-                      className={styles.smartFillTextarea}
-                      rows={2}
-                      aria-label={t("home.smartFillToggle")}
-                    />
-                    <div className={styles.smartFillHint}>
-                      {t("home.smartFillHint")}
-                    </div>
-                    <div className={styles.smartFillExamples}>
-                      {smartFillExamples.map((example) => (
+                {/* ── Progress dots ── */}
+                <ol className={styles.questionDots}>
+                  {questions.map((question, index) => {
+                    const reachable = isQuestionReachable(index);
+                    return (
+                      <li key={question.id} className={styles.questionDotItem}>
                         <button
-                          key={example}
                           type="button"
-                          className={styles.smartFillExampleChip}
-                          onClick={() => setSmartFillText(example)}
-                        >
-                          {example}
-                        </button>
-                      ))}
+                          className={[
+                            styles.questionDot,
+                            question.answered ? styles.questionDotAnswered : "",
+                            index === questionIndex ? styles.questionDotCurrent : "",
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                          onClick={() => goToQuestion(index)}
+                          disabled={!reachable}
+                          aria-current={index === questionIndex ? "step" : undefined}
+                          aria-label={`${index + 1}. ${question.label}`}
+                        />
+                      </li>
+                    );
+                  })}
+                </ol>
+
+                <div className={styles.questionHead} aria-live="polite">
+                  <span className={styles.cardKicker}>{t("home.birthChartIntake")}</span>
+                  <h2 className={styles.questionHeading}>{activeQuestion.heading}</h2>
+                  <p className={styles.questionHelper}>{activeQuestion.helper}</p>
+                </div>
+
+                <div className={styles.questionBody} ref={questionBodyRef}>
+                  {activeQuestion.id === "name" && (
+                    <div className={styles.premiumField}>
+                      <PremiumInput
+                        id="birth-name"
+                        name="name"
+                        label={t("home.formName")}
+                        value={draft.name}
+                        onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
+                        placeholder={t("home.formNamePlaceholder")}
+                        icon={<HiOutlineUser />}
+                        completed={hasName}
+                        required
+                        autoComplete="name"
+                      />
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleSmartFill}
-                      className={styles.smartFillButton}
-                      disabled={smartFillText.trim().length < 10}
-                    >
-                      {t("home.smartFillButton")}
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* ── Name Field ── */}
-              {/* Recent birth details */}
-              <div className={styles.birthHistoryWrapper}>
-                <button
-                  type="button"
-                  className={styles.birthHistoryToggle}
-                  onClick={() => setHistoryExpanded((expanded) => !expanded)}
-                  aria-expanded={historyExpanded}
-                  aria-controls="birth-details-history-panel"
-                >
-                  <HiOutlineClock />
-                  <span>{t("home.birthHistoryToggle")}</span>
-                  {birthDetailsHistory.length > 0 && (
-                    <span className={styles.birthHistoryCount}>
-                      {t("home.birthHistoryCount", { count: String(birthDetailsHistory.length) })}
-                    </span>
                   )}
-                  <HiOutlineChevronDown className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`} />
-                </button>
 
-                {historyExpanded && (
-                  <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
-                    {birthDetailsHistory.length > 0 ? (
-                      <div className={styles.birthHistoryList}>
-                        {birthDetailsHistory.map((entry) => {
-                          const location = [entry.draft.city, entry.draft.state, entry.draft.country]
-                            .filter((part) => part.trim().length > 0)
-                            .join(", ");
-                          const coarseTimeKey = entry.coarseTime
-                            ? `home.coarse${entry.coarseTime.charAt(0).toUpperCase()}${entry.coarseTime.slice(1)}`
-                            : "home.coarseUnknown";
-                          const timeLabel = entry.unknownTime
-                            ? t("home.birthHistoryApproxTime", { time: t(coarseTimeKey) })
-                            : entry.draft.birthTime;
+                  {activeQuestion.id === "birthDate" && (
+                    <div className={styles.premiumField}>
+                      <PremiumDatePicker
+                        id="birth-date"
+                        name="birthDate"
+                        label={t("home.formBirthDate")}
+                        value={draft.birthDate ? new Date(draft.birthDate + "T00:00:00") : null}
+                        onChange={(date: Date | null) => {
+                          if (date) {
+                            const yyyy = date.getFullYear();
+                            const mm = String(date.getMonth() + 1).padStart(2, "0");
+                            const dd = String(date.getDate()).padStart(2, "0");
+                            setDraft((prev) => ({ ...prev, birthDate: `${yyyy}-${mm}-${dd}` }));
+                          }
+                        }}
+                        placeholder={t("home.birthDatePlaceholder")}
+                        formatHint={tWithFallback(
+                          "home.birthDateFormatHint",
+                          "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
+                        )}
+                        dateFormat="dd MMM yyyy"
+                        icon={<HiOutlineCalendarDays />}
+                        completed={hasBirthDate}
+                        required
+                        preventOpenOnFocus
+                        autoComplete="bday"
+                        maxDate={new Date()}
+                        minDate={new Date(1900, 0, 1)}
+                        showYearDropdown
+                        showMonthDropdown
+                        yearDropdownItemNumber={100}
+                      />
+                    </div>
+                  )}
 
-                          return (
-                            <button
-                              key={entry.id}
-                              type="button"
-                              className={styles.birthHistoryItem}
-                              onClick={() => restoreBirthDetailsHistory(entry)}
-                            >
-                              <span className={styles.birthHistoryName}>
-                                {entry.draft.name || t("home.birthHistoryUnnamed")}
-                              </span>
-                              <span className={styles.birthHistoryMeta}>
-                                {[entry.draft.birthDate, timeLabel, location].filter(Boolean).join(" - ")}
-                              </span>
-                              <span className={styles.birthHistorySavedAt}>
-                                {formatHistoryDate(entry.savedAt)}
-                              </span>
-                            </button>
-                          );
-                        })}
+                  {activeQuestion.id === "birthTime" && (
+                    <>
+                      <div className={styles.premiumField}>
+                        {!unknownTime ? (
+                          <PremiumDatePicker
+                            id="birth-time"
+                            name="birthTime"
+                            label={t("home.formBirthTime")}
+                            value={
+                              draft.birthTime
+                                ? (() => {
+                                    const [h, m] = draft.birthTime.split(":");
+                                    const d = new Date();
+                                    d.setHours(Number(h), Number(m), 0, 0);
+                                    return d;
+                                  })()
+                                : null
+                            }
+                            onChange={(date: Date | null) => {
+                              if (date) {
+                                const hh = String(date.getHours()).padStart(2, "0");
+                                const mm = String(date.getMinutes()).padStart(2, "0");
+                                setDraft((prev) => ({ ...prev, birthTime: `${hh}:${mm}` }));
+                              }
+                            }}
+                            placeholder={t("home.birthTimePlaceholder")}
+                            formatHint={tWithFallback(
+                              "home.birthTimeFormatHint",
+                              "Enter a time like 14:30 or 2:30 PM.",
+                            )}
+                            showTimeSelect
+                            showTimeSelectOnly
+                            timeIntervals={5}
+                            timeCaption={t("home.timeCaption")}
+                            dateFormat="h:mm aa"
+                            icon={<HiOutlineClock />}
+                            completed={hasBirthTimeSignal}
+                            required={!unknownTime}
+                            preventOpenOnFocus
+                          />
+                        ) : (
+                          <div className={styles.approxTimePanel}>
+                            <div className={styles.approxTimeHeader}>
+                              <span className={styles.approxTimeLabel}>{t("home.approxTimeLabel")}</span>
+                              <span className={styles.approxTimeHint}>{t("home.approxTimeHint")}</span>
+                            </div>
+                            <div className={styles.approxTimeOptions}>
+                              {COARSE_TIME_OPTIONS.map((option) => (
+                                <button
+                                  key={option.value}
+                                  type="button"
+                                  className={`${styles.approxTimeOption} ${
+                                    coarseTime === option.value ? styles.approxTimeOptionSelected : ""
+                                  }`}
+                                  onClick={() => setCoarseTime(option.value)}
+                                  aria-pressed={coarseTime === option.value}
+                                >
+                                  {t(option.labelKey)}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <p className={styles.birthHistoryEmpty}>{t("home.birthHistoryEmpty")}</p>
-                    )}
+
+                      <div className={styles.unknownTimeOption}>
+                        <PremiumToggle
+                          label={t("home.unknownTimeLabel")}
+                          checked={unknownTime}
+                          onChange={(checked) => {
+                            setUnknownTime(checked);
+                            if (!checked) setCoarseTime("");
+                            setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
+                          }}
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  {activeQuestion.id === "country" && (
+                    <div className={styles.premiumField}>
+                      <div className={styles.autocompleteWrapper}>
+                        <label id="birth-country-label" htmlFor="birth-country">
+                          {t("home.formCountry")}
+                        </label>
+                        <div
+                          className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}
+                        >
+                          <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                            <HiOutlineMapPin />
+                          </span>
+                          <AutocompleteInput
+                            id="birth-country"
+                            name="country"
+                            ariaLabelledBy="birth-country-label"
+                            value={draft.country}
+                            onChange={handleCountryChange}
+                            onSelect={handleCountrySelect}
+                            placeholder={t("home.formCountryPlaceholder")}
+                            suggestType="country"
+                            required
+                          />
+                          {hasCountry && (
+                            <span
+                              className={styles.fieldCompleteBadge}
+                              aria-label={t("home.fieldComplete", { field: t("home.formCountry") })}
+                              role="status"
+                            >
+                              <HiOutlineCheckCircle />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeQuestion.id === "state" && (
+                    <div className={styles.premiumField}>
+                      <div className={styles.autocompleteWrapper}>
+                        <label id="birth-state-label" htmlFor="birth-state">
+                          {t("home.formState")}
+                        </label>
+                        <div
+                          className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}
+                        >
+                          <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                            <HiOutlineMapPin />
+                          </span>
+                          <AutocompleteInput
+                            id="birth-state"
+                            name="state"
+                            ariaLabelledBy="birth-state-label"
+                            value={draft.state}
+                            onChange={handleStateChange}
+                            onSelect={handleStateSelect}
+                            placeholder={t("home.formStatePlaceholder")}
+                            suggestType="state"
+                            contextCountry={draft.country}
+                            required
+                          />
+                          {hasState && (
+                            <span
+                              className={styles.fieldCompleteBadge}
+                              aria-label={t("home.fieldComplete", { field: t("home.formState") })}
+                              role="status"
+                            >
+                              <HiOutlineCheckCircle />
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {activeQuestion.id === "city" && (
+                    <>
+                      <div className={styles.premiumField}>
+                        <div className={styles.autocompleteWrapper}>
+                          <label id="birth-city-label" htmlFor="birth-city">
+                            {t("home.formCity")}
+                          </label>
+                          <div
+                            className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}
+                          >
+                            <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                              <HiOutlineMapPin />
+                            </span>
+                            <AutocompleteInput
+                              id="birth-city"
+                              name="city"
+                              ariaLabelledBy="birth-city-label"
+                              value={draft.city}
+                              onChange={setField("city")}
+                              onSelect={setField("city")}
+                              placeholder={t("home.formCityPlaceholder")}
+                              suggestType="city"
+                              contextCountry={draft.country}
+                              contextState={draft.state}
+                              required
+                            />
+                            {hasCity && (
+                              <span
+                                className={styles.fieldCompleteBadge}
+                                aria-label={t("home.fieldComplete", { field: t("home.formCity") })}
+                                role="status"
+                              >
+                                <HiOutlineCheckCircle />
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ── Lat/Lon escape hatch: only the last question needs it ── */}
+                      <button
+                        type="button"
+                        className={styles.coordsToggleWrapper}
+                        onClick={() => setLatLonExpanded(!latLonExpanded)}
+                        aria-expanded={latLonExpanded}
+                        aria-controls="manual-coordinate-fields"
+                      >
+                        <span className={styles.coordsToggleText}>
+                          <GiCompass aria-hidden="true" />
+                          {t("home.enterCoordinates")}
+                        </span>
+                        <span
+                          className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ""}`}
+                          aria-hidden="true"
+                        >
+                          &#9662;
+                        </span>
+                      </button>
+
+                      {latLonExpanded && (
+                        <div id="manual-coordinate-fields" className={styles.latLonFields}>
+                          <PremiumInput
+                            id="birth-latitude"
+                            name="latitude"
+                            label={t("home.formLatitude")}
+                            value={draft.latitude}
+                            onChange={(value) => setField("latitude")(value)}
+                            placeholder="e.g. 40.7128"
+                            icon={<GiCompass />}
+                            completed={hasLatitude}
+                            required
+                            inputMode="decimal"
+                          />
+                          <PremiumInput
+                            id="birth-longitude"
+                            name="longitude"
+                            label={t("home.formLongitude")}
+                            value={draft.longitude}
+                            onChange={(value) => setField("longitude")(value)}
+                            placeholder="e.g. -74.0060"
+                            icon={<GiCompass />}
+                            completed={hasLongitude}
+                            required
+                            inputMode="decimal"
+                          />
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>{/* /questionBody */}
+
+                {/* ── Quick actions: whole-form shortcuts, so only the first question offers them ── */}
+                {questionIndex === 0 && (
+                  <div className={styles.quickActionsRow}>
+                    <div className={styles.smartFillWrapper}>
+                      <button
+                        type="button"
+                        className={styles.smartFillToggle}
+                        onClick={() => setSmartFillExpanded(!smartFillExpanded)}
+                        aria-expanded={smartFillExpanded}
+                        aria-controls="smart-fill-panel"
+                      >
+                        <HiOutlineSparkles aria-hidden="true" />
+                        <span>{t("home.smartFillToggle")}</span>
+                        <HiOutlineChevronDown
+                          className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ""}`}
+                          aria-hidden="true"
+                        />
+                      </button>
+
+                      {smartFillExpanded && (
+                        <div id="smart-fill-panel" className={styles.smartFillContent}>
+                          <textarea
+                            value={smartFillText}
+                            onChange={(e) => setSmartFillText(e.target.value)}
+                            placeholder={t("home.smartFillPlaceholder")}
+                            className={styles.smartFillTextarea}
+                            rows={2}
+                            aria-label={t("home.smartFillToggle")}
+                          />
+                          <div className={styles.smartFillHint}>{t("home.smartFillHint")}</div>
+                          <div className={styles.smartFillExamples}>
+                            {smartFillExamples.map((example) => (
+                              <button
+                                key={example}
+                                type="button"
+                                className={styles.smartFillExampleChip}
+                                onClick={() => setSmartFillText(example)}
+                              >
+                                {example}
+                              </button>
+                            ))}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={handleSmartFill}
+                            className={styles.smartFillButton}
+                            disabled={smartFillText.trim().length < 10}
+                          >
+                            {t("home.smartFillButton")}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className={styles.birthHistoryWrapper}>
+                      <button
+                        type="button"
+                        className={styles.birthHistoryToggle}
+                        onClick={() => setHistoryExpanded((expanded) => !expanded)}
+                        aria-expanded={historyExpanded}
+                        aria-controls="birth-details-history-panel"
+                      >
+                        <HiOutlineClock />
+                        <span>{t("home.birthHistoryToggle")}</span>
+                        {birthDetailsHistory.length > 0 && (
+                          <span className={styles.birthHistoryCount}>
+                            {t("home.birthHistoryCount", { count: String(birthDetailsHistory.length) })}
+                          </span>
+                        )}
+                        <HiOutlineChevronDown
+                          className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`}
+                        />
+                      </button>
+
+                      {historyExpanded && (
+                        <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
+                          {birthDetailsHistory.length > 0 ? (
+                            <div className={styles.birthHistoryList}>
+                              {birthDetailsHistory.map((entry) => {
+                                const location = [entry.draft.city, entry.draft.state, entry.draft.country]
+                                  .filter((part) => part.trim().length > 0)
+                                  .join(", ");
+                                const coarseTimeKey = entry.coarseTime
+                                  ? `home.coarse${entry.coarseTime.charAt(0).toUpperCase()}${entry.coarseTime.slice(1)}`
+                                  : "home.coarseUnknown";
+                                const timeLabel = entry.unknownTime
+                                  ? t("home.birthHistoryApproxTime", { time: t(coarseTimeKey) })
+                                  : entry.draft.birthTime;
+
+                                return (
+                                  <button
+                                    key={entry.id}
+                                    type="button"
+                                    className={styles.birthHistoryItem}
+                                    onClick={() => restoreBirthDetailsHistory(entry)}
+                                  >
+                                    <span className={styles.birthHistoryName}>
+                                      {entry.draft.name || t("home.birthHistoryUnnamed")}
+                                    </span>
+                                    <span className={styles.birthHistoryMeta}>
+                                      {[entry.draft.birthDate, timeLabel, location].filter(Boolean).join(" - ")}
+                                    </span>
+                                    <span className={styles.birthHistorySavedAt}>
+                                      {formatHistoryDate(entry.savedAt)}
+                                    </span>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          ) : (
+                            <p className={styles.birthHistoryEmpty}>{t("home.birthHistoryEmpty")}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-              </div>
-              </div>
-                </>
-              )}
-
-              {/* ── Section Divider ── */}
-              {intakeStep === 2 && (
-                <>
-              <div className={styles.sectionDivider}>
-                <div className={styles.dividerLine}></div>
-                <span className={styles.dividerText}>{t("home.birthLocation")}</span>
-                <div className={styles.dividerLine}></div>
-              </div>
-
-              <div className={styles.fieldGrid}>
-              {/* ── Country Field ── */}
-              <div className={styles.premiumField}>
-                <div className={styles.autocompleteWrapper}>
-                  <label id="birth-country-label" htmlFor="birth-country">
-                    {t("home.formCountry")}
-                  </label>
-                  <div className={`${styles.autocompleteFrame} ${hasCountry ? styles.autocompleteFrameComplete : ""}`}>
-                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                      <HiOutlineMapPin />
-                    </span>
-                    <AutocompleteInput
-                      id="birth-country"
-                      name="country"
-                      ariaLabelledBy="birth-country-label"
-                      value={draft.country}
-                      onChange={handleCountryChange}
-                      onSelect={handleCountrySelect}
-                      placeholder={t("home.formCountryPlaceholder")}
-                      suggestType="country"
-                      required
-                    />
-                    {hasCountry && (
-                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formCountry") })} role="status">
-                        <HiOutlineCheckCircle />
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* ── State Field ── */}
-              <div className={styles.premiumField}>
-                <div className={styles.autocompleteWrapper}>
-                  <label id="birth-state-label" htmlFor="birth-state">
-                    {t("home.formState")}
-                  </label>
-                  <div className={`${styles.autocompleteFrame} ${hasState ? styles.autocompleteFrameComplete : ""}`}>
-                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                      <HiOutlineMapPin />
-                    </span>
-                    <AutocompleteInput
-                      id="birth-state"
-                      name="state"
-                      ariaLabelledBy="birth-state-label"
-                      value={draft.state}
-                      onChange={handleStateChange}
-                      onSelect={handleStateSelect}
-                      placeholder={t("home.formStatePlaceholder")}
-                      suggestType="state"
-                      contextCountry={draft.country}
-                      required
-                    />
-                    {hasState && (
-                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formState") })} role="status">
-                        <HiOutlineCheckCircle />
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* ── City Field ── */}
-              <div className={styles.premiumField}>
-                <div className={styles.autocompleteWrapper}>
-                  <label id="birth-city-label" htmlFor="birth-city">
-                    {t("home.formCity")}
-                  </label>
-                  <div className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}>
-                    <span className={styles.fieldLeadingIcon} aria-hidden="true">
-                      <HiOutlineMapPin />
-                    </span>
-                    <AutocompleteInput
-                      id="birth-city"
-                      name="city"
-                      ariaLabelledBy="birth-city-label"
-                      value={draft.city}
-                      onChange={setField("city")}
-                      onSelect={setField("city")}
-                      placeholder={t("home.formCityPlaceholder")}
-                      suggestType="city"
-                      contextCountry={draft.country}
-                      contextState={draft.state}
-                      required
-                    />
-                    {hasCity && (
-                      <span className={styles.fieldCompleteBadge} aria-label={t("home.fieldComplete", { field: t("home.formCity") })} role="status">
-                        <HiOutlineCheckCircle />
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              </div>{/* /fieldGrid */}
-
-              {/* ── Lat/Lon Toggle ── */}
-              <button
-                type="button"
-                className={styles.coordsToggleWrapper}
-                onClick={() => setLatLonExpanded(!latLonExpanded)}
-                aria-expanded={latLonExpanded}
-                aria-controls="manual-coordinate-fields"
-              >
-                <span className={styles.coordsToggleText}>
-                  <GiCompass aria-hidden="true" />
-                  {t("home.enterCoordinates")}
-                </span>
-                <span
-                  className={`${styles.coordsToggleArrow} ${latLonExpanded ? styles.expanded : ''}`}
-                  aria-hidden="true"
-                >
-                  &#9662;
-                </span>
-              </button>
-
-              {latLonExpanded && (
-                <div id="manual-coordinate-fields" className={styles.latLonFields}>
-                  <PremiumInput
-                    id="birth-latitude"
-                    name="latitude"
-                    label={t("home.formLatitude")}
-                    value={draft.latitude}
-                    onChange={(value) => setField("latitude")(value)}
-                    placeholder="e.g. 40.7128"
-                    icon={<GiCompass />}
-                    completed={hasLatitude}
-                    required
-                    inputMode="decimal"
-                  />
-                  <PremiumInput
-                    id="birth-longitude"
-                    name="longitude"
-                    label={t("home.formLongitude")}
-                    value={draft.longitude}
-                    onChange={(value) => setField("longitude")(value)}
-                    placeholder="e.g. -74.0060"
-                    icon={<GiCompass />}
-                    completed={hasLongitude}
-                    required
-                    inputMode="decimal"
-                  />
-                </div>
-              )}
-                </>
-              )}
-
               </div>{/* /formSectionCard */}
 
-          {/* PRIMARY CTA */}
-          <div className={styles.primaryAction}>
-            {intakeStep === 1 ? (
-              <PremiumButton
-                type="button"
-                variant="primary"
-                size="lg"
-                fullWidth
-                disabled={!canContinue}
-                describedBy={!canContinue ? "intake-action-hint" : undefined}
-                onClick={() => setIntakeStep(2)}
-              >
-                {t("home.continueToLocation")}
-              </PremiumButton>
-            ) : (
-              <div className={styles.stepActions}>
-                <button type="button" className={styles.backButton} onClick={() => setIntakeStep(1)}>
-                  {t("home.back")}
-                </button>
-                <PremiumButton
-                  type="submit"
-                  variant="primary"
-                  size="lg"
-                  fullWidth
-                  loading={isSubmitting}
-                  loadingLabel={t("home.ctaLoading")}
-                  disabled={!canSubmit}
-                  describedBy={!canSubmit ? "intake-action-hint" : undefined}
-                  icon={<GiCrystalBall />}
-                >
-                  {t("home.cta")}
-                </PremiumButton>
+              {/* PRIMARY CTA */}
+              <div className={styles.primaryAction}>
+                <div className={styles.stepActions}>
+                  <button
+                    type="button"
+                    className={styles.backButton}
+                    onClick={goBack}
+                    disabled={questionIndex === 0}
+                  >
+                    {t("home.back")}
+                  </button>
+                  {isLastQuestion ? (
+                    <div
+                      ref={submitWrapperRef}
+                      className={styles.submitWrapper}
+                      onClick={canSubmit ? handleSubmitClick : undefined}
+                    >
+                      <PremiumButton
+                        type="submit"
+                        variant="primary"
+                        size="lg"
+                        fullWidth
+                        loading={isSubmitting}
+                        loadingLabel={t("home.ctaLoading")}
+                        disabled={!canSubmit}
+                        describedBy={!canSubmit ? "intake-action-hint" : undefined}
+                        icon={<GiCrystalBall />}
+                      >
+                        {t("home.cta")}
+                      </PremiumButton>
+                    </div>
+                  ) : (
+                    <PremiumButton
+                      type="submit"
+                      variant="primary"
+                      size="lg"
+                      fullWidth
+                      disabled={!activeQuestion.answered}
+                      describedBy={!activeQuestion.answered ? "intake-action-hint" : undefined}
+                    >
+                      {tWithFallback("home.next", "Next")}
+                    </PremiumButton>
+                  )}
+                </div>
+
+                {((isLastQuestion && !canSubmit) || (!isLastQuestion && !activeQuestion.answered)) && (
+                  <p id="intake-action-hint" className={styles.actionHint} aria-live="polite">
+                    <HiOutlineExclamationCircle aria-hidden="true" />
+                    {isLastQuestion
+                      ? actionHintText
+                      : tWithFallback("home.actionHintMissing", `Add ${activeQuestion.label} to continue.`, {
+                          fields: activeQuestion.label,
+                        })}
+                  </p>
+                )}
+
+                <div className={styles.keyHintRow}>
+                  <span className={styles.keyHint}>
+                    <kbd>&crarr;</kbd> {tWithFallback("home.keyboardHintNext", "Press Enter")}
+                  </span>
+                  {questionIndex > 0 && (
+                    <span className={styles.keyHint}>
+                      <kbd>&#8679;</kbd>
+                      <kbd>&crarr;</kbd> {tWithFallback("home.keyboardHintBack", "Shift + Enter to go back")}
+                    </span>
+                  )}
+                  {draftSaved && (
+                    <span className={styles.draftIndicator} role="status">
+                      <HiOutlineCheckCircle aria-hidden="true" />
+                      {t("home.draftSaved")}
+                    </span>
+                  )}
+                </div>
+
+                <p className={styles.trustMicrocopy}>{t("home.trustMicrocopy")}</p>
               </div>
-            )}
-            {((intakeStep === 1 && !canContinue) || (intakeStep === 2 && !canSubmit)) && (
-              <p id="intake-action-hint" className={styles.actionHint} aria-live="polite">
-                <HiOutlineExclamationCircle aria-hidden="true" />
-                {intakeStep === 1 ? stepOneHintText : actionHintText}
-              </p>
-            )}
-            <p className={styles.trustMicrocopy}>
-              {t("home.trustMicrocopy")}
-            </p>
-          </div>
             </div>{/* /formColumn */}
 
             {/* RIGHT COLUMN: Chart Preview */}

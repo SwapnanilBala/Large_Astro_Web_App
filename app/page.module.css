@@ -2253,3 +2253,158 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ═══════════════════════════════════════════════
+   ONE QUESTION AT A TIME
+
+   The card holds a single question. Everything here sizes off the question
+   rather than the field, so the answer area stays generous in the wide
+   layout instead of leaving the left column half empty.
+   ═══════════════════════════════════════════════ */
+
+.questionDots {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.questionDotItem {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.questionDot {
+  display: block;
+  width: 100%;
+  height: 4px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.questionDot:disabled {
+  cursor: default;
+}
+
+.questionDotAnswered {
+  background: linear-gradient(90deg, rgba(232, 200, 154, 0.9), rgba(108, 225, 212, 0.85));
+}
+
+.questionDotCurrent {
+  background: var(--accent-gold-light, #e8c89a);
+  box-shadow: 0 0 0 3px rgba(232, 200, 154, 0.12);
+}
+
+.questionDot:focus-visible {
+  outline: 2px solid rgba(232, 200, 154, 0.75);
+  outline-offset: 3px;
+}
+
+.questionHead {
+  margin-bottom: clamp(1.35rem, 2.5vw, 2rem);
+}
+
+.questionHeading {
+  margin: 0.4rem 0 0;
+  color: var(--text-primary, #fff);
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.7rem, 2.6vw, 2.6rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.questionHelper {
+  max-width: 38rem;
+  margin: 0.7rem 0 0;
+  color: var(--text-secondary);
+  font-size: clamp(0.95rem, 0.3vw + 0.9rem, 1.08rem);
+  line-height: 1.5;
+}
+
+/* One field on screen, so it gets room to breathe without running the full
+   width of the column — long inputs are harder to scan, not easier. */
+.questionBody {
+  width: min(100%, 34rem);
+  min-height: 8.5rem;
+}
+
+.questionBody .premiumField:last-child {
+  margin-bottom: 0;
+}
+
+.questionBody .unknownTimeOption {
+  justify-content: flex-start;
+  margin-top: 0.9rem;
+  margin-bottom: 0;
+}
+
+.questionBody .latLonFields {
+  margin-top: 0.9rem;
+}
+
+/* The particle burst and ripple need a positioned, clipping host. */
+.submitWrapper {
+  position: relative;
+  flex: 1;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.keyHintRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-top: 0.85rem;
+}
+
+.keyHint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-tertiary, #6b6560);
+  font-size: 0.78rem;
+}
+
+.keyHint kbd {
+  display: inline-grid;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  place-items: center;
+  padding: 0 0.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.72rem;
+}
+
+.draftIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--accent-teal-light, #4aab9e);
+  font-size: 0.78rem;
+}
+
+.draftIndicator svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+@media (max-width: 600px) {
+  .questionBody {
+    width: 100%;
+  }
+
+  .questionDots {
+    gap: 0.35rem;
+  }
+}

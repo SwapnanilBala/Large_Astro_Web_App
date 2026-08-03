@@ -154,6 +154,15 @@ interface PremiumDatePickerProps {
   autoComplete?: string;
   /** Message shown when typed text cannot be parsed. Defaults per field type. */
   formatHint?: string;
+  /**
+   * Keep the calendar shut when the field merely receives focus.
+   *
+   * Needed wherever focus is moved programmatically: an open picker treats
+   * Enter as "accept the highlighted option", and with an empty field that
+   * option is the current date and time — so a stray Enter silently writes
+   * "now" as the birth moment. Clicking the field still opens it.
+   */
+  preventOpenOnFocus?: boolean;
 }
 
 export default function PremiumDatePicker({
@@ -180,6 +189,7 @@ export default function PremiumDatePicker({
   minDate,
   autoComplete,
   formatHint,
+  preventOpenOnFocus = false,
 }: PremiumDatePickerProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
@@ -323,6 +333,7 @@ export default function PremiumDatePicker({
           placeholderText={placeholder}
           disabled={disabled}
           autoComplete={autoComplete}
+          preventOpenOnFocus={preventOpenOnFocus}
           showTimeSelect={showTimeSelect}
           showTimeSelectOnly={showTimeSelectOnly}
           dateFormat={dateFormat}
