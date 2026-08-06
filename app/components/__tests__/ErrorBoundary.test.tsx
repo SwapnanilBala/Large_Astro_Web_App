@@ -7,7 +7,10 @@ beforeEach(() => {
   vi.spyOn(console, "error").mockImplementation(() => {});
 });
 
-function ThrowingComponent({ message }: { message: string }) {
+// Annotated `never` on purpose: a function declaration whose body only throws is
+// inferred as returning `void`, which is not a valid JSX element type. The
+// annotation states what the component already does.
+function ThrowingComponent({ message }: { message: string }): never {
   throw new Error(message);
 }
 

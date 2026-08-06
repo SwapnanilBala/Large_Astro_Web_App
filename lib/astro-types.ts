@@ -16,13 +16,111 @@ export type ProfileQueryInput = {
   birthTimeFallback: string;
 };
 
+// ---------------------------------------------------------------------------
+// Rule engine
+//
+// This file is the SINGLE declaration site for DeterministicRule and
+// LifeDomainInsight. lib/engines/rule-engine.ts re-exports these types rather
+// than declaring its own copies -- a field added to only one of two structurally
+// similar declarations is present at runtime but invisible to the UI at compile
+// time, which is the worst failure mode available here.
+// ---------------------------------------------------------------------------
+
+export type RuleCategory = "core" | "career" | "love";
+export type RulePriority = "high" | "medium" | "low";
+export type RuleTier = "foundation" | "signature" | "combination";
+export type PlanetDignity = "exalted" | "own_sign" | "debilitated" | "neutral";
+
+/** One machine-readable provenance fact. Rendered by the UI, never by the engine. */
+export type EvidenceClaim = {
+  /** Short technical label, e.g. "10th house sign", "10th lord placement". */
+  label: string;
+  /** Already-formatted value, e.g. "Taurus", "6th house", "own sign", "12.47 deg". */
+  value: string;
+  /** Optional one-clause elaboration. An astrologer-facing register is fine here. */
+  detail?: string;
+  /** Degrees, JSON dumps and raw counters are only legal with kind "measurement". */
+  kind: "placement" | "lordship" | "dignity" | "aspect" | "count" | "measurement";
+};
+
+export type RarityBand =
+  | "common" // fire_rate > 0.35
+  | "notable" // 0.15 < fire_rate <= 0.35
+  | "uncommon" // 0.05 < fire_rate <= 0.15
+  | "rare" // 0.01 < fire_rate <= 0.05
+  | "very_rare"; // fire_rate <= 0.01
+
+export type RuleRarity = {
+  /** Observed fraction of the synthetic sample in which this rule fired. (0,1]. */
+  fire_rate: number;
+  /** 1 - fire_rate. HIGH means rare means noteworthy. Always [0,1). */
+  score: number;
+  band: RarityBand;
+  /** Absolute number of sample charts in which it fired. */
+  observed_count: number;
+  /** Monte Carlo sample size the rate was measured against. */
+  sample_size: number;
+  /** True when observed_count < 30 -- band is capped and the label goes non-numeric. */
+  low_confidence: boolean;
+  /** Matches rarity.json `version`. Used for cache busting and audit. */
+  dataset_version: string;
+};
+
+/** The client-facing tier. Contains no degrees, no JSON, no un-glossed Sanskrit. */
+export type RuleDisplay = {
+  /** Plain-language title. Replaces `title` in the default view. */
+  headline: string;
+  /** Plain-language paragraph. Replaces `insight` in the default view. */
+  body: string;
+  /** The honest counterweight, in plain language. Replaces `tension_note`. */
+  tension?: string;
+  /** e.g. "Shows up in about 3 of every 100 charts." Never a bare decimal. */
+  rarity_label: string;
+};
+
+/** The technical tier. Everything here sits inside the collapsed disclosure. */
+export type RuleEvidence = {
+  /** The legacy `basis` string, verbatim. Astrologer-facing. */
+  technical_note: string;
+  claims: EvidenceClaim[];
+  rarity: RuleRarity;
+  /** Which predicate clauses matched, for audit. Rendered only in advanced view. */
+  matched_conditions: string[];
+};
+
+export type RuleSelectionMeta = {
+  /** Chart-specific magnitude of the pattern, [0,1]. Declared per rule. */
+  strength: number;
+  /** rarity.score * strength, [0,1]. The only ranking key. */
+  score: number;
+  selected: boolean;
+  /** 1-based rank within the selected set; 0 when not selected. */
+  rank: number;
+};
+
 export type DeterministicRule = {
-  title: string;
-  insight: string;
-  basis: string;
-  priority: "high" | "medium" | "low";
+  /** Stable, copy-independent id from the data file, e.g. "career.tenth_house_axis". */
+  id?: string;
+  /** id plus bound discriminators, unique within one chart. Use as the React key. */
+  instance_key?: string;
+  tier?: RuleTier;
+
+  display?: RuleDisplay;
+  evidence?: RuleEvidence;
+  selection?: RuleSelectionMeta;
+
+  priority: RulePriority;
   category?: string;
+
+  /** @deprecated read display.headline. Mirrors it exactly. */
+  title: string;
+  /** @deprecated read display.body. Mirrors it exactly. */
+  insight: string;
+  /** @deprecated read evidence.technical_note. Mirrors it exactly. */
+  basis: string;
+  /** @deprecated read selection.score. Mirrors it exactly. Always [0,1]. */
   confidence_score?: number;
+  /** @deprecated read display.tension. Mirrors `display.tension ?? ""`. */
   tension_note?: string;
 };
 
@@ -201,9 +299,42 @@ export type AshtakavargaData = {
   weakSigns: string[];
 };
 
+export type LifeDomainKey =
+  | "love_life"
+  | "career"
+  | "family"
+  | "inheritance"
+  | "influence"
+  | "life_cycle"
+  | "travel_destinations";
+
+export type DomainDisplay = {
+  headline: string;
+  body: string;
+  /** Two or three plain-language bullets. Replaces the four stacked technical lists. */
+  highlights: string[];
+  guidance: string;
+};
+
+export type DomainEvidence = {
+  /** The old headline + overview, verbatim. */
+  technical_note: string;
+  claims: EvidenceClaim[];
+  /**
+   * Identical to `confidence_score`. This is a STRENGTH signal, not a rarity
+   * signal, and is never rendered as a percentage.
+   */
+  signal_score: number;
+};
+
 export type LifeDomainInsight = {
-  key: "love_life" | "career" | "family" | "inheritance" | "influence" | "life_cycle" | "travel_destinations";
+  key: LifeDomainKey;
   label: string;
+
+  display?: DomainDisplay;
+  evidence?: DomainEvidence;
+
+  // Computed exactly as before; demoted to the evidence tier at the render sites.
   headline: string;
   overview: string;
   strengths: string[];
@@ -212,6 +343,7 @@ export type LifeDomainInsight = {
   supporting_patterns: string[];
   guidance: string;
   long_game: string;
+  /** Still calculateDomainSignalScore(), still clamped [0.55, 0.94]. */
   confidence_score: number;
 };
 

@@ -1557,36 +1557,12 @@
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 0 20px rgba(242, 194, 108, 0.05);
 }
 
-.ashtakavarga-total {
-  display: block;
-  margin-top: 0.3rem;
-  font-size: 1.28rem;
+.ashtakavarga-intro {
+  margin-top: 0.45rem;
+  max-width: 52ch;
+  font-size: 1.24rem;
+  line-height: 1.5;
   color: var(--ink-soft);
-}
-
-.ashtakavarga-checksum {
-  display: inline-flex;
-  align-items: center;
-  margin-top: 0.5rem;
-  padding: 0.24rem 0.52rem;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  font-size: 1.08rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  line-height: 1.25;
-}
-
-.ashtakavarga-checksum--verified {
-  border-color: rgba(108, 225, 212, 0.3);
-  background: rgba(108, 225, 212, 0.1);
-  color: var(--accent-aqua);
-}
-
-.ashtakavarga-checksum--alert {
-  border-color: rgba(255, 143, 126, 0.36);
-  background: rgba(255, 143, 126, 0.1);
-  color: var(--accent-coral);
 }
 
 .ashtakavarga-tabs {

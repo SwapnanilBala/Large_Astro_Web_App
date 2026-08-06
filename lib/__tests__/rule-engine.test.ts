@@ -153,7 +153,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const sunRule = rules.find((r) => r.title.startsWith("Solar Identity"));
+      const sunRule = rules.find((r) => r.id === "core.solar_identity");
       expect(sunRule).toBeDefined();
       expect(sunRule!.title).toContain("Taurus"); // Sun is in Taurus
       expect(sunRule!.category).toBe("core");
@@ -164,7 +164,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const moonRule = rules.find((r) => r.title.startsWith("Lunar Mindset"));
+      const moonRule = rules.find((r) => r.id === "core.lunar_mindset");
       expect(moonRule).toBeDefined();
       expect(moonRule!.title).toContain("Leo"); // Moon is in Leo
     });
@@ -176,7 +176,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const careerAxis = rules.find((r) => r.title.startsWith("Career Axis"));
+      const careerAxis = rules.find((r) => r.id === "career.tenth_house_axis");
       expect(careerAxis).toBeDefined();
       expect(careerAxis!.category).toBe("career");
       expect(careerAxis!.priority).toBe("high");
@@ -189,7 +189,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const loveAxis = rules.find((r) => r.title.startsWith("Partnership Axis"));
+      const loveAxis = rules.find((r) => r.id === "love.seventh_house_axis");
       expect(loveAxis).toBeDefined();
       expect(loveAxis!.category).toBe("love");
     });
@@ -199,7 +199,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const venusRule = rules.find((r) => r.title.startsWith("Venus in"));
+      const venusRule = rules.find((r) => r.id === "love.venus_expression");
       expect(venusRule).toBeDefined();
       expect(venusRule!.category).toBe("love");
     });
@@ -213,7 +213,7 @@ describe("rule-engine", () => {
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
       const jupiterExalted = rules.find(
-        (r) => r.title.includes("Jupiter") && r.title.includes("Exalted")
+        (r) => r.instance_key === "dignity.planet_strength:Jupiter:exalted"
       );
       expect(jupiterExalted).toBeDefined();
       expect(jupiterExalted!.priority).toBe("high");
@@ -225,7 +225,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const ownSignRules = rules.filter((r) => r.title.includes("Own Sign"));
+      const ownSignRules = rules.filter((r) => r.instance_key?.endsWith(":own_sign"));
       expect(ownSignRules.length).toBeGreaterThan(0);
     });
 
@@ -237,7 +237,7 @@ describe("rule-engine", () => {
 
       // There should be no dignity rule for Sun (neutral in Taurus)
       const sunDignity = rules.find(
-        (r) => r.title.includes("Sun Strength") && r.title.includes("Neutral")
+        (r) => r.instance_key === "dignity.planet_strength:Sun:neutral"
       );
       expect(sunDignity).toBeUndefined();
     });
@@ -250,7 +250,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const budhaAditya = rules.find((r) => r.title.includes("Budha-Aditya"));
+      const budhaAditya = rules.find((r) => r.id === "yoga.budha_aditya");
       expect(budhaAditya).toBeDefined();
       expect(budhaAditya!.category).toBe("career");
     });
@@ -265,7 +265,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const gajaKesari = rules.find((r) => r.title.includes("Gaja-Kesari"));
+      const gajaKesari = rules.find((r) => r.id === "yoga.gaja_kesari");
       // With Moon in Leo and Jupiter in Cancer, sign distance = 12, not kendra
       expect(gajaKesari).toBeUndefined();
     });
@@ -280,7 +280,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const gajaKesari = rules.find((r) => r.title.includes("Gaja-Kesari"));
+      const gajaKesari = rules.find((r) => r.id === "yoga.gaja_kesari");
       expect(gajaKesari).toBeDefined();
     });
   });
@@ -291,7 +291,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const ascLord = rules.find((r) => r.title.startsWith("Ascendant Lord"));
+      const ascLord = rules.find((r) => r.id === "core.ascendant_lord");
       expect(ascLord).toBeDefined();
       // Taurus ruler is Venus
       expect(ascLord!.title).toContain("Venus");
@@ -302,7 +302,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const nodal = rules.find((r) => r.title.startsWith("Nodal Axis"));
+      const nodal = rules.find((r) => r.id === "core.nodal_axis");
       expect(nodal).toBeDefined();
       expect(nodal!.category).toBe("core");
     });
@@ -312,7 +312,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const moonFocus = rules.find((r) => r.title.startsWith("Emotional Focus"));
+      const moonFocus = rules.find((r) => r.id === "core.emotional_focus");
       expect(moonFocus).toBeDefined();
     });
   });
@@ -323,7 +323,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const elementRule = rules.find((r) => r.title.startsWith("Dominant Element"));
+      const elementRule = rules.find((r) => r.id === "core.dominant_element");
       expect(elementRule).toBeDefined();
       expect(elementRule!.category).toBe("core");
     });
@@ -347,10 +347,10 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const solarRule = rules.find((r) => r.title.startsWith("Solar Identity"));
+      const solarRule = rules.find((r) => r.id === "core.solar_identity");
       expect(solarRule).toBeDefined();
       // Sun=Earth, Moon=Fire -> mismatch, so tension_note should be non-empty
-      expect(solarRule!.tension_note.length).toBeGreaterThan(0);
+      expect(solarRule!.tension_note!.length).toBeGreaterThan(0);
     });
   });
 

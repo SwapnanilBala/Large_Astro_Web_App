@@ -200,7 +200,9 @@ describe("engine-registry", () => {
       expect(meta).toHaveProperty("house_system");
       expect(meta).toHaveProperty("description");
       // sidereal_mode_name should NOT be in the metadata
-      expect((meta as Record<string, unknown>)).not.toHaveProperty("sidereal_mode_name");
+      expect(meta as unknown as Record<string, unknown>).not.toHaveProperty(
+        "sidereal_mode_name",
+      );
     });
 
     it("preserves all public-facing fields", () => {

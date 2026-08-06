@@ -5,36 +5,27 @@ import type { PlanetPosition, HousePlacement } from "./swiss-ephemeris-engine";
 // Types
 // --------------------------------------------------------------------------
 
-export interface DeterministicRule {
-  title: string;
-  insight: string;
-  basis: string;
-  priority: "high" | "medium" | "low";
-  category: string;
-  confidence_score: number;
-  tension_note: string;
-}
+// These types are declared once, in lib/astro-types.ts, and re-exported here so
+// existing importers (chart-service, reading-store, the tests) keep working.
+export type {
+  DeterministicRule,
+  LifeDomainInsight,
+  LifeDomainKey,
+  RuleCategory,
+  RulePriority,
+  RuleTier,
+  PlanetDignity,
+  EvidenceClaim,
+  RarityBand,
+  RuleRarity,
+  RuleDisplay,
+  RuleEvidence,
+  RuleSelectionMeta,
+  DomainDisplay,
+  DomainEvidence,
+} from "@/lib/astro-types";
 
-export interface LifeDomainInsight {
-  key:
-    | "love_life"
-    | "career"
-    | "family"
-    | "inheritance"
-    | "influence"
-    | "life_cycle"
-    | "travel_destinations";
-  label: string;
-  headline: string;
-  overview: string;
-  strengths: string[];
-  watchouts: string[];
-  timing_triggers: string[];
-  supporting_patterns: string[];
-  guidance: string;
-  long_game: string;
-  confidence_score: number;
-}
+import type { DeterministicRule, LifeDomainInsight } from "@/lib/astro-types";
 
 // --------------------------------------------------------------------------
 // Constants
@@ -563,6 +554,8 @@ function careerRules(planets: PlanetPosition[], houses: HousePlacement[]): Deter
   }
 
   rules.push({
+    id: "career.tenth_house_axis",
+    instance_key: `career.tenth_house_axis:${house10.sign}`,
     title: `Career Axis: 10th House in ${house10.sign}`,
     insight: CAREER_INSIGHTS[house10.sign],
     basis: `10th house sign: ${house10.sign}. Lord ${tenthLordName} placed in house ${tenthLord.house} in ${tenthLord.sign}.`,
@@ -574,6 +567,8 @@ function careerRules(planets: PlanetPosition[], houses: HousePlacement[]): Deter
 
   if (house10.planets.length > 0) {
     rules.push({
+      id: "career.tenth_house_activators",
+      instance_key: `career.tenth_house_activators:${house10.planets.join("-")}`,
       title: "Career Activators in House 10",
       insight: `${house10.planets.join(", ")} directly energize your professional identity, bringing their qualities into public standing and career ambition.`,
       basis: `Planets in 10th house (${house10.sign}): ${house10.planets.join(", ")}.`,
@@ -615,6 +610,8 @@ function loveRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
   }
 
   rules.push({
+    id: "love.seventh_house_axis",
+    instance_key: `love.seventh_house_axis:${house7.sign}`,
     title: `Partnership Axis: 7th House in ${house7.sign}`,
     insight: LOVE_INSIGHTS[house7.sign],
     basis: `7th house sign: ${house7.sign}. Lord ${seventhLordName} in house ${seventhLord.house} (${seventhLord.sign}).`,
@@ -625,6 +622,8 @@ function loveRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
   });
 
   rules.push({
+    id: "love.venus_expression",
+    instance_key: `love.venus_expression:${venus.sign}:${venus.house}`,
     title: `Venus in ${venus.sign} (House ${venus.house})`,
     insight: `Venus governs love expression. In ${venus.sign}, romance channels through ${SIGN_ELEMENTS[venus.sign].toLowerCase()} qualities, shaping how you attract and give affection.`,
     basis: `Venus at ${venus.degree_in_sign.toFixed(2)} deg in ${venus.sign}, house ${venus.house}.`,
@@ -636,6 +635,8 @@ function loveRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
 
   if (house5.planets.length > 0) {
     rules.push({
+      id: "love.fifth_house_activators",
+      instance_key: `love.fifth_house_activators:${house5.planets.join("-")}`,
       title: "Romance House Activators",
       insight: `${house5.planets.join(", ")} in the 5th house bring creative and romantic energy, enhancing self-expression and passionate connection.`,
       basis: `5th house in ${house5.sign} with ${house5.planets.join(", ")}.`,
@@ -688,6 +689,8 @@ function dignityRules(planets: PlanetPosition[]): DeterministicRule[] {
     else if (["Venus", "Moon", "Mars"].includes(planet.name)) category = "love";
 
     rules.push({
+      id: "dignity.planet_strength",
+      instance_key: `dignity.planet_strength:${planet.name}:${dignity}`,
       title: `${planet.name} Strength: ${dignity.replace("_", " ").replace(/\b\w/g, (c) => c.toUpperCase())}`,
       insight,
       basis: `${planet.name} placed in ${planet.sign}, house ${planet.house}.`,
@@ -715,6 +718,8 @@ function yogaRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
 
   if (sun.house === mercury.house) {
     rules.push({
+      id: "yoga.budha_aditya",
+      instance_key: `yoga.budha_aditya:${sun.house}`,
       title: "Budha-Aditya Pattern",
       insight: "Sun and Mercury occupy the same house, which often sharpens intellect, message control, and the ability to turn ideas into influence.",
       basis: `Sun and Mercury are both in house ${sun.house}.`,
@@ -728,6 +733,8 @@ function yogaRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
   const moonToJupiter = signDistance(moon.sign, jupiter.sign);
   if ([1, 4, 7, 10].includes(moonToJupiter)) {
     rules.push({
+      id: "yoga.gaja_kesari",
+      instance_key: `yoga.gaja_kesari:${moonToJupiter}`,
       title: "Gaja-Kesari Support",
       insight: "Jupiter holds a kendra relationship from the Moon, which usually supports resilience, social grace, and the ability to recover perspective after emotional turbulence.",
       basis: `Moon in ${moon.sign}; Jupiter in ${jupiter.sign} (${moonToJupiter} houses from Moon).`,
@@ -740,6 +747,8 @@ function yogaRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
 
   if (moon.house === mars.house) {
     rules.push({
+      id: "yoga.chandra_mangala",
+      instance_key: `yoga.chandra_mangala:${moon.house}`,
       title: "Chandra-Mangala Drive",
       insight: "Moon and Mars share the same house, creating strong emotional activation, financial hunger, and quick response energy. This can be productive when directed well.",
       basis: `Moon and Mars are both in house ${moon.house}.`,
@@ -753,6 +762,8 @@ function yogaRules(planets: PlanetPosition[], houses: HousePlacement[]): Determi
   const house9 = houseByNumber(houses, 9);
   if (house9.planets.length > 0) {
     rules.push({
+      id: "yoga.fortune_house",
+      instance_key: `yoga.fortune_house:${house9.planets.join("-")}`,
       title: "Fortune House Activation",
       insight: "The 9th house is active, which often magnifies teachers, belief systems, long-range luck, and the role of guidance in the life path.",
       basis: `9th house in ${house9.sign} with ${house9.planets.join(", ")}.`,
@@ -790,6 +801,8 @@ function corePathRules(
   }
 
   rules.push({
+    id: "core.ascendant_lord",
+    instance_key: `core.ascendant_lord:${lagnaLord.name}:${lagnaLord.house}`,
     title: `Ascendant Lord: ${lagnaLord.name} in House ${lagnaLord.house}`,
     insight: `The ruler of your lagna is ${lagnaLord.name}, and its placement ties life direction to ${HOUSE_THEMES[lagnaLord.house]}. This is one of the clearest signatures for how your chart actually moves.`,
     basis: `${lagnaLord.name} rules ${ascendantSign} and is placed in ${lagnaLord.sign}, house ${lagnaLord.house}.`,
@@ -800,6 +813,8 @@ function corePathRules(
   });
 
   rules.push({
+    id: "core.emotional_focus",
+    instance_key: `core.emotional_focus:${moon.house}`,
     title: `Emotional Focus: Moon in House ${moon.house}`,
     insight: `Your emotional attention repeatedly returns to ${HOUSE_THEMES[moon.house]}, which tells us where you instinctively seek reassurance, rhythm, and belonging.`,
     basis: `Moon placed in ${moon.sign}, house ${moon.house}.`,
@@ -810,6 +825,8 @@ function corePathRules(
   });
 
   rules.push({
+    id: "core.nodal_axis",
+    instance_key: `core.nodal_axis:${rahu.house}:${ketu.house}`,
     title: `Nodal Axis: Rahu ${rahu.house} / Ketu ${ketu.house}`,
     insight: `Rahu pulls growth toward ${HOUSE_THEMES[rahu.house]}, while Ketu asks for detachment and maturity around ${HOUSE_THEMES[ketu.house]}. This axis often describes the chart's deeper hunger-and-release pattern.`,
     basis: `Rahu in ${rahu.sign}, house ${rahu.house}; Ketu in ${ketu.sign}, house ${ketu.house}.`,
@@ -822,6 +839,8 @@ function corePathRules(
   const kendraPlanets = planets.filter((p) => [1, 4, 7, 10].includes(p.house)).map((p) => p.name);
   if (kendraPlanets.length >= 3) {
     rules.push({
+      id: "core.angular_emphasis",
+      instance_key: `core.angular_emphasis:${kendraPlanets.join("-")}`,
       title: "Angular House Emphasis",
       insight: `${kendraPlanets.join(", ")} occupy angular houses, which makes the chart more visible, eventful, and responsive to decisive action in the outer world.`,
       basis: `Planets in kendras: ${kendraPlanets.join(", ")}.`,
@@ -858,6 +877,8 @@ export function generateRules(
   }
 
   rules.push({
+    id: "core.lagna_signature",
+    instance_key: `core.lagna_signature:${ascendantSign}`,
     title: `Lagna Signature: ${ascendantSign}`,
     insight: ASCENDANT_INSIGHTS[ascendantSign],
     basis: `Ascendant computed in ${ascendantSign}.`,
@@ -868,6 +889,8 @@ export function generateRules(
   });
 
   rules.push({
+    id: "core.solar_identity",
+    instance_key: `core.solar_identity:${sun.sign}`,
     title: `Solar Identity in ${sun.sign}`,
     insight: SUN_SIGN_INSIGHTS[sun.sign],
     basis: `Sun sign placement: ${sun.sign} (${sun.degree_in_sign.toFixed(2)} deg).`,
@@ -878,6 +901,8 @@ export function generateRules(
   });
 
   rules.push({
+    id: "core.lunar_mindset",
+    instance_key: `core.lunar_mindset:${moon.sign}`,
     title: `Lunar Mindset in ${moon.sign}`,
     insight: MOON_SIGN_INSIGHTS[moon.sign],
     basis: `Moon sign placement: ${moon.sign} (${moon.degree_in_sign.toFixed(2)} deg).`,
@@ -901,6 +926,8 @@ export function generateRules(
   }
 
   rules.push({
+    id: "core.dominant_element",
+    instance_key: `core.dominant_element:${domEl}`,
     title: `Dominant Element: ${domEl}`,
     insight: `${domCount} of 7 classical planets are in ${domEl} signs, which shapes your default decision style and energetic baseline.`,
     basis: `Element distribution: ${JSON.stringify(elCounts)}.`,
@@ -916,6 +943,8 @@ export function generateRules(
   }
   if (denseHouse.planets.length > 0) {
     rules.push({
+      id: "core.focused_house",
+      instance_key: `core.focused_house:${denseHouse.house_number}`,
       title: `Focused House: ${denseHouse.house_number}`,
       insight: `Multiple planetary activations highlight house ${denseHouse.house_number}: ${HOUSE_THEMES[denseHouse.house_number]}.`,
       basis: `House ${denseHouse.house_number} in ${denseHouse.sign} carries ${denseHouse.planets.join(", ")}.`,

@@ -15,7 +15,6 @@ const SIGN_GLYPHS: Record<string, string> = {
 };
 
 const BAV_PLANETS = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
-const BASE_SAV_BINDU_TOTAL = 337;
 
 type Props = {
   ashtakavarga: AshtakavargaData;
@@ -45,30 +44,19 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
 
   const showingBAV = selectedPlanet !== null;
   const bavData = selectedPlanet ? ashtakavarga.bhinnashtakavarga[selectedPlanet] : null;
-  const calculatedSavTotal = ashtakavarga.sarvashtakavarga.reduce(
-    (total, bindus) => total + bindus,
-    0,
-  );
-  const hasVerifiedBaseChecksum =
-    ashtakavarga.totalBindus === BASE_SAV_BINDU_TOTAL &&
-    calculatedSavTotal === BASE_SAV_BINDU_TOTAL;
+  // The SAV bindu checksum is enforced upstream: the ashtakavarga engine throws
+  // if the total is wrong, so this component can never receive a failed chart.
+  // There is nothing to re-check or report here.
 
   return (
     <section className="ashtakavarga-panel">
       <div className="rules-header">
         <p className="kicker">Vedic Transit Strength</p>
         <h2>Ashtakavarga</h2>
-        <small className="ashtakavarga-total">
-          Total bindus: {ashtakavarga.totalBindus}
-        </small>
-        <span
-          className={`ashtakavarga-checksum${hasVerifiedBaseChecksum ? " ashtakavarga-checksum--verified" : " ashtakavarga-checksum--alert"}`}
-          role="status"
-        >
-          {hasVerifiedBaseChecksum
-            ? "Base SAV checksum verified: 337 / 337"
-            : `Checksum alert: ${calculatedSavTotal} / ${BASE_SAV_BINDU_TOTAL}`}
-        </span>
+        <p className="ashtakavarga-intro">
+          Each sign is scored on how much planetary support it carries. Higher
+          scores mark the areas where things tend to move more easily for you.
+        </p>
       </div>
 
       {/* Planet selector tabs */}
@@ -122,7 +110,7 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
       <div className="ashtakavarga-summary">
         {ashtakavarga.strongSigns.length > 0 && (
           <div className="ashtakavarga-summary-group">
-            <h4>Higher-score signs (SAV &ge; 28)</h4>
+            <h4>Where you have the most support</h4>
             <div className="ashtakavarga-sign-chips">
               {ashtakavarga.strongSigns.map((sign) => (
                 <span key={sign} className="ashtakavarga-chip ashtakavarga-chip--strong">
@@ -134,7 +122,7 @@ function AshtakavargaPanel({ ashtakavarga, transits }: Props) {
         )}
         {ashtakavarga.weakSigns.length > 0 && (
           <div className="ashtakavarga-summary-group">
-            <h4>Lower-score signs (SAV &le; 25)</h4>
+            <h4>Where you may need more patience</h4>
             <div className="ashtakavarga-sign-chips">
               {ashtakavarga.weakSigns.map((sign) => (
                 <span key={sign} className="ashtakavarga-chip ashtakavarga-chip--weak">

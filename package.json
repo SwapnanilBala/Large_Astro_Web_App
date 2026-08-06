@@ -11,10 +11,14 @@
     "start": "next start",
     "lint": "eslint app lib proxy.ts eslint.config.mjs vitest.config.ts vitest.setup.ts next.config.ts",
     "test": "vitest run",
-    "test:watch": "vitest --watch"
+    "test:watch": "vitest --watch",
+    "predev": "node scripts/copy-fonts.cjs",
+    "prebuild": "node scripts/copy-fonts.cjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
+    "@fontsource/cinzel": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
     "@mediapipe/tasks-vision": "^0.10.32",
     "@react-pdf/renderer": "^4.0.0",
     "@supabase/supabase-js": "^2.57.4",

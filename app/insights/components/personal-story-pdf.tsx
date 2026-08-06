@@ -1,5 +1,30 @@
-import { Document, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
+import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type { PersonalStory } from "@/lib/story-engine";
+
+// Served from public/fonts, populated by scripts/copy-fonts.cjs at pre(dev|build).
+// These must be URLs rather than node_modules paths: the document is rendered in
+// the browser (personal-story.tsx calls pdf().toBlob()), so each face is fetched.
+// Both families are SIL Open Font License 1.1; the licence ships alongside them.
+Font.register({
+  family: "Cinzel",
+  fonts: [
+    { src: "/fonts/cinzel-latin-400-normal.woff", fontWeight: 400 },
+    { src: "/fonts/cinzel-latin-700-normal.woff", fontWeight: 700 },
+  ],
+});
+
+Font.register({
+  family: "EBGaramond",
+  fonts: [
+    { src: "/fonts/eb-garamond-latin-400-normal.woff", fontWeight: 400 },
+    { src: "/fonts/eb-garamond-latin-400-italic.woff", fontWeight: 400, fontStyle: "italic" },
+    { src: "/fonts/eb-garamond-latin-600-normal.woff", fontWeight: 600 },
+  ],
+});
+
+// Garamond's ascenders and descenders are long, so it carries generous leading
+// better than Helvetica did; hyphenation off keeps the ragged edge quiet.
+Font.registerHyphenationCallback((word) => [word]);
 
 export type PersonalStoryPdfProps = {
   story: PersonalStory;
@@ -16,18 +41,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 52,
     fontSize: 13,
     color: "#000000",
-    fontFamily: "Helvetica",
+    fontFamily: "EBGaramond",
   },
   kicker: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Cinzel", fontWeight: 700,
     letterSpacing: 1.5,
     textTransform: "uppercase",
     marginBottom: 10,
   },
   title: {
     fontSize: 30,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Cinzel", fontWeight: 700,
     marginBottom: 14,
   },
   intro: {
@@ -50,14 +75,14 @@ const styles = StyleSheet.create({
   },
   chapterEyebrow: {
     fontSize: 11,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Cinzel", fontWeight: 700,
     letterSpacing: 1,
     textTransform: "uppercase",
     marginBottom: 4,
   },
   chapterTitle: {
     fontSize: 19,
-    fontFamily: "Helvetica-Bold",
+    fontFamily: "Cinzel", fontWeight: 700,
     marginBottom: 10,
   },
   body: {
