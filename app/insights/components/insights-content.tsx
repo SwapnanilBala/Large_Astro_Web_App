@@ -963,8 +963,8 @@ export default function InsightsContent({
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>{t("insights.kicker")}</p>
             <h1 className={styles.title}>
-              {payload.client.name}
-              {t("insights.headingSuffix")}
+              <span className={styles.titleName}>{payload.client.name}</span>
+              <span className={styles.titleSuffix}>{t("insights.headingSuffix")}</span>
             </h1>
             <p className={styles.lead}>{payload.chart.summary}</p>
             <div className={styles.heroFacts} aria-label="Key chart facts">
