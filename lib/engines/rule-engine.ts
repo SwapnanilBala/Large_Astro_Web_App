@@ -114,20 +114,11 @@ const MOON_SIGN_INSIGHTS: Record<string, string> = {
   Pisces: "Emotional rhythm is porous and intuitive, requiring energetic boundaries.",
 };
 
-export const HOUSE_THEMES: Record<number, string> = {
-  1: "identity, appearance and direction",
-  2: "assets, income and values",
-  3: "communication, learning and siblings",
-  4: "home, roots and emotional foundations",
-  5: "creativity, romance and children",
-  6: "service, routines and health",
-  7: "partnerships and agreements",
-  8: "shared resources and transformation",
-  9: "beliefs, wisdom and long-distance journeys",
-  10: "career, authority and public standing",
-  11: "community, networks and long goals",
-  12: "retreat, subconscious and spiritual closure",
-};
+// Declared in lib/rules/tables.ts alongside the other copy tables, and
+// re-exported here as a runtime value: chart-service.ts and rule-engine.test.ts
+// both import HOUSE_THEMES from this module.
+export { HOUSE_THEMES } from "@/lib/rules/tables";
+import { HOUSE_THEMES } from "@/lib/rules/tables";
 
 const CAREER_INSIGHTS: Record<string, string> = {
   Aries: "Leadership-driven career path. You excel in entrepreneurship, military, sports, or any role demanding initiative and speed.",
