@@ -6,7 +6,15 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 // Brief extraction helpers
 // ---------------------------------------------------------------------------
 
-/** Combine headline + first sentence of overview, capped at `maxLen` chars. */
+/**
+ * Combine headline + body, capped at `maxLen` chars.
+ *
+ * Reads the DISPLAY tier deliberately. These columns feed a client-facing
+ * brief, and the technical tier would persist "Career: Capricorn house 10, led
+ * by Saturn." into Supabase, where it outlives any later copy fix. The
+ * house-lord notation is still available on the payload for anyone who wants
+ * it; it just is not what gets written to the database.
+ */
 function domainBrief(
   insights: LifeDomainInsight[] | undefined | null,
   key: LifeDomainInsight["key"],
@@ -15,7 +23,7 @@ function domainBrief(
   if (!insights) return "";
   const domain = insights.find((d) => d.key === key);
   if (!domain) return "";
-  const raw = `${domain.headline}. ${domain.overview}`;
+  const raw = `${domain.display.headline}. ${domain.display.body}`;
   if (raw.length <= maxLen) return raw;
   // Truncate at word boundary
   const truncated = raw.slice(0, maxLen);

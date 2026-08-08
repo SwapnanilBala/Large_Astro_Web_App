@@ -86,49 +86,38 @@ describe("rule-engine", () => {
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
       for (const rule of rules) {
-        expect(rule).toHaveProperty("title");
-        expect(rule).toHaveProperty("insight");
-        expect(rule).toHaveProperty("basis");
         expect(rule).toHaveProperty("priority");
         expect(rule).toHaveProperty("category");
-        expect(rule).toHaveProperty("confidence_score");
-        expect(rule).toHaveProperty("tension_note");
-
-        expect(typeof rule.title).toBe("string");
-        expect(typeof rule.insight).toBe("string");
-        expect(typeof rule.basis).toBe("string");
-        expect(typeof rule.tension_note).toBe("string");
 
         // Identity and the two-layer split.
         expect(rule).toHaveProperty("id");
         expect(rule).toHaveProperty("instance_key");
         expect(rule).toHaveProperty("tier");
-        expect(rule.display).toHaveProperty("headline");
-        expect(rule.display).toHaveProperty("body");
-        expect(rule.display).toHaveProperty("rarity_label");
-        expect(rule.evidence).toHaveProperty("technical_note");
-        expect(Array.isArray(rule.evidence!.claims)).toBe(true);
+        expect(typeof rule.display.headline).toBe("string");
+        expect(typeof rule.display.body).toBe("string");
+        expect(typeof rule.display.rarity_label).toBe("string");
+        expect(typeof rule.evidence.technical_note).toBe("string");
+        expect(Array.isArray(rule.evidence.claims)).toBe(true);
         expect(rule.evidence).toHaveProperty("rarity");
-        expect(typeof rule.selection!.strength).toBe("number");
-        expect(typeof rule.selection!.score).toBe("number");
-        expect(typeof rule.selection!.rank).toBe("number");
+        expect(typeof rule.selection.strength).toBe("number");
+        expect(typeof rule.selection.score).toBe("number");
+        expect(typeof rule.selection.rank).toBe("number");
       }
     });
 
-    it("keeps every deprecated mirror consistent with the tier it mirrors", () => {
-      // The tripwire for the migration: these five fields still have readers,
-      // and a mirror that goes stale renders last month's copy next to this
-      // month's evidence with nothing failing.
+    it("no longer carries the deprecated compatibility mirrors", () => {
+      // title / insight / basis / confidence_score / tension_note existed only
+      // to keep unmigrated consumers rendering during the migration. Every
+      // reader is on the display and evidence tiers now, so a rule that still
+      // carried them would just be a second place for copy to go stale.
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
       for (const rule of rules) {
-        expect(rule.title).toBe(rule.display!.headline);
-        expect(rule.insight).toBe(rule.display!.body);
-        expect(rule.basis).toBe(rule.evidence!.technical_note);
-        expect(rule.confidence_score).toBe(rule.selection!.score);
-        expect(rule.tension_note).toBe(rule.display!.tension ?? "");
+        for (const dropped of ["title", "insight", "basis", "confidence_score", "tension_note"]) {
+          expect(rule, `${rule.id} still carries ${dropped}`).not.toHaveProperty(dropped);
+        }
       }
     });
 
@@ -193,8 +182,12 @@ describe("rule-engine", () => {
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
       for (const rule of rules) {
-        expect(rule.confidence_score).toBeGreaterThanOrEqual(0);
-        expect(rule.confidence_score).toBeLessThanOrEqual(1);
+        // selection.score is a product of two [0,1] values, so this holds by
+        // construction -- it is here to catch the construction changing.
+        expect(rule.selection.score).toBeGreaterThanOrEqual(0);
+        expect(rule.selection.score).toBeLessThanOrEqual(1);
+        expect(rule.selection.strength).toBeGreaterThanOrEqual(0);
+        expect(rule.selection.strength).toBeLessThanOrEqual(1);
       }
     });
 
@@ -433,8 +426,8 @@ describe("rule-engine", () => {
 
       const solarRule = rules.find((r) => r.id === "core.solar_identity");
       expect(solarRule).toBeDefined();
-      // Sun=Earth, Moon=Fire -> mismatch, so tension_note should be non-empty
-      expect(solarRule!.tension_note!.length).toBeGreaterThan(0);
+      // Sun=Earth, Moon=Fire -> mismatch, so the tension variant should fire.
+      expect(solarRule!.display.tension?.length).toBeGreaterThan(0);
     });
   });
 

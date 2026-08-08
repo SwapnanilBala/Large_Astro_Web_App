@@ -1,13 +1,14 @@
 /**
  * Test factories for the rule payload shapes.
  *
- * These exist so the deprecated mirrors live in exactly one place. When
- * `title` / `insight` / `basis` / `confidence_score` / `tension_note` are
- * finally deleted from DeterministicRule, that is a one-file change here
- * rather than a hunt through every fixture in the suite.
+ * These were introduced so the deprecated compatibility mirrors lived in one
+ * place; deleting those five fields was a one-file change here rather than a
+ * hunt through every fixture. They stay because the same argument applies to
+ * the next shape change.
  *
- * `makeRule` keeps the mirrors consistent with the tiers by construction, so a
- * fixture cannot accidentally encode a state the engine would never produce.
+ * `selection.score` is derived from the rarity and strength a caller passes,
+ * so a fixture cannot encode a scoring relationship the engine would never
+ * produce.
  */
 
 import type {
@@ -78,14 +79,6 @@ export function makeRule(overrides: RuleOverrides = {}): DeterministicRule {
     display,
     evidence,
     selection,
-
-    // Mirrors, derived rather than authored, so a fixture cannot drift from
-    // what the engine would actually emit.
-    title: display.headline,
-    insight: display.body,
-    basis: evidence.technical_note,
-    confidence_score: selection.score,
-    tension_note: display.tension ?? "",
 
     ...rest,
   };

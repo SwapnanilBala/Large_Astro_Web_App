@@ -643,16 +643,6 @@ export function generateRules(
       selection: { strength, score, selected: selection.selected, rank: selection.rank },
       category: fired.category,
       priority: fired.priority,
-
-      // Deprecated mirrors. Every one of these is read by at least one consumer
-      // that has not migrated yet; they are dropped in a follow-up once the
-      // last reader is gone. Kept exact so a stale reader degrades to the old
-      // copy rather than rendering undefined.
-      title: display.headline,
-      insight: display.body,
-      basis: evidence.technical_note,
-      confidence_score: score,
-      tension_note: display.tension ?? "",
     };
   });
 

@@ -116,17 +116,6 @@ export type DeterministicRule = {
    * the page entirely. Enforced by Zod at rule-load time.
    */
   category: RuleCategory;
-
-  /** @deprecated read display.headline. Mirrors it exactly. */
-  title: string;
-  /** @deprecated read display.body. Mirrors it exactly. */
-  insight: string;
-  /** @deprecated read evidence.technical_note. Mirrors it exactly. */
-  basis: string;
-  /** @deprecated read selection.score. Mirrors it exactly. Always [0,1]. */
-  confidence_score: number;
-  /** @deprecated read display.tension. Mirrors `display.tension ?? ""`. */
-  tension_note: string;
 };
 
 export type PlanetPosition = {
