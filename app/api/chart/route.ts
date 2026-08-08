@@ -1,9 +1,10 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { buildChart } from "@/lib/engines/chart-service";
 import type { BirthDetailsInput } from "@/lib/engines/compatibility-service";
 import { BirthInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
+import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 
 // ---------------------------------------------------------------------------
 // Structured error logger
@@ -64,6 +65,7 @@ export async function GET(request: NextRequest) {
       lat: birth.latitude,
       lng: birth.longitude,
       transits: includeTransits,
+      rules_schema: RULES_SCHEMA_VERSION,
     });
 
     const cached = serverCaches.chart.get(cacheKey);
@@ -127,6 +129,7 @@ export async function POST(request: NextRequest) {
       lat: birth.latitude,
       lng: birth.longitude,
       transits: includeTransits,
+      rules_schema: RULES_SCHEMA_VERSION,
     });
 
     const cached = serverCaches.chart.get(cacheKey);

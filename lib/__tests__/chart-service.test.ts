@@ -40,6 +40,8 @@ import {
   type ForecastReading,
 } from "../engines/chart-service";
 import type { BirthDetailsInput } from "../engines/compatibility-service";
+import { makeCacheKey } from "../server-cache";
+import { RULES_SCHEMA_VERSION } from "../rules";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -91,6 +93,59 @@ describe("chart-service", () => {
       expect(chart.chart.ascendant).toHaveProperty("sign");
       expect(chart.chart.deterministic_rules.length).toBeGreaterThan(0);
       expect(typeof chart.chart.summary).toBe("string");
+    });
+
+    it("publishes a selected rule set that points at real rules", () => {
+      const chart = buildChart(BIRTH);
+      expect(chart.chart.selected_rule_ids.length).toBeGreaterThan(0);
+      expect(chart.chart.selected_rule_ids.length).toBeLessThanOrEqual(7);
+
+      const keys = new Set(chart.chart.deterministic_rules.map((r) => r.instance_key));
+      for (const id of chart.chart.selected_rule_ids) expect(keys.has(id)).toBe(true);
+    });
+
+    it("stamps the rarity dataset version so a stale payload is detectable", () => {
+      const chart = buildChart(BIRTH);
+      expect(chart.chart.rules_dataset_version).toMatch(/^\d{4}-\d{2}-\d{2}\.\d+$/);
+    });
+
+    it("never starves a consumer surface", () => {
+      // Selection is metadata, so the full list must still carry at least one
+      // rule per desktop bucket and at least one high-priority rule for
+      // mobile's above-the-fold filter. If either of these can go empty, a
+      // section renders a heading over nothing.
+      const chart = buildChart(BIRTH);
+      const rules = chart.chart.deterministic_rules;
+
+      expect(rules.some((r) => r.priority === "high")).toBe(true);
+      for (const category of ["core", "career", "love"] as const) {
+        expect(rules.some((r) => r.category === category), `no ${category} rule`).toBe(true);
+      }
+    });
+
+    it("keeps the full fired list rather than only the selected rules", () => {
+      const chart = buildChart(BIRTH);
+      const selected = chart.chart.deterministic_rules.filter((r) => r.selection.selected);
+      expect(chart.chart.deterministic_rules.length).toBeGreaterThan(selected.length);
+    });
+
+    it("makes the rule schema version part of the cache key", () => {
+      // Four cache layers can hold rule output and none of them was versioned.
+      // The key is a hash, so the checkable property is that the version
+      // participates: bump it and every cached entry is orphaned rather than
+      // being re-served with the old rule shape.
+      const base = {
+        birth_date: BIRTH.birth_date,
+        birth_time: BIRTH.birth_time,
+        lat: BIRTH.latitude,
+        lng: BIRTH.longitude,
+      };
+      const current = makeCacheKey("pos", { ...base, rules_schema: RULES_SCHEMA_VERSION });
+      const bumped = makeCacheKey("pos", { ...base, rules_schema: `${RULES_SCHEMA_VERSION}-next` });
+      const unversioned = makeCacheKey("pos", base);
+
+      expect(current).not.toBe(bumped);
+      expect(current).not.toBe(unversioned);
     });
 
     it("engine section has correct preset info", () => {

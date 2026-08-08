@@ -100,17 +100,22 @@ export type RuleSelectionMeta = {
 
 export type DeterministicRule = {
   /** Stable, copy-independent id from the data file, e.g. "career.tenth_house_axis". */
-  id?: string;
+  id: string;
   /** id plus bound discriminators, unique within one chart. Use as the React key. */
-  instance_key?: string;
-  tier?: RuleTier;
+  instance_key: string;
+  tier: RuleTier;
 
-  display?: RuleDisplay;
-  evidence?: RuleEvidence;
-  selection?: RuleSelectionMeta;
+  display: RuleDisplay;
+  evidence: RuleEvidence;
+  selection: RuleSelectionMeta;
 
   priority: RulePriority;
-  category?: string;
+  /**
+   * Narrowed from `string | undefined`. Load-bearing for page structure: the
+   * desktop split buckets by this, so a fourth value would drop those rules off
+   * the page entirely. Enforced by Zod at rule-load time.
+   */
+  category: RuleCategory;
 
   /** @deprecated read display.headline. Mirrors it exactly. */
   title: string;
@@ -119,9 +124,9 @@ export type DeterministicRule = {
   /** @deprecated read evidence.technical_note. Mirrors it exactly. */
   basis: string;
   /** @deprecated read selection.score. Mirrors it exactly. Always [0,1]. */
-  confidence_score?: number;
+  confidence_score: number;
   /** @deprecated read display.tension. Mirrors `display.tension ?? ""`. */
-  tension_note?: string;
+  tension_note: string;
 };
 
 export type PlanetPosition = {
@@ -308,12 +313,24 @@ export type LifeDomainKey =
   | "life_cycle"
   | "travel_destinations";
 
+/**
+ * The client-facing tier for a life domain.
+ *
+ * Plain language throughout: no "Label: Sign house N, led by Lord" headlines,
+ * no transit or house vocabulary in `timing`. The technical versions of all of
+ * this survive verbatim on the legacy fields and in `DomainEvidence`.
+ */
 export type DomainDisplay = {
   headline: string;
   body: string;
-  /** Two or three plain-language bullets. Replaces the four stacked technical lists. */
-  highlights: string[];
   guidance: string;
+  long_game: string;
+  /** At most 3. */
+  strengths: string[];
+  /** At most 2. */
+  watchouts: string[];
+  /** At most 2, and free of transit/house vocabulary. */
+  timing: string[];
 };
 
 export type DomainEvidence = {
@@ -533,6 +550,10 @@ export type ChartApiResponse = {
     houses: HousePlacement[];
     house_cusps?: number[];
     deterministic_rules: DeterministicRule[];
+    /** Rank-ordered instance_keys of the selected rules. Length <= topN. */
+    selected_rule_ids?: string[];
+    /** Mirrors rarity.json's version, so a stale cached payload is detectable. */
+    rules_dataset_version?: string;
     summary: string;
     nakshatra?: NakshatraInfo;
     dasha?: DashaInfo;

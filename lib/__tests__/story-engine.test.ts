@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import type { MajorLifeShift } from "@/lib/engines/major-shifts-engine";
 import { buildPersonalStory } from "@/lib/story-engine";
+import { makeDomainInsight, makeRule } from "./factories";
 
 const LIFE_SHIFTS: MajorLifeShift[] = [
   {
@@ -47,17 +48,7 @@ function makePayload(): ChartApiResponse {
         { name: "Ketu", longitude: 61, sign: "Gemini", degree_in_sign: 1, house: 3 },
       ],
       houses: [],
-      deterministic_rules: [
-        {
-          title: "Ascendant Lord: Mars in House 1",
-          insight: "Mars gives a direct, practical edge to your life direction.",
-          basis: "Mars in Aries, house 1.",
-          priority: "high",
-          category: "core",
-          confidence_score: 0.86,
-          tension_note: "Move quickly, but leave a pause for consultation before a high-impact decision.",
-        },
-      ],
+      deterministic_rules: [makeRule()],
       summary: "A focused chart with a practical impulse toward leadership.",
       nakshatra: {
         name: "Ashlesha",
@@ -75,21 +66,7 @@ function makePayload(): ChartApiResponse {
         current_antardasha_end: "2027-10-01",
         periods: [],
       },
-      life_domain_insights: [
-        {
-          key: "career",
-          label: "Career",
-          headline: "Career: Build visible responsibility around your strongest skills.",
-          overview: "Career patterns reward steady leadership.",
-          strengths: ["Strategic execution", "Clear responsibility"],
-          watchouts: ["Taking on every urgent task yourself"],
-          timing_triggers: ["you pair a long-range commitment with a clear operating rhythm"],
-          supporting_patterns: ["Mars in the first house"],
-          guidance: "Choose one meaningful scope, then make it repeatable.",
-          long_game: "Build authority through outcomes and reliable systems.",
-          confidence_score: 0.91,
-        },
-      ],
+      life_domain_insights: [makeDomainInsight()],
       shadbala: [
         {
           planet: "Mars",

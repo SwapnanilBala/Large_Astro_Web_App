@@ -98,7 +98,83 @@ describe("rule-engine", () => {
         expect(typeof rule.insight).toBe("string");
         expect(typeof rule.basis).toBe("string");
         expect(typeof rule.tension_note).toBe("string");
+
+        // Identity and the two-layer split.
+        expect(rule).toHaveProperty("id");
+        expect(rule).toHaveProperty("instance_key");
+        expect(rule).toHaveProperty("tier");
+        expect(rule.display).toHaveProperty("headline");
+        expect(rule.display).toHaveProperty("body");
+        expect(rule.display).toHaveProperty("rarity_label");
+        expect(rule.evidence).toHaveProperty("technical_note");
+        expect(Array.isArray(rule.evidence!.claims)).toBe(true);
+        expect(rule.evidence).toHaveProperty("rarity");
+        expect(typeof rule.selection!.strength).toBe("number");
+        expect(typeof rule.selection!.score).toBe("number");
+        expect(typeof rule.selection!.rank).toBe("number");
       }
+    });
+
+    it("keeps every deprecated mirror consistent with the tier it mirrors", () => {
+      // The tripwire for the migration: these five fields still have readers,
+      // and a mirror that goes stale renders last month's copy next to this
+      // month's evidence with nothing failing.
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const { rules } = generateRules(ASC_SIGN, planets, houses);
+
+      for (const rule of rules) {
+        expect(rule.title).toBe(rule.display!.headline);
+        expect(rule.insight).toBe(rule.display!.body);
+        expect(rule.basis).toBe(rule.evidence!.technical_note);
+        expect(rule.confidence_score).toBe(rule.selection!.score);
+        expect(rule.tension_note).toBe(rule.display!.tension ?? "");
+      }
+    });
+
+    it("keeps rarity pointing the right way: high score means rare", () => {
+      // Rarity's natural expression is a fire rate, where LOW means rare. Every
+      // ranking sort in the app is descending, so an inversion here would
+      // promote the most ordinary rule in the chart to the headline silently.
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const { rules } = generateRules(ASC_SIGN, planets, houses);
+
+      for (const rule of rules) {
+        const rarity = rule.evidence!.rarity;
+        expect(rarity.score).toBeCloseTo(1 - rarity.fire_rate, 6);
+        expect(rule.selection!.score).toBeCloseTo(rarity.score * rule.selection!.strength, 6);
+      }
+    });
+
+    it("marks a selected set that is ranked 1..N and never empty", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const { rules } = generateRules(ASC_SIGN, planets, houses);
+
+      const selected = rules
+        .filter((r) => r.selection!.selected)
+        .sort((a, b) => a.selection!.rank - b.selection!.rank);
+
+      expect(selected.length).toBeGreaterThan(0);
+      expect(selected.length).toBeLessThanOrEqual(7);
+      expect(selected.map((r) => r.selection!.rank)).toEqual(
+        selected.map((_, i) => i + 1)
+      );
+      for (const rule of rules) {
+        if (!rule.selection!.selected) expect(rule.selection!.rank).toBe(0);
+      }
+    });
+
+    it("keeps deterministic_rules the full fired list, not the selected one", () => {
+      // Selection is metadata. If this ever becomes a filter, the desktop
+      // category buckets can empty and mobile loses its above-the-fold content.
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const { rules } = generateRules(ASC_SIGN, planets, houses);
+
+      expect(rules.length).toBeGreaterThan(7);
+      expect(rules.some((r) => !r.selection!.selected)).toBe(true);
     });
 
     it("priority values are high, medium, or low", () => {
@@ -140,8 +216,10 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      expect(rules[0].title).toContain("Lagna Signature");
-      expect(rules[0].title).toContain(ASC_SIGN);
+      // Looked up by id, not by copy. Display headlines are plain language
+      // now; the sign name lives in the technical tier.
+      expect(rules[0].id).toBe("core.lagna_signature");
+      expect(rules[0].evidence!.technical_note).toContain(ASC_SIGN);
       expect(rules[0].priority).toBe("high");
       expect(rules[0].category).toBe("core");
     });
@@ -155,7 +233,7 @@ describe("rule-engine", () => {
 
       const sunRule = rules.find((r) => r.id === "core.solar_identity");
       expect(sunRule).toBeDefined();
-      expect(sunRule!.title).toContain("Taurus"); // Sun is in Taurus
+      expect(sunRule!.evidence!.technical_note).toContain("Taurus"); // Sun is in Taurus
       expect(sunRule!.category).toBe("core");
     });
 
@@ -166,7 +244,7 @@ describe("rule-engine", () => {
 
       const moonRule = rules.find((r) => r.id === "core.lunar_mindset");
       expect(moonRule).toBeDefined();
-      expect(moonRule!.title).toContain("Leo"); // Moon is in Leo
+      expect(moonRule!.evidence!.technical_note).toContain("Leo"); // Moon is in Leo
     });
   });
 
@@ -212,8 +290,11 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
+      // Dignity rules are one record per (dignity x category), so Jupiter --
+      // a career planet in the legacy category split -- lands on the career
+      // variant of the exalted record.
       const jupiterExalted = rules.find(
-        (r) => r.instance_key === "dignity.planet_strength:Jupiter:exalted"
+        (r) => r.instance_key === "dignity.exalted_career:Jupiter"
       );
       expect(jupiterExalted).toBeDefined();
       expect(jupiterExalted!.priority).toBe("high");
@@ -225,7 +306,7 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      const ownSignRules = rules.filter((r) => r.instance_key?.endsWith(":own_sign"));
+      const ownSignRules = rules.filter((r) => r.id?.startsWith("dignity.own_sign"));
       expect(ownSignRules.length).toBeGreaterThan(0);
     });
 
@@ -235,11 +316,14 @@ describe("rule-engine", () => {
       const houses = buildTestHouses(ASC_SIGN);
       const { rules } = generateRules(ASC_SIGN, planets, houses);
 
-      // There should be no dignity rule for Sun (neutral in Taurus)
+      // There should be no dignity rule for Sun (neutral in Taurus). The skip
+      // survives as the absence of a dignity.neutral record, not as a
+      // downstream filter.
       const sunDignity = rules.find(
-        (r) => r.instance_key === "dignity.planet_strength:Sun:neutral"
+        (r) => r.id?.startsWith("dignity.") && r.instance_key?.endsWith(":Sun")
       );
       expect(sunDignity).toBeUndefined();
+      expect(rules.some((r) => r.id?.startsWith("dignity.neutral"))).toBe(false);
     });
   });
 
@@ -294,7 +378,7 @@ describe("rule-engine", () => {
       const ascLord = rules.find((r) => r.id === "core.ascendant_lord");
       expect(ascLord).toBeDefined();
       // Taurus ruler is Venus
-      expect(ascLord!.title).toContain("Venus");
+      expect(ascLord!.evidence!.technical_note).toContain("Venus");
     });
 
     it("generates Nodal Axis rule", () => {

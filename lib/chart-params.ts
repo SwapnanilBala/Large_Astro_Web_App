@@ -2,6 +2,7 @@ import { buildChart } from "@/lib/engines/chart-service";
 import type { BirthDetailsInput } from "@/lib/engines/compatibility-service";
 import { BirthInputSchema, firstZodError } from "@/lib/schemas";
 import { makeCacheKey, serverCaches } from "@/lib/server-cache";
+import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import type { ChartApiResponse } from "@/lib/astro-types";
 
 /**
@@ -109,6 +110,7 @@ export function getChartPayload(chartParams: ChartParams): ChartApiResponse {
     lat: birth.latitude,
     lng: birth.longitude,
     transits: includeTransits,
+    rules_schema: RULES_SCHEMA_VERSION,
   });
 
   const cached = serverCaches.chart.get(cacheKey) as ChartApiResponse | null;

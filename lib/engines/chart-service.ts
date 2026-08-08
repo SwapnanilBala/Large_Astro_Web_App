@@ -7,8 +7,15 @@ import {
   type AscendantData,
   type SwissEngineResult,
 } from "./swiss-ephemeris-engine";
-import { generateRules, generateLifeDomainInsights, HOUSE_THEMES } from "./rule-engine";
+import {
+  generateRules,
+  generateLifeDomainInsights,
+  selectedRuleIds,
+  rulesDatasetVersion,
+  HOUSE_THEMES,
+} from "./rule-engine";
 import type { DeterministicRule, LifeDomainInsight } from "./rule-engine";
+import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import {
   calculateNakshatra,
   calculateDashaTimeline,
@@ -62,6 +69,10 @@ export interface ChartResponse {
     houses: HousePlacement[];
     house_cusps?: number[];
     deterministic_rules: DeterministicRule[];
+    /** Rank-ordered instance_keys of the selected rules. Length <= topN. */
+    selected_rule_ids: string[];
+    /** Mirrors rarity.json's version, so a stale cached payload is detectable. */
+    rules_dataset_version: string;
     summary: string;
     nakshatra?: {
       name: string;
@@ -294,7 +305,9 @@ interface StageCaches {
 
 function createStageCaches(): StageCaches {
   return {
-    positions: new ServerCache<CorePositionsResult>("stage_positions", 500, DAY_MS),
+    // Renamed alongside the rule-shape change so an already-warm process
+    // starts cold rather than serving pre-migration rule objects.
+    positions: new ServerCache<CorePositionsResult>("stage_positions_v2", 500, DAY_MS),
     dasha: new ServerCache<DashaStageResult>("stage_dasha", 300, DAY_MS),
     aspects: new ServerCache<AspectStageResult>("stage_aspects", 300, DAY_MS),
     navamsa: new ServerCache<NavamsaStageResult>("stage_navamsa", 300, DAY_MS),
@@ -451,6 +464,10 @@ function hashLongitudes(planets: PlanetPosition[]): string {
 // --------------------------------------------------------------------------
 
 function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
+  // RULES_SCHEMA_VERSION is load-bearing, not decorative. This stage holds
+  // rule output for 24 hours; without it, a payload-cache miss two hours after
+  // a deploy rebuilds from day-old cached rules and republishes the old shape
+  // into a fresh entry, and consumers reading display.headline get undefined.
   const cacheKey = makeCacheKey("pos", {
     birth_date: birth.birth_date,
     birth_time: birth.birth_time,
@@ -458,6 +475,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
     lat: birth.latitude,
     lng: birth.longitude,
     engine_id: birth.engine_id ?? "lahiri_classic",
+    rules_schema: RULES_SCHEMA_VERSION,
   });
 
   const cached = stageCaches.positions.get(cacheKey);
@@ -823,6 +841,8 @@ export function buildChart(
       houses: core.houses,
       house_cusps: core.house_cusps,
       deterministic_rules: core.rules,
+      selected_rule_ids: selectedRuleIds(core.rules),
+      rules_dataset_version: rulesDatasetVersion(),
       summary: core.summary,
       nakshatra: nakshatraInfo,
       dasha: dashaInfo,

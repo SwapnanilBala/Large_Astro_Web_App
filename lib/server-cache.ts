@@ -131,8 +131,9 @@ interface GlobalCaches {
 
 function createCaches(): GlobalCaches {
   return {
-    /** 500 entries, 1 hour TTL */
-    chart: new ServerCache("chart", 500, 60 * 60 * 1000),
+    /** 500 entries, 1 hour TTL. Renamed to v2 to force a cold start when the
+     *  rule payload shape changed; entries here can hold rule output. */
+    chart: new ServerCache("chart_v2", 500, 60 * 60 * 1000),
     /** 100 entries, 5 min TTL */
     forecast: new ServerCache("forecast", 100, 5 * 60 * 1000),
     /** 200 entries, 30 min TTL */
