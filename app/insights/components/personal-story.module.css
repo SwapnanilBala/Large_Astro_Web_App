@@ -52,6 +52,13 @@
   flex: 0 0 auto;
 }
 
+.compactAction {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.45rem;
+}
+
 /* Scoped hard, so it does not inherit the global <button> treatment
    (5-layer gradient, rotating halo, breathing glow) that the rest of the
    results page uses for primary calls to action. */
@@ -126,6 +133,11 @@
 
   .action {
     width: 100%;
+  }
+
+  .compactAction {
+    width: 100%;
+    align-items: stretch;
   }
 
   .downloadButton {

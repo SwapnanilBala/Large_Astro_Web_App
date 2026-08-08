@@ -9,6 +9,7 @@ import styles from "./personal-story.module.css";
 export type PersonalStoryProps = {
   payload: ChartApiResponse;
   className?: string;
+  compact?: boolean;
 };
 
 function slugify(value: string): string {
@@ -43,7 +44,7 @@ function formatGeneratedDate(isoValue: string): string | undefined {
  * card that opened a modal sidebar with a chapter accordion, which put two
  * navigation steps and a scroll trap between the reader and the text.
  */
-export default function PersonalStory({ payload, className }: PersonalStoryProps) {
+export default function PersonalStory({ payload, className, compact = false }: PersonalStoryProps) {
   const [status, setStatus] = useState<"idle" | "generating" | "error">("idle");
   const story = useMemo(() => buildPersonalStory(payload), [payload]);
 
@@ -83,6 +84,35 @@ export default function PersonalStory({ payload, className }: PersonalStoryProps
 
   const generating = status === "generating";
 
+  const downloadAction = (
+    <button
+      type="button"
+      className={styles.downloadButton}
+      onClick={handleDownload}
+      disabled={generating}
+    >
+      {generating ? (
+        <Loader2 className={styles.spinIcon} size={18} aria-hidden="true" />
+      ) : (
+        <Download size={18} aria-hidden="true" />
+      )}
+      <span>{generating ? "Preparing PDF…" : compact ? "Download reading" : "Download PDF"}</span>
+    </button>
+  );
+
+  if (compact) {
+    return (
+      <div className={[styles.compactAction, className].filter(Boolean).join(" ")}>
+        {downloadAction}
+        {status === "error" && (
+          <p className={styles.error} role="alert">
+            The PDF could not be generated. Please try again.
+          </p>
+        )}
+      </div>
+    );
+  }
+
   return (
     <section className={[styles.storyRow, className].filter(Boolean).join(" ")}>
       <div className={styles.copy}>
@@ -94,19 +124,7 @@ export default function PersonalStory({ payload, className }: PersonalStoryProps
       </div>
 
       <div className={styles.action}>
-        <button
-          type="button"
-          className={styles.downloadButton}
-          onClick={handleDownload}
-          disabled={generating}
-        >
-          {generating ? (
-            <Loader2 className={styles.spinIcon} size={18} aria-hidden="true" />
-          ) : (
-            <Download size={18} aria-hidden="true" />
-          )}
-          <span>{generating ? "Preparing PDF…" : "Download PDF"}</span>
-        </button>
+        {downloadAction}
 
         {status === "error" && (
           <p className={styles.error} role="alert">

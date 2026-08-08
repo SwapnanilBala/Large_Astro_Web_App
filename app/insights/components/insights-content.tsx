@@ -70,108 +70,6 @@ const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: fa
 import type { ChartApiResponse, DeterministicRule, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
-import ZodiacSignImage from "@/app/components/ZodiacSignImage";
-import PlanetOrbRow from "@/app/components/PlanetOrbRow";
-import type { PlanetName } from "@/app/components/PlanetOrb";
-
-type HeroPlanetMetadata = {
-  planet: PlanetName;
-  sign?: string;
-  house?: number;
-  dignity?: string;
-  shadbalaStrength?: number;
-  strengthPercent?: number;
-  isCurrentDashaLord: boolean;
-  tooltip: string;
-};
-
-type FuturePlanetOrbRowProps = React.ComponentProps<typeof PlanetOrbRow> & {
-  planetMetadata?: HeroPlanetMetadata[];
-  activePlanet?: PlanetName;
-  currentDashaLord?: PlanetName;
-};
-
-const PLANET_NAMES: PlanetName[] = [
-  "Sun",
-  "Moon",
-  "Mars",
-  "Mercury",
-  "Jupiter",
-  "Venus",
-  "Saturn",
-  "Rahu",
-  "Ketu",
-];
-
-const PLANET_NAME_SET = new Set<string>(PLANET_NAMES);
-const HeroPlanetOrbRow = PlanetOrbRow as React.ComponentType<FuturePlanetOrbRowProps>;
-
-function toPlanetName(name?: string | null): PlanetName | null {
-  if (!name) return null;
-  return PLANET_NAME_SET.has(name) ? (name as PlanetName) : null;
-}
-
-function formatDignity(dignity?: string) {
-  if (!dignity) return undefined;
-  return dignity
-    .split(/[_\s-]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function buildHeroPlanetMetadata(payload: ChartApiResponse) {
-  const currentDashaLord = toPlanetName(payload.chart.dasha?.current_dasha);
-  const shadbalaByPlanet = new Map(
-    (payload.chart.shadbala ?? []).map((planet) => [planet.planet, planet])
-  );
-  const navamsaByPlanet = new Map(
-    (payload.chart.navamsa ?? []).map((planet) => [planet.name, planet])
-  );
-  const seenPlanets = new Set<PlanetName>();
-  const metadata: HeroPlanetMetadata[] = [];
-
-  for (const planet of payload.chart.planets) {
-    const planetName = toPlanetName(planet.name);
-    if (!planetName || seenPlanets.has(planetName)) continue;
-
-    seenPlanets.add(planetName);
-    const shadbala = shadbalaByPlanet.get(planet.name);
-    const dignity = formatDignity(navamsaByPlanet.get(planet.name)?.dignity);
-    const house =
-      planet.house ??
-      payload.chart.houses.find((housePlacement) =>
-        housePlacement.planets.includes(planet.name)
-      )?.house_number;
-    const strengthPercent =
-      typeof shadbala?.strengthRatio === "number"
-        ? Math.round(shadbala.strengthRatio * 100)
-        : undefined;
-    const details = [
-      planet.sign,
-      house ? `House ${house}` : undefined,
-      dignity,
-      currentDashaLord === planetName ? "Current dasha lord" : undefined,
-    ].filter(Boolean);
-
-    metadata.push({
-      planet: planetName,
-      sign: planet.sign,
-      house,
-      dignity,
-      shadbalaStrength: shadbala?.strengthRatio,
-      strengthPercent,
-      isCurrentDashaLord: currentDashaLord === planetName,
-      tooltip: `${planetName}${details.length > 0 ? ` - ${details.join(" - ")}` : ""}`,
-    });
-  }
-
-  return {
-    planets: metadata.map((planet) => planet.planet),
-    metadata,
-    currentDashaLord,
-  };
-}
 
 type InsightsContentProps = {
   payload: ChartApiResponse;
@@ -359,15 +257,11 @@ function CollapsibleSection({
 }
 
 const SECTION_ANCHORS = [
-  { id: "chart-map", label: "Map" },
+  { id: "overview", label: "Overview" },
+  { id: "chart-map", label: "Chart" },
   { id: "timing", label: "Timing" },
-  { id: "vimshottari-dashas", label: "Dashas" },
-  { id: "core", label: "Core" },
-  { id: "themes", label: "Themes" },
-  { id: "karma", label: "Karma" },
-  { id: "continue-reading", label: "Continue" },
-  { id: "ultimate", label: "Ultimate" },
-  { id: "fortune", label: "Fortune" },
+  { id: "ultimate", label: "Life areas" },
+  { id: "continue-reading", label: "More" },
 ];
 
 function SectionAnchorNav() {
@@ -501,96 +395,51 @@ function getElementCounts(planets: ChartApiResponse["chart"]["planets"]) {
     }, {});
 }
 
-function ChartStrengthMap({ payload }: { payload: ChartApiResponse }) {
+function ChartAtAGlance({ payload }: { payload: ChartApiResponse }) {
   const shadbala = payload.chart.shadbala ?? [];
-  const strongest = [...shadbala]
-    .sort((left, right) => right.strengthRatio - left.strengthRatio)
-    .slice(0, 3);
-  const watchPlanets = [...shadbala]
-    .sort((left, right) => left.strengthRatio - right.strengthRatio)
-    .slice(0, 3);
+  const strongest = [...shadbala].sort(
+    (left, right) => right.strengthRatio - left.strengthRatio,
+  )[0];
   const elementCounts = getElementCounts(payload.chart.planets);
   const dominantElement =
     Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? "Mixed";
-  const activeHouses = payload.chart.houses
+  const activeHouse = [...payload.chart.houses]
     .filter((house) => house.planets.length > 0)
-    .sort((left, right) => right.planets.length - left.planets.length)
-    .slice(0, 4);
+    .sort((left, right) => right.planets.length - left.planets.length)[0];
 
   return (
-    <section id="chart-map" className={`${styles.strengthMap} ${styles.anchorTarget}`}>
-      <div className={styles.strengthMapHeader}>
+    <aside className={styles.chartGlance} aria-label="Chart at a glance">
+      <div>
+        <p className={styles.kicker}>Chart at a glance</p>
+        <h2>{payload.chart.ascendant.sign} rising</h2>
+        <p className={styles.chartGlanceIntro}>
+          The three chart signals worth carrying into the interpretation.
+        </p>
+      </div>
+      <dl className={styles.chartGlanceFacts}>
         <div>
-          <p className={styles.kicker}>Chart Strength Map</p>
-          <h2 className={styles.heading}>Fast scan of pressure, support, and emphasis</h2>
+          <dt>Strongest support</dt>
+          <dd>{strongest?.planet ?? "Balanced"}</dd>
         </div>
-        <span className={styles.strengthElement}>{dominantElement}</span>
-      </div>
-
-      <div className={styles.strengthGrid}>
-        <div className={styles.strengthPanel}>
-          <h3>Strongest Planets</h3>
-          <div className={styles.strengthList}>
-            {/* The bar still encodes the ratio; the printed percentage does
-                not. A shadbala ratio is strength against a required minimum,
-                so it exceeds 100% routinely -- printing it as a percentage
-                invited a reading it cannot support. */}
-            {strongest.map((planet) => (
-              <div key={planet.planet} className={styles.strengthRow}>
-                <span>{planet.planet}</span>
-                <div className={styles.strengthTrack}>
-                  <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
+        <div>
+          <dt>Dominant tone</dt>
+          <dd>{dominantElement}</dd>
         </div>
-
-        <div className={styles.strengthPanel}>
-          <h3>Needs Care</h3>
-          <div className={styles.strengthList}>
-            {watchPlanets.map((planet) => (
-              <div key={planet.planet} className={styles.strengthRow}>
-                <span>{planet.planet}</span>
-                <div className={`${styles.strengthTrack} ${styles.strengthTrackWarm}`}>
-                  <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
+        <div>
+          <dt>Most active area</dt>
+          <dd>
+            {activeHouse
+              ? `House ${activeHouse.house_number} · ${activeHouse.sign}`
+              : "Evenly distributed"}
+          </dd>
         </div>
-
-        <div className={styles.strengthPanel}>
-          <h3>Active Houses</h3>
-          <div className={styles.housePills}>
-            {activeHouses.map((house) => (
-              <span key={house.house_number}>
-                H{house.house_number} {house.sign}: {house.planets.join(", ")}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ActionGuidanceChips({ payload }: { payload: ChartApiResponse }) {
-  const highRules = payload.chart.deterministic_rules.filter((rule) => rule.priority === "high");
-  const currentDasha = payload.chart.dasha?.current_dasha;
-  const chips = [
-    currentDasha ? `Use ${currentDasha} timing consciously` : "Use timing consciously",
-    highRules[0]?.category === "career" ? "Prioritize work structure" : "Act on the clearest high-priority theme",
-    highRules.some((rule) => rule.category === "love") ? "Keep relationship choices deliberate" : "Keep decisions deliberate",
-    payload.chart.lucky_elements?.lucky_day ? `Plan key actions on ${payload.chart.lucky_elements.lucky_day}` : "Pick clean timing windows",
-  ];
-
-  return (
-    <section className={styles.guidanceChips} aria-label="Action-oriented guidance">
-      {chips.map((chip) => (
-        <span key={chip}>{chip}</span>
-      ))}
-    </section>
+      </dl>
+      {activeHouse && (
+        <p className={styles.chartGlanceNote}>
+          {activeHouse.planets.join(", ")} concentrate in this part of the chart.
+        </p>
+      )}
+    </aside>
   );
 }
 
@@ -714,9 +563,6 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: primaryRule.priority === "high" ? "Highest signal" : "Chart signal",
       title: primaryRule.display.headline,
       body: primaryRule.display.body,
-      // The rarity phrase rather than the technical basis. The basis is still
-      // one click away in the rule card's evidence disclosure.
-      meta: primaryRule.display.rarity_label,
       tone: "gold",
     });
   }
@@ -1230,8 +1076,6 @@ export default function InsightsContent({
         payload.chart.dasha?.current_antardasha
       )
     : [];
-  const heroPlanetStrip = buildHeroPlanetMetadata(payload);
-
   const copyCurrentChartLink = async () => {
     try {
       await navigator.clipboard.writeText(
@@ -1262,18 +1106,6 @@ export default function InsightsContent({
         visible: {
           opacity: 1,
           transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-        },
-      };
-
-  const bentoItem = shouldReduceMotion
-    ? noMotion
-    : {
-        hidden: { opacity: 0, y: 24, scale: 0.97 },
-        visible: {
-          opacity: 1,
-          y: 0,
-          scale: 1,
-          transition: { type: "spring", stiffness: 200, damping: 20 },
         },
       };
 
@@ -1320,155 +1152,45 @@ export default function InsightsContent({
       <section className={`dashboard-shell ${styles.dashboard}`}>
         <SectionAnchorNav />
         {/* â”€â”€â”€ Hero Header â”€â”€â”€ */}
-        <motion.div
-          className={styles.hero}
+        <motion.header
+          id="overview"
+          className={`${styles.hero} ${styles.anchorTarget}`}
           initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 22 }}
         >
-          <p className={styles.kicker}>{t("insights.kicker")}</p>
-          <h1 className={styles.title}>
-            {payload.client.name}
-            {t("insights.headingSuffix")}
-          </h1>
-          <p className={styles.lead}>{payload.chart.summary}</p>
+          <div className={styles.heroCopy}>
+            <p className={styles.kicker}>{t("insights.kicker")}</p>
+            <h1 className={styles.title}>
+              {payload.client.name}
+              {t("insights.headingSuffix")}
+            </h1>
+            <p className={styles.lead}>{payload.chart.summary}</p>
+            <div className={styles.heroFacts} aria-label="Key chart facts">
+              <span>{payload.chart.ascendant.sign} rising</span>
+              {payload.chart.dasha?.current_dasha && (
+                <span>{payload.chart.dasha.current_dasha} period</span>
+              )}
+            </div>
+          </div>
+          <div className={styles.heroActions} aria-label="Report actions">
+            <button
+              type="button"
+              className={styles.heroAction}
+              onClick={() => void copyCurrentChartLink()}
+            >
+              <FiCopy size={16} />
+              Copy link
+            </button>
+            <PersonalStory payload={payload} compact />
+          </div>
+        </motion.header>
 
-          {/* Planet orbs row â€“ key planets from this chart, centered */}
-          {heroPlanetStrip.planets.length > 0 && (
-            <section className={styles.heroPlanetStrip} aria-labelledby="hero-planet-strip-heading">
-              <div className={styles.heroPlanetStripHeader}>
-                <p className={styles.heroPlanetKicker}>Natal Signature</p>
-                <h2 id="hero-planet-strip-heading" className={styles.heroPlanetTitle}>
-                  Planetary field
-                </h2>
-                {heroPlanetStrip.currentDashaLord && (
-                  <span className={styles.heroDashaPill}>
-                    {heroPlanetStrip.currentDashaLord} dasha
-                  </span>
-                )}
-              </div>
-              <div className={styles.heroPlanetRail}>
-                <div className={styles.heroPlanetScroller}>
-                  <HeroPlanetOrbRow
-                    planets={heroPlanetStrip.planets}
-                    planetMetadata={heroPlanetStrip.metadata}
-                    activePlanet={heroPlanetStrip.currentDashaLord ?? undefined}
-                    currentDashaLord={heroPlanetStrip.currentDashaLord ?? undefined}
-                    size="md"
-                    showLabels
-                    className={styles.heroPlanetRow}
-                  />
-                </div>
-              </div>
-            </section>
-          )}
-        </motion.div>
-
-        {/* â”€â”€â”€ Top Metrics Bento Row â”€â”€â”€ */}
-        <ActionGuidanceChips payload={payload} />
-        <PersonalStory payload={payload} />
         <TopTakeawaysModule payload={payload} />
 
         <motion.div
-          className={styles.gridHero}
-          variants={bentoContainer}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Lagna Card */}
-          <motion.article
-            className={`${styles.cardMetric} ${styles.cardGold} ${styles.cardDepthFront}`}
-            variants={bentoItem}
-          >
-            <ZodiacSignImage
-              sign={payload.chart.ascendant.sign}
-              size={64}
-              style={{
-                border: "2px solid rgba(255,200,80,0.4)",
-                boxShadow: "0 0 20px rgba(255,200,80,0.25)",
-                marginBottom: "0.5rem",
-              }}
-            />
-            <h3>{t("insights.lagna")}</h3>
-            <p className={styles.metricValue}>
-              {payload.chart.ascendant.sign}
-            </p>
-            {/* The raw degree-in-sign readout is gone. A number to two decimal
-                places is a measurement, not a reading, and it was the first
-                thing on the page. The exact degree is still in the planet
-                table and in every rule's evidence. */}
-          </motion.article>
-
-          {/* Engine Card */}
-          <motion.article
-            className={`${styles.cardMetric} ${styles.cardAqua} ${styles.cardDepthFront}`}
-            variants={bentoItem}
-          >
-            <div className={styles.metricIcon}>&#x2699;</div>
-            <h3>{t("insights.engine")}</h3>
-            <p className={styles.metricValue}>
-              {payload.engine.engine_label}
-            </p>
-            {/* Ayanamsha, house system and the engine switcher are calculation
-                settings, not findings, so they sit behind a disclosure with
-                the rest of the technical tier.
-
-                The fallback marker used to read literally as "&bull; Fallback":
-                inside a JS string that is not an HTML entity, only in JSX text.
-                It is a real character now. */}
-            <details className={styles.evidence}>
-              <summary className={styles.evidenceSummary}>Calculation settings</summary>
-              <div className={styles.evidenceBody}>
-                <p className={styles.ruleBasis}>
-                  {payload.engine.ayanamsha} • {payload.engine.house_system}
-                  {payload.engine.fallback_mode ? " • Fallback" : ""}
-                </p>
-                {availableEngines.length > 1 && (
-                  <label className={styles.engineSwitcher}>
-                    <span className={styles.claimLabel}>Engine</span>
-                    <select
-                      value={payload.engine.engine_id}
-                      onChange={(event) => switchEngine(event.target.value)}
-                      disabled={isRouting}
-                    >
-                      {availableEngines.map((engine) => (
-                        <option key={engine.engine_id} value={engine.engine_id}>
-                          {engine.label}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                )}
-              </div>
-            </details>
-          </motion.article>
-
-          {/* Ascendant Sign Card (moved from hero) */}
-          <motion.article
-            className={`${styles.cardMetric} ${styles.cardGold} ${styles.cardDepthFront}`}
-            variants={bentoItem}
-          >
-            <ZodiacSignImage
-              sign={payload.chart.ascendant.sign}
-              size={52}
-              style={{
-                border: "2px solid rgba(255,200,80,0.5)",
-                boxShadow: "0 0 16px rgba(255,200,80,0.3)",
-                marginBottom: "0.35rem",
-              }}
-            />
-            <h3>{t("insights.ascendantSign")}</h3>
-            <p className={styles.metricValue}>
-              {payload.chart.ascendant.sign}
-            </p>
-          </motion.article>
-        </motion.div>
-
-        <ConstellationDivider />
-
-        {/* â”€â”€â”€ Main Bento Grid â”€â”€â”€ */}
-        <motion.div
-          className={styles.gridMain}
+          id="chart-map"
+          className={`${styles.gridMain} ${styles.anchorTarget}`}
           variants={bentoContainer}
           initial="hidden"
           whileInView="visible"
@@ -1489,23 +1211,55 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
 
-          {/* Planetary Snapshots â€” Side card */}
           <motion.div
-            className={`${styles.cardPlanets} ${styles.cardDepthFront}`}
+            className={styles.chartGlanceShell}
             variants={bentoItemFromRight}
           >
-            <PanelErrorBoundary panelName="Planetary Snapshots">
-              <PlanetarySnapshots planets={payload.chart.planets} />
-            </PanelErrorBoundary>
+            <ChartAtAGlance payload={payload} />
           </motion.div>
-
         </motion.div>
 
-        <ConstellationDivider compact />
+        <CollapsibleSection
+          kicker="Chart details"
+          title="Placements and calculation settings"
+          defaultOpen={false}
+          className={styles.chartDetails}
+          persistKey={`${sectionStateScope}:chart-details`}
+        >
+          <div className={styles.chartDetailsGrid}>
+            <div className={styles.cardPlanets}>
+              <PanelErrorBoundary panelName="Planetary Snapshots">
+                <PlanetarySnapshots planets={payload.chart.planets} />
+              </PanelErrorBoundary>
+            </div>
+            <section className={styles.calculationPanel}>
+              <p className={styles.kicker}>Calculation method</p>
+              <h3>{payload.engine.engine_label}</h3>
+              <p>
+                {payload.engine.ayanamsha} · {payload.engine.house_system}
+                {payload.engine.fallback_mode ? " · Fallback" : ""}
+              </p>
+              {availableEngines.length > 1 && (
+                <label className={styles.engineSwitcher}>
+                  <span className={styles.claimLabel}>Change method</span>
+                  <select
+                    value={payload.engine.engine_id}
+                    onChange={(event) => switchEngine(event.target.value)}
+                    disabled={isRouting}
+                  >
+                    {availableEngines.map((engine) => (
+                      <option key={engine.engine_id} value={engine.engine_id}>
+                        {engine.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </section>
+          </div>
+        </CollapsibleSection>
 
         {/* â”€â”€â”€ Forecasts & Timing (Collapsible) â”€â”€â”€ */}
-        <ChartStrengthMap payload={payload} />
-
         <CollapsibleSection
           id="timing"
           kicker={t("insights.timingKicker")}

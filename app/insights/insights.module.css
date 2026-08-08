@@ -39,8 +39,16 @@
 
 /* ── Hero Header ── */
 .hero {
-  text-align: center;
-  padding: 2.25rem 1rem 1.15rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: clamp(1.25rem, 3vw, 3rem);
+  text-align: left;
+  padding: clamp(1.6rem, 3vw, 2.4rem) clamp(0.25rem, 1vw, 1rem) 0.75rem;
+}
+
+.heroCopy {
+  min-width: 0;
 }
 
 .kicker {
@@ -61,8 +69,7 @@
   color: var(--ink-main);
   margin: 0 0 1rem;
   line-height: 1.32;
-  text-align: center;
-  justify-content: center;
+  text-align: left;
   background: linear-gradient(135deg, #EAEDF3 40%, #F0B754);
   -webkit-background-clip: text;
   background-clip: text;
@@ -74,8 +81,61 @@
   font-size: 1.32rem;
   color: var(--ink-soft);
   line-height: 1.8;
-  max-width: 680px;
-  margin: 0 auto;
+  max-width: 760px;
+  margin: 0;
+}
+
+.heroFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.heroFacts span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  border-radius: 999px;
+  background: rgba(200, 155, 60, 0.06);
+  color: var(--ink-main);
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.15rem;
+}
+
+.heroAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid rgba(200, 155, 60, 0.2);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.04);
+  color: var(--ink-main);
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+.heroAction:hover,
+.heroAction:focus-visible {
+  border-color: rgba(200, 155, 60, 0.55);
+  background: rgba(200, 155, 60, 0.1);
+  outline: none;
 }
 
 .heroPlanetStrip {
@@ -541,6 +601,7 @@
 .gridMain {
   composes: grid;
   grid-template-columns: 2fr 1fr;
+  align-items: stretch;
 }
 
 .gridThemes {
@@ -837,6 +898,103 @@
 }
 
 /* ── Planets Card ── */
+.chartGlanceShell {
+  min-width: 0;
+}
+
+.chartGlance {
+  composes: card;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  height: 100%;
+  padding: clamp(1.1rem, 2vw, 1.5rem);
+  border-top: 2px solid var(--accent-teal);
+}
+
+.chartGlance h2 {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.45rem, 2vw, 1.9rem);
+  line-height: 1.2;
+}
+
+.chartGlanceIntro,
+.chartGlanceNote {
+  margin: 0.55rem 0 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.chartGlanceFacts {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.chartGlanceFacts > div {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.chartGlanceFacts dt {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.chartGlanceFacts dd {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.chartDetails {
+  border-top-color: rgba(200, 155, 60, 0.22);
+}
+
+.chartDetailsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.8fr);
+  gap: 1rem;
+  padding-top: 0.85rem;
+}
+
+.chartDetailsGrid .cardPlanets {
+  grid-column: auto;
+  max-height: 620px;
+}
+
+.calculationPanel {
+  align-self: start;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: rgba(255, 243, 210, 0.025);
+  padding: 1.15rem;
+}
+
+.calculationPanel h3 {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.25rem;
+}
+
+.calculationPanel > p:not(.kicker) {
+  margin: 0.5rem 0 1rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
+}
+
 .cardPlanets {
   composes: card;
   grid-column: 2;
@@ -3226,7 +3384,20 @@
    ═══════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .heroActions {
+    justify-content: flex-start;
+  }
+
   .gridMain {
+    grid-template-columns: 1fr;
+  }
+
+  .chartDetailsGrid {
     grid-template-columns: 1fr;
   }
 
@@ -3306,6 +3477,11 @@
 
   .gridThemes {
     grid-template-columns: 1fr;
+  }
+
+  .heroActions,
+  .heroAction {
+    width: 100%;
   }
 
   .continuationHub {
