@@ -847,21 +847,26 @@ function RuleCard({ rule, index }: RuleCardProps) {
     >
       <header className={styles.ruleHeader}>
         <h3>{rule.display.headline}</h3>
-        {/* The measured rarity phrase, not the raw lowercase "high" literal.
-            "priority" is an internal display-tone field; it was never meant to
-            be read by a client. */}
-        <span
-          className={
-            rule.priority === "high"
-              ? styles.priorityHigh
-              : rule.priority === "medium"
-                ? styles.priorityMedium
-                : styles.priorityLow
-          }
-        >
-          {rule.display.rarity_label}
-        </span>
       </header>
+      {/* The measured rarity phrase, not the raw lowercase "high" literal.
+          "priority" is an internal display-tone field; it was never meant to
+          be read by a client.
+
+          This is a full sentence, so it gets its own line. It briefly lived in
+          the header as a flex sibling of the title, where `flex-shrink: 0` --
+          correct for the one-word badge that used to sit there -- let it push
+          the heading down to a single character per line. */}
+      <p
+        className={`${styles.rarityLabel} ${
+          rule.priority === "high"
+            ? styles.rarityHigh
+            : rule.priority === "medium"
+              ? styles.rarityMedium
+              : styles.rarityLow
+        }`}
+      >
+        {rule.display.rarity_label}
+      </p>
       <p className={styles.ruleInsight}>{rule.display.body}</p>
       {rule.display.tension && (
         <p className={styles.ruleTension}>{rule.display.tension}</p>
