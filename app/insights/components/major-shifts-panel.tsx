@@ -37,11 +37,27 @@ function statusClass(status: MajorShiftStatus): string {
   return styles.lifeShiftCardUpcoming;
 }
 
-export default function MajorShiftsPanel({
-  payload,
-}: {
-  payload: ChartApiResponse;
-}) {
+function ShiftCard({ shift }: { shift: MajorLifeShift }) {
+  return (
+    <article className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}>
+      <header className={styles.lifeShiftHeader}>
+        <span className={styles.lifeShiftIndex}>#{shift.index}</span>
+        <span className={styles.lifeShiftStatus}>{STATUS_LABEL[shift.status]}</span>
+      </header>
+      <p className={styles.lifeShiftLabel}>{shift.label}</p>
+      <h3>{shift.theme}</h3>
+      <p className={styles.lifeShiftWindow}>
+        <strong>Pivot:</strong> {formatPivot(shift.pivotIso)} · age {shift.ageAtPivot}
+        <br />
+        <strong>Window:</strong> {formatRange(shift.windowStartIso, shift.windowEndIso)}
+      </p>
+      <p>{shift.narrative}</p>
+      {shift.evidence && <small>{shift.evidence}</small>}
+    </article>
+  );
+}
+
+export default function MajorShiftsPanel({ payload }: { payload: ChartApiResponse }) {
   const shifts: MajorLifeShift[] = useMemo(
     () => computeMajorLifeShifts(payload),
     [payload],
@@ -52,56 +68,50 @@ export default function MajorShiftsPanel({
       <div className={styles.lifeShiftsPanel}>
         <p className={styles.sectionIntro}>
           Not enough birth-data context on this chart to estimate major life
-          shift windows. Re-run with a confirmed birth time to unlock this
-          section.
+          shift windows. Re-run with a confirmed birth time to unlock this section.
         </p>
       </div>
     );
   }
 
+  const forwardShifts = shifts
+    .filter((shift) => shift.status === "active" || shift.status === "upcoming")
+    .slice(0, 2);
+  const featuredShifts = forwardShifts.length > 0 ? forwardShifts : shifts.slice(-1);
+  const featuredKeys = new Set(
+    featuredShifts.map((shift) => `${shift.kind}-${shift.pivotIso}`),
+  );
+  const pastShifts = shifts.filter(
+    (shift) =>
+      shift.status === "past" &&
+      !featuredKeys.has(`${shift.kind}-${shift.pivotIso}`),
+  );
+
   return (
     <div className={styles.lifeShiftsPanel}>
       <p className={styles.sectionIntro}>
-        Five approximate windows where your chart sets up a major life shift —
-        drawn from your mahadasha transitions and the Saturn, Jupiter, and
-        nodal return cycles. Dates are pivots, not deadlines: treat each as a
-        9 to 18 month doorway around the listed month.
+        Focus on the chapter that is active now and the next major transition.
+        Dates are planning windows, not deadlines.
       </p>
 
       <div className={styles.lifeShiftsTimeline}>
-        {shifts.map((shift) => (
-          <article
-            key={`${shift.kind}-${shift.pivotIso}`}
-            className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}
-          >
-            <header className={styles.lifeShiftHeader}>
-              <span className={styles.lifeShiftIndex}>#{shift.index}</span>
-              <span className={styles.lifeShiftStatus}>
-                {STATUS_LABEL[shift.status]}
-              </span>
-            </header>
-            <p className={styles.lifeShiftLabel}>{shift.label}</p>
-            <h3>{shift.theme}</h3>
-            <p className={styles.lifeShiftWindow}>
-              <strong>Pivot:</strong> {formatPivot(shift.pivotIso)} · age{" "}
-              {shift.ageAtPivot}
-              <br />
-              <strong>Window:</strong> {formatRange(shift.windowStartIso, shift.windowEndIso)}
-            </p>
-            <p>{shift.narrative}</p>
-            {shift.evidence && (
-              <small>{shift.evidence}</small>
-            )}
-          </article>
+        {featuredShifts.map((shift) => (
+          <ShiftCard key={`${shift.kind}-${shift.pivotIso}`} shift={shift} />
         ))}
       </div>
 
-      <p className={styles.lifeShiftsNote}>
-        These windows compound: when a mahadasha change overlaps a Saturn or
-        Jupiter return, the shift hits harder. Use them as planning anchors —
-        for commitments, exits, study, or recovery — rather than predictions
-        of specific events.
-      </p>
+      {pastShifts.length > 0 && (
+        <details className={styles.lifeShiftsArchive}>
+          <summary>
+            View {pastShifts.length} past chapter{pastShifts.length === 1 ? "" : "s"}
+          </summary>
+          <div className={styles.lifeShiftsTimeline}>
+            {pastShifts.map((shift) => (
+              <ShiftCard key={`${shift.kind}-${shift.pivotIso}`} shift={shift} />
+            ))}
+          </div>
+        </details>
+      )}
     </div>
   );
 }

@@ -2538,10 +2538,23 @@
 }
 
 .domainSelectLabel {
-  font-size: 1.35rem;
+  margin: 0;
+  color: var(--ink-main);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.domainSelectorHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0 0.6rem;
+}
+
+.domainSelectorHeader > span {
   color: var(--ink-soft);
-  margin-bottom: 0.6rem;
-  font-weight: 500;
+  font-size: 0.85rem;
 }
 
 .domainChips {
@@ -2554,10 +2567,10 @@
 .domainChip {
   all: unset;
   cursor: pointer;
-  padding: 0.5rem 1.1rem;
+  padding: 0.55rem 0.9rem;
   border-radius: 24px;
-  font-size: 1.35rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--ink-soft);
   background: rgba(255, 243, 210, 0.04);
   border: 1px solid rgba(200, 155, 60, 0.14);
@@ -2597,8 +2610,8 @@
     0 0 20px rgba(200, 155, 60, 0.08),
     inset 0 0 20px rgba(200, 155, 60, 0.03);
   font-weight: 600;
-  transform: scale(1.06);
-  padding: 0.5rem 1.3rem;
+  transform: none;
+  padding: 0.55rem 0.9rem;
 }
 
 .domainChipActive:hover {
@@ -2606,7 +2619,7 @@
   box-shadow:
     0 4px 20px rgba(200, 155, 60, 0.12),
     inset 0 0 20px rgba(200, 155, 60, 0.04);
-  transform: scale(1.08);
+  transform: translateY(-1px);
 }
 
 /* Domain chip icon slot */
@@ -3119,6 +3132,25 @@
   composes: card;
 }
 
+.deepReadingBlock {
+  display: grid;
+  gap: 0.85rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--line-soft);
+}
+
+.deepReadingBlock:first-child {
+  border-top: 0;
+  padding-top: 0.5rem;
+}
+
+.deepReadingBlock > h3 {
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.3rem;
+}
+
 .cardKarma {
   align-self: center;
   width: min(100%, calc(100vw - 2rem));
@@ -3377,6 +3409,28 @@
   line-height: 1.6;
   margin: 0;
   padding: 0.1rem 0 0.1rem 0.85rem;
+}
+
+.lifeShiftsArchive {
+  margin-top: 0.25rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.9rem;
+}
+
+.lifeShiftsArchive > summary {
+  width: fit-content;
+  color: var(--accent-gold);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.lifeShiftsArchive[open] > summary {
+  margin-bottom: 1rem;
+}
+
+.lifeShiftsArchive .lifeShiftCard {
+  min-height: 0;
 }
 
 /* ═══════════════════════════════════════════════
