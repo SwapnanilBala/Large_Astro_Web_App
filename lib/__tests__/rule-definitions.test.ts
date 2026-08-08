@@ -11,6 +11,7 @@ import { describe, it, expect } from "vitest";
 import { RULE_DEFINITIONS, loadRuleDefinitions, evaluateRules } from "../rules";
 import { ruleDefinitionSchema, RULE_CATEGORIES, RULE_TIERS } from "../rules/schema";
 import { buildRuleContext } from "../rules/context";
+import { RARITY_DATASET } from "../rules/rarity";
 import { calculate } from "../engines/swiss-ephemeris-engine";
 
 // ---------------------------------------------------------------------------
@@ -215,6 +216,17 @@ describe("rule definitions against real charts", () => {
         for (const rule of fired) {
           if (rule.definition.when.op === "always") continue;
           expect(rule.matched_conditions.length, rule.instance_key).toBeGreaterThan(0);
+        }
+      });
+
+      it("measured the rarity of every key it fires", () => {
+        // You cannot ship a rule whose rarity was never measured -- the label
+        // would be a claim resting on nothing.
+        for (const rule of fired) {
+          expect(
+            RARITY_DATASET.counts[rule.rarity_key],
+            `${rule.instance_key} fires under unmeasured key "${rule.rarity_key}"`,
+          ).toBeDefined();
         }
       });
 

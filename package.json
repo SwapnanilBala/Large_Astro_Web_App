@@ -12,6 +12,7 @@
     "lint": "eslint app lib proxy.ts eslint.config.mjs vitest.config.ts vitest.setup.ts next.config.ts",
     "test": "vitest run",
     "test:watch": "vitest --watch",
+    "rarity": "tsx scripts/rarity/generate-rarity.ts",
     "predev": "node scripts/copy-fonts.cjs",
     "prebuild": "node scripts/copy-fonts.cjs"
   },
@@ -50,6 +51,7 @@
     "eslint": "^9.21.0",
     "eslint-config-next": "^16.1.7",
     "jsdom": "^25.0.1",
+    "tsx": "^4.23.11",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   }
