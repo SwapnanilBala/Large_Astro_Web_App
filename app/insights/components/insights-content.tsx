@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -22,7 +22,7 @@ function PanelSkeleton() {
   return <div className={styles.card} style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>{t("insights.loading")}</div>;
 }
 
-/* ─── Intersection Observer Lazy Panel ─── */
+/* â”€â”€â”€ Intersection Observer Lazy Panel â”€â”€â”€ */
 function LazyPanel({
   children,
   fallback,
@@ -67,7 +67,7 @@ const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
+import type { ChartApiResponse, DeterministicRule, LifeDomainInsight } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
@@ -151,7 +151,6 @@ function buildHeroPlanetMetadata(payload: ChartApiResponse) {
       planet.sign,
       house ? `House ${house}` : undefined,
       dignity,
-      strengthPercent !== undefined ? `${strengthPercent}% strength` : undefined,
       currentDashaLord === planetName ? "Current dasha lord" : undefined,
     ].filter(Boolean);
 
@@ -185,7 +184,7 @@ type RuleCardProps = {
   index: number;
 };
 
-/* ─── Animated Section Header ─── */
+/* â”€â”€â”€ Animated Section Header â”€â”€â”€ */
 function SectionHeader({
   kicker,
   heading,
@@ -211,7 +210,7 @@ function SectionHeader({
   );
 }
 
-/* ─── Collapsible Section Wrapper ─── */
+/* â”€â”€â”€ Collapsible Section Wrapper â”€â”€â”€ */
 function CollapsibleSection({
   id,
   title,
@@ -532,13 +531,16 @@ function ChartStrengthMap({ payload }: { payload: ChartApiResponse }) {
         <div className={styles.strengthPanel}>
           <h3>Strongest Planets</h3>
           <div className={styles.strengthList}>
+            {/* The bar still encodes the ratio; the printed percentage does
+                not. A shadbala ratio is strength against a required minimum,
+                so it exceeds 100% routinely -- printing it as a percentage
+                invited a reading it cannot support. */}
             {strongest.map((planet) => (
               <div key={planet.planet} className={styles.strengthRow}>
                 <span>{planet.planet}</span>
                 <div className={styles.strengthTrack}>
                   <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
                 </div>
-                <strong>{Math.round(planet.strengthRatio * 100)}%</strong>
               </div>
             ))}
           </div>
@@ -553,7 +555,6 @@ function ChartStrengthMap({ payload }: { payload: ChartApiResponse }) {
                 <div className={`${styles.strengthTrack} ${styles.strengthTrackWarm}`}>
                   <span style={{ width: `${Math.min(100, Math.round(planet.strengthRatio * 100))}%` }} />
                 </div>
-                <strong>{Math.round(planet.strengthRatio * 100)}%</strong>
               </div>
             ))}
           </div>
@@ -608,7 +609,7 @@ function buildChartHighlights(payload: ChartApiResponse): ChartHighlight[] {
     : undefined;
   const primaryRule = [...payload.chart.deterministic_rules]
     .filter((rule) => rule.priority === "high")
-    .sort((left, right) => (right.confidence_score ?? 0) - (left.confidence_score ?? 0))[0];
+    .sort((left, right) => (right.selection?.score ?? 0) - (left.selection?.score ?? 0))[0];
   const topDomain = [...(payload.chart.life_domain_insights ?? [])].sort(
     (left, right) => right.confidence_score - left.confidence_score,
   )[0];
@@ -630,18 +631,21 @@ function buildChartHighlights(payload: ChartApiResponse): ChartHighlight[] {
       : "";
     highlights.push({
       title: `${strongestPlanet.planet} is a major strength`,
-      detail: `${Math.round(strongestPlanet.strengthRatio * 100)}% strength${placement}.`,
+      // No percentage. A shadbala ratio is an internal comparison against a
+      // required minimum, not a share of anything, so "117%" reads as nonsense
+      // and "83%" reads as a failing grade. Neither is what it means.
+      detail: `One of the cleaner sources of support in the chart${placement}.`,
     });
   }
 
   if (primaryRule) {
-    highlights.push({ title: primaryRule.title, detail: primaryRule.insight });
+    highlights.push({ title: primaryRule.display.headline, detail: primaryRule.display.body });
   }
 
   if (topDomain) {
     highlights.push({
       title: `${topDomain.label} stands out`,
-      detail: topDomain.headline,
+      detail: topDomain.display.body,
     });
   }
 
@@ -679,7 +683,7 @@ function ChartHighlights({ payload }: { payload: ChartApiResponse }) {
   );
 }
 
-/* ─── Rule Card (Animated) ─── */
+/* â”€â”€â”€ Rule Card (Animated) â”€â”€â”€ */
 /* Top Takeaways */
 type TopTakeaway = {
   label: string;
@@ -708,9 +712,11 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
   if (primaryRule) {
     takeaways.push({
       label: primaryRule.priority === "high" ? "Highest signal" : "Chart signal",
-      title: primaryRule.title,
-      body: primaryRule.insight,
-      meta: primaryRule.basis,
+      title: primaryRule.display.headline,
+      body: primaryRule.display.body,
+      // The rarity phrase rather than the technical basis. The basis is still
+      // one click away in the rule card's evidence disclosure.
+      meta: primaryRule.display.rarity_label,
       tone: "gold",
     });
   }
@@ -732,9 +738,9 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
   if (topDomain) {
     takeaways.push({
       label: topDomain.label,
-      title: topDomain.headline,
-      body: topDomain.guidance || topDomain.overview,
-      meta: `${Math.round(topDomain.confidence_score * 100)}% signal strength`,
+      title: topDomain.display.headline,
+      body: topDomain.display.guidance,
+      meta: topDomain.label,
       tone: "coral",
     });
   }
@@ -744,7 +750,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: "Strongest planet",
       title: `${strongestPlanet.planet} leads the strength map`,
       body: "This planet is one of the cleaner sources of support to lean on when the chart feels noisy.",
-      meta: `${Math.round(strongestPlanet.strengthRatio * 100)}% strength`,
+      meta: undefined,
       tone: "teal",
     });
   }
@@ -754,7 +760,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: "Chart orientation",
       title: `${payload.chart.ascendant.sign} rising sets the approach`,
       body: payload.chart.summary,
-      meta: `${payload.chart.ascendant.degree_in_sign.toFixed(2)} deg in sign`,
+      meta: undefined,
       tone: "gold",
     });
   }
@@ -810,6 +816,19 @@ function TopTakeawaysModule({ payload }: { payload: ChartApiResponse }) {
   );
 }
 
+/**
+ * Order by the measured rank, with unselected rules after the selected ones.
+ *
+ * `rank` is 0 for anything the selection layer did not pick, so a naive
+ * ascending sort would float every unselected rule to the top.
+ */
+function bySelectionRank(left: DeterministicRule, right: DeterministicRule): number {
+  const leftRank = left.selection?.selected ? left.selection.rank : Number.MAX_SAFE_INTEGER;
+  const rightRank = right.selection?.selected ? right.selection.rank : Number.MAX_SAFE_INTEGER;
+  if (leftRank !== rightRank) return leftRank - rightRank;
+  return (right.selection?.score ?? 0) - (left.selection?.score ?? 0);
+}
+
 /* Rule Card (Animated) */
 function RuleCard({ rule, index }: RuleCardProps) {
   const shouldReduceMotion = useReducedMotion();
@@ -827,32 +846,55 @@ function RuleCard({ rule, index }: RuleCardProps) {
       }}
     >
       <header className={styles.ruleHeader}>
-        <h3>{rule.title}</h3>
-        <span className={rule.priority === "high" ? styles.priorityHigh : rule.priority === "medium" ? styles.priorityMedium : styles.priorityLow}>
-          {rule.priority}
+        <h3>{rule.display.headline}</h3>
+        {/* The measured rarity phrase, not the raw lowercase "high" literal.
+            "priority" is an internal display-tone field; it was never meant to
+            be read by a client. */}
+        <span
+          className={
+            rule.priority === "high"
+              ? styles.priorityHigh
+              : rule.priority === "medium"
+                ? styles.priorityMedium
+                : styles.priorityLow
+          }
+        >
+          {rule.display.rarity_label}
         </span>
       </header>
-      <p className={styles.ruleInsight}>{rule.insight}</p>
-      <small className={styles.ruleBasis}>{rule.basis}</small>
-      {typeof rule.confidence_score === "number" && (
-        <div className={styles.confidenceBar}>
-          <div
-            className={styles.confidenceFill}
-            style={{ width: `${Math.round(rule.confidence_score * 100)}%` }}
-          />
-          <span className={styles.confidenceLabel}>
-            {Math.round(rule.confidence_score * 100)}%
-          </span>
+      <p className={styles.ruleInsight}>{rule.display.body}</p>
+      {rule.display.tension && (
+        <p className={styles.ruleTension}>{rule.display.tension}</p>
+      )}
+
+      {/* The technical tier. Native <details> rather than a hand-rolled
+          disclosure: it is keyboard accessible and correct by default, and
+          nothing here needs to animate. The confidence bar that used to sit
+          here is gone -- it rendered a hardcoded constant as a percentage. */}
+      <details className={styles.evidence}>
+        <summary className={styles.evidenceSummary}>Why this reading</summary>
+        <div className={styles.evidenceBody}>
+          <p className={styles.ruleBasis}>{rule.evidence.technical_note}</p>
+          <dl className={styles.claims}>
+            {rule.evidence.claims.map((claim) => (
+              <div key={claim.label} className={styles.claim}>
+                <dt className={styles.claimLabel}>{claim.label}</dt>
+                <dd className={styles.claimValue}>
+                  {claim.value}
+                  {claim.detail && (
+                    <span className={styles.claimDetail}>{claim.detail}</span>
+                  )}
+                </dd>
+              </div>
+            ))}
+          </dl>
         </div>
-      )}
-      {rule.tension_note && (
-        <p className={styles.ruleTension}>{rule.tension_note}</p>
-      )}
+      </details>
     </motion.article>
   );
 }
 
-/* ─── Locked Feature Preview ─── */
+/* â”€â”€â”€ Locked Feature Preview â”€â”€â”€ */
 
 function LockedFeaturePreview({
   title,
@@ -870,7 +912,7 @@ function LockedFeaturePreview({
   );
 }
 
-/* ─── Constellation Section Divider ─── */
+/* â”€â”€â”€ Constellation Section Divider â”€â”€â”€ */
 function ConstellationDivider({ compact = false }: { compact?: boolean }) {
   return (
     <div
@@ -902,7 +944,7 @@ type DomainReadCopy = {
   boundaryRule: string;
 };
 
-/* ─── Domain Icon Map ─── */
+/* â”€â”€â”€ Domain Icon Map â”€â”€â”€ */
 const DOMAIN_ICONS: Record<LifeDomainKey, string> = {
   love_life: "\u2661",
   career: "\u2726",
@@ -986,6 +1028,13 @@ const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
   },
 };
 
+/**
+ * The technical read-out for a domain.
+ *
+ * These deliberately keep reading the legacy fields -- house-lord notation and
+ * transit language are correct here, because this now renders only inside the
+ * evidence disclosure.
+ */
 function buildDomainRules(domain: LifeDomainInsight) {
   return [
     {
@@ -1027,9 +1076,11 @@ function getDomainTimingWindows(
   currentDasha?: string,
   currentAntardasha?: string
 ) {
-  const currentTiming = domain.timing_triggers[0];
-  const nextTiming = domain.timing_triggers[1] ?? domain.timing_triggers[0];
-  const caution = domain.watchouts[0];
+  // Display tier: these render above the fold, so they must not contain
+  // transit or house vocabulary.
+  const currentTiming = domain.display.timing[0];
+  const nextTiming = domain.display.timing[1] ?? domain.display.timing[0];
+  const caution = domain.display.watchouts[0];
 
   return [
     {
@@ -1055,7 +1106,7 @@ function getDomainTimingWindows(
   ];
 }
 
-/* ─── Animated Counter for Metric Values ─── */
+/* â”€â”€â”€ Animated Counter for Metric Values â”€â”€â”€ */
 function AnimatedCounter({
   value,
   decimals = 0,
@@ -1099,9 +1150,9 @@ function AnimatedCounter({
   );
 }
 
-/* ═══════════════════════════════════════════════
+/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN INSIGHTS DASHBOARD (BENTO GRID LAYOUT)
-   ═══════════════════════════════════════════════ */
+   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
 export default function InsightsContent({
   payload,
@@ -1135,12 +1186,12 @@ export default function InsightsContent({
   >(domainInsights[0]?.key ?? "love_life");
   const [domainViewMode, setDomainViewMode] = useState<DomainViewMode>("brief");
 
+  // Ranked by selection.rank, which is the measured ordering. Unselected rules
+  // sort to the end rather than to the front -- rank 0 means "not selected",
+  // not "ranked first".
   const coreRules = [...payload.chart.deterministic_rules]
-    .filter((rule) => !rule.category || rule.category === "core")
-    .sort((left, right) => {
-      const priorityRank = { high: 0, medium: 1, low: 2 };
-      return priorityRank[left.priority] - priorityRank[right.priority];
-    });
+    .filter((rule) => rule.category === "core")
+    .sort((left, right) => bySelectionRank(left, right));
   const careerRules = payload.chart.deterministic_rules.filter(
     (rule) => rule.category === "career"
   );
@@ -1195,7 +1246,7 @@ export default function InsightsContent({
     });
   };
 
-  /* ─── Stagger animation for bento cells ─── */
+  /* â”€â”€â”€ Stagger animation for bento cells â”€â”€â”€ */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const noMotion: any = { hidden: { opacity: 1 }, visible: { opacity: 1 } };
 
@@ -1263,7 +1314,7 @@ export default function InsightsContent({
       <ParallaxLayer depth={0} className={styles.parallaxLayer}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
         <SectionAnchorNav />
-        {/* ─── Hero Header ─── */}
+        {/* â”€â”€â”€ Hero Header â”€â”€â”€ */}
         <motion.div
           className={styles.hero}
           initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
@@ -1277,7 +1328,7 @@ export default function InsightsContent({
           </h1>
           <p className={styles.lead}>{payload.chart.summary}</p>
 
-          {/* Planet orbs row – key planets from this chart, centered */}
+          {/* Planet orbs row â€“ key planets from this chart, centered */}
           {heroPlanetStrip.planets.length > 0 && (
             <section className={styles.heroPlanetStrip} aria-labelledby="hero-planet-strip-heading">
               <div className={styles.heroPlanetStripHeader}>
@@ -1308,7 +1359,7 @@ export default function InsightsContent({
           )}
         </motion.div>
 
-        {/* ─── Top Metrics Bento Row ─── */}
+        {/* â”€â”€â”€ Top Metrics Bento Row â”€â”€â”€ */}
         <ActionGuidanceChips payload={payload} />
         <PersonalStory payload={payload} />
         <TopTakeawaysModule payload={payload} />
@@ -1337,13 +1388,10 @@ export default function InsightsContent({
             <p className={styles.metricValue}>
               {payload.chart.ascendant.sign}
             </p>
-            <small>
-              <AnimatedCounter
-                value={payload.chart.ascendant.degree_in_sign}
-                decimals={2}
-                suffix={`° ${t("insights.degInSign")}`}
-              />
-            </small>
+            {/* The raw degree-in-sign readout is gone. A number to two decimal
+                places is a measurement, not a reading, and it was the first
+                thing on the page. The exact degree is still in the planet
+                table and in every rule's evidence. */}
           </motion.article>
 
           {/* Engine Card */}
@@ -1356,25 +1404,38 @@ export default function InsightsContent({
             <p className={styles.metricValue}>
               {payload.engine.engine_label}
             </p>
-            <small>
-              {payload.engine.ayanamsha} &bull; {payload.engine.house_system}
-              {payload.engine.fallback_mode ? " &bull; Fallback" : ""}
-            </small>
-            {availableEngines.length > 1 && (
-              <label className={styles.engineSwitcher}>
-                <select
-                  value={payload.engine.engine_id}
-                  onChange={(event) => switchEngine(event.target.value)}
-                  disabled={isRouting}
-                >
-                  {availableEngines.map((engine) => (
-                    <option key={engine.engine_id} value={engine.engine_id}>
-                      {engine.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
+            {/* Ayanamsha, house system and the engine switcher are calculation
+                settings, not findings, so they sit behind a disclosure with
+                the rest of the technical tier.
+
+                The fallback marker used to read literally as "&bull; Fallback":
+                inside a JS string that is not an HTML entity, only in JSX text.
+                It is a real character now. */}
+            <details className={styles.evidence}>
+              <summary className={styles.evidenceSummary}>Calculation settings</summary>
+              <div className={styles.evidenceBody}>
+                <p className={styles.ruleBasis}>
+                  {payload.engine.ayanamsha} • {payload.engine.house_system}
+                  {payload.engine.fallback_mode ? " • Fallback" : ""}
+                </p>
+                {availableEngines.length > 1 && (
+                  <label className={styles.engineSwitcher}>
+                    <span className={styles.claimLabel}>Engine</span>
+                    <select
+                      value={payload.engine.engine_id}
+                      onChange={(event) => switchEngine(event.target.value)}
+                      disabled={isRouting}
+                    >
+                      {availableEngines.map((engine) => (
+                        <option key={engine.engine_id} value={engine.engine_id}>
+                          {engine.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </div>
+            </details>
           </motion.article>
 
           {/* Ascendant Sign Card (moved from hero) */}
@@ -1400,7 +1461,7 @@ export default function InsightsContent({
 
         <ConstellationDivider />
 
-        {/* ─── Main Bento Grid ─── */}
+        {/* â”€â”€â”€ Main Bento Grid â”€â”€â”€ */}
         <motion.div
           className={styles.gridMain}
           variants={bentoContainer}
@@ -1408,7 +1469,7 @@ export default function InsightsContent({
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          {/* Birth Chart — Large card spanning 2 columns */}
+          {/* Birth Chart â€” Large card spanning 2 columns */}
           <motion.div
             className={`${styles.cardChart} ${styles.chartStarfield} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
@@ -1423,7 +1484,7 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </motion.div>
 
-          {/* Planetary Snapshots — Side card */}
+          {/* Planetary Snapshots â€” Side card */}
           <motion.div
             className={`${styles.cardPlanets} ${styles.cardDepthFront}`}
             variants={bentoItemFromRight}
@@ -1437,7 +1498,7 @@ export default function InsightsContent({
 
         <ConstellationDivider compact />
 
-        {/* ─── Forecasts & Timing (Collapsible) ─── */}
+        {/* â”€â”€â”€ Forecasts & Timing (Collapsible) â”€â”€â”€ */}
         <ChartStrengthMap payload={payload} />
 
         <CollapsibleSection
@@ -1476,7 +1537,7 @@ export default function InsightsContent({
           </div>
         </CollapsibleSection>
 
-        {/* ─── Vimshottari Dashas Section ─── */}
+        {/* â”€â”€â”€ Vimshottari Dashas Section â”€â”€â”€ */}
         {payload.chart.nakshatra && payload.chart.dasha && (
           <>
             <ConstellationDivider />
@@ -1510,34 +1571,39 @@ export default function InsightsContent({
           </>
         )}
 
-        {/* ─── Core Rules Section ─── */}
-        <CollapsibleSection
-          id="core"
-          kicker={t("insights.coreKicker")}
-          title={t("insights.coreHeading")}
-          defaultOpen={true}
-          className={styles.cardRules}
-          persistKey={`${sectionStateScope}:core`}
-        >
-          <p className={styles.sectionIntro}>
-            This section pulls together the backbone of the chart: your lagna
-            path, house emphasis, elemental style, nodal direction, and the
-            structural signatures most likely to shape major outcomes.
-          </p>
-          <div className={styles.rulesScroll}>
-            {coreRules.map((rule, i) => (
-              <RuleCard
-                key={`${rule.category}-${rule.title}`}
-                rule={rule}
-                index={i}
-              />
-            ))}
-          </div>
-        </CollapsibleSection>
+        {/* â”€â”€â”€ Core Rules Section â”€â”€â”€ */}
+        {/* Guarded like every other rule section. Without this the heading and
+            intro render over an empty scroller, and SectionAnchorNav keeps an
+            entry pointing at nothing. */}
+        {coreRules.length > 0 && (
+          <CollapsibleSection
+            id="core"
+            kicker={t("insights.coreKicker")}
+            title={t("insights.coreHeading")}
+            defaultOpen={true}
+            className={styles.cardRules}
+            persistKey={`${sectionStateScope}:core`}
+          >
+            <p className={styles.sectionIntro}>
+              This section pulls together the backbone of the chart: your lagna
+              path, house emphasis, elemental style, nodal direction, and the
+              structural signatures most likely to shape major outcomes.
+            </p>
+            <div className={styles.rulesScroll}>
+              {coreRules.map((rule, i) => (
+                <RuleCard
+                  key={rule.instance_key}
+                  rule={rule}
+                  index={i}
+                />
+              ))}
+            </div>
+          </CollapsibleSection>
+        )}
 
         <ConstellationDivider />
 
-        {/* ─── Yoga Lifetime Summary ─── */}
+        {/* â”€â”€â”€ Yoga Lifetime Summary â”€â”€â”€ */}
         {payload.chart.yogas && payload.chart.yogas.length > 0 && (
           <motion.section
             className={styles.cardRules}
@@ -1556,7 +1622,7 @@ export default function InsightsContent({
 
         <ConstellationDivider />
 
-        {/* ─── Career & Love in Bento Grid ─── */}
+        {/* â”€â”€â”€ Career & Love in Bento Grid â”€â”€â”€ */}
         {(careerRules.length > 0 || loveRules.length > 0) && (
           <div id="themes" className={`${styles.gridThemes} ${styles.anchorTarget}`}>
             {careerRules.length > 0 && (
@@ -1588,7 +1654,7 @@ export default function InsightsContent({
                 <div className={styles.rulesScroll}>
                   {careerRules.map((rule, i) => (
                     <RuleCard
-                      key={`${rule.category}-${rule.title}`}
+                      key={rule.instance_key}
                       rule={rule}
                       index={i}
                     />
@@ -1626,7 +1692,7 @@ export default function InsightsContent({
                 <div className={styles.rulesScroll}>
                   {loveRules.map((rule, i) => (
                     <RuleCard
-                      key={`${rule.category}-${rule.title}`}
+                      key={rule.instance_key}
                       rule={rule}
                       index={i}
                     />
@@ -1678,7 +1744,7 @@ export default function InsightsContent({
 
         <ConstellationDivider />
 
-        {/* ─── Continue your reading ─── */}
+        {/* â”€â”€â”€ Continue your reading â”€â”€â”€ */}
         <motion.section
           id="continue-reading"
           className={`${styles.continuationHub} ${styles.anchorTarget}`}
@@ -1715,22 +1781,22 @@ export default function InsightsContent({
                   className={`${styles.continuationAction} ${styles.continuationActionRecommended}`}
                   data-tone="gold"
                 >
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">⌁</span>
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">âŒ</span>
                   <span className={styles.continuationActionBody}>
                     <span className={styles.continuationRecommendation}>Recommended next</span>
                     <strong>Find a good time</strong>
                     <span>Use your personalised timing windows for the decision in front of you.</span>
                   </span>
-                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">→</span></span>
+                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">â†’</span></span>
                 </Link>
 
                 <Link href="#life-shifts" className={styles.continuationAction} data-tone="green">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">↝</span>
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">â†</span>
                   <span className={styles.continuationActionBody}>
                     <strong>Your life timeline</strong>
                     <span>See the pivotal life windows and dasha transitions still unfolding.</span>
                   </span>
-                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">→</span></span>
+                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">â†’</span></span>
                 </Link>
               </div>
             </section>
@@ -1744,41 +1810,41 @@ export default function InsightsContent({
               </div>
               <div className={styles.continuationActions}>
                 <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">✦</span>
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">âœ¦</span>
                   <span className={styles.continuationActionBody}>
                     <strong>Current transits</strong>
                     <span>Compare the present sky with the promise carried in your natal chart.</span>
                   </span>
-                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">→</span></span>
+                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">â†’</span></span>
                 </Link>
 
                 <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">∞</span>
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">âˆž</span>
                   <span className={styles.continuationActionBody}>
                     <strong>Compare with a partner</strong>
                     <span>Open a relationship workspace to compare two full birth profiles.</span>
                   </span>
-                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">→</span></span>
+                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">â†’</span></span>
                 </Link>
 
                 <Link href={palmWorkspaceHref} className={styles.continuationAction} data-tone="violet">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">◈</span>
+                  <span className={styles.continuationActionGlyph} aria-hidden="true">â—ˆ</span>
                   <span className={styles.continuationActionBody}>
                     <strong>Chart + palm synthesis</strong>
                     <span>Bring your palm and chart together to surface recurring strengths.</span>
                   </span>
-                  <span className={styles.continuationRoute}>Requires a palm photo <span aria-hidden="true">→</span></span>
+                  <span className={styles.continuationRoute}>Requires a palm photo <span aria-hidden="true">â†’</span></span>
                 </Link>
               </div>
             </section>
           </div>
 
           <Link href={advancedInsightsHref} className={styles.continuationBrowse}>
-            Browse all advanced tools <span aria-hidden="true">→</span>
+            Browse all advanced tools <span aria-hidden="true">â†’</span>
           </Link>
         </motion.section>
 
-        {/* ─── Life Domain Deep Dives ─── */}
+        {/* â”€â”€â”€ Life Domain Deep Dives â”€â”€â”€ */}
         <AuthGate
           featureLabel="Life Domain Deep Dives"
           isLocked={lockedFeatures.has("life_domain_readings")}
@@ -1805,19 +1871,18 @@ export default function InsightsContent({
                 <section className={styles.domainPriorityPanel}>
                   <div>
                     <p className={styles.kicker}>Most active right now</p>
-                    <h3>{topDomainInsight.label}</h3>
-                    <p>{topDomainInsight.guidance || topDomainInsight.overview}</p>
+                    <h3>{topDomainInsight.display.headline}</h3>
+                    <p>{topDomainInsight.display.guidance}</p>
                   </div>
-                  <span
-                    className={styles.domainPriorityScore}
-                    aria-label={`${topDomainInsight.label} signal strength ${getDomainScore(topDomainInsight)} percent`}
-                  >
-                    Signal Strength {getDomainScore(topDomainInsight)}%
-                  </span>
                 </section>
               )}
 
-              <div className={styles.domainScoreGrid} aria-label="Life domain signal strengths">
+              {/* Domains are ordered by signal, but the number itself is gone.
+                  confidence_score lives on an arbitrary [0.55, 0.94] scale, so
+                  "86%" was never a probability of anything -- rendering it as
+                  one implied a precision the model does not have. The relative
+                  ordering it drives is still here; the false precision is not. */}
+              <div className={styles.domainScoreGrid} aria-label="Life domains, most active first">
                 {rankedDomainInsights.map((domain) => {
                   const score = getDomainScore(domain);
                   return (
@@ -1827,12 +1892,11 @@ export default function InsightsContent({
                       className={domain.key === selectedDomainKey ? styles.domainScoreCardActive : styles.domainScoreCard}
                       data-domain={domain.key}
                       onClick={() => setSelectedDomainKey(domain.key)}
-                      aria-label={`${domain.label} signal strength ${score} percent, ${getDomainScoreTone(score)}`}
+                      aria-label={`${domain.label}, ${getDomainScoreTone(score)} signal`}
                     >
                       <span className={styles.domainScoreIcon}>{DOMAIN_ICONS[domain.key]}</span>
                       <span className={styles.domainScoreLabel}>{domain.label}</span>
-                      <strong>{score}%</strong>
-                      <span className={styles.domainScoreTone}>Signal Strength: {getDomainScoreTone(score)}</span>
+                      <span className={styles.domainScoreTone}>{getDomainScoreTone(score)}</span>
                     </button>
                   );
                 })}
@@ -1884,19 +1948,12 @@ export default function InsightsContent({
                       <p className={styles.kicker}>
                         {selectedDomainInsight.label}
                       </p>
-                      <h3>{selectedDomainInsight.headline}</h3>
+                      <h3>{selectedDomainInsight.display.headline}</h3>
                     </div>
-                    <span className={styles.accessPillPremium}>
-                      Signal Strength{" "}
-                      {Math.round(
-                        selectedDomainInsight.confidence_score * 100
-                      )}
-                      %
-                    </span>
                   </div>
 
                   <p className={styles.domainOverview}>
-                    {selectedDomainInsight.overview}
+                    {selectedDomainInsight.display.body}
                   </p>
 
                   <div className={styles.domainTimingWindows}>
@@ -1913,16 +1970,16 @@ export default function InsightsContent({
                       <section className={styles.domainCol}>
                         <h4>Top support</h4>
                         <ul>
-                          {selectedDomainInsight.strengths.slice(0, 3).map((item) => (
+                          {selectedDomainInsight.display.strengths.map((item) => (
                             <li key={item}>{item}</li>
                           ))}
                         </ul>
                       </section>
-                      {selectedDomainInsight.watchouts.length > 0 && (
+                      {selectedDomainInsight.display.watchouts.length > 0 && (
                         <section className={styles.domainCol}>
                           <h4>Top watchout</h4>
                           <ul>
-                            {selectedDomainInsight.watchouts.slice(0, 2).map((item) => (
+                            {selectedDomainInsight.display.watchouts.map((item) => (
                               <li key={item}>{item}</li>
                             ))}
                           </ul>
@@ -1954,57 +2011,80 @@ export default function InsightsContent({
                   )}
 
                   {domainViewMode === "detailed" && (
-                    <div className={styles.domainRulesPanel}>
-                    <h4>How this domain is being read</h4>
-                    <ol>
-                      {selectedDomainRules.map((rule) => (
-                        <li key={rule.label}>
-                          <strong>{rule.label}:</strong> {rule.body}
-                        </li>
-                      ))}
-                    </ol>
+                    <div className={styles.domainGrid}>
+                      <section className={styles.domainCol}>
+                        <h4>Support</h4>
+                        <ul>
+                          {selectedDomainInsight.display.strengths.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
+                      {selectedDomainInsight.display.watchouts.length > 0 && (
+                        <section className={styles.domainCol}>
+                          <h4>Watch</h4>
+                          <ul>
+                            {selectedDomainInsight.display.watchouts.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        </section>
+                      )}
+                      <section className={styles.domainCol}>
+                        <h4>Timing</h4>
+                        <ul>
+                          {selectedDomainInsight.display.timing.map((item) => (
+                            <li key={item}>{item}</li>
+                          ))}
+                        </ul>
+                      </section>
                     </div>
                   )}
 
+                  {/* The technical read. This used to be two more stacked
+                      lists in the default view -- house-lord notation, transit
+                      windows and the "How this domain is being read" rule
+                      trace, none of which mean anything without training. */}
                   {domainViewMode === "detailed" && (
-                    <div className={styles.domainGrid}>
-                    <section className={styles.domainCol}>
-                      <h4>Support</h4>
-                      <ul>
-                        {selectedDomainInsight.strengths.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </section>
-                    {selectedDomainInsight.watchouts.length > 0 && (
-                      <section className={styles.domainCol}>
-                        <h4>Watch</h4>
-                        <ul>
-                          {selectedDomainInsight.watchouts.map((item) => (
-                            <li key={item}>{item}</li>
+                    <details className={styles.evidence}>
+                      <summary className={styles.evidenceSummary}>
+                        How this domain is being read
+                      </summary>
+                      <div className={styles.evidenceBody}>
+                        <p className={styles.ruleBasis}>
+                          {selectedDomainInsight.evidence.technical_note}
+                        </p>
+                        <dl className={styles.claims}>
+                          {selectedDomainInsight.evidence.claims.map((claim) => (
+                            <div key={claim.label} className={styles.claim}>
+                              <dt className={styles.claimLabel}>{claim.label}</dt>
+                              <dd className={styles.claimValue}>
+                                {claim.value}
+                                {claim.detail && (
+                                  <span className={styles.claimDetail}>{claim.detail}</span>
+                                )}
+                              </dd>
+                            </div>
                           ))}
-                        </ul>
-                      </section>
-                    )}
-                    <section className={styles.domainCol}>
-                      <h4>Timing</h4>
-                      <ul>
-                        {selectedDomainInsight.timing_triggers.map((item) => (
-                          <li key={item}>{item}</li>
-                        ))}
-                      </ul>
-                    </section>
-                    {selectedDomainInsight.supporting_patterns.length > 0 && (
-                      <section className={styles.domainCol}>
-                        <h4>Evidence</h4>
-                        <ul>
-                          {selectedDomainInsight.supporting_patterns.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </section>
-                    )}
-                    </div>
+                        </dl>
+                        <div className={styles.domainRulesPanel}>
+                          <ol>
+                            {selectedDomainRules.map((rule) => (
+                              <li key={rule.label}>
+                                <strong>{rule.label}:</strong> {rule.body}
+                              </li>
+                            ))}
+                          </ol>
+                        </div>
+                        {selectedDomainInsight.supporting_patterns.length > 0 && (
+                          <ul className={styles.evidencePatterns}>
+                            {selectedDomainInsight.supporting_patterns.map((item) => (
+                              <li key={item}>{item}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </details>
                   )}
 
                   {domainViewMode === "action" && (
@@ -2031,11 +2111,11 @@ export default function InsightsContent({
                     <>
                       <p className={styles.domainGuidance}>
                         <strong>Guidance:</strong>{" "}
-                        {selectedDomainInsight.guidance}
+                        {selectedDomainInsight.display.guidance}
                       </p>
                       <p className={styles.domainLongGame}>
                         <strong>Long game:</strong>{" "}
-                        {selectedDomainInsight.long_game}
+                        {selectedDomainInsight.display.long_game}
                       </p>
                     </>
                   )}
@@ -2050,7 +2130,7 @@ export default function InsightsContent({
           )}
         </AuthGate>
 
-        {/* ─── Lucky Elements ─── */}
+        {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
         {payload.chart.lucky_elements && (
           <div id="fortune" className={styles.anchorTarget}>
           <LazyPanel>
@@ -2061,7 +2141,7 @@ export default function InsightsContent({
           </div>
         )}
 
-        {/* ─── Footer Actions ─── */}
+        {/* â”€â”€â”€ Footer Actions â”€â”€â”€ */}
         <motion.div
           className={styles.actions}
           initial={shouldReduceMotion ? false : { opacity: 0 }}

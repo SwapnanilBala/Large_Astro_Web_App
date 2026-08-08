@@ -157,6 +157,127 @@ describe("buildPersonalStory", () => {
     );
   });
 
+  // -------------------------------------------------------------------------
+  // Ordering.
+  //
+  // Both rule sorts in story-engine.ts were previously untested, because the
+  // fixture array held exactly one rule. These are the direct guard against a
+  // silent ranking inversion: rarity's natural form is a fire rate where LOW
+  // means rare, both sorts are hardcoded descending, and getting the direction
+  // wrong would headline the single most ordinary thing in the chart with no
+  // error, no log, and no failing test.
+  // -------------------------------------------------------------------------
+
+  it("promotes the rarer of two same-priority rules to the essence chapter", () => {
+    const common = makeRule({
+      id: "test.common",
+      instance_key: "test.common",
+      priority: "high",
+      display: { headline: "Common pattern" },
+      selection: { strength: 1, score: 0.2 },
+    });
+    const rare = makeRule({
+      id: "test.rare",
+      instance_key: "test.rare",
+      priority: "high",
+      display: { headline: "Rare pattern" },
+      selection: { strength: 1, score: 0.93 },
+    });
+
+    const payload = makePayload();
+    payload.chart.deterministic_rules = [common, rare];
+
+    const story = buildPersonalStory(payload, { lifeShifts: LIFE_SHIFTS });
+    const essence = story.chapters.find((c) => c.id === "essence")!;
+
+    expect(essence.signals.some((s) => s.value.includes("Rare pattern"))).toBe(true);
+    expect(essence.signals.some((s) => s.value.includes("Common pattern"))).toBe(false);
+  });
+
+  it("still ranks priority above rarity in the essence chapter", () => {
+    const highPriority = makeRule({
+      id: "test.high",
+      instance_key: "test.high",
+      priority: "high",
+      display: { headline: "High priority pattern" },
+      selection: { strength: 1, score: 0.1 },
+    });
+    const rareButLow = makeRule({
+      id: "test.low",
+      instance_key: "test.low",
+      priority: "low",
+      display: { headline: "Rare but minor pattern" },
+      selection: { strength: 1, score: 0.99 },
+    });
+
+    const payload = makePayload();
+    payload.chart.deterministic_rules = [rareButLow, highPriority];
+
+    const story = buildPersonalStory(payload, { lifeShifts: LIFE_SHIFTS });
+    const essence = story.chapters.find((c) => c.id === "essence")!;
+
+    expect(essence.signals.some((s) => s.value.includes("High priority pattern"))).toBe(true);
+  });
+
+  it("picks the rarer tension for the grounding chapter", () => {
+    const commonTension = makeRule({
+      id: "test.common",
+      instance_key: "test.common",
+      display: { headline: "Common edge", tension: "The common counterweight." },
+      selection: { strength: 1, score: 0.15 },
+    });
+    const rareTension = makeRule({
+      id: "test.rare",
+      instance_key: "test.rare",
+      display: { headline: "Rare edge", tension: "The rare counterweight." },
+      selection: { strength: 1, score: 0.91 },
+    });
+
+    const payload = makePayload();
+    payload.chart.deterministic_rules = [commonTension, rareTension];
+
+    const story = buildPersonalStory(payload, { lifeShifts: LIFE_SHIFTS });
+    const grounding = story.chapters.find((c) => c.id === "grounding")!;
+
+    expect(grounding.body).toContain("The rare counterweight.");
+    expect(grounding.signals.some((s) => s.value.includes("Rare edge"))).toBe(true);
+  });
+
+  it("skips rules with no tension when choosing the grounding edge", () => {
+    const noTension = makeRule({
+      id: "test.silent",
+      instance_key: "test.silent",
+      display: { headline: "Silent", tension: undefined },
+      selection: { strength: 1, score: 0.99 },
+    });
+    const withTension = makeRule({
+      id: "test.voiced",
+      instance_key: "test.voiced",
+      display: { headline: "Voiced", tension: "The only counterweight." },
+      selection: { strength: 1, score: 0.2 },
+    });
+
+    const payload = makePayload();
+    payload.chart.deterministic_rules = [noTension, withTension];
+
+    const story = buildPersonalStory(payload, { lifeShifts: LIFE_SHIFTS });
+    const grounding = story.chapters.find((c) => c.id === "grounding")!;
+
+    expect(grounding.body).toContain("The only counterweight.");
+  });
+
+  it("never renders a life-domain score as a percentage", () => {
+    const story = buildPersonalStory(makePayload(), { lifeShifts: LIFE_SHIFTS });
+    for (const chapter of story.chapters) {
+      const rendered = [
+        chapter.body,
+        ...chapter.highlights,
+        ...chapter.signals.map((s) => `${s.label} ${s.value}`),
+      ].join(" ");
+      expect(rendered, chapter.id).not.toMatch(/\d+%\s*(signal|strength)|signal strength/i);
+    }
+  });
+
   it("returns a usable story when premium enrichment is unavailable", () => {
     const payload = makePayload();
     payload.chart.nakshatra = undefined;

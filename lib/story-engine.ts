@@ -188,7 +188,10 @@ function getMostRelevantRule(payload: ChartApiResponse): DeterministicRule | und
   return [...payload.chart.deterministic_rules].sort((left, right) => {
     const priorityDifference = priorityRank[left.priority] - priorityRank[right.priority];
     if (priorityDifference !== 0) return priorityDifference;
-    return (right.confidence_score ?? 0) - (left.confidence_score ?? 0);
+    // selection.score is rarity x strength, so descending still means "most
+    // noteworthy first". Reading a fire rate here would headline the single
+    // most ordinary thing in the chart.
+    return (right.selection?.score ?? 0) - (left.selection?.score ?? 0);
   })[0];
 }
 
@@ -283,12 +286,12 @@ function buildEssenceChapter(payload: ChartApiResponse): PersonalStoryChapter {
     body: `${approach} ${rulerSentence}`,
     highlights: withoutDuplicates([
       ascendant ? `${ascendant} ascendant: ${approach}` : undefined,
-      coreRule ? coreRule.insight : undefined,
+      coreRule ? coreRule.display.body : undefined,
     ]),
     signals: withoutDuplicates([
       ascendant ? `Ascendant|${ascendant}` : undefined,
       rulerPlacement ? `Life-path ruler|${ruler} in ${rulerPlacement.sign}, house ${rulerPlacement.house}` : undefined,
-      coreRule ? `Primary chart signal|${coreRule.title}` : undefined,
+      coreRule ? `Primary chart signal|${coreRule.display.headline}` : undefined,
     ]).map(toSignal),
   };
 }
@@ -302,7 +305,7 @@ function buildStrengthsChapter(payload: ChartApiResponse): PersonalStoryChapter 
     ? `${strongestPlanet.planet} is one of the chart's most supported tools, adding ${PLANET_GIFTS[strongestPlanet.planet] ?? "reliable capacity"}.`
     : "The clearest strengths emerge where your chart combines natural interest with steady effort.";
   const domainSentence = topDomain
-    ? `The strongest current life-domain signal is ${topDomain.headline}`
+    ? `${topDomain.display.headline}: ${topDomain.display.body}`
     : "Your best contribution is likely to come from work that lets you combine skill, usefulness, and a sense of meaning.";
 
   return {
@@ -311,12 +314,15 @@ function buildStrengthsChapter(payload: ChartApiResponse): PersonalStoryChapter 
     title: topDomain ? `Make ${topDomain.label.toLowerCase()} a deliberate stage` : "Make your strongest gifts visible",
     body: `${domainSentence} ${strengthSentence}${strongestPlacement ? ` Its placement in house ${strongestPlacement.house} points especially toward ${houseTheme(strongestPlacement.house)}.` : ""}`,
     highlights: withoutDuplicates([
-      topDomain?.strengths[0],
-      topDomain?.strengths[1],
+      topDomain?.display.strengths[0],
+      topDomain?.display.strengths[1],
       yoga ? `${yoga.name}: ${yoga.effects}` : undefined,
     ]),
     signals: withoutDuplicates([
-      topDomain ? `Leading domain|${topDomain.label} (${Math.round(topDomain.confidence_score * 100)}% signal)` : undefined,
+      // No percentage. confidence_score is an internal strength signal on an
+      // arbitrary [0.55, 0.94] scale; rendering it as "86%" reads as a
+      // confidence claim about the client's life, which it is not.
+      topDomain ? `Leading domain|${topDomain.label}` : undefined,
       strongestPlanet
         ? `Strongest support|${strongestPlanet.planet}${strongestPlacement ? ` · house ${strongestPlacement.house}` : ""}`
         : undefined,
@@ -372,9 +378,11 @@ function buildLifeDomainChapter(config: LifeDomainChapterConfig): PersonalStoryC
     };
   }
 
-  const guidance = relabelDomainMentions(domain.guidance, domain.label, domainAlias);
-  const longGame = relabelDomainMentions(domain.long_game, domain.label, domainAlias);
-  const body = `${domain.overview} ${guidance} ${longGame}`.trim();
+  const guidance = relabelDomainMentions(domain.display.guidance, domain.label, domainAlias);
+  const longGame = relabelDomainMentions(domain.display.long_game, domain.label, domainAlias);
+  const body = `${domain.display.body} ${guidance} ${longGame}`.trim();
+  // The technical headline still supplies the placement line, which belongs in
+  // signals (the evidence tier of a chapter) rather than in the prose.
   const placement = domain.headline.replace(/^[^:]*:\s*/, "").replace(/\.$/, "");
 
   return {
@@ -383,14 +391,13 @@ function buildLifeDomainChapter(config: LifeDomainChapterConfig): PersonalStoryC
     title,
     body,
     highlights: withoutDuplicates([
-      domain.strengths[0],
-      domain.strengths[1],
-      domain.watchouts[0] ? `Watch for: ${domain.watchouts[0]}` : undefined,
+      domain.display.strengths[0],
+      domain.display.strengths[1],
+      domain.display.watchouts[0] ? `Watch for: ${domain.display.watchouts[0]}` : undefined,
     ]),
     signals: withoutDuplicates([
       placement ? `Chart placement|${placement}` : undefined,
-      `Signal strength|${Math.round(domain.confidence_score * 100)}%`,
-      domain.timing_triggers[0] ? `Timing to watch|${domain.timing_triggers[0]}` : undefined,
+      domain.display.timing[0] ? `Timing to watch|${domain.display.timing[0]}` : undefined,
       domain.supporting_patterns[0] ? `Supporting pattern|${domain.supporting_patterns[0]}` : undefined,
     ]).map(toSignal),
   };
@@ -516,8 +523,8 @@ function buildTimingChapter(
 function buildGroundingChapter(payload: ChartApiResponse): PersonalStoryChapter {
   const topDomain = getTopUndedicatedDomain(payload);
   const tensionRule = [...payload.chart.deterministic_rules]
-    .filter((rule) => Boolean(rule.tension_note?.trim()))
-    .sort((left, right) => (right.confidence_score ?? 0) - (left.confidence_score ?? 0))[0];
+    .filter((rule) => Boolean(rule.display?.tension?.trim()))
+    .sort((left, right) => (right.selection?.score ?? 0) - (left.selection?.score ?? 0))[0];
   const saturn = getPlanet(payload.chart.planets, "Saturn");
   const watchout = topDomain?.watchouts[0];
   const guidance = topDomain?.guidance;
@@ -529,14 +536,14 @@ function buildGroundingChapter(payload: ChartApiResponse): PersonalStoryChapter 
     id: "grounding",
     eyebrow: "Grounded considerations",
     title: "Use the pattern; keep your agency",
-    body: `${saturnLine} ${compactText(tensionRule?.tension_note, "A chart is most useful when it helps you choose a next step, not when it replaces your judgment.")}`,
+    body: `${saturnLine} ${compactText(tensionRule?.display?.tension, "A chart is most useful when it helps you choose a next step, not when it replaces your judgment.")}`,
     highlights: withoutDuplicates([
       watchout ? `Watch for: ${watchout}` : undefined,
       guidance ? `Practical guidance: ${guidance}` : undefined,
     ]),
     signals: withoutDuplicates([
       saturn ? `Structure signal|Saturn in ${saturn.sign}, house ${saturn.house}` : undefined,
-      tensionRule ? `Growth edge|${tensionRule.title}` : undefined,
+      tensionRule ? `Growth edge|${tensionRule.display.headline}` : undefined,
       topDomain ? `Grounding domain|${topDomain.label}` : undefined,
     ]).map(toSignal),
   };

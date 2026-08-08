@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { ChartApiResponse } from "@/lib/astro-types";
+import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
 import shell from "../mobile.module.css";
 import styles from "./insights.module.css";
 
@@ -76,7 +76,71 @@ function Section({
   );
 }
 
+/**
+ * One reading, with its technical basis behind a disclosure.
+ *
+ * The open state is owned by MobileInsights rather than by this component:
+ * `Section` unmounts its body when collapsed, so a `useState` in here would
+ * reset every time the parent section was closed and reopened.
+ */
+function RuleCard({
+  rule,
+  open,
+  onToggle,
+}: {
+  rule: DeterministicRule;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <li className={styles.rule}>
+      <h3 className={styles.ruleTitle}>{rule.display.headline}</h3>
+      <span className={styles.rarity}>{rule.display.rarity_label}</span>
+      <p className={styles.ruleInsight}>{rule.display.body}</p>
+      {rule.display.tension && <p className={styles.ruleTension}>{rule.display.tension}</p>}
+
+      <button
+        type="button"
+        className={styles.evidenceToggle}
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <span>Why this reading</span>
+        <span
+          className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
+          aria-hidden="true"
+        >
+          ⌄
+        </span>
+      </button>
+
+      {open && (
+        <div className={styles.evidenceBody}>
+          <p className={styles.ruleBasis}>{rule.evidence.technical_note}</p>
+          <dl className={styles.claims}>
+            {rule.evidence.claims.map((claim) => (
+              <div key={claim.label} className={styles.claim}>
+                <dt className={styles.claimLabel}>{claim.label}</dt>
+                <dd className={styles.claimValue}>
+                  {claim.value}
+                  {claim.detail && <span className={styles.claimDetail}>{claim.detail}</span>}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      )}
+    </li>
+  );
+}
+
 export default function MobileInsights({ payload, error, desktopHref }: Props) {
+  // Keyed by "section:instance_key" so the same rule appearing in both the
+  // above-the-fold list and the full list opens independently.
+  const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
+  const toggleEvidence = (key: string) =>
+    setOpenEvidence((prev) => ({ ...prev, [key]: !prev[key] }));
+
   if (error || !payload) {
     return (
       <div className={shell.page}>
@@ -142,14 +206,12 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
           <tbody>
             {planets.map((planet) => (
               <tr key={planet.name}>
+                {/* Plain spans, not <abbr title>: a tooltip is unreachable on
+                    a touch screen, so the meaning goes in the legend below. */}
                 <th scope="row" className={styles.planetName}>
                   {planet.name}
-                  {planet.is_retrograde && (
-                    <abbr className={styles.flag} title="Retrograde">R</abbr>
-                  )}
-                  {planet.is_combust && (
-                    <abbr className={styles.flag} title="Combust">C</abbr>
-                  )}
+                  {planet.is_retrograde && <span className={styles.flag}>Rx</span>}
+                  {planet.is_combust && <span className={styles.flag}>Cmb</span>}
                 </th>
                 <td>{planet.sign}</td>
                 <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
@@ -158,6 +220,11 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
             ))}
           </tbody>
         </table>
+        {planets.some((p) => p.is_retrograde || p.is_combust) && (
+          <p className={styles.legend}>
+            Rx = moving backwards from here · Cmb = too close to the Sun to act freely
+          </p>
+        )}
       </Section>
 
       {highPriority.length > 0 && (
@@ -168,11 +235,12 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
         >
           <ul className={styles.rules}>
             {highPriority.map((rule) => (
-              <li key={rule.title} className={styles.rule}>
-                <h3 className={styles.ruleTitle}>{rule.title}</h3>
-                <p className={styles.ruleInsight}>{rule.insight}</p>
-                <p className={styles.ruleBasis}>{rule.basis}</p>
-              </li>
+              <RuleCard
+                key={rule.instance_key}
+                rule={rule}
+                open={Boolean(openEvidence[`top:${rule.instance_key}`])}
+                onToggle={() => toggleEvidence(`top:${rule.instance_key}`)}
+              />
             ))}
           </ul>
         </Section>
@@ -222,13 +290,12 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
         >
           <ul className={styles.rules}>
             {(rules ?? []).map((rule) => (
-              <li key={rule.title} className={styles.rule}>
-                <h3 className={styles.ruleTitle}>
-                  {rule.title}
-                  <span className={styles.priority}>{rule.priority}</span>
-                </h3>
-                <p className={styles.ruleInsight}>{rule.insight}</p>
-              </li>
+              <RuleCard
+                key={rule.instance_key}
+                rule={rule}
+                open={Boolean(openEvidence[`all:${rule.instance_key}`])}
+                onToggle={() => toggleEvidence(`all:${rule.instance_key}`)}
+              />
             ))}
           </ul>
         </Section>

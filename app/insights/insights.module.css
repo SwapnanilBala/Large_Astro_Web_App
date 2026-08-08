@@ -1423,38 +1423,111 @@
   margin: 0;
 }
 
+/* Now the body of the evidence disclosure rather than a line under every card. */
 .ruleBasis {
   font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
-  font-size: 1.32rem;
+  font-size: 1.28rem;
   color: var(--ink-soft);
   display: block;
+  margin: 0;
+  line-height: 1.55;
+}
+
+/* --------------------------------------------------------------------------
+   Evidence disclosure
+
+   Replaces the confidence bar, which drew a gradient meter from a hardcoded
+   constant and labelled it as a percentage. What sits here instead is the
+   provenance: the technical note and the machine-readable claims behind it.
+   -------------------------------------------------------------------------- */
+
+.evidence {
   margin-top: auto;
   padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Confidence bar */
-.confidenceBar {
-  position: relative;
-  margin-top: 0.25rem;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.10);
-  border-radius: 4px;
-  overflow: visible;
-}
-
-.confidenceFill {
-  height: 100%;
-  border-radius: 4px;
-  background: linear-gradient(90deg, var(--accent-teal), var(--accent-gold));
-  transition: width 0.6s ease;
-}
-
-.confidenceLabel {
-  position: absolute;
-  right: 0;
-  top: -16px;
+.evidenceSummary {
+  font-family: var(--font-display), sans-serif;
   font-size: 1.22rem;
   color: var(--ink-soft);
+  cursor: pointer;
+  list-style: none;
+  padding: 0.35rem 0;
+  user-select: none;
+}
+
+.evidenceSummary::-webkit-details-marker {
+  display: none;
+}
+
+.evidenceSummary::before {
+  content: "+";
+  display: inline-block;
+  width: 1.1em;
+  color: var(--accent-gold);
+}
+
+.evidence[open] > .evidenceSummary::before {
+  content: "\2212"; /* minus */
+}
+
+.evidenceSummary:focus-visible {
+  outline: 2px solid rgba(240, 183, 84, 0.68);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.evidenceBody {
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.35rem 0 0.15rem;
+}
+
+.claims {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+}
+
+.claim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 0.5rem;
+  font-size: 1.22rem;
+  line-height: 1.5;
+}
+
+.claimLabel {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.claimLabel::after {
+  content: ":";
+}
+
+.claimValue {
+  margin: 0;
+  color: var(--ink-main);
+}
+
+.claimDetail {
+  display: block;
+  width: 100%;
+  font-size: 1.12rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.evidencePatterns {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 1.22rem;
+  color: var(--ink-soft);
+  line-height: 1.55;
 }
 
 .ruleTension {
@@ -2075,21 +2148,7 @@
   margin: 0;
 }
 
-.domainPriorityScore {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  min-width: 4.5rem;
-  min-height: 4.5rem;
-  border: 1px solid rgba(200, 155, 60, 0.28);
-  border-radius: 50%;
-  background: rgba(200, 155, 60, 0.1);
-  color: var(--accent-gold);
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.35rem;
-  font-weight: 800;
-}
+/* .domainPriorityScore removed with the "Signal Strength 86%" badge it styled. */
 
 .domainScoreGrid {
   display: grid;

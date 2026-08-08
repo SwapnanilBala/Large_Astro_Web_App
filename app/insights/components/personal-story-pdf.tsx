@@ -103,6 +103,44 @@ const styles = StyleSheet.create({
     fontSize: 12.5,
     lineHeight: 1.5,
   },
+  /* ------------------------------------------------------------------------
+     Evidence block.
+
+     highlights and signals used to render as one undifferentiated bullet list,
+     which is how "Signal strength: 91%" ended up sitting directly beside prose
+     as though the two carried equal weight. Signals are provenance; they get
+     their own de-emphasised tier.
+     ------------------------------------------------------------------------ */
+  evidenceBlock: {
+    marginTop: 6,
+    paddingTop: 6,
+    paddingLeft: 10,
+    borderLeftWidth: 1,
+    borderLeftColor: "#c8b48a",
+    borderLeftStyle: "solid",
+  },
+  evidenceHeading: {
+    fontSize: 9,
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: "#7a6a4a",
+    marginBottom: 3,
+  },
+  evidenceRow: {
+    flexDirection: "row",
+    marginBottom: 2,
+  },
+  evidenceLabel: {
+    fontSize: 10,
+    color: "#7a6a4a",
+    marginRight: 4,
+  },
+  evidenceValue: {
+    flex: 1,
+    fontSize: 10,
+    lineHeight: 1.45,
+    color: "#4a4034",
+  },
   footerNote: {
     marginTop: 8,
     fontSize: 11,
@@ -157,14 +195,17 @@ export function PersonalStoryPdfDocument({
               </View>
             ))}
 
-            {chapter.signals.map((signal) => (
-              <View key={`${signal.label}-${signal.value}`} style={styles.bulletRow}>
-                <Text style={styles.bulletMark}>{"•"}</Text>
-                <Text style={styles.bulletText}>
-                  {signal.label}: {signal.value}
-                </Text>
+            {chapter.signals.length > 0 && (
+              <View style={styles.evidenceBlock}>
+                <Text style={styles.evidenceHeading}>What this is based on</Text>
+                {chapter.signals.map((signal) => (
+                  <View key={`${signal.label}-${signal.value}`} style={styles.evidenceRow}>
+                    <Text style={styles.evidenceLabel}>{signal.label}:</Text>
+                    <Text style={styles.evidenceValue}>{signal.value}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
+            )}
           </View>
         ))}
 

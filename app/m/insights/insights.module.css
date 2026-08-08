@@ -167,16 +167,15 @@
 
 .ruleTitle {
   margin: 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.5rem;
   font-size: 0.9375rem;
   font-weight: 600;
+  line-height: 1.4;
 }
 
-.priority {
+/* Replaces the raw lowercase "high" badge with the measured rarity phrase. */
+.rarity {
   font-size: 0.6875rem;
+  letter-spacing: 0.02em;
   color: var(--text-tertiary, #6b6560);
 }
 
@@ -187,9 +186,92 @@
   color: var(--text-secondary, #a8a090);
 }
 
+.ruleTension {
+  margin: 0;
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--border-medium, rgba(212, 165, 116, 0.24));
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #a8a090);
+}
+
+/* --------------------------------------------------------------------------
+   Evidence disclosure
+   The technical basis is no longer printed under every reading; it sits behind
+   this trigger, which is sized for a thumb rather than a cursor.
+   -------------------------------------------------------------------------- */
+
+.evidenceToggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 0.15rem;
+  padding: 0.5rem 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--border-subtle, rgba(212, 165, 116, 0.12));
+  font: inherit;
+  font-size: 0.8125rem;
+  color: var(--text-tertiary, #6b6560);
+  text-align: left;
+  cursor: pointer;
+}
+
+.evidenceBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-bottom: 0.35rem;
+}
+
 .ruleBasis {
   margin: 0;
   font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-tertiary, #6b6560);
+}
+
+.claims {
+  margin: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.claim {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-size: 0.8125rem;
+}
+
+.claimLabel {
+  margin: 0;
+  color: var(--text-tertiary, #6b6560);
+}
+
+.claimLabel::after {
+  content: ":";
+}
+
+.claimValue {
+  margin: 0;
+  color: var(--text-secondary, #a8a090);
+}
+
+.claimDetail {
+  display: block;
+  width: 100%;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-tertiary, #6b6560);
+}
+
+.legend {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
   line-height: 1.5;
   color: var(--text-tertiary, #6b6560);
 }

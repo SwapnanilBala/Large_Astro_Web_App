@@ -648,7 +648,12 @@ export default function CompatibilityPageClient({
                           ))}
                           {theme.title}
                         </h3>
-                        <span>{Math.round(theme.confidence_score * 100)}%</span>
+                        {/* The "86%" badge is gone. CompatibilityTheme.
+                            confidence_score is a hardcoded constant in
+                            compatibility-service.ts -- the same species of
+                            number the rule engine just stopped asserting --
+                            and rendering it as a percentage presented an
+                            authored guess as a measurement. */}
                       </header>
                       <p style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
                         {signsInInsight.length > 0 && signsInInsight.map((s) => (
