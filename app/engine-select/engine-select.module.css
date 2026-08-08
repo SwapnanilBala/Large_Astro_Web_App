@@ -65,6 +65,10 @@
   font-size: clamp(1.55rem, 3vw, 2rem);
   font-weight: 700;
   text-align: center;
+  /* globals.css makes every h1 a flex container, which parks the text at
+     flex-start and leaves text-align with nothing to act on. Center the
+     anonymous flex item so the heading sits under the kicker. */
+  justify-content: center;
   color: #EAEDF3;
   margin: 0 0 0.75rem;
   line-height: 1.2;
