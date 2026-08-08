@@ -11,15 +11,12 @@ import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
 import PersonalStory from "@/app/insights/components/personal-story";
-import ParallaxContainer from "@/app/components/ParallaxContainer";
-import ParallaxLayer from "@/app/components/ParallaxLayer";
-import CosmicOrbs from "@/app/components/CosmicOrbs";
 import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels
-function PanelSkeleton() {
+function PanelSkeleton({ minHeight = 200 }: { minHeight?: number }) {
   const { t } = useTranslation();
-  return <div className={styles.card} style={{ minHeight: 200, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>{t("insights.loading")}</div>;
+  return <div className={styles.card} style={{ minHeight, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>{t("insights.loading")}</div>;
 }
 
 /* â”€â”€â”€ Intersection Observer Lazy Panel â”€â”€â”€ */
@@ -27,10 +24,12 @@ function LazyPanel({
   children,
   fallback,
   rootMargin = "200px",
+  minHeight = 200,
 }: {
   children: React.ReactNode;
   fallback?: React.ReactNode;
   rootMargin?: string;
+  minHeight?: number;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -52,8 +51,8 @@ function LazyPanel({
   }, [rootMargin]);
 
   return (
-    <div ref={ref}>
-      {isVisible ? children : (fallback ?? <PanelSkeleton />)}
+    <div ref={ref} className={styles.lazyPanel} style={{ minHeight }}>
+      {isVisible ? children : (fallback ?? <PanelSkeleton minHeight={minHeight} />)}
     </div>
   );
 }
@@ -848,13 +847,9 @@ export default function InsightsContent({
   const compatibilityHref = historyQs
     ? `/insights/compatibility?${historyQs}`
     : "/insights/compatibility";
-  const getAdvancedViewHref = (view: "transits" | "palm") => {
-    const params = new URLSearchParams(historyQs);
-    params.set("view", view);
-    return `/insights/advanced?${params.toString()}`;
-  };
-  const transitWorkspaceHref = getAdvancedViewHref("transits");
-  const palmWorkspaceHref = getAdvancedViewHref("palm");
+  const transitParams = new URLSearchParams(historyQs);
+  transitParams.set("view", "transits");
+  const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
   const sectionStateScope = `insights:section-state:${historyQs}`;
   const domainInsights = payload.chart.life_domain_insights ?? [];
   const rankedDomainInsights = [...domainInsights].sort(
@@ -947,7 +942,7 @@ export default function InsightsContent({
   };
 
   return (
-    <ParallaxContainer className={styles.parallaxShell}>
+    <>
       <ChartHistorySaver
         name={payload.client.name}
         city={payload.client.city}
@@ -955,12 +950,6 @@ export default function InsightsContent({
         ascendantSign={payload.chart.ascendant.sign}
         queryString={historyQs}
       />
-      {/* Floating cosmic orbs with parallax */}
-      <CosmicOrbs />
-      <div className="ambient ambient-left" />
-      <div className="ambient ambient-right" />
-
-      <ParallaxLayer depth={0} className={styles.parallaxLayer}>
       <section className={`dashboard-shell ${styles.dashboard}`}>
         <SectionAnchorNav />
         {/* â”€â”€â”€ Hero Header â”€â”€â”€ */}
@@ -1010,7 +999,7 @@ export default function InsightsContent({
         >
           {/* Birth Chart â€” Large card spanning 2 columns */}
           <motion.div
-            className={`${styles.cardChart} ${styles.chartStarfield} ${styles.cardDepthFront}`}
+            className={`${styles.cardChart} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
           >
             <PanelErrorBoundary panelName="Lagna Chart">
@@ -1193,112 +1182,12 @@ export default function InsightsContent({
           className={styles.cardKarma}
           persistKey={`${sectionStateScope}:life-shifts`}
         >
-          <LazyPanel>
+          <LazyPanel minHeight={560}>
             <PanelErrorBoundary panelName="Major Life Shifts">
               <MajorShiftsPanel payload={payload} />
             </PanelErrorBoundary>
           </LazyPanel>
         </CollapsibleSection>
-
-        {/* â”€â”€â”€ Continue your reading â”€â”€â”€ */}
-        <motion.section
-          id="continue-reading"
-          className={`${styles.continuationHub} ${styles.anchorTarget}`}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-          aria-labelledby="continue-reading-heading"
-        >
-          <div className={styles.continuationHeader}>
-            <div>
-              <p className={styles.kicker}>Continue your reading</p>
-              <h2 id="continue-reading-heading" className={styles.continuationTitle}>
-                What would you like to explore next?
-              </h2>
-            </div>
-            <p className={styles.continuationLead}>
-              Choose a focused next step. Every option tells you whether it keeps
-              you here, opens a workspace, or needs a palm photo.
-            </p>
-          </div>
-
-          <div className={styles.continuationGroups}>
-            <section className={styles.continuationGroup} aria-labelledby="continue-here-heading">
-              <div className={styles.continuationGroupHeader}>
-                <h3 id="continue-here-heading" className={styles.continuationGroupTitle}>
-                  Continue here
-                </h3>
-                <p className={styles.continuationGroupHint}>Stay on this page</p>
-              </div>
-              <div className={styles.continuationActions}>
-                <Link
-                  href="#muhurta"
-                  className={`${styles.continuationAction} ${styles.continuationActionRecommended}`}
-                  data-tone="gold"
-                >
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">âŒ</span>
-                  <span className={styles.continuationActionBody}>
-                    <span className={styles.continuationRecommendation}>Recommended next</span>
-                    <strong>Find a good time</strong>
-                    <span>Use your personalised timing windows for the decision in front of you.</span>
-                  </span>
-                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">â†’</span></span>
-                </Link>
-
-                <Link href="#life-shifts" className={styles.continuationAction} data-tone="green">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">â†</span>
-                  <span className={styles.continuationActionBody}>
-                    <strong>Your life timeline</strong>
-                    <span>See the pivotal life windows and dasha transitions still unfolding.</span>
-                  </span>
-                  <span className={styles.continuationRoute}>Stay on this page <span aria-hidden="true">â†’</span></span>
-                </Link>
-              </div>
-            </section>
-
-            <section className={styles.continuationGroup} aria-labelledby="specialist-tools-heading">
-              <div className={styles.continuationGroupHeader}>
-                <h3 id="specialist-tools-heading" className={styles.continuationGroupTitle}>
-                  Open a specialist tool
-                </h3>
-                <p className={styles.continuationGroupHint}>Focused workspace</p>
-              </div>
-              <div className={styles.continuationActions}>
-                <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">âœ¦</span>
-                  <span className={styles.continuationActionBody}>
-                    <strong>Current transits</strong>
-                    <span>Compare the present sky with the promise carried in your natal chart.</span>
-                  </span>
-                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">â†’</span></span>
-                </Link>
-
-                <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">âˆž</span>
-                  <span className={styles.continuationActionBody}>
-                    <strong>Compare with a partner</strong>
-                    <span>Open a relationship workspace to compare two full birth profiles.</span>
-                  </span>
-                  <span className={styles.continuationRoute}>Opens workspace <span aria-hidden="true">â†’</span></span>
-                </Link>
-
-                <Link href={palmWorkspaceHref} className={styles.continuationAction} data-tone="violet">
-                  <span className={styles.continuationActionGlyph} aria-hidden="true">â—ˆ</span>
-                  <span className={styles.continuationActionBody}>
-                    <strong>Chart + palm synthesis</strong>
-                    <span>Bring your palm and chart together to surface recurring strengths.</span>
-                  </span>
-                  <span className={styles.continuationRoute}>Requires a palm photo <span aria-hidden="true">â†’</span></span>
-                </Link>
-              </div>
-            </section>
-          </div>
-
-          <Link href={advancedInsightsHref} className={styles.continuationBrowse}>
-            Browse all advanced tools <span aria-hidden="true">â†’</span>
-          </Link>
-        </motion.section>
 
         {/* â”€â”€â”€ Life Domain Deep Dives â”€â”€â”€ */}
         <AuthGate
@@ -1558,14 +1447,69 @@ export default function InsightsContent({
 
         {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
         {payload.chart.lucky_elements && (
-          <div id="fortune" className={styles.anchorTarget}>
-          <LazyPanel>
-            <PanelErrorBoundary panelName="Lucky Elements">
-              <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
-            </PanelErrorBoundary>
-          </LazyPanel>
-          </div>
+          <CollapsibleSection
+            id="fortune"
+            kicker="Secondary details"
+            title="Lucky elements and practical fortune"
+            defaultOpen={false}
+            className={styles.cardRules}
+            persistKey={`${sectionStateScope}:fortune`}
+          >
+            <LazyPanel>
+              <PanelErrorBoundary panelName="Lucky Elements">
+                <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
+              </PanelErrorBoundary>
+            </LazyPanel>
+          </CollapsibleSection>
         )}
+
+        <motion.section
+          id="continue-reading"
+          className={`${styles.continuationHub} ${styles.anchorTarget}`}
+          initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-60px" }}
+          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.28 }}
+          aria-labelledby="continue-reading-heading"
+        >
+          <div className={styles.continuationHeader}>
+            <div>
+              <p className={styles.kicker}>Explore next</p>
+              <h2 id="continue-reading-heading" className={styles.continuationTitle}>
+                Keep going with a focused tool
+              </h2>
+            </div>
+            <p className={styles.continuationLead}>
+              Three clear next steps, without repeating the reading you just finished.
+            </p>
+          </div>
+
+          <div className={`${styles.continuationActions} ${styles.continuationActionsCompact}`}>
+            <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
+              <span className={styles.continuationActionBody}>
+                <strong>Current transits</strong>
+                <span>Compare today’s sky with your natal chart.</span>
+              </span>
+              <span className={styles.continuationRoute}>Open tool <span aria-hidden="true">→</span></span>
+            </Link>
+
+            <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
+              <span className={styles.continuationActionBody}>
+                <strong>Partner comparison</strong>
+                <span>Compare two complete birth profiles.</span>
+              </span>
+              <span className={styles.continuationRoute}>Open tool <span aria-hidden="true">→</span></span>
+            </Link>
+
+            <Link href={advancedInsightsHref} className={styles.continuationAction} data-tone="gold">
+              <span className={styles.continuationActionBody}>
+                <strong>All advanced tools</strong>
+                <span>Choose another specialist reading.</span>
+              </span>
+              <span className={styles.continuationRoute}>Browse tools <span aria-hidden="true">→</span></span>
+            </Link>
+          </div>
+        </motion.section>
 
         {/* â”€â”€â”€ Footer Actions â”€â”€â”€ */}
         <motion.div
@@ -1575,14 +1519,6 @@ export default function InsightsContent({
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
         >
-          <button
-            type="button"
-            className={styles.actionBtn}
-            onClick={() => void copyCurrentChartLink()}
-          >
-            <FiCopy size={16} />
-            Copy chart link
-          </button>
           <Link href="/workspace" className={styles.actionBtnGhost}>
             <FiGrid size={16} />
             Open Workspace
@@ -1593,7 +1529,6 @@ export default function InsightsContent({
           </Link>
         </motion.div>
       </section>
-      </ParallaxLayer>
-    </ParallaxContainer>
+    </>
   );
 }
