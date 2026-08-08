@@ -27,6 +27,7 @@ export type {
 
 import type {
   DeterministicRule,
+  EvidenceClaim,
   LifeDomainInsight,
   RuleDisplay,
   RuleEvidence,
@@ -41,6 +42,7 @@ import { evaluateRules } from "@/lib/rules";
 import { rarityFor, rarityLabel, RARITY_DATASET } from "@/lib/rules/rarity";
 import { computeStrength } from "@/lib/rules/strength";
 import { selectRules } from "@/lib/rules/selection";
+import { humanDignity, ordinal } from "@/lib/rules/paths";
 
 // Declared in lib/rules/tables.ts alongside the other copy tables, and
 // re-exported here as a runtime value: chart-service.ts and rule-engine.test.ts
@@ -354,6 +356,153 @@ function domainLongGame(
   );
 }
 
+// --------------------------------------------------------------------------
+// Life domain: the client-facing tier
+//
+// Everything below produces plain language. The technical versions -- the
+// "Career: Capricorn house 10, led by Saturn." headline, the house-lord
+// notation, the four stacked lists -- survive untouched on the legacy fields
+// and are demoted into `evidence`.
+// --------------------------------------------------------------------------
+
+/** Plain-language framing per domain, replacing "Label: Sign house N" headlines. */
+const DOMAIN_PLAIN_COPY: Record<string, { headline: string; focus: string }> = {
+  love_life: {
+    headline: "What partnership actually asks of you",
+    focus: "who you pair with, and what it takes to keep it working",
+  },
+  career: {
+    headline: "Where your working life is heading",
+    focus: "the work you do and the standing it earns you",
+  },
+  family: {
+    headline: "What home is supposed to give you",
+    focus: "the people you came from, and the base you build for yourself",
+  },
+  inheritance: {
+    headline: "What reaches you through other people",
+    focus: "shared money, what you inherit, and resources you did not earn alone",
+  },
+  influence: {
+    headline: "How far your voice carries",
+    focus: "your network, your reach, and your ability to move people",
+  },
+  life_cycle: {
+    headline: "How you reinvent yourself",
+    focus: "the long arc of your phases, recoveries and rebuilds",
+  },
+  travel_destinations: {
+    headline: "Where you end up, and why",
+    focus: "distance, unfamiliar ground, and the places that change you",
+  },
+};
+
+function buildDomainDisplayBody(
+  focus: string,
+  primaryHouse: HousePlacement,
+  primaryLord: PlanetPosition
+): string {
+  return (
+    `Your ${focus} runs on a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} rhythm. ` +
+    `Whatever drives this area keeps steering it toward ${HOUSE_THEMES[primaryLord.house]}, ` +
+    `which is where the results actually land -- not always where you were looking for them.`
+  );
+}
+
+function buildDomainDisplayStrengths(
+  primaryHouse: HousePlacement,
+  secondaryHouse: HousePlacement,
+  primaryLord: PlanetPosition
+): string[] {
+  const strengths = [
+    `This part of life moves at a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} pace, and fights you when you force another one.`,
+    `What you get out of it tends to arrive through ${HOUSE_THEMES[primaryLord.house]}.`,
+  ];
+  strengths.push(
+    primaryHouse.planets.length > 0
+      ? "You have real weight behind this one. Several parts of your chart are actively involved, so it rarely stays quiet for long."
+      : `It draws quiet support from ${HOUSE_THEMES[secondaryHouse.house_number]}, which is where to look when the main route stalls.`
+  );
+  return strengths.slice(0, 3);
+}
+
+function buildDomainDisplayWatchouts(
+  primaryHouse: HousePlacement,
+  primaryLord: PlanetPosition,
+  anchorPlanet: PlanetPosition
+): string[] {
+  const watchouts: string[] = [];
+  if ([6, 8, 12].includes(primaryLord.house)) {
+    watchouts.push(
+      "Expect this one to take longer than it should and cost more effort than it looks like it should. That is the shape of it, not a sign you picked wrong."
+    );
+  }
+  if (planetDignity(primaryLord) === "debilitated") {
+    watchouts.push(
+      "This area rewards structure and good advice more than instinct. Waiting until you feel naturally good at it is the wrong order."
+    );
+  }
+  if (planetDignity(anchorPlanet) === "debilitated") {
+    watchouts.push(
+      "Your read on timing here is less reliable than your read on people. Check the calendar against someone else's judgement."
+    );
+  }
+  if (primaryHouse.planets.length === 0) {
+    watchouts.push(
+      "Nothing is forcing this area to happen. It moves when you move it, and it will sit still indefinitely if you let it."
+    );
+  }
+  return watchouts.slice(0, 2);
+}
+
+/** Max 2, and deliberately free of transit and house vocabulary. */
+function buildDomainDisplayTiming(
+  primaryHouse: HousePlacement,
+  anchorPlanet: PlanetPosition
+): string[] {
+  const dignity = planetDignity(anchorPlanet);
+  const instinct =
+    dignity === "exalted" || dignity === "own_sign"
+      ? "Your instincts about when to act here are good. When something feels ready, it usually is."
+      : dignity === "debilitated"
+        ? "Give yourself a second opinion on timing here. Your first read tends to run early or late, rarely on the beat."
+        : "Timing here answers to preparation more than to opportunity. The opening tends to arrive for whoever is already set up for it.";
+
+  const shape =
+    primaryHouse.planets.length > 0
+      ? "When this area moves, it moves loudly and in front of other people."
+      : "When this area moves, it usually moves quietly, and you may only notice in hindsight.";
+
+  return [instinct, shape].slice(0, 2);
+}
+
+function buildDomainClaims(
+  config: (typeof LIFE_DOMAIN_CONFIG)[string],
+  primaryHouse: HousePlacement,
+  secondaryHouse: HousePlacement,
+  primaryLord: PlanetPosition,
+  anchorPlanet: PlanetPosition
+): EvidenceClaim[] {
+  return [
+    { label: "Primary house", value: `${ordinal(config.primary_house)} house`, kind: "placement" },
+    { label: "Sign on that house", value: primaryHouse.sign, kind: "placement" },
+    { label: "House lord", value: primaryLord.name, kind: "lordship" },
+    {
+      label: "Lord placement",
+      value: `${ordinal(primaryLord.house)} house`,
+      kind: "placement",
+      detail: `In ${primaryLord.sign}, ${humanDignity(planetDignity(primaryLord))} by dignity.`,
+    },
+    { label: "Supporting house", value: `${ordinal(secondaryHouse.house_number)} house`, kind: "placement" },
+    {
+      label: "Anchor planet",
+      value: anchorPlanet.name,
+      kind: "dignity",
+      detail: `${humanDignity(planetDignity(anchorPlanet))} in ${anchorPlanet.sign}.`,
+    },
+  ];
+}
+
 function buildLifeDomainInsight(
   key: string,
   planets: PlanetPosition[],
@@ -382,9 +531,37 @@ function buildLifeDomainInsight(
     `${primaryLord.name} in house ${primaryLord.house} links outcomes to ${HOUSE_THEMES[primaryLord.house]}. ` +
     `The practical read is to separate the promise of house ${config.primary_house} from the delivery route of ${primaryLord.name}, then use ${anchorPlanet.name} as the instinctive filter.`;
 
+  const plain = DOMAIN_PLAIN_COPY[key];
+
   return {
     key: key as LifeDomainInsight["key"],
     label: config.label,
+
+    display: {
+      headline: plain.headline,
+      body: buildDomainDisplayBody(plain.focus, primaryHouse, primaryLord),
+      guidance:
+        `For ${config.label.toLowerCase()}, lead with your ${domElement.toLowerCase()} instincts, ` +
+        `then build the habits that keep ${HOUSE_THEMES[primaryHouse.house_number]} in working order.`,
+      long_game:
+        `This area improves slowly and then holds. Treat any single event as evidence rather than a verdict, ` +
+        `and give it several attempts before you decide what it means about you.`,
+      strengths: buildDomainDisplayStrengths(primaryHouse, secondaryHouse, primaryLord),
+      watchouts: buildDomainDisplayWatchouts(primaryHouse, primaryLord, anchorPlanet),
+      timing: buildDomainDisplayTiming(primaryHouse, anchorPlanet),
+    },
+
+    evidence: {
+      technical_note: `${headline} ${overview}`,
+      claims: buildDomainClaims(config, primaryHouse, secondaryHouse, primaryLord, anchorPlanet),
+      // Deliberately the same number as confidence_score. This is a STRENGTH
+      // signal, not a rarity one, and it stops being rendered as a percentage.
+      signal_score: confidence,
+    },
+
+    // Every legacy field below is computed exactly as before. Nothing is
+    // dropped -- these are demoted to the technical tier at the render sites,
+    // not deleted.
     headline,
     overview,
     strengths: buildDomainStrengths(primaryHouse, secondaryHouse, primaryLord, anchorPlanet),

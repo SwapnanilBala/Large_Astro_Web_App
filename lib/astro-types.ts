@@ -348,8 +348,8 @@ export type LifeDomainInsight = {
   key: LifeDomainKey;
   label: string;
 
-  display?: DomainDisplay;
-  evidence?: DomainEvidence;
+  display: DomainDisplay;
+  evidence: DomainEvidence;
 
   // Computed exactly as before; demoted to the evidence tier at the render sites.
   headline: string;

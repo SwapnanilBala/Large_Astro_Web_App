@@ -491,6 +491,89 @@ describe("rule-engine", () => {
       }
     });
 
+    it("each insight has both tiers", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      for (const insight of insights) {
+        expect(insight.display).toHaveProperty("headline");
+        expect(insight.display).toHaveProperty("body");
+        expect(insight.display).toHaveProperty("guidance");
+        expect(insight.display).toHaveProperty("long_game");
+        expect(Array.isArray(insight.display.strengths)).toBe(true);
+        expect(Array.isArray(insight.display.watchouts)).toBe(true);
+        expect(Array.isArray(insight.display.timing)).toBe(true);
+
+        expect(typeof insight.evidence.technical_note).toBe("string");
+        expect(Array.isArray(insight.evidence.claims)).toBe(true);
+        expect(insight.evidence.claims.length).toBeGreaterThan(0);
+        expect(insight.evidence.signal_score).toBe(insight.confidence_score);
+      }
+    });
+
+    it("respects the display list caps", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      for (const insight of insights) {
+        expect(insight.display.strengths.length).toBeLessThanOrEqual(3);
+        expect(insight.display.watchouts.length).toBeLessThanOrEqual(2);
+        expect(insight.display.timing.length).toBeLessThanOrEqual(2);
+      }
+    });
+
+    it("keeps house-lord notation out of the display tier", () => {
+      // The technical headline ("Career: Capricorn house 10, led by Saturn.")
+      // moves into evidence. The default view gets plain language.
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      for (const insight of insights) {
+        const shown = [
+          insight.display.headline,
+          insight.display.body,
+          insight.display.guidance,
+          insight.display.long_game,
+          ...insight.display.strengths,
+          ...insight.display.watchouts,
+          ...insight.display.timing,
+        ].join(" ");
+
+        expect(shown, insight.key).not.toMatch(/\bhouse \d+\b|\bled by\b|\blord\b|\btransit/i);
+        expect(shown, insight.key).not.toMatch(/\d+%|\d+\.\d+/);
+      }
+    });
+
+    it("keeps the technical tier available for the disclosure", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      for (const insight of insights) {
+        expect(insight.evidence.technical_note).toContain(insight.headline);
+        expect(insight.evidence.technical_note).toContain(insight.overview);
+      }
+    });
+
+    // ------------------------------------------------------------------
+    // The four scoring tests below are deliberately unchanged by the rarity
+    // work, because life-domain scoring is out of scope for it.
+    //
+    // LifeDomainInsight.confidence_score is a STRENGTH signal:
+    // calculateDomainSignalScore(), clamped to [0.55, 0.94]. It rises with an
+    // occupied house and a dignified lord.
+    //
+    // DeterministicRule.confidence_score is rarity x strength, where rarity
+    // rises as a pattern gets less common.
+    //
+    // These must not be unified. Under a rarity metric all three monotonic
+    // tests below would invert -- a debilitated lord is rarer than an own-sign
+    // one, and an empty house is rarer than an occupied one.
+    // ------------------------------------------------------------------
+
     it("confidence_score stays within intended life-domain bounds", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
