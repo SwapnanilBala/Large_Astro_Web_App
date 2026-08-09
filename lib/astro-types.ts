@@ -353,6 +353,11 @@ export type LifeDomainInsight = {
   confidence_score: number;
 };
 
+export type LifeDomainInsightsResponse = {
+  generated_at_utc: string;
+  insights: LifeDomainInsight[];
+};
+
 export type EnginePresetInfo = {
   engine_id: string;
   label: string;

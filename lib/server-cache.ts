@@ -116,10 +116,11 @@ export function makeCacheKey(
 // Singleton instances (survive hot-reload in dev via globalThis)
 // ---------------------------------------------------------------------------
 
-const GLOBAL_KEY = "__serverCaches";
+const GLOBAL_KEY = "__serverCaches_v3";
 
 interface GlobalCaches {
   chart: ServerCache;
+  lifeDomains: ServerCache;
   forecast: ServerCache;
   dasha: ServerCache;
   compatibility: ServerCache;
@@ -133,7 +134,9 @@ function createCaches(): GlobalCaches {
   return {
     /** 500 entries, 1 hour TTL. Renamed to v2 to force a cold start when the
      *  rule payload shape changed; entries here can hold rule output. */
-    chart: new ServerCache("chart_v2", 500, 60 * 60 * 1000),
+    chart: new ServerCache("chart_v3", 500, 60 * 60 * 1000),
+    /** 300 entries, 1 hour TTL — deferred seven-domain synthesis */
+    lifeDomains: new ServerCache("life_domains_v1", 300, 60 * 60 * 1000),
     /** 100 entries, 5 min TTL */
     forecast: new ServerCache("forecast", 100, 5 * 60 * 1000),
     /** 200 entries, 30 min TTL */

@@ -704,6 +704,23 @@ function computeInsights(
   return result;
 }
 
+/**
+ * Compute only the core chart facts required by the Life Domain module, then
+ * run the domain synthesis stage. This is intentionally separate from
+ * buildChart() so the results page can defer the heavier seven-domain read
+ * without recalculating dasha, divisional charts, shadbala, or transits.
+ */
+export function buildLifeDomainInsights(
+  birth: BirthDetailsInput
+): LifeDomainInsight[] {
+  const core = computeCorePositions(birth);
+  return computeInsights(
+    core.ascendant.sign,
+    core.planets,
+    core.houses,
+  ).lifeDomainInsights;
+}
+
 // --------------------------------------------------------------------------
 // Build chart (same signature and return type as before)
 // --------------------------------------------------------------------------
@@ -712,6 +729,7 @@ export interface BuildChartOptions {
   includeTransits?: boolean;
   includePremium?: boolean;
   includeUltimate?: boolean;
+  deferLifeDomains?: boolean;
   subscriptionTier?: string;
 }
 
@@ -723,6 +741,7 @@ export function buildChart(
     includeTransits = false,
     includePremium = true,
     includeUltimate = false,
+    deferLifeDomains = false,
     subscriptionTier = "guest",
   } = options;
 
@@ -776,7 +795,7 @@ export function buildChart(
     ashtakavargaData = computeAshtakavarga(core.planets, core.ascendant.sign);
   }
 
-  if (includeUltimate) {
+  if (includeUltimate && !deferLifeDomains) {
     // Stage E: life domain insights
     const insightsStage = computeInsights(
       core.ascendant.sign,

@@ -110,6 +110,7 @@ export function getChartPayload(chartParams: ChartParams): ChartApiResponse {
     lat: birth.latitude,
     lng: birth.longitude,
     transits: includeTransits,
+    domains: "deferred",
     rules_schema: RULES_SCHEMA_VERSION,
   });
 
@@ -120,6 +121,7 @@ export function getChartPayload(chartParams: ChartParams): ChartApiResponse {
     includeTransits,
     includePremium: true,
     includeUltimate: true,
+    deferLifeDomains: true,
     subscriptionTier: "guest",
   }) as unknown as ChartApiResponse;
 

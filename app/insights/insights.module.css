@@ -2315,6 +2315,180 @@
   padding: 1.5rem;
 }
 
+.domainLoading,
+.domainLoadError {
+  composes: card;
+  min-height: 430px;
+  padding: clamp(1.4rem, 3vw, 2.4rem);
+}
+
+.domainLoading {
+  display: grid;
+  align-content: center;
+  gap: 1.4rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(200, 155, 60, 0.12), transparent 34%),
+    radial-gradient(circle at 86% 84%, rgba(26, 123, 110, 0.12), transparent 32%),
+    rgba(13, 10, 22, 0.9);
+}
+
+.domainLoadingHeader {
+  max-width: 760px;
+}
+
+.domainLoadingHeader h2,
+.domainLoadError h2 {
+  margin: 0.35rem 0 0.65rem;
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.65rem, 3vw, 2.5rem);
+  line-height: 1.16;
+}
+
+.domainLoadingHeader > p:last-child,
+.domainLoadError > p {
+  max-width: 720px;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+  line-height: 1.65;
+}
+
+.domainLoadingSteps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.domainLoadingSteps span {
+  position: relative;
+  padding: 0.8rem 0.85rem 0.8rem 2rem;
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.035);
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.domainLoadingSteps span::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0.82rem;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 0 0 0 rgba(200, 155, 60, 0.28);
+  transform: translateY(-50%);
+  animation: domainLoadingPulse 1.8s ease-out infinite;
+}
+
+.domainLoadingSteps span:nth-child(2)::before {
+  animation-delay: 0.3s;
+}
+
+.domainLoadingSteps span:nth-child(3)::before {
+  animation-delay: 0.6s;
+}
+
+.domainLoadingSkeleton {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.domainLoadingSkeleton span {
+  position: relative;
+  min-height: 92px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.domainLoadingSkeleton span::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 20%,
+    rgba(255, 243, 210, 0.08) 48%,
+    transparent 76%
+  );
+  transform: translateX(-100%);
+  animation: domainLoadingSweep 1.8s ease-in-out infinite;
+}
+
+.domainLoadingSkeleton span:nth-child(2)::after {
+  animation-delay: 0.25s;
+}
+
+.domainLoadingSkeleton span:nth-child(3)::after {
+  animation-delay: 0.5s;
+}
+
+.domainLoadError {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 18% 8%, rgba(200, 155, 60, 0.1), transparent 34%),
+    rgba(13, 10, 22, 0.9);
+}
+
+.domainRetryButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.2rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid rgba(200, 155, 60, 0.35);
+  border-radius: 999px;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--accent-gold);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.domainRetryButton:hover {
+  border-color: var(--accent-gold);
+  background: rgba(200, 155, 60, 0.16);
+}
+
+.domainRetryButton:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+@keyframes domainLoadingPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(200, 155, 60, 0.3);
+  }
+
+  70%,
+  100% {
+    box-shadow: 0 0 0 8px rgba(200, 155, 60, 0);
+  }
+}
+
+@keyframes domainLoadingSweep {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  65%,
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* ── Locked Feature Preview ── */
 .lockedPreview {
   display: flex;
@@ -2940,6 +3114,15 @@
   .domainStatementGrid,
   .domainGrid {
     grid-template-columns: 1fr;
+  }
+
+  .domainLoadingSteps,
+  .domainLoadingSkeleton {
+    grid-template-columns: 1fr;
+  }
+
+  .domainLoadingSkeleton span {
+    min-height: 64px;
   }
 
   .domainModeTabs {
@@ -3878,6 +4061,11 @@
 
   .domainChipActive {
     transform: none;
+  }
+
+  .domainLoadingSteps span::before,
+  .domainLoadingSkeleton span::after {
+    animation: none;
   }
 
   .anchorLink,

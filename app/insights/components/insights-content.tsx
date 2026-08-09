@@ -66,7 +66,12 @@ const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-import type { ChartApiResponse, DeterministicRule, LifeDomainInsight } from "@/lib/astro-types";
+import type {
+  ChartApiResponse,
+  DeterministicRule,
+  LifeDomainInsight,
+  LifeDomainInsightsResponse,
+} from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
 
@@ -647,26 +652,65 @@ function RuleCard({ rule, index }: RuleCardProps) {
   );
 }
 
-/* â”€â”€â”€ Locked Feature Preview â”€â”€â”€ */
+function LifeDomainLoadingState({ queued }: { queued: boolean }) {
+  return (
+    <section
+      className={styles.domainLoading}
+      aria-live="polite"
+      aria-busy={!queued}
+    >
+      <div className={styles.domainLoadingHeader}>
+        <p className={styles.kicker}>Life domain analysis</p>
+        <h2>
+          {queued
+            ? "Your deeper reading is ready to begin"
+            : "Calculating seven life areas separately"}
+        </h2>
+        <p>
+          {queued
+            ? "The detailed formulas will start as you approach this section, keeping the first part of your report fast."
+            : "We are comparing the promise, supporting ruler, pressure points, and timing path for each area—not recycling one general reading."}
+        </p>
+      </div>
 
-function LockedFeaturePreview({
-  title,
-  description,
+      <div className={styles.domainLoadingSteps} aria-hidden="true">
+        <span>House and ruler relationships</span>
+        <span>Strength and pressure signals</span>
+        <span>Timing and tailored synthesis</span>
+      </div>
+
+      <div className={styles.domainLoadingSkeleton} aria-hidden="true">
+        <span />
+        <span />
+        <span />
+      </div>
+    </section>
+  );
+}
+
+function LifeDomainErrorState({
+  message,
+  onRetry,
 }: {
-  title: string;
-  description: string;
+  message: string;
+  onRetry: () => void;
 }) {
   return (
-    <div className={styles.lockedPreview}>
-      <div className={styles.lockedIcon}>&#128274;</div>
-      <h3>{title}</h3>
-      <p>{description}</p>
-    </div>
+    <section className={styles.domainLoadError} role="alert">
+      <p className={styles.kicker}>Life domain analysis</p>
+      <h2>The detailed reading did not finish</h2>
+      <p>{message}</p>
+      <button type="button" className={styles.domainRetryButton} onClick={onRetry}>
+        <FiRefreshCw size={16} />
+        Try again
+      </button>
+    </section>
   );
 }
 
 type LifeDomainKey = LifeDomainInsight["key"];
 type DomainViewMode = "brief" | "detailed" | "action";
+type DomainLoadState = "idle" | "loading" | "ready" | "error";
 
 type DomainReadCopy = {
   description: string;
@@ -841,6 +885,7 @@ export default function InsightsContent({
   const shouldReduceMotion = useReducedMotion();
   const [isRouting, startRouting] = useTransition();
   const lockedFeatures = new Set(payload.access.locked_features);
+  const isLifeDomainLocked = lockedFeatures.has("life_domain_readings");
   const advancedInsightsHref = historyQs
     ? `/insights/advanced?${historyQs}`
     : "/insights/advanced";
@@ -851,15 +896,116 @@ export default function InsightsContent({
   transitParams.set("view", "transits");
   const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
   const sectionStateScope = `insights:section-state:${historyQs}`;
-  const domainInsights = payload.chart.life_domain_insights ?? [];
+  const initialDomainInsights = payload.chart.life_domain_insights ?? [];
+  const [domainInsights, setDomainInsights] = useState<LifeDomainInsight[]>(
+    initialDomainInsights
+  );
   const rankedDomainInsights = [...domainInsights].sort(
     (left, right) => right.confidence_score - left.confidence_score
   );
   const availableEngines = payload.engine.available_engines ?? [];
   const [selectedDomainKey, setSelectedDomainKey] = useState<
     LifeDomainInsight["key"]
-  >(rankedDomainInsights[0]?.key ?? "love_life");
+  >(
+    [...initialDomainInsights].sort(
+      (left, right) => right.confidence_score - left.confidence_score
+    )[0]?.key ?? "love_life"
+  );
   const [domainViewMode, setDomainViewMode] = useState<DomainViewMode>("brief");
+  const [domainLoadState, setDomainLoadState] = useState<DomainLoadState>(
+    initialDomainInsights.length > 0 ? "ready" : "idle"
+  );
+  const [domainLoadError, setDomainLoadError] = useState("");
+  const [domainRetryToken, setDomainRetryToken] = useState(0);
+  const domainSectionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const suppliedInsights = payload.chart.life_domain_insights ?? [];
+    if (suppliedInsights.length > 0) {
+      const topDomain = [...suppliedInsights].sort(
+        (left, right) => right.confidence_score - left.confidence_score
+      )[0];
+      setDomainInsights(suppliedInsights);
+      if (topDomain) setSelectedDomainKey(topDomain.key);
+      setDomainLoadError("");
+      setDomainLoadState("ready");
+      return;
+    }
+
+    setDomainInsights([]);
+    setDomainLoadError("");
+    setDomainLoadState("idle");
+    if (isLifeDomainLocked) return;
+
+    const controller = new AbortController();
+    let requested = false;
+
+    const loadLifeDomains = async () => {
+      if (requested) return;
+      requested = true;
+      setDomainLoadState("loading");
+
+      try {
+        const response = await fetch(`/api/chart/life-domains?${historyQs}`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("We could not complete the domain formulas.");
+        }
+
+        const result = (await response.json()) as LifeDomainInsightsResponse;
+        if (!Array.isArray(result.insights) || result.insights.length === 0) {
+          throw new Error("The domain analysis returned no results.");
+        }
+        if (controller.signal.aborted) return;
+
+        const topDomain = [...result.insights].sort(
+          (left, right) => right.confidence_score - left.confidence_score
+        )[0];
+        setDomainInsights(result.insights);
+        if (topDomain) setSelectedDomainKey(topDomain.key);
+        setDomainLoadState("ready");
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        setDomainLoadError(
+          error instanceof Error
+            ? error.message
+            : "We could not complete the domain formulas."
+        );
+        setDomainLoadState("error");
+      }
+    };
+
+    const section = domainSectionRef.current;
+    if (!section || typeof IntersectionObserver === "undefined") {
+      void loadLifeDomains();
+      return () => controller.abort();
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        observer.disconnect();
+        void loadLifeDomains();
+      },
+      { rootMargin: "700px 0px" }
+    );
+    observer.observe(section);
+
+    return () => {
+      observer.disconnect();
+      controller.abort();
+    };
+  }, [domainRetryToken, historyQs, isLifeDomainLocked, payload.chart.life_domain_insights]);
+
+  const payloadWithDomainInsights: ChartApiResponse =
+    domainInsights.length > 0
+      ? {
+          ...payload,
+          chart: { ...payload.chart, life_domain_insights: domainInsights },
+        }
+      : payload;
 
   // Ranked by selection.rank, which is the measured ordering. Unselected rules
   // sort to the end rather than to the front -- rank 0 means "not selected",
@@ -983,11 +1129,11 @@ export default function InsightsContent({
               <FiCopy size={16} />
               Copy link
             </button>
-            <PersonalStory payload={payload} compact />
+            <PersonalStory payload={payloadWithDomainInsights} compact />
           </div>
         </motion.header>
 
-        <TopTakeawaysModule payload={payload} />
+        <TopTakeawaysModule payload={payloadWithDomainInsights} />
 
         <motion.div
           id="chart-map"
@@ -1190,15 +1336,24 @@ export default function InsightsContent({
         </CollapsibleSection>
 
         {/* â”€â”€â”€ Life Domain Deep Dives â”€â”€â”€ */}
-        <AuthGate
-          featureLabel="Life Domain Deep Dives"
-          isLocked={lockedFeatures.has("life_domain_readings")}
-          requiredTier="ultimate"
+        <div
+          id="ultimate"
+          ref={domainSectionRef}
+          className={styles.anchorTarget}
         >
-          {selectedDomainInsight ? (
-            <motion.section
-              id="ultimate"
-              className={`${styles.cardDomains} ${styles.anchorTarget}`}
+          <AuthGate
+            featureLabel="Life Domain Deep Dives"
+            isLocked={isLifeDomainLocked}
+            requiredTier="ultimate"
+          >
+            {domainLoadState === "error" ? (
+              <LifeDomainErrorState
+                message={domainLoadError}
+                onRetry={() => setDomainRetryToken((value) => value + 1)}
+              />
+            ) : selectedDomainInsight ? (
+              <motion.section
+              className={styles.cardDomains}
               initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: "-60px" }}
@@ -1209,7 +1364,8 @@ export default function InsightsContent({
                 heading="Life domain deep dives"
               />
               <p className={styles.sectionIntro}>
-                Choose a life area for a full house, lord, timing, evidence, and rule-based read.
+                Each area runs its own formula across primary promise, supporting ruler,
+                strength, pressure, timing, and delivery path.
               </p>
 
               <div className={styles.domainSelectorHeader}>
@@ -1436,14 +1592,12 @@ export default function InsightsContent({
                   )}
                 </motion.article>
               </AnimatePresence>
-            </motion.section>
-          ) : (
-            <LockedFeaturePreview
-              title="Life domain deep dives"
-              description="Ultimate unlocks focused readings for love life, career, family, inheritance, influence, and major life cycles."
-            />
-          )}
-        </AuthGate>
+              </motion.section>
+            ) : (
+              <LifeDomainLoadingState queued={domainLoadState === "idle"} />
+            )}
+          </AuthGate>
+        </div>
 
         {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
         {payload.chart.lucky_elements && (

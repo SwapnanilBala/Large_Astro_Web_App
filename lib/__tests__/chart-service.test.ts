@@ -36,6 +36,7 @@ vi.mock("swisseph", () => {
 import {
   buildChart,
   buildForecast,
+  buildLifeDomainInsights,
   type ChartResponse,
   type ForecastReading,
 } from "../engines/chart-service";
@@ -259,6 +260,23 @@ describe("chart-service", () => {
       it("includeUltimate=false locks life_domain_readings", () => {
         const chart = buildChart(BIRTH, { includeUltimate: false });
         expect(chart.access.locked_features).toContain("life_domain_readings");
+      });
+
+      it("can defer life-domain work without locking the feature", () => {
+        const chart = buildChart(BIRTH, {
+          includeUltimate: true,
+          deferLifeDomains: true,
+        });
+
+        expect(chart.chart.life_domain_insights).toBeNull();
+        expect(chart.access.ultimate_features_enabled).toBe(true);
+        expect(chart.access.locked_features).not.toContain("life_domain_readings");
+      });
+
+      it("buildLifeDomainInsights computes only the deferred domain payload", () => {
+        const insights = buildLifeDomainInsights(BIRTH);
+        expect(insights).toHaveLength(7);
+        expect(new Set(insights.map((insight) => insight.key)).size).toBe(7);
       });
     });
 

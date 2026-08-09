@@ -16,6 +16,7 @@ type RateLimitConfig = {
 /** Per-route rate limit configuration. Key is matched against the request pathname. */
 const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart/forecast": { limit: 20, windowMs: 60_000 },
+  "/api/chart/life-domains": { limit: 20, windowMs: 60_000 },
   "/api/chart/dasha-subperiods": { limit: 40, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   "/api/compatibility": { limit: 10, windowMs: 60_000 },

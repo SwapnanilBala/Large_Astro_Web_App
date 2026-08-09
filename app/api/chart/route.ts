@@ -65,6 +65,7 @@ export async function GET(request: NextRequest) {
       lat: birth.latitude,
       lng: birth.longitude,
       transits: includeTransits,
+      domains: "deferred",
       rules_schema: RULES_SCHEMA_VERSION,
     });
 
@@ -83,6 +84,7 @@ export async function GET(request: NextRequest) {
       includeTransits,
       includePremium: true,
       includeUltimate: true,
+      deferLifeDomains: true,
       subscriptionTier: "guest",
     });
 
@@ -129,6 +131,7 @@ export async function POST(request: NextRequest) {
       lat: birth.latitude,
       lng: birth.longitude,
       transits: includeTransits,
+      domains: "deferred",
       rules_schema: RULES_SCHEMA_VERSION,
     });
 
@@ -147,6 +150,7 @@ export async function POST(request: NextRequest) {
       includeTransits,
       includePremium: true,
       includeUltimate: true,
+      deferLifeDomains: true,
       subscriptionTier: "guest",
     });
 
