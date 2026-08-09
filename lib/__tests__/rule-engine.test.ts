@@ -505,6 +505,38 @@ describe("rule-engine", () => {
       }
     });
 
+    it("uses distinct narrative rules for every visible domain section", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      const visibleSlots = [
+        (insight: LifeDomainInsight) => insight.display.body,
+        (insight: LifeDomainInsight) => insight.display.guidance,
+        (insight: LifeDomainInsight) => insight.display.long_game,
+        (insight: LifeDomainInsight) => insight.display.strengths[0],
+        (insight: LifeDomainInsight) => insight.display.watchouts[0],
+        (insight: LifeDomainInsight) => insight.display.timing[0],
+        (insight: LifeDomainInsight) => insight.display.timing[1],
+      ];
+
+      for (const readSlot of visibleSlots) {
+        const values = insights.map(readSlot);
+        expect(values.every(Boolean)).toBe(true);
+        expect(new Set(values).size).toBe(insights.length);
+      }
+    });
+
+    it("includes the supporting ruler in the technical evidence", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+
+      for (const insight of insights) {
+        expect(insight.evidence.claims.some((claim) => claim.label === "Supporting lord")).toBe(true);
+      }
+    });
+
     it("respects the display list caps", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);
@@ -638,6 +670,36 @@ describe("rule-engine", () => {
 
       expect(strongLove.confidence_score).toBeGreaterThan(
         debilitatedLove.confidence_score
+      );
+    });
+
+    it("raises a domain score when its supporting lord is stronger", () => {
+      const weakSupportPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Venus" ? { ...planet, sign: "Virgo" } : planet
+      );
+      const strongSupportPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Venus" ? { ...planet, sign: "Libra" } : planet
+      );
+
+      const weakCareer = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          weakSupportPlanets,
+          buildHousesFromPlanets(ASC_SIGN, weakSupportPlanets)
+        ),
+        "career"
+      );
+      const strongCareer = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          strongSupportPlanets,
+          buildHousesFromPlanets(ASC_SIGN, strongSupportPlanets)
+        ),
+        "career"
+      );
+
+      expect(strongCareer.confidence_score).toBeGreaterThan(
+        weakCareer.confidence_score
       );
     });
 

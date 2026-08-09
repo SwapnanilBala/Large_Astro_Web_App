@@ -29,6 +29,7 @@ import type {
   DeterministicRule,
   EvidenceClaim,
   LifeDomainInsight,
+  LifeDomainKey,
   RuleDisplay,
   RuleEvidence,
 } from "@/lib/astro-types";
@@ -66,16 +67,15 @@ const SIGN_STYLE_PHRASES: Record<string, string> = {
 };
 
 
-const LIFE_DOMAIN_CONFIG: Record<
-  string,
-  {
-    label: string;
-    primary_house: number;
-    secondary_house: number;
-    anchor_planet: string;
-    summary_focus: string;
-  }
-> = {
+type LifeDomainConfig = {
+  label: string;
+  primary_house: number;
+  secondary_house: number;
+  anchor_planet: string;
+  summary_focus: string;
+};
+
+const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
   love_life: {
     label: "Love Life",
     primary_house: 7,
@@ -226,6 +226,7 @@ function calculateDomainSignalScore(
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): number {
   const primaryOccupancySignal = Math.min(primaryHouse.planets.length, 3) * 0.025;
@@ -237,8 +238,14 @@ function calculateDomainSignalScore(
     secondaryOccupancySignal +
     housePlacementSignal(primaryLord.house) +
     dignitySignal(primaryLord, 0.065, 0.045, -0.05) +
+    dignitySignal(secondaryLord, 0.025, 0.018, -0.02) +
     dignitySignal(anchorPlanet, 0.045, 0.03, -0.035) +
-    anchorHouseRelevanceSignal(anchorPlanet, primaryHouse, secondaryHouse);
+    anchorHouseRelevanceSignal(anchorPlanet, primaryHouse, secondaryHouse) +
+    (primaryLord.house === secondaryHouse.house_number ? 0.03 : 0) +
+    (secondaryLord.house === primaryHouse.house_number ? 0.025 : 0) +
+    (primaryLord.name === secondaryLord.name ? 0.02 : 0) -
+    (primaryLord.is_combust ? 0.025 : 0) -
+    (primaryLord.is_retrograde ? 0.01 : 0);
 
   return boundedDomainScore(signal);
 }
@@ -312,14 +319,16 @@ function domainGuidance(
 }
 
 function domainTimingTriggers(
-  config: (typeof LIFE_DOMAIN_CONFIG)[string],
+  config: LifeDomainConfig,
   primaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): string[] {
   const triggers: string[] = [
-    `${primaryLord.name} periods and major transits move this area fastest.`,
-    `${anchorPlanet.name} activations color timing through ${HOUSE_THEMES[anchorPlanet.house]}.`,
+    `${primaryLord.name} periods and major transits move ${config.label.toLowerCase()} fastest.`,
+    `${secondaryLord.name} periods test whether support from house ${config.secondary_house} can carry the primary promise.`,
+    `${anchorPlanet.name} activations color ${config.label.toLowerCase()} timing through ${HOUSE_THEMES[anchorPlanet.house]}.`,
     `Transits over house ${config.primary_house}, house ${config.secondary_house}, or ${primaryHouse.sign} should be treated as confirmation windows rather than standalone promises.`,
   ];
   if (primaryHouse.planets.length > 0) {
@@ -334,11 +343,13 @@ function domainSupportingPatterns(
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): string[] {
   return [
     `${primaryHouse.sign} sets the main tone.`,
     `${secondaryHouse.sign} adds support through house ${secondaryHouse.house_number}.`,
+    `${secondaryLord.name} carries that supporting house from house ${secondaryLord.house}.`,
     `${anchorPlanet.name} filters instinct through house ${anchorPlanet.house}.`,
     dignitySummary(primaryLord),
   ];
@@ -365,122 +376,271 @@ function domainLongGame(
 // and are demoted into `evidence`.
 // --------------------------------------------------------------------------
 
-/** Plain-language framing per domain, replacing "Label: Sign house N" headlines. */
-const DOMAIN_PLAIN_COPY: Record<string, { headline: string; focus: string }> = {
+type DomainNarrativeProfile = {
+  headline: string;
+  body: string;
+  approachStrength: string;
+  deliveryStrength: string;
+  occupiedStrength: string;
+  quietStrength: string;
+  linkedSignal: string;
+  primaryRisk: string;
+  anchorRisk: string;
+  baselineWatchout: string;
+  strongTiming: string;
+  weakTiming: string;
+  neutralTiming: string;
+  activeTiming: string;
+  quietTiming: string;
+  guidance: string;
+  longGame: string;
+};
+
+const DOMAIN_NARRATIVES: Record<LifeDomainKey, DomainNarrativeProfile> = {
   love_life: {
     headline: "What partnership actually asks of you",
-    focus: "who you pair with, and what it takes to keep it working",
+    body: "Partnership starts through {styleWithArticle} approach to attraction, but commitment is delivered through {delivery}. The distance between those two shows what a bond must learn before it can last.",
+    approachStrength: "You read chemistry and reciprocity through {sign}'s {style} style; forced intimacy is unlikely to feel convincing.",
+    deliveryStrength: "{lord} carries partnership outcomes into {delivery}, so love tends to affect that part of life directly.",
+    occupiedStrength: "With {occupants} directly activating partnership, relationship choices become visible and difficult to postpone.",
+    quietStrength: "With partnership unoccupied, the romantic pattern develops through {support}; consistent behavior matters more than dramatic beginnings.",
+    linkedSignal: "Romance and commitment are tightly linked here, so attraction tends to become a decision about the future.",
+    primaryRisk: "Partnership can ask for repair work, boundaries, or patience before equality is possible; chemistry alone will not solve that workload.",
+    anchorRisk: "{anchor} asks for more discernment than indulgence: affection may be real while values and compatibility still need separate checks.",
+    baselineWatchout: "The recurring relationship test is whether closeness remains reciprocal after the first intensity settles.",
+    strongTiming: "{anchor} gives clean relationship instincts; mutual interest is easier to recognize and commitment conversations land at the right pace.",
+    weakTiming: "Attraction can arrive before reliability is proven, so let consistency establish the timing instead of chemistry.",
+    neutralTiming: "Relationship timing improves when affection is matched by clear agreements and repeatable follow-through.",
+    activeTiming: "Partnership periods tend to announce themselves openly through meetings, choices, or a visible change in commitment.",
+    quietTiming: "A meaningful bond may form quietly; notice who keeps showing up before looking for a dramatic turning point.",
+    guidance: "In love, {elementMethod}. Then test attraction against reciprocity, conflict repair, and whether both people can keep agreements.",
+    longGame: "The durable relationship pattern is built by letting {lord} mature your standards; fewer assumptions and better repair matter more than constant intensity.",
   },
   career: {
     headline: "Where your working life is heading",
-    focus: "the work you do and the standing it earns you",
+    body: "Your public work favors {styleWithArticle} operating style. Recognition accumulates through {delivery}, so the job title matters less than the proof you build along that route.",
+    approachStrength: "Your professional advantage is {sign}'s {style} way of solving problems and taking responsibility.",
+    deliveryStrength: "{lord} routes advancement through {delivery}; that is where competence becomes reputation.",
+    occupiedStrength: "{occupants} make career decisions a foreground concern, increasing both visibility and the cost of drifting without a plan.",
+    quietStrength: "With the career zone unoccupied, professional traction comes through {support}; daily systems create the public result.",
+    linkedSignal: "Workload and public standing reinforce one another strongly, so better process is likely to produce visible advancement.",
+    primaryRisk: "Career progress may require apprenticeship, repeated proof, or behind-the-scenes labor before authority catches up with ability.",
+    anchorRisk: "{anchor} can turn discipline into self-criticism; use deadlines and standards without making every delay a verdict on your competence.",
+    baselineWatchout: "The professional trap is confusing motion with progress; prioritize work that leaves evidence, leverage, or a stronger position.",
+    strongTiming: "{anchor} supports patient professional timing; promotions and heavier responsibility are easier to accept when the structure is ready.",
+    weakTiming: "Professional pressure can make the next offer look more urgent than it is; verify role, authority, and workload before committing.",
+    neutralTiming: "Career openings respond to preparation: credentials, work samples, and useful relationships should exist before the vacancy appears.",
+    activeTiming: "Career shifts are likely to be public and measurable, such as a new mandate, title, client base, or change in accountability.",
+    quietTiming: "The next professional phase may begin as a process change or private responsibility before anyone calls it advancement.",
+    guidance: "At work, {elementMethod}. Convert that instinct into visible proof, a repeatable system, and a clear next level of responsibility.",
+    longGame: "Career compounds when {lord} turns skill into authority; choose roles that deepen judgement instead of merely increasing activity.",
   },
   family: {
     headline: "What home is supposed to give you",
-    focus: "the people you came from, and the base you build for yourself",
+    body: "Home and belonging are filtered through {styleWithArticle} emotional rhythm. Stability is rebuilt through {delivery}, which reveals where family patterns are actually repaired.",
+    approachStrength: "{sign} gives the private life {styleWithArticle} way of protecting, nesting, and deciding who feels like family.",
+    deliveryStrength: "{lord} connects emotional security with {delivery}; changes there tend to alter the atmosphere at home.",
+    occupiedStrength: "{occupants} keep family and home themes active, making private decisions central rather than occasional.",
+    quietStrength: "With the home zone unoccupied, belonging is strengthened through {support}; speech, shared values, and practical continuity carry more weight.",
+    linkedSignal: "Home and lineage are closely connected, so changing the household pattern also changes what is carried forward from family.",
+    primaryRisk: "Family stability may require difficult caretaking, privacy, or emotional repair before the home feels restorative again.",
+    anchorRisk: "{anchor} can blur your needs with the family's mood; name what belongs to you before taking responsibility for everyone else.",
+    baselineWatchout: "The family pattern becomes costly when peace is maintained by avoiding the conversation that would make the home safer.",
+    strongTiming: "{anchor} supports accurate emotional timing; you can usually tell when to gather people, set a boundary, or make a home change.",
+    weakTiming: "Family decisions can be made from a temporary mood, so let the emotional weather settle before changing the structure around it.",
+    neutralTiming: "Home decisions work best after the practical and emotional needs have both been named, not when one is used to silence the other.",
+    activeTiming: "Family developments tend to become obvious through a move, a caregiving decision, or a visible change in household roles.",
+    quietTiming: "The private life changes through small routines first; the larger family shift becomes clear only after those habits hold.",
+    guidance: "For family, {elementMethod}. Use that instinct to create predictable care, clearer boundaries, and a home that restores rather than drains.",
+    longGame: "Family security improves as {lord} helps you replace inherited reflexes with chosen rituals, honest speech, and steadier forms of support.",
   },
   inheritance: {
     headline: "What reaches you through other people",
-    focus: "shared money, what you inherit, and resources you did not earn alone",
+    body: "Shared money and legacy questions unfold through {styleWithArticle} risk pattern. Their consequences land in {delivery}, so stewardship matters as much as what is received.",
+    approachStrength: "{sign} gives you {styleWithArticle} response to debt, dependency, confidential resources, and irreversible financial decisions.",
+    deliveryStrength: "{lord} directs shared-resource outcomes toward {delivery}; that area often carries the real obligation attached to an asset.",
+    occupiedStrength: "{occupants} make shared assets and legacy matters more active, increasing the need for explicit ownership and documentation.",
+    quietStrength: "With the inheritance zone unoccupied, resource transfers depend more on {support}; reserves and family agreements become the stabilizer.",
+    linkedSignal: "Stored wealth and transferred wealth are closely linked, so what is preserved matters as much as what is inherited.",
+    primaryRisk: "Shared resources can arrive with delay, secrecy, debt, or emotional strings; investigate obligations before counting the asset.",
+    anchorRisk: "{anchor} can overestimate goodwill or future value; independent advice and complete records are more useful than reassurance.",
+    baselineWatchout: "The main financial boundary is transparency: unclear ownership, undocumented promises, and mixed accounts should never be treated as minor details.",
+    strongTiming: "{anchor} supports sound stewardship; negotiations are cleaner when growth, tax, debt, and responsibility are discussed together.",
+    weakTiming: "Optimism can outrun due diligence, so delay signatures until ownership, liabilities, and exit conditions are fully visible.",
+    neutralTiming: "Resource transfers favor preparation over prediction; organize records and contingencies before money or responsibility changes hands.",
+    activeTiming: "A shared-resource period is likely to surface through a concrete negotiation, settlement, debt decision, or change in ownership.",
+    quietTiming: "The important shift may begin with paperwork or a private conversation long before any asset visibly changes hands.",
+    guidance: "With shared resources, {elementMethod}. Follow that instinct with documentation, independent valuation, and a clear map of responsibility.",
+    longGame: "Legacy becomes safer when {lord} turns complexity into stewardship; protect future choices instead of maximizing the immediate transfer.",
   },
   influence: {
     headline: "How far your voice carries",
-    focus: "your network, your reach, and your ability to move people",
+    body: "Your reach grows through {styleWithArticle} social strategy. Influence is earned in {delivery}, showing where an audience begins to trust your judgement.",
+    approachStrength: "{sign} gives your network {styleWithArticle} way of gathering allies, sharing ideas, and deciding which groups deserve your energy.",
+    deliveryStrength: "{lord} converts reach into results through {delivery}; credibility there determines how far the message travels.",
+    occupiedStrength: "{occupants} amplify network activity, making alliances, audiences, and collective goals unusually visible.",
+    quietStrength: "With the network zone unoccupied, influence grows through {support}; reputation has to precede reach.",
+    linkedSignal: "Public standing and network reach feed each other directly, so credible work is the strongest audience-building strategy.",
+    primaryRisk: "Influence can grow through demanding groups, political friction, or obligations that consume more energy than the access is worth.",
+    anchorRisk: "{anchor} can make visibility personal; separate the usefulness of the message from the amount of attention it receives.",
+    baselineWatchout: "The audience becomes a distraction when reach expands faster than the message, boundaries, or delivery system can support.",
+    strongTiming: "{anchor} supports visible leadership; it is easier to know when to claim credit, represent the group, or put your name behind an idea.",
+    weakTiming: "Recognition can distort judgement, so test the message with trusted peers before treating applause or resistance as proof.",
+    neutralTiming: "Influence grows when a useful message is repeated consistently enough for other people to carry it without your supervision.",
+    activeTiming: "Network shifts tend to be public, arriving through invitations, introductions, audience growth, or a larger collective responsibility.",
+    quietTiming: "The next expansion may start with one strategic ally; depth of trust matters more than the first visible increase in reach.",
+    guidance: "For influence, {elementMethod}. Turn that instinct into a repeatable message, a defined audience, and alliances with mutual value.",
+    longGame: "Reach compounds when {lord} ties visibility to contribution; build a body of work that other people can quote, use, and recommend.",
   },
   life_cycle: {
     headline: "How you reinvent yourself",
-    focus: "the long arc of your phases, recoveries and rebuilds",
+    body: "Identity changes through {styleWithArticle} cycle of action and reflection. Each reinvention is delivered through {delivery}, which names the terrain where the new self is tested.",
+    approachStrength: "{sign} gives self-direction {styleWithArticle} pattern; you renew momentum by returning to that native way of meeting life.",
+    deliveryStrength: "{lord} carries identity changes into {delivery}, so major personal chapters are rarely confined to appearance or mood.",
+    occupiedStrength: "{occupants} intensify self-development, making reinvention an active and recurring part of the life story.",
+    quietStrength: "With identity unoccupied, transformation gathers through {support}; change begins below the surface before it becomes a new direction.",
+    linkedSignal: "Identity and transformation are tightly coupled, so endings tend to produce a genuine new operating system rather than a cosmetic reset.",
+    primaryRisk: "Personal growth can be shaped by crisis, exhaustion, or retreat; recovery must be treated as part of the change rather than a delay in it.",
+    anchorRisk: "{anchor} can make a temporary feeling look like a permanent identity; wait for the pattern to repeat before rewriting your self-concept.",
+    baselineWatchout: "Reinvention becomes avoidance when the outer change is dramatic but the underlying habit, fear, or dependency remains untouched.",
+    strongTiming: "{anchor} gives good instincts for personal turning points; inner readiness and outer change are more likely to arrive together.",
+    weakTiming: "A strong mood can trigger a premature reset, so make identity decisions after the emotional peak rather than inside it.",
+    neutralTiming: "A new chapter is ready when the daily behavior already resembles the person you intend to become.",
+    activeTiming: "Life-cycle shifts are likely to be unmistakable, bringing a visible change in role, body, direction, or personal priorities.",
+    quietTiming: "Reinvention begins privately through recovery and changed habits; the new identity becomes visible only after it is stable.",
+    guidance: "For reinvention, {elementMethod}. Reduce the change to one identity-defining habit and let repeated action make the new chapter credible.",
+    longGame: "Personal evolution deepens when {lord} turns each ending into a better structure for agency, resilience, and self-trust.",
   },
   travel_destinations: {
     headline: "Where you end up, and why",
-    focus: "distance, unfamiliar ground, and the places that change you",
+    body: "Distance and discovery follow {styleWithArticle} appetite for movement. The purpose of travel is delivered through {delivery}, revealing what a place is meant to teach or change.",
+    approachStrength: "{sign} gives travel {styleWithArticle} rhythm; the right journey needs to match that pace rather than merely look impressive.",
+    deliveryStrength: "{lord} connects distant places with {delivery}, so destination choices often serve that larger purpose.",
+    occupiedStrength: "{occupants} activate travel and relocation themes, making movement, foreign links, or changing horizons more consequential.",
+    quietStrength: "With long-distance travel unoccupied, movement grows through {support}; short trips, skills, and logistics prepare the larger departure.",
+    linkedSignal: "Short journeys and long-distance movement reinforce each other, so local exploration can become the bridge to relocation or foreign opportunity.",
+    primaryRisk: "Travel can involve bureaucracy, health strain, hidden cost, or separation; the meaningful destination still requires practical buffers.",
+    anchorRisk: "{anchor} can idealize a place before daily life there is understood; compare the dream with cost, routine, community, and legal reality.",
+    baselineWatchout: "Movement becomes escape when the destination is expected to solve a pattern that has not been addressed at home.",
+    strongTiming: "{anchor} supports expansive travel choices; learning, meaning, and logistics are more likely to point toward the same destination.",
+    weakTiming: "The promise of distance can be exaggerated, so verify documents, finances, and daily conditions before treating a place as destiny.",
+    neutralTiming: "Travel timing improves when purpose and preparation agree; a clear reason to go is more reliable than restlessness alone.",
+    activeTiming: "Travel periods are likely to arrive through a visible invitation, course, relocation option, or foreign connection.",
+    quietTiming: "The important journey may begin with research, language, paperwork, or repeated short trips before the long move becomes possible.",
+    guidance: "For travel, {elementMethod}. Match that instinct with a defined purpose, realistic logistics, and enough margin for the unfamiliar.",
+    longGame: "Distance becomes meaningful when {lord} turns experience into perspective; choose journeys that expand judgement, not only scenery.",
   },
 };
 
-function buildDomainDisplayBody(
-  focus: string,
+const ELEMENT_METHODS: Record<string, string> = {
+  Fire: "act directly and create momentum",
+  Earth: "build proof through routines and material follow-through",
+  Air: "name the terms, compare options, and keep communication moving",
+  Water: "read the emotional undercurrent and protect what needs time",
+};
+
+type DomainNarrativeFacts = Record<
+  "style" | "styleWithArticle" | "delivery" | "support" | "sign" | "lord" | "secondaryLord" | "anchor" | "occupants" | "elementMethod",
+  string
+>;
+
+function renderDomainNarrative(template: string, facts: DomainNarrativeFacts): string {
+  return template.replace(/\{(\w+)\}/g, (_match, token: string) => facts[token as keyof DomainNarrativeFacts] ?? "");
+}
+
+function domainsAreLinked(
   primaryHouse: HousePlacement,
-  primaryLord: PlanetPosition
-): string {
+  secondaryHouse: HousePlacement,
+  primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition
+): boolean {
   return (
-    `Your ${focus} runs on a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} rhythm. ` +
-    `Whatever drives this area keeps steering it toward ${HOUSE_THEMES[primaryLord.house]}, ` +
-    `which is where the results actually land -- not always where you were looking for them.`
+    primaryLord.name === secondaryLord.name ||
+    primaryLord.house === secondaryHouse.house_number ||
+    secondaryLord.house === primaryHouse.house_number
   );
 }
 
 function buildDomainDisplayStrengths(
+  profile: DomainNarrativeProfile,
+  facts: DomainNarrativeFacts,
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
-  primaryLord: PlanetPosition
+  primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition
 ): string[] {
-  const strengths = [
-    `This part of life moves at a ${SIGN_STYLE_PHRASES[primaryHouse.sign]} pace, and fights you when you force another one.`,
-    `What you get out of it tends to arrive through ${HOUSE_THEMES[primaryLord.house]}.`,
-  ];
-  strengths.push(
-    primaryHouse.planets.length > 0
-      ? "You have real weight behind this one. Several parts of your chart are actively involved, so it rarely stays quiet for long."
-      : `It draws quiet support from ${HOUSE_THEMES[secondaryHouse.house_number]}, which is where to look when the main route stalls.`
+  const third = domainsAreLinked(primaryHouse, secondaryHouse, primaryLord, secondaryLord)
+    ? profile.linkedSignal
+    : primaryHouse.planets.length > 0
+      ? profile.occupiedStrength
+      : profile.quietStrength;
+
+  return [profile.approachStrength, profile.deliveryStrength, third].map((item) =>
+    renderDomainNarrative(item, facts)
   );
-  return strengths.slice(0, 3);
 }
 
 function buildDomainDisplayWatchouts(
+  profile: DomainNarrativeProfile,
+  facts: DomainNarrativeFacts,
   primaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): string[] {
   const watchouts: string[] = [];
-  if ([6, 8, 12].includes(primaryLord.house)) {
-    watchouts.push(
-      "Expect this one to take longer than it should and cost more effort than it looks like it should. That is the shape of it, not a sign you picked wrong."
-    );
+  const lordNeedsCare =
+    [6, 8, 12].includes(primaryLord.house) ||
+    planetDignity(primaryLord) === "debilitated" ||
+    primaryLord.is_retrograde ||
+    primaryLord.is_combust;
+  const anchorNeedsCare =
+    planetDignity(anchorPlanet) === "debilitated" ||
+    anchorPlanet.is_retrograde ||
+    anchorPlanet.is_combust;
+
+  if (lordNeedsCare) watchouts.push(profile.primaryRisk);
+  if (anchorNeedsCare) watchouts.push(profile.anchorRisk);
+  if (primaryHouse.planets.length === 0 || watchouts.length === 0) {
+    watchouts.push(profile.baselineWatchout);
   }
-  if (planetDignity(primaryLord) === "debilitated") {
-    watchouts.push(
-      "This area rewards structure and good advice more than instinct. Waiting until you feel naturally good at it is the wrong order."
-    );
-  }
-  if (planetDignity(anchorPlanet) === "debilitated") {
-    watchouts.push(
-      "Your read on timing here is less reliable than your read on people. Check the calendar against someone else's judgement."
-    );
-  }
-  if (primaryHouse.planets.length === 0) {
-    watchouts.push(
-      "Nothing is forcing this area to happen. It moves when you move it, and it will sit still indefinitely if you let it."
-    );
-  }
-  return watchouts.slice(0, 2);
+
+  return [...new Set(watchouts)]
+    .slice(0, 2)
+    .map((item) => renderDomainNarrative(item, facts));
 }
 
 /** Max 2, and deliberately free of transit and house vocabulary. */
 function buildDomainDisplayTiming(
+  profile: DomainNarrativeProfile,
+  facts: DomainNarrativeFacts,
   primaryHouse: HousePlacement,
+  secondaryHouse: HousePlacement,
+  primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): string[] {
   const dignity = planetDignity(anchorPlanet);
   const instinct =
     dignity === "exalted" || dignity === "own_sign"
-      ? "Your instincts about when to act here are good. When something feels ready, it usually is."
-      : dignity === "debilitated"
-        ? "Give yourself a second opinion on timing here. Your first read tends to run early or late, rarely on the beat."
-        : "Timing here answers to preparation more than to opportunity. The opening tends to arrive for whoever is already set up for it.";
+      ? profile.strongTiming
+      : dignity === "debilitated" || anchorPlanet.is_retrograde || anchorPlanet.is_combust
+        ? profile.weakTiming
+        : profile.neutralTiming;
+  const shape = domainsAreLinked(primaryHouse, secondaryHouse, primaryLord, secondaryLord)
+    ? profile.linkedSignal
+    : primaryHouse.planets.length > 0
+      ? profile.activeTiming
+      : profile.quietTiming;
 
-  const shape =
-    primaryHouse.planets.length > 0
-      ? "When this area moves, it moves loudly and in front of other people."
-      : "When this area moves, it usually moves quietly, and you may only notice in hindsight.";
-
-  return [instinct, shape].slice(0, 2);
+  return [instinct, shape].map((item) => renderDomainNarrative(item, facts));
 }
 
 function buildDomainClaims(
-  config: (typeof LIFE_DOMAIN_CONFIG)[string],
+  config: LifeDomainConfig,
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
+  secondaryLord: PlanetPosition,
   anchorPlanet: PlanetPosition
 ): EvidenceClaim[] {
   return [
@@ -495,6 +655,12 @@ function buildDomainClaims(
     },
     { label: "Supporting house", value: `${ordinal(secondaryHouse.house_number)} house`, kind: "placement" },
     {
+      label: "Supporting lord",
+      value: secondaryLord.name,
+      kind: "lordship",
+      detail: `Placed in the ${ordinal(secondaryLord.house)} house, ${humanDignity(planetDignity(secondaryLord))} by dignity.`,
+    },
+    {
       label: "Anchor planet",
       value: anchorPlanet.name,
       kind: "dignity",
@@ -504,7 +670,7 @@ function buildDomainClaims(
 }
 
 function buildLifeDomainInsight(
-  key: string,
+  key: LifeDomainKey,
   planets: PlanetPosition[],
   houses: HousePlacement[],
   domElement: string
@@ -514,12 +680,15 @@ function buildLifeDomainInsight(
   const secondaryHouse = houseByNumber(houses, config.secondary_house);
   const primaryLordName = SIGN_RULERS[primaryHouse.sign];
   const primaryLord = planetByName(planets, primaryLordName);
+  const secondaryLordName = SIGN_RULERS[secondaryHouse.sign];
+  const secondaryLord = planetByName(planets, secondaryLordName);
   const anchorPlanet = planetByName(planets, config.anchor_planet);
 
   const confidence = calculateDomainSignalScore(
     primaryHouse,
     secondaryHouse,
     primaryLord,
+    secondaryLord,
     anchorPlanet
   );
 
@@ -531,29 +700,53 @@ function buildLifeDomainInsight(
     `${primaryLord.name} in house ${primaryLord.house} links outcomes to ${HOUSE_THEMES[primaryLord.house]}. ` +
     `The practical read is to separate the promise of house ${config.primary_house} from the delivery route of ${primaryLord.name}, then use ${anchorPlanet.name} as the instinctive filter.`;
 
-  const plain = DOMAIN_PLAIN_COPY[key];
+  const profile = DOMAIN_NARRATIVES[key];
+  const style = SIGN_STYLE_PHRASES[primaryHouse.sign];
+  const facts: DomainNarrativeFacts = {
+    style,
+    styleWithArticle: `${/^[aeiou]/i.test(style) ? "an" : "a"} ${style}`,
+    delivery: HOUSE_THEMES[primaryLord.house],
+    support: HOUSE_THEMES[secondaryHouse.house_number],
+    sign: primaryHouse.sign,
+    lord: primaryLord.name,
+    secondaryLord: secondaryLord.name,
+    anchor: anchorPlanet.name,
+    occupants: primaryHouse.planets.join(", ") || "No planet",
+    elementMethod: ELEMENT_METHODS[domElement] ?? ELEMENT_METHODS.Fire,
+  };
 
   return {
-    key: key as LifeDomainInsight["key"],
+    key,
     label: config.label,
 
     display: {
-      headline: plain.headline,
-      body: buildDomainDisplayBody(plain.focus, primaryHouse, primaryLord),
-      guidance:
-        `For ${config.label.toLowerCase()}, lead with your ${domElement.toLowerCase()} instincts, ` +
-        `then build the habits that keep ${HOUSE_THEMES[primaryHouse.house_number]} in working order.`,
-      long_game:
-        `This area improves slowly and then holds. Treat any single event as evidence rather than a verdict, ` +
-        `and give it several attempts before you decide what it means about you.`,
-      strengths: buildDomainDisplayStrengths(primaryHouse, secondaryHouse, primaryLord),
-      watchouts: buildDomainDisplayWatchouts(primaryHouse, primaryLord, anchorPlanet),
-      timing: buildDomainDisplayTiming(primaryHouse, anchorPlanet),
+      headline: profile.headline,
+      body: renderDomainNarrative(profile.body, facts),
+      guidance: renderDomainNarrative(profile.guidance, facts),
+      long_game: renderDomainNarrative(profile.longGame, facts),
+      strengths: buildDomainDisplayStrengths(
+        profile,
+        facts,
+        primaryHouse,
+        secondaryHouse,
+        primaryLord,
+        secondaryLord
+      ),
+      watchouts: buildDomainDisplayWatchouts(profile, facts, primaryHouse, primaryLord, anchorPlanet),
+      timing: buildDomainDisplayTiming(
+        profile,
+        facts,
+        primaryHouse,
+        secondaryHouse,
+        primaryLord,
+        secondaryLord,
+        anchorPlanet
+      ),
     },
 
     evidence: {
       technical_note: `${headline} ${overview}`,
-      claims: buildDomainClaims(config, primaryHouse, secondaryHouse, primaryLord, anchorPlanet),
+      claims: buildDomainClaims(config, primaryHouse, secondaryHouse, primaryLord, secondaryLord, anchorPlanet),
       // Deliberately the same number as confidence_score. This is a STRENGTH
       // signal, not a rarity one, and it stops being rendered as a percentage.
       signal_score: confidence,
@@ -566,8 +759,8 @@ function buildLifeDomainInsight(
     overview,
     strengths: buildDomainStrengths(primaryHouse, secondaryHouse, primaryLord, anchorPlanet),
     watchouts: buildDomainWatchouts(primaryHouse, primaryLord, anchorPlanet),
-    timing_triggers: domainTimingTriggers(config, primaryHouse, primaryLord, anchorPlanet),
-    supporting_patterns: domainSupportingPatterns(primaryHouse, secondaryHouse, primaryLord, anchorPlanet),
+    timing_triggers: domainTimingTriggers(config, primaryHouse, primaryLord, secondaryLord, anchorPlanet),
+    supporting_patterns: domainSupportingPatterns(primaryHouse, secondaryHouse, primaryLord, secondaryLord, anchorPlanet),
     guidance: domainGuidance(domElement, primaryHouse, primaryLord, config.label),
     long_game: domainLongGame(config.label, primaryHouse, primaryLord, domElement),
     confidence_score: confidence,
@@ -689,7 +882,7 @@ export function generateLifeDomainInsights(
   houses: HousePlacement[]
 ): LifeDomainInsight[] {
   const { element: domEl } = dominantElement(planets);
-  return Object.keys(LIFE_DOMAIN_CONFIG).map((key) =>
+  return (Object.keys(LIFE_DOMAIN_CONFIG) as LifeDomainKey[]).map((key) =>
     buildLifeDomainInsight(key, planets, houses, domEl)
   );
 }
