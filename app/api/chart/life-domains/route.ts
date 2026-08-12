@@ -6,6 +6,7 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import { buildLifeDomainInsights } from "@/lib/engines/chart-service";
+import { LIFE_DOMAIN_RULES_VERSION } from "@/lib/engines/rule-engine";
 import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import { makeCacheKey, serverCaches } from "@/lib/server-cache";
 import type { LifeDomainInsightsResponse } from "@/lib/astro-types";
@@ -42,6 +43,7 @@ export async function GET(request: NextRequest) {
       lat: birth.latitude,
       lng: birth.longitude,
       rules_schema: RULES_SCHEMA_VERSION,
+      life_domain_rules: LIFE_DOMAIN_RULES_VERSION,
     });
     const cached = serverCaches.lifeDomains.get(cacheKey) as LifeDomainInsightsResponse | null;
 

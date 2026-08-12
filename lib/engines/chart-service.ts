@@ -15,6 +15,7 @@ import {
   HOUSE_THEMES,
 } from "./rule-engine";
 import type { DeterministicRule, LifeDomainInsight } from "./rule-engine";
+import type { LifeDomainExtendedEvidence } from "./life-domain-rules";
 import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import {
   calculateNakshatra,
@@ -26,7 +27,10 @@ import {
 import type { NakshatraData } from "./nakshatra-engine";
 import { calculateAspects } from "./aspect-engine";
 import { calculateNavamsa } from "./navamsa-engine";
-import { computeMultipleDivisionalCharts } from "./divisional-engine";
+import {
+  computeMultipleDivisionalCharts,
+  ALL_DIVISIONAL_CHARTS,
+} from "./divisional-engine";
 import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
 import { calculateShadbala } from "./shadbala-engine";
@@ -685,6 +689,7 @@ function computeInsights(
   ascendantSign: string,
   planets: PlanetPosition[],
   houses: HousePlacement[],
+  extendedEvidence?: LifeDomainExtendedEvidence,
 ): InsightsStageResult {
   const longHash = hashLongitudes(planets);
   const houseSig = houses.map((h) => h.sign).join(",");
@@ -692,12 +697,20 @@ function computeInsights(
   for (let i = 0; i < houseSig.length; i++) {
     hHash = ((hHash << 5) + hHash + houseSig.charCodeAt(i)) | 0;
   }
-  const cacheKey = `ins_${longHash}_${(hHash >>> 0).toString(36)}`;
+  const evidenceSignature = extendedEvidence
+    ? `${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
+    : "natal";
+  const cacheKey = `ins_v3_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
 
   const cached = stageCaches.insights.get(cacheKey);
   if (cached) return cached;
 
-  const lifeDomainInsights = generateLifeDomainInsights(ascendantSign, planets, houses);
+  const lifeDomainInsights = generateLifeDomainInsights(
+    ascendantSign,
+    planets,
+    houses,
+    extendedEvidence
+  );
   const result: InsightsStageResult = { lifeDomainInsights };
 
   stageCaches.insights.set(cacheKey, result);
@@ -706,18 +719,55 @@ function computeInsights(
 
 /**
  * Compute only the core chart facts required by the Life Domain module, then
- * run the domain synthesis stage. This is intentionally separate from
- * buildChart() so the results page can defer the heavier seven-domain read
- * without recalculating dasha, divisional charts, shadbala, or transits.
+ * run the complete domain synthesis stage. This is intentionally separate
+ * from buildChart() so vargas, strength, house support, yogas, and timing stay
+ * lazy and do not delay the first viewport of the report.
  */
 export function buildLifeDomainInsights(
   birth: BirthDetailsInput
 ): LifeDomainInsight[] {
   const core = computeCorePositions(birth);
+  const aspects = computeAspects(core.planets);
+  const navamsa = computeNavamsa(core.planets);
+  const divisionalCharts = computeMultipleDivisionalCharts(
+    [
+      {
+        name: "Ascendant",
+        longitude: core.ascendant.longitude,
+        sign: core.ascendant.sign,
+        degree_in_sign: core.ascendant.degree_in_sign,
+        house: 1,
+      },
+      ...core.planets,
+    ],
+    ALL_DIVISIONAL_CHARTS
+  );
+  const dashaStage = computeDashaTimeline(
+    birth,
+    core.planets,
+    currentLocalDateStr(birth)
+  );
+  const transits = computeTransitPositions(new Date(), birth.engine_id);
+  const extendedEvidence: LifeDomainExtendedEvidence = {
+    divisionalCharts,
+    shadbala: calculateShadbala(core.planets, navamsa, aspects),
+    ashtakavarga: computeAshtakavarga(core.planets, core.ascendant.sign),
+    yogas: detectYogas({
+      planets: core.planets,
+      houses: core.houses,
+      ascendantSign: core.ascendant.sign,
+    }),
+    timingLords: [
+      dashaStage.dashaInfo.current_dasha,
+      dashaStage.dashaInfo.current_antardasha,
+    ].filter((lord): lord is string => Boolean(lord)),
+    transits: transits.map((transit) => ({ name: transit.name, sign: transit.sign })),
+  };
   return computeInsights(
     core.ascendant.sign,
     core.planets,
     core.houses,
+    extendedEvidence,
   ).lifeDomainInsights;
 }
 
@@ -775,10 +825,19 @@ export function buildChart(
     // Stage D: navamsa
     navamsaInfo = computeNavamsa(core.planets);
 
-    // Stage D2: divisional charts (D2, D3, D4, D7, D10, D12)
+    // Stage D2: complete supported divisional chart atlas
     divisionalChartsInfo = computeMultipleDivisionalCharts(
-      core.planets,
-      [2, 3, 4, 7, 10, 12]
+      [
+        {
+          name: "Ascendant",
+          longitude: core.ascendant.longitude,
+          sign: core.ascendant.sign,
+          degree_in_sign: core.ascendant.degree_in_sign,
+          house: 1,
+        },
+        ...core.planets,
+      ],
+      ALL_DIVISIONAL_CHARTS
     );
 
     // Stage D3: shadbala (planetary strength)
@@ -797,10 +856,23 @@ export function buildChart(
 
   if (includeUltimate && !deferLifeDomains) {
     // Stage E: life domain insights
+    const extendedEvidence: LifeDomainExtendedEvidence | undefined = includePremium
+      ? {
+          divisionalCharts: divisionalChartsInfo,
+          shadbala: shadbalInfo,
+          ashtakavarga: ashtakavargaData,
+          yogas: yogasInfo,
+          timingLords: [
+            dashaInfo?.current_dasha,
+            dashaInfo?.current_antardasha,
+          ].filter((lord): lord is string => Boolean(lord)),
+        }
+      : undefined;
     const insightsStage = computeInsights(
       core.ascendant.sign,
       core.planets,
       core.houses,
+      extendedEvidence,
     );
     lifeDomainInsights = insightsStage.lifeDomainInsights;
   }

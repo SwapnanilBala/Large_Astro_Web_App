@@ -594,7 +594,7 @@ export default function AdvancedContent({
                       ) : (
                         <LockedFeaturePreview
                           title="Divisional Varga Charts"
-                          description="Unlock D2 through D12 divisional charts to examine wealth, siblings, career, children, and more."
+                          description="Unlock the complete supported divisional atlas for natal foundations, wealth, relationships, career, ancestry, resilience, and more."
                         />
                       )}
                     </AuthGate>

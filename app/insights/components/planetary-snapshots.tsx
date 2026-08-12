@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, memo } from "react";
+import type { CSSProperties } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import PlanetOrb from "@/app/components/PlanetOrb";
 import type { PlanetName } from "@/app/components/PlanetOrb";
+import styles from "./planetary-snapshots.module.css";
 
 const PLANET_COLORS: Record<string, string> = {
   Sun: "#f5a623",
@@ -16,18 +18,6 @@ const PLANET_COLORS: Record<string, string> = {
   Saturn: "#95a5a6",
   Rahu: "#8e44ad",
   Ketu: "#e67e22",
-};
-
-const PLANET_GLYPHS: Record<string, string> = {
-  Sun: "☉",
-  Moon: "☽",
-  Mercury: "☿",
-  Venus: "♀",
-  Mars: "♂",
-  Jupiter: "♃",
-  Saturn: "♄",
-  Rahu: "☊",
-  Ketu: "☋",
 };
 
 /** Derive a simple dignity label from degree and sign — purely cosmetic. */
@@ -50,117 +40,143 @@ function getDignityLabel(planet: PlanetPosition): string | null {
   return null;
 }
 
+const SUPPORTIVE_DIGNITIES = new Set(["Domicile", "Exalted"]);
+
 type PlanetarySnapshotsProps = {
   planets: PlanetPosition[];
 };
 
+/**
+ * The compact placement grid.
+ *
+ * Every fact a reader scans for -- sign, degree, house, dignity, motion --
+ * is on the resting face of the card. The drawer holds only the precise
+ * numbers, so collapsing a card never hides the answer to "where is Mars".
+ */
 function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
   const { t } = useTranslation();
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
-  function handleCardClick(name: string) {
+  function handleToggle(name: string) {
     setExpandedPlanet((prev) => (prev === name ? null : name));
   }
 
   return (
-    <section className="planet-panel planet-panel--compact">
-      <div className="rules-header">
-        <p className="kicker">{t("insights.planetKicker")}</p>
-        <h2>{t("insights.planetHeading")}</h2>
+    <section className={styles.panel}>
+      <div className={styles.header}>
+        <p className={styles.kicker}>{t("insights.planetKicker")}</p>
+        <h2 className={styles.heading}>{t("insights.planetHeading")}</h2>
+        <p className={styles.intro}>
+          Sign, degree, house, and dignity for every graha. Open a card for the exact
+          longitude and motion.
+        </p>
       </div>
 
-      <p className="section-intro planet-panel-intro">
-        A compact placement summary for quick scanning. The deeper chart logic is carried in the main
-        analysis above.
-      </p>
-
-      <div className="planet-grid planet-grid--compact">
+      <div className={styles.grid}>
         {planets.map((planet) => {
-          const color      = PLANET_COLORS[planet.name] ?? "#f2c26c";
-          const glyph      = PLANET_GLYPHS[planet.name] ?? "★";
-          const dignity    = getDignityLabel(planet);
+          const color = PLANET_COLORS[planet.name] ?? "#f2c26c";
+          const dignity = getDignityLabel(planet);
           const isExpanded = expandedPlanet === planet.name;
+          const detailId = `planet-detail-${planet.name}`;
 
           return (
             <article
               key={planet.name}
-              className={`planet-card planet-card--compact${isExpanded ? " planet-card--expanded" : ""}`}
-              style={{
-                borderLeftWidth: "3px",
-                borderLeftStyle: "solid",
-                borderLeftColor: color,
-              }}
-              onClick={() => handleCardClick(planet.name)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleCardClick(planet.name);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-expanded={isExpanded}
+              className={`${styles.card}${isExpanded ? ` ${styles.cardOpen}` : ""}`}
+              style={{ "--planet-accent": color } as CSSProperties}
             >
-              {/* ── Compact row (always visible) ── */}
-              <div className="planet-card__header">
-                <PlanetOrb
-                  planet={planet.name as PlanetName}
-                  size="sm"
-                />
-
-                <div className="planet-card__title-group">
-                  <h3 style={{ color }}>{planet.name}</h3>
-                  <span className="planet-card__sign">{planet.sign}</span>
-                </div>
-
-                <span
-                  className={`planet-card__chevron${isExpanded ? " planet-card__chevron--open" : ""}`}
-                  aria-hidden="true"
-                >
-                  ▾
+              <button
+                type="button"
+                className={styles.toggle}
+                onClick={() => handleToggle(planet.name)}
+                aria-expanded={isExpanded}
+                aria-controls={detailId}
+              >
+                <span className={styles.identity}>
+                  <PlanetOrb planet={planet.name as PlanetName} size="sm" />
+                  <span className={styles.name}>{planet.name}</span>
+                  {/* Status markers ride the identity row rather than the chip
+                      row below: three chips wrap on a narrow column, and one
+                      wrapped card stretches its whole grid row. */}
+                  {planet.is_retrograde && (
+                    <span
+                      className={styles.marker}
+                      role="img"
+                      aria-label="Retrograde"
+                      title="Retrograde"
+                    >
+                      ℞
+                    </span>
+                  )}
+                  {planet.is_combust && (
+                    <span
+                      className={`${styles.marker} ${styles.markerCombust}`}
+                      role="img"
+                      aria-label="Combust"
+                      title="Combust"
+                    >
+                      ☌
+                    </span>
+                  )}
+                  <span
+                    className={`${styles.chevron}${isExpanded ? ` ${styles.chevronOpen}` : ""}`}
+                    aria-hidden="true"
+                  >
+                    ▾
+                  </span>
                 </span>
-              </div>
 
-              {/* ── Expanded detail (revealed on hover/click) ── */}
-              <div className="planet-card__detail">
-                <div className="planet-card__detail-row">
-                  <span className="planet-card__detail-label">
-                    {t("insights.house")}
-                  </span>
-                  <span className="planet-card__detail-value">
-                    {planet.house}
-                  </span>
-                </div>
-
-                <div className="planet-card__detail-row">
-                  <span className="planet-card__detail-label">Degree</span>
-                  <span className="planet-card__detail-value">
+                <span className={styles.placement}>
+                  <span className={styles.sign}>{planet.sign}</span>
+                  <span className={styles.degree}>
                     {planet.degree_in_sign.toFixed(2)}°
                   </span>
-                </div>
+                </span>
 
-                {dignity && (
-                  <div className="planet-card__detail-row">
-                    <span className="planet-card__detail-label">Dignity</span>
+                <span className={styles.chips}>
+                  <span className={`${styles.chip} ${styles.chipHouse}`}>
+                    {t("insights.house")} {planet.house}
+                  </span>
+                  {dignity && (
                     <span
-                      className="planet-card__dignity"
-                      style={{
-                        color:
-                          dignity === "Exalted" || dignity === "Domicile"
-                            ? color
-                            : "var(--accent-coral, #ff6b5b)",
-                      }}
+                      className={`${styles.chip} ${
+                        SUPPORTIVE_DIGNITIES.has(dignity)
+                          ? styles.chipStrong
+                          : styles.chipWeak
+                      }`}
                     >
                       {dignity}
                     </span>
-                  </div>
-                )}
+                  )}
+                </span>
+              </button>
 
-                <div className="planet-card__detail-row">
-                  <span className="planet-card__detail-label">Longitude</span>
-                  <span className="planet-card__detail-value">
-                    {planet.longitude.toFixed(2)}°
-                  </span>
+              <div
+                id={detailId}
+                className={`${styles.drawer}${isExpanded ? ` ${styles.drawerOpen}` : ""}`}
+              >
+                <div className={styles.drawerInner}>
+                  <dl className={styles.detailList}>
+                    <div className={styles.detailRow}>
+                      <dt className={styles.detailLabel}>Longitude</dt>
+                      <dd className={styles.detailValue}>
+                        {planet.longitude.toFixed(2)}°
+                      </dd>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <dt className={styles.detailLabel}>Motion</dt>
+                      <dd className={styles.detailValue}>
+                        {planet.is_retrograde ? "Retrograde" : "Direct"}
+                        {typeof planet.speed === "number"
+                          ? ` · ${planet.speed.toFixed(3)}°/day`
+                          : ""}
+                      </dd>
+                    </div>
+                    <div className={styles.detailRow}>
+                      <dt className={styles.detailLabel}>Dignity</dt>
+                      <dd className={styles.detailValue}>{dignity ?? "Neutral"}</dd>
+                    </div>
+                  </dl>
                 </div>
               </div>
             </article>

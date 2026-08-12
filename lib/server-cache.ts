@@ -136,7 +136,7 @@ function createCaches(): GlobalCaches {
      *  rule payload shape changed; entries here can hold rule output. */
     chart: new ServerCache("chart_v3", 500, 60 * 60 * 1000),
     /** 300 entries, 1 hour TTL — deferred seven-domain synthesis */
-    lifeDomains: new ServerCache("life_domains_v1", 300, 60 * 60 * 1000),
+    lifeDomains: new ServerCache("life_domains_v2", 300, 60 * 60 * 1000),
     /** 100 entries, 5 min TTL */
     forecast: new ServerCache("forecast", 100, 5 * 60 * 1000),
     /** 200 entries, 30 min TTL */

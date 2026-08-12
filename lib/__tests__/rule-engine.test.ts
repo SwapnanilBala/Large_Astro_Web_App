@@ -494,6 +494,9 @@ describe("rule-engine", () => {
         expect(insight.display).toHaveProperty("body");
         expect(insight.display).toHaveProperty("guidance");
         expect(insight.display).toHaveProperty("long_game");
+        expect(insight.display).toHaveProperty("clarity");
+        expect(insight.display).toHaveProperty("decision_rule");
+        expect(insight.display).toHaveProperty("boundary_rule");
         expect(Array.isArray(insight.display.strengths)).toBe(true);
         expect(Array.isArray(insight.display.watchouts)).toBe(true);
         expect(Array.isArray(insight.display.timing)).toBe(true);
@@ -502,6 +505,80 @@ describe("rule-engine", () => {
         expect(Array.isArray(insight.evidence.claims)).toBe(true);
         expect(insight.evidence.claims.length).toBeGreaterThan(0);
         expect(insight.evidence.signal_score).toBe(insight.confidence_score);
+        expect(insight.rule_hits.length).toBeGreaterThanOrEqual(4);
+        expect(insight.signal_profile.activity_score).toBe(insight.confidence_score);
+        expect(insight.signal_profile.activation_planets.length).toBeGreaterThanOrEqual(1);
+        expect(insight.evidence_matrix.entries.length).toBeGreaterThanOrEqual(7);
+        expect(insight.subthemes.length).toBeGreaterThanOrEqual(5);
+      }
+    });
+
+    it("requires three independent evidence families for a strong conclusion", () => {
+      const insights = generateLifeDomainInsights(
+        ASC_SIGN,
+        buildTestPlanets(),
+        buildTestHouses(ASC_SIGN)
+      );
+
+      for (const insight of insights) {
+        if (insight.evidence_matrix.conclusion_strength === "strong") {
+          expect(insight.evidence_matrix.supporting_families.length).toBeGreaterThanOrEqual(3);
+        }
+      }
+    });
+
+    it("ranks distinct subthemes within every domain", () => {
+      const insights = generateLifeDomainInsights(
+        ASC_SIGN,
+        buildTestPlanets(),
+        buildTestHouses(ASC_SIGN)
+      );
+
+      for (const insight of insights) {
+        const scores = insight.subthemes.map((subtheme) => subtheme.score);
+        expect(scores).toEqual([...scores].sort((left, right) => right - left));
+        expect(new Set(insight.subthemes.map((subtheme) => subtheme.key)).size).toBe(
+          insight.subthemes.length
+        );
+      }
+    });
+
+    it("fires chart-specific support, pressure, activation, and context rules", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const insights = generateLifeDomainInsights(ASC_SIGN, planets, houses);
+      const impacts = new Set(
+        insights.flatMap((insight) => insight.rule_hits.map((rule) => rule.impact))
+      );
+
+      expect(impacts.has("support")).toBe(true);
+      expect(impacts.has("pressure")).toBe(true);
+      expect(impacts.has("activation")).toBe(true);
+      expect(impacts.has("context")).toBe(true);
+    });
+
+    it("derives visible support and watchouts from fired rule summaries", () => {
+      const insights = generateLifeDomainInsights(
+        ASC_SIGN,
+        buildTestPlanets(),
+        buildTestHouses(ASC_SIGN)
+      );
+
+      for (const insight of insights) {
+        const ruleSummaries = new Set(insight.rule_hits.map((rule) => rule.summary));
+        expect(
+          insight.display.strengths.some((item) => ruleSummaries.has(item)),
+          insight.key
+        ).toBe(true);
+        const pressureRules = insight.rule_hits.filter(
+          (rule) => rule.impact === "pressure"
+        );
+        if (pressureRules.length > 0) {
+          expect(
+            insight.display.watchouts.some((item) => ruleSummaries.has(item)),
+            insight.key
+          ).toBe(true);
+        }
       }
     });
 
@@ -562,6 +639,9 @@ describe("rule-engine", () => {
           insight.display.body,
           insight.display.guidance,
           insight.display.long_game,
+          insight.display.clarity,
+          insight.display.decision_rule,
+          insight.display.boundary_rule,
           ...insight.display.strengths,
           ...insight.display.watchouts,
           ...insight.display.timing,

@@ -165,12 +165,27 @@ describe("chart-service", () => {
     });
 
     describe("premium tier", () => {
-      it("includePremium=true includes nakshatra, dasha, aspects, navamsa", () => {
+      it("includePremium=true includes nakshatra, dasha, aspects, navamsa, and divisional charts", () => {
         const chart = buildChart(BIRTH, { includePremium: true });
         expect(chart.chart.nakshatra).not.toBeNull();
         expect(chart.chart.dasha).not.toBeNull();
         expect(chart.chart.aspects).not.toBeNull();
         expect(chart.chart.navamsa).not.toBeNull();
+        expect(chart.chart.divisional_charts).not.toBeNull();
+      });
+
+      it("calculates the complete supported divisional chart atlas", () => {
+        const chart = buildChart(BIRTH, { includePremium: true });
+        const divisions = Object.keys(chart.chart.divisional_charts ?? {}).map(Number);
+
+        expect(divisions).toEqual([
+          1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 16, 20, 24, 27, 30, 40, 45, 60,
+        ]);
+        for (const division of divisions) {
+          const positions = chart.chart.divisional_charts?.[division].positions ?? [];
+          expect(positions).toHaveLength(10);
+          expect(positions[0].name).toBe("Ascendant");
+        }
       });
 
       it("nakshatra has correct shape", () => {
@@ -224,12 +239,13 @@ describe("chart-service", () => {
     });
 
     describe("guest tier (no premium)", () => {
-      it("excludes nakshatra, dasha, aspects, navamsa", () => {
+      it("excludes nakshatra, dasha, aspects, navamsa, and divisional charts", () => {
         const chart = buildChart(BIRTH, { includePremium: false });
         expect(chart.chart.nakshatra).toBeNull();
         expect(chart.chart.dasha).toBeNull();
         expect(chart.chart.aspects).toBeNull();
         expect(chart.chart.navamsa).toBeNull();
+        expect(chart.chart.divisional_charts).toBeNull();
       });
 
       it("locked_features includes premium features", () => {
@@ -239,6 +255,7 @@ describe("chart-service", () => {
             "nakshatra_dasha",
             "planetary_aspects",
             "navamsa_d9",
+            "divisional_charts",
             "live_transits",
           ])
         );
@@ -277,6 +294,14 @@ describe("chart-service", () => {
         const insights = buildLifeDomainInsights(BIRTH);
         expect(insights).toHaveLength(7);
         expect(new Set(insights.map((insight) => insight.key)).size).toBe(7);
+        expect(insights.every((insight) => insight.subthemes.length >= 5)).toBe(true);
+        for (const family of ["divisional", "strength", "house_support"] as const) {
+          expect(
+            insights.every((insight) =>
+              insight.evidence_matrix.entries.some((entry) => entry.family === family)
+            )
+          ).toBe(true);
+        }
       });
     });
 

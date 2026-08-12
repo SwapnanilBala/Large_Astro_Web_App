@@ -278,7 +278,7 @@ export default function NakshatraDashaPanel({
 }: NakshatraDashaPanelProps) {
   const { t } = useTranslation();
   const currentPlanet = dasha.current_dasha;
-  const [showAudit, setShowAudit] = useState(true);
+  const [showAudit, setShowAudit] = useState(false);
   const [popup, setPopup] = useState<PopupData | null>(null);
   const [drillPath, setDrillPath] = useState<DrillStep[]>([]);
   const [subPeriodCache, setSubPeriodCache] = useState<Record<string, SubPeriodInfo[]>>({});

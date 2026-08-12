@@ -314,12 +314,83 @@ export type DomainDisplay = {
   body: string;
   guidance: string;
   long_game: string;
+  /** Chart-specific synthesis of the strongest support and pressure rules. */
+  clarity: string;
+  /** A domain-specific action threshold derived from the active rules. */
+  decision_rule: string;
+  /** The condition that should be protected before acting. */
+  boundary_rule: string;
   /** At most 3. */
   strengths: string[];
   /** At most 2. */
   watchouts: string[];
   /** At most 2, and free of transit/house vocabulary. */
   timing: string[];
+};
+
+export type DomainRuleImpact = "support" | "pressure" | "activation" | "context";
+
+export type DomainRuleHit = {
+  id: string;
+  label: string;
+  impact: DomainRuleImpact;
+  /** Relative contribution within the domain model; never shown as probability. */
+  weight: number;
+  /** Plain-language result used in the visible reading. */
+  summary: string;
+  /** Technical trace shown only in the evidence disclosure. */
+  technical_note: string;
+};
+
+export type DomainSignalProfile = {
+  activity_score: number;
+  support_score: number;
+  pressure_score: number;
+  activity_band: "developing" | "active" | "prominent";
+  activation_planets: string[];
+};
+
+export type DomainEvidenceFamily =
+  | "primary"
+  | "supporting"
+  | "divisional"
+  | "strength"
+  | "house_support"
+  | "yoga"
+  | "timing"
+  | "contradiction";
+
+export type DomainEvidenceStatus = "support" | "pressure" | "mixed" | "context";
+
+export type DomainEvidenceMatrixEntry = {
+  family: DomainEvidenceFamily;
+  label: string;
+  status: DomainEvidenceStatus;
+  summary: string;
+  technical_note: string;
+};
+
+export type DomainEvidenceMatrix = {
+  entries: DomainEvidenceMatrixEntry[];
+  supporting_families: DomainEvidenceFamily[];
+  pressure_families: DomainEvidenceFamily[];
+  conclusion_strength: "strong" | "moderate" | "cautious";
+  confirmation_status:
+    | "confirmed"
+    | "qualified"
+    | "improved"
+    | "contradictory"
+    | "insufficient";
+  synthesis: string;
+};
+
+export type DomainSubtheme = {
+  key: string;
+  label: string;
+  score: number;
+  band: "leading" | "supporting" | "developing";
+  summary: string;
+  supporting_families: DomainEvidenceFamily[];
 };
 
 export type DomainEvidence = {
@@ -339,6 +410,10 @@ export type LifeDomainInsight = {
 
   display: DomainDisplay;
   evidence: DomainEvidence;
+  rule_hits: DomainRuleHit[];
+  signal_profile: DomainSignalProfile;
+  evidence_matrix: DomainEvidenceMatrix;
+  subthemes: DomainSubtheme[];
 
   // Computed exactly as before; demoted to the evidence tier at the render sites.
   headline: string;
@@ -349,7 +424,7 @@ export type LifeDomainInsight = {
   supporting_patterns: string[];
   guidance: string;
   long_game: string;
-  /** Still calculateDomainSignalScore(), still clamped [0.55, 0.94]. */
+  /** Legacy alias of signal_profile.activity_score for existing sort consumers. */
   confidence_score: number;
 };
 

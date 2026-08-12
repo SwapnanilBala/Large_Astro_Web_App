@@ -66,6 +66,7 @@ const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+const DivisionalChartsPanel = dynamic(() => import("./divisional-charts-panel"), { ssr: false, loading: () => <PanelSkeleton minHeight={440} /> });
 import type {
   ChartApiResponse,
   DeterministicRule,
@@ -73,6 +74,7 @@ import type {
   LifeDomainInsightsResponse,
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import { useToast } from "@/lib/toast-context";
 
 type InsightsContentProps = {
@@ -811,6 +813,13 @@ const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
  * evidence disclosure.
  */
 function buildDomainRules(domain: LifeDomainInsight) {
+  if (Array.isArray(domain.rule_hits) && domain.rule_hits.length > 0) {
+    return domain.rule_hits.map((rule) => ({
+      label: `${rule.impact === "pressure" ? "Pressure" : rule.impact === "support" ? "Support" : rule.impact === "activation" ? "Activation" : "Context"} · ${rule.label}`,
+      body: rule.technical_note,
+    }));
+  }
+
   return [
     {
       label: "House rule",
@@ -831,41 +840,6 @@ function buildDomainRules(domain: LifeDomainInsight) {
     {
       label: "Action rule",
       body: domain.guidance,
-    },
-  ];
-}
-
-function getDomainTimingWindows(
-  domain: LifeDomainInsight,
-  currentDasha?: string,
-  currentAntardasha?: string
-) {
-  // Display tier: these render above the fold, so they must not contain
-  // transit or house vocabulary.
-  const currentTiming = domain.display.timing[0];
-  const nextTiming = domain.display.timing[1] ?? domain.display.timing[0];
-  const caution = domain.display.watchouts[0];
-
-  return [
-    {
-      label: "Current activation",
-      value:
-        currentTiming ??
-        (currentDasha
-          ? `${currentDasha}${currentAntardasha ? ` / ${currentAntardasha}` : ""} is the active timing lens.`
-          : "Watch for repeated signals before treating this domain as active."),
-    },
-    {
-      label: "Next favorable window",
-      value:
-        nextTiming ??
-        "The next clean opening comes when support and guidance repeat the same theme.",
-    },
-    {
-      label: "Caution window",
-      value:
-        caution ??
-        "Avoid forcing outcomes when the evidence is mixed or timing feels noisy.",
     },
   ];
 }
@@ -989,7 +963,7 @@ export default function InsightsContent({
         observer.disconnect();
         void loadLifeDomains();
       },
-      { rootMargin: "700px 0px" }
+      { rootMargin: "250px 0px" }
     );
     observer.observe(section);
 
@@ -1023,11 +997,7 @@ export default function InsightsContent({
     ? buildDomainRules(selectedDomainInsight)
     : [];
   const selectedDomainTimingWindows = selectedDomainInsight
-    ? getDomainTimingWindows(
-        selectedDomainInsight,
-        payload.chart.dasha?.current_dasha,
-        payload.chart.dasha?.current_antardasha
-      )
+    ? getLifeDomainTimingWindows(selectedDomainInsight, payload.chart.dasha)
     : [];
   const copyCurrentChartLink = async () => {
     try {
@@ -1173,19 +1143,33 @@ export default function InsightsContent({
           className={styles.chartDetails}
           persistKey={`${sectionStateScope}:chart-details`}
         >
-          <div className={styles.chartDetailsGrid}>
-            <div className={styles.cardPlanets}>
-              <PanelErrorBoundary panelName="Planetary Snapshots">
-                <PlanetarySnapshots planets={payload.chart.planets} />
-              </PanelErrorBoundary>
-            </div>
+          <div className={styles.chartDetailsLayout}>
+            {/* The calculation method reads as an instrument bar across the top
+                rather than a narrow side column: it is one short fact set, and
+                giving it a 240px rail was what squeezed the placement grid. */}
             <section className={styles.calculationPanel}>
-              <p className={styles.kicker}>Calculation method</p>
-              <h3>{payload.engine.engine_label}</h3>
-              <p>
-                {payload.engine.ayanamsha} · {payload.engine.house_system}
-                {payload.engine.fallback_mode ? " · Fallback" : ""}
-              </p>
+              <div className={styles.calculationIdentity}>
+                <p className={styles.kicker}>Calculation method</p>
+                <h3>{payload.engine.engine_label}</h3>
+              </div>
+
+              <dl className={styles.calculationFacts}>
+                <div className={styles.calculationFact}>
+                  <dt>Ayanamsha</dt>
+                  <dd>{payload.engine.ayanamsha}</dd>
+                </div>
+                <div className={styles.calculationFact}>
+                  <dt>House system</dt>
+                  <dd>{payload.engine.house_system}</dd>
+                </div>
+                <div className={styles.calculationFact}>
+                  <dt>Mode</dt>
+                  <dd>
+                    {payload.engine.fallback_mode ? "Fallback" : "Swiss Ephemeris"}
+                  </dd>
+                </div>
+              </dl>
+
               {availableEngines.length > 1 && (
                 <label className={styles.engineSwitcher}>
                   <span className={styles.claimLabel}>Change method</span>
@@ -1203,8 +1187,35 @@ export default function InsightsContent({
                 </label>
               )}
             </section>
+
+            <div className={styles.cardPlanets}>
+              <PanelErrorBoundary panelName="Planetary Snapshots">
+                <PlanetarySnapshots planets={payload.chart.planets} />
+              </PanelErrorBoundary>
+            </div>
           </div>
         </CollapsibleSection>
+
+        {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
+          <CollapsibleSection
+            id="divisional-charts"
+            kicker="Divisional chart atlas"
+            title="Complete divisional chart atlas"
+            defaultOpen={false}
+            className={styles.cardRules}
+          >
+            <LazyPanel minHeight={440}>
+              <PanelErrorBoundary panelName="Complete Divisional Chart Atlas">
+                <AuthGate
+                  featureLabel="Divisional Charts"
+                  isLocked={lockedFeatures.has("divisional_charts")}
+                >
+                  <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
+                </AuthGate>
+              </PanelErrorBoundary>
+            </LazyPanel>
+          </CollapsibleSection>
+        )}
 
         {/* â”€â”€â”€ Forecasts & Timing (Collapsible) â”€â”€â”€ */}
         <CollapsibleSection
@@ -1364,8 +1375,9 @@ export default function InsightsContent({
                 heading="Life domain deep dives"
               />
               <p className={styles.sectionIntro}>
-                Each area runs its own formula across primary promise, supporting ruler,
-                strength, pressure, timing, and delivery path.
+                Each area runs its own evidence matrix across natal promise,
+                supporting factors, divisional confirmation, measured strength,
+                house support, combinations, timing, and contradictions.
               </p>
 
               <div className={styles.domainSelectorHeader}>
@@ -1421,11 +1433,51 @@ export default function InsightsContent({
                       </p>
                       <h3>{selectedDomainInsight.display.headline}</h3>
                     </div>
+                    {selectedDomainInsight.signal_profile?.activity_band && (
+                      <span className={styles.domainSignalBadge}>
+                        {selectedDomainInsight.signal_profile.activity_band} activity
+                      </span>
+                    )}
                   </div>
 
                   <p className={styles.domainOverview}>
                     {selectedDomainInsight.display.body}
                   </p>
+
+                  {selectedDomainInsight.evidence_matrix && (
+                    <div className={styles.domainEvidenceVerdict}>
+                      <div>
+                        <span className={styles.domainVerdictLabel}>
+                          {selectedDomainInsight.evidence_matrix.confirmation_status.replace("_", " ")}
+                        </span>
+                        <strong>
+                          {selectedDomainInsight.evidence_matrix.conclusion_strength} conclusion
+                        </strong>
+                      </div>
+                      <p>{selectedDomainInsight.evidence_matrix.synthesis}</p>
+                    </div>
+                  )}
+
+                  {(selectedDomainInsight.subthemes?.length ?? 0) > 0 && (
+                    <section className={styles.domainSubthemes} aria-labelledby="domain-subthemes-heading">
+                      <div className={styles.domainSubthemeHeader}>
+                        <h4 id="domain-subthemes-heading">What stands out within this area</h4>
+                        <span>Ranked from this chart&apos;s evidence</span>
+                      </div>
+                      <div className={styles.domainSubthemeGrid}>
+                        {selectedDomainInsight.subthemes.slice(0, 6).map((subtheme, index) => (
+                          <article key={subtheme.key} className={styles.domainSubthemeCard}>
+                            <span className={styles.domainSubthemeRank}>#{index + 1}</span>
+                            <div>
+                              <strong>{subtheme.label}</strong>
+                              <small>{subtheme.band}</small>
+                            </div>
+                            <p>{subtheme.summary}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </section>
+                  )}
 
                   <div className={styles.domainTimingWindows}>
                     {selectedDomainTimingWindows.map((window) => (
@@ -1467,15 +1519,24 @@ export default function InsightsContent({
                       <div className={styles.domainStatementGrid}>
                         <section className={styles.domainStatement}>
                           <h4>Clarity statement</h4>
-                          <p>{selectedDomainCopy.clarity}</p>
+                          <p>
+                            {selectedDomainInsight.display.clarity ??
+                              selectedDomainCopy.clarity}
+                          </p>
                         </section>
                         <section className={styles.domainStatement}>
                           <h4>Decision rule</h4>
-                          <p>{selectedDomainCopy.decisionRule}</p>
+                          <p>
+                            {selectedDomainInsight.display.decision_rule ??
+                              selectedDomainCopy.decisionRule}
+                          </p>
                         </section>
                         <section className={styles.domainStatement}>
                           <h4>Boundary rule</h4>
-                          <p>{selectedDomainCopy.boundaryRule}</p>
+                          <p>
+                            {selectedDomainInsight.display.boundary_rule ??
+                              selectedDomainCopy.boundaryRule}
+                          </p>
                         </section>
                       </div>
                     </div>
@@ -1547,6 +1608,19 @@ export default function InsightsContent({
                             ))}
                           </ol>
                         </div>
+                        {selectedDomainInsight.evidence_matrix && (
+                          <div className={styles.domainEvidenceMatrix}>
+                            {selectedDomainInsight.evidence_matrix.entries.map((entry) => (
+                              <section key={entry.family}>
+                                <div>
+                                  <h4>{entry.label}</h4>
+                                  <span data-status={entry.status}>{entry.status}</span>
+                                </div>
+                                <p>{entry.summary}</p>
+                              </section>
+                            ))}
+                          </div>
+                        )}
                         {selectedDomainInsight.supporting_patterns.length > 0 && (
                           <ul className={styles.evidencePatterns}>
                             {selectedDomainInsight.supporting_patterns.map((item) => (
@@ -1562,16 +1636,17 @@ export default function InsightsContent({
                     <div className={styles.domainActionPanel}>
                       <section>
                         <h4>Do next</h4>
-                        <p>{selectedDomainInsight.guidance}</p>
+                        <p>{selectedDomainInsight.display.guidance}</p>
                       </section>
                       <section>
                         <h4>Keep in mind</h4>
-                        <p>{selectedDomainInsight.long_game}</p>
+                        <p>{selectedDomainInsight.display.long_game}</p>
                       </section>
                       <section>
                         <h4>Decision filter</h4>
                         <p>
-                          {selectedDomainCopy?.decisionRule ??
+                          {selectedDomainInsight.display.decision_rule ??
+                            selectedDomainCopy?.decisionRule ??
                             "Move when the support, timing, and evidence point in the same direction."}
                         </p>
                       </section>

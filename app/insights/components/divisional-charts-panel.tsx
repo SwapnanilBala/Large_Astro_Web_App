@@ -16,12 +16,17 @@ type DivisionalChartsPanelProps = {
 // --------------------------------------------------------------------------
 
 const DIVISION_META: Record<number, { icon: string; theme: string }> = {
+  1:  { icon: "\u25C9", theme: "Overall life, identity, and the natal foundation" },
   2:  { icon: "\u2600", theme: "Wealth and financial capacity" },
   3:  { icon: "\u2694", theme: "Siblings, courage, and initiative" },
   4:  { icon: "\u2302", theme: "Property, fortune, and fixed assets" },
+  5:  { icon: "\u265B", theme: "Authority, influence, and recognition" },
+  6:  { icon: "\u271A", theme: "Health patterns, routines, and everyday obstacles" },
   7:  { icon: "\u2764", theme: "Children and progeny" },
+  8:  { icon: "\u21AF", theme: "Sudden change, transformation, and vulnerabilities" },
   9:  { icon: "\u2638", theme: "Marriage, dharma, and inner nature" },
   10: { icon: "\u2692", theme: "Career, profession, and public life" },
+  11: { icon: "\u2197", theme: "Gains, networks, and the fulfillment of ambitions" },
   12: { icon: "\u2B50", theme: "Parents and ancestral lineage" },
   16: { icon: "\u2708", theme: "Vehicles, comforts, and happiness" },
   20: { icon: "\u2721", theme: "Spiritual progress and worship" },
@@ -35,6 +40,7 @@ const DIVISION_META: Record<number, { icon: string; theme: string }> = {
 
 // Planet Unicode glyphs (same as navamsa-chart.tsx)
 const PLANET_GLYPHS: Record<string, string> = {
+  Ascendant: "\u2191",
   Sun:     "\u2609",
   Moon:    "\u263D",
   Mercury: "\u263F",
@@ -74,8 +80,8 @@ function DivisionalChartsPanel({
       </div>
 
       <p className="section-intro">
-        Divisional charts (Vargas) magnify specific life themes by subdividing
-        each sign into smaller portions. Select a chart below to see where each
+        D1 is the natal foundation; the remaining charts magnify specific life
+        themes by subdividing each sign. Select a chart below to see where each
         planet lands in that division.
       </p>
 
@@ -152,7 +158,8 @@ function DivisionalChartsPanel({
       <p className="divisional-hint">
         Planets in the same sign as their rashi position are highlighted.
         This repetition strengthens that planet&apos;s expression in the
-        corresponding life area.
+        corresponding life area. D5, D6, D8, and D11 use extended traditional
+        mappings; they sit outside the classical sixteen Parashari vargas.
       </p>
     </section>
   );

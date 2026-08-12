@@ -1015,24 +1015,36 @@
   border-top-color: rgba(200, 155, 60, 0.22);
 }
 
-.chartDetailsGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.6fr) minmax(240px, 0.8fr);
+/* A single column: the calculation bar, then the placement grid. The grid
+   sizes its own columns, so nothing here caps a height or forces a shrink --
+   which is what previously collapsed the planet cards onto each other. */
+.chartDetailsLayout {
+  display: flex;
+  flex-direction: column;
   gap: 1rem;
   padding-top: 0.85rem;
 }
 
-.chartDetailsGrid .cardPlanets {
-  grid-column: auto;
-  max-height: 620px;
-}
-
 .calculationPanel {
-  align-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 1rem 1.6rem;
   border: 1px solid var(--line-soft);
   border-radius: 14px;
-  background: rgba(255, 243, 210, 0.025);
-  padding: 1.15rem;
+  background:
+    linear-gradient(
+      120deg,
+      rgba(200, 155, 60, 0.07) 0%,
+      rgba(255, 243, 210, 0.02) 45%,
+      transparent 100%
+    );
+  padding: 1rem 1.15rem;
+}
+
+.calculationIdentity {
+  flex: 1 1 15rem;
+  min-width: 0;
 }
 
 .calculationPanel h3 {
@@ -1040,44 +1052,42 @@
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
   font-size: 1.25rem;
+  line-height: 1.25;
 }
 
-.calculationPanel > p:not(.kicker) {
-  margin: 0.5rem 0 1rem;
+.calculationFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.5rem;
+  margin: 0;
+}
+
+.calculationFact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.calculationFact dt {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
   color: var(--ink-soft);
-  line-height: 1.55;
+}
+
+.calculationFact dd {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: var(--ink-main);
 }
 
 .cardPlanets {
   composes: card;
-  grid-column: 2;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-
-.cardPlanets :global(.planet-panel) {
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: none;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.cardPlanets :global(.planet-panel)::after {
-  display: none;
-}
-
-.cardPlanets :global(.planet-grid--compact) {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
 }
 
 /* ── Lahiri Placidus Lagna Chart ── */
@@ -1202,151 +1212,6 @@
   display: grid;
   place-items: center;
   color: var(--ink-soft);
-}
-
-/* ── Planet Card: base compact state ── */
-.cardPlanets :global(.planet-card--compact) {
-  padding: 0;
-  border-radius: 12px;
-  background: rgba(255, 243, 210, 0.04);
-  border: 1px solid rgba(200, 155, 60, 0.14);
-  overflow: hidden;
-  max-height: 56px;
-  transition:
-    max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-    box-shadow 0.25s ease,
-    transform 0.2s ease,
-    border-color 0.2s ease,
-    background 0.2s ease;
-  cursor: pointer;
-  outline: none;
-}
-
-/* Hover and click-expanded states */
-.cardPlanets :global(.planet-card--compact):hover,
-.cardPlanets :global(.planet-card--expanded) {
-  max-height: 220px;
-  transform: translateY(-2px);
-  border-color: rgba(200, 155, 60, 0.2);
-  background: rgba(255, 243, 210, 0.05);
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.25),
-    0 0 12px rgba(200, 155, 60, 0.08);
-}
-
-/* Keyboard focus ring */
-.cardPlanets :global(.planet-card--compact):focus-visible {
-  outline: 2px solid var(--accent-gold, #C89B3C);
-  outline-offset: 2px;
-}
-
-/* ── Header row (always visible) ── */
-.cardPlanets :global(.planet-card__header) {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.65rem 0.8rem;
-  min-height: 56px;
-  box-sizing: border-box;
-}
-
-/* Large planet glyph */
-.cardPlanets :global(.planet-card__glyph) {
-  font-size: 1.42rem;
-  line-height: 1;
-  flex-shrink: 0;
-  width: 1.5rem;
-  text-align: center;
-  filter: drop-shadow(0 0 4px currentColor);
-  transition: filter 0.25s ease;
-}
-
-.cardPlanets :global(.planet-card--compact):hover :global(.planet-card__glyph),
-.cardPlanets :global(.planet-card--expanded) :global(.planet-card__glyph) {
-  filter: drop-shadow(0 0 7px currentColor);
-}
-
-/* Planet name + sign */
-.cardPlanets :global(.planet-card__title-group) {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 0.45rem;
-  flex-wrap: wrap;
-}
-
-.cardPlanets :global(.planet-card__title-group h3) {
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.18rem;
-  font-weight: 600;
-  margin: 0;
-  line-height: 1.2;
-  white-space: nowrap;
-}
-
-.cardPlanets :global(.planet-card__sign) {
-  font-size: 1.1rem;
-  color: var(--ink-soft);
-  white-space: nowrap;
-}
-
-/* Chevron indicator */
-.cardPlanets :global(.planet-card__chevron) {
-  font-size: 1.1rem;
-  color: var(--ink-soft);
-  flex-shrink: 0;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.2s ease;
-  display: inline-block;
-  line-height: 1;
-}
-
-.cardPlanets :global(.planet-card__chevron--open) {
-  transform: rotate(180deg);
-  color: var(--accent-gold, #F0B754);
-}
-
-/* ── Expanded detail section ── */
-.cardPlanets :global(.planet-card__detail) {
-  padding: 0 0.8rem 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  opacity: 0;
-  transition: opacity 0.2s ease 0.1s;
-}
-
-.cardPlanets :global(.planet-card--compact):hover :global(.planet-card__detail),
-.cardPlanets :global(.planet-card--expanded) :global(.planet-card__detail) {
-  opacity: 1;
-}
-
-.cardPlanets :global(.planet-card__detail-row) {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.cardPlanets :global(.planet-card__detail-label) {
-  font-size: 1.02rem;
-  color: var(--ink-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-weight: 500;
-}
-
-.cardPlanets :global(.planet-card__detail-value) {
-  font-size: 1.1rem;
-  color: var(--ink-main);
-  font-weight: 500;
-}
-
-.cardPlanets :global(.planet-card__dignity) {
-  font-size: 1.05rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 /* ── Forecast Card ── */
@@ -2903,12 +2768,68 @@
   margin: 0.25rem 0 0;
 }
 
+.domainSignalBadge {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 2rem;
+  border: 1px solid rgba(108, 225, 212, 0.24);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--accent-teal);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  padding: 0.35rem 0.7rem;
+  text-transform: uppercase;
+}
+
 .domainOverview {
   font-size: 1.28rem;
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 0 0 1.25rem;
 }
+
+.domainEvidenceVerdict {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.34fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin: 0 0 1.25rem;
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(115deg, rgba(26, 123, 110, 0.11), rgba(200, 155, 60, 0.045));
+  padding: 1rem;
+}
+
+.domainEvidenceVerdict > div { display: grid; gap: 0.25rem; }
+.domainEvidenceVerdict strong { color: var(--ink-main); font-family: var(--font-display), sans-serif; font-size: 1.02rem; text-transform: capitalize; }
+.domainEvidenceVerdict p { color: var(--ink-soft); line-height: 1.55; margin: 0; }
+.domainVerdictLabel { color: var(--accent-teal); font-size: 0.72rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
+
+.domainSubthemes { display: grid; gap: 0.75rem; margin: 0 0 1.25rem; }
+.domainSubthemeHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.domainSubthemeHeader h4 { color: var(--accent-gold); font-family: var(--font-display), sans-serif; margin: 0; }
+.domainSubthemeHeader span { color: var(--ink-muted); font-size: 0.82rem; }
+.domainSubthemeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
+.domainSubthemeCard { min-width: 0; border: 1px solid rgba(200, 155, 60, 0.12); border-radius: 10px; background: rgba(255, 243, 210, 0.025); padding: 0.8rem; }
+.domainSubthemeCard > div { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.domainSubthemeCard strong { color: var(--ink-main); }
+.domainSubthemeCard small,
+.domainSubthemeRank { color: var(--accent-teal); font-size: 0.68rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.domainSubthemeCard p { color: var(--ink-muted); font-size: 0.86rem; line-height: 1.45; margin: 0.45rem 0 0; }
+
+.domainEvidenceMatrix { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; margin: 0 0 1rem; }
+.domainEvidenceMatrix section { border-left: 2px solid rgba(108, 225, 212, 0.35); background: rgba(108, 225, 212, 0.035); padding: 0.75rem; }
+.domainEvidenceMatrix section > div { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.domainEvidenceMatrix h4 { color: var(--ink-main); font-size: 0.88rem; margin: 0; }
+.domainEvidenceMatrix span { color: var(--ink-muted); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.domainEvidenceMatrix span[data-status="support"] { color: var(--accent-teal); }
+.domainEvidenceMatrix span[data-status="pressure"] { color: #e8a28f; }
+.domainEvidenceMatrix span[data-status="mixed"] { color: var(--accent-gold); }
+.domainEvidenceMatrix p { color: var(--ink-muted); font-size: 0.84rem; line-height: 1.45; margin: 0.4rem 0 0; }
 
 .domainTimingWindows {
   display: grid;
@@ -3100,6 +3021,9 @@
   }
 
   .domainTimingWindows,
+  .domainSubthemeGrid,
+  .domainEvidenceMatrix,
+  .domainEvidenceVerdict,
   .domainStatementGrid,
   .domainGrid {
     grid-template-columns: 1fr;
@@ -3658,15 +3582,14 @@
     grid-template-columns: 1fr;
   }
 
-  .chartDetailsGrid {
-    grid-template-columns: 1fr;
-  }
-
   .cardChart,
-  .cardLahiriPlacidus,
-  .cardPlanets {
+  .cardLahiriPlacidus {
     grid-column: 1;
     grid-row: auto;
+  }
+
+  .calculationPanel {
+    align-items: flex-start;
   }
 
   .anchorNav {
@@ -3706,11 +3629,6 @@
 
   .cardChart {
     grid-column: 1;
-  }
-
-  .cardPlanets {
-    grid-column: 1;
-    max-height: 400px;
   }
 
   .gridAdvanced {
@@ -3982,12 +3900,8 @@
     flex-direction: column;
   }
 
-  .cardPlanets {
-    max-height: none;
-  }
-
-  .cardPlanets :global(.planet-grid--compact) {
-    overflow-y: visible;
+  .calculationFacts {
+    gap: 0.55rem 1.1rem;
   }
 
   .cardForecast :global(.forecast-panel),

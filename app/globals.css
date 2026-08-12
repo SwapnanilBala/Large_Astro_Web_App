@@ -836,7 +836,6 @@ button:focus-visible,
 
 .lagna-panel::after,
 .rules-panel::after,
-.planet-panel::after,
 .compatibility-cta::after,
 .career-summary-card::after,
 .love-summary-card::after {
@@ -912,16 +911,6 @@ button:focus-visible,
 .rule-low span {
   background: linear-gradient(135deg, rgba(255, 143, 126, 0.3), rgba(255, 160, 140, 0.15));
   color: var(--accent-coral);
-}
-
-.planet-grid {
-  display: grid;
-  gap: 0.78rem;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-}
-
-.planet-grid--compact {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .ghost-link {
@@ -1666,21 +1655,6 @@ label:has(.autocomplete-wrapper.is-open) {
     font-size: 1.22rem;
     padding: 0.3rem 0.55rem;
   }}
-
-.planet-card__sign-group {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.planet-card__sign-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
-}
 
 .planet-interpretation {
   margin-top: 0.7rem;
@@ -2498,10 +2472,6 @@ label:has(.autocomplete-wrapper.is-open) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .planet-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .aspect-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }}
@@ -2578,8 +2548,7 @@ label:has(.autocomplete-wrapper.is-open) {
     border-radius: 22px;
   }
 
-  .metrics-grid,
-  .planet-grid {
+  .metrics-grid {
     grid-template-columns: 1fr;
   }
 

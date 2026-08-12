@@ -27,12 +27,23 @@ export type {
 
 import type {
   DeterministicRule,
+  DomainRuleHit,
+  DomainEvidenceFamily,
+  DomainEvidenceMatrix,
+  DomainEvidenceMatrixEntry,
+  DomainSubtheme,
   EvidenceClaim,
   LifeDomainInsight,
   LifeDomainKey,
   RuleDisplay,
   RuleEvidence,
 } from "@/lib/astro-types";
+import {
+  evaluateLifeDomainRules,
+  LIFE_DOMAIN_RULES_VERSION,
+  type LifeDomainExtendedEvidence,
+} from "./life-domain-rules";
+export { LIFE_DOMAIN_RULES_VERSION };
 
 // The rule interpreter. generateRules() is a thin adapter over this: build the
 // context, fire the rules, attach measured rarity and per-chart strength, rank,
@@ -73,6 +84,73 @@ type LifeDomainConfig = {
   secondary_house: number;
   anchor_planet: string;
   summary_focus: string;
+  decision_test: string;
+  boundary_focus: string;
+};
+
+type DomainSubthemeConfig = {
+  key: string;
+  label: string;
+  houses: number[];
+  planets: string[];
+  families: DomainEvidenceFamily[];
+};
+
+const DOMAIN_SUBTHEMES: Record<LifeDomainKey, DomainSubthemeConfig[]> = {
+  career: [
+    { key: "vocation", label: "Vocation", houses: [9, 10], planets: ["Sun", "Jupiter"], families: ["primary", "divisional"] },
+    { key: "daily_work", label: "Daily work", houses: [6, 10], planets: ["Saturn", "Mercury"], families: ["primary", "strength"] },
+    { key: "leadership", label: "Leadership", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["yoga", "divisional"] },
+    { key: "entrepreneurship", label: "Entrepreneurship", houses: [3, 10, 11], planets: ["Mars", "Mercury"], families: ["supporting", "strength"] },
+    { key: "earnings", label: "Earnings", houses: [2, 11], planets: ["Jupiter", "Mercury"], families: ["house_support", "supporting"] },
+    { key: "recognition", label: "Professional recognition", houses: [10, 11], planets: ["Sun", "Jupiter"], families: ["divisional", "yoga"] },
+  ],
+  love_life: [
+    { key: "attraction", label: "Attraction", houses: [5, 7], planets: ["Venus", "Mars"], families: ["primary", "supporting"] },
+    { key: "commitment", label: "Commitment", houses: [7, 8], planets: ["Venus", "Jupiter", "Saturn"], families: ["divisional", "strength"] },
+    { key: "availability", label: "Emotional availability", houses: [4, 7], planets: ["Moon", "Venus"], families: ["supporting", "strength"] },
+    { key: "intimacy", label: "Intimacy", houses: [8, 12], planets: ["Venus", "Moon"], families: ["primary", "divisional"] },
+    { key: "repair", label: "Conflict repair", houses: [6, 7], planets: ["Mars", "Mercury", "Venus"], families: ["contradiction", "strength"] },
+    { key: "shared_resources", label: "Shared resources", houses: [2, 8], planets: ["Venus", "Jupiter"], families: ["house_support", "supporting"] },
+  ],
+  family: [
+    { key: "home", label: "Home environment", houses: [4], planets: ["Moon"], families: ["primary", "divisional"] },
+    { key: "parents", label: "Parents", houses: [4, 9], planets: ["Moon", "Sun"], families: ["divisional", "supporting"] },
+    { key: "lineage", label: "Lineage", houses: [2, 8], planets: ["Moon", "Jupiter"], families: ["divisional", "primary"] },
+    { key: "property", label: "Property", houses: [4, 11], planets: ["Mars", "Moon"], families: ["divisional", "house_support"] },
+    { key: "caregiving", label: "Caregiving", houses: [4, 6], planets: ["Moon", "Jupiter"], families: ["supporting", "strength"] },
+    { key: "security", label: "Emotional security", houses: [2, 4], planets: ["Moon", "Venus"], families: ["primary", "strength"] },
+  ],
+  inheritance: [
+    { key: "ownership", label: "Ownership", houses: [2, 8], planets: ["Jupiter", "Saturn"], families: ["primary", "house_support"] },
+    { key: "debt", label: "Debt and obligations", houses: [6, 8], planets: ["Saturn", "Mars"], families: ["contradiction", "strength"] },
+    { key: "transfers", label: "Resource transfers", houses: [2, 8, 11], planets: ["Jupiter", "Mercury"], families: ["divisional", "supporting"] },
+    { key: "documentation", label: "Documentation", houses: [3, 8], planets: ["Mercury", "Saturn"], families: ["strength", "house_support"] },
+    { key: "shared_assets", label: "Shared assets", houses: [2, 7, 8], planets: ["Venus", "Jupiter"], families: ["primary", "divisional"] },
+  ],
+  influence: [
+    { key: "communication", label: "Communication", houses: [3], planets: ["Mercury"], families: ["primary", "strength"] },
+    { key: "leadership", label: "Leadership", houses: [10], planets: ["Sun", "Saturn"], families: ["divisional", "yoga"] },
+    { key: "audience", label: "Audience", houses: [3, 11], planets: ["Mercury", "Rahu"], families: ["primary", "house_support"] },
+    { key: "alliances", label: "Alliances", houses: [7, 11], planets: ["Venus", "Jupiter"], families: ["supporting", "yoga"] },
+    { key: "authority", label: "Institutional authority", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["divisional", "strength"] },
+    { key: "reach", label: "Social reach", houses: [3, 10, 11], planets: ["Mercury", "Sun"], families: ["divisional", "house_support"] },
+  ],
+  life_cycle: [
+    { key: "identity", label: "Identity changes", houses: [1, 8], planets: ["Moon", "Sun"], families: ["primary", "divisional"] },
+    { key: "recovery", label: "Recovery patterns", houses: [6, 8], planets: ["Moon", "Saturn"], families: ["strength", "house_support"] },
+    { key: "endings", label: "Endings and release", houses: [8, 12], planets: ["Saturn", "Ketu"], families: ["divisional", "contradiction"] },
+    { key: "resilience", label: "Resilience", houses: [1, 6, 8], planets: ["Mars", "Saturn"], families: ["strength", "yoga"] },
+    { key: "reinvention", label: "Reinvention", houses: [1, 8, 12], planets: ["Moon", "Rahu"], families: ["primary", "timing"] },
+  ],
+  travel_destinations: [
+    { key: "short_journeys", label: "Short journeys", houses: [3], planets: ["Mercury"], families: ["primary", "strength"] },
+    { key: "education", label: "Education travel", houses: [5, 9], planets: ["Jupiter", "Mercury"], families: ["supporting", "yoga"] },
+    { key: "pilgrimage", label: "Pilgrimage", houses: [9, 12], planets: ["Jupiter", "Ketu"], families: ["primary", "timing"] },
+    { key: "foreign_work", label: "Foreign work", houses: [6, 9, 12], planets: ["Saturn", "Rahu"], families: ["strength", "timing"] },
+    { key: "relocation", label: "Relocation", houses: [4, 9, 12], planets: ["Moon", "Jupiter"], families: ["divisional", "house_support"] },
+    { key: "settlement", label: "Long-term settlement", houses: [4, 9, 11, 12], planets: ["Moon", "Saturn"], families: ["divisional", "strength"] },
+  ],
 };
 
 const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
@@ -82,6 +160,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 5,
     anchor_planet: "Venus",
     summary_focus: "partnership, attraction, emotional availability, and long-term bonding",
+    decision_test: "reciprocity, conflict repair, and shared commitments repeat in behavior",
+    boundary_focus: "chemistry overrule reliability, consent, or compatible values",
   },
   career: {
     label: "Career",
@@ -89,6 +169,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 6,
     anchor_planet: "Saturn",
     summary_focus: "career growth, authority, public standing, and work ethic",
+    decision_test: "the role adds visible proof, real authority, and a sustainable workload",
+    boundary_focus: "urgency or status disguise unclear authority and chronic overwork",
   },
   family: {
     label: "Family",
@@ -96,6 +178,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 2,
     anchor_planet: "Moon",
     summary_focus: "home life, emotional grounding, lineage, and support systems",
+    decision_test: "care, boundaries, and practical responsibility make the home more restorative",
+    boundary_focus: "temporary peace replace honest communication and emotional safety",
   },
   inheritance: {
     label: "Inheritance",
@@ -103,6 +187,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 2,
     anchor_planet: "Jupiter",
     summary_focus: "inheritance, shared assets, legacies, and resource transitions",
+    decision_test: "ownership, liabilities, valuation, and exit conditions are independently verified",
+    boundary_focus: "goodwill or family pressure replace complete records and clear ownership",
   },
   influence: {
     label: "Influence",
@@ -110,6 +196,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 10,
     anchor_planet: "Sun",
     summary_focus: "influence, network effect, social reach, and the ability to move people",
+    decision_test: "the message is useful, repeatable, and supported by credible work",
+    boundary_focus: "attention expand faster than the message, audience, or delivery system",
   },
   life_cycle: {
     label: "Life Cycle",
@@ -117,6 +205,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 8,
     anchor_planet: "Moon",
     summary_focus: "major life phases, reinvention, recovery, and long-range personal evolution",
+    decision_test: "daily behavior already supports the identity or direction you want to claim",
+    boundary_focus: "a dramatic reset leave the underlying habit, fear, or dependency untouched",
   },
   travel_destinations: {
     label: "Travel & Destinations",
@@ -124,6 +214,8 @@ const LIFE_DOMAIN_CONFIG: Record<LifeDomainKey, LifeDomainConfig> = {
     secondary_house: 3,
     anchor_planet: "Jupiter",
     summary_focus: "long-distance travel, foreign lands, pilgrimages, relocation potential, and short journeys",
+    decision_test: "purpose, documents, finances, health, and daily logistics support the move",
+    boundary_focus: "the idea of escape substitute for a workable life in the destination",
   },
 };
 
@@ -178,76 +270,6 @@ function dominantElement(planets: PlanetPosition[]): { element: string; count: n
     }
   }
   return { element: maxEl, count: maxCount };
-}
-
-function roundedConfidence(value: number): number {
-  return Math.round(value * 100) / 100;
-}
-
-function boundedDomainScore(value: number): number {
-  return roundedConfidence(Math.max(0.55, Math.min(0.94, value)));
-}
-
-function dignitySignal(planet: PlanetPosition, strongBoost: number, ownSignBoost: number, debilityDrag: number): number {
-  const dignity = planetDignity(planet);
-  if (dignity === "exalted") return strongBoost;
-  if (dignity === "own_sign") return ownSignBoost;
-  if (dignity === "debilitated") return debilityDrag;
-  return 0;
-}
-
-function housePlacementSignal(houseNumber: number): number {
-  let signal = 0;
-  if ([1, 4, 7, 10].includes(houseNumber)) signal += 0.05;
-  if ([1, 5, 9].includes(houseNumber)) signal += 0.04;
-  if ([3, 6, 10, 11].includes(houseNumber)) signal += 0.02;
-  if ([6, 8, 12].includes(houseNumber)) signal -= 0.04;
-  return signal;
-}
-
-function planetRulesHouse(planetName: string, house: HousePlacement): boolean {
-  return SIGN_RULERS[house.sign] === planetName;
-}
-
-function anchorHouseRelevanceSignal(
-  anchorPlanet: PlanetPosition,
-  primaryHouse: HousePlacement,
-  secondaryHouse: HousePlacement
-): number {
-  let signal = 0;
-  if (anchorPlanet.house === primaryHouse.house_number) signal += 0.04;
-  if (anchorPlanet.house === secondaryHouse.house_number) signal += 0.03;
-  if (planetRulesHouse(anchorPlanet.name, primaryHouse)) signal += 0.025;
-  if (planetRulesHouse(anchorPlanet.name, secondaryHouse)) signal += 0.015;
-  return signal;
-}
-
-function calculateDomainSignalScore(
-  primaryHouse: HousePlacement,
-  secondaryHouse: HousePlacement,
-  primaryLord: PlanetPosition,
-  secondaryLord: PlanetPosition,
-  anchorPlanet: PlanetPosition
-): number {
-  const primaryOccupancySignal = Math.min(primaryHouse.planets.length, 3) * 0.025;
-  const secondaryOccupancySignal = Math.min(secondaryHouse.planets.length, 2) * 0.015;
-
-  const signal =
-    0.64 +
-    primaryOccupancySignal +
-    secondaryOccupancySignal +
-    housePlacementSignal(primaryLord.house) +
-    dignitySignal(primaryLord, 0.065, 0.045, -0.05) +
-    dignitySignal(secondaryLord, 0.025, 0.018, -0.02) +
-    dignitySignal(anchorPlanet, 0.045, 0.03, -0.035) +
-    anchorHouseRelevanceSignal(anchorPlanet, primaryHouse, secondaryHouse) +
-    (primaryLord.house === secondaryHouse.house_number ? 0.03 : 0) +
-    (secondaryLord.house === primaryHouse.house_number ? 0.025 : 0) +
-    (primaryLord.name === secondaryLord.name ? 0.02 : 0) -
-    (primaryLord.is_combust ? 0.025 : 0) -
-    (primaryLord.is_retrograde ? 0.01 : 0);
-
-  return boundedDomainScore(signal);
 }
 
 // --------------------------------------------------------------------------
@@ -358,8 +380,7 @@ function domainSupportingPatterns(
 function domainLongGame(
   label: string,
   primaryHouse: HousePlacement,
-  primaryLord: PlanetPosition,
-  domElement: string
+  primaryLord: PlanetPosition
 ): string {
   return (
     `${label} improves when ${primaryLord.name}-led choices stay paced, measurable, and consistent around ` +
@@ -548,6 +569,208 @@ function renderDomainNarrative(template: string, facts: DomainNarrativeFacts): s
   return template.replace(/\{(\w+)\}/g, (_match, token: string) => facts[token as keyof DomainNarrativeFacts] ?? "");
 }
 
+function rankedRuleHits(
+  rules: DomainRuleHit[],
+  impact: DomainRuleHit["impact"]
+): DomainRuleHit[] {
+  return rules
+    .filter((rule) => rule.impact === impact)
+    .sort((left, right) => right.weight - left.weight || left.id.localeCompare(right.id));
+}
+
+function uniqueCopy(items: Array<string | undefined>): string[] {
+  return [...new Set(items.filter((item): item is string => Boolean(item?.trim())))];
+}
+
+function matrixStatus(rules: DomainRuleHit[]): DomainEvidenceMatrixEntry["status"] {
+  const hasSupport = rules.some((rule) => rule.impact === "support" || rule.impact === "activation");
+  const hasPressure = rules.some((rule) => rule.impact === "pressure");
+  if (hasSupport && hasPressure) return "mixed";
+  if (hasSupport) return "support";
+  if (hasPressure) return "pressure";
+  return "context";
+}
+
+function matrixEntry(
+  family: DomainEvidenceFamily,
+  label: string,
+  rules: DomainRuleHit[],
+  fallback: string
+): DomainEvidenceMatrixEntry {
+  const ordered = [...rules].sort((left, right) => right.weight - left.weight);
+  return {
+    family,
+    label,
+    status: matrixStatus(ordered),
+    summary: ordered[0]?.summary ?? fallback,
+    technical_note: ordered.map((rule) => rule.technical_note).join(" ") || fallback,
+  };
+}
+
+function buildEvidenceMatrix(
+  label: string,
+  rules: DomainRuleHit[]
+): DomainEvidenceMatrix {
+  const groups: Array<[DomainEvidenceFamily, string, (rule: DomainRuleHit) => boolean, string]> = [
+    ["primary", "Natal promise", (rule) => /^(primary_|delivery_|primary_house_|benefic_|malefic_|matrix_primary_)/.test(rule.id), "The natal house and its ruler remain the baseline evidence."],
+    ["supporting", "Supporting factors", (rule) => /^(supporting_|anchor_|primary_secondary_|shared_domain_|domain_yoga|matrix_support_)/.test(rule.id), "No dominant supporting factor overrides the natal baseline."],
+    ["divisional", "Divisional confirmation", (rule) => rule.id.startsWith("divisional_"), "No relevant divisional confirmation was available."],
+    ["strength", "Delivery capacity", (rule) => rule.id.startsWith("shadbala_"), "Measured Shadbala was not available for this calculation."],
+    ["house_support", "House support", (rule) => rule.id.startsWith("ashtakavarga_"), "Ashtakavarga house support was not available."],
+    ["yoga", "Combination support", (rule) => rule.id === "domain_yoga_support", "No relevant yoga was strong enough to modify the conclusion."],
+    ["timing", "Timing and activation", (rule) => rule.id.startsWith("timing_"), "No direct timing activation is being claimed."],
+  ];
+  const entries = groups.map(([family, entryLabel, predicate, fallback]) =>
+    matrixEntry(family, entryLabel, rules.filter(predicate), fallback)
+  );
+  const supportFamilies = entries
+    .filter((entry) => entry.status === "support")
+    .map((entry) => entry.family);
+  const pressureFamilies = entries
+    .filter((entry) => entry.status === "pressure")
+    .map((entry) => entry.family);
+  const mixedFamilies = entries.filter((entry) => entry.status === "mixed");
+  const natal = entries.find((entry) => entry.family === "primary")!;
+  const divisional = entries.find((entry) => entry.family === "divisional")!;
+
+  let confirmationStatus: DomainEvidenceMatrix["confirmation_status"] = "insufficient";
+  if (divisional.status === "support" && natal.status === "support") confirmationStatus = "confirmed";
+  else if (divisional.status === "pressure" && (natal.status === "support" || natal.status === "mixed")) confirmationStatus = "qualified";
+  else if (divisional.status === "support" && natal.status === "pressure") confirmationStatus = "improved";
+  else if (mixedFamilies.length >= 2 || (supportFamilies.length >= 2 && pressureFamilies.length >= 2)) confirmationStatus = "contradictory";
+  else if (divisional.status !== "context") confirmationStatus = "qualified";
+
+  if (confirmationStatus === "contradictory") {
+    entries.push({
+      family: "contradiction",
+      label: "Contradiction check",
+      status: "mixed",
+      summary: "Independent evidence families disagree, so this conclusion should be used cautiously.",
+      technical_note: `Support: ${supportFamilies.join(", ") || "none"}; pressure: ${pressureFamilies.join(", ") || "none"}; mixed: ${mixedFamilies.map((entry) => entry.family).join(", ") || "none"}.`,
+    });
+  }
+
+  const conclusionStrength: DomainEvidenceMatrix["conclusion_strength"] =
+    supportFamilies.length >= 3 && pressureFamilies.length <= 1 && confirmationStatus !== "contradictory"
+      ? "strong"
+      : supportFamilies.length >= 2 && confirmationStatus !== "contradictory"
+        ? "moderate"
+        : "cautious";
+  const baseSynthesis: Record<DomainEvidenceMatrix["confirmation_status"], string> = {
+    confirmed: "Natal promise confirmed in the relevant divisional chart.",
+    qualified: "Natal promise is present but weakened or qualified in delivery.",
+    improved: "The relevant divisional chart improves a pressured natal pattern.",
+    contradictory: "Evidence is contradictory and should be treated cautiously.",
+    insufficient: "The natal reading remains primary because independent confirmation is limited.",
+  };
+  const strengthEntry = entries.find((entry) => entry.family === "strength");
+  const houseEntry = entries.find((entry) => entry.family === "house_support");
+  let modifier = "";
+  if (strengthEntry?.status === "support" && houseEntry?.status === "pressure") modifier = " A strong ruler is working with weaker house support.";
+  else if (strengthEntry?.status === "pressure" && houseEntry?.status === "support") modifier = " A weaker ruler receives protective house reinforcement.";
+  else if (natal.status === "support" && houseEntry?.status === "pressure") modifier = " Strong natal promise meets lighter support conditions.";
+  else if (natal.status === "mixed" && houseEntry?.status === "support") modifier = " A moderate natal promise has unusually favorable support conditions.";
+
+  return {
+    entries,
+    supporting_families: supportFamilies,
+    pressure_families: pressureFamilies,
+    conclusion_strength: conclusionStrength,
+    confirmation_status: confirmationStatus,
+    synthesis: `${baseSynthesis[confirmationStatus]}${modifier} ${label} is described as especially strong only when at least three independent evidence families agree.`.trim(),
+  };
+}
+
+function buildDomainSubthemes(
+  key: LifeDomainKey,
+  houses: HousePlacement[],
+  planets: PlanetPosition[],
+  matrix: DomainEvidenceMatrix,
+  evidence?: LifeDomainExtendedEvidence
+): DomainSubtheme[] {
+  const familyStatuses = new Map(matrix.entries.map((entry) => [entry.family, entry.status]));
+  const shadbala = new Map((evidence?.shadbala ?? []).map((item) => [item.planet, item]));
+
+  return DOMAIN_SUBTHEMES[key]
+    .map((subtheme) => {
+      let score = 0.44;
+      const occupied = subtheme.houses.filter((house) => houseByNumber(houses, house).planets.length > 0);
+      score += Math.min(0.14, occupied.length * 0.055);
+      const strongPlanets = subtheme.planets.filter((name) => {
+        const planet = planets.find((item) => item.name === name);
+        if (!planet) return false;
+        const dignity = planetDignity(planet);
+        return dignity === "exalted" || dignity === "own_sign" || (shadbala.get(name)?.strengthRatio ?? 0) >= 1;
+      });
+      const weakPlanets = subtheme.planets.filter((name) => {
+        const planet = planets.find((item) => item.name === name);
+        return Boolean(planet && (planetDignity(planet) === "debilitated" || (shadbala.get(name)?.strengthRatio ?? 1) < 0.85));
+      });
+      score += Math.min(0.12, strongPlanets.length * 0.05);
+      score -= Math.min(0.1, weakPlanets.length * 0.045);
+      for (const family of subtheme.families) {
+        const status = familyStatuses.get(family);
+        if (status === "support") score += 0.045;
+        if (status === "pressure") score -= 0.035;
+      }
+      score = Math.round(Math.max(0.25, Math.min(0.92, score)) * 100) / 100;
+      const band: DomainSubtheme["band"] = score >= 0.68 ? "leading" : score >= 0.52 ? "supporting" : "developing";
+      const reasons = uniqueCopy([
+        occupied.length > 0 ? `houses ${occupied.join(" and ")} are activated` : undefined,
+        strongPlanets.length > 0 ? `${strongPlanets.join(" and ")} add delivery strength` : undefined,
+        weakPlanets.length > 0 ? `${weakPlanets.join(" and ")} need reinforcement` : undefined,
+      ]);
+      return {
+        key: subtheme.key,
+        label: subtheme.label,
+        score,
+        band,
+        summary: reasons.length > 0
+          ? `${subtheme.label} ranks ${band} because ${reasons.join(", while ")}.`
+          : `${subtheme.label} remains ${band}; it needs clearer activation before becoming a leading theme.`,
+        supporting_families: subtheme.families.filter((family) => familyStatuses.get(family) === "support"),
+      };
+    })
+    .sort((left, right) => right.score - left.score || left.label.localeCompare(right.label));
+}
+
+function buildDomainClarity(
+  label: string,
+  rules: DomainRuleHit[]
+): string {
+  const support = rankedRuleHits(rules, "support")[0];
+  const pressure = rankedRuleHits(rules, "pressure")[0];
+  const activation = rankedRuleHits(rules, "activation")[0];
+  const lead = support ?? activation ?? rules[0];
+
+  if (!lead) {
+    return `${label} needs repeated evidence before one event is treated as a stable pattern.`;
+  }
+
+  return pressure
+    ? `${lead.summary} The main condition is equally important: ${pressure.summary}`
+    : `${lead.summary} No dominant pressure rule overrides that support, so consistency becomes the main test.`;
+}
+
+function buildDomainDecisionRule(
+  config: LifeDomainConfig,
+  activationPlanets: string[]
+): string {
+  const timing = activationPlanets.length > 0
+    ? ` Give extra weight to ${activationPlanets.join(", ")} periods only when the visible evidence agrees.`
+    : "";
+  return `Move on ${config.label.toLowerCase()} decisions when ${config.decision_test}.${timing}`;
+}
+
+function buildDomainBoundaryRule(
+  config: LifeDomainConfig,
+  rules: DomainRuleHit[]
+): string {
+  const pressure = rankedRuleHits(rules, "pressure")[0];
+  const condition = pressure ? `${pressure.summary} ` : "";
+  return `${condition}Do not let ${config.boundary_focus}.`;
+}
+
 function domainsAreLinked(
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
@@ -567,7 +790,8 @@ function buildDomainDisplayStrengths(
   primaryHouse: HousePlacement,
   secondaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
-  secondaryLord: PlanetPosition
+  secondaryLord: PlanetPosition,
+  rules: DomainRuleHit[]
 ): string[] {
   const third = domainsAreLinked(primaryHouse, secondaryHouse, primaryLord, secondaryLord)
     ? profile.linkedSignal
@@ -575,9 +799,13 @@ function buildDomainDisplayStrengths(
       ? profile.occupiedStrength
       : profile.quietStrength;
 
-  return [profile.approachStrength, profile.deliveryStrength, third].map((item) =>
-    renderDomainNarrative(item, facts)
-  );
+  return uniqueCopy([
+    ...rankedRuleHits(rules, "support").map((rule) => rule.summary),
+    ...rankedRuleHits(rules, "activation").map((rule) => rule.summary),
+    renderDomainNarrative(profile.approachStrength, facts),
+    renderDomainNarrative(profile.deliveryStrength, facts),
+    renderDomainNarrative(third, facts),
+  ]).slice(0, 3);
 }
 
 function buildDomainDisplayWatchouts(
@@ -585,9 +813,12 @@ function buildDomainDisplayWatchouts(
   facts: DomainNarrativeFacts,
   primaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
-  anchorPlanet: PlanetPosition
+  anchorPlanet: PlanetPosition,
+  rules: DomainRuleHit[]
 ): string[] {
-  const watchouts: string[] = [];
+  const watchouts: string[] = rankedRuleHits(rules, "pressure").map(
+    (rule) => rule.summary
+  );
   const lordNeedsCare =
     [6, 8, 12].includes(primaryLord.house) ||
     planetDignity(primaryLord) === "debilitated" ||
@@ -617,7 +848,8 @@ function buildDomainDisplayTiming(
   secondaryHouse: HousePlacement,
   primaryLord: PlanetPosition,
   secondaryLord: PlanetPosition,
-  anchorPlanet: PlanetPosition
+  anchorPlanet: PlanetPosition,
+  rules: DomainRuleHit[]
 ): string[] {
   const dignity = planetDignity(anchorPlanet);
   const instinct =
@@ -632,7 +864,12 @@ function buildDomainDisplayTiming(
       ? profile.activeTiming
       : profile.quietTiming;
 
-  return [instinct, shape].map((item) => renderDomainNarrative(item, facts));
+  const activation = rankedRuleHits(rules, "activation")[0]?.summary;
+  return uniqueCopy([
+    activation,
+    renderDomainNarrative(instinct, facts),
+    renderDomainNarrative(shape, facts),
+  ]).slice(0, 2);
 }
 
 function buildDomainClaims(
@@ -673,7 +910,8 @@ function buildLifeDomainInsight(
   key: LifeDomainKey,
   planets: PlanetPosition[],
   houses: HousePlacement[],
-  domElement: string
+  domElement: string,
+  extendedEvidence?: LifeDomainExtendedEvidence
 ): LifeDomainInsight {
   const config = LIFE_DOMAIN_CONFIG[key];
   const primaryHouse = houseByNumber(houses, config.primary_house);
@@ -683,14 +921,30 @@ function buildLifeDomainInsight(
   const secondaryLordName = SIGN_RULERS[secondaryHouse.sign];
   const secondaryLord = planetByName(planets, secondaryLordName);
   const anchorPlanet = planetByName(planets, config.anchor_planet);
-
-  const confidence = calculateDomainSignalScore(
+  const { rules: domainRules, profile: signalProfile } = evaluateLifeDomainRules({
+    key,
+    label: config.label,
     primaryHouse,
     secondaryHouse,
     primaryLord,
     secondaryLord,
-    anchorPlanet
+    anchorPlanet,
+    planets,
+    houses,
+    evidence: extendedEvidence,
+  });
+  const evidenceMatrix = buildEvidenceMatrix(
+    config.label,
+    domainRules
   );
+  const subthemes = buildDomainSubthemes(
+    key,
+    houses,
+    planets,
+    evidenceMatrix,
+    extendedEvidence
+  );
+  const confidence = signalProfile.activity_score;
 
   const headline =
     `${config.label}: ${primaryHouse.sign} house ${primaryHouse.house_number}, led by ${primaryLord.name}.`;
@@ -714,6 +968,14 @@ function buildLifeDomainInsight(
     occupants: primaryHouse.planets.join(", ") || "No planet",
     elementMethod: ELEMENT_METHODS[domElement] ?? ELEMENT_METHODS.Fire,
   };
+  const leadingSpecificRule =
+    rankedRuleHits(domainRules, "support")[0] ??
+    rankedRuleHits(domainRules, "activation")[0] ??
+    rankedRuleHits(domainRules, "pressure")[0];
+  const displayBody = uniqueCopy([
+    renderDomainNarrative(profile.body, facts),
+    leadingSpecificRule?.summary,
+  ]).join(" ");
 
   return {
     key,
@@ -721,18 +983,32 @@ function buildLifeDomainInsight(
 
     display: {
       headline: profile.headline,
-      body: renderDomainNarrative(profile.body, facts),
+      body: displayBody,
       guidance: renderDomainNarrative(profile.guidance, facts),
       long_game: renderDomainNarrative(profile.longGame, facts),
+      clarity: `${evidenceMatrix.synthesis} ${buildDomainClarity(config.label, domainRules)}`,
+      decision_rule: buildDomainDecisionRule(
+        config,
+        signalProfile.activation_planets
+      ),
+      boundary_rule: buildDomainBoundaryRule(config, domainRules),
       strengths: buildDomainDisplayStrengths(
         profile,
         facts,
         primaryHouse,
         secondaryHouse,
         primaryLord,
-        secondaryLord
+        secondaryLord,
+        domainRules
       ),
-      watchouts: buildDomainDisplayWatchouts(profile, facts, primaryHouse, primaryLord, anchorPlanet),
+      watchouts: buildDomainDisplayWatchouts(
+        profile,
+        facts,
+        primaryHouse,
+        primaryLord,
+        anchorPlanet,
+        domainRules
+      ),
       timing: buildDomainDisplayTiming(
         profile,
         facts,
@@ -740,17 +1016,22 @@ function buildLifeDomainInsight(
         secondaryHouse,
         primaryLord,
         secondaryLord,
-        anchorPlanet
+        anchorPlanet,
+        domainRules
       ),
     },
 
     evidence: {
       technical_note: `${headline} ${overview}`,
       claims: buildDomainClaims(config, primaryHouse, secondaryHouse, primaryLord, secondaryLord, anchorPlanet),
-      // Deliberately the same number as confidence_score. This is a STRENGTH
-      // signal, not a rarity one, and it stops being rendered as a percentage.
+      // Legacy sort consumers still read confidence_score; both fields now
+      // carry the rule-derived activity score, never a probability.
       signal_score: confidence,
     },
+    rule_hits: domainRules,
+    signal_profile: signalProfile,
+    evidence_matrix: evidenceMatrix,
+    subthemes,
 
     // Every legacy field below is computed exactly as before. Nothing is
     // dropped -- these are demoted to the technical tier at the render sites,
@@ -762,7 +1043,7 @@ function buildLifeDomainInsight(
     timing_triggers: domainTimingTriggers(config, primaryHouse, primaryLord, secondaryLord, anchorPlanet),
     supporting_patterns: domainSupportingPatterns(primaryHouse, secondaryHouse, primaryLord, secondaryLord, anchorPlanet),
     guidance: domainGuidance(domElement, primaryHouse, primaryLord, config.label),
-    long_game: domainLongGame(config.label, primaryHouse, primaryLord, domElement),
+    long_game: domainLongGame(config.label, primaryHouse, primaryLord),
     confidence_score: confidence,
   };
 }
@@ -879,10 +1160,11 @@ export function rulesDatasetVersion(): string {
 export function generateLifeDomainInsights(
   _ascendantSign: string,
   planets: PlanetPosition[],
-  houses: HousePlacement[]
+  houses: HousePlacement[],
+  extendedEvidence?: LifeDomainExtendedEvidence
 ): LifeDomainInsight[] {
   const { element: domEl } = dominantElement(planets);
   return (Object.keys(LIFE_DOMAIN_CONFIG) as LifeDomainKey[]).map((key) =>
-    buildLifeDomainInsight(key, planets, houses, domEl)
+    buildLifeDomainInsight(key, planets, houses, domEl, extendedEvidence)
   );
 }

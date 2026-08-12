@@ -10,8 +10,7 @@
  * globals.css, so the cascade among these rules is unchanged.
  */
 .lagna-panel,
-.rules-panel,
-.planet-panel {
+.rules-panel {
   margin-top: 1.2rem;
   border-radius: 16px;
   border: 1px solid rgba(200, 155, 60, 0.14);
@@ -26,8 +25,7 @@
 }
 
 .lagna-panel:hover,
-.rules-panel:hover,
-.planet-panel:hover {
+.rules-panel:hover {
   border-color: rgba(200, 155, 60, 0.28);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(200, 155, 60, 0.08), 0 0 20px rgba(200, 155, 60, 0.08);
 }
@@ -71,48 +69,6 @@
   color: var(--ink-soft);
 }
 
-.planet-card {
-  border-radius: 14px;
-  border: 1px solid var(--line-soft);
-  background: rgba(11, 9, 20, 0.90);
-  padding: 0.74rem;
-}
-
-.planet-card h3 {
-  margin: 0;
-  font-size: 1.28rem;
-}
-
-.planet-card p {
-  margin: 0.34rem 0;
-  color: var(--ink-main);
-}
-
-.planet-card small {
-  color: var(--ink-soft);
-}
-
-.planet-panel--compact {
-  padding-top: 0.95rem;
-}
-
-.planet-panel-intro {
-  margin-bottom: 0.9rem;
-}
-
-.planet-card--compact {
-  padding: 0.62rem 0.72rem;
-}
-
-.planet-card--compact h3 {
-  font-size: 1.18rem;
-}
-
-.planet-card--compact p {
-  margin: 0.2rem 0;
-  font-size: 1.15rem;
-}
-
 /* ── Enhanced Rule Cards ── */
 
 .rule-card {
@@ -122,18 +78,6 @@
 .rule-card:hover {
   transform: translateY(-1px);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-}
-
-/* ── Enhanced Planet Cards ── */
-
-.planet-card {
-  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
-}
-
-.planet-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.28);
-  border-color: rgba(108, 225, 212, 0.3);
 }
 
 /* ── Nakshatra & Dasha Panel ── */
@@ -1716,23 +1660,6 @@
   border: 1px solid rgba(255, 143, 126, 0.3);
 }
 
-/* ── Planet Card Expandable Interpretations ── */
-
-.planet-card {
-  cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease, transform 120ms ease;
-}
-
-.planet-card:hover {
-  transform: translateY(-1px);
-}
-
-.planet-card--expanded {
-  grid-column: 1 / -1;
-  border-color: var(--accent-gold);
-  background: var(--surface-strong);
-}
-
 /* ── Navamsa Expandable Interpretations ── */
 
 .navamsa-row {
@@ -3094,14 +3021,12 @@
 /* Enhanced hover lift with soft shadow bloom for card containers */
 
 .lagna-panel,
-.rules-panel,
-.planet-panel {
+.rules-panel {
   transition: transform 280ms ease, box-shadow 280ms ease, border-color 0.3s ease;
 }
 
 .lagna-panel:hover,
-.rules-panel:hover,
-.planet-panel:hover {
+.rules-panel:hover {
   transform: translateY(-4px);
 }
 
@@ -3114,17 +3039,6 @@
   box-shadow:
     0 14px 36px rgba(0, 0, 0, 0.28),
     0 0 18px rgba(108, 225, 212, 0.06);
-}
-
-.planet-card {
-  transition: transform 280ms ease, box-shadow 280ms ease, border-color 240ms ease;
-}
-
-.planet-card:hover {
-  transform: translateY(-4px);
-  box-shadow:
-    0 14px 36px rgba(0, 0, 0, 0.3),
-    0 0 18px rgba(108, 225, 212, 0.08);
 }
 
 .dasha-bar {
