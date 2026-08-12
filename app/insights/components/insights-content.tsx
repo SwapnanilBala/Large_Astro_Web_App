@@ -1601,8 +1601,8 @@ export default function InsightsContent({
                         </dl>
                         <div className={styles.domainRulesPanel}>
                           <ol>
-                            {selectedDomainRules.map((rule) => (
-                              <li key={rule.label}>
+                            {selectedDomainRules.map((rule, index) => (
+                              <li key={`${rule.label}-${index}`}>
                                 <strong>{rule.label}:</strong> {rule.body}
                               </li>
                             ))}

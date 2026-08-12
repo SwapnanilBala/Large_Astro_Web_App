@@ -698,9 +698,9 @@ function computeInsights(
     hHash = ((hHash << 5) + hHash + houseSig.charCodeAt(i)) | 0;
   }
   const evidenceSignature = extendedEvidence
-    ? `${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
+    ? `${extendedEvidence.birthTimeAccuracy ?? "exact"}_${extendedEvidence.birthTimeFallback ? "fallback" : "recorded"}_${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
     : "natal";
-  const cacheKey = `ins_v3_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
+  const cacheKey = `ins_v4_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
 
   const cached = stageCaches.insights.get(cacheKey);
   if (cached) return cached;
@@ -762,6 +762,8 @@ export function buildLifeDomainInsights(
       dashaStage.dashaInfo.current_antardasha,
     ].filter((lord): lord is string => Boolean(lord)),
     transits: transits.map((transit) => ({ name: transit.name, sign: transit.sign })),
+    birthTimeAccuracy: birth.birth_time_accuracy,
+    birthTimeFallback: birth.birth_time_fallback,
   };
   return computeInsights(
     core.ascendant.sign,
@@ -866,6 +868,8 @@ export function buildChart(
             dashaInfo?.current_dasha,
             dashaInfo?.current_antardasha,
           ].filter((lord): lord is string => Boolean(lord)),
+          birthTimeAccuracy: birth.birth_time_accuracy,
+          birthTimeFallback: birth.birth_time_fallback,
         }
       : undefined;
     const insightsStage = computeInsights(

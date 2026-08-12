@@ -56,6 +56,9 @@ export interface BirthDetailsInput {
   city?: string;
   town?: string;
   time_zone_id?: string;
+  birth_time_accuracy?: "exact" | "morning" | "afternoon" | "evening" | "unknown";
+  birth_time_source?: "exact" | "fallback";
+  birth_time_fallback?: boolean;
 }
 
 // --------------------------------------------------------------------------

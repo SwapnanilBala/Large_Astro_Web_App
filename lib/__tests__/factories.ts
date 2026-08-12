@@ -134,6 +134,7 @@ export function makeDomainInsight(overrides: DomainOverrides = {}): LifeDomainIn
       entries: [],
       supporting_families: ["primary", "divisional", "strength"],
       pressure_families: [],
+      independent_support_groups: ["natal_promise", "delivery_confirmation", "house_environment"],
       conclusion_strength: "strong",
       confirmation_status: "confirmed",
       synthesis: "Natal promise confirmed in the relevant divisional chart.",

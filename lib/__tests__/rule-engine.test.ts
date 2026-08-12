@@ -7,6 +7,7 @@ import {
   type LifeDomainInsight,
 } from "../engines/rule-engine";
 import type { PlanetPosition, HousePlacement } from "../engines/swiss-ephemeris-engine";
+import type { LifeDomainExtendedEvidence } from "../engines/life-domain-rules";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -54,6 +55,38 @@ function getInsight(
   const insight = insights.find((i) => i.key === key);
   expect(insight).toBeDefined();
   return insight!;
+}
+
+function extendedEvidence(
+  overrides: Partial<LifeDomainExtendedEvidence> = {}
+): LifeDomainExtendedEvidence {
+  const sav = [26, 26, 32, 26, 26, 26, 32, 26, 26, 26, 32, 32];
+  return {
+    birthTimeAccuracy: "exact",
+    birthTimeFallback: false,
+    divisionalCharts: {
+      4: { division: 4, label: "D4", description: "Home", positions: [] },
+      7: { division: 7, label: "D7", description: "Lineage", positions: [] },
+      9: { division: 9, label: "D9", description: "Relationships", positions: [] },
+      10: {
+        division: 10,
+        label: "D10",
+        description: "Career",
+        positions: [{ name: "Saturn", rashi_sign: "Capricorn", divisional_sign: "Capricorn", division_number: 0 }],
+      },
+      12: { division: 12, label: "D12", description: "Ancestry", positions: [] },
+    },
+    ashtakavarga: {
+      bhinnashtakavarga: { Saturn: [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5] },
+      sarvashtakavarga: sav,
+      totalBindus: sav.reduce((sum, score) => sum + score, 0),
+      strongSigns: [],
+      weakSigns: [],
+    },
+    timingLords: ["Saturn"],
+    transits: [{ name: "Saturn", sign: "Aquarius" }],
+    ...overrides,
+  };
 }
 
 // ---------------------------------------------------------------------------
@@ -523,8 +556,123 @@ describe("rule-engine", () => {
       for (const insight of insights) {
         if (insight.evidence_matrix.conclusion_strength === "strong") {
           expect(insight.evidence_matrix.supporting_families.length).toBeGreaterThanOrEqual(3);
+          expect(insight.evidence_matrix.independent_support_groups.length).toBeGreaterThanOrEqual(3);
+          expect(
+            insight.evidence_matrix.entries.find((entry) => entry.family === "primary")?.status
+          ).toBe("support");
         }
       }
+    });
+
+    it("collapses correlated delivery evidence and never promotes a pressured natal baseline to strong", () => {
+      const pressuredPlanets = buildTestPlanets().map((planet) =>
+        planet.name === "Saturn" ? { ...planet, sign: "Aries" } : planet
+      );
+      const career = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          pressuredPlanets,
+          buildHousesFromPlanets(ASC_SIGN, pressuredPlanets),
+          extendedEvidence()
+        ),
+        "career"
+      );
+
+      expect(career.evidence_matrix.conclusion_strength).not.toBe("strong");
+      expect(career.evidence_matrix.independent_support_groups).toContain("delivery_confirmation");
+      expect(career.evidence_matrix.independent_support_groups).not.toEqual(
+        expect.arrayContaining(["divisional", "strength", "yoga"])
+      );
+      expect(
+        career.evidence_matrix.entries.find((entry) => entry.family === "primary")?.status
+      ).not.toBe("support");
+    });
+
+    it("withholds time-sensitive evidence when the birth time is approximate", () => {
+      const career = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          buildTestPlanets(),
+          buildTestHouses(ASC_SIGN),
+          extendedEvidence({ birthTimeAccuracy: "afternoon", birthTimeFallback: true })
+        ),
+        "career"
+      );
+
+      for (const family of ["divisional", "strength", "house_support", "yoga", "timing"] as const) {
+        expect(career.evidence_matrix.entries.find((entry) => entry.family === family)?.status).toBe("context");
+      }
+      expect(career.evidence_matrix.conclusion_strength).not.toBe("strong");
+      expect(career.evidence_matrix.synthesis).toContain("withheld");
+      expect(career.rule_hits.some((rule) => rule.id === "divisional_confirmation")).toBe(false);
+    });
+
+    it("applies D7 only to the lineage subtheme rather than the whole family domain", () => {
+      const evidence = extendedEvidence({
+        divisionalCharts: {
+          4: { division: 4, label: "D4", description: "Home", positions: [] },
+          7: {
+            division: 7,
+            label: "D7",
+            description: "Lineage",
+            positions: [{ name: "Jupiter", rashi_sign: "Cancer", divisional_sign: "Cancer", division_number: 0 }],
+          },
+          12: { division: 12, label: "D12", description: "Ancestry", positions: [] },
+        },
+      });
+      const family = getInsight(
+        generateLifeDomainInsights(ASC_SIGN, buildTestPlanets(), buildTestHouses(ASC_SIGN), evidence),
+        "family"
+      );
+      const lineage = family.subthemes.find((subtheme) => subtheme.key === "lineage")!;
+      const home = family.subthemes.find((subtheme) => subtheme.key === "home")!;
+
+      expect(lineage.summary).toContain("D7");
+      expect(lineage.supporting_families).toContain("divisional");
+      expect(home.summary).not.toContain("D7");
+    });
+
+    it("matches yoga support by domain-specific identifiers rather than broad category alone", () => {
+      const evidence = extendedEvidence({
+        yogas: [{
+          yoga_id: "dhana_lord_kendra",
+          name: "Dhana Lord Kendra Yoga",
+          sanskrit: "Dhana Lord Kendra Yoga",
+          category: "wealth",
+          present: true,
+          strength: "strong",
+          occurrence_chance: 80,
+          involved_planets: ["Saturn"],
+          description: "Financial support",
+          effects: "Supports resources",
+        }],
+      });
+      const insights = generateLifeDomainInsights(
+        ASC_SIGN,
+        buildTestPlanets(),
+        buildTestHouses(ASC_SIGN),
+        evidence
+      );
+
+      expect(getInsight(insights, "inheritance").rule_hits.some((rule) => rule.id === "domain_yoga_support")).toBe(true);
+      expect(getInsight(insights, "career").rule_hits.some((rule) => rule.id === "domain_yoga_support")).toBe(false);
+    });
+
+    it("uses planet-specific BAV alongside SAV for domain-relevant transit support", () => {
+      const career = getInsight(
+        generateLifeDomainInsights(
+          ASC_SIGN,
+          buildTestPlanets(),
+          buildTestHouses(ASC_SIGN),
+          extendedEvidence()
+        ),
+        "career"
+      );
+      const transitRule = career.rule_hits.find((rule) => rule.id.startsWith("timing_transit_"));
+
+      expect(transitRule).toBeDefined();
+      expect(transitRule?.technical_note).toContain("BAV");
+      expect(transitRule?.technical_note).toContain("SAV");
     });
 
     it("ranks distinct subthemes within every domain", () => {

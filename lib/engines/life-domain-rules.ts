@@ -15,7 +15,7 @@ import type {
   PlanetPosition,
 } from "./swiss-ephemeris-engine";
 
-export const LIFE_DOMAIN_RULES_VERSION = "2026-08-domain-v3";
+export const LIFE_DOMAIN_RULES_VERSION = "2026-08-domain-v4";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -37,23 +37,79 @@ export type LifeDomainExtendedEvidence = {
   yogas?: YogaDetectionResult[] | null;
   timingLords?: string[];
   transits?: Array<{ name: string; sign: string }>;
+  birthTimeAccuracy?: "exact" | "morning" | "afternoon" | "evening" | "unknown";
+  birthTimeFallback?: boolean;
+};
+
+type DomainDivisionScope = {
+  division: number;
+  subthemes: string[];
+  domainWide: boolean;
+  method: "classical" | "extended";
 };
 
 type DomainEvidenceConfig = {
   houses: number[];
   planets: string[];
-  divisions: number[];
-  yogaCategories: YogaDetectionResult["category"][];
+  divisionScopes: DomainDivisionScope[];
+  yogaIdPrefixes: string[];
 };
 
 export const LIFE_DOMAIN_EVIDENCE_CONFIG: Record<LifeDomainKey, DomainEvidenceConfig> = {
-  love_life: { houses: [5, 7, 8, 12], planets: ["Venus", "Jupiter", "Moon"], divisions: [9], yogaCategories: ["benefic"] },
-  career: { houses: [2, 6, 10, 11], planets: ["Saturn", "Mercury", "Sun", "Jupiter"], divisions: [10], yogaCategories: ["wealth", "mahapurusha"] },
-  family: { houses: [2, 4], planets: ["Moon", "Jupiter"], divisions: [4, 7, 12], yogaCategories: ["benefic"] },
-  inheritance: { houses: [2, 8], planets: ["Jupiter", "Saturn"], divisions: [2], yogaCategories: ["wealth", "viparita"] },
-  influence: { houses: [3, 10, 11], planets: ["Sun", "Mercury", "Jupiter"], divisions: [5, 10, 11], yogaCategories: ["wealth", "benefic", "mahapurusha"] },
-  life_cycle: { houses: [1, 8, 12], planets: ["Moon", "Saturn"], divisions: [8, 27, 30], yogaCategories: ["viparita", "benefic"] },
-  travel_destinations: { houses: [3, 4, 9, 12], planets: ["Jupiter", "Moon"], divisions: [4, 12], yogaCategories: ["benefic"] },
+  love_life: {
+    houses: [5, 7, 8, 12],
+    planets: ["Venus", "Jupiter", "Moon"],
+    divisionScopes: [{ division: 9, subthemes: ["commitment", "availability", "intimacy", "repair"], domainWide: true, method: "classical" }],
+    yogaIdPrefixes: ["yuvati_", "sukha_yuvati_", "shukra_", "malavya", "hamsa"],
+  },
+  career: {
+    houses: [2, 6, 10, 11],
+    planets: ["Saturn", "Mercury", "Sun", "Jupiter"],
+    divisionScopes: [{ division: 10, subthemes: ["vocation", "daily_work", "leadership", "entrepreneurship", "recognition"], domainWide: true, method: "classical" }],
+    yogaIdPrefixes: ["karma_", "artha_support", "dharma_karmadhipati", "parakrama_karma_", "shani_", "budha_", "surya_", "kahala", "bheri", "akhanda_samrajya", "bhadra", "hamsa", "sasa"],
+  },
+  family: {
+    houses: [2, 4],
+    planets: ["Moon", "Jupiter"],
+    divisionScopes: [
+      { division: 4, subthemes: ["home", "property", "security"], domainWide: true, method: "classical" },
+      { division: 12, subthemes: ["parents", "lineage"], domainWide: true, method: "classical" },
+      { division: 7, subthemes: ["lineage"], domainWide: false, method: "classical" },
+    ],
+    yogaIdPrefixes: ["sukha_", "chandra_", "moksha_support", "vidya_", "hamsa"],
+  },
+  inheritance: {
+    houses: [2, 8],
+    planets: ["Jupiter", "Saturn"],
+    divisionScopes: [{ division: 2, subthemes: ["ownership", "transfers", "shared_assets"], domainWide: false, method: "classical" }],
+    yogaIdPrefixes: ["randhra_", "dhana_", "dhanakaraka", "shatru_", "bhrigu_mangal", "hamsa", "sasa"],
+  },
+  influence: {
+    houses: [3, 10, 11],
+    planets: ["Sun", "Mercury", "Jupiter"],
+    divisionScopes: [
+      { division: 10, subthemes: ["leadership", "authority", "reach"], domainWide: true, method: "classical" },
+      { division: 5, subthemes: ["communication", "leadership", "reach"], domainWide: false, method: "extended" },
+      { division: 11, subthemes: ["audience", "alliances", "reach"], domainWide: false, method: "extended" },
+    ],
+    yogaIdPrefixes: ["parakrama_", "karma_", "labha_", "budha_", "surya_", "dharma_karma_", "karma_labha_", "bhadra", "hamsa"],
+  },
+  life_cycle: {
+    houses: [1, 8, 12],
+    planets: ["Moon", "Saturn"],
+    divisionScopes: [
+      { division: 8, subthemes: ["identity", "endings", "reinvention"], domainWide: false, method: "extended" },
+      { division: 27, subthemes: ["recovery", "resilience"], domainWide: false, method: "classical" },
+      { division: 30, subthemes: ["recovery", "endings"], domainWide: false, method: "classical" },
+    ],
+    yogaIdPrefixes: ["lagna_", "randhra_", "vyaya_", "moksha_", "shatru_", "sasa"],
+  },
+  travel_destinations: {
+    houses: [3, 4, 9, 12],
+    planets: ["Jupiter", "Moon"],
+    divisionScopes: [{ division: 4, subthemes: ["relocation", "settlement"], domainWide: false, method: "classical" }],
+    yogaIdPrefixes: ["bhagya_", "vyaya_", "dharma_support", "hamsa"],
+  },
 };
 
 type RuleDraft = Omit<DomainRuleHit, "weight"> & { weight: number };
@@ -410,6 +466,35 @@ function divisionalDignity(planetName: string, sign: string): "strong" | "weak" 
   return "neutral";
 }
 
+function hasReliableBirthTime(evidence: LifeDomainExtendedEvidence): boolean {
+  return (
+    !evidence.birthTimeFallback &&
+    (evidence.birthTimeAccuracy === undefined || evidence.birthTimeAccuracy === "exact")
+  );
+}
+
+function addTimePrecisionCautions(rules: RuleDraft[], evidence: LifeDomainExtendedEvidence): void {
+  const accuracy = evidence.birthTimeAccuracy ?? "fallback";
+  const note = `Birth-time quality is ${accuracy}${evidence.birthTimeFallback ? " (fallback time)" : ""}; house-sensitive confirmation is suppressed.`;
+  const cautions: Array<[string, string, string]> = [
+    ["divisional_time_caution", "Divisional confirmation needs an exact birth time", "Divisional evidence is withheld because the recorded time is approximate."],
+    ["shadbala_time_caution", "Measured delivery strength needs an exact birth time", "House- and time-sensitive Shadbala components are withheld for this reading."],
+    ["ashtakavarga_time_caution", "House support needs an exact birth time", "Ashtakavarga house support is withheld because the ascendant may shift."],
+    ["domain_yoga_time_caution", "Combination support needs an exact birth time", "House-dependent yoga confirmation is withheld for this reading."],
+    ["timing_time_caution", "Activation timing needs an exact birth time", "Dasha and transit-house confirmation are not promoted while birth time is approximate."],
+  ];
+  for (const [id, label, summary] of cautions) {
+    addRule(rules, {
+      id,
+      label,
+      impact: "context",
+      weight: 0.01,
+      summary,
+      technical_note: note,
+    });
+  }
+}
+
 function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput): void {
   const evidence = input.evidence;
   if (!evidence) return;
@@ -421,13 +506,25 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
     input.anchorPlanet,
     ...input.planets.filter((planet) => config.planets.includes(planet.name)),
   ]);
-  const divisionalReadings = config.divisions.flatMap((division) => {
-    const chart = evidence.divisionalCharts?.[division];
+
+  if (!hasReliableBirthTime(evidence)) {
+    addTimePrecisionCautions(rules, evidence);
+    return;
+  }
+
+  const domainDivisionScopes = config.divisionScopes.filter((scope) => scope.domainWide);
+  const divisionalReadings = domainDivisionScopes.flatMap((scope) => {
+    const chart = evidence.divisionalCharts?.[scope.division];
     if (!chart) return [];
     return relevantPlanets.flatMap((planetName) => {
       const position = chart.positions.find((item) => item.name === planetName);
       if (!position) return [];
-      return [{ division, planetName, sign: position.divisional_sign, dignity: divisionalDignity(planetName, position.divisional_sign) }];
+      return [{
+        ...scope,
+        planetName,
+        sign: position.divisional_sign,
+        dignity: divisionalDignity(planetName, position.divisional_sign),
+      }];
     });
   });
   const strongDivisional = divisionalReadings.filter((item) => item.dignity === "strong");
@@ -441,7 +538,7 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       impact: "support",
       weight: 0.09,
       summary: `The natal promise receives confirmation in D${lead.division}, where ${lead.planetName} has strong sign support.`,
-      technical_note: `${lead.planetName} is ${lead.sign} in D${lead.division}; divisional evidence is used as confirmation, not an override.`,
+      technical_note: `${lead.planetName} is ${lead.sign} in D${lead.division}; the ${lead.method} method applies to ${lead.subthemes.join(", ")}. Divisional evidence confirms but never overrides the natal baseline.`,
     });
   }
   if (weakDivisional.length > 0) {
@@ -452,7 +549,7 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       impact: "pressure",
       weight: 0.085,
       summary: `The natal promise is present, but D${lead.division} shows that delivery needs more maturity and support.`,
-      technical_note: `${lead.planetName} is debilitated in ${lead.sign} in D${lead.division}; this qualifies rather than erases the natal indication.`,
+      technical_note: `${lead.planetName} is debilitated in ${lead.sign} in D${lead.division}; the ${lead.method} method applies to ${lead.subthemes.join(", ")}. This qualifies rather than erases the natal indication.`,
     });
   }
 
@@ -492,26 +589,33 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       score: sav[(SIGN_INDEX_FOR_EVIDENCE(input, house))],
     }));
     const average = houseScores.reduce((sum, item) => sum + item.score, 0) / houseScores.length;
+    const chartBaseline = sav.reduce((sum, score) => sum + score, 0) / sav.length;
+    const supportThreshold = chartBaseline + 0.75;
+    const pressureThreshold = chartBaseline - 1.75;
+    const status = average >= supportThreshold ? "support" : average <= pressureThreshold ? "pressure" : "context";
     addRule(rules, {
-      id: average >= 28 ? "ashtakavarga_house_support" : average <= 25 ? "ashtakavarga_house_pressure" : "ashtakavarga_house_mixed",
-      label: average >= 28 ? "Relevant houses have strong point support" : average <= 25 ? "Relevant houses need better activation conditions" : "Relevant houses have mixed point support",
-      impact: average >= 28 ? "support" : average <= 25 ? "pressure" : "context",
-      weight: average >= 28 || average <= 25 ? 0.075 : 0.025,
-      summary: average >= 28
+      id: status === "support" ? "ashtakavarga_house_support" : status === "pressure" ? "ashtakavarga_house_pressure" : "ashtakavarga_house_mixed",
+      label: status === "support" ? "Relevant houses have strong point support" : status === "pressure" ? "Relevant houses need better activation conditions" : "Relevant houses have mixed point support",
+      impact: status,
+      weight: status === "context" ? 0.025 : 0.075,
+      summary: status === "support"
         ? "The relevant houses have above-average Ashtakavarga support, improving delivery conditions."
-        : average <= 25
+        : status === "pressure"
           ? "The relevant houses have lighter Ashtakavarga support, so timing and preparation matter more than promise alone."
           : "The relevant houses have mixed Ashtakavarga support, making outcomes more conditional than automatic.",
-      technical_note: `Relevant-house Sarvashtakavarga average: ${average.toFixed(1)} bindus (${houseScores.map((item) => `H${item.house}:${item.score}`).join(", ")}).`,
+      technical_note: `Relevant-house Sarvashtakavarga average: ${average.toFixed(1)} versus this chart's ${chartBaseline.toFixed(1)} baseline (${houseScores.map((item) => `H${item.house}:${item.score}`).join(", ")}).`,
     });
   }
 
   const matchingYogas = (evidence.yogas ?? []).filter(
-    (yoga) => yoga.present && config.yogaCategories.includes(yoga.category) &&
+    (yoga) => yoga.present &&
+      config.yogaIdPrefixes.some((prefix) => yoga.yoga_id === prefix || yoga.yoga_id.startsWith(prefix)) &&
       yoga.involved_planets.some((planet) => relevantPlanets.includes(planet))
   );
-  if (matchingYogas.length > 0) {
-    const lead = matchingYogas.sort((left, right) => {
+  const supportingYogas = matchingYogas.filter((yoga) => yoga.category !== "challenging" && !yoga.cancellation);
+  const pressuredYogas = matchingYogas.filter((yoga) => yoga.category === "challenging" || Boolean(yoga.cancellation));
+  if (supportingYogas.length > 0) {
+    const lead = supportingYogas.sort((left, right) => {
       const rank = { strong: 3, moderate: 2, weak: 1 };
       return rank[right.strength] - rank[left.strength];
     })[0];
@@ -522,6 +626,17 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       weight: lead.strength === "strong" ? 0.075 : 0.05,
       summary: `${lead.name} reinforces this area, but it remains supporting evidence rather than a standalone verdict.`,
       technical_note: `${lead.name} (${lead.category}, ${lead.strength}) involves ${lead.involved_planets.join(", ")}.`,
+    });
+  }
+  if (pressuredYogas.length > 0) {
+    const lead = pressuredYogas[0];
+    addRule(rules, {
+      id: "domain_yoga_pressure",
+      label: `${lead.name} adds a contradiction`,
+      impact: "pressure",
+      weight: 0.065,
+      summary: `${lead.name} adds a domain-specific condition, so the stronger indicators need practical confirmation before being trusted.`,
+      technical_note: `${lead.name} (${lead.category}, ${lead.strength}) involves ${lead.involved_planets.join(", ")}${lead.cancellation ? `; cancellation: ${lead.cancellation}` : ""}.`,
     });
   }
 
@@ -561,11 +676,24 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       const activatedHouses = config.houses.filter((house) =>
         house === transitHouse || aspectDistances(transit.name).includes(wholeSignDistance(transitHouse, house))
       );
+      const bav = evidence.ashtakavarga?.bhinnashtakavarga[transit.name];
+      const sav = evidence.ashtakavarga?.sarvashtakavarga;
+      const bavBindus = bav?.[transitIndex];
+      const savBindus = sav?.[transitIndex];
+      const bavAverage = bav ? bav.reduce((sum, score) => sum + score, 0) / bav.length : undefined;
+      const savAverage = sav ? sav.reduce((sum, score) => sum + score, 0) / sav.length : undefined;
+      const supportIndex = typeof bavBindus === "number" && typeof savBindus === "number" && typeof bavAverage === "number" && typeof savAverage === "number"
+        ? (bavBindus - bavAverage) + (savBindus - savAverage) / 7
+        : undefined;
       return {
         ...transit,
         transitHouse,
         activatedHouses,
-        bindus: evidence.ashtakavarga?.sarvashtakavarga[transitIndex],
+        bavBindus,
+        bavAverage,
+        savBindus,
+        savAverage,
+        supportIndex,
       };
     })
     .filter((transit): transit is {
@@ -573,25 +701,34 @@ function addExtendedEvidenceRules(rules: RuleDraft[], input: LifeDomainRuleInput
       sign: string;
       transitHouse: number;
       activatedHouses: number[];
-      bindus: number;
+      bavBindus: number;
+      bavAverage: number;
+      savBindus: number;
+      savAverage: number;
+      supportIndex: number;
     } =>
       transit.transitHouse > 0 &&
       transit.activatedHouses.length > 0 &&
-      typeof transit.bindus === "number"
+      typeof transit.bavBindus === "number" &&
+      typeof transit.bavAverage === "number" &&
+      typeof transit.savBindus === "number" &&
+      typeof transit.savAverage === "number" &&
+      typeof transit.supportIndex === "number"
     );
   if (transitSignals.length > 0) {
-    const transitAverage = transitSignals.reduce((sum, item) => sum + item.bindus, 0) / transitSignals.length;
+    const transitAverage = transitSignals.reduce((sum, item) => sum + item.supportIndex, 0) / transitSignals.length;
+    const status = transitAverage >= 0.5 ? "support" : transitAverage <= -0.5 ? "pressure" : "context";
     addRule(rules, {
-      id: transitAverage >= 28 ? "timing_transit_support" : transitAverage <= 25 ? "timing_transit_pressure" : "timing_transit_mixed",
-      label: transitAverage >= 28 ? "Current transit signs are well supported" : transitAverage <= 25 ? "Current transit support is light" : "Current transit support is mixed",
-      impact: transitAverage >= 28 ? "support" : transitAverage <= 25 ? "pressure" : "context",
-      weight: transitAverage >= 28 || transitAverage <= 25 ? 0.065 : 0.02,
-      summary: transitAverage >= 28
+      id: status === "support" ? "timing_transit_support" : status === "pressure" ? "timing_transit_pressure" : "timing_transit_mixed",
+      label: status === "support" ? "Current transit signs are well supported" : status === "pressure" ? "Current transit support is light" : "Current transit support is mixed",
+      impact: status,
+      weight: status === "context" ? 0.02 : 0.065,
+      summary: status === "support"
         ? "Current Jupiter and Saturn transit signs have favorable Ashtakavarga support for activation."
-        : transitAverage <= 25
+        : status === "pressure"
           ? "The natal promise may be stronger than current Jupiter and Saturn transit support, so timing should remain conservative."
           : "Current Jupiter and Saturn transit support is mixed, so external timing is neither a clear accelerator nor a veto.",
-      technical_note: `${transitSignals.map((item) => `${item.name} in ${item.sign} (H${item.transitHouse}) activates H${item.activatedHouses.join("/H")}: ${item.bindus}`).join(", ")} SAV bindus; average ${transitAverage.toFixed(1)}.`,
+      technical_note: `${transitSignals.map((item) => `${item.name} in ${item.sign} (H${item.transitHouse}) activates H${item.activatedHouses.join("/H")}: BAV ${item.bavBindus} vs ${item.bavAverage.toFixed(1)}, SAV ${item.savBindus} vs ${item.savAverage.toFixed(1)}`).join(", ")}; normalized support ${transitAverage.toFixed(2)}.`,
     });
   }
 }

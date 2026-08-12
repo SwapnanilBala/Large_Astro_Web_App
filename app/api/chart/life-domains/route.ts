@@ -42,6 +42,8 @@ export async function GET(request: NextRequest) {
       tz: birth.timezone_offset_minutes,
       lat: birth.latitude,
       lng: birth.longitude,
+      birth_time_accuracy: birth.birth_time_accuracy,
+      birth_time_fallback: birth.birth_time_fallback,
       rules_schema: RULES_SCHEMA_VERSION,
       life_domain_rules: LIFE_DOMAIN_RULES_VERSION,
     });

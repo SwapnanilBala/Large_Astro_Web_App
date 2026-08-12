@@ -374,6 +374,8 @@ export type DomainEvidenceMatrix = {
   entries: DomainEvidenceMatrixEntry[];
   supporting_families: DomainEvidenceFamily[];
   pressure_families: DomainEvidenceFamily[];
+  /** Correlated planet-delivery families are collapsed into one vote here. */
+  independent_support_groups: string[];
   conclusion_strength: "strong" | "moderate" | "cautious";
   confirmation_status:
     | "confirmed"

@@ -94,62 +94,63 @@ type DomainSubthemeConfig = {
   houses: number[];
   planets: string[];
   families: DomainEvidenceFamily[];
+  divisions: number[];
 };
 
 const DOMAIN_SUBTHEMES: Record<LifeDomainKey, DomainSubthemeConfig[]> = {
   career: [
-    { key: "vocation", label: "Vocation", houses: [9, 10], planets: ["Sun", "Jupiter"], families: ["primary", "divisional"] },
-    { key: "daily_work", label: "Daily work", houses: [6, 10], planets: ["Saturn", "Mercury"], families: ["primary", "strength"] },
-    { key: "leadership", label: "Leadership", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["yoga", "divisional"] },
-    { key: "entrepreneurship", label: "Entrepreneurship", houses: [3, 10, 11], planets: ["Mars", "Mercury"], families: ["supporting", "strength"] },
-    { key: "earnings", label: "Earnings", houses: [2, 11], planets: ["Jupiter", "Mercury"], families: ["house_support", "supporting"] },
-    { key: "recognition", label: "Professional recognition", houses: [10, 11], planets: ["Sun", "Jupiter"], families: ["divisional", "yoga"] },
+    { key: "vocation", label: "Vocation", houses: [9, 10], planets: ["Sun", "Jupiter"], families: ["primary", "divisional"], divisions: [10] },
+    { key: "daily_work", label: "Daily work", houses: [6, 10], planets: ["Saturn", "Mercury"], families: ["primary", "strength"], divisions: [10] },
+    { key: "leadership", label: "Leadership", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["yoga", "divisional"], divisions: [10] },
+    { key: "entrepreneurship", label: "Entrepreneurship", houses: [3, 10, 11], planets: ["Mars", "Mercury"], families: ["supporting", "strength"], divisions: [10] },
+    { key: "earnings", label: "Earnings", houses: [2, 11], planets: ["Jupiter", "Mercury"], families: ["house_support", "supporting"], divisions: [] },
+    { key: "recognition", label: "Professional recognition", houses: [10, 11], planets: ["Sun", "Jupiter"], families: ["divisional", "yoga"], divisions: [10] },
   ],
   love_life: [
-    { key: "attraction", label: "Attraction", houses: [5, 7], planets: ["Venus", "Mars"], families: ["primary", "supporting"] },
-    { key: "commitment", label: "Commitment", houses: [7, 8], planets: ["Venus", "Jupiter", "Saturn"], families: ["divisional", "strength"] },
-    { key: "availability", label: "Emotional availability", houses: [4, 7], planets: ["Moon", "Venus"], families: ["supporting", "strength"] },
-    { key: "intimacy", label: "Intimacy", houses: [8, 12], planets: ["Venus", "Moon"], families: ["primary", "divisional"] },
-    { key: "repair", label: "Conflict repair", houses: [6, 7], planets: ["Mars", "Mercury", "Venus"], families: ["contradiction", "strength"] },
-    { key: "shared_resources", label: "Shared resources", houses: [2, 8], planets: ["Venus", "Jupiter"], families: ["house_support", "supporting"] },
+    { key: "attraction", label: "Attraction", houses: [5, 7], planets: ["Venus", "Mars"], families: ["primary", "supporting"], divisions: [] },
+    { key: "commitment", label: "Commitment", houses: [7, 8], planets: ["Venus", "Jupiter", "Saturn"], families: ["divisional", "strength"], divisions: [9] },
+    { key: "availability", label: "Emotional availability", houses: [4, 7], planets: ["Moon", "Venus"], families: ["supporting", "strength"], divisions: [9] },
+    { key: "intimacy", label: "Intimacy", houses: [8, 12], planets: ["Venus", "Moon"], families: ["primary", "divisional"], divisions: [9] },
+    { key: "repair", label: "Conflict repair", houses: [6, 7], planets: ["Mars", "Mercury", "Venus"], families: ["contradiction", "strength"], divisions: [9] },
+    { key: "shared_resources", label: "Shared resources", houses: [2, 8], planets: ["Venus", "Jupiter"], families: ["house_support", "supporting"], divisions: [] },
   ],
   family: [
-    { key: "home", label: "Home environment", houses: [4], planets: ["Moon"], families: ["primary", "divisional"] },
-    { key: "parents", label: "Parents", houses: [4, 9], planets: ["Moon", "Sun"], families: ["divisional", "supporting"] },
-    { key: "lineage", label: "Lineage", houses: [2, 8], planets: ["Moon", "Jupiter"], families: ["divisional", "primary"] },
-    { key: "property", label: "Property", houses: [4, 11], planets: ["Mars", "Moon"], families: ["divisional", "house_support"] },
-    { key: "caregiving", label: "Caregiving", houses: [4, 6], planets: ["Moon", "Jupiter"], families: ["supporting", "strength"] },
-    { key: "security", label: "Emotional security", houses: [2, 4], planets: ["Moon", "Venus"], families: ["primary", "strength"] },
+    { key: "home", label: "Home environment", houses: [4], planets: ["Moon"], families: ["primary", "divisional"], divisions: [4] },
+    { key: "parents", label: "Parents", houses: [4, 9], planets: ["Moon", "Sun"], families: ["divisional", "supporting"], divisions: [12] },
+    { key: "lineage", label: "Lineage", houses: [2, 8], planets: ["Moon", "Jupiter"], families: ["divisional", "primary"], divisions: [7, 12] },
+    { key: "property", label: "Property", houses: [4, 11], planets: ["Mars", "Moon"], families: ["divisional", "house_support"], divisions: [4] },
+    { key: "caregiving", label: "Caregiving", houses: [4, 6], planets: ["Moon", "Jupiter"], families: ["supporting", "strength"], divisions: [] },
+    { key: "security", label: "Emotional security", houses: [2, 4], planets: ["Moon", "Venus"], families: ["primary", "strength"], divisions: [4] },
   ],
   inheritance: [
-    { key: "ownership", label: "Ownership", houses: [2, 8], planets: ["Jupiter", "Saturn"], families: ["primary", "house_support"] },
-    { key: "debt", label: "Debt and obligations", houses: [6, 8], planets: ["Saturn", "Mars"], families: ["contradiction", "strength"] },
-    { key: "transfers", label: "Resource transfers", houses: [2, 8, 11], planets: ["Jupiter", "Mercury"], families: ["divisional", "supporting"] },
-    { key: "documentation", label: "Documentation", houses: [3, 8], planets: ["Mercury", "Saturn"], families: ["strength", "house_support"] },
-    { key: "shared_assets", label: "Shared assets", houses: [2, 7, 8], planets: ["Venus", "Jupiter"], families: ["primary", "divisional"] },
+    { key: "ownership", label: "Ownership", houses: [2, 8], planets: ["Jupiter", "Saturn"], families: ["primary", "house_support"], divisions: [2] },
+    { key: "debt", label: "Debt and obligations", houses: [6, 8], planets: ["Saturn", "Mars"], families: ["contradiction", "strength"], divisions: [] },
+    { key: "transfers", label: "Resource transfers", houses: [2, 8, 11], planets: ["Jupiter", "Mercury"], families: ["divisional", "supporting"], divisions: [2] },
+    { key: "documentation", label: "Documentation", houses: [3, 8], planets: ["Mercury", "Saturn"], families: ["strength", "house_support"], divisions: [] },
+    { key: "shared_assets", label: "Shared assets", houses: [2, 7, 8], planets: ["Venus", "Jupiter"], families: ["primary", "divisional"], divisions: [2] },
   ],
   influence: [
-    { key: "communication", label: "Communication", houses: [3], planets: ["Mercury"], families: ["primary", "strength"] },
-    { key: "leadership", label: "Leadership", houses: [10], planets: ["Sun", "Saturn"], families: ["divisional", "yoga"] },
-    { key: "audience", label: "Audience", houses: [3, 11], planets: ["Mercury", "Rahu"], families: ["primary", "house_support"] },
-    { key: "alliances", label: "Alliances", houses: [7, 11], planets: ["Venus", "Jupiter"], families: ["supporting", "yoga"] },
-    { key: "authority", label: "Institutional authority", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["divisional", "strength"] },
-    { key: "reach", label: "Social reach", houses: [3, 10, 11], planets: ["Mercury", "Sun"], families: ["divisional", "house_support"] },
+    { key: "communication", label: "Communication", houses: [3], planets: ["Mercury"], families: ["primary", "strength"], divisions: [5] },
+    { key: "leadership", label: "Leadership", houses: [10], planets: ["Sun", "Saturn"], families: ["divisional", "yoga"], divisions: [5, 10] },
+    { key: "audience", label: "Audience", houses: [3, 11], planets: ["Mercury", "Rahu"], families: ["primary", "house_support"], divisions: [11] },
+    { key: "alliances", label: "Alliances", houses: [7, 11], planets: ["Venus", "Jupiter"], families: ["supporting", "yoga"], divisions: [11] },
+    { key: "authority", label: "Institutional authority", houses: [10, 11], planets: ["Sun", "Saturn"], families: ["divisional", "strength"], divisions: [10] },
+    { key: "reach", label: "Social reach", houses: [3, 10, 11], planets: ["Mercury", "Sun"], families: ["divisional", "house_support"], divisions: [5, 10, 11] },
   ],
   life_cycle: [
-    { key: "identity", label: "Identity changes", houses: [1, 8], planets: ["Moon", "Sun"], families: ["primary", "divisional"] },
-    { key: "recovery", label: "Recovery patterns", houses: [6, 8], planets: ["Moon", "Saturn"], families: ["strength", "house_support"] },
-    { key: "endings", label: "Endings and release", houses: [8, 12], planets: ["Saturn", "Ketu"], families: ["divisional", "contradiction"] },
-    { key: "resilience", label: "Resilience", houses: [1, 6, 8], planets: ["Mars", "Saturn"], families: ["strength", "yoga"] },
-    { key: "reinvention", label: "Reinvention", houses: [1, 8, 12], planets: ["Moon", "Rahu"], families: ["primary", "timing"] },
+    { key: "identity", label: "Identity changes", houses: [1, 8], planets: ["Moon", "Sun"], families: ["primary", "divisional"], divisions: [8] },
+    { key: "recovery", label: "Recovery patterns", houses: [6, 8], planets: ["Moon", "Saturn"], families: ["strength", "house_support"], divisions: [27, 30] },
+    { key: "endings", label: "Endings and release", houses: [8, 12], planets: ["Saturn", "Ketu"], families: ["divisional", "contradiction"], divisions: [8, 30] },
+    { key: "resilience", label: "Resilience", houses: [1, 6, 8], planets: ["Mars", "Saturn"], families: ["strength", "yoga"], divisions: [27] },
+    { key: "reinvention", label: "Reinvention", houses: [1, 8, 12], planets: ["Moon", "Rahu"], families: ["primary", "timing"], divisions: [8] },
   ],
   travel_destinations: [
-    { key: "short_journeys", label: "Short journeys", houses: [3], planets: ["Mercury"], families: ["primary", "strength"] },
-    { key: "education", label: "Education travel", houses: [5, 9], planets: ["Jupiter", "Mercury"], families: ["supporting", "yoga"] },
-    { key: "pilgrimage", label: "Pilgrimage", houses: [9, 12], planets: ["Jupiter", "Ketu"], families: ["primary", "timing"] },
-    { key: "foreign_work", label: "Foreign work", houses: [6, 9, 12], planets: ["Saturn", "Rahu"], families: ["strength", "timing"] },
-    { key: "relocation", label: "Relocation", houses: [4, 9, 12], planets: ["Moon", "Jupiter"], families: ["divisional", "house_support"] },
-    { key: "settlement", label: "Long-term settlement", houses: [4, 9, 11, 12], planets: ["Moon", "Saturn"], families: ["divisional", "strength"] },
+    { key: "short_journeys", label: "Short journeys", houses: [3], planets: ["Mercury"], families: ["primary", "strength"], divisions: [] },
+    { key: "education", label: "Education travel", houses: [5, 9], planets: ["Jupiter", "Mercury"], families: ["supporting", "yoga"], divisions: [] },
+    { key: "pilgrimage", label: "Pilgrimage", houses: [9, 12], planets: ["Jupiter", "Ketu"], families: ["primary", "timing"], divisions: [] },
+    { key: "foreign_work", label: "Foreign work", houses: [6, 9, 12], planets: ["Saturn", "Rahu"], families: ["strength", "timing"], divisions: [] },
+    { key: "relocation", label: "Relocation", houses: [4, 9, 12], planets: ["Moon", "Jupiter"], families: ["divisional", "house_support"], divisions: [4] },
+    { key: "settlement", label: "Long-term settlement", houses: [4, 9, 11, 12], planets: ["Moon", "Saturn"], families: ["divisional", "strength"], divisions: [4] },
   ],
 };
 
@@ -617,7 +618,7 @@ function buildEvidenceMatrix(
     ["divisional", "Divisional confirmation", (rule) => rule.id.startsWith("divisional_"), "No relevant divisional confirmation was available."],
     ["strength", "Delivery capacity", (rule) => rule.id.startsWith("shadbala_"), "Measured Shadbala was not available for this calculation."],
     ["house_support", "House support", (rule) => rule.id.startsWith("ashtakavarga_"), "Ashtakavarga house support was not available."],
-    ["yoga", "Combination support", (rule) => rule.id === "domain_yoga_support", "No relevant yoga was strong enough to modify the conclusion."],
+    ["yoga", "Combination support", (rule) => rule.id.startsWith("domain_yoga_"), "No relevant yoga was strong enough to modify the conclusion."],
     ["timing", "Timing and activation", (rule) => rule.id.startsWith("timing_"), "No direct timing activation is being claimed."],
   ];
   const entries = groups.map(([family, entryLabel, predicate, fallback]) =>
@@ -632,12 +633,25 @@ function buildEvidenceMatrix(
   const mixedFamilies = entries.filter((entry) => entry.status === "mixed");
   const natal = entries.find((entry) => entry.family === "primary")!;
   const divisional = entries.find((entry) => entry.family === "divisional")!;
+  const independentSupportGroups = uniqueCopy([
+    natal.status === "support" ? "natal_promise" : undefined,
+    entries.find((entry) => entry.family === "supporting")?.status === "support" ? "supporting_natal" : undefined,
+    ["divisional", "strength", "yoga"].some((family) =>
+      entries.find((entry) => entry.family === family)?.status === "support"
+    ) ? "delivery_confirmation" : undefined,
+    entries.find((entry) => entry.family === "house_support")?.status === "support" ? "house_environment" : undefined,
+    entries.find((entry) => entry.family === "timing")?.status === "support" ? "activation" : undefined,
+  ]);
 
   let confirmationStatus: DomainEvidenceMatrix["confirmation_status"] = "insufficient";
   if (divisional.status === "support" && natal.status === "support") confirmationStatus = "confirmed";
   else if (divisional.status === "pressure" && (natal.status === "support" || natal.status === "mixed")) confirmationStatus = "qualified";
   else if (divisional.status === "support" && natal.status === "pressure") confirmationStatus = "improved";
-  else if (mixedFamilies.length >= 2 || (supportFamilies.length >= 2 && pressureFamilies.length >= 2)) confirmationStatus = "contradictory";
+  else if (
+    mixedFamilies.length >= 2 ||
+    pressureFamilies.length >= 3 ||
+    (supportFamilies.length >= 2 && pressureFamilies.length >= 2)
+  ) confirmationStatus = "contradictory";
   else if (divisional.status !== "context") confirmationStatus = "qualified";
 
   if (confirmationStatus === "contradictory") {
@@ -651,9 +665,12 @@ function buildEvidenceMatrix(
   }
 
   const conclusionStrength: DomainEvidenceMatrix["conclusion_strength"] =
-    supportFamilies.length >= 3 && pressureFamilies.length <= 1 && confirmationStatus !== "contradictory"
+    natal.status === "support" &&
+    independentSupportGroups.length >= 3 &&
+    pressureFamilies.length <= 1 &&
+    confirmationStatus !== "contradictory"
       ? "strong"
-      : supportFamilies.length >= 2 && confirmationStatus !== "contradictory"
+      : independentSupportGroups.length >= 2 && confirmationStatus !== "contradictory"
         ? "moderate"
         : "cautious";
   const baseSynthesis: Record<DomainEvidenceMatrix["confirmation_status"], string> = {
@@ -670,14 +687,21 @@ function buildEvidenceMatrix(
   else if (strengthEntry?.status === "pressure" && houseEntry?.status === "support") modifier = " A weaker ruler receives protective house reinforcement.";
   else if (natal.status === "support" && houseEntry?.status === "pressure") modifier = " Strong natal promise meets lighter support conditions.";
   else if (natal.status === "mixed" && houseEntry?.status === "support") modifier = " A moderate natal promise has unusually favorable support conditions.";
+  if (natal.status !== "support" && conclusionStrength !== "cautious") {
+    modifier += " The natal baseline caps this below a strong conclusion.";
+  }
+  if (rules.some((rule) => rule.id.endsWith("_time_caution"))) {
+    modifier += " Exact-time confirmation is withheld because the recorded birth time is approximate.";
+  }
 
   return {
     entries,
     supporting_families: supportFamilies,
     pressure_families: pressureFamilies,
+    independent_support_groups: independentSupportGroups,
     conclusion_strength: conclusionStrength,
     confirmation_status: confirmationStatus,
-    synthesis: `${baseSynthesis[confirmationStatus]}${modifier} ${label} is described as especially strong only when at least three independent evidence families agree.`.trim(),
+    synthesis: `${baseSynthesis[confirmationStatus]}${modifier} ${label} is described as especially strong only when at least three independent evidence groups agree after correlated delivery signals are collapsed.`.trim(),
   };
 }
 
@@ -690,6 +714,8 @@ function buildDomainSubthemes(
 ): DomainSubtheme[] {
   const familyStatuses = new Map(matrix.entries.map((entry) => [entry.family, entry.status]));
   const shadbala = new Map((evidence?.shadbala ?? []).map((item) => [item.planet, item]));
+  const hasReliableBirthTime = !evidence?.birthTimeFallback &&
+    (evidence?.birthTimeAccuracy === undefined || evidence.birthTimeAccuracy === "exact");
 
   return DOMAIN_SUBTHEMES[key]
     .map((subtheme) => {
@@ -708,6 +734,27 @@ function buildDomainSubthemes(
       });
       score += Math.min(0.12, strongPlanets.length * 0.05);
       score -= Math.min(0.1, weakPlanets.length * 0.045);
+      const divisionalSignals = hasReliableBirthTime
+        ? subtheme.divisions.flatMap((division) => {
+            const chart = evidence?.divisionalCharts?.[division];
+            if (!chart) return [];
+            return subtheme.planets.flatMap((planetName) => {
+              const position = chart.positions.find((item) => item.name === planetName);
+              if (!position) return [];
+              return [{
+                division,
+                planetName,
+                dignity: dignityOf(planetName, position.divisional_sign),
+              }];
+            });
+          })
+        : [];
+      const divisionalSupport = divisionalSignals.filter((signal) =>
+        signal.dignity === "exalted" || signal.dignity === "own_sign"
+      );
+      const divisionalPressure = divisionalSignals.filter((signal) => signal.dignity === "debilitated");
+      score += Math.min(0.08, divisionalSupport.length * 0.04);
+      score -= Math.min(0.08, divisionalPressure.length * 0.04);
       for (const family of subtheme.families) {
         const status = familyStatuses.get(family);
         if (status === "support") score += 0.045;
@@ -719,6 +766,9 @@ function buildDomainSubthemes(
         occupied.length > 0 ? `houses ${occupied.join(" and ")} are activated` : undefined,
         strongPlanets.length > 0 ? `${strongPlanets.join(" and ")} add delivery strength` : undefined,
         weakPlanets.length > 0 ? `${weakPlanets.join(" and ")} need reinforcement` : undefined,
+        divisionalSupport.length > 0 ? `D${[...new Set(divisionalSupport.map((signal) => signal.division))].join(" and D")} confirms this specific theme` : undefined,
+        divisionalPressure.length > 0 ? `D${[...new Set(divisionalPressure.map((signal) => signal.division))].join(" and D")} qualifies its delivery` : undefined,
+        !hasReliableBirthTime && subtheme.divisions.length > 0 ? "divisional ranking is withheld without an exact birth time" : undefined,
       ]);
       return {
         key: subtheme.key,
@@ -728,7 +778,12 @@ function buildDomainSubthemes(
         summary: reasons.length > 0
           ? `${subtheme.label} ranks ${band} because ${reasons.join(", while ")}.`
           : `${subtheme.label} remains ${band}; it needs clearer activation before becoming a leading theme.`,
-        supporting_families: subtheme.families.filter((family) => familyStatuses.get(family) === "support"),
+        supporting_families: [
+          ...new Set([
+            ...subtheme.families.filter((family) => familyStatuses.get(family) === "support"),
+            ...(divisionalSupport.length > 0 ? ["divisional" as const] : []),
+          ]),
+        ],
       };
     })
     .sort((left, right) => right.score - left.score || left.label.localeCompare(right.label));
