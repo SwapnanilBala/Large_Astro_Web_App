@@ -18,19 +18,25 @@ type HouseRegion = {
 
 const LAHIRI_PLACIDUS_ENGINE_ID = "lahiri_placidus";
 
-const HOUSE_REGIONS: Record<number, HouseRegion> = {
-  1: { cx: 300, cy: 105, path: "M 300,0 L 450,150 L 300,300 L 150,150 Z" },
-  2: { cx: 75, cy: 105, path: "M 0,0 L 150,150 L 0,300 Z" },
-  3: { cx: 75, cy: 300, path: "M 0,300 L 150,150 L 300,300 L 150,450 Z" },
-  4: { cx: 75, cy: 495, path: "M 0,300 L 150,450 L 0,600 Z" },
-  5: { cx: 300, cy: 495, path: "M 150,450 L 300,300 L 450,450 L 300,600 Z" },
-  6: { cx: 525, cy: 495, path: "M 600,300 L 450,450 L 600,600 Z" },
-  7: { cx: 525, cy: 300, path: "M 600,300 L 450,150 L 300,300 L 450,450 Z" },
-  8: { cx: 525, cy: 105, path: "M 600,0 L 450,150 L 600,300 Z" },
-  9: { cx: 450, cy: 40, path: "M 300,0 L 600,0 L 450,150 Z" },
-  10: { cx: 150, cy: 560, path: "M 0,600 L 150,450 L 300,600 Z" },
-  11: { cx: 450, cy: 560, path: "M 300,600 L 450,450 L 600,600 Z" },
-  12: { cx: 150, cy: 40, path: "M 0,0 L 300,0 L 150,150 Z" },
+/*
+  Same North Indian layout as lagna-chart.tsx: houses run counter-clockwise
+  from the top centre rhombus, so the kendras 1/4/7/10 are the four rhombi
+  (top, left, bottom, right) and the other eight fill the corner triangles in
+  order. cx/cy is each region's centroid.
+*/
+export const HOUSE_REGIONS: Record<number, HouseRegion> = {
+  1: { cx: 300, cy: 150, path: "M 300,0 L 450,150 L 300,300 L 150,150 Z" },
+  2: { cx: 150, cy: 50, path: "M 0,0 L 300,0 L 150,150 Z" },
+  3: { cx: 50, cy: 150, path: "M 0,0 L 150,150 L 0,300 Z" },
+  4: { cx: 150, cy: 300, path: "M 0,300 L 150,150 L 300,300 L 150,450 Z" },
+  5: { cx: 50, cy: 450, path: "M 0,300 L 150,450 L 0,600 Z" },
+  6: { cx: 150, cy: 550, path: "M 0,600 L 150,450 L 300,600 Z" },
+  7: { cx: 300, cy: 450, path: "M 150,450 L 300,300 L 450,450 L 300,600 Z" },
+  8: { cx: 450, cy: 550, path: "M 300,600 L 450,450 L 600,600 Z" },
+  9: { cx: 550, cy: 450, path: "M 600,300 L 450,450 L 600,600 Z" },
+  10: { cx: 450, cy: 300, path: "M 600,300 L 450,150 L 300,300 L 450,450 Z" },
+  11: { cx: 550, cy: 150, path: "M 600,0 L 450,150 L 600,300 Z" },
+  12: { cx: 450, cy: 50, path: "M 300,0 L 600,0 L 450,150 Z" },
 };
 
 const PLANET_GLYPHS: Record<string, string> = {

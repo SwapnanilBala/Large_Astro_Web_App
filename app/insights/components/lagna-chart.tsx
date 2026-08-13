@@ -62,87 +62,95 @@ const SIGN_SYMBOLS: Record<string, string> = {
 /*
   North Indian Diamond Chart Layout
   ─────────────────────────────────
-  The chart is a square divided by diagonals and midlines into 12 triangular/rhombus regions.
-  House 1 (Ascendant) is always the top center diamond.
-  Houses flow counter-clockwise from House 1.
+  The square is cut by both diagonals and by the diamond joining the midpoints
+  of the four sides, which yields exactly 12 regions: four rhombi at top,
+  left, bottom and right centre, and eight corner triangles.
 
-  Layout positions (center of each house region) within a 600x600 viewBox:
+  House 1 (Ascendant) is the top centre rhombus and the houses run
+  counter-clockwise, so the four kendras — 1, 4, 7, 10 — land on the four
+  rhombi (top, left, bottom, right) and the remaining eight houses fill the
+  corner triangles in order. The earlier table numbered the rhombi 1, 3, 5, 7
+  and swept the corner triangles up afterwards, which put every house except
+  the first in the wrong region.
+
+  cx/cy is the centroid of each region, used to anchor its labels.
+  Coordinates are in the 600x600 viewBox.
 */
-const HOUSE_REGIONS: Record<
+export const HOUSE_REGIONS: Record<
   number,
   { cx: number; cy: number; path: string }
 > = {
-  // Top center diamond = House 1 (Ascendant)
+  // Top centre rhombus = House 1 (Ascendant)
   1: {
     cx: 300,
-    cy: 105,
+    cy: 150,
     path: "M 300,0 L 450,150 L 300,300 L 150,150 Z",
   },
-  // Left-top triangle = House 2
+  // Top-left triangle = House 2
   2: {
-    cx: 75,
-    cy: 105,
+    cx: 150,
+    cy: 50,
+    path: "M 0,0 L 300,0 L 150,150 Z",
+  },
+  // Left-top triangle = House 3
+  3: {
+    cx: 50,
+    cy: 150,
     path: "M 0,0 L 150,150 L 0,300 Z",
   },
-  // Left-middle diamond = House 3
-  3: {
-    cx: 75,
+  // Left centre rhombus = House 4
+  4: {
+    cx: 150,
     cy: 300,
     path: "M 0,300 L 150,150 L 300,300 L 150,450 Z",
   },
-  // Left-bottom triangle = House 4
-  4: {
-    cx: 75,
-    cy: 495,
+  // Left-bottom triangle = House 5
+  5: {
+    cx: 50,
+    cy: 450,
     path: "M 0,300 L 150,450 L 0,600 Z",
   },
-  // Bottom center diamond = House 5
-  5: {
+  // Bottom-left triangle = House 6
+  6: {
+    cx: 150,
+    cy: 550,
+    path: "M 0,600 L 150,450 L 300,600 Z",
+  },
+  // Bottom centre rhombus = House 7
+  7: {
     cx: 300,
-    cy: 495,
+    cy: 450,
     path: "M 150,450 L 300,300 L 450,450 L 300,600 Z",
   },
-  // Right-bottom triangle = House 6
-  6: {
-    cx: 525,
-    cy: 495,
+  // Bottom-right triangle = House 8
+  8: {
+    cx: 450,
+    cy: 550,
+    path: "M 300,600 L 450,450 L 600,600 Z",
+  },
+  // Right-bottom triangle = House 9
+  9: {
+    cx: 550,
+    cy: 450,
     path: "M 600,300 L 450,450 L 600,600 Z",
   },
-  // Right-middle diamond = House 7
-  7: {
-    cx: 525,
+  // Right centre rhombus = House 10
+  10: {
+    cx: 450,
     cy: 300,
     path: "M 600,300 L 450,150 L 300,300 L 450,450 Z",
   },
-  // Right-top triangle = House 8
-  8: {
-    cx: 525,
-    cy: 105,
+  // Right-top triangle = House 11
+  11: {
+    cx: 550,
+    cy: 150,
     path: "M 600,0 L 450,150 L 600,300 Z",
   },
-  // Top-right triangle = House 9
-  9: {
-    cx: 450,
-    cy: 40,
-    path: "M 300,0 L 600,0 L 450,150 Z",
-  },
-  // Bottom-left triangle = House 10
-  10: {
-    cx: 150,
-    cy: 560,
-    path: "M 0,600 L 150,450 L 300,600 Z",
-  },
-  // Bottom-right triangle = House 11
-  11: {
-    cx: 450,
-    cy: 560,
-    path: "M 300,600 L 450,450 L 600,600 Z",
-  },
-  // Top-left triangle = House 12
+  // Top-right triangle = House 12
   12: {
-    cx: 150,
-    cy: 40,
-    path: "M 0,0 L 300,0 L 150,150 Z",
+    cx: 450,
+    cy: 50,
+    path: "M 300,0 L 600,0 L 450,150 Z",
   },
 };
 
