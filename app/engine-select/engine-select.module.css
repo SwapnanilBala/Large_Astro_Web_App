@@ -559,6 +559,80 @@
   font-size: 1.06rem;
 }
 
+.engineChoiceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 0.65rem;
+}
+
+.cardGoButton {
+  all: unset;
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  min-height: 2.7rem;
+  padding: 0.55rem 0.78rem;
+  border: 1px solid rgba(255, 225, 148, 0.5);
+  border-radius: 10px;
+  color: #0F1117;
+  background: linear-gradient(135deg, #e1bb62, #C89B3C 55%, #a87a24);
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.22),
+    0 0 18px rgba(var(--tradition-accent-rgb), 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+  font-family: var(--font-body), sans-serif;
+  font-size: 1rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 0.22s ease,
+    filter 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.cardGoButton svg {
+  width: 1rem;
+  height: 1rem;
+  transition: transform 0.22s ease;
+}
+
+.cardGoButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.08) saturate(1.05);
+  box-shadow:
+    0 11px 24px rgba(0, 0, 0, 0.26),
+    0 0 24px rgba(var(--tradition-accent-rgb), 0.24),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+}
+
+.cardGoButton:hover:not(:disabled) svg {
+  transform: translateX(2px);
+}
+
+.cardGoButton:active:not(:disabled) {
+  transform: translateY(0) scale(0.97);
+}
+
+.cardGoButton:focus-visible {
+  outline: 2px solid #f4d07b;
+  outline-offset: 3px;
+}
+
+.cardGoButton:disabled {
+  cursor: wait;
+  filter: saturate(0.6);
+  opacity: 0.64;
+}
+
 .footer {
   text-align: center;
 }

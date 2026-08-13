@@ -8,7 +8,7 @@ import {
   type KeyboardEvent,
 } from "react";
 import { useRouter } from "next/navigation";
-import { FiCheck } from "react-icons/fi";
+import { FiArrowRight, FiCheck } from "react-icons/fi";
 import {
   listEnginePresets,
   DEFAULT_ENGINE_ID,
@@ -120,9 +120,9 @@ export default function EngineSelectClient({
     radios?.[nextIndex]?.focus();
   };
 
-  const handleGenerate = () => {
+  const handleGenerate = (engineId: string) => {
     const params = new URLSearchParams(profileParams);
-    params.set("engineId", selectedId);
+    params.set("engineId", engineId);
     startTransition(() => {
       router.push(`/insights?${params.toString()}`);
     });
@@ -212,30 +212,43 @@ export default function EngineSelectClient({
               <span className={styles.styleLabel} id={styleGroupLabelId}>
                 {t("engineSelect.styleLabel")}
               </span>
-              <div
-                className={`${styles.houseGrid} ${styles.compactChips}`}
-                role="radiogroup"
-                aria-labelledby={styleGroupLabelId}
-              >
-                {group.engines.map((engine, engineIndex) => {
-                  const isChipActive = engine.engine_id === activeEngine?.engine_id;
-                  return (
-                    <button
-                      key={engine.engine_id}
-                      type="button"
-                      role="radio"
-                      className={`${styles.houseChip}${isChipActive ? ` ${styles.houseChipActive}` : ""}`}
-                      aria-checked={isChipActive}
-                      tabIndex={isChipActive ? 0 : -1}
-                      onClick={() => handleSelectEngine(engine.engine_id)}
-                      onKeyDown={(event) => handleChipKeyDown(event, group.engines, engineIndex)}
-                    >
-                      <span className={styles.houseChipLabel}>
-                        {t(`engineSelect.styles.${engine.house_system_code}.label`)}
-                      </span>
-                    </button>
-                  );
-                })}
+              <div className={styles.engineChoiceRow}>
+                <div
+                  className={`${styles.houseGrid} ${styles.compactChips}`}
+                  role="radiogroup"
+                  aria-labelledby={styleGroupLabelId}
+                >
+                  {group.engines.map((engine, engineIndex) => {
+                    const isChipActive = engine.engine_id === activeEngine?.engine_id;
+                    return (
+                      <button
+                        key={engine.engine_id}
+                        type="button"
+                        role="radio"
+                        className={`${styles.houseChip}${isChipActive ? ` ${styles.houseChipActive}` : ""}`}
+                        aria-checked={isChipActive}
+                        tabIndex={isChipActive ? 0 : -1}
+                        onClick={() => handleSelectEngine(engine.engine_id)}
+                        onKeyDown={(event) => handleChipKeyDown(event, group.engines, engineIndex)}
+                      >
+                        <span className={styles.houseChipLabel}>
+                          {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.cardGoButton}
+                  onClick={() => activeEngine && handleGenerate(activeEngine.engine_id)}
+                  disabled={!activeEngine || isPending}
+                  aria-label={`${t("engineSelect.goWith")} ${t(`engineSelect.groups.${group.key}.label`)} - ${activeEngine ? t(`engineSelect.styles.${activeEngine.house_system_code}.label`) : ""}`}
+                >
+                  <span>{t("engineSelect.go")}</span>
+                  <FiArrowRight aria-hidden="true" />
+                </button>
               </div>
 
               <p className={styles.styleHint}>
@@ -287,7 +300,7 @@ export default function EngineSelectClient({
         <button
           type="button"
           className={styles.cta}
-          onClick={handleGenerate}
+          onClick={() => handleGenerate(selectedId)}
           disabled={isPending}
         >
           {isPending ? (

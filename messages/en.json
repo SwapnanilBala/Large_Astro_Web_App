@@ -152,6 +152,8 @@
     "summaryImpactText": "The ayanamsha shifts sidereal planet degrees; the house style changes how life areas are divided around the ascendant.",
     "computing": "Computing Chart...",
     "generate": "Generate Chart Intelligence ->",
+    "go": "Go",
+    "goWith": "View results with",
     "groups": {
       "lahiri": {
         "label": "Lahiri",

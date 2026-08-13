@@ -128,6 +128,8 @@
     "summaryImpactText": "El ayanamsha ajusta los grados siderales de los planetas; el estilo de casas cambia cómo se dividen las áreas de vida alrededor del ascendente.",
     "computing": "Calculando carta...",
     "generate": "Generar inteligencia de carta ->",
+    "go": "Ir",
+    "goWith": "Ver resultados con",
     "groups": {
       "lahiri": {
         "label": "Lahiri",

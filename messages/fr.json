@@ -128,6 +128,8 @@
     "summaryImpactText": "L'ayanamsha décale les degrés sidéraux des planètes; le style de maisons change la division des domaines de vie autour de l'ascendant.",
     "computing": "Calcul de la carte...",
     "generate": "Générer l'analyse de carte ->",
+    "go": "Voir",
+    "goWith": "Voir les résultats avec",
     "groups": {
       "lahiri": {
         "label": "Lahiri",
