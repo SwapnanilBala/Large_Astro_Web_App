@@ -12,6 +12,18 @@
       ],
       "port": 7002,
       "autoPort": true
+    },
+    {
+      "name": "prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "-p",
+        "7003"
+      ],
+      "port": 7003,
+      "autoPort": true
     }
   ]
 }

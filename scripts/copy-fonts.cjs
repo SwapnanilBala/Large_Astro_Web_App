@@ -7,6 +7,12 @@
  * time keeps the binaries out of git while still serving them as static assets.
  *
  * Runs from `predev` and `prebuild`. public/fonts is gitignored.
+ *
+ * Because those are npm lifecycle hooks, anything that builds the app has to
+ * go through npm for them to fire -- `vercel.json` therefore sets buildCommand
+ * to `npm run build`, not `next build`. Calling the binary directly skips the
+ * hook, ships a deployment with no public/fonts, and the story PDF fails in the
+ * browser with a 404 on the first typeface.
  */
 const fs = require("fs");
 const path = require("path");
