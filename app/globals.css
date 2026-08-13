@@ -6489,10 +6489,21 @@ textarea:focus-visible {
   scrollbar-gutter: stable both-edges;
 }
 
+/* react-datepicker hard-codes `height: 30px` on the row and we never override
+   it. Under the global `box-sizing: border-box`, our 8px vertical padding then
+   ate into that 30px and left a 14px content box for a 28px line, so the label
+   overflowed 6px past the bottom of its own highlight — its centre sat 7px
+   below the highlight's centre, which is what read as the selected row's box
+   being misaligned with its time. Size the row from its content instead of a
+   fixed height, and centre the label in it so this holds at any font size. */
 .react-datepicker__time-list-item {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: auto !important;
   color: var(--ink-main) !important;
   font-size: 1.35rem !important;
-  padding: 8px 16px !important;
+  padding: 5px 16px !important;
   border-radius: 8px !important;
   margin: 1px 6px !important;
   transition: all 0.15s ease !important;
