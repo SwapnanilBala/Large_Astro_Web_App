@@ -750,7 +750,9 @@ export function buildLifeDomainInsights(
   const transits = computeTransitPositions(new Date(), birth.engine_id);
   const extendedEvidence: LifeDomainExtendedEvidence = {
     divisionalCharts,
-    shadbala: calculateShadbala(core.planets, navamsa, aspects),
+    shadbala: calculateShadbala(core.planets, navamsa, aspects, {
+      latitude: birth.latitude,
+    }),
     ashtakavarga: computeAshtakavarga(core.planets, core.ascendant.sign),
     yogas: detectYogas({
       planets: core.planets,
@@ -843,7 +845,9 @@ export function buildChart(
     );
 
     // Stage D3: shadbala (planetary strength)
-    shadbalInfo = calculateShadbala(core.planets, navamsaInfo, aspectsInfo);
+    shadbalInfo = calculateShadbala(core.planets, navamsaInfo, aspectsInfo, {
+      latitude: birth.latitude,
+    });
 
     // Stage D4: yogas (classical combinations)
     yogasInfo = detectYogas({

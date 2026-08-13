@@ -7,6 +7,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiCopy, FiGrid, FiRefreshCw } from "react-icons/fi";
 import AuthGate from "@/app/insights/components/auth-gate";
+import DivisionalChartsGateway from "@/app/insights/components/divisional-charts-gateway";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
@@ -66,7 +67,6 @@ const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr
 const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
 const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const DivisionalChartsPanel = dynamic(() => import("./divisional-charts-panel"), { ssr: false, loading: () => <PanelSkeleton minHeight={440} /> });
 import type {
   ChartApiResponse,
   DeterministicRule,
@@ -192,19 +192,16 @@ function CollapsibleSection({
   }, [id, openForHash]);
 
   useEffect(() => {
-    if (
-      !isOpen ||
-      !openForHash ||
-      window.location.hash.replace("#", "") !== openForHash
-    ) {
+    const hashId = window.location.hash.replace("#", "");
+    if (!isOpen || (hashId !== id && hashId !== openForHash)) {
       return;
     }
 
     const frame = window.requestAnimationFrame(() => {
-      document.getElementById(openForHash)?.scrollIntoView({ block: "start" });
+      document.getElementById(hashId)?.scrollIntoView({ block: "start" });
     });
     return () => window.cancelAnimationFrame(frame);
-  }, [isOpen, openForHash]);
+  }, [id, isOpen, openForHash]);
 
   useEffect(() => {
     if (!persistKey || !hasRestored) return;
@@ -1165,7 +1162,7 @@ export default function InsightsContent({
                 <div className={styles.calculationFact}>
                   <dt>Mode</dt>
                   <dd>
-                    {payload.engine.fallback_mode ? "Fallback" : "Swiss Ephemeris"}
+                    {payload.engine.fallback_mode ? "Fallback calculation" : payload.engine.ephemeris_provider}
                   </dd>
                 </div>
               </dl>
@@ -1195,27 +1192,6 @@ export default function InsightsContent({
             </div>
           </div>
         </CollapsibleSection>
-
-        {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
-          <CollapsibleSection
-            id="divisional-charts"
-            kicker="Divisional chart atlas"
-            title="Complete divisional chart atlas"
-            defaultOpen={false}
-            className={styles.cardRules}
-          >
-            <LazyPanel minHeight={440}>
-              <PanelErrorBoundary panelName="Complete Divisional Chart Atlas">
-                <AuthGate
-                  featureLabel="Divisional Charts"
-                  isLocked={lockedFeatures.has("divisional_charts")}
-                >
-                  <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
-                </AuthGate>
-              </PanelErrorBoundary>
-            </LazyPanel>
-          </CollapsibleSection>
-        )}
 
         {/* â”€â”€â”€ Forecasts & Timing (Collapsible) â”€â”€â”€ */}
         <CollapsibleSection
@@ -1278,6 +1254,29 @@ export default function InsightsContent({
                 </AuthGate>
               </PanelErrorBoundary>
             </LazyPanel>
+          </CollapsibleSection>
+        )}
+
+        {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
+          <CollapsibleSection
+            id="divisional-charts"
+            kicker="D1-D60 precision layers"
+            title="Explore the charts behind your reading"
+            defaultOpen={false}
+            className={styles.cardRules}
+            persistKey={`${sectionStateScope}:divisional-charts`}
+          >
+            <PanelErrorBoundary panelName="Divisional Chart Atlas">
+              <AuthGate
+                featureLabel="Divisional Charts"
+                isLocked={lockedFeatures.has("divisional_charts")}
+              >
+                <DivisionalChartsGateway
+                  href={`/insights/divisional-charts?${historyQs}`}
+                  chartCount={Object.keys(payload.chart.divisional_charts).length}
+                />
+              </AuthGate>
+            </PanelErrorBoundary>
           </CollapsibleSection>
         )}
 
