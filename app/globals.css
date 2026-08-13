@@ -6481,11 +6481,14 @@ textarea:focus-visible {
    the selected row's highlight read as off-centre.
    border-box contains it; stable both-edges reserves the scrollbar gutter
    on both sides so the row stays centred whether or not it is scrolling. */
+/* 280px, not 220px: rows are now sized from their content (see below) and come
+   out at a 40px pitch rather than the old clipped 32px, so 220px would have
+   shown 5.5 options where it used to show ~6.9. 280px keeps 7 in view. */
 .react-datepicker__time-list {
   box-sizing: border-box !important;
   width: 100% !important;
   padding: 4px 0 !important;
-  height: 220px !important;
+  height: 280px !important;
   scrollbar-gutter: stable both-edges;
 }
 
