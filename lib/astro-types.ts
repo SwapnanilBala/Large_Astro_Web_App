@@ -609,6 +609,8 @@ export type ChartApiResponse = {
     longitude: number;
     timezone_offset_minutes: number;
     time_zone_id?: string;
+    birth_time_accuracy?: string;
+    birth_time_fallback?: boolean;
   };
   chart: {
     julian_day_ut: number;

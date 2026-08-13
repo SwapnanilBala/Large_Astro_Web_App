@@ -122,6 +122,10 @@ describe("buildPersonalStory", () => {
     const story = buildPersonalStory(makePayload(), { lifeShifts: LIFE_SHIFTS });
 
     expect(story.title).toBe("Avery story");
+    expect(story.subtitle).toContain("client-focused");
+    expect(story.preface).toHaveLength(2);
+    expect(story.atAGlance.length).toBeGreaterThanOrEqual(3);
+    expect(story.verification.checks.length).toBeGreaterThanOrEqual(8);
     expect(story.chapters.map((chapter) => chapter.id)).toEqual([
       "essence",
       "marriage",
@@ -147,6 +151,9 @@ describe("buildPersonalStory", () => {
       "Upcoming: Jupiter return (third) (Aug 2026 – Dec 2027)",
     );
     expect(story.chapters[8].body).toContain("Saturn");
+    expect(story.chapters.every((chapter) => chapter.narrative?.length)).toBe(true);
+    expect(story.chapters.every((chapter) => chapter.reflectionPrompt?.endsWith("?"))).toBe(true);
+    expect(story.chapters.every((chapter) => Boolean(chapter.support))).toBe(true);
   });
 
   it("remains deterministic when its life-shift inputs are supplied", () => {

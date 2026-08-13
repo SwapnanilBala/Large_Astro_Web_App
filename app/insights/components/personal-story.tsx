@@ -3,13 +3,32 @@
 import { useCallback, useMemo, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import type { ChartApiResponse } from "@/lib/astro-types";
-import { buildPersonalStory } from "@/lib/story-engine";
+import {
+  buildPersonalStory,
+  type PersonalStory as PersonalStoryData,
+} from "@/lib/story-engine";
 import styles from "./personal-story.module.css";
 
 export type PersonalStoryProps = {
   payload: ChartApiResponse;
   className?: string;
   compact?: boolean;
+  queryString?: string;
+};
+
+type GenerationStage =
+  | "idle"
+  | "calculating"
+  | "verifying"
+  | "writing"
+  | "typesetting"
+  | "error";
+
+const STAGE_LABELS: Record<Exclude<GenerationStage, "idle" | "error">, string> = {
+  calculating: "Completing calculations...",
+  verifying: "Cross-checking the chart...",
+  writing: "Writing your story...",
+  typesetting: "Typesetting the PDF...",
 };
 
 function slugify(value: string): string {
@@ -38,25 +57,47 @@ function formatGeneratedDate(isoValue: string): string | undefined {
   });
 }
 
-/**
- * The story is a document, so the results page offers it as one: a single
- * download, read wherever the client prefers to read. It used to be a CTA
- * card that opened a modal sidebar with a chapter accordion, which put two
- * navigation steps and a scroll trap between the reader and the text.
- */
-export default function PersonalStory({ payload, className, compact = false }: PersonalStoryProps) {
-  const [status, setStatus] = useState<"idle" | "generating" | "error">("idle");
-  const story = useMemo(() => buildPersonalStory(payload), [payload]);
+export default function PersonalStory({
+  payload,
+  className,
+  compact = false,
+  queryString,
+}: PersonalStoryProps) {
+  const [stage, setStage] = useState<GenerationStage>("idle");
+  const previewStory = useMemo(() => buildPersonalStory(payload), [payload]);
 
   const handleDownload = useCallback(async () => {
-    if (status === "generating") return;
-    setStatus("generating");
+    if (stage !== "idle" && stage !== "error") return;
+    setStage("calculating");
+
     try {
+      let story: PersonalStoryData;
+      if (queryString) {
+        const response = await fetch(`/api/chart/story-report?${queryString}`, {
+          cache: "no-store",
+        });
+        if (!response.ok) {
+          const result = await response.json().catch(() => null) as
+            | { error?: { message?: string } }
+            | null;
+          throw new Error(
+            result?.error?.message ?? "The verified report could not be prepared.",
+          );
+        }
+        setStage("verifying");
+        const result = await response.json() as { story: PersonalStoryData };
+        story = result.story;
+      } else {
+        story = buildPersonalStory(payload);
+      }
+
+      setStage("writing");
       const [{ pdf }, { PersonalStoryPdfDocument }] = await Promise.all([
         import("@react-pdf/renderer"),
         import("./personal-story-pdf"),
       ]);
 
+      setStage("typesetting");
       const blob = await pdf(
         <PersonalStoryPdfDocument
           story={story}
@@ -75,14 +116,19 @@ export default function PersonalStory({ payload, className, compact = false }: P
       link.click();
       link.remove();
       URL.revokeObjectURL(url);
-      setStatus("idle");
+      setStage("idle");
     } catch (error) {
       console.error("Failed to generate story PDF", error);
-      setStatus("error");
+      setStage("error");
     }
-  }, [payload, status, story]);
+  }, [payload, queryString, stage]);
 
-  const generating = status === "generating";
+  const generating = stage !== "idle" && stage !== "error";
+  const buttonLabel = generating
+    ? STAGE_LABELS[stage as Exclude<GenerationStage, "idle" | "error">]
+    : compact
+      ? "Download reading"
+      : "Download PDF";
 
   const downloadAction = (
     <button
@@ -96,7 +142,7 @@ export default function PersonalStory({ payload, className, compact = false }: P
       ) : (
         <Download size={18} aria-hidden="true" />
       )}
-      <span>{generating ? "Preparing PDF…" : compact ? "Download reading" : "Download PDF"}</span>
+      <span>{buttonLabel}</span>
     </button>
   );
 
@@ -104,9 +150,9 @@ export default function PersonalStory({ payload, className, compact = false }: P
     return (
       <div className={[styles.compactAction, className].filter(Boolean).join(" ")}>
         {downloadAction}
-        {status === "error" && (
+        {stage === "error" && (
           <p className={styles.error} role="alert">
-            The PDF could not be generated. Please try again.
+            The report did not pass generation. Please try again.
           </p>
         )}
       </div>
@@ -117,18 +163,18 @@ export default function PersonalStory({ payload, className, compact = false }: P
     <section className={[styles.storyRow, className].filter(Boolean).join(" ")}>
       <div className={styles.copy}>
         <p className={styles.kicker}>Personal reading</p>
-        <h2 className={styles.title}>{story.title}</h2>
+        <h2 className={styles.title}>{previewStory.title}</h2>
         <p className={styles.subtitle}>
-          {story.chapters.length} chapters — marriage, family, career, wealth, timing and more.
+          {previewStory.chapters.length} verified chapters covering identity,
+          relationships, family, vocation, resources, timing, and grounded action.
         </p>
       </div>
 
       <div className={styles.action}>
         {downloadAction}
-
-        {status === "error" && (
+        {stage === "error" && (
           <p className={styles.error} role="alert">
-            The PDF could not be generated. Please try again.
+            The report did not pass generation. Please try again.
           </p>
         )}
       </div>

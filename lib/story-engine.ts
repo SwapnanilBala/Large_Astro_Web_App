@@ -9,6 +9,10 @@ import {
   computeMajorLifeShifts,
   type MajorLifeShift,
 } from "@/lib/engines/major-shifts-engine";
+import {
+  verifyChartForStory,
+  type StoryVerification,
+} from "@/lib/story-verification";
 
 export type PersonalStoryChapterId =
   | "essence"
@@ -26,6 +30,21 @@ export type PersonalStorySignal = {
   value: string;
 };
 
+export type StorySupportLevel = "well-supported" | "supported" | "exploratory";
+
+export type StoryAtAGlanceItem = {
+  label: string;
+  value: string;
+  context: string;
+};
+
+export type StoryTimelineItem = {
+  status: "active" | "upcoming" | "background";
+  label: string;
+  window: string;
+  narrative: string;
+};
+
 export type PersonalStoryChapter = {
   id: PersonalStoryChapterId;
   eyebrow: string;
@@ -33,12 +52,24 @@ export type PersonalStoryChapter = {
   body: string;
   highlights: string[];
   signals: PersonalStorySignal[];
+  opening?: string;
+  narrative?: string[];
+  practices?: string[];
+  reflectionPrompt?: string;
+  support?: StorySupportLevel;
+  supportNote?: string;
 };
 
 export type PersonalStory = {
   title: string;
+  subtitle: string;
   introduction: string;
+  preface: string[];
+  atAGlance: StoryAtAGlanceItem[];
+  centralThemes: string[];
+  timeline: StoryTimelineItem[];
   chapters: PersonalStoryChapter[];
+  verification: StoryVerification;
   reflectionNote: string;
 };
 
@@ -48,6 +79,7 @@ export type BuildPersonalStoryOptions = {
    * recalculating the shared timing model. Omit it for the standard app flow.
    */
   lifeShifts?: MajorLifeShift[];
+  verification?: StoryVerification;
 };
 
 const SIGN_APPROACHES: Record<string, string> = {
@@ -557,6 +589,226 @@ function toSignal(serialized: string): PersonalStorySignal {
   };
 }
 
+const DOMAIN_BY_CHAPTER: Partial<Record<PersonalStoryChapterId, LifeDomainInsight["key"]>> = {
+  marriage: "love_life",
+  family: "family",
+  career: "career",
+  wealth: "inheritance",
+};
+
+const REFLECTION_PROMPTS: Record<PersonalStoryChapterId, string> = {
+  essence: "Where do you feel most like yourself without needing to perform or explain?",
+  marriage: "What shared pace, boundary, or conversation would make partnership feel more sustainable?",
+  family: "Which home rhythm restores you reliably, and which inherited pattern are you ready to change?",
+  career: "What capability could become unmistakable if you practiced and documented it for one year?",
+  wealth: "Which financial agreement, habit, or uncertainty would benefit most from clearer structure?",
+  strengths: "Where are you underusing a strength because it feels too natural to count as valuable?",
+  "emotional-orientation": "What does your inner state need before you ask it to make a major decision?",
+  timing: "What would wise preparation look like if this season were an invitation rather than a deadline?",
+  grounding: "Which part of this reading becomes useful only when translated into one grounded choice?",
+};
+
+function supportForChapter(
+  chapter: PersonalStoryChapter,
+  payload: ChartApiResponse,
+  verification: StoryVerification,
+): { level: StorySupportLevel; note: string } {
+  const domainKey = DOMAIN_BY_CHAPTER[chapter.id];
+  const domain = domainKey ? getDomainByKey(payload, domainKey) : undefined;
+  const matrix = domain?.evidence_matrix;
+  const supportGroups = matrix?.independent_support_groups?.length ?? 0;
+
+  let level: StorySupportLevel;
+  if (matrix) {
+    if (
+      matrix.conclusion_strength === "strong" &&
+      supportGroups >= 2 &&
+      matrix.confirmation_status !== "contradictory"
+    ) {
+      level = "well-supported";
+    } else if (
+      matrix.confirmation_status === "insufficient" ||
+      matrix.confirmation_status === "contradictory"
+    ) {
+      level = "exploratory";
+    } else {
+      level = "supported";
+    }
+  } else if (chapter.signals.length >= 3) {
+    level = "well-supported";
+  } else if (chapter.signals.length > 0) {
+    level = "supported";
+  } else {
+    level = "exploratory";
+  }
+
+  const timeSensitive = ["marriage", "family", "career", "wealth", "timing"].includes(chapter.id);
+  if (
+    timeSensitive &&
+    (payload.client.birth_time_fallback || payload.client.birth_time_accuracy !== "exact") &&
+    level === "well-supported"
+  ) {
+    level = "supported";
+  }
+  if (verification.status === "failed") level = "exploratory";
+
+  const note = level === "well-supported"
+    ? "Repeated across independent chart factors and suitable for emphasis."
+    : level === "supported"
+      ? "Supported by the available chart factors, with normal interpretive caution."
+      : "A reflective possibility; do not treat it as a fixed outcome or standalone prediction.";
+  return { level, note };
+}
+
+function chapterOpening(chapter: PersonalStoryChapter, payload: ChartApiResponse): string {
+  const ascendant = payload.chart.ascendant?.sign;
+  const moon = getPlanet(payload.chart.planets, "Moon");
+  const ruler = SIGN_RULERS[ascendant];
+  const rulerPlacement = getPlanet(payload.chart.planets, ruler);
+
+  const openings: Record<PersonalStoryChapterId, string> = {
+    essence: ascendant
+      ? `The first thread in your story is the contrast between a ${ascendant} way of meeting life and the deeper needs described by your ${moon?.sign ?? "inner"} Moon.`
+      : "The first thread in your story is the relationship between how you meet the world and what quietly restores you.",
+    marriage: "Partnership is presented here as a practice of pacing, repair, and mutual responsibility - not as a promise about a particular person.",
+    family: "Home is more than a location in this chart; it is the emotional system that determines how quickly you recover your clarity.",
+    career: rulerPlacement
+      ? `Your vocational story grows where ${ruler} in house ${rulerPlacement.house} turns natural orientation into visible contribution.`
+      : "Your vocational story becomes clearer when aptitude is converted into work other people can reliably recognize and use.",
+    wealth: "Your resource story is strongest when money, ownership, and shared obligations are handled with patience and explicit agreements.",
+    strengths: "The chart's strongest factors are not guarantees; they are capacities that become dependable when you give them repetition and a useful outlet.",
+    "emotional-orientation": moon
+      ? `Your ${moon.sign} Moon describes an inner tempo that may be quieter, faster, or more private than the identity other people first encounter.`
+      : "Your inner tempo deserves to be understood separately from the identity other people first encounter.",
+    timing: "Timing works best as weather: it describes the kind of preparation a season rewards, while leaving choices and outcomes in your hands.",
+    grounding: "A useful reading should return you to agency. The final chapter separates durable guidance from anything too fragile to carry forward.",
+  };
+  return openings[chapter.id];
+}
+
+function chapterPractices(
+  chapter: PersonalStoryChapter,
+  payload: ChartApiResponse,
+): string[] {
+  const domainKey = DOMAIN_BY_CHAPTER[chapter.id];
+  const domain = domainKey ? getDomainByKey(payload, domainKey) : undefined;
+  return withoutDuplicates([
+    domain?.display.decision_rule,
+    domain?.display.boundary_rule,
+    ...chapter.highlights,
+  ]).slice(0, 4);
+}
+
+function enrichChapter(
+  chapter: PersonalStoryChapter,
+  payload: ChartApiResponse,
+  verification: StoryVerification,
+): PersonalStoryChapter {
+  const support = supportForChapter(chapter, payload, verification);
+  const opening = chapterOpening(chapter, payload);
+  return {
+    ...chapter,
+    opening,
+    narrative: withoutDuplicates([opening, chapter.body]),
+    practices: chapterPractices(chapter, payload),
+    reflectionPrompt: REFLECTION_PROMPTS[chapter.id],
+    support: support.level,
+    supportNote: support.note,
+  };
+}
+
+function buildAtAGlance(payload: ChartApiResponse): StoryAtAGlanceItem[] {
+  const ascendant = payload.chart.ascendant?.sign;
+  const ruler = SIGN_RULERS[ascendant];
+  const rulerPlacement = getPlanet(payload.chart.planets, ruler);
+  const moon = getPlanet(payload.chart.planets, "Moon");
+  const strongest = getStrongestPlanet(payload);
+  const strongestPlacement = getPlanet(payload.chart.planets, strongest?.planet);
+  const dasha = payload.chart.dasha;
+
+  return [
+    ascendant
+      ? {
+          label: "How you meet life",
+          value: `${ascendant} rising`,
+          context: rulerPlacement
+            ? `${ruler} carries this approach into house ${rulerPlacement.house}.`
+            : `${ruler ?? "Its ruler"} sets the chart's practical direction.`,
+        }
+      : undefined,
+    moon
+      ? {
+          label: "Inner rhythm",
+          value: `${moon.sign} Moon`,
+          context: `Emotional attention returns to ${houseTheme(moon.house)}.`,
+        }
+      : undefined,
+    strongest
+      ? {
+          label: "Strongest support",
+          value: strongest.planet,
+          context: strongestPlacement
+            ? `Most available through ${houseTheme(strongestPlacement.house)}.`
+            : "A capacity worth making visible and repeatable.",
+        }
+      : undefined,
+    dasha?.current_dasha && dasha.current_dasha !== "Unknown"
+      ? {
+          label: "Current season",
+          value: `${dasha.current_dasha}${dasha.current_antardasha && dasha.current_antardasha !== "Unknown" ? ` / ${dasha.current_antardasha}` : ""}`,
+          context: formatMonthYear(dasha.current_dasha_end)
+            ? `Long-cycle emphasis through ${formatMonthYear(dasha.current_dasha_end)}.`
+            : "Use this as a planning lens, not a deadline.",
+        }
+      : undefined,
+  ].filter((item): item is StoryAtAGlanceItem => Boolean(item));
+}
+
+function buildCentralThemes(payload: ChartApiResponse): string[] {
+  const concise = (value: string) => {
+    const sentence = value.match(/^.*?[.!?](?:\s|$)/)?.[0]?.trim() ?? value.trim();
+    return sentence.length > 190 ? `${sentence.slice(0, 187).trimEnd()}...` : sentence;
+  };
+  const domains = [...(payload.chart.life_domain_insights ?? [])]
+    .filter((domain) => domain.evidence_matrix?.confirmation_status !== "insufficient")
+    .sort((left, right) => right.confidence_score - left.confidence_score)
+    .slice(0, 3);
+  if (domains.length > 0) {
+    return domains.map((domain) => `${domain.label}: ${concise(domain.display.clarity)}`);
+  }
+  return payload.chart.deterministic_rules
+    .filter((rule) => rule.priority === "high")
+    .slice(0, 3)
+    .map((rule) => rule.display.headline);
+}
+
+function buildStoryTimeline(
+  payload: ChartApiResponse,
+  lifeShifts: MajorLifeShift[],
+): StoryTimelineItem[] {
+  const selected = lifeShifts
+    .filter((shift) => shift.status === "active" || shift.status === "upcoming")
+    .slice(0, 3)
+    .map((shift): StoryTimelineItem => ({
+      status: shift.status === "active" ? "active" : "upcoming",
+      label: shift.label,
+      window: formatWindow(shift),
+      narrative: shift.narrative,
+    }));
+
+  if (selected.length > 0) return selected;
+  const dasha = payload.chart.dasha;
+  if (dasha?.current_dasha && dasha.current_dasha !== "Unknown") {
+    return [{
+      status: "background",
+      label: `${dasha.current_dasha} long cycle`,
+      window: formatMonthYear(dasha.current_dasha_end) ?? "Current background cycle",
+      narrative: "A broad developmental background rather than a single predicted event.",
+    }];
+  }
+  return [];
+}
+
 /**
  * Builds a concise, explainable synthesis strictly from chart data already
  * present in ChartApiResponse. It is deterministic: no LLM, API request, or
@@ -567,25 +819,40 @@ export function buildPersonalStory(
   options: BuildPersonalStoryOptions = {},
 ): PersonalStory {
   const lifeShifts = options.lifeShifts ?? computeMajorLifeShifts(payload);
+  const verification = options.verification ?? verifyChartForStory(payload);
   const name = displayName(payload.client.name);
   const ascendant = payload.chart.ascendant?.sign;
+  const moon = getPlanet(payload.chart.planets, "Moon");
+  const strongest = getStrongestPlanet(payload);
+  const chapters = [
+    buildEssenceChapter(payload),
+    buildMarriageChapter(payload),
+    buildFamilyChapter(payload),
+    buildCareerChapter(payload),
+    buildWealthChapter(payload),
+    buildStrengthsChapter(payload),
+    buildEmotionalOrientationChapter(payload),
+    buildTimingChapter(payload, lifeShifts),
+    buildGroundingChapter(payload),
+  ].map((chapter) => enrichChapter(chapter, payload, verification));
 
   return {
     title: `${name} story`,
+    subtitle: "A verified, client-focused astrological portrait",
     introduction: ascendant
       ? `A practical reading of your ${ascendant} ascendant, partnership style, family life, career direction, wealth patterns, emotional rhythm, and current timing cycles.`
       : "A practical reading of the recurring patterns, partnership style, family life, career direction, wealth outlook, and timing signals already present in this chart.",
-    chapters: [
-      buildEssenceChapter(payload),
-      buildMarriageChapter(payload),
-      buildFamilyChapter(payload),
-      buildCareerChapter(payload),
-      buildWealthChapter(payload),
-      buildStrengthsChapter(payload),
-      buildEmotionalOrientationChapter(payload),
-      buildTimingChapter(payload, lifeShifts),
-      buildGroundingChapter(payload),
+    preface: [
+      `${name}, this report is written as a connected portrait rather than a list of placements. It begins with the natal foundation, then asks where independent strength, divisional, domain, and timing factors repeat the same theme.`,
+      ascendant
+        ? `The central contrast is between your ${ascendant} way of approaching life${moon ? ` and the private rhythm of a ${moon.sign} Moon` : ""}${strongest ? `. ${strongest.planet} appears as one of the cleaner resources available when the chart becomes demanding.` : "."}`
+        : "The most useful themes are the ones repeated across independent factors and translated into choices you can observe in real life.",
     ],
+    atAGlance: buildAtAGlance(payload),
+    centralThemes: buildCentralThemes(payload),
+    timeline: buildStoryTimeline(payload, lifeShifts),
+    chapters,
+    verification,
     reflectionNote:
       "Use this as a reflective planning tool, not a prediction or a substitute for professional, medical, legal, or financial advice.",
   };

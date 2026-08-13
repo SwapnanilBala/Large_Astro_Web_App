@@ -1096,7 +1096,11 @@ export default function InsightsContent({
               <FiCopy size={16} />
               Copy link
             </button>
-            <PersonalStory payload={payloadWithDomainInsights} compact />
+            <PersonalStory
+              payload={payloadWithDomainInsights}
+              compact
+              queryString={historyQs}
+            />
           </div>
         </motion.header>
 

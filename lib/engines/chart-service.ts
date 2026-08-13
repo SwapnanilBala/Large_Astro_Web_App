@@ -65,6 +65,8 @@ export interface ChartResponse {
     longitude: number;
     timezone_offset_minutes: number;
     time_zone_id: string;
+    birth_time_accuracy?: string;
+    birth_time_fallback?: boolean;
   };
   chart: {
     julian_day_ut: number;
@@ -932,6 +934,8 @@ export function buildChart(
       longitude: birth.longitude,
       timezone_offset_minutes: birth.timezone_offset_minutes,
       time_zone_id: birth.time_zone_id ?? "",
+      birth_time_accuracy: birth.birth_time_accuracy,
+      birth_time_fallback: birth.birth_time_fallback,
     },
     chart: {
       julian_day_ut: core.julian_day_ut,
