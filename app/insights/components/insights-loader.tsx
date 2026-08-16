@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import InsightsContent from "@/app/insights/components/insights-content";
@@ -8,8 +8,6 @@ import InsightsSkeleton from "@/app/insights/components/insights-skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
-import { useAuth } from "@/lib/auth-context";
-import { saveAuthenticatedReading, saveGuestReading } from "@/lib/reading-store";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 
 const REQUEST_TIMEOUT_MS = 55_000;
@@ -65,22 +63,6 @@ function buildHistoryQs(params: ChartParams): string {
   return new URLSearchParams(qs).toString();
 }
 
-async function persistReading(
-  params: ChartParams,
-  data: ChartApiResponse,
-  userId?: string | null
-) {
-  try {
-    if (userId) {
-      await saveAuthenticatedReading(userId, params, data);
-    } else {
-      await saveGuestReading(params, data);
-    }
-  } catch {
-    // Silent — persistence is best-effort, never blocks the UI
-  }
-}
-
 export default function InsightsLoader({
   chartParams,
   initialPayload = null,
@@ -89,8 +71,6 @@ export default function InsightsLoader({
   const [payload, setPayload] = useState<ChartApiResponse | null>(initialPayload);
   const [error, setError] = useState<string>(initialError);
   const [isLoading, setIsLoading] = useState(!initialPayload && !initialError);
-  const { user } = useAuth();
-  const persistedRef = useRef(false);
 
   const fetchChart = useCallback(async () => {
     setIsLoading(true);
@@ -105,11 +85,6 @@ export default function InsightsLoader({
     if (cached) {
       setPayload(cached);
       setIsLoading(false);
-      // Persist even on cache hit (first time only)
-      if (!persistedRef.current) {
-        persistedRef.current = true;
-        void persistReading(chartParams, cached, user?.user_id);
-      }
       return;
     }
 
@@ -131,12 +106,6 @@ export default function InsightsLoader({
       const data = (await response.json()) as ChartApiResponse;
       chartCache.set(cacheKey, data);
       setPayload(data);
-
-      // Fire-and-forget: persist reading to Supabase
-      if (!persistedRef.current) {
-        persistedRef.current = true;
-        void persistReading(chartParams, data, user?.user_id);
-      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         setError(
@@ -149,26 +118,23 @@ export default function InsightsLoader({
     } finally {
       setIsLoading(false);
     }
-  }, [chartParams, user?.user_id]);
+  }, [chartParams]);
 
   useEffect(() => {
     setPayload(initialPayload);
     setError(initialError);
     setIsLoading(!initialPayload && !initialError);
-    persistedRef.current = false;
 
     if (initialPayload) {
       const chartUrl = buildChartApiUrl(chartParams);
       chartCache.set(ChartCache.makeKey(chartUrl), initialPayload);
-      persistedRef.current = true;
-      void persistReading(chartParams, initialPayload, user?.user_id);
       return;
     }
 
     if (!initialError) {
       void fetchChart();
     }
-  }, [chartParams, fetchChart, initialError, initialPayload, user?.user_id]);
+  }, [chartParams, fetchChart, initialError, initialPayload]);
 
   const historyQs = payload ? buildHistoryQs(chartParams) : "";
 

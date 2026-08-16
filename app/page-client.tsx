@@ -21,7 +21,8 @@ import {
   getBirthTimeFallback,
   hasCoarseTimeFallback,
 } from "@/lib/birth-time";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import { profileScopedKey } from "@/lib/local-profiles";
 import { useTranslation } from "@/lib/i18n-context";
 import AutocompleteInput from "./components/AutocompleteInput";
 import ChartHistory from "./components/ChartHistory";
@@ -71,8 +72,10 @@ const SMART_FILL_EXAMPLES = [
   },
 ];
 
-const INTAKE_DRAFT_STORAGE_KEY = "astro_intake_draft";
-const BIRTH_DETAILS_HISTORY_STORAGE_KEY = "astro_birth_details_history";
+/* Both are per-profile: a half-typed draft and a birth-details history are
+   exactly the data one person on a shared device should not show another. */
+const INTAKE_DRAFT_PREFIX = "astro_intake_draft";
+const BIRTH_DETAILS_HISTORY_PREFIX = "astro_birth_details_history";
 const BIRTH_DETAILS_HISTORY_LIMIT = 5;
 
 type StoredIntakeDraft = {
@@ -149,9 +152,13 @@ function createHistoryId() {
   return globalThis.crypto?.randomUUID?.() ?? `history-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
-function parseBirthDetailsHistory(): BirthDetailsHistoryEntry[] {
+function parseBirthDetailsHistory(profileId: string | null): BirthDetailsHistoryEntry[] {
+  if (!profileId) return [];
+
   try {
-    const stored = localStorage.getItem(BIRTH_DETAILS_HISTORY_STORAGE_KEY);
+    const stored = localStorage.getItem(
+      profileScopedKey(BIRTH_DETAILS_HISTORY_PREFIX, profileId)
+    );
     if (!stored) return [];
 
     const parsed = JSON.parse(stored);
@@ -196,7 +203,7 @@ export default function Home() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
-  const { user } = useAuth();
+  const { activeProfile, profileId } = useProfile();
   const { t } = useTranslation();
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -224,8 +231,10 @@ export default function Home() {
 
   /* ── Restore draft from localStorage on mount (runs after timezone default) ── */
   useEffect(() => {
+    if (!profileId) return;
+
     try {
-      const stored = localStorage.getItem(INTAKE_DRAFT_STORAGE_KEY);
+      const stored = localStorage.getItem(profileScopedKey(INTAKE_DRAFT_PREFIX, profileId));
       if (!stored) return;
       const parsed = JSON.parse(stored) as Record<string, unknown>;
       const savedDraft =
@@ -242,15 +251,18 @@ export default function Home() {
     } catch {
       // localStorage may throw in private browsing or if data is corrupt
     }
-  }, []);
+  }, [profileId]);
 
   useEffect(() => {
-    setBirthDetailsHistory(parseBirthDetailsHistory());
-  }, []);
+    setBirthDetailsHistory(parseBirthDetailsHistory(profileId));
+  }, [profileId]);
 
   /* ── Auto-save draft to localStorage (debounced 500ms) ── */
   useEffect(() => {
     if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
+    if (!profileId) return;
+
+    const draftKey = profileScopedKey(INTAKE_DRAFT_PREFIX, profileId);
 
     draftSaveTimer.current = setTimeout(() => {
       try {
@@ -260,7 +272,7 @@ export default function Home() {
         ];
         const hasContent = userFields.some((f) => draft[f].trim().length > 0);
         if (!hasContent) {
-          localStorage.removeItem(INTAKE_DRAFT_STORAGE_KEY);
+          localStorage.removeItem(draftKey);
           return;
         }
         const storedDraft: StoredIntakeDraft = {
@@ -268,7 +280,7 @@ export default function Home() {
           unknownTime,
           coarseTime,
         };
-        localStorage.setItem(INTAKE_DRAFT_STORAGE_KEY, JSON.stringify(storedDraft));
+        localStorage.setItem(draftKey, JSON.stringify(storedDraft));
         setDraftSaved(true);
         if (draftSavedDisplayTimer.current) clearTimeout(draftSavedDisplayTimer.current);
         draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
@@ -280,7 +292,7 @@ export default function Home() {
     return () => {
       if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
     };
-  }, [coarseTime, draft, unknownTime]);
+  }, [coarseTime, draft, profileId, unknownTime]);
 
   const draftCountry = draft.country;
   const draftState = draft.state;
@@ -696,8 +708,10 @@ export default function Home() {
   };
 
   const saveBirthDetailsHistory = useCallback((entry: StoredIntakeDraft) => {
+    if (!profileId) return;
+
     try {
-      const currentHistory = parseBirthDetailsHistory();
+      const currentHistory = parseBirthDetailsHistory(profileId);
       const entryKey = buildHistoryKey(entry);
       const nextEntry: BirthDetailsHistoryEntry = {
         ...entry,
@@ -709,12 +723,15 @@ export default function Home() {
         ...currentHistory.filter((item) => buildHistoryKey(item) !== entryKey),
       ].slice(0, BIRTH_DETAILS_HISTORY_LIMIT);
 
-      localStorage.setItem(BIRTH_DETAILS_HISTORY_STORAGE_KEY, JSON.stringify(nextHistory));
+      localStorage.setItem(
+        profileScopedKey(BIRTH_DETAILS_HISTORY_PREFIX, profileId),
+        JSON.stringify(nextHistory)
+      );
       setBirthDetailsHistory(nextHistory);
     } catch {
       // History is a convenience; chart generation should still continue.
     }
-  }, []);
+  }, [profileId]);
 
   const restoreBirthDetailsHistory = useCallback((entry: BirthDetailsHistoryEntry) => {
     setDraft({ ...profileInitialState, ...entry.draft });
@@ -1627,7 +1644,7 @@ export default function Home() {
 
       {/* === FOOTER === */}
       <footer className={styles.intakeFooter}>
-        <ChartHistory userName={user?.display_name} />
+        <ChartHistory userName={activeProfile?.display_name} />
       </footer>
 
     </div>

@@ -2,18 +2,12 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "मेरी कुंडली",
-    "pricing": "मूल्य निर्धारण",
     "workspace": "कार्यक्षेत्र",
-    "access": "पहुँच",
-    "guest": "अतिथि",
     "menu": "मेनू",
-    "register": "पंजीकरण",
-    "signIn": "साइन इन",
-    "signOut": "लॉग आउट",
-    "signInPrompt": "पहले से खाता है?",
-    "alreadyUser": "पहले से उपयोगकर्ता?",
     "close": "बंद करें",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "switchProfile": "प्रोफ़ाइल बदलें",
+    "noProfile": "कोई प्रोफ़ाइल नहीं"
   },
   "home": {
     "kicker": "वैदिक बुद्धिमत्ता इंजन",
@@ -201,42 +195,9 @@
       }
     }
   },
-  "login": {
-    "kicker": "वापस स्वागत है",
-    "heading": "साइन इन",
-    "lead": "अपने उन्नत वैदिक ज्ञान तक पहुंचें — नक्षत्र, दशा, दृष्टि, नवांश और गोचर।",
-    "email": "ईमेल",
-    "emailPlaceholder": "you@example.com",
-    "password": "पासवर्ड",
-    "passwordPlaceholder": "••••••••",
-    "submit": "साइन इन",
-    "submitting": "साइन इन हो रहा है…",
-    "switchText": "खाता नहीं है?",
-    "switchLink": "बनाएं",
-    "redirecting": "रीडायरेक्ट हो रहा है…"
-  },
-  "register": {
-    "kicker": "Lagna Atelier से जुड़ें",
-    "heading": "खाता बनाएं",
-    "lead": "उन्नत वैदिक ज्योतिष मॉड्यूल अनलॉक करें — नक्षत्र, दशा, दृष्टि, नवांश और गोचर।",
-    "displayName": "प्रदर्शन नाम",
-    "displayNamePlaceholder": "आपका नाम",
-    "email": "ईमेल",
-    "emailPlaceholder": "you@example.com",
-    "password": "पासवर्ड",
-    "passwordPlaceholder": "कम से कम 6 अक्षर",
-    "confirmPassword": "पासवर्ड पुष्टि",
-    "confirmPasswordPlaceholder": "अपना पासवर्ड दोहराएं",
-    "passwordMismatch": "पासवर्ड मेल नहीं खाते।",
-    "submit": "खाता बनाएं",
-    "submitting": "खाता बन रहा है…",
-    "switchText": "पहले से खाता है?",
-    "switchLink": "साइन इन करें",
-    "redirecting": "रीडायरेक्ट हो रहा है…"
-  },
   "chartHistory": {
     "welcomeHeading": "स्वागत है",
-    "welcomeText": "आपका खाता तैयार है। नक्षत्र, दशा, दृष्टि, नवांश और गोचर विश्लेषण सहित अपनी पहली वैदिक ज्योतिष कुंडली बनाने के लिए जन्म विवरण भरें।",
+    "welcomeText": "आपकी प्रोफ़ाइल तैयार है। पहली कुंडली बनाने के लिए नीचे जन्म विवरण भरें।",
     "pickUp": "जहां छोड़ा था वहां से जारी रखें",
     "viewChart": "कुंडली देखें",
     "divider": "या नई कुंडली बनाएं"
@@ -257,9 +218,6 @@
     "julianDay": "जूलियन दिन UT",
     "julianDaySub": "Swiss Ephemeris समय आधार",
     "engine": "इंजन",
-    "dataStorage": "डेटा संग्रहण",
-    "saved": "सहेजा गया",
-    "notSaved": "नहीं सहेजा गया",
     "coreKicker": "नियम इंजन आउटपुट",
     "coreHeading": "मूल विश्लेषण",
     "careerKicker": "करियर बुद्धिमत्ता",
@@ -327,8 +285,6 @@
     "advancedHeading": "उन्नत वैदिक मॉड्यूल",
     "palmKicker": "हस्तरेखा",
     "palmHeading": "हस्त रेखा विश्लेषण",
-    "allFeatures": "सभी सुविधाएँ अनलॉक हैं",
-    "limitedResponse": "सीमित प्रतिक्रिया",
     "ascendantSign": "लग्न राशि"
   },
   "dasha": {
@@ -385,13 +341,6 @@
     "applying": "आवेदक",
     "separating": "विभाजक"
   },
-  "authGate": {
-    "loading": "लोड हो रहा है…",
-    "unlock": "{feature} अनलॉक करें",
-    "description": "नक्षत्र, दशा, दृष्टि, नवांश और गोचर तक पहुंच के लिए मुफ्त खाता बनाएं।",
-    "createAccount": "खाता बनाएं",
-    "signIn": "साइन इन"
-  },
   "compatibility": {
     "kicker": "सिनास्ट्री विश्लेषण",
     "heading": "अनुकूलता जांच",
@@ -403,24 +352,6 @@
     "incompleteProfiles": "दोनों जन्म प्रोफाइल में पूर्ण तिथि, समय, स्थान और समय क्षेत्र आवश्यक हैं।",
     "generating": "अनुकूलता विश्लेषण तैयार हो रहा है...",
     "error": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
-  },
-  "pricing": {
-    "kicker": "मूल्य निर्धारण",
-    "heading": "खुली पहुँच और खाता लेबल",
-    "activePlan": "सक्रिय योजना",
-    "accountLabel": "आपका खाता लेबल है",
-    "browsingAsGuest": "आप वर्तमान में अतिथि के रूप में ब्राउज़ कर रहे हैं। सभी कुंडली पठन सुविधाएँ अनलॉक हैं।",
-    "featureMatrixKicker": "सुविधा मैट्रिक्स",
-    "featureMatrixHeading": "वर्तमान पहुँच स्थिति",
-    "guestName": "अतिथि",
-    "proName": "प्रो",
-    "ultimateName": "अल्टीमेट",
-    "guestDesc": "अतिथि मोड यहाँ डिफ़ॉल्ट रूप से शुरू होता है",
-    "proDesc": "सिंक किए गए कार्यक्षेत्र भंडारण के लिए ही खाता बनाएं",
-    "ultimateDesc": "सभी कुंडली पठन सुविधाएँ पहले से अनलॉक हैं",
-    "included": "शामिल",
-    "accountRequired": "खाता आवश्यक",
-    "comingSoon": "जल्द आ रहा है"
   },
   "workspace": {
     "loading": "आपका सहेजा गया ज्योतिष कार्यक्षेत्र लोड हो रहा है...",
@@ -504,5 +435,28 @@
   },
   "bottomNav": {
     "calendar": "Calendar"
+  },
+  "profiles": {
+    "kicker": "यह डिवाइस",
+    "heading": "प्रोफ़ाइल चुनें",
+    "lead": "प्रोफ़ाइल इस डिवाइस पर सहेजी गई कुंडलियाँ और रीडिंग अलग रखती हैं। कुछ भी इस ब्राउज़र से बाहर नहीं जाता।",
+    "active": "सक्रिय",
+    "opening": "खोला जा रहा है…",
+    "addDivider": "या किसी को जोड़ें",
+    "nameLabel": "प्रोफ़ाइल का नाम",
+    "create": "प्रोफ़ाइल बनाएँ",
+    "rename": "नाम बदलें",
+    "renameLabel": "नया प्रोफ़ाइल नाम",
+    "saveName": "नाम सहेजें",
+    "cancel": "रद्द करें",
+    "delete": "हटाएँ",
+    "confirmDelete": "हटाने की पुष्टि करें",
+    "deleteWarning": "इससे इस प्रोफ़ाइल में सहेजी गई हर कुंडली और रीडिंग मिट जाएगी।",
+    "full": "इस डिवाइस में सभी {max} प्रोफ़ाइल भर चुकी हैं। नई जोड़ने के लिए एक हटाएँ।",
+    "storageNote": "प्रति डिवाइस अधिकतम {max} प्रोफ़ाइल। सब कुछ केवल इसी ब्राउज़र में सहेजा जाता है।",
+    "switchFailed": "प्रोफ़ाइल नहीं बदल सकी।",
+    "createFailed": "प्रोफ़ाइल नहीं बन सकी।",
+    "renameFailed": "प्रोफ़ाइल का नाम नहीं बदल सका।",
+    "deleteFailed": "प्रोफ़ाइल हटाई नहीं जा सकी।"
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import AdvancedContent from "./advanced-content";
@@ -8,8 +8,6 @@ import InsightsSkeleton from "@/app/insights/components/insights-skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
-import { useAuth } from "@/lib/auth-context";
-import { saveAuthenticatedReading, saveGuestReading } from "@/lib/reading-store";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import type { AdvancedFocusView } from "./advanced-views";
 
@@ -65,22 +63,6 @@ function buildHistoryQs(params: ChartParams): string {
   return new URLSearchParams(qs).toString();
 }
 
-async function persistReading(
-  params: ChartParams,
-  data: ChartApiResponse,
-  userId?: string | null
-) {
-  try {
-    if (userId) {
-      await saveAuthenticatedReading(userId, params, data);
-    } else {
-      await saveGuestReading(params, data);
-    }
-  } catch {
-    // Silent — persistence is best-effort, never blocks the UI
-  }
-}
-
 export default function AdvancedLoader({
   chartParams,
   focusView,
@@ -88,8 +70,6 @@ export default function AdvancedLoader({
   const [payload, setPayload] = useState<ChartApiResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useAuth();
-  const persistedRef = useRef(false);
 
   const fetchChart = useCallback(async () => {
     setIsLoading(true);
@@ -103,10 +83,6 @@ export default function AdvancedLoader({
     if (cached) {
       setPayload(cached);
       setIsLoading(false);
-      if (!persistedRef.current) {
-        persistedRef.current = true;
-        void persistReading(chartParams, cached, user?.user_id);
-      }
       return;
     }
 
@@ -128,11 +104,6 @@ export default function AdvancedLoader({
       const data = (await response.json()) as ChartApiResponse;
       chartCache.set(cacheKey, data);
       setPayload(data);
-
-      if (!persistedRef.current) {
-        persistedRef.current = true;
-        void persistReading(chartParams, data, user?.user_id);
-      }
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         setError(

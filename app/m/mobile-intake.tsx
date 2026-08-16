@@ -6,6 +6,8 @@ import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { COARSE_TIME_OPTIONS, hasCoarseTimeFallback } from "@/lib/birth-time";
 import { buildChartQuery } from "@/lib/intake-query";
 import { useTranslation } from "@/lib/i18n-context";
+import { profileScopedKey } from "@/lib/local-profiles";
+import { useProfile } from "@/lib/profile-context";
 import styles from "./mobile.module.css";
 
 /*
@@ -22,7 +24,7 @@ import styles from "./mobile.module.css";
  * screen-reader support for free, and exact minutes without typing.
  */
 
-const STORAGE_KEY = "astro_intake_draft";
+const STORAGE_PREFIX = "astro_intake_draft";
 
 type GeocodeApiResponse = {
   found?: boolean;
@@ -43,6 +45,7 @@ function initialDraft(): ProfileQueryInput {
 export default function MobileIntake() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { profileId } = useProfile();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
@@ -54,8 +57,10 @@ export default function MobileIntake() {
 
   /* Share the desktop draft so switching trees mid-entry does not lose work. */
   useEffect(() => {
+    if (!profileId) return;
+
     try {
-      const stored = localStorage.getItem(STORAGE_KEY);
+      const stored = localStorage.getItem(profileScopedKey(STORAGE_PREFIX, profileId));
       if (!stored) return;
       const parsed = JSON.parse(stored) as {
         draft?: Partial<ProfileQueryInput>;
@@ -68,15 +73,20 @@ export default function MobileIntake() {
     } catch {
       /* A corrupt draft is not worth failing the page over. */
     }
-  }, []);
+  }, [profileId]);
 
   useEffect(() => {
+    if (!profileId) return;
+
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify({ draft, unknownTime, coarseTime }));
+      localStorage.setItem(
+        profileScopedKey(STORAGE_PREFIX, profileId),
+        JSON.stringify({ draft, unknownTime, coarseTime })
+      );
     } catch {
       /* Private mode and quota errors are non-fatal here. */
     }
-  }, [draft, unknownTime, coarseTime]);
+  }, [coarseTime, draft, profileId, unknownTime]);
 
   const set = (key: keyof ProfileQueryInput, value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));

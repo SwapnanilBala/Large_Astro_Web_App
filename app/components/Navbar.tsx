@@ -3,13 +3,13 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
+import { readChartHistory } from "@/lib/chart-history-store";
 import { listSavedCharts } from "@/lib/workspace-store";
-import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
 
 export default function Navbar() {
-  const { user, isAuthenticated, isLoading, isPremium, logout } = useAuth();
+  const { activeProfile, isLoading, profileId } = useProfile();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -35,22 +35,21 @@ export default function Navbar() {
 
   useEffect(() => {
     const getLastChartFromLocal = () => {
-      try {
-        const raw = localStorage.getItem("astro_chart_history");
-        if (!raw) return null;
-        const entries: ChartHistoryEntry[] = JSON.parse(raw);
-        if (!Array.isArray(entries) || entries.length === 0) return null;
+      const entries = readChartHistory(profileId);
+      if (entries.length === 0) return null;
 
-        const latest = [...entries].sort(
-          (left, right) =>
-            Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
-        )[0];
-        const queryString = latest?.queryString?.trim().replace(/^\?/, "");
-        return queryString ? `/insights?${queryString}` : null;
-      } catch {
-        return null;
-      }
+      const latest = [...entries].sort(
+        (left, right) =>
+          Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
+      )[0];
+      const queryString = latest?.queryString?.trim().replace(/^\?/, "");
+      return queryString ? `/insights?${queryString}` : null;
     };
+
+    // A profile switch must not carry the previous profile's chart link over.
+    setLastChartUrl(null);
+
+    if (!profileId) return;
 
     let isCancelled = false;
     const localChartUrl = getLastChartFromLocal();
@@ -60,8 +59,8 @@ export default function Navbar() {
 
     const loadSavedCharts = async () => {
       try {
-        if (localChartUrl || !isAuthenticated || !user) return;
-        const data = await listSavedCharts(user.user_id);
+        if (localChartUrl) return;
+        const data = await listSavedCharts(profileId);
         if (isCancelled || data.length === 0) return;
 
         const queryString = data[0].query_string.trim().replace(/^\?/, "");
@@ -69,7 +68,7 @@ export default function Navbar() {
           setLastChartUrl(getLastChartFromLocal() ?? `/insights?${queryString}`);
         }
       } catch {
-        /* ignore and keep local fallback */
+        /* ignore and keep the history fallback */
       }
     };
 
@@ -79,7 +78,7 @@ export default function Navbar() {
       isCancelled = true;
       window.cancelAnimationFrame(localChartFrame);
     };
-  }, [isAuthenticated, pathname, user]);
+  }, [pathname, profileId]);
 
   /* Track scroll position for glass effect */
   useEffect(() => {
@@ -201,43 +200,25 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Desktop auth section - hidden on mobile */}
+          {/* Desktop profile section - hidden on mobile */}
           <div className="navbar-desktop-auth">
-            {isAuthenticated && user ? (
-              <div className="user-badge">
-                <Link href="/pricing" className="navbar-chart-link">
-                  {t("navbar.pricing")}
+            <div className="user-badge">
+              <Link href="/workspace" className="navbar-chart-link">
+                {t("navbar.workspace")}
+              </Link>
+              <Link href="/calendar" className="navbar-chart-link">
+                {t("navbar.calendar")}
+              </Link>
+              {lastChartUrl && (
+                <Link href={lastChartUrl} className="navbar-chart-link">
+                  {t("navbar.myChart")}
                 </Link>
-                <Link href="/workspace" className="navbar-chart-link">
-                  {t("navbar.workspace")}
-                </Link>
-                <Link href="/calendar" className="navbar-chart-link">
-                  {t("navbar.calendar")}
-                </Link>
-                {lastChartUrl && (
-                  <Link href={lastChartUrl} className="navbar-chart-link">
-                    {t("navbar.myChart")}
-                  </Link>
-                )}
-                <strong>{user.display_name}</strong>
-                <span className={`navbar-tier ${isPremium ? "navbar-tier--premium" : "navbar-tier--core"}`}>
-                  {user.subscription_tier}
-                </span>
-                <button className="logout-btn" onClick={logout} type="button">
-                  {t("navbar.signOut")}
-                </button>
-              </div>
-            ) : (
-              <>
-                <Link href="/pricing" className="navbar-chart-link">
-                  {t("navbar.access")}
-                </Link>
-                <span className="navbar-tier navbar-tier--core">{t("navbar.guest")}</span>
-                <Link href="/login" className="navbar-signin-link">
-                  {t("navbar.signInPrompt")} <span>{t("navbar.signIn")}</span>
-                </Link>
-              </>
-            )}
+              )}
+              <Link href="/login" className="navbar-profile-link">
+                <strong>{activeProfile?.display_name ?? t("navbar.noProfile")}</strong>
+                <span className="navbar-profile-switch">{t("navbar.switchProfile")}</span>
+              </Link>
+            </div>
           </div>
 
           {/* Hamburger button - mobile only */}
@@ -290,17 +271,6 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav aria-label={t("bottomNav.plans")}>
-          <Link
-            href="/pricing"
-            className="drawer-link"
-            onClick={closeDrawer}
-            aria-current={pathname === "/pricing" ? "page" : undefined}
-          >
-            {t("navbar.pricing")}
-          </Link>
-        </nav>
-
         <nav className="drawer-nav">
           <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
             {t("navbar.workspace")}
@@ -317,35 +287,21 @@ export default function Navbar() {
 
         <div className="drawer-divider" />
 
-        {isAuthenticated && user ? (
-          <div className="drawer-auth">
-            <div className="drawer-user-info">
-              <strong className="drawer-username">{user.display_name}</strong>
-              <span className={`navbar-tier ${isPremium ? "navbar-tier--premium" : "navbar-tier--core"}`}>
-                {user.subscription_tier}
-              </span>
-            </div>
-            <button
-              className="drawer-signout-btn"
-              onClick={() => {
-                logout();
-                closeDrawer();
-              }}
-              type="button"
-            >
-              {t("navbar.signOut")}
-            </button>
+        <div className="drawer-auth">
+          <div className="drawer-user-info">
+            <strong className="drawer-username">
+              {activeProfile?.display_name ?? t("navbar.noProfile")}
+            </strong>
           </div>
-        ) : (
-          <div className="drawer-auth">
-            <Link href="/login" className="drawer-link" onClick={closeDrawer}>
-              {t("navbar.signIn")}
-            </Link>
-            <Link href="/register" className="drawer-link" onClick={closeDrawer}>
-              {t("navbar.register")}
-            </Link>
-          </div>
-        )}
+          <Link
+            href="/login"
+            className="drawer-link"
+            onClick={closeDrawer}
+            aria-current={pathname === "/login" ? "page" : undefined}
+          >
+            {t("navbar.switchProfile")}
+          </Link>
+        </div>
       </aside>
     </>
   );

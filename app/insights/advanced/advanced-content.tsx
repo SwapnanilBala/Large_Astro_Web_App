@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiArrowLeft } from "react-icons/fi";
-import AuthGate from "@/app/insights/components/auth-gate";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
@@ -306,10 +305,6 @@ function LiveTransitsModule({
   return (
     <LazyPanel rootMargin={rootMargin}>
       <PanelErrorBoundary panelName="Live Transits">
-        <AuthGate
-          featureLabel="Live Transits"
-          isLocked={lockedFeatures.has("live_transits")}
-        >
           {payload.transits ? (
             <TransitsPanel transits={payload.transits} />
           ) : (
@@ -318,7 +313,6 @@ function LiveTransitsModule({
               description="Track the current sky against the natal chart to understand active triggers and near-term windows."
             />
           )}
-        </AuthGate>
       </PanelErrorBoundary>
     </LazyPanel>
   );
@@ -336,13 +330,7 @@ function PalmReadingModule({
   return (
     <LazyPanel rootMargin={rootMargin}>
       <PanelErrorBoundary panelName="Palm Reading">
-        <AuthGate
-          featureLabel="Palm Reading"
-          isLocked={lockedFeatures.has("palm_reading")}
-          requiredTier="premium"
-        >
           <PalmReadingPanel jyotishContext={jyotishContext} />
-        </AuthGate>
       </PanelErrorBoundary>
     </LazyPanel>
   );
@@ -499,10 +487,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Nakshatra & Dasha">
-                    <AuthGate
-                      featureLabel="Nakshatra & Dasha"
-                      isLocked={lockedFeatures.has("nakshatra_dasha")}
-                    >
                       {payload.chart.nakshatra && payload.chart.dasha ? (
                         <NakshatraDashaPanel
                           nakshatra={payload.chart.nakshatra}
@@ -516,7 +500,6 @@ export default function AdvancedContent({
                           description="Unlock lunar mansion analysis, current dasha sequencing, and timing-sensitive drill-downs."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -531,10 +514,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Planetary Aspects">
-                    <AuthGate
-                      featureLabel="Planetary Aspects"
-                      isLocked={lockedFeatures.has("planetary_aspects")}
-                    >
                       {payload.chart.aspects && payload.chart.aspects.length > 0 ? (
                         <AspectsPanel aspects={payload.chart.aspects} />
                       ) : (
@@ -543,7 +522,6 @@ export default function AdvancedContent({
                           description="See the strongest harmonious and friction-heavy contacts in the natal chart, ranked by orb."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -558,10 +536,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Navamsa D9 Chart">
-                    <AuthGate
-                      featureLabel="Navamsa D9 Chart"
-                      isLocked={lockedFeatures.has("navamsa_d9")}
-                    >
                       {payload.chart.navamsa && payload.chart.navamsa.length > 0 ? (
                         <NavamsaChart navamsa={payload.chart.navamsa} />
                       ) : (
@@ -570,7 +544,6 @@ export default function AdvancedContent({
                           description="Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -585,10 +558,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Divisional Charts">
-                    <AuthGate
-                      featureLabel="Divisional Charts"
-                      isLocked={lockedFeatures.has("divisional_charts")}
-                    >
                       {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 ? (
                         <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
                       ) : (
@@ -597,7 +566,6 @@ export default function AdvancedContent({
                           description="Unlock the complete supported divisional atlas for natal foundations, wealth, relationships, career, ancestry, resilience, and more."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -613,16 +581,11 @@ export default function AdvancedContent({
                 >
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Shadbala Analysis">
-                      <AuthGate
-                        featureLabel="Shadbala Analysis"
-                        isLocked={lockedFeatures.has("planetary_aspects")}
-                      >
                         <ShadbalaPanel
                           shadbala={payload.chart.shadbala}
                           planets={payload.chart.planets}
                           ashtakavarga={payload.ashtakavarga}
                         />
-                      </AuthGate>
                     </PanelErrorBoundary>
                   </LazyPanel>
                 </motion.div>
@@ -657,10 +620,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Live Transits">
-                    <AuthGate
-                      featureLabel="Live Transits"
-                      isLocked={lockedFeatures.has("live_transits")}
-                    >
                       {payload.transits ? (
                         <TransitsPanel transits={payload.transits} />
                       ) : (
@@ -669,7 +628,6 @@ export default function AdvancedContent({
                           description="Track the current sky against the natal chart to understand active triggers and near-term windows."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -684,10 +642,6 @@ export default function AdvancedContent({
               >
                 <LazyPanel>
                   <PanelErrorBoundary panelName="Ashtakavarga">
-                    <AuthGate
-                      featureLabel="Ashtakavarga"
-                      isLocked={lockedFeatures.has("live_transits")}
-                    >
                       {payload.ashtakavarga ? (
                         <AshtakavargaPanel
                           ashtakavarga={payload.ashtakavarga}
@@ -699,7 +653,6 @@ export default function AdvancedContent({
                           description="Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
                         />
                       )}
-                    </AuthGate>
                   </PanelErrorBoundary>
                 </LazyPanel>
               </motion.div>
@@ -716,13 +669,7 @@ export default function AdvancedContent({
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Palm Reading">
-                <AuthGate
-                  featureLabel="Palm Reading"
-                  isLocked={lockedFeatures.has("palm_reading")}
-                  requiredTier="premium"
-                >
                   <PalmReadingPanel jyotishContext={jyotishContext} />
-                </AuthGate>
               </PanelErrorBoundary>
             </LazyPanel>
           </CollapsibleSection>

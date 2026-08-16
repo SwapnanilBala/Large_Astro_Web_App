@@ -72,18 +72,44 @@ export type PalmLineCoordinates = Partial<
   >
 >;
 
-/** NEW (optional): jyotish correlation block, present when natal context was supplied. */
+/** Per-line detection quality, as emitted under `line_confidence`. */
+export type PalmLineConfidenceEntry = {
+  visibility: "clear" | "partial" | "faint" | "not_detected";
+  /** 0–1. */
+  confidence: number;
+};
+
+export type PalmImageQuality = {
+  rating: "excellent" | "good" | "marginal" | "poor";
+  issues: string[];
+  reliable_for_reading: boolean;
+  notes: string;
+};
+
+/** Jyotish correlation block, present when natal context was supplied. */
 export type PalmJyotishCorrelation = {
-  ascendant_alignment?: string;
-  moon_sign_alignment?: string;
-  dasha_alignment?: string;
-  notes?: string;
+  summary: string;
+  correlations: Array<{
+    palm_indicator: string;
+    chart_factor: string;
+    reinforcement: "strong" | "moderate" | "contradictory" | "neutral";
+    reading: string;
+  }>;
 };
 
 export type PalmDashaRelevance = {
-  current_mahadasha?: string;
-  current_antardasha?: string;
-  notes?: string;
+  active_period_summary: string;
+  relevant_palm_indicators: Array<{
+    indicator: string;
+    relevance_to_dasha: string;
+    timing_note?: string;
+  }>;
+};
+
+export type PalmClassicalFrameworkNotes = {
+  framework: string;
+  sanskrit_terms: Array<{ term: string; meaning: string; observation: string }>;
+  classical_text_references: string[];
 };
 
 export type PalmReadingJSON = {
@@ -104,27 +130,21 @@ export type PalmReadingJSON = {
   special_markings: PalmSpecialMarkings;
   guidance: string;
 
-  // ---- NEW optional fields (sister agents) -------------------------------
-  /** NEW (optional): qualitative judgement of the source image's clarity. */
-  image_quality?: {
-    rating?: "excellent" | "good" | "fair" | "poor";
-    notes?: string;
-  };
-  /** NEW (optional): per-line confidence aggregate. */
+  // ---- Optional blocks, present only when the model emits them -----------
+  /** Qualitative judgement of the source image's clarity. */
+  image_quality?: PalmImageQuality;
+  /** Per-line visibility and confidence. */
   line_confidence?: Partial<
-    Record<
-      "heart_line" | "head_line" | "life_line" | "fate_line",
-      "high" | "medium" | "low"
-    >
+    Record<"heart_line" | "head_line" | "life_line" | "fate_line", PalmLineConfidenceEntry>
   >;
-  /** NEW (optional): traced coordinates for each detected line. */
+  /** Traced coordinates for each detected line. */
   line_coordinates?: PalmLineCoordinates;
-  /** NEW (optional): how the palm reading correlates with the natal chart context. */
+  /** How the palm reading correlates with the natal chart context. */
   jyotish_correlation?: PalmJyotishCorrelation;
-  /** NEW (optional): dasha-period relevance commentary. */
+  /** Dasha-period relevance commentary. */
   dasha_relevance?: PalmDashaRelevance;
-  /** NEW (optional): commentary in the classical Samudrika framework. */
-  classical_framework_notes?: string;
+  /** Commentary in the classical Samudrika framework. */
+  classical_framework_notes?: PalmClassicalFrameworkNotes;
 };
 
 // ---------------------------------------------------------------------------
@@ -152,7 +172,8 @@ export type JyotishContext = {
 
 export type PalmReadingRecord = {
   id: string;
-  user_id: string;
+  /** The local device profile this reading belongs to. */
+  profile_id: string;
   created_at: string;
   title: string | null;
   image_data_url: string;
@@ -160,7 +181,6 @@ export type PalmReadingRecord = {
   jyotish_context: JyotishContext | null;
   classical_mode: boolean;
   notes: string | null;
-  deleted_at: string | null;
 };
 
 export type PalmReadingSummary = {

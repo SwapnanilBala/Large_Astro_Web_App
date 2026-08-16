@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import { getPalmReadingsByIds } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/insights/components/PalmAnnotation";
-import type { ComputedDiff } from "@/lib/palm-readings/diff";
+import { computeReadingDiff, type ComputedDiff } from "@/lib/palm-readings/diff";
 import type { PalmReadingRecord } from "@/lib/palm-readings/types";
 
 const UUID_RE =
@@ -48,8 +48,7 @@ type CompareResponse = {
 type Props = { ids: string };
 
 export default function PalmCompareClient({ ids }: Props) {
-  const router = useRouter();
-  const { token, isAuthenticated, isLoading: authLoading, isPremium } = useAuth();
+  const { isLoading: profileLoading, profileId } = useProfile();
 
   const parsedIds = useMemo(() => {
     return ids
@@ -67,96 +66,40 @@ export default function PalmCompareClient({ ids }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Auth gate ──
+  // ── Load both readings from this profile's local archive ──
   useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated) {
-      router.replace(
-        `/login?returnTo=${encodeURIComponent(
-          `/insights/palm-history/compare?ids=${ids}`,
-        )}`,
-      );
-    }
-  }, [authLoading, isAuthenticated, router, ids]);
+    if (profileLoading) return;
 
-  // ── Fetch ──
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated || !token) return;
-    if (!isPremium) {
-      setLoading(false);
-      return;
-    }
+    setData(null);
+
     if (!idsValid) {
       setLoading(false);
       setError("Select exactly two readings to compare.");
       return;
     }
 
-    let cancelled = false;
+    if (!profileId) {
+      setLoading(false);
+      setError("Choose a profile to compare its readings.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
 
-    (async () => {
-      try {
-        const url = `/api/palm-readings/compare?ids=${parsedIds[0]},${parsedIds[1]}`;
-        const res = await fetch(url, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          if (res.status === 404)
-            throw new Error("One or both readings could not be found.");
-          const err = await res.json().catch(() => ({}));
-          throw new Error(
-            (err && (err.error?.message || err.detail)) ||
-              "Failed to load comparison.",
-          );
-        }
-        const body = (await res.json()) as CompareResponse;
-        if (cancelled) return;
-        if (!body || !body.a || !body.b || !body.diff) {
-          throw new Error("Comparison response was malformed.");
-        }
-        setData(body);
-      } catch (e) {
-        if (cancelled) return;
-        setError(
-          e instanceof Error ? e.message : "Failed to load comparison.",
-        );
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
+    const [a, b] = getPalmReadingsByIds(profileId, [parsedIds[0], parsedIds[1]]);
+    if (!a || !b) {
+      setError("One or both readings could not be found.");
+    } else {
+      setData({ a, b, diff: computeReadingDiff(a, b) });
+    }
+    setLoading(false);
+  }, [idsValid, parsedIds, profileId, profileLoading]);
 
-    return () => {
-      cancelled = true;
-    };
-  }, [authLoading, isAuthenticated, isPremium, token, idsValid, parsedIds]);
-
-  // ── Auth-gated states ──
-  if (authLoading) {
+  if (profileLoading) {
     return (
       <section className="palm-history-shell">
-        <p className="palm-history-subtitle">Checking your session…</p>
-      </section>
-    );
-  }
-  if (!isAuthenticated) return null;
-
-  if (!isPremium) {
-    return (
-      <section className="palm-history-shell">
-        <header className="palm-history-header">
-          <h1>Compare palm readings</h1>
-        </header>
-        <div className="palm-history-empty">
-          <p>Compare is part of the Pro plan.</p>
-          <div className="palm-history-empty-cta">
-            <Link href="/pricing" className="palm-btn-camera">
-              See plans
-            </Link>
-          </div>
-        </div>
+        <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
       </section>
     );
   }

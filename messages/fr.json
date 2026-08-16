@@ -2,18 +2,12 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "Ma Carte",
-    "pricing": "Tarifs",
     "workspace": "Espace de travail",
-    "access": "Accès",
-    "guest": "invité",
     "menu": "Menu",
-    "register": "S'inscrire",
-    "signIn": "Se Connecter",
-    "signOut": "Déconnexion",
-    "signInPrompt": "Déjà un compte ?",
-    "alreadyUser": "Déjà utilisateur ?",
     "close": "Fermer",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "switchProfile": "Changer de profil",
+    "noProfile": "Aucun profil"
   },
   "home": {
     "kicker": "Moteur d'Intelligence Védique",
@@ -201,42 +195,9 @@
       }
     }
   },
-  "login": {
-    "kicker": "Bon Retour",
-    "heading": "Se Connecter",
-    "lead": "Accédez à vos connaissances védiques avancées — Nakshatra, Dasha, Aspects, Navamsa et Transits.",
-    "email": "Email",
-    "emailPlaceholder": "vous@exemple.com",
-    "password": "Mot de passe",
-    "passwordPlaceholder": "••••••••",
-    "submit": "Se Connecter",
-    "submitting": "Connexion en cours…",
-    "switchText": "Pas de compte ?",
-    "switchLink": "En créer un",
-    "redirecting": "Redirection…"
-  },
-  "register": {
-    "kicker": "Rejoignez Lagna Atelier",
-    "heading": "Créer un Compte",
-    "lead": "Débloquez les modules avancés d'astrologie védique — Nakshatra, Dasha, Aspects, Navamsa et Transits.",
-    "displayName": "Nom d'Affichage",
-    "displayNamePlaceholder": "Votre nom",
-    "email": "Email",
-    "emailPlaceholder": "vous@exemple.com",
-    "password": "Mot de passe",
-    "passwordPlaceholder": "Au moins 6 caractères",
-    "confirmPassword": "Confirmer le Mot de passe",
-    "confirmPasswordPlaceholder": "Répétez votre mot de passe",
-    "passwordMismatch": "Les mots de passe ne correspondent pas.",
-    "submit": "Créer un Compte",
-    "submitting": "Création du compte…",
-    "switchText": "Déjà un compte ?",
-    "switchLink": "Se connecter",
-    "redirecting": "Redirection…"
-  },
   "chartHistory": {
     "welcomeHeading": "Bienvenue",
-    "welcomeText": "Votre compte est prêt. Remplissez les détails de naissance pour générer votre première carte astrologique védique — avec Nakshatra, Dasha, Aspects, Navamsa et analyse des Transits.",
+    "welcomeText": "Votre profil est prêt. Renseignez les détails de naissance pour générer votre premier thème.",
     "pickUp": "Reprenez Là Où Vous en Étiez",
     "viewChart": "Voir la Carte",
     "divider": "ou créer une nouvelle carte"
@@ -257,9 +218,6 @@
     "julianDay": "Jour Julien UT",
     "julianDaySub": "Base de temps Swiss Ephemeris",
     "engine": "Moteur",
-    "dataStorage": "Stockage",
-    "saved": "Enregistré",
-    "notSaved": "Non Enregistré",
     "coreKicker": "Sortie du Moteur de Règles",
     "coreHeading": "Analyse Principale",
     "careerKicker": "Intelligence Professionnelle",
@@ -327,8 +285,6 @@
     "advancedHeading": "Modules Védiques Avancés",
     "palmKicker": "Chiromancie",
     "palmHeading": "Analyse de Lecture de Paume",
-    "allFeatures": "Toutes les fonctionnalités débloquées",
-    "limitedResponse": "Réponse limitée",
     "ascendantSign": "Signe Ascendant"
   },
   "dasha": {
@@ -385,13 +341,6 @@
     "applying": "Application",
     "separating": "Séparation"
   },
-  "authGate": {
-    "loading": "Chargement…",
-    "unlock": "Débloquer {feature}",
-    "description": "Créez un compte gratuit pour accéder aux Nakshatra, Dasha, Aspects, Navamsa et Transits.",
-    "createAccount": "Créer un Compte",
-    "signIn": "Se Connecter"
-  },
   "compatibility": {
     "kicker": "Analyse Synastrique",
     "heading": "Vérification de Compatibilité",
@@ -403,24 +352,6 @@
     "incompleteProfiles": "Les deux profils de naissance nécessitent une date, une heure, un lieu et un fuseau horaire complets.",
     "generating": "Génération de l'analyse de compatibilité...",
     "error": "Une erreur est survenue. Veuillez réessayer."
-  },
-  "pricing": {
-    "kicker": "Tarifs",
-    "heading": "Accès ouvert et labels de compte",
-    "activePlan": "Plan actif",
-    "accountLabel": "Le label de votre compte est",
-    "browsingAsGuest": "Vous naviguez actuellement en tant qu'invité. Toutes les fonctionnalités de lecture de cartes sont débloquées.",
-    "featureMatrixKicker": "Matrice des fonctionnalités",
-    "featureMatrixHeading": "État d'accès actuel",
-    "guestName": "Invité",
-    "proName": "Pro",
-    "ultimateName": "Ultimate",
-    "guestDesc": "Le mode invité démarre ici par défaut",
-    "proDesc": "Créez un compte uniquement si vous souhaitez un stockage synchronisé de l'espace de travail",
-    "ultimateDesc": "Toutes les fonctionnalités de lecture de cartes sont déjà débloquées",
-    "included": "Inclus",
-    "accountRequired": "Compte requis",
-    "comingSoon": "Bientôt disponible"
   },
   "workspace": {
     "loading": "Chargement de votre espace de travail astrologique sauvegardé...",
@@ -504,5 +435,28 @@
   },
   "bottomNav": {
     "calendar": "Calendar"
+  },
+  "profiles": {
+    "kicker": "Cet appareil",
+    "heading": "Choisissez un profil",
+    "lead": "Les profils séparent les thèmes et lectures enregistrés sur cet appareil. Rien ne quitte ce navigateur.",
+    "active": "Actif",
+    "opening": "Ouverture…",
+    "addDivider": "ou ajoutez quelqu'un",
+    "nameLabel": "Nom du profil",
+    "create": "Créer un profil",
+    "rename": "Renommer",
+    "renameLabel": "Nouveau nom du profil",
+    "saveName": "Enregistrer le nom",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "confirmDelete": "Confirmer la suppression",
+    "deleteWarning": "Cela efface tous les thèmes et lectures enregistrés sous ce profil.",
+    "full": "Cet appareil contient déjà {max} profils. Supprimez-en un pour en ajouter un autre.",
+    "storageNote": "Jusqu'à {max} profils par appareil. Tout est stocké uniquement dans ce navigateur.",
+    "switchFailed": "Impossible de changer de profil.",
+    "createFailed": "Impossible de créer le profil.",
+    "renameFailed": "Impossible de renommer le profil.",
+    "deleteFailed": "Impossible de supprimer le profil."
   }
 }

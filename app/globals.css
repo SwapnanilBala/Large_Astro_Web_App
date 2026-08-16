@@ -746,7 +746,7 @@ button:focus-visible,
 .ghost-link:focus-visible,
 .recalculate-btn:focus-visible,
 .compatibility-cta-button:focus-visible,
-.navbar-signin-link:focus-visible,
+.navbar-profile-link:focus-visible,
 .navbar-chart-link:focus-visible,
 .lang-option:focus-visible,
 .lang-toggle:focus-visible,
@@ -2617,27 +2617,7 @@ label:has(.autocomplete-wrapper.is-open) {
   font-size: 1.45rem;
 }
 
-.logout-btn {
-  background: none !important;
-  border: none;
-  color: var(--accent-coral);
-  cursor: pointer;
-  font-size: 1.35rem;
-  padding: 0.2rem 0.4rem;
-  margin: 0;
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  box-shadow: none !important;
-  transition: color 250ms ease, text-shadow 250ms ease;
-}
 
-.logout-btn:hover {
-  color: #fff;
-  text-shadow: 0 0 10px rgba(255, 143, 126, 0.4);
-  transform: none;
-  box-shadow: none !important;
-}
 
 .navbar-chart-link {
   color: #F0B754;
@@ -2886,7 +2866,7 @@ label:has(.autocomplete-wrapper.is-open) {
   color: #F0B754;
 }
 
-.navbar-signin-link {
+.navbar-profile-link {
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
@@ -2901,13 +2881,13 @@ label:has(.autocomplete-wrapper.is-open) {
   transition: border-color 250ms ease, color 250ms ease, box-shadow 250ms ease, background 250ms ease, transform 250ms ease;
 }
 
-.navbar-signin-link span {
+.navbar-profile-link span {
   color: #F0B754;
   font-weight: 700;
   transition: text-shadow 250ms ease;
 }
 
-.navbar-signin-link:hover {
+.navbar-profile-link:hover {
   border-color: rgba(240, 183, 84, 0.55);
   color: #EAEDF3;
   background: rgba(240, 183, 84, 0.08);
@@ -2915,11 +2895,11 @@ label:has(.autocomplete-wrapper.is-open) {
   transform: translateY(-2px);
 }
 
-.navbar-signin-link:hover span {
+.navbar-profile-link:hover span {
   text-shadow: 0 0 12px rgba(240, 183, 84, 0.4);
 }
 
-.navbar-signin-link:active {
+.navbar-profile-link:active {
   transform: translateY(0) scale(0.97);
 }
 
@@ -3229,26 +3209,8 @@ label:has(.autocomplete-wrapper.is-open) {
   animation: toastProgress var(--toast-duration, 4s) linear forwards;
 }
 
-.navbar-tier {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-size: 1.28rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06rem;
-}
 
-.navbar-tier--premium {
-  background: rgba(242, 194, 108, 0.14);
-  color: var(--accent-gold);
-}
 
-.navbar-tier--core {
-  background: rgba(212, 164, 86, 0.12);
-  color: #d4a456;
-}
 
 @media (max-width: 980px) {
   .compatibility-grid {
@@ -4257,11 +4219,11 @@ label:has(.autocomplete-wrapper.is-open) {
   }
 
   .lang-toggle,
-  .theme-toggle-btn,
-  .logout-btn {
+  .theme-toggle-btn {
     min-height: 44px;
     min-width: 44px;
-  }}
+  }
+}
 
 /* ═══════════════════════════════════════════════
    ACCESSIBILITY — Focus Indicators
@@ -4501,33 +4463,8 @@ a:focus-visible {
   font-size: 1rem;
 }
 
-.drawer-signout-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.6rem 0.85rem;
-  border-radius: 12px;
-  background: rgba(255, 143, 126, 0.1) !important;
-  border: 1px solid rgba(255, 143, 126, 0.25) !important;
-  color: var(--accent-coral) !important;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 200ms ease, border-color 200ms ease;
-  min-height: 2.75rem !important;
-  box-shadow: none !important;
-}
 
-.drawer-signout-btn:hover {
-  background: rgba(255, 143, 126, 0.18) !important;
-  border-color: rgba(255, 143, 126, 0.4) !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
 
-.drawer-signout-btn::after {
-  display: none !important;
-}
 
 /* ── Mobile breakpoint: show hamburger, hide desktop auth ── */
 @media (max-width: 768px) {
@@ -5686,20 +5623,11 @@ a:focus-visible {
 
 .navbar-hamburger:active,
 .drawer-close-btn:active,
-.drawer-signout-btn:active {
-  transform: scale(0.97);
-  transition: transform 60ms ease-out;
-}
-
 .theme-toggle-btn:active {
   transform: scale(0.97);
   transition: transform 60ms ease-out;
 }
 
-.logout-btn:active {
-  transform: scale(0.97);
-  transition: transform 60ms ease-out;
-}
 
 .metric-card {
   transition: transform 280ms ease, box-shadow 280ms ease, border-color 240ms ease;
@@ -6791,3 +6719,14 @@ textarea:focus-visible {
     --surface-strong: rgba(255, 243, 210, 0.16);
     --bg-glass: rgba(18, 18, 26, 0.82);
   }}
+
+.navbar-profile-switch {
+  font-size: 0.85em;
+  color: #8B8FA3;
+  letter-spacing: 0.04em;
+}
+
+.navbar-profile-link strong {
+  color: #F0B754;
+  font-weight: 700;
+}

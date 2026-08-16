@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiCopy, FiGrid, FiRefreshCw } from "react-icons/fi";
-import AuthGate from "@/app/insights/components/auth-gate";
 import DivisionalChartsGateway from "@/app/insights/components/divisional-charts-gateway";
 import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
@@ -74,6 +73,7 @@ import type {
   LifeDomainInsightsResponse,
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { useProfile } from "@/lib/profile-context";
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import { useToast } from "@/lib/toast-context";
 
@@ -852,6 +852,7 @@ export default function InsightsContent({
 }: InsightsContentProps) {
   const { t } = useTranslation();
   const { pushToast } = useToast();
+  const { profileId } = useProfile();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const [isRouting, startRouting] = useTransition();
@@ -866,7 +867,10 @@ export default function InsightsContent({
   const transitParams = new URLSearchParams(historyQs);
   transitParams.set("view", "transits");
   const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
-  const sectionStateScope = `insights:section-state:${historyQs}`;
+  // Profile-scoped: the query string carries the subject's name and birth
+  // details, so an unscoped key would leave one profile's charts listed in
+  // storage for the next person on the device.
+  const sectionStateScope = `astro_insights_section_state:${profileId ?? "none"}:${historyQs}`;
   const initialDomainInsights = payload.chart.life_domain_insights ?? [];
   const [domainInsights, setDomainInsights] = useState<LifeDomainInsight[]>(
     initialDomainInsights
@@ -1245,17 +1249,12 @@ export default function InsightsContent({
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Vimshottari Dashas">
-                <AuthGate
-                  featureLabel="Vimshottari Dashas"
-                  isLocked={lockedFeatures.has("nakshatra_dasha")}
-                >
                   <NakshatraDashaPanel
                     nakshatra={payload.chart.nakshatra}
                     dasha={payload.chart.dasha}
                     audit={payload.chart.calculation_audit}
                     planets={payload.chart.planets}
                   />
-                </AuthGate>
               </PanelErrorBoundary>
             </LazyPanel>
           </CollapsibleSection>
@@ -1271,15 +1270,10 @@ export default function InsightsContent({
             persistKey={`${sectionStateScope}:divisional-charts`}
           >
             <PanelErrorBoundary panelName="Divisional Chart Atlas">
-              <AuthGate
-                featureLabel="Divisional Charts"
-                isLocked={lockedFeatures.has("divisional_charts")}
-              >
                 <DivisionalChartsGateway
                   href={`/insights/divisional-charts?${historyQs}`}
                   chartCount={Object.keys(payload.chart.divisional_charts).length}
                 />
-              </AuthGate>
             </PanelErrorBoundary>
           </CollapsibleSection>
         )}
@@ -1355,11 +1349,6 @@ export default function InsightsContent({
           ref={domainSectionRef}
           className={styles.anchorTarget}
         >
-          <AuthGate
-            featureLabel="Life Domain Deep Dives"
-            isLocked={isLifeDomainLocked}
-            requiredTier="ultimate"
-          >
             {domainLoadState === "error" ? (
               <LifeDomainErrorState
                 message={domainLoadError}
@@ -1674,7 +1663,6 @@ export default function InsightsContent({
             ) : (
               <LifeDomainLoadingState queued={domainLoadState === "idle"} />
             )}
-          </AuthGate>
         </div>
 
         {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}

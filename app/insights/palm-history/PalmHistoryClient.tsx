@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import {
+  deletePalmReading,
+  listPalmReadings,
+  subscribeToPalmReadings,
+} from "@/lib/palm-readings/local-store";
 import type { PalmReadingSummary } from "@/lib/palm-readings/types";
 
 /* ──────────────────────────────────────────────────────────
@@ -38,7 +43,7 @@ function truncate(text: string, max = 180): string {
 export default function PalmHistoryClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { token, isAuthenticated, isLoading: authLoading, isPremium } = useAuth();
+  const { isLoading: profileLoading, profileId } = useProfile();
 
   const compareWithId = searchParams?.get("compareWith") ?? null;
 
@@ -52,58 +57,28 @@ export default function PalmHistoryClient() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // ── Auth gate ──
+  // ── Load this profile's readings ──
   useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated) {
-      router.replace(
-        `/login?returnTo=${encodeURIComponent("/insights/palm-history")}`,
-      );
-    }
-  }, [authLoading, isAuthenticated, router]);
+    if (profileLoading) return;
 
-  // ── Fetch list ──
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated || !token) return;
-    if (!isPremium) {
+    // Clear first so a profile switch cannot show the previous archive.
+    setReadings(null);
+    setSelected(compareWithId ? [compareWithId] : []);
+
+    if (!profileId) {
       setLoading(false);
       return;
     }
 
-    let cancelled = false;
-    setLoading(true);
-    setLoadError(null);
-
-    (async () => {
-      try {
-        const res = await fetch("/api/palm-readings", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          const message =
-            (err && (err.error?.message || err.detail)) ||
-            "Failed to load your saved readings.";
-          throw new Error(message);
-        }
-        const data = (await res.json()) as { readings?: PalmReadingSummary[] };
-        if (cancelled) return;
-        setReadings(Array.isArray(data.readings) ? data.readings : []);
-      } catch (e) {
-        if (cancelled) return;
-        setLoadError(
-          e instanceof Error ? e.message : "Failed to load your saved readings.",
-        );
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
+    const load = () => {
+      setReadings(listPalmReadings(profileId));
+      setLoadError(null);
+      setLoading(false);
     };
-  }, [authLoading, isAuthenticated, isPremium, token]);
+
+    load();
+    return subscribeToPalmReadings(profileId, load);
+  }, [compareWithId, profileId, profileLoading]);
 
   // ── Selection handling ──
   const toggleSelected = useCallback((id: string) => {
@@ -134,20 +109,12 @@ export default function PalmHistoryClient() {
 
   // ── Delete handling ──
   const confirmDelete = useCallback(
-    async (id: string) => {
-      if (!token) return;
+    (id: string) => {
+      if (!profileId) return;
       setDeletingId(id);
       try {
-        const res = await fetch(`/api/palm-readings/${id}`, {
-          method: "DELETE",
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(
-            (err && (err.error?.message || err.detail)) ||
-              "Failed to delete reading.",
-          );
+        if (!deletePalmReading(profileId, id)) {
+          throw new Error("Failed to delete reading.");
         }
         setReadings((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
         setSelected((prev) => prev.filter((x) => x !== id));
@@ -160,7 +127,7 @@ export default function PalmHistoryClient() {
         setPendingDeleteId(null);
       }
     },
-    [token],
+    [profileId],
   );
 
   const total = readings?.length ?? 0;
@@ -172,46 +139,13 @@ export default function PalmHistoryClient() {
     return `${total} saved readings.`;
   }, [loading, total]);
 
-  // ── Auth-gated states ──
-  if (authLoading) {
+  if (profileLoading) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
           <h1>Your Palm Readings</h1>
-          <p className="palm-history-subtitle">Checking your session…</p>
+          <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
         </header>
-      </section>
-    );
-  }
-
-  if (!isAuthenticated) {
-    // Redirecting from effect; render nothing to avoid flash.
-    return null;
-  }
-
-  if (!isPremium) {
-    return (
-      <section className="palm-history-shell">
-        <header className="palm-history-header">
-          <h1>Your Palm Readings</h1>
-        </header>
-        <div className="palm-history-empty">
-          <p>
-            Saved palm readings are part of the Pro plan. Upgrade to keep a
-            personal archive of every reading.
-          </p>
-          <div className="palm-history-empty-cta">
-            <Link href="/pricing" className="palm-btn-camera">
-              See plans
-            </Link>
-            <Link
-              href="/insights/advanced"
-              className="palm-btn-upload"
-            >
-              Back to insights
-            </Link>
-          </div>
-        </div>
       </section>
     );
   }

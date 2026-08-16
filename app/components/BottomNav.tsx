@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Bookmark, CalendarDays, House, Sparkles } from 'lucide-react';
-import { useAuth } from '@/lib/auth-context';
+import { useProfile } from '@/lib/profile-context';
 import { useTranslation } from '@/lib/i18n-context';
+import { chartHistoryKey, subscribeToChartHistory } from '@/lib/chart-history-store';
 import { listSavedCharts } from '@/lib/workspace-store';
 import styles from './BottomNav.module.css';
 
@@ -26,9 +27,11 @@ function insightsUrl(queryString: unknown) {
   return query ? `/insights?${query}` : null;
 }
 
-function latestLocalChartUrl() {
+function latestLocalChartUrl(profileId: string | null) {
+  if (!profileId) return null;
+
   try {
-    const raw = window.localStorage.getItem('astro_chart_history');
+    const raw = window.localStorage.getItem(chartHistoryKey(profileId));
     if (!raw) return null;
 
     const entries = JSON.parse(raw) as StoredChartHistoryEntry[];
@@ -48,10 +51,10 @@ function latestLocalChartUrl() {
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { isAuthenticated, user } = useAuth();
+  const { profileId } = useProfile();
   const { t } = useTranslation();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
-  const isHidden = ["/login", "/register", "/auth", "/engine-select"].some(
+  const isHidden = ["/login", "/engine-select"].some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
 
@@ -63,42 +66,44 @@ export default function BottomNav() {
   }, [isHidden]);
 
   useEffect(() => {
+    // A profile switch must not leave the previous profile's chart on the tab.
+    setLastChartUrl(null);
+
+    if (!profileId) return;
+
     let cancelled = false;
 
     const resolveLatestChart = async () => {
-      const localUrl = latestLocalChartUrl();
+      const localUrl = latestLocalChartUrl(profileId);
       if (!cancelled) {
         setLastChartUrl(localUrl);
       }
 
-      if (localUrl || !isAuthenticated || !user) return;
+      if (localUrl) return;
 
       try {
-        const savedCharts = await listSavedCharts(user.user_id);
+        const savedCharts = await listSavedCharts(profileId);
         if (!cancelled) {
           setLastChartUrl(
-            latestLocalChartUrl() ?? insightsUrl(savedCharts[0]?.query_string)
+            latestLocalChartUrl(profileId) ?? insightsUrl(savedCharts[0]?.query_string)
           );
         }
       } catch {
-        /* Keep the local fallback when the account workspace is unavailable. */
+        /* Keep whatever the local history gave us. */
       }
     };
 
     void resolveLatestChart();
 
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === 'astro_chart_history') {
-        setLastChartUrl(latestLocalChartUrl());
-      }
-    };
-    window.addEventListener('storage', handleStorage);
+    const unsubscribe = subscribeToChartHistory(profileId, () => {
+      setLastChartUrl(latestLocalChartUrl(profileId));
+    });
 
     return () => {
       cancelled = true;
-      window.removeEventListener('storage', handleStorage);
+      unsubscribe();
     };
-  }, [isAuthenticated, pathname, user]);
+  }, [pathname, profileId]);
 
   if (isHidden) return null;
 

@@ -2,18 +2,12 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "La Mia Carta",
-    "pricing": "Prezzi",
     "workspace": "Area di lavoro",
-    "access": "Accesso",
-    "guest": "ospite",
     "menu": "Menu",
-    "register": "Registrati",
-    "signIn": "Accedi",
-    "signOut": "Esci",
-    "signInPrompt": "Hai già un account?",
-    "alreadyUser": "Già utente?",
     "close": "Chiudi",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "switchProfile": "Cambia profilo",
+    "noProfile": "Nessun profilo"
   },
   "home": {
     "kicker": "Motore di Intelligenza Vedica",
@@ -201,42 +195,9 @@
       }
     }
   },
-  "login": {
-    "kicker": "Bentornato",
-    "heading": "Accedi",
-    "lead": "Accedi alle tue conoscenze vediche avanzate — Nakshatra, Dasha, Aspetti, Navamsa e Transiti.",
-    "email": "Email",
-    "emailPlaceholder": "tu@esempio.com",
-    "password": "Password",
-    "passwordPlaceholder": "••••••••",
-    "submit": "Accedi",
-    "submitting": "Accesso in corso…",
-    "switchText": "Non hai un account?",
-    "switchLink": "Creane uno",
-    "redirecting": "Reindirizzamento…"
-  },
-  "register": {
-    "kicker": "Unisciti a Lagna Atelier",
-    "heading": "Crea Account",
-    "lead": "Sblocca i moduli avanzati di astrologia vedica — Nakshatra, Dasha, Aspetti, Navamsa e Transiti.",
-    "displayName": "Nome Visualizzato",
-    "displayNamePlaceholder": "Il tuo nome",
-    "email": "Email",
-    "emailPlaceholder": "tu@esempio.com",
-    "password": "Password",
-    "passwordPlaceholder": "Almeno 6 caratteri",
-    "confirmPassword": "Conferma Password",
-    "confirmPasswordPlaceholder": "Ripeti la password",
-    "passwordMismatch": "Le password non corrispondono.",
-    "submit": "Crea Account",
-    "submitting": "Creazione account…",
-    "switchText": "Hai già un account?",
-    "switchLink": "Accedi",
-    "redirecting": "Reindirizzamento…"
-  },
   "chartHistory": {
     "welcomeHeading": "Benvenuto",
-    "welcomeText": "Il tuo account è pronto. Inserisci i dati di nascita per generare la tua prima carta astrologica vedica — completa di Nakshatra, Dasha, Aspetti, Navamsa e analisi dei Transiti.",
+    "welcomeText": "Il tuo profilo è pronto. Inserisci i dati di nascita per generare il tuo primo tema.",
     "pickUp": "Riprendi da Dove Hai Lasciato",
     "viewChart": "Vedi Carta",
     "divider": "o crea una nuova carta"
@@ -257,9 +218,6 @@
     "julianDay": "Giorno Giuliano UT",
     "julianDaySub": "Base temporale Swiss Ephemeris",
     "engine": "Motore",
-    "dataStorage": "Archiviazione",
-    "saved": "Salvato",
-    "notSaved": "Non Salvato",
     "coreKicker": "Output Motore Regole",
     "coreHeading": "Analisi Principale",
     "careerKicker": "Intelligenza Professionale",
@@ -327,8 +285,6 @@
     "advancedHeading": "Moduli Vedici Avanzati",
     "palmKicker": "Chiromanzia",
     "palmHeading": "Analisi della Lettura del Palmo",
-    "allFeatures": "Tutte le funzionalità sbloccate",
-    "limitedResponse": "Risposta limitata",
     "ascendantSign": "Segno Ascendente"
   },
   "dasha": {
@@ -385,13 +341,6 @@
     "applying": "Applicazione",
     "separating": "Separazione"
   },
-  "authGate": {
-    "loading": "Caricamento…",
-    "unlock": "Sblocca {feature}",
-    "description": "Crea un account gratuito per accedere a Nakshatra, Dasha, Aspetti, Navamsa e Transiti.",
-    "createAccount": "Crea Account",
-    "signIn": "Accedi"
-  },
   "compatibility": {
     "kicker": "Analisi Sinastrica",
     "heading": "Verifica Compatibilità",
@@ -403,24 +352,6 @@
     "incompleteProfiles": "Entrambi i profili di nascita necessitano di data, ora, posizione e fuso orario completi.",
     "generating": "Generazione dell'analisi di compatibilità...",
     "error": "Qualcosa è andato storto. Riprova."
-  },
-  "pricing": {
-    "kicker": "Prezzi",
-    "heading": "Accesso aperto ed etichette account",
-    "activePlan": "Piano attivo",
-    "accountLabel": "L'etichetta del tuo account è",
-    "browsingAsGuest": "Stai navigando come ospite. Tutte le funzionalità di lettura carte sono sbloccate.",
-    "featureMatrixKicker": "Matrice funzionalità",
-    "featureMatrixHeading": "Stato di accesso attuale",
-    "guestName": "Ospite",
-    "proName": "Pro",
-    "ultimateName": "Ultimate",
-    "guestDesc": "La modalità ospite inizia qui per impostazione predefinita",
-    "proDesc": "Crea un account solo se desideri l'archiviazione sincronizzata dell'area di lavoro",
-    "ultimateDesc": "Tutte le funzionalità di lettura carte sono già sbloccate",
-    "included": "Incluso",
-    "accountRequired": "Account richiesto",
-    "comingSoon": "In arrivo"
   },
   "workspace": {
     "loading": "Caricamento della tua area di lavoro astrologica salvata...",
@@ -504,5 +435,28 @@
   },
   "bottomNav": {
     "calendar": "Calendar"
+  },
+  "profiles": {
+    "kicker": "Questo dispositivo",
+    "heading": "Scegli un profilo",
+    "lead": "I profili tengono separati i temi e le letture salvati su questo dispositivo. Niente esce da questo browser.",
+    "active": "Attivo",
+    "opening": "Apertura…",
+    "addDivider": "o aggiungi qualcuno",
+    "nameLabel": "Nome del profilo",
+    "create": "Crea profilo",
+    "rename": "Rinomina",
+    "renameLabel": "Nuovo nome del profilo",
+    "saveName": "Salva nome",
+    "cancel": "Annulla",
+    "delete": "Elimina",
+    "confirmDelete": "Conferma eliminazione",
+    "deleteWarning": "Questo cancella ogni tema e lettura salvati con questo profilo.",
+    "full": "Questo dispositivo contiene già {max} profili. Eliminane uno per aggiungerne un altro.",
+    "storageNote": "Fino a {max} profili per dispositivo. Tutto è salvato solo in questo browser.",
+    "switchFailed": "Impossibile cambiare profilo.",
+    "createFailed": "Impossibile creare il profilo.",
+    "renameFailed": "Impossibile rinominare il profilo.",
+    "deleteFailed": "Impossibile eliminare il profilo."
   }
 }

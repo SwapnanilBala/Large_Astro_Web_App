@@ -4,7 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import { getPalmReading, updatePalmReading } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/insights/components/PalmAnnotation";
 import type {
   PalmLineReading,
@@ -96,7 +97,7 @@ type Props = { id: string };
 
 export default function PalmReadingDetailClient({ id }: Props) {
   const router = useRouter();
-  const { token, isAuthenticated, isLoading: authLoading, isPremium } = useAuth();
+  const { isLoading: profileLoading, profileId } = useProfile();
 
   const [record, setRecord] = useState<PalmReadingRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,62 +114,28 @@ export default function PalmReadingDetailClient({ id }: Props) {
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Auth gate ──
+  // ── Load reading from this profile's local archive ──
   useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated) {
-      router.replace(
-        `/login?returnTo=${encodeURIComponent(`/insights/palm-history/${id}`)}`,
-      );
-    }
-  }, [authLoading, isAuthenticated, router, id]);
+    if (profileLoading) return;
 
-  // ── Fetch reading ──
-  useEffect(() => {
-    if (authLoading) return;
-    if (!isAuthenticated || !token) return;
-    if (!isPremium) {
+    setRecord(null);
+    setError(null);
+
+    if (!profileId) {
       setLoading(false);
       return;
     }
 
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-
-    (async () => {
-      try {
-        const res = await fetch(`/api/palm-readings/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          if (res.status === 404) throw new Error("Reading not found.");
-          const err = await res.json().catch(() => ({}));
-          throw new Error(
-            (err && (err.error?.message || err.detail)) ||
-              "Failed to load reading.",
-          );
-        }
-        const data = (await res.json()) as { reading?: PalmReadingRecord };
-        if (cancelled) return;
-        if (!data.reading) throw new Error("Reading not found.");
-        setRecord(data.reading);
-        setTitleDraft(data.reading.title ?? "");
-        setNotesDraft(data.reading.notes ?? "");
-      } catch (e) {
-        if (cancelled) return;
-        setError(
-          e instanceof Error ? e.message : "Failed to load reading.",
-        );
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [authLoading, isAuthenticated, isPremium, token, id]);
+    const found = getPalmReading(profileId, id);
+    if (!found) {
+      setError("Reading not found.");
+    } else {
+      setRecord(found);
+      setTitleDraft(found.title ?? "");
+      setNotesDraft(found.notes ?? "");
+    }
+    setLoading(false);
+  }, [id, profileId, profileLoading]);
 
   useEffect(() => {
     if (editingTitle) {
@@ -179,47 +146,28 @@ export default function PalmReadingDetailClient({ id }: Props) {
 
   // ── Save title / notes ──
   const persistMetadata = useCallback(
-    async (
+    (
       patch: { title?: string | null; notes?: string | null },
       kind: "title" | "notes",
     ) => {
-      if (!token || !record) return;
+      if (!profileId || !record) return;
       const setState =
         kind === "title" ? setTitleSaveState : setNotesSaveState;
       setState("saving");
       try {
-        const res = await fetch(`/api/palm-readings/${record.id}`, {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(patch),
-        });
-        if (!res.ok) {
-          const err = await res.json().catch(() => ({}));
-          throw new Error(
-            (err && (err.error?.message || err.detail)) ||
-              `Failed to save ${kind}.`,
-          );
+        const updated = updatePalmReading(profileId, record.id, patch);
+        if (!updated) {
+          throw new Error(`Failed to save ${kind}.`);
         }
         setState("saved");
-        setRecord((prev) =>
-          prev
-            ? {
-                ...prev,
-                ...(patch.title !== undefined ? { title: patch.title } : {}),
-                ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
-              }
-            : prev,
-        );
+        setRecord(updated);
         // Reset to idle after a beat
         window.setTimeout(() => setState("idle"), 1600);
       } catch {
         setState("error");
       }
     },
-    [token, record],
+    [profileId, record],
   );
 
   const onTitleBlur = useCallback(() => {
@@ -253,33 +201,10 @@ export default function PalmReadingDetailClient({ id }: Props) {
     [lineCoordsObj],
   );
 
-  // ── Auth-gated states ──
-  if (authLoading) {
+  if (profileLoading) {
     return (
       <section className="palm-history-shell">
-        <p className="palm-history-subtitle">Checking your session…</p>
-      </section>
-    );
-  }
-  if (!isAuthenticated) return null;
-
-  if (!isPremium) {
-    return (
-      <section className="palm-history-shell">
-        <header className="palm-history-header">
-          <h1>Palm Reading</h1>
-        </header>
-        <div className="palm-history-empty">
-          <p>
-            Saved palm readings are part of the Pro plan. Upgrade to view your
-            archive.
-          </p>
-          <div className="palm-history-empty-cta">
-            <Link href="/pricing" className="palm-btn-camera">
-              See plans
-            </Link>
-          </div>
-        </div>
+        <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
       </section>
     );
   }
@@ -466,7 +391,12 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   {conf && (
                     <div className="palm-line-confidence">
                       Confidence:{" "}
-                      <strong>{conf}</strong>
+                      <strong>
+                        {conf.visibility.replace(/_/g, " ")}
+                        {typeof conf.confidence === "number"
+                          ? ` (${Math.round(conf.confidence * 100)}%)`
+                          : ""}
+                      </strong>
                     </div>
                   )}
                   {line.description && (
@@ -530,9 +460,6 @@ export default function PalmReadingDetailClient({ id }: Props) {
               {reading.jyotish_correlation.summary}
             </p>
           )}
-          {reading.jyotish_correlation.notes && (
-            <p>{reading.jyotish_correlation.notes}</p>
-          )}
           {Array.isArray(reading.jyotish_correlation.correlations) &&
             reading.jyotish_correlation.correlations.length > 0 && (
               <ul className="palm-correlation-list">
@@ -578,9 +505,6 @@ export default function PalmReadingDetailClient({ id }: Props) {
             <p className="palm-section-lead">
               {reading.dasha_relevance.active_period_summary}
             </p>
-          )}
-          {reading.dasha_relevance.notes && (
-            <p>{reading.dasha_relevance.notes}</p>
           )}
           {Array.isArray(reading.dasha_relevance.relevant_palm_indicators) &&
             reading.dasha_relevance.relevant_palm_indicators.length > 0 && (

@@ -6,7 +6,7 @@ import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types"
 import BackButton from "../components/BackButton";
 import FlipCard from "../components/FlipCard";
 import CompatibilityScoreRing from "../components/CompatibilityScoreRing";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";
 import styles from "./workspace.module.css";
@@ -85,7 +85,7 @@ function matchesSearch<T extends SavedChartRecord | SavedComparisonRecord>(
 }
 
 export default function WorkspacePageClient() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { activeProfile, isLoading, profileId } = useProfile();
   const { t } = useTranslation();
   const { pushToast } = useToast();
   const [search, setSearch] = useState("");
@@ -106,11 +106,14 @@ export default function WorkspacePageClient() {
   }, []);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
-      setSavedCharts([]);
-      setSavedComparisons([]);
-      return;
-    }
+    // Everything below belongs to one profile — clear it all on a switch, not
+    // just the lists, or note drafts and save states bleed across profiles.
+    setSavedCharts([]);
+    setSavedComparisons([]);
+    setNotesDrafts({});
+    setSaveStates({});
+
+    if (!profileId) return;
 
     let isCancelled = false;
 
@@ -118,8 +121,8 @@ export default function WorkspacePageClient() {
       try {
         setPageError("");
         const [charts, comparisons] = await Promise.all([
-          listSavedCharts(user.user_id),
-          listSavedComparisons(user.user_id),
+          listSavedCharts(profileId),
+          listSavedComparisons(profileId),
         ]);
 
         if (isCancelled) {
@@ -148,7 +151,7 @@ export default function WorkspacePageClient() {
     return () => {
       isCancelled = true;
     };
-  }, [deferredSearch, isAuthenticated, statusFilter, user]);
+  }, [profileId]);
 
   const visibleCharts = useMemo(
     () =>
@@ -188,11 +191,11 @@ export default function WorkspacePageClient() {
   };
 
   const saveChartNotes = async (savedChartId: string) => {
-    if (!user) return;
+    if (!profileId) return;
     try {
       setSaveStates((previous) => ({ ...previous, [savedChartId]: "saving" }));
       const updated = await updateSavedChartNotes(
-        user.user_id,
+        profileId,
         savedChartId,
         notesDrafts[savedChartId] ?? ""
       );
@@ -211,11 +214,11 @@ export default function WorkspacePageClient() {
   };
 
   const saveComparisonNotes = async (savedComparisonId: string) => {
-    if (!user) return;
+    if (!profileId) return;
     try {
       setSaveStates((previous) => ({ ...previous, [savedComparisonId]: "saving" }));
       const updated = await updateSavedComparisonNotes(
-        user.user_id,
+        profileId,
         savedComparisonId,
         notesDrafts[savedComparisonId] ?? ""
       );
@@ -234,10 +237,10 @@ export default function WorkspacePageClient() {
   };
 
   const toggleChartArchive = async (chart: SavedChartRecord) => {
-    if (!user) return;
+    if (!profileId) return;
     try {
       const updated = await toggleSavedChartArchive(
-        user.user_id,
+        profileId,
         chart.saved_chart_id,
         !chart.archived_at
       );
@@ -254,10 +257,10 @@ export default function WorkspacePageClient() {
   };
 
   const toggleComparisonArchive = async (comparison: SavedComparisonRecord) => {
-    if (!user) return;
+    if (!profileId) return;
     try {
       const updated = await toggleSavedComparisonArchive(
-        user.user_id,
+        profileId,
         comparison.saved_comparison_id,
         !comparison.archived_at
       );
@@ -276,12 +279,12 @@ export default function WorkspacePageClient() {
   };
 
   const deleteChart = async (chart: SavedChartRecord) => {
-    if (!user) return;
+    if (!profileId) return;
     if (!window.confirm(`Delete ${chart.name}'s saved chart permanently?`)) {
       return;
     }
     try {
-      const deleted = await deleteSavedChart(user.user_id, chart.saved_chart_id);
+      const deleted = await deleteSavedChart(profileId, chart.saved_chart_id);
       if (!deleted) {
         throw new Error("Delete failed.");
       }
@@ -295,13 +298,13 @@ export default function WorkspacePageClient() {
   };
 
   const deleteComparison = async (comparison: SavedComparisonRecord) => {
-    if (!user) return;
+    if (!profileId) return;
     if (!window.confirm(`Delete the saved report for ${comparison.primary_name} and ${comparison.partner_name}?`)) {
       return;
     }
     try {
       const deleted = await deleteSavedComparison(
-        user.user_id,
+        profileId,
         comparison.saved_comparison_id
       );
       if (!deleted) {
@@ -341,10 +344,10 @@ export default function WorkspacePageClient() {
   };
 
   const exportWorkspace = async () => {
-    if (!user) return;
+    if (!profileId) return;
     try {
       setIsExporting(true);
-      const snapshot = await exportWorkspaceSnapshot(user.user_id);
+      const snapshot = await exportWorkspaceSnapshot(profileId);
       const blob = new Blob([JSON.stringify(snapshot, null, 2)], {
         type: "application/json",
       });
@@ -377,32 +380,6 @@ export default function WorkspacePageClient() {
     );
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="insights-shell">
-        <div className="ambient ambient-left" />
-        <div className="ambient ambient-right" />
-        <BackButton href="/" />
-        <section className="dashboard-shell">
-          <p className="kicker">Workspace</p>
-          <h1>Guest mode has full chart access. Workspace still needs an account.</h1>
-          <p className="lead">
-            The astrology engine is fully open for guests. Sign in only if you want account-backed saved
-            charts, saved compatibility reports, notes, archive controls, delete actions, and export.
-          </p>
-          <div className="workspace-actions">
-            <Link href="/login" className="ghost-link">
-              Sign in
-            </Link>
-            <Link href="/register" className="recalculate-btn">
-              Create account
-            </Link>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div className="insights-shell">
       <div className="ambient ambient-left" />
@@ -410,9 +387,10 @@ export default function WorkspacePageClient() {
       <BackButton href="/" />
       <section className="dashboard-shell">
         <p className="kicker">Workspace</p>
-        <h1>{user?.display_name ?? "Your"} astrology workspace</h1>
+        <h1>{activeProfile?.display_name ?? "Your"} astrology workspace</h1>
         <p className="lead">
-          Search saved charts, revisit compatibility readings, archive old items, share links, and export account data.
+          Search saved charts, revisit compatibility readings, archive old items, share links, and export
+          this profile&apos;s data.
         </p>
 
         <div className={styles.toolbar}>
@@ -426,8 +404,8 @@ export default function WorkspacePageClient() {
             />
           </label>
           <div className={styles.toolbarActions}>
-            <Link href="/pricing" className="ghost-link">
-              Manage plan
+            <Link href="/login" className="ghost-link">
+              Switch profile
             </Link>
             <button type="button" onClick={exportWorkspace} disabled={isExporting}>
               {isExporting ? t("workspace.exportPreparing") : t("workspace.exportButton")}
@@ -474,9 +452,9 @@ export default function WorkspacePageClient() {
             <small>Relationship reports matching the current workspace filters.</small>
           </article>
           <article className="metric-card">
-            <h3>Subscription tier</h3>
-            <p>{user?.subscription_tier ?? "guest"}</p>
-            <small>Current account label. Chart modules are open regardless of tier.</small>
+            <h3>Stored on this device</h3>
+            <p>{savedCharts.length + savedComparisons.length}</p>
+            <small>Total records saved under this profile. Nothing is sent to a server.</small>
           </article>
         </div>
 

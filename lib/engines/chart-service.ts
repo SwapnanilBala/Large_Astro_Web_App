@@ -971,7 +971,7 @@ export function buildChart(
       configured: false,
       persisted: false,
       message:
-        "Persistence is disabled in the chart engine. Save charts and workspace records through the Next.js app's Supabase layer.",
+        "Persistence is disabled in the chart engine. Charts are saved in the browser under the active local profile.",
     },
     access: {
       subscription_tier: subscriptionTier,

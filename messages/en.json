@@ -2,18 +2,12 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "My Chart",
-    "pricing": "Pricing",
     "workspace": "Workspace",
-    "access": "Access",
-    "guest": "guest",
     "menu": "Menu",
-    "register": "Register",
-    "signIn": "Sign In",
-    "signOut": "Sign Out",
-    "signInPrompt": "Already a user?",
-    "alreadyUser": "Already a user?",
     "close": "Close",
-    "calendar": "Calendar"
+    "calendar": "Calendar",
+    "switchProfile": "Switch profile",
+    "noProfile": "No profile"
   },
   "home": {
     "kicker": "Astro Intelligence Studio",
@@ -225,42 +219,9 @@
       }
     }
   },
-  "login": {
-    "kicker": "Welcome Back",
-    "heading": "Sign In",
-    "lead": "Access your advanced Vedic insights — Nakshatra, Dasha, Aspects, Navamsa and Transits.",
-    "email": "Email",
-    "emailPlaceholder": "you@example.com",
-    "password": "Password",
-    "passwordPlaceholder": "••••••••",
-    "submit": "Sign In",
-    "submitting": "Signing in…",
-    "switchText": "Don't have an account?",
-    "switchLink": "Create one",
-    "redirecting": "Redirecting…"
-  },
-  "register": {
-    "kicker": "Join Lagna Atelier",
-    "heading": "Create Account",
-    "lead": "Unlock advanced Vedic astrology modules — Nakshatra, Dasha, Aspects, Navamsa and Transits.",
-    "displayName": "Display Name",
-    "displayNamePlaceholder": "Your name",
-    "email": "Email",
-    "emailPlaceholder": "you@example.com",
-    "password": "Password",
-    "passwordPlaceholder": "At least 6 characters",
-    "confirmPassword": "Confirm Password",
-    "confirmPasswordPlaceholder": "Repeat your password",
-    "passwordMismatch": "Passwords do not match.",
-    "submit": "Create Account",
-    "submitting": "Creating account…",
-    "switchText": "Already have an account?",
-    "switchLink": "Sign in",
-    "redirecting": "Redirecting…"
-  },
   "chartHistory": {
     "welcomeHeading": "Welcome",
-    "welcomeText": "Your account is ready. Fill in birth details below to generate your first Vedic astrology chart — complete with Nakshatra, Dasha, Aspects, Navamsa, and Transit analysis.",
+    "welcomeText": "Your profile is ready. Fill in birth details below to generate your first chart.",
     "pickUp": "Pick Up Where You Left Off",
     "viewChart": "View Chart",
     "divider": "or create a new chart"
@@ -281,9 +242,6 @@
     "julianDay": "Julian Day UT",
     "julianDaySub": "Swiss Ephemeris timebase",
     "engine": "Engine",
-    "dataStorage": "Data Storage",
-    "saved": "Saved",
-    "notSaved": "Not Saved",
     "coreKicker": "Rule Engine Output",
     "coreHeading": "Core Analysis",
     "careerKicker": "Career Intelligence",
@@ -365,8 +323,6 @@
     "advancedHeading": "Advanced Vedic Modules",
     "palmKicker": "Palmistry",
     "palmHeading": "Palm Reading Analysis",
-    "allFeatures": "All features unlocked",
-    "limitedResponse": "Limited response",
     "ascendantSign": "Ascendant Sign"
   },
   "dasha": {
@@ -423,13 +379,6 @@
     "applying": "Applying",
     "separating": "Separating"
   },
-  "authGate": {
-    "loading": "Loading…",
-    "unlock": "Unlock {feature}",
-    "description": "Create a free account to access Nakshatra, Dasha, Aspects, Navamsa, and Transit insights.",
-    "createAccount": "Create Account",
-    "signIn": "Sign In"
-  },
   "compatibility": {
     "kicker": "Synastry Analysis",
     "heading": "Compatibility Check",
@@ -441,24 +390,6 @@
     "incompleteProfiles": "Both birth profiles need complete date, time, location, and timezone data.",
     "generating": "Generating compatibility analysis...",
     "error": "Something went wrong. Please try again."
-  },
-  "pricing": {
-    "kicker": "Pricing",
-    "heading": "Open access and account labels",
-    "activePlan": "Active plan",
-    "accountLabel": "Your account label is",
-    "browsingAsGuest": "You are currently browsing as guest. All chart-reading features are unlocked.",
-    "featureMatrixKicker": "Feature Matrix",
-    "featureMatrixHeading": "Current access state",
-    "guestName": "Guest",
-    "proName": "Pro",
-    "ultimateName": "Ultimate",
-    "guestDesc": "Guest mode starts here by default",
-    "proDesc": "Create an account only if you want synced workspace storage",
-    "ultimateDesc": "All chart-reading features are already unlocked",
-    "included": "Included",
-    "accountRequired": "Account required",
-    "comingSoon": "Coming soon"
   },
   "workspace": {
     "loading": "Loading your saved astrology workspace...",
@@ -478,7 +409,6 @@
     "home": "Home",
     "insights": "Insights",
     "saved": "Saved",
-    "plans": "Plans",
     "calendar": "Calendar"
   },
   "errorBoundary": {
@@ -584,5 +514,28 @@
     "mars": "Mars",
     "jupiter": "Jupiter",
     "saturn": "Saturn"
+  },
+  "profiles": {
+    "kicker": "This Device",
+    "heading": "Choose a profile",
+    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser.",
+    "active": "Active",
+    "opening": "Opening…",
+    "addDivider": "or add someone",
+    "nameLabel": "Profile name",
+    "create": "Create profile",
+    "rename": "Rename",
+    "renameLabel": "New profile name",
+    "saveName": "Save name",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Confirm delete",
+    "deleteWarning": "This erases every chart and reading saved under this profile.",
+    "full": "This device holds all {max} profiles. Delete one to add another.",
+    "storageNote": "Up to {max} profiles per device. Everything is stored in this browser only.",
+    "switchFailed": "Could not switch profile.",
+    "createFailed": "Could not create profile.",
+    "renameFailed": "Could not rename profile.",
+    "deleteFailed": "Could not delete profile."
   }
 }

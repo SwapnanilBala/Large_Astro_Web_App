@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { buildAuthCallbackUrl, resolvePostAuthDestination } from "@/lib/post-auth-redirect";
+import { resolveProfileDestination } from "@/lib/profile-redirect";
+import { chartHistoryKey } from "@/lib/chart-history-store";
 import { listSavedCharts } from "@/lib/workspace-store";
 
 vi.mock("@/lib/workspace-store", () => ({
@@ -8,33 +9,39 @@ vi.mock("@/lib/workspace-store", () => ({
 
 const mockedListSavedCharts = vi.mocked(listSavedCharts);
 
+const PROFILE = "profile-1";
+
 const completeQuery =
   "name=Asha&birthDate=1992-05-12&birthTime=08%3A30&timezoneOffsetMinutes=330&latitude=22.57&longitude=88.36&country=India&state=West+Bengal&city=Kolkata&engineId=lahiri_classic";
 
-describe("post-auth redirects", () => {
+describe("profile redirects", () => {
   beforeEach(() => {
     localStorage.clear();
     mockedListSavedCharts.mockReset();
     mockedListSavedCharts.mockResolvedValue([]);
   });
 
-  it("routes returning local chart users to engine selection", async () => {
+  it("routes a profile with chart history to engine selection", async () => {
     localStorage.setItem(
-      "astro_chart_history",
+      chartHistoryKey(PROFILE),
       JSON.stringify([
         {
+          name: "Asha",
+          city: "Kolkata",
+          birthDate: "1992-05-12",
+          ascendantSign: "Leo",
           queryString: completeQuery,
           savedAt: "2026-04-27T10:00:00.000Z",
         },
       ])
     );
 
-    await expect(resolvePostAuthDestination("user-1", "/")).resolves.toBe(
+    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe(
       `/engine-select?${completeQuery}`
     );
   });
 
-  it("routes returning remote chart users to engine selection", async () => {
+  it("routes a profile with a saved chart to engine selection", async () => {
     mockedListSavedCharts.mockResolvedValue([
       {
         saved_chart_id: "chart-1",
@@ -58,16 +65,23 @@ describe("post-auth redirects", () => {
       },
     ]);
 
-    await expect(resolvePostAuthDestination("user-1", "/")).resolves.toBe(
+    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe(
       `/engine-select?${completeQuery}`
     );
   });
 
-  it("keeps new users on a safe internal fallback", async () => {
-    await expect(resolvePostAuthDestination("user-1", "https://example.com")).resolves.toBe("/");
+  it("does not leak another profile's chart history", async () => {
+    localStorage.setItem(
+      chartHistoryKey("someone-else"),
+      JSON.stringify([{ name: "Asha", queryString: completeQuery, savedAt: "2026-04-27T10:00:00.000Z" }])
+    );
+
+    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe("/");
   });
 
-  it("builds a same-origin auth callback URL", () => {
-    expect(buildAuthCallbackUrl("/pricing")).toBe("http://localhost:3000/auth/callback?next=%2Fpricing");
+  it("keeps new profiles on a safe internal fallback", async () => {
+    await expect(
+      resolveProfileDestination(PROFILE, "https://example.com")
+    ).resolves.toBe("/");
   });
 });

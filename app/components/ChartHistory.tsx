@@ -2,11 +2,11 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
+import { readChartHistory, type ChartHistoryEntry } from "@/lib/chart-history-store";
 import { listSavedCharts } from "@/lib/workspace-store";
 import { HiOutlineSparkles } from "react-icons/hi2";
-import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
 
 type ChartHistoryProps = {
   userName?: string;
@@ -32,15 +32,6 @@ function getSignColor(sign?: string): string | null {
   if (!sign) return null;
   const normalized = sign.trim();
   return SIGN_COLORS[normalized] ?? null;
-}
-
-function loadLocalEntries(): ChartHistoryEntry[] {
-  try {
-    const raw = localStorage.getItem("astro_chart_history");
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
 }
 
 /* ── 3D tilt card wrapper ── */
@@ -106,24 +97,22 @@ function TiltCard({
 }
 
 export default function ChartHistory({ userName }: ChartHistoryProps) {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isLoading, profileId } = useProfile();
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ChartHistoryEntry[]>([]);
   const router = useRouter();
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    setEntries(loadLocalEntries());
-  }, [isAuthenticated]);
+    // Clear first so a profile switch never shows the previous profile's charts.
+    setEntries(readChartHistory(profileId));
 
-  useEffect(() => {
-    if (!isAuthenticated || !user) return;
+    if (!profileId) return;
 
     let isCancelled = false;
 
     const loadSavedCharts = async () => {
       try {
-        const data = await listSavedCharts(user.user_id);
+        const data = await listSavedCharts(profileId);
         if (isCancelled || data.length === 0) return;
 
         setEntries(
@@ -137,7 +126,7 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
           }))
         );
       } catch {
-        /* ignore and keep local fallback */
+        /* ignore and keep the history fallback */
       }
     };
 
@@ -146,9 +135,9 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
     return () => {
       isCancelled = true;
     };
-  }, [isAuthenticated, user]);
+  }, [profileId]);
 
-  if (isLoading || !isAuthenticated) {
+  if (isLoading) {
     return null;
   }
 

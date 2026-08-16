@@ -4,7 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiAlertTriangle, FiCalendar, FiClock, FiRefreshCw, FiStar } from "react-icons/fi";
 import BackButton from "../components/BackButton";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import { readChartHistory } from "@/lib/chart-history-store";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import type {
   CalendarPlannerDay,
@@ -31,7 +32,6 @@ type ChartOption = {
   source: "workspace" | "recent";
 };
 
-const STORAGE_KEY = "astro_chart_history";
 const RANGE_OPTIONS = [
   { label: "7 days", days: 7 },
   { label: "10 days", days: 10 },
@@ -78,12 +78,9 @@ function formatWindowRange(window: CalendarPlannerWindow) {
   return `${formatter.format(new Date(window.start))} - ${formatter.format(new Date(window.end))}`;
 }
 
-function normalizeRecentCharts(): ChartOption[] {
+function normalizeRecentCharts(profileId: string | null): ChartOption[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const entries = JSON.parse(raw) as ChartHistoryEntry[];
-    if (!Array.isArray(entries)) return [];
+    const entries: ChartHistoryEntry[] = readChartHistory(profileId);
 
     return entries
       .filter((entry) => entry.queryString)
@@ -204,7 +201,7 @@ function buildPlannerSummary(planner: CalendarPlannerResponse, selectedIntent: C
 }
 
 export default function CalendarPageClient() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isLoading, profileId } = useProfile();
   const [chartOptions, setChartOptions] = useState<ChartOption[]>([]);
   const [selectedChartId, setSelectedChartId] = useState("");
   const [startDate, setStartDate] = useState(() => localDateString());
@@ -223,28 +220,27 @@ export default function CalendarPageClient() {
   const selectedIntentLabel = INTENTS.find((item) => item.value === intent)?.label ?? "All signals";
 
   useEffect(() => {
+    // Drop the previous profile's selection so its planner cannot linger.
+    setChartOptions([]);
+    setSelectedChartId("");
+    setPlanner(null);
+
+    if (!profileId) return;
+
     let isCancelled = false;
 
     const loadCharts = async () => {
       try {
-        const recentCharts = normalizeRecentCharts();
-        if (isAuthenticated && user) {
-          const savedCharts = await listSavedCharts(user.user_id);
-          if (isCancelled) return;
+        const recentCharts = normalizeRecentCharts(profileId);
+        const savedCharts = await listSavedCharts(profileId);
+        if (isCancelled) return;
 
-          const workspaceCharts = savedCharts.map(chartRecordToOption);
-          const seen = new Set(workspaceCharts.map((chart) => chart.queryString));
-          const uniqueRecent = recentCharts.filter((chart) => !seen.has(chart.queryString));
-          const nextCharts = [...workspaceCharts, ...uniqueRecent];
-          setChartOptions(nextCharts);
-          setSelectedChartId((previous) => previous || nextCharts[0]?.id || "");
-          return;
-        }
-
-        if (!isLoading) {
-          setChartOptions(recentCharts);
-          setSelectedChartId((previous) => previous || recentCharts[0]?.id || "");
-        }
+        const workspaceCharts = savedCharts.map(chartRecordToOption);
+        const seen = new Set(workspaceCharts.map((chart) => chart.queryString));
+        const uniqueRecent = recentCharts.filter((chart) => !seen.has(chart.queryString));
+        const nextCharts = [...workspaceCharts, ...uniqueRecent];
+        setChartOptions(nextCharts);
+        setSelectedChartId(nextCharts[0]?.id ?? "");
       } catch (error) {
         setPageError(error instanceof Error ? error.message : "Could not load saved charts.");
       }
@@ -255,7 +251,7 @@ export default function CalendarPageClient() {
     return () => {
       isCancelled = true;
     };
-  }, [isAuthenticated, isLoading, user]);
+  }, [profileId]);
 
   const loadPlanner = useCallback(async () => {
     if (!selectedChart) return;

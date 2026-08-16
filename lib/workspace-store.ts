@@ -1,5 +1,12 @@
+/**
+ * Saved charts and comparisons for one local profile.
+ *
+ * Everything lives in `localStorage` under a profile-scoped key — there is no
+ * remote backend. `profileId` comes from `lib/local-profiles`.
+ */
+
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
-import { getSupabaseBrowserClient } from "@/lib/supabase/client";
+import { profileScopedKey } from "@/lib/local-profiles";
 
 type SavedChartInput = Omit<
   SavedChartRecord,
@@ -23,10 +30,6 @@ type WorkspaceSnapshot = {
 
 const LOCAL_CHARTS_PREFIX = "astro_workspace_saved_charts";
 const LOCAL_COMPARISONS_PREFIX = "astro_workspace_saved_comparisons";
-
-function scopedStorageKey(prefix: string, userId: string) {
-  return `${prefix}:${userId}`;
-}
 
 function nowIso() {
   return new Date().toISOString();
@@ -55,7 +58,12 @@ function writeLocalCollection<T>(storageKey: string, value: T[]) {
   if (typeof window === "undefined") {
     return;
   }
-  window.localStorage.setItem(storageKey, JSON.stringify(value));
+  try {
+    window.localStorage.setItem(storageKey, JSON.stringify(value));
+  } catch {
+    // Quota exceeded or storage blocked — the caller still gets the record it
+    // built, it just will not survive a reload.
+  }
 }
 
 function sortByUpdatedAt<T extends { updated_at: string }>(items: T[]) {
@@ -65,34 +73,42 @@ function sortByUpdatedAt<T extends { updated_at: string }>(items: T[]) {
   );
 }
 
-function chartsStorageKey(userId: string) {
-  return scopedStorageKey(LOCAL_CHARTS_PREFIX, userId);
+function chartsStorageKey(profileId: string) {
+  return profileScopedKey(LOCAL_CHARTS_PREFIX, profileId);
 }
 
-function comparisonsStorageKey(userId: string) {
-  return scopedStorageKey(LOCAL_COMPARISONS_PREFIX, userId);
+function comparisonsStorageKey(profileId: string) {
+  return profileScopedKey(LOCAL_COMPARISONS_PREFIX, profileId);
 }
 
-function readLocalCharts(userId: string) {
-  return sortByUpdatedAt(readLocalCollection<SavedChartRecord>(chartsStorageKey(userId)));
+function readLocalCharts(profileId: string) {
+  return sortByUpdatedAt(readLocalCollection<SavedChartRecord>(chartsStorageKey(profileId)));
 }
 
-function writeLocalCharts(userId: string, charts: SavedChartRecord[]) {
-  writeLocalCollection(chartsStorageKey(userId), sortByUpdatedAt(charts));
+function writeLocalCharts(profileId: string, charts: SavedChartRecord[]) {
+  writeLocalCollection(chartsStorageKey(profileId), sortByUpdatedAt(charts));
 }
 
-function readLocalComparisons(userId: string) {
+function readLocalComparisons(profileId: string) {
   return sortByUpdatedAt(
-    readLocalCollection<SavedComparisonRecord>(comparisonsStorageKey(userId))
+    readLocalCollection<SavedComparisonRecord>(comparisonsStorageKey(profileId))
   );
 }
 
-function writeLocalComparisons(userId: string, comparisons: SavedComparisonRecord[]) {
-  writeLocalCollection(comparisonsStorageKey(userId), sortByUpdatedAt(comparisons));
+function writeLocalComparisons(profileId: string, comparisons: SavedComparisonRecord[]) {
+  writeLocalCollection(comparisonsStorageKey(profileId), sortByUpdatedAt(comparisons));
 }
 
-function upsertLocalChart(userId: string, payload: SavedChartInput) {
-  const charts = readLocalCharts(userId);
+export async function listSavedCharts(profileId: string): Promise<SavedChartRecord[]> {
+  return readLocalCharts(profileId);
+}
+
+/** Upsert on (name, birth_date, birth_time) so recalculating a chart updates it. */
+export async function saveChart(
+  profileId: string,
+  payload: SavedChartInput
+): Promise<SavedChartRecord> {
+  const charts = readLocalCharts(profileId);
   const existing = charts.find(
     (chart) =>
       chart.name === payload.name &&
@@ -121,12 +137,62 @@ function upsertLocalChart(userId: string, payload: SavedChartInput) {
         chart.saved_chart_id === existing.saved_chart_id ? nextRecord : chart
       )
     : [nextRecord, ...charts];
-  writeLocalCharts(userId, nextCharts);
+  writeLocalCharts(profileId, nextCharts);
   return nextRecord;
 }
 
-function upsertLocalComparison(userId: string, payload: SavedComparisonInput) {
-  const comparisons = readLocalComparisons(userId);
+export async function updateSavedChartNotes(
+  profileId: string,
+  savedChartId: string,
+  notes: string
+): Promise<SavedChartRecord | null> {
+  const charts = readLocalCharts(profileId);
+  const updated = charts.map((chart) =>
+    chart.saved_chart_id === savedChartId
+      ? { ...chart, notes, updated_at: nowIso() }
+      : chart
+  );
+  writeLocalCharts(profileId, updated);
+  return updated.find((chart) => chart.saved_chart_id === savedChartId) ?? null;
+}
+
+export async function toggleSavedChartArchive(
+  profileId: string,
+  savedChartId: string,
+  archived: boolean
+): Promise<SavedChartRecord | null> {
+  const archivedAt = archived ? nowIso() : null;
+  const charts = readLocalCharts(profileId);
+  const updated = charts.map((chart) =>
+    chart.saved_chart_id === savedChartId
+      ? { ...chart, archived_at: archivedAt, updated_at: nowIso() }
+      : chart
+  );
+  writeLocalCharts(profileId, updated);
+  return updated.find((chart) => chart.saved_chart_id === savedChartId) ?? null;
+}
+
+export async function deleteSavedChart(
+  profileId: string,
+  savedChartId: string
+): Promise<boolean> {
+  const charts = readLocalCharts(profileId);
+  const nextCharts = charts.filter((chart) => chart.saved_chart_id !== savedChartId);
+  writeLocalCharts(profileId, nextCharts);
+  return nextCharts.length !== charts.length;
+}
+
+export async function listSavedComparisons(
+  profileId: string
+): Promise<SavedComparisonRecord[]> {
+  return readLocalComparisons(profileId);
+}
+
+export async function saveComparison(
+  profileId: string,
+  payload: SavedComparisonInput
+): Promise<SavedComparisonRecord> {
+  const comparisons = readLocalComparisons(profileId);
   const timestamp = nowIso();
   const nextRecord: SavedComparisonRecord = {
     ...payload,
@@ -136,287 +202,67 @@ function upsertLocalComparison(userId: string, payload: SavedComparisonInput) {
     updated_at: timestamp,
     archived_at: null,
   };
-  writeLocalComparisons(userId, [nextRecord, ...comparisons]);
+  writeLocalComparisons(profileId, [nextRecord, ...comparisons]);
   return nextRecord;
 }
 
-export async function listSavedCharts(userId: string): Promise<SavedChartRecord[]> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    return readLocalCharts(userId);
-  }
-
-  const { data, error } = await supabase
-    .from("saved_charts")
-    .select("*")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
-
-  if (error || !data) {
-    return readLocalCharts(userId);
-  }
-
-  return data as SavedChartRecord[];
-}
-
-export async function saveChart(userId: string, payload: SavedChartInput): Promise<SavedChartRecord> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    return upsertLocalChart(userId, payload);
-  }
-
-  const { data, error } = await supabase
-    .from("saved_charts")
-    .upsert(
-      {
-        user_id: userId,
-        ...payload,
-        notes: payload.notes ?? "",
-      },
-      {
-        onConflict: "user_id,name,birth_date,birth_time",
-      }
-    )
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return upsertLocalChart(userId, payload);
-  }
-
-  return data as SavedChartRecord;
-}
-
-export async function updateSavedChartNotes(
-  userId: string,
-  savedChartId: string,
-  notes: string
-): Promise<SavedChartRecord | null> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const charts = readLocalCharts(userId);
-    const updated = charts.map((chart) =>
-      chart.saved_chart_id === savedChartId
-        ? { ...chart, notes, updated_at: nowIso() }
-        : chart
-    );
-    writeLocalCharts(userId, updated);
-    return updated.find((chart) => chart.saved_chart_id === savedChartId) ?? null;
-  }
-
-  const { data, error } = await supabase
-    .from("saved_charts")
-    .update({ notes })
-    .eq("saved_chart_id", savedChartId)
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as SavedChartRecord;
-}
-
-export async function toggleSavedChartArchive(
-  userId: string,
-  savedChartId: string,
-  archived: boolean
-): Promise<SavedChartRecord | null> {
-  const archivedAt = archived ? nowIso() : null;
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const charts = readLocalCharts(userId);
-    const updated = charts.map((chart) =>
-      chart.saved_chart_id === savedChartId
-        ? { ...chart, archived_at: archivedAt, updated_at: nowIso() }
-        : chart
-    );
-    writeLocalCharts(userId, updated);
-    return updated.find((chart) => chart.saved_chart_id === savedChartId) ?? null;
-  }
-
-  const { data, error } = await supabase
-    .from("saved_charts")
-    .update({ archived_at: archivedAt })
-    .eq("saved_chart_id", savedChartId)
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as SavedChartRecord;
-}
-
-export async function deleteSavedChart(userId: string, savedChartId: string): Promise<boolean> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const charts = readLocalCharts(userId);
-    const nextCharts = charts.filter((chart) => chart.saved_chart_id !== savedChartId);
-    writeLocalCharts(userId, nextCharts);
-    return nextCharts.length !== charts.length;
-  }
-
-  const { error } = await supabase
-    .from("saved_charts")
-    .delete()
-    .eq("saved_chart_id", savedChartId)
-    .eq("user_id", userId);
-  return !error;
-}
-
-export async function listSavedComparisons(
-  userId: string
-): Promise<SavedComparisonRecord[]> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    return readLocalComparisons(userId);
-  }
-
-  const { data, error } = await supabase
-    .from("saved_comparisons")
-    .select("*")
-    .eq("user_id", userId)
-    .order("updated_at", { ascending: false });
-
-  if (error || !data) {
-    return readLocalComparisons(userId);
-  }
-
-  return data as SavedComparisonRecord[];
-}
-
-export async function saveComparison(
-  userId: string,
-  payload: SavedComparisonInput
-): Promise<SavedComparisonRecord> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    return upsertLocalComparison(userId, payload);
-  }
-
-  const { data, error } = await supabase
-    .from("saved_comparisons")
-    .insert({
-      user_id: userId,
-      ...payload,
-      notes: payload.notes ?? "",
-    })
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return upsertLocalComparison(userId, payload);
-  }
-
-  return data as SavedComparisonRecord;
-}
-
 export async function updateSavedComparisonNotes(
-  userId: string,
+  profileId: string,
   savedComparisonId: string,
   notes: string
 ): Promise<SavedComparisonRecord | null> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const comparisons = readLocalComparisons(userId);
-    const updated = comparisons.map((comparison) =>
-      comparison.saved_comparison_id === savedComparisonId
-        ? { ...comparison, notes, updated_at: nowIso() }
-        : comparison
-    );
-    writeLocalComparisons(userId, updated);
-    return (
-      updated.find(
-        (comparison) => comparison.saved_comparison_id === savedComparisonId
-      ) ?? null
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("saved_comparisons")
-    .update({ notes })
-    .eq("saved_comparison_id", savedComparisonId)
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as SavedComparisonRecord;
+  const comparisons = readLocalComparisons(profileId);
+  const updated = comparisons.map((comparison) =>
+    comparison.saved_comparison_id === savedComparisonId
+      ? { ...comparison, notes, updated_at: nowIso() }
+      : comparison
+  );
+  writeLocalComparisons(profileId, updated);
+  return (
+    updated.find(
+      (comparison) => comparison.saved_comparison_id === savedComparisonId
+    ) ?? null
+  );
 }
 
 export async function toggleSavedComparisonArchive(
-  userId: string,
+  profileId: string,
   savedComparisonId: string,
   archived: boolean
 ): Promise<SavedComparisonRecord | null> {
   const archivedAt = archived ? nowIso() : null;
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const comparisons = readLocalComparisons(userId);
-    const updated = comparisons.map((comparison) =>
-      comparison.saved_comparison_id === savedComparisonId
-        ? { ...comparison, archived_at: archivedAt, updated_at: nowIso() }
-        : comparison
-    );
-    writeLocalComparisons(userId, updated);
-    return (
-      updated.find(
-        (comparison) => comparison.saved_comparison_id === savedComparisonId
-      ) ?? null
-    );
-  }
-
-  const { data, error } = await supabase
-    .from("saved_comparisons")
-    .update({ archived_at: archivedAt })
-    .eq("saved_comparison_id", savedComparisonId)
-    .eq("user_id", userId)
-    .select("*")
-    .single();
-
-  if (error || !data) {
-    return null;
-  }
-
-  return data as SavedComparisonRecord;
+  const comparisons = readLocalComparisons(profileId);
+  const updated = comparisons.map((comparison) =>
+    comparison.saved_comparison_id === savedComparisonId
+      ? { ...comparison, archived_at: archivedAt, updated_at: nowIso() }
+      : comparison
+  );
+  writeLocalComparisons(profileId, updated);
+  return (
+    updated.find(
+      (comparison) => comparison.saved_comparison_id === savedComparisonId
+    ) ?? null
+  );
 }
 
 export async function deleteSavedComparison(
-  userId: string,
+  profileId: string,
   savedComparisonId: string
 ): Promise<boolean> {
-  const supabase = getSupabaseBrowserClient();
-  if (!supabase) {
-    const comparisons = readLocalComparisons(userId);
-    const nextComparisons = comparisons.filter(
-      (comparison) => comparison.saved_comparison_id !== savedComparisonId
-    );
-    writeLocalComparisons(userId, nextComparisons);
-    return nextComparisons.length !== comparisons.length;
-  }
-
-  const { error } = await supabase
-    .from("saved_comparisons")
-    .delete()
-    .eq("saved_comparison_id", savedComparisonId)
-    .eq("user_id", userId);
-  return !error;
+  const comparisons = readLocalComparisons(profileId);
+  const nextComparisons = comparisons.filter(
+    (comparison) => comparison.saved_comparison_id !== savedComparisonId
+  );
+  writeLocalComparisons(profileId, nextComparisons);
+  return nextComparisons.length !== comparisons.length;
 }
 
 export async function exportWorkspaceSnapshot(
-  userId: string
+  profileId: string
 ): Promise<WorkspaceSnapshot> {
   const [charts, comparisons] = await Promise.all([
-    listSavedCharts(userId),
-    listSavedComparisons(userId),
+    listSavedCharts(profileId),
+    listSavedComparisons(profileId),
   ]);
 
   return {

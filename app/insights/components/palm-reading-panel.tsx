@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
+import { savePalmReading } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "./PalmAnnotation";
 
 /* ────────────────────────────────────────────────
@@ -208,7 +209,7 @@ type PalmReadingPanelProps = {
 };
 
 export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelProps = {}) {
-  const { token, isAuthenticated, isPremium } = useAuth();
+  const { profileId } = useProfile();
 
   /* ── state ── */
   const [phase, setPhase] = useState<Phase>("idle");
@@ -460,21 +461,12 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   /* ── API call ── */
   const analyzePalm = async () => {
     if (!imageData) return;
-    if (!isAuthenticated || !token) {
-      setError("Sign in to use palm reading.");
-      return;
-    }
-    if (!isPremium) {
-      setError("Palm reading requires an active premium plan.");
-      return;
-    }
 
     setPhase("analyzing");
     setError(null);
     try {
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       };
       const body: Record<string, unknown> = { image: imageData, mediaType };
       if (classicalMode) body.classicalMode = true;
@@ -600,33 +592,22 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const saveReading = async () => {
     if (!reading || !imagePreview) return;
     if (saveState === "saving" || saveState === "saved") return;
-    if (!isAuthenticated || !token) {
-      setSaveError("Sign in to save readings.");
+    if (!profileId) {
+      setSaveError("Choose a profile before saving readings.");
       setSaveState("error");
       return;
     }
     setSaveState("saving");
     setSaveError(null);
     try {
-      const res = await fetch("/api/palm-readings", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          image_data_url: imagePreview,
-          reading,
-          jyotish_context: jyotishContext ?? null,
-          classical_mode: classicalMode,
-        }),
+      // The store downscales the image before writing — a full-resolution palm
+      // photo would exhaust the browser's storage quota on its own.
+      await savePalmReading(profileId, {
+        image_data_url: imagePreview,
+        reading,
+        jyotish_context: jyotishContext ?? null,
+        classical_mode: classicalMode,
       });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(
-          (err && (err.error?.message || err.detail)) || "Failed to save reading",
-        );
-      }
       setSaveState("saved");
     } catch (e) {
       setSaveError(e instanceof Error ? e.message : "Failed to save reading");
@@ -675,7 +656,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       {phase === "idle" && (
         <div className="palm-idle">
           <div className="palm-header">
-            <span className="palm-kicker">Pro Feature</span>
+            <span className="palm-kicker">Palm Reading</span>
             <h2 className="palm-heading">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8, verticalAlign: "middle" }}>
                 <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0" />
@@ -861,7 +842,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 className="palm-save-btn"
                 onClick={saveReading}
                 disabled={saveState === "saving" || saveState === "saved"}
-                title={saveState === "saved" ? "Already saved" : "Save this reading to your account"}
+                title={saveState === "saved" ? "Already saved" : "Save this reading to this device"}
               >
                 {saveState === "saving"
                   ? "Saving…"

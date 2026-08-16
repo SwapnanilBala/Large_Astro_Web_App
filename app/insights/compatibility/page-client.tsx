@@ -9,7 +9,7 @@ import BackButton from "@/app/components/BackButton";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
-import { useAuth } from "@/lib/auth-context";
+import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
 import { useToast } from "@/lib/toast-context";
@@ -413,7 +413,7 @@ function buildCompatibilityQueryString(primary: ProfileQueryInput, partner: Prof
 export default function CompatibilityPageClient({
   initialSearchParams,
 }: CompatibilityPageClientProps) {
-  const { isAuthenticated, user } = useAuth();
+  const { profileId } = useProfile();
   const { t } = useTranslation();
   const { pushToast } = useToast();
   const [primary, setPrimary] = useState<ProfileQueryInput>(() =>
@@ -461,8 +461,8 @@ export default function CompatibilityPageClient({
       }
 
       const payload = (await response.json()) as CompatibilityApiResponse;
-      if (saveResult && user) {
-        const saved = await saveComparison(user.user_id, {
+      if (saveResult && profileId) {
+        const saved = await saveComparison(profileId, {
           primary_name: payload.primary_client.name,
           partner_name: payload.partner_client.name,
           compatibility_score: payload.compatibility_score,
@@ -482,7 +482,7 @@ export default function CompatibilityPageClient({
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, partner, primary, pushToast, user]);
+  }, [canSubmit, partner, primary, profileId, pushToast]);
 
   const shareCompatibility = async () => {
     const url = `${window.location.origin}/insights/compatibility?${buildCompatibilityQueryString(primary, partner)}`;
@@ -532,7 +532,7 @@ export default function CompatibilityPageClient({
         <h1>Compatibility workspace</h1>
         <p className="lead">
           Compare two full birth profiles, inspect the strongest synastry links, and save the report
-          into your Supabase-backed account workspace.
+          into this profile&apos;s workspace on this device.
         </p>
 
         <div className="compatibility-grid">
@@ -547,7 +547,7 @@ export default function CompatibilityPageClient({
           <button
             type="button"
             onClick={() => void submitCompatibility(true)}
-            disabled={isSubmitting || !isAuthenticated}
+            disabled={isSubmitting}
           >
             {isSubmitting ? "Saving..." : "Save to workspace"}
           </button>
@@ -558,11 +558,6 @@ export default function CompatibilityPageClient({
           >
             Share compatibility
           </button>
-          {!isAuthenticated && (
-            <Link href="/login" className="ghost-link">
-              Sign in to save reports
-            </Link>
-          )}
         </div>
 
         {error && <p className="error-note">{error}</p>}

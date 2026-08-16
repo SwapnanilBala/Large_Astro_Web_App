@@ -21,7 +21,7 @@ import GradientBlobs from "./components/GradientBlobs";
 import Navbar from "./components/Navbar";
 import BottomNav from "./components/BottomNav";
 import ViewportScaler from "./components/ViewportScaler";
-import { AuthProvider } from "@/lib/auth-context";
+import { ProfileProvider } from "@/lib/profile-context";
 import { LanguageProvider } from "@/lib/i18n-context";
 import { ToastProvider } from "@/lib/toast-context";
 
@@ -70,13 +70,13 @@ export default function RootLayout({
         <GradientBlobs />
         <LanguageProvider>
           <ToastProvider>
-            <AuthProvider>
+            <ProfileProvider>
               <Navbar />
               <main id="main-content" tabIndex={-1}>
                 {children}
               </main>
               <BottomNav />
-            </AuthProvider>
+            </ProfileProvider>
           </ToastProvider>
         </LanguageProvider>
         {process.env.NODE_ENV === "production" && (
