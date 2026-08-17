@@ -21,6 +21,14 @@ import {
   getBirthTimeFallback,
   hasCoarseTimeFallback,
 } from "@/lib/birth-time";
+import {
+  normalizeBirthDate,
+  normalizeBirthTime,
+  normalizeCoordinate,
+  normalizeCoordinatePair,
+  normalizePersonName,
+  normalizePlaceName,
+} from "@/lib/intake-normalize";
 import { useProfile } from "@/lib/profile-context";
 import { profileScopedKey } from "@/lib/local-profiles";
 import { useTranslation } from "@/lib/i18n-context";
@@ -743,100 +751,58 @@ export default function Home() {
     draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
   }, []);
 
-  // Smart fill parser - handles various formats
+  /* Smart fill: one comma-separated line into the whole form.
+   *
+   * Each part is handed to the same normalisers the individual fields use, so
+   * a date or time pasted here is read — and repaired — exactly as it would be
+   * if it had been typed into its own box. The parts are matched by what they
+   * parse as rather than by position, because people write the birth moment in
+   * either order and sometimes leave the time out entirely. */
   const parseSmartFill = (text: string) => {
-    const parts = text.split(',').map(p => p.trim());
+    const parts = text.split(",").map((part) => part.trim()).filter(Boolean);
     if (parts.length < 3) return null;
 
     const parsed: Partial<ProfileQueryInput> = {};
-    let partIndex = 0;
+    const leftovers: string[] = [];
 
-    // Extract name (first part)
-    if (parts[partIndex]) {
-      parsed.name = parts[partIndex];
-      partIndex++;
-    }
-
-    // Extract date (various formats: "14 Mar 1995", "March 14 1995", "1995-03-14")
-    if (parts[partIndex]) {
-      const dateStr = parts[partIndex];
-      const dateMatch = dateStr.match(/(\d{1,2})\s+(\w+)\s+(\d{4})/) || 
-                       dateStr.match(/(\w+)\s+(\d{1,2}),?\s+(\d{4})/) ||
-                       dateStr.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-      
-      if (dateMatch) {
-        const months: Record<string, string> = {
-          jan: '01', january: '01',
-          feb: '02', february: '02',
-          mar: '03', march: '03',
-          apr: '04', april: '04',
-          may: '05',
-          jun: '06', june: '06',
-          jul: '07', july: '07',
-          aug: '08', august: '08',
-          sep: '09', september: '09',
-          oct: '10', october: '10',
-          nov: '11', november: '11',
-          dec: '12', december: '12'
-        };
-        
-        let year, month, day;
-        if (dateStr.match(/\d{4}-\d{1,2}-\d{1,2}/)) {
-          [year, month, day] = [dateMatch[1], dateMatch[2].padStart(2, '0'), dateMatch[3].padStart(2, '0')];
-        } else {
-          const [, dOrM, mOrD, y] = dateMatch;
-          if (parseInt(dOrM) > 31) {
-            // First part is month name
-            const monthNum = months[mOrD.toLowerCase()] || mOrD.padStart(2, '0');
-            [year, month, day] = [y, monthNum, dOrM.padStart(2, '0')];
-          } else {
-            // First part is day
-            const monthNum = months[mOrD.toLowerCase()] || mOrD.padStart(2, '0');
-            [year, month, day] = [y, monthNum, dOrM.padStart(2, '0')];
-          }
+    parts.forEach((part, index) => {
+      if (index === 0) {
+        const name = normalizePersonName(part);
+        if (name.value) {
+          parsed.name = name.value;
+          return;
         }
-        parsed.birthDate = `${year}-${month}-${day}`;
-        partIndex++;
       }
-    }
 
-    // Extract time (various formats: "3:45 PM", "15:45", "3.45pm")
-    if (parts[partIndex]) {
-      const timeStr = parts[partIndex];
-      const timeMatch = timeStr.match(/(\d{1,2})[:.](\d{2})\s*(am|pm)?/i);
-      
-      if (timeMatch) {
-        const [, hours, minutes, meridiem] = timeMatch;
-        let h = parseInt(hours);
-        const m = minutes;
-        
-        if (meridiem?.toLowerCase() === 'pm' && h !== 12) {
-          h += 12;
-        } else if (meridiem?.toLowerCase() === 'am' && h === 12) {
-          h = 0;
+      if (!parsed.birthDate) {
+        const date = normalizeBirthDate(part);
+        if (date.value) {
+          parsed.birthDate = date.value;
+          return;
         }
-        
-        parsed.birthTime = `${String(h).padStart(2, '0')}:${m}`;
-        partIndex++;
       }
-    }
 
-    // Extract location (remaining parts combined)
-    if (parts[partIndex]) {
-      const locationParts = parts.slice(partIndex);
-      // Try to parse as "City, State Country" or "City, Country"
-      if (locationParts.length >= 2) {
-        parsed.city = locationParts[0];
-        parsed.state = locationParts[1];
-        if (locationParts[2]) {
-          parsed.country = locationParts[2];
-        } else {
-          parsed.country = locationParts[1];
-          parsed.state = "";
+      if (!parsed.birthTime) {
+        const time = normalizeBirthTime(part);
+        if (time.value) {
+          parsed.birthTime = time.value;
+          return;
         }
-      } else {
-        parsed.city = locationParts[0];
       }
+
+      leftovers.push(part);
+    });
+
+    /* Whatever is left is the place, written outward: "City, State, Country". */
+    const place = leftovers.map((part) => normalizePlaceName(part).value || part);
+    if (place.length >= 3) {
+      [parsed.city, parsed.state, parsed.country] = place;
+    } else if (place.length === 2) {
+      parsed.city = place[0];
+      parsed.state = "";
+      parsed.country = place[1];
+    } else if (place.length === 1) {
+      parsed.city = place[0];
     }
 
     return parsed;
@@ -883,9 +849,56 @@ export default function Home() {
     clearGeoResults();
   };
 
+  /* Re-casing "india" to "India" is not a change of country, so it must not
+   * take the state and city down with it the way handleCountryChange does. */
+  const recaseField = (field: "country" | "state") => (value: string) => {
+    setDraft((prev) => ({ ...prev, [field]: value }));
+  };
+
+  /* Map apps put "12.9716, 77.5946" on the clipboard as one string, and it
+   * lands in whichever coordinate box was clicked first. Split it across both
+   * rather than leaving the visitor to retype half of it. */
+  const handleCoordinateChange = (axis: "latitude" | "longitude") => (value: string) => {
+    const pair = normalizeCoordinatePair(value);
+    if (pair) {
+      setDraft((prev) => ({
+        ...prev,
+        latitude: pair.latitude.value,
+        longitude: pair.longitude.value,
+      }));
+      return;
+    }
+    setField(axis)(value);
+  };
+
+  /* One question is on screen at a time, so advancing unmounts the field the
+   * visitor was just in — and an unmounted input never fires the blur its
+   * normaliser hangs off. Run the whole draft through the normalisers here
+   * instead, which also catches a draft restored from localStorage or from
+   * history before this pass existed. Every normaliser is idempotent, so a
+   * value that is already canonical comes back untouched. */
+  const normalizedDraft = (source: ProfileQueryInput): ProfileQueryInput => {
+    const keep = (raw: string, result: { value: string }) => result.value || raw;
+
+    return {
+      ...source,
+      name: keep(source.name, normalizePersonName(source.name)),
+      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate)),
+      birthTime: keep(source.birthTime, normalizeBirthTime(source.birthTime)),
+      country: keep(source.country, normalizePlaceName(source.country)),
+      state: keep(source.state, normalizePlaceName(source.state)),
+      city: keep(source.city, normalizePlaceName(source.city)),
+      latitude: keep(source.latitude, normalizeCoordinate(source.latitude, "latitude")),
+      longitude: keep(source.longitude, normalizeCoordinate(source.longitude, "longitude")),
+    };
+  };
+
   /* The Next button, the final submit, and the Enter key all land here: every
    * question but the last advances instead of submitting. */
   const advanceOrSubmit = () => {
+    const tidied = normalizedDraft(draft);
+    setDraft(tidied);
+
     if (!isLastQuestion) {
       if (activeQuestion.answered) setQuestionIndex((index) => index + 1);
       return;
@@ -903,9 +916,9 @@ export default function Home() {
         ? coarseTime
         : "unknown"
       : "exact";
-    const birthTimeForSubmit = unknownTime ? getBirthTimeFallback(birthTimeAccuracy) : draft.birthTime.trim();
+    const birthTimeForSubmit = unknownTime ? getBirthTimeFallback(birthTimeAccuracy) : tidied.birthTime.trim();
 
-    Object.entries(draft).forEach(([key, value]) => {
+    Object.entries(tidied).forEach(([key, value]) => {
       params.set(key, value.trim());
     });
 
@@ -916,8 +929,8 @@ export default function Home() {
 
     saveBirthDetailsHistory({
       draft: {
-        ...draft,
-        birthTime: unknownTime ? "" : draft.birthTime,
+        ...tidied,
+        birthTime: unknownTime ? "" : tidied.birthTime,
       },
       unknownTime,
       coarseTime,
@@ -1082,6 +1095,7 @@ export default function Home() {
                         label={t("home.formName")}
                         value={draft.name}
                         onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
+                        normalize={normalizePersonName}
                         placeholder={t("home.formNamePlaceholder")}
                         icon={<HiOutlineUser />}
                         completed={hasName}
@@ -1229,6 +1243,8 @@ export default function Home() {
                                 value={draft.country}
                                 onChange={handleCountryChange}
                                 onSelect={handleCountrySelect}
+                                normalize={normalizePlaceName}
+                                onNormalize={recaseField("country")}
                                 placeholder={t("home.formCountryPlaceholder")}
                                 suggestType="country"
                                 required
@@ -1264,6 +1280,8 @@ export default function Home() {
                                 value={draft.state}
                                 onChange={handleStateChange}
                                 onSelect={handleStateSelect}
+                                normalize={normalizePlaceName}
+                                onNormalize={recaseField("state")}
                                 placeholder={t("home.formStatePlaceholder")}
                                 suggestType="state"
                                 contextCountry={draft.country}
@@ -1300,6 +1318,7 @@ export default function Home() {
                                 value={draft.city}
                                 onChange={setField("city")}
                                 onSelect={setField("city")}
+                                normalize={normalizePlaceName}
                                 placeholder={t("home.formCityPlaceholder")}
                                 suggestType="city"
                                 contextCountry={draft.country}
@@ -1347,24 +1366,26 @@ export default function Home() {
                             name="latitude"
                             label={t("home.formLatitude")}
                             value={draft.latitude}
-                            onChange={(value) => setField("latitude")(value)}
+                            onChange={handleCoordinateChange("latitude")}
+                            normalize={(value) => normalizeCoordinate(value, "latitude")}
                             placeholder="e.g. 40.7128"
                             icon={<GiCompass />}
                             completed={hasLatitude}
                             required
-                            inputMode="decimal"
+                            inputMode="text"
                           />
                           <PremiumInput
                             id="birth-longitude"
                             name="longitude"
                             label={t("home.formLongitude")}
                             value={draft.longitude}
-                            onChange={(value) => setField("longitude")(value)}
+                            onChange={handleCoordinateChange("longitude")}
+                            normalize={(value) => normalizeCoordinate(value, "longitude")}
                             placeholder="e.g. -74.0060"
                             icon={<GiCompass />}
                             completed={hasLongitude}
                             required
-                            inputMode="decimal"
+                            inputMode="text"
                           />
                         </div>
                       )}

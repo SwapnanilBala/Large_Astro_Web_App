@@ -257,3 +257,39 @@
     transition: opacity 120ms ease;
   }
 }
+
+/*
+ * Read-back and repair notes.
+ *
+ * A native time input shows "14:30" in a 24-hour locale, so this line is the
+ * only place the visitor sees "2:30 PM" and can catch a half-a-day mistake
+ * before the chart is built.
+ */
+.fieldNote {
+  margin-top: 0.4rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--accent-gold, #d4a574);
+}
+
+.fieldNoteError {
+  color: #e84545;
+}
+
+.noteChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+}
+
+.noteChip {
+  min-height: 2.5rem;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--accent-gold, #d4a574);
+  background: transparent;
+  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.35));
+  border-radius: 999px;
+}

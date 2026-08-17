@@ -1,8 +1,14 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useId } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import {
+  normalizeBirthDate,
+  normalizeBirthTime,
+  type IntakeFieldResult,
+  type IntakeSuggestion,
+} from "@/lib/intake-normalize";
 import styles from "./PremiumDatePicker.module.css";
 
 export function parseLocalIsoDate(value: string): Date | null {
@@ -19,114 +25,41 @@ export function parseLocalIsoDate(value: string): Date | null {
     : null;
 }
 
-const MONTH_NAMES = [
-  "jan", "feb", "mar", "apr", "may", "jun",
-  "jul", "aug", "sep", "oct", "nov", "dec",
-];
+/** Turn a canonical "HH:MM" into today's date carrying that clock time. */
+export function parseLocalClockTime(value: string): Date | null {
+  const match = /^(\d{2}):(\d{2})$/.exec(value.trim());
+  if (!match) return null;
 
-/* Build a local date only if the components survive the round-trip, which
- * rejects things like 31 February that Date would otherwise roll forward. */
-function buildDate(year: number, month: number, day: number): Date | null {
-  if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
-  const date = new Date(year, month - 1, day);
-  return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
-    ? date
-    : null;
+  const date = new Date();
+  date.setHours(Number(match[1]), Number(match[2]), 0, 0);
+  return date;
 }
 
 /**
  * Parse a typed birth date leniently.
  *
  * react-datepicker only accepts text matching its own `dateFormat`, so
- * "15/05/1990" parsed to null and was discarded on blur without a word to
- * the user. Everything below is a format a person plausibly types:
- *
- *   1990-05-15   ISO
- *   15/05/1990   day-first with / - or .
- *   15 May 1990  day then month name
- *   May 15 1990  month name then day
- *
- * Numeric input is read day-first, matching the `dd MMM yyyy` display format
- * and the app's primary audience. Where day-first is impossible but
- * month-first works — "05/22/1990" — we fall back rather than reject, since
- * that ordering is unambiguous. Years must be four digits: a two-digit birth
- * year cannot be disambiguated safely, so it is rejected rather than guessed.
+ * "15/05/1990" parsed to null and was discarded on blur without a word to the
+ * user. The reading rules — and the repairs applied along the way — live in
+ * lib/intake-normalize so the mobile intake and the compatibility form apply
+ * exactly the same ones.
  */
 export function parseFlexibleDate(value: string): Date | null {
-  const raw = value.trim();
-  if (!raw) return null;
-
-  const iso = /^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})$/.exec(raw);
-  if (iso) return buildDate(Number(iso[1]), Number(iso[2]), Number(iso[3]));
-
-  const numeric = /^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})$/.exec(raw);
-  if (numeric) {
-    const first = Number(numeric[1]);
-    const second = Number(numeric[2]);
-    const year = Number(numeric[3]);
-    return buildDate(year, second, first) ?? buildDate(year, first, second);
-  }
-
-  const named = /^(\d{1,2})[\s-]*([a-z]+)[\s,-]*(\d{4})$/i.exec(raw);
-  if (named) {
-    const month = MONTH_NAMES.indexOf(named[2].slice(0, 3).toLowerCase());
-    if (month >= 0) return buildDate(Number(named[3]), month + 1, Number(named[1]));
-  }
-
-  const namedFirst = /^([a-z]+)[\s-]*(\d{1,2})[\s,-]*(\d{4})$/i.exec(raw);
-  if (namedFirst) {
-    const month = MONTH_NAMES.indexOf(namedFirst[1].slice(0, 3).toLowerCase());
-    if (month >= 0) return buildDate(Number(namedFirst[3]), month + 1, Number(namedFirst[2]));
-  }
-
-  return null;
+  const result = normalizeBirthDate(value);
+  return result.value ? parseLocalIsoDate(result.value) : null;
 }
 
 /**
  * Parse a typed birth time leniently, returning today's date carrying the
  * parsed clock time — the shape react-datepicker's time mode expects.
  *
- *   14:30   2:30pm   2:30 PM   1430   14.30
- *
- * Minute precision matters here: the ascendant advances about one degree
- * every four minutes, so rounding a birth time to the picker's dropdown
- * steps is a real loss of accuracy, not a convenience trade.
+ * Minute precision matters here: the ascendant advances about one degree every
+ * four minutes, so rounding a birth time to the picker's dropdown steps is a
+ * real loss of accuracy, not a convenience trade.
  */
 export function parseFlexibleTime(value: string): Date | null {
-  const raw = value.trim().toLowerCase();
-  if (!raw) return null;
-
-  const match = /^(\d{1,2})[:.\s]?(\d{2})?\s*(am|pm)?$/.exec(raw);
-  if (!match) return null;
-
-  let hours = Number(match[1]);
-  const minutes = match[2] === undefined ? 0 : Number(match[2]);
-  const meridiem = match[3];
-
-  if (!Number.isFinite(hours) || !Number.isFinite(minutes)) return null;
-  if (minutes > 59) return null;
-
-  if (meridiem) {
-    if (hours < 1 || hours > 12) return null;
-    if (meridiem === "pm" && hours !== 12) hours += 12;
-    if (meridiem === "am" && hours === 12) hours = 0;
-  } else if (hours > 23) {
-    /* Bare four-digit input such as "1430". */
-    const compact = /^(\d{2})(\d{2})$/.exec(raw);
-    if (!compact) return null;
-    const ch = Number(compact[1]);
-    const cm = Number(compact[2]);
-    if (ch > 23 || cm > 59) return null;
-    const bare = new Date();
-    bare.setHours(ch, cm, 0, 0);
-    return bare;
-  }
-
-  if (hours > 23) return null;
-
-  const date = new Date();
-  date.setHours(hours, minutes, 0, 0);
-  return date;
+  const result = normalizeBirthTime(value);
+  return result.value ? parseLocalClockTime(result.value) : null;
 }
 
 interface PremiumDatePickerProps {
@@ -165,6 +98,22 @@ interface PremiumDatePickerProps {
   preventOpenOnFocus?: boolean;
 }
 
+/* What the assist line is reporting.
+ *
+ * "live" is a read-out of half-typed text, updated on every keystroke and
+ * never phrased as a complaint. "committed" is the note that survives after
+ * the value is written: what got repaired, or which other reading is on
+ * offer.
+ *
+ * `forTime` stamps the value the note describes, so a value that arrives from
+ * anywhere else — a restored draft, a click in the calendar — retires the note
+ * during render instead of through an effect that fires a beat later. */
+type AssistState = {
+  kind: "live" | "committed";
+  result: IntakeFieldResult;
+  forTime: number | null;
+};
+
 export default function PremiumDatePicker({
   id,
   name,
@@ -192,28 +141,59 @@ export default function PremiumDatePicker({
   preventOpenOnFocus = false,
 }: PremiumDatePickerProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isFilled, setIsFilled] = useState(false);
-  const [parseError, setParseError] = useState<string | null>(null);
+  const [storedAssist, setAssist] = useState<AssistState | null>(null);
   const typedTextRef = useRef("");
   const calendarRef = useRef<HTMLDivElement>(null);
   const generatedId = useId();
   const inputId = id ?? `premium-date-picker-${generatedId}`;
   const errorId = `${inputId}-error`;
+  const assistId = `${inputId}-assist`;
 
-  const parseTyped = (text: string) =>
-    showTimeSelectOnly ? parseFlexibleTime(text) : parseFlexibleDate(text);
+  const isFilled = value !== null;
+  const valueTime = value ? value.getTime() : null;
+  /* A committed note describes one particular value, so it retires as soon as
+   * a different one arrives. A live note describes the text in the box and is
+   * rewritten on the next keystroke either way — including while
+   * react-datepicker is pushing its own reading of half-typed text upstream. */
+  const assist =
+    storedAssist && (storedAssist.kind === "live" || storedAssist.forTime === valueTime)
+      ? storedAssist
+      : null;
 
   const defaultHint = showTimeSelectOnly
     ? "Enter a time like 14:30 or 2:30 PM."
     : "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.";
 
-  useEffect(() => {
-    setIsFilled(value !== null);
-    if (value !== null) {
+  const minYear = minDate?.getFullYear();
+  const maxTime = maxDate?.getTime();
+
+  const readTyped = useCallback(
+    (text: string): IntakeFieldResult =>
+      showTimeSelectOnly
+        ? normalizeBirthTime(text)
+        : normalizeBirthDate(text, {
+            today: maxTime === undefined ? undefined : new Date(maxTime),
+            minYear,
+          }),
+    [maxTime, minYear, showTimeSelectOnly],
+  );
+
+  const toDate = useCallback(
+    (canonical: string): Date | null =>
+      showTimeSelectOnly ? parseLocalClockTime(canonical) : parseLocalIsoDate(canonical),
+    [showTimeSelectOnly],
+  );
+
+  const applyValue = useCallback(
+    (date: Date | null, note: IntakeFieldResult | null) => {
       typedTextRef.current = "";
-      setParseError(null);
-    }
-  }, [value]);
+      setAssist(
+        note ? { kind: "committed", result: note, forTime: date ? date.getTime() : null } : null,
+      );
+      onChange(date);
+    },
+    [onChange],
+  );
 
   const handleFocus = () => setIsFocused(true);
 
@@ -224,20 +204,38 @@ export default function PremiumDatePicker({
    * makes it render the formatted date *alongside* the characters still in its
    * own buffer ("15 May 199015/05/1990"). And a half-typed date should not be
    * reported as invalid while the user is still typing it. */
-  const commitTypedText = () => {
+  const commitTypedText = useCallback(() => {
     const text = typedTextRef.current.trim();
-    if (!text) {
-      setParseError(null);
+    /* Nothing typed since the last commit — leave whatever note is showing
+     * alone, including one just applied from a suggestion chip. */
+    if (!text) return;
+
+    const result = readTyped(text);
+    if (result.status === "empty") {
+      setAssist(null);
       return;
     }
-    const parsed = parseTyped(text);
-    if (parsed) {
-      setParseError(null);
-      handleChange(parsed);
-    } else {
-      setParseError(formatHint ?? defaultHint);
+    if (result.status === "invalid") {
+      setAssist({
+        kind: "committed",
+        result: { ...result, message: result.message ?? formatHint ?? defaultHint },
+        forTime: valueTime,
+      });
+      return;
     }
-  };
+
+    const parsed = toDate(result.value);
+    if (!parsed) {
+      setAssist({
+        kind: "committed",
+        result: { status: "invalid", value: "", display: "", message: formatHint ?? defaultHint },
+        forTime: valueTime,
+      });
+      return;
+    }
+
+    applyValue(parsed, result.status === "ok" ? null : result);
+  }, [applyValue, defaultHint, formatHint, readTyped, toDate, valueTime]);
 
   const handleBlur = () => {
     setIsFocused(false);
@@ -275,13 +273,17 @@ export default function PremiumDatePicker({
     return () => input.removeEventListener("blur", onNativeBlur);
   }, []);
 
+  /* react-datepicker parses the input itself as it is typed, and its fallback
+   * is `new Date(text)` — which reads "05/06/1990" month-first, the opposite of
+   * the rule this app documents. Let its reading through so the field stays
+   * responsive, but leave the read-out alone: the authoritative reading, and
+   * the note explaining it, are applied on commit. */
   const handleChange = (date: Date | null) => {
-    onChange(date);
-    setIsFilled(date !== null);
-    if (date) {
-      typedTextRef.current = "";
-      setParseError(null);
+    if (typedTextRef.current.trim()) {
+      onChange(date);
+      return;
     }
+    applyValue(date, null);
   };
 
   const handleRawChange = (
@@ -290,12 +292,54 @@ export default function PremiumDatePicker({
     const target = event?.target;
     if (!(target instanceof HTMLInputElement)) return;
 
-    /* Record only. The commit happens in commitTypedText. */
+    /* Record only — the commit happens in commitTypedText. What is shown back
+     * meanwhile is a read-out, never a verdict: half of "15/05/1990" is not a
+     * mistake, it is someone still typing. */
     typedTextRef.current = target.value;
-    if (!target.value.trim()) setParseError(null);
+    const text = target.value.trim();
+    if (!text) {
+      setAssist(null);
+      return;
+    }
+
+    const result = readTyped(text);
+    setAssist(
+      result.status === "invalid" || result.status === "empty"
+        ? null
+        : { kind: "live", result, forTime: valueTime },
+    );
   };
 
-  const visibleError = error ?? parseError ?? undefined;
+  /* Taking a suggestion must not depend on the click surviving a blur, so the
+   * work happens on mousedown-prevented default: focus never leaves the input,
+   * then we blur it deliberately so react-datepicker reformats from the new
+   * value instead of the stale text still in its buffer. */
+  const applySuggestion = (suggestion: IntakeSuggestion) => {
+    const parsed = toDate(suggestion.value);
+    if (!parsed) return;
+
+    applyValue(parsed, {
+      status: "corrected",
+      value: suggestion.value,
+      display: suggestion.label,
+      message: `Set to ${suggestion.label}.`,
+    });
+    calendarRef.current?.querySelector("input")?.blur();
+  };
+
+  const assistError =
+    assist?.result.status === "invalid" ? assist.result.message ?? defaultHint : undefined;
+  const visibleError = error ?? assistError;
+
+  const assistNote = useMemo(() => {
+    if (visibleError || !assist || assist.result.status === "invalid") return null;
+    if (assist.kind === "live") return `Reads as ${assist.result.display}`;
+    return assist.result.message ?? `Read as ${assist.result.display}`;
+  }, [assist, visibleError]);
+
+  const suggestions =
+    !visibleError && assist?.kind === "committed" ? assist.result.suggestions ?? [] : [];
+
   const isComplete = (completed ?? isFilled) && !visibleError && !disabled;
   const inputClasses = [
     styles.datePickerInput,
@@ -304,6 +348,8 @@ export default function PremiumDatePicker({
   ]
     .filter(Boolean)
     .join(" ");
+
+  const describedBy = visibleError ? errorId : assistNote ? assistId : undefined;
 
   return (
     <div
@@ -340,7 +386,7 @@ export default function PremiumDatePicker({
           required={required}
           ariaRequired={required ? "true" : undefined}
           ariaInvalid={visibleError ? "true" : undefined}
-          ariaDescribedBy={visibleError ? errorId : undefined}
+          ariaDescribedBy={describedBy}
           maxDate={maxDate}
           minDate={minDate}
           timeIntervals={timeIntervals}
@@ -369,6 +415,31 @@ export default function PremiumDatePicker({
       {visibleError && (
         <div id={errorId} className={styles.errorMessage} role="alert">
           {visibleError}
+        </div>
+      )}
+      {assistNote && (
+        <p
+          id={assistId}
+          className={`${styles.assistMessage} ${assist?.kind === "live" ? styles.assistLive : ""}`}
+          aria-live="polite"
+        >
+          {assistNote}
+        </p>
+      )}
+      {suggestions.length > 0 && (
+        <div className={styles.assistSuggestions}>
+          <span className={styles.assistSuggestionsLabel}>Did you mean</span>
+          {suggestions.map((suggestion) => (
+            <button
+              key={suggestion.value}
+              type="button"
+              className={styles.assistChip}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => applySuggestion(suggestion)}
+            >
+              {suggestion.label}
+            </button>
+          ))}
         </div>
       )}
     </div>

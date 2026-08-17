@@ -55,8 +55,10 @@ describe("parseFlexibleDate", () => {
     expect(parseFlexibleDate("32/01/1990")).toBeNull();
   });
 
-  it("rejects two-digit years instead of guessing a century", () => {
-    expect(parseFlexibleDate("15/05/90")).toBeNull();
+  it("expands a two-digit year to the reading that has already happened", () => {
+    /* The full rules — and the note explaining the expansion to the visitor —
+     * live in lib/intake-normalize; this only pins the picker's own wrapper. */
+    expect(ymd(parseFlexibleDate("15/05/90"))).toEqual([1990, 5, 15]);
   });
 
   it("rejects text that is not a date", () => {
@@ -94,10 +96,14 @@ describe("parseFlexibleTime", () => {
     expect(hm(parseFlexibleTime("00:00"))).toEqual([0, 0]);
   });
 
+  it("repairs a self-contradicting meridiem rather than discarding the entry", () => {
+    /* The hour is the deliberate half of "13:00 PM"; the tag is the slip. */
+    expect(hm(parseFlexibleTime("13:00 PM"))).toEqual([13, 0]);
+  });
+
   it("rejects impossible clock values", () => {
     expect(parseFlexibleTime("25:00")).toBeNull();
     expect(parseFlexibleTime("14:75")).toBeNull();
-    expect(parseFlexibleTime("13:00 PM")).toBeNull();
     expect(parseFlexibleTime("hello")).toBeNull();
     expect(parseFlexibleTime("")).toBeNull();
   });

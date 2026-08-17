@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import type { IntakeFieldResult } from "@/lib/intake-normalize";
 
 interface Suggestion {
   name: string;
@@ -19,6 +20,18 @@ interface AutocompleteInputProps {
   required?: boolean;
   contextCountry?: string;
   contextState?: string;
+  /**
+   * Tidy the typed place name once focus leaves — spacing, and casing where
+   * the visitor clearly was not casing at all.
+   */
+  normalize?: (value: string) => IntakeFieldResult;
+  /**
+   * Where the tidied value is written back. Defaults to `onChange`, but the
+   * cascading fields pass their own setter: country and state clear their
+   * children on change, and re-casing "india" to "India" must not throw away
+   * a state and city the visitor already gave.
+   */
+  onNormalize?: (value: string) => void;
 }
 
 export default function AutocompleteInput({
@@ -33,6 +46,8 @@ export default function AutocompleteInput({
   required,
   contextCountry,
   contextState,
+  normalize,
+  onNormalize,
 }: AutocompleteInputProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -159,6 +174,9 @@ export default function AutocompleteInput({
             setIsOpen(false);
             setActiveIndex(-1);
           }
+          if (!normalize) return;
+          const result = normalize(value);
+          if (result.value && result.value !== value) (onNormalize ?? onChange)(result.value);
         }}
         placeholder={placeholder}
         required={required}

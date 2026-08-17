@@ -5,6 +5,15 @@ import { useRouter } from "next/navigation";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { COARSE_TIME_OPTIONS, hasCoarseTimeFallback } from "@/lib/birth-time";
 import { buildChartQuery } from "@/lib/intake-query";
+import {
+  formatBirthDateDisplay,
+  formatClockDisplay,
+  normalizeBirthDate,
+  normalizeBirthTime,
+  normalizePersonName,
+  normalizePlaceName,
+  type IntakeFieldResult,
+} from "@/lib/intake-normalize";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileScopedKey } from "@/lib/local-profiles";
 import { useProfile } from "@/lib/profile-context";
@@ -22,6 +31,12 @@ import styles from "./mobile.module.css";
  * fields are native date/time inputs, so the OS picker opens instead: the
  * scroll wheel people already know, correct for their locale, keyboard and
  * screen-reader support for free, and exact minutes without typing.
+ *
+ * The typed-entry normalisers still run on blur. Two reasons: a browser
+ * without native date/time support degrades the field to plain text, where
+ * "2:30 pm" would otherwise be submitted verbatim; and a 24-hour locale shows
+ * the birth time back as "14:30", so the read-out under the field is the only
+ * place the visitor sees which half of the day the chart will be built for.
  */
 
 const STORAGE_PREFIX = "astro_intake_draft";
@@ -51,6 +66,9 @@ export default function MobileIntake() {
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
+  const [fieldNotes, setFieldNotes] = useState<
+    Partial<Record<keyof ProfileQueryInput, IntakeFieldResult | undefined>>
+  >({});
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const [submitting, setSubmitting] = useState(false);
   const geoAbort = useRef<AbortController | null>(null);
@@ -90,6 +108,65 @@ export default function MobileIntake() {
 
   const set = (key: keyof ProfileQueryInput, value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
+
+  /* Typing replaces the answer a note was written about, so the note goes with
+   * it — the next blur produces a fresh one. */
+  const edit = (key: keyof ProfileQueryInput, value: string) => {
+    set(key, value);
+    setFieldNotes((prev) => (prev[key] ? { ...prev, [key]: undefined } : prev));
+  };
+
+  /* Tidy a field once the visitor moves on, and keep whatever the normaliser
+   * had to say about it. Blur rather than keystroke: rewriting text under a
+   * moving cursor is hostile, and half a date is not a wrong date. */
+  const commit =
+    (key: keyof ProfileQueryInput, normalize: (value: string) => IntakeFieldResult) => () => {
+      const result = normalize(draft[key]);
+      setFieldNotes((prev) => ({
+        ...prev,
+        [key]: result.status === "ok" || result.status === "empty" ? undefined : result,
+      }));
+      if (result.value && result.value !== draft[key]) set(key, result.value);
+    };
+
+  const applySuggestion = (key: keyof ProfileQueryInput, value: string, label: string) => {
+    set(key, value);
+    setFieldNotes((prev) => ({
+      ...prev,
+      [key]: { status: "corrected", value, display: label, message: `Set to ${label}.` },
+    }));
+  };
+
+  const renderNote = (key: keyof ProfileQueryInput) => {
+    const note = fieldNotes[key];
+    if (!note) return null;
+
+    return (
+      <>
+        <p
+          className={`${styles.fieldNote} ${note.status === "invalid" ? styles.fieldNoteError : ""}`}
+          role={note.status === "invalid" ? "alert" : undefined}
+          aria-live={note.status === "invalid" ? undefined : "polite"}
+        >
+          {note.message ?? `Read as ${note.display}`}
+        </p>
+        {note.suggestions?.length ? (
+          <div className={styles.noteChips}>
+            {note.suggestions.map((suggestion) => (
+              <button
+                key={suggestion.value}
+                type="button"
+                className={styles.noteChip}
+                onClick={() => applySuggestion(key, suggestion.value, suggestion.label)}
+              >
+                {suggestion.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
+      </>
+    );
+  };
 
   const hasName = draft.name.trim().length > 0;
   const hasDate = draft.birthDate.trim().length > 0;
@@ -165,8 +242,29 @@ export default function MobileIntake() {
     return gaps;
   }, [step, hasName, hasDate, hasTime, draft.country, draft.state, draft.city, t]);
 
+  /* Step 1's fields unmount when step 2 opens, and an unmounted input never
+   * fires the blur its normaliser hangs off — so the whole draft goes through
+   * the normalisers here as well. Idempotent, so anything already canonical
+   * comes back untouched. */
+  const normalizedDraft = (source: ProfileQueryInput): ProfileQueryInput => {
+    const keep = (raw: string, result: IntakeFieldResult) => result.value || raw;
+
+    return {
+      ...source,
+      name: keep(source.name, normalizePersonName(source.name)),
+      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate)),
+      birthTime: keep(source.birthTime, normalizeBirthTime(source.birthTime)),
+      country: keep(source.country, normalizePlaceName(source.country)),
+      state: keep(source.state, normalizePlaceName(source.state)),
+      city: keep(source.city, normalizePlaceName(source.city)),
+    };
+  };
+
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const tidied = normalizedDraft(draft);
+    setDraft(tidied);
 
     if (step === 1) {
       if (canContinue) setStep(2);
@@ -175,7 +273,7 @@ export default function MobileIntake() {
     if (!canSubmit || submitting) return;
 
     setSubmitting(true);
-    const params = buildChartQuery(draft, { unknownTime, coarseTime });
+    const params = buildChartQuery(tidied, { unknownTime, coarseTime });
     router.push(`/engine-select?${params.toString()}`);
   };
 
@@ -206,12 +304,14 @@ export default function MobileIntake() {
               id="m-name"
               className={styles.input}
               value={draft.name}
-              onChange={(e) => set("name", e.target.value)}
+              onChange={(e) => edit("name", e.target.value)}
+              onBlur={commit("name", normalizePersonName)}
               placeholder={t("home.formNamePlaceholder")}
               autoComplete="name"
               enterKeyHint="next"
               required
             />
+            {renderNote("name")}
           </div>
 
           <div className={styles.field}>
@@ -226,12 +326,18 @@ export default function MobileIntake() {
               className={styles.input}
               type="date"
               value={draft.birthDate}
-              onChange={(e) => set("birthDate", e.target.value)}
+              onChange={(e) => edit("birthDate", e.target.value)}
+              onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
               max={new Date().toISOString().slice(0, 10)}
               min="1900-01-01"
               autoComplete="bday"
               required
             />
+            {fieldNotes.birthDate ? (
+              renderNote("birthDate")
+            ) : hasDate ? (
+              <p className={styles.fieldNote}>{formatBirthDateDisplay(draft.birthDate)}</p>
+            ) : null}
           </div>
 
           {!unknownTime && (
@@ -249,9 +355,15 @@ export default function MobileIntake() {
                 type="time"
                 step={60}
                 value={draft.birthTime}
-                onChange={(e) => set("birthTime", e.target.value)}
+                onChange={(e) => edit("birthTime", e.target.value)}
+                onBlur={commit("birthTime", normalizeBirthTime)}
                 required
               />
+              {fieldNotes.birthTime ? (
+                renderNote("birthTime")
+              ) : draft.birthTime ? (
+                <p className={styles.fieldNote}>{formatClockDisplay(draft.birthTime)}</p>
+              ) : null}
             </div>
           )}
 
@@ -264,7 +376,7 @@ export default function MobileIntake() {
               onChange={(e) => {
                 setUnknownTime(e.target.checked);
                 if (!e.target.checked) setCoarseTime("");
-                else set("birthTime", "");
+                else edit("birthTime", "");
               }}
             />
             <label className={styles.toggleLabel} htmlFor="m-unknown-time">
@@ -302,10 +414,12 @@ export default function MobileIntake() {
               id="m-country"
               className={styles.input}
               value={draft.country}
-              onChange={(e) => set("country", e.target.value)}
+              onChange={(e) => edit("country", e.target.value)}
+              onBlur={commit("country", normalizePlaceName)}
               autoComplete="country-name"
               required
             />
+            {renderNote("country")}
           </div>
 
           <div className={styles.field}>
@@ -317,10 +431,12 @@ export default function MobileIntake() {
               id="m-state"
               className={styles.input}
               value={draft.state}
-              onChange={(e) => set("state", e.target.value)}
+              onChange={(e) => edit("state", e.target.value)}
+              onBlur={commit("state", normalizePlaceName)}
               autoComplete="address-level1"
               required
             />
+            {renderNote("state")}
           </div>
 
           <div className={styles.field}>
@@ -332,10 +448,12 @@ export default function MobileIntake() {
               id="m-city"
               className={styles.input}
               value={draft.city}
-              onChange={(e) => set("city", e.target.value)}
+              onChange={(e) => edit("city", e.target.value)}
+              onBlur={commit("city", normalizePlaceName)}
               autoComplete="address-level2"
               required
             />
+            {renderNote("city")}
           </div>
 
           <p className={styles.status} role="status" aria-live="polite">

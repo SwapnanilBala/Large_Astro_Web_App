@@ -580,3 +580,54 @@
     right: 0.7rem !important;
   }
 }
+
+/* ── Typed-entry assistance ──
+ *
+ * Two registers, deliberately different in weight. The live read-out is a
+ * quiet confirmation while someone types; the committed note reports a repair
+ * we made to their answer and has to be noticeable enough to argue with. */
+.assistMessage {
+  margin-top: var(--space-sm);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgba(242, 194, 108, 0.92);
+  animation: slideDown 0.2s ease-out;
+}
+
+.assistMessage.assistLive {
+  color: var(--text-secondary);
+  opacity: 0.85;
+}
+
+.assistSuggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+  animation: slideDown 0.2s ease-out;
+}
+
+.assistSuggestionsLabel {
+  font-size: 0.78125rem;
+  color: var(--text-secondary);
+}
+
+.assistChip {
+  padding: 0.28rem 0.7rem;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(242, 194, 108, 0.95);
+  background: rgba(242, 194, 108, 0.1);
+  border: 1px solid rgba(242, 194, 108, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+
+.assistChip:hover,
+.assistChip:focus-visible {
+  background: rgba(242, 194, 108, 0.2);
+  border-color: rgba(242, 194, 108, 0.6);
+}

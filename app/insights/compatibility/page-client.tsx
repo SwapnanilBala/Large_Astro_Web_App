@@ -9,6 +9,18 @@ import BackButton from "@/app/components/BackButton";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
+import {
+  formatBirthDateDisplay,
+  formatClockDisplay,
+  normalizeBirthDate,
+  normalizeBirthTime,
+  normalizeCoordinate,
+  normalizeCoordinatePair,
+  normalizePersonName,
+  normalizePlaceName,
+  normalizeUtcOffsetMinutes,
+  type IntakeFieldResult,
+} from "@/lib/intake-normalize";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
@@ -188,6 +200,9 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
     ? "rgba(100,200,255,0.25)"
     : "rgba(255,100,150,0.25)";
   const profileSign = sunSignFromDate(profile.birthDate);
+  const [fieldNotes, setFieldNotes] = useState<
+    Partial<Record<keyof ProfileQueryInput, IntakeFieldResult | undefined>>
+  >({});
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -254,10 +269,85 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
     (event: ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setProfile((previous) => ({ ...previous, [field]: value }));
+      if (fieldNotes[field]) setFieldNotes((previous) => ({ ...previous, [field]: undefined }));
     };
 
   const setField = (field: keyof ProfileQueryInput) => (value: string) => {
     setProfile((previous) => ({ ...previous, [field]: value }));
+  };
+
+  /* Same typed-entry rules as the main intake, so a birth moment entered here
+   * is read the way it is read there. This form matters more than it looks:
+   * its coordinate and offset boxes used to be type="number", which throws
+   * away "40° 42' 46\" N" and "+05:30" without saying anything. */
+  const commit =
+    (field: keyof ProfileQueryInput, normalize: (value: string) => IntakeFieldResult) => () => {
+      const result = normalize(profile[field]);
+      setFieldNotes((previous) => ({
+        ...previous,
+        [field]: result.status === "ok" || result.status === "empty" ? undefined : result,
+      }));
+      if (result.value && result.value !== profile[field]) {
+        setProfile((previous) => ({ ...previous, [field]: result.value }));
+      }
+    };
+
+  const applySuggestion = (field: keyof ProfileQueryInput, value: string, label: string) => {
+    setProfile((previous) => ({ ...previous, [field]: value }));
+    setFieldNotes((previous) => ({
+      ...previous,
+      [field]: { status: "corrected", value, display: label, message: `Set to ${label}.` },
+    }));
+  };
+
+  /* A pasted "12.9716, 77.5946" fills both boxes rather than only the one it
+   * landed in. */
+  const updateCoordinate =
+    (field: "latitude" | "longitude") =>
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const pair = normalizeCoordinatePair(event.target.value);
+      if (pair) {
+        setProfile((previous) => ({
+          ...previous,
+          latitude: pair.latitude.value,
+          longitude: pair.longitude.value,
+        }));
+        setFieldNotes((previous) => ({ ...previous, latitude: undefined, longitude: undefined }));
+        return;
+      }
+      updateField(field)(event);
+    };
+
+  const renderNote = (field: keyof ProfileQueryInput) => {
+    const note = fieldNotes[field];
+    if (!note) return null;
+
+    return (
+      <>
+        <span
+          className={`field-note${note.status === "invalid" ? " field-note-error" : ""}`}
+          role={note.status === "invalid" ? "alert" : undefined}
+          aria-live={note.status === "invalid" ? undefined : "polite"}
+        >
+          {note.message ?? `Read as ${note.display}`}
+        </span>
+        {note.suggestions?.length ? (
+          <span className="field-note-chips">
+            {note.suggestions.map((suggestion) => (
+              <button
+                key={suggestion.value}
+                type="button"
+                className="field-note-chip"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => applySuggestion(field, suggestion.value, suggestion.label)}
+              >
+                {suggestion.label}
+              </button>
+            ))}
+          </span>
+        ) : null}
+      </>
+    );
   };
 
   return (
@@ -286,14 +376,30 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
       <div className="input-grid">
         <label className="input-glow-gold">
           Name
-          <input type="text" value={profile.name} onChange={updateField("name")} />
+          <input
+            type="text"
+            value={profile.name}
+            onChange={updateField("name")}
+            onBlur={commit("name", normalizePersonName)}
+          />
+          {renderNote("name")}
         </label>
         <label className="input-glow-aqua">
           Birth date
           <div className="datetime-field">
-            <input type="date" value={profile.birthDate} onChange={updateField("birthDate")} />
+            <input
+              type="date"
+              value={profile.birthDate}
+              onChange={updateField("birthDate")}
+              onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
+            />
             <HiOutlineCalendarDays className="datetime-icon datetime-icon-aqua" />
           </div>
+          {fieldNotes.birthDate ? (
+            renderNote("birthDate")
+          ) : profile.birthDate ? (
+            <span className="field-note">{formatBirthDateDisplay(profile.birthDate)}</span>
+          ) : null}
         </label>
       </div>
 
@@ -301,19 +407,33 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
         <label className="input-glow-coral">
           Birth time
           <div className="datetime-field">
-            <input type="time" value={profile.birthTime} onChange={updateField("birthTime")} />
+            <input
+              type="time"
+              value={profile.birthTime}
+              onChange={updateField("birthTime")}
+              onBlur={commit("birthTime", normalizeBirthTime)}
+            />
             <HiOutlineClock className="datetime-icon datetime-icon-coral" />
           </div>
+          {fieldNotes.birthTime ? (
+            renderNote("birthTime")
+          ) : profile.birthTime ? (
+            <span className="field-note">{formatClockDisplay(profile.birthTime)}</span>
+          ) : null}
         </label>
         <label className="input-glow-violet">
           UTC offset (minutes)
+          {/* Text, not number: half the world writes this offset as "+05:30",
+              and a number field discards that keystroke by keystroke. */}
           <input
-            type="number"
+            type="text"
+            inputMode="text"
             value={profile.timezoneOffsetMinutes}
             onChange={updateField("timezoneOffsetMinutes")}
-            min={-720}
-            max={840}
+            onBlur={commit("timezoneOffsetMinutes", normalizeUtcOffsetMinutes)}
+            placeholder="330 or +05:30"
           />
+          {renderNote("timezoneOffsetMinutes")}
         </label>
       </div>
 
@@ -324,6 +444,7 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
             value={profile.country}
             onChange={setField("country")}
             onSelect={setField("country")}
+            normalize={normalizePlaceName}
             placeholder="Country"
             suggestType="country"
             required
@@ -335,6 +456,7 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
             value={profile.state}
             onChange={setField("state")}
             onSelect={setField("state")}
+            normalize={normalizePlaceName}
             placeholder="State or province"
             suggestType="state"
             required
@@ -348,6 +470,7 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
           value={profile.city}
           onChange={setField("city")}
           onSelect={setField("city")}
+          normalize={normalizePlaceName}
           placeholder="City"
           suggestType="city"
           required
@@ -368,11 +491,27 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
       <div className="input-grid three-col">
         <label className="input-glow-aqua">
           Latitude
-          <input type="number" value={profile.latitude} onChange={updateField("latitude")} />
+          <input
+            type="text"
+            inputMode="text"
+            value={profile.latitude}
+            onChange={updateCoordinate("latitude")}
+            onBlur={commit("latitude", (value) => normalizeCoordinate(value, "latitude"))}
+            placeholder="12.9716"
+          />
+          {renderNote("latitude")}
         </label>
         <label className="input-glow-coral">
           Longitude
-          <input type="number" value={profile.longitude} onChange={updateField("longitude")} />
+          <input
+            type="text"
+            inputMode="text"
+            value={profile.longitude}
+            onChange={updateCoordinate("longitude")}
+            onBlur={commit("longitude", (value) => normalizeCoordinate(value, "longitude"))}
+            placeholder="77.5946"
+          />
+          {renderNote("longitude")}
         </label>
         <label className="input-glow-violet">
           Time zone ID

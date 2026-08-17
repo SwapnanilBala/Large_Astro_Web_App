@@ -1422,6 +1422,44 @@ label:has(.autocomplete-wrapper.is-open) {
   color: var(--accent-coral);
 }
 
+/* Typed-entry read-back and repair notes, sized to sit under a form label. */
+.field-note {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 1.2rem;
+  line-height: 1.45;
+  font-weight: 400;
+  color: var(--accent-gold);
+}
+
+.field-note-error {
+  color: var(--accent-coral);
+}
+
+.field-note-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+}
+
+.field-note-chip {
+  padding: 0.25rem 0.75rem;
+  font: inherit;
+  font-size: 1.15rem;
+  color: var(--accent-gold);
+  background: rgba(242, 194, 108, 0.1);
+  border: 1px solid rgba(242, 194, 108, 0.35);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.field-note-chip:hover,
+.field-note-chip:focus-visible {
+  background: rgba(242, 194, 108, 0.2);
+  border-color: rgba(242, 194, 108, 0.6);
+}
+
 .dasha-audit-kicker {
   margin: 0;
   font-size: 1.22rem;
