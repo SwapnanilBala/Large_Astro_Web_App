@@ -10,10 +10,13 @@ import {
   formatClockDisplay,
   normalizeBirthDate,
   normalizeBirthTime,
+  normalizeCoordinate,
+  normalizeCoordinatePair,
   normalizePersonName,
   normalizePlaceName,
   type IntakeFieldResult,
 } from "@/lib/intake-normalize";
+import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileScopedKey } from "@/lib/local-profiles";
 import { useProfile } from "@/lib/profile-context";
@@ -70,6 +73,7 @@ export default function MobileIntake() {
     Partial<Record<keyof ProfileQueryInput, IntakeFieldResult | undefined>>
   >({});
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
+  const [coordsExpanded, setCoordsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const geoAbort = useRef<AbortController | null>(null);
 
@@ -135,6 +139,53 @@ export default function MobileIntake() {
       ...prev,
       [key]: { status: "corrected", value, display: label, message: `Set to ${label}.` },
     }));
+  };
+
+  /* Same shape as `commit`, but driven by AutocompleteInput, which hands back
+   * the whole result rather than firing a blur we could hang off. */
+  const commitPlace = (key: keyof ProfileQueryInput) => (result: IntakeFieldResult) => {
+    setFieldNotes((prev) => ({
+      ...prev,
+      [key]: result.status === "ok" || result.status === "empty" ? undefined : result,
+    }));
+    if (result.value && result.value !== draft[key]) set(key, result.value);
+  };
+
+  /* A resolved location belongs to the place that was named. Change the place
+   * and the coordinates are stale, so they go rather than quietly describing
+   * somewhere the visitor has moved on from. */
+  const clearResolvedLocation = () => {
+    setDraft((prev) => ({ ...prev, latitude: "", longitude: "" }));
+    setGeoStatus("idle");
+  };
+
+  const changeCountry = (value: string) => {
+    setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
+    setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined, city: undefined }));
+    clearResolvedLocation();
+  };
+
+  const changeState = (value: string) => {
+    setDraft((prev) => ({ ...prev, state: value, city: "" }));
+    setFieldNotes((prev) => ({ ...prev, state: undefined, city: undefined }));
+    clearResolvedLocation();
+  };
+
+  /* A pasted "12.9716, 77.5946" fills both boxes rather than only the one it
+   * landed in — the likeliest way a coordinate reaches this form is a paste
+   * from a map app. */
+  const editCoordinate = (axis: "latitude" | "longitude", value: string) => {
+    const pair = normalizeCoordinatePair(value);
+    if (pair) {
+      setDraft((prev) => ({
+        ...prev,
+        latitude: pair.latitude.value,
+        longitude: pair.longitude.value,
+      }));
+      setFieldNotes((prev) => ({ ...prev, latitude: undefined, longitude: undefined }));
+      return;
+    }
+    edit(axis, value);
   };
 
   const renderNote = (key: keyof ProfileQueryInput) => {
@@ -257,6 +308,8 @@ export default function MobileIntake() {
       country: keep(source.country, normalizePlaceName(source.country)),
       state: keep(source.state, normalizePlaceName(source.state)),
       city: keep(source.city, normalizePlaceName(source.city)),
+      latitude: keep(source.latitude, normalizeCoordinate(source.latitude, "latitude")),
+      longitude: keep(source.longitude, normalizeCoordinate(source.longitude, "longitude")),
     };
   };
 
@@ -405,18 +458,26 @@ export default function MobileIntake() {
         </div>
       ) : (
         <div className={styles.fields}>
+          {/* One cascading answer, same as the desktop tree: the country
+              narrows the state list, the state narrows the city list, and the
+              city fixes the coordinates. Typing a place name on a phone is the
+              slowest thing in this form, so the suggestion list earns its keep
+              more here than anywhere else. */}
           <div className={styles.field}>
             <label className={styles.label} htmlFor="m-country">
               {t("home.formCountry")}
               <span className={styles.required} aria-hidden="true">*</span>
             </label>
-            <input
+            <AutocompleteInput
               id="m-country"
               className={styles.input}
               value={draft.country}
-              onChange={(e) => edit("country", e.target.value)}
-              onBlur={commit("country", normalizePlaceName)}
-              autoComplete="country-name"
+              onChange={changeCountry}
+              onSelect={changeCountry}
+              normalize={normalizePlaceName}
+              onNormalized={commitPlace("country")}
+              placeholder={t("home.formCountryPlaceholder")}
+              suggestType="country"
               required
             />
             {renderNote("country")}
@@ -427,13 +488,17 @@ export default function MobileIntake() {
               {t("home.formState")}
               <span className={styles.required} aria-hidden="true">*</span>
             </label>
-            <input
+            <AutocompleteInput
               id="m-state"
               className={styles.input}
               value={draft.state}
-              onChange={(e) => edit("state", e.target.value)}
-              onBlur={commit("state", normalizePlaceName)}
-              autoComplete="address-level1"
+              onChange={changeState}
+              onSelect={changeState}
+              normalize={normalizePlaceName}
+              onNormalized={commitPlace("state")}
+              placeholder={t("home.formStatePlaceholder")}
+              suggestType="state"
+              contextCountry={draft.country}
               required
             />
             {renderNote("state")}
@@ -444,13 +509,18 @@ export default function MobileIntake() {
               {t("home.formCity")}
               <span className={styles.required} aria-hidden="true">*</span>
             </label>
-            <input
+            <AutocompleteInput
               id="m-city"
               className={styles.input}
               value={draft.city}
-              onChange={(e) => edit("city", e.target.value)}
-              onBlur={commit("city", normalizePlaceName)}
-              autoComplete="address-level2"
+              onChange={(value) => edit("city", value)}
+              onSelect={(value) => edit("city", value)}
+              normalize={normalizePlaceName}
+              onNormalized={commitPlace("city")}
+              placeholder={t("home.formCityPlaceholder")}
+              suggestType="city"
+              contextCountry={draft.country}
+              contextState={draft.state}
               required
             />
             {renderNote("city")}
@@ -462,6 +532,57 @@ export default function MobileIntake() {
               `Located — ${Number(draft.latitude).toFixed(3)}, ${Number(draft.longitude).toFixed(3)}`}
             {geoStatus === "not-found" && "Could not find that place. Check the spelling."}
           </p>
+
+          {/* Without this the mobile tree dead-ends: submitting needs
+              coordinates, so a place the geocoder cannot find leaves no way
+              forward at all. Opened for the visitor when the lookup fails. */}
+          <div className={styles.field}>
+            <button
+              type="button"
+              className={styles.disclosure}
+              onClick={() => setCoordsExpanded((expanded) => !expanded)}
+              aria-expanded={coordsExpanded || geoStatus === "not-found"}
+              aria-controls="m-coordinate-fields"
+            >
+              {t("home.enterCoordinates")}
+            </button>
+
+            {(coordsExpanded || geoStatus === "not-found") && (
+              <div id="m-coordinate-fields" className={styles.fields}>
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="m-latitude">
+                    {t("home.formLatitude")}
+                  </label>
+                  <input
+                    id="m-latitude"
+                    className={styles.input}
+                    value={draft.latitude}
+                    onChange={(e) => editCoordinate("latitude", e.target.value)}
+                    onBlur={commit("latitude", (value) => normalizeCoordinate(value, "latitude"))}
+                    inputMode="text"
+                    placeholder="12.9716"
+                  />
+                  {renderNote("latitude")}
+                </div>
+
+                <div className={styles.field}>
+                  <label className={styles.label} htmlFor="m-longitude">
+                    {t("home.formLongitude")}
+                  </label>
+                  <input
+                    id="m-longitude"
+                    className={styles.input}
+                    value={draft.longitude}
+                    onChange={(e) => editCoordinate("longitude", e.target.value)}
+                    onBlur={commit("longitude", (value) => normalizeCoordinate(value, "longitude"))}
+                    inputMode="text"
+                    placeholder="77.5946"
+                  />
+                  {renderNote("longitude")}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

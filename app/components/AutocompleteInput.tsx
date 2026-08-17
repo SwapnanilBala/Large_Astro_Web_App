@@ -26,12 +26,21 @@ interface AutocompleteInputProps {
    */
   normalize?: (value: string) => IntakeFieldResult;
   /**
-   * Where the tidied value is written back. Defaults to `onChange`, but the
-   * cascading fields pass their own setter: country and state clear their
-   * children on change, and re-casing "india" to "India" must not throw away
-   * a state and city the visitor already gave.
+   * Receives the whole normalisation result instead of the component writing
+   * it back itself, so the caller decides what to do with it.
+   *
+   * The cascading fields need this: country and state clear their children on
+   * change, and re-casing "india" to "India" must not throw away a state and
+   * city the visitor already gave. The mobile tree needs it too, to show what
+   * was tidied. Without it the tidied value simply goes back through onChange.
    */
-  onNormalize?: (value: string) => void;
+  onNormalized?: (result: IntakeFieldResult) => void;
+  /**
+   * Class for the input itself, so each tree can apply its own field styling.
+   * The dropdown needs no equivalent: globals.css already turns it into a
+   * bottom sheet with 48px rows below 768px.
+   */
+  className?: string;
 }
 
 export default function AutocompleteInput({
@@ -47,7 +56,8 @@ export default function AutocompleteInput({
   contextCountry,
   contextState,
   normalize,
-  onNormalize,
+  onNormalized,
+  className,
 }: AutocompleteInputProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -159,6 +169,7 @@ export default function AutocompleteInput({
       <input
         id={inputId}
         name={name}
+        className={className}
         type="text"
         value={value}
         onChange={(e) => {
@@ -176,7 +187,11 @@ export default function AutocompleteInput({
           }
           if (!normalize) return;
           const result = normalize(value);
-          if (result.value && result.value !== value) (onNormalize ?? onChange)(result.value);
+          if (onNormalized) {
+            onNormalized(result);
+            return;
+          }
+          if (result.value && result.value !== value) onChange(result.value);
         }}
         placeholder={placeholder}
         required={required}

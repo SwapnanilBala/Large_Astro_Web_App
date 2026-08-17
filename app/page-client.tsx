@@ -28,6 +28,7 @@ import {
   normalizeCoordinatePair,
   normalizePersonName,
   normalizePlaceName,
+  type IntakeFieldResult,
 } from "@/lib/intake-normalize";
 import { useProfile } from "@/lib/profile-context";
 import { profileScopedKey } from "@/lib/local-profiles";
@@ -851,8 +852,9 @@ export default function Home() {
 
   /* Re-casing "india" to "India" is not a change of country, so it must not
    * take the state and city down with it the way handleCountryChange does. */
-  const recaseField = (field: "country" | "state") => (value: string) => {
-    setDraft((prev) => ({ ...prev, [field]: value }));
+  const recaseField = (field: "country" | "state") => (result: IntakeFieldResult) => {
+    if (!result.value || result.value === draft[field]) return;
+    setDraft((prev) => ({ ...prev, [field]: result.value }));
   };
 
   /* Map apps put "12.9716, 77.5946" on the clipboard as one string, and it
@@ -1244,7 +1246,7 @@ export default function Home() {
                                 onChange={handleCountryChange}
                                 onSelect={handleCountrySelect}
                                 normalize={normalizePlaceName}
-                                onNormalize={recaseField("country")}
+                                onNormalized={recaseField("country")}
                                 placeholder={t("home.formCountryPlaceholder")}
                                 suggestType="country"
                                 required
@@ -1281,7 +1283,7 @@ export default function Home() {
                                 onChange={handleStateChange}
                                 onSelect={handleStateSelect}
                                 normalize={normalizePlaceName}
-                                onNormalize={recaseField("state")}
+                                onNormalized={recaseField("state")}
                                 placeholder={t("home.formStatePlaceholder")}
                                 suggestType="state"
                                 contextCountry={draft.country}

@@ -293,3 +293,24 @@
   border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.35));
   border-radius: 999px;
 }
+
+/*
+ * The shared AutocompleteInput carries the fetching, debouncing and combobox
+ * semantics, and globals.css already turns its dropdown into a bottom sheet
+ * with 48px rows below 768px — the pattern the rest of the phone tree uses.
+ * Only the input itself is skinned here, via the className prop, so it keeps
+ * the 16px floor and the touch sizing the other fields have.
+ */
+
+.disclosure {
+  align-self: flex-start;
+  min-height: 2.75rem;
+  padding: 0.5rem 0;
+  font-size: 0.9375rem;
+  font-family: inherit;
+  color: var(--accent-gold, #d4a574);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
