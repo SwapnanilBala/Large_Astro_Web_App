@@ -649,7 +649,13 @@ button:active:where(:not(:disabled))::before {
   0%   { opacity: 0.75; transform: scale(0.25); }
   100% { opacity: 0;    transform: scale(2.6);  }}
 
-/* Shimmer sweep + rotating halo on hover — ::after */
+/* Shimmer sweep + rotating halo on hover — ::after
+ *
+ * The blur belongs to the hover state, not the resting one. Declared on the
+ * base rule it gave every button on the page a permanent blurred layer to
+ * composite while showing nothing: on the insights route that was 23 buttons
+ * and two thirds of a viewport of blur that no one could see. `filter: none`
+ * interpolates from the identity filter, so the glow still fades in. */
 button::after {
   content: "";
   position: absolute;
@@ -658,13 +664,14 @@ button::after {
   background-size: 200% 200%, 200% 100%;
   background-position: 0 0, 200% 0;
   opacity: 0;
-  filter: blur(8px);
-  transition: background-position 900ms ease, opacity 300ms ease;
+  filter: none;
+  transition: background-position 900ms ease, opacity 300ms ease, filter 300ms ease;
   pointer-events: none;
   z-index: -1;
 }
 button:hover:where(:not(:disabled))::after {
   opacity: 1;
+  filter: blur(8px);
   background-position: 200% 200%, -200% 0;
   animation: btn-halo-spin 6s linear infinite;
 }
@@ -4351,6 +4358,14 @@ a:focus-visible {
 }
 
 /* Drawer backdrop */
+/* The scrim is full-viewport and backdrop-filtered, so it must be taken out of
+ * the paint path entirely when the drawer is shut — not merely made
+ * transparent. `opacity: 0` leaves a render surface the compositor still has
+ * to re-sample everything behind, on every page, whether or not a drawer
+ * exists there; `visibility: hidden` does not.
+ *
+ * visibility transitions as a step at the end of the duration, so the fade-out
+ * still plays in full before the element stops being painted. */
 .drawer-backdrop {
   position: fixed;
   inset: 0;
@@ -4358,12 +4373,14 @@ a:focus-visible {
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(8px);
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
-  transition: opacity 300ms ease;
+  transition: opacity 300ms ease, visibility 300ms ease;
 }
 
 .drawer-backdrop--open {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
 }
 

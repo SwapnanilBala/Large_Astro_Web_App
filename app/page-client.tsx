@@ -39,7 +39,6 @@ import FormCelebration from "./components/FormCelebration";
 import { hapticSuccess } from "@/lib/haptics";
 import PremiumInput from "./components/PremiumInput";
 import PremiumButton from "./components/PremiumButton";
-import PremiumDatePicker from "./components/PremiumDatePicker";
 import PremiumToggle from "./components/PremiumToggle";
 import styles from "./page.module.css";
 
@@ -52,6 +51,21 @@ const CosmicBackground = dynamic(() => import("./components/CosmicBackground"), 
 const BirthChartTeaser = dynamic(() => import("./components/BirthChartTeaser"), {
   ssr: false,
   loading: () => null,
+});
+
+/* react-datepicker and its stylesheet are the heaviest thing this route pulls
+ * in — around 380KB of JavaScript before compression. It is needed by the
+ * second and third questions, never by the first, and only the active question
+ * is mounted, so it has no business being in the bundle that renders "What is
+ * your name?". Split out and warmed during that first question (see
+ * warmDatePicker below), it is in place well before anyone reaches a date. */
+const loadDatePicker = () => import("./components/PremiumDatePicker");
+
+const PremiumDatePicker = dynamic(loadDatePicker, {
+  ssr: false,
+  /* Holds the field's height so answering the name question does not shunt the
+   * layout when the date question takes its place. */
+  loading: () => <div className={styles.pickerPlaceholder} aria-hidden="true" />,
 });
 
 const requiredFields: Array<keyof ProfileQueryInput> = [
@@ -636,6 +650,21 @@ export default function Home() {
     t,
     tWithFallback,
   ]);
+
+  /* Pull the date-picker chunk while the visitor is still on the name
+   * question. Idle time if the browser offers it, a short timer otherwise —
+   * either way it lands long before question two, so splitting it out of the
+   * initial bundle costs nothing at the point of use. */
+  useEffect(() => {
+    const warm = () => { void loadDatePicker(); };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const handle = window.requestIdleCallback(warm, { timeout: 2500 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(warm, 1200);
+    return () => clearTimeout(timer);
+  }, []);
 
   const submitWrapperRef = useRef<HTMLDivElement>(null);
 

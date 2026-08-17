@@ -2483,3 +2483,14 @@
     padding: 0.4rem;
   }
 }
+
+/*
+ * Stand-in for the split-out date picker.
+ *
+ * Matches the height of a rendered field — label, input, and the gap between
+ * them — so the card does not jump if the chunk is still arriving when the
+ * question changes. In practice the warm-up means this is rarely seen.
+ */
+.pickerPlaceholder {
+  height: 5.25rem;
+}

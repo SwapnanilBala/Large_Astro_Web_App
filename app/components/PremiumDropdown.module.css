@@ -140,13 +140,14 @@
   border-radius: var(--radius-xl);
   background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 165, 116, 0.15), transparent 50%);
   opacity: 0;
-  transition: opacity var(--transition-base);
+  transition: opacity var(--transition-base), filter var(--transition-base);
   pointer-events: none;
-  filter: blur(8px);
+  filter: none;
 }
 
 .premiumDropdown.focused .dropdownGlow {
   opacity: 1;
+  filter: blur(8px);
 }
 
 /* Dropdown menu */
