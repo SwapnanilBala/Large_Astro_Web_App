@@ -87,6 +87,27 @@ describe("chart-service", () => {
       expect(chart.client.timezone_offset_minutes).toBe(330);
     });
 
+    it("derives the historical birth offset from coordinates instead of trusting stale client metadata", () => {
+      const chart = buildChart(
+        {
+          ...BIRTH,
+          timezone_offset_minutes: 0,
+          time_zone_id: "America/New_York",
+        },
+        { includePremium: true },
+      );
+
+      expect(chart.client.time_zone_id).toBe("Asia/Kolkata");
+      expect(chart.client.timezone_offset_minutes).toBe(330);
+      expect(chart.chart.calculation_audit).toMatchObject({
+        time_zone_id: "Asia/Kolkata",
+        timezone_offset_minutes: 330,
+        timezone_source: "coordinates",
+        birth_local_iso: "1990-06-15T14:30",
+        birth_utc_iso: "1990-06-15T09:00",
+      });
+    });
+
     it("chart section has planets, houses, ascendant, rules", () => {
       const chart = buildChart(BIRTH);
       expect(chart.chart.planets).toHaveLength(9);

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import tzLookup from "tz-lookup";
-import { getTimezoneOffset } from "date-fns-tz";
 import { nominatimFetch } from "@/lib/nominatim-throttle";
+import { resolveZonedLocalMoment } from "@/lib/birth-moment";
 import { GeocodeInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
@@ -121,9 +121,9 @@ export async function GET(request: NextRequest) {
     try {
       timeZoneId = tzLookup(latitude, longitude);
       if (birthDate && birthTime) {
-        timezoneOffsetMinutes = Math.round(
-          getTimezoneOffset(timeZoneId, new Date(`${birthDate}T${birthTime}:00`)) / 60000
-        );
+        timezoneOffsetMinutes =
+          resolveZonedLocalMoment(birthDate, birthTime, timeZoneId)
+            ?.timezoneOffsetMinutes ?? null;
       }
     } catch (tzError) {
       logApiError("/api/geocode", tzError, {

@@ -174,6 +174,7 @@ export type CalculationAuditInfo = {
   house_system: string;
   time_zone_id?: string;
   timezone_offset_minutes: number;
+  timezone_source?: "coordinates" | "time_zone_id" | "numeric_offset";
   latitude: number;
   longitude: number;
   birth_local_iso: string;

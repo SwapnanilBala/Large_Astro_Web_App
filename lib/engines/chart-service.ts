@@ -48,6 +48,7 @@ import {
 import type { BirthDetailsInput } from "./compatibility-service";
 import { computeLuckyElements } from "./lucky-elements-engine";
 import { ServerCache, makeCacheKey } from "../server-cache";
+import { resolveBirthMoment } from "../birth-moment";
 
 // --------------------------------------------------------------------------
 // Response types (matching ChartApiResponse in astro-types.ts)
@@ -368,28 +369,15 @@ function parseBirthUTC(birth: BirthDetailsInput): {
   utc_minute: number;
   utc_second: number;
 } {
-  // birth_date: "YYYY-MM-DD", birth_time: "HH:MM" or "HH:MM:SS"
-  const [y, m, d] = birth.birth_date.split("-").map(Number);
-  const timeParts = birth.birth_time.split(":").map(Number);
-  const hour = timeParts[0] ?? 0;
-  const minute = timeParts[1] ?? 0;
-  const second = timeParts[2] ?? 0;
-
-  // Convert local to UTC using timezone_offset_minutes
-  const localTotalMinutes = hour * 60 + minute;
-  const utcTotalMinutes = localTotalMinutes - (birth.timezone_offset_minutes ?? 0);
-
-  // Create a date and adjust
-  const localDate = new Date(Date.UTC(y, m - 1, d, 0, 0, second));
-  localDate.setUTCMinutes(localDate.getUTCMinutes() + utcTotalMinutes);
+  const { utcDate } = resolveBirthMoment(birth);
 
   return {
-    utc_year: localDate.getUTCFullYear(),
-    utc_month: localDate.getUTCMonth() + 1,
-    utc_day: localDate.getUTCDate(),
-    utc_hour: localDate.getUTCHours(),
-    utc_minute: localDate.getUTCMinutes(),
-    utc_second: localDate.getUTCSeconds(),
+    utc_year: utcDate.getUTCFullYear(),
+    utc_month: utcDate.getUTCMonth() + 1,
+    utc_day: utcDate.getUTCDate(),
+    utc_hour: utcDate.getUTCHours(),
+    utc_minute: utcDate.getUTCMinutes(),
+    utc_second: utcDate.getUTCSeconds(),
   };
 }
 
@@ -399,9 +387,21 @@ function birthLocalMomentStr(birth: BirthDetailsInput): string {
 }
 
 function currentLocalDateStr(birth: BirthDetailsInput): string {
-  // Approximate current local time from UTC + offset
+  const birthMoment = resolveBirthMoment(birth);
+  if (birthMoment.timeZoneId) {
+    const parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: birthMoment.timeZoneId,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(new Date());
+    const part = (type: Intl.DateTimeFormatPartTypes) =>
+      parts.find((item) => item.type === type)?.value ?? "";
+    return `${part("year")}-${part("month")}-${part("day")}`;
+  }
+
   const now = new Date();
-  const localMs = now.getTime() + (birth.timezone_offset_minutes ?? 0) * 60000;
+  const localMs = now.getTime() + birthMoment.timezoneOffsetMinutes * 60000;
   const local = new Date(localMs);
   return local.toISOString().split("T")[0];
 }
@@ -474,10 +474,10 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
   // rule output for 24 hours; without it, a payload-cache miss two hours after
   // a deploy rebuilds from day-old cached rules and republishes the old shape
   // into a fresh entry, and consumers reading display.headline get undefined.
+  const birthMoment = resolveBirthMoment(birth);
   const cacheKey = makeCacheKey("pos", {
-    birth_date: birth.birth_date,
-    birth_time: birth.birth_time,
-    tz: birth.timezone_offset_minutes,
+    birth_utc: birthMoment.utcDate.toISOString(),
+    time_zone_id: birthMoment.timeZoneId,
     lat: birth.latitude,
     lng: birth.longitude,
     engine_id: birth.engine_id ?? "lahiri_classic",
@@ -528,12 +528,14 @@ function computeDashaTimeline(
   const moon = planets.find((p) => p.name === "Moon")!;
   // Round Moon longitude to 0.001 degrees for cache key stability
   const moonLngRounded = Math.round(moon.longitude * 1000) / 1000;
+  const birthMoment = resolveBirthMoment(birth);
 
   const cacheKey = makeCacheKey("dasha_stage", {
     moon_lng: moonLngRounded,
     birth_date: birth.birth_date,
     birth_time: birth.birth_time,
-    tz: birth.timezone_offset_minutes,
+    birth_utc: birthMoment.utcDate.toISOString(),
+    time_zone_id: birthMoment.timeZoneId,
     ref_date: currentLocalStr,
   });
 
@@ -586,13 +588,11 @@ function computeDashaTimeline(
   const dashaSeedElapsedYears = fractionElapsed * dashaSeedTotalYears;
   const dashaSeedRemainingYears = Math.max(dashaSeedTotalYears - dashaSeedElapsedYears, 0);
 
-  const birthLocalDate = new Date(birth.birth_date + "T" + birth.birth_time + ":00");
-  const birthUtcDate = new Date(
-    birthLocalDate.getTime() - (birth.timezone_offset_minutes ?? 0) * 60000
-  );
+  const birthLocalDate = birthMoment.localWallClockDate;
+  const birthUtcDate = birthMoment.utcDate;
   const nowUtc = new Date();
   const nowLocal = new Date(
-    nowUtc.getTime() + (birth.timezone_offset_minutes ?? 0) * 60000
+    nowUtc.getTime() + birthMoment.timezoneOffsetMinutes * 60000
   );
 
   const dashaSeedStartLocal = new Date(
@@ -607,8 +607,9 @@ function computeDashaTimeline(
     engine_label: preset.label,
     ayanamsha: preset.ayanamsha,
     house_system: preset.house_system,
-    time_zone_id: birth.time_zone_id ?? "",
-    timezone_offset_minutes: birth.timezone_offset_minutes,
+    time_zone_id: birthMoment.timeZoneId,
+    timezone_offset_minutes: birthMoment.timezoneOffsetMinutes,
+    timezone_source: birthMoment.source,
     latitude: Math.round(birth.latitude * 1000000) / 1000000,
     longitude: Math.round(birth.longitude * 1000000) / 1000000,
     birth_local_iso: isoMinute(birthLocalDate),
@@ -804,6 +805,7 @@ export function buildChart(
   // Stage A: core positions (planets, houses, ascendant, rules)
   const core = computeCorePositions(birth);
   const preset = getEnginePreset(birth.engine_id);
+  const birthMoment = resolveBirthMoment(birth);
 
   let nakshatraInfo: ChartResponse["chart"]["nakshatra"] = null;
   let dashaInfo: ChartResponse["chart"]["dasha"] = null;
@@ -932,8 +934,8 @@ export function buildChart(
       town: birth.town ?? "",
       latitude: birth.latitude,
       longitude: birth.longitude,
-      timezone_offset_minutes: birth.timezone_offset_minutes,
-      time_zone_id: birth.time_zone_id ?? "",
+      timezone_offset_minutes: birthMoment.timezoneOffsetMinutes,
+      time_zone_id: birthMoment.timeZoneId,
       birth_time_accuracy: birth.birth_time_accuracy,
       birth_time_fallback: birth.birth_time_fallback,
     },

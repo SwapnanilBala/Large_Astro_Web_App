@@ -100,7 +100,8 @@ const MILLISECONDS_PER_DAY = 86400000;
 //   Lahiri        – Indian Astronomical Ephemeris / Rashtriya Panchang:
 //                   23°51'11" at J2000.0 (JD 2451545.0), calibrated so that
 //                   Spica (Chitra) sits at 0° Libra (180° sidereal longitude).
-//   Raman         – B.V. Raman's value: 22°27'37.76" on 21 Mar 1956
+//   Raman         – Swiss Ephemeris SE_SIDM_RAMAN reference:
+//                   21°00'51.984" at J1900.0 (Newcomb-based definition)
 //   Krishnamurti  – KP system: 22°22'25.44" at J1900.0 (JD 2415020.0)
 //                   (derived so that KP ayanamsha ≈ 23°46'25" at J2000.0,
 //                   matching the standard Krishnamurti Paddhati tables)
@@ -129,8 +130,11 @@ const AYANAMSA_REF: Record<string, AyanamsaRef> = {
     jd_epoch: 2451545.0,                   // J2000.0 (1 Jan 2000 12h TT)
   },
   SE_SIDM_RAMAN: {
-    value_deg: 22 + 27 / 60 + 37.76 / 3600, // 22°27'37.76"
-    jd_epoch: 2435190.5,                      // 21 March 1956 0h UT
+    // Swiss Ephemeris defines Raman at J1900 as 360° - 338.98556°.
+    // The former 1956 reference was about 0.675° too large and could put
+    // the ascendant in the preceding sign near a boundary.
+    value_deg: 360 - 338.98556,
+    jd_epoch: 2415020.0,
   },
   SE_SIDM_KRISHNAMURTI: {
     value_deg: 22 + 22 / 60 + 25.44 / 3600, // 22°22'25.44"

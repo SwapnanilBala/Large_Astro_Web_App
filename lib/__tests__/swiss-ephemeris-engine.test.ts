@@ -179,6 +179,30 @@ describe("swiss-ephemeris-engine", () => {
       }
     });
 
+    it("matches the Swiss Ephemeris Raman reference and preserves the sign at a boundary", () => {
+      const base: BirthInput = {
+        utc_year: 1990,
+        utc_month: 6,
+        utc_day: 15,
+        utc_hour: 12,
+        utc_minute: 0,
+        utc_second: 0,
+        latitude: 28.6139,
+        longitude: 77.209,
+        engine_id: "raman_classic",
+      };
+
+      const reference = calculate(base);
+      expect(reference.ascendant.longitude).toBeCloseTo(218.8713, 2);
+      expect(reference.ascendant.sign).toBe("Scorpio");
+
+      // Swiss Ephemeris 2.10.03: 240.1407935°. The previous Raman reference
+      // returned about 239.46° here and incorrectly crossed back into Scorpio.
+      const boundary = calculate({ ...base, utc_hour: 13, utc_minute: 38 });
+      expect(boundary.ascendant.longitude).toBeCloseTo(240.1408, 2);
+      expect(boundary.ascendant.sign).toBe("Sagittarius");
+    });
+
     it("Ketu is exactly 180 degrees from Rahu", () => {
       const result = calculate(birth);
       const rahu = result.planets.find((p) => p.name === "Rahu")!;

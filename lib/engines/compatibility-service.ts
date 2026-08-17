@@ -1,6 +1,7 @@
 
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 import { buildChart } from "./chart-service";
+import { resolveBirthMoment } from "../birth-moment";
 
 // --------------------------------------------------------------------------
 // Types
@@ -125,6 +126,7 @@ function buildSynastryAspects(
 }
 
 function clientProfileFromBirth(birth: BirthDetailsInput): ClientProfile {
+  const birthMoment = resolveBirthMoment(birth);
   return {
     name: birth.name,
     country: birth.country ?? "",
@@ -133,8 +135,8 @@ function clientProfileFromBirth(birth: BirthDetailsInput): ClientProfile {
     town: birth.town ?? "",
     latitude: birth.latitude,
     longitude: birth.longitude,
-    timezone_offset_minutes: birth.timezone_offset_minutes,
-    time_zone_id: birth.time_zone_id ?? "",
+    timezone_offset_minutes: birthMoment.timezoneOffsetMinutes,
+    time_zone_id: birthMoment.timeZoneId,
   };
 }
 
