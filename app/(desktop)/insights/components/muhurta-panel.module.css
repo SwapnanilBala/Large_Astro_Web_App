@@ -60,7 +60,9 @@
   font-weight: 500;
   font-family: var(--font-body), sans-serif;
   cursor: pointer;
-  transition: all 0.2s;
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
 }
 
 .presetBtn:hover {

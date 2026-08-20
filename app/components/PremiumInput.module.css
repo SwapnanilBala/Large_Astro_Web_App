@@ -31,7 +31,9 @@
   background: rgba(15, 15, 25, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  transition: all 0.2s ease;
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
   overflow: hidden;
 }
 
@@ -115,7 +117,9 @@
   border: none;
   outline: none;
   font-family: inherit;
-  transition: all var(--transition-base);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-base);
   caret-color: var(--accent-gold);
   line-height: 1.5;
 }

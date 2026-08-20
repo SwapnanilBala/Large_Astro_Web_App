@@ -11,7 +11,9 @@
   border: 1px solid var(--border-soft);
   border-radius: var(--radius-lg);
   padding: var(--space-md);
-  transition: all var(--transition-smooth);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-smooth);
   box-shadow: var(--shadow-sm);
 }
 
@@ -39,7 +41,9 @@
   color: var(--accent-gold);
   font-size: 1.25rem;
   pointer-events: none;
-  transition: all var(--transition-base);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-base);
   z-index: 2;
 }
 
@@ -59,7 +63,9 @@
   border: none;
   outline: none;
   font-family: inherit;
-  transition: all var(--transition-base);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-base);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -88,7 +94,9 @@
   color: var(--text-secondary);
   font-size: 1rem;
   pointer-events: none;
-  transition: all var(--transition-smooth);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-smooth);
   transform-origin: left center;
   z-index: 1;
 }
@@ -195,7 +203,9 @@
   color: var(--text-primary);
   font-size: 0.875rem;
   outline: none;
-  transition: all var(--transition-base);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-base);
 }
 
 .searchField:focus {
@@ -213,7 +223,9 @@
   padding: var(--space-sm) var(--space-md);
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: var(--transition-fast);
   color: var(--text-primary);
   font-size: 0.9375rem;
 }

@@ -29,9 +29,12 @@ function loadPolicy(): Policy {
     join(process.cwd(), "public", "sw-cache-policy.js"),
     "utf8",
   );
-  const module = { exports: {} as Policy };
-  new Function("module", "self", source)(module, undefined);
-  return module.exports;
+  /* Named `mod`, not `module`: Next's no-assign-module-variable rule fires on a
+     local called `module`. The parameter inside the generated function is still
+     `module`, which is what the UMD wrapper in the policy file looks for. */
+  const mod = { exports: {} as Policy };
+  new Function("module", "self", source)(mod, undefined);
+  return mod.exports;
 }
 
 const policy = loadPolicy();

@@ -380,7 +380,9 @@
   border: 1.5px solid rgba(200, 155, 60, 0.10);
   background: rgba(255, 243, 210, 0.04);
   color: transparent;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cardCheckVisible {
