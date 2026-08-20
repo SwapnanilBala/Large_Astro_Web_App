@@ -112,17 +112,21 @@ describe("service worker cache policy", () => {
       expect(policy.isCacheable(nav(`${ORIGIN}/some/future/route`), ORIGIN)).toBe(false);
     });
 
-    it("caches /login only in its query-less form", () => {
-      /* /login is the one allowlisted route that is server-rendered rather than
-         prerendered: it awaits searchParams to read returnTo. That matters
-         because lib/profile-redirect.ts builds returnTo values pointing at
-         /engine-select with the full chart query attached, so the parameterised
-         form carries birth details into the URL. Only the bare form is stored. */
+    it("never caches /login, in any form", () => {
+      /* Removed from the allowlist deliberately: it is rendered per request and
+         embeds a daily-changing sky line, so a cached copy goes stale in a way
+         the prerendered routes cannot.
+
+         The parameterised form was never cacheable either, and that is the case
+         worth keeping a test on: lib/profile-redirect.ts builds returnTo values
+         pointing at /engine-select with the full chart query attached, so
+         /login?returnTo=... carries birth details into the URL. */
       const personalReturnTo =
         `${ORIGIN}/login?returnTo=` +
         encodeURIComponent(`/engine-select?${CHART_QUERY}`);
-      expect(policy.isCacheable(nav(`${ORIGIN}/login`), ORIGIN)).toBe(true);
+      expect(policy.isCacheable(nav(`${ORIGIN}/login`), ORIGIN)).toBe(false);
       expect(policy.isCacheable(nav(personalReturnTo), ORIGIN)).toBe(false);
+      expect(policy.NAVIGATION_ALLOWLIST).not.toContain("/login");
     });
   });
 

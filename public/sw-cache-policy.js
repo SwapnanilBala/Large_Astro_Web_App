@@ -45,28 +45,23 @@
   /*
    * Routes whose HTML is a generic shell once the query string is gone.
    *
-   * That is the actual test for membership, and it is narrower than "is it
-   * prerendered". Three of these are prerendered (a "○" in the `next build`
-   * route table) and read their personal data from localStorage on the client.
-   * /login is marked dynamic ("ƒ") only because it awaits searchParams to read
-   * returnTo — and since nothing with a query string is ever cached, the copy
-   * that reaches Cache Storage always has returnTo empty. Its profile list is
-   * client-side like the others.
+   * That is the test for membership, and it is narrower than "is it
+   * prerendered". Before adding a route here, do not check the build table.
+   * Check what is in the server-rendered HTML when the URL has no query: if any
+   * of it came from a database, a cookie, or the request, it does not belong.
    *
-   * So before adding a route here, do not check the build table. Check what is
-   * in the server-rendered HTML when the URL has no query: if any of it came
-   * from a database, a cookie, or the request, it does not belong on this list.
+   * All three read their personal data from localStorage on the client, so the
+   * document itself carries nothing about anyone.
    *
-   * Known wart, not a leak: /login also embeds getDailySkyLine(), which changes
-   * daily, so an offline visitor can see a stale line. Navigation is
-   * network-first, so this only shows with no connection.
+   * /login was on this list and was deliberately removed. It leaked nothing —
+   * only query-less URLs are ever cached, so the stored copy always had an
+   * empty returnTo — but it is the one route rendered per request rather than
+   * prerendered, and it embeds getDailySkyLine(), which changes daily. A cached
+   * copy therefore goes stale in a way the other three cannot, and the offline
+   * value of a profile picker you cannot act on did not justify keeping it.
+   * Do not re-add it without a reason that outweighs that.
    */
-  const NAVIGATION_ALLOWLIST = [
-    "/calendar",
-    "/workspace",
-    "/login",
-    "/insights/palm-history",
-  ];
+  const NAVIGATION_ALLOWLIST = ["/calendar", "/workspace", "/insights/palm-history"];
 
   function normalise(pathname) {
     if (pathname.length > 1 && pathname.endsWith("/")) return pathname.slice(0, -1);
