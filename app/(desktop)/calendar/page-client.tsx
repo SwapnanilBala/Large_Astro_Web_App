@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FiAlertTriangle, FiCalendar, FiClock, FiRefreshCw, FiStar } from "react-icons/fi";
-import BackButton from "../components/BackButton";
+import BackButton from "@/app/components/BackButton";
 import { useProfile } from "@/lib/profile-context";
 import { readChartHistory } from "@/lib/chart-history-store";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
@@ -16,7 +16,7 @@ import type {
   CalendarPlannerDashaContext,
   SavedChartRecord,
 } from "@/lib/astro-types";
-import type { ChartHistoryEntry } from "@/app/insights/components/chart-history-saver";
+import type { ChartHistoryEntry } from "@/app/(desktop)/insights/components/chart-history-saver";
 import { listSavedCharts } from "@/lib/workspace-store";
 import styles from "./calendar.module.css";
 

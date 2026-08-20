@@ -7,7 +7,7 @@ import { buildChart } from "@/lib/engines/chart-service";
 import type { BirthDetailsInput } from "@/lib/engines/compatibility-service";
 import { buildPersonalStory } from "@/lib/story-engine";
 import { verifyChartForStory } from "@/lib/story-verification";
-import { PersonalStoryPdfDocument } from "@/app/insights/components/personal-story-pdf";
+import { PersonalStoryPdfDocument } from "@/app/(desktop)/insights/components/personal-story-pdf";
 
 const root = process.env.STORY_PDF_ROOT || path.resolve(__dirname, "..");
 const fonts = path.join(root, "public", "fonts");

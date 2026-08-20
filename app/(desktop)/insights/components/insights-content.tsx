@@ -6,11 +6,11 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiCopy, FiGrid, FiRefreshCw } from "react-icons/fi";
-import DivisionalChartsGateway from "@/app/insights/components/divisional-charts-gateway";
-import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
-import ChartHistorySaver from "@/app/insights/components/chart-history-saver";
-import PlanetarySnapshots from "@/app/insights/components/planetary-snapshots";
-import PersonalStory from "@/app/insights/components/personal-story";
+import DivisionalChartsGateway from "@/app/(desktop)/insights/components/divisional-charts-gateway";
+import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
+import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history-saver";
+import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
+import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import styles from "../insights.module.css";
 
 // Lightweight skeleton for lazy-loaded panels

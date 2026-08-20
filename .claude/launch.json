@@ -2,28 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "dev",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "next",
-        "dev",
-        "-p",
-        "7002"
-      ],
-      "port": 7002,
-      "autoPort": true
-    },
-    {
-      "name": "prod",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "next",
-        "start",
-        "-p",
-        "7003"
-      ],
-      "port": 7003,
-      "autoPort": true
+      "name": "lagna-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 7001
     }
   ]
 }

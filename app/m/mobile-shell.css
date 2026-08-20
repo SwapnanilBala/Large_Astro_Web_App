@@ -1,0 +1,93 @@
+/*
+ * Mobile base sheet — the entire global stylesheet for the /m tree.
+ *
+ * globals.css is 174KB (22KB gzipped) and loads on the desktop tree only. The
+ * mobile module sheets were already written to be self-contained, but they
+ * read eleven custom properties that globals.css happened to define, so those
+ * eleven are restated here. That is the whole dependency: audited by
+ * extracting every var() in app/m/**.css and checking each against globals.css.
+ *
+ * Keep this file small. A rule belongs in a route's *.module.css unless every
+ * mobile page needs it.
+ */
+
+:root {
+  /* The eleven tokens app/m/**.module.css actually reads. Values copied from
+     globals.css so the two trees stay visually identical. */
+  --bg-deep: #0a0a0f;
+  --bg-surface: #12121a;
+  --surface: rgba(255, 243, 210, 0.03);
+  --surface-strong: rgba(255, 243, 210, 0.05);
+  --text-primary: #f5f0e6;
+  --text-secondary: #a8a090;
+  --text-tertiary: #6b6560;
+  --accent-gold: #d4a574;
+  --border-soft: rgba(212, 165, 116, 0.12);
+  --border-medium: rgba(212, 165, 116, 0.2);
+  /* Referenced by the mobile sheets but never defined in globals.css either —
+     it was resolving to its inline fallback. Given a real value here so the
+     border scale is soft < subtle < medium rather than having a hole in it. */
+  --border-subtle: rgba(212, 165, 116, 0.16);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  /* System stack only. The desktop tree preloads Cinzel and Newsreader —
+     145KB of woff2 — and no mobile sheet references either family. */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
+/* Touch targets are the one thing worth enforcing globally: a 44px minimum is
+   WCAG 2.5.5 AAA and the floor Apple and Google both publish. */
+button,
+a[role="button"],
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:where(button, a[role="button"]) {
+  min-height: 44px;
+}
+
+::selection {
+  background: rgba(212, 165, 116, 0.25);
+  color: var(--text-primary);
+}
+
+/* Hover styling is opt-in per component, but the tap-highlight rectangle is
+   never wanted — components draw their own :active state. */
+a,
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

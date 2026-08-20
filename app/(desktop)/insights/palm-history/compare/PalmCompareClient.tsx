@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useProfile } from "@/lib/profile-context";
 import { getPalmReadingsByIds } from "@/lib/palm-readings/local-store";
-import PalmAnnotation from "@/app/insights/components/PalmAnnotation";
+import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import { computeReadingDiff, type ComputedDiff } from "@/lib/palm-readings/diff";
 import type { PalmReadingRecord } from "@/lib/palm-readings/types";
 

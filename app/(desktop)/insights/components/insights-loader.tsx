@@ -3,13 +3,12 @@
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
-import AdvancedContent from "./advanced-content";
-import InsightsSkeleton from "@/app/insights/components/insights-skeleton";
+import InsightsContent from "@/app/(desktop)/insights/components/insights-content";
+import InsightsSkeleton from "@/app/(desktop)/insights/components/insights-skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
-import type { AdvancedFocusView } from "./advanced-views";
 
 const REQUEST_TIMEOUT_MS = 55_000;
 
@@ -31,9 +30,10 @@ type ChartParams = {
   birthTimeFallback: string;
 };
 
-type AdvancedLoaderProps = {
+type InsightsLoaderProps = {
   chartParams: ChartParams;
-  focusView: AdvancedFocusView | null;
+  initialPayload?: ChartApiResponse | null;
+  initialError?: string;
 };
 
 function buildChartApiUrl(params: ChartParams): string {
@@ -63,13 +63,14 @@ function buildHistoryQs(params: ChartParams): string {
   return new URLSearchParams(qs).toString();
 }
 
-export default function AdvancedLoader({
+export default function InsightsLoader({
   chartParams,
-  focusView,
-}: AdvancedLoaderProps) {
-  const [payload, setPayload] = useState<ChartApiResponse | null>(null);
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  initialPayload = null,
+  initialError = "",
+}: InsightsLoaderProps) {
+  const [payload, setPayload] = useState<ChartApiResponse | null>(initialPayload);
+  const [error, setError] = useState<string>(initialError);
+  const [isLoading, setIsLoading] = useState(!initialPayload && !initialError);
 
   const fetchChart = useCallback(async () => {
     setIsLoading(true);
@@ -79,6 +80,7 @@ export default function AdvancedLoader({
     const chartUrl = buildChartApiUrl(chartParams);
     const cacheKey = ChartCache.makeKey(chartUrl);
 
+    // Check client-side cache first
     const cached = chartCache.get(cacheKey) as ChartApiResponse | null;
     if (cached) {
       setPayload(cached);
@@ -119,13 +121,26 @@ export default function AdvancedLoader({
   }, [chartParams]);
 
   useEffect(() => {
-    void fetchChart();
-  }, [fetchChart]);
+    setPayload(initialPayload);
+    setError(initialError);
+    setIsLoading(!initialPayload && !initialError);
+
+    if (initialPayload) {
+      const chartUrl = buildChartApiUrl(chartParams);
+      chartCache.set(ChartCache.makeKey(chartUrl), initialPayload);
+      return;
+    }
+
+    if (!initialError) {
+      void fetchChart();
+    }
+  }, [chartParams, fetchChart, initialError, initialPayload]);
 
   const historyQs = payload ? buildHistoryQs(chartParams) : "";
 
   return (
     <AnimatePresence mode="wait">
+      {/* ── Loading state ── */}
       {isLoading && (
         <motion.div
           key="skeleton"
@@ -138,6 +153,7 @@ export default function AdvancedLoader({
         </motion.div>
       )}
 
+      {/* ── Error state ── */}
       {!isLoading && (error || !payload) && (
         <motion.div
           key="error"
@@ -152,8 +168,8 @@ export default function AdvancedLoader({
             <p className="kicker">Chart Error</p>
             <h1>Chart calculation could not be completed.</h1>
             <p className="lead">
-              The chart engine encountered an error. Please check that the <code>swisseph</code> npm
-              package is installed and your input data is valid, then try again.
+              The chart engine could not finish this request. Please review the birth details,
+              location, and selected engine, then try again.
             </p>
             <p className="error-note">Error: {error || "No data received"}</p>
             <div className="skel-error-actions">
@@ -173,6 +189,7 @@ export default function AdvancedLoader({
         </motion.div>
       )}
 
+      {/* ── Success state ── */}
       {!isLoading && !error && payload && (
         <motion.div
           key="content"
@@ -182,10 +199,10 @@ export default function AdvancedLoader({
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <ErrorBoundary>
-            <AdvancedContent
+            <InsightsContent
               payload={payload}
+              birthDate={chartParams.birthDate}
               historyQs={historyQs}
-              focusView={focusView}
             />
           </ErrorBoundary>
         </motion.div>

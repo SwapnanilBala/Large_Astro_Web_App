@@ -1,5 +1,5 @@
 import Link from "next/link";
-import InsightsLoader from "@/app/insights/components/insights-loader";
+import InsightsLoader from "@/app/(desktop)/insights/components/insights-loader";
 import BackButton from "@/app/components/BackButton";
 import PageTransition from "@/app/components/PageTransition";
 import {

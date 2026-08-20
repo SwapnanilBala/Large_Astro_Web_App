@@ -1,6 +1,6 @@
 import Link from "next/link";
 import BackButton from "@/app/components/BackButton";
-import EngineSelectClient from "@/app/engine-select/engine-select-client";
+import EngineSelectClient from "@/app/(desktop)/engine-select/engine-select-client";
 import styles from "./engine-select.module.css";
 
 export const maxDuration = 60;

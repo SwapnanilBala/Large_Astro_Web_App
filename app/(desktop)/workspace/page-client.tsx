@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useDeferredValue, useCallback, useEffect, useMemo, useState } from "react";
 import type { SavedChartRecord, SavedComparisonRecord } from "@/lib/astro-types";
-import BackButton from "../components/BackButton";
-import FlipCard from "../components/FlipCard";
-import CompatibilityScoreRing from "../components/CompatibilityScoreRing";
+import BackButton from "@/app/components/BackButton";
+import FlipCard from "@/app/components/FlipCard";
+import CompatibilityScoreRing from "@/app/components/CompatibilityScoreRing";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { useToast } from "@/lib/toast-context";

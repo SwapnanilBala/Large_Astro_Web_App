@@ -3,6 +3,43 @@
 import { useEffect } from "react";
 import Link from "next/link";
 
+/*
+ * Root error boundary — catches anything the desktop group's own boundary
+ * does not, which in practice means errors thrown under /m.
+ *
+ * Inline styles, no globals.css: see the note in app/not-found.tsx. The rich
+ * version is at app/(desktop)/error.tsx.
+ */
+
+const page: React.CSSProperties = {
+  minHeight: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "1rem",
+  padding: "2rem 1.5rem",
+  textAlign: "center",
+  background: "#0A0A0F",
+  color: "#F5F0E6",
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+};
+
+const control: React.CSSProperties = {
+  minHeight: 44,
+  display: "inline-flex",
+  alignItems: "center",
+  padding: "0 1.5rem",
+  borderRadius: 999,
+  border: "1px solid rgba(212, 165, 116, 0.2)",
+  background: "rgba(255, 243, 210, 0.03)",
+  color: "#D4A574",
+  textDecoration: "none",
+  font: "inherit",
+  cursor: "pointer",
+};
+
 export default function RootError({
   error,
   reset,
@@ -11,65 +48,33 @@ export default function RootError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[RootError]", error);
+    console.error(error);
   }, [error]);
 
   return (
-    <div className="error-page">
-      {/* Decorative star field */}
-      <div className="error-stars" aria-hidden="true">
-        {Array.from({ length: 24 }).map((_, i) => (
-          <span
-            key={i}
-            className="error-star"
-            style={{
-              left: `${(i * 41 + 13) % 100}%`,
-              top: `${(i * 59 + 5) % 100}%`,
-              animationDelay: `${(i * 0.5) % 4}s`,
-              animationDuration: `${2 + (i % 4)}s`,
-            }}
-          />
-        ))}
+    <div style={page}>
+      <p style={{ margin: 0, fontSize: "2.5rem", color: "#D4A574" }} aria-hidden="true">
+        ☄
+      </p>
+      <h1 style={{ margin: 0, fontSize: "1.375rem", fontWeight: 600 }}>
+        The stars have momentarily misaligned
+      </h1>
+      <p style={{ margin: 0, maxWidth: "34ch", color: "#A8A090", lineHeight: 1.6 }}>
+        Something went wrong while drawing this page.
+      </p>
+      <div style={{ display: "flex", gap: "0.75rem", marginTop: "0.5rem", flexWrap: "wrap", justifyContent: "center" }}>
+        <button type="button" onClick={reset} style={control}>
+          Try again
+        </button>
+        <Link href="/" style={control}>
+          Start over
+        </Link>
       </div>
-
-      {/* Constellation lines */}
-      <svg className="error-constellation" viewBox="0 0 400 200" aria-hidden="true">
-        <line x1="50" y1="30" x2="120" y2="80" />
-        <line x1="120" y1="80" x2="200" y2="50" />
-        <line x1="200" y1="50" x2="280" y2="90" />
-        <line x1="280" y1="90" x2="350" y2="60" />
-        <circle cx="50" cy="30" r="2.5" />
-        <circle cx="120" cy="80" r="3" />
-        <circle cx="200" cy="50" r="2" />
-        <circle cx="280" cy="90" r="3" />
-        <circle cx="350" cy="60" r="2.5" />
-      </svg>
-
-      <div className="error-card">
-        <div className="error-icon" aria-hidden="true">&#x2604;</div>
-        <h1 className="error-title">The Stars Have Momentarily Misaligned</h1>
-        <p className="error-description">
-          A cosmic disturbance has disrupted your experience. The celestial
-          mechanics are being recalibrated.
+      {error.digest && (
+        <p style={{ margin: 0, fontSize: "0.75rem", color: "#6B6560" }}>
+          Reference: {error.digest}
         </p>
-
-        <details className="error-details">
-          <summary>View technical details</summary>
-          <pre className="error-message">{error.message}</pre>
-          {error.digest && (
-            <p className="error-digest">Digest: {error.digest}</p>
-          )}
-        </details>
-
-        <div className="error-actions">
-          <button onClick={reset} className="error-btn error-btn-primary">
-            <span aria-hidden="true">&#x21BB;</span> Try Again
-          </button>
-          <Link href="/" className="error-btn error-btn-secondary">
-            Return Home
-          </Link>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

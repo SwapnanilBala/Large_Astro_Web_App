@@ -1,8 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import "./mobile-shell.css";
 import styles from "./mobile.module.css";
 
 /*
  * Mobile shell.
+ *
+ * Sibling of app/(desktop)/layout.tsx, not a child of it. The root layout is
+ * bare, so this tree loads mobile-shell.css and nothing else — no globals.css,
+ * no webfonts, no navigation, no animated background, no ToastProvider.
  *
  * Separate routes mean /m and / can serve the same content at two URLs, so
  * every mobile page declares a canonical pointing at its desktop twin. Without
@@ -31,5 +36,12 @@ export const viewport: Viewport = {
 };
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
-  return <div className={styles.shell}>{children}</div>;
+  /* The desktop tree's <main> landmark lives in its own layout, so the mobile
+     tree has to declare one of its own or screen readers get a document with
+     no main region. */
+  return (
+    <main id="main-content" className={styles.shell}>
+      {children}
+    </main>
+  );
 }

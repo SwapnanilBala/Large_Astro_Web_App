@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { useProfile } from "@/lib/profile-context";
 import { getPalmReading, updatePalmReading } from "@/lib/palm-readings/local-store";
-import PalmAnnotation from "@/app/insights/components/PalmAnnotation";
+import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import type {
   PalmLineReading,
   PalmReadingJSON,

@@ -33,22 +33,22 @@ import {
 import { useProfile } from "@/lib/profile-context";
 import { profileScopedKey } from "@/lib/local-profiles";
 import { useTranslation } from "@/lib/i18n-context";
-import AutocompleteInput from "./components/AutocompleteInput";
-import ChartHistory from "./components/ChartHistory";
-import FormCelebration from "./components/FormCelebration";
+import AutocompleteInput from "@/app/components/AutocompleteInput";
+import ChartHistory from "@/app/components/ChartHistory";
+import FormCelebration from "@/app/components/FormCelebration";
 import { hapticSuccess } from "@/lib/haptics";
-import PremiumInput from "./components/PremiumInput";
-import PremiumButton from "./components/PremiumButton";
-import PremiumToggle from "./components/PremiumToggle";
+import PremiumInput from "@/app/components/PremiumInput";
+import PremiumButton from "@/app/components/PremiumButton";
+import PremiumToggle from "@/app/components/PremiumToggle";
 import styles from "./page.module.css";
 
 
-const CosmicBackground = dynamic(() => import("./components/CosmicBackground"), {
+const CosmicBackground = dynamic(() => import("@/app/components/CosmicBackground"), {
   ssr: false,
   loading: () => null,
 });
 
-const BirthChartTeaser = dynamic(() => import("./components/BirthChartTeaser"), {
+const BirthChartTeaser = dynamic(() => import("@/app/components/BirthChartTeaser"), {
   ssr: false,
   loading: () => null,
 });
@@ -59,7 +59,7 @@ const BirthChartTeaser = dynamic(() => import("./components/BirthChartTeaser"), 
  * is mounted, so it has no business being in the bundle that renders "What is
  * your name?". Split out and warmed during that first question (see
  * warmDatePicker below), it is in place well before anyone reaches a date. */
-const loadDatePicker = () => import("./components/PremiumDatePicker");
+const loadDatePicker = () => import("@/app/components/PremiumDatePicker");
 
 const PremiumDatePicker = dynamic(loadDatePicker, {
   ssr: false,

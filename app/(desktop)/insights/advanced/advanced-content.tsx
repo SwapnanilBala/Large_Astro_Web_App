@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiArrowLeft } from "react-icons/fi";
-import PanelErrorBoundary from "@/app/insights/components/PanelErrorBoundary";
+import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import ParallaxContainer from "@/app/components/ParallaxContainer";
 import ParallaxLayer from "@/app/components/ParallaxLayer";
 import CosmicOrbs from "@/app/components/CosmicOrbs";

@@ -1,48 +1,60 @@
 import Link from "next/link";
 
+/*
+ * Root 404 — for URLs that match neither tree (/foo), and for anything under
+ * /m that 404s.
+ *
+ * Styled inline rather than with global class names on purpose. The rich
+ * constellation version lives at app/(desktop)/not-found.tsx and is styled by
+ * globals.css; importing that sheet here would attach 22KB gzipped to *every*
+ * route in the app, mobile included, because this file sits in the root
+ * segment. That is exactly the coupling the shell split removes.
+ */
+
+const page: React.CSSProperties = {
+  minHeight: "100dvh",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: "1rem",
+  padding: "2rem 1.5rem",
+  textAlign: "center",
+  background: "#0A0A0F",
+  color: "#F5F0E6",
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
+};
+
 export default function NotFound() {
   return (
-    <div className="not-found-page">
-      {/* Animated stars */}
-      <div className="not-found-stars" aria-hidden="true">
-        {Array.from({ length: 30 }).map((_, i) => (
-          <span
-            key={i}
-            className="not-found-star"
-            style={{
-              left: `${(i * 37 + 9) % 100}%`,
-              top: `${(i * 47 + 3) % 100}%`,
-              animationDelay: `${(i * 0.4) % 5}s`,
-              animationDuration: `${1.8 + (i % 5) * 0.6}s`,
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Floating planet decoration */}
-      <div className="not-found-planet" aria-hidden="true">
-        <div className="not-found-planet-body" />
-        <div className="not-found-planet-ring" />
-      </div>
-
-      <div className="not-found-content">
-        <p className="not-found-code">404</p>
-        <h1 className="not-found-title">Lost in the Cosmos</h1>
-        <p className="not-found-description">
-          The celestial coordinates you seek do not correspond to any known
-          destination in our astral map. Perhaps the stars will guide you back.
-        </p>
-
-        <div className="not-found-orbit-divider" aria-hidden="true">
-          <span className="not-found-orbit-dot" />
-          <span className="not-found-orbit-line" />
-          <span className="not-found-orbit-dot" />
-        </div>
-
-        <Link href="/" className="not-found-home-btn">
-          Return to Observatory
-        </Link>
-      </div>
+    <div style={page}>
+      <p style={{ margin: 0, fontSize: "2.5rem", color: "#D4A574" }} aria-hidden="true">
+        ✦
+      </p>
+      <h1 style={{ margin: 0, fontSize: "1.375rem", fontWeight: 600 }}>
+        This chart has no house here
+      </h1>
+      <p style={{ margin: 0, maxWidth: "32ch", color: "#A8A090", lineHeight: 1.6 }}>
+        The page you asked for does not exist.
+      </p>
+      <Link
+        href="/"
+        style={{
+          marginTop: "0.5rem",
+          minHeight: 44,
+          display: "inline-flex",
+          alignItems: "center",
+          padding: "0 1.5rem",
+          borderRadius: 999,
+          border: "1px solid rgba(212, 165, 116, 0.2)",
+          background: "rgba(255, 243, 210, 0.03)",
+          color: "#D4A574",
+          textDecoration: "none",
+        }}
+      >
+        Start a new reading
+      </Link>
     </div>
   );
 }
