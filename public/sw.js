@@ -1,58 +1,69 @@
-const CACHE_NAME = 'lagna-v3';
-const STATIC_ASSETS = ['/', '/offline.html'];
+importScripts('/sw-cache-policy.js');
 
-// Install: pre-cache the shell + offline page
+/*
+ * Editing sw-cache-policy.js alone is enough for current browsers — the update
+ * algorithm re-fetches imported scripts and treats a byte change as a new
+ * worker. Older engines only compared this file, so if a policy change ever
+ * needs to reach everyone, touch this file too.
+ */
+
+/*
+ * Cache version. Bumping it purges every earlier cache in the activate handler
+ * below, which is how devices that already stored birth details under the old
+ * policy get cleaned. v3 cached every successful navigation and API response,
+ * including /insights?name=...&birthDate=...&birthTime=...&latitude=... — so
+ * this bump is the cleanup, not just a cache-busting formality. Do not reuse an
+ * old name.
+ */
+const CACHE_NAME = 'lagna-v4';
+
+/*
+ * Only the offline page is pre-cached. v2 also pre-cached '/', which is one of
+ * the paths proxy.ts varies by User-Agent: on a handset the install-time fetch
+ * follows the 307 and stores the /m document under the key '/'.
+ */
+const PRECACHE = ['/offline.html'];
+
+const ORIGIN = self.location.origin;
+
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE)));
   self.skipWaiting();
 });
 
-// Activate: purge old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))
+      )
+      .then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Fetch: strategy per request type
+/** Store a response only if the policy allows it. Never blocks the response. */
+function maybeCache(request, response) {
+  if (!response || !response.ok || response.redirected) return;
+  if (!self.isCacheable(request, ORIGIN)) return;
+  const clone = response.clone();
+  caches.open(CACHE_NAME).then((cache) => cache.put(request, clone)).catch(() => {});
+}
+
 self.addEventListener('fetch', (event) => {
-  const url = new URL(event.request.url);
+  const { request } = event;
 
-  // Network-first for API routes (chart data should be fresh)
-  if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
+  if (request.method !== 'GET') return;
 
-  // Cache-first for static assets (CSS, JS, images, fonts)
-  if (
-    event.request.destination === 'style' ||
-    event.request.destination === 'script' ||
-    event.request.destination === 'image' ||
-    event.request.destination === 'font'
-  ) {
+  /* Content-hashed build output: cache-first, since the URL changes with the
+     bytes. This is the only place a cached copy is preferred over the network. */
+  if (self.isCacheFirst(request, ORIGIN)) {
     event.respondWith(
-      caches.match(event.request).then(
+      caches.match(request).then(
         (cached) =>
           cached ||
-          fetch(event.request).then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          fetch(request).then((response) => {
+            maybeCache(request, response);
             return response;
           })
       )
@@ -60,29 +71,32 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network-first for navigation — with offline fallback page
-  if (event.request.mode === 'navigate') {
+  /* Navigations: network-first, falling back to a cached copy where the policy
+     permitted one and to the offline page otherwise. A personalised URL has
+     nothing cached by design, so it lands on /offline.html rather than showing
+     a previous visitor's chart. */
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request)
+      fetch(request)
         .then((response) => {
-          // Cache successful navigation responses for offline use
-          if (response.ok) {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          }
+          maybeCache(request, response);
           return response;
         })
         .catch(() =>
-          caches.match(event.request).then((cached) =>
-            cached || caches.match('/offline.html')
-          )
+          caches.match(request).then((cached) => cached || caches.match('/offline.html'))
         )
     );
     return;
   }
 
-  // Network-first for everything else
+  /* Everything else — including /api/*, which the policy never stores. Offline,
+     a chart request fails rather than resolving with another profile's data. */
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(request)
+      .then((response) => {
+        maybeCache(request, response);
+        return response;
+      })
+      .catch(() => caches.match(request).then((cached) => cached || Response.error()))
   );
 });
