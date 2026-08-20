@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import MobileLanguageProvider from "@/lib/i18n-mobile";
 import "./mobile-shell.css";
 import styles from "./mobile.module.css";
 
@@ -40,8 +41,10 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
      tree has to declare one of its own or screen readers get a document with
      no main region. */
   return (
-    <main id="main-content" className={styles.shell}>
-      {children}
-    </main>
+    <MobileLanguageProvider>
+      <main id="main-content" className={styles.shell}>
+        {children}
+      </main>
+    </MobileLanguageProvider>
   );
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 
 /*
  * Root 404 — for URLs that match neither tree (/foo), and for anything under
@@ -38,7 +37,7 @@ export default function NotFound() {
       <p style={{ margin: 0, maxWidth: "32ch", color: "#A8A090", lineHeight: 1.6 }}>
         The page you asked for does not exist.
       </p>
-      <Link
+      <a
         href="/"
         style={{
           marginTop: "0.5rem",
@@ -54,7 +53,7 @@ export default function NotFound() {
         }}
       >
         Start a new reading
-      </Link>
+      </a>
     </div>
   );
 }

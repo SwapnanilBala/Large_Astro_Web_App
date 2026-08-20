@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 
 /*
  * Root error boundary — catches anything the desktop group's own boundary
@@ -9,6 +8,10 @@ import Link from "next/link";
  *
  * Inline styles, no globals.css: see the note in app/not-found.tsx. The rich
  * version is at app/(desktop)/error.tsx.
+ *
+ * Plain <a>, not next/link, and not only to keep next/link out of the chunk
+ * this boundary adds to every route. Client-side routing out of a thrown error
+ * keeps the same broken React tree alive; a document navigation is the reset.
  */
 
 const page: React.CSSProperties = {
@@ -66,9 +69,9 @@ export default function RootError({
         <button type="button" onClick={reset} style={control}>
           Try again
         </button>
-        <Link href="/" style={control}>
+        <a href="/" style={control}>
           Start over
-        </Link>
+        </a>
       </div>
       {error.digest && (
         <p style={{ margin: 0, fontSize: "0.75rem", color: "#6B6560" }}>

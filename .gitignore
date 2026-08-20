@@ -30,3 +30,4 @@ public/fonts/
 # locally rendered PDF QA artifacts
 output/pdf/*.pdf
 tmp/
+tsconfig.tsbuildinfo

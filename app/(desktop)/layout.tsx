@@ -6,6 +6,7 @@ import Navbar from "@/app/components/Navbar";
 import BottomNav from "@/app/components/BottomNav";
 import ViewportScaler from "@/app/components/ViewportScaler";
 import { ToastProvider } from "@/lib/toast-context";
+import DesktopLanguageProvider from "@/lib/i18n-desktop";
 
 /*
  * Desktop shell.
@@ -52,13 +53,15 @@ export default function DesktopLayout({
       </a>
       <ViewportScaler />
       <GradientBlobs />
-      <ToastProvider>
-        <Navbar />
-        <main id="main-content" tabIndex={-1}>
-          {children}
-        </main>
-        <BottomNav />
-      </ToastProvider>
+      <DesktopLanguageProvider>
+        <ToastProvider>
+          <Navbar />
+          <main id="main-content" tabIndex={-1}>
+            {children}
+          </main>
+          <BottomNav />
+        </ToastProvider>
+      </DesktopLanguageProvider>
     </div>
   );
 }

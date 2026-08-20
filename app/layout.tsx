@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { ProfileProvider } from "@/lib/profile-context";
-import { LanguageProvider } from "@/lib/i18n-context";
 
 /*
  * Root shell — deliberately almost empty.
@@ -14,11 +13,10 @@ import { LanguageProvider } from "@/lib/i18n-context";
  *
  * Only two things are shared, and both are load-bearing on every route:
  *
- * - LanguageProvider / ProfileProvider. app/m/mobile-intake.tsx calls both
- *   useTranslation and useProfile, so hoisting them here keeps one provider
- *   instance across a desktop<->mobile hop instead of two divergent ones.
- *   ToastProvider is NOT here: nothing under /m uses it, so it belongs to the
- *   desktop tree.
+ * - ProfileProvider. app/m/mobile-intake.tsx calls useProfile, so one instance
+ *   here serves both trees. ToastProvider is NOT here — nothing under /m uses
+ *   it — and neither is LanguageProvider, which each tree now supplies with its
+ *   own English baseline so /m does not ship strings only desktop can render.
  * - The service worker registration, which is device-independent.
  *
  * No <main> and no skip link here either — each tree owns its own landmark so
@@ -62,9 +60,7 @@ export default function RootLayout({
           desktop tree now, and the mobile sheet is a route chunk, so without
           this a handset flashes white before either arrives. */}
       <body style={{ background: "#0A0A0F" }}>
-        <LanguageProvider>
-          <ProfileProvider>{children}</ProfileProvider>
-        </LanguageProvider>
+        <ProfileProvider>{children}</ProfileProvider>
         {process.env.NODE_ENV === "production" && (
           <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`}

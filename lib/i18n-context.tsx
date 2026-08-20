@@ -9,7 +9,17 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import englishMessages from "@/messages/en.json";
+/* No message file is imported here on purpose.
+ *
+ * This module is pulled into every tree, so a top-level import of en.json
+ * would put all 9.4KB gzipped of it on every route -- including /m, which uses
+ * the "home" namespace and nothing else. The baseline set is injected instead
+ * by a thin per-tree wrapper (lib/i18n-desktop.tsx, lib/i18n-mobile.tsx) so
+ * each bundle carries only the strings its routes can render.
+ *
+ * Wrappers, not a prop on a server layout: passing the object down from a
+ * server component would serialise it into the RSC payload as well as the
+ * client chunk, paying for it twice. */
 
 /* ── Supported languages ── */
 
@@ -45,9 +55,7 @@ function flattenMessages(
   return result;
 }
 
-const ENGLISH_MESSAGES = flattenMessages(
-  englishMessages as Record<string, unknown>
-);
+export type MessageTree = Record<string, unknown>;
 
 /* ── Context type ── */
 
@@ -61,8 +69,23 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 
 /* ── Provider ── */
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
+export function LanguageProvider({
+  children,
+  baseMessages,
+}: {
+  children: ReactNode;
+  /** The English baseline for this tree. See the note at the top of the file. */
+  baseMessages: MessageTree;
+}) {
   const [language, setLanguageState] = useState<Language>("en");
+  /* Flattening walks the whole tree, so do it once per mount rather than on
+     every render. baseMessages is a module-level JSON import in both wrappers,
+     so its identity is stable. */
+  const englishRef = useRef<Record<string, string> | null>(null);
+  if (englishRef.current === null) {
+    englishRef.current = flattenMessages(baseMessages);
+  }
+  const ENGLISH_MESSAGES = englishRef.current;
   const [messages, setMessages] =
     useState<Record<string, string>>(ENGLISH_MESSAGES);
   const loadRequestRef = useRef(0);
@@ -93,7 +116,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
         setMessages(ENGLISH_MESSAGES);
       }
     }
-  }, []);
+  }, [ENGLISH_MESSAGES]);
 
   /* Hydrate from localStorage on mount */
   useEffect(() => {
@@ -127,7 +150,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       }
       return text;
     },
-    [messages]
+    [messages, ENGLISH_MESSAGES]
   );
 
   return (
