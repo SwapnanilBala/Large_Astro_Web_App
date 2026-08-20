@@ -43,8 +43,23 @@
   const DEVICE_DEPENDENT_PATHS = DEVICE_DEPENDENT_EXACT.concat(DEVICE_DEPENDENT_PREFIX);
 
   /*
-   * Prerendered, query-less routes that render their personal data on the
-   * client from localStorage, so the cached HTML is a generic shell.
+   * Routes whose HTML is a generic shell once the query string is gone.
+   *
+   * That is the actual test for membership, and it is narrower than "is it
+   * prerendered". Three of these are prerendered (a "○" in the `next build`
+   * route table) and read their personal data from localStorage on the client.
+   * /login is marked dynamic ("ƒ") only because it awaits searchParams to read
+   * returnTo — and since nothing with a query string is ever cached, the copy
+   * that reaches Cache Storage always has returnTo empty. Its profile list is
+   * client-side like the others.
+   *
+   * So before adding a route here, do not check the build table. Check what is
+   * in the server-rendered HTML when the URL has no query: if any of it came
+   * from a database, a cookie, or the request, it does not belong on this list.
+   *
+   * Known wart, not a leak: /login also embeds getDailySkyLine(), which changes
+   * daily, so an offline visitor can see a stale line. Navigation is
+   * network-first, so this only shows with no connection.
    */
   const NAVIGATION_ALLOWLIST = [
     "/calendar",
