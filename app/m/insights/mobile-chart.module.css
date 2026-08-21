@@ -1,0 +1,100 @@
+/*
+ * Birth wheel, handset sizing.
+ *
+ * The desktop chart's styles live in globals.css, which the /m tree does not
+ * load — but that dependency was only five rules and 470 bytes, so restating
+ * the handful that matter here costs less than pulling the sheet in.
+ */
+
+.wrap {
+  margin: 0;
+  padding: 0.75rem 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: radial-gradient(circle at 50% 45%, #101622 0%, #0b0d14 70%);
+  border: 1px solid var(--border-soft);
+  /* Glyph sizes below are in viewBox units, so they must not inherit the page
+     font — a 600-unit box scaled to 335px would render them unreadably small
+     if they tracked rem instead. */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.signGlyph {
+  font-size: 20px;
+  fill: rgba(212, 165, 116, 0.75);
+}
+
+.houseNum {
+  font-size: 17px;
+  fill: rgba(168, 160, 144, 0.65);
+}
+
+.coreKicker {
+  font-size: 13px;
+  letter-spacing: 3px;
+  fill: rgba(212, 165, 116, 0.7);
+}
+
+.coreSign {
+  font-size: 28px;
+  font-weight: 600;
+  fill: #f5f0e6;
+}
+
+.planet {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.planet:focus-visible {
+  outline: none;
+}
+
+.planet:focus-visible circle:nth-of-type(2) {
+  stroke-width: 2.5;
+}
+
+.planetGlyph {
+  font-size: 19px;
+  pointer-events: none;
+}
+
+.retro {
+  font-size: 12px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+/* Selected-planet readout. Reserves its own height so tapping between grahas
+   does not shift the wheel above it. */
+.caption {
+  min-height: 2.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  justify-content: center;
+  padding: 0 0.25rem;
+}
+
+.captionName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.captionDetail {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}
+
+.captionHint {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+}

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
 import shell from "../mobile.module.css";
+import MobileChart from "./mobile-chart";
 import styles from "./insights.module.css";
 
 /*
@@ -156,7 +157,7 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
   }
 
   const { client, chart } = payload;
-  const { ascendant, planets, nakshatra, dasha, deterministic_rules: rules } = chart;
+  const { ascendant, planets, houses, nakshatra, dasha, deterministic_rules: rules } = chart;
 
   const highPriority = (rules ?? []).filter((rule) => rule.priority === "high");
 
@@ -192,6 +193,15 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
           </div>
         )}
       </div>
+
+      {/* The wheel sits above the table on purpose: it answers "what does my
+          chart look like" at a glance, and the table answers "what exactly is
+          where" for anyone who wants the numbers. */}
+      <MobileChart
+        ascendantSign={ascendant.sign}
+        houses={houses}
+        planets={planets}
+      />
 
       <Section title="Planetary positions" subtitle={`${planets.length} grahas`} defaultOpen>
         <table className={styles.table}>

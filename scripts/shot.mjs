@@ -114,6 +114,25 @@ const send = (method, params = {}) =>
 const once = (method) => new Promise((resolve) => events.set(method, resolve));
 
 await send("Page.enable");
+
+/* Console and uncaught errors go to stderr. A screenshot shows what rendered;
+   it does not show a React key warning or a thrown effect, and those are
+   exactly what turn up as "N Issues" in the dev overlay. */
+const consoleLines = [];
+ws.addEventListener("message", (event) => {
+  const msg = JSON.parse(event.data);
+  if (msg.method === "Runtime.consoleAPICalled" && /error|warning/.test(msg.params.type)) {
+    consoleLines.push(
+      `[${msg.params.type}] ` +
+        msg.params.args.map((a) => a.value ?? a.description ?? a.type).join(" "),
+    );
+  }
+  if (msg.method === "Runtime.exceptionThrown") {
+    const d = msg.params.exceptionDetails;
+    consoleLines.push(`[exception] ${d.exception?.description ?? d.text}`);
+  }
+});
+await send("Runtime.enable");
 /* The whole point: an exact viewport the OS window cannot constrain. */
 await send("Emulation.setDeviceMetricsOverride", {
   width,
@@ -174,6 +193,11 @@ const metrics = await send("Runtime.evaluate", {
   returnByValue: true,
 });
 console.log(out, metrics.result.value);
+if (consoleLines.length) {
+  console.error(`
+${consoleLines.length} console error/warning(s):`);
+  for (const line of consoleLines.slice(0, 15)) console.error("  " + line.slice(0, 600));
+}
 
 ws.close();
 child.kill();
