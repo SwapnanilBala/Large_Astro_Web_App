@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   FiAlertCircle,
   FiArrowLeft,
+  FiArrowRight,
   FiBookOpen,
   FiCheckCircle,
   FiClock,
@@ -75,6 +76,11 @@ function reliabilityCopy(accuracy: string, fallback: boolean) {
 
 function positionFor(chart: DivisionalChartInfo, name: string) {
   return chart.positions.find((position) => position.name === name);
+}
+
+function detailHref(division: number, historyQs: string) {
+  const query = historyQs ? `?${historyQs}` : "";
+  return `/insights/divisional-charts/${division}${query}`;
 }
 
 export default function DivisionalChartsClient({
@@ -176,21 +182,34 @@ export default function DivisionalChartsClient({
               const sensitivity = SENSITIVITY_COPY[item.sensitivity];
               const isSelected = item.division === selectedDivision;
               return (
-                <button
+                <article
                   key={item.division}
-                  type="button"
                   className={`${styles.importantCard} ${isSelected ? styles.importantCardActive : ""}`}
-                  onClick={() => selectChart(item.division, true)}
-                  aria-pressed={isSelected}
                 >
-                  <span className={styles.cardTopline}>
-                    <strong>{item.label}</strong>
-                    <small className={styles[sensitivity.className]}>{sensitivity.label}</small>
-                  </span>
-                  <span className={styles.cardName}>{item.name}</span>
-                  <span className={styles.cardFocus}>{item.focus}</span>
-                  <span className={styles.cardSummary}>{item.summary}</span>
-                </button>
+                  <button
+                    type="button"
+                    className={styles.importantCardSelect}
+                    onClick={() => selectChart(item.division, true)}
+                    aria-pressed={isSelected}
+                    aria-label={`Preview ${item.label} ${item.name} in the atlas`}
+                  >
+                    <span className={styles.cardTopline}>
+                      <strong>{item.label}</strong>
+                      <small className={styles[sensitivity.className]}>{sensitivity.label}</small>
+                    </span>
+                    <span className={styles.cardName}>{item.name}</span>
+                    <span className={styles.cardFocus}>{item.focus}</span>
+                    <span className={styles.cardSummary}>{item.summary}</span>
+                  </button>
+                  <Link
+                    href={detailHref(item.division, historyQs)}
+                    className={styles.importantCardLink}
+                    aria-label={`Open full ${item.label} details`}
+                  >
+                    Show more details
+                    <FiArrowRight aria-hidden="true" />
+                  </Link>
+                </article>
               );
             })}
           </div>
@@ -235,6 +254,15 @@ export default function DivisionalChartsClient({
               <div>
                 <p className={styles.kicker}>{guide?.name ?? "Divisional chart"}</p>
                 <h2>{guide?.focus ?? chart.description}</h2>
+                {guide && (
+                  <Link
+                    href={detailHref(selectedDivision, historyQs)}
+                    className={styles.detailPageLink}
+                  >
+                    Open full {chart.label} details
+                    <FiArrowRight aria-hidden="true" />
+                  </Link>
+                )}
               </div>
             </div>
 
