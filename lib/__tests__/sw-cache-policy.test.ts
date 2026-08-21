@@ -78,7 +78,7 @@ describe("service worker cache policy", () => {
   describe("never stores a device-dependent entry page", () => {
     /* proxy.ts varies these on User-Agent and the astro_view cookie; Cache
        Storage keys on URL alone and cannot distinguish the variants. */
-    it.each(["/", "/insights", "/m", "/m/insights", "/m/"])("refuses %s", (path) => {
+    it.each(["/", "/insights", "/login", "/m", "/m/insights", "/m/login", "/m/"])("refuses %s", (path) => {
       expect(policy.isCacheable(nav(`${ORIGIN}${path}`), ORIGIN)).toBe(false);
     });
 
@@ -116,9 +116,9 @@ describe("service worker cache policy", () => {
     });
 
     it("never caches /login, in any form", () => {
-      /* Removed from the allowlist deliberately: it is rendered per request and
-         embeds a daily-changing sky line, so a cached copy goes stale in a way
-         the prerendered routes cannot.
+      /* Off the allowlist deliberately, and since /m/login shipped it is also
+         device-dependent: proxy.ts now varies /login on User-Agent, so a cached
+         copy could hand a handset the desktop document.
 
          The parameterised form was never cacheable either, and that is the case
          worth keeping a test on: lib/profile-redirect.ts builds returnTo values

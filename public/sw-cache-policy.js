@@ -38,7 +38,7 @@
    * never reaches the proxy and is not device-dependent. "/m/:path*" is a
    * wildcard, so the whole mobile tree is.
    */
-  const DEVICE_DEPENDENT_EXACT = ["/", "/insights"];
+  const DEVICE_DEPENDENT_EXACT = ["/", "/insights", "/login"];
   const DEVICE_DEPENDENT_PREFIX = ["/m"];
   const DEVICE_DEPENDENT_PATHS = DEVICE_DEPENDENT_EXACT.concat(DEVICE_DEPENDENT_PREFIX);
 

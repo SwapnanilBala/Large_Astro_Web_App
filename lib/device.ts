@@ -36,7 +36,7 @@ export type ViewPreference = "mobile" | "desktop";
  * from the shared tree on both devices, so adding a mobile route is a matter
  * of building it and adding its path here.
  */
-export const MOBILE_ROUTES = ["/", "/insights"] as const;
+export const MOBILE_ROUTES = ["/", "/insights", "/login"] as const;
 
 /*
  * Deliberately narrow. A UA string cannot reliably tell us screen size, and

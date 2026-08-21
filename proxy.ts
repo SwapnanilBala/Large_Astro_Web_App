@@ -111,5 +111,5 @@ export const config = {
   /* API routes for rate limiting, plus the page routes that have a mobile
    * counterpart. Everything else — including static assets and _next
    * internals — never reaches this middleware. */
-  matcher: ["/api/:path*", "/", "/insights", "/m", "/m/:path*"],
+  matcher: ["/api/:path*", "/", "/insights", "/login", "/m", "/m/:path*"],
 };

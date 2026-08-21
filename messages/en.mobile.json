@@ -126,5 +126,28 @@
     "stepTabPlace": "Birthplace",
     "askPlace": "Where were you born?",
     "askPlaceHelper": "The place of birth, not where you live now — this is what locks the coordinates and the time zone."
+  },
+  "profiles": {
+    "kicker": "This Device",
+    "heading": "Choose a profile",
+    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser.",
+    "active": "Active",
+    "opening": "Opening…",
+    "addDivider": "or add someone",
+    "nameLabel": "Profile name",
+    "create": "Create profile",
+    "rename": "Rename",
+    "renameLabel": "New profile name",
+    "saveName": "Save name",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Confirm delete",
+    "deleteWarning": "This erases every chart and reading saved under this profile.",
+    "full": "This device holds all {max} profiles. Delete one to add another.",
+    "storageNote": "Up to {max} profiles per device. Everything is stored in this browser only.",
+    "switchFailed": "Could not switch profile.",
+    "createFailed": "Could not create profile.",
+    "renameFailed": "Could not rename profile.",
+    "deleteFailed": "Could not delete profile."
   }
 }
