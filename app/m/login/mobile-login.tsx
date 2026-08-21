@@ -199,7 +199,7 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
       </div>
 
       <Ornament />
-      <h1 className={styles.heading}>{t("profiles.heading")}</h1>
+      <h1 className={`${styles.heading} mGold`}>{t("profiles.heading")}</h1>
       <p className={styles.lead}>{t("profiles.lead")}</p>
 
       <p className={styles.sectionLabel}>{t("profiles.kicker")}</p>

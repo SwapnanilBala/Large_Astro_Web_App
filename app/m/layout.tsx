@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Cinzel } from "next/font/google";
 import MobileLanguageProvider from "@/lib/i18n-mobile";
 import "./mobile-shell.css";
 import styles from "./mobile.module.css";
@@ -36,13 +37,33 @@ export const viewport: Viewport = {
   themeColor: "#0F1117",
 };
 
+/*
+ * One weight, one subset, headings only — 14.8KB against a font budget that
+ * was sitting at zero.
+ *
+ * The whole /m tree ran on system-ui, which is why it read like a settings
+ * panel rather than this product: Cinzel's serif capitals are the identity on
+ * desktop, and dropping them was over-correction, not a cost the budget
+ * required. Body copy and data stay on the system stack — this face is for
+ * titles and section labels, where its character does the work and its
+ * legibility at small sizes never has to.
+ *
+ * display:swap so it can never block first paint.
+ */
+const cinzel = Cinzel({
+  subsets: ["latin"],
+  weight: ["600"],
+  display: "swap",
+  variable: "--font-display-m",
+});
+
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   /* The desktop tree's <main> landmark lives in its own layout, so the mobile
      tree has to declare one of its own or screen readers get a document with
      no main region. */
   return (
     <MobileLanguageProvider>
-      <main id="main-content" className={styles.shell}>
+      <main id="main-content" className={`${cinzel.variable} ${styles.shell}`}>
         {children}
       </main>
     </MobileLanguageProvider>

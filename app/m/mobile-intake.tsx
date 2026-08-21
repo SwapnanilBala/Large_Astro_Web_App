@@ -334,7 +334,7 @@ export default function MobileIntake() {
     <form className={styles.page} onSubmit={onSubmit} noValidate>
       <header className={styles.header}>
         <span className={styles.step}>Step {step} of 2</span>
-        <h1 className={styles.title}>
+        <h1 className={`${styles.title} mGold`}>
           {step === 1 ? t("home.intakeHeadingDetails") : t("home.intakeHeadingLocation")}
         </h1>
         <p className={styles.lead}>

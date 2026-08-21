@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
 import shell from "../mobile.module.css";
+import { SIGN_SYMBOLS } from "@/lib/constellation-geometry";
 import MobileChart from "./mobile-chart";
 import styles from "./insights.module.css";
 
@@ -146,7 +147,7 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
     return (
       <div className={shell.page}>
         <header className={shell.header}>
-          <h1 className={shell.title}>Could not build this chart</h1>
+          <h1 className={`${shell.title} mGold`}>Could not build this chart</h1>
           <p className={shell.lead}>{error || "The chart could not be calculated."}</p>
         </header>
         <Link className={styles.textLink} href="/m">
@@ -223,7 +224,19 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
                   {planet.is_retrograde && <span className={styles.flag}>Rx</span>}
                   {planet.is_combust && <span className={styles.flag}>Cmb</span>}
                 </th>
-                <td>{planet.sign}</td>
+                <td>
+                  {/* The glyph is the fastest way to scan a column of signs;
+                      the name stays because the glyph alone is not legible to
+                      everyone. aria-hidden so it is not read twice. */}
+                  <span className={styles.signGlyph} aria-hidden="true">
+                    {/* U+FE0E forces text presentation. Without it the system
+                        emoji font claims the zodiac symbols and renders them as
+                        colour emoji, which ignores the gold and reads as a row
+                        of purple boxes. */}
+                    {SIGN_SYMBOLS[planet.sign] ? `${SIGN_SYMBOLS[planet.sign]}︎` : ""}
+                  </span>
+                  {planet.sign}
+                </td>
                 <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
                 <td className={styles.numeric}>{planet.house}</td>
               </tr>

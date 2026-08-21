@@ -43,9 +43,11 @@
 
 .title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 600;
   line-height: 1.25;
+  letter-spacing: 0.01em;
 }
 
 .lead {
@@ -227,14 +229,21 @@
   font-size: 1rem;
   font-family: inherit;
   font-weight: 600;
-  color: var(--bg-deep, #0a0a0f);
-  background: var(--accent-gold, #d4a574);
+  color: #1a1206;
+  background: linear-gradient(100deg, #c89b3c, #e8c89a);
   border: none;
   border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
 }
 
+/* A solid gold fill at 45% opacity over a near-black page renders as brown
+   sludge — and it was the primary action on the first screen anyone sees. A
+   disabled control should read as inert, not as a dimmed copy of the live one,
+   so it drops to a neutral surface with dimmed gold text. */
 .button:disabled {
-  opacity: 0.45;
+  color: rgba(212, 165, 116, 0.5);
+  background: rgba(255, 243, 210, 0.05);
+  box-shadow: inset 0 0 0 1px rgba(212, 165, 116, 0.14);
 }
 
 .buttonGhost {
