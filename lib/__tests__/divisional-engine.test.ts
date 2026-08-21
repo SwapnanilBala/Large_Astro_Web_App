@@ -121,12 +121,78 @@ describe("divisional-engine", () => {
     ]);
   });
 
-  it("maps D60 by the half-degree ordinal rather than natal sign", () => {
+  it("counts D60 from the planet's own sign", () => {
+    /* Parashara: degrees x 2, divide by 12, count the remainder from the sign
+       the planet is in. This asserted the opposite until the natal sign was
+       restored — every planet was placed as though it sat in Aries. */
     expect(signsFor(60, "Aries", [0.1, 0.6, 6.1])).toEqual([
       "Aries", "Taurus", "Aries",
     ]);
+    // 6.1 deg -> floor(12.2) = 12 -> 12 % 12 = 0 -> the sign itself.
     expect(signsFor(60, "Scorpio", [0.1, 0.6, 6.1])).toEqual([
-      "Aries", "Taurus", "Aries",
+      "Scorpio", "Sagittarius", "Scorpio",
     ]);
+    expect(signsFor(60, "Pisces", [0.1, 0.6, 6.1])).toEqual([
+      "Pisces", "Aries", "Pisces",
+    ]);
+  });
+
+  /* ----------------------------------------------------------------------
+   * The canonical vargas.
+   *
+   * These had no assertions at all while the four non-Parashari extensions
+   * (D5, D6, D8, D11) were each covered — so the least authoritative parts of
+   * the engine were the best tested. D9 and D10 in particular are the two most
+   * consulted charts after D1.
+   * -------------------------------------------------------------------- */
+
+  it("maps D2 horas to Leo and Cancer by parity", () => {
+    // Odd sign: Sun's hora first, Moon's second. Even sign: reversed.
+    expect(signsFor(2, "Aries", [1, 20])).toEqual(["Leo", "Cancer"]);
+    expect(signsFor(2, "Taurus", [1, 20])).toEqual(["Cancer", "Leo"]);
+  });
+
+  it("maps D3 decanates to the 1st, 5th and 9th from the sign", () => {
+    expect(signsFor(3, "Aries", [5, 15, 25])).toEqual(["Aries", "Leo", "Sagittarius"]);
+    expect(signsFor(3, "Leo", [5, 15, 25])).toEqual(["Leo", "Sagittarius", "Aries"]);
+  });
+
+  it("starts D7 from the sign in odd rashis and the 7th in even rashis", () => {
+    // 30/7 = 4.2857 deg per part.
+    expect(signsFor(7, "Aries", [1, 5])).toEqual(["Aries", "Taurus"]);
+    expect(signsFor(7, "Taurus", [1, 5])).toEqual(["Scorpio", "Sagittarius"]);
+  });
+
+  it("starts D9 from the element's movable sign", () => {
+    // Fire -> Aries, Earth -> Capricorn, Air -> Libra, Water -> Cancer.
+    expect(signsFor(9, "Aries", [0])).toEqual(["Aries"]);
+    expect(signsFor(9, "Taurus", [0])).toEqual(["Capricorn"]);
+    expect(signsFor(9, "Gemini", [0])).toEqual(["Libra"]);
+    expect(signsFor(9, "Cancer", [0])).toEqual(["Cancer"]);
+    // 30/9 = 3.3333 deg per part; 7 deg falls in the third navamsa.
+    expect(signsFor(9, "Aries", [7])).toEqual(["Gemini"]);
+    // The last navamsa of a sign is the 9th from its start.
+    expect(signsFor(9, "Aries", [29.9])).toEqual(["Sagittarius"]);
+  });
+
+  it("starts D10 from the sign in odd rashis and the 9th in even rashis", () => {
+    expect(signsFor(10, "Aries", [1, 4])).toEqual(["Aries", "Taurus"]);
+    expect(signsFor(10, "Taurus", [1, 4])).toEqual(["Capricorn", "Aquarius"]);
+  });
+
+  it("walks D12 forward from the sign itself", () => {
+    // 2.5 deg per part, all rashis start from themselves.
+    expect(signsFor(12, "Aries", [1, 4, 29])).toEqual(["Aries", "Taurus", "Pisces"]);
+    expect(signsFor(12, "Scorpio", [1, 4])).toEqual(["Scorpio", "Sagittarius"]);
+  });
+
+  it("rejects an unknown rashi instead of silently treating it as Aries", () => {
+    expect(() => signsFor(9, "Bogus", [5])).toThrow(/Unknown rashi/);
+  });
+
+  it("rejects a degree that is not a finite number inside the sign", () => {
+    expect(() => signsFor(9, "Aries", [Number.NaN])).toThrow(/finite/);
+    expect(() => signsFor(9, "Aries", [30])).toThrow(/\[0, 30\)/);
+    expect(() => signsFor(9, "Aries", [-1])).toThrow(/\[0, 30\)/);
   });
 });

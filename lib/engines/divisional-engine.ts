@@ -38,21 +38,42 @@ const SIGNS = [
 const SIGN_INDEX: Record<string, number> = {};
 SIGNS.forEach((s, i) => { SIGN_INDEX[s] = i; });
 
+/**
+ * Sign name to index, strictly.
+ *
+ * Every lookup here used to be `SIGN_INDEX[sign] ?? 0`, which turned any
+ * unrecognised name into Aries and returned a confident, plausible, wrong
+ * answer — "Bogus" at 5 degrees came back as Taurus in D9. For a calculation
+ * engine a loud failure beats a quiet fabrication.
+ *
+ * The names come from swiss-ephemeris-engine's own SIGNS array, which is
+ * identical to this one, so on the real path this cannot fire.
+ */
+function signIndexOf(sign: string): number {
+  const idx = SIGN_INDEX[sign];
+  if (idx === undefined) {
+    throw new Error(
+      `Unknown rashi "${sign}" — expected one of: ${SIGNS.join(", ")}`,
+    );
+  }
+  return idx;
+}
+
 /** Element of each sign: 0=Fire, 1=Earth, 2=Air, 3=Water */
 function signElement(sign: string): number {
-  const idx = SIGN_INDEX[sign] ?? 0;
+  const idx = signIndexOf(sign);
   return idx % 4; // Aries=0(Fire), Taurus=1(Earth), Gemini=2(Air), Cancer=3(Water)
 }
 
 /** Whether a sign is odd (1-indexed: Aries=1=odd, Taurus=2=even, etc.) */
 function isOddSign(sign: string): boolean {
-  const idx = SIGN_INDEX[sign] ?? 0;
+  const idx = signIndexOf(sign);
   return idx % 2 === 0; // 0-indexed: 0=odd(Aries), 1=even(Taurus), etc.
 }
 
 /** Modality of each sign: 0=Movable, 1=Fixed, 2=Dual. */
 function signModality(sign: string): number {
-  const idx = SIGN_INDEX[sign] ?? 0;
+  const idx = signIndexOf(sign);
   return idx % 3;
 }
 
@@ -100,7 +121,7 @@ function computeD2(sign: string, degreeInSign: number): string {
 }
 
 function computeD3(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const division = Math.min(Math.floor(degreeInSign / 10), 2);
   // 1st decanate: same sign, 2nd: 5th from it (+4), 3rd: 9th from it (+8)
   const offsets = [0, 4, 8];
@@ -108,7 +129,7 @@ function computeD3(sign: string, degreeInSign: number): string {
 }
 
 function computeD4(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const division = Math.min(Math.floor(degreeInSign / 7.5), 3);
   // The four quarters map to the 1st, 4th, 7th, and 10th from the natal sign.
   return SIGNS[(signIdx + division * 3) % 12];
@@ -131,7 +152,7 @@ function computeD6(sign: string, degreeInSign: number): string {
 }
 
 function computeD7(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const spanSize = 30 / 7;
   const division = Math.min(Math.floor(degreeInSign / spanSize), 6);
   const odd = isOddSign(sign);
@@ -158,7 +179,7 @@ function computeD9(sign: string, degreeInSign: number): string {
 }
 
 function computeD10(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const spanSize = 3; // 30 / 10
   const division = Math.min(Math.floor(degreeInSign / spanSize), 9);
   const odd = isOddSign(sign);
@@ -168,7 +189,7 @@ function computeD10(sign: string, degreeInSign: number): string {
 }
 
 function computeD11(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const division = Math.min(Math.floor(degreeInSign / (30 / 11)), 10);
   // Reflect the natal sign's ordinal position anti-zodiacally from Aries,
   // then proceed zodiacally through the eleven parts.
@@ -177,7 +198,7 @@ function computeD11(sign: string, degreeInSign: number): string {
 }
 
 function computeD12(sign: string, degreeInSign: number): string {
-  const signIdx = SIGN_INDEX[sign] ?? 0;
+  const signIdx = signIndexOf(sign);
   const spanSize = 2.5; // 30 / 12
   const division = Math.min(Math.floor(degreeInSign / spanSize), 11);
   return SIGNS[(signIdx + division) % 12];
@@ -253,10 +274,20 @@ function computeD45(sign: string, degreeInSign: number): string {
 }
 
 function computeD60(sign: string, degreeInSign: number): string {
+  const signIdx = signIndexOf(sign);
   const spanSize = 0.5; // 30 / 60
   const division = Math.min(Math.floor(degreeInSign / spanSize), 59);
-  // The rashi is the 60th-part ordinal, independent of the natal sign.
-  return SIGNS[division % 12];
+  /*
+   * Parashara: multiply the degrees in the sign by two, divide by twelve, and
+   * count the remainder from the sign the planet is actually in.
+   *
+   * This previously returned SIGNS[division % 12] — the 60th-part ordinal
+   * counted from Aries for every planet, discarding the rashi. Because each
+   * planet then shifted by a different amount, it was not a rotated chart but
+   * a scrambled one: the angular relationships between planets were wrong too,
+   * so D60 conjunctions and aspects meant nothing.
+   */
+  return SIGNS[(signIdx + division) % 12];
 }
 
 // --------------------------------------------------------------------------
@@ -312,6 +343,24 @@ export function computeDivisionalChart(
   }
 
   return planets.map((planet) => {
+    /*
+     * A non-finite degree used to flow straight through: Math.floor(NaN/span)
+     * is NaN, Math.min(NaN, 59) is NaN, and SIGNS[NaN % 12] is undefined — so
+     * the position came back with divisional_sign: undefined and rendered as a
+     * blank cell with no error anywhere. Checked here rather than inside each
+     * computer so the message can name the planet.
+     */
+    if (!Number.isFinite(planet.degree_in_sign)) {
+      throw new Error(
+        `${planet.name}: degree_in_sign must be a finite number, got ${planet.degree_in_sign}`,
+      );
+    }
+    if (planet.degree_in_sign < 0 || planet.degree_in_sign >= 30) {
+      throw new Error(
+        `${planet.name}: degree_in_sign must be within [0, 30), got ${planet.degree_in_sign}`,
+      );
+    }
+
     const divisionalSign = computer(planet.sign, planet.degree_in_sign);
     const spanSize = 30 / divisionNumber;
     const division = Math.min(
