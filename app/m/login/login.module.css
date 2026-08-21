@@ -11,10 +11,14 @@
  */
 
 .page {
+  /* flex:1 so the footer note can be pushed to the bottom with margin-top:auto.
+     The parent (app/m/mobile.module.css .shell) is a 100dvh flex column, so
+     without this the page only grows to its content and the note strands
+     itself in the middle of an otherwise empty screen. */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  padding: 0.875rem 1.25rem 2rem;
+  padding: 0.875rem 1.25rem 1.25rem;
   min-height: 100%;
 }
 
@@ -58,13 +62,8 @@
   width: 56px;
   height: 56px;
   margin-bottom: 1rem;
-  border-radius: 50%;
-  border: 1px solid rgba(212, 165, 116, 0.45);
-  background: repeating-conic-gradient(
-    from 0deg,
-    rgba(212, 165, 116, 0.34) 0 4deg,
-    transparent 4deg 20deg
-  );
+  /* Drawn in mobile-login.tsx from the same shapes as public/icon.svg. */
+  display: block;
 }
 
 .heading {
@@ -121,8 +120,19 @@
 }
 
 .rowActive {
-  border-color: var(--border-medium);
+  /* The active row was only a slightly lighter panel and a slightly warmer
+     border, which at a glance was indistinguishable from the others — you had
+     to read the word "Active" to tell. The filled avatar below carries it
+     instead, and this just supports that. */
+  border-color: rgba(212, 165, 116, 0.55);
   background: var(--surface-strong);
+}
+
+/* Inverted avatar: solid gold with dark initial. Unmistakable at a glance and
+   it changes nothing about the row's geometry, so the list stays even. */
+.rowActive .avatar {
+  color: #1a1206;
+  background: linear-gradient(100deg, #c89b3c, #e8c89a);
 }
 
 /* The row is one tap: pick and go, as on desktop. */
@@ -309,7 +319,21 @@
   line-height: 1.5;
   /* See .sectionLabel — tertiary is decorative-only in this tree. */
   color: var(--text-secondary);
-  text-align: center;
+}
+
+/* Pushed to the bottom of the viewport rather than left floating below the
+   last row. Left-aligned, because everything above it is. */
+.footNote {
+  margin: 2rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(212, 165, 116, 0.1);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.page > .footNote {
+  margin-top: auto;
 }
 
 .error {

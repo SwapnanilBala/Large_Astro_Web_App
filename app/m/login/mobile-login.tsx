@@ -49,6 +49,35 @@ function Glyph({ d, label }: { d: string; label?: string }) {
   );
 }
 
+/*
+ * Header ornament, drawn from the same vocabulary as public/icon.svg: two
+ * concentric rings, a four-pointed star, a centre dot.
+ *
+ * The first version was a repeating-conic-gradient, which at 56px rendered as
+ * eighteen hard spokes — it read as a bicycle wheel and said nothing about the
+ * product. Teal is in the real mark but left out here; at this size it lands as
+ * a smudge, and gold alone is calmer.
+ */
+function Ornament() {
+  return (
+    <svg
+      className={styles.ornament}
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <circle cx="50" cy="50" r="46" fill="none" stroke="#C89B3C" strokeWidth="1" opacity="0.34" />
+      <circle cx="50" cy="50" r="31" fill="none" stroke="#C89B3C" strokeWidth="0.8" opacity="0.2" />
+      <path
+        d="M50 12 L54 42 L84 50 L54 58 L50 88 L46 58 L16 50 L46 42 Z"
+        fill="#D4A574"
+        opacity="0.9"
+      />
+      <circle cx="50" cy="50" r="3.5" fill="#E8C89A" />
+    </svg>
+  );
+}
+
 const ICON = {
   pencil: "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
   trash: "M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6",
@@ -169,7 +198,7 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
         {skyLine && <span className={styles.sky}>{skyLine}</span>}
       </div>
 
-      <div className={styles.ornament} aria-hidden="true" />
+      <Ornament />
       <h1 className={styles.heading}>{t("profiles.heading")}</h1>
       <p className={styles.lead}>{t("profiles.lead")}</p>
 
@@ -304,7 +333,7 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
         <p className={styles.fine}>{t("profiles.full").replace("{max}", String(maxProfiles))}</p>
       )}
 
-      <p className={styles.fine}>
+      <p className={styles.footNote}>
         {t("profiles.storageNote").replace("{max}", String(maxProfiles))}
       </p>
     </div>

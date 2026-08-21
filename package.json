@@ -15,7 +15,8 @@
     "pdf:sample": "esbuild ./scripts/render-story-pdf-sample.tsx --bundle --platform=node --format=cjs --outfile=./tmp/render-story-pdf-sample.cjs --external:@react-pdf/renderer && node ./tmp/render-story-pdf-sample.cjs",
     "rarity": "tsx scripts/rarity/generate-rarity.ts",
     "predev": "node scripts/copy-fonts.cjs",
-    "prebuild": "node scripts/copy-fonts.cjs"
+    "prebuild": "node scripts/copy-fonts.cjs",
+    "shot": "node scripts/shot.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
