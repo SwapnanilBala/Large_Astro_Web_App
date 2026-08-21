@@ -1983,49 +1983,6 @@
 }
 
 /* Chart view toggle */
-.constellation-chart-toggle-wrap {
-  position: relative;
-  width: 100%;
-}
-
-.constellation-chart-toggle {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  z-index: 10;
-  display: flex;
-  gap: 2px;
-  background: rgba(4, 20, 32, 0.85);
-  border: 1px solid rgba(195, 231, 255, 0.12);
-  border-radius: 8px;
-  padding: 3px;
-  backdrop-filter: blur(8px);
-}
-
-.constellation-chart-toggle button {
-  all: unset;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-size: 1.2rem;
-  font-family: var(--font-body), sans-serif;
-  letter-spacing: 0.5px;
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: background 200ms ease, color 200ms ease;
-  text-transform: uppercase;
-}
-
-.constellation-chart-toggle button:hover {
-  background: rgba(108, 225, 212, 0.08);
-}
-
-.constellation-chart-toggle button[data-active="true"] {
-  background: rgba(242, 194, 108, 0.12);
-  color: var(--accent-gold);
-}
 
 /* ═══════════════════════════════════════════════
    PALM READING PANEL
@@ -3008,11 +2965,6 @@
 .palm-preview--small { max-width: 220px; margin: 0 auto 0.6rem; }
 
 .dasha-bar[role="button"]:active {
-  transform: scale(0.97);
-  transition: transform 60ms ease-out;
-}
-
-.constellation-chart-toggle button:active {
   transform: scale(0.97);
   transition: transform 60ms ease-out;
 }

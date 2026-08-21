@@ -32,7 +32,7 @@ const BROWSERS = [
 const [, , url, out, w = "375", h = "812", ...rest] = process.argv;
 if (!url || !out) {
   console.error(
-    "usage: node shot.mjs <url> <out.png> [width] [height] [--full] [--init=<file.js>]",
+    "usage: node shot.mjs <url> <out.png> [w] [h] [--full] [--init=f.js] [--scroll-to=sel] [--wait=ms]",
   );
   process.exit(1);
 }
@@ -138,10 +138,33 @@ await Promise.race([loaded, sleep(15000)]);
 /* Fonts, hydration, and any first paint after it. */
 await sleep(1200);
 
+/* --scroll-to brings one element to the top of the viewport. Full-page capture
+   of a long results page produces an image too tall to read; this frames the
+   part being judged instead. */
+const scrollTo = rest.find((a) => a.startsWith("--scroll-to="))?.slice(12);
+if (scrollTo) {
+  await send("Runtime.evaluate", {
+    expression: `(() => { const el = document.querySelector(${JSON.stringify(scrollTo)});
+      if (el) { window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - 24, behavior: "instant" }); return "ok"; }
+      return "selector not found: " + ${JSON.stringify(scrollTo)}; })()`,
+    returnByValue: true,
+  }).then((r) => { if (r.result.value !== "ok") console.error(r.result.value); });
+  /* Sections here reveal on intersection, so the frame right after a scroll is
+     still mid-animation. --wait raises this for pages that need longer. */
+  await sleep(1500);
+}
+
+const extraWait = Number(rest.find((a) => a.startsWith("--wait="))?.slice(7) ?? 0);
+if (extraWait) await sleep(extraWait);
+
+/* No clip. captureScreenshot's clip is in page coordinates, not viewport ones,
+   so clipping at y:0 returns the top of the document however far the page has
+   been scrolled — which silently defeats --scroll-to. The viewport is already
+   exactly `width` x `height` from setDeviceMetricsOverride, so an unclipped
+   capture is the right size anyway. */
 const { data } = await send("Page.captureScreenshot", {
   format: "png",
   captureBeyondViewport: fullPage,
-  ...(fullPage ? {} : { clip: { x: 0, y: 0, width, height, scale: 1 } }),
 });
 writeFileSync(out, Buffer.from(data, "base64"));
 

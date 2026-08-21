@@ -57,7 +57,12 @@ function LazyPanel({
   );
 }
 
-const LagnaChart = dynamic(() => import("./lagna-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
+/* The diamond (North Indian) chart was removed: its house geometry placed
+ * houses 2 and 12 outside the chart box and the placements did not line up.
+ * The constellation view is the only chart here now, so it is imported
+ * directly rather than through the old toggle wrapper. Recover the diamond
+ * from git history if it is ever fixed. */
+const ConstellationChart = dynamic(() => import("./constellation-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
@@ -1124,11 +1129,10 @@ export default function InsightsContent({
             variants={bentoItemFromLeft}
           >
             <PanelErrorBoundary panelName="Lagna Chart">
-              <LagnaChart
+              <ConstellationChart
                 ascendantSign={payload.chart.ascendant.sign}
                 houses={payload.chart.houses}
                 planets={payload.chart.planets}
-                currentDashaLord={payload.chart.dasha?.current_dasha}
               />
             </PanelErrorBoundary>
           </motion.div>

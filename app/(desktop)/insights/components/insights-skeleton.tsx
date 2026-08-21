@@ -100,32 +100,16 @@ const LAGNA_DOTS: Array<{ top: string; left: string; delay: number }> = [
 ];
 
 function LagnaChartSkeleton() {
+  /* Circular, and with no toggle row: the diamond chart and the view switch
+     were both removed, so a skeleton that drew a square with diagonals
+     promised a layout that never arrives. */
   return (
     <div className={s.lagnaCard}>
       <div className={s.lagnaInner}>
-        {/* Toggle row */}
-        <div className={s.chartToggle}>
-          <div className={s.chartToggleBtn} style={{ animationDelay: "0s" }} />
-          <div className={s.chartToggleBtn} style={{ animationDelay: "0.1s" }} />
-        </div>
-
-        {/* The chart itself */}
         <div className={s.lagnaChart} aria-hidden="true">
-          {/* Background square */}
-          <div className={s.lagnaSquare} />
+          <div className={s.constellationDisc} />
+          <div className={s.constellationRing} />
 
-          {/* Diagonal structural lines */}
-          <div className={s.lagnaDiag1} />
-          <div className={s.lagnaDiag2} />
-
-          {/* Inner diamond outline */}
-          <div className={s.lagnaInnerDiamond} />
-
-          {/* Midlines */}
-          <div className={s.lagnaMidH} />
-          <div className={s.lagnaMidV} />
-
-          {/* Planet dots scattered across houses */}
           {LAGNA_DOTS.map((dot, i) => (
             <div
               key={i}
@@ -139,7 +123,6 @@ function LagnaChartSkeleton() {
             />
           ))}
 
-          {/* Centre circle */}
           <div className={s.lagnaCenter} />
         </div>
       </div>

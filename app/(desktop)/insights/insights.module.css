@@ -677,7 +677,11 @@
 
 .gridMain {
   composes: grid;
-  grid-template-columns: 2fr 1fr;
+  /* One column: the chart gets the full content width rather than two thirds
+     of it. The glance panel that used to sit alongside held three short facts
+     and a sentence in a column half of which was empty, so it reads better as
+     a strip underneath. */
+  grid-template-columns: 1fr;
   align-items: stretch;
 }
 
@@ -928,7 +932,16 @@
   grid-column: 1;
   padding: 0;
   overflow: hidden;
+  max-width: min(100%, 840px);
+  margin-inline: auto;
+  width: 100%;
 }
+
+/* The constellation is square, so at the full content width it also becomes
+   taller than the viewport and you cannot see the whole chart at once. The cap
+   goes on the card rather than the chart inside it, so the card hugs the chart
+   instead of framing it with empty panel either side. Still far larger than the
+   ~595px it had when it shared the row with the glance panel. */
 
 .cardChart :global(.lagna-panel) {
   margin: 0;
@@ -954,13 +967,20 @@
 
 .chartGlance {
   composes: card;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 1.25rem;
-  height: 100%;
+  /* Was a tall column beside the chart; now a full-width strip below it. The
+     heading sits left, the three facts run across the remaining space. */
+  display: grid;
+  grid-template-columns: minmax(14rem, 1fr) 2fr;
+  align-items: start;
+  gap: 1.25rem clamp(1.5rem, 4vw, 3rem);
   padding: clamp(1.1rem, 2vw, 1.5rem);
   border-top: 2px solid var(--accent-teal);
+}
+
+@media (max-width: 720px) {
+  .chartGlance {
+    grid-template-columns: 1fr;
+  }
 }
 
 .chartGlance h2 {
@@ -973,6 +993,7 @@
 
 .chartGlanceIntro,
 .chartGlanceNote {
+  grid-column: 1 / -1;
   margin: 0.55rem 0 0;
   color: var(--ink-soft);
   font-size: 1rem;
@@ -981,7 +1002,9 @@
 
 .chartGlanceFacts {
   display: grid;
-  gap: 0;
+  /* Three across in the strip layout, stacking on narrow viewports. */
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0 clamp(1rem, 3vw, 2rem);
   margin: 0;
 }
 
