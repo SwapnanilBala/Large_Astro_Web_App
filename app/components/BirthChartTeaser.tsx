@@ -29,6 +29,7 @@ interface BirthChartTeaserProps {
   city?: string;
   unknownTime?: boolean;
   coarseTime?: string;
+  presentation?: "default" | "embedded";
 }
 
 const ZODIAC_SIGNS = [
@@ -120,8 +121,10 @@ export default function BirthChartTeaser({
   city,
   unknownTime,
   coarseTime,
+  presentation = "default",
 }: BirthChartTeaserProps) {
   const { t } = useTranslation();
+  const isEmbedded = presentation === "embedded";
   const filledCount = useMemo(
     () => getFilledFieldsCount({ name, birthDate, birthTime, country, state, city }),
     [name, birthDate, birthTime, country, state, city]
@@ -266,8 +269,27 @@ export default function BirthChartTeaser({
     { label: t("birthChartTeaser.houses"), active: hasTimeSignal, accent: "#C89B3C" },
   ];
 
+  // The landing preview already owns its heading, progress meter, and intake
+  // rail. Embedded teasers only surface chart facts that have actually been
+  // unlocked, avoiding a second set of pending/progress UI inside that card.
+  const visibleInfoRows = isEmbedded ? infoRows.filter((row) => row.active) : infoRows;
+  const centerName =
+    isEmbedded && previewState === "dormant"
+      ? t("home.chartPreview")
+      : getDisplayName(name, t("birthChartTeaser.awaitingName"));
+  const centerMeta = isEmbedded
+    ? previewState === "dormant"
+      ? null
+      : isNearComplete
+        ? t("birthChartTeaser.ready")
+        : chartConfidence
+    : isNearComplete
+      ? t("birthChartTeaser.ready")
+      : t("birthChartTeaser.fields", { filled: String(filledCount), total: "6" });
+
   const containerClassName = [
     styles.teaserContainer,
+    isEmbedded ? styles.isEmbedded : "",
     previewState === "dormant" ? styles.isDormant : "",
     previewState === "partial" ? styles.isPartial : "",
     isNearComplete ? styles.isReady : "",
@@ -275,21 +297,23 @@ export default function BirthChartTeaser({
 
   return (
     <div className={containerClassName}>
-      <div className={styles.teaserHeader}>
-        <div>
-          <span className={styles.teaserKicker}>{t("birthChartTeaser.kicker")}</span>
-          <span className={styles.teaserTitle}>{t("home.chartPreview")}</span>
-        </div>
-        <div className={styles.headerStatus}>
-          <span className={styles.chartConfidence}>{chartConfidence}</span>
-          <div
-            className={styles.progressBar}
-            aria-label={t("birthChartTeaser.readinessAria", { percent: String(readiness) })}
-          >
-            <div className={styles.progressFill} style={{ width: `${readiness}%` }} />
+      {!isEmbedded && (
+        <div className={styles.teaserHeader}>
+          <div>
+            <span className={styles.teaserKicker}>{t("birthChartTeaser.kicker")}</span>
+            <span className={styles.teaserTitle}>{t("home.chartPreview")}</span>
+          </div>
+          <div className={styles.headerStatus}>
+            <span className={styles.chartConfidence}>{chartConfidence}</span>
+            <div
+              className={styles.progressBar}
+              aria-label={t("birthChartTeaser.readinessAria", { percent: String(readiness) })}
+            >
+              <div className={styles.progressFill} style={{ width: `${readiness}%` }} />
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       <div className={styles.teaserBody}>
         <div className={styles.astrolabeWrap} aria-hidden="true">
@@ -336,33 +360,31 @@ export default function BirthChartTeaser({
               </span>
             ))}
             <div className={styles.centerSeal}>
-              <span className={styles.centerName}>{getDisplayName(name, t("birthChartTeaser.awaitingName"))}</span>
-              <span className={styles.centerMeta}>
-                {isNearComplete
-                  ? t("birthChartTeaser.ready")
-                  : t("birthChartTeaser.fields", { filled: String(filledCount), total: "6" })}
-              </span>
+              <span className={styles.centerName}>{centerName}</span>
+              {centerMeta && <span className={styles.centerMeta}>{centerMeta}</span>}
             </div>
           </div>
-          <div className={styles.unlockRail}>
-            {unlockRail.map((item, index) => (
-              <span
-                key={item.label}
-                className={[
-                  styles.unlockStep,
-                  item.active ? styles.unlockStepActive : "",
-                ].filter(Boolean).join(" ")}
-                style={{ "--accent": item.accent } as CSSProperties}
-              >
-                <span className={styles.unlockStepDot}>{index + 1}</span>
-                <span className={styles.unlockStepLabel}>{item.label}</span>
-              </span>
-            ))}
-          </div>
+          {!isEmbedded && (
+            <div className={styles.unlockRail}>
+              {unlockRail.map((item, index) => (
+                <span
+                  key={item.label}
+                  className={[
+                    styles.unlockStep,
+                    item.active ? styles.unlockStepActive : "",
+                  ].filter(Boolean).join(" ")}
+                  style={{ "--accent": item.accent } as CSSProperties}
+                >
+                  <span className={styles.unlockStepDot}>{index + 1}</span>
+                  <span className={styles.unlockStepLabel}>{item.label}</span>
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className={styles.teaserRows}>
-          {infoRows.map((row) => (
+          {visibleInfoRows.map((row) => (
             <div
               key={row.label}
               className={[
@@ -371,25 +393,30 @@ export default function BirthChartTeaser({
               ].filter(Boolean).join(" ")}
               style={{ "--accent": row.accent } as CSSProperties}
             >
-              <span className={styles.rowIcon}>{row.icon}</span>
+              <span className={styles.rowIcon} aria-hidden="true">{row.icon}</span>
               <span className={styles.rowMain}>
                 <span className={styles.rowLabel}>{row.label}</span>
                 <span className={styles.rowValue}>{row.value}</span>
               </span>
-              <span className={styles.rowMeta}>{row.meta}</span>
+              {!isEmbedded && <span className={styles.rowMeta}>{row.meta}</span>}
             </div>
           ))}
+          {isEmbedded && visibleInfoRows.length === 0 && (
+            <p className={styles.embeddedEmptyState}>{t("birthChartTeaser.addDetails")}</p>
+          )}
         </div>
       </div>
 
-      <div className={styles.teaserFooter}>
-        <span className={styles.readinessText}>
-          {isNearComplete ? t("birthChartTeaser.nearlyFormed") : t("birthChartTeaser.addDetails")}
-        </span>
-        <span className={styles.readinessValue}>
-          {t("birthChartTeaser.readyPercent", { percent: String(readiness) })}
-        </span>
-      </div>
+      {!isEmbedded && (
+        <div className={styles.teaserFooter}>
+          <span className={styles.readinessText}>
+            {isNearComplete ? t("birthChartTeaser.nearlyFormed") : t("birthChartTeaser.addDetails")}
+          </span>
+          <span className={styles.readinessValue}>
+            {t("birthChartTeaser.readyPercent", { percent: String(readiness) })}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

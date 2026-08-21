@@ -41,13 +41,6 @@ import PremiumInput from "@/app/components/PremiumInput";
 import PremiumButton from "@/app/components/PremiumButton";
 import PremiumToggle from "@/app/components/PremiumToggle";
 import styles from "./page.module.css";
-
-
-const CosmicBackground = dynamic(() => import("@/app/components/CosmicBackground"), {
-  ssr: false,
-  loading: () => null,
-});
-
 const BirthChartTeaser = dynamic(() => import("@/app/components/BirthChartTeaser"), {
   ssr: false,
   loading: () => null,
@@ -118,17 +111,6 @@ type GeocodeApiResponse = {
   lon?: number;
   timezoneOffsetMinutes?: number;
   timeZoneId?: string;
-};
-
-/* Annotated rather than inferred: only some steps carry meta/missing, and an
- * inferred union would make those properties unreachable at the call site. */
-type IntakeStepState = {
-  id: string;
-  label: string;
-  detail: string;
-  complete: boolean;
-  meta?: string;
-  missing?: string;
 };
 
 const withClientTimezoneDefault = (): ProfileQueryInput => ({
@@ -231,7 +213,6 @@ export default function Home() {
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latLonExpanded, setLatLonExpanded] = useState(false);
-  const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
   const [birthDetailsHistory, setBirthDetailsHistory] = useState<BirthDetailsHistoryEntry[]>([]);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -353,9 +334,6 @@ export default function Home() {
                 : prev.timezoneOffsetMinutes,
             timeZoneId: typeof data.timeZoneId === "string" ? data.timeZoneId : prev.timeZoneId,
           }));
-          setGeoStatus("found");
-        } else {
-          setGeoStatus("not-found");
         }
       };
 
@@ -368,8 +346,6 @@ export default function Home() {
       geoAbortController.current?.abort();
       const controller = new AbortController();
       geoAbortController.current = controller;
-      setGeoStatus("loading");
-
       try {
         const res = await fetch(`/api/geocode?${cacheKey}`, { signal: controller.signal });
         const data = await res.json() as GeocodeApiResponse;
@@ -385,7 +361,6 @@ export default function Home() {
         applyGeocodeResult(data);
       } catch {
         if (controller.signal.aborted) return;
-        setGeoStatus("not-found");
       }
     }, 800);
 
@@ -403,32 +378,21 @@ export default function Home() {
     return hasRequiredProfile && hasUsableBirthTime;
   }, [coarseTime, draft, unknownTime]);
 
-  /* Preview completion follows the teaser fields without changing submit validation. */
-  const previewCompletion = useMemo(() => {
-    const locationFilled = ["country", "state", "city"].filter(
-      (field) => draft[field as keyof ProfileQueryInput].trim().length > 0,
+  const previewReadiness = useMemo(() => {
+    const locationFieldsFilled = [draft.country, draft.state, draft.city].filter(
+      (field) => field.trim().length > 0,
     ).length;
-    const timeFilled = draft.birthTime.trim().length > 0 || (unknownTime && hasCoarseTimeFallback(coarseTime));
-    const filled =
-      Number(draft.name.trim().length > 0) +
-      Number(draft.birthDate.trim().length > 0) +
-      Number(timeFilled) +
-      locationFilled;
+    const hasTime = draft.birthTime.trim().length > 0 || (unknownTime && hasCoarseTimeFallback(coarseTime));
 
     return {
-      filled,
+      filled:
+        Number(draft.name.trim().length > 0) +
+        Number(draft.birthDate.trim().length > 0) +
+        Number(hasTime) +
+        locationFieldsFilled,
       total: 6,
-      percent: Math.round((filled / 6) * 100),
     };
   }, [coarseTime, draft, unknownTime]);
-
-  const previewStatus = useMemo(() => {
-    if (canSubmit) return t("home.previewStatusReady");
-    if (geoStatus === "found") return t("home.previewStatusCoordinates");
-    if (unknownTime && hasCoarseTimeFallback(coarseTime)) return t("home.previewStatusEstimate");
-    if (previewCompletion.filled === 0) return t("home.previewStatusAwaiting");
-    return t("home.previewStatusBuilding");
-  }, [canSubmit, coarseTime, geoStatus, previewCompletion.filled, t, unknownTime]);
 
   const tWithFallback = useCallback(
     (key: string, fallback: string, params?: Record<string, string>) => {
@@ -448,8 +412,6 @@ export default function Home() {
   const hasCity = draft.city.trim().length > 0;
   const hasLatitude = draft.latitude.trim().length > 0;
   const hasLongitude = draft.longitude.trim().length > 0;
-  const hasLocation = hasCountry && hasState && hasCity && hasLatitude && hasLongitude;
-
   const missingFieldLabels = useMemo(() => {
     const missing: string[] = [];
     if (!hasName) missing.push(t("home.formName"));
@@ -501,7 +463,7 @@ export default function Home() {
         id: "name" as const,
         tabLabel: tWithFallback("home.stepTabName", "Name"),
         answered: hasName,
-        label: t("home.formName"),
+        label: tWithFallback("home.formNameShort", "Name"),
         heading: tWithFallback("home.askName", "What should we call you?"),
         helper: tWithFallback("home.askNameHelper", "The name this reading is written for."),
       },
@@ -544,6 +506,13 @@ export default function Home() {
 
   const activeQuestion = questions[questionIndex] ?? questions[0];
   const isLastQuestion = questionIndex === questions.length - 1;
+  const nextActionLabel = activeQuestion.id === "name"
+    ? tWithFallback("home.continueToBirthDate", "Continue to birth date")
+    : activeQuestion.id === "birthDate"
+      ? tWithFallback("home.continueToBirthTime", "Continue to birth time")
+      : activeQuestion.id === "birthTime"
+        ? tWithFallback("home.continueToBirthplace", "Continue to birthplace")
+        : t("home.cta");
 
   /* A dot is reachable once every question before it has an answer, so the
    * flow can be re-entered anywhere already satisfied without letting anyone
@@ -580,76 +549,6 @@ export default function Home() {
     }
     questionBodyRef.current?.querySelector<HTMLElement>("input, textarea, button")?.focus();
   }, [questionIndex]);
-
-  const intakeSteps = useMemo(() => {
-    const birthMomentComplete = hasBirthDate && hasBirthTimeSignal;
-    const stepStates: IntakeStepState[] = [
-      {
-        id: "identity",
-        label: tWithFallback("home.stepIdentityLabel", "Identity"),
-        detail: tWithFallback("home.stepIdentityDetail", "Name anchors the reading"),
-        complete: hasName,
-        missing: !hasName ? t("home.formName") : undefined,
-      },
-      {
-        id: "birth",
-        label: tWithFallback("home.stepBirthMomentLabel", "Birth moment"),
-        detail: tWithFallback("home.stepBirthMomentDetail", "Date and time tune the sky"),
-        complete: birthMomentComplete,
-        missing: !birthMomentComplete
-          ? [!hasBirthDate ? t("home.formBirthDate") : "", !hasBirthTimeSignal ? t("home.formBirthTime") : ""]
-              .filter(Boolean)
-              .join(", ")
-          : undefined,
-      },
-      {
-        id: "location",
-        label: tWithFallback("home.stepLocationLabel", "Location"),
-        detail: tWithFallback("home.stepLocationDetail", "Place locks coordinates"),
-        complete: hasLocation,
-        meta: geoStatus === "found" ? t("home.previewStatusCoordinates") : undefined,
-        missing: !hasLocation
-          ? [
-              !hasCountry ? t("home.formCountry") : "",
-              !hasState ? t("home.formState") : "",
-              !hasCity ? t("home.formCity") : "",
-              !hasLatitude || !hasLongitude ? t("home.enterCoordinates") : "",
-            ]
-              .filter(Boolean)
-              .join(", ")
-          : undefined,
-      },
-      {
-        id: "ready",
-        label: tWithFallback("home.stepChartReadyLabel", "Chart ready"),
-        detail: tWithFallback("home.stepChartReadyDetail", "All signals aligned"),
-        complete: canSubmit,
-        meta: `${previewCompletion.filled}/${previewCompletion.total}`,
-        missing: !canSubmit ? t("home.previewStatusBuilding") : undefined,
-      },
-    ];
-    const activeIndex = stepStates.findIndex((step) => !step.complete);
-    return stepStates.map((step, index) => ({
-      ...step,
-      active: activeIndex === -1 ? index === stepStates.length - 1 : index === activeIndex,
-    }));
-  }, [
-    canSubmit,
-    geoStatus,
-    hasBirthDate,
-    hasBirthTimeSignal,
-    hasCity,
-    hasCountry,
-    hasLatitude,
-    hasLocation,
-    hasLongitude,
-    hasName,
-    hasState,
-    previewCompletion.filled,
-    previewCompletion.total,
-    t,
-    tWithFallback,
-  ]);
 
   /* Pull the date-picker chunk while the visitor is still on the name
    * question. Idle time if the browser offers it, a short timer otherwise —
@@ -855,7 +754,6 @@ export default function Home() {
       timezoneOffsetMinutes: String(-new Date().getTimezoneOffset()),
       timeZoneId: typeof Intl !== "undefined" ? Intl.DateTimeFormat().resolvedOptions().timeZone : "",
     }));
-    setGeoStatus("idle");
   };
 
   // Cascading handlers: changing a parent clears its children
@@ -1045,27 +943,17 @@ export default function Home() {
 
   return (
     <div className={styles.professionalIntake}>
-      <CosmicBackground />
       <FormCelebration isComplete={canSubmit} />
-
-      {/* ── Floating Cosmic Particles ── */}
-
-
-
-      {/* ── Hero wrapper: positions wheel behind the panel ── */}
 
       <header className={styles.streamlinedHeader}>
         <span className={styles.stepLabel}>
-          {tWithFallback("home.questionCounter", `Question ${questionIndex + 1} of ${questions.length}`, {
-            current: String(questionIndex + 1),
-            total: String(questions.length),
-          })}
+          {tWithFallback("home.intakeEyebrow", "Your Vedic birth chart")}
         </span>
         <h1>{t("home.intakeHeadingDetails")}</h1>
         <p>
           {tWithFallback(
-            "home.intakeLeadStepped",
-            "One question at a time. Press Enter to continue, Shift + Enter to step back.",
+            "home.intakeLeadOutcome",
+            "Map the sky at your first breath to reveal your Lagna, houses, and planetary story.",
           )}
         </p>
       </header>
@@ -1112,7 +1000,6 @@ export default function Home() {
                 </ol>
 
                 <div className={styles.questionHead} aria-live="polite">
-                  <span className={styles.cardKicker}>{t("home.birthChartIntake")}</span>
                   <h2 className={styles.questionHeading}>{activeQuestion.heading}</h2>
                   <p className={styles.questionHelper}>{activeQuestion.helper}</p>
                 </div>
@@ -1123,7 +1010,7 @@ export default function Home() {
                       <PremiumInput
                         id="birth-name"
                         name="name"
-                        label={t("home.formName")}
+                        label={tWithFallback("home.formNameShort", "Name")}
                         value={draft.name}
                         onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
                         normalize={normalizePersonName}
@@ -1424,136 +1311,20 @@ export default function Home() {
                   )}
                 </div>{/* /questionBody */}
 
-                {/* ── Quick actions: whole-form shortcuts, so only the first question offers them ── */}
-                {questionIndex === 0 && (
-                  <div className={styles.quickActionsRow}>
-                    <div className={styles.smartFillWrapper}>
-                      <button
-                        type="button"
-                        className={styles.smartFillToggle}
-                        onClick={() => setSmartFillExpanded(!smartFillExpanded)}
-                        aria-expanded={smartFillExpanded}
-                        aria-controls="smart-fill-panel"
-                      >
-                        <HiOutlineSparkles aria-hidden="true" />
-                        <span>{t("home.smartFillToggle")}</span>
-                        <HiOutlineChevronDown
-                          className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ""}`}
-                          aria-hidden="true"
-                        />
-                      </button>
-
-                      {smartFillExpanded && (
-                        <div id="smart-fill-panel" className={styles.smartFillContent}>
-                          <textarea
-                            value={smartFillText}
-                            onChange={(e) => setSmartFillText(e.target.value)}
-                            placeholder={t("home.smartFillPlaceholder")}
-                            className={styles.smartFillTextarea}
-                            rows={2}
-                            aria-label={t("home.smartFillToggle")}
-                          />
-                          <div className={styles.smartFillHint}>{t("home.smartFillHint")}</div>
-                          <div className={styles.smartFillExamples}>
-                            {smartFillExamples.map((example) => (
-                              <button
-                                key={example}
-                                type="button"
-                                className={styles.smartFillExampleChip}
-                                onClick={() => setSmartFillText(example)}
-                              >
-                                {example}
-                              </button>
-                            ))}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={handleSmartFill}
-                            className={styles.smartFillButton}
-                            disabled={smartFillText.trim().length < 10}
-                          >
-                            {t("home.smartFillButton")}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className={styles.birthHistoryWrapper}>
-                      <button
-                        type="button"
-                        className={styles.birthHistoryToggle}
-                        onClick={() => setHistoryExpanded((expanded) => !expanded)}
-                        aria-expanded={historyExpanded}
-                        aria-controls="birth-details-history-panel"
-                      >
-                        <HiOutlineClock />
-                        <span>{t("home.birthHistoryToggle")}</span>
-                        {birthDetailsHistory.length > 0 && (
-                          <span className={styles.birthHistoryCount}>
-                            {t("home.birthHistoryCount", { count: String(birthDetailsHistory.length) })}
-                          </span>
-                        )}
-                        <HiOutlineChevronDown
-                          className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`}
-                        />
-                      </button>
-
-                      {historyExpanded && (
-                        <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
-                          {birthDetailsHistory.length > 0 ? (
-                            <div className={styles.birthHistoryList}>
-                              {birthDetailsHistory.map((entry) => {
-                                const location = [entry.draft.city, entry.draft.state, entry.draft.country]
-                                  .filter((part) => part.trim().length > 0)
-                                  .join(", ");
-                                const coarseTimeKey = entry.coarseTime
-                                  ? `home.coarse${entry.coarseTime.charAt(0).toUpperCase()}${entry.coarseTime.slice(1)}`
-                                  : "home.coarseUnknown";
-                                const timeLabel = entry.unknownTime
-                                  ? t("home.birthHistoryApproxTime", { time: t(coarseTimeKey) })
-                                  : entry.draft.birthTime;
-
-                                return (
-                                  <button
-                                    key={entry.id}
-                                    type="button"
-                                    className={styles.birthHistoryItem}
-                                    onClick={() => restoreBirthDetailsHistory(entry)}
-                                  >
-                                    <span className={styles.birthHistoryName}>
-                                      {entry.draft.name || t("home.birthHistoryUnnamed")}
-                                    </span>
-                                    <span className={styles.birthHistoryMeta}>
-                                      {[entry.draft.birthDate, timeLabel, location].filter(Boolean).join(" - ")}
-                                    </span>
-                                    <span className={styles.birthHistorySavedAt}>
-                                      {formatHistoryDate(entry.savedAt)}
-                                    </span>
-                                  </button>
-                                );
-                              })}
-                            </div>
-                          ) : (
-                            <p className={styles.birthHistoryEmpty}>{t("home.birthHistoryEmpty")}</p>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </div>{/* /formSectionCard */}
 
               {/* PRIMARY CTA */}
               <div className={styles.primaryAction}>
                 <div className={styles.stepActions}>
-                  <button
-                    type="button"
-                    className={styles.backButton}
-                    onClick={goBack}
-                    disabled={questionIndex === 0}
-                  >
-                    {t("home.back")}
-                  </button>
+                  {questionIndex > 0 && (
+                    <button
+                      type="button"
+                      className={styles.backButton}
+                      onClick={goBack}
+                    >
+                      {t("home.back")}
+                    </button>
+                  )}
                   {isLastQuestion ? (
                     <div
                       ref={submitWrapperRef}
@@ -1583,7 +1354,7 @@ export default function Home() {
                       disabled={!activeQuestion.answered}
                       describedBy={!activeQuestion.answered ? "intake-action-hint" : undefined}
                     >
-                      {tWithFallback("home.next", "Next")}
+                      {nextActionLabel}
                     </PremiumButton>
                   )}
                 </div>
@@ -1619,6 +1390,124 @@ export default function Home() {
 
                 <p className={styles.trustMicrocopy}>{t("home.trustMicrocopy")}</p>
               </div>
+
+              {/* Whole-form shortcuts stay secondary to the current question's action. */}
+              {questionIndex === 0 && (
+                <div className={styles.quickActionsRow}>
+                  <div className={styles.smartFillWrapper}>
+                    <button
+                      type="button"
+                      className={styles.smartFillToggle}
+                      onClick={() => setSmartFillExpanded(!smartFillExpanded)}
+                      aria-expanded={smartFillExpanded}
+                      aria-controls="smart-fill-panel"
+                    >
+                      <HiOutlineSparkles aria-hidden="true" />
+                      <span>{t("home.smartFillToggle")}</span>
+                      <HiOutlineChevronDown
+                        className={`${styles.smartFillArrow} ${smartFillExpanded ? styles.expanded : ""}`}
+                        aria-hidden="true"
+                      />
+                    </button>
+
+                    {smartFillExpanded && (
+                      <div id="smart-fill-panel" className={styles.smartFillContent}>
+                        <textarea
+                          value={smartFillText}
+                          onChange={(e) => setSmartFillText(e.target.value)}
+                          placeholder={t("home.smartFillPlaceholder")}
+                          className={styles.smartFillTextarea}
+                          rows={2}
+                          aria-label={t("home.smartFillToggle")}
+                        />
+                        <div className={styles.smartFillHint}>{t("home.smartFillHint")}</div>
+                        <div className={styles.smartFillExamples}>
+                          {smartFillExamples.map((example) => (
+                            <button
+                              key={example}
+                              type="button"
+                              className={styles.smartFillExampleChip}
+                              onClick={() => setSmartFillText(example)}
+                            >
+                              {example}
+                            </button>
+                          ))}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleSmartFill}
+                          className={styles.smartFillButton}
+                          disabled={smartFillText.trim().length < 10}
+                        >
+                          {t("home.smartFillButton")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.birthHistoryWrapper}>
+                    <button
+                      type="button"
+                      className={styles.birthHistoryToggle}
+                      onClick={() => setHistoryExpanded((expanded) => !expanded)}
+                      aria-expanded={historyExpanded}
+                      aria-controls="birth-details-history-panel"
+                    >
+                      <HiOutlineClock />
+                      <span>{t("home.birthHistoryToggle")}</span>
+                      {birthDetailsHistory.length > 0 && (
+                        <span className={styles.birthHistoryCount}>
+                          {t("home.birthHistoryCount", { count: String(birthDetailsHistory.length) })}
+                        </span>
+                      )}
+                      <HiOutlineChevronDown
+                        className={`${styles.birthHistoryArrow} ${historyExpanded ? styles.expanded : ""}`}
+                      />
+                    </button>
+
+                    {historyExpanded && (
+                      <div id="birth-details-history-panel" className={styles.birthHistoryPanel}>
+                        {birthDetailsHistory.length > 0 ? (
+                          <div className={styles.birthHistoryList}>
+                            {birthDetailsHistory.map((entry) => {
+                              const location = [entry.draft.city, entry.draft.state, entry.draft.country]
+                                .filter((part) => part.trim().length > 0)
+                                .join(", ");
+                              const coarseTimeKey = entry.coarseTime
+                                ? `home.coarse${entry.coarseTime.charAt(0).toUpperCase()}${entry.coarseTime.slice(1)}`
+                                : "home.coarseUnknown";
+                              const timeLabel = entry.unknownTime
+                                ? t("home.birthHistoryApproxTime", { time: t(coarseTimeKey) })
+                                : entry.draft.birthTime;
+
+                              return (
+                                <button
+                                  key={entry.id}
+                                  type="button"
+                                  className={styles.birthHistoryItem}
+                                  onClick={() => restoreBirthDetailsHistory(entry)}
+                                >
+                                  <span className={styles.birthHistoryName}>
+                                    {entry.draft.name || t("home.birthHistoryUnnamed")}
+                                  </span>
+                                  <span className={styles.birthHistoryMeta}>
+                                    {[entry.draft.birthDate, timeLabel, location].filter(Boolean).join(" - ")}
+                                  </span>
+                                  <span className={styles.birthHistorySavedAt}>
+                                    {formatHistoryDate(entry.savedAt)}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className={styles.birthHistoryEmpty}>{t("home.birthHistoryEmpty")}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>{/* /formColumn */}
 
             {/* RIGHT COLUMN: Chart Preview */}
@@ -1626,30 +1515,20 @@ export default function Home() {
               <div className={styles.previewCard}>
                 <div className={styles.previewHeader}>
                   <span className={styles.previewKicker}>{t("home.previewKicker")}</span>
-                  <span className={styles.previewStatus}>{previewStatus}</span>
+                  <span className={styles.previewStatus} role="status" aria-live="polite">
+                    {tWithFallback(
+                      "home.previewReadiness",
+                      `${previewReadiness.filled} of ${previewReadiness.total} details ready`,
+                      {
+                        count: String(previewReadiness.filled),
+                        total: String(previewReadiness.total),
+                      },
+                    )}
+                  </span>
                 </div>
-
-                <div
-                  className={styles.previewMeter}
-                  role="progressbar"
-                  aria-label={t("home.previewProgressAria")}
-                  aria-valuenow={previewCompletion.percent}
-                  aria-valuemin={0}
-                  aria-valuemax={100}
-                >
-                  <span
-                    className={styles.previewMeterFill}
-                    style={{ width: `${previewCompletion.percent}%` }}
-                  />
-                </div>
-                <p className={styles.previewCount}>
-                  {t("home.stickyComplete", {
-                    count: String(previewCompletion.filled),
-                    total: String(previewCompletion.total),
-                  })}
-                </p>
 
                 <BirthChartTeaser
+                  presentation="embedded"
                   name={draft.name}
                   birthDate={draft.birthDate}
                   birthTime={draft.birthTime}
@@ -1660,33 +1539,6 @@ export default function Home() {
                   unknownTime={unknownTime}
                   coarseTime={coarseTime}
                 />
-
-                <ol className={styles.progressRail}>
-                  {intakeSteps.map((step) => (
-                    <li
-                      key={step.id}
-                      className={[
-                        styles.railStep,
-                        step.complete ? styles.railStepComplete : "",
-                        step.active ? styles.railStepActive : "",
-                      ]
-                        .filter(Boolean)
-                        .join(" ")}
-                      aria-current={step.active ? "step" : undefined}
-                    >
-                      <span className={styles.railMarker} aria-hidden="true">
-                        {step.complete ? <HiOutlineCheckCircle /> : null}
-                      </span>
-                      <span className={styles.railBody}>
-                        <span className={styles.railLabel}>
-                          {step.label}
-                          {step.meta ? <span className={styles.railMeta}>{step.meta}</span> : null}
-                        </span>
-                        <span className={styles.railDetail}>{step.missing ?? step.detail}</span>
-                      </span>
-                    </li>
-                  ))}
-                </ol>
               </div>
             </aside>
           </div>{/* /formLayout */}

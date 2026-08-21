@@ -493,6 +493,119 @@
   color: var(--accent-gold, #C89B3C);
 }
 
+/* Embedded teasers live inside a preview card that already supplies the
+   heading, progress, and surface treatment. Keep this presentation flat and
+   still: the astrolabe is the only visual focal point and unlocked facts read
+   as a simple list rather than a second stack of cards. */
+.isEmbedded {
+  margin: 0;
+  padding: 0.35rem 0 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+.isEmbedded::before {
+  display: none;
+}
+
+.isEmbedded.isDormant {
+  filter: none;
+}
+
+.isEmbedded.isPartial,
+.isEmbedded.isReady {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.isEmbedded .teaserBody {
+  grid-template-columns: minmax(112px, 0.72fr) minmax(0, 1.28fr);
+  gap: 0.75rem;
+}
+
+.isEmbedded .astrolabeWrap {
+  gap: 0;
+}
+
+.isEmbedded .astrolabe {
+  width: min(100%, 148px);
+  max-width: 148px;
+}
+
+.isEmbedded .houseRing {
+  animation: none;
+}
+
+.isEmbedded .outerRing,
+.isEmbedded .unlockRingActive,
+.isEmbedded .houseTickActive,
+.isEmbedded .planetMarkerActive,
+.isEmbedded .planetMarkerActive::after,
+.isEmbedded .centerSeal {
+  box-shadow: none;
+}
+
+.isEmbedded .unlockRingLabel {
+  display: none;
+}
+
+.isEmbedded .planetMarker {
+  width: 1.9rem;
+  height: 1.9rem;
+  font-size: 0.43rem;
+}
+
+.isEmbedded .teaserRows {
+  gap: 0;
+}
+
+.isEmbedded .teaserRow {
+  grid-template-columns: 1.8rem minmax(0, 1fr);
+  gap: 0.38rem;
+  min-height: 2.45rem;
+  padding: 0.4rem 0;
+  background: transparent;
+  border: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+}
+
+.isEmbedded .teaserRow:first-child {
+  border-top: 0;
+}
+
+.isEmbedded .rowIcon {
+  width: 1.7rem;
+  height: 1.7rem;
+  font-size: 0.42rem;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.isEmbedded .rowIcon svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.isEmbedded .rowValue {
+  font-size: 0.82rem;
+}
+
+.embeddedEmptyState {
+  margin: 0;
+  max-width: 20rem;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: rgba(234, 237, 243, 0.58);
+  text-wrap: balance;
+}
+
 @keyframes orbitDrift {
   to {
     transform: rotate(360deg);
@@ -512,12 +625,29 @@
   .unlockRail {
     width: min(100%, 320px);
   }
+
+  .isEmbedded .teaserBody {
+    grid-template-columns: 1fr;
+  }
+
+  .isEmbedded .astrolabe {
+    width: min(60vw, 148px);
+  }
+
+  .isEmbedded .teaserRows {
+    width: 100%;
+  }
 }
 
 @media (max-width: 520px) {
   .teaserContainer {
     padding: 0.88rem;
     border-radius: 12px;
+  }
+
+  .isEmbedded.teaserContainer {
+    padding: 0.25rem 0 0;
+    border-radius: 0;
   }
 
   .teaserHeader,
