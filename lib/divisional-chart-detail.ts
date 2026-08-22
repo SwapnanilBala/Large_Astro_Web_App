@@ -248,7 +248,7 @@ export function buildDivisionalChartDetail(
         name: position.name,
         rashiSign: position.rashi_sign,
         vargaSign: position.divisional_sign,
-        divisionPart: position.division_number,
+        divisionPart: position.part_index,
         wholeSignHouse: house,
         signRuler: validVargaSign
           ? (SIGN_RULERS[position.divisional_sign] ?? null)

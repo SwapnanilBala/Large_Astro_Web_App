@@ -239,13 +239,18 @@ export type DivisionalPositionInfo = {
   name: string;
   rashi_sign: string;
   divisional_sign: string;
-  division_number: number;
+  /** Zero-based part within the rashi, 0 to D-1. */
+  part_index: number;
+  /** Degrees into the divisional sign, [0, 30). */
+  degree_in_divisional_sign: number;
 };
 
 export type DivisionalChartInfo = {
   division: number;
   label: string;
   description: string;
+  /** "extended" marks a varga outside Parashara's sixteen — D5, D6, D8, D11. */
+  tradition?: "shodasavarga" | "extended";
   positions: DivisionalPositionInfo[];
 };
 

@@ -772,3 +772,17 @@
     transition: none;
   }
 }
+
+/* Marks the four vargas outside Parashara's sixteen (D5, D6, D8, D11), which
+   otherwise render identically to the classical ones. */
+.traditionNote {
+  margin: 0.5rem 0 0;
+  padding: 0.4rem 0.6rem;
+  max-width: 46ch;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  background: rgba(255, 243, 210, 0.04);
+  border-left: 2px solid rgba(212, 165, 116, 0.4);
+  border-radius: 0 6px 6px 0;
+}

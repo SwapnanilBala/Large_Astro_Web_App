@@ -9,21 +9,47 @@ export interface DivisionalPosition {
   name: string;
   rashi_sign: string;
   divisional_sign: string;
-  division_number: number;
+  /**
+   * Zero-based index of the part within the rashi, 0 to D-1.
+   *
+   * Was `division_number`, which read like the varga number sitting beside
+   * DivisionalChartResult.division, which actually is the varga number. The one
+   * consumer already called it divisionPart.
+   */
+  part_index: number;
+  /**
+   * Degrees into the divisional sign, [0, 30).
+   *
+   * Each varga part spans 30/D degrees of the rashi and maps onto a whole sign,
+   * so the offset within the part scales up by D. Without this the divisional
+   * position is only accurate to a sign, which rules out divisional dignity by
+   * degree, aspects within a varga, and a proper Vimshopaka Bala later.
+   */
+  degree_in_divisional_sign: number;
 }
 
 export interface DivisionalChartResult {
   division: number;
   label: string;
   description: string;
+  tradition: VargaTradition;
   positions: DivisionalPosition[];
 }
+
+/**
+ * Whether a varga is one of Parashara's sixteen (shodasavarga) or an addition
+ * from later/other traditions. D5, D6, D8 and D11 are not in BPHS's scheme;
+ * they are presented alongside the classical ones and a reader deserves to know
+ * which is which.
+ */
+export type VargaTradition = "shodasavarga" | "extended";
 
 export interface DivisionInfo {
   division: number;
   name: string;
   label: string;
   description: string;
+  tradition: VargaTradition;
 }
 
 // --------------------------------------------------------------------------
@@ -82,26 +108,26 @@ function signModality(sign: string): number {
 // --------------------------------------------------------------------------
 
 export const AVAILABLE_DIVISIONS: DivisionInfo[] = [
-  { division: 1,  name: "Rashi",          label: "D1",  description: "Overall life, identity, and the natal foundation" },
-  { division: 2,  name: "Hora",           label: "D2",  description: "Wealth and financial capacity" },
-  { division: 3,  name: "Drekkana",       label: "D3",  description: "Siblings, courage, and initiative" },
-  { division: 4,  name: "Chaturthamsa",   label: "D4",  description: "Property, fortune, and fixed assets" },
-  { division: 5,  name: "Panchamsa",      label: "D5",  description: "Authority, influence, and recognition" },
-  { division: 6,  name: "Shashtamsa",     label: "D6",  description: "Health patterns, routines, and everyday obstacles" },
-  { division: 7,  name: "Saptamsa",       label: "D7",  description: "Children and progeny" },
-  { division: 8,  name: "Ashtamsa",       label: "D8",  description: "Sudden change, transformation, and vulnerabilities" },
-  { division: 9,  name: "Navamsa",        label: "D9",  description: "Marriage, dharma, and inner nature" },
-  { division: 10, name: "Dasamsa",        label: "D10", description: "Career, profession, and public life" },
-  { division: 11, name: "Rudramsa",       label: "D11", description: "Gains, networks, and the fulfillment of ambitions" },
-  { division: 12, name: "Dwadasamsa",     label: "D12", description: "Parents and ancestral lineage" },
-  { division: 16, name: "Shodasamsa",     label: "D16", description: "Vehicles, comforts, and happiness" },
-  { division: 20, name: "Vimsamsa",       label: "D20", description: "Spiritual progress and worship" },
-  { division: 24, name: "Chaturvimsamsa",  label: "D24", description: "Education, learning, and knowledge" },
-  { division: 27, name: "Nakshatramsa",   label: "D27", description: "Strengths and weaknesses" },
-  { division: 30, name: "Trimsamsa",      label: "D30", description: "Misfortune, disease, and evils" },
-  { division: 40, name: "Khavedamsa",     label: "D40", description: "Auspicious and inauspicious effects" },
-  { division: 45, name: "Akshavedamsa",   label: "D45", description: "General indications and character" },
-  { division: 60, name: "Shashtiamsa",    label: "D60", description: "Past life karma and all general matters" },
+  { division: 1,  name: "Rashi",          label: "D1",  description: "Overall life, identity, and the natal foundation" , tradition: "shodasavarga" },
+  { division: 2,  name: "Hora",           label: "D2",  description: "Wealth and financial capacity" , tradition: "shodasavarga" },
+  { division: 3,  name: "Drekkana",       label: "D3",  description: "Siblings, courage, and initiative" , tradition: "shodasavarga" },
+  { division: 4,  name: "Chaturthamsa",   label: "D4",  description: "Property, fortune, and fixed assets" , tradition: "shodasavarga" },
+  { division: 5,  name: "Panchamsa",      label: "D5",  description: "Authority, influence, and recognition" , tradition: "extended" },
+  { division: 6,  name: "Shashtamsa",     label: "D6",  description: "Health patterns, routines, and everyday obstacles" , tradition: "extended" },
+  { division: 7,  name: "Saptamsa",       label: "D7",  description: "Children and progeny" , tradition: "shodasavarga" },
+  { division: 8,  name: "Ashtamsa",       label: "D8",  description: "Sudden change, transformation, and vulnerabilities" , tradition: "extended" },
+  { division: 9,  name: "Navamsa",        label: "D9",  description: "Marriage, dharma, and inner nature" , tradition: "shodasavarga" },
+  { division: 10, name: "Dasamsa",        label: "D10", description: "Career, profession, and public life" , tradition: "shodasavarga" },
+  { division: 11, name: "Rudramsa",       label: "D11", description: "Gains, networks, and the fulfillment of ambitions" , tradition: "extended" },
+  { division: 12, name: "Dwadasamsa",     label: "D12", description: "Parents and ancestral lineage" , tradition: "shodasavarga" },
+  { division: 16, name: "Shodasamsa",     label: "D16", description: "Vehicles, comforts, and happiness" , tradition: "shodasavarga" },
+  { division: 20, name: "Vimsamsa",       label: "D20", description: "Spiritual progress and worship" , tradition: "shodasavarga" },
+  { division: 24, name: "Chaturvimsamsa",  label: "D24", description: "Education, learning, and knowledge" , tradition: "shodasavarga" },
+  { division: 27, name: "Nakshatramsa",   label: "D27", description: "Strengths and weaknesses" , tradition: "shodasavarga" },
+  { division: 30, name: "Trimsamsa",      label: "D30", description: "Misfortune, disease, and evils" , tradition: "shodasavarga" },
+  { division: 40, name: "Khavedamsa",     label: "D40", description: "Auspicious and inauspicious effects" , tradition: "shodasavarga" },
+  { division: 45, name: "Akshavedamsa",   label: "D45", description: "General indications and character" , tradition: "shodasavarga" },
+  { division: 60, name: "Shashtiamsa",    label: "D60", description: "Past life karma and all general matters" , tradition: "shodasavarga" },
 ];
 
 // --------------------------------------------------------------------------
@@ -368,11 +394,20 @@ export function computeDivisionalChart(
       divisionNumber - 1
     );
 
+    /* Offset inside the part, scaled to the full 30 degrees of the varga sign.
+       Computed from the part index rather than with % so it cannot drift from
+       the `division` the sign was chosen with. */
+    const degreeInDivisional = Math.min(
+      (planet.degree_in_sign - division * spanSize) * divisionNumber,
+      29.999999,
+    );
+
     return {
       name: planet.name,
       rashi_sign: planet.sign,
       divisional_sign: divisionalSign,
-      division_number: division,
+      part_index: division,
+      degree_in_divisional_sign: degreeInDivisional,
     };
   });
 }
@@ -397,6 +432,7 @@ export function computeMultipleDivisionalCharts(
       division: div,
       label: info.label,
       description: info.description,
+      tradition: info.tradition,
       positions: computeDivisionalChart(planets, div),
     };
   }

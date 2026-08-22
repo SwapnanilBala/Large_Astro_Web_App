@@ -254,6 +254,16 @@ export default function DivisionalChartsClient({
               <div>
                 <p className={styles.kicker}>{guide?.name ?? "Divisional chart"}</p>
                 <h2>{guide?.focus ?? chart.description}</h2>
+                {/* D5, D6, D8 and D11 are not among Parashara's sixteen. They
+                    sit in the same atlas as the classical vargas, so say which
+                    is which rather than letting the presentation imply equal
+                    authority. */}
+                {chart.tradition === "extended" && (
+                  <p className={styles.traditionNote}>
+                    Outside Parashara&rsquo;s sixteen vargas — read as a
+                    supplementary layer, not a classical authority.
+                  </p>
+                )}
                 {guide && (
                   <Link
                     href={detailHref(selectedDivision, historyQs)}

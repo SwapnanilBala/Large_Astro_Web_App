@@ -138,7 +138,8 @@ export interface ChartResponse {
         name: string;
         rashi_sign: string;
         divisional_sign: string;
-        division_number: number;
+        part_index: number;
+        degree_in_divisional_sign: number;
       }>;
     }> | null;
     life_domain_insights?: LifeDomainInsight[] | null;
