@@ -9,7 +9,15 @@
   --bg-glass-strong: rgba(18, 18, 26, 0.8);
   
   /* Surface Colors */
-  --surface: rgba(255, 243, 210, 0.03);
+  /* Raised from 0.03, which against this backdrop was invisible: every card
+     on the results page read as outlined text on black rather than a surface.
+     Still subtle -- the point is that an edge is discernible, not that panels
+     shout. */
+  --surface: rgba(255, 243, 210, 0.055);
+
+  /* Section headings, everywhere. See the note on --heading-teal below. */
+  --heading-teal: #2FA192;
+  --heading-gradient: linear-gradient(135deg, var(--heading-teal), #C89B3C);
   --surface-soft: rgba(255, 243, 210, 0.02);
   --surface-strong: rgba(255, 243, 210, 0.05);
   --surface-hover: rgba(255, 243, 210, 0.06);
@@ -39,8 +47,8 @@
   --accent-teal-glow: rgba(42, 139, 126, 0.15);
   
   /* Border Colors */
-  --border-soft: rgba(212, 165, 116, 0.12);
-  --border-medium: rgba(212, 165, 116, 0.20);
+  --border-soft: rgba(212, 165, 116, 0.17);
+  --border-medium: rgba(212, 165, 116, 0.26);
   --border-strong: rgba(212, 165, 116, 0.30);
   --border-glow: rgba(212, 165, 116, 0.25);
   

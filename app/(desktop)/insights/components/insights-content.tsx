@@ -158,6 +158,7 @@ function CollapsibleSection({
   className = "",
   persistKey,
   openForHash,
+  summary,
 }: {
   id?: string;
   title: string;
@@ -167,6 +168,15 @@ function CollapsibleSection({
   className?: string;
   persistKey?: string;
   openForHash?: string;
+  /**
+   * What the section contains, shown in the bar itself.
+   *
+   * Closed, these rows were a heading on the far left and a chevron ~1200px
+   * away on the right with nothing in between -- so a collapsed section told
+   * you its topic and nothing about whether it was worth opening. Facts belong
+   * in the bar; they are the reason to open it.
+   */
+  summary?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [hasRestored, setHasRestored] = useState(false);
@@ -263,10 +273,13 @@ function CollapsibleSection({
         aria-expanded={isOpen}
         aria-controls={contentId}
       >
-        <div>
+        <div className={styles.collapsibleLabel}>
           <span className={styles.kicker}>{kicker}</span>
           <h2 className={styles.heading}>{title}</h2>
         </div>
+        {summary && !isOpen && (
+          <div className={styles.collapsibleSummary}>{summary}</div>
+        )}
         <motion.span
           animate={{ rotate: isOpen ? 180 : 0 }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
@@ -453,29 +466,31 @@ function ChartAtAGlance({ payload }: { payload: ChartApiResponse }) {
           The three chart signals worth carrying into the interpretation.
         </p>
       </div>
-      <dl className={styles.chartGlanceFacts}>
-        <div>
-          <dt>Strongest support</dt>
-          <dd>{strongest?.planet ?? "Balanced"}</dd>
-        </div>
-        <div>
-          <dt>Dominant tone</dt>
-          <dd>{dominantElement}</dd>
-        </div>
-        <div>
-          <dt>Most active area</dt>
-          <dd>
-            {activeHouse
-              ? `House ${activeHouse.house_number} · ${activeHouse.sign}`
-              : "Evenly distributed"}
-          </dd>
-        </div>
-      </dl>
-      {activeHouse && (
-        <p className={styles.chartGlanceNote}>
-          {activeHouse.planets.join(", ")} concentrate in this part of the chart.
-        </p>
-      )}
+      <div className={styles.chartGlanceRight}>
+        <dl className={styles.chartGlanceFacts}>
+          <div>
+            <dt>Strongest support</dt>
+            <dd>{strongest?.planet ?? "Balanced"}</dd>
+          </div>
+          <div>
+            <dt>Dominant tone</dt>
+            <dd>{dominantElement}</dd>
+          </div>
+          <div>
+            <dt>Most active area</dt>
+            <dd>
+              {activeHouse
+                ? `House ${activeHouse.house_number} · ${activeHouse.sign}`
+                : "Evenly distributed"}
+            </dd>
+          </div>
+        </dl>
+        {activeHouse && (
+          <p className={styles.chartGlanceNote}>
+            {activeHouse.planets.join(", ")} concentrate in this part of the chart.
+          </p>
+        )}
+      </div>
     </aside>
   );
 }
@@ -1121,6 +1136,19 @@ export default function InsightsContent({
           defaultOpen={false}
           className={styles.chartDetails}
           persistKey={`${sectionStateScope}:chart-details`}
+          summary={
+            <>
+              <span>
+                <strong>{payload.chart.planets.length}</strong> placements
+              </span>
+              <span>
+                <strong>{payload.chart.houses.length}</strong> houses
+              </span>
+              {payload.chart.calculation_audit?.ayanamsha && (
+                <span>{payload.chart.calculation_audit.ayanamsha}</span>
+              )}
+            </>
+          }
         >
           <div className={styles.chartDetailsLayout}>
             {/* The calculation method reads as an instrument bar across the top
@@ -1175,29 +1203,10 @@ export default function InsightsContent({
           </div>
         </CollapsibleSection>
 
-        {/* ─── Timing & electional (gateway to its own page) ─── */}
-        <GatewaySection id="timing" className={styles.timingSection}>
-          <SectionGateway
-            href={`/insights/timing?${historyQs}`}
-            icon={<FiClock />}
-            heading="Forecast, electional windows, and the year ahead"
-            blurb={
-              "Three long views that were burying the rest of this report. They " +
-              "now have a page of their own, with room for the explanations each " +
-              "one needs."
-            }
-            chipsLabel="What the timing page covers"
-            chips={[
-              { label: "Forecast", note: "periods now and next" },
-              { label: "Muhurta", note: "when to begin" },
-              { label: "Varshaphal", note: "this year's chart" },
-            ]}
-            footnote="Electional windows are scored against this chart, not a generic calendar."
-            footnoteIcon={<FiClock aria-hidden="true" />}
-            ctaLabel="Open timing and electional"
-          />
-        </GatewaySection>
-
+        {/* The two reference panels sit together, then the three doorways.
+            Previously the dasha table was wedged between the timing gateway
+            and the varga gateway, which split the doorways apart and left the
+            page a single column of full-width bars all the way down. */}
         {payload.chart.nakshatra && payload.chart.dasha && (
           <CollapsibleSection
             id="vimshottari-dashas"
@@ -1206,6 +1215,25 @@ export default function InsightsContent({
             defaultOpen={false}
             className={`${styles.cardRules} ${styles.cardDasha}`}
             persistKey={`${sectionStateScope}:vimshottari-dashas`}
+            summary={
+              <>
+                <span>
+                  <strong>{payload.chart.dasha.current_dasha}</strong> maha dasha
+                </span>
+                {payload.chart.dasha.current_antardasha && (
+                  <span>
+                    <strong>{payload.chart.dasha.current_antardasha}</strong> antardasha
+                  </span>
+                )}
+                {payload.chart.dasha.current_dasha_end && (
+                  <span>
+                    to{" "}
+                    {formatMonthYear(payload.chart.dasha.current_dasha_end) ??
+                      payload.chart.dasha.current_dasha_end}
+                  </span>
+                )}
+              </>
+            }
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Vimshottari Dashas">
@@ -1220,58 +1248,84 @@ export default function InsightsContent({
           </CollapsibleSection>
         )}
 
-        {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
-          <GatewaySection id="divisional-charts">
-            <PanelErrorBoundary panelName="Divisional Chart Atlas">
-              <SectionGateway
-                href={`/insights/divisional-charts?${historyQs}`}
-                icon={<FiLayers />}
-                heading="See the layers behind your main chart"
-                blurb={
-                  `All ${Object.keys(payload.chart.divisional_charts).length} supported vargas from D1 through D60, ` +
-                  "with guidance for the ten that matter most in a client reading."
-                }
-                chipsLabel="Ten key divisional charts"
-                chips={IMPORTANT_DIVISIONAL_CHARTS.map((chart) => ({
-                  label: chart.label,
-                  note: chart.name,
-                  title: chart.focus,
-                }))}
-                footnote="Higher divisions are shown with birth-time reliability guidance."
-                footnoteIcon={<FiClock aria-hidden="true" />}
-                ctaLabel="Open your varga atlas"
-              />
-            </PanelErrorBoundary>
+        <div className={styles.gatewayGrid}>
+          {/* ─── Timing & electional (gateway to its own page) ─── */}
+          <GatewaySection id="timing" className={styles.timingSection}>
+            <SectionGateway
+              href={`/insights/timing?${historyQs}`}
+              icon={<FiClock />}
+              heading="Forecast, electional windows, and the year ahead"
+              blurb={
+                "Three long views that were burying the rest of this report. They " +
+                "now have a page of their own, with room for the explanations each " +
+                "one needs."
+              }
+              chipsLabel="What the timing page covers"
+              chips={[
+                { label: "Forecast", note: "periods now and next" },
+                { label: "Muhurta", note: "when to begin" },
+                { label: "Varshaphal", note: "this year's chart" },
+              ]}
+              footnote="Electional windows are scored against this chart, not a generic calendar."
+              footnoteIcon={<FiClock aria-hidden="true" />}
+              ctaLabel="Open timing and electional"
+            />
           </GatewaySection>
-        )}
 
-        {/* ─── Full reading (gateway to its own page) ─── */}
-        <GatewaySection id="core">
-          <SectionGateway
-            href={`/insights/full-reading?${historyQs}`}
-            icon={<FiBookOpen />}
-            heading="Every finding, with the placement behind it"
-            blurb={
-              `All ${payload.chart.deterministic_rules.length} matched patterns, the ` +
-              "long-term combinations, and the karmic reading — laid out in a grid " +
-              "with the type set to be read rather than skimmed."
-            }
-            chipsLabel="What the full reading covers"
-            chips={[
-              {
-                label: String(payload.chart.deterministic_rules.length),
-                note: "chart findings",
-              },
-              {
-                label: String(payload.chart.yogas?.length ?? 0),
-                note: "lifetime combinations",
-              },
-              { label: "Karma", note: "inherited patterns" },
-            ]}
-            footnote="The three priorities at the top of this report are drawn from this set."
-            ctaLabel="Open the full reading"
-          />
-        </GatewaySection>
+          {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
+            <GatewaySection id="divisional-charts">
+              <PanelErrorBoundary panelName="Divisional Chart Atlas">
+                <SectionGateway
+                  href={`/insights/divisional-charts?${historyQs}`}
+                  icon={<FiLayers />}
+                  heading="See the layers behind your main chart"
+                  blurb={
+                    `All ${Object.keys(payload.chart.divisional_charts).length} supported vargas from D1 through D60, ` +
+                    "with guidance for the ten that matter most in a client reading."
+                  }
+                  chipsLabel="Ten key divisional charts"
+                  chips={IMPORTANT_DIVISIONAL_CHARTS.map((chart) => ({
+                    label: chart.label,
+                    note: chart.name,
+                    title: chart.focus,
+                  }))}
+                  footnote="Higher divisions are shown with birth-time reliability guidance."
+                  footnoteIcon={<FiClock aria-hidden="true" />}
+                  ctaLabel="Open your varga atlas"
+                />
+              </PanelErrorBoundary>
+            </GatewaySection>
+          )}
+
+          {/* ─── Full reading (gateway to its own page) ─── */}
+          <GatewaySection id="core">
+            <SectionGateway
+              href={`/insights/full-reading?${historyQs}`}
+              icon={<FiBookOpen />}
+              heading="Every finding, with the placement behind it"
+              blurb={
+                `All ${payload.chart.deterministic_rules.length} matched patterns, the ` +
+                "long-term combinations, and the karmic reading — laid out in a grid " +
+                "with the type set to be read rather than skimmed."
+              }
+              chipsLabel="What the full reading covers"
+              chips={[
+                {
+                  label: String(payload.chart.deterministic_rules.length),
+                  note: "chart findings",
+                },
+                {
+                  label: String(payload.chart.yogas?.length ?? 0),
+                  note: "lifetime combinations",
+                },
+                { label: "Karma", note: "inherited patterns" },
+              ]}
+              footnote="The three priorities at the top of this report are drawn from this set."
+              ctaLabel="Open the full reading"
+            />
+          </GatewaySection>
+        </div>
+
 
         <CollapsibleSection
           id="life-shifts"
@@ -1619,6 +1673,14 @@ export default function InsightsContent({
             defaultOpen={false}
             className={styles.cardRules}
             persistKey={`${sectionStateScope}:fortune`}
+            summary={
+              <>
+                <span>Colours, numbers, days</span>
+                <span>
+                  keyed to <strong>{payload.chart.ascendant.sign}</strong> lagna
+                </span>
+              </>
+            }
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Lucky Elements">

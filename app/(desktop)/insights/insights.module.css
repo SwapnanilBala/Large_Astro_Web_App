@@ -412,6 +412,36 @@
    than everything around them. */
 .gatewaySection {
   display: block;
+  min-width: 0;
+}
+
+/*
+ * The three doorways, as a row rather than three more full-width bars.
+ *
+ * 30rem is the point below which a gateway's chips start wrapping badly, so
+ * auto-fit gives two across on a normal desktop, three on a very wide screen
+ * and one on a laptop -- without any of them being squeezed to get there.
+ */
+.gatewayGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
+  align-items: stretch;
+  gap: clamp(1.15rem, 1.8vw, 1.65rem);
+  min-width: 0;
+}
+
+.gatewayGrid > * {
+  min-width: 0;
+  /* So the cards can respond to their own width rather than the viewport's:
+     at half width a gateway needs a different footer layout than at full. */
+  container-type: inline-size;
+}
+
+/* An odd one out spans the row instead of leaving a hole beside it. With three
+   gateways that is timing and the varga atlas paired, the full reading across
+   the bottom; with two it does nothing. */
+.gatewayGrid > *:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 .anchorTarget {
@@ -469,7 +499,10 @@
 
 .takeawaysTitle {
   font-family: var(--font-display), sans-serif;
-  color: var(--ink-main);
+  background: var(--heading-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-size: clamp(1.5rem, 2vw, 1.85rem);
   line-height: 1.32;
   max-width: 32ch;
@@ -734,7 +767,7 @@
   font-weight: 600;
   margin: 0;
   line-height: 1.42;
-  background: linear-gradient(135deg, #1A7B6E, #C89B3C);
+  background: var(--heading-gradient);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -1051,8 +1084,8 @@
   /* Was a tall column beside the chart; now a full-width strip below it. The
      heading sits left, the three facts run across the remaining space. */
   display: grid;
-  grid-template-columns: minmax(14rem, 1fr) 2fr;
-  align-items: start;
+  grid-template-columns: minmax(14rem, 1fr) 1.6fr;
+  align-items: stretch;
   gap: 1.25rem clamp(1.5rem, 4vw, 3rem);
   padding: clamp(1.1rem, 2vw, 1.5rem);
   border-top: 2px solid var(--accent-teal);
@@ -1066,19 +1099,35 @@
 
 .chartGlance h2 {
   margin: 0;
-  color: var(--ink-main);
+  background: var(--heading-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
   font-family: var(--font-display), sans-serif;
   font-size: clamp(1.45rem, 2vw, 1.9rem);
   line-height: 1.2;
 }
 
+/* The right column: three facts, then the sentence about them directly
+   underneath. The note used to span the full width as a third grid child,
+   which is what left the space below the facts empty. */
+.chartGlanceRight {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
 .chartGlanceIntro,
 .chartGlanceNote {
-  grid-column: 1 / -1;
   margin: 0.55rem 0 0;
   color: var(--ink-soft);
   font-size: 1.08rem;
   line-height: 1.55;
+}
+
+.chartGlanceNote {
+  padding-top: 0.15rem;
 }
 
 .chartGlanceFacts {
@@ -1415,11 +1464,53 @@
   all: unset;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* The label takes what it needs, the summary takes the middle, the chevron
+     stays at the end. Previously two items with space-between, which is what
+     left a closed row empty across its whole middle. */
+  gap: clamp(1rem, 3vw, 2.5rem);
   width: 100%;
   cursor: pointer;
   padding: 0 0 0.75rem;
   box-sizing: border-box;
+}
+
+.collapsibleLabel {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+/* Facts about what is inside, shown while the section is shut. */
+.collapsibleSummary {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 0.4rem clamp(0.9rem, 2vw, 1.75rem);
+  min-width: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.35;
+  text-align: right;
+}
+
+.collapsibleSummary strong {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+}
+
+.collapsibleSummary > span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 860px) {
+  .collapsibleSummary {
+    display: none;
+  }
 }
 
 .collapsibleTrigger:hover .heading {
@@ -1436,6 +1527,10 @@
   color: var(--ink-soft);
   display: flex;
   align-items: center;
+  /* Sits at the end of the bar whether or not a summary is present. The
+     trigger dropped space-between when the summary slot went in, which left
+     the chevron tucked against the heading on sections that have none. */
+  margin-left: auto;
   transition: color 0.2s;
 }
 
