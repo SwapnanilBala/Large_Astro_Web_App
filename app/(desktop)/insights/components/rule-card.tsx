@@ -15,6 +15,27 @@ import styles from "../insights.module.css";
  * results page and duplicating it would let the two drift.
  */
 
+/**
+ * Order by the measured rank, with unselected rules after the selected ones.
+ *
+ * `rank` is 0 for anything the selection layer did not pick, so a naive
+ * ascending sort would float every unselected rule to the top.
+ *
+ * Lives here rather than in insights-content because the full-reading page is
+ * now the only place that renders the whole rule list, and it was rendering it
+ * in raw engine order -- the comparator was left behind on the results page
+ * when the list moved.
+ */
+export function bySelectionRank(
+  left: ChartApiResponse["chart"]["deterministic_rules"][number],
+  right: ChartApiResponse["chart"]["deterministic_rules"][number],
+): number {
+  const leftRank = left.selection?.selected ? left.selection.rank : Number.MAX_SAFE_INTEGER;
+  const rightRank = right.selection?.selected ? right.selection.rank : Number.MAX_SAFE_INTEGER;
+  if (leftRank !== rightRank) return leftRank - rightRank;
+  return (right.selection?.score ?? 0) - (left.selection?.score ?? 0);
+}
+
 type RuleCardProps = {
   rule: ChartApiResponse["chart"]["deterministic_rules"][number];
   index: number;

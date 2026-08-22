@@ -49,7 +49,8 @@
 .footer p {
   margin: 0;
   color: var(--ink-soft);
-  line-height: 1.55;
+  font-size: 1.1rem;
+  line-height: 1.6;
 }
 
 /* Auto-fit rather than a fixed five: the varga atlas shows ten chips, timing
@@ -73,13 +74,13 @@
   border-radius: 10px;
   background: rgba(108, 225, 212, 0.045);
   color: var(--ink-soft);
-  font-size: 0.75rem;
-  line-height: 1.2;
+  font-size: 0.84rem;
+  line-height: 1.25;
 }
 
 .chips strong {
   color: var(--accent-gold);
-  font-size: 0.95rem;
+  font-size: 1.02rem;
 }
 
 .footer {
@@ -94,7 +95,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.9rem;
+  font-size: 0.98rem;
 }
 
 .openLink {

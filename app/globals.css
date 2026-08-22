@@ -141,7 +141,12 @@ body {
   text-size-adjust: 100%;
   transition: background-color 0.35s ease, color 0.35s ease;
   background: var(--bg-deep);
-  overflow-x: hidden;
+  /* `clip`, not `hidden`. `overflow-x: hidden` forces the other axis to
+     compute as `auto`, which makes body a scroll container -- and since body
+     is not what actually scrolls, every `position: sticky` element on the site
+     was sticking to a scrollport that never moves, i.e. not sticking at all.
+     `clip` suppresses the same horizontal overflow without creating one. */
+  overflow-x: clip;
 }
 
 /* ── Noise Grain Texture ── */
@@ -208,7 +213,13 @@ h3 {
   display: grid;
   place-items: center;
   position: relative;
-  overflow: hidden;
+  /* Not `overflow: hidden`. That makes this element the scroll container for
+     sticky descendants, and since it never scrolls itself the section nav
+     inside it scrolled away instead of sticking. `clip` on one axis with
+     `visible` on the other keeps the ambient blobs from widening the page
+     without establishing a scrollport. */
+  overflow-x: clip;
+  overflow-y: visible;
 }
 
 .insights-shell > * {
@@ -2617,6 +2628,24 @@ label:has(.autocomplete-wrapper.is-open) {
 
 /* ── Site Navbar ────────────────────────────────── */
 
+/* The navbar is fixed and 108px tall at desktop sizes (1rem padding top and
+   bottom around a 1.85rem brand). Anything that has to sit clear of it -- the
+   back button, the sticky section nav -- derives its offset from this rather
+   than carrying its own guess, because the two guesses in the tree had both
+   drifted below the real height and were rendering underneath it. */
+:root {
+  --navbar-h: 108px;
+}
+
+/* The bar loses half its vertical padding and a font step below 768px, which
+   takes it from 108px to about 61px. Anything positioned against it has to
+   follow, or it lands 47px too low on a phone. */
+@media (max-width: 768px) {
+  :root {
+    --navbar-h: 64px;
+  }
+}
+
 .site-navbar {
   position: fixed;
   top: 0;
@@ -4672,10 +4701,17 @@ a:focus-visible {
    ═══════════════════════════════════════════════ */
 
 .back-btn {
+  /* Declared fixed, but `will-change: transform` on the page-transition
+     wrapper makes that wrapper the containing block, so this actually behaves
+     as absolute and scrolls away with the page. That is the behaviour we
+     want here; the offsets below are therefore document offsets. */
   position: fixed;
-  top: 5.5rem;
-  left: 2rem;
-  z-index: 90;
+  /* Was 5.5rem (88px) against a 108px navbar, so the top 20px of the pill sat
+     behind it. Sits below the bar now, and indented to line up with the
+     section nav underneath rather than hugging the viewport edge. */
+  top: calc(var(--navbar-h) + 1.15rem);
+  left: 3.5rem;
+  z-index: 40;
   /* Override `.insights-shell > * { width: 100% }`, which otherwise
      stretches this fixed button across the full viewport. */
   width: fit-content;
@@ -4684,7 +4720,7 @@ a:focus-visible {
   gap: 0.5rem;
   padding: 0.55rem 1.1rem 0.55rem 0.85rem;
   font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
-  font-size: 1.42rem;
+  font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--accent-gold);
@@ -4735,11 +4771,12 @@ a:focus-visible {
 /* Mobile: tighter positioning */
 @media (max-width: 680px) {
   .back-btn {
-    top: 4.5rem;
-    left: 0.75rem;
+    top: calc(var(--navbar-h) + 0.6rem);
+    left: 1.1rem;
     padding: 0.45rem 0.85rem 0.45rem 0.65rem;
-    font-size: 1.32rem;
-  }}
+    font-size: 1rem;
+  }
+}
 
 /* ═══════════════════════════════════════════════
    FLOATING QUOTES

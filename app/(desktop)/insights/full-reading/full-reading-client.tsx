@@ -4,7 +4,7 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 import { FiArrowLeft, FiBookOpen } from "react-icons/fi";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
-import RuleCard from "../components/rule-card";
+import RuleCard, { bySelectionRank } from "../components/rule-card";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import styles from "./full-reading.module.css";
 
@@ -36,7 +36,9 @@ type Props = {
 };
 
 export default function FullReadingClient({ payload, historyQs }: Props) {
-  const rules = [...payload.chart.deterministic_rules];
+  /* Most significant first. This page inherited the list from the results page
+     but not its ordering, so the findings were arriving in raw engine order. */
+  const rules = [...payload.chart.deterministic_rules].sort(bySelectionRank);
   const yogas = payload.chart.yogas ?? [];
 
   return (

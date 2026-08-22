@@ -6,13 +6,11 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
 import { FiChevronDown, FiCopy, FiGrid, FiRefreshCw } from "react-icons/fi";
-import DivisionalChartsGateway from "@/app/(desktop)/insights/components/divisional-charts-gateway";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
 import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import styles from "../insights.module.css";
-import RuleCard from "./rule-card";
 import SectionGateway from "./section-gateway";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
@@ -68,16 +66,10 @@ function LazyPanel({
  * from git history if it is ever fixed. */
 const ConstellationChart = dynamic(() => import("./constellation-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const FutureForecastPanel = dynamic(() => import("./future-forecast-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const MuhurtaPanel = dynamic(() => import("./muhurta-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const VarshaphalPanel = dynamic(() => import("./varshaphal-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const YogaLifetimeSummary = dynamic(() => import("./yoga-lifetime-summary"), { ssr: false, loading: () => <PanelSkeleton /> });
-const PastLifeInsightsPanel = dynamic(() => import("./past-life-insights-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 import type {
   ChartApiResponse,
-  DeterministicRule,
   LifeDomainInsight,
   LifeDomainInsightsResponse,
 } from "@/lib/astro-types";
@@ -460,6 +452,27 @@ type TopTakeaway = {
   tone: "gold" | "teal" | "coral";
 };
 
+/*
+ * A summary card should not assert a day.
+ *
+ * This printed `current_dasha_end` straight from the engine -- "Runs through
+ * 2029-01-05" -- while the dasha panel further down the same page renders the
+ * same boundary as "Jan 4, 2029", because the engine's end is exclusive and
+ * the panel shows it inclusively. Two different dates for one boundary on one
+ * page. Month and year is the honest precision for a takeaway, and it sidesteps
+ * the off-by-one entirely; the panel remains the place for day precision.
+ */
+function formatMonthYear(iso: string): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
+  const date = new Date(`${iso}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleDateString("en-US", {
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
   const priorityRank = { high: 0, medium: 1, low: 2 };
   const sortedRules = [...payload.chart.deterministic_rules].sort(
@@ -493,7 +506,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
         ? `${dasha.current_antardasha} antardasha narrows the period into more immediate choices and responses.`
         : "Use the current dasha as the main timing lens for near-term decisions.",
       meta: dasha.current_dasha_end
-        ? `Runs through ${dasha.current_dasha_end}`
+        ? `Runs through ${formatMonthYear(dasha.current_dasha_end) ?? dasha.current_dasha_end}`
         : undefined,
       tone: "teal",
     });
@@ -504,7 +517,8 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       label: topDomain.label,
       title: topDomain.display.headline,
       body: topDomain.display.guidance,
-      meta: topDomain.label,
+      /* No meta: this used to repeat topDomain.label, which is already the
+         card's label, so the same words appeared twice on one card. */
       tone: "coral",
     });
   }
@@ -515,7 +529,7 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
       title: `${strongestPlanet.planet} leads the strength map`,
       body: "This planet is one of the cleaner sources of support to lean on when the chart feels noisy.",
       meta: undefined,
-      tone: "teal",
+      tone: "coral",
     });
   }
 
@@ -562,13 +576,13 @@ function TopTakeawaysModule({ payload }: { payload: ChartApiResponse }) {
             key={`${takeaway.label}-${takeaway.title}`}
             className={`${styles.takeawayCard} ${getTakeawayToneClass(takeaway.tone)}`}
           >
-            <span className={styles.takeawayNumber}>
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <div>
+            <div className={styles.takeawayTop}>
+              <span className={styles.takeawayNumber}>
+                {String(index + 1).padStart(2, "0")}
+              </span>
               <p className={styles.takeawayLabel}>{takeaway.label}</p>
-              <h3>{takeaway.title}</h3>
             </div>
+            <h3>{takeaway.title}</h3>
             <p className={styles.takeawayBody}>{takeaway.body}</p>
             {takeaway.meta && (
               <small className={styles.takeawayMeta}>{takeaway.meta}</small>
@@ -580,20 +594,6 @@ function TopTakeawaysModule({ payload }: { payload: ChartApiResponse }) {
   );
 }
 
-/**
- * Order by the measured rank, with unselected rules after the selected ones.
- *
- * `rank` is 0 for anything the selection layer did not pick, so a naive
- * ascending sort would float every unselected rule to the top.
- */
-function bySelectionRank(left: DeterministicRule, right: DeterministicRule): number {
-  const leftRank = left.selection?.selected ? left.selection.rank : Number.MAX_SAFE_INTEGER;
-  const rightRank = right.selection?.selected ? right.selection.rank : Number.MAX_SAFE_INTEGER;
-  if (leftRank !== rightRank) return leftRank - rightRank;
-  return (right.selection?.score ?? 0) - (left.selection?.score ?? 0);
-}
-
-/* Rule Card (Animated) */
 function LifeDomainLoadingState({ queued }: { queued: boolean }) {
   return (
     <section
@@ -925,12 +925,6 @@ export default function InsightsContent({
         }
       : payload;
 
-  // Ranked by selection.rank, which is the measured ordering. Unselected rules
-  // sort to the end rather than to the front -- rank 0 means "not selected",
-  // not "ranked first".
-  const coreRules = [...payload.chart.deterministic_rules]
-    .filter((rule) => rule.category === "core")
-    .sort((left, right) => bySelectionRank(left, right));
   const selectedDomainInsight =
     domainInsights.find((domain) => domain.key === selectedDomainKey) ??
     rankedDomainInsights[0];
