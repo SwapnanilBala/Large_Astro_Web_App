@@ -1,0 +1,150 @@
+/*
+ * Timing and electional page.
+ *
+ * Deliberately larger than the results page. This exists because the three
+ * panels were unreadable squeezed into a collapsed section, so the whole point
+ * is room: a wider measure for the prose, bigger headings, and generous space
+ * between the three views so they read as separate questions rather than one
+ * long scroll.
+ */
+
+.page {
+  width: min(100% - 2.5rem, 74rem);
+  margin: 0 auto;
+  /* The navbar is position:fixed at 108px; clear it with air to spare. */
+  padding: max(9rem, 150px) 0 5rem;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(2.5rem, 5vw, 4rem);
+}
+
+/* ── header ── */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+.back:hover,
+.back:focus-visible {
+  color: var(--accent-gold);
+}
+
+.kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  color: var(--accent-gold);
+  font-family: var(--font-display), serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  /* Larger than the results page's h1 — this page has one subject. */
+  font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink-main);
+}
+
+.lead {
+  max-width: 46ch;
+  margin: 0.6rem 0 0;
+  /* 1.2rem against the results page's 1rem: the explanations are the reason
+     this page exists, so they are set to be read rather than skimmed. */
+  font-size: 1.2rem;
+  line-height: 1.65;
+  color: var(--ink-soft);
+}
+
+/* ── sections ── */
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  scroll-margin-top: 8rem;
+}
+
+.sectionHead {
+  max-width: 60ch;
+}
+
+.sectionKicker {
+  margin: 0 0 0.4rem;
+  color: rgba(108, 225, 212, 0.85);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.sectionHead h2 {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink-main);
+}
+
+.sectionLead {
+  margin: 0.7rem 0 0;
+  font-size: 1.075rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+.panel {
+  padding: clamp(1rem, 2vw, 1.6rem);
+  border: 1px solid rgba(200, 155, 60, 0.16);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 210, 0.035), rgba(255, 243, 210, 0) 40%),
+    rgba(9, 14, 28, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.loading {
+  margin: 0;
+  padding: 2.5rem 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  text-align: center;
+}
+
+.footer {
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(200, 155, 60, 0.14);
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding-top: max(7rem, 120px);
+    gap: 2.25rem;
+  }
+
+  .panel {
+    padding: 0.85rem;
+    border-radius: 14px;
+  }
+}

@@ -1,363 +1,941 @@
-/*
- * Handset profile picker.
- *
- * Self-contained apart from the eleven tokens app/m/mobile-shell.css defines.
- * Every size here comes from a six-step scale — 11, 12, 14, 16, 20, 26 — which
- * replaced the twenty ad-hoc sizes the desktop page renders at 375px, where
- * supporting copy at 20px outranked the profile name at 17.6px.
- *
- * Surfaces are opaque. The desktop panel is 11% translucent with no
- * backdrop-filter, so its ambient astrolabe reads straight through the controls.
- */
-
 .page {
-  /* flex:1 so the footer note can be pushed to the bottom with margin-top:auto.
-     The parent (app/m/mobile.module.css .shell) is a 100dvh flex column, so
-     without this the page only grows to its content and the note strands
-     itself in the middle of an otherwise empty screen. */
+  --auth-panel: linear-gradient(180deg, #1a1a26 0%, #12121a 100%);
+  --auth-rim: linear-gradient(
+    135deg,
+    rgba(232, 200, 154, 0.58),
+    rgba(42, 139, 126, 0.36) 52%,
+    rgba(123, 107, 168, 0.3)
+  );
+  position: relative;
+  isolation: isolate;
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 0.875rem 1.25rem 1.25rem;
   min-height: 100%;
+  padding: 0.625rem clamp(1rem, 5vw, 1.5rem) 2rem;
+  overflow-x: clip;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(123, 107, 168, 0.16), transparent 36%),
+    radial-gradient(circle at 12% 78%, rgba(42, 139, 126, 0.1), transparent 32%),
+    radial-gradient(circle at 88% 65%, rgba(200, 155, 60, 0.08), transparent 30%),
+    var(--bg-deep);
 }
 
-/* ── header ── */
+.ambientWheel {
+  position: fixed;
+  z-index: -1;
+  top: 12%;
+  left: 50%;
+  width: min(128vw, 580px);
+  height: min(128vw, 580px);
+  color: var(--accent-gold);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  opacity: 0.065;
+  pointer-events: none;
+  transform: translateX(-50%);
+  transform-origin: 50% 50%;
+}
+
+.rail {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+}
 
 .topBar {
-  display: flex;
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
-/* Inline, not fixed. The desktop back button is position:fixed at top 4.5rem
-   and lands 30px on top of the panel at this width. */
 .back {
+  justify-self: start;
+  min-width: 44px;
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  /* 44px tall for the tap target, pulled left so the glyph still lines up with
-     the text column rather than sitting inside its own padding. */
-  min-height: 44px;
   margin-left: -0.5rem;
   padding: 0 0.5rem;
-  font-size: 0.875rem;
+  border-radius: 12px;
   color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1;
   text-decoration: none;
 }
 
+.wordmark {
+  justify-self: center;
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(245, 240, 230, 0.82);
+}
+
+.topBarSpacer {
+  justify-self: end;
+  width: 44px;
+  height: 44px;
+}
+
+.mainLayout {
+  display: grid;
+  gap: 1.15rem;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
 .sky {
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-  /* The desktop sky line sits at rgba(200,155,60,.78) over its panel, which
-     measures 4.26:1 — under the 4.5 minimum. Full-strength gold on the opaque
-     page background clears it. */
-  color: var(--accent-gold);
-  text-align: right;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  max-width: 100%;
+  margin-bottom: 0.7rem;
+  padding: 0.35rem 0.75rem;
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  border-radius: 999px;
+  background: rgba(18, 18, 26, 0.82);
+  color: #e4bd78;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  letter-spacing: 0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.05);
+}
+
+.markHalo {
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.55rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(42, 139, 126, 0.16) 0%, rgba(123, 107, 168, 0.13) 42%, transparent 72%);
+  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.28));
 }
 
 .ornament {
-  width: 56px;
-  height: 56px;
-  margin-bottom: 1rem;
-  /* Drawn in mobile-login.tsx from the same shapes as public/icon.svg. */
   display: block;
+  width: 88px;
+  height: 88px;
+}
+
+.eyebrow {
+  margin: 0 0 0.3rem;
+  font-family: var(--font-display);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #d6ad67;
 }
 
 .heading {
-  margin: 0 0 0.375rem;
+  max-width: 100%;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 1.625rem;
+  font-size: clamp(1.875rem, 8vw, 2.125rem);
   font-weight: 600;
-  line-height: 1.15;
-  letter-spacing: -0.01em;
-  color: var(--text-primary);
+  line-height: 1.12;
+  letter-spacing: -0.018em;
+  text-wrap: balance;
 }
 
 .lead {
-  margin: 0 0 1.5rem;
-  font-size: 0.875rem;
-  line-height: 1.5;
+  max-width: 390px;
+  margin: 0.65rem 0 0;
   color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.52;
+  text-wrap: pretty;
 }
 
-.sectionLabel {
-  margin: 0 0 0.5rem;
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  font-family: var(--font-display);
-  /* --text-tertiary measures 3.44:1 against the page ground, under the 4.5
-     minimum for text this size. --text-secondary clears it at 5.99:1. */
-  color: var(--text-secondary);
+.profileArea {
+  min-width: 0;
 }
 
-/* ── profile rows ── */
+.profilePanel {
+  position: relative;
+  padding: 0.75rem;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: var(--auth-panel) padding-box, var(--auth-rim) border-box;
+  box-shadow:
+    0 22px 56px rgba(0, 0, 0, 0.36),
+    inset 0 1px 0 rgba(255, 243, 210, 0.07);
+}
 
 .list {
   list-style: none;
-  margin: 0 0 0.75rem;
-  padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
+  margin: 0;
+  padding: 0;
 }
 
 .row {
-  display: flex;
-  flex-direction: column;
+  min-width: 0;
 }
 
 .rowMain {
-  display: flex;
+  min-width: 0;
+  min-height: 76px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;
-  gap: 0.25rem;
-  padding-right: 0.25rem;
-  background: var(--surface-lit);
-  box-shadow: var(--edge-highlight);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
+  gap: 0.15rem;
+  padding: 0.25rem 0.35rem 0.25rem 0.25rem;
+  border: 1px solid rgba(255, 243, 210, 0.08);
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 210, 0.045), transparent 50%),
+    #15151f;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.045);
 }
 
 .rowActive {
-  /* The active row was only a slightly lighter panel and a slightly warmer
-     border, which at a glance was indistinguishable from the others — you had
-     to read the word "Active" to tell. The filled avatar below carries it
-     instead, and this just supports that. */
-  border-color: rgba(212, 165, 116, 0.55);
-  background: var(--surface-lit-strong);
+  border-color: rgba(212, 165, 116, 0.48);
+  background:
+    linear-gradient(100deg, rgba(200, 155, 60, 0.14), rgba(42, 139, 126, 0.045) 62%, transparent),
+    #181722;
 }
 
-/* Inverted avatar: solid gold with dark initial. Unmistakable at a glance and
-   it changes nothing about the row's geometry, so the list stays even. */
-.rowActive .avatar {
-  color: #1a1206;
-  background: linear-gradient(100deg, #c89b3c, #e8c89a);
-}
-
-/* The row is one tap: pick and go, as on desktop. */
 .pick {
-  flex: 1;
   min-width: 0;
+  min-height: 66px;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  min-height: 60px;
-  padding: 0 0.25rem 0 0.75rem;
-  background: none;
+  padding: 0.35rem 0.25rem 0.35rem 0.45rem;
   border: 0;
-  text-align: left;
+  border-radius: 13px;
+  background: transparent;
   color: inherit;
+  text-align: left;
   cursor: pointer;
-}
-
-.pick:disabled {
-  opacity: 0.55;
 }
 
 .avatar {
   flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   display: grid;
   place-items: center;
-  font-size: 1rem;
+  border: 1px solid rgba(212, 165, 116, 0.35);
+  border-radius: 50%;
+  background: rgba(212, 165, 116, 0.12);
+  color: #dfb665;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
   font-weight: 600;
-  color: var(--accent-gold);
-  background: rgba(212, 165, 116, 0.16);
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.08);
+}
+
+.rowActive .avatar {
+  border-color: rgba(232, 200, 154, 0.7);
+  background: linear-gradient(135deg, #e5c47f, #c89b3c);
+  color: #1a1206;
+  box-shadow: 0 6px 18px rgba(200, 155, 60, 0.2);
 }
 
 .pickText {
   min-width: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  gap: 0.0625rem;
+  gap: 0.18rem;
+}
+
+.nameLine {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .name {
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-primary);
+  min-width: 0;
   overflow: hidden;
+  color: var(--text-primary);
+  font-size: 1.0875rem;
+  font-weight: 600;
+  line-height: 1.25;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.meta {
+.activeBadge {
+  flex: none;
+  padding: 0.14rem 0.4rem;
+  border: 1px solid rgba(212, 165, 116, 0.34);
+  border-radius: 999px;
+  background: rgba(200, 155, 60, 0.09);
+  color: #e5bd73;
   font-size: 0.75rem;
-  color: var(--text-secondary);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
 }
 
-.iconBtn {
-  flex: none;
+.meta {
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.iconBtn,
+.sheetClose {
   width: 44px;
   height: 44px;
   display: grid;
   place-items: center;
-  background: none;
-  border: 0;
-  border-radius: 10px;
-  color: var(--text-tertiary);
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 13px;
+  background: transparent;
+  color: #b8afa0;
   cursor: pointer;
 }
-
-.iconBtn:active {
-  background: var(--surface);
-  color: var(--text-primary);
-}
-
-/* Second tap confirms. Colour is the only thing that changes, so the target
-   does not move under the finger between the two taps. */
-.iconBtnDanger {
-  color: #e58b8b;
-}
-
-.warning {
-  margin: 0.375rem 0 0;
-  padding: 0 0.75rem;
-  font-size: 0.75rem;
-  line-height: 1.45;
-  color: #e58b8b;
-}
-
-/* ── rename ── */
-
-.editForm {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  padding: 0.5rem 0.25rem 0.5rem 0.75rem;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-medium);
-  border-radius: 12px;
-}
-
-.editInput {
-  flex: 1;
-  min-width: 0;
-  min-height: 44px;
-  padding: 0 0.5rem;
-  font-size: 1rem;
-  color: var(--text-primary);
-  background: none;
-  border: 0;
-  border-bottom: 1px solid var(--border-soft);
-  border-radius: 0;
-}
-
-.editInput:focus-visible {
-  outline: none;
-  border-bottom-color: var(--accent-gold);
-}
-
-/* ── add a profile ── */
 
 .addRow {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   width: 100%;
   min-height: 56px;
-  padding: 0 0.75rem;
-  font-size: 0.875rem;
-  color: var(--accent-gold);
-  background: none;
-  border: 1px dashed rgba(212, 165, 116, 0.35);
-  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-top: 0.65rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid rgba(42, 139, 126, 0.38);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(42, 139, 126, 0.16), rgba(200, 155, 60, 0.08)),
+    #15151f;
+  color: #ead5a7;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.05);
 }
 
 .addIcon {
-  flex: none;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
-  border: 1px solid rgba(212, 165, 116, 0.3);
+  border: 1px solid rgba(212, 165, 116, 0.28);
+  border-radius: 50%;
+  color: #dcb46a;
+  background: rgba(212, 165, 116, 0.06);
 }
-
-.addForm {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-/* 16px minimum: iOS Safari zooms the viewport on focus for anything smaller. */
-.addInput {
-  min-height: 52px;
-  padding: 0 0.875rem;
-  font-size: 1rem;
-  color: var(--text-primary);
-  background: var(--bg-surface);
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-}
-
-.addInput:focus-visible {
-  outline: none;
-  border-color: var(--accent-gold);
-}
-
-.addSubmit {
-  min-height: 52px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1206;
-  background: linear-gradient(100deg, #c89b3c, #e8c89a);
-  border: 0;
-  border-radius: 12px;
-  cursor: pointer;
-}
-
-/* ── footer copy ── */
 
 .fine {
-  margin: 1rem 0 0;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  /* See .sectionLabel — tertiary is decorative-only in this tree. */
+  margin: 0.7rem 0 0;
   color: var(--text-secondary);
-}
-
-/* Pushed to the bottom of the viewport rather than left floating below the
-   last row. Left-aligned, because everything above it is. */
-.footNote {
-  margin: 2rem 0 0;
-  padding-top: 1rem;
-  border-top: 1px solid rgba(212, 165, 116, 0.1);
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   line-height: 1.5;
-  color: var(--text-secondary);
-}
-
-.page > .footNote {
-  margin-top: auto;
+  text-align: center;
 }
 
 .error {
   margin: 0.75rem 0 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(229, 139, 139, 0.28);
+  border-radius: 14px;
+  background: rgba(229, 139, 139, 0.08);
+  color: #f0a4a4;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.footNote {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.55rem;
+  margin: 0.8rem auto 0;
+  padding: 0 0.4rem;
+  color: var(--text-secondary);
   font-size: 0.875rem;
-  color: #e58b8b;
+  line-height: 1.45;
+  text-align: left;
+}
+
+.lockIcon {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  margin-top: -0.2rem;
+  border: 1px solid rgba(42, 139, 126, 0.28);
+  border-radius: 50%;
+  color: #55a99d;
+  background: rgba(42, 139, 126, 0.08);
+}
+
+.loadingCard {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 360px);
+  min-height: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  margin: clamp(4rem, 18vh, 9rem) auto 0;
+  border: 1px solid transparent;
+  border-radius: 24px;
+  background: var(--auth-panel) padding-box, var(--auth-rim) border-box;
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.36);
+}
+
+.loadingCard .ornament {
+  width: 76px;
+  height: 76px;
 }
 
 .loading {
-  margin: 25vh 0 0;
+  margin: 0;
+  color: #e5bd73;
+  font-family: var(--font-display);
   font-size: 0.875rem;
-  color: var(--text-secondary);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.sheetOverlay {
+  position: fixed;
+  z-index: 100;
+  top: var(--mobile-sheet-viewport-top, 0px);
+  right: 0;
+  left: 0;
+  height: var(--mobile-sheet-viewport-height, 100dvh);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem 0 0;
+  background: rgba(5, 5, 10, 0.76);
+  overscroll-behavior: none;
+  touch-action: pan-y;
+}
+
+.sheet {
+  width: min(100%, 440px);
+  max-height: calc(var(--mobile-sheet-viewport-height, 100dvh) - 1rem);
+  overflow-y: auto;
+  padding: 0.45rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  scroll-padding-block: 1rem calc(1rem + env(safe-area-inset-bottom));
+  border: 1px solid rgba(212, 165, 116, 0.28);
+  border-bottom: 0;
+  border-radius: 26px 26px 0 0;
+  background:
+    radial-gradient(circle at 85% 0%, rgba(123, 107, 168, 0.13), transparent 34%),
+    linear-gradient(180deg, #1c1b28, #12121a);
+  color: var(--text-primary);
+  box-shadow: 0 -18px 60px rgba(0, 0, 0, 0.54), inset 0 1px 0 rgba(255, 243, 210, 0.06);
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.sheetHandle {
+  width: 42px;
+  height: 4px;
+  margin: 0.25rem auto 0.75rem;
+  border-radius: 999px;
+  background: rgba(245, 240, 230, 0.2);
+}
+
+.sheetHeader {
+  min-height: 54px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.sheetHeading {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheetEyebrow {
+  margin: 0 0 0.22rem;
+  color: #d6ad67;
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.sheetTitle {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.sheetClose {
+  flex: none;
+  margin: -0.2rem -0.35rem 0 0;
+  border-color: rgba(255, 243, 210, 0.08);
+  background: rgba(255, 243, 210, 0.035);
+}
+
+.sheetForm,
+.sheetActions,
+.deleteConfirm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.fieldLabel {
+  color: #d7cbb8;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.sheetInput {
+  width: 100%;
+  min-height: 56px;
+  padding: 0.8rem 0.95rem;
+  border: 1px solid rgba(212, 165, 116, 0.28);
+  border-radius: 15px;
+  background: #101018;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.3;
+  caret-color: #e1b763;
+}
+
+.sheetInput[aria-invalid="true"] {
+  border-color: rgba(229, 139, 139, 0.72);
+}
+
+.sheetError {
+  margin: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid rgba(229, 139, 139, 0.24);
+  border-radius: 13px;
+  background: rgba(229, 139, 139, 0.08);
+  color: #f0a4a4;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+}
+
+.primaryAction,
+.secondaryAction,
+.deleteAction {
+  min-height: 54px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border-radius: 15px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.primaryAction {
+  flex: 1;
+  border: 1px solid rgba(232, 200, 154, 0.34);
+  background: linear-gradient(105deg, #d2a549, #ebcf91);
+  color: #1a1206;
+  box-shadow: 0 9px 24px rgba(200, 155, 60, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+}
+
+.secondaryAction {
+  flex: 1;
+  border: 1px solid rgba(255, 243, 210, 0.13);
+  background: rgba(255, 243, 210, 0.045);
+  color: var(--text-primary);
+}
+
+.deleteAction {
+  flex: 1;
+  border: 1px solid rgba(229, 139, 139, 0.32);
+  background: rgba(190, 72, 72, 0.2);
+  color: #f4b1b1;
+}
+
+.sheetAction {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid rgba(255, 243, 210, 0.09);
+  border-radius: 15px;
+  background: rgba(255, 243, 210, 0.035);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sheetActionIcon {
+  flex: none;
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(212, 165, 116, 0.2);
+  border-radius: 12px;
+  background: rgba(212, 165, 116, 0.06);
+  color: #ddb56d;
+}
+
+.dangerAction {
+  color: #efaaaa;
+}
+
+.dangerAction .sheetActionIcon {
+  border-color: rgba(229, 139, 139, 0.22);
+  background: rgba(229, 139, 139, 0.06);
+  color: #efaaaa;
+}
+
+.actionRow {
+  display: flex;
+  gap: 0.65rem;
+}
+
+.deleteConfirm {
+  align-items: center;
   text-align: center;
 }
 
+.deleteMark {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(229, 139, 139, 0.24);
+  border-radius: 50%;
+  background: rgba(229, 139, 139, 0.08);
+  color: #efaaaa;
+}
+
+.deleteWarning {
+  max-width: 350px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.deleteConfirm .actionRow {
+  width: 100%;
+}
+
+:where(.back, .pick, .iconBtn, .addRow, .sheetClose, .sheetAction, .primaryAction, .secondaryAction, .deleteAction):focus-visible,
+.sheetInput:focus-visible {
+  outline: 3px solid rgba(88, 190, 175, 0.62);
+  outline-offset: 2px;
+}
+
+:where(.pick, .iconBtn, .addRow, .sheetAction, .primaryAction, .secondaryAction, .deleteAction):disabled {
+  cursor: wait;
+  opacity: 0.56;
+}
+
+:where(.back, .pick, .iconBtn, .addRow, .sheetClose, .sheetAction, .primaryAction, .secondaryAction, .deleteAction):active {
+  transform: scale(0.985);
+}
+
+@media (hover: hover) {
+  .back:hover,
+  .iconBtn:hover,
+  .sheetClose:hover {
+    background: rgba(255, 243, 210, 0.06);
+    color: var(--text-primary);
+  }
+
+  .rowMain:hover {
+    border-color: rgba(212, 165, 116, 0.28);
+  }
+
+  .addRow:hover,
+  .sheetAction:hover,
+  .secondaryAction:hover {
+    border-color: rgba(42, 139, 126, 0.48);
+    background-color: rgba(42, 139, 126, 0.09);
+  }
+}
+
+@media (max-width: 350px) {
+  .page {
+    padding-inline: 0.875rem;
+  }
+
+  .wordmark {
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+  }
+
+  .profilePanel {
+    padding: 0.625rem;
+    border-radius: 21px;
+  }
+
+  .rowMain {
+    grid-template-columns: minmax(0, 1fr) 42px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .name {
+    font-size: 1.025rem;
+  }
+}
+
+@media (orientation: portrait) and (max-height: 700px) {
+  .page {
+    padding-top: 0.35rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .topBar {
+    margin-bottom: 0.25rem;
+  }
+
+  .mainLayout {
+    gap: 0.85rem;
+  }
+
+  .sky {
+    margin-bottom: 0.35rem;
+  }
+
+  .markHalo {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 0.3rem;
+  }
+
+  .ornament {
+    width: 72px;
+    height: 72px;
+  }
+
+  .heading {
+    font-size: 1.8rem;
+  }
+
+  .lead {
+    margin-top: 0.45rem;
+    line-height: 1.45;
+  }
+
+  .rowMain {
+    min-height: 72px;
+  }
+
+  .pick {
+    min-height: 62px;
+  }
+
+  .footNote {
+    margin-top: 0.65rem;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 600px) and (max-height: 520px) {
+  .page {
+    padding: 0.35rem clamp(1.25rem, 4vw, 2rem) 1rem;
+    background:
+      radial-gradient(circle at 25% 46%, rgba(123, 107, 168, 0.16), transparent 36%),
+      radial-gradient(circle at 84% 70%, rgba(42, 139, 126, 0.11), transparent 34%),
+      var(--bg-deep);
+  }
+
+  .ambientWheel {
+    top: 50%;
+    left: 24%;
+    width: min(68vw, 450px);
+    height: min(68vw, 450px);
+    transform: translate(-50%, -50%);
+  }
+
+  .rail {
+    max-width: 780px;
+  }
+
+  .topBar {
+    margin-bottom: 0.15rem;
+  }
+
+  .mainLayout {
+    grid-template-columns: minmax(210px, 0.82fr) minmax(0, 1.18fr);
+    align-items: center;
+    gap: clamp(1rem, 3vw, 2.5rem);
+  }
+
+  .hero {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .sky {
+    justify-content: flex-start;
+    margin-bottom: 0.35rem;
+  }
+
+  .markHalo {
+    width: 78px;
+    height: 78px;
+    margin-bottom: 0.25rem;
+  }
+
+  .ornament {
+    width: 66px;
+    height: 66px;
+  }
+
+  .eyebrow {
+    font-size: 0.75rem;
+  }
+
+  .heading {
+    font-size: clamp(1.7rem, 3.7vw, 2rem);
+  }
+
+  .lead {
+    max-width: 310px;
+    margin-top: 0.4rem;
+    font-size: 1rem;
+    line-height: 1.42;
+  }
+
+  .profilePanel {
+    padding: 0.65rem;
+  }
+
+  .rowMain {
+    min-height: 70px;
+  }
+
+  .pick {
+    min-height: 60px;
+  }
+
+  .avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .addRow {
+    min-height: 52px;
+    margin-top: 0.5rem;
+  }
+
+  .footNote {
+    max-width: 410px;
+    margin-top: 0.55rem;
+  }
+
+  .sheetOverlay {
+    align-items: center;
+    padding:
+      max(0.75rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.75rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .sheet {
+    max-height: calc(var(--mobile-sheet-viewport-height, 100dvh) - 1.5rem);
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+    border-bottom: 1px solid rgba(212, 165, 116, 0.28);
+    border-radius: 24px;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
+  .ambientWheel {
+    animation: wheelDrift 180s linear infinite;
+  }
+
+  .sheetOverlay {
+    animation: overlayIn 180ms ease-out both;
+  }
+
+  .sheet {
+    animation: sheetIn 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .back,
   .pick,
   .iconBtn,
-  .addRow {
-    transition-property: background, color, border-color;
-    transition-duration: 0.15s;
-    transition-timing-function: ease;
+  .addRow,
+  .sheetClose,
+  .sheetAction,
+  .primaryAction,
+  .secondaryAction,
+  .deleteAction {
+    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 100ms ease;
+  }
+}
+
+@keyframes wheelDrift {
+  from {
+    rotate: 0deg;
+  }
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes sheetIn {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

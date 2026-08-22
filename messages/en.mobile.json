@@ -136,6 +136,7 @@
     "addDivider": "or add someone",
     "nameLabel": "Profile name",
     "create": "Create profile",
+    "manage": "Manage profile",
     "rename": "Rename",
     "renameLabel": "New profile name",
     "saveName": "Save name",

@@ -452,6 +452,7 @@
     "addDivider": "o añade a alguien",
     "nameLabel": "Nombre del perfil",
     "create": "Crear perfil",
+    "manage": "Administrar perfil",
     "rename": "Renombrar",
     "renameLabel": "Nuevo nombre del perfil",
     "saveName": "Guardar nombre",

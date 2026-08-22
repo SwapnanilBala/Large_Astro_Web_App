@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
@@ -8,33 +9,21 @@ import { resolveProfileDestination } from "@/lib/profile-redirect";
 import { readChartHistory } from "@/lib/chart-history-store";
 import styles from "./login.module.css";
 
-/*
- * Handset profile picker.
- *
- * Same state machine as app/(desktop)/login/page-client.tsx and the same
- * lib/profile-context calls — this is presentation only. What differs is what a
- * 375px screen can carry:
- *
- * - No lucide-react. Four inline glyphs weigh less than pulling an icon package
- *   into a tree whose entire stylesheet is under 2KB.
- * - No AuthAmbient or ZodiacFloater. The desktop astrolabe renders 338px wide
- *   on a phone, directly behind the profile list; here it is a 56px ornament in
- *   the header, and the surfaces underneath it are opaque.
- * - Rows are the content. A row is one tap: pick the profile and go, matching
- *   desktop rather than adding a select-then-confirm step. Rename and delete
- *   move behind a per-row edit toggle instead of sitting always-visible.
- * - Each row says how many charts the profile has, which is the question you
- *   are actually answering when you pick one.
- */
-
 type Props = { returnTo?: string; skyLine?: string };
 
-function Glyph({ d, label }: { d: string; label?: string }) {
+type SheetState =
+  | { kind: "add" }
+  | { kind: "manage"; profileId: string }
+  | { kind: "rename"; profileId: string }
+  | { kind: "delete"; profileId: string }
+  | null;
+
+function Glyph({ d, label, size = 20 }: { d: string; label?: string; size?: number }) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width={size}
+      height={size}
       fill="none"
       stroke="currentColor"
       strokeWidth="2"
@@ -49,42 +38,54 @@ function Glyph({ d, label }: { d: string; label?: string }) {
   );
 }
 
-/*
- * Header ornament, drawn from the same vocabulary as public/icon.svg: two
- * concentric rings, a four-pointed star, a centre dot.
- *
- * The first version was a repeating-conic-gradient, which at 56px rendered as
- * eighteen hard spokes — it read as a bicycle wheel and said nothing about the
- * product. Teal is in the real mark but left out here; at this size it lands as
- * a smudge, and gold alone is calmer.
- */
 function Ornament() {
   return (
-    <svg
-      className={styles.ornament}
-      viewBox="0 0 100 100"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <circle cx="50" cy="50" r="46" fill="none" stroke="#C89B3C" strokeWidth="1" opacity="0.34" />
-      <circle cx="50" cy="50" r="31" fill="none" stroke="#C89B3C" strokeWidth="0.8" opacity="0.2" />
+    <svg className={styles.ornament} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <defs>
+        <linearGradient id="mobile-orbit-gold" x1="18" y1="16" x2="82" y2="86" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#E8C89A" />
+          <stop offset="1" stopColor="#C89B3C" />
+        </linearGradient>
+        <linearGradient id="mobile-orbit-teal" x1="26" y1="22" x2="74" y2="78" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#46B6A7" />
+          <stop offset="1" stopColor="#1A7B6E" />
+        </linearGradient>
+      </defs>
+      <circle cx="50" cy="50" r="45" fill="#11111A" stroke="url(#mobile-orbit-gold)" strokeWidth="1" opacity="0.96" />
+      <circle cx="50" cy="50" r="32" fill="none" stroke="url(#mobile-orbit-teal)" strokeWidth="0.9" opacity="0.5" />
       <path
         d="M50 12 L54 42 L84 50 L54 58 L50 88 L46 58 L16 50 L46 42 Z"
-        fill="#D4A574"
-        opacity="0.9"
+        fill="url(#mobile-orbit-gold)"
+        opacity="0.96"
       />
-      <circle cx="50" cy="50" r="3.5" fill="#E8C89A" />
+      <circle cx="50" cy="50" r="4" fill="url(#mobile-orbit-teal)" />
+      <circle cx="50" cy="5" r="1.8" fill="#D4A574" />
+      <circle cx="95" cy="50" r="1.6" fill="#2DA89A" />
+      <circle cx="50" cy="95" r="1.8" fill="#D4A574" />
+      <circle cx="5" cy="50" r="1.6" fill="#2DA89A" />
+    </svg>
+  );
+}
+
+function AmbientWheel() {
+  return (
+    <svg className={styles.ambientWheel} viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+      <circle cx="300" cy="300" r="284" />
+      <circle cx="300" cy="300" r="224" />
+      <circle cx="300" cy="300" r="108" />
+      <path d="M300 16V584 M16 300H584 M99 99L501 501 M501 99L99 501 M54 158L546 442 M158 54L442 546 M442 54L158 546 M546 158L54 442" />
     </svg>
   );
 }
 
 const ICON = {
-  pencil: "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
-  trash: "M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6",
-  check: "M20 6 9 17l-5-5",
-  close: "M18 6 6 18 M6 6l12 12",
-  plus: "M12 5v14 M5 12h14",
   chevron: "m15 18-6-6 6-6",
+  close: "M18 6 6 18 M6 6l12 12",
+  lock: "M7 11V7a5 5 0 0 1 10 0v4 M5 11h14v10H5z",
+  more: "M5 12h.01 M12 12h.01 M19 12h.01",
+  pencil: "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z",
+  plus: "M12 5v14 M5 12h14",
+  trash: "M3 6h18 M8 6V4h8v2 M19 6l-1 14H6L5 6",
 };
 
 export default function MobileLogin({ returnTo, skyLine }: Props) {
@@ -103,33 +104,133 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
   const router = useRouter();
 
   const [newName, setNewName] = useState("");
-  const [adding, setAdding] = useState(false);
-  const [error, setError] = useState("");
-  const [editingId, setEditingId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [sheet, setSheet] = useState<SheetState>(null);
+  const [error, setError] = useState("");
   const [busyId, setBusyId] = useState<string | null>(null);
-  /* Chart counts read from localStorage, so only after mount — rendering them
-     during SSR would mismatch on hydration. */
   const [counts, setCounts] = useState<Record<string, number>>({});
+  const lastTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const addTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const manageTriggerRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const railRef = useRef<HTMLDivElement | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
 
   const destination = returnTo || "/";
+  const isSheetOpen = sheet !== null;
+  const sheetProfile =
+    sheet && "profileId" in sheet
+      ? profiles.find((profile) => profile.profile_id === sheet.profileId) ?? null
+      : null;
 
   useEffect(() => {
     const next: Record<string, number> = {};
     for (const profile of profiles) {
       next[profile.profile_id] = readChartHistory(profile.profile_id).length;
     }
+    // Counts come from browser storage and must be populated after hydration.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCounts(next);
   }, [profiles]);
 
   useEffect(() => {
-    // A rename or delete elsewhere can invalidate the row being edited.
-    if (editingId && !profiles.some((p) => p.profile_id === editingId)) setEditingId(null);
-    if (pendingDeleteId && !profiles.some((p) => p.profile_id === pendingDeleteId)) {
-      setPendingDeleteId(null);
+    if (sheet && "profileId" in sheet && !profiles.some((profile) => profile.profile_id === sheet.profileId)) {
+      // A profile can disappear through another mounted profile switcher.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSheet(null);
+      setError("");
+      window.setTimeout(() => addTriggerRef.current?.focus(), 0);
     }
-  }, [editingId, pendingDeleteId, profiles]);
+  }, [profiles, sheet]);
+
+  useEffect(() => {
+    if (!isSheetOpen) return;
+    const root = document.documentElement;
+    const body = document.body;
+    const rail = railRef.current;
+    const viewport = window.visualViewport;
+    const previousRootOverflow = root.style.overflow;
+    const previousRootOverscroll = root.style.overscrollBehavior;
+    const previousBodyOverflow = body.style.overflow;
+
+    rail?.setAttribute("inert", "");
+    root.style.overflow = "hidden";
+    root.style.overscrollBehavior = "none";
+    body.style.overflow = "hidden";
+
+    const syncVisualViewport = () => {
+      root.style.setProperty(
+        "--mobile-sheet-viewport-height",
+        `${viewport?.height ?? window.innerHeight}px`
+      );
+      root.style.setProperty("--mobile-sheet-viewport-top", `${viewport?.offsetTop ?? 0}px`);
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSheet(null);
+        setError("");
+        window.setTimeout(() => lastTriggerRef.current?.focus(), 0);
+        return;
+      }
+
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(
+        sheetRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+        ) ?? []
+      ).filter((element) => element.getClientRects().length > 0);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+      if (event.shiftKey && (active === first || !sheetRef.current?.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (active === last || !sheetRef.current?.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    syncVisualViewport();
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("resize", syncVisualViewport);
+    viewport?.addEventListener("resize", syncVisualViewport);
+    viewport?.addEventListener("scroll", syncVisualViewport);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("resize", syncVisualViewport);
+      viewport?.removeEventListener("resize", syncVisualViewport);
+      viewport?.removeEventListener("scroll", syncVisualViewport);
+      rail?.removeAttribute("inert");
+      root.style.overflow = previousRootOverflow;
+      root.style.overscrollBehavior = previousRootOverscroll;
+      body.style.overflow = previousBodyOverflow;
+      root.style.removeProperty("--mobile-sheet-viewport-height");
+      root.style.removeProperty("--mobile-sheet-viewport-top");
+    };
+  }, [isSheetOpen]);
+
+  const closeSheet = () => {
+    setSheet(null);
+    setError("");
+    window.setTimeout(() => lastTriggerRef.current?.focus(), 0);
+  };
+
+  const openAddSheet = (event: React.MouseEvent<HTMLButtonElement>) => {
+    lastTriggerRef.current = event.currentTarget;
+    setNewName("");
+    setError("");
+    setSheet({ kind: "add" });
+  };
+
+  const openManageSheet = (event: React.MouseEvent<HTMLButtonElement>, profileId: string) => {
+    lastTriggerRef.current = event.currentTarget;
+    setError("");
+    setSheet({ kind: "manage", profileId });
+  };
 
   const goToProfile = async (profileId: string) => {
     setBusyId(profileId);
@@ -156,7 +257,7 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
       return;
     }
     setNewName("");
-    setAdding(false);
+    setSheet(null);
     await goToProfile(result.profile.profile_id);
   };
 
@@ -168,174 +269,308 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
       setError(result.error ?? t("profiles.renameFailed"));
       return;
     }
-    setEditingId(null);
     setRenameValue("");
+    closeSheet();
   };
 
   const handleDelete = (profileId: string) => {
     setError("");
+    const profileIndex = profiles.findIndex((profile) => profile.profile_id === profileId);
+    const nextFocusId =
+      profiles[profileIndex + 1]?.profile_id ?? profiles[profileIndex - 1]?.profile_id ?? null;
     const result = deleteProfile(profileId);
-    if (!result.ok) setError(result.error ?? t("profiles.deleteFailed"));
-    setPendingDeleteId(null);
-    setEditingId(null);
+    if (!result.ok) {
+      setError(result.error ?? t("profiles.deleteFailed"));
+      return;
+    }
+    setSheet(null);
+    window.setTimeout(() => {
+      if (nextFocusId) manageTriggerRefs.current[nextFocusId]?.focus();
+      else addTriggerRef.current?.focus();
+    }, 0);
   };
 
   if (isLoading) {
     return (
       <div className={styles.page}>
-        <p className={styles.loading}>{t("profiles.opening")}</p>
+        <AmbientWheel />
+        <div className={styles.loadingCard} role="status">
+          <Ornament />
+          <p className={styles.loading}>{t("profiles.opening")}</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className={styles.page}>
-      <div className={styles.topBar}>
-        <a href="/" className={styles.back}>
-          <Glyph d={ICON.chevron} />
-          {t("home.back")}
-        </a>
-        {skyLine && <span className={styles.sky}>{skyLine}</span>}
+      <AmbientWheel />
+      <div ref={railRef} className={styles.rail}>
+        <header className={styles.topBar}>
+          <Link href="/" className={styles.back}>
+            <Glyph d={ICON.chevron} size={18} />
+            {t("home.back")}
+          </Link>
+          <span className={styles.wordmark}>Lagna Atelier</span>
+          <span className={styles.topBarSpacer} aria-hidden="true" />
+        </header>
+
+        <div className={styles.mainLayout}>
+          <section className={styles.hero} aria-labelledby="mobile-profile-heading">
+            {skyLine && <span className={styles.sky}>{skyLine}</span>}
+            <div className={styles.markHalo}>
+              <Ornament />
+            </div>
+            <p className={styles.eyebrow}>{t("profiles.kicker")}</p>
+            <h1 id="mobile-profile-heading" className={`${styles.heading} mGold`}>
+              {t("profiles.heading")}
+            </h1>
+            <p className={styles.lead}>{t("profiles.lead")}</p>
+          </section>
+
+          <div className={styles.profileArea}>
+            <section className={styles.profilePanel} aria-label={t("profiles.heading")} aria-busy={busyId !== null}>
+              <ul className={styles.list}>
+                {profiles.map((profile) => {
+                  const isActive = profile.profile_id === activeProfile?.profile_id;
+                  const count = counts[profile.profile_id] ?? 0;
+
+                  return (
+                    <li key={profile.profile_id} className={styles.row}>
+                      <div className={`${styles.rowMain} ${isActive ? styles.rowActive : ""}`}>
+                        <button
+                          type="button"
+                          className={styles.pick}
+                          onClick={() => void handleUse(profile.profile_id)}
+                          disabled={busyId !== null}
+                        >
+                          <span className={styles.avatar} aria-hidden="true">
+                            {profile.display_name.slice(0, 1).toUpperCase()}
+                          </span>
+                          <span className={styles.pickText}>
+                            <span className={styles.nameLine}>
+                              <span className={styles.name}>{profile.display_name}</span>
+                              {isActive && <span className={styles.activeBadge}>{t("profiles.active")}</span>}
+                            </span>
+                            <span className={styles.meta} aria-live="polite">
+                              {busyId === profile.profile_id
+                                ? t("profiles.opening")
+                                : `${count} ${count === 1 ? "chart" : "charts"}`}
+                            </span>
+                          </span>
+                        </button>
+                        <button
+                          ref={(node) => {
+                            manageTriggerRefs.current[profile.profile_id] = node;
+                          }}
+                          type="button"
+                          className={styles.iconBtn}
+                          onClick={(event) => openManageSheet(event, profile.profile_id)}
+                          disabled={busyId !== null}
+                          aria-label={`${t("profiles.manage")} ${profile.display_name}`}
+                          aria-haspopup="dialog"
+                        >
+                          <Glyph d={ICON.more} />
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+
+              {canCreateProfile ? (
+                <button
+                  ref={addTriggerRef}
+                  type="button"
+                  className={styles.addRow}
+                  onClick={openAddSheet}
+                  disabled={busyId !== null}
+                  aria-haspopup="dialog"
+                >
+                  <span className={styles.addIcon} aria-hidden="true">
+                    <Glyph d={ICON.plus} />
+                  </span>
+                  <span>{t("profiles.addDivider")}</span>
+                </button>
+              ) : (
+                <p className={styles.fine}>{t("profiles.full").replace("{max}", String(maxProfiles))}</p>
+              )}
+            </section>
+
+            {error && !sheet && (
+              <p className={styles.error} role="alert">
+                {error}
+              </p>
+            )}
+
+            <p className={styles.footNote}>
+              <span className={styles.lockIcon} aria-hidden="true">
+                <Glyph d={ICON.lock} size={18} />
+              </span>
+              <span>{t("profiles.storageNote").replace("{max}", String(maxProfiles))}</span>
+            </p>
+          </div>
+        </div>
       </div>
 
-      <Ornament />
-      <h1 className={`${styles.heading} mGold`}>{t("profiles.heading")}</h1>
-      <p className={styles.lead}>{t("profiles.lead")}</p>
+      {sheet && (
+        <div
+          className={styles.sheetOverlay}
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeSheet();
+          }}
+        >
+          <section
+            ref={sheetRef}
+            className={styles.sheet}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="mobile-sheet-title"
+          >
+            <div className={styles.sheetHandle} aria-hidden="true" />
+            <header className={styles.sheetHeader}>
+              <div className={styles.sheetHeading}>
+                <p className={styles.sheetEyebrow}>{t("profiles.kicker")}</p>
+                <h2 id="mobile-sheet-title" className={styles.sheetTitle}>
+                  {sheet.kind === "add" && t("profiles.create")}
+                  {sheet.kind === "manage" && sheetProfile?.display_name}
+                  {sheet.kind === "rename" && t("profiles.rename")}
+                  {sheet.kind === "delete" && `${t("profiles.confirmDelete")}: ${sheetProfile?.display_name ?? ""}`}
+                </h2>
+              </div>
+              <button type="button" className={styles.sheetClose} onClick={closeSheet} aria-label={t("profiles.cancel")}>
+                <Glyph d={ICON.close} />
+              </button>
+            </header>
 
-      <p className={styles.sectionLabel}>{t("profiles.kicker")}</p>
-
-      <ul className={styles.list}>
-        {profiles.map((profile) => {
-          const isActive = profile.profile_id === activeProfile?.profile_id;
-          const isEditing = editingId === profile.profile_id;
-          const isConfirming = pendingDeleteId === profile.profile_id;
-          const count = counts[profile.profile_id] ?? 0;
-
-          if (isEditing) {
-            return (
-              <li key={profile.profile_id} className={styles.row}>
-                <form className={styles.editForm} onSubmit={(e) => handleRename(e, profile.profile_id)}>
-                  <input
-                    className={styles.editInput}
-                    value={renameValue}
-                    onChange={(e) => setRenameValue(e.target.value)}
-                    maxLength={40}
-                    aria-label={t("profiles.renameLabel")}
-                    autoFocus
-                  />
-                  <button type="submit" className={styles.iconBtn} aria-label={t("profiles.saveName")}>
-                    <Glyph d={ICON.check} />
-                  </button>
-                  <button
-                    type="button"
-                    className={styles.iconBtn}
-                    onClick={() => setEditingId(null)}
-                    aria-label={t("profiles.cancel")}
-                  >
-                    <Glyph d={ICON.close} />
-                  </button>
-                </form>
-              </li>
-            );
-          }
-
-          return (
-            <li key={profile.profile_id} className={styles.row}>
-              <div className={`${styles.rowMain} ${isActive ? styles.rowActive : ""}`}>
-                <button
-                  type="button"
-                  className={styles.pick}
-                  onClick={() => void handleUse(profile.profile_id)}
-                  disabled={busyId !== null}
-                >
-                  <span className={styles.avatar} aria-hidden="true">
-                    {profile.display_name.slice(0, 1).toUpperCase()}
-                  </span>
-                  <span className={styles.pickText}>
-                    <span className={styles.name}>{profile.display_name}</span>
-                    <span className={styles.meta}>
-                      {busyId === profile.profile_id
-                        ? t("profiles.opening")
-                        : `${count} ${count === 1 ? "chart" : "charts"}${isActive ? ` · ${t("profiles.active")}` : ""}`}
-                    </span>
-                  </span>
+            {sheet.kind === "add" && (
+              <form className={styles.sheetForm} onSubmit={handleCreate}>
+                <label className={styles.fieldLabel} htmlFor="m-profile-name">
+                  {t("profiles.nameLabel")}
+                </label>
+                <input
+                  id="m-profile-name"
+                  className={styles.sheetInput}
+                  value={newName}
+                  onChange={(event) => setNewName(event.target.value)}
+                  maxLength={40}
+                  required
+                  autoFocus
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "mobile-sheet-error" : undefined}
+                />
+                {error && (
+                  <p id="mobile-sheet-error" className={styles.sheetError} role="alert">
+                    {error}
+                  </p>
+                )}
+                <button type="submit" className={styles.primaryAction}>
+                  {t("profiles.create")}
                 </button>
+              </form>
+            )}
+
+            {sheet.kind === "manage" && sheetProfile && (
+              <div className={styles.sheetActions}>
                 <button
                   type="button"
-                  className={styles.iconBtn}
+                  className={styles.sheetAction}
+                  autoFocus
                   onClick={() => {
-                    setEditingId(profile.profile_id);
-                    setRenameValue(profile.display_name);
-                    setPendingDeleteId(null);
+                    setRenameValue(sheetProfile.display_name);
+                    setError("");
+                    setSheet({ kind: "rename", profileId: sheetProfile.profile_id });
                   }}
-                  aria-label={`${t("profiles.rename")} ${profile.display_name}`}
                 >
-                  <Glyph d={ICON.pencil} />
+                  <span className={styles.sheetActionIcon} aria-hidden="true">
+                    <Glyph d={ICON.pencil} />
+                  </span>
+                  <span>{t("profiles.rename")}</span>
                 </button>
                 {profiles.length > 1 && (
                   <button
                     type="button"
-                    className={`${styles.iconBtn} ${isConfirming ? styles.iconBtnDanger : ""}`}
-                    onClick={() =>
-                      isConfirming
-                        ? handleDelete(profile.profile_id)
-                        : setPendingDeleteId(profile.profile_id)
-                    }
-                    aria-label={
-                      isConfirming
-                        ? `${t("profiles.confirmDelete")} ${profile.display_name}`
-                        : `${t("profiles.delete")} ${profile.display_name}`
-                    }
+                    className={`${styles.sheetAction} ${styles.dangerAction}`}
+                    onClick={() => {
+                      setError("");
+                      setSheet({ kind: "delete", profileId: sheetProfile.profile_id });
+                    }}
                   >
-                    <Glyph d={isConfirming ? ICON.check : ICON.trash} />
+                    <span className={styles.sheetActionIcon} aria-hidden="true">
+                      <Glyph d={ICON.trash} />
+                    </span>
+                    <span>{t("profiles.delete")}</span>
                   </button>
                 )}
+                <button type="button" className={styles.secondaryAction} onClick={closeSheet}>
+                  {t("profiles.cancel")}
+                </button>
               </div>
-              {isConfirming && <p className={styles.warning}>{t("profiles.deleteWarning")}</p>}
-            </li>
-          );
-        })}
-      </ul>
+            )}
 
-      {error && (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
+            {sheet.kind === "rename" && sheetProfile && (
+              <form className={styles.sheetForm} onSubmit={(event) => handleRename(event, sheetProfile.profile_id)}>
+                <label className={styles.fieldLabel} htmlFor="m-profile-rename">
+                  {t("profiles.renameLabel")}
+                </label>
+                <input
+                  id="m-profile-rename"
+                  className={styles.sheetInput}
+                  value={renameValue}
+                  onChange={(event) => setRenameValue(event.target.value)}
+                  maxLength={40}
+                  autoFocus
+                  aria-invalid={Boolean(error)}
+                  aria-describedby={error ? "mobile-sheet-error" : undefined}
+                />
+                {error && (
+                  <p id="mobile-sheet-error" className={styles.sheetError} role="alert">
+                    {error}
+                  </p>
+                )}
+                <div className={styles.actionRow}>
+                  <button type="button" className={styles.secondaryAction} onClick={closeSheet}>
+                    {t("profiles.cancel")}
+                  </button>
+                  <button type="submit" className={styles.primaryAction}>
+                    {t("profiles.saveName")}
+                  </button>
+                </div>
+              </form>
+            )}
+
+            {sheet.kind === "delete" && sheetProfile && (
+              <div className={styles.deleteConfirm}>
+                <div className={styles.deleteMark} aria-hidden="true">
+                  <Glyph d={ICON.trash} size={24} />
+                </div>
+                <p id="mobile-delete-warning" className={styles.deleteWarning}>
+                  {t("profiles.deleteWarning")}
+                </p>
+                {error && (
+                  <p className={styles.sheetError} role="alert">
+                    {error}
+                  </p>
+                )}
+                <div className={styles.actionRow}>
+                  <button type="button" className={styles.secondaryAction} autoFocus onClick={closeSheet}>
+                    {t("profiles.cancel")}
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.deleteAction}
+                    onClick={() => handleDelete(sheetProfile.profile_id)}
+                    aria-describedby="mobile-delete-warning"
+                    aria-label={`${t("profiles.delete")} ${sheetProfile.display_name}`}
+                  >
+                    {t("profiles.delete")}
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
       )}
-
-      {canCreateProfile ? (
-        adding ? (
-          <form className={styles.addForm} onSubmit={handleCreate}>
-            <input
-              id="m-profile-name"
-              className={styles.addInput}
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder={t("profiles.nameLabel")}
-              aria-label={t("profiles.nameLabel")}
-              maxLength={40}
-              required
-              autoFocus
-            />
-            <button type="submit" className={styles.addSubmit}>
-              {t("profiles.create")}
-            </button>
-          </form>
-        ) : (
-          <button type="button" className={styles.addRow} onClick={() => setAdding(true)}>
-            <span className={styles.addIcon} aria-hidden="true">
-              <Glyph d={ICON.plus} />
-            </span>
-            {t("profiles.addDivider")}
-          </button>
-        )
-      ) : (
-        <p className={styles.fine}>{t("profiles.full").replace("{max}", String(maxProfiles))}</p>
-      )}
-
-      <p className={styles.footNote}>
-        {t("profiles.storageNote").replace("{max}", String(maxProfiles))}
-      </p>
     </div>
   );
 }

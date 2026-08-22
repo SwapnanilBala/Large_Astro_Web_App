@@ -12,6 +12,10 @@ import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history
 import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
 import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import styles from "../insights.module.css";
+import RuleCard from "./rule-card";
+import SectionGateway from "./section-gateway";
+import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
+import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
 
 // Lightweight skeleton for lazy-loaded panels
 function PanelSkeleton({ minHeight = 200 }: { minHeight?: number }) {
@@ -86,11 +90,6 @@ type InsightsContentProps = {
   payload: ChartApiResponse;
   birthDate: string;
   historyQs: string;
-};
-
-type RuleCardProps = {
-  rule: ChartApiResponse["chart"]["deterministic_rules"][number];
-  index: number;
 };
 
 /* â”€â”€â”€ Animated Section Header â”€â”€â”€ */
@@ -595,67 +594,6 @@ function bySelectionRank(left: DeterministicRule, right: DeterministicRule): num
 }
 
 /* Rule Card (Animated) */
-function RuleCard({ rule, index }: RuleCardProps) {
-  const shouldReduceMotion = useReducedMotion();
-  return (
-    <motion.article
-      className={`${styles.ruleCard} ${rule.priority === "high" ? styles.ruleHigh : rule.priority === "medium" ? styles.ruleMedium : styles.ruleLow}`}
-      initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={shouldReduceMotion ? { duration: 0 } : {
-        type: "spring",
-        stiffness: 200,
-        damping: 20,
-        delay: index * 0.05,
-      }}
-    >
-      <header className={styles.ruleHeader}>
-        <h3>{rule.display.headline}</h3>
-      </header>
-      <p className={styles.ruleInsight}>{rule.display.body}</p>
-      {rule.display.tension && (
-        <p className={styles.ruleTension}>{rule.display.tension}</p>
-      )}
-
-      {/* The technical tier. Native <details> rather than a hand-rolled
-          disclosure: it is keyboard accessible and correct by default, and
-          nothing here needs to animate. The confidence bar that used to sit
-          here is gone -- it rendered a hardcoded constant as a percentage. */}
-      <details className={styles.evidence}>
-        <summary className={styles.evidenceSummary}>Why this reading</summary>
-        <div className={styles.evidenceBody}>
-          <p
-            className={`${styles.rarityLabel} ${
-              rule.priority === "high"
-                ? styles.rarityHigh
-                : rule.priority === "medium"
-                  ? styles.rarityMedium
-                  : styles.rarityLow
-            }`}
-          >
-            {rule.display.rarity_label}
-          </p>
-          <p className={styles.ruleBasis}>{rule.evidence.technical_note}</p>
-          <dl className={styles.claims}>
-            {rule.evidence.claims.map((claim) => (
-              <div key={claim.label} className={styles.claim}>
-                <dt className={styles.claimLabel}>{claim.label}</dt>
-                <dd className={styles.claimValue}>
-                  {claim.value}
-                  {claim.detail && (
-                    <span className={styles.claimDetail}>{claim.detail}</span>
-                  )}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-      </details>
-    </motion.article>
-  );
-}
-
 function LifeDomainLoadingState({ queued }: { queued: boolean }) {
   return (
     <section
@@ -1205,41 +1143,34 @@ export default function InsightsContent({
           </div>
         </CollapsibleSection>
 
-        {/* â”€â”€â”€ Forecasts & Timing (Collapsible) â”€â”€â”€ */}
+        {/* ─── Timing & electional (gateway to its own page) ─── */}
         <CollapsibleSection
           id="timing"
           kicker={t("insights.timingKicker")}
           title={t("insights.timingHeading")}
-          defaultOpen={false}
+          defaultOpen
           className={`${styles.cardRules} ${styles.timingSection}`}
           persistKey={`${sectionStateScope}:timing`}
-          openForHash="muhurta"
         >
-          <div className={styles.timingPanels}>
-            <div className={styles.cardForecast}>
-              <LazyPanel>
-                <PanelErrorBoundary panelName="Future Forecast">
-                  <FutureForecastPanel queryString={historyQs} />
-                </PanelErrorBoundary>
-              </LazyPanel>
-            </div>
-
-            <div id="muhurta" className={`${styles.cardForecast} ${styles.anchorTarget}`}>
-              <LazyPanel>
-                <PanelErrorBoundary panelName="Muhurta">
-                  <MuhurtaPanel queryString={historyQs} />
-                </PanelErrorBoundary>
-              </LazyPanel>
-            </div>
-
-            <div className={styles.cardForecast}>
-              <LazyPanel>
-                <PanelErrorBoundary panelName="Varshaphal & Annual Profections">
-                  <VarshaphalPanel queryString={historyQs} birthDate={birthDate} />
-                </PanelErrorBoundary>
-              </LazyPanel>
-            </div>
-          </div>
+          <SectionGateway
+            href={`/insights/timing?${historyQs}`}
+            icon={<FiClock />}
+            heading="Forecast, electional windows, and the year ahead"
+            blurb={
+              "Three long views that were burying the rest of this report. They " +
+              "now have a page of their own, with room for the explanations each " +
+              "one needs."
+            }
+            chipsLabel="What the timing page covers"
+            chips={[
+              { label: "Forecast", note: "periods now and next" },
+              { label: "Muhurta", note: "when to begin" },
+              { label: "Varshaphal", note: "this year's chart" },
+            ]}
+            footnote="Electional windows are scored against this chart, not a generic calendar."
+            footnoteIcon={<FiClock aria-hidden="true" />}
+            ctaLabel="Open timing and electional"
+          />
         </CollapsibleSection>
 
         {payload.chart.nakshatra && payload.chart.dasha && (
@@ -1269,67 +1200,68 @@ export default function InsightsContent({
             id="divisional-charts"
             kicker="D1-D60 precision layers"
             title="Explore the charts behind your reading"
-            defaultOpen={false}
+            /* Open by default like the other two gateways: the whole point of a
+               gateway is that its button is visible without a click. */
+            defaultOpen
             className={styles.cardRules}
             persistKey={`${sectionStateScope}:divisional-charts`}
           >
             <PanelErrorBoundary panelName="Divisional Chart Atlas">
-                <DivisionalChartsGateway
-                  href={`/insights/divisional-charts?${historyQs}`}
-                  chartCount={Object.keys(payload.chart.divisional_charts).length}
-                />
+              <SectionGateway
+                href={`/insights/divisional-charts?${historyQs}`}
+                icon={<FiLayers />}
+                heading="See the layers behind your main chart"
+                blurb={
+                  `All ${Object.keys(payload.chart.divisional_charts).length} supported vargas from D1 through D60, ` +
+                  "with guidance for the ten that matter most in a client reading."
+                }
+                chipsLabel="Ten key divisional charts"
+                chips={IMPORTANT_DIVISIONAL_CHARTS.map((chart) => ({
+                  label: chart.label,
+                  note: chart.name,
+                  title: chart.focus,
+                }))}
+                footnote="Higher divisions are shown with birth-time reliability guidance."
+                footnoteIcon={<FiClock aria-hidden="true" />}
+                ctaLabel="Open your varga atlas"
+              />
             </PanelErrorBoundary>
           </CollapsibleSection>
         )}
 
+        {/* ─── Full reading (gateway to its own page) ─── */}
         <CollapsibleSection
           id="core"
           kicker="Full reading"
           title="All chart findings"
-          defaultOpen={false}
+          defaultOpen
           className={styles.cardRules}
           persistKey={`${sectionStateScope}:core`}
         >
-          {coreRules.length > 0 && (
-            <div className={styles.deepReadingBlock}>
-              <h3>Core patterns</h3>
-              <p className={styles.sectionIntro}>
-                The supporting patterns behind the three priorities at the top of this report.
-              </p>
-              <div className={styles.rulesScroll}>
-                {coreRules.map((rule, i) => (
-                  <RuleCard
-                    key={rule.instance_key}
-                    rule={rule}
-                    index={i}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {payload.chart.yogas && payload.chart.yogas.length > 0 && (
-            <div className={styles.deepReadingBlock}>
-              <h3>Long-term combinations</h3>
-              <LazyPanel>
-                <PanelErrorBoundary panelName="Yoga Lifetime Summary">
-                  <YogaLifetimeSummary yogas={payload.chart.yogas} />
-                </PanelErrorBoundary>
-              </LazyPanel>
-            </div>
-          )}
-
-          <div id="karma" className={`${styles.deepReadingBlock} ${styles.anchorTarget}`}>
-            <h3>Karma, fate, and vocation</h3>
-            <p className={styles.sectionIntro}>
-              A secondary reading of inherited patterns, release points, and vocation.
-            </p>
-            <LazyPanel>
-              <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
-                <PastLifeInsightsPanel payload={payload} />
-              </PanelErrorBoundary>
-            </LazyPanel>
-          </div>
+          <SectionGateway
+            href={`/insights/full-reading?${historyQs}`}
+            icon={<FiBookOpen />}
+            heading="Every finding, with the placement behind it"
+            blurb={
+              `All ${payload.chart.deterministic_rules.length} matched patterns, the ` +
+              "long-term combinations, and the karmic reading — laid out in a grid " +
+              "with the type set to be read rather than skimmed."
+            }
+            chipsLabel="What the full reading covers"
+            chips={[
+              {
+                label: String(payload.chart.deterministic_rules.length),
+                note: "chart findings",
+              },
+              {
+                label: String(payload.chart.yogas?.length ?? 0),
+                note: "lifetime combinations",
+              },
+              { label: "Karma", note: "inherited patterns" },
+            ]}
+            footnote="The three priorities at the top of this report are drawn from this set."
+            ctaLabel="Open the full reading"
+          />
         </CollapsibleSection>
 
         <CollapsibleSection
