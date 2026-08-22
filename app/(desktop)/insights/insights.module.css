@@ -428,13 +428,18 @@
  * the window made the cards worse. Holding each track to at least half the
  * container keeps the count at two and lets the cards grow with the page;
  * where two 26rem tracks will not fit, it falls to one.
+ *
+ * The outer min(100%, ...) is what keeps that floor from exceeding the
+ * container itself. Without it a 328px phone column still asked for a 416px
+ * track, and because body clips the x axis the card was silently cut off at
+ * the screen edge rather than producing a scrollbar that would have shown it.
  */
 .gatewayGrid {
   --gateway-gap: clamp(1.15rem, 1.8vw, 1.65rem);
   display: grid;
   grid-template-columns: repeat(
     auto-fit,
-    minmax(max(26rem, calc((100% - var(--gateway-gap)) / 2)), 1fr)
+    minmax(min(100%, max(26rem, calc((100% - var(--gateway-gap)) / 2))), 1fr)
   );
   /* Not stretch. The varga gateway carries ten chips against the other two's
      three, so forcing a pair to equal height opens a void of a couple of
@@ -4074,6 +4079,11 @@
   .anchorLink {
     display: inline-flex;
     align-items: center;
+    /* Keep the natural width. This row is a horizontal scroller; letting the
+       pills shrink defeated that -- all five stayed on screen, each narrower
+       than its own label, so the text ran through the padding and the labels
+       touched. */
+    flex: 0 0 auto;
     min-height: 2.75rem;
     scroll-snap-align: start;
     white-space: nowrap;
