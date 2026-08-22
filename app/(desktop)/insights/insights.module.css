@@ -406,6 +406,14 @@
     0 6px 16px rgba(0, 0, 0, 0.16);
 }
 
+/* A gateway section is just its card -- no outer panel chrome, because the
+   card already has a border, a surface and a heading of its own, and nesting
+   one bordered box inside another was the reason these three read as heavier
+   than everything around them. */
+.gatewaySection {
+  display: block;
+}
+
 .anchorTarget {
   /* Navbar (108) + the sticky section nav (~46) + breathing room. Before the
      nav actually stuck this only had to clear the navbar. */

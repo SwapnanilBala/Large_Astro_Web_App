@@ -111,6 +111,44 @@ function SectionHeader({
 }
 
 /* â”€â”€â”€ Collapsible Section Wrapper â”€â”€â”€ */
+/*
+ * A section that is only a doorway to another page.
+ *
+ * The three gateways were each wrapped in a CollapsibleSection, which meant
+ * every one of them announced itself twice -- "Timing & electional / Forecasts
+ * & Muhurta" in the accordion header, then "Forecast, electional windows, and
+ * the year ahead" on the card immediately below it -- and carried a collapse
+ * chevron over a single link. There is nothing to collapse: the point of a
+ * gateway is that its button is visible without a click.
+ *
+ * This keeps the id, the anchor offset and the reveal so the section nav and
+ * deep links behave exactly as before, and drops the rest.
+ */
+function GatewaySection({
+  id,
+  className = "",
+  children,
+}: {
+  id: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const shouldReduceMotion = useReducedMotion();
+
+  return (
+    <motion.section
+      id={id}
+      className={`${styles.gatewaySection} ${styles.anchorTarget} ${className}`}
+      initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
 function CollapsibleSection({
   id,
   title,
@@ -1138,14 +1176,7 @@ export default function InsightsContent({
         </CollapsibleSection>
 
         {/* ─── Timing & electional (gateway to its own page) ─── */}
-        <CollapsibleSection
-          id="timing"
-          kicker={t("insights.timingKicker")}
-          title={t("insights.timingHeading")}
-          defaultOpen
-          className={`${styles.cardRules} ${styles.timingSection}`}
-          persistKey={`${sectionStateScope}:timing`}
-        >
+        <GatewaySection id="timing" className={styles.timingSection}>
           <SectionGateway
             href={`/insights/timing?${historyQs}`}
             icon={<FiClock />}
@@ -1165,7 +1196,7 @@ export default function InsightsContent({
             footnoteIcon={<FiClock aria-hidden="true" />}
             ctaLabel="Open timing and electional"
           />
-        </CollapsibleSection>
+        </GatewaySection>
 
         {payload.chart.nakshatra && payload.chart.dasha && (
           <CollapsibleSection
@@ -1190,16 +1221,7 @@ export default function InsightsContent({
         )}
 
         {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
-          <CollapsibleSection
-            id="divisional-charts"
-            kicker="D1-D60 precision layers"
-            title="Explore the charts behind your reading"
-            /* Open by default like the other two gateways: the whole point of a
-               gateway is that its button is visible without a click. */
-            defaultOpen
-            className={styles.cardRules}
-            persistKey={`${sectionStateScope}:divisional-charts`}
-          >
+          <GatewaySection id="divisional-charts">
             <PanelErrorBoundary panelName="Divisional Chart Atlas">
               <SectionGateway
                 href={`/insights/divisional-charts?${historyQs}`}
@@ -1220,18 +1242,11 @@ export default function InsightsContent({
                 ctaLabel="Open your varga atlas"
               />
             </PanelErrorBoundary>
-          </CollapsibleSection>
+          </GatewaySection>
         )}
 
         {/* ─── Full reading (gateway to its own page) ─── */}
-        <CollapsibleSection
-          id="core"
-          kicker="Full reading"
-          title="All chart findings"
-          defaultOpen
-          className={styles.cardRules}
-          persistKey={`${sectionStateScope}:core`}
-        >
+        <GatewaySection id="core">
           <SectionGateway
             href={`/insights/full-reading?${historyQs}`}
             icon={<FiBookOpen />}
@@ -1256,7 +1271,7 @@ export default function InsightsContent({
             footnote="The three priorities at the top of this report are drawn from this set."
             ctaLabel="Open the full reading"
           />
-        </CollapsibleSection>
+        </GatewaySection>
 
         <CollapsibleSection
           id="life-shifts"
