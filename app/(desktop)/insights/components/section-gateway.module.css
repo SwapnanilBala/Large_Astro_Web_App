@@ -2,13 +2,7 @@
    Copied from divisional-charts-gateway so the three read as one pattern. */
 .gateway {
   display: grid;
-  /* The chips row absorbs the slack so every card in a row ends its footer on
-     the same line, whatever its blurb length or chip count. */
-  grid-template-rows: auto 1fr auto;
   gap: 1.15rem;
-  /* Fill the grid cell rather than sitting at its natural height, so two
-     gateways side by side are the same height. */
-  height: 100%;
   margin-top: 0.8rem;
   padding: clamp(1rem, 2vw, 1.45rem);
   border: 1px solid rgba(200, 155, 60, 0.2);
@@ -104,6 +98,10 @@
 }
 
 .footer p {
+  /* Row direction only. flex-basis follows the main axis, so when the
+     container query below turns this into a column the same declaration reads
+     as a 16rem *minimum height* and inflated the footer to 323px, which is
+     what opened the gap between the footnote and the button. */
   flex: 1 1 16rem;
   min-width: 0;
 }
@@ -114,6 +112,10 @@
   .footer {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .footer p {
+    flex: 0 0 auto;
   }
 }
 

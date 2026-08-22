@@ -418,15 +418,30 @@
 /*
  * The three doorways, as a row rather than three more full-width bars.
  *
- * 30rem is the point below which a gateway's chips start wrapping badly, so
- * auto-fit gives two across on a normal desktop, three on a very wide screen
- * and one on a laptop -- without any of them being squeezed to get there.
+ * 26rem rather than 30rem so a 13" laptop gets two columns as well, at the
+ * cost of a tighter chip grid on the varga card at that width. The chips are
+ * the densest thing in any gateway, so they are what sets this number.
+ *
+ * Capped at two columns. A bare `minmax(26rem, 1fr)` fits three tracks once
+ * the container passes ~78rem, which made 1440 render three 425px cards --
+ * narrower than the two 458px cards the same rule gives at 1024, so widening
+ * the window made the cards worse. Holding each track to at least half the
+ * container keeps the count at two and lets the cards grow with the page;
+ * where two 26rem tracks will not fit, it falls to one.
  */
 .gatewayGrid {
+  --gateway-gap: clamp(1.15rem, 1.8vw, 1.65rem);
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(30rem, 1fr));
-  align-items: stretch;
-  gap: clamp(1.15rem, 1.8vw, 1.65rem);
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(max(26rem, calc((100% - var(--gateway-gap)) / 2)), 1fr)
+  );
+  /* Not stretch. The varga gateway carries ten chips against the other two's
+     three, so forcing a pair to equal height opens a void of a couple of
+     hundred pixels inside the shorter card. Ragged bottoms read as normal;
+     a card with a hole in the middle of it does not. */
+  align-items: start;
+  gap: var(--gateway-gap);
   min-width: 0;
 }
 
