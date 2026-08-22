@@ -212,9 +212,28 @@ function buildSubPeriodWindows(
 export function calculateDashaTimeline(
   nakshatra: NakshatraData,
   birthDateStr: string,
-  currentDateStr?: string
+  currentDateStr?: string,
+  /**
+   * The true birth instant in epoch ms.
+   *
+   * Without it the timeline is anchored to midnight UTC of birthDateStr, which
+   * throws away the birth time entirely — a 14:30 IST birth was being anchored
+   * nine hours early. The Moon's longitude already uses the exact time (that is
+   * where the dasha balance comes from), so the balance was right and the
+   * timeline it was added to was not.
+   *
+   * It barely matters for an eighteen-year mahadasha. It matters for the
+   * pratyantardasha this panel prints to the day: a nine-hour error against a
+   * ~32-day window is over 1%, and near a boundary it changes which period
+   * "today" falls in.
+   *
+   * Optional so existing callers and tests that only have a date keep working.
+   */
+  birthInstantMs?: number
 ): DashaTimeline {
-  const birthMs = dateToMs(birthDateStr);
+  const birthMs = Number.isFinite(birthInstantMs)
+    ? (birthInstantMs as number)
+    : dateToMs(birthDateStr);
   const currentMs = currentDateStr
     ? dateToMs(currentDateStr)
     : Date.now();

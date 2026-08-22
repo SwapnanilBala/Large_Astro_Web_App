@@ -176,19 +176,9 @@ if (scrollTo) {
 const extraWait = Number(rest.find((a) => a.startsWith("--wait="))?.slice(7) ?? 0);
 if (extraWait) await sleep(extraWait);
 
-/* No clip. captureScreenshot's clip is in page coordinates, not viewport ones,
-   so clipping at y:0 returns the top of the document however far the page has
-   been scrolled — which silently defeats --scroll-to. The viewport is already
-   exactly `width` x `height` from setDeviceMetricsOverride, so an unclipped
-   capture is the right size anyway. */
-const { data } = await send("Page.captureScreenshot", {
-  format: "png",
-  captureBeyondViewport: fullPage,
-});
-writeFileSync(out, Buffer.from(data, "base64"));
-
-/* --eval runs an expression in the page after everything has settled and prints
-   the result. A screenshot shows what rendered; this answers why. */
+/* --eval runs before the capture, not after: it is used to interact with the
+   page (expand a section, click a tab) as often as to inspect it, and running
+   it afterwards meant the screenshot never showed the result. */
 const evalExpr = rest.find((a) => a.startsWith("--eval="))?.slice(7);
 if (evalExpr) {
   const out = await send("Runtime.evaluate", {
@@ -202,6 +192,21 @@ if (evalExpr) {
       : JSON.stringify(out.result.value, null, 1),
   );
 }
+
+
+/* Let any state change from --eval paint. */
+if (evalExpr) await sleep(900);
+
+/* No clip. captureScreenshot's clip is in page coordinates, not viewport ones,
+   so clipping at y:0 returns the top of the document however far the page has
+   been scrolled — which silently defeats --scroll-to. The viewport is already
+   exactly `width` x `height` from setDeviceMetricsOverride, so an unclipped
+   capture is the right size anyway. */
+const { data } = await send("Page.captureScreenshot", {
+  format: "png",
+  captureBeyondViewport: fullPage,
+});
+writeFileSync(out, Buffer.from(data, "base64"));
 
 const metrics = await send("Runtime.evaluate", {
   expression:

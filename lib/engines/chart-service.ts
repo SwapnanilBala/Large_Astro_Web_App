@@ -387,6 +387,17 @@ function birthLocalMomentStr(birth: BirthDetailsInput): string {
   return birth.birth_date;
 }
 
+/**
+ * The exact birth instant, for anchoring the dasha timeline.
+ *
+ * birthLocalMomentStr deliberately returns only a date, and the dasha engine
+ * used to turn that into midnight UTC — discarding the birth time from a
+ * calculation that then reports sub-periods to the day.
+ */
+function birthInstantMs(birth: BirthDetailsInput): number {
+  return resolveBirthMoment(birth).utcDate.getTime();
+}
+
 function currentLocalDateStr(birth: BirthDetailsInput): string {
   const birthMoment = resolveBirthMoment(birth);
   if (birthMoment.timeZoneId) {
@@ -545,7 +556,12 @@ function computeDashaTimeline(
 
   const birthLocalStr = birthLocalMomentStr(birth);
   const nakData = calculateNakshatra(moon.longitude);
-  const dashaTimeline = calculateDashaTimeline(nakData, birthLocalStr, currentLocalStr);
+  const dashaTimeline = calculateDashaTimeline(
+    nakData,
+    birthLocalStr,
+    currentLocalStr,
+    birthInstantMs(birth),
+  );
 
   const nakshatraInfo = {
     name: nakData.name,
@@ -1035,7 +1051,12 @@ export function buildForecast(
   // Build nakshatra/dasha for target date
   const moon = core.planets.find((p) => p.name === "Moon")!;
   const nakData = calculateNakshatra(moon.longitude);
-  const dashaTimeline = calculateDashaTimeline(nakData, birthLocalStr, targetDateStr);
+  const dashaTimeline = calculateDashaTimeline(
+    nakData,
+    birthLocalStr,
+    targetDateStr,
+    birthInstantMs(birth),
+  );
 
   const dashaInfo = {
     current_dasha: dashaTimeline.current_dasha?.planet ?? "Unknown",
