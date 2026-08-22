@@ -987,9 +987,10 @@ export default function Home() {
                           aria-current={index === questionIndex ? "step" : undefined}
                           aria-label={`${index + 1}. ${question.label}`}
                         >
-                          <span className={styles.questionDotIndex} aria-hidden="true">
-                            {question.answered ? <HiOutlineCheckCircle /> : index + 1}
-                          </span>
+                          {/* A real element rather than ::before: as a
+                              pseudo it generated but never took layout space,
+                              so the segment was invisible. */}
+                          <span className={styles.questionDotBar} aria-hidden="true" />
                           <span className={styles.questionDotLabel} aria-hidden="true">
                             {question.tabLabel}
                           </span>

@@ -187,6 +187,22 @@ const { data } = await send("Page.captureScreenshot", {
 });
 writeFileSync(out, Buffer.from(data, "base64"));
 
+/* --eval runs an expression in the page after everything has settled and prints
+   the result. A screenshot shows what rendered; this answers why. */
+const evalExpr = rest.find((a) => a.startsWith("--eval="))?.slice(7);
+if (evalExpr) {
+  const out = await send("Runtime.evaluate", {
+    expression: evalExpr,
+    returnByValue: true,
+    awaitPromise: true,
+  });
+  console.log(
+    typeof out.result.value === "string"
+      ? out.result.value
+      : JSON.stringify(out.result.value, null, 1),
+  );
+}
+
 const metrics = await send("Runtime.evaluate", {
   expression:
     "JSON.stringify({inner:innerWidth+'x'+innerHeight, overflow: document.documentElement.scrollWidth - document.documentElement.clientWidth, title: document.title})",

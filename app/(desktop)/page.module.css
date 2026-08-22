@@ -1888,7 +1888,19 @@
   width: 100%;
   max-width: var(--intake-cap);
   margin: 0 auto;
-  padding: clamp(4.65rem, 7vh, 5.6rem) var(--intake-gutter) clamp(0.85rem, 2vh, 1.25rem);
+  /*
+   * The navbar is position:fixed at 108px tall, so page content flows beneath
+   * it. This resolved to 74.4px, which left the eyebrow 23px *behind* the
+   * navbar — measured on the rendered page, not inferred.
+   *
+   * A px floor rather than rem alone: the value has to clear a fixed pixel
+   * height, so tying it only to the root font size means any future change to
+   * that size silently re-creates the overlap. 168px leaves 60px of air.
+   *
+   * Note there is an earlier, dead .streamlinedHeader rule further up this
+   * file from a previous centred layout. This is the one that wins.
+   */
+  padding: max(10.5rem, 168px) var(--intake-gutter) clamp(0.85rem, 2vh, 1.25rem);
   text-align: left;
 }
 
@@ -1961,119 +1973,115 @@
 }
 
 /* One celestial progress path: nodes supply state without becoming four cards. */
+/* ── Step rail ────────────────────────────────────────────────
+ *
+ * Was four numbered circles that each rendered inside a 1px gold rectangle,
+ * so the row read as a bordered table. The rectangles were not declared here:
+ * globals.css styles the bare `button` element with an inset gold rim, a
+ * cosmic gradient and a 12px radius, and this component reset border and
+ * background but not box-shadow. Everything the global rule contributes is
+ * reset explicitly below.
+ *
+ * The replacement is a progress track rather than a set of buttons: a thin
+ * segment per step with its label beneath. Filled segments read as progress at
+ * a glance without needing numbers, circles or a container.
+ */
 .questionDots {
-  position: relative;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
   width: min(100%, 36rem);
-  margin: 0 0 clamp(0.9rem, 1.7vw, 1.25rem);
+  margin: 0 0 clamp(1.1rem, 2vw, 1.6rem);
   padding: 0;
   list-style: none;
 }
 
-.questionDots::before {
-  content: "";
-  position: absolute;
-  top: 1.35rem;
-  right: 12.5%;
-  left: 12.5%;
-  height: 1px;
-  background: linear-gradient(90deg, rgba(108, 225, 212, 0.28), rgba(232, 200, 154, 0.28), rgba(255, 255, 255, 0.1));
-}
-
 .questionDotItem {
-  position: relative;
-  z-index: 1;
   min-width: 0;
 }
 
 .questionDot {
+  /* Undo the global `button` treatment. Without these the segments inherit a
+     gradient fill, a gold rim, a radius and a top margin. */
+  all: unset;
+
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 0.35rem;
+  gap: 0.5rem;
   width: 100%;
-  min-height: 2.75rem;
-  margin: 0;
   padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: rgba(231, 230, 236, 0.5);
-  font: inherit;
-  font-size: 0.74rem;
-  font-weight: 650;
-  text-align: center;
+  color: rgba(231, 230, 236, 0.45);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-align: left;
   cursor: pointer;
-  transition: color 160ms ease, transform 160ms ease;
+  transition: color 180ms ease;
 }
 
-.questionDotIndex {
-  display: grid;
-  flex: 0 0 auto;
-  width: 1.72rem;
-  height: 1.72rem;
-  place-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+/* The segment itself. A 3px bar reads as progress where a circle reads as a
+   node needing a connector drawn between it and the next one. */
+.questionDotBar {
+  display: block;
+  width: 100%;
+  height: 3px;
   border-radius: 999px;
-  background: #15151f;
-  color: rgba(231, 230, 236, 0.68);
-  font-size: 0.78rem;
-  line-height: 1;
-  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
-}
-
-.questionDotIndex svg {
-  width: 1rem;
-  height: 1rem;
+  background: rgba(255, 255, 255, 0.09);
+  transition: background-color 200ms ease, box-shadow 200ms ease;
 }
 
 .questionDotLabel {
-  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.questionDot:disabled {
-  opacity: 0.62;
-  cursor: default;
+/* The number is gone — the label carries the step, and four numbers plus four
+   labels was two systems doing one job. Kept in the DOM for screen readers via
+   the button's aria-label. */
+.questionDotIndex {
+  display: none;
 }
 
 .questionDotAnswered {
-  color: rgba(108, 225, 212, 0.82);
+  color: rgba(231, 230, 236, 0.72);
 }
 
-.questionDotAnswered .questionDotIndex {
-  border-color: rgba(108, 225, 212, 0.52);
-  background: #18312f;
-  color: #89e8dc;
+.questionDotAnswered .questionDotBar {
+  background: rgba(200, 155, 60, 0.55);
 }
 
 .questionDotCurrent {
-  color: rgba(248, 227, 168, 0.96);
+  color: #f3dfae;
 }
 
-.questionDotCurrent .questionDotIndex,
-.questionDotCurrent.questionDotAnswered .questionDotIndex {
-  border-color: rgba(248, 227, 168, 0.88);
-  background: #d7b66e;
-  color: #17140f;
-  box-shadow: 0 0 0 3px rgba(232, 200, 154, 0.09);
+.questionDotCurrent .questionDotBar {
+  background: linear-gradient(90deg, #c89b3c, #e8c89a);
+  box-shadow: 0 0 10px rgba(200, 155, 60, 0.35);
+}
+
+.questionDot:disabled {
+  cursor: default;
+  color: rgba(231, 230, 236, 0.28);
 }
 
 .questionDot:focus-visible {
   outline: 2px solid rgba(232, 200, 154, 0.78);
   outline-offset: 4px;
+  border-radius: 4px;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .questionDot:not(:disabled):hover {
     color: rgba(248, 227, 168, 0.9);
-    transform: translateY(-1px);
+  }
+
+  .questionDot:not(:disabled):not(.questionDotCurrent):hover .questionDotBar {
+    background: rgba(200, 155, 60, 0.4);
   }
 }
+
 
 .questionHead {
   margin-bottom: clamp(1rem, 1.8vw, 1.35rem);
