@@ -41,7 +41,7 @@
   --accent-purple-glow: rgba(123, 107, 168, 0.15);
   
   /* Accent Colors - Deep Teal */
-  --accent-teal: #2A8B7E;
+  --accent-teal: #31A394;
   --accent-teal-light: #4AAB9E;
   --accent-teal-dim: #1A5B4E;
   --accent-teal-glow: rgba(42, 139, 126, 0.15);
@@ -107,7 +107,7 @@
   --bg-night: #0A0A0F;
   --ink-main: #F5F0E6;
   --ink-soft: #A8A090;
-  --accent-aqua: #2A8B7E;
+  --accent-aqua: #31A394;
   --accent-coral: #C96B2A;
   --success: #2A8B7E;
   --primary: #2A8B7E;
@@ -3051,7 +3051,10 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .danger-btn {
-  background: linear-gradient(110deg, #7c2d2d, #aa4c34, #d46c56) !important;
+  /* Light end capped at #b94b38: the cream label reads 3.28:1 against
+     #d46c56 and 4.84:1 against this, so it clears AA across the whole fill
+     rather than only over the dark end of the sweep. */
+  background: linear-gradient(110deg, #7c2d2d, #aa4c34, #b94b38) !important;
   color: #fff8f2 !important;
 }
 
