@@ -303,10 +303,16 @@ export default function Home() {
   const draftCity = draft.city;
   const draftBirthDate = draft.birthDate;
   const draftBirthTime = draft.birthTime;
+  /* Ticking "I don't know my birth time" hides the picker, it does not throw
+   * the answer away — an accidental tap would otherwise wipe a time the
+   * visitor typed (or one restored from a saved draft) with no way back.
+   * The value stays in the draft and every reader goes through here instead,
+   * so nothing downstream mistakes a parked time for a claimed one. */
+  const exactBirthTime = unknownTime ? "" : draftBirthTime;
   const effectiveBirthTime =
     unknownTime && hasCoarseTimeFallback(coarseTime)
       ? getBirthTimeFallback(coarseTime)
-      : draftBirthTime;
+      : exactBirthTime;
 
   useEffect(() => {
     if (!draftCountry.trim() && !draftCity.trim()) return;
@@ -382,7 +388,9 @@ export default function Home() {
     const locationFieldsFilled = [draft.country, draft.state, draft.city].filter(
       (field) => field.trim().length > 0,
     ).length;
-    const hasTime = draft.birthTime.trim().length > 0 || (unknownTime && hasCoarseTimeFallback(coarseTime));
+    const hasTime = unknownTime
+      ? hasCoarseTimeFallback(coarseTime)
+      : draft.birthTime.trim().length > 0;
 
     return {
       filled:
@@ -1129,9 +1137,10 @@ export default function Home() {
                           label={t("home.unknownTimeLabel")}
                           checked={unknownTime}
                           onChange={(checked) => {
+                            /* The typed time is left in the draft on the way
+                             * in, so unticking this brings it straight back. */
                             setUnknownTime(checked);
                             if (!checked) setCoarseTime("");
-                            setDraft((prev) => ({ ...prev, birthTime: checked ? "" : prev.birthTime }));
                           }}
                         />
                       </div>
@@ -1532,7 +1541,7 @@ export default function Home() {
                   presentation="embedded"
                   name={draft.name}
                   birthDate={draft.birthDate}
-                  birthTime={draft.birthTime}
+                  birthTime={exactBirthTime}
                   timezoneOffsetMinutes={draft.timezoneOffsetMinutes}
                   country={draft.country}
                   state={draft.state}

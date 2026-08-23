@@ -221,7 +221,13 @@ export default function MobileIntake() {
 
   const hasName = draft.name.trim().length > 0;
   const hasDate = draft.birthDate.trim().length > 0;
-  const hasTime = unknownTime ? hasCoarseTimeFallback(coarseTime) : draft.birthTime.trim().length > 0;
+  /* Ticking "I don't know my birth time" hides the input, it does not throw
+   * the answer away — a mistaken tap would otherwise wipe a time the visitor
+   * typed (or one restored from the shared draft) with no way back. The value
+   * stays in the draft and every reader goes through here instead, so nothing
+   * downstream mistakes a parked time for a claimed one. */
+  const exactBirthTime = unknownTime ? "" : draft.birthTime;
+  const hasTime = unknownTime ? hasCoarseTimeFallback(coarseTime) : exactBirthTime.trim().length > 0;
   const canContinue = hasName && hasDate && hasTime;
 
   const hasPlace =
@@ -241,7 +247,7 @@ export default function MobileIntake() {
       state: draft.state.trim(),
       country: draft.country.trim(),
       birthDate: draft.birthDate.trim(),
-      birthTime: draft.birthTime.trim() || "12:00",
+      birthTime: exactBirthTime.trim() || "12:00",
     });
 
     const timer = setTimeout(async () => {
@@ -276,7 +282,7 @@ export default function MobileIntake() {
       clearTimeout(timer);
       geoAbort.current?.abort();
     };
-  }, [step, hasPlace, draft.city, draft.state, draft.country, draft.birthDate, draft.birthTime]);
+  }, [step, hasPlace, draft.city, draft.state, draft.country, draft.birthDate, exactBirthTime]);
 
   const missing = useMemo(() => {
     if (step === 1) {
@@ -427,9 +433,10 @@ export default function MobileIntake() {
               type="checkbox"
               checked={unknownTime}
               onChange={(e) => {
+                /* The typed time is left in the draft on the way in, so
+                 * unticking this brings it straight back. */
                 setUnknownTime(e.target.checked);
                 if (!e.target.checked) setCoarseTime("");
-                else edit("birthTime", "");
               }}
             />
             <label className={styles.toggleLabel} htmlFor="m-unknown-time">
