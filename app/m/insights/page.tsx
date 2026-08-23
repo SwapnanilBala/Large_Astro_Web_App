@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import {
   chartParamsToQuery,
   getChartPayload,
@@ -38,9 +37,9 @@ export default async function MobileInsightsPage({ searchParams }: PageProps) {
             Head back to intake and fill in the birth details to generate a chart.
           </p>
         </header>
-        <Link className={styles.button} href="/m" style={{ textAlign: "center", lineHeight: "3.25rem" }}>
+        <a className={styles.backToIntake} href="/m">
           Back to intake
-        </Link>
+        </a>
       </div>
     );
   }

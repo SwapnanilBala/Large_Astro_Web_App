@@ -115,6 +115,26 @@ const AYANAMSHAS: AyanamshaInfo[] = [
   },
 ];
 
+/**
+ * The order the traditions are offered in, most-used first.
+ *
+ * Deliberately not AYANAMSHAS' declaration order, which is grouped by
+ * provenance. This is a presentation decision, but it lives here rather than
+ * in a page because both the desktop and the mobile chooser render it: two
+ * copies would let the trees drift into offering different traditions, or the
+ * same ones in a different order, the next time one is added.
+ */
+export const TRADITION_ORDER = [
+  "lahiri",
+  "raman",
+  "krishnamurti",
+  "fagan_bradley",
+  "pushyapaksha",
+  "yukteshwar",
+] as const;
+
+export type TraditionKey = (typeof TRADITION_ORDER)[number];
+
 function engineIdFor(ayanamshaKey: string, houseSystemCode: string) {
   return `${ayanamshaKey}_${houseSystemCode === "whole_sign" ? "classic" : houseSystemCode}`;
 }

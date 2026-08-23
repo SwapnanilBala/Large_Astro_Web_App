@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
+  MOBILE_ROUTES,
   hasMobileRoute,
   isMobilePath,
   isMobileUserAgent,
@@ -56,7 +59,7 @@ describe("path mapping", () => {
   });
 
   it("round-trips", () => {
-    for (const path of ["/", "/insights"]) {
+    for (const path of ["/", "/insights", "/login", "/engine-select"]) {
       expect(toDesktopPath(toMobilePath(path))).toBe(path);
     }
   });
@@ -78,8 +81,25 @@ describe("path mapping", () => {
   it("only claims routes that actually have a mobile counterpart", () => {
     expect(hasMobileRoute("/")).toBe(true);
     expect(hasMobileRoute("/insights")).toBe(true);
+    expect(hasMobileRoute("/login")).toBe(true);
+    expect(hasMobileRoute("/engine-select")).toBe(true);
     expect(hasMobileRoute("/pricing")).toBe(false);
     expect(hasMobileRoute("/insights/advanced")).toBe(false);
+  });
+
+  /* Claiming a route without shipping its page sends every phone to a 404,
+     and claiming it without adding it to the middleware matcher means the
+     redirect never runs at all. Both are silent, so they are asserted here
+     against the files on disk rather than trusted to review. */
+  it("ships a page for every route it claims, and routes it through the proxy", () => {
+    const matcher = readFileSync(join(process.cwd(), "proxy.ts"), "utf8");
+
+    for (const route of MOBILE_ROUTES) {
+      const mobilePath = toMobilePath(route);
+      const dir = join(process.cwd(), "app", ...mobilePath.split("/").filter(Boolean));
+      expect(existsSync(join(dir, "page.tsx")), `${mobilePath} has no page.tsx`).toBe(true);
+      expect(matcher.includes(`"${route}"`), `${route} is not in the proxy matcher`).toBe(true);
+    }
   });
 });
 
@@ -96,6 +116,15 @@ describe("readViewPreference", () => {
 });
 
 describe("resolveRoute", () => {
+  it("sends phones to the mobile tree for engine selection", () => {
+    expect(
+      resolveRoute({ pathname: "/engine-select", userAgent: UA.iphone, preference: null }),
+    ).toEqual({ action: "redirect", pathname: "/m/engine-select" });
+    expect(
+      resolveRoute({ pathname: "/m/engine-select", userAgent: UA.mac, preference: null }),
+    ).toEqual({ action: "redirect", pathname: "/engine-select" });
+  });
+
   it("sends phones to the mobile tree", () => {
     expect(resolveRoute({ pathname: "/", userAgent: UA.iphone, preference: null })).toEqual({
       action: "redirect",

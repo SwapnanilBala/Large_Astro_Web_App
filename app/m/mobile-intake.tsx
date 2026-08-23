@@ -365,7 +365,10 @@ export default function MobileIntake() {
 
     setSubmitting(true);
     const params = buildChartQuery(tidied, { unknownTime, coarseTime });
-    router.push(`/engine-select?${params.toString()}`);
+    /* Straight to the mobile chooser. /engine-select would land here anyway
+       now that it is a mobile route, but by way of a redirect on the step
+       between filling the form and seeing anything. */
+    router.push(`/m/engine-select?${params.toString()}`);
   };
 
   return (

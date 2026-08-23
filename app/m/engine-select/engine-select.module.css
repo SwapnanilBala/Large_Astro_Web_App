@@ -1,0 +1,277 @@
+/* Mobile method chooser. Self-contained; inherits tokens only. */
+
+/*
+ * The shared page rule reserves 7.5rem for a one-row action bar. This one
+ * carries the running selection above the row, so it needs more.
+ */
+.page {
+  padding-bottom: 10rem;
+}
+
+.traditions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.card {
+  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
+  border-radius: 12px;
+  background: var(--surface-lit);
+  box-shadow: var(--edge-highlight);
+  overflow: hidden;
+}
+
+.cardOpen {
+  border-color: var(--border-medium, rgba(212, 165, 116, 0.2));
+  background: var(--surface-lit-strong);
+}
+
+/*
+ * The whole head is the control. Six of these are scanned in a column, so the
+ * target is the row rather than a chevron somewhere inside it.
+ */
+.cardHead {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  font-family: inherit;
+  text-align: left;
+  color: var(--text-primary, #f5f0e6);
+  background: none;
+  border: none;
+}
+
+.glyph {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 10px;
+  /* Decorative tint, one per tradition, so the column is separable at a
+     glance. Nothing reads text against it. */
+  color: var(--tradition-accent, var(--accent-gold, #d4a574));
+  background: color-mix(in srgb, var(--tradition-accent, #d4a574) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--tradition-accent, #d4a574) 32%, transparent);
+}
+
+.glyph svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.headText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.cardTitle {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.tag {
+  padding: 0.05rem 0.4rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent-gold, #d4a574);
+  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.2));
+  border-radius: 999px;
+}
+
+/*
+ * Everything below is on --text-secondary rather than the tertiary tone the
+ * tree normally gives supporting labels. Measured against this page's real
+ * paint stack, tertiary comes out at 3.09:1 — under the 4.5:1 AA floor — and
+ * this page is nothing but explanatory prose someone reads before making a
+ * choice. Hierarchy is carried by size, caps, and the accent rule on the
+ * method aside instead of by dimming text below legibility.
+ */
+.origin {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #a8a090);
+}
+
+.summary {
+  margin-top: 0.15rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--text-secondary, #a8a090);
+}
+
+.check {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  margin-top: 0.125rem;
+  border-radius: 999px;
+  color: var(--bg-deep, #0a0a0f);
+  background: transparent;
+  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.2));
+}
+
+.checkOn {
+  background: var(--accent-gold, #d4a574);
+  border-color: var(--accent-gold, #d4a574);
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 0.875rem 0.875rem;
+}
+
+/* The flex rule above would otherwise beat the UA's [hidden] display:none. */
+.cardBody[hidden] {
+  display: none;
+}
+
+.detail {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #a8a090);
+}
+
+.method {
+  margin: 0;
+  padding-left: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #a8a090);
+  border-left: 2px solid color-mix(in srgb, var(--tradition-accent, #d4a574) 45%, transparent);
+}
+
+.styleLabel {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #a8a090);
+}
+
+.chips {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.chip {
+  min-height: 2.875rem;
+  padding: 0.5rem 0.625rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: var(--text-secondary, #a8a090);
+  background: transparent;
+  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
+  border-radius: 10px;
+}
+
+.chipActive {
+  color: var(--bg-deep, #0a0a0f);
+  background: var(--accent-gold, #d4a574);
+  border-color: var(--accent-gold, #d4a574);
+  font-weight: 600;
+}
+
+.styleHint {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #a8a090);
+}
+
+.note {
+  padding: 0.875rem;
+  border: 1px dashed var(--border-soft, rgba(212, 165, 116, 0.16));
+  border-radius: 12px;
+}
+
+.noteTitle {
+  margin: 0 0 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #a8a090);
+}
+
+.noteText {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #a8a090);
+}
+
+/*
+ * The running selection, above the CTA. Announced politely rather than
+ * assertively: it changes on every chip tap, and it is confirming what the
+ * visitor just did, not interrupting them.
+ */
+.selection {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #a8a090);
+}
+
+.selectionLabel {
+  flex: 0 0 auto;
+}
+
+.selectionValue {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--accent-gold, #d4a574);
+}
+
+/* Same ghost treatment the intake's Back button gets, on an anchor. */
+.back {
+  flex: 0 0 auto;
+  min-width: 5.5rem;
+  min-height: 3.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: var(--text-primary, #f5f0e6);
+  background: transparent;
+  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.2));
+  border-radius: 12px;
+}
+
+.back:active {
+  background: var(--surface, rgba(255, 243, 210, 0.03));
+}

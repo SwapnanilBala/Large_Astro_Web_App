@@ -306,6 +306,24 @@
   color: var(--text-tertiary, #6b6560);
 }
 
+/* The way back when a page cannot render — incomplete chart details reach
+   both the results route and the method chooser. Gold on a page with no other
+   control on it, because it is the only thing to do here. */
+.backToIntake {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3.25rem;
+  padding: 0 1.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  color: #1a1206;
+  background: linear-gradient(100deg, #c89b3c, #e8c89a);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .button {
     transition: opacity 120ms ease;

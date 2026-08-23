@@ -12,7 +12,9 @@ import { FiArrowRight, FiCheck } from "react-icons/fi";
 import {
   listEnginePresets,
   DEFAULT_ENGINE_ID,
+  TRADITION_ORDER,
   type EnginePreset,
+  type TraditionKey,
 } from "@/lib/engines/engine-registry";
 import { useTranslation } from "@/lib/i18n-context";
 import TraditionGlyph from "@/app/components/TraditionGlyph";
@@ -24,16 +26,9 @@ type EngineSelectClientProps = {
 };
 
 const engines = listEnginePresets();
-const ayanamshaOrder = [
-  "lahiri",
-  "raman",
-  "krishnamurti",
-  "fagan_bradley",
-  "pushyapaksha",
-  "yukteshwar",
-] as const;
+const ayanamshaOrder = TRADITION_ORDER;
 
-type AyanamshaKey = (typeof ayanamshaOrder)[number];
+type AyanamshaKey = TraditionKey;
 
 /* RGB triplets (not hex) so CSS can compose them into rgba() at varying
    opacity for backgrounds/borders/text via a single custom property. */

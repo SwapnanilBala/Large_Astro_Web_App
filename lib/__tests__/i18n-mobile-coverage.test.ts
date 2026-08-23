@@ -6,7 +6,7 @@ import fullMessages from "@/messages/en.json";
 
 /*
  * messages/en.mobile.json is a trimmed English baseline for the /m tree — the
- * "home" namespace only, 2.3KB gzipped against 9.4KB for the full file.
+ * namespaces its pages actually render, rather than the whole English file.
  *
  * The saving is only safe while every key a mobile page renders is present in
  * the subset, because a miss in t() falls through to returning the key itself

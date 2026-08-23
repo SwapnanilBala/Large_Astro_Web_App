@@ -6,6 +6,7 @@ import {
   ENGINE_PRESETS,
   HOUSE_SYSTEMS,
   DEFAULT_ENGINE_ID,
+  TRADITION_ORDER,
   type EnginePreset,
   type EnginePresetInfo,
 } from "../engines/engine-registry";
@@ -214,6 +215,30 @@ describe("engine-registry", () => {
       expect(meta.ayanamsha).toBe("Raman");
       expect(meta.house_system).toBe("Whole Sign");
       expect(meta.description.length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("TRADITION_ORDER", () => {
+    /* Both chooser pages iterate this rather than the presets, so a tradition
+       missing from it is a tradition neither tree offers — and nothing else
+       would fail. */
+    it("covers every tradition the presets define, exactly once", () => {
+      const suffixes = HOUSE_SYSTEMS.map((house) =>
+        house.code === "whole_sign" ? "classic" : house.code,
+      );
+      const fromPresets = new Set(
+        listEnginePresets().map((preset) => {
+          const suffix = suffixes.find((candidate) => preset.engine_id.endsWith(`_${candidate}`));
+          return suffix ? preset.engine_id.slice(0, -(suffix.length + 1)) : preset.engine_id;
+        }),
+      );
+
+      expect([...TRADITION_ORDER].sort()).toEqual([...fromPresets].sort());
+      expect(new Set(TRADITION_ORDER).size).toBe(TRADITION_ORDER.length);
+    });
+
+    it("starts on the tradition the default engine belongs to", () => {
+      expect(DEFAULT_ENGINE_ID.startsWith(`${TRADITION_ORDER[0]}_`)).toBe(true);
     });
   });
 });
