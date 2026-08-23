@@ -160,10 +160,62 @@ export function LanguageProvider({
   );
 }
 
-/* ── Hook ── */
+/* ── Hooks ── */
 
 export function useTranslation(): I18nContextValue {
   const ctx = useContext(I18nContext);
   if (!ctx) throw new Error("useTranslation must be used within LanguageProvider");
   return ctx;
+}
+
+/**
+ * A translator backed by a catalog that ships with one route.
+ *
+ * The provider's English baseline is loaded by the layout, so every namespace
+ * in it is downloaded by every page under that layout — fine for strings the
+ * whole tree renders, wasteful for a namespace only one route does. A route
+ * with its own body of copy passes it here instead and pays for it alone.
+ *
+ * Resolution order is context first, this catalog second, which is what makes
+ * it correct rather than a hack: a visitor on a non-English language has the
+ * complete translation file loaded by the provider, so `t` already answers and
+ * this catalog is never consulted. It answers for English, where the baseline
+ * deliberately does not carry these keys — and for any language whose file has
+ * not finished loading, or is missing a key, which would otherwise render the
+ * raw key on screen.
+ *
+ * Keys still have to exist somewhere: lib/__tests__/i18n-mobile-coverage.test.ts
+ * checks every key a mobile page reads against the baseline plus the route
+ * catalog covering that directory.
+ */
+export function useRouteMessages(
+  routeMessages: MessageTree
+): (key: string, params?: Record<string, string>) => string {
+  const { t } = useTranslation();
+
+  /* Flattened once per mount, like the provider's own baseline — callers pass
+     a module-level JSON import, so the identity is stable. */
+  const flatRef = useRef<Record<string, string> | null>(null);
+  if (flatRef.current === null) {
+    flatRef.current = flattenMessages(routeMessages);
+  }
+  const routeFallback = flatRef.current;
+
+  return useCallback(
+    (key: string, params?: Record<string, string>): string => {
+      const translated = t(key, params);
+      /* `t` returns the key itself when it cannot resolve it. */
+      if (translated !== key) return translated;
+
+      let text = routeFallback[key];
+      if (text === undefined) return key;
+      if (params) {
+        for (const [placeholder, value] of Object.entries(params)) {
+          text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), value);
+        }
+      }
+      return text;
+    },
+    [routeFallback, t]
+  );
 }

@@ -9,7 +9,8 @@ import {
   type EnginePreset,
   type TraditionKey,
 } from "@/lib/engines/engine-registry";
-import { useTranslation } from "@/lib/i18n-context";
+import { useRouteMessages } from "@/lib/i18n-context";
+import engineSelectMessages from "@/messages/en.engine-select.json";
 import TraditionGlyph from "@/app/components/TraditionGlyph";
 import shell from "../mobile.module.css";
 import styles from "./engine-select.module.css";
@@ -71,7 +72,11 @@ function CheckMark() {
 
 export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
   const router = useRouter();
-  const { t } = useTranslation();
+  /* tr, not t: this page's copy is a namespace of its own that ships with the
+     route rather than riding in the layout's baseline, where every mobile page
+     would download it. tr reads the shared baseline first and falls back to
+     that catalog, so "home.back" below resolves exactly as it always did. */
+  const tr = useRouteMessages(engineSelectMessages);
   const [selectedId, setSelectedId] = useState(defaultEngineId || DEFAULT_ENGINE_ID);
   const [isPending, startTransition] = useTransition();
 
@@ -101,9 +106,9 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
     selectedGroup.engines.find((engine) => engine.engine_id === selectedId) ??
     selectedGroup.defaultEngine;
 
-  const selectedTraditionLabel = t(`engineSelect.groups.${selectedGroup.key}.label`);
+  const selectedTraditionLabel = tr(`engineSelect.groups.${selectedGroup.key}.label`);
   const selectedStyleLabel = selectedEngine
-    ? t(`engineSelect.styles.${selectedEngine.house_system_code}.label`)
+    ? tr(`engineSelect.styles.${selectedEngine.house_system_code}.label`)
     : "";
 
   /* Arrow keys move between house styles, the way a native radiogroup does.
@@ -150,9 +155,9 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
   return (
     <div className={`${shell.page} ${styles.page}`}>
       <header className={shell.header}>
-        <span className={shell.step}>{t("engineSelect.kicker")}</span>
-        <h1 className={`${shell.title} mGold`}>{t("engineSelect.heading")}</h1>
-        <p className={shell.lead}>{t("engineSelect.lead")}</p>
+        <span className={shell.step}>{tr("engineSelect.kicker")}</span>
+        <h1 className={`${shell.title} mGold`}>{tr("engineSelect.heading")}</h1>
+        <p className={shell.lead}>{tr("engineSelect.lead")}</p>
       </header>
 
       <div className={styles.traditions}>
@@ -188,17 +193,17 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
                 <span className={styles.headText}>
                   <span className={styles.titleRow}>
                     <span className={styles.cardTitle}>
-                      {t(`engineSelect.groups.${group.key}.label`)}
+                      {tr(`engineSelect.groups.${group.key}.label`)}
                     </span>
                     {isRecommended && (
-                      <span className={styles.tag}>{t("engineSelect.recommended")}</span>
+                      <span className={styles.tag}>{tr("engineSelect.recommended")}</span>
                     )}
                   </span>
                   <span className={styles.origin}>
-                    {t(`engineSelect.groups.${group.key}.origin`)}
+                    {tr(`engineSelect.groups.${group.key}.origin`)}
                   </span>
                   <span className={styles.summary}>
-                    {t(`engineSelect.groups.${group.key}.summary`)}
+                    {tr(`engineSelect.groups.${group.key}.summary`)}
                   </span>
                 </span>
 
@@ -212,12 +217,12 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
 
               <div id={bodyId} className={styles.cardBody} hidden={!isOpen}>
                 <p className={styles.detail}>
-                  {t(`engineSelect.groups.${group.key}.description`)}
+                  {tr(`engineSelect.groups.${group.key}.description`)}
                 </p>
-                <p className={styles.method}>{t(`engineSelect.groups.${group.key}.method`)}</p>
+                <p className={styles.method}>{tr(`engineSelect.groups.${group.key}.method`)}</p>
 
                 <span className={styles.styleLabel} id={styleLabelId}>
-                  {t("engineSelect.styleLabel")}
+                  {tr("engineSelect.styleLabel")}
                 </span>
                 <div className={styles.chips} role="radiogroup" aria-labelledby={styleLabelId}>
                   {group.engines.map((engine, engineIndex) => {
@@ -233,7 +238,7 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
                         onClick={() => setSelectedId(engine.engine_id)}
                         onKeyDown={(event) => handleChipKeyDown(event, group.engines, engineIndex)}
                       >
-                        {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                        {tr(`engineSelect.styles.${engine.house_system_code}.label`)}
                       </button>
                     );
                   })}
@@ -241,7 +246,7 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
 
                 <p className={styles.styleHint}>
                   {activeEngine
-                    ? t(`engineSelect.styles.${activeEngine.house_system_code}.description`)
+                    ? tr(`engineSelect.styles.${activeEngine.house_system_code}.description`)
                     : ""}
                 </p>
               </div>
@@ -253,20 +258,20 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
       {/* The one sentence that says why this page exists at all, parked at the
           end for whoever scrolled the whole list and is still deciding. */}
       <section className={styles.note}>
-        <h2 className={styles.noteTitle}>{t("engineSelect.summaryImpact")}</h2>
-        <p className={styles.noteText}>{t("engineSelect.summaryImpactText")}</p>
+        <h2 className={styles.noteTitle}>{tr("engineSelect.summaryImpact")}</h2>
+        <p className={styles.noteText}>{tr("engineSelect.summaryImpactText")}</p>
       </section>
 
       <div className={shell.actions}>
         <p className={styles.selection} aria-live="polite">
-          <span className={styles.selectionLabel}>{t("engineSelect.selectedKicker")}</span>
+          <span className={styles.selectionLabel}>{tr("engineSelect.selectedKicker")}</span>
           <strong className={styles.selectionValue}>
             {selectedTraditionLabel} · {selectedStyleLabel}
           </strong>
         </p>
         <div className={shell.actionRow}>
           <a className={styles.back} href="/m">
-            {t("home.back")}
+            {tr("home.back")}
           </a>
           <button
             type="button"
@@ -274,7 +279,7 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
             onClick={handleGenerate}
             disabled={isPending || !selectedEngine}
           >
-            {isPending ? t("engineSelect.computing") : t("engineSelect.generate")}
+            {isPending ? tr("engineSelect.computing") : tr("engineSelect.generate")}
           </button>
         </div>
       </div>
