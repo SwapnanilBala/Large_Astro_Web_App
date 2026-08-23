@@ -13,14 +13,40 @@
 
 :root {
   /* The eleven tokens app/m/**.module.css actually reads. Values copied from
-     globals.css so the two trees stay visually identical. */
+     globals.css so the two trees stay visually identical — with one deliberate
+     exception, noted on --text-tertiary below. */
   --bg-deep: #0a0a0f;
   --bg-surface: #12121a;
   --surface: rgba(255, 243, 210, 0.03);
   --surface-strong: rgba(255, 243, 210, 0.05);
   --text-primary: #f5f0e6;
   --text-secondary: #a8a090;
-  --text-tertiary: #6b6560;
+  /*
+   * The one value that does not match globals.css, which has #6b6560.
+   *
+   * That measured 2.52:1 against the lightest surface in this sheet and 3.44:1
+   * against the page itself — under the 4.5:1 AA floor everywhere it was used,
+   * and it was used for twelve pieces of real 11-13px copy: field hints, the
+   * geocoding status line, the "add these to continue" prompt, input
+   * placeholders, and most of the labelling on the results page. None of that
+   * is decorative or disabled, so none of it is exempt.
+   *
+   * #9a918a clears 4.70:1 against the lightest surface here and 6.41:1 against
+   * the page. lib/__tests__/mobile-contrast.test.ts recomputes this from the
+   * declarations below, so a surface lightened later fails the build rather
+   * than quietly dragging the text under the floor again.
+   *
+   * What it costs: on a near-black page there is very little room left below
+   * --text-secondary once a tone has to clear AA, so these two now differ by
+   * about a fifth in luminance where they used to differ by nearly three
+   * times. Lightness alone no longer does much de-emphasis in this tree — for
+   * a third tier that genuinely recedes, reach for size, weight or caps as
+   * well, the way app/m/engine-select does.
+   *
+   * The desktop tree has the same #6b6560 against its own surfaces and has not
+   * been audited.
+   */
+  --text-tertiary: #9a918a;
   --accent-gold: #d4a574;
   --border-soft: rgba(212, 165, 116, 0.12);
   --border-medium: rgba(212, 165, 116, 0.2);

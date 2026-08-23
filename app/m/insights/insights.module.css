@@ -19,7 +19,7 @@
 
 .factLabel {
   font-size: 0.75rem;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .factValue {
@@ -71,7 +71,7 @@
 
 .sectionSubtitle {
   font-size: 0.8125rem;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .chevron {
@@ -193,7 +193,7 @@
 .rarity {
   font-size: 0.6875rem;
   letter-spacing: 0.02em;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .ruleInsight {
@@ -232,7 +232,7 @@
   border-top: 1px solid var(--border-subtle, rgba(212, 165, 116, 0.12));
   font: inherit;
   font-size: 0.8125rem;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
   text-align: left;
   cursor: pointer;
 }
@@ -248,7 +248,7 @@
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .claims {
@@ -266,7 +266,7 @@
 
 .claimLabel {
   margin: 0;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .claimLabel::after {
@@ -283,14 +283,14 @@
   width: 100%;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .legend {
   margin: 0.6rem 0 0;
   font-size: 0.75rem;
   line-height: 1.5;
-  color: var(--text-tertiary, #6b6560);
+  color: var(--text-tertiary, #9a918a);
 }
 
 .summary {
