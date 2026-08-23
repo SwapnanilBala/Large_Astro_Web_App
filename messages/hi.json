@@ -107,6 +107,8 @@
     "continueToBirthplace": "जन्म स्थान पर आगे बढ़ें",
     "continueToLocation": "स्थान पर जारी रखें",
     "cta": "मेरा भविष्य प्रकट करें",
+    "memberLogin": "लॉग इन",
+    "memberLoginAria": "इस डिवाइस पर सहेजी गई प्रोफ़ाइल में लॉग इन करें",
     "actionHint": "चार्ट बनाने के लिए सभी फील्ड पूरे करें",
     "actionHintMissing": "Add {fields} to continue.",
     "trustMicrocopy": "एन्क्रिप्टेड · कभी साझा नहीं · ~60 सेकंड",

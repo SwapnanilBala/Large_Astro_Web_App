@@ -44,6 +44,19 @@ import styles from "./mobile.module.css";
 
 const STORAGE_PREFIX = "astro_intake_draft";
 
+/* The fields that make a draft worth keeping. Metadata the form fills in by
+   itself — the timezone guess, geocoded coordinates — does not count, or a
+   visitor who typed nothing would still leave a draft behind. Same list the
+   desktop tree persists on. */
+const DRAFT_CONTENT_FIELDS: Array<keyof ProfileQueryInput> = [
+  "name",
+  "birthDate",
+  "birthTime",
+  "country",
+  "state",
+  "city",
+];
+
 type GeocodeApiResponse = {
   found?: boolean;
   lat?: number;
@@ -97,14 +110,33 @@ export default function MobileIntake() {
     }
   }, [profileId]);
 
+  /* Which profile this session has actually written a draft for, so an empty
+     draft can tell "nothing typed yet" from "the visitor cleared the form". */
+  const persistedFor = useRef<string | null>(null);
+
   useEffect(() => {
     if (!profileId) return;
 
+    const key = profileScopedKey(STORAGE_PREFIX, profileId);
+    const hasContent = DRAFT_CONTENT_FIELDS.some((field) => draft[field].trim().length > 0);
+
+    /* This runs on mount with the untouched initial draft, before the restore
+       above has landed. Writing that unconditionally means every arrival
+       blanks the stored draft and then races the read meant to bring it back —
+       survivable in production only because the restored value is written
+       again on the next commit, and not survivable at all under the double
+       invoke React runs in development. So an empty draft is only written once
+       this profile has stored something, which is the visitor clearing it. */
+    if (!hasContent && persistedFor.current !== profileId) return;
+
     try {
-      localStorage.setItem(
-        profileScopedKey(STORAGE_PREFIX, profileId),
-        JSON.stringify({ draft, unknownTime, coarseTime })
-      );
+      if (hasContent) {
+        localStorage.setItem(key, JSON.stringify({ draft, unknownTime, coarseTime }));
+        persistedFor.current = profileId;
+      } else {
+        localStorage.removeItem(key);
+        persistedFor.current = null;
+      }
     } catch {
       /* Private mode and quota errors are non-fatal here. */
     }
@@ -595,6 +627,34 @@ export default function MobileIntake() {
 
       <div className={styles.actions}>
         <div className={styles.actionRow}>
+          {/* Step 1 is the whole of this tree's front door, and until now it
+              offered no way to reach the profile portal — a member who already
+              has charts on this device was asked to fill the form again. The
+              left slot holds that door on step 1 and Back on step 2, so the
+              row never carries three controls at 375px.
+
+              An anchor, not a button: it cannot submit the form it sits in,
+              and the draft is written to localStorage on every edit, so
+              leaving mid-entry costs nothing either way.
+
+              A bare anchor rather than next/link, which is the convention
+              everywhere else. Two reasons, both about this page specifically:
+              Link is not otherwise in /m's graph and pulls 3.3KB gzipped into
+              the one route with the least headroom, and sitting in a fixed bar
+              it would never leave the viewport, so its default prefetch would
+              fetch the login route for every visitor — including the many who
+              are here to build a first chart and will never tap this. A hard
+              navigation is the right trade for a deliberate, once-a-visit
+              action. */}
+          {step === 1 && (
+            <a
+              href="/m/login"
+              className={styles.buttonLogin}
+              aria-label={t("home.memberLoginAria")}
+            >
+              {t("home.memberLogin")}
+            </a>
+          )}
           {step === 2 && (
             <button
               type="button"

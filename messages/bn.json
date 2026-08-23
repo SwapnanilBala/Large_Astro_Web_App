@@ -107,6 +107,8 @@
     "continueToBirthplace": "জন্মস্থানে এগিয়ে যান",
     "continueToLocation": "অবস্থানে এগিয়ে যান",
     "cta": "আমার ভবিষ্যৎ উন্মোচন করুন",
+    "memberLogin": "লগ ইন",
+    "memberLoginAria": "এই ডিভাইসে সংরক্ষিত প্রোফাইলে লগ ইন করুন",
     "actionHint": "চার্ট তৈরি করতে সব ঘর পূরণ করুন",
     "actionHintMissing": "Add {fields} to continue.",
     "trustMicrocopy": "এনক্রিপ্টেড · কখনও শেয়ার নয় · ~60 সেকেন্ড",

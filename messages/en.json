@@ -112,6 +112,8 @@
     "continueToBirthplace": "Continue to birthplace",
     "continueToLocation": "Continue to location",
     "cta": "Unravel My Future",
+    "memberLogin": "Log In",
+    "memberLoginAria": "Log in to a profile saved on this device",
     "actionHint": "Complete all fields to generate your chart",
     "actionHintMissing": "Add {fields} to continue.",
     "trustMicrocopy": "Encrypted · Never shared · ~60 seconds",

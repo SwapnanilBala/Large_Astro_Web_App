@@ -107,6 +107,8 @@
     "continueToBirthplace": "Continuar con el lugar de nacimiento",
     "continueToLocation": "Continuar a la ubicación",
     "cta": "Revelar mi futuro",
+    "memberLogin": "Acceder",
+    "memberLoginAria": "Inicia sesión en un perfil guardado en este dispositivo",
     "actionHint": "Completa todos los campos para generar tu carta",
     "actionHintMissing": "Agrega {fields} para continuar.",
     "trustMicrocopy": "Cifrado · Nunca compartido · ~60 segundos",

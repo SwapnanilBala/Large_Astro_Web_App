@@ -254,6 +254,51 @@
   border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.24));
 }
 
+/*
+ * Returning-member entrance.
+ *
+ * This tree carries no navigation chrome at all, so the profile portal at
+ * /m/login had nothing pointing at it — a member with saved charts could only
+ * reach it by typing the URL. It goes in the action bar because that is the
+ * one part of this screen a thumb is already heading for.
+ *
+ * Red rather than gold on purpose. Gold is the primary path, and a second gold
+ * control beside it would read as an equal choice; the red pill is sized to
+ * its label so the primary keeps the width and the hierarchy stays obvious
+ * even while the primary is disabled and dimmed.
+ *
+ * The gradient stops at #c62f2b rather than anything brighter so the cream
+ * label clears 5:1 against the light end, not only the dark one.
+ */
+.buttonLogin {
+  /* Sized to its label, but never past 45% of the row: a locale with a longer
+     word for this must not leave the primary action the smaller of the two.
+     Past that cap the label wraps inside the pill rather than being clipped,
+     and min-height keeps the 44px touch floor either way. */
+  flex: 0 0 auto;
+  max-width: 45%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.05rem;
+  min-height: 3.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+  text-decoration: none;
+  color: #fff4ef;
+  background: linear-gradient(100deg, #a4141f, #c62f2b);
+  border-radius: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.22);
+}
+
+/* The shell clears the tap-highlight rectangle globally, so a control with no
+   :active state of its own feels dead under a thumb. */
+.buttonLogin:active {
+  filter: brightness(0.9);
+}
+
 .actionHint {
   margin: 0;
   font-size: 0.8125rem;
