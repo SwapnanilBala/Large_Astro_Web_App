@@ -215,10 +215,14 @@
   border-color: rgba(108, 225, 212, 0.45);
 }
 
+/* Buttons on this page settle on the outline idiom the file already used for
+   .questionDot and .coordsToggleWrapper. The rings replaced here were
+   box-shadow at 0.16-0.18 alpha with `outline: none` on top, which is a
+   focus state you have to look for to find. */
 .birthHistoryToggle:focus-visible {
   border-color: rgba(242, 194, 108, 0.72);
-  box-shadow: 0 0 0 3px rgba(242, 194, 108, 0.16);
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .birthHistoryToggle svg {
@@ -283,8 +287,8 @@
 
 .birthHistoryItem:focus-visible {
   border-color: rgba(242, 194, 108, 0.72);
-  box-shadow: 0 0 0 3px rgba(242, 194, 108, 0.16);
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .birthHistoryName {
@@ -456,7 +460,7 @@
 }
 
 .coordsToggleWrapper:focus-visible {
-  outline: 2px solid rgba(242, 194, 108, 0.72);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
 
@@ -1117,6 +1121,19 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.42) !important;
 }
 
+/* globals.css zeroes every transition-duration under reduced motion, so the
+   lift above stops animating — but it still applies, as an instant 3px jump
+   under the pointer. Nothing in the hover state needs the displacement to be
+   legible; the shadow change carries it.
+
+   Must stay below that rule: same specificity, both !important, so this only
+   wins on source order. */
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction :global(button:hover) > div:first-child {
+    transform: none !important;
+  }
+}
+
 .primaryAction :global(button:disabled) > div:first-child {
   background:
     linear-gradient(135deg, rgba(139, 143, 163, 0.44), rgba(74, 81, 96, 0.42)) !important;
@@ -1288,11 +1305,11 @@
 }
 
 .approxTimeOption:focus-visible {
-  outline: none;
   border-color: var(--accent-gold);
-  box-shadow:
-    0 0 0 3px rgba(212, 165, 116, 0.18),
-    0 12px 28px rgba(0, 0, 0, 0.24);
+  /* Keeps its lift shadow; only the 0.18-alpha ring is replaced. */
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.24);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .approxTimeOptionSelected {
@@ -1480,7 +1497,15 @@
 .backButton:focus-visible {
   border-color: rgba(232, 200, 154, 0.56);
   background: rgba(232, 200, 154, 0.1);
-  outline: none;
+}
+
+/* Focus gets a mark of its own. The rule above is shared with :hover, so the
+   keyboard state was already indistinguishable from the pointer state, and
+   the `outline: none` that used to sit in it removed the one thing that could
+   have told them apart. */
+.backButton:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .intakeFooter {
@@ -2065,7 +2090,7 @@
 }
 
 .questionDot:focus-visible {
-  outline: 2px solid rgba(232, 200, 154, 0.78);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 4px;
   border-radius: 4px;
 }

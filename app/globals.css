@@ -123,6 +123,10 @@
   --btn-text: #0A0A0F;
   --field-shadow: 0 2px 10px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.04);
   --field-glow: 0 0 0 3px rgba(123, 107, 168, 0.28);
+  /* Buttons focus with an outline in this colour rather than --field-glow.
+     7.7:1 against the page, and it survives forced-colors where a shadow
+     does not. Matches the ring .questionDot already uses. */
+  --focus-ring: rgba(232, 200, 154, 0.78);
   --field-glow-warm: 0 0 0 3px rgba(212, 165, 116, 0.24);
   --font-mobile-body: 1rem;
   --font-mobile-label: 0.875rem;
@@ -751,7 +755,25 @@ button.btn-ghost::after,
 
 input:focus-visible,
 select:focus-visible,
-textarea:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow: var(--field-glow);
+}
+
+/* Buttons focus with a real outline; only fields keep the glow.
+ *
+ * --field-glow is a 3px ring at 28% alpha of a muted purple. Around a dark
+ * input that reads, and the field changes its border colour on focus as well,
+ * so the ring is not carrying the state alone. Around the intake CTA — a
+ * filled gold gradient that changes nothing else on focus — it was the whole
+ * indicator, and close to invisible.
+ *
+ * `outline` rather than another box-shadow for two reasons: forced-colors
+ * mode drops box-shadow entirely and keeps outlines, and an outline is not
+ * clipped by the overflow:hidden that .premiumButton needs for its corners.
+ *
+ * This is the treatment .questionDot and .coordsToggleWrapper already use.
+ * The file had both idioms; this settles it on the one that works. */
 button:focus-visible,
 .ghost-link:focus-visible,
 .recalculate-btn:focus-visible,
@@ -761,8 +783,44 @@ button:focus-visible,
 .lang-option:focus-visible,
 .lang-toggle:focus-visible,
 .theme-toggle-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--field-glow);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* Forced-colors (Windows High Contrast) replaces author colours and drops
+ * background-image, box-shadow and filter. Every button here is drawn with
+ * some combination of exactly those, so without this they flatten into
+ * unmarked text: no edge, no focus ring, and no way to tell a disabled one
+ * from a live one.
+ *
+ * Everything below is inside the media query, so it is inert until the mode
+ * is on. It could not be verified in this browser — the mode is an OS
+ * setting — so it is written to the system-colour contract rather than to
+ * an observed rendering. */
+@media (forced-colors: active) {
+  button {
+    border: 1px solid ButtonBorder;
+  }
+
+  button:focus-visible {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  button:disabled {
+    color: GrayText;
+    border-color: GrayText;
+    /* The dimming this app does with opacity is invisible here; GrayText is
+       how the mode itself says "disabled". */
+    opacity: 1;
+  }
+
+  /* Decorative only — the ripple and the shimmer-halo carry no meaning and
+     forced-colors turns them into opaque plates over the label. */
+  button::before,
+  button::after {
+    display: none;
+  }
 }
 
 .metrics-grid {
