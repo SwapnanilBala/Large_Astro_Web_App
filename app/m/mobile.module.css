@@ -239,9 +239,15 @@
 /* A solid gold fill at 45% opacity over a near-black page renders as brown
    sludge — and it was the primary action on the first screen anyone sees. A
    disabled control should read as inert, not as a dimmed copy of the live one,
-   so it drops to a neutral surface with dimmed gold text. */
+   so it drops to a neutral surface with dimmed gold text.
+
+   The label alpha was 0.5, which is 2.89:1 on that surface. The neutral fill
+   is what says "inert" here — it is a different treatment from the live
+   button, not a fainter one — so the text alpha was carrying a signal the
+   fill already carries, at the cost of the only words on the control. 0.8
+   gives 5.29:1 and the state still reads at a glance. */
 .button:disabled {
-  color: rgba(212, 165, 116, 0.5);
+  color: rgba(212, 165, 116, 0.8);
   background: rgba(255, 243, 210, 0.05);
   box-shadow: inset 0 0 0 1px rgba(212, 165, 116, 0.14);
 }

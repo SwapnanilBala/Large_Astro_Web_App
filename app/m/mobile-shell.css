@@ -55,6 +55,14 @@
      border scale is soft < subtle < medium rather than having a hole in it. */
   --border-subtle: rgba(212, 165, 116, 0.16);
 
+  /* Keyboard focus, for the whole tree. The value is the one /m/login already
+     used; it is a token now because the rest of the tree had no focus styling
+     at all and needed the same ring, not a second opinion. Teal rather than
+     the gold accent so the ring never sits on a fill close to its own colour:
+     it measures 3.94:1 on the page and 3.89:1 on the action bar, against the
+     3:1 WCAG 2.4.11 asks of a focus indicator. */
+  --focus-ring: rgba(88, 190, 175, 0.62);
+
   /*
    * Lit surfaces.
    *
@@ -175,6 +183,26 @@ button {
 }
 
 /*
+ * Keyboard focus, once, for every control in the tree.
+ *
+ * /m/login styled its own controls and nothing else did, so the intake CTA,
+ * the login pill, the method chips, the varga cards and the results
+ * disclosures had no focus indicator of any kind. That is not a phone
+ * concern that can be waved off — an external keyboard, a switch, or
+ * full-keyboard-access on iOS all navigate this tree, and the rule above
+ * removes the tap highlight, so there was nothing left to show position.
+ *
+ * globals.css does the same job on the desktop tree and does not load here;
+ * this is the /m counterpart, not a duplicate that could drift out of sync
+ * with one.
+ */
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/*
  * One entrance, for the page as a whole.
  *
  * Not a staggered cascade over every card: this tree has no animation library
@@ -209,5 +237,39 @@ button {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/*
+ * Forced colours (Windows High Contrast, and the Android/Chrome equivalent).
+ *
+ * The mode discards background-image, box-shadow and filter and replaces
+ * author colours with a system palette. Every control in this tree is drawn
+ * with exactly those: the primary action is a gold gradient with no border,
+ * the ghost and chip variants are a 1px rim in a colour that gets replaced,
+ * and the disabled state is a tinted surface. Without this they all flatten
+ * into unmarked text.
+ *
+ * Inert unless the mode is on. Written to the system-colour contract rather
+ * than to an observed rendering — the mode is an OS setting and could not be
+ * exercised here, so this is unverified.
+ */
+@media (forced-colors: active) {
+  a,
+  button {
+    border: 1px solid ButtonBorder;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+
+  button:disabled {
+    /* GrayText is how the mode itself says "disabled"; the tinted surface
+       this tree uses for it is not painted at all here. */
+    color: GrayText;
+    border-color: GrayText;
   }
 }

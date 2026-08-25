@@ -663,9 +663,13 @@
   width: 100%;
 }
 
-:where(.back, .pick, .iconBtn, .addRow, .sheetClose, .sheetAction, .primaryAction, .secondaryAction, .deleteAction):focus-visible,
+/* The buttons this used to list are covered by the a/button rule in
+   mobile-shell.css now, at the same width, offset and colour — that value is
+   --focus-ring, and it was taken from here. Only the input still needs naming:
+   the shell rule deliberately does not cover inputs, which carry their own
+   focus treatment. */
 .sheetInput:focus-visible {
-  outline: 3px solid rgba(88, 190, 175, 0.62);
+  outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
