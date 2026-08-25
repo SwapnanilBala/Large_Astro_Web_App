@@ -171,6 +171,14 @@
 
 /* Calendar popup styling */
 .calendarPopup {
+  /* Two caps, whichever is smaller. --dp-available-height is published by the
+     `size` middleware in PremiumDatePicker.tsx; the viewport term is a floor
+     under it, because that property is an inline style on a reused element and
+     survives from one open to the next — it read 567px on a 420px-tall window
+     until size ran again. The viewport cannot be stale. */
+  max-height: min(var(--dp-available-height, 100vh), calc(100vh - 1.5rem));
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background: var(--bg-elevated);
   border: 1px solid var(--border-medium);
   border-radius: var(--radius-lg);

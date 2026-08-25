@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import DatePicker from "react-datepicker";
+import { shift, size } from "@floating-ui/react";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   normalizeBirthDate,
@@ -10,6 +11,51 @@ import {
   type IntakeSuggestion,
 } from "@/lib/intake-normalize";
 import styles from "./PremiumDatePicker.module.css";
+
+/*
+ * Keep the calendar on screen.
+ *
+ * react-datepicker installs [flip, offset, arrow] and nothing else, so a
+ * placement that does not fit is flipped but never nudged back or resized. The
+ * calendar is 409px tall and the field it hangs off sits mid-page, so on a
+ * 700px-tall window it flipped above the input and rendered at top:-70 — the
+ * month and year controls off the top of the screen with no way to reach them.
+ *
+ * `shift` pushes it back inside the viewport; `size` then caps its height to
+ * whatever room is actually left, published as a custom property that
+ * .calendarPopup turns into a max-height. The 220px floor is there so a very
+ * short window gets a scrollable calendar rather than a sliver.
+ *
+ * Appended after the library's own middleware, which is the order Floating UI
+ * wants: flip decides, shift corrects, size measures what is left. It lands
+ * after `arrow` too, which would matter if an arrow were rendered — this
+ * component does not pass showArrow.
+ *
+ * Declared once at module scope: these are recreated on every render if
+ * inlined, and a new middleware array each render restarts the position
+ * calculation.
+ */
+const POPPER_MODIFIERS = [
+  /*
+   * Horizontal only, which is `shift`'s default for a top/bottom placement.
+   * crossAxis:true was tried and reverted: it does keep the calendar out of
+   * the viewport edge, but it does so by sliding it along the axis that points
+   * at the primary action, so the calendar ended up over the Continue button
+   * with the button punching back through it. The vertical fit is `size`'s job
+   * below — shrink the calendar to the room available rather than move it
+   * somewhere there is more.
+   */
+  shift({ padding: 8 }),
+  size({
+    padding: 8,
+    apply({ availableHeight, elements }) {
+      elements.floating.style.setProperty(
+        "--dp-available-height",
+        `${Math.max(Math.round(availableHeight), 220)}px`
+      );
+    },
+  }),
+];
 
 export function parseLocalIsoDate(value: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
@@ -397,6 +443,7 @@ export default function PremiumDatePicker({
           className={inputClasses}
           calendarClassName={styles.calendarPopup}
           popperClassName={styles.popper}
+          popperModifiers={POPPER_MODIFIERS}
           wrapperClassName={styles.datePickerWrapperInner}
         />
         <span
