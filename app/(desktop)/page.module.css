@@ -1070,44 +1070,31 @@
   font-weight: 700;
 }
 
+/* This block and the one near the end of the file both style the intake CTA,
+   and neither one wins outright: the declarations below carry !important, the
+   later block does not, so what renders is a hybrid of the two. Everything
+   that was losing cleanly has been removed from here, which is why what is
+   left looks lopsided — these are exactly the declarations that still beat
+   the later block, and deleting any of them changes the button.
+
+   Gone from here: the conic-gradient ring and its hover and disabled states
+   (the later block sets display:none on ::before to keep globals.css's button
+   ripple off this button, which hid the ring too), min-height, border-radius
+   and filter on the button, and text-transform on the fill — all overridden
+   there at equal specificity with no !important on either side, so they never
+   applied in any state or viewport.
+
+   Untangling the two blocks into one is worth doing, but it changes pixels
+   and this commit does not. */
 .primaryAction {
-  max-width: 860px;
-  margin: clamp(1.75rem, 2.6vw, 2.75rem) auto 0;
   position: relative;
 }
 
 .primaryAction :global(button) {
-  min-height: 4.35rem;
-  border-radius: 22px;
   font-size: clamp(1.08rem, 0.65vw + 0.98rem, 1.32rem) !important;
-  filter:
-    drop-shadow(0 18px 34px rgba(212, 165, 116, 0.18))
-    drop-shadow(0 0 28px rgba(108, 225, 212, 0.10));
-}
-
-.primaryAction :global(button)::before {
-  content: "";
-  position: absolute;
-  inset: -2px;
-  border-radius: 24px;
-  background: conic-gradient(
-    from 160deg,
-    rgba(248, 227, 168, 0.86),
-    rgba(108, 225, 212, 0.55),
-    rgba(140, 100, 220, 0.42),
-    rgba(248, 227, 168, 0.86)
-  );
-  opacity: 0.74;
-  transition: opacity 0.25s ease, filter 0.25s ease;
-}
-
-.primaryAction :global(button:hover)::before {
-  opacity: 1;
-  filter: blur(1px);
 }
 
 .primaryAction :global(button) > div:first-child {
-  min-height: 4.35rem;
   border-radius: 22px !important;
   background:
     radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.24), transparent 30%),
@@ -1119,7 +1106,6 @@
     inset 0 -10px 22px rgba(70, 52, 20, 0.12) !important;
   font-weight: 900 !important;
   letter-spacing: 0.04em !important;
-  text-transform: uppercase;
 }
 
 .primaryAction :global(button:hover) > div:first-child {
@@ -1131,16 +1117,10 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.42) !important;
 }
 
-.primaryAction :global(button:disabled)::before {
-  opacity: 0.28;
-  filter: grayscale(0.55);
-}
-
 .primaryAction :global(button:disabled) > div:first-child {
   background:
     linear-gradient(135deg, rgba(139, 143, 163, 0.44), rgba(74, 81, 96, 0.42)) !important;
   color: rgba(245, 240, 230, 0.70) !important;
-  text-transform: none;
 }
 
 @media (max-width: 1320px) {
@@ -2186,9 +2166,13 @@
   transition: transform 150ms ease, opacity 150ms ease, border-color 150ms ease;
 }
 
+/* globals.css gives every button a ::before ripple and a ::after shimmer-halo.
+   This button brings its own fill and shadow, and the two layers stacked read
+   as a smear on hover, so the intake CTA opts out of both. Nothing in this
+   file generates those pseudo-elements — removing this rule does not delete
+   an effect, it turns the global one back on. */
 .primaryAction :global(button)::before,
-.primaryAction :global(button)::after,
-.primaryAction :global(button) > div:not(:first-child) {
+.primaryAction :global(button)::after {
   display: none;
 }
 

@@ -47,8 +47,6 @@ export default function PremiumButton({
           <span className={styles.buttonText}>{children}</span>
         )}
       </div>
-      <div className={styles.buttonGlow} />
-      <div className={styles.buttonShine} />
     </button>
   );
 }

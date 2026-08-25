@@ -9,6 +9,9 @@
   transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
   transition-duration: 0.3s;
   transition-timing-function: var(--transition-smooth);
+  /* Kept after the shine sweep it used to clip was removed: .buttonContent is
+     given a larger radius than this button by the intake page, so this is what
+     actually rounds the visible corners. Dropping it squares them off. */
   overflow: hidden;
 }
 
@@ -129,68 +132,4 @@
 .loadingText {
   position: relative;
   z-index: 1;
-}
-
-/* Glow effect */
-.buttonGlow {
-  position: absolute;
-  inset: -2px;
-  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(212, 165, 116, 0.3), transparent 60%);
-  opacity: 0;
-  transition: opacity var(--transition-base), filter var(--transition-base);
-  filter: none;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.premiumButton:hover .buttonGlow {
-  opacity: 1;
-  filter: blur(12px);
-}
-
-/* Shine effect */
-.buttonShine {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.2),
-    transparent
-  );
-  transition: left var(--transition-slow);
-  z-index: 3;
-  pointer-events: none;
-}
-
-.premiumButton:hover .buttonShine {
-  left: 100%;
-}
-
-/* Ripple effect */
-@keyframes ripple {
-  to {
-    transform: scale(4);
-    opacity: 0;
-  }
-}
-
-.premiumButton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
-  opacity: 0;
-  transform: scale(0);
-  transition: opacity var(--transition-base), transform var(--transition-base);
-  pointer-events: none;
-}
-
-.premiumButton:active::after {
-  opacity: 1;
-  transform: scale(2);
-  transition: 0s;
 }
