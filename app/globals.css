@@ -1994,7 +1994,10 @@ label:has(.autocomplete-wrapper.is-open) {
 .forecast-filter:hover,
 .forecast-filter--active {
   border-color: rgba(108, 225, 212, 0.45);
-  background: rgba(108, 225, 212, 0.1);
+  /* Opaque for the same reason as the varshaphal chips: a translucent tint of
+     the text's own hue over a card that carries a gradient measured 4.35:1 at
+     its worst point. 5.14:1 fixed. */
+  background: #1b2422;
   color: var(--accent-teal);
 }
 

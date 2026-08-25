@@ -379,7 +379,13 @@
   margin-top: 0.9rem;
   border: 1px solid rgba(108, 225, 212, 0.2);
   border-radius: 999px;
-  background: rgba(108, 225, 212, 0.07);
+  /* Opaque, not a tint. A translucent wash of #6ce1d4 lightens the surface
+     toward the very hue the label is written in, and what it lightens is
+     whatever the card underneath happens to be painting at that spot — a
+     gradient here, so the contrast varied along the card and bottomed out at
+     3.41:1. An opaque chip makes it a fixed pair: 5.14:1, the same reading
+     --accent-teal gets on a plain card. */
+  background: #1b2422;
   color: var(--accent-teal);
   font-size: 0.76rem;
   font-weight: 800;
@@ -521,7 +527,8 @@
   position: absolute;
   top: 0.75rem;
   right: 0.8rem;
-  color: rgba(200, 155, 60, 0.76);
+  /* 0.76 measured 4.18:1 on this card. */
+  color: rgba(200, 155, 60, 0.9);
   font-size: 0.72rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -708,7 +715,9 @@
 }
 
 .windowCardWatch span {
-  color: var(--accent-coral);
+  /* --accent-coral itself is 3.94:1 on this card; lightened here rather than
+     moved at the token, which reads fine on the fills it is used for. */
+  color: #dd8248;
 }
 
 .weatherPanel {
@@ -774,18 +783,23 @@
   text-transform: uppercase;
 }
 
+/* These three are one control in three hues, so they move together even
+   though only the teal one failed: each was a 0.12-0.13 tint of its own text
+   colour, which is the worst direction a backdrop can move, over a card that
+   is not a flat colour. Opaque surfaces make all three exact — teal 5.14:1,
+   gold 7.45:1, coral 4.81:1 — and keep the set looking like a set. */
 .weatherTrendRising {
-  background: rgba(108, 225, 212, 0.13);
+  background: #1b2422;
   color: var(--accent-teal);
 }
 
 .weatherTrendSteady {
-  background: rgba(200, 155, 60, 0.13);
+  background: #231e12;
   color: var(--accent-gold);
 }
 
 .weatherTrendReview {
-  background: rgba(240, 112, 104, 0.12);
+  background: #201410;
   color: var(--accent-coral);
 }
 
