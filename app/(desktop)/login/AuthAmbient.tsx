@@ -9,6 +9,7 @@
    ───────────────────────────────────────────────────────── */
 
 import { useMemo } from "react";
+import { svgCoord } from "@/lib/svg-precision";
 import styles from "./AuthAmbient.module.css";
 
 const CX = 300;
@@ -20,9 +21,17 @@ const R_INNER = 60;
 const R_TICK_OUTER = 290;
 const R_TICK_INNER = 278;
 
+/* Rounded before it reaches an attribute: this component renders on the server
+   as well as the client, and Math.cos/Math.sin can disagree in the last place
+   between the two. See lib/svg-precision.ts — the mismatch was failing
+   hydration on the landing page, intermittently, and taking the intake form's
+   event handlers down with it. */
 function polar(cx: number, cy: number, r: number, angleDeg: number) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  return {
+    x: svgCoord(cx + r * Math.cos(rad)),
+    y: svgCoord(cy + r * Math.sin(rad)),
+  };
 }
 
 export default function AuthAmbient() {
