@@ -331,7 +331,9 @@
   margin-top: 0.2rem;
   font-size: 0.55rem;
   font-weight: 700;
-  color: rgba(234, 237, 243, 0.48);
+  /* 8.8px is below the large-text threshold however bold it is, so this is
+     held to 4.5:1. 0.48 measured 4.42:1 on the preview's own backdrop. */
+  color: rgba(234, 237, 243, 0.6);
   text-transform: uppercase;
 }
 

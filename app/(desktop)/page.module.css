@@ -2020,7 +2020,12 @@
   gap: 0.5rem;
   width: 100%;
   padding: 0;
-  color: rgba(231, 230, 236, 0.45);
+  /* The reachable-but-unvisited tier. 0.45 measured 3.84:1 against the card
+     this rail sits on — which is #1c181f, not the page — leaving the live
+     state less readable than the disabled one below. 0.62 gives 6.10:1 and
+     keeps the four tiers ordered: current 13.32, answered 7.81, this 6.10,
+     disabled 5.09. */
+  color: rgba(231, 230, 236, 0.62);
   font-size: 0.76rem;
   font-weight: 600;
   letter-spacing: 0.01em;
