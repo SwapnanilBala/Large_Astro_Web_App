@@ -35,6 +35,50 @@ import styles from "./PremiumDatePicker.module.css";
  * inlined, and a new middleware array each render restarts the position
  * calculation.
  */
+/*
+ * Opens upward, over the form's own content, because the step's primary action
+ * sits directly below the field.
+ *
+ * react-datepicker defaults to bottom-start and only flips when that does not
+ * fit, so on a roomy window the calendar had 499px of space above it, took the
+ * 421px below instead, and landed on the Continue button — a 280x74 overlap.
+ * Ranking the button above it, which is what I did first, only decides which
+ * one wins the pixels; both are still there, and the button reads as punched
+ * through the calendar. Above the field there is nothing but the question
+ * heading, which the calendar is welcome to cover while it is open.
+ *
+ * `flip` still sends it back down if there is genuinely no room above, and
+ * `size` shrinks it either way, so this is a preference rather than a lock.
+ */
+/*
+ * Fixed rather than absolute, so overflow detection is against the viewport.
+ *
+ * .professionalIntake on the intake route sets `overflow: clip visible`. With
+ * overflow-y visible that ancestor does not clip vertically, so Floating UI's
+ * clipping rect ran past the top of the screen: with the field scrolled to
+ * y=0 it still reported 506px of room above, `flip` saw no reason to flip and
+ * `size` no reason to shrink, and the calendar rendered at top:-390 — wholly
+ * off screen. Positioning fixed makes the containing block the viewport, which
+ * is the boundary the measurements should have been using all along.
+ *
+ * autoUpdate is already wired up by react-datepicker's whileElementsMounted,
+ * so the popup still tracks the field on scroll.
+ */
+const POPPER_PROPS = { strategy: "fixed" } as const;
+
+/* react-datepicker's own offset(10) between the field and the popup. */
+const POPUP_OFFSET = 10;
+
+/*
+ * Stand-in height for the room check below, used only when the popup cannot be
+ * measured yet. onCalendarOpen fires before the popup has been laid out often
+ * enough to matter — it happened on the first open at 420px and not at 600px,
+ * which is the kind of difference that should not decide whether a fix works.
+ * Measuring is still preferred; this is the floor under it, and it only has to
+ * be close: asking for slightly too much room costs a few pixels of scroll.
+ */
+const POPUP_FALLBACK_HEIGHT = 372;
+
 const POPPER_MODIFIERS = [
   /*
    * Horizontal only, which is `shift`'s default for a top/bottom placement.
@@ -305,6 +349,46 @@ export default function PremiumDatePicker({
    * This reads typedTextRef rather than input.value, so it does not race
    * react-datepicker's own habit of clearing the field on an unparseable
    * blur — by then our copy of what the user typed is already recorded. */
+  /*
+   * Scroll the field down far enough that the calendar can open above it.
+   *
+   * top-start keeps the calendar clear of the step's Continue button, which
+   * always sits below the field — but only while there is room above. Scrolled
+   * to where the field is near the top of a short window there is not, `flip`
+   * sends the calendar down, and it lands on the button again: the exact
+   * collision this placement exists to avoid.
+   *
+   * So make the room instead of hoping for it. Scrolling the page up moves the
+   * field down the viewport, which is free here because the shortfall only
+   * happens when the page is already scrolled. Capped at scrollY so it never
+   * asks for more than exists, and by the minimum needed so a field that
+   * already has room is left alone.
+   *
+   * The height is measured off the calendar where possible, falling back to a
+   * constant when this fires before the popup is laid out.
+   */
+  const ensureRoomAbove = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const input = calendarRef.current?.querySelector("input");
+    const popup = calendarRef.current?.querySelector<HTMLElement>(".react-datepicker");
+    if (!input) return;
+    const measured = popup?.offsetHeight ?? 0;
+    const needed = (measured > 0 ? measured : POPUP_FALLBACK_HEIGHT) + POPUP_OFFSET;
+    const rect = input.getBoundingClientRect();
+
+    /* Never push the field past the bottom of the screen chasing room above it.
+       The browser scrolls a focused element back into view, so asking for more
+       than this starts a tug of war it wins — which is what happened at 420px
+       tall, where the popup and the field together are taller than the window
+       and no amount of scrolling can seat both. Take what is available. */
+    const highestUseful = Math.max(0, window.innerHeight - rect.height - POPUP_OFFSET);
+    const target = Math.min(needed, highestUseful);
+
+    const shortfall = target - rect.top;
+    if (shortfall <= 0) return;
+    window.scrollBy({ top: -Math.min(shortfall, window.scrollY), behavior: "auto" });
+  }, []);
+
   const commitRef = useRef(commitTypedText);
 
   useEffect(() => {
@@ -421,6 +505,7 @@ export default function PremiumDatePicker({
           onChangeRaw={handleRawChange}
           onFocus={handleFocus}
           onBlur={handleBlur}
+          onCalendarOpen={ensureRoomAbove}
           onCalendarClose={handleCalendarClose}
           placeholderText={placeholder}
           disabled={disabled}
@@ -443,6 +528,8 @@ export default function PremiumDatePicker({
           className={inputClasses}
           calendarClassName={styles.calendarPopup}
           popperClassName={styles.popper}
+          popperPlacement="top-start"
+          popperProps={POPPER_PROPS}
           popperModifiers={POPPER_MODIFIERS}
           wrapperClassName={styles.datePickerWrapperInner}
         />
