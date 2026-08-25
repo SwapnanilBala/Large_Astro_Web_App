@@ -1092,6 +1092,23 @@
    and this commit does not. */
 .primaryAction {
   position: relative;
+  /*
+   * The step's action row outranks anything a field can open.
+   *
+   * Every overlay on this form — the calendar, the place suggestions, the
+   * custom selects — renders inside .formSectionCard, which sets
+   * isolation:isolate. That caps their z-index inside the card no matter how
+   * large it is, which is why a 1 here beats the calendar's 9999: this row is
+   * the card's sibling, not its descendant, so the comparison is between the
+   * two of them and not between the numbers.
+   *
+   * Before this the row won only by source order, which is not a guarantee —
+   * giving the card a z-index, or moving this above it in the markup, would
+   * silently put a 409px calendar over the primary action with nothing in the
+   * diff to suggest it. One declaration, and it holds for every step, since
+   * they all render through this row.
+   */
+  z-index: 1;
 }
 
 .primaryAction :global(button) {

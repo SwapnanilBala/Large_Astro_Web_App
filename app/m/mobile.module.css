@@ -210,6 +210,12 @@
   left: 0;
   right: 0;
   bottom: 0;
+  /* Outranks anything a field opens. The bar is fixed and the suggestion list
+     is absolute, so without a stated order the two are settled by whichever
+     happens to come later in the markup — which put a list of place names
+     over the only button on the screen. See --layer-overlay in
+     mobile-shell.css, which the list sits on. */
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;

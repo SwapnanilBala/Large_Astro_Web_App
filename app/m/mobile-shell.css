@@ -63,6 +63,11 @@
      3:1 WCAG 2.4.11 asks of a focus indicator. */
   --focus-ring: rgba(88, 190, 175, 0.62);
 
+  /* One rank for anything a field opens over the page. The action bar sits
+     above it at 20 so the primary control is never the thing that gets
+     covered. */
+  --layer-overlay: 10;
+
   /*
    * Lit surfaces.
    *
@@ -200,6 +205,67 @@ a:focus-visible,
 button:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
+}
+
+/*
+ * Place suggestions.
+ *
+ * AutocompleteInput is shared with the desktop tree, but every style it has
+ * lives in globals.css, which this tree does not load. So the country and city
+ * lists arrived here as a bare <ul> in normal flow: no surface, no elevation,
+ * no height cap, shoving the form down a row at a time as you typed, and
+ * colliding with the fixed action bar at the bottom of the screen.
+ *
+ * An overlay with a stated rank instead — below the action bar, above the
+ * form. The height cap matters more here than on desktop: ten results on a
+ * 375px screen is most of the viewport, and the bar takes the bottom of it.
+ */
+.autocomplete-wrapper {
+  position: relative;
+}
+
+.autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  right: 0;
+  z-index: var(--layer-overlay);
+  max-height: min(42vh, 16rem);
+  margin: 0;
+  padding: 0.25rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: 12px;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+}
+
+.autocomplete-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding: 0.65rem 0.7rem;
+  border-radius: 8px;
+  cursor: pointer;
+  /* 44px floor, same as every other control in this tree. */
+  min-height: 44px;
+  justify-content: center;
+}
+
+.autocomplete-item.active {
+  background: var(--surface-strong);
+}
+
+.autocomplete-item-name {
+  color: var(--text-primary);
+  font-size: var(--font-mobile-body);
+}
+
+.autocomplete-item-detail {
+  color: var(--text-secondary);
+  font-size: var(--font-mobile-meta);
 }
 
 /*
