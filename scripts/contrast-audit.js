@@ -24,6 +24,19 @@
  *   - background-clip:text is skipped on both sides: it is not measurable from
  *     `color`, and it is not a surface behind its siblings
  *   - the AA floor follows the large-text rule (3:1 at >=24px, or >=18.66px bold)
+ *   - disabled text is measured and reported under `inactive`, not dropped
+ *
+ * That last one used to be a `continue`. WCAG 1.4.3 exempts inactive user
+ * interface components, so skipping them is defensible for a greyed-out
+ * button nobody needs to read — but the exemption is about controls, and
+ * `:disabled` is not a reliable proxy for "nobody needs to read this". The
+ * intake step rail is four disabled buttons whose labels are the only thing
+ * telling a first-time visitor the form has four steps; they measured 1.43:1
+ * and this audit reported the page clean. So disabled text is measured like
+ * anything else and returned separately: `results` stays the list of AA
+ * violations, `inactive` is the list a human has to judge, because the
+ * question it asks — is this an inactive control, or is it content that
+ * happens to sit on one? — is not one a stylesheet can answer.
  *
  * Caveat for headless/hidden viewports: rAF does not fire, so framer-motion
  * elements freeze at whatever inline opacity they stopped on and CSS
@@ -104,6 +117,8 @@ export const CONTRAST_AUDIT = String.raw`
     return variants && variants.length ? variants : [base];
   };
 
+  const off = el => !!(el.closest('[disabled]') || (el.matches && el.matches(':disabled')));
+
   const chainOpacity = el => {
     let o = 1, n = el;
     while (n && n !== document.documentElement) { const v = Number(getComputedStyle(n).opacity); if (!isNaN(v)) o *= v; n = n.parentElement; }
@@ -120,14 +135,13 @@ export const CONTRAST_AUDIT = String.raw`
     if (cs.visibility === 'hidden' || cs.display === 'none') continue;
     const r = el.getBoundingClientRect();
     if (r.width < 2 || r.height < 2) continue;
-    if (el.closest('[disabled]') || (el.matches && el.matches(':disabled'))) continue;
     if (el.querySelector && el.querySelector('select, option, optgroup')) continue;
-    const key = (el.className||'').toString().slice(0,60) + '|' + cs.color + '|' + cs.fontSize + '|' + cs.fontWeight;
+    const key = (el.className||'').toString().slice(0,60) + '|' + cs.color + '|' + cs.fontSize + '|' + cs.fontWeight + '|' + off(el);
     if (!groups.has(key)) groups.set(key, el);
   }
 
   const label = el => (el.className||'').toString().split(/\s+/).map(c => c.split('__').pop()).join(' ').slice(0,42) || el.tagName;
-  const results = [], unmeasurable = [];
+  const results = [], inactive = [], unmeasurable = [];
   for (const [, el] of groups) {
     const cs = getComputedStyle(el);
     const bds = backdrops(el);
@@ -148,12 +162,14 @@ export const CONTRAST_AUDIT = String.raw`
       if (!worst || rr < worst.rr) worst = { rr, bd, eff };
     }
     if (worst.rr < floor) {
-      results.push({ cls: label(el), px: cs.fontSize, weight, ratio: +worst.rr.toFixed(2), floor,
-                     fg: hex(worst.eff), bg: hex(worst.bd), text: (el.textContent||'').trim().replace(/\s+/g,' ').slice(0,26) });
+      const row = { cls: label(el), px: cs.fontSize, weight, ratio: +worst.rr.toFixed(2), floor,
+                    fg: hex(worst.eff), bg: hex(worst.bd), text: (el.textContent||'').trim().replace(/\s+/g,' ').slice(0,26) };
+      (off(el) ? inactive : results).push(row);
     }
   }
   results.sort((a,b) => a.ratio - b.ratio);
-  return { url: location.pathname, checked: groups.size, failures: results.length, results, unmeasurable };
+  inactive.sort((a,b) => a.ratio - b.ratio);
+  return { url: location.pathname, checked: groups.size, failures: results.length, results, inactive, unmeasurable };
 })()
 `;
 
