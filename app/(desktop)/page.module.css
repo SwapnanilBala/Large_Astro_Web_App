@@ -2195,7 +2195,13 @@
 .primaryAction :global(button:disabled) {
   border-color: rgba(255, 255, 255, 0.08);
   box-shadow: none;
-  opacity: 0.48;
+  /* Was 0.48, which put the label at 2.39:1 over its own fill — and this is
+     the state the button is in when the page loads, so the hero control read
+     as broken rather than waiting. The greyed fill and the gold one are
+     already unmistakably different; the opacity was saying the same thing a
+     second time and taking the label with it. Same colours at full opacity
+     give 5.09:1. */
+  opacity: 1;
 }
 
 .primaryAction :global(button:disabled) > div:first-child {
@@ -2307,11 +2313,20 @@
   margin: 0;
 }
 
+/* "Quick Fill (Paste client data)" wraps to two lines at the width these
+   share; "Previous searches" does not. Same control, same weight, same top
+   edge, and they ended 54px against 41px — a ragged step across the middle
+   of the form. The floor is the two-line height so both sit on it.
+
+   A floor here rather than align-items:stretch on the row: the wrappers are
+   column flex and each holds a disclosure panel as well as its button, so
+   stretching them lets whichever panel is open set the row height and grows
+   the closed button opposite to match. */
 .smartFillToggle,
 .birthHistoryToggle {
   align-self: stretch;
   width: 100%;
-  min-height: 2.55rem;
+  min-height: 3.4rem;
   margin: 0;
   padding: 0.55rem 0.75rem;
   border: 1px solid rgba(255, 255, 255, 0.1);
