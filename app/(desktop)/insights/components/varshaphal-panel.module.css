@@ -385,7 +385,7 @@
      gradient here, so the contrast varied along the card and bottomed out at
      3.41:1. An opaque chip makes it a fixed pair: 5.14:1, the same reading
      --accent-teal gets on a plain card. */
-  background: #1b2422;
+  background: var(--chip-teal-surface);
   color: var(--accent-teal);
   font-size: 0.76rem;
   font-weight: 800;
@@ -789,17 +789,17 @@
    is not a flat colour. Opaque surfaces make all three exact — teal 5.14:1,
    gold 7.45:1, coral 4.81:1 — and keep the set looking like a set. */
 .weatherTrendRising {
-  background: #1b2422;
+  background: var(--chip-teal-surface);
   color: var(--accent-teal);
 }
 
 .weatherTrendSteady {
-  background: #231e12;
+  background: var(--chip-gold-surface);
   color: var(--accent-gold);
 }
 
 .weatherTrendReview {
-  background: #201410;
+  background: var(--chip-coral-surface);
   color: var(--accent-coral);
 }
 

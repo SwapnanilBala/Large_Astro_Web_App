@@ -1450,7 +1450,10 @@
   font-weight: 700;
   letter-spacing: 0.04rem;
   text-transform: uppercase;
-  background: rgba(100, 200, 255, 0.2);
+  /* Was a blue wash under teal text — the one chip in the divisional family
+     whose tint was not even its own hue, which is why it was the one that
+     failed. The border keeps the family's blue; the surface matches the text. */
+  background: var(--chip-teal-surface);
   color: var(--accent-aqua);
   border: 1px solid rgba(100, 200, 255, 0.35);
 }
@@ -1655,7 +1658,7 @@
 }
 
 .ashtakavarga-chip--weak {
-  background: rgba(255, 143, 126, 0.12);
+  background: var(--chip-coral-surface);
   color: var(--accent-coral);
   border: 1px solid rgba(255, 143, 126, 0.3);
 }
@@ -3311,7 +3314,7 @@
 }
 
 .shadbala-ratio-weak {
-  background: rgba(255, 143, 126, 0.15);
+  background: var(--chip-coral-surface);
   color: var(--accent-coral);
 }
 
@@ -3416,7 +3419,7 @@
 }
 
 .shadbala-label-weak {
-  background: rgba(255, 143, 126, 0.12);
+  background: var(--chip-coral-surface);
   color: var(--accent-coral);
 }
 

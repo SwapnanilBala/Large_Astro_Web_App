@@ -127,6 +127,26 @@
      7.7:1 against the page, and it survives forced-colors where a shadow
      does not. Matches the ring .questionDot already uses. */
   --focus-ring: rgba(232, 200, 154, 0.78);
+
+  /*
+   * Chip surfaces for accent text.
+   *
+   * The pattern these replace is accent text on a translucent tint of its own
+   * hue. It looks right in a mockup and fails twice over: the tint moves the
+   * backdrop toward the text in both lightness and hue, and being translucent
+   * it inherits whatever is painted underneath, so the same chip measures
+   * differently on a flat card and on a gradient one.
+   *
+   * These are opaque, so a chip is a fixed pair with its text no matter where
+   * it sits. Measured against the accent each is named for:
+   *   teal  #31A394 on #1b2422 = 5.14:1
+   *   gold  #d4a574 on #231e12 = 7.45:1
+   *   coral #c96b2a on #1c110d = 4.95:1
+   * Reach for these rather than inventing another rgba() wash.
+   */
+  --chip-teal-surface: #1b2422;
+  --chip-gold-surface: #231e12;
+  --chip-coral-surface: #1c110d;
   --field-glow-warm: 0 0 0 3px rgba(212, 165, 116, 0.24);
   --font-mobile-body: 1rem;
   --font-mobile-label: 0.875rem;
@@ -1552,19 +1572,19 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .aspect-badge--harmonious {
-  background: rgba(108, 225, 212, 0.25);
+  background: var(--chip-teal-surface);
   color: var(--accent-aqua);
   border: 1px solid rgba(108, 225, 212, 0.4);
 }
 
 .aspect-badge--tension {
-  background: rgba(255, 143, 126, 0.25);
+  background: var(--chip-coral-surface);
   color: var(--accent-coral);
   border: 1px solid rgba(255, 143, 126, 0.4);
 }
 
 .aspect-badge--union {
-  background: rgba(242, 194, 108, 0.25);
+  background: var(--chip-gold-surface);
   color: var(--accent-gold);
   border: 1px solid rgba(242, 194, 108, 0.4);
 }
@@ -1997,7 +2017,7 @@ label:has(.autocomplete-wrapper.is-open) {
   /* Opaque for the same reason as the varshaphal chips: a translucent tint of
      the text's own hue over a card that carries a gradient measured 4.35:1 at
      its worst point. 5.14:1 fixed. */
-  background: #1b2422;
+  background: var(--chip-teal-surface);
   color: var(--accent-teal);
 }
 
@@ -2071,7 +2091,7 @@ label:has(.autocomplete-wrapper.is-open) {
   width: fit-content;
   border-radius: 999px;
   border: 1px solid rgba(108, 225, 212, 0.3);
-  background: rgba(108, 225, 212, 0.12);
+  background: var(--chip-teal-surface);
   color: var(--accent-teal);
   font-size: 0.8rem;
   font-weight: 800;
