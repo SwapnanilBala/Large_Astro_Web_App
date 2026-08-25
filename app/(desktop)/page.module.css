@@ -2067,7 +2067,21 @@
 
 .questionDot:disabled {
   cursor: default;
-  color: rgba(231, 230, 236, 0.28);
+  /* opacity:1 on purpose. globals.css dims every disabled button by 0.56, and
+     that multiplier stacked on the alpha below put the steps ahead of you at
+     1.43:1 — lower than .trustMicrocopy managed before it was fixed further up
+     this file. The rail is a progress indicator built out of disabled buttons,
+     so those three labels are the only thing saying the form has four steps;
+     invisible, they read as a one-question page. One dimming mechanism,
+     carried by the colour: 0.55 gives 5.25:1, still the dimmest of the three
+     tiers behind .questionDotAnswered at 8.4:1 and .questionDotCurrent at
+     15.03:1.
+
+     scripts/contrast-audit.js does not cover this: it skips :disabled, which
+     WCAG 1.4.3 does exempt — correct for an inactive control, wrong for a
+     label whose whole job is to be read. */
+  opacity: 1;
+  color: rgba(231, 230, 236, 0.55);
 }
 
 .questionDot:focus-visible {
