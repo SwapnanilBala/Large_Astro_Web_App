@@ -8,6 +8,7 @@
   background: var(--bg-deep);
   position: relative;
   overflow-x: hidden;
+
 }
 
 :global(.site-navbar.navbar-scrolled) {

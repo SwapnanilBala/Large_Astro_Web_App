@@ -79,6 +79,13 @@ const POPUP_OFFSET = 10;
  */
 const POPUP_FALLBACK_HEIGHT = 372;
 
+/*
+ * The smallest popup worth opening above the field. Above this the calendar is
+ * short but usable and scrolls; below it, giving the space to the submit button
+ * instead is the better trade.
+ */
+const MIN_USEFUL_POPUP = 200;
+
 const POPPER_MODIFIERS = [
   /*
    * Horizontal only, which is `shift`'s default for a top/bottom placement.
@@ -92,11 +99,24 @@ const POPPER_MODIFIERS = [
   shift({ padding: 8 }),
   size({
     padding: 8,
-    apply({ availableHeight, elements }) {
-      elements.floating.style.setProperty(
-        "--dp-available-height",
-        `${Math.max(Math.round(availableHeight), 220)}px`
-      );
+    apply({ availableHeight, elements, placement, rects }) {
+      /* availableHeight runs a few pixels ahead of the real gap — at 420px tall
+         it reported 220 into a 213px space and the calendar sat 7px off the top
+         of the screen. The gap is measurable, so measure it: the distance from
+         the field to the edge it is opening toward, less the offset and the
+         same padding this middleware was given. */
+      const ref = rects.reference;
+      const edge = placement.startsWith("top")
+        ? ref.y
+        : window.innerHeight - (ref.y + ref.height);
+      const gap = edge - POPUP_OFFSET - 8;
+      /* No floor under this. An earlier version kept a 220px minimum so a very
+         short window would not get a sliver, but a minimum taller than the gap
+         is just the overflow again with a nicer name — it was what put the
+         calendar 7px off screen. The gap is the constraint; the scroll assist
+         is what makes the gap large enough to be usable. */
+      const height = Math.max(Math.round(Math.min(availableHeight, gap)), 0);
+      elements.floating.style.setProperty("--dp-available-height", `${height}px`);
     },
   }),
 ];
@@ -378,11 +398,44 @@ export default function PremiumDatePicker({
 
     /* Never push the field past the bottom of the screen chasing room above it.
        The browser scrolls a focused element back into view, so asking for more
-       than this starts a tug of war it wins — which is what happened at 420px
-       tall, where the popup and the field together are taller than the window
-       and no amount of scrolling can seat both. Take what is available. */
-    const highestUseful = Math.max(0, window.innerHeight - rect.height - POPUP_OFFSET);
-    const target = Math.min(needed, highestUseful);
+       than this starts a tug of war it wins.
+
+       Below the field, the thing that has to stay reachable is the form's submit
+       button, so measure down to it rather than guess. Seating the field higher
+       by that much leaves less room above it, and less room above is what
+       `size` reads to cap the popup — so on a window too short for all three,
+       the popup is what gives and the button stays on screen.
+
+       A constant was tried and cannot work: the two steps put different amounts
+       between the field and the button, so 120px seated the date step perfectly
+       and left the time step's button 51px under the fold. The distance is
+       already in the DOM. */
+    const submit = input
+      .closest("form")
+      ?.querySelector<HTMLElement>('button[type="submit"]');
+    const reserveBelow = submit
+      ? Math.max(0, submit.getBoundingClientRect().bottom - rect.bottom + POPUP_OFFSET)
+      : 0;
+
+    /* Two things want the same pixels on a short window, and they have to be
+       ranked rather than averaged.
+       
+       Keeping the submit button on screen is the nicer outcome, and where there
+       is room for both that is what happens. But buying it by seating the field
+       higher leaves less space above, and once that space drops under what the
+       popup needs, `flip` sends the popup downward — onto the button. Paying
+       for a visible button with a covered button is the trade this whole change
+       exists to stop making.
+       
+       So the button's room is taken only while the popup still clears
+       MIN_USEFUL_POPUP above; below that the button is allowed under the fold,
+       where it is one scroll away rather than hidden behind a calendar. */
+    const keepFieldVisible = Math.max(0, window.innerHeight - rect.height - POPUP_OFFSET);
+    const withReserve = keepFieldVisible - reserveBelow;
+    const target =
+      withReserve - POPUP_OFFSET >= MIN_USEFUL_POPUP
+        ? Math.min(needed, withReserve)
+        : Math.min(needed, keepFieldVisible);
 
     const shortfall = target - rect.top;
     if (shortfall <= 0) return;
