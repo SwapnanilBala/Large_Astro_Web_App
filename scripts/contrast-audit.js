@@ -21,6 +21,8 @@
  *     but only linear/conic — radial gradients in this codebase are 0.6px
  *     sparkle overlays and scoring their bright stops as a fill reported a
  *     readable gold button as 1.27:1
+ *   - every layer of the stack is composited onto every candidate backdrop, so
+ *     an element's own fill still wins over a gradient on an ancestor
  *   - background-clip:text is skipped on both sides: it is not measurable from
  *     `color`, and it is not a surface behind its siblings
  *   - the AA floor follows the large-text rule (3:1 at >=24px, or >=18.66px bold)
@@ -37,6 +39,12 @@
  * violations, `inactive` is the list a human has to judge, because the
  * question it asks — is this an inactive control, or is it content that
  * happens to sit on one? — is not one a stylesheet can answer.
+ *
+ * Anything whose sample point cannot be confirmed to land on it comes back
+ * under `unmeasurable` rather than being scored. Read that list: on a long
+ * page in a short viewport it is where the off-screen content goes when the
+ * scroll does not flush, and a short `checked` count with a long
+ * `unmeasurable` one means the page was not really audited.
  *
  * Caveat for headless/hidden viewports: rAF does not fire, so framer-motion
  * elements freeze at whatever inline opacity they stopped on and CSS
@@ -104,17 +112,44 @@ export const CONTRAST_AUDIT = String.raw`
     if (x < 0 || y < 0 || x > innerWidth || y > innerHeight) return null;
     const stack = document.elementsFromPoint(x, y);
     if (!stack.length) return null;
-    let base = [10,10,15,1], variants = null;
+    /* Only score a pixel that provably belongs to this element. scrollIntoView
+       above does not always land before the rect is re-read — in a viewport
+       that is not compositing it updates scrollY without flushing hit-testing
+       — and the sample point then falls on whatever happens to be at those
+       coordinates. That is not a miss, it is a wrong answer: it reported an
+       active gold chip on /m/engine-select, dark text on #d4a574, as 1.36:1
+       against a backdrop the chip never touches. elementsFromPoint returns
+       ancestors too, so el is in this list whenever the point is inside it. */
+    if (!stack.includes(el)) return null;
+    /* Composite the stack bottom-up, carrying every candidate backdrop the
+       whole way rather than keeping a single colour plus the last gradient
+       seen. A gradient used to overwrite the variant list outright, so it
+       survived to the end while later, higher elements only updated the
+       solid base colour — so any element with its own background sitting
+       inside a gradient-backed ancestor got scored against the ancestor. The
+       active chip on /m/engine-select is dark text on solid #d4a574 inside a
+       card with a 0.08-alpha sheen; it was reported at 1.36:1 against the
+       sheen, a colour it never touches. */
+    let variants = [[10,10,15,1]];
     for (let i = stack.length - 1; i >= 0; i--) {
       const cs = getComputedStyle(stack[i]);
       if (cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') continue;
       const o = Number(cs.opacity), mul = isNaN(o) ? 1 : o;
       const bg = parse(cs.backgroundColor);
-      if (bg[3] > 0) base = over([bg[0],bg[1],bg[2], bg[3]*mul], base);
+      if (bg[3] > 0) variants = variants.map(v => over([bg[0],bg[1],bg[2], bg[3]*mul], v));
       const st = stopsOf(cs.backgroundImage);
-      if (st.length) variants = st.map(c => over([c[0],c[1],c[2], c[3]*mul], base));
+      if (st.length) {
+        const next = [];
+        for (const v of variants) for (const c of st) next.push(over([c[0],c[1],c[2], c[3]*mul], v));
+        /* Nested gradients would multiply without bound. The caller scores the
+           worst backdrop, and the worst is always an extreme, so past a
+           handful keep only the lightest and the darkest. */
+        variants = next.length > 8
+          ? [next.reduce((a,b) => lum(a) <= lum(b) ? a : b), next.reduce((a,b) => lum(a) >= lum(b) ? a : b)]
+          : next;
+      }
     }
-    return variants && variants.length ? variants : [base];
+    return variants;
   };
 
   const off = el => !!(el.closest('[disabled]') || (el.matches && el.matches(':disabled')));
@@ -145,7 +180,7 @@ export const CONTRAST_AUDIT = String.raw`
   for (const [, el] of groups) {
     const cs = getComputedStyle(el);
     const bds = backdrops(el);
-    if (!bds) continue;
+    if (!bds) { unmeasurable.push({ cls: label(el), why: 'sample point did not land on it' }); continue; }
     const size = parseFloat(cs.fontSize), weight = Number(cs.fontWeight) || 400;
     const floor = (size >= 24 || (size >= 18.66 && weight >= 700)) ? 3 : 4.5;
     const fg = parse(cs.color);
