@@ -10,6 +10,10 @@ import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBo
 import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
 import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
+/* Static, not dynamic(): it is a pure function of the chart with no clock and
+   no browser API, so it server-renders — and it sits near the top of the page,
+   where a lazy gate is exactly what made Major Life Shifts feel slow. */
+import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import styles from "../insights.module.css";
 import SectionGateway from "./section-gateway";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
@@ -1162,6 +1166,28 @@ export default function InsightsContent({
             <ChartAtAGlance payload={payload} />
           </motion.div>
         </motion.div>
+
+        {/* Gated out here, not just inside the panel. The panel returns null
+            without an Ashtakavarga block, but the section wrapper would still
+            have drawn its heading and an empty body — a titled section with
+            nothing under it reads as a failure rather than as an omission. */}
+        {payload.ashtakavarga?.sarvashtakavarga?.length === 12 &&
+          payload.chart.houses?.length === 12 && (
+            <CollapsibleSection
+              id="house-support"
+              kicker="House support"
+              title="How much support your chart receives from the houses"
+              defaultOpen={true}
+              persistKey={`${sectionStateScope}:house-support`}
+            >
+              <PanelErrorBoundary panelName="House Support">
+                <HouseSupportPanel
+                  ashtakavarga={payload.ashtakavarga}
+                  houses={payload.chart.houses}
+                />
+              </PanelErrorBoundary>
+            </CollapsibleSection>
+          )}
 
         <CollapsibleSection
           kicker="Chart details"

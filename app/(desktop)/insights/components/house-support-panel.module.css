@@ -1,0 +1,270 @@
+/*
+ * House support — two readings of the same twelve numbers, side by side.
+ *
+ * Its own module rather than more rows in insights.module.css, which is
+ * already ~57KB shared across every panel on the page.
+ */
+
+.panel {
+  display: grid;
+  gap: 1.4rem;
+}
+
+.intro {
+  margin: 0;
+  max-width: 78ch;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #a8a090);
+}
+
+.intro code {
+  padding: 0.05em 0.4em;
+  border-radius: 5px;
+  background: rgba(212, 165, 116, 0.12);
+  color: var(--accent-gold, #d4a574);
+  font-size: 0.92em;
+  font-variant-numeric: tabular-nums;
+}
+
+.columns {
+  display: grid;
+  /* The ring is a fixed-size instrument; the distribution wants whatever is
+     left. Below 900px they stack rather than squeezing the 12 columns. */
+  grid-template-columns: minmax(240px, 20rem) minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+@media (max-width: 900px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.25rem;
+  border: 1px solid rgba(232, 200, 154, 0.22);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(232, 200, 154, 0.10), transparent 42%),
+    linear-gradient(150deg, rgba(24, 21, 31, 0.82), rgba(12, 14, 20, 0.78));
+}
+
+.cardHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cardKicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent-gold, #d4a574);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary, #f5f0e6);
+}
+
+.formula {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text-tertiary, #9a918a);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Left: the ascendant ring ── */
+
+.ringWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0 0.1rem;
+}
+
+.ring {
+  width: 100%;
+  max-width: 15rem;
+  height: auto;
+}
+
+.ringTrack {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.09);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+.ringValue {
+  fill: none;
+  stroke: url(#houseSupportRingGradient);
+  stroke-width: 13;
+  stroke-linecap: round;
+}
+
+/* The 100% mark. Without it the arc is a pretty shape with no scale on it —
+   the whole claim is "against average", so average has to be visible. */
+.ringBaseline {
+  stroke: rgba(245, 240, 230, 0.62);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.ringPercent {
+  fill: var(--text-primary, #f5f0e6);
+  font-size: 27px;
+  font-weight: 700;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.ringCaption {
+  fill: var(--text-secondary, #a8a090);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-anchor: middle;
+  text-transform: uppercase;
+}
+
+.ringBaselineLabel {
+  fill: rgba(245, 240, 230, 0.62);
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  text-anchor: middle;
+}
+
+/* ── Shared readout rows ── */
+
+.facts {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.42rem 0.6rem;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.035);
+  font-size: 0.86rem;
+}
+
+.factLabel {
+  color: var(--text-secondary, #a8a090);
+}
+
+.factValue {
+  font-weight: 600;
+  color: var(--text-primary, #f5f0e6);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Right: the twelve-house distribution ── */
+
+.bars {
+  width: 100%;
+  height: auto;
+}
+
+/* The empty slot behind each bar. Decorative: the bar height, the printed
+   bindu count and the dashed 28.1 baseline all carry the reading, so WCAG
+   1.4.11's 3:1 floor does not apply to it (it composites to about 1.5:1
+   against the card, and is meant to). 0.05 was low enough to be invisible,
+   which left short bars reading as a small chart rather than a short bar. */
+.barTrack {
+  fill: rgba(255, 255, 255, 0.08);
+}
+
+.barStrong { fill: #7fd8c4; }
+.barNeutral { fill: #d4a574; }
+.barWeak { fill: #b98a86; }
+
+.barBaseline {
+  stroke: rgba(245, 240, 230, 0.55);
+  stroke-width: 1.4;
+  stroke-dasharray: 5 4;
+}
+
+.barBaselineLabel {
+  fill: rgba(245, 240, 230, 0.72);
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+}
+
+.barHouseLabel {
+  fill: var(--text-secondary, #a8a090);
+  font-size: 10px;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.barValueLabel {
+  fill: var(--text-primary, #f5f0e6);
+  font-size: 10px;
+  font-weight: 600;
+  text-anchor: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+  color: var(--text-secondary, #a8a090);
+}
+
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.legendSwatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 3px;
+  flex: 0 0 auto;
+}
+
+.caveat {
+  margin: 0;
+  padding: 0.55rem 0.7rem;
+  border-left: 3px solid rgba(212, 165, 116, 0.55);
+  border-radius: 0 8px 8px 0;
+  background: rgba(212, 165, 116, 0.08);
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: var(--text-secondary, #a8a090);
+}
+
+/* Screen-reader-only table: the SVGs carry the picture, this carries the
+   numbers for anyone not looking at it. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
