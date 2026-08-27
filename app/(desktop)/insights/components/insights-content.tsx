@@ -67,7 +67,14 @@ function LazyPanel({
 const ConstellationChart = dynamic(() => import("./constellation-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
 const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
-const MajorShiftsPanel = dynamic(() => import("./major-shifts-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
+/*
+ * Named rather than inlined so the chunk can be warmed ahead of the scroll —
+ * see the idle prefetch in InsightsContent. The panel is 12.7KB of JS minified
+ * (React, the shifts engine, nothing else), which is not worth a cold network
+ * round trip at the moment someone arrives at the section.
+ */
+const loadMajorShiftsPanel = () => import("./major-shifts-panel");
+const MajorShiftsPanel = dynamic(loadMajorShiftsPanel, { ssr: false, loading: () => <PanelSkeleton /> });
 import type {
   ChartApiResponse,
   LifeDomainInsight,
@@ -890,6 +897,32 @@ export default function InsightsContent({
   const [domainRetryToken, setDomainRetryToken] = useState(0);
   const domainSectionRef = useRef<HTMLDivElement>(null);
 
+  /*
+   * Warm the Major Life Shifts chunk while the visitor is still at the top of
+   * the page.
+   *
+   * That section sits ~3,200px down and had two gates in series before it: an
+   * IntersectionObserver that fires only within 200px, and then a cold fetch
+   * of its own chunk. Nothing was requested until someone had almost arrived,
+   * so the wait was a full network round trip spent staring at "Loading…" —
+   * for 12.7KB of minified JS whose whole module graph is React plus the
+   * shifts engine. The split saves less than the round trip costs.
+   *
+   * Warming it here settles the chunk during idle time, so the observer
+   * resolves against a module that is already in memory. Same idiom as the
+   * date-picker warm on the intake page.
+   */
+  useEffect(() => {
+    const warm = () => { void loadMajorShiftsPanel(); };
+
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const handle = window.requestIdleCallback(warm, { timeout: 2500 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(warm, 1200);
+    return () => clearTimeout(timer);
+  }, []);
+
   useEffect(() => {
     const suppliedInsights = payload.chart.life_domain_insights ?? [];
     if (suppliedInsights.length > 0) {
@@ -1335,7 +1368,10 @@ export default function InsightsContent({
           className={styles.cardKarma}
           persistKey={`${sectionStateScope}:life-shifts`}
         >
-          <LazyPanel minHeight={560}>
+          {/* 800px rather than the 200px default: the warm above means the
+              module is already in memory, so the only thing left to buy is
+              enough lead time to render before the section is actually read. */}
+          <LazyPanel minHeight={560} rootMargin="800px">
             <PanelErrorBoundary panelName="Major Life Shifts">
               <MajorShiftsPanel payload={payload} />
             </PanelErrorBoundary>
