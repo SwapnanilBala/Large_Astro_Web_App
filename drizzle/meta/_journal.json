@@ -15,6 +15,13 @@
       "when": 1787849388570,
       "tag": "0001_tighten_core_integrity",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1787851819526,
+      "tag": "0002_remove_deferred_tables",
+      "breakpoints": true
     }
   ]
 }

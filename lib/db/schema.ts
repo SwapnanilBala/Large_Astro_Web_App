@@ -491,149 +491,6 @@ export const chartFindings = pgTable(
   ],
 );
 
-export const tags = pgTable(
-  "tags",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id")
-      .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
-    name: varchar("name", { length: 80 }).notNull(),
-    color: varchar("color", { length: 24 }),
-    ...timestamps(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    unique("tags_workspace_id_id_unique").on(table.workspaceId, table.id),
-    uniqueIndex("tags_workspace_lower_name_unique")
-      .on(table.workspaceId, sql`lower(${table.name})`)
-      .where(sql`${table.deletedAt} is null`),
-    check("tags_name_not_blank", sql`char_length(btrim(${table.name})) > 0`),
-  ],
-);
-
-export const clientTags = pgTable(
-  "client_tags",
-  {
-    workspaceId: uuid("workspace_id").notNull(),
-    clientId: uuid("client_id").notNull(),
-    tagId: uuid("tag_id").notNull(),
-    assignedByAuthUserId: varchar("assigned_by_auth_user_id", { length: 255 }),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    primaryKey({ columns: [table.clientId, table.tagId] }),
-    foreignKey({
-      name: "client_tags_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
-    }).onDelete("cascade"),
-    foreignKey({
-      name: "client_tags_workspace_tag_fk",
-      columns: [table.workspaceId, table.tagId],
-      foreignColumns: [tags.workspaceId, tags.id],
-    }).onDelete("cascade"),
-  ],
-);
-
-export const consultations = pgTable(
-  "consultations",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
-    clientId: uuid("client_id").notNull(),
-    chartId: uuid("chart_id").references(() => chartCalculations.id, {
-      onDelete: "set null",
-    }),
-    status: varchar("status", { length: 24 }).default("scheduled").notNull(),
-    consultationType: varchar("consultation_type", { length: 60 }),
-    channel: varchar("channel", { length: 40 }),
-    scheduledStart: timestamp("scheduled_start", { withTimezone: true }),
-    scheduledEnd: timestamp("scheduled_end", { withTimezone: true }),
-    startedAt: timestamp("started_at", { withTimezone: true }),
-    endedAt: timestamp("ended_at", { withTimezone: true }),
-    goals: text("goals"),
-    summary: text("summary"),
-    recommendations: text("recommendations"),
-    followUpAt: timestamp("follow_up_at", { withTimezone: true }),
-    practitionerAuthUserId: varchar("practitioner_auth_user_id", { length: 255 }),
-    feeMinor: integer("fee_minor"),
-    currency: varchar("currency", { length: 3 }),
-    ...timestamps(),
-    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    unique("consultations_workspace_id_id_unique").on(table.workspaceId, table.id),
-    foreignKey({
-      name: "consultations_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
-    }).onDelete("cascade"),
-    foreignKey({
-      name: "consultations_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
-    }),
-    index("consultations_client_schedule_idx").on(table.clientId, table.scheduledStart),
-    index("consultations_workspace_status_schedule_idx").on(
-      table.workspaceId,
-      table.status,
-      table.scheduledStart,
-    ),
-    check(
-      "consultations_status_check",
-      sql`${table.status} in ('draft', 'scheduled', 'completed', 'cancelled', 'no_show')`,
-    ),
-    check(
-      "consultations_schedule_window_check",
-      sql`${table.scheduledEnd} is null or ${table.scheduledStart} is null or ${table.scheduledEnd} > ${table.scheduledStart}`,
-    ),
-    check(
-      "consultations_actual_window_check",
-      sql`${table.endedAt} is null or ${table.startedAt} is null or ${table.endedAt} > ${table.startedAt}`,
-    ),
-    check("consultations_fee_check", sql`${table.feeMinor} is null or ${table.feeMinor} >= 0`),
-    check(
-      "consultations_currency_check",
-      sql`${table.currency} is null or ${table.currency} ~ '^[A-Z]{3}$'`,
-    ),
-  ],
-);
-
-export const clientNotes = pgTable(
-  "client_notes",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
-    clientId: uuid("client_id").notNull(),
-    consultationId: uuid("consultation_id").references(() => consultations.id, {
-      onDelete: "set null",
-    }),
-    noteType: varchar("note_type", { length: 40 }).default("general").notNull(),
-    body: text("body").notNull(),
-    isPinned: boolean("is_pinned").default(false).notNull(),
-    authorAuthUserId: varchar("author_auth_user_id", { length: 255 }),
-    ...timestamps(),
-    deletedAt: timestamp("deleted_at", { withTimezone: true }),
-  },
-  (table) => [
-    foreignKey({
-      name: "client_notes_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
-    }).onDelete("cascade"),
-    foreignKey({
-      name: "client_notes_workspace_consultation_fk",
-      columns: [table.workspaceId, table.consultationId],
-      foreignColumns: [consultations.workspaceId, consultations.id],
-    }),
-    index("client_notes_client_updated_idx").on(table.clientId, table.updatedAt),
-    index("client_notes_workspace_pinned_idx").on(table.workspaceId, table.isPinned),
-    check("client_notes_body_not_blank", sql`char_length(btrim(${table.body})) > 0`),
-  ],
-);
-
 export const compatibilityReports = pgTable(
   "compatibility_reports",
   {
@@ -733,9 +590,6 @@ export const generatedArtifacts = pgTable(
     chartId: uuid("chart_id").references(() => chartCalculations.id, {
       onDelete: "set null",
     }),
-    consultationId: uuid("consultation_id").references(() => consultations.id, {
-      onDelete: "set null",
-    }),
     sourceAssetId: uuid("source_asset_id").references(() => assets.id, {
       onDelete: "set null",
     }),
@@ -772,11 +626,6 @@ export const generatedArtifacts = pgTable(
       foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
     }),
     foreignKey({
-      name: "generated_artifacts_workspace_consultation_fk",
-      columns: [table.workspaceId, table.consultationId],
-      foreignColumns: [consultations.workspaceId, consultations.id],
-    }),
-    foreignKey({
       name: "generated_artifacts_workspace_source_asset_fk",
       columns: [table.workspaceId, table.sourceAssetId],
       foreignColumns: [assets.workspaceId, assets.id],
@@ -807,73 +656,6 @@ export const generatedArtifacts = pgTable(
       "generated_artifacts_cost_check",
       sql`${table.costMicrousd} is null or ${table.costMicrousd} >= 0`,
     ),
-  ],
-);
-
-/** Append-only consent history; a phone number never implies SMS consent. */
-export const consentRecords = pgTable(
-  "consent_records",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
-    clientId: uuid("client_id").notNull(),
-    purpose: varchar("purpose", { length: 80 }).notNull(),
-    policyVersion: varchar("policy_version", { length: 40 }).notNull(),
-    grantedAt: timestamp("granted_at", { withTimezone: true }).notNull(),
-    revokedAt: timestamp("revoked_at", { withTimezone: true }),
-    captureSource: varchar("capture_source", { length: 60 }),
-    evidenceJson: jsonb("evidence_json").$type<JsonObject>().default(sql`'{}'::jsonb`).notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    foreignKey({
-      name: "consent_records_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
-    }).onDelete("cascade"),
-    index("consent_records_client_purpose_granted_idx").on(
-      table.clientId,
-      table.purpose,
-      table.grantedAt,
-    ),
-    uniqueIndex("consent_records_one_active_purpose_unique")
-      .on(table.clientId, table.purpose)
-      .where(sql`${table.revokedAt} is null`),
-    check("consent_records_purpose_not_blank", sql`char_length(btrim(${table.purpose})) > 0`),
-    check(
-      "consent_records_revoke_window_check",
-      sql`${table.revokedAt} is null or ${table.revokedAt} >= ${table.grantedAt}`,
-    ),
-  ],
-);
-
-/** Append-only metadata about sensitive changes; raw PII should not be copied here. */
-export const auditEvents = pgTable(
-  "audit_events",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id")
-      .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
-    actorAuthUserId: varchar("actor_auth_user_id", { length: 255 }),
-    clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
-    entityType: varchar("entity_type", { length: 60 }).notNull(),
-    entityId: uuid("entity_id"),
-    action: varchar("action", { length: 60 }).notNull(),
-    changedFields: jsonb("changed_fields").$type<JsonObject>().default(sql`'{}'::jsonb`).notNull(),
-    requestId: varchar("request_id", { length: 120 }),
-    occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
-  },
-  (table) => [
-    foreignKey({
-      name: "audit_events_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
-    }),
-    index("audit_events_workspace_occurred_idx").on(table.workspaceId, table.occurredAt),
-    index("audit_events_entity_idx").on(table.entityType, table.entityId, table.occurredAt),
-    check("audit_events_entity_type_not_blank", sql`char_length(btrim(${table.entityType})) > 0`),
-    check("audit_events_action_not_blank", sql`char_length(btrim(${table.action})) > 0`),
   ],
 );
 

@@ -11,24 +11,27 @@ if (!databaseUrl) {
 
 const expectedTables = [
   "assets",
-  "audit_events",
   "birth_profiles",
   "chart_aspects",
   "chart_calculations",
   "chart_findings",
   "chart_houses",
   "chart_placements",
-  "client_notes",
-  "client_tags",
   "clients",
   "compatibility_reports",
-  "consent_records",
-  "consultations",
   "dasha_periods",
   "generated_artifacts",
-  "tags",
   "workspace_members",
   "workspaces",
+];
+
+const deferredTables = [
+  "audit_events",
+  "client_notes",
+  "client_tags",
+  "consent_records",
+  "consultations",
+  "tags",
 ];
 
 const sql = neon(databaseUrl);
@@ -37,9 +40,16 @@ const liveTables = await sql.query(
 );
 const liveTableNames = liveTables.map(({ table_name: tableName }) => tableName);
 const missingTables = expectedTables.filter((tableName) => !liveTableNames.includes(tableName));
+const unexpectedDeferredTables = deferredTables.filter((tableName) =>
+  liveTableNames.includes(tableName),
+);
 
 if (missingTables.length > 0) {
   throw new Error(`Missing database tables: ${missingTables.join(", ")}`);
+}
+
+if (unexpectedDeferredTables.length > 0) {
+  throw new Error(`Deferred tables still exist: ${unexpectedDeferredTables.join(", ")}`);
 }
 
 await sql.query(`
@@ -56,14 +66,9 @@ DECLARE
   chart_one uuid := gen_random_uuid();
   chart_partner uuid := gen_random_uuid();
   chart_other_workspace uuid := gen_random_uuid();
-  consultation_one uuid := gen_random_uuid();
-  note_one uuid := gen_random_uuid();
-  tag_one uuid := gen_random_uuid();
   asset_one uuid := gen_random_uuid();
   artifact_one uuid := gen_random_uuid();
-  audit_one uuid := gen_random_uuid();
   invalid_phone_rejected boolean := false;
-  duplicate_consent_rejected boolean := false;
   cross_workspace_link_rejected boolean := false;
 BEGIN
   INSERT INTO workspaces (id, name) VALUES
@@ -98,18 +103,19 @@ BEGIN
   END IF;
 
   INSERT INTO birth_profiles (
-    id, workspace_id, client_id, birth_date, reported_birth_time, calculation_birth_time,
-    birth_time_accuracy, calculation_time_is_fallback, latitude, longitude,
-    time_zone_id, resolved_utc_offset_minutes, timezone_source, birth_instant_utc
+    id, workspace_id, client_id, birth_date, reported_birth_time,
+    calculation_birth_time, birth_time_accuracy, calculation_time_is_fallback,
+    latitude, longitude, time_zone_id, resolved_utc_offset_minutes,
+    timezone_source, birth_instant_utc
   ) VALUES
     (birth_one, workspace_one, client_one, date '1990-06-15', null, time '12:00:00',
       'unknown', true, 28.613900, 77.209000, 'Asia/Kolkata', 330,
       'coordinates', timestamp with time zone '1990-06-15 06:30:00+00'),
-    (birth_partner, workspace_one, client_partner, date '1992-02-20', time '08:30:00', time '08:30:00',
-      'exact', false, 40.712800, -74.006000, 'America/New_York', -300,
+    (birth_partner, workspace_one, client_partner, date '1992-02-20', time '08:30:00',
+      time '08:30:00', 'exact', false, 40.712800, -74.006000, 'America/New_York', -300,
       'coordinates', timestamp with time zone '1992-02-20 13:30:00+00'),
-    (birth_other_workspace, workspace_two, client_other_workspace, date '1988-10-10', null, time '12:00:00',
-      'unknown', true, 51.507400, -0.127800, 'Europe/London', 60,
+    (birth_other_workspace, workspace_two, client_other_workspace, date '1988-10-10', null,
+      time '12:00:00', 'unknown', true, 51.507400, -0.127800, 'Europe/London', 60,
       'coordinates', timestamp with time zone '1988-10-10 11:00:00+00');
 
   INSERT INTO chart_calculations (
@@ -120,8 +126,9 @@ BEGIN
       'verification-engine', '1', 'Aries', 'Gemini', 'Cancer'),
     (chart_partner, workspace_one, birth_partner, repeat('b', 64), '{"source":"verification"}'::jsonb,
       'verification-engine', '1', 'Taurus', 'Pisces', 'Leo'),
-    (chart_other_workspace, workspace_two, birth_other_workspace, repeat('c', 64), '{"source":"verification"}'::jsonb,
-      'verification-engine', '1', 'Virgo', 'Libra', 'Scorpio');
+    (chart_other_workspace, workspace_two, birth_other_workspace, repeat('c', 64),
+      '{"source":"verification"}'::jsonb, 'verification-engine', '1',
+      'Virgo', 'Libra', 'Scorpio');
 
   INSERT INTO chart_placements (
     workspace_id, chart_id, point_code, longitude, sign_code, degree_in_sign, house_number
@@ -145,16 +152,6 @@ BEGIN
     'core', 'foundation', 'high', 0.8, 0.7, true, 1
   );
 
-  INSERT INTO consultations (id, workspace_id, client_id, chart_id, consultation_type)
-  VALUES (consultation_one, workspace_one, client_one, chart_one, 'natal');
-
-  INSERT INTO client_notes (id, workspace_id, client_id, consultation_id, body)
-  VALUES (note_one, workspace_one, client_one, consultation_one, 'Schema verification note');
-
-  INSERT INTO tags (id, workspace_id, name) VALUES (tag_one, workspace_one, 'Verification');
-  INSERT INTO client_tags (workspace_id, client_id, tag_id)
-  VALUES (workspace_one, client_one, tag_one);
-
   INSERT INTO compatibility_reports (
     workspace_id, primary_client_id, partner_client_id, primary_chart_id,
     partner_chart_id, compatibility_score, algorithm_version, input_fingerprint
@@ -172,40 +169,15 @@ BEGIN
   );
 
   INSERT INTO generated_artifacts (
-    id, workspace_id, client_id, chart_id, consultation_id,
-    source_asset_id, output_asset_id, artifact_type, generator_version
+    id, workspace_id, client_id, chart_id, source_asset_id,
+    output_asset_id, artifact_type, generator_version
   ) VALUES (
-    artifact_one, workspace_one, client_one, chart_one, consultation_one,
-    asset_one, asset_one, 'verification_report', '1'
-  );
-
-  INSERT INTO consent_records (
-    workspace_id, client_id, purpose, policy_version, granted_at, capture_source
-  ) VALUES (
-    workspace_one, client_one, 'birth_data_processing', 'verification-1', now(), 'admin'
+    artifact_one, workspace_one, client_one, chart_one, asset_one,
+    asset_one, 'verification_report', '1'
   );
 
   BEGIN
-    INSERT INTO consent_records (
-      workspace_id, client_id, purpose, policy_version, granted_at, capture_source
-    ) VALUES (
-      workspace_one, client_one, 'birth_data_processing', 'verification-1', now(), 'admin'
-    );
-  EXCEPTION WHEN unique_violation THEN
-    duplicate_consent_rejected := true;
-  END;
-  IF NOT duplicate_consent_rejected THEN
-    RAISE EXCEPTION 'active-consent uniqueness was not enforced';
-  END IF;
-
-  INSERT INTO audit_events (
-    id, workspace_id, actor_auth_user_id, client_id, entity_type, entity_id, action
-  ) VALUES (
-    audit_one, workspace_one, 'schema-verifier', client_one, 'client', client_one, 'verified'
-  );
-
-  BEGIN
-    UPDATE consultations SET chart_id = chart_other_workspace WHERE id = consultation_one;
+    UPDATE generated_artifacts SET chart_id = chart_other_workspace WHERE id = artifact_one;
   EXCEPTION WHEN foreign_key_violation THEN
     cross_workspace_link_rejected := true;
   END;
@@ -214,29 +186,13 @@ BEGIN
   END IF;
 
   DELETE FROM chart_calculations WHERE id = chart_one;
-  IF (SELECT chart_id IS NOT NULL FROM consultations WHERE id = consultation_one) THEN
-    RAISE EXCEPTION 'chart delete did not clear consultation link';
-  END IF;
   IF (SELECT chart_id IS NOT NULL FROM generated_artifacts WHERE id = artifact_one) THEN
     RAISE EXCEPTION 'chart delete did not clear artifact link';
-  END IF;
-
-  DELETE FROM consultations WHERE id = consultation_one;
-  IF (SELECT consultation_id IS NOT NULL FROM client_notes WHERE id = note_one) THEN
-    RAISE EXCEPTION 'consultation delete did not clear note link';
-  END IF;
-  IF (SELECT consultation_id IS NOT NULL FROM generated_artifacts WHERE id = artifact_one) THEN
-    RAISE EXCEPTION 'consultation delete did not clear artifact link';
   END IF;
 
   DELETE FROM assets WHERE id = asset_one;
   IF (SELECT source_asset_id IS NOT NULL OR output_asset_id IS NOT NULL FROM generated_artifacts WHERE id = artifact_one) THEN
     RAISE EXCEPTION 'asset delete did not clear artifact links';
-  END IF;
-
-  DELETE FROM clients WHERE id = client_one;
-  IF (SELECT client_id IS NOT NULL FROM audit_events WHERE id = audit_one) THEN
-    RAISE EXCEPTION 'client delete did not preserve a sanitized audit event';
   END IF;
 
   DELETE FROM workspaces WHERE id IN (workspace_one, workspace_two);
