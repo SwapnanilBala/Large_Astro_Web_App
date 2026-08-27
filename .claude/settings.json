@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/session-start-pull.sh\"",
+            "shell": "bash",
+            "timeout": 30,
+            "statusMessage": "Pulling latest from origin…"
+          }
+        ]
+      }
+    ]
+  }
+}

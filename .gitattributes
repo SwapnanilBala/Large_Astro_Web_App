@@ -1,0 +1,6 @@
+# Shell scripts must keep LF endings. This repo is developed on Windows with
+# core.autocrlf=true, which would otherwise hand a fresh checkout a CRLF copy
+# of .claude/hooks/session-start-pull.sh — and bash on most platforms fails a
+# CRLF script with `$'\r': command not found` before it runs a line of it.
+# Git Bash here happens to tolerate it; a clone elsewhere would not.
+*.sh text eol=lf
