@@ -48,6 +48,25 @@
   background: var(--gradient-gold);
   color: var(--bg-deep);
   box-shadow: var(--shadow-gold);
+
+  /* This is the one button face in the system that is dark type on a light
+     fill, so it has to opt out of two defaults set for the opposite case.
+
+     text-shadow inherits, and globals.css puts one on the bare `button`
+     element for the site's usual gold-on-cosmic-gradient control: a hard black
+     drop plus a 12px gold bloom. Landing on dark glyphs over gold, the bloom
+     is a *light* halo eating each stroke from the outside and the drop smears
+     a black edge under an already-black letter. Neither reads as an effect —
+     the label just looks slightly out of focus, which is what it was.
+
+     -webkit-font-smoothing: antialiased, set on the body, is the same mistake
+     in the other direction. It suits the light-on-dark everything else here
+     is made of; on dark-on-light it drops the denser rasterisation and thins
+     strokes exactly where they need the most body. macOS and iOS only —
+     Windows ignores the property, which is why this reads worst on a Mac. */
+  text-shadow: none;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 .premiumButton.primary:hover .buttonContent {

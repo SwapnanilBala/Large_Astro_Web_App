@@ -193,6 +193,11 @@
   background: var(--accent-gold, #d4a574);
   border-color: var(--accent-gold, #d4a574);
   font-weight: 500;
+  /* Dark on gold, so it opts out of the body's antialiased setting for the
+     reason spelled out on .button below. This one has the least to spare of
+     the three: 15px at weight 500 is the lightest inverted text in the tree. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 .status {
@@ -240,6 +245,16 @@
   border: none;
   border-radius: 12px;
   box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
+
+  /* mobile-shell.css sets -webkit-font-smoothing: antialiased on the body,
+     which is right for the cream-on-near-black this tree is otherwise made of
+     and wrong for the one element that inverts it. On iOS the thinned
+     rasterisation costs these dark glyphs the stroke density they need against
+     a bright gold fill, and the label goes soft at exactly the size where it
+     has the least to spare. Everything else here stays on the inherited
+     value. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 /* A solid gold fill at 45% opacity over a near-black page renders as brown
@@ -264,6 +279,12 @@
   color: var(--text-primary, #f5f0e6);
   background: transparent;
   border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.24));
+  /* Back to the body's setting. This variant carries .button as well, but it
+     is cream on the page rather than near-black on gold, so it wants the
+     thinner rasterisation the rest of the tree uses — the opt-out above is
+     specifically for the inverted fill. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /*
@@ -334,6 +355,9 @@
   background: linear-gradient(100deg, #c89b3c, #e8c89a);
   border-radius: 12px;
   box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
+  /* Same fill and same inversion as .button, so the same opt-out. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
 @media (prefers-reduced-motion: no-preference) {
