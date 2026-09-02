@@ -4586,10 +4586,14 @@ a:focus-visible {
    CONSTELLATION CHART
    ═══════════════════════════════════════════════ */
 
+/* The card around this owns the corner: it clips at its own 16px radius, so the
+   12px these used to carry never showed -- the looser radius simply lost to the
+   card's clip. Inherit rather than restate it, so the chart keeps tracking the
+   card instead of going stale again the next time that radius moves. */
 .constellation-panel {
   position: relative;
   width: 100%;
-  border-radius: 12px;
+  border-radius: inherit;
   overflow: hidden;
 }
 
@@ -4597,7 +4601,7 @@ a:focus-visible {
   display: block;
   width: 100%;
   height: auto;
-  border-radius: 12px;
+  border-radius: inherit;
 }
 
 /* Star twinkle animation */
