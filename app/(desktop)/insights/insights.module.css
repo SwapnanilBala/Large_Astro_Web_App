@@ -2359,6 +2359,22 @@
 .cardAshtakavarga,
 .cardDomains {
   composes: card;
+}
+
+/* These cards hand their inset to the panel inside, which then fills them edge
+   to edge -- right for the bare panels in the advanced grid, where the card is
+   nothing but a frame. A collapsible card also draws its own header row, and
+   with the card's padding gone that kicker and heading sat flush against the
+   border while every other section on the results page was inset by the card's
+   1.25rem. So zero the padding only for the bare case; as a collapsible the
+   card keeps its own padding, including the 1rem it drops to on narrow
+   viewports. .cardDomains is left out on purpose -- it sets its own 1.5rem
+   below, which this higher-specificity rule would otherwise beat. */
+.cardDasha:not(.collapsible),
+.cardAspects:not(.collapsible),
+.cardNavamsa:not(.collapsible),
+.cardTransits:not(.collapsible),
+.cardAshtakavarga:not(.collapsible) {
   padding: 0;
 }
 
@@ -2383,6 +2399,17 @@
 .cardTransits :global(.transits-panel)::after,
 .cardAshtakavarga :global(.ashtakavarga-panel)::after {
   display: none;
+}
+
+/* The card supplies the inset in the collapsible case, so the panel must not
+   add a second one -- otherwise the body sits further in than the header above
+   it and the section stops lining up with its neighbours. */
+.collapsible.cardDasha :global(.nakshatra-panel),
+.collapsible.cardAspects :global(.aspects-panel),
+.collapsible.cardNavamsa :global(.navamsa-panel),
+.collapsible.cardTransits :global(.transits-panel),
+.collapsible.cardAshtakavarga :global(.ashtakavarga-panel) {
+  padding: 0;
 }
 
 .cardDomains {
