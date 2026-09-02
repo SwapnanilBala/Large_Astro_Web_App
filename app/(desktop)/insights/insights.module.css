@@ -1061,6 +1061,16 @@
 }
 
 /* ── Chart Card (Large) ── */
+
+/* The constellation is square, so at the full content width it also becomes
+   taller than the viewport and you cannot see the whole chart at once. The cap
+   goes on the card rather than the chart inside it, so the card hugs the chart
+   instead of framing it with empty panel either side. Still far larger than the
+   ~595px it had when it shared the row with the glance panel.
+
+   padding: 0 is deliberate here, unlike on the collapsible cards: this card
+   holds nothing but the square SVG, which is meant to bleed to the border. The
+   breathing room around the wheel comes from empty sky inside the artwork. */
 .cardChart {
   composes: card;
   grid-column: 1;
@@ -1069,29 +1079,6 @@
   max-width: min(100%, 840px);
   margin-inline: auto;
   width: 100%;
-}
-
-/* The constellation is square, so at the full content width it also becomes
-   taller than the viewport and you cannot see the whole chart at once. The cap
-   goes on the card rather than the chart inside it, so the card hugs the chart
-   instead of framing it with empty panel either side. Still far larger than the
-   ~595px it had when it shared the row with the glance panel. */
-
-.cardChart :global(.lagna-panel) {
-  margin: 0;
-  padding: 0;
-  border: none;
-  background: none;
-}
-
-.cardChart :global(.lagna-panel)::after {
-  display: none;
-}
-
-.cardChart :global(.lagna-svg--interactive) {
-  width: 100%;
-  height: auto;
-  display: block;
 }
 
 /* ── Planets Card ── */
