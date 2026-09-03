@@ -129,6 +129,55 @@ export const clients = pgTable(
   ],
 );
 
+/**
+ * A permission someone gave, pinned to the wording they were shown.
+ *
+ * Created in 0000, dropped in 0002 as deferred, restored here because
+ * `birth_profiles.consent_record_id` is `not null`: birth facts cannot reach
+ * the database without a row in this table. That makes the gate structural
+ * rather than a rule each new write path has to remember.
+ *
+ * `policy_version` is the point of the table. Knowing that someone agreed is
+ * worth little a year later; knowing *which* wording they agreed to is what
+ * the record is for.
+ */
+export const consentRecords = pgTable(
+  "consent_records",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    workspaceId: uuid("workspace_id").notNull(),
+    clientId: uuid("client_id").notNull(),
+    purpose: varchar("purpose", { length: 80 }).notNull(),
+    policyVersion: varchar("policy_version", { length: 40 }).notNull(),
+    grantedAt: timestamp("granted_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    captureSource: varchar("capture_source", { length: 60 }),
+    evidenceJson: jsonb("evidence_json").$type<JsonObject>().default(sql`'{}'::jsonb`).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    unique("consent_records_workspace_id_id_unique").on(table.workspaceId, table.id),
+    foreignKey({
+      name: "consent_records_workspace_client_fk",
+      columns: [table.workspaceId, table.clientId],
+      foreignColumns: [clients.workspaceId, clients.id],
+    }).onDelete("cascade"),
+    uniqueIndex("consent_records_one_active_purpose_unique")
+      .on(table.clientId, table.purpose)
+      .where(sql`${table.revokedAt} is null`),
+    index("consent_records_client_purpose_granted_idx").on(
+      table.clientId,
+      table.purpose,
+      table.grantedAt,
+    ),
+    check("consent_records_purpose_not_blank", sql`char_length(btrim(${table.purpose})) > 0`),
+    check(
+      "consent_records_revoke_window_check",
+      sql`${table.revokedAt} is null or ${table.revokedAt} >= ${table.grantedAt}`,
+    ),
+  ],
+);
+
 /** Immutable-friendly birth facts; corrections create a new profile/version. */
 export const birthProfiles = pgTable(
   "birth_profiles",
@@ -136,6 +185,12 @@ export const birthProfiles = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     workspaceId: uuid("workspace_id").notNull(),
     clientId: uuid("client_id").notNull(),
+    /**
+     * Not nullable on purpose. Every other guard against storing birth facts
+     * without permission is a line of application code someone can forget to
+     * write; this one is the database refusing the insert.
+     */
+    consentRecordId: uuid("consent_record_id").notNull(),
     label: varchar("label", { length: 80 }).default("Primary").notNull(),
     isPrimary: boolean("is_primary").default(true).notNull(),
     birthDate: date("birth_date", { mode: "string" }).notNull(),
@@ -171,6 +226,20 @@ export const birthProfiles = pgTable(
       columns: [table.workspaceId, table.clientId],
       foreignColumns: [clients.workspaceId, clients.id],
     }).onDelete("cascade"),
+    /**
+     * Deliberately `no action` rather than `restrict`. Deleting a client
+     * cascades to the consent record and to this row in the same statement,
+     * and `restrict` is checked immediately -- it would fire on the consent
+     * row while this one still pointed at it and block a legitimate delete.
+     * `no action` defers the check to the end of the statement, by which time
+     * both rows are gone. Revoking consent is a `revoked_at` write plus a
+     * delete of the birth profile, not a delete of the consent record.
+     */
+    foreignKey({
+      name: "birth_profiles_workspace_consent_fk",
+      columns: [table.workspaceId, table.consentRecordId],
+      foreignColumns: [consentRecords.workspaceId, consentRecords.id],
+    }),
     uniqueIndex("birth_profiles_one_primary_per_client_unique")
       .on(table.clientId)
       .where(sql`${table.isPrimary} = true and ${table.archivedAt} is null`),
