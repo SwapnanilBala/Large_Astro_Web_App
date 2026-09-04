@@ -67,7 +67,7 @@
     "timezoneShort": "Zona horaria",
     "back": "Atrás",
     "continueHint": "Añade tu nombre, fecha y hora de nacimiento para continuar.",
-    "smartFillToggle": "Relleno rapido (pega datos del cliente)",
+    "smartFillToggle": "Relleno rápido (pega tus datos)",
     "smartFillPlaceholder": "Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY",
     "smartFillHint": "Formato: Nombre, fecha, hora, ubicacion (separado por comas)",
     "smartFillButton": "Rellenar formulario",

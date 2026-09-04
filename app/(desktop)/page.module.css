@@ -1115,16 +1115,10 @@
   font-size: clamp(1.08rem, 0.65vw + 0.98rem, 1.32rem) !important;
 }
 
+/* Shape and typography, which are the same whether or not the button is
+   pressable. Only the paint below distinguishes the two states. */
 .primaryAction :global(button) > div:first-child {
   border-radius: 22px !important;
-  background:
-    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.24), transparent 30%),
-    linear-gradient(135deg, #f8e3a8 0%, #d4a574 36%, #6ce1d4 100%) !important;
-  color: #080b12 !important;
-  box-shadow:
-    0 18px 42px rgba(0, 0, 0, 0.30),
-    inset 0 1px 0 rgba(255, 255, 255, 0.38),
-    inset 0 -10px 22px rgba(70, 52, 20, 0.12) !important;
   /* Was 900. Segoe UI has nothing between Bold and Black, so 800 and 900
      measure identically here and this was simply asking for the heaviest face
      available — the wrong one for dark type on a light fill, where irradiation
@@ -1135,6 +1129,26 @@
      this pair is left tangled on purpose — see af2c6d1. */
   font-weight: 700 !important;
   letter-spacing: 0.04em !important;
+}
+
+/* :not(:disabled) is the whole point of this selector.
+   The gold used to be painted on every state, and since the CTA starts
+   disabled on an empty form, the loudest and most pressable-looking thing on
+   the landing page was the one control that does nothing yet. It also silently
+   killed the disabled fill further down this file — #3b3940 at 5.09:1, written
+   deliberately for this exact state, with a comment noting it is "the state
+   the button is in when the page loads" — because no amount of specificity
+   beats !important. Scoping the paint to the enabled button lets that rule do
+   the job it was written for, and makes the gradient mean "ready". */
+.primaryAction :global(button:not(:disabled)) > div:first-child {
+  background:
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.24), transparent 30%),
+    linear-gradient(135deg, #f8e3a8 0%, #d4a574 36%, #6ce1d4 100%) !important;
+  color: #080b12 !important;
+  box-shadow:
+    0 18px 42px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38),
+    inset 0 -10px 22px rgba(70, 52, 20, 0.12) !important;
 }
 
 .primaryAction :global(button:hover) > div:first-child {
@@ -1949,6 +1963,11 @@
   font-weight: 500;
   letter-spacing: -0.045em;
   line-height: 1.01;
+  /* Default wrapping filled the first line and dropped "chart" alone onto the
+     second, which reads as a stray word rather than a title. balance evens the
+     two lines instead. Safe at this length: the algorithm only applies to short
+     blocks, so a longer translated heading falls back to normal wrapping. */
+  text-wrap: balance;
 }
 
 .streamlinedHeader p {
@@ -1983,6 +2002,13 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(21rem, 29rem);
   gap: clamp(1.25rem, 2.6vw, 2.5rem);
+  /* start, not stretch. Stretching was tried and is worse: the row's height
+     comes from the whole left column — answer card plus CTA, hint, key row and
+     quick-fill — not from the answer card alone, so the preview grew to 600px
+     against a 318px card and the dead space it was meant to close roughly
+     doubled. The two cards are already within ~20px of each other at their
+     natural heights; the gap below the preview is the left column's other
+     controls, which is what a sticky sidebar is supposed to sit beside. */
   align-items: start;
 }
 
@@ -2348,9 +2374,16 @@
 
 .trustMicrocopy {
   margin-top: 0.55rem;
-  /* 0.51 is the alpha at which this clears 4.5:1 on the page background. */
-  color: rgba(231, 230, 236, 0.51);
-  font-size: 0.74rem;
+  /* 0.51 was the alpha at which this cleared 4.5:1 — sized at 0.74rem it was
+     the smallest text on the page, on the one sentence that tells someone what
+     happens to their birth date, time and place. Clearing the minimum is not
+     the same as being read.
+     0.82rem is still small print rather than body copy, and stays under the
+     18.66px where WCAG relaxes to 3:1, so it is held to 4.5:1 either way; 0.66
+     buys headroom above that line instead of sitting exactly on it. Measured
+     after the change, not assumed — see the commit. */
+  color: rgba(231, 230, 236, 0.66);
+  font-size: 0.82rem;
 }
 
 /* Whole-form shortcuts sit after the task and read as quiet disclosures. */

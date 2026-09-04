@@ -72,7 +72,7 @@
     "timezoneShort": "TZ",
     "back": "Back",
     "continueHint": "Add your name, birth date, and birth time to continue.",
-    "smartFillToggle": "Quick Fill (Paste client data)",
+    "smartFillToggle": "Quick fill (paste your details)",
     "smartFillPlaceholder": "Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY",
     "smartFillHint": "Format: Name, Date, Time, Location (comma-separated)",
     "smartFillButton": "Fill Form",

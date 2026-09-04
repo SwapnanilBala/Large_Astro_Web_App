@@ -273,9 +273,15 @@ export default function BirthChartTeaser({
   // rail. Embedded teasers only surface chart facts that have actually been
   // unlocked, avoiding a second set of pending/progress UI inside that card.
   const visibleInfoRows = isEmbedded ? infoRows.filter((row) => row.active) : infoRows;
+  /* Nothing in the seal while the embedded preview is dormant. It used to read
+     "Chart Preview", which is 13 characters clamped to two lines at ~10.5px
+     inside a 53px disc — small enough to be texture rather than words, and
+     redundant besides: the panel it sits in is already headed "Live sky build"
+     and says "Add details to wake the chart" right beside it. An empty seal
+     reads as a chart waiting to be drawn, which is what it is. */
   const centerName =
     isEmbedded && previewState === "dormant"
-      ? t("home.chartPreview")
+      ? null
       : getDisplayName(name, t("birthChartTeaser.awaitingName"));
   const centerMeta = isEmbedded
     ? previewState === "dormant"
@@ -360,7 +366,7 @@ export default function BirthChartTeaser({
               </span>
             ))}
             <div className={styles.centerSeal}>
-              <span className={styles.centerName}>{centerName}</span>
+              {centerName && <span className={styles.centerName}>{centerName}</span>}
               {centerMeta && <span className={styles.centerMeta}>{centerMeta}</span>}
             </div>
           </div>
