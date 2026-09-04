@@ -233,8 +233,6 @@
 
 .planetMarker {
   position: absolute;
-  top: 50%;
-  left: 50%;
   display: grid;
   width: 2.18rem;
   height: 2.18rem;
@@ -247,7 +245,20 @@
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 50%;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-  transform: translate(-50%, -50%) rotate(var(--angle)) translateY(calc(var(--radius) * -1)) rotate(calc(var(--angle) * -1));
+  /* Polar placement, resolved against the ring rather than the marker.
+     This was `rotate(--angle) translateY(calc(var(--radius) * -1)) rotate(...)`,
+     but a percentage inside translateY resolves against the *element's own*
+     height — 2.18rem here, not the dial. Every marker therefore landed
+     7-11px from the centre instead of the 17-26px its radius asked for, and
+     all four 30px discs sat in a heap in the middle of the ring. Measured:
+     30.4px x 0.33 = 10.0px, exactly where SUN was.
+     Percentages in `left`/`top` resolve against the containing block, which is
+     the ring, so the radii mean what they say. sin/cos keep the same geometry
+     as the old rotate pair — 0deg is 12 o'clock, increasing clockwise — and
+     dropping the counter-rotation leaves the labels upright by construction. */
+  left: calc(50% + var(--radius) * sin(var(--angle)));
+  top: calc(50% - var(--radius) * cos(var(--angle)));
+  transform: translate(-50%, -50%);
   transition: color 0.24s ease, border-color 0.24s ease, box-shadow 0.24s ease, background 0.24s ease;
 }
 

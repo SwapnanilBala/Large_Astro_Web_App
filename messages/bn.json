@@ -67,7 +67,7 @@
     "timezoneShort": "সময় অঞ্চল",
     "back": "পিছনে",
     "continueHint": "এগিয়ে যেতে আপনার নাম, জন্মতারিখ ও জন্মসময় যোগ করুন।",
-    "smartFillToggle": "দ্রুত পূরণ (ক্লায়েন্ট তথ্য পেস্ট করুন)",
+    "smartFillToggle": "দ্রুত পূরণ (আপনার তথ্য পেস্ট করুন)",
     "smartFillPlaceholder": "Jane Doe, 14 Mar 1995, 3:45 PM, Brooklyn NY",
     "smartFillHint": "ফরম্যাট: নাম, তারিখ, সময়, স্থান (কমা দিয়ে আলাদা)",
     "smartFillButton": "ফর্ম পূরণ",
