@@ -40,6 +40,26 @@ function failed(origin: string, reason: string) {
   return NextResponse.redirect(url, 303);
 }
 
+/**
+ * Record why a sign-in failed, server-side.
+ *
+ * The visitor gets a coarse code because naming the step helps somebody
+ * probing the flow. That reasoning stops at the browser: swallowing the
+ * underlying error in the logs too leaves an operator staring at
+ * "signin_failed" with no way to tell a missing table from a rejected token,
+ * which is exactly the position this flow was in.
+ */
+function logAuthFailure(reason: string, error: unknown, context?: Record<string, unknown>) {
+  console.error(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route: "/api/auth/google/callback",
+    reason,
+    error: error instanceof Error ? error.message : String(error),
+    stack: error instanceof Error ? error.stack : undefined,
+    ...context,
+  }));
+}
+
 /** Handshake cookies are single-use; clear them however this ends. */
 function clearHandshake(response: NextResponse) {
   for (const name of HANDSHAKE_COOKIES) {
@@ -86,7 +106,8 @@ export async function GET(request: NextRequest) {
   let identity;
   try {
     identity = await exchangeCode(config, code, codeVerifier, nonce);
-  } catch {
+  } catch (error) {
+    logAuthFailure("exchange_failed", error, { redirectUri: config.redirectUri });
     return clearHandshake(failed(origin, "exchange_failed"));
   }
 
@@ -96,7 +117,21 @@ export async function GET(request: NextRequest) {
     return clearHandshake(failed(origin, "email_unverified"));
   }
 
-  const deviceId = readDeviceId(request.cookies.get(DEVICE_COOKIE)?.value);
+  /* `readDeviceId` throws when DEVICE_ID_SECRET is unset or too short, and it
+     is only reached when the visitor already carries an `astro_did` cookie —
+     so a deployment missing that one variable turned the last step of a
+     successful sign-in into an unhandled 500, on returning visitors only.
+     Nothing else here is allowed to fail that way, and this should not either:
+     without a trustworthy secret there is simply no device to attribute, which
+     `signInWithProvider` already accepts as null. The cost is that the
+     anonymous workspace is not claimed, and that is the safe direction to
+     fail — it never merges one person's charts into another's account. */
+  let deviceId: string | null = null;
+  try {
+    deviceId = readDeviceId(request.cookies.get(DEVICE_COOKIE)?.value);
+  } catch (error) {
+    logAuthFailure("device_id_unreadable", error);
+  }
 
   try {
     const result = await signInWithProvider(
@@ -127,7 +162,8 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(new URL(destination, origin), 303);
     response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
     return clearHandshake(response);
-  } catch {
+  } catch (error) {
+    logAuthFailure("signin_failed", error, { claimedDevice: deviceId !== null });
     return clearHandshake(failed(origin, "signin_failed"));
   }
 }
