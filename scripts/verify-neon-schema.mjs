@@ -11,6 +11,10 @@ if (!databaseUrl) {
 
 const expectedTables = [
   "assets",
+  "auth_credentials",
+  "auth_identities",
+  "auth_sessions",
+  "auth_users",
   "birth_profiles",
   "chart_aspects",
   "chart_calculations",
