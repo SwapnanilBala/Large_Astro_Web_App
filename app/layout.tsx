@@ -23,7 +23,41 @@ import { ProfileProvider } from "@/lib/profile-context";
  * the mobile one is not forced into the desktop page structure.
  */
 
+/**
+ * Absolute base for Open Graph, Twitter and canonical URLs.
+ *
+ * The concrete effect today is on the four `/m` pages, which each declare an
+ * `alternates.canonical` pointing at their desktop twin. Without a base those
+ * emit relative — `<link rel="canonical" href="/login">` — and a canonical is
+ * meant to name one absolute URL, which is the whole point of pointing a
+ * handset page at its desktop equivalent. With a base they resolve to
+ * `https://…/login`. It is also what any `openGraph.images` added later will
+ * resolve against, and Next does warn about a missing base in that case.
+ *
+ * `APP_ORIGIN` is reused rather than given a sibling variable because it is
+ * already defined as the canonical origin this app is reached on — the same
+ * value the OAuth redirect URI is built from. One variable means the two cannot
+ * drift into disagreeing about what this site is called.
+ *
+ * `VERCEL_URL` is the per-deployment fallback so a preview build describes
+ * itself rather than production; it arrives without a scheme. A malformed value
+ * falls back rather than throwing: this is cosmetic metadata, and it should not
+ * be able to take every route down when a canonical URL would merely be wrong.
+ */
+function resolveMetadataBase(): URL {
+  const configured =
+    process.env.APP_ORIGIN ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "");
+
+  try {
+    return new URL((configured || "http://localhost:7001").replace(/\/+$/, ""));
+  } catch {
+    return new URL("http://localhost:7001");
+  }
+}
+
 export const metadata: Metadata = {
+  metadataBase: resolveMetadataBase(),
   title: "Lagna Atelier",
   description: "Swiss Ephemeris astrology intelligence workspace",
   manifest: "/manifest.json",
