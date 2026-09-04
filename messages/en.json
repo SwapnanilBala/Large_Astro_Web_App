@@ -547,5 +547,20 @@
     "createFailed": "Could not create profile.",
     "renameFailed": "Could not rename profile.",
     "deleteFailed": "Could not delete profile."
+  },
+  "signIn": {
+    "divider": "or sign in",
+    "google": "Continue with Google",
+    "googleBusy": "Opening Google…",
+    "note": "Signing in keeps your charts when you switch device. Profiles on this device stay where they are.",
+    "errorHeading": "Sign-in didn’t finish",
+    "error_not_configured": "Google sign-in isn’t set up on this server yet.",
+    "error_declined": "That sign-in was cancelled. If the app is still in testing, the account also has to be on its test-user list.",
+    "error_expired": "That attempt took too long. Try again.",
+    "error_state_mismatch": "That sign-in couldn’t be verified. Start again from this page.",
+    "error_exchange_failed": "Google couldn’t complete the sign-in. Try again.",
+    "error_email_unverified": "Google hasn’t verified the email on that account, so it can’t be used to sign in.",
+    "error_signin_failed": "Something went wrong finishing sign-in. Try again.",
+    "error_unknown": "Sign-in didn’t finish. Try again."
   }
 }
