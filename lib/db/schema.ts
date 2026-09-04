@@ -71,6 +71,111 @@ export const workspaceMembers = pgTable(
   ],
 );
 
+/**
+ * A person who can sign in.
+ *
+ * Deliberately not joined to `workspaces` by a foreign key. Membership already
+ * has a table — `workspace_members`, whose `auth_user_id` is a loose varchar so
+ * the auth provider stays replaceable — and a signed-in person is written there
+ * as `user:<id>` exactly the way an anonymous device is written as `anon:<id>`.
+ * That is what lets someone sign in and keep the workspace their device already
+ * built: a second member row, not a migration.
+ */
+export const authUsers = pgTable(
+  "auth_users",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    email: varchar("email", { length: 320 }).notNull(),
+    emailVerifiedAt: timestamp("email_verified_at", { withTimezone: true }),
+    displayName: varchar("display_name", { length: 120 }),
+    ...timestamps(),
+    disabledAt: timestamp("disabled_at", { withTimezone: true }),
+  },
+  (table) => [
+    /* Case-insensitive: nobody thinks Sam@ and sam@ are two accounts, and
+       letting both exist is an account-takeover trick, not a feature. */
+    uniqueIndex("auth_users_email_unique").on(sql`lower(${table.email})`),
+    check("auth_users_email_shape", sql`${table.email} ~ '^[^@[:space:]]+@[^@[:space:]]+\\.[^@[:space:]]+$'`),
+  ],
+);
+
+/**
+ * A password, for the people who use one. Absent for Google-only accounts,
+ * which is why it is its own table rather than a nullable column.
+ */
+export const authCredentials = pgTable(
+  "auth_credentials",
+  {
+    userId: uuid("user_id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    /** `scrypt$N$r$p$salt$hash` — self-describing, so cost can rise later. */
+    passwordHash: text("password_hash").notNull(),
+    passwordUpdatedAt: timestamp("password_updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    failedAttempts: integer("failed_attempts").default(0).notNull(),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
+  },
+  (table) => [
+    check("auth_credentials_failed_attempts_check", sql`${table.failedAttempts} >= 0`),
+  ],
+);
+
+/** A link to an external provider account. One row per provider per person. */
+export const authIdentities = pgTable(
+  "auth_identities",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    provider: varchar("provider", { length: 40 }).notNull(),
+    /** The provider's stable subject claim — Google's `sub`, never the email. */
+    providerAccountId: varchar("provider_account_id", { length: 255 }).notNull(),
+    email: varchar("email", { length: 320 }),
+    ...timestamps(),
+  },
+  (table) => [
+    uniqueIndex("auth_identities_provider_account_unique").on(
+      table.provider,
+      table.providerAccountId,
+    ),
+    uniqueIndex("auth_identities_one_per_provider_unique").on(table.userId, table.provider),
+    check("auth_identities_provider_check", sql`${table.provider} in ('google')`),
+  ],
+);
+
+/**
+ * A signed-in session.
+ *
+ * Opaque server-side tokens rather than a JWT, so signing out actually ends the
+ * session. Only the SHA-256 of the token is stored: a leaked database backup
+ * then yields no usable cookies.
+ */
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    tokenHash: varchar("token_hash", { length: 64 }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    lastSeenAt: timestamp("last_seen_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true }),
+    userAgent: varchar("user_agent", { length: 255 }),
+    ipAddress: varchar("ip_address", { length: 45 }),
+  },
+  (table) => [
+    uniqueIndex("auth_sessions_token_hash_unique").on(table.tokenHash),
+    index("auth_sessions_user_expiry_idx").on(table.userId, table.expiresAt),
+    check("auth_sessions_token_hash_check", sql`${table.tokenHash} ~ '^[0-9a-f]{64}$'`),
+    check("auth_sessions_window_check", sql`${table.expiresAt} > ${table.createdAt}`),
+  ],
+);
+
 /** A person whose contact information and astrology records are managed. */
 export const clients = pgTable(
   "clients",
