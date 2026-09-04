@@ -9,15 +9,25 @@ import { resolveProfileDestination } from "@/lib/profile-redirect";
 import PageTransition from "@/app/components/PageTransition";
 import BackButton from "@/app/components/BackButton";
 import AuthAmbient from "./AuthAmbient";
+import GoogleSignIn from "./GoogleSignIn";
 import ZodiacFloater from "./ZodiacFloater";
 import styles from "./login.module.css";
 
 type ProfilePickerClientProps = {
   returnTo?: string;
   skyLine?: string;
+  /** False when the server has no Google credentials configured. */
+  googleEnabled?: boolean;
+  /** Error code the OAuth callback bounced back with, if any. */
+  signInError?: string;
 };
 
-export default function ProfilePickerClient({ returnTo, skyLine }: ProfilePickerClientProps) {
+export default function ProfilePickerClient({
+  returnTo,
+  skyLine,
+  googleEnabled = false,
+  signInError,
+}: ProfilePickerClientProps) {
   const {
     profiles,
     activeProfile,
@@ -131,6 +141,12 @@ export default function ProfilePickerClient({ returnTo, skyLine }: ProfilePicker
             <h1 className={styles.heading}>{t("profiles.heading")}</h1>
             <p className={styles.lead}>{t("profiles.lead")}</p>
           </div>
+
+          <GoogleSignIn
+            enabled={googleEnabled}
+            errorCode={signInError || undefined}
+            returnTo={returnTo}
+          />
 
           <ul className={styles.profileList}>
             {profiles.map((profile) => {

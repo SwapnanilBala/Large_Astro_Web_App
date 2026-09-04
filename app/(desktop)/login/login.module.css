@@ -651,3 +651,69 @@
   border-color: rgba(200, 155, 60, 0.75);
   box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.15);
 }
+
+/* ── Google sign-in ── */
+
+/* Deliberately not .submitBtn. That gradient is this screen's primary action,
+   and giving the same weight to two buttons makes neither read as the main
+   one. Google's own guidance also wants a plain surface behind their mark. */
+.googleBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 15px 24px;
+  border-radius: 14px;
+  border: 1px solid rgba(232, 237, 247, 0.22);
+  background: rgba(232, 237, 247, 0.06);
+  color: #EAEDF3;
+  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.28rem;
+  font-weight: 650;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;
+}
+
+.googleBtn:hover:not(:disabled) {
+  border-color: rgba(232, 237, 247, 0.4);
+  background: rgba(232, 237, 247, 0.1);
+  transform: translateY(-2px);
+}
+
+.googleBtn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition: transform 80ms ease-out;
+}
+
+.googleBtn:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+}
+
+.googleBtn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+  transform: none;
+}
+
+.googleBtn svg {
+  flex: none;
+}
+
+.googleNote {
+  margin: 0.7rem 0 0;
+  color: var(--ink-soft, rgba(234, 237, 243, 0.62));
+  font-size: 1.05rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .googleBtn,
+  .googleBtn:hover:not(:disabled),
+  .googleBtn:active:not(:disabled) {
+    transition: none;
+    transform: none;
+  }
+}
