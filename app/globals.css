@@ -2990,6 +2990,32 @@ label:has(.autocomplete-wrapper.is-open) {
   transform: translateY(0) scale(0.97);
 }
 
+/* Sign out sits beside the profile pill rather than inside it: the pill is a
+   link to the profile switcher, and nesting a button in a link is both invalid
+   and a coin toss over which one a click lands on. Quieter than the pill by
+   design — signing out is not the action anyone came to the navbar for. */
+.navbar-signout {
+  font-family: inherit;
+  font-size: 1.1rem;
+  color: #8B8FA3;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: border-color 250ms ease, color 250ms ease, background 250ms ease;
+}
+
+.navbar-signout:hover {
+  color: #EAEDF3;
+  border-color: rgba(240, 183, 84, 0.45);
+  background: rgba(240, 183, 84, 0.06);
+}
+
+.navbar-signout:active {
+  transform: scale(0.97);
+}
+
 
 /* ── DateTime Field Upgrade ──────────────────── */
 
@@ -4556,14 +4582,38 @@ a:focus-visible {
 
 .drawer-user-info {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  /* Column since an account adds an email line under the name; with the single
+     child it had before, the axis made no visual difference. */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
   padding: 0 0.85rem;
 }
 
 .drawer-username {
   color: var(--ink-main);
   font-size: 1rem;
+}
+
+.drawer-account-email {
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  /* A long address must not widen the drawer past the viewport. */
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Matches .drawer-link, which is an <a> — this is a <button>, so the font and
+   alignment browsers impose on form controls have to be undone. */
+.drawer-signout {
+  font-family: inherit;
+  width: 100%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
 }
 
 

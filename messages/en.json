@@ -7,7 +7,8 @@
     "close": "Close",
     "calendar": "Calendar",
     "switchProfile": "Switch profile",
-    "noProfile": "No profile"
+    "noProfile": "No profile",
+    "signOut": "Sign out"
   },
   "home": {
     "kicker": "Astro Intelligence Studio",
