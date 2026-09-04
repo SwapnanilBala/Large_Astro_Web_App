@@ -4,12 +4,14 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
+import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { readChartHistory } from "@/lib/chart-history-store";
 import { listSavedCharts } from "@/lib/workspace-store";
 
 export default function Navbar() {
   const { activeProfile, isLoading, profileId } = useProfile();
+  const { account, signOut } = useAccount();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -214,10 +216,26 @@ export default function Navbar() {
                   {t("navbar.myChart")}
                 </Link>
               )}
+              {/* Signed in, the account is the identity on show; the profile
+                  switcher stays reachable underneath because profiles are
+                  still what charts are filed under. */}
               <Link href="/login" className="navbar-profile-link">
-                <strong>{activeProfile?.display_name ?? t("navbar.noProfile")}</strong>
+                <strong>
+                  {account
+                    ? account.displayName ?? account.email
+                    : activeProfile?.display_name ?? t("navbar.noProfile")}
+                </strong>
                 <span className="navbar-profile-switch">{t("navbar.switchProfile")}</span>
               </Link>
+              {account && (
+                <button
+                  type="button"
+                  className="navbar-signout"
+                  onClick={() => void signOut()}
+                >
+                  {t("navbar.signOut")}
+                </button>
+              )}
             </div>
           </div>
 
@@ -290,8 +308,17 @@ export default function Navbar() {
         <div className="drawer-auth">
           <div className="drawer-user-info">
             <strong className="drawer-username">
-              {activeProfile?.display_name ?? t("navbar.noProfile")}
+              {account
+                ? account.displayName ?? account.email
+                : activeProfile?.display_name ?? t("navbar.noProfile")}
             </strong>
+            {/* The email is worth repeating here even when it is also the name
+                above: on a handset this drawer is the only place the account is
+                visible at all, and "which Google account is this?" is the
+                question it exists to answer. */}
+            {account && account.displayName && (
+              <span className="drawer-account-email">{account.email}</span>
+            )}
           </div>
           <Link
             href="/login"
@@ -301,6 +328,18 @@ export default function Navbar() {
           >
             {t("navbar.switchProfile")}
           </Link>
+          {account && (
+            <button
+              type="button"
+              className="drawer-link drawer-signout"
+              onClick={() => {
+                closeDrawer();
+                void signOut();
+              }}
+            >
+              {t("navbar.signOut")}
+            </button>
+          )}
         </div>
       </aside>
     </>

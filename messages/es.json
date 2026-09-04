@@ -7,7 +7,8 @@
     "close": "Cerrar",
     "calendar": "Calendar",
     "switchProfile": "Cambiar de perfil",
-    "noProfile": "Sin perfil"
+    "noProfile": "Sin perfil",
+    "signOut": "Cerrar sesión"
   },
   "home": {
     "kicker": "Motor de Inteligencia Védica",
