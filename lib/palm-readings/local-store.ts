@@ -1,9 +1,8 @@
 /**
  * Palm readings persisted on the device, scoped to a local profile.
  *
- * Replaces the former `/api/palm-readings` Supabase CRUD routes. The analysis
- * itself still runs server-side (`/api/palm-reading`); only the saved copy
- * lives here.
+ * Replaces the former `/api/palm-readings` CRUD routes. The analysis itself
+ * still runs server-side (`/api/palm-reading`); only the saved copy lives here.
  *
  * Storage note: a raw palm photo data URL runs to several megabytes, and the
  * whole localStorage origin quota is typically 5–10MB. Saved images are
