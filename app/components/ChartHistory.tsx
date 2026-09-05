@@ -4,7 +4,11 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
-import { readChartHistory, type ChartHistoryEntry } from "@/lib/chart-history-store";
+import {
+  readChartHistory,
+  recordChartVisit,
+  type ChartHistoryEntry,
+} from "@/lib/chart-history-store";
 import { HiOutlineSparkles } from "react-icons/hi2";
 
 type ChartHistoryProps = {
@@ -104,7 +108,70 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
   useEffect(() => {
     // Read on every profile change, so a switch never shows the previous
     // profile's charts.
-    setEntries(readChartHistory(profileId));
+    const local = readChartHistory(profileId);
+    setEntries(local);
+
+    /*
+     * Hydration: the browser is empty, so ask the account whether it is.
+     *
+     * Only when empty, and that is a deliberate limit rather than an
+     * optimisation. Charts are stored per workspace — one device or one
+     * signed-in account — while this list is per local profile, and the two
+     * do not nest. Merging the account's charts into a profile that already
+     * has its own would put one person's charts under another's name. An
+     * empty list has no such ambiguity: whatever the account holds is the
+     * best answer available, and this is the case that makes signing in on a
+     * second device worth doing.
+     */
+    if (local.length > 0 || !profileId) return;
+
+    let cancelled = false;
+
+    const hydrate = async () => {
+      try {
+        const response = await fetch("/api/sync/charts", {
+          headers: { Accept: "application/json" },
+          credentials: "same-origin",
+        });
+        if (!response.ok || cancelled) return;
+
+        const { charts } = (await response.json()) as {
+          charts: {
+            name: string;
+            city: string;
+            birthDate: string;
+            ascendantSign: string | null;
+            queryString: string;
+            savedAt: string;
+          }[];
+        };
+        if (cancelled || charts.length === 0) return;
+
+        /* Oldest first, because recordChartVisit prepends — this leaves the
+           newest chart at the head, matching how local history reads. */
+        for (const chart of [...charts].reverse()) {
+          recordChartVisit(profileId, {
+            name: chart.name,
+            city: chart.city,
+            birthDate: chart.birthDate,
+            ascendantSign: chart.ascendantSign ?? "",
+            queryString: chart.queryString,
+            savedAt: chart.savedAt,
+          });
+        }
+
+        if (!cancelled) setEntries(readChartHistory(profileId));
+      } catch {
+        /* Offline, or the account store is down. The welcome panel is the
+           honest thing to show; it is what a genuinely new visitor sees. */
+      }
+    };
+
+    void hydrate();
+
+    return () => {
+      cancelled = true;
+    };
   }, [profileId]);
 
   if (isLoading) {

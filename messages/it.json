@@ -427,7 +427,6 @@
   "profiles": {
     "kicker": "Questo dispositivo",
     "heading": "Scegli un profilo",
-    "lead": "I profili tengono separati i temi e le letture salvati su questo dispositivo. Niente esce da questo browser.",
     "active": "Attivo",
     "opening": "Apertura…",
     "addDivider": "o aggiungi qualcuno",
