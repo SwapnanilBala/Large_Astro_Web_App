@@ -1,7 +1,8 @@
 # Making an account carry data
 
-Status: **proposal, nothing built.** Written 2026-09-04, after the session-read
-work landed. Nothing here is implemented until it is approved.
+Status: **steps 0-2 built on 2026-09-05.** Written 2026-09-04 as a proposal;
+what shipped is marked per step under "Order of work". Steps 3-5 are still
+proposals and nothing about them is implemented.
 
 Amended 2026-09-05, on direction that changes the target:
 
@@ -188,23 +189,39 @@ route named after a deleted one invites the wrong reading.)
 
 ## Order of work
 
-0. **The consent grant.** One insert into `consent_records`, the prompt that
-   produces it, and the `/login` copy change that stops promising the opposite.
-   Nothing else can be built first: `birth_profiles.consent_record_id` is
-   `NOT NULL`, so step 1 does not compile a working insert without it. Small,
-   and it is the step that decides whether the rest is allowed to run.
-1. **Charts only, guests included.** `clients` + `birth_profiles` +
-   `chart_calculations`, keyed on whatever workspace the request resolves to —
-   `anon:` or `user:`, the insert does not care. This exercises the whole path
-   end to end, and doing it for both subjects from the start is what keeps
-   guest mode from becoming a second code path bolted on later.
-2. **Hydrate on sign-in.** When a signed-in device has no local charts, pull the
-   account's. This is where "my charts followed me" actually becomes true.
+0. **The consent grant.** ✅ `lib/sync/consent.ts`,
+   `app/components/ChartSyncPrompt.tsx`, and the `/login` copy. The
+   post-decline nudge is a one-shot that cannot fire in the view the decline
+   happened in, and it gates nothing.
+1. **Charts only, guests included.** ✅ `lib/sync/charts.ts` and
+   `POST /api/sync/charts`. Keyed on the workspace the request resolves to —
+   `anon:` or `user:`, the insert does not care — so guest mode never became a
+   second code path. Idempotent on fingerprints, and a corrected birth time
+   supersedes the profile rather than overwriting it.
+2. **Hydrate on sign-in.** ✅ `GET /api/sync/charts`, read by
+   `app/components/ChartHistory.tsx` when local history is empty. Empty only:
+   charts are per workspace and that list is per local profile, so merging
+   them would file one person's charts under another's name. Widening this is
+   what step 3 has to solve first.
 3. **Adopt existing local data.** On first sign-in, push what is already on the
    device. Without this, everyone's current work looks lost the moment they sign
    in — this cannot be deferred past step 2. Note that a guest who consented has
    already pushed, and `signInWithProvider` claims their workspace, so for them
    this step is a no-op rather than a migration.
+
+   **Not built.** A visitor who declined, collected charts locally and then
+   changes their mind still has nothing pushed but the chart they happen to be
+   looking at. The rest of their history needs a deliberate backfill.
+
+   ### The /m tree is not covered
+
+   `app/m/insights` records no chart history at all — not locally, and so not
+   remotely either. That predates this work: `recordChartVisit` has only ever
+   been called from the desktop tree. A handset visitor therefore gets no
+   persistence of any kind, and closing that needs the local saver first, plus
+   the prompt and its strings in the mobile bundle — which the mobile layout
+   treats as a real cost, since its catalogue rides in the layout and every
+   handset page pays for a namespace added to it.
 4. **Comparisons**, into `compatibility_reports`. Nothing stores a comparison
    locally any more, so this step now starts with deciding where a saved one
    lives at all — the table is ready, the client side is not.
