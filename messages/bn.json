@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "আমার কুণ্ডলী",
     "menu": "মেনু",
-    "close": "বন্ধ করুন",
     "switchProfile": "প্রোফাইল বদলান",
     "noProfile": "কোনো প্রোফাইল নেই",
     "signOut": "সাইন আউট"
@@ -414,9 +413,6 @@
     "ariaLabel": "ভূমিকা অ্যানিমেশন। এড়াতে ক্লিক করুন বা Escape চাপুন।",
     "tagline": "আপনার কসমিক নকশা, ডিকোড করা",
     "skipHint": "এড়াতে ক্লিক করুন বা Esc চাপুন"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "{planet} দ্বারা শাসিত"
   },
   "planetNames": {
     "sun": "সূর্য",

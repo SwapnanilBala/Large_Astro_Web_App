@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "Ma Carte",
     "menu": "Menu",
-    "close": "Fermer",
     "switchProfile": "Changer de profil",
     "noProfile": "Aucun profil",
     "signOut": "Se déconnecter"
@@ -414,9 +413,6 @@
     "ariaLabel": "Animation d introduction. Cliquez ou appuyez sur Echap pour passer.",
     "tagline": "Votre plan cosmique, decode",
     "skipHint": "Cliquez ou appuyez sur Echap pour passer"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "Gouverne par {planet}"
   },
   "planetNames": {
     "sun": "Soleil",

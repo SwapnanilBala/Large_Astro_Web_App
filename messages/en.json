@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "My Chart",
     "menu": "Menu",
-    "close": "Close",
     "switchProfile": "Switch profile",
     "noProfile": "No profile",
     "signOut": "Sign out"
@@ -494,9 +493,6 @@
     "ariaLabel": "Onboarding intro animation. Click or press Escape to skip.",
     "tagline": "Your Cosmic Blueprint, Decoded",
     "skipHint": "Click or press Esc to skip"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "Ruled by {planet}"
   },
   "planetNames": {
     "sun": "Sun",

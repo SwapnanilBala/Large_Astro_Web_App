@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "मेरी कुंडली",
     "menu": "मेनू",
-    "close": "बंद करें",
     "switchProfile": "प्रोफ़ाइल बदलें",
     "noProfile": "कोई प्रोफ़ाइल नहीं",
     "signOut": "साइन आउट"
@@ -414,9 +413,6 @@
     "ariaLabel": "परिचय एनीमेशन। छोड़ने के लिए क्लिक करें या Escape दबाएं।",
     "tagline": "आपका कॉस्मिक ब्लूप्रिंट, डिकोडेड",
     "skipHint": "छोड़ने के लिए क्लिक करें या Esc दबाएं"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "{planet} द्वारा शासित"
   },
   "planetNames": {
     "sun": "सूर्य",

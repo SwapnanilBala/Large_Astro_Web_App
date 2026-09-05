@@ -2,8 +2,9 @@
  * Zod validation schemas for all API inputs.
  *
  * Each schema provides runtime validation **and** TypeScript type inference
- * via `z.infer<typeof Schema>`, replacing the hand-written validators in
- * lib/api-validation.ts.
+ * via `z.infer<typeof Schema>`. It replaced a set of hand-written validators
+ * in lib/api-validation.ts, which no route imported by the end and which has
+ * since been deleted.
  */
 
 import { z } from "zod";

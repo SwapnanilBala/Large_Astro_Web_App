@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "Mi Carta",
     "menu": "Menú",
-    "close": "Cerrar",
     "switchProfile": "Cambiar de perfil",
     "noProfile": "Sin perfil",
     "signOut": "Cerrar sesión"
@@ -414,9 +413,6 @@
     "ariaLabel": "Animacion de introduccion. Haz clic o presiona Escape para saltar.",
     "tagline": "Tu mapa cosmico, decodificado",
     "skipHint": "Haz clic o presiona Esc para saltar"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "Regido por {planet}"
   },
   "planetNames": {
     "sun": "Sol",

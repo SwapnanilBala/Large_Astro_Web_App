@@ -3,7 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "La Mia Carta",
     "menu": "Menu",
-    "close": "Chiudi",
     "switchProfile": "Cambia profilo",
     "noProfile": "Nessun profilo",
     "signOut": "Esci"
@@ -414,9 +413,6 @@
     "ariaLabel": "Animazione introduttiva. Fai clic o premi Escape per saltare.",
     "tagline": "Il tuo disegno cosmico, decodificato",
     "skipHint": "Fai clic o premi Esc per saltare"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "Governato da {planet}"
   },
   "planetNames": {
     "sun": "Sole",
