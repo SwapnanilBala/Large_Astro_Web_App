@@ -1,8 +1,17 @@
 # Making an account carry data
 
-Status: **steps 0-2 built on 2026-09-05.** Written 2026-09-04 as a proposal;
-what shipped is marked per step under "Order of work". Steps 3-5 are still
-proposals and nothing about them is implemented.
+Status: **steps 0-3 built on 2026-09-05, and verified in production.**
+Written 2026-09-04 as a proposal; what shipped is marked per step under "Order
+of work". Steps 4-5 are still proposals and nothing about them is implemented.
+
+Checked against the deployment on 2026-09-05, not just localhost: a guest push
+created its workspace, a second identical push was a no-op, a push with no
+consent block was refused, and withdrawing deleted the chart and kept the
+revoked grant. Production shares the Neon branch `.env.local` points at, and
+`DATABASE_URL` and `DEVICE_ID_SECRET` are both configured there. Worth knowing
+for the next check: `GET /api/sync/charts` returns 200 with an empty list on a
+cookieless request *without reaching Postgres at all*, so that response proves
+the route is deployed and nothing about the database.
 
 Amended 2026-09-05, on direction that changes the target:
 
@@ -203,25 +212,25 @@ route named after a deleted one invites the wrong reading.)
    charts are per workspace and that list is per local profile, so merging
    them would file one person's charts under another's name. Widening this is
    what step 3 has to solve first.
-3. **Adopt existing local data.** On first sign-in, push what is already on the
-   device. Without this, everyone's current work looks lost the moment they sign
-   in — this cannot be deferred past step 2. Note that a guest who consented has
-   already pushed, and `signInWithProvider` claims their workspace, so for them
-   this step is a no-op rather than a migration.
+3. **Adopt existing local data.** ✅ `lib/chart-sync-backfill.ts`, run from
+   the /insights grant and from the /login switch. A first yes now pushes the
+   active profile's whole history, not only the chart on screen. A guest who
+   consented has already pushed and `signInWithProvider` claims their
+   workspace, so for them signing in is a no-op rather than a migration.
 
-   **Not built.** A visitor who declined, collected charts locally and then
-   changes their mind still has nothing pushed but the chart they happen to be
-   looking at. The rest of their history needs a deliberate backfill.
+   This is also what made hydration safe to reason about. "History is empty"
+   was never on its own permission to fill it: a second profile on a shared
+   browser is empty too and resolves to the same device workspace. An account
+   now hydrates anywhere, a device only while it holds one profile.
 
-   ### The /m tree is not covered
+   ### /m is covered as of 2026-09-05
 
-   `app/m/insights` records no chart history at all — not locally, and so not
-   remotely either. That predates this work: `recordChartVisit` has only ever
-   been called from the desktop tree. A handset visitor therefore gets no
-   persistence of any kind, and closing that needs the local saver first, plus
-   the prompt and its strings in the mobile bundle — which the mobile layout
-   treats as a real cost, since its catalogue rides in the layout and every
-   handset page pays for a namespace added to it.
+   `app/m/insights` recorded no chart history at all — not locally, so not
+   remotely either, because `recordChartVisit` had only ever been called from
+   the desktop tree. `app/m/insights/mobile-chart-sync.tsx` is now the local
+   saver and the consent card in one component, styled against the mobile
+   tokens rather than pulling globals.css onto a handset, and carrying only
+   the nine strings the card renders.
 4. **Comparisons**, into `compatibility_reports`. Nothing stores a comparison
    locally any more, so this step now starts with deciding where a saved one
    lives at all — the table is ready, the client side is not.
