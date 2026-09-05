@@ -205,12 +205,6 @@ export default function Navbar() {
           {/* Desktop profile section - hidden on mobile */}
           <div className="navbar-desktop-auth">
             <div className="user-badge">
-              <Link href="/workspace" className="navbar-chart-link">
-                {t("navbar.workspace")}
-              </Link>
-              <Link href="/calendar" className="navbar-chart-link">
-                {t("navbar.calendar")}
-              </Link>
               {lastChartUrl && (
                 <Link href={lastChartUrl} className="navbar-chart-link">
                   {t("navbar.myChart")}
@@ -290,12 +284,6 @@ export default function Navbar() {
         </div>
 
         <nav className="drawer-nav">
-          <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
-            {t("navbar.workspace")}
-          </Link>
-          <Link href="/calendar" className="drawer-link" onClick={closeDrawer}>
-            {t("navbar.calendar")}
-          </Link>
           {lastChartUrl && (
             <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
               {t("navbar.myChart")}

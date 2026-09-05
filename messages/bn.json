@@ -2,10 +2,8 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "আমার কুণ্ডলী",
-    "workspace": "ওয়ার্কস্পেস",
     "menu": "মেনু",
     "close": "বন্ধ করুন",
-    "calendar": "Calendar",
     "switchProfile": "প্রোফাইল বদলান",
     "noProfile": "কোনো প্রোফাইল নেই",
     "signOut": "সাইন আউট"
@@ -363,20 +361,6 @@
     "generating": "সামঞ্জস্য বিশ্লেষণ তৈরি হচ্ছে...",
     "error": "কিছু ভুল হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।"
   },
-  "workspace": {
-    "loading": "আপনার সংরক্ষিত জ্যোতিষ ওয়ার্কস্পেস লোড হচ্ছে...",
-    "exportPreparing": "রপ্তানি প্রস্তুত হচ্ছে...",
-    "exportButton": "ওয়ার্কস্পেস রপ্তানি",
-    "unknownCity": "অজানা শহর",
-    "saving": "সংরক্ষণ হচ্ছে...",
-    "saveNotes": "নোট সংরক্ষণ",
-    "saved": "সংরক্ষিত",
-    "saveFailed": "সংরক্ষণ ব্যর্থ",
-    "restore": "পুনরুদ্ধার",
-    "archive": "আর্কাইভ",
-    "noCharts": "এখনো কোনো সংরক্ষিত কুণ্ডলী নেই",
-    "noChartsDesc": "এখানে দেখতে হোম পেজ থেকে একটি কুণ্ডলী তৈরি করুন"
-  },
   "birthChartTeaser": {
     "awaitingName": "নামের অপেক্ষা",
     "exactTime": "সঠিক সময়",
@@ -443,9 +427,7 @@
     "jupiter": "বৃহস্পতি",
     "saturn": "শনি"
   },
-  "bottomNav": {
-    "calendar": "Calendar"
-  },
+  "bottomNav": {},
   "profiles": {
     "kicker": "এই ডিভাইস",
     "heading": "একটি প্রোফাইল বেছে নিন",

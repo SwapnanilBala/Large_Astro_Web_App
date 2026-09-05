@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import dynamic from "next/dynamic";
-import { FiChevronDown, FiCopy, FiGrid, FiRefreshCw } from "react-icons/fi";
+import { FiChevronDown, FiCopy, FiRefreshCw } from "react-icons/fi";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history-saver";
 import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
@@ -1808,10 +1808,6 @@ export default function InsightsContent({
           viewport={{ once: true }}
           transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.5, delay: 0.2 }}
         >
-          <Link href="/workspace" className={styles.actionBtnGhost}>
-            <FiGrid size={16} />
-            Open Workspace
-          </Link>
           <Link href="/" className={styles.actionBtnRefresh}>
             <FiRefreshCw size={16} />
             {t("insights.recalculate")}

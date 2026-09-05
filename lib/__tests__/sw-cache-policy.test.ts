@@ -51,7 +51,7 @@ describe("service worker cache policy", () => {
     it("refuses any URL carrying a query string", () => {
       expect(policy.isCacheable(nav(`${ORIGIN}/insights?${CHART_QUERY}`), ORIGIN)).toBe(false);
       expect(policy.isCacheable(nav(`${ORIGIN}/m/insights?${CHART_QUERY}`), ORIGIN)).toBe(false);
-      expect(policy.isCacheable(nav(`${ORIGIN}/workspace?saved=3`), ORIGIN)).toBe(false);
+      expect(policy.isCacheable(nav(`${ORIGIN}/insights/palm-history?saved=3`), ORIGIN)).toBe(false);
     });
 
     it("refuses every API route, with or without a query", () => {
@@ -71,7 +71,7 @@ describe("service worker cache policy", () => {
     });
 
     it("refuses cross-origin responses, which may be opaque", () => {
-      expect(policy.isCacheable(nav("https://elsewhere.test/calendar"), ORIGIN)).toBe(false);
+      expect(policy.isCacheable(nav("https://elsewhere.test/insights/palm-history"), ORIGIN)).toBe(false);
     });
   });
 

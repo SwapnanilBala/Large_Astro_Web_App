@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bookmark, CalendarDays, House, Sparkles } from 'lucide-react';
+import { House, Sparkles } from 'lucide-react';
 import { useProfile } from '@/lib/profile-context';
 import { useTranslation } from '@/lib/i18n-context';
 import { chartHistoryKey, subscribeToChartHistory } from '@/lib/chart-history-store';
@@ -12,8 +12,6 @@ import styles from './BottomNav.module.css';
 const NAV_ITEMS = [
   { href: '/', labelKey: 'bottomNav.home', Icon: House },
   { href: '/insights', labelKey: 'bottomNav.insights', Icon: Sparkles },
-  { href: '/workspace', labelKey: 'bottomNav.saved', Icon: Bookmark },
-  { href: '/calendar', labelKey: 'bottomNav.calendar', Icon: CalendarDays },
 ];
 
 type StoredChartHistoryEntry = {

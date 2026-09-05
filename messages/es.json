@@ -2,10 +2,8 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "Mi Carta",
-    "workspace": "Espacio de trabajo",
     "menu": "Menú",
     "close": "Cerrar",
-    "calendar": "Calendar",
     "switchProfile": "Cambiar de perfil",
     "noProfile": "Sin perfil",
     "signOut": "Cerrar sesión"
@@ -363,20 +361,6 @@
     "generating": "Generando análisis de compatibilidad...",
     "error": "Algo salió mal. Por favor, inténtalo de nuevo."
   },
-  "workspace": {
-    "loading": "Cargando tu espacio de trabajo de astrología guardado...",
-    "exportPreparing": "Preparando exportación...",
-    "exportButton": "Exportar espacio de trabajo",
-    "unknownCity": "Ciudad desconocida",
-    "saving": "Guardando...",
-    "saveNotes": "Guardar notas",
-    "saved": "Guardado",
-    "saveFailed": "Error al guardar",
-    "restore": "Restaurar",
-    "archive": "Archivar",
-    "noCharts": "Aún no hay cartas guardadas",
-    "noChartsDesc": "Genera una carta desde la página principal para verla aquí"
-  },
   "birthChartTeaser": {
     "awaitingName": "Esperando nombre",
     "exactTime": "Hora exacta",
@@ -443,9 +427,7 @@
     "jupiter": "Jupiter",
     "saturn": "Saturno"
   },
-  "bottomNav": {
-    "calendar": "Calendar"
-  },
+  "bottomNav": {},
   "profiles": {
     "kicker": "Este dispositivo",
     "heading": "Elige un perfil",
