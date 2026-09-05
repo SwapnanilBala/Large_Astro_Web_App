@@ -563,6 +563,8 @@
     "withdrawDone": "Deleted. Your charts are in this browser only.",
     "withdrawFailed": "Could not delete them just now. Nothing has changed — please try again.",
     "resume": "Save my charts to my account",
-    "resumeDone": "Saved from now on. Charts you already have are saved as you open them."
+    "resumeDone": "Saved. {stored} chart(s) from this browser are now on your account.",
+    "resuming": "Saving your charts...",
+    "resumePartial": "Saved {stored}, but some could not be stored. They stay in this browser and we will try again next time you open one."
   }
 }

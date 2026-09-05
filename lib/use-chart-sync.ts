@@ -20,6 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import { backfillCharts } from "@/lib/chart-sync-backfill";
 import {
   markNudgeShown,
   readChartSyncState,
@@ -68,7 +69,16 @@ const STORED_CONSENT_REFERENCE =
 const MAX_PUSH_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 1200;
 
-export function useChartSync(chart: ChartToSync | null): ChartSyncController {
+/**
+ * @param chart      what is on screen, or null when there is nothing to store.
+ * @param profileId  whose history to back-fill on a first yes. Passed in
+ *                   rather than read from context so the hook stays testable
+ *                   without a ProfileProvider around it.
+ */
+export function useChartSync(
+  chart: ChartToSync | null,
+  profileId: string | null = null,
+): ChartSyncController {
   const [state, setState] = useState<ChartSyncState>(() => readChartSyncState());
   const [stored, setStored] = useState(false);
 
@@ -141,6 +151,22 @@ export function useChartSync(chart: ChartToSync | null): ChartSyncController {
 
           if (outcome === "stored") {
             setStored(true);
+
+            /*
+             * The chart on screen is stored; now the rest of this profile's
+             * history, which the grant covers just as much. Deliberately after
+             * the visible one so the thing they were looking at is safe first,
+             * and deliberately not awaited into the caller — a twenty-chart
+             * backfill must not hold up anything on the page.
+             */
+            void backfillCharts(
+              profileId,
+              { prompt: evidence.prompt, captureSource: evidence.captureSource },
+              {
+                alreadyPushed: pushed.current,
+                isCancelled: () => cancelled,
+              },
+            );
             return;
           }
           if (outcome === "rejected") return;
@@ -167,7 +193,7 @@ export function useChartSync(chart: ChartToSync | null): ChartSyncController {
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [chart, state.decision]);
+  }, [chart, profileId, state.decision]);
 
   const grant = useCallback((prompt: string, source: "intake" | "nudge") => {
     pendingConsent.current = { granted: true, prompt, captureSource: source };

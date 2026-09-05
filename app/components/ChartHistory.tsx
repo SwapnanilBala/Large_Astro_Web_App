@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
+import { getProfilesSnapshot } from "@/lib/local-profiles";
 import { useTranslation } from "@/lib/i18n-context";
 import { formatBirthDate } from "@/lib/format-birth-date";
 import {
@@ -115,14 +116,10 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
     /*
      * Hydration: the browser is empty, so ask the account whether it is.
      *
-     * Only when empty, and that is a deliberate limit rather than an
-     * optimisation. Charts are stored per workspace — one device or one
+     * Only when empty. Charts are stored per workspace — one device or one
      * signed-in account — while this list is per local profile, and the two
-     * do not nest. Merging the account's charts into a profile that already
-     * has its own would put one person's charts under another's name. An
-     * empty list has no such ambiguity: whatever the account holds is the
-     * best answer available, and this is the case that makes signing in on a
-     * second device worth doing.
+     * do not nest. Filling a profile that already has charts would interleave
+     * two people's histories under one name.
      */
     if (local.length > 0 || !profileId) return;
 
@@ -136,7 +133,8 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
         });
         if (!response.ok || cancelled) return;
 
-        const { charts } = (await response.json()) as {
+        const { charts, workspace } = (await response.json()) as {
+          workspace: "account" | "device" | null;
           charts: {
             name: string;
             city: string;
@@ -147,6 +145,23 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
           }[];
         };
         if (cancelled || charts.length === 0) return;
+
+        /*
+         * An empty list is not on its own permission to fill it.
+         *
+         * A second profile made on a shared browser is empty too, and it
+         * resolves to the same device workspace as the first — so hydrating it
+         * would hand one housemate the other's charts, which is the single
+         * thing profiles exist to prevent.
+         *
+         * A signed-in account is different: it is one person by construction,
+         * and giving them their charts on a new device is the entire promise
+         * of signing in. So an account hydrates anywhere, and a device only
+         * hydrates while it holds one profile — which is what a genuinely
+         * fresh browser, or one whose storage was cleared, looks like.
+         */
+        const profileCount = getProfilesSnapshot().profiles.length;
+        if (workspace === "device" && profileCount > 1) return;
 
         /* Oldest first, because recordChartVisit prepends — this leaves the
            newest chart at the head, matching how local history reads. */

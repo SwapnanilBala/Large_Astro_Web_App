@@ -21,7 +21,9 @@
 
 import { useEffect, useState } from "react";
 
+import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
+import { backfillCharts } from "@/lib/chart-sync-backfill";
 import {
   readChartSyncState,
   recordDecision,
@@ -35,6 +37,7 @@ type Result = { tone: "ok" | "error"; message: string } | null;
 
 export default function ChartSyncSettings() {
   const { t } = useTranslation();
+  const { profileId } = useProfile();
   const [state, setState] = useState<ChartSyncState | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result>(null);
@@ -90,9 +93,26 @@ export default function ChartSyncSettings() {
     }
   };
 
-  const resume = () => {
+  const resume = async () => {
+    const prompt = `${t("chartSync.statusLocal")} ${t("chartSync.resume")}`;
     recordDecision("granted");
-    setResult({ tone: "ok", message: t("chartSync.resumeDone") });
+
+    setBusy(true);
+    setResult({ tone: "ok", message: t("chartSync.resuming") });
+
+    /* Turning it back on here means the charts already on this device, not
+       just the next one opened. /insights back-fills on its own grant; this
+       is the same job from the page that has no chart on screen. */
+    const outcome = await backfillCharts(profileId, { prompt, captureSource: "settings" });
+
+    setBusy(false);
+    setResult({
+      tone: outcome.failed > 0 ? "error" : "ok",
+      message:
+        outcome.failed > 0
+          ? t("chartSync.resumePartial").replace("{stored}", String(outcome.stored))
+          : t("chartSync.resumeDone").replace("{stored}", String(outcome.stored)),
+    });
   };
 
   return (
@@ -119,7 +139,12 @@ export default function ChartSyncSettings() {
             {busy ? t("chartSync.withdrawing") : t("chartSync.withdraw")}
           </button>
         ) : (
-          <button type="button" className={styles.button} onClick={resume} disabled={busy}>
+          <button
+            type="button"
+            className={styles.button}
+            onClick={() => void resume()}
+            disabled={busy}
+          >
             {t("chartSync.resume")}
           </button>
         )}
