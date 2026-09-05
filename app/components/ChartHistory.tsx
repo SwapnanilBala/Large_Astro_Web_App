@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
+import { formatBirthDate } from "@/lib/format-birth-date";
 import {
   readChartHistory,
   recordChartVisit,
@@ -226,11 +227,7 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
           </span>
           <span className="chart-history-hero-meta">
             {hero.city} &middot; {hero.ascendantSign} Lagna &middot;{" "}
-            {new Date(hero.birthDate).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {formatBirthDate(hero.birthDate)}
           </span>
         </div>
         <span className="chart-history-hero-cta">{t("chartHistory.viewChart")} &rarr;</span>
@@ -263,11 +260,7 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
                     {entry.city} &middot; {entry.ascendantSign} Lagna
                   </span>
                   <span className="chart-history-date">
-                    {new Date(entry.birthDate).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
+                    {formatBirthDate(entry.birthDate)}
                   </span>
                 </TiltCard>
               );
