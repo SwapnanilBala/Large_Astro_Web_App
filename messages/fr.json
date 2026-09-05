@@ -427,7 +427,6 @@
   "profiles": {
     "kicker": "Cet appareil",
     "heading": "Choisissez un profil",
-    "lead": "Les profils séparent les thèmes et lectures enregistrés sur cet appareil. Rien ne quitte ce navigateur.",
     "active": "Actif",
     "opening": "Ouverture…",
     "addDivider": "ou ajoutez quelqu'un",

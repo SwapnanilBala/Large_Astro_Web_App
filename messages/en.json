@@ -506,7 +506,7 @@
   "profiles": {
     "kicker": "This Device",
     "heading": "Choose a profile",
-    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser.",
+    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser unless you ask us to save your charts to your account.",
     "active": "Active",
     "opening": "Opening…",
     "addDivider": "or add someone",
@@ -541,5 +541,17 @@
     "error_email_unverified": "Google hasn’t verified the email on that account, so it can’t be used to sign in.",
     "error_signin_failed": "Something went wrong finishing sign-in. Try again.",
     "error_unknown": "Sign-in didn’t finish. Try again."
+  },
+  "chartSync": {
+    "kicker": "Saving your chart",
+    "askQuestion": "Save your charts to your account?",
+    "askDetail": "Your charts are kept in this browser. Saving them to your account means they come back if you clear your history, and they open on your phone as well as here.",
+    "askNote": "Either way this chart stays on screen and stays in this browser. You can change your mind at any time.",
+    "accept": "Save my charts",
+    "decline": "Keep them in this browser only",
+    "nudgeQuestion": "This chart lives only in this browser",
+    "nudgeDetail": "Clearing your history erases it, and it will not be on your phone. Saving it to your account is what makes it come back.",
+    "nudgeDismiss": "No thanks",
+    "nudgeNote": "We will not ask again."
   }
 }

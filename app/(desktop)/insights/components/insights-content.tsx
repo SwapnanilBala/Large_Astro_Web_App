@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useState, useTransition, useEffect, useRef } from "react";
+import { useState, useTransition, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -8,6 +8,7 @@ import dynamic from "next/dynamic";
 import { FiChevronDown, FiCopy, FiRefreshCw } from "react-icons/fi";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import ChartHistorySaver from "@/app/(desktop)/insights/components/chart-history-saver";
+import ChartSyncPrompt from "@/app/components/ChartSyncPrompt";
 import PlanetarySnapshots from "@/app/(desktop)/insights/components/planetary-snapshots";
 import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 /* Static, not dynamic(): it is a pure function of the chart with no clock and
@@ -874,6 +875,23 @@ export default function InsightsContent({
   const transitParams = new URLSearchParams(historyQs);
   transitParams.set("view", "transits");
   const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
+  /* What ChartSyncPrompt would store, memoised: the sync effect keys on this
+     object, and a fresh one each render would re-run it on every keystroke
+     elsewhere on the page. */
+  const chartToSync = useMemo(
+    () =>
+      historyQs
+        ? {
+            queryString: historyQs,
+            ascendantSign: payload.chart.ascendant.sign ?? null,
+            sunSign:
+              payload.chart.planets.find((planet) => planet.name === "Sun")?.sign ?? null,
+            moonSign:
+              payload.chart.planets.find((planet) => planet.name === "Moon")?.sign ?? null,
+          }
+        : null,
+    [historyQs, payload.chart.ascendant.sign, payload.chart.planets],
+  );
   // Profile-scoped: the query string carries the subject's name and birth
   // details, so an unscoped key would leave one profile's charts listed in
   // storage for the next person on the device.
@@ -1813,6 +1831,11 @@ export default function InsightsContent({
             {t("insights.recalculate")}
           </Link>
         </motion.div>
+
+        {/* Below the chart and below the actions, deliberately. The question
+            is worth asking where somebody has finished reading, not in front
+            of the thing they came for. */}
+        <ChartSyncPrompt chart={chartToSync} />
       </section>
     </>
   );

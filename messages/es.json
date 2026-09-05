@@ -427,7 +427,6 @@
   "profiles": {
     "kicker": "Este dispositivo",
     "heading": "Elige un perfil",
-    "lead": "Los perfiles mantienen separadas las cartas y lecturas guardadas en este dispositivo. Nada sale de este navegador.",
     "active": "Activo",
     "opening": "Abriendo…",
     "addDivider": "o añade a alguien",

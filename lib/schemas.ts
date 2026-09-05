@@ -215,6 +215,69 @@ export const SuggestInputSchema = z.object({
 export type SuggestInput = z.infer<typeof SuggestInputSchema>;
 
 // ---------------------------------------------------------------------------
+// Chart sync
+// ---------------------------------------------------------------------------
+
+/**
+ * What a client may ask the server to store.
+ *
+ * Deliberately thin. The birth facts are not sent as fields — they are derived
+ * server-side from `queryString` by lib/sync/facts.ts, so the client cannot
+ * describe a chart differently from the way /insights rendered it.
+ */
+export const ChartSyncRequestSchema = z.object({
+  queryString: z.string().min(1, "queryString is required").max(4000),
+  ascendantSign: z.string().max(20).nullish(),
+  sunSign: z.string().max(20).nullish(),
+  moonSign: z.string().max(20).nullish(),
+  consent: z.object({
+    /**
+     * `true` and nothing else. A request that says `false` is not a request to
+     * store without permission — it is a bug, and the type system should not
+     * let it be mistaken for a valid shape the route has to remember to check.
+     */
+    granted: z.literal(true),
+    /** The exact wording the visitor agreed to, kept as evidence. */
+    prompt: z.string().min(1, "consent.prompt is required").max(500),
+    captureSource: z.enum(["intake", "nudge", "settings"]),
+  }),
+});
+
+export type ChartSyncRequest = z.infer<typeof ChartSyncRequestSchema>;
+
+/**
+ * The birth facts, once derived from the query string.
+ *
+ * Ranges here mirror the check constraints on `birth_profiles` so a bad value
+ * is a 400 with a readable message rather than a 500 from Postgres. The
+ * coordinate pair rule is enforced in lib/sync/facts.ts, which can only
+ * produce both or neither.
+ */
+export const ChartSyncFactsSchema = z.object({
+  name: z.string().trim().min(1, "name is required").max(120),
+  /* birthDateField already rejects a malformed or impossible date; the floor
+     is birth_profiles_birth_date_check, restated so it fails as a 400. */
+  birthDate: birthDateField.refine((value: string) => value >= "1900-01-01", {
+    message: "birthDate must be 1900-01-01 or later",
+  }),
+  birthTime: birthTimeField,
+  latitude: latitudeField.nullable(),
+  longitude: longitudeField.nullable(),
+  timezoneOffsetMinutes: z
+    .number()
+    .int("timezoneOffsetMinutes must be a whole number of minutes")
+    .min(-720)
+    .max(840),
+  timeZoneId: z.string().max(100),
+  country: z.string().max(120),
+  state: z.string().max(120),
+  city: z.string().max(120),
+  town: z.string().max(120),
+});
+
+export type ChartSyncFacts = z.infer<typeof ChartSyncFactsSchema>;
+
+// ---------------------------------------------------------------------------
 // Helper: extract first Zod error message
 // ---------------------------------------------------------------------------
 

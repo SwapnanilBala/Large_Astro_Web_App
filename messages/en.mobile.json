@@ -132,7 +132,7 @@
   "profiles": {
     "kicker": "This Device",
     "heading": "Choose a profile",
-    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser.",
+    "lead": "Profiles keep saved charts and readings separate on this device. Nothing leaves this browser unless you ask us to save your charts to your account.",
     "active": "Active",
     "opening": "Opening…",
     "addDivider": "or add someone",

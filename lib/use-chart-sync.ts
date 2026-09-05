@@ -1,0 +1,196 @@
+"use client";
+
+/**
+ * Asking whether a chart may be stored, and storing it once the answer is yes.
+ *
+ * Three states, and only one of them is ever visible at a time:
+ *
+ * - `asking`   — no answer on file yet.
+ * - `pushing`  — the answer was yes; the chart on screen is being sent.
+ * - `nudging`  — the answer was no, on an earlier visit, and this is the one
+ *                and only time the case for changing it gets made.
+ *
+ * The nudge deliberately cannot fire in the same page view as the decline. A
+ * dialog that reappears the moment you dismiss it is not persuasion, and a
+ * consent record extracted that way is evidence of pestering rather than of
+ * agreement — which defeats the purpose of keeping the record at all. So the
+ * decline timestamp is compared against when this component mounted: the
+ * answer has to predate the visit for the nudge to be due.
+ */
+
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
+import {
+  markNudgeShown,
+  readChartSyncState,
+  recordDecision,
+  subscribeToChartSync,
+  type ChartSyncState,
+} from "@/lib/chart-sync-store";
+
+export type ChartToSync = {
+  queryString: string;
+  ascendantSign: string | null;
+  sunSign: string | null;
+  moonSign: string | null;
+};
+
+export type ChartSyncPhase = "idle" | "asking" | "nudging";
+
+export type ChartSyncController = {
+  phase: ChartSyncPhase;
+  /** True once this chart is known to be stored. */
+  stored: boolean;
+  grant: (prompt: string, source: "intake" | "nudge") => void;
+  decline: () => void;
+  dismissNudge: () => void;
+};
+
+type PushBody = {
+  queryString: string;
+  ascendantSign: string | null;
+  sunSign: string | null;
+  moonSign: string | null;
+  consent: { granted: true; prompt: string; captureSource: "intake" | "nudge" | "settings" };
+};
+
+/**
+ * Stands in for the wording on a push that rides on an earlier grant.
+ *
+ * Never shown to anyone. It exists so `evidence_json` says plainly that the
+ * agreement was recorded on a previous visit, rather than claiming the visitor
+ * was shown a prompt during this one.
+ */
+const STORED_CONSENT_REFERENCE =
+  "Consent previously granted on this device; see the earlier consent record.";
+
+/** Two tries, then wait for the next visit. See the note in `push`. */
+const MAX_PUSH_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 1200;
+
+export function useChartSync(chart: ChartToSync | null): ChartSyncController {
+  const [state, setState] = useState<ChartSyncState>(() => readChartSyncState());
+  const [stored, setStored] = useState(false);
+
+  /**
+   * When this view began. Anything decided after it was decided *here*, and a
+   * nudge for an answer given seconds ago is the thing this exists to prevent.
+   */
+  const mountedAt = useRef(Date.now());
+
+  /** Query strings already sent in this view, so a re-render is not a re-POST. */
+  const pushed = useRef(new Set<string>());
+
+  /** The wording to record as evidence, set when the visitor says yes. */
+  const pendingConsent = useRef<PushBody["consent"] | null>(null);
+
+  useEffect(() => subscribeToChartSync(() => setState(readChartSyncState())), []);
+
+  useEffect(() => {
+    if (state.decision !== "granted" || !chart?.queryString) return;
+
+    const consent = pendingConsent.current;
+
+    /* Granted on an earlier visit, so there is no freshly-shown wording to
+       quote. The server already holds the record from when they agreed; this
+       push rides on it. */
+    const evidence: PushBody["consent"] =
+      consent ?? { granted: true, prompt: STORED_CONSENT_REFERENCE, captureSource: "settings" };
+
+    if (pushed.current.has(chart.queryString)) return;
+    pushed.current.add(chart.queryString);
+
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const attemptPush = async () => {
+      const response = await fetch("/api/sync/charts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        body: JSON.stringify({
+          queryString: chart.queryString,
+          ascendantSign: chart.ascendantSign,
+          sunSign: chart.sunSign,
+          moonSign: chart.moonSign,
+          consent: evidence,
+        } satisfies PushBody),
+      });
+
+      if (response.ok) return "stored" as const;
+
+      /* A 4xx says this chart cannot be stored — a malformed query string, a
+         birth date outside what the table accepts. Retrying is a loop against
+         a wall. A 5xx or a thrown fetch is the server or the network, which
+         may well work in a moment. */
+      return response.status >= 500 ? ("retry" as const) : ("rejected" as const);
+    };
+
+    const push = async () => {
+      for (let attempt = 0; attempt < MAX_PUSH_ATTEMPTS; attempt += 1) {
+        if (attempt > 0) {
+          await new Promise((resolve) => {
+            retryTimer = setTimeout(resolve, RETRY_DELAY_MS);
+          });
+          if (cancelled) return;
+        }
+
+        try {
+          const outcome = await attemptPush();
+          if (cancelled) return;
+
+          if (outcome === "stored") {
+            setStored(true);
+            return;
+          }
+          if (outcome === "rejected") return;
+        } catch {
+          if (cancelled) return;
+          /* Network error. Falls through to the next attempt. */
+        }
+      }
+
+      /*
+       * Both attempts failed, so let the next page view try again.
+       *
+       * That is the whole of the retry policy on purpose. The chart is in
+       * localStorage either way, so a failed sync costs a sync and not a
+       * chart, and the visitor opens /insights often enough that a persistent
+       * outage does not need a queue in here to survive.
+       */
+      pushed.current.delete(chart.queryString);
+    };
+
+    void push();
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+  }, [chart, state.decision]);
+
+  const grant = useCallback((prompt: string, source: "intake" | "nudge") => {
+    pendingConsent.current = { granted: true, prompt, captureSource: source };
+    recordDecision("granted");
+  }, []);
+
+  const decline = useCallback(() => {
+    pendingConsent.current = null;
+    recordDecision("declined");
+  }, []);
+
+  const dismissNudge = useCallback(() => markNudgeShown(), []);
+
+  const phase = useMemo<ChartSyncPhase>(() => {
+    if (!chart?.queryString) return "idle";
+    if (state.decision === null) return "asking";
+    if (state.decision === "granted") return "idle";
+
+    /* Declined. One nudge, ever, and never in the view it was declined in. */
+    if (state.nudgeShownAt) return "idle";
+    const decidedAt = state.decidedAt ? Date.parse(state.decidedAt) : 0;
+    return decidedAt && decidedAt < mountedAt.current ? "nudging" : "idle";
+  }, [chart?.queryString, state]);
+
+  return { phase, stored, grant, decline, dismissNudge };
+}
