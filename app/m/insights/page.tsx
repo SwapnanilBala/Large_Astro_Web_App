@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import {
+  buildChartHistoryQuery,
   chartParamsToQuery,
   getChartPayload,
   hasAllChartParams,
@@ -58,6 +59,10 @@ export default async function MobileInsightsPage({ searchParams }: PageProps) {
       payload={payload}
       error={error}
       desktopHref={`/insights?${chartParamsToQuery(chartParams)}&view=desktop`}
+      /* The same string the desktop tree files a chart under, so a chart cast
+         on a phone and one cast on a laptop are one entry, not two. */
+      historyQs={buildChartHistoryQuery(chartParams)}
+      birthDate={chartParams.birthDate}
     />
   );
 }

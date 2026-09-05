@@ -6,6 +6,7 @@ import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
 import shell from "../mobile.module.css";
 import { SIGN_SYMBOLS } from "@/lib/constellation-geometry";
 import MobileChart from "./mobile-chart";
+import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
 
 /*
@@ -26,6 +27,8 @@ type Props = {
   payload: ChartApiResponse | null;
   error: string;
   desktopHref: string;
+  historyQs: string;
+  birthDate: string;
 };
 
 function formatDegree(value: number): string {
@@ -136,7 +139,13 @@ function RuleCard({
   );
 }
 
-export default function MobileInsights({ payload, error, desktopHref }: Props) {
+export default function MobileInsights({
+  payload,
+  error,
+  desktopHref,
+  historyQs,
+  birthDate,
+}: Props) {
   // Keyed by "section:instance_key" so the same rule appearing in both the
   // above-the-fold list and the full list opens independently.
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
@@ -323,6 +332,18 @@ export default function MobileInsights({ payload, error, desktopHref }: Props) {
           </ul>
         </Section>
       )}
+
+      {/* Below the reading, above the footer: the question is worth asking
+          where somebody has finished, not in front of what they came for. */}
+      <MobileChartSync
+        historyQs={historyQs}
+        name={client.name}
+        city={client.city}
+        birthDate={birthDate}
+        ascendantSign={ascendant.sign}
+        sunSign={planets.find((planet) => planet.name === "Sun")?.sign ?? null}
+        moonSign={planets.find((planet) => planet.name === "Moon")?.sign ?? null}
+      />
 
       <footer className={styles.footer}>
         <Link className={styles.textLink} href="/m">
