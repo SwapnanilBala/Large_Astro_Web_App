@@ -89,6 +89,21 @@ export function recordDecision(decision: SyncDecision) {
   });
 }
 
+/**
+ * A deliberate withdrawal from settings, as opposed to declining the first ask.
+ *
+ * Spends the nudge in the same write, and that is the whole reason this is not
+ * just `recordDecision("declined")`. Somebody who has gone to /login and
+ * pressed a button that deletes their data has decided; meeting them on the
+ * next chart with "saving it is what makes it come back" would be arguing with
+ * an informed choice, which is precisely the behaviour the one-shot rule
+ * exists to rule out. The nudge is for a first no, not for a withdrawal.
+ */
+export function recordWithdrawal() {
+  const now = new Date().toISOString();
+  write({ decision: "declined", decidedAt: now, nudgeShownAt: now });
+}
+
 /** Mark the one-shot post-decline prompt as spent. */
 export function markNudgeShown() {
   write({ ...readChartSyncState(), nudgeShownAt: new Date().toISOString() });

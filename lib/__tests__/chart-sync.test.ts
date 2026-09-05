@@ -5,6 +5,7 @@ import {
   markNudgeShown,
   readChartSyncState,
   recordDecision,
+  recordWithdrawal,
 } from "@/lib/chart-sync-store";
 import { useChartSync, type ChartToSync } from "@/lib/use-chart-sync";
 
@@ -64,6 +65,18 @@ describe("the decision this browser remembers", () => {
        the reason will have changed and is worth answering once more. */
     recordDecision("granted");
     expect(readChartSyncState().nudgeShownAt).toBeNull();
+  });
+
+  it("spends the nudge when consent is withdrawn on purpose", () => {
+    recordDecision("granted");
+    recordWithdrawal();
+
+    const state = readChartSyncState();
+    expect(state.decision).toBe("declined");
+    /* Somebody who pressed a delete button has decided. Meeting them on the
+       next chart with the case for saving would be arguing with an informed
+       choice, which is what the one-shot rule exists to rule out. */
+    expect(state.nudgeShownAt).not.toBeNull();
   });
 
   it("survives a corrupted stored value rather than throwing", () => {
@@ -219,6 +232,21 @@ describe("the one nudge after a decline", () => {
        rather than of pestering. */
     expect(result.current.phase).toBe("idle");
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("stays quiet after a withdrawal, however long ago it was", () => {
+    recordWithdrawal();
+
+    /* Backdate it so the "not in the same view" rule is not what is being
+       measured — this has to be the withdrawal itself that silences it. */
+    const state = JSON.parse(localStorage.getItem("astro_chart_sync_consent")!);
+    localStorage.setItem(
+      "astro_chart_sync_consent",
+      JSON.stringify({ ...state, decidedAt: new Date(Date.now() - 86_400_000).toISOString() }),
+    );
+
+    const { result } = renderHook(() => useChartSync(CHART));
+    expect(result.current.phase).toBe("idle");
   });
 
   it("makes the case once on a later visit", () => {
