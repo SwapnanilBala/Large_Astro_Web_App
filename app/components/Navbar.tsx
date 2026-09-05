@@ -251,15 +251,21 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav className="drawer-nav">
-          {lastChartUrl && (
-            <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
-              {t("navbar.myChart")}
-            </Link>
-          )}
-        </nav>
+        {/* My Chart is the only link left in here, and it does not exist until
+            somebody has cast a chart. Rendering the section regardless left a
+            first-time visitor an empty block and a divider under a heading
+            with nothing beneath it. */}
+        {lastChartUrl && (
+          <>
+            <nav className="drawer-nav">
+              <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
+                {t("navbar.myChart")}
+              </Link>
+            </nav>
 
-        <div className="drawer-divider" />
+            <div className="drawer-divider" />
+          </>
+        )}
 
         <div className="drawer-auth">
           <div className="drawer-user-info">
