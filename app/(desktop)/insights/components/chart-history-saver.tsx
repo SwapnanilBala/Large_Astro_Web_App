@@ -2,9 +2,7 @@
 
 import { useEffect } from "react";
 import { useProfile } from "@/lib/profile-context";
-import { buildSavedChartPayload } from "@/lib/chart-query";
 import { recordChartVisit } from "@/lib/chart-history-store";
-import { saveChart as saveChartRecord } from "@/lib/workspace-store";
 
 export type { ChartHistoryEntry } from "@/lib/chart-history-store";
 
@@ -34,20 +32,6 @@ export default function ChartHistorySaver({
       queryString,
     });
   }, [ascendantSign, birthDate, city, name, profileId, queryString]);
-
-  useEffect(() => {
-    if (!profileId) return;
-
-    const syncChart = async () => {
-      try {
-        await saveChartRecord(profileId, buildSavedChartPayload(queryString, ascendantSign));
-      } catch {
-        /* ignore workspace write failures and keep the history entry */
-      }
-    };
-
-    void syncChart();
-  }, [ascendantSign, profileId, queryString]);
 
   return null;
 }

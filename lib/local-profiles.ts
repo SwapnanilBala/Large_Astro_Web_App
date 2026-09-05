@@ -39,6 +39,8 @@ export const PROFILES_CHANGED_EVENT = "astro:profiles-changed";
  * or its rows will outlive the profile that created them.
  */
 const SCOPED_KEY_PREFIXES = [
+  /* Written by the removed workspace page. Kept on the list so a profile
+     delete still scrubs the rows it left in browsers that once used it. */
   "astro_workspace_saved_charts",
   "astro_workspace_saved_comparisons",
   "astro_chart_history",

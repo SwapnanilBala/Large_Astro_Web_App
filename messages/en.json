@@ -2,10 +2,7 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "My Chart",
-    "workspace": "Workspace",
     "menu": "Menu",
-    "close": "Close",
-    "calendar": "Calendar",
     "switchProfile": "Switch profile",
     "noProfile": "No profile",
     "signOut": "Sign out"
@@ -401,25 +398,9 @@
     "generating": "Generating compatibility analysis...",
     "error": "Something went wrong. Please try again."
   },
-  "workspace": {
-    "loading": "Loading your saved astrology workspace...",
-    "exportPreparing": "Preparing export...",
-    "exportButton": "Export workspace",
-    "unknownCity": "Unknown city",
-    "saving": "Saving...",
-    "saveNotes": "Save notes",
-    "saved": "Saved",
-    "saveFailed": "Save failed",
-    "restore": "Restore",
-    "archive": "Archive",
-    "noCharts": "No saved charts yet",
-    "noChartsDesc": "Generate a chart from the home page to see it here"
-  },
   "bottomNav": {
     "home": "Home",
-    "insights": "Insights",
-    "saved": "Saved",
-    "calendar": "Calendar"
+    "insights": "Insights"
   },
   "errorBoundary": {
     "heading": "Something went wrong",
@@ -512,9 +493,6 @@
     "ariaLabel": "Onboarding intro animation. Click or press Escape to skip.",
     "tagline": "Your Cosmic Blueprint, Decoded",
     "skipHint": "Click or press Esc to skip"
-  },
-  "zodiacPortrait": {
-    "ruledBy": "Ruled by {planet}"
   },
   "planetNames": {
     "sun": "Sun",

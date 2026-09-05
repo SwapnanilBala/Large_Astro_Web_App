@@ -669,40 +669,6 @@ export type ChartApiResponse = {
   ashtakavarga?: AshtakavargaData;
 };
 
-export type SavedChartRecord = {
-  saved_chart_id: string;
-  name: string;
-  city: string;
-  birth_date: string;
-  birth_time: string;
-  timezone_offset_minutes: number;
-  country: string;
-  state: string;
-  town: string;
-  latitude: number;
-  longitude: number;
-  time_zone_id: string;
-  ascendant_sign: string;
-  query_string: string;
-  notes: string;
-  saved_at: string;
-  updated_at: string;
-  archived_at?: string | null;
-};
-
-export type SavedComparisonRecord = {
-  saved_comparison_id: string;
-  primary_name: string;
-  partner_name: string;
-  compatibility_score: number;
-  summary: string;
-  query_string: string;
-  notes: string;
-  saved_at: string;
-  updated_at: string;
-  archived_at?: string | null;
-};
-
 export type ClientReadingRecord = {
   reading_id: string;
   user_id: string;

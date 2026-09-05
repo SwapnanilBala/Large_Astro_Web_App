@@ -3326,18 +3326,6 @@
   box-shadow: none;
 }
 
-.actionBtnGhost {
-  composes: actionBtn;
-  background: transparent;
-  border-color: rgba(200, 155, 60, 0.10);
-  color: var(--ink-soft);
-}
-
-.actionBtnGhost:hover {
-  color: var(--ink-main);
-  border-color: rgba(255, 255, 255, 0.16);
-}
-
 .actionBtnRefresh {
   composes: actionBtn;
   background: linear-gradient(135deg, rgba(200, 155, 60, 0.12), rgba(26, 123, 110, 0.12));

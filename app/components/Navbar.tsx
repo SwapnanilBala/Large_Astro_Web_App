@@ -7,7 +7,6 @@ import { useProfile } from "@/lib/profile-context";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { readChartHistory } from "@/lib/chart-history-store";
-import { listSavedCharts } from "@/lib/workspace-store";
 
 export default function Navbar() {
   const { activeProfile, isLoading, profileId } = useProfile();
@@ -36,50 +35,19 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const getLastChartFromLocal = () => {
-      const entries = readChartHistory(profileId);
-      if (entries.length === 0) return null;
-
-      const latest = [...entries].sort(
-        (left, right) =>
-          Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
-      )[0];
-      const queryString = latest?.queryString?.trim().replace(/^\?/, "");
-      return queryString ? `/insights?${queryString}` : null;
-    };
-
     // A profile switch must not carry the previous profile's chart link over.
     setLastChartUrl(null);
 
     if (!profileId) return;
 
-    let isCancelled = false;
-    const localChartUrl = getLastChartFromLocal();
-    const localChartFrame = window.requestAnimationFrame(() => {
-      if (!isCancelled) setLastChartUrl(localChartUrl);
-    });
+    const entries = readChartHistory(profileId);
+    const latest = [...entries].sort(
+      (left, right) =>
+        Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
+    )[0];
+    const queryString = latest?.queryString?.trim().replace(/^\?/, "");
 
-    const loadSavedCharts = async () => {
-      try {
-        if (localChartUrl) return;
-        const data = await listSavedCharts(profileId);
-        if (isCancelled || data.length === 0) return;
-
-        const queryString = data[0].query_string.trim().replace(/^\?/, "");
-        if (queryString) {
-          setLastChartUrl(getLastChartFromLocal() ?? `/insights?${queryString}`);
-        }
-      } catch {
-        /* ignore and keep the history fallback */
-      }
-    };
-
-    void loadSavedCharts();
-
-    return () => {
-      isCancelled = true;
-      window.cancelAnimationFrame(localChartFrame);
-    };
+    setLastChartUrl(queryString ? `/insights?${queryString}` : null);
   }, [pathname, profileId]);
 
   /* Track scroll position for glass effect */
@@ -205,12 +173,6 @@ export default function Navbar() {
           {/* Desktop profile section - hidden on mobile */}
           <div className="navbar-desktop-auth">
             <div className="user-badge">
-              <Link href="/workspace" className="navbar-chart-link">
-                {t("navbar.workspace")}
-              </Link>
-              <Link href="/calendar" className="navbar-chart-link">
-                {t("navbar.calendar")}
-              </Link>
               {lastChartUrl && (
                 <Link href={lastChartUrl} className="navbar-chart-link">
                   {t("navbar.myChart")}
@@ -289,21 +251,21 @@ export default function Navbar() {
           </button>
         </div>
 
-        <nav className="drawer-nav">
-          <Link href="/workspace" className="drawer-link" onClick={closeDrawer}>
-            {t("navbar.workspace")}
-          </Link>
-          <Link href="/calendar" className="drawer-link" onClick={closeDrawer}>
-            {t("navbar.calendar")}
-          </Link>
-          {lastChartUrl && (
-            <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
-              {t("navbar.myChart")}
-            </Link>
-          )}
-        </nav>
+        {/* My Chart is the only link left in here, and it does not exist until
+            somebody has cast a chart. Rendering the section regardless left a
+            first-time visitor an empty block and a divider under a heading
+            with nothing beneath it. */}
+        {lastChartUrl && (
+          <>
+            <nav className="drawer-nav">
+              <Link href={lastChartUrl} className="drawer-link" onClick={closeDrawer}>
+                {t("navbar.myChart")}
+              </Link>
+            </nav>
 
-        <div className="drawer-divider" />
+            <div className="drawer-divider" />
+          </>
+        )}
 
         <div className="drawer-auth">
           <div className="drawer-user-info">

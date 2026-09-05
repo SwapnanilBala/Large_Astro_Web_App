@@ -99,29 +99,6 @@ export const authUsers = pgTable(
   ],
 );
 
-/**
- * A password, for the people who use one. Absent for Google-only accounts,
- * which is why it is its own table rather than a nullable column.
- */
-export const authCredentials = pgTable(
-  "auth_credentials",
-  {
-    userId: uuid("user_id")
-      .primaryKey()
-      .references(() => authUsers.id, { onDelete: "cascade" }),
-    /** `scrypt$N$r$p$salt$hash` — self-describing, so cost can rise later. */
-    passwordHash: text("password_hash").notNull(),
-    passwordUpdatedAt: timestamp("password_updated_at", { withTimezone: true })
-      .defaultNow()
-      .notNull(),
-    failedAttempts: integer("failed_attempts").default(0).notNull(),
-    lockedUntil: timestamp("locked_until", { withTimezone: true }),
-  },
-  (table) => [
-    check("auth_credentials_failed_attempts_check", sql`${table.failedAttempts} >= 0`),
-  ],
-);
-
 /** A link to an external provider account. One row per provider per person. */
 export const authIdentities = pgTable(
   "auth_identities",

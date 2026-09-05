@@ -3,6 +3,20 @@
 Status: **proposal, nothing built.** Written 2026-09-04, after the session-read
 work landed. Nothing here is implemented until it is approved.
 
+Amended 2026-09-05, on direction that changes the target:
+
+1. `/workspace` and `/calendar` were removed from the app, and
+   `lib/workspace-store.ts` with them — less to sync, one fewer store to write.
+2. **Password sign-in is not being built.** Google stays because it is the
+   convenient one; `lib/identity/password.ts` and the `auth_credentials` table
+   are deleted.
+3. **Guest mode persists too.** Charts should reach the database whether or not
+   somebody signed in with Google. A guest is not a second-class visitor whose
+   work lives only in their browser.
+
+Point 3 is the substantive one, and the good news is that the schema already
+accommodates it. See "Guest mode is already an account" below.
+
 ## Where things stand
 
 Signing in works and persists. What it produces is an identity and an empty
@@ -16,20 +30,26 @@ Everything a person would actually miss lives in `localStorage`:
 | --- | --- | --- |
 | `astro_local_profiles` | `lib/local-profiles.ts` | up to 5 device profiles |
 | `astro_chart_history` | `lib/chart-history-store.ts` | recently cast charts |
-| `astro_workspace_saved_charts` | `lib/workspace-store.ts` | saved charts |
-| `astro_workspace_saved_comparisons` | `lib/workspace-store.ts` | saved comparisons |
 | `astro_palm_readings` | `lib/palm-readings/local-store.ts` | palm readings + images |
 | `astro_birth_details_history` | — | birth-detail autofill |
+
+`astro_workspace_saved_charts` and `astro_workspace_saved_comparisons` were on
+this list. They held a second copy of what `astro_chart_history` already keeps,
+plus saved comparisons that only `/workspace` could open; both keys are gone
+from the code and remain only on the profile-delete scrub list, to clear rows
+left in browsers that used the old page. Nothing is lost to sync there —
+chart history is the same data under different field names.
 
 So signing in on a second device gets you a working account with nothing in it.
 That is the gap.
 
-Thirteen tables already model this data and are entirely unused:
+Twelve tables already model this data and are entirely unused:
 
 `clients`, `birth_profiles`, `chart_calculations`, `chart_placements`,
 `chart_houses`, `chart_aspects`, `chart_findings`, `dasha_periods`,
-`compatibility_reports`, `generated_artifacts`, `assets`, `consent_records`,
-`auth_credentials`.
+`compatibility_reports`, `generated_artifacts`, `assets`, `consent_records`.
+
+(`auth_credentials` was the thirteenth. It is dropped in migration 0005.)
 
 The schema was designed for a practitioner with clients — `workspaces` is
 documented as "a tenant boundary; one practitioner still receives one
@@ -39,6 +59,87 @@ including yourself.
 
 **This is not a database design job. The design is there and is good. What is
 missing is the layer that reads and writes it.**
+
+## Guest mode is already an account
+
+The instinct behind "guests should get their data saved too" is right, and it
+needs almost nothing new in the schema, because a guest already has the two
+things a row needs to hang off.
+
+`lib/identity/device-id.ts` issues a signed cookie per browser.
+`resolveAnonymousWorkspace` in `lib/identity/anonymous-account.ts` turns that
+into a `workspaces` row plus a `workspace_members` row with the subject
+`anon:<device>`. A signed-in person gets the identical pair with the subject
+`user:<id>`. Every other table in the schema keys on `workspace_id` and knows
+nothing about which of the two it came from.
+
+So "write the guest's charts to the database" is not a separate code path. It is
+the same insert, against a workspace that already exists.
+
+Three consequences worth stating before anyone builds on it:
+
+- **The upgrade path is already handled.** `signInWithProvider` claims the
+  device's anonymous workspace on first Google sign-in, unless another account
+  already owns it. A guest who casts ten charts and then signs in keeps them,
+  with no migration step, because the workspace id does not change.
+- **The cookie is the account.** Clear it and the charts are unreachable — the
+  workspace id is derived from the device id, and there is no email to recover
+  by. That is the honest limit of guest mode, and it is the one thing worth
+  saying on screen: signing in with Google is what makes the data survive a
+  cleared browser or a second device.
+- **A guest workspace is still personal data on a server.** Anonymous means no
+  name attached, not "not personal" — a birth date, time and place identifies
+  somebody. The consent rules below apply to guests exactly as they do to
+  signed-in accounts. Do not treat `anon:` as a reason to skip them.
+
+## Consent, and the nudge
+
+`birth_profiles.consent_record_id` is `NOT NULL` with a foreign key to
+`consent_records`. This is the strongest thing in the schema and it should stay
+exactly as it is: **the database physically cannot hold a birth date without a
+consent row pointing at it.** Not a check somebody remembers to write — the
+insert fails.
+
+The flow that follows from it:
+
+1. First time a chart would be written for a workspace, ask. One question, in
+   plain words: *save this chart to your account so you can open it on another
+   device?*
+2. **Yes** — insert a `consent_records` row (`purpose: "chart_storage"`,
+   `policy_version` from a constant, `capture_source: "intake"`,
+   `evidence_json` holding the copy they actually saw), then write the chart.
+3. **No** — write nothing server-side. The chart still computes, still renders,
+   still lands in `localStorage`. Declining costs the visitor no feature on the
+   device in front of them, which is what makes the yes meaningful.
+4. Revoking sets `revoked_at`. The partial unique index allows exactly one live
+   grant per purpose, so re-granting later is another insert, not an update.
+
+### The prompt after a no
+
+The ask is for a prompt that follows a "no" and makes the case for saying yes.
+It is worth building, and worth building narrowly, because the failure mode is
+specific: consent that was nagged out of somebody is weaker evidence than
+consent freely given, and the whole value of `consent_records` is that it is
+evidence. A dialog that reappears until the answer changes turns a legal record
+into a record of pestering.
+
+So: show it, once, where the benefit is real rather than hypothetical.
+
+- **Trigger.** Not immediately after the no — at the next moment the visitor
+  does something that storage would have helped with: reopening a chart from
+  history, or signing in with Google on a device whose charts are local-only.
+- **Content.** The concrete thing they lose, not a warning. "This chart lives
+  only in this browser. Clear your history and it is gone, and it will not be
+  on your phone." Then the same yes.
+- **Frequency.** Once per decline, ever. Record the dismissal locally; a second
+  no is final until the visitor opens settings and changes it themselves.
+- **Nothing is gated.** No feature is withheld to make the point. If the prompt
+  only works because the app got worse after a no, it is not persuasion.
+
+This is a UI decision as much as a data one, and it belongs in the same release
+as the `/login` copy change noted under "Things that will bite" — that screen
+currently promises "nothing leaves this browser", which stops being true the
+first time a consent grant is honoured.
 
 ## The decision that shapes everything
 
@@ -66,34 +167,49 @@ Stores call into it; it no-ops when signed out.
 ```
 lib/sync/
   index.ts          push(entity, payload) / pull(workspaceId)
-  charts.ts         chart_history + saved_charts -> clients/birth_profiles/chart_calculations
-  comparisons.ts    saved_comparisons -> compatibility_reports
+  charts.ts         chart_history -> clients/birth_profiles/chart_calculations
+  comparisons.ts    compatibility results -> compatibility_reports
   readings.ts       palm readings -> generated_artifacts + assets
 ```
 
 Two API routes, both requiring a resolved session and scoping every query to the
 caller's `workspace_id`:
 
-- `GET /api/workspace/sync` — everything in the account's workspace since a cursor
-- `POST /api/workspace/sync` — accept a batch of local records, upsert, return applied ids
+- `GET /api/sync` — everything in the account's workspace since a cursor
+- `POST /api/sync` — accept a batch of local records, upsert, return applied ids
+
+(Named `/api/sync` rather than `/api/workspace/sync`: `workspaces` is still the
+tenant table these queries scope to, but `/workspace` is no longer a page, and a
+route named after a deleted one invites the wrong reading.)
 
 ## Order of work
 
-1. **Charts only.** `clients` + `birth_profiles` + `chart_calculations`. This is
-   the one that makes signing in worth doing, and it exercises the whole path
-   end to end. Ship it before anything else.
+0. **The consent grant.** One insert into `consent_records`, the prompt that
+   produces it, and the `/login` copy change that stops promising the opposite.
+   Nothing else can be built first: `birth_profiles.consent_record_id` is
+   `NOT NULL`, so step 1 does not compile a working insert without it. Small,
+   and it is the step that decides whether the rest is allowed to run.
+1. **Charts only, guests included.** `clients` + `birth_profiles` +
+   `chart_calculations`, keyed on whatever workspace the request resolves to —
+   `anon:` or `user:`, the insert does not care. This exercises the whole path
+   end to end, and doing it for both subjects from the start is what keeps
+   guest mode from becoming a second code path bolted on later.
 2. **Hydrate on sign-in.** When a signed-in device has no local charts, pull the
    account's. This is where "my charts followed me" actually becomes true.
 3. **Adopt existing local data.** On first sign-in, push what is already on the
    device. Without this, everyone's current work looks lost the moment they sign
-   in — this cannot be deferred past step 2.
-4. **Comparisons**, into `compatibility_reports`.
+   in — this cannot be deferred past step 2. Note that a guest who consented has
+   already pushed, and `signInWithProvider` claims their workspace, so for them
+   this step is a no-op rather than a migration.
+4. **Comparisons**, into `compatibility_reports`. Nothing stores a comparison
+   locally any more, so this step now starts with deciding where a saved one
+   lives at all — the table is ready, the client side is not.
 5. **Palm readings.** Deliberately last: images are megabytes and belong in
    object storage with `assets` holding metadata, not in Postgres. `local-store.ts`
    already downscales to a display-sized JPEG, which is a starting point but not
    a storage strategy.
 
-Steps 1–3 are the ones that deliver the promise. 4 and 5 are follow-ons.
+Steps 0–3 are the ones that deliver the promise. 4 and 5 are follow-ons.
 
 ## Things that will bite
 
@@ -114,7 +230,13 @@ Steps 1–3 are the ones that deliver the promise. 4 and 5 are follow-ons.
   device and onto a server is a different privacy posture from "nothing leaves
   this browser" — which is what `/login` currently promises on screen. That copy
   has to change in the same release, and the table is already there to record
-  the agreement.
+  the agreement. See "Consent, and the nudge" above for the flow and for why the
+  prompt after a decline is deliberately a one-shot.
+- **A guest's charts die with the cookie.** `DEVICE_ID_SECRET` signs it and the
+  workspace id is derived from it, so a cleared cookie is an unreachable
+  workspace with no recovery path — no email, no password now that
+  `auth_credentials` is gone. Rotating that secret has the same effect on every
+  guest at once. Say the limit on screen rather than discovering it in support.
 
 ## Estimate
 

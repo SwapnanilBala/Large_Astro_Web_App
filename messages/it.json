@@ -2,10 +2,7 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "La Mia Carta",
-    "workspace": "Area di lavoro",
     "menu": "Menu",
-    "close": "Chiudi",
-    "calendar": "Calendar",
     "switchProfile": "Cambia profilo",
     "noProfile": "Nessun profilo",
     "signOut": "Esci"
@@ -363,20 +360,6 @@
     "generating": "Generazione dell'analisi di compatibilità...",
     "error": "Qualcosa è andato storto. Riprova."
   },
-  "workspace": {
-    "loading": "Caricamento della tua area di lavoro astrologica salvata...",
-    "exportPreparing": "Preparazione esportazione...",
-    "exportButton": "Esporta area di lavoro",
-    "unknownCity": "Città sconosciuta",
-    "saving": "Salvataggio...",
-    "saveNotes": "Salva note",
-    "saved": "Salvato",
-    "saveFailed": "Salvataggio fallito",
-    "restore": "Ripristina",
-    "archive": "Archivia",
-    "noCharts": "Nessuna carta salvata",
-    "noChartsDesc": "Genera una carta dalla pagina principale per vederla qui"
-  },
   "birthChartTeaser": {
     "awaitingName": "In attesa del nome",
     "exactTime": "Ora esatta",
@@ -431,9 +414,6 @@
     "tagline": "Il tuo disegno cosmico, decodificato",
     "skipHint": "Fai clic o premi Esc per saltare"
   },
-  "zodiacPortrait": {
-    "ruledBy": "Governato da {planet}"
-  },
   "planetNames": {
     "sun": "Sole",
     "moon": "Luna",
@@ -443,9 +423,7 @@
     "jupiter": "Giove",
     "saturn": "Saturno"
   },
-  "bottomNav": {
-    "calendar": "Calendar"
-  },
+  "bottomNav": {},
   "profiles": {
     "kicker": "Questo dispositivo",
     "heading": "Scegli un profilo",

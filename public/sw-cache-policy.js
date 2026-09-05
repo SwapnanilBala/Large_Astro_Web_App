@@ -50,18 +50,18 @@
    * Check what is in the server-rendered HTML when the URL has no query: if any
    * of it came from a database, a cookie, or the request, it does not belong.
    *
-   * All three read their personal data from localStorage on the client, so the
+   * It reads its personal data from localStorage on the client, so the
    * document itself carries nothing about anyone.
    *
    * /login was on this list and was deliberately removed. It leaked nothing —
    * only query-less URLs are ever cached, so the stored copy always had an
    * empty returnTo — but it is the one route rendered per request rather than
    * prerendered, and it embeds getDailySkyLine(), which changes daily. A cached
-   * copy therefore goes stale in a way the other three cannot, and the offline
+   * copy therefore goes stale in a way this one cannot, and the offline
    * value of a profile picker you cannot act on did not justify keeping it.
    * Do not re-add it without a reason that outweighs that.
    */
-  const NAVIGATION_ALLOWLIST = ["/calendar", "/workspace", "/insights/palm-history"];
+  const NAVIGATION_ALLOWLIST = ["/insights/palm-history"];
 
   function normalise(pathname) {
     if (pathname.length > 1 && pathname.endsWith("/")) return pathname.slice(0, -1);

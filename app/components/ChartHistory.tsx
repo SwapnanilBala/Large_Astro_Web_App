@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { readChartHistory, type ChartHistoryEntry } from "@/lib/chart-history-store";
-import { listSavedCharts } from "@/lib/workspace-store";
 import { HiOutlineSparkles } from "react-icons/hi2";
 
 type ChartHistoryProps = {
@@ -103,38 +102,9 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
   const router = useRouter();
 
   useEffect(() => {
-    // Clear first so a profile switch never shows the previous profile's charts.
+    // Read on every profile change, so a switch never shows the previous
+    // profile's charts.
     setEntries(readChartHistory(profileId));
-
-    if (!profileId) return;
-
-    let isCancelled = false;
-
-    const loadSavedCharts = async () => {
-      try {
-        const data = await listSavedCharts(profileId);
-        if (isCancelled || data.length === 0) return;
-
-        setEntries(
-          data.map((entry) => ({
-            name: entry.name,
-            city: entry.city,
-            birthDate: entry.birth_date,
-            ascendantSign: entry.ascendant_sign,
-            savedAt: entry.saved_at,
-            queryString: entry.query_string,
-          }))
-        );
-      } catch {
-        /* ignore and keep the history fallback */
-      }
-    };
-
-    void loadSavedCharts();
-
-    return () => {
-      isCancelled = true;
-    };
   }, [profileId]);
 
   if (isLoading) {

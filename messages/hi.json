@@ -2,10 +2,7 @@
   "navbar": {
     "brand": "Lagna Atelier",
     "myChart": "मेरी कुंडली",
-    "workspace": "कार्यक्षेत्र",
     "menu": "मेनू",
-    "close": "बंद करें",
-    "calendar": "Calendar",
     "switchProfile": "प्रोफ़ाइल बदलें",
     "noProfile": "कोई प्रोफ़ाइल नहीं",
     "signOut": "साइन आउट"
@@ -363,20 +360,6 @@
     "generating": "अनुकूलता विश्लेषण तैयार हो रहा है...",
     "error": "कुछ गलत हो गया। कृपया पुनः प्रयास करें।"
   },
-  "workspace": {
-    "loading": "आपका सहेजा गया ज्योतिष कार्यक्षेत्र लोड हो रहा है...",
-    "exportPreparing": "निर्यात तैयार हो रहा है...",
-    "exportButton": "कार्यक्षेत्र निर्यात करें",
-    "unknownCity": "अज्ञात शहर",
-    "saving": "सहेजा जा रहा है...",
-    "saveNotes": "नोट्स सहेजें",
-    "saved": "सहेजा गया",
-    "saveFailed": "सहेजना विफल",
-    "restore": "पुनर्स्थापित करें",
-    "archive": "संग्रहित करें",
-    "noCharts": "अभी तक कोई सहेजी गई कुंडली नहीं",
-    "noChartsDesc": "यहाँ देखने के लिए होम पेज से एक कुंडली बनाएं"
-  },
   "birthChartTeaser": {
     "awaitingName": "नाम की प्रतीक्षा",
     "exactTime": "सटीक समय",
@@ -431,9 +414,6 @@
     "tagline": "आपका कॉस्मिक ब्लूप्रिंट, डिकोडेड",
     "skipHint": "छोड़ने के लिए क्लिक करें या Esc दबाएं"
   },
-  "zodiacPortrait": {
-    "ruledBy": "{planet} द्वारा शासित"
-  },
   "planetNames": {
     "sun": "सूर्य",
     "moon": "चंद्र",
@@ -443,9 +423,7 @@
     "jupiter": "बृहस्पति",
     "saturn": "शनि"
   },
-  "bottomNav": {
-    "calendar": "Calendar"
-  },
+  "bottomNav": {},
   "profiles": {
     "kicker": "यह डिवाइस",
     "heading": "प्रोफ़ाइल चुनें",

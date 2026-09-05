@@ -3139,7 +3139,7 @@ label:has(.autocomplete-wrapper.is-open) {
   background: rgba(255, 143, 126, 0.1);
 }
 
-.workspace-actions {
+.compatibility-actions {
   margin-top: 1.5rem;
   display: flex;
   flex-wrap: wrap;

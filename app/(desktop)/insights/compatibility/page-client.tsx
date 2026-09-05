@@ -21,11 +21,9 @@ import {
   normalizeUtcOffsetMinutes,
   type IntakeFieldResult,
 } from "@/lib/intake-normalize";
-import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
 import { useToast } from "@/lib/toast-context";
-import { saveComparison } from "@/lib/workspace-store";
 
 /** Derives the Western (Tropical) sun sign from a YYYY-MM-DD birth date string. */
 function sunSignFromDate(birthDate: string): string {
@@ -552,7 +550,6 @@ function buildCompatibilityQueryString(primary: ProfileQueryInput, partner: Prof
 export default function CompatibilityPageClient({
   initialSearchParams,
 }: CompatibilityPageClientProps) {
-  const { profileId } = useProfile();
   const { t } = useTranslation();
   const { pushToast } = useToast();
   const [primary, setPrimary] = useState<ProfileQueryInput>(() =>
@@ -572,7 +569,7 @@ export default function CompatibilityPageClient({
     );
   }, [partner, primary]);
 
-  const submitCompatibility = useCallback(async (saveResult: boolean) => {
+  const submitCompatibility = useCallback(async () => {
     if (!canSubmit) {
       setError(t("compatibility.incompleteProfiles"));
       return;
@@ -600,28 +597,15 @@ export default function CompatibilityPageClient({
       }
 
       const payload = (await response.json()) as CompatibilityApiResponse;
-      if (saveResult && profileId) {
-        const saved = await saveComparison(profileId, {
-          primary_name: payload.primary_client.name,
-          partner_name: payload.partner_client.name,
-          compatibility_score: payload.compatibility_score,
-          summary: payload.summary,
-          query_string: buildCompatibilityQueryString(primary, partner),
-        });
-        payload.saved_comparison_id = saved.saved_comparison_id;
-      }
       setResult(payload);
-      pushToast(
-        saveResult ? "Compatibility report saved." : "Compatibility report ready.",
-        "success"
-      );
+      pushToast("Compatibility report ready.", "success");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Compatibility request failed.");
       pushToast("Compatibility request failed.", "error");
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, partner, primary, profileId, pushToast]);
+  }, [canSubmit, partner, primary, pushToast]);
 
   const shareCompatibility = async () => {
     const url = `${window.location.origin}/insights/compatibility?${buildCompatibilityQueryString(primary, partner)}`;
@@ -657,7 +641,7 @@ export default function CompatibilityPageClient({
     }
 
     autoSubmittedRef.current = true;
-    void submitCompatibility(false);
+    void submitCompatibility();
   }, [canSubmit, partner, result, submitCompatibility]);
 
   return (
@@ -668,10 +652,10 @@ export default function CompatibilityPageClient({
 
       <section className="dashboard-shell">
         <p className="kicker">Synastry Analysis</p>
-        <h1>Compatibility workspace</h1>
+        <h1>Compatibility</h1>
         <p className="lead">
-          Compare two full birth profiles, inspect the strongest synastry links, and save the report
-          into this profile&apos;s workspace on this device.
+          Compare two full birth profiles, inspect the strongest synastry links, and share the
+          report as a link.
         </p>
 
         <div className="compatibility-grid">
@@ -679,16 +663,9 @@ export default function CompatibilityPageClient({
           <ProfileCard title="Partner profile" profile={partner} setProfile={setPartner} accentColor="coral" />
         </div>
 
-        <div className="workspace-actions">
-          <button type="button" onClick={() => void submitCompatibility(false)} disabled={isSubmitting}>
+        <div className="compatibility-actions">
+          <button type="button" onClick={() => void submitCompatibility()} disabled={isSubmitting}>
             {isSubmitting ? "Calculating..." : "Run compatibility"}
-          </button>
-          <button
-            type="button"
-            onClick={() => void submitCompatibility(true)}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Saving..." : "Save to workspace"}
           </button>
           <button
             type="button"
@@ -703,7 +680,7 @@ export default function CompatibilityPageClient({
 
         {result && (
           <>
-            <div className="workspace-summary-grid">
+            <div className="compatibility-summary-grid">
               <article className="metric-card metric-card--score-ring">
                 <h3>Compatibility score</h3>
                 <div style={{
@@ -743,15 +720,6 @@ export default function CompatibilityPageClient({
                 </div>
                 <CompatibilityRing score={result.compatibility_score} />
                 <small>Composite synastry score from aspects and elemental fit.</small>
-              </article>
-              <article className="metric-card">
-                <h3>Saved report</h3>
-                <p>{result.saved_comparison_id ? "Yes" : "Not yet"}</p>
-                <small>
-                  {result.saved_comparison_id
-                    ? "This comparison is now available from the workspace page."
-                    : "Save the report to store it with notes and export."}
-                </small>
               </article>
             </div>
 
@@ -806,10 +774,10 @@ export default function CompatibilityPageClient({
                 <p className="kicker">Synastry</p>
                 <h2>Inter-chart aspects</h2>
               </div>
-              <div className="workspace-card-grid">
+              <div className="synastry-card-grid">
                 {result.synastry_aspects.map((aspect) => (
-                  <article key={`${aspect.primary_planet}-${aspect.partner_planet}-${aspect.aspect_type}`} className="workspace-card">
-                    <div className="workspace-card-header">
+                  <article key={`${aspect.primary_planet}-${aspect.partner_planet}-${aspect.aspect_type}`} className="synastry-card">
+                    <div className="synastry-card-header">
                       <div>
                         <h3>
                           {aspect.primary_planet} to {aspect.partner_planet}
@@ -820,7 +788,7 @@ export default function CompatibilityPageClient({
                         {aspect.harmonious ? "Supportive" : "Friction"}
                       </span>
                     </div>
-                    <p className="workspace-card-meta">Orb: {aspect.orb.toFixed(2)} degrees</p>
+                    <p className="synastry-card-meta">Orb: {aspect.orb.toFixed(2)} degrees</p>
                   </article>
                 ))}
               </div>
