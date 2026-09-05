@@ -105,9 +105,13 @@ The flow that follows from it:
 1. First time a chart would be written for a workspace, ask. One question, in
    plain words: *save this chart to your account so you can open it on another
    device?*
-2. **Yes** — insert a `consent_records` row (`purpose: "chart_storage"`,
+2. **Yes** — insert a `consent_records` row (`purpose: "store_birth_details"`,
    `policy_version` from a constant, `capture_source: "intake"`,
    `evidence_json` holding the copy they actually saw), then write the chart.
+   The purpose string is not a new invention: `scripts/verify-neon-schema.mjs`
+   already inserts `store_birth_details` in its smoke test, so that is the
+   established name and application code should match it rather than coin a
+   second one for the same permission.
 3. **No** — write nothing server-side. The chart still computes, still renders,
    still lands in `localStorage`. Declining costs the visitor no feature on the
    device in front of them, which is what makes the yes meaningful.
