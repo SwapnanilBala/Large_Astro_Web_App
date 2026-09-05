@@ -1,0 +1,71 @@
+/* Consent card for the handset tree. Self-contained; inherits tokens only. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.05rem;
+  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.2));
+  border-radius: 14px;
+  background: var(--surface-lit-strong, rgba(255, 243, 210, 0.05));
+  box-shadow: var(--edge-highlight);
+}
+
+.question {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: var(--text-primary, #f5f0e6);
+}
+
+.detail {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: var(--text-secondary, #a8a090);
+}
+
+/*
+ * Stacked, not side by side. At 320px two buttons in a row leave each one
+ * about 140px, which forces the labels to wrap mid-phrase — and the labels are
+ * the part that has to be read carefully before either is pressed.
+ */
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.button {
+  /* 44px, the smallest target a thumb hits reliably. */
+  min-height: 44px;
+  padding: 0.6rem 1rem;
+  border-radius: 11px;
+  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.2));
+  background: transparent;
+  color: var(--text-secondary, #a8a090);
+  font-family: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.accept {
+  border-color: var(--accent-gold, #d4a574);
+  color: var(--accent-gold, #d4a574);
+  background: var(--surface-strong, rgba(255, 243, 210, 0.05));
+}
+
+/*
+ * The decline is a full-width button of the same height as the accept. On a
+ * phone the temptation is to shrink it into a text link; a choice that is
+ * harder to hit than its alternative is not a choice being offered honestly.
+ */
+.note {
+  margin: 0;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--text-tertiary, #9a918a);
+}

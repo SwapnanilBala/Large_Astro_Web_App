@@ -9,6 +9,7 @@ import ErrorBoundary from "@/app/components/ErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
+import { buildChartHistoryQuery } from "@/lib/chart-params";
 import type { AdvancedFocusView } from "./advanced-views";
 
 const REQUEST_TIMEOUT_MS = 55_000;
@@ -40,27 +41,6 @@ function buildChartApiUrl(params: ChartParams): string {
   return buildBirthProfileApiUrl("/api/chart", window.location.origin, params, {
     include_transits: true,
   });
-}
-
-function buildHistoryQs(params: ChartParams): string {
-  const qs: Record<string, string> = {
-    name: params.name,
-    birthDate: params.birthDate,
-    birthTime: params.birthTime,
-    timezoneOffsetMinutes: params.timezoneOffsetMinutes,
-    latitude: params.latitude,
-    longitude: params.longitude,
-    country: params.country,
-    state: params.state,
-    city: params.city,
-    engineId: params.engineId,
-  };
-  if (params.town) qs.town = params.town;
-  if (params.timeZoneId) qs.timeZoneId = params.timeZoneId;
-  if (params.birthTimeAccuracy) qs.birthTimeAccuracy = params.birthTimeAccuracy;
-  if (params.birthTimeSource) qs.birthTimeSource = params.birthTimeSource;
-  if (params.birthTimeFallback) qs.birthTimeFallback = params.birthTimeFallback;
-  return new URLSearchParams(qs).toString();
 }
 
 export default function AdvancedLoader({
@@ -122,7 +102,7 @@ export default function AdvancedLoader({
     void fetchChart();
   }, [fetchChart]);
 
-  const historyQs = payload ? buildHistoryQs(chartParams) : "";
+  const historyQs = payload ? buildChartHistoryQuery(chartParams) : "";
 
   return (
     <AnimatePresence mode="wait">

@@ -545,12 +545,12 @@
   "chartSync": {
     "kicker": "Saving your chart",
     "askQuestion": "Save your charts to your account?",
-    "askDetail": "Your charts are kept in this browser. Saving them to your account means they come back if you clear your history, and they open on your phone as well as here.",
+    "askDetail": "Your charts are kept in this browser. Saving them to your account means they come back if you clear your history, and they open on your other devices too.",
     "askNote": "Either way this chart stays on screen and stays in this browser. You can change your mind at any time.",
     "accept": "Save my charts",
     "decline": "Keep them in this browser only",
     "nudgeQuestion": "This chart lives only in this browser",
-    "nudgeDetail": "Clearing your history erases it, and it will not be on your phone. Saving it to your account is what makes it come back.",
+    "nudgeDetail": "Clearing your history erases it, and it will not be on your other devices. Saving it to your account is what makes it come back.",
     "nudgeDismiss": "No thanks",
     "nudgeNote": "We will not ask again.",
     "settingsHeading": "Saved charts",
@@ -563,6 +563,8 @@
     "withdrawDone": "Deleted. Your charts are in this browser only.",
     "withdrawFailed": "Could not delete them just now. Nothing has changed — please try again.",
     "resume": "Save my charts to my account",
-    "resumeDone": "Saved from now on. Charts you already have are saved as you open them."
+    "resumeDone": "Saved. {stored} chart(s) from this browser are now on your account.",
+    "resuming": "Saving your charts...",
+    "resumePartial": "Saved {stored}, but some could not be stored. They stay in this browser and we will try again next time you open one."
   }
 }

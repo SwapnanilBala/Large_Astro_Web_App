@@ -152,5 +152,16 @@
     "createFailed": "Could not create profile.",
     "renameFailed": "Could not rename profile.",
     "deleteFailed": "Could not delete profile."
+  },
+  "chartSync": {
+    "askQuestion": "Save your charts to your account?",
+    "askDetail": "Your charts are kept in this browser. Saving them to your account means they come back if you clear your history, and they open on your other devices too.",
+    "askNote": "Either way this chart stays on screen and stays in this browser. You can change your mind at any time.",
+    "accept": "Save my charts",
+    "decline": "Keep them in this browser only",
+    "nudgeQuestion": "This chart lives only in this browser",
+    "nudgeDetail": "Clearing your history erases it, and it will not be on your other devices. Saving it to your account is what makes it come back.",
+    "nudgeDismiss": "No thanks",
+    "nudgeNote": "We will not ask again."
   }
 }

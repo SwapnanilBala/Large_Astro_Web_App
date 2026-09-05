@@ -130,6 +130,42 @@ export function getChartPayload(chartParams: ChartParams): ChartApiResponse {
 }
 
 /** Rebuild the query string for linking between the two trees. */
+/**
+ * The query string a chart is filed and reopened under.
+ *
+ * Narrower than `chartParamsToQuery`, and deliberately: this is what lands in
+ * chart history, in a shared link and in `chart_calculations.input_snapshot_json`,
+ * so it carries the birth facts and the engine and nothing incidental to one
+ * page view. Optional fields are omitted rather than sent blank, because the
+ * string is compared and fingerprinted downstream and a trailing `&town=` would
+ * make two identical charts look different.
+ *
+ * Lived in two loaders as identical copies before the mobile tree needed a
+ * third.
+ */
+export function buildChartHistoryQuery(params: ChartParams): string {
+  const qs: Record<string, string> = {
+    name: params.name,
+    birthDate: params.birthDate,
+    birthTime: params.birthTime,
+    timezoneOffsetMinutes: params.timezoneOffsetMinutes,
+    latitude: params.latitude,
+    longitude: params.longitude,
+    country: params.country,
+    state: params.state,
+    city: params.city,
+    engineId: params.engineId,
+  };
+
+  if (params.town) qs.town = params.town;
+  if (params.timeZoneId) qs.timeZoneId = params.timeZoneId;
+  if (params.birthTimeAccuracy) qs.birthTimeAccuracy = params.birthTimeAccuracy;
+  if (params.birthTimeSource) qs.birthTimeSource = params.birthTimeSource;
+  if (params.birthTimeFallback) qs.birthTimeFallback = params.birthTimeFallback;
+
+  return new URLSearchParams(qs).toString();
+}
+
 export function chartParamsToQuery(params: ChartParams): string {
   const search = new URLSearchParams();
   (Object.entries(params) as [string, string][]).forEach(([key, value]) => {
