@@ -11,7 +11,6 @@ if (!databaseUrl) {
 
 const expectedTables = [
   "assets",
-  "auth_credentials",
   "auth_identities",
   "auth_sessions",
   "auth_users",
@@ -30,8 +29,16 @@ const expectedTables = [
   "workspaces",
 ];
 
+/**
+ * Tables a migration has removed. Present in the live schema means a migration
+ * did not run, or ran against a different branch than the one being checked.
+ *
+ * `auth_credentials` joins the list in 0005: email/password sign-in was never
+ * built, so the table never held a row.
+ */
 const deferredTables = [
   "audit_events",
+  "auth_credentials",
   "client_notes",
   "client_tags",
   "consultations",
