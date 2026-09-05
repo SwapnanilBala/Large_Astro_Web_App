@@ -29,7 +29,14 @@ npm install
 npm run dev
 ```
 
-App runs at `http://localhost:7001`
+App runs at `http://localhost:7001`. If that port is already held by an
+earlier run, free it first (PowerShell):
+
+```powershell
+Get-NetTCPConnection -LocalPort 7001 -ErrorAction SilentlyContinue |
+  Select-Object -ExpandProperty OwningProcess -Unique |
+  ForEach-Object { Stop-Process -Id $_ -Force }
+```
 
 ## Environment
 
