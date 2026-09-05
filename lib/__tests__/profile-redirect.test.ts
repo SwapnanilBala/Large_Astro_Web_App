@@ -1,13 +1,6 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { resolveProfileDestination } from "@/lib/profile-redirect";
 import { chartHistoryKey } from "@/lib/chart-history-store";
-import { listSavedCharts } from "@/lib/workspace-store";
-
-vi.mock("@/lib/workspace-store", () => ({
-  listSavedCharts: vi.fn(),
-}));
-
-const mockedListSavedCharts = vi.mocked(listSavedCharts);
 
 const PROFILE = "profile-1";
 
@@ -17,11 +10,9 @@ const completeQuery =
 describe("profile redirects", () => {
   beforeEach(() => {
     localStorage.clear();
-    mockedListSavedCharts.mockReset();
-    mockedListSavedCharts.mockResolvedValue([]);
   });
 
-  it("routes a profile with chart history to engine selection", async () => {
+  it("routes a profile with chart history to engine selection", () => {
     localStorage.setItem(
       chartHistoryKey(PROFILE),
       JSON.stringify([
@@ -36,52 +27,37 @@ describe("profile redirects", () => {
       ])
     );
 
-    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe(
-      `/engine-select?${completeQuery}`
-    );
+    expect(resolveProfileDestination(PROFILE, "/")).toBe(`/engine-select?${completeQuery}`);
   });
 
-  it("routes a profile with a saved chart to engine selection", async () => {
-    mockedListSavedCharts.mockResolvedValue([
-      {
-        saved_chart_id: "chart-1",
-        name: "Asha",
-        city: "Kolkata",
-        birth_date: "1992-05-12",
-        birth_time: "08:30",
-        timezone_offset_minutes: 330,
-        country: "India",
-        state: "West Bengal",
-        town: "",
-        latitude: 22.57,
-        longitude: 88.36,
-        time_zone_id: "Asia/Kolkata",
-        ascendant_sign: "Leo",
-        query_string: completeQuery,
-        notes: "",
-        saved_at: "2026-04-27T10:00:00.000Z",
-        updated_at: "2026-04-27T10:00:00.000Z",
-        archived_at: null,
-      },
-    ]);
-
-    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe(
-      `/engine-select?${completeQuery}`
+  it("ignores a history entry that is missing birth details", () => {
+    localStorage.setItem(
+      chartHistoryKey(PROFILE),
+      JSON.stringify([
+        {
+          name: "Asha",
+          city: "Kolkata",
+          birthDate: "1992-05-12",
+          ascendantSign: "Leo",
+          queryString: "name=Asha&birthDate=1992-05-12",
+          savedAt: "2026-04-27T10:00:00.000Z",
+        },
+      ])
     );
+
+    expect(resolveProfileDestination(PROFILE, "/")).toBe("/");
   });
 
-  it("does not leak another profile's chart history", async () => {
+  it("does not leak another profile's chart history", () => {
     localStorage.setItem(
       chartHistoryKey("someone-else"),
       JSON.stringify([{ name: "Asha", queryString: completeQuery, savedAt: "2026-04-27T10:00:00.000Z" }])
     );
 
-    await expect(resolveProfileDestination(PROFILE, "/")).resolves.toBe("/");
+    expect(resolveProfileDestination(PROFILE, "/")).toBe("/");
   });
 
-  it("keeps new profiles on a safe internal fallback", async () => {
-    await expect(
-      resolveProfileDestination(PROFILE, "https://example.com")
-    ).resolves.toBe("/");
+  it("keeps new profiles on a safe internal fallback", () => {
+    expect(resolveProfileDestination(PROFILE, "https://example.com")).toBe("/");
   });
 });

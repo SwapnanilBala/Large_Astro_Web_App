@@ -64,7 +64,7 @@ export default function ProfilePickerClient({
 
   const goToProfile = async (profileId: string) => {
     setSettling(true);
-    const resolved = await resolveProfileDestination(profileId, destination);
+    const resolved = resolveProfileDestination(profileId, destination);
     // Brief shimmer choreography before navigating away
     await new Promise((resolve) => setTimeout(resolve, 500));
     setRedirecting(true);

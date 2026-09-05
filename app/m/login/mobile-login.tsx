@@ -234,7 +234,7 @@ export default function MobileLogin({ returnTo, skyLine }: Props) {
 
   const goToProfile = async (profileId: string) => {
     setBusyId(profileId);
-    const resolved = await resolveProfileDestination(profileId, destination);
+    const resolved = resolveProfileDestination(profileId, destination);
     router.push(resolved);
   };
 

@@ -7,7 +7,6 @@ import { useProfile } from "@/lib/profile-context";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { readChartHistory } from "@/lib/chart-history-store";
-import { listSavedCharts } from "@/lib/workspace-store";
 
 export default function Navbar() {
   const { activeProfile, isLoading, profileId } = useProfile();
@@ -36,50 +35,19 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    const getLastChartFromLocal = () => {
-      const entries = readChartHistory(profileId);
-      if (entries.length === 0) return null;
-
-      const latest = [...entries].sort(
-        (left, right) =>
-          Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
-      )[0];
-      const queryString = latest?.queryString?.trim().replace(/^\?/, "");
-      return queryString ? `/insights?${queryString}` : null;
-    };
-
     // A profile switch must not carry the previous profile's chart link over.
     setLastChartUrl(null);
 
     if (!profileId) return;
 
-    let isCancelled = false;
-    const localChartUrl = getLastChartFromLocal();
-    const localChartFrame = window.requestAnimationFrame(() => {
-      if (!isCancelled) setLastChartUrl(localChartUrl);
-    });
+    const entries = readChartHistory(profileId);
+    const latest = [...entries].sort(
+      (left, right) =>
+        Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
+    )[0];
+    const queryString = latest?.queryString?.trim().replace(/^\?/, "");
 
-    const loadSavedCharts = async () => {
-      try {
-        if (localChartUrl) return;
-        const data = await listSavedCharts(profileId);
-        if (isCancelled || data.length === 0) return;
-
-        const queryString = data[0].query_string.trim().replace(/^\?/, "");
-        if (queryString) {
-          setLastChartUrl(getLastChartFromLocal() ?? `/insights?${queryString}`);
-        }
-      } catch {
-        /* ignore and keep the history fallback */
-      }
-    };
-
-    void loadSavedCharts();
-
-    return () => {
-      isCancelled = true;
-      window.cancelAnimationFrame(localChartFrame);
-    };
+    setLastChartUrl(queryString ? `/insights?${queryString}` : null);
   }, [pathname, profileId]);
 
   /* Track scroll position for glass effect */

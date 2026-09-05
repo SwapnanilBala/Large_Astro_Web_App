@@ -6,7 +6,6 @@ import { House, Sparkles } from 'lucide-react';
 import { useProfile } from '@/lib/profile-context';
 import { useTranslation } from '@/lib/i18n-context';
 import { chartHistoryKey, subscribeToChartHistory } from '@/lib/chart-history-store';
-import { listSavedCharts } from '@/lib/workspace-store';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
@@ -69,38 +68,11 @@ export default function BottomNav() {
 
     if (!profileId) return;
 
-    let cancelled = false;
+    setLastChartUrl(latestLocalChartUrl(profileId));
 
-    const resolveLatestChart = async () => {
-      const localUrl = latestLocalChartUrl(profileId);
-      if (!cancelled) {
-        setLastChartUrl(localUrl);
-      }
-
-      if (localUrl) return;
-
-      try {
-        const savedCharts = await listSavedCharts(profileId);
-        if (!cancelled) {
-          setLastChartUrl(
-            latestLocalChartUrl(profileId) ?? insightsUrl(savedCharts[0]?.query_string)
-          );
-        }
-      } catch {
-        /* Keep whatever the local history gave us. */
-      }
-    };
-
-    void resolveLatestChart();
-
-    const unsubscribe = subscribeToChartHistory(profileId, () => {
+    return subscribeToChartHistory(profileId, () => {
       setLastChartUrl(latestLocalChartUrl(profileId));
     });
-
-    return () => {
-      cancelled = true;
-      unsubscribe();
-    };
   }, [pathname, profileId]);
 
   if (isHidden) return null;

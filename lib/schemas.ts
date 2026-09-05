@@ -115,22 +115,6 @@ const targetDateField = z
     { message: "target_date is not a valid calendar date" },
   );
 
-const dateOnlyField = (fieldName: string) => z
-  .string({ error: `${fieldName} is required` })
-  .regex(/^\d{4}-\d{2}-\d{2}$/, `${fieldName} must match YYYY-MM-DD format`)
-  .refine(
-    (v) => {
-      const [y, m, d] = v.split("-").map(Number);
-      const date = new Date(Date.UTC(y, m - 1, d));
-      return (
-        date.getUTCFullYear() === y &&
-        date.getUTCMonth() === m - 1 &&
-        date.getUTCDate() === d
-      );
-    },
-    { message: `${fieldName} is not a valid calendar date` },
-  );
-
 // ---------------------------------------------------------------------------
 // Composite schemas
 // ---------------------------------------------------------------------------
@@ -163,35 +147,6 @@ export const ForecastInputSchema = BirthInputSchema.extend({
 });
 
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
-
-export const CalendarPlannerIntentSchema = z.enum([
-  "action",
-  "rest",
-  "communication",
-  "relationships",
-  "money",
-  "study",
-  "travel",
-]);
-
-/** Calendar planner endpoint: birth details + bounded date range. */
-export const CalendarPlannerInputSchema = BirthInputSchema.extend({
-  start_date: dateOnlyField("start_date"),
-  end_date: dateOnlyField("end_date"),
-  intent: CalendarPlannerIntentSchema.optional(),
-}).refine(
-  (v) => v.end_date >= v.start_date,
-  { message: "end_date must be on or after start_date", path: ["end_date"] },
-).refine(
-  (v) => {
-    const start = Date.parse(`${v.start_date}T00:00:00Z`);
-    const end = Date.parse(`${v.end_date}T00:00:00Z`);
-    return Math.floor((end - start) / 86400000) + 1 <= 14;
-  },
-  { message: "calendar planner range must be 14 days or fewer", path: ["end_date"] },
-);
-
-export type CalendarPlannerInput = z.infer<typeof CalendarPlannerInputSchema>;
 
 /** Dasha sub-period expansion. */
 export const DashaSubperiodsInputSchema = z.object({
