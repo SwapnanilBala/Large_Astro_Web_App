@@ -552,6 +552,17 @@
     "nudgeQuestion": "This chart lives only in this browser",
     "nudgeDetail": "Clearing your history erases it, and it will not be on your phone. Saving it to your account is what makes it come back.",
     "nudgeDismiss": "No thanks",
-    "nudgeNote": "We will not ask again."
+    "nudgeNote": "We will not ask again.",
+    "settingsHeading": "Saved charts",
+    "statusSaving": "Your charts are saved to your account.",
+    "detailSaving": "They come back if you clear this browser, and they open on your other devices. Sign in with Google to reach them from a device that is not this one.",
+    "statusLocal": "Your charts stay in this browser.",
+    "detailLocal": "Nothing about them is on our servers. Clearing your history erases them, and they are not on your other devices.",
+    "withdraw": "Stop saving and delete what is stored",
+    "withdrawing": "Deleting...",
+    "withdrawDone": "Deleted. Your charts are in this browser only.",
+    "withdrawFailed": "Could not delete them just now. Nothing has changed — please try again.",
+    "resume": "Save my charts to my account",
+    "resumeDone": "Saved from now on. Charts you already have are saved as you open them."
   }
 }

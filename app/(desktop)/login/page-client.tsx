@@ -7,6 +7,7 @@ import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { resolveProfileDestination } from "@/lib/profile-redirect";
 import PageTransition from "@/app/components/PageTransition";
+import ChartSyncSettings from "@/app/components/ChartSyncSettings";
 import BackButton from "@/app/components/BackButton";
 import AuthAmbient from "./AuthAmbient";
 import GoogleSignIn from "./GoogleSignIn";
@@ -305,6 +306,11 @@ export default function ProfilePickerClient({
           <p className={styles.switchText}>
             {t("profiles.storageNote").replace("{max}", String(maxProfiles))}
           </p>
+
+          {/* Sits under the storage note on purpose: that paragraph explains
+              where data lives, and this is the control over the one part of it
+              that can leave the browser. */}
+          <ChartSyncSettings />
         </section>
       </div>
     </PageTransition>
