@@ -3,6 +3,10 @@
 Status: **proposal, nothing built.** Written 2026-09-04, after the session-read
 work landed. Nothing here is implemented until it is approved.
 
+Amended 2026-09-05: `/workspace` and `/calendar` were removed from the app, and
+`lib/workspace-store.ts` with them. What that changes for this plan is listed
+under "Where things stand" — less to sync, and one fewer store to write.
+
 ## Where things stand
 
 Signing in works and persists. What it produces is an identity and an empty
@@ -16,10 +20,15 @@ Everything a person would actually miss lives in `localStorage`:
 | --- | --- | --- |
 | `astro_local_profiles` | `lib/local-profiles.ts` | up to 5 device profiles |
 | `astro_chart_history` | `lib/chart-history-store.ts` | recently cast charts |
-| `astro_workspace_saved_charts` | `lib/workspace-store.ts` | saved charts |
-| `astro_workspace_saved_comparisons` | `lib/workspace-store.ts` | saved comparisons |
 | `astro_palm_readings` | `lib/palm-readings/local-store.ts` | palm readings + images |
 | `astro_birth_details_history` | — | birth-detail autofill |
+
+`astro_workspace_saved_charts` and `astro_workspace_saved_comparisons` were on
+this list. They held a second copy of what `astro_chart_history` already keeps,
+plus saved comparisons that only `/workspace` could open; both keys are gone
+from the code and remain only on the profile-delete scrub list, to clear rows
+left in browsers that used the old page. Nothing is lost to sync there —
+chart history is the same data under different field names.
 
 So signing in on a second device gets you a working account with nothing in it.
 That is the gap.
@@ -66,16 +75,20 @@ Stores call into it; it no-ops when signed out.
 ```
 lib/sync/
   index.ts          push(entity, payload) / pull(workspaceId)
-  charts.ts         chart_history + saved_charts -> clients/birth_profiles/chart_calculations
-  comparisons.ts    saved_comparisons -> compatibility_reports
+  charts.ts         chart_history -> clients/birth_profiles/chart_calculations
+  comparisons.ts    compatibility results -> compatibility_reports
   readings.ts       palm readings -> generated_artifacts + assets
 ```
 
 Two API routes, both requiring a resolved session and scoping every query to the
 caller's `workspace_id`:
 
-- `GET /api/workspace/sync` — everything in the account's workspace since a cursor
-- `POST /api/workspace/sync` — accept a batch of local records, upsert, return applied ids
+- `GET /api/sync` — everything in the account's workspace since a cursor
+- `POST /api/sync` — accept a batch of local records, upsert, return applied ids
+
+(Named `/api/sync` rather than `/api/workspace/sync`: `workspaces` is still the
+tenant table these queries scope to, but `/workspace` is no longer a page, and a
+route named after a deleted one invites the wrong reading.)
 
 ## Order of work
 
@@ -87,7 +100,9 @@ caller's `workspace_id`:
 3. **Adopt existing local data.** On first sign-in, push what is already on the
    device. Without this, everyone's current work looks lost the moment they sign
    in — this cannot be deferred past step 2.
-4. **Comparisons**, into `compatibility_reports`.
+4. **Comparisons**, into `compatibility_reports`. Nothing stores a comparison
+   locally any more, so this step now starts with deciding where a saved one
+   lives at all — the table is ready, the client side is not.
 5. **Palm readings.** Deliberately last: images are megabytes and belong in
    object storage with `assets` holding metadata, not in Postgres. `local-store.ts`
    already downscales to a display-sized JPEG, which is a starting point but not

@@ -8,19 +8,22 @@ A full-stack Vedic astrology intelligence application built entirely on Next.js.
 - **astronomy-engine** — server-side planetary and house calculations
 - **Framer Motion** — animations and transitions
 - **Zod** — runtime validation
-- **Browser localStorage** — all user data, scoped to local device profiles
+- **Browser localStorage** — all chart data, scoped to local device profiles
+- **Neon Postgres** + **Drizzle** — accounts and sessions, and nothing else yet
 
-## Local-only data
+## Where data lives
 
-There are no accounts and no database. Up to **5 profiles** can live on one
-device, each keeping its own saved charts, comparisons, palm readings, chart
-history, and intake drafts. Everything is stored in the browser:
+Signing in with Google gives you an identity, not a synced library. Everything
+a reading is made of still lives in the browser: up to **5 profiles** on one
+device, each with its own chart history, palm readings and intake drafts.
 
 - Clearing site data erases it.
 - Nothing syncs across devices, browsers, or private windows.
 - Deleting a profile deletes everything saved under it.
 
-Use the profile picker at `/login` to switch, create, rename, or delete profiles.
+Use the profile picker at `/login` to switch, create, rename, or delete
+profiles. `docs/account-data-sync-plan.md` is the proposal for closing the gap
+between the two.
 
 ## Run Locally
 
@@ -40,20 +43,15 @@ Get-NetTCPConnection -LocalPort 7001 -ErrorAction SilentlyContinue |
 
 ## Environment
 
-No environment variables are required — the chart engine runs without any.
-Create `.env.local` only to enable the AI-backed endpoints:
+Charts need no environment variables — the astronomy engine runs on an empty
+one. Copy `.env.example` to `.env.local` to enable the parts that do:
 
-```bash
-# Palm-image analysis (/api/palm-reading)
-OPENAI_API_KEY=your-key
+- `OPENAI_API_KEY` — palm-image analysis (`/api/palm-reading`)
+- `DATABASE_URL`, `DATABASE_URL_UNPOOLED`, `DEVICE_ID_SECRET`,
+  `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `APP_ORIGIN` — Google sign-in
 
-# Chart question endpoint
-ANTHROPIC_API_KEY=your-key
-
-# Optional: path to Swiss Ephemeris data files for higher precision
-# If not set, falls back to built-in Moshier ephemeris
-# EPHEMERIS_PATH=/path/to/ephe
-```
+Without the sign-in group the button is hidden and nothing else changes. See
+`.env.example` for what each one is and where to get it.
 
 ## Deploy
 
