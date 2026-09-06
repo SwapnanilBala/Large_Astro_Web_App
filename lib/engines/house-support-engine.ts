@@ -26,6 +26,47 @@ export const SAV_TOTAL_BINDUS = 337;
 /** 337 / 12 = 28.083…, the bindu count a house holds at dead average. */
 export const AVERAGE_BINDUS_PER_HOUSE = SAV_TOTAL_BINDUS / 12;
 
+/*
+ * Classical names and groupings for the twelve bhavas.
+ *
+ * Here rather than in either panel because the desktop /insights view and the
+ * /m/insights view both render this reference and must not drift apart.
+ *
+ * The *copy* for what each house governs is deliberately not here — that is
+ * HOUSE_THEMES in lib/rules/tables.ts, which the rule engine and chart-service
+ * already use to write sentences about house activation. A second wording
+ * would let the panels disagree with the readings on the same page.
+ */
+export const BHAVA_NAMES: Record<number, string> = {
+  1: "Tanu", 2: "Dhana", 3: "Sahaja", 4: "Bandhu",
+  5: "Putra", 6: "Ari", 7: "Yuvati", 8: "Randhra",
+  9: "Dharma", 10: "Karma", 11: "Labha", 12: "Vyaya",
+};
+
+/*
+ * Two groupings, in this order: the angular one first, then the qualifiers.
+ *
+ * Kendra/Panaphara/Apoklima partitions all twelve houses, so every entry gets
+ * at least one tag and none of them look truncated. Trikona, Upachaya and
+ * Dusthana overlap it and each other on purpose — the 6th really is both an
+ * Upachaya and a Dusthana, and the 1st really is both a Kendra and a Trikona.
+ * Picking one to display would be tidier and wrong.
+ */
+export const HOUSE_GROUPS: Record<number, readonly string[]> = {
+  1: ["Kendra", "Trikona"],
+  2: ["Panaphara"],
+  3: ["Apoklima", "Upachaya"],
+  4: ["Kendra"],
+  5: ["Panaphara", "Trikona"],
+  6: ["Apoklima", "Upachaya", "Dusthana"],
+  7: ["Kendra"],
+  8: ["Panaphara", "Dusthana"],
+  9: ["Apoklima", "Trikona"],
+  10: ["Kendra", "Upachaya"],
+  11: ["Panaphara", "Upachaya"],
+  12: ["Apoklima", "Dusthana"],
+};
+
 export type SupportBand = "strong" | "neutral" | "weak";
 
 export type HouseSupport = {
