@@ -22,7 +22,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
   if (!hasAllChartParams(chartParams)) {
     return (
       <PageTransition>
-      <div className="insights-shell">
+      <div className="insights-shell below-navbar">
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Missing Input</p>
@@ -50,7 +50,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
 
   return (
     <PageTransition>
-    <div className="insights-shell">
+    <div className="insights-shell below-navbar">
       <BackButton href="/" />
       <InsightsLoader
         chartParams={chartParams}
