@@ -5,6 +5,13 @@ import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
 import shell from "../mobile.module.css";
 import { SIGN_SYMBOLS } from "@/lib/constellation-geometry";
+import {
+  BHAVA_NAMES,
+  HOUSE_GROUPS,
+  computeHouseSupport,
+  type HouseSupport,
+} from "@/lib/engines/house-support-engine";
+import { HOUSE_THEMES } from "@/lib/rules/tables";
 import MobileChart from "./mobile-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
@@ -139,6 +146,73 @@ function RuleCard({
   );
 }
 
+/**
+ * What each house is responsible for — the /m twin of the block attached under
+ * House Support on the desktop route.
+ *
+ * The desktop version sits beneath a bar chart that defines a bindu, and can
+ * lean on it. There is no such chart here, so the count carries a one-line
+ * explanation of its own; without it "Virgo · 27" is a number with no units.
+ *
+ * One row per house rather than the desktop's card grid: a handset column is
+ * too narrow to put a name and a readout side by side without one of them
+ * wrapping mid-word.
+ */
+function HouseRoleList({ houses }: { houses: HouseSupport[] }) {
+  return (
+    <>
+      <p className={styles.legend}>
+        Bindus are Ashtakavarga&rsquo;s support score for the sign sitting on
+        that house, out of a fixed pool of 337. Dead average is 28.1, so a house
+        is read against that rather than against a maximum.
+      </p>
+
+      <ul className={styles.roles}>
+        {houses.map((house) => (
+          <li key={house.house} className={styles.role} data-band={house.band}>
+            <div className={styles.roleTop}>
+              <span className={styles.roleNumber} aria-hidden="true">
+                {house.house}
+              </span>
+              <span className={styles.roleName}>
+                <span className={styles.srOnly}>House {house.house}, </span>
+                {BHAVA_NAMES[house.house]} Bhava
+              </span>
+              <span className={styles.roleReadout}>
+                <span className={styles.srOnly}>
+                  {house.sign}, {house.bindus} bindus
+                </span>
+                <span aria-hidden="true">
+                  {house.sign} · {house.bindus}
+                </span>
+              </span>
+            </div>
+
+            <p className={styles.roleTheme}>{HOUSE_THEMES[house.house]}</p>
+
+            <p className={styles.roleTags}>
+              {HOUSE_GROUPS[house.house].map((group) => (
+                <span key={group} className={styles.roleTag}>
+                  {group}
+                </span>
+              ))}
+            </p>
+          </li>
+        ))}
+      </ul>
+
+      <p className={styles.legend}>
+        <b>Kendra</b> are the four angles the chart is built on; <b>Panaphara</b>{" "}
+        and <b>Apoklima</b> are the houses that follow them and fall away from
+        them. On top of that, <b>Trikona</b> houses are read as where merit
+        arrives, <b>Upachaya</b> as the ones that improve with age and effort,
+        and <b>Dusthana</b> as the ones that ask for something first. A house can
+        be more than one — the 6th is an Upachaya and a Dusthana both.
+      </p>
+    </>
+  );
+}
+
 export default function MobileInsights({
   payload,
   error,
@@ -170,6 +244,11 @@ export default function MobileInsights({
   const { ascendant, planets, houses, nakshatra, dasha, deterministic_rules: rules } = chart;
 
   const highPriority = (rules ?? []).filter((rule) => rule.priority === "high");
+
+  /* Gated the same way the desktop panel gates it: without a Sarvashtakavarga
+     block there are no bindus to show, and a titled collapsible that opens
+     onto nothing reads as a failure rather than as an omission. */
+  const houseSupport = computeHouseSupport(payload.ashtakavarga, houses);
 
   return (
     <div className={shell.page}>
@@ -258,6 +337,15 @@ export default function MobileInsights({
           </p>
         )}
       </Section>
+
+      {houseSupport && (
+        <Section
+          title="Which house is responsible for what"
+          subtitle="All twelve, and the support each holds"
+        >
+          <HouseRoleList houses={houseSupport.houses} />
+        </Section>
+      )}
 
       {highPriority.length > 0 && (
         <Section

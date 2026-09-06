@@ -1,6 +1,8 @@
 import type { AshtakavargaData, HousePlacement } from "@/lib/astro-types";
 import {
   AVERAGE_BINDUS_PER_HOUSE,
+  BHAVA_NAMES,
+  HOUSE_GROUPS,
   SAV_TOTAL_BINDUS,
   computeHouseSupport,
   type HouseSupport,
@@ -40,44 +42,6 @@ const BAND_SWATCH: Record<HouseSupport["band"], string> = {
   strong: "#7fd8c4",
   neutral: "#d4a574",
   weak: "#b98a86",
-};
-
-/*
- * Classical names and groupings for the twelve bhavas.
- *
- * The *copy* for what each house governs is not here — that is HOUSE_THEMES in
- * lib/rules/tables.ts, which the rule engine and chart-service already use to
- * write sentences about house activation. Restating it here would let this
- * panel drift out of agreement with the readings elsewhere on the same page.
- */
-const BHAVA_NAMES: Record<number, string> = {
-  1: "Tanu", 2: "Dhana", 3: "Sahaja", 4: "Bandhu",
-  5: "Putra", 6: "Ari", 7: "Yuvati", 8: "Randhra",
-  9: "Dharma", 10: "Karma", 11: "Labha", 12: "Vyaya",
-};
-
-/*
- * Two groupings, in this order: the angular one first, then the qualifiers.
- *
- * Kendra/Panaphara/Apoklima partitions all twelve houses, so every row gets at
- * least one tag and none of them look truncated. Trikona, Upachaya and
- * Dusthana overlap it and each other on purpose — the 6th really is both an
- * Upachaya and a Dusthana, and the 1st really is both a Kendra and a Trikona.
- * Picking one to display would be tidier and wrong.
- */
-const HOUSE_GROUPS: Record<number, readonly string[]> = {
-  1: ["Kendra", "Trikona"],
-  2: ["Panaphara"],
-  3: ["Apoklima", "Upachaya"],
-  4: ["Kendra"],
-  5: ["Panaphara", "Trikona"],
-  6: ["Apoklima", "Upachaya", "Dusthana"],
-  7: ["Kendra"],
-  8: ["Panaphara", "Dusthana"],
-  9: ["Apoklima", "Trikona"],
-  10: ["Kendra", "Upachaya"],
-  11: ["Panaphara", "Upachaya"],
-  12: ["Apoklima", "Dusthana"],
 };
 
 function polarPoint(angleDeg: number, radius: number): [number, number] {
