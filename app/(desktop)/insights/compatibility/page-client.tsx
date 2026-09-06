@@ -645,7 +645,7 @@ export default function CompatibilityPageClient({
   }, [canSubmit, partner, result, submitCompatibility]);
 
   return (
-    <div className="insights-shell">
+    <div className="insights-shell below-navbar">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
       <BackButton />

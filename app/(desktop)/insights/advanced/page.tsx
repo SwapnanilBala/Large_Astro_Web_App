@@ -52,7 +52,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   if (!hasAllInputs) {
     return (
       <PageTransition>
-      <div className="insights-shell">
+      <div className="insights-shell below-navbar">
         <BackButton href="/" />
         <section className="dashboard-shell">
           <p className="kicker">Missing Input</p>
@@ -81,7 +81,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
 
   return (
     <PageTransition>
-    <div className="insights-shell">
+    <div className="insights-shell below-navbar">
       <BackButton href="/" />
       <AdvancedLoader chartParams={chartParams} focusView={focusView} />
     </div>

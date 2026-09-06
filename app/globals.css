@@ -254,6 +254,25 @@ h3 {
   overflow-y: visible;
 }
 
+/*
+ * For pages whose card opens straight onto a link or a kicker.
+ *
+ * .insights-shell's own 4.5rem is below --navbar-h, so the card lands under
+ * the bar. On /insights that is harmless -- the navbar is frosted, a card edge
+ * passing beneath it is the intended look, and that page's hero puts the first
+ * text 300px+ down regardless. On /insights/advanced and
+ * /insights/compatibility the card's first child *is* the text, and only
+ * .dashboard-shell's clamp(1.3rem, 2.7vw, 2.6rem) stood between it and the
+ * bar. That clamp shrinks with the viewport while the navbar does not, so the
+ * text slid under: 3px at 1180, 7px at 1024, 13px at 820.
+ *
+ * Derived from --navbar-h rather than restating 150px, per the note at that
+ * token: the offsets that carry their own guess are the ones that drift.
+ */
+.insights-shell.below-navbar {
+  padding-top: calc(var(--navbar-h) + 2.6rem + env(safe-area-inset-top));
+}
+
 .insights-shell > * {
   width: 100%;
   min-width: 0;
