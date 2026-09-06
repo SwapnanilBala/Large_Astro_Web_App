@@ -5,6 +5,7 @@ import {
   computeHouseSupport,
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
+import { HOUSE_THEMES } from "@/lib/rules/tables";
 import styles from "./house-support-panel.module.css";
 
 /*
@@ -39,6 +40,44 @@ const BAND_SWATCH: Record<HouseSupport["band"], string> = {
   strong: "#7fd8c4",
   neutral: "#d4a574",
   weak: "#b98a86",
+};
+
+/*
+ * Classical names and groupings for the twelve bhavas.
+ *
+ * The *copy* for what each house governs is not here — that is HOUSE_THEMES in
+ * lib/rules/tables.ts, which the rule engine and chart-service already use to
+ * write sentences about house activation. Restating it here would let this
+ * panel drift out of agreement with the readings elsewhere on the same page.
+ */
+const BHAVA_NAMES: Record<number, string> = {
+  1: "Tanu", 2: "Dhana", 3: "Sahaja", 4: "Bandhu",
+  5: "Putra", 6: "Ari", 7: "Yuvati", 8: "Randhra",
+  9: "Dharma", 10: "Karma", 11: "Labha", 12: "Vyaya",
+};
+
+/*
+ * Two groupings, in this order: the angular one first, then the qualifiers.
+ *
+ * Kendra/Panaphara/Apoklima partitions all twelve houses, so every row gets at
+ * least one tag and none of them look truncated. Trikona, Upachaya and
+ * Dusthana overlap it and each other on purpose — the 6th really is both an
+ * Upachaya and a Dusthana, and the 1st really is both a Kendra and a Trikona.
+ * Picking one to display would be tidier and wrong.
+ */
+const HOUSE_GROUPS: Record<number, readonly string[]> = {
+  1: ["Kendra", "Trikona"],
+  2: ["Panaphara"],
+  3: ["Apoklima", "Upachaya"],
+  4: ["Kendra"],
+  5: ["Panaphara", "Trikona"],
+  6: ["Apoklima", "Upachaya", "Dusthana"],
+  7: ["Kendra"],
+  8: ["Panaphara", "Dusthana"],
+  9: ["Apoklima", "Trikona"],
+  10: ["Kendra", "Upachaya"],
+  11: ["Panaphara", "Upachaya"],
+  12: ["Apoklima", "Dusthana"],
 };
 
 function polarPoint(angleDeg: number, radius: number): [number, number] {
@@ -173,6 +212,95 @@ function HouseBars({ houses }: { houses: HouseSupport[] }) {
   );
 }
 
+function HouseRoles({
+  houses,
+  strongestHouse,
+  weakestHouse,
+}: {
+  houses: HouseSupport[];
+  strongestHouse: number;
+  weakestHouse: number;
+}) {
+  return (
+    <section className={styles.roles} aria-labelledby="house-support-roles-title">
+      <div className={styles.rolesHead}>
+        <span className={styles.cardKicker}>What each house answers for</span>
+        <h3 className={styles.rolesTitle} id="house-support-roles-title">
+          Which house is responsible for what
+        </h3>
+        <p className={styles.rolesIntro}>
+          The bars above say how much support a house holds. This says what it
+          holds it <em>for</em>. Each row carries the sign your chart puts on
+          that house and the bindus that came with it, so a number above and a
+          subject here are the same house.
+        </p>
+      </div>
+
+      <ul className={styles.roleGrid}>
+        {houses.map((house) => (
+          <li
+            key={house.house}
+            className={styles.role}
+            data-band={house.band}
+            data-peak={
+              house.house === strongestHouse
+                ? "strongest"
+                : house.house === weakestHouse
+                  ? "weakest"
+                  : undefined
+            }
+          >
+            <div className={styles.roleTop}>
+              <span className={styles.roleNumber} aria-hidden="true">
+                {house.house}
+              </span>
+              <span className={styles.roleName}>
+                <span className={styles.srOnly}>House {house.house}, </span>
+                {BHAVA_NAMES[house.house]} Bhava
+              </span>
+              <span className={styles.roleReadout}>
+                <span className={styles.srOnly}>
+                  {house.sign}, {house.bindus} bindus
+                </span>
+                <span aria-hidden="true">
+                  {house.sign} · {house.bindus}
+                </span>
+              </span>
+            </div>
+
+            <p className={styles.roleTheme}>{HOUSE_THEMES[house.house]}</p>
+
+            <p className={styles.roleTags}>
+              {HOUSE_GROUPS[house.house].map((group) => (
+                <span key={group} className={styles.roleTag}>
+                  {group}
+                </span>
+              ))}
+              {house.house === strongestHouse && (
+                <span className={styles.rolePeak}>best supported</span>
+              )}
+              {house.house === weakestHouse && (
+                <span className={styles.rolePeak}>least supported</span>
+              )}
+            </p>
+          </li>
+        ))}
+      </ul>
+
+      <p className={styles.rolesLegend}>
+        <b>Kendra</b> are the four angles the chart is built on;{" "}
+        <b>Panaphara</b> and <b>Apoklima</b> are the houses that follow them and
+        fall away from them. On top of that, <b>Trikona</b> houses are read as
+        where merit arrives, <b>Upachaya</b> as the ones that improve with age
+        and effort, and <b>Dusthana</b> as the ones that ask for something
+        first. A house can be more than one — the 6th is an Upachaya and a
+        Dusthana both, which is why difficulty there is usually read as the kind
+        you grow out of.
+      </p>
+    </section>
+  );
+}
+
 export default function HouseSupportPanel({
   ashtakavarga,
   houses,
@@ -293,6 +421,12 @@ export default function HouseSupportPanel({
           )}
         </section>
       </div>
+
+      <HouseRoles
+        houses={support.houses}
+        strongestHouse={whole.strongest.house}
+        weakestHouse={whole.weakest.house}
+      />
 
       <table className={styles.srOnly}>
         <caption>Bindus and support percentage by house</caption>
