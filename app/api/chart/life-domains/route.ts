@@ -2,13 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import {
   chartParamsToBirthInput,
+  getLifeDomainPayload,
   hasAllChartParams,
   readChartParams,
 } from "@/lib/chart-params";
-import { buildLifeDomainInsights } from "@/lib/engines/chart-service";
-import { LIFE_DOMAIN_RULES_VERSION } from "@/lib/engines/rule-engine";
-import { RULES_SCHEMA_VERSION } from "@/lib/rules";
-import { makeCacheKey, serverCaches } from "@/lib/server-cache";
 import type { LifeDomainInsightsResponse } from "@/lib/astro-types";
 
 const CACHE_HEADER = "private, max-age=3600, stale-while-revalidate=1800";
@@ -25,9 +22,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    let birth;
+    /* Parsed here purely to turn a bad input into a 400 before the builder
+       throws its own error deeper down. */
     try {
-      birth = chartParamsToBirthInput(chartParams);
+      chartParamsToBirthInput(chartParams);
     } catch (error) {
       throw new ApiError(
         ErrorCode.VALIDATION_FAILED,
@@ -35,34 +33,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const cacheKey = makeCacheKey("life_domains", {
-      birth_date: birth.birth_date,
-      birth_time: birth.birth_time,
-      engine_id: birth.engine_id,
-      tz: birth.timezone_offset_minutes,
-      lat: birth.latitude,
-      lng: birth.longitude,
-      birth_time_accuracy: birth.birth_time_accuracy,
-      birth_time_fallback: birth.birth_time_fallback,
-      rules_schema: RULES_SCHEMA_VERSION,
-      life_domain_rules: LIFE_DOMAIN_RULES_VERSION,
-    });
-    const cached = serverCaches.lifeDomains.get(cacheKey) as LifeDomainInsightsResponse | null;
+    /* Cache lookup, key and build all live in getLifeDomainPayload so this
+       route and /insights/life-areas cannot drift onto different keys. */
+    const result: LifeDomainInsightsResponse = getLifeDomainPayload(chartParams);
 
-    if (cached) {
-      return NextResponse.json(cached, {
-        headers: { "Cache-Control": CACHE_HEADER, "X-Cache": "HIT" },
-      });
-    }
-
-    const result: LifeDomainInsightsResponse = {
-      generated_at_utc: new Date().toISOString(),
-      insights: buildLifeDomainInsights(birth),
-    };
-    serverCaches.lifeDomains.set(cacheKey, result);
-
+    /* No X-Cache here any more. The hit/miss now happens inside
+       getLifeDomainPayload, so this side cannot tell the two apart, and a
+       header that says MISS on every hit is worse than no header. */
     return NextResponse.json(result, {
-      headers: { "Cache-Control": CACHE_HEADER, "X-Cache": "MISS" },
+      headers: { "Cache-Control": CACHE_HEADER },
     });
   } catch (error) {
     console.error(JSON.stringify({

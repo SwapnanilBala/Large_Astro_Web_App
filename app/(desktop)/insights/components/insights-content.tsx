@@ -87,7 +87,7 @@ import type {
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { useProfile } from "@/lib/profile-context";
-import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
+import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
 
 type InsightsContentProps = {
@@ -715,139 +715,7 @@ function LifeDomainErrorState({
   );
 }
 
-type LifeDomainKey = LifeDomainInsight["key"];
-type DomainViewMode = "brief" | "detailed" | "action";
 type DomainLoadState = "idle" | "loading" | "ready" | "error";
-
-type DomainReadCopy = {
-  description: string;
-  clarity: string;
-  decisionRule: string;
-  boundaryRule: string;
-};
-
-/* â”€â”€â”€ Domain Icon Map â”€â”€â”€ */
-const DOMAIN_ICONS: Record<LifeDomainKey, string> = {
-  love_life: "\u2661",
-  career: "\u2726",
-  family: "\u2302",
-  inheritance: "\u229B",
-  influence: "\u2605",
-  life_cycle: "\u21BB",
-  travel_destinations: "\u2708",
-};
-
-const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
-  love_life: {
-    description:
-      "Separates attraction, partnership durability, emotional availability, and the timing that makes connection easier to sustain.",
-    clarity:
-      "Do not judge love from Venus alone. Read the 7th house for partnership, the 5th for romance, the house lord for delivery, and timing triggers for when the pattern becomes visible.",
-    decisionRule:
-      "A relationship signal is stronger when support, watchout, and timing notes repeat the same theme.",
-    boundaryRule:
-      "If the watchout contradicts the support, treat the watchout as the condition that must be managed before the support pays off.",
-  },
-  career: {
-    description:
-      "Distinguishes vocation, workload, authority, public reputation, service pressure, and the route through which professional recognition is built.",
-    clarity:
-      "Do not read career from the 10th house alone. Weigh the 10th sign, its lord, the 6th house work pattern, and Saturn's discipline filter together.",
-    decisionRule:
-      "Career moves are cleaner when the timing trigger reinforces both the 10th-house promise and the lord's placement.",
-    boundaryRule:
-      "If pressure houses are involved, advancement may require systems, mentors, and repeatable proof before visibility arrives.",
-  },
-  family: {
-    description:
-      "Clarifies home life, inherited emotional patterns, family support, private stability, and the habits that make belonging feel reliable.",
-    clarity:
-      "Read the 4th house for emotional ground, the 2nd for lineage and speech, the Moon for felt safety, and the house lord for where repair happens.",
-    decisionRule:
-      "Family guidance is strongest when the support pattern names the same need as the long-game statement.",
-    boundaryRule:
-      "When the watchout is active, protect steadiness first; resolution works better after the emotional baseline is restored.",
-  },
-  inheritance: {
-    description:
-      "Frames shared resources, legacy, debt, hidden obligations, family assets, and the maturity needed around resource transitions.",
-    clarity:
-      "Read the 8th house for transferred resources, the 2nd for stored value, Jupiter for stewardship, and the lord placement for the route of responsibility.",
-    decisionRule:
-      "Treat inheritance signals as practical planning prompts when they repeat across support, watchout, and timing sections.",
-    boundaryRule:
-      "If the watchout names hidden cost or delay, prioritize documentation, transparency, and patient sequencing.",
-  },
-  influence: {
-    description:
-      "Looks at public impact, allies, social reach, authority, reputation, and the conditions that help your voice move people.",
-    clarity:
-      "Read the 11th house for networks, the 10th for public standing, the Sun for visibility, and the lord for where influence is earned.",
-    decisionRule:
-      "Influence grows fastest when timing triggers amplify an existing support pattern rather than forcing visibility too early.",
-    boundaryRule:
-      "If the watchout names diffusion or delay, narrow the audience and make the message easier to repeat.",
-  },
-  life_cycle: {
-    description:
-      "Connects identity, reinvention, recovery cycles, resilience, and the periods where life asks for a cleaner version of self-direction.",
-    clarity:
-      "Read the 1st house for identity, the 8th for transformation, the Moon for adaptation, and the lord placement for the terrain of change.",
-    decisionRule:
-      "A life-cycle signal deserves priority when timing notes and long-game guidance both point toward the same kind of maturity.",
-    boundaryRule:
-      "If the watchout is active, slow the pace and make the next step smaller, clearer, and easier to sustain.",
-  },
-  travel_destinations: {
-    description:
-      "Clarifies long-distance travel, short journeys, relocation pull, foreign links, pilgrimage themes, and what makes a place feel meaningful.",
-    clarity:
-      "Read the 9th house for distance and meaning, the 3rd for movement and logistics, Jupiter for expansion, and the lord placement for travel purpose.",
-    decisionRule:
-      "Travel signals become practical when timing triggers support both opportunity and preparation.",
-    boundaryRule:
-      "If watchouts name friction, treat planning, documents, health, and timing buffers as part of the reading rather than afterthoughts.",
-  },
-};
-
-/**
- * The technical read-out for a domain.
- *
- * These deliberately keep reading the legacy fields -- house-lord notation and
- * transit language are correct here, because this now renders only inside the
- * evidence disclosure.
- */
-function buildDomainRules(domain: LifeDomainInsight) {
-  if (Array.isArray(domain.rule_hits) && domain.rule_hits.length > 0) {
-    return domain.rule_hits.map((rule) => ({
-      label: `${rule.impact === "pressure" ? "Pressure" : rule.impact === "support" ? "Support" : rule.impact === "activation" ? "Activation" : "Context"} · ${rule.label}`,
-      body: rule.technical_note,
-    }));
-  }
-
-  return [
-    {
-      label: "House rule",
-      body: `${domain.headline} Use this as the baseline before judging specific events.`,
-    },
-    {
-      label: "Evidence rule",
-      body:
-        domain.supporting_patterns[0] ??
-        "Give more weight to patterns that repeat across houses, lord placements, and timing indicators.",
-    },
-    {
-      label: "Timing rule",
-      body:
-        domain.timing_triggers[0] ??
-        "Use timing triggers as activation windows, not as isolated promises.",
-    },
-    {
-      label: "Action rule",
-      body: domain.guidance,
-    },
-  ];
-}
 
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN INSIGHTS DASHBOARD (BENTO GRID LAYOUT)
@@ -872,6 +740,9 @@ export default function InsightsContent({
   const compatibilityHref = historyQs
     ? `/insights/compatibility?${historyQs}`
     : "/insights/compatibility";
+  /* Always carries a query string: the page rebuilds the chart from it, so a
+     bare /insights/life-areas would land on "details are incomplete". */
+  const lifeAreasHref = `/insights/life-areas?${historyQs}`;
   const transitParams = new URLSearchParams(historyQs);
   transitParams.set("view", "transits");
   const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
@@ -911,7 +782,6 @@ export default function InsightsContent({
       (left, right) => right.confidence_score - left.confidence_score
     )[0]?.key ?? "love_life"
   );
-  const [domainViewMode, setDomainViewMode] = useState<DomainViewMode>("brief");
   const [domainLoadState, setDomainLoadState] = useState<DomainLoadState>(
     initialDomainInsights.length > 0 ? "ready" : "idle"
   );
@@ -1036,15 +906,6 @@ export default function InsightsContent({
   const selectedDomainInsight =
     domainInsights.find((domain) => domain.key === selectedDomainKey) ??
     rankedDomainInsights[0];
-  const selectedDomainCopy = selectedDomainInsight
-    ? DOMAIN_READ_COPY[selectedDomainInsight.key]
-    : undefined;
-  const selectedDomainRules = selectedDomainInsight
-    ? buildDomainRules(selectedDomainInsight)
-    : [];
-  const selectedDomainTimingWindows = selectedDomainInsight
-    ? getLifeDomainTimingWindows(selectedDomainInsight, payload.chart.dasha)
-    : [];
   const copyCurrentChartLink = async () => {
     try {
       await navigator.clipboard.writeText(
@@ -1445,10 +1306,11 @@ export default function InsightsContent({
                 kicker="Ultimate Module"
                 heading="Life domain deep dives"
               />
+              {/* The intro used to list all eight evidence families. That
+                  sentence is now on the page that actually shows them. */}
               <p className={styles.sectionIntro}>
-                Each area runs its own evidence matrix across natal promise,
-                supporting factors, divisional confirmation, measured strength,
-                house support, combinations, timing, and contradictions.
+                Seven areas, each read against its own evidence. Pick one for the
+                headline; the full workup opens on its own page.
               </p>
 
               <div className={styles.domainSelectorHeader}>
@@ -1473,24 +1335,16 @@ export default function InsightsContent({
                 ))}
               </div>
 
-              <div className={styles.domainModeTabs} role="tablist" aria-label="Domain reading depth">
-                {(["brief", "detailed", "action"] as DomainViewMode[]).map((mode) => (
-                  <button
-                    key={mode}
-                    type="button"
-                    role="tab"
-                    aria-selected={domainViewMode === mode}
-                    className={domainViewMode === mode ? styles.domainModeTabActive : styles.domainModeTab}
-                    onClick={() => setDomainViewMode(mode)}
-                  >
-                    {mode === "brief" ? "Brief" : mode === "detailed" ? "Detailed" : "Action Plan"}
-                  </button>
-                ))}
-              </div>
-
+              {/* The brief, and only the brief.
+                  Detailed and Action Plan were tabs here, and the evidence
+                  verdict, the six ranked subthemes, the timing windows,
+                  guidance and long game rendered under all three. That is a
+                  full consultation for one area, seven areas deep, on the page
+                  a client sees first. It all lives at /insights/life-areas now;
+                  what is left is the headline and the paragraph under it. */}
               <AnimatePresence mode="wait">
                 <motion.article
-                  key={`${selectedDomainInsight.key}-${domainViewMode}`}
+                  key={selectedDomainInsight.key}
                   className={styles.domainCard}
                   initial={shouldReduceMotion ? false : { opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -1515,227 +1369,13 @@ export default function InsightsContent({
                     {selectedDomainInsight.display.body}
                   </p>
 
-                  {selectedDomainInsight.evidence_matrix && (
-                    <div className={styles.domainEvidenceVerdict}>
-                      <div>
-                        <span className={styles.domainVerdictLabel}>
-                          {selectedDomainInsight.evidence_matrix.confirmation_status.replace("_", " ")}
-                        </span>
-                        <strong>
-                          {selectedDomainInsight.evidence_matrix.conclusion_strength} conclusion
-                        </strong>
-                      </div>
-                      <p>{selectedDomainInsight.evidence_matrix.synthesis}</p>
-                    </div>
-                  )}
-
-                  {(selectedDomainInsight.subthemes?.length ?? 0) > 0 && (
-                    <section className={styles.domainSubthemes} aria-labelledby="domain-subthemes-heading">
-                      <div className={styles.domainSubthemeHeader}>
-                        <h4 id="domain-subthemes-heading">What stands out within this area</h4>
-                        <span>Ranked from this chart&apos;s evidence</span>
-                      </div>
-                      <div className={styles.domainSubthemeGrid}>
-                        {selectedDomainInsight.subthemes.slice(0, 6).map((subtheme, index) => (
-                          <article key={subtheme.key} className={styles.domainSubthemeCard}>
-                            <span className={styles.domainSubthemeRank}>#{index + 1}</span>
-                            <div>
-                              <strong>{subtheme.label}</strong>
-                              <small>{subtheme.band}</small>
-                            </div>
-                            <p>{subtheme.summary}</p>
-                          </article>
-                        ))}
-                      </div>
-                    </section>
-                  )}
-
-                  <div className={styles.domainTimingWindows}>
-                    {selectedDomainTimingWindows.map((window) => (
-                      <section key={window.label}>
-                        <h4>{window.label}</h4>
-                        <p>{window.value}</p>
-                      </section>
-                    ))}
-                  </div>
-
-                  {domainViewMode === "brief" && (
-                    <div className={styles.domainGrid}>
-                      <section className={styles.domainCol}>
-                        <h4>Top support</h4>
-                        <ul>
-                          {selectedDomainInsight.display.strengths.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </section>
-                      {selectedDomainInsight.display.watchouts.length > 0 && (
-                        <section className={styles.domainCol}>
-                          <h4>Top watchout</h4>
-                          <ul>
-                            {selectedDomainInsight.display.watchouts.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        </section>
-                      )}
-                    </div>
-                  )}
-
-                  {domainViewMode === "detailed" && selectedDomainCopy && (
-                    <div className={styles.domainClarityBlock}>
-                      <p className={styles.domainDeepDescription}>
-                        {selectedDomainCopy.description}
-                      </p>
-                      <div className={styles.domainStatementGrid}>
-                        <section className={styles.domainStatement}>
-                          <h4>Clarity statement</h4>
-                          <p>
-                            {selectedDomainInsight.display.clarity ??
-                              selectedDomainCopy.clarity}
-                          </p>
-                        </section>
-                        <section className={styles.domainStatement}>
-                          <h4>Decision rule</h4>
-                          <p>
-                            {selectedDomainInsight.display.decision_rule ??
-                              selectedDomainCopy.decisionRule}
-                          </p>
-                        </section>
-                        <section className={styles.domainStatement}>
-                          <h4>Boundary rule</h4>
-                          <p>
-                            {selectedDomainInsight.display.boundary_rule ??
-                              selectedDomainCopy.boundaryRule}
-                          </p>
-                        </section>
-                      </div>
-                    </div>
-                  )}
-
-                  {domainViewMode === "detailed" && (
-                    <div className={styles.domainGrid}>
-                      <section className={styles.domainCol}>
-                        <h4>Support</h4>
-                        <ul>
-                          {selectedDomainInsight.display.strengths.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </section>
-                      {selectedDomainInsight.display.watchouts.length > 0 && (
-                        <section className={styles.domainCol}>
-                          <h4>Watch</h4>
-                          <ul>
-                            {selectedDomainInsight.display.watchouts.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        </section>
-                      )}
-                      <section className={styles.domainCol}>
-                        <h4>Timing</h4>
-                        <ul>
-                          {selectedDomainInsight.display.timing.map((item) => (
-                            <li key={item}>{item}</li>
-                          ))}
-                        </ul>
-                      </section>
-                    </div>
-                  )}
-
-                  {/* The technical read. This used to be two more stacked
-                      lists in the default view -- house-lord notation, transit
-                      windows and the "How this domain is being read" rule
-                      trace, none of which mean anything without training. */}
-                  {domainViewMode === "detailed" && (
-                    <details className={styles.evidence}>
-                      <summary className={styles.evidenceSummary}>
-                        How this domain is being read
-                      </summary>
-                      <div className={styles.evidenceBody}>
-                        <p className={styles.ruleBasis}>
-                          {selectedDomainInsight.evidence.technical_note}
-                        </p>
-                        <dl className={styles.claims}>
-                          {selectedDomainInsight.evidence.claims.map((claim) => (
-                            <div key={claim.label} className={styles.claim}>
-                              <dt className={styles.claimLabel}>{claim.label}</dt>
-                              <dd className={styles.claimValue}>
-                                {claim.value}
-                                {claim.detail && (
-                                  <span className={styles.claimDetail}>{claim.detail}</span>
-                                )}
-                              </dd>
-                            </div>
-                          ))}
-                        </dl>
-                        <div className={styles.domainRulesPanel}>
-                          <ol>
-                            {selectedDomainRules.map((rule, index) => (
-                              <li key={`${rule.label}-${index}`}>
-                                <strong>{rule.label}:</strong> {rule.body}
-                              </li>
-                            ))}
-                          </ol>
-                        </div>
-                        {selectedDomainInsight.evidence_matrix && (
-                          <div className={styles.domainEvidenceMatrix}>
-                            {selectedDomainInsight.evidence_matrix.entries.map((entry) => (
-                              <section key={entry.family}>
-                                <div>
-                                  <h4>{entry.label}</h4>
-                                  <span data-status={entry.status}>{entry.status}</span>
-                                </div>
-                                <p>{entry.summary}</p>
-                              </section>
-                            ))}
-                          </div>
-                        )}
-                        {selectedDomainInsight.supporting_patterns.length > 0 && (
-                          <ul className={styles.evidencePatterns}>
-                            {selectedDomainInsight.supporting_patterns.map((item) => (
-                              <li key={item}>{item}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
-                    </details>
-                  )}
-
-                  {domainViewMode === "action" && (
-                    <div className={styles.domainActionPanel}>
-                      <section>
-                        <h4>Do next</h4>
-                        <p>{selectedDomainInsight.display.guidance}</p>
-                      </section>
-                      <section>
-                        <h4>Keep in mind</h4>
-                        <p>{selectedDomainInsight.display.long_game}</p>
-                      </section>
-                      <section>
-                        <h4>Decision filter</h4>
-                        <p>
-                          {selectedDomainInsight.display.decision_rule ??
-                            selectedDomainCopy?.decisionRule ??
-                            "Move when the support, timing, and evidence point in the same direction."}
-                        </p>
-                      </section>
-                    </div>
-                  )}
-
-                  {domainViewMode !== "action" && (
-                    <>
-                      <p className={styles.domainGuidance}>
-                        <strong>Guidance:</strong>{" "}
-                        {selectedDomainInsight.display.guidance}
-                      </p>
-                      <p className={styles.domainLongGame}>
-                        <strong>Long game:</strong>{" "}
-                        {selectedDomainInsight.display.long_game}
-                      </p>
-                    </>
-                  )}
+                  <Link
+                    href={`${lifeAreasHref}&domain=${selectedDomainInsight.key}`}
+                    className={styles.domainOpenLink}
+                  >
+                    Full reading for {selectedDomainInsight.label.toLowerCase()}
+                    <span aria-hidden="true">&rarr;</span>
+                  </Link>
                 </motion.article>
               </AnimatePresence>
               </motion.section>

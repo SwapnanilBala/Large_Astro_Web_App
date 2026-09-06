@@ -3004,6 +3004,36 @@
   margin: 0.25rem 0 0;
 }
 
+/* The way out of the brief. The domain card on the results page is now a
+   headline and a paragraph, so this is the only thing under it -- it has to
+   read as the continuation, not as a footnote. */
+.domainOpenLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-self: start;
+  min-height: 2.6rem;
+  margin-top: 0.25rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(224, 184, 92, 0.4);
+  border-radius: 10px;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--accent-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.94rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.domainOpenLink:hover,
+.domainOpenLink:focus-visible {
+  transform: translateX(2px);
+  border-color: rgba(224, 184, 92, 0.7);
+  background: rgba(200, 155, 60, 0.17);
+  outline: none;
+}
+
 .domainSignalBadge {
   display: inline-flex;
   align-items: center;

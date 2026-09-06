@@ -1,0 +1,652 @@
+/*
+ * The life areas, on their own page.
+ *
+ * Purpose-built rather than reusing the .domain* rules in insights.module.css.
+ * Those were written for a section competing with twenty others in a report --
+ * three-up subtheme cards, tight margins, everything compressed. The whole
+ * reason this content moved here is that it needed room, so it gets type and
+ * spacing set for a page instead of copies of the cramped versions.
+ */
+
+.page {
+  --area-gold: #e0b85c;
+  --area-teal: #6ce1d4;
+  --area-ink: #f4f1ec;
+  --area-soft: #b9bbc7;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  /* Measured from the navbar token, not a hand-picked rem. The sibling pages
+     that guessed their own value all ended up rendering underneath it. */
+  padding: calc(var(--navbar-h) + 2.6rem + env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    calc(3rem + env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  color: var(--area-ink);
+  background:
+    radial-gradient(circle at 12% 6%, rgba(75, 113, 128, 0.16), transparent 26rem),
+    radial-gradient(circle at 88% 14%, rgba(154, 112, 45, 0.12), transparent 24rem),
+    linear-gradient(160deg, #090b11 0%, #11121a 45%, #0b1114 100%);
+}
+
+.shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.backButton,
+.backButtonBottom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  justify-self: start;
+  min-height: 2.7rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid rgba(200, 155, 60, 0.25);
+  border-radius: 999px;
+  background: rgba(12, 16, 29, 0.78);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--area-ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.backButton:hover,
+.backButton:focus-visible,
+.backButtonBottom:hover,
+.backButtonBottom:focus-visible {
+  transform: translateX(-2px);
+  border-color: rgba(224, 184, 92, 0.65);
+  background: rgba(200, 155, 60, 0.12);
+  outline: none;
+}
+
+/* ── Hero ── */
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem) 1rem clamp(0.5rem, 2vw, 1.25rem);
+  text-align: center;
+}
+
+.heroIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(200, 155, 60, 0.32);
+  border-radius: 14px;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--area-gold);
+}
+
+.heroIcon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  line-height: 1.15;
+}
+
+.lead {
+  margin: 0.35rem 0 0;
+  max-width: 60ch;
+  color: var(--area-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* ── Area picker ── */
+
+.domainNav {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.domainNavLabel {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 0;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.domainNavLabel span {
+  color: var(--area-soft);
+  font-family: inherit;
+  font-size: 0.78rem;
+  font-weight: 500;
+}
+
+.domainChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.domainChip,
+.domainChipActive {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 2.5rem;
+  padding: 0.5rem 0.9rem;
+  border: 1px solid rgba(200, 155, 60, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 243, 210, 0.03);
+  color: var(--area-soft);
+  font-family: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.domainChip:hover {
+  border-color: rgba(224, 184, 92, 0.4);
+  color: var(--area-ink);
+}
+
+.domainChipActive {
+  border-color: rgba(224, 184, 92, 0.62);
+  background: rgba(200, 155, 60, 0.13);
+  color: var(--area-ink);
+  font-weight: 650;
+}
+
+.domainChipIcon {
+  color: var(--area-gold);
+}
+
+/* ── The reading ── */
+
+.domainCard {
+  display: grid;
+  gap: 1.25rem;
+  padding: clamp(1.15rem, 2.4vw, 1.9rem);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 18px;
+  background: rgba(13, 10, 22, 0.9);
+}
+
+.domainHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.domainHeader h2 {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.35rem, 2.4vw, 1.75rem);
+  line-height: 1.25;
+}
+
+.domainSignalBadge {
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+  min-height: 2rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(108, 225, 212, 0.24);
+  border-radius: 999px;
+  background: rgba(108, 225, 212, 0.08);
+  color: var(--area-teal);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: capitalize;
+}
+
+.domainOverview {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--area-soft);
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+
+.domainEvidenceVerdict {
+  display: grid;
+  grid-template-columns: minmax(170px, 0.34fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem;
+  border: 1px solid rgba(108, 225, 212, 0.18);
+  border-radius: 12px;
+  background: linear-gradient(115deg, rgba(26, 123, 110, 0.11), rgba(200, 155, 60, 0.045));
+}
+
+.domainEvidenceVerdict > div {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.domainEvidenceVerdict p {
+  margin: 0;
+  color: var(--area-soft);
+  line-height: 1.55;
+}
+
+.domainVerdictLabel {
+  color: var(--area-teal);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* ── Depth tabs ── */
+
+.modeTabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding-bottom: 0.15rem;
+  border-bottom: 1px solid rgba(200, 155, 60, 0.14);
+}
+
+.modeTab,
+.modeTabActive {
+  min-height: 2.5rem;
+  padding: 0.5rem 1.1rem;
+  border: 1px solid transparent;
+  border-radius: 10px 10px 0 0;
+  background: transparent;
+  color: var(--area-soft);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease;
+}
+
+.modeTab:hover {
+  color: var(--area-ink);
+  background: rgba(255, 243, 210, 0.04);
+}
+
+.modeTabActive {
+  border-color: rgba(200, 155, 60, 0.22);
+  border-bottom-color: transparent;
+  background: rgba(200, 155, 60, 0.12);
+  color: var(--area-ink);
+}
+
+/* ── Subthemes ── */
+
+.domainSubthemes {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.domainSubthemeHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.domainSubthemeHeader h3 {
+  margin: 0;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+}
+
+.domainSubthemeHeader span {
+  color: var(--area-soft);
+  font-size: 0.82rem;
+}
+
+/* Two-up rather than the report's three. The page is narrower than the bento
+   grid it came from, and three columns put these back to two words a line. */
+.domainSubthemeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: 0.65rem;
+}
+
+.domainSubthemeCard {
+  min-width: 0;
+  padding: 0.85rem;
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.025);
+}
+
+.domainSubthemeCard > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.domainSubthemeCard strong {
+  color: var(--area-ink);
+}
+
+.domainSubthemeCard small,
+.domainSubthemeRank {
+  color: var(--area-teal);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.domainSubthemeCard p {
+  margin: 0.45rem 0 0;
+  color: var(--area-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ── Timing ── */
+
+.domainTimingWindows {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.65rem;
+}
+
+.domainTimingWindows section {
+  padding: 0.85rem;
+  border-left: 2px solid rgba(224, 184, 92, 0.45);
+  border-radius: 0 10px 10px 0;
+  background: rgba(255, 243, 210, 0.03);
+}
+
+.domainTimingWindows h3 {
+  margin: 0 0 0.3rem;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+}
+
+.domainTimingWindows p {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* ── Detailed ── */
+
+.domainClarityBlock {
+  display: grid;
+  gap: 1rem;
+}
+
+.domainDeepDescription {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--area-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.domainStatementGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem;
+}
+
+.domainStatement {
+  min-width: 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid rgba(26, 123, 110, 0.55);
+}
+
+.domainStatement h3 {
+  margin: 0 0 0.4rem;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.05rem;
+  font-weight: 650;
+}
+
+.domainStatement p {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: 0.96rem;
+  line-height: 1.55;
+}
+
+.domainGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+}
+
+.domainCol h3 {
+  margin: 0 0 0.5rem;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1rem;
+}
+
+.domainCol ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.35rem;
+  color: var(--area-soft);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+/* ── Action plan ── */
+
+.domainActionPanel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.domainActionPanel section {
+  padding: 1rem;
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.035);
+}
+
+.domainActionPanel h3 {
+  margin: 0 0 0.4rem;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.02rem;
+}
+
+.domainActionPanel p {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.domainGuidance,
+.domainLongGame {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--area-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.domainGuidance strong,
+.domainLongGame strong {
+  color: var(--area-gold);
+}
+
+/* ── Technical disclosure ── */
+
+.evidence {
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 12px;
+  background: rgba(255, 243, 210, 0.02);
+}
+
+.evidenceSummary {
+  padding: 0.8rem 1rem;
+  color: var(--area-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.evidenceBody {
+  display: grid;
+  gap: 1rem;
+  padding: 0 1rem 1rem;
+}
+
+.ruleBasis {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.claims {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.claim {
+  padding: 0.55rem 0.7rem;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.claimLabel {
+  color: var(--area-soft);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.claimValue {
+  margin: 0.2rem 0 0;
+  display: grid;
+  gap: 0.15rem;
+  color: var(--area-ink);
+  font-size: 0.94rem;
+}
+
+.claimDetail {
+  color: var(--area-soft);
+  font-size: 0.84rem;
+}
+
+.domainRulesPanel ol {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--area-soft);
+  font-size: 0.94rem;
+  line-height: 1.5;
+}
+
+.domainRulesPanel strong {
+  color: var(--area-ink);
+}
+
+.domainEvidenceMatrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.65rem;
+}
+
+.domainEvidenceMatrix section {
+  padding: 0.75rem;
+  border-left: 2px solid rgba(108, 225, 212, 0.35);
+  background: rgba(108, 225, 212, 0.035);
+}
+
+.domainEvidenceMatrix section > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.domainEvidenceMatrix h4 {
+  margin: 0;
+  color: var(--area-ink);
+  font-size: 0.96rem;
+}
+
+.domainEvidenceMatrix span {
+  color: var(--area-soft);
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.domainEvidenceMatrix span[data-status="support"] {
+  color: var(--area-teal);
+}
+
+.domainEvidenceMatrix p {
+  margin: 0.4rem 0 0;
+  color: var(--area-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.evidencePatterns {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
+  color: var(--area-soft);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding-top: calc(var(--navbar-h) + 1.5rem + env(safe-area-inset-top));
+  }
+
+  .domainEvidenceVerdict {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .domainHeader {
+    flex-direction: column;
+  }
+}
