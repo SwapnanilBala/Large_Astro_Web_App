@@ -7,7 +7,11 @@
   isolation: isolate;
   min-height: 100dvh;
   overflow: hidden;
-  padding: calc(5.5rem + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) calc(3rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
+  /* The fixed .site-navbar is 108px tall, so 5.5rem (88px) put the back
+     button *under* it -- 20px of its 46px was covered. max(9rem, 150px) is
+     what /insights/timing and /insights/full-reading already use to clear the
+     same navbar with air to spare; this page was the one that missed it. */
+  padding: calc(max(9rem, 150px) + env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right)) calc(3rem + env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   background:
     linear-gradient(rgba(7, 10, 20, 0.78), rgba(7, 10, 20, 0.94)),
     url('/background-1280.webp') center top / cover fixed;
@@ -713,7 +717,9 @@
 
 @media (max-width: 560px) {
   .page {
-    padding-top: calc(4.7rem + env(safe-area-inset-top));
+    /* Narrow viewports get a shorter navbar, but 4.7rem (75px) was still
+       under it. Same floor the sibling pages drop to. */
+    padding-top: calc(max(7rem, 120px) + env(safe-area-inset-top));
   }
 
   .hero {
