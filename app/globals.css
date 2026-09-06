@@ -255,16 +255,21 @@ h3 {
 }
 
 /*
- * For pages whose card opens straight onto a link or a kicker.
+ * Navbar clearance for the pages that need it.
  *
- * .insights-shell's own 4.5rem is below --navbar-h, so the card lands under
- * the bar. On /insights that is harmless -- the navbar is frosted, a card edge
- * passing beneath it is the intended look, and that page's hero puts the first
- * text 300px+ down regardless. On /insights/advanced and
- * /insights/compatibility the card's first child *is* the text, and only
- * .dashboard-shell's clamp(1.3rem, 2.7vw, 2.6rem) stood between it and the
- * bar. That clamp shrinks with the viewport while the navbar does not, so the
- * text slid under: 3px at 1180, 7px at 1024, 13px at 820.
+ * .insights-shell's own 4.5rem is below --navbar-h, so its card lands under
+ * the bar. That only shows on pages whose content is tall enough to overflow:
+ * the shell is `place-items: center`, so the short missing-params states float
+ * mid-viewport and never come near the navbar. The tall ones pin to
+ * padding-top and start 36px underneath it.
+ *
+ * On /insights/advanced and /insights/compatibility the card's first child is
+ * text, and only .dashboard-shell's clamp(1.3rem, 2.7vw, 2.6rem) stood between
+ * it and the bar. That clamp shrinks with the viewport while the navbar does
+ * not, so the text slid under as the window narrowed: 3px at 1180, 7px at
+ * 1024, 13px at 820. On /insights no text was occluded -- the hero puts it
+ * 300px+ down -- but the card's own top edge and rounded corners still ran
+ * beneath the bar, and it reads better sitting below it.
  *
  * Derived from --navbar-h rather than restating 150px, per the note at that
  * token: the offsets that carry their own guess are the ones that drift.
