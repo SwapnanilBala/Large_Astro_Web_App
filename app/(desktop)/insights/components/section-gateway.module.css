@@ -66,14 +66,25 @@
   gap: 0.55rem;
 }
 
+/* 6.5rem (104px) was below the widest chip. "Chaturvimshamsa" under D24 is
+   the longest varga name: 116px with the padding, and it is one unbreakable
+   word, so wherever auto-fit resolved a track under that -- 109px at 1920,
+   106px at 1600, 105px at 1100 -- it rendered outside its own border. Only
+   1280 happened to land wide enough to hide it. 7.5rem floors the track at
+   120px, which resolves to 125px or more at every width. */
 .chips[data-count="many"] {
-  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
 }
 
 .chips span {
   display: grid;
   gap: 0.12rem;
   min-width: 0;
+  /* min-width: 0 lets the track shrink below its content, which is what let a
+     long name escape the chip rather than push the column wider. The floor
+     above means nothing wraps today; this is so a longer name added later
+     wraps to a second line instead of spilling out again. */
+  overflow-wrap: break-word;
   padding: 0.6rem 0.68rem;
   border: 1px solid rgba(108, 225, 212, 0.13);
   border-radius: 10px;
