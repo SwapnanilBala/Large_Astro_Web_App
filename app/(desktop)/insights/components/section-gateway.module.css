@@ -1,5 +1,5 @@
 /* Shared by every results-page section that links out to its own page.
-   Copied from divisional-charts-gateway so the three read as one pattern. */
+   Carried over from the varga-atlas gateway so the three read as one pattern. */
 .gateway {
   display: grid;
   gap: 1.15rem;

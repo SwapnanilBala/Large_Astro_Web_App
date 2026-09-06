@@ -12,9 +12,9 @@ import styles from "./section-gateway.module.css";
  * the type can be larger and the explanations longer than a collapsed section
  * on a crowded page can carry.
  *
- * Generalised from divisional-charts-gateway, which already did this for the
- * varga atlas; that component's shape is preserved so the three read as one
- * pattern rather than three variations.
+ * Generalised from the earlier varga-atlas gateway, which already did this for
+ * the divisional charts; that component's shape is preserved so the three read
+ * as one pattern rather than three variations.
  */
 
 export type GatewayChip = {
