@@ -24,7 +24,11 @@
 .shell {
   width: min(100% - 2rem, 78rem);
   margin: 0 auto;
-  padding: clamp(6rem, 9vw, 8rem) 0 4rem;
+  /* The 6rem floor (96px) was below --navbar-h, so wherever 9vw fell short of
+     it -- every width under ~1180px -- the breadcrumb rendered 12px beneath
+     the bar. The floor now derives from the navbar; 9vw still takes over on
+     very wide screens. */
+  padding: max(calc(var(--navbar-h) + 2.6rem), 9vw) 0 4rem;
 }
 
 .breadcrumbs {
@@ -912,7 +916,9 @@
 @media (max-width: 720px) {
   .shell {
     width: min(100% - 1rem, 78rem);
-    padding-top: 5rem;
+    /* Phones get less air above the fold, but measured from the bar rather
+       than a flat 5rem that happened to land 16px clear of it. */
+    padding-top: calc(var(--navbar-h) + 1.5rem);
   }
 
   .hero {
