@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 
 import {
   markNudgeShown,
@@ -294,5 +296,40 @@ describe("the one nudge after a decline", () => {
       "phase",
       "stored",
     ]);
+  });
+});
+
+describe("the first render, which has to match the server's", () => {
+  /*
+   * The prompt is server-rendered, and the server cannot read localStorage, so
+   * the first client render has to be the silent one the server produced —
+   * whatever this browser remembers. Resolving the phase during render broke
+   * exactly this: the server sent the ask, a visitor who had declined earlier
+   * hydrated into the nudge, and React failed hydration on a text mismatch.
+   *
+   * `renderToStaticMarkup` runs no effects, so what it returns is that first
+   * render and nothing after it. jsdom leaves localStorage readable throughout,
+   * which is the point — the phase has to be "idle" despite an answer being
+   * right there to read.
+   */
+  function firstRenderPhase(): string {
+    function Probe() {
+      return useChartSync(CHART).phase;
+    }
+    return renderToStaticMarkup(createElement(Probe));
+  }
+
+  it("is silent when the answer on file would ask for a nudge", () => {
+    declinedEarlier();
+    expect(firstRenderPhase()).toBe("idle");
+  });
+
+  it("is silent when the answer on file was yes", () => {
+    recordDecision("granted");
+    expect(firstRenderPhase()).toBe("idle");
+  });
+
+  it("is silent even with no answer on file, so the ask is never in the HTML", () => {
+    expect(firstRenderPhase()).toBe("idle");
   });
 });
