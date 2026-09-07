@@ -38,7 +38,7 @@ export type ConsentEvidence = {
 
 /** The live grant for this client, or null. */
 export async function findActiveConsentId(
-  workspaceId: string,
+  userId: string,
   clientId: string,
 ): Promise<string | null> {
   const rows = await getDb()
@@ -46,7 +46,7 @@ export async function findActiveConsentId(
     .from(consentRecords)
     .where(
       and(
-        eq(consentRecords.workspaceId, workspaceId),
+        eq(consentRecords.userId, userId),
         eq(consentRecords.clientId, clientId),
         eq(consentRecords.purpose, CONSENT_PURPOSE),
         isNull(consentRecords.revokedAt),
@@ -67,18 +67,18 @@ export async function findActiveConsentId(
  * same permission a millisecond earlier, which is the outcome we wanted.
  */
 export async function grantConsent(
-  workspaceId: string,
+  userId: string,
   clientId: string,
   evidence: ConsentEvidence,
 ): Promise<string> {
-  const existing = await findActiveConsentId(workspaceId, clientId);
+  const existing = await findActiveConsentId(userId, clientId);
   if (existing) return existing;
 
   try {
     const inserted = await getDb()
       .insert(consentRecords)
       .values({
-        workspaceId,
+        userId,
         clientId,
         purpose: CONSENT_PURPOSE,
         policyVersion: CONSENT_POLICY_VERSION,
@@ -90,7 +90,7 @@ export async function grantConsent(
 
     return inserted[0].id;
   } catch (error) {
-    const raced = await findActiveConsentId(workspaceId, clientId);
+    const raced = await findActiveConsentId(userId, clientId);
     if (raced) return raced;
     throw error;
   }
@@ -111,10 +111,10 @@ export async function grantConsent(
  * needs and what a delete would destroy.
  */
 export async function revokeConsent(
-  workspaceId: string,
+  userId: string,
   clientId: string,
 ): Promise<boolean> {
-  const consentId = await findActiveConsentId(workspaceId, clientId);
+  const consentId = await findActiveConsentId(userId, clientId);
   if (!consentId) return false;
 
   const db = getDb();
@@ -124,7 +124,7 @@ export async function revokeConsent(
       .delete(birthProfiles)
       .where(
         and(
-          eq(birthProfiles.workspaceId, workspaceId),
+          eq(birthProfiles.userId, userId),
           eq(birthProfiles.clientId, clientId),
         ),
       ),
@@ -137,14 +137,14 @@ export async function revokeConsent(
   return true;
 }
 
-/** Withdraw permission for every client in a workspace. Used by "stop syncing". */
-export async function revokeAllConsent(workspaceId: string): Promise<number> {
+/** Withdraw permission for every client on an account. Used by "stop syncing". */
+export async function revokeAllConsent(userId: string): Promise<number> {
   const rows = await getDb()
     .select({ clientId: consentRecords.clientId })
     .from(consentRecords)
     .where(
       and(
-        eq(consentRecords.workspaceId, workspaceId),
+        eq(consentRecords.userId, userId),
         eq(consentRecords.purpose, CONSENT_PURPOSE),
         isNull(consentRecords.revokedAt),
       ),
@@ -152,7 +152,7 @@ export async function revokeAllConsent(workspaceId: string): Promise<number> {
 
   let revoked = 0;
   for (const row of rows) {
-    if (await revokeConsent(workspaceId, row.clientId)) revoked += 1;
+    if (await revokeConsent(userId, row.clientId)) revoked += 1;
   }
 
   return revoked;

@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { DEVICE_COOKIE, readDeviceId } from "@/lib/identity/device-id";
 import {
   GOOGLE_NONCE_COOKIE,
   GOOGLE_RETURN_COOKIE,
@@ -117,33 +116,18 @@ export async function GET(request: NextRequest) {
     return clearHandshake(failed(origin, "email_unverified"));
   }
 
-  /* `readDeviceId` throws when DEVICE_ID_SECRET is unset or too short, and it
-     is only reached when the visitor already carries an `astro_did` cookie —
-     so a deployment missing that one variable turned the last step of a
-     successful sign-in into an unhandled 500, on returning visitors only.
-     Nothing else here is allowed to fail that way, and this should not either:
-     without a trustworthy secret there is simply no device to attribute, which
-     `signInWithProvider` already accepts as null. The cost is that the
-     anonymous workspace is not claimed, and that is the safe direction to
-     fail — it never merges one person's charts into another's account. */
-  let deviceId: string | null = null;
   try {
-    deviceId = readDeviceId(request.cookies.get(DEVICE_COOKIE)?.value);
-  } catch (error) {
-    logAuthFailure("device_id_unreadable", error);
-  }
-
-  try {
-    const result = await signInWithProvider(
-      {
-        provider: "google",
-        subject: identity.subject,
-        email: identity.email,
-        emailVerified: identity.emailVerified,
-        name: identity.name,
-      },
-      deviceId,
-    );
+    /* No device id is read here any more. It existed so that a returning
+       visitor's anonymous workspace could be claimed by the account signing
+       in; 0006 dropped `workspaces`, so there is no anonymous data to adopt
+       and nothing to attribute a browser to. */
+    const result = await signInWithProvider({
+      provider: "google",
+      subject: identity.subject,
+      email: identity.email,
+      emailVerified: identity.emailVerified,
+      name: identity.name,
+    });
 
     const { token, expiresAt } = await createSession(result.userId, {
       userAgent: request.headers.get("user-agent"),
@@ -163,7 +147,7 @@ export async function GET(request: NextRequest) {
     response.cookies.set(SESSION_COOKIE, token, sessionCookieOptions(expiresAt));
     return clearHandshake(response);
   } catch (error) {
-    logAuthFailure("signin_failed", error, { claimedDevice: deviceId !== null });
+    logAuthFailure("signin_failed", error);
     return clearHandshake(failed(origin, "signin_failed"));
   }
 }

@@ -21,7 +21,6 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart": { limit: 30, windowMs: 60_000 },
   /* Tight: a POST here can insert a workspace row, so an unthrottled loop is a
      way to fill the table. A real visitor needs it once per device, ever. */
-  "/api/account/session": { limit: 10, windowMs: 60_000 },
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },
   "/api/palm-reading": { limit: 5, windowMs: 60_000 },

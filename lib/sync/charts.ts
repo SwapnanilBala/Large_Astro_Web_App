@@ -72,7 +72,7 @@ function trimTo(value: string, length: number): string | null {
 }
 
 async function findClientByReference(
-  workspaceId: string,
+  userId: string,
   reference: string,
 ): Promise<string | null> {
   const rows = await getDb()
@@ -80,7 +80,7 @@ async function findClientByReference(
     .from(clients)
     .where(
       and(
-        eq(clients.workspaceId, workspaceId),
+        eq(clients.userId, userId),
         eq(clients.externalReference, reference),
         isNull(clients.deletedAt),
       ),
@@ -90,18 +90,18 @@ async function findClientByReference(
   return rows[0]?.id ?? null;
 }
 
-/** Find, or create, the clients row for this person in this workspace. */
-async function ensureClient(workspaceId: string, facts: BirthFacts): Promise<string> {
+/** Find, or create, the clients row for this person under this account. */
+async function ensureClient(userId: string, facts: BirthFacts): Promise<string> {
   const reference = clientReference(facts.name, facts.birthDate);
 
-  const existing = await findClientByReference(workspaceId, reference);
+  const existing = await findClientByReference(userId, reference);
   if (existing) return existing;
 
   try {
     const inserted = await getDb()
       .insert(clients)
       .values({
-        workspaceId,
+        userId,
         displayName: facts.name.trim().slice(0, 120),
         externalReference: reference,
         timeZoneId: trimTo(facts.timeZoneId, 100),
@@ -115,9 +115,9 @@ async function ensureClient(workspaceId: string, facts: BirthFacts): Promise<str
 
     return inserted[0].id;
   } catch (error) {
-    /* clients_workspace_external_reference_unique. Two tabs pushing the same
+    /* clients_user_external_reference_unique. Two tabs pushing the same
        chart at once is ordinary, not exceptional. */
-    const raced = await findClientByReference(workspaceId, reference);
+    const raced = await findClientByReference(userId, reference);
     if (raced) return raced;
     throw error;
   }
@@ -132,7 +132,7 @@ async function ensureClient(workspaceId: string, facts: BirthFacts): Promise<str
  * and silently wrong the first time somebody adds a twelfth.
  */
 async function ensureBirthProfile(
-  workspaceId: string,
+  userId: string,
   clientId: string,
   facts: BirthFacts,
   consentRecordId: string,
@@ -147,7 +147,7 @@ async function ensureBirthProfile(
     .from(birthProfiles)
     .where(
       and(
-        eq(birthProfiles.workspaceId, workspaceId),
+        eq(birthProfiles.userId, userId),
         eq(birthProfiles.clientId, clientId),
         isNull(birthProfiles.archivedAt),
       ),
@@ -160,7 +160,7 @@ async function ensureBirthProfile(
   const supersedes = live[0]?.id ?? null;
 
   const values = {
-    workspaceId,
+    userId,
     clientId,
     consentRecordId,
     label: "Primary",
@@ -212,14 +212,14 @@ async function ensureBirthProfile(
  * the way if this is the first time.
  */
 export async function saveChart(
-  workspaceId: string,
+  userId: string,
   input: ChartSyncInput,
   consent: ConsentEvidence,
 ): Promise<SaveChartResult> {
-  const clientId = await ensureClient(workspaceId, input.facts);
-  const consentRecordId = await grantConsent(workspaceId, clientId, consent);
+  const clientId = await ensureClient(userId, input.facts);
+  const consentRecordId = await grantConsent(userId, clientId, consent);
   const birthProfileId = await ensureBirthProfile(
-    workspaceId,
+    userId,
     clientId,
     input.facts,
     consentRecordId,
@@ -231,7 +231,7 @@ export async function saveChart(
   const db = getDb();
 
   const reproducible = and(
-    eq(chartCalculations.workspaceId, workspaceId),
+    eq(chartCalculations.userId, userId),
     eq(chartCalculations.birthProfileId, birthProfileId),
     eq(chartCalculations.chartType, "natal"),
     eq(chartCalculations.inputFingerprint, fingerprint),
@@ -252,7 +252,7 @@ export async function saveChart(
   const inserted = await db
     .insert(chartCalculations)
     .values({
-      workspaceId,
+      userId,
       birthProfileId,
       chartType: "natal",
       inputFingerprint: fingerprint,
@@ -272,12 +272,12 @@ export async function saveChart(
 }
 
 /**
- * Every stored chart in this workspace, newest first.
+ * Every stored chart on this account, newest first.
  *
  * Shaped to match ChartHistoryEntry in lib/chart-history-store, so hydration
  * is an assignment rather than a translation layer.
  */
-export async function listCharts(workspaceId: string): Promise<SyncedChart[]> {
+export async function listCharts(userId: string): Promise<SyncedChart[]> {
   const rows = await getDb()
     .select({
       chartId: chartCalculations.id,
@@ -293,19 +293,19 @@ export async function listCharts(workspaceId: string): Promise<SyncedChart[]> {
       birthProfiles,
       and(
         eq(birthProfiles.id, chartCalculations.birthProfileId),
-        eq(birthProfiles.workspaceId, chartCalculations.workspaceId),
+        eq(birthProfiles.userId, chartCalculations.userId),
       ),
     )
     .innerJoin(
       clients,
       and(
         eq(clients.id, birthProfiles.clientId),
-        eq(clients.workspaceId, birthProfiles.workspaceId),
+        eq(clients.userId, birthProfiles.userId),
       ),
     )
     .where(
       and(
-        eq(chartCalculations.workspaceId, workspaceId),
+        eq(chartCalculations.userId, userId),
         isNull(chartCalculations.archivedAt),
         isNull(clients.deletedAt),
       ),
@@ -335,13 +335,13 @@ export async function listCharts(workspaceId: string): Promise<SyncedChart[]> {
 }
 
 /** How many charts are stored, for deciding whether hydration has work to do. */
-export async function countCharts(workspaceId: string): Promise<number> {
+export async function countCharts(userId: string): Promise<number> {
   const rows = await getDb()
     .select({ n: sql<number>`count(*)::int` })
     .from(chartCalculations)
     .where(
       and(
-        eq(chartCalculations.workspaceId, workspaceId),
+        eq(chartCalculations.userId, userId),
         isNull(chartCalculations.archivedAt),
       ),
     );
