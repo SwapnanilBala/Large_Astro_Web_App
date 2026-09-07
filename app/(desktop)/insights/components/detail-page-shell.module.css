@@ -1,0 +1,124 @@
+/*
+ * Chrome for the pages the results page hands off to.
+ *
+ * /insights/life-areas, /insights/house-support and /insights/life-shifts are
+ * the same page furniture with different bodies: one background, one back
+ * button, one centred hero. The varga atlas and the timing page predate this
+ * and still carry their own copies, which is how the varga page ended up with
+ * a top padding that put its back button under the navbar while its siblings
+ * were fine. One definition, so there is one thing to get right.
+ */
+
+.page {
+  --detail-gold: #e0b85c;
+  --detail-teal: #6ce1d4;
+  --detail-ink: #f4f1ec;
+  --detail-soft: #b9bbc7;
+  position: relative;
+  isolation: isolate;
+  min-height: 100dvh;
+  /* Measured from the navbar token, never a hand-picked rem. */
+  padding: calc(var(--navbar-h) + 2.6rem + env(safe-area-inset-top))
+    max(1rem, env(safe-area-inset-right))
+    calc(3rem + env(safe-area-inset-bottom))
+    max(1rem, env(safe-area-inset-left));
+  color: var(--detail-ink);
+  background:
+    radial-gradient(circle at 12% 6%, rgba(75, 113, 128, 0.16), transparent 26rem),
+    radial-gradient(circle at 88% 14%, rgba(154, 112, 45, 0.12), transparent 24rem),
+    linear-gradient(160deg, #090b11 0%, #11121a 45%, #0b1114 100%);
+}
+
+.shell {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.backButton,
+.backButtonBottom {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  justify-self: start;
+  min-height: 2.7rem;
+  padding: 0.65rem 0.95rem;
+  border: 1px solid rgba(200, 155, 60, 0.25);
+  border-radius: 999px;
+  background: rgba(12, 16, 29, 0.78);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  color: var(--detail-ink);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.9rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
+}
+
+.backButton:hover,
+.backButton:focus-visible,
+.backButtonBottom:hover,
+.backButtonBottom:focus-visible {
+  transform: translateX(-2px);
+  border-color: rgba(224, 184, 92, 0.65);
+  background: rgba(200, 155, 60, 0.12);
+  outline: none;
+}
+
+.hero {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: clamp(1.5rem, 4vw, 3rem) 1rem clamp(0.5rem, 2vw, 1.25rem);
+  text-align: center;
+}
+
+.heroIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(200, 155, 60, 0.32);
+  border-radius: 14px;
+  background: rgba(200, 155, 60, 0.1);
+  color: var(--detail-gold);
+}
+
+.heroIcon svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.kicker {
+  margin: 0;
+  color: var(--detail-gold);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.hero h1 {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
+  line-height: 1.15;
+}
+
+.lead {
+  margin: 0.35rem 0 0;
+  max-width: 60ch;
+  color: var(--detail-soft);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 720px) {
+  .page {
+    padding-top: calc(var(--navbar-h) + 1.5rem + env(safe-area-inset-top));
+  }
+}

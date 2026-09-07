@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { FiCompass } from "react-icons/fi";
 import PageTransition from "@/app/components/PageTransition";
+import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import LifeAreasClient from "./life-areas-client";
 import {
   chartParamsToQuery,
@@ -94,13 +96,19 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
 
   return (
     <PageTransition>
-      <LifeAreasClient
-        clientName={payload.client.name}
-        insights={insights}
-        dasha={payload.chart.dasha}
-        historyQs={historyQs}
-        initialDomainKey={requestedKey ?? ""}
-      />
+      <DetailPageShell
+        backHref={`/insights?${historyQs}#ultimate`}
+        kicker="Ultimate Module · Life areas"
+        title={`${payload.client.name}'s life areas in full`}
+        lead="Each area runs its own evidence matrix across natal promise, supporting factors, divisional confirmation, measured strength, house support, combinations, timing, and contradictions."
+        icon={<FiCompass />}
+      >
+        <LifeAreasClient
+          insights={insights}
+          dasha={payload.chart.dasha}
+          initialDomainKey={requestedKey ?? ""}
+        />
+      </DetailPageShell>
     </PageTransition>
   );
 }

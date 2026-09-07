@@ -1,97 +1,23 @@
 /*
- * The life areas, on their own page.
+ * Body styles for /insights/life-areas.
  *
- * Purpose-built rather than reusing the .domain* rules in insights.module.css.
- * Those were written for a section competing with twenty others in a report --
- * three-up subtheme cards, tight margins, everything compressed. The whole
- * reason this content moved here is that it needed room, so it gets type and
- * spacing set for a page instead of copies of the cramped versions.
+ * The page frame -- background, back buttons, hero -- is
+ * detail-page-shell.module.css now, shared with /insights/house-support and
+ * /insights/life-shifts. What is left here is the part that is only about life
+ * areas. Purpose-built rather than reusing the .domain* rules in
+ * insights.module.css: those were written for a section competing with twenty
+ * others in a report, and the whole reason this content moved was that it
+ * needed room.
  */
 
-.page {
-  --area-gold: #e0b85c;
-  --area-teal: #6ce1d4;
-  --area-ink: #f4f1ec;
-  --area-soft: #b9bbc7;
-  position: relative;
-  isolation: isolate;
-  min-height: 100dvh;
-  /* Measured from the navbar token, not a hand-picked rem. The sibling pages
-     that guessed their own value all ended up rendering underneath it. */
-  padding: calc(var(--navbar-h) + 2.6rem + env(safe-area-inset-top))
-    max(1rem, env(safe-area-inset-right))
-    calc(3rem + env(safe-area-inset-bottom))
-    max(1rem, env(safe-area-inset-left));
-  color: var(--area-ink);
-  background:
-    radial-gradient(circle at 12% 6%, rgba(75, 113, 128, 0.16), transparent 26rem),
-    radial-gradient(circle at 88% 14%, rgba(154, 112, 45, 0.12), transparent 24rem),
-    linear-gradient(160deg, #090b11 0%, #11121a 45%, #0b1114 100%);
-}
-
-.shell {
-  width: min(1080px, 100%);
-  margin: 0 auto;
-  display: grid;
-  gap: 1.5rem;
-}
-
-.backButton,
-.backButtonBottom {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  justify-self: start;
-  min-height: 2.7rem;
-  padding: 0.65rem 0.95rem;
-  border: 1px solid rgba(200, 155, 60, 0.25);
-  border-radius: 999px;
-  background: rgba(12, 16, 29, 0.78);
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  color: var(--area-ink);
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.9rem;
-  font-weight: 750;
-  text-decoration: none;
-  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
-}
-
-.backButton:hover,
-.backButton:focus-visible,
-.backButtonBottom:hover,
-.backButtonBottom:focus-visible {
-  transform: translateX(-2px);
-  border-color: rgba(224, 184, 92, 0.65);
-  background: rgba(200, 155, 60, 0.12);
-  outline: none;
-}
-
-/* ── Hero ── */
-
-.hero {
-  display: grid;
-  justify-items: center;
-  gap: 0.5rem;
-  padding: clamp(1.5rem, 4vw, 3rem) 1rem clamp(0.5rem, 2vw, 1.25rem);
-  text-align: center;
-}
-
-.heroIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 3rem;
-  height: 3rem;
-  border: 1px solid rgba(200, 155, 60, 0.32);
-  border-radius: 14px;
-  background: rgba(200, 155, 60, 0.1);
-  color: var(--area-gold);
-}
-
-.heroIcon svg {
-  width: 1.4rem;
-  height: 1.4rem;
+/* The frame sets --detail-*; these alias them so the rules below read the
+   same as when this file owned the page. */
+.domainNav,
+.domainCard {
+  --area-gold: var(--detail-gold, #e0b85c);
+  --area-teal: var(--detail-teal, #6ce1d4);
+  --area-ink: var(--detail-ink, #f4f1ec);
+  --area-soft: var(--detail-soft, #b9bbc7);
 }
 
 .kicker {
@@ -102,21 +28,6 @@
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-}
-
-.hero h1 {
-  margin: 0.2rem 0 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.7rem, 3.4vw, 2.5rem);
-  line-height: 1.15;
-}
-
-.lead {
-  margin: 0.35rem 0 0;
-  max-width: 60ch;
-  color: var(--area-soft);
-  font-size: 1rem;
-  line-height: 1.6;
 }
 
 /* ── Area picker ── */
@@ -638,10 +549,6 @@
 }
 
 @media (max-width: 720px) {
-  .page {
-    padding-top: calc(var(--navbar-h) + 1.5rem + env(safe-area-inset-top));
-  }
-
   .domainEvidenceVerdict {
     grid-template-columns: minmax(0, 1fr);
   }

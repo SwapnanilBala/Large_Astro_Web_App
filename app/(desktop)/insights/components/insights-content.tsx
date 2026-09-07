@@ -743,6 +743,8 @@ export default function InsightsContent({
   /* Always carries a query string: the page rebuilds the chart from it, so a
      bare /insights/life-areas would land on "details are incomplete". */
   const lifeAreasHref = `/insights/life-areas?${historyQs}`;
+  const houseSupportHref = `/insights/house-support?${historyQs}`;
+  const lifeShiftsHref = `/insights/life-shifts?${historyQs}`;
   const transitParams = new URLSearchParams(historyQs);
   transitParams.set("view", "transits");
   const transitWorkspaceHref = `/insights/advanced?${transitParams.toString()}`;
@@ -1063,8 +1065,13 @@ export default function InsightsContent({
                 <HouseSupportPanel
                   ashtakavarga={payload.ashtakavarga}
                   houses={payload.chart.houses}
+                  variant="brief"
                 />
               </PanelErrorBoundary>
+              <Link href={houseSupportHref} className={styles.domainOpenLink}>
+                What each house is responsible for
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
             </CollapsibleSection>
           )}
 
@@ -1278,9 +1285,13 @@ export default function InsightsContent({
               enough lead time to render before the section is actually read. */}
           <LazyPanel minHeight={560} rootMargin="800px">
             <PanelErrorBoundary panelName="Major Life Shifts">
-              <MajorShiftsPanel payload={payload} />
+              <MajorShiftsPanel payload={payload} variant="brief" />
             </PanelErrorBoundary>
           </LazyPanel>
+          <Link href={lifeShiftsHref} className={styles.domainOpenLink}>
+            Every chapter, past and ahead
+            <span aria-hidden="true">&rarr;</span>
+          </Link>
         </CollapsibleSection>
 
         {/* â”€â”€â”€ Life Domain Deep Dives â”€â”€â”€ */}
