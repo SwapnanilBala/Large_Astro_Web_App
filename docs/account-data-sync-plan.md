@@ -13,6 +13,33 @@ for the next check: `GET /api/sync/charts` returns 200 with an empty list on a
 cookieless request *without reaching Postgres at all*, so that response proves
 the route is deployed and nothing about the database.
 
+Amended 2026-09-06, and this one reverses a decision rather than narrowing it.
+**Migration 0006 deleted `workspaces` and `workspace_members`.** `auth_users.id`
+is the tenant root now: every table that keyed on `workspace_id` keys on
+`user_id`, and the 6 composite unique constraints, 18 composite foreign keys and
+11 indexes that were led by the old column were rebuilt on the new one. The 9
+stored charts were carried across, not recreated.
+
+Two consequences that contradict what is written below, so read them first:
+
+- **Point 3 of the 2026-09-05 amendment is reversed. Guest mode no longer
+  reaches Postgres.** A signed-out visitor has nowhere on the server to put a
+  chart; `POST /api/sync/charts` answers 401 and their charts live only in the
+  browser, under the single scope `lib/local-scope.ts` established when the
+  local profile picker was retired. "Guest mode is already an account", below,
+  is now a description of how this used to work.
+- **The upgrade path went with it.** There is no anonymous workspace left to
+  claim, so `lib/identity/device-id.ts`, `lib/identity/anonymous-account.ts` and
+  `GET/POST /api/account/session` are deleted, and `signInWithProvider` takes
+  the provider identity alone. `DEVICE_ID_SECRET` is no longer read by any code
+  path; it can be removed from the environment.
+
+What did not change: the consent flow. `birth_profiles.consent_record_id` is
+still `NOT NULL` with a foreign key to `consent_records`, so the database still
+physically cannot hold a birth date without a live grant pointing at it, and
+`store_birth_details` is still the purpose string. Sections below on consent,
+the nudge, and the mirror-versus-source-of-truth decision all still hold.
+
 Amended 2026-09-05, on direction that changes the target:
 
 1. `/workspace` and `/calendar` were removed from the app, and

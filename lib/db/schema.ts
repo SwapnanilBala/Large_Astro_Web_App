@@ -29,57 +29,22 @@ const timestamps = () => ({
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
 });
 
-/** A tenant boundary. One practitioner still receives one workspace. */
-export const workspaces = pgTable(
-  "workspaces",
-  {
-    id: uuid("id").defaultRandom().primaryKey(),
-    name: varchar("name", { length: 120 }).notNull(),
-    slug: varchar("slug", { length: 80 }),
-    metadata: jsonb("metadata").$type<JsonObject>().default(sql`'{}'::jsonb`).notNull(),
-    ...timestamps(),
-    archivedAt: timestamp("archived_at", { withTimezone: true }),
-  },
-  (table) => [
-    uniqueIndex("workspaces_slug_unique")
-      .on(table.slug)
-      .where(sql`${table.slug} is not null and ${table.archivedAt} is null`),
-    check("workspaces_name_not_blank", sql`char_length(btrim(${table.name})) > 0`),
-  ],
-);
-
-/** Authentication subjects are external text ids, so auth providers remain replaceable. */
-export const workspaceMembers = pgTable(
-  "workspace_members",
-  {
-    workspaceId: uuid("workspace_id")
-      .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
-    authUserId: varchar("auth_user_id", { length: 255 }).notNull(),
-    role: varchar("role", { length: 24 }).default("owner").notNull(),
-    joinedAt: timestamp("joined_at", { withTimezone: true }).defaultNow().notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
-    removedAt: timestamp("removed_at", { withTimezone: true }),
-  },
-  (table) => [
-    primaryKey({ columns: [table.workspaceId, table.authUserId] }),
-    index("workspace_members_auth_user_idx").on(table.authUserId, table.removedAt),
-    check(
-      "workspace_members_role_check",
-      sql`${table.role} in ('owner', 'admin', 'practitioner', 'viewer')`,
-    ),
-  ],
-);
-
 /**
- * A person who can sign in.
+ * A person who can sign in, and the tenant root every other table keys on.
  *
- * Deliberately not joined to `workspaces` by a foreign key. Membership already
- * has a table — `workspace_members`, whose `auth_user_id` is a loose varchar so
- * the auth provider stays replaceable — and a signed-in person is written there
- * as `user:<id>` exactly the way an anonymous device is written as `anon:<id>`.
- * That is what lets someone sign in and keep the workspace their device already
- * built: a second member row, not a migration.
+ * `workspaces` and `workspace_members` used to sit between this table and the
+ * data, so that a device with no login still had somewhere to write: an
+ * anonymous `anon:<device>` member and a signed-in `user:<id>` member were the
+ * same shape, and signing in claimed the device's workspace rather than
+ * migrating out of it. Migration 0006 removed that layer. Google is now the
+ * only way in, so there is no longer a second kind of subject for the
+ * indirection to abstract over, and one account owning exactly one workspace
+ * made the join table a rename of `auth_users` with extra steps.
+ *
+ * What that costs, stated plainly: a visitor who has not signed in has nowhere
+ * on the server to put a chart. Guest persistence was a real feature and it is
+ * gone — the browser keeps their charts (see `lib/local-scope.ts`) and nothing
+ * reaches Postgres until they sign in.
  */
 export const authUsers = pgTable(
   "auth_users",
@@ -158,9 +123,9 @@ export const clients = pgTable(
   "clients",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     displayName: varchar("display_name", { length: 120 }).notNull(),
     preferredName: varchar("preferred_name", { length: 120 }),
     email: varchar("email", { length: 320 }),
@@ -178,18 +143,18 @@ export const clients = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    unique("clients_workspace_id_id_unique").on(table.workspaceId, table.id),
-    index("clients_workspace_status_updated_idx").on(
-      table.workspaceId,
+    unique("clients_user_id_id_unique").on(table.userId, table.id),
+    index("clients_user_status_updated_idx").on(
+      table.userId,
       table.status,
       table.updatedAt,
     ),
-    index("clients_workspace_name_idx").on(table.workspaceId, sql`lower(${table.displayName})`),
-    index("clients_workspace_email_idx")
-      .on(table.workspaceId, sql`lower(${table.email})`)
+    index("clients_user_name_idx").on(table.userId, sql`lower(${table.displayName})`),
+    index("clients_user_email_idx")
+      .on(table.userId, sql`lower(${table.email})`)
       .where(sql`${table.email} is not null and ${table.deletedAt} is null`),
-    uniqueIndex("clients_workspace_external_reference_unique")
-      .on(table.workspaceId, table.externalReference)
+    uniqueIndex("clients_user_external_reference_unique")
+      .on(table.userId, table.externalReference)
       .where(sql`${table.externalReference} is not null and ${table.deletedAt} is null`),
     check("clients_display_name_not_blank", sql`char_length(btrim(${table.displayName})) > 0`),
     check(
@@ -227,7 +192,7 @@ export const consentRecords = pgTable(
   "consent_records",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     clientId: uuid("client_id").notNull(),
     purpose: varchar("purpose", { length: 80 }).notNull(),
     policyVersion: varchar("policy_version", { length: 40 }).notNull(),
@@ -238,11 +203,11 @@ export const consentRecords = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique("consent_records_workspace_id_id_unique").on(table.workspaceId, table.id),
+    unique("consent_records_user_id_id_unique").on(table.userId, table.id),
     foreignKey({
-      name: "consent_records_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "consent_records_user_client_fk",
+      columns: [table.userId, table.clientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     uniqueIndex("consent_records_one_active_purpose_unique")
       .on(table.clientId, table.purpose)
@@ -265,7 +230,7 @@ export const birthProfiles = pgTable(
   "birth_profiles",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     clientId: uuid("client_id").notNull(),
     /**
      * Not nullable on purpose. Every other guard against storing birth facts
@@ -302,11 +267,11 @@ export const birthProfiles = pgTable(
     archivedAt: timestamp("archived_at", { withTimezone: true }),
   },
   (table) => [
-    unique("birth_profiles_workspace_id_id_unique").on(table.workspaceId, table.id),
+    unique("birth_profiles_user_id_id_unique").on(table.userId, table.id),
     foreignKey({
-      name: "birth_profiles_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "birth_profiles_user_client_fk",
+      columns: [table.userId, table.clientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     /**
      * Deliberately `no action` rather than `restrict`. Deleting a client
@@ -318,9 +283,9 @@ export const birthProfiles = pgTable(
      * delete of the birth profile, not a delete of the consent record.
      */
     foreignKey({
-      name: "birth_profiles_workspace_consent_fk",
-      columns: [table.workspaceId, table.consentRecordId],
-      foreignColumns: [consentRecords.workspaceId, consentRecords.id],
+      name: "birth_profiles_user_consent_fk",
+      columns: [table.userId, table.consentRecordId],
+      foreignColumns: [consentRecords.userId, consentRecords.id],
     }),
     uniqueIndex("birth_profiles_one_primary_per_client_unique")
       .on(table.clientId)
@@ -375,7 +340,7 @@ export const chartCalculations = pgTable(
   "chart_calculations",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     birthProfileId: uuid("birth_profile_id").notNull(),
     chartType: varchar("chart_type", { length: 40 }).default("natal").notNull(),
     inputFingerprint: varchar("input_fingerprint", { length: 128 }).notNull(),
@@ -414,11 +379,11 @@ export const chartCalculations = pgTable(
     archivedAt: timestamp("archived_at", { withTimezone: true }),
   },
   (table) => [
-    unique("chart_calculations_workspace_id_id_unique").on(table.workspaceId, table.id),
+    unique("chart_calculations_user_id_id_unique").on(table.userId, table.id),
     foreignKey({
-      name: "chart_calculations_workspace_birth_profile_fk",
-      columns: [table.workspaceId, table.birthProfileId],
-      foreignColumns: [birthProfiles.workspaceId, birthProfiles.id],
+      name: "chart_calculations_user_birth_profile_fk",
+      columns: [table.userId, table.birthProfileId],
+      foreignColumns: [birthProfiles.userId, birthProfiles.id],
     }).onDelete("cascade"),
     uniqueIndex("chart_calculations_reproducible_unique").on(
       table.birthProfileId,
@@ -427,13 +392,13 @@ export const chartCalculations = pgTable(
       table.engineId,
       table.calculationVersion,
     ),
-    index("chart_calculations_workspace_computed_idx").on(table.workspaceId, table.computedAt),
+    index("chart_calculations_user_computed_idx").on(table.userId, table.computedAt),
     index("chart_calculations_birth_profile_computed_idx").on(
       table.birthProfileId,
       table.computedAt,
     ),
     index("chart_calculations_signs_idx").on(
-      table.workspaceId,
+      table.userId,
       table.ascendantSign,
       table.moonSign,
       table.sunSign,
@@ -461,7 +426,7 @@ export const chartCalculations = pgTable(
 export const chartPlacements = pgTable(
   "chart_placements",
   {
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     chartId: uuid("chart_id").notNull(),
     division: smallint("division").default(1).notNull(),
     pointCode: varchar("point_code", { length: 40 }).notNull(),
@@ -479,12 +444,12 @@ export const chartPlacements = pgTable(
   (table) => [
     primaryKey({ columns: [table.chartId, table.division, table.pointCode] }),
     foreignKey({
-      name: "chart_placements_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "chart_placements_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     index("chart_placements_analytics_idx").on(
-      table.workspaceId,
+      table.userId,
       table.pointCode,
       table.signCode,
       table.houseNumber,
@@ -509,7 +474,7 @@ export const chartPlacements = pgTable(
 export const chartHouses = pgTable(
   "chart_houses",
   {
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     chartId: uuid("chart_id").notNull(),
     division: smallint("division").default(1).notNull(),
     houseNumber: smallint("house_number").notNull(),
@@ -519,12 +484,12 @@ export const chartHouses = pgTable(
   (table) => [
     primaryKey({ columns: [table.chartId, table.division, table.houseNumber] }),
     foreignKey({
-      name: "chart_houses_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "chart_houses_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     index("chart_houses_analytics_idx").on(
-      table.workspaceId,
+      table.userId,
       table.houseNumber,
       table.signCode,
     ),
@@ -541,7 +506,7 @@ export const chartAspects = pgTable(
   "chart_aspects",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     chartId: uuid("chart_id").notNull(),
     division: smallint("division").default(1).notNull(),
     fromPoint: varchar("from_point", { length: 40 }).notNull(),
@@ -554,9 +519,9 @@ export const chartAspects = pgTable(
   },
   (table) => [
     foreignKey({
-      name: "chart_aspects_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "chart_aspects_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     uniqueIndex("chart_aspects_calculation_unique").on(
       table.chartId,
@@ -579,7 +544,7 @@ export const dashaPeriods = pgTable(
   "dasha_periods",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     chartId: uuid("chart_id").notNull(),
     parentPeriodId: uuid("parent_period_id").references((): AnyPgColumn => dashaPeriods.id, {
       onDelete: "cascade",
@@ -593,11 +558,11 @@ export const dashaPeriods = pgTable(
     isPartial: boolean("is_partial").default(false).notNull(),
   },
   (table) => [
-    unique("dasha_periods_workspace_id_id_unique").on(table.workspaceId, table.id),
+    unique("dasha_periods_user_id_id_unique").on(table.userId, table.id),
     foreignKey({
-      name: "dasha_periods_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "dasha_periods_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     index("dasha_periods_chart_window_idx").on(table.chartId, table.startAt, table.endAt),
     check("dasha_periods_level_check", sql`${table.level} between 1 and 5`),
@@ -608,7 +573,7 @@ export const dashaPeriods = pgTable(
 export const chartFindings = pgTable(
   "chart_findings",
   {
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     chartId: uuid("chart_id").notNull(),
     instanceKey: varchar("instance_key", { length: 255 }).notNull(),
     ruleId: varchar("rule_id", { length: 160 }).notNull(),
@@ -626,12 +591,12 @@ export const chartFindings = pgTable(
   (table) => [
     primaryKey({ columns: [table.chartId, table.instanceKey] }),
     foreignKey({
-      name: "chart_findings_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "chart_findings_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     index("chart_findings_selected_idx").on(
-      table.workspaceId,
+      table.userId,
       table.category,
       table.selected,
       table.rank,
@@ -646,7 +611,7 @@ export const compatibilityReports = pgTable(
   "compatibility_reports",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     primaryClientId: uuid("primary_client_id").notNull(),
     partnerClientId: uuid("partner_client_id").notNull(),
     primaryChartId: uuid("primary_chart_id").notNull(),
@@ -664,31 +629,31 @@ export const compatibilityReports = pgTable(
   },
   (table) => [
     foreignKey({
-      name: "compatibility_reports_workspace_primary_client_fk",
-      columns: [table.workspaceId, table.primaryClientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "compatibility_reports_user_primary_client_fk",
+      columns: [table.userId, table.primaryClientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     foreignKey({
-      name: "compatibility_reports_workspace_partner_client_fk",
-      columns: [table.workspaceId, table.partnerClientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "compatibility_reports_user_partner_client_fk",
+      columns: [table.userId, table.partnerClientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     foreignKey({
-      name: "compatibility_reports_workspace_primary_chart_fk",
-      columns: [table.workspaceId, table.primaryChartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "compatibility_reports_user_primary_chart_fk",
+      columns: [table.userId, table.primaryChartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     foreignKey({
-      name: "compatibility_reports_workspace_partner_chart_fk",
-      columns: [table.workspaceId, table.partnerChartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "compatibility_reports_user_partner_chart_fk",
+      columns: [table.userId, table.partnerChartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }).onDelete("cascade"),
     uniqueIndex("compatibility_reports_reproducible_unique").on(
-      table.workspaceId,
+      table.userId,
       table.inputFingerprint,
       table.algorithmVersion,
     ),
-    index("compatibility_reports_workspace_computed_idx").on(table.workspaceId, table.computedAt),
+    index("compatibility_reports_user_computed_idx").on(table.userId, table.computedAt),
     check(
       "compatibility_reports_score_check",
       sql`${table.compatibilityScore} between 0 and 100`,
@@ -705,9 +670,9 @@ export const assets = pgTable(
   "assets",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id")
+    userId: uuid("user_id")
       .notNull()
-      .references(() => workspaces.id, { onDelete: "cascade" }),
+      .references(() => authUsers.id, { onDelete: "cascade" }),
     clientId: uuid("client_id"),
     storageProvider: varchar("storage_provider", { length: 40 }).notNull(),
     objectKey: varchar("object_key", { length: 1024 }).notNull(),
@@ -719,11 +684,11 @@ export const assets = pgTable(
     deletedAt: timestamp("deleted_at", { withTimezone: true }),
   },
   (table) => [
-    unique("assets_workspace_id_id_unique").on(table.workspaceId, table.id),
+    unique("assets_user_id_id_unique").on(table.userId, table.id),
     foreignKey({
-      name: "assets_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "assets_user_client_fk",
+      columns: [table.userId, table.clientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     uniqueIndex("assets_provider_object_key_unique").on(table.storageProvider, table.objectKey),
     index("assets_client_created_idx").on(table.clientId, table.createdAt),
@@ -736,7 +701,7 @@ export const generatedArtifacts = pgTable(
   "generated_artifacts",
   {
     id: uuid("id").defaultRandom().primaryKey(),
-    workspaceId: uuid("workspace_id").notNull(),
+    userId: uuid("user_id").notNull(),
     clientId: uuid("client_id").notNull(),
     chartId: uuid("chart_id").references(() => chartCalculations.id, {
       onDelete: "set null",
@@ -767,24 +732,24 @@ export const generatedArtifacts = pgTable(
   },
   (table) => [
     foreignKey({
-      name: "generated_artifacts_workspace_client_fk",
-      columns: [table.workspaceId, table.clientId],
-      foreignColumns: [clients.workspaceId, clients.id],
+      name: "generated_artifacts_user_client_fk",
+      columns: [table.userId, table.clientId],
+      foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
     foreignKey({
-      name: "generated_artifacts_workspace_chart_fk",
-      columns: [table.workspaceId, table.chartId],
-      foreignColumns: [chartCalculations.workspaceId, chartCalculations.id],
+      name: "generated_artifacts_user_chart_fk",
+      columns: [table.userId, table.chartId],
+      foreignColumns: [chartCalculations.userId, chartCalculations.id],
     }),
     foreignKey({
-      name: "generated_artifacts_workspace_source_asset_fk",
-      columns: [table.workspaceId, table.sourceAssetId],
-      foreignColumns: [assets.workspaceId, assets.id],
+      name: "generated_artifacts_user_source_asset_fk",
+      columns: [table.userId, table.sourceAssetId],
+      foreignColumns: [assets.userId, assets.id],
     }),
     foreignKey({
-      name: "generated_artifacts_workspace_output_asset_fk",
-      columns: [table.workspaceId, table.outputAssetId],
-      foreignColumns: [assets.workspaceId, assets.id],
+      name: "generated_artifacts_user_output_asset_fk",
+      columns: [table.userId, table.outputAssetId],
+      foreignColumns: [assets.userId, assets.id],
     }),
     index("generated_artifacts_client_type_generated_idx").on(
       table.clientId,
@@ -810,8 +775,6 @@ export const generatedArtifacts = pgTable(
   ],
 );
 
-export type Workspace = typeof workspaces.$inferSelect;
-export type NewWorkspace = typeof workspaces.$inferInsert;
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type BirthProfile = typeof birthProfiles.$inferSelect;
