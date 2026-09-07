@@ -6315,14 +6315,27 @@ textarea:focus-visible {
   }}
 
 /* ── Landscape phone ── */
+/*
+ * No `overflow-y: auto` on the cards here, on purpose -- see the note on
+ * .home-shell/.insights-shell about not making an ancestor of the section nav
+ * a scroll container.
+ *
+ * This block used to give .intake-panel and .dashboard-shell
+ * `max-height: none; overflow-y: auto; -webkit-overflow-scrolling: touch`.
+ * Nothing in the tree sets a max-height on either card, so `none` reset
+ * nothing and the card was never shorter than its content -- the scrollport
+ * it opened could not scroll (scrollHeight == clientHeight). What it could do
+ * is become the sticky scrollport for .anchorNav inside it, and since a
+ * scrollport that never scrolls is always at scrollTop 0, the bar was pinned
+ * to its `top` offset within the *card* instead of the viewport: 102px below
+ * its own flow slot, sitting across the top of the hero heading. 17.4px of
+ * the h1 was underneath it at 850x700, and the bar never stuck to anything.
+ *
+ * The condition is why this only showed in a band of sizes: `landscape` kept
+ * it off portrait phones and `900px` kept it off desktop, so it took a wide,
+ * short window to see.
+ */
 @media (max-width: 900px) and (orientation: landscape) {
-  .intake-panel,
-  .dashboard-shell {
-    max-height: none;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
   .home-shell {
     padding-inline: 1rem;
   }}
