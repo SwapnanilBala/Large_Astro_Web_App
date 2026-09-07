@@ -27,12 +27,38 @@ const FACES = [
   ["@fontsource/eb-garamond", "eb-garamond-latin-600-normal.woff"],
 ];
 
+/**
+ * Locates a file inside an installed package by asking Node to resolve it,
+ * returning null when the package genuinely is not there.
+ *
+ * Joining __dirname to "../node_modules" would be shorter but only works in the
+ * primary checkout. Git worktrees never get a node_modules of their own -- it
+ * is the first line of .gitignore, so git does not materialise it -- and instead
+ * pick the dependencies up from the primary checkout further up the tree, the
+ * way `next` and `tsc` already do. A literal path skips that lookup and fails in
+ * every worktree even though the font is sitting right there for require().
+ */
+function resolveInPackage(pkg, relPath) {
+  try {
+    return require.resolve(`${pkg}/${relPath}`);
+  } catch {
+    // A package whose "exports" map does not publish this subpath still exports
+    // its own package.json by convention, so resolve that and walk from its dir.
+    try {
+      const src = path.join(path.dirname(require.resolve(`${pkg}/package.json`)), relPath);
+      return fs.existsSync(src) ? src : null;
+    } catch {
+      return null;
+    }
+  }
+}
+
 fs.mkdirSync(OUT_DIR, { recursive: true });
 
 let copied = 0;
 for (const [pkg, file] of FACES) {
-  const src = path.join(__dirname, "..", "node_modules", pkg, "files", file);
-  if (!fs.existsSync(src)) {
+  const src = resolveInPackage(pkg, `files/${file}`);
+  if (!src) {
     console.error(`[copy-fonts] missing ${pkg}/files/${file} -- run npm install`);
     process.exit(1);
   }
@@ -43,8 +69,8 @@ for (const [pkg, file] of FACES) {
 // The OFL requires the copyright notice and licence to travel with the font
 // files wherever they are redistributed, and public/ is served to the client.
 for (const pkg of ["@fontsource/cinzel", "@fontsource/eb-garamond"]) {
-  const src = path.join(__dirname, "..", "node_modules", pkg, "LICENSE");
-  if (fs.existsSync(src)) {
+  const src = resolveInPackage(pkg, "LICENSE");
+  if (src) {
     const name = `${pkg.split("/")[1]}-OFL.txt`;
     fs.copyFileSync(src, path.join(OUT_DIR, name));
     copied++;
