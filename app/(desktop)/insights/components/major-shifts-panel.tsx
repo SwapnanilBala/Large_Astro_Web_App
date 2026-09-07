@@ -57,7 +57,23 @@ function ShiftCard({ shift }: { shift: MajorLifeShift }) {
   );
 }
 
-export default function MajorShiftsPanel({ payload }: { payload: ChartApiResponse }) {
+/*
+ * `brief` is the results page: the one chapter that is actually live, and
+ * nothing else. `full` is /insights/life-shifts, which carries the next
+ * transition and every past chapter.
+ *
+ * A variant rather than two components, because the featured/past split below
+ * is the only thing deciding which chapter counts as "now" -- forking it would
+ * let the two pages disagree about that.
+ */
+export default function MajorShiftsPanel({
+  payload,
+  variant = "full",
+}: {
+  payload: ChartApiResponse;
+  variant?: "brief" | "full";
+}) {
+  const isBrief = variant === "brief";
   const shifts: MajorLifeShift[] = useMemo(
     () => computeMajorLifeShifts(payload),
     [payload],
@@ -76,7 +92,7 @@ export default function MajorShiftsPanel({ payload }: { payload: ChartApiRespons
 
   const forwardShifts = shifts
     .filter((shift) => shift.status === "active" || shift.status === "upcoming")
-    .slice(0, 2);
+    .slice(0, isBrief ? 1 : 2);
   const featuredShifts = forwardShifts.length > 0 ? forwardShifts : shifts.slice(-1);
   const featuredKeys = new Set(
     featuredShifts.map((shift) => `${shift.kind}-${shift.pivotIso}`),
@@ -90,8 +106,9 @@ export default function MajorShiftsPanel({ payload }: { payload: ChartApiRespons
   return (
     <div className={styles.lifeShiftsPanel}>
       <p className={styles.sectionIntro}>
-        Focus on the chapter that is active now and the next major transition.
-        Dates are planning windows, not deadlines.
+        {isBrief
+          ? "The chapter you are in now. Dates are planning windows, not deadlines."
+          : "Focus on the chapter that is active now and the next major transition. Dates are planning windows, not deadlines."}
       </p>
 
       <div className={styles.lifeShiftsTimeline}>
@@ -100,7 +117,10 @@ export default function MajorShiftsPanel({ payload }: { payload: ChartApiRespons
         ))}
       </div>
 
-      {pastShifts.length > 0 && (
+      {/* Past chapters are already behind a disclosure, but on the results
+          page they are still markup, still measured, and still one click from
+          a wall of text under a section that opens by default. */}
+      {!isBrief && pastShifts.length > 0 && (
         <details className={styles.lifeShiftsArchive}>
           <summary>
             View {pastShifts.length} past chapter{pastShifts.length === 1 ? "" : "s"}

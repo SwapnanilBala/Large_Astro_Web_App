@@ -1,8 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
-import { FiArrowLeft, FiCompass } from "react-icons/fi";
 import {
   DOMAIN_ICONS,
   DOMAIN_READ_COPY,
@@ -29,18 +27,14 @@ import styles from "./life-areas.module.css";
 type ViewMode = "detailed" | "action";
 
 type LifeAreasClientProps = {
-  clientName: string;
   insights: LifeDomainInsight[];
   dasha?: DashaInfo | null;
-  historyQs: string;
   initialDomainKey: string;
 };
 
 export default function LifeAreasClient({
-  clientName,
   insights,
   dasha,
-  historyQs,
   initialDomainKey,
 }: LifeAreasClientProps) {
   const ranked = useMemo(
@@ -66,26 +60,7 @@ export default function LifeAreasClient({
   const timingWindows = getLifeDomainTimingWindows(domain, dasha);
 
   return (
-    <main className={styles.page}>
-      <div className={styles.shell}>
-        <Link href={`/insights?${historyQs}#ultimate`} className={styles.backButton}>
-          <FiArrowLeft aria-hidden="true" />
-          Back to your reading
-        </Link>
-
-        <header className={styles.hero}>
-          <div className={styles.heroIcon} aria-hidden="true">
-            <FiCompass />
-          </div>
-          <p className={styles.kicker}>Ultimate Module · Life areas</p>
-          <h1>{clientName}&apos;s life areas in full</h1>
-          <p className={styles.lead}>
-            Each area runs its own evidence matrix across natal promise,
-            supporting factors, divisional confirmation, measured strength,
-            house support, combinations, timing, and contradictions.
-          </p>
-        </header>
-
+    <>
         <nav className={styles.domainNav} aria-label="Life areas">
           <p className={styles.domainNavLabel}>
             Choose a life area
@@ -332,12 +307,6 @@ export default function LifeAreasClient({
             </>
           )}
         </article>
-
-        <Link href={`/insights?${historyQs}#ultimate`} className={styles.backButtonBottom}>
-          <FiArrowLeft aria-hidden="true" />
-          Back to your reading
-        </Link>
-      </div>
-    </main>
+    </>
   );
 }

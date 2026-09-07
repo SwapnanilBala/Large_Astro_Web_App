@@ -265,30 +265,50 @@ function HouseRoles({
   );
 }
 
+/*
+ * `brief` is what the results page gets: the two instruments and one sentence
+ * of scaffolding. `full` is /insights/house-support, which adds the derivation
+ * and the twelve-house reference.
+ *
+ * A variant rather than two components. The ring, the bars and the band
+ * thresholds are the reading itself -- a second copy would be a second place
+ * for 28.1 to go stale.
+ */
 export default function HouseSupportPanel({
   ashtakavarga,
   houses,
+  variant = "full",
 }: {
   ashtakavarga: AshtakavargaData | null | undefined;
   houses: HousePlacement[] | null | undefined;
+  variant?: "brief" | "full";
 }) {
   const support = computeHouseSupport(ashtakavarga, houses);
   if (!support) return null;
 
   const { ascendant, whole } = support;
+  const isBrief = variant === "brief";
 
   return (
     <div className={styles.panel}>
-      <p className={styles.intro}>
-        Ashtakavarga scores every sign out of a fixed pool of{" "}
-        <code>{SAV_TOTAL_BINDUS}</code> bindus — points of planetary support —
-        and each house inherits the score of the sign on it. Dead average is{" "}
-        <code>337 ÷ 12 = 28.1</code> bindus per house, so a house is read
-        against that number rather than against a maximum. On the left, the
-        first house alone: <code>bindus ÷ 28.1</code>, the support your chart
-        gives the self. On the right, all twelve added back up against the same
-        337 pool, which is where that support actually sits.
-      </p>
+      {isBrief ? (
+        <p className={styles.intro}>
+          Ashtakavarga splits a fixed pool of <code>{SAV_TOTAL_BINDUS}</code>{" "}
+          bindus across the twelve houses. Dead average is <code>28.1</code>, so
+          each house is read against that rather than against a maximum.
+        </p>
+      ) : (
+        <p className={styles.intro}>
+          Ashtakavarga scores every sign out of a fixed pool of{" "}
+          <code>{SAV_TOTAL_BINDUS}</code> bindus — points of planetary support —
+          and each house inherits the score of the sign on it. Dead average is{" "}
+          <code>337 ÷ 12 = 28.1</code> bindus per house, so a house is read
+          against that number rather than against a maximum. On the left, the
+          first house alone: <code>bindus ÷ 28.1</code>, the support your chart
+          gives the self. On the right, all twelve added back up against the same
+          337 pool, which is where that support actually sits.
+        </p>
+      )}
 
       <div className={styles.columns}>
         <section className={styles.card} aria-labelledby="house-support-asc-title">
@@ -386,11 +406,16 @@ export default function HouseSupportPanel({
         </section>
       </div>
 
-      <HouseRoles
-        houses={support.houses}
-        strongestHouse={whole.strongest.house}
-        weakestHouse={whole.weakest.house}
-      />
+      {/* The twelve-house reference is 2,084 of this panel's 3,478 characters.
+          It is a lookup table, not a reading, so the results page links to it
+          instead of printing it under a section that opens by default. */}
+      {!isBrief && (
+        <HouseRoles
+          houses={support.houses}
+          strongestHouse={whole.strongest.house}
+          weakestHouse={whole.weakest.house}
+        />
+      )}
 
       <table className={styles.srOnly}>
         <caption>Bindus and support percentage by house</caption>
