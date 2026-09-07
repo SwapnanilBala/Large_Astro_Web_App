@@ -902,9 +902,20 @@
   margin: 0.42rem 0 0.7rem;
 }
 
+/*
+ * Carries its own bottom margin because it is not in a grid.
+ *
+ * `grid-column` reads like it is a full-width cell of .sectionGrid, but the
+ * markup never nests it in one -- the Seasonal Forecast block is a plain
+ * sibling under .panel and the .sectionGrid rows only begin further down. So
+ * no grid `gap` ever reaches it and it sat flush against the timing windows
+ * below. Every other block directly under .panel spaces itself with 1.5rem,
+ * and this is now one of them.
+ */
 .sectionFull {
   composes: section;
   grid-column: 1 / -1;
+  margin-bottom: 1.5rem;
 }
 
 .sectionIntro {
