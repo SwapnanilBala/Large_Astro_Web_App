@@ -1067,7 +1067,7 @@ export default function InsightsContent({
                   variant="brief"
                 />
               </PanelErrorBoundary>
-              <Link href={houseSupportHref} className={styles.domainOpenLink}>
+              <Link href={houseSupportHref} className={styles.sectionOpenLink}>
                 What each house is responsible for
                 <span aria-hidden="true">&rarr;</span>
               </Link>
@@ -1287,7 +1287,7 @@ export default function InsightsContent({
               <MajorShiftsPanel payload={payload} variant="brief" />
             </PanelErrorBoundary>
           </LazyPanel>
-          <Link href={lifeShiftsHref} className={styles.domainOpenLink}>
+          <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>
             Every chapter, past and ahead
             <span aria-hidden="true">&rarr;</span>
           </Link>

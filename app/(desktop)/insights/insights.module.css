@@ -3132,6 +3132,57 @@
   outline: none;
 }
 
+/*
+ * The handoff at the foot of a section that has a page of its own.
+ *
+ * Timing, the varga atlas and the full reading render theirs through
+ * SectionGateway, whose .openLink is a solid gold button. House support and
+ * the life shifts sit inside a CollapsibleSection instead and were borrowing
+ * .domainOpenLink -- a faint 10% wash built for a tertiary link inside a
+ * domain card. Same job, two treatments, and next to the gold ones the quiet
+ * one read as disabled rather than secondary.
+ *
+ * Deliberately mirrors section-gateway.module.css .openLink; keep the two in
+ * step. Not `composes` from that file: every compose in this tree is local,
+ * and cross-file composition would be a new pattern to maintain here.
+ *
+ * font-family is left to inherit, which is what the gateway button does --
+ * setting var(--font-display) here is what put this button in Cinzel while
+ * its three peers were in the system sans.
+ */
+.sectionOpenLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  /* The section's own padding is 1.25rem, so the space above the button now
+     matches the space below it down to the card's edge. It was 0.25rem, which
+     left the button touching the panel it belongs under. */
+  margin-top: 1.25rem;
+  min-height: 2.8rem;
+  padding: 0.72rem 1rem;
+  border: 1px solid rgba(255, 226, 154, 0.48);
+  border-radius: 10px;
+  color: #10131c;
+  background: linear-gradient(135deg, #e2bc63, #c89b3c 58%, #a67925);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24), 0 0 24px rgba(200, 155, 60, 0.12);
+  font-size: 1rem;
+  font-weight: 800;
+  text-decoration: none;
+  /* No nowrap, unlike the gateway button. "What each house is responsible for"
+     is roughly twice the length of "Open your varga atlas" and would run out
+     of a narrowed section rather than wrap. */
+  transition: transform 180ms ease, filter 180ms ease, box-shadow 180ms ease;
+}
+
+.sectionOpenLink:hover,
+.sectionOpenLink:focus-visible {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.28), 0 0 30px rgba(200, 155, 60, 0.2);
+  outline: none;
+}
+
 .domainSignalBadge {
   display: inline-flex;
   align-items: center;
@@ -4139,6 +4190,12 @@
   .card {
     padding: 1rem;
     border-radius: 12px;
+  }
+
+  /* Follows the card padding directly above, so the space above the handoff
+     button keeps matching the space below it down to the card's edge. */
+  .sectionOpenLink {
+    margin-top: 1rem;
   }
 
   .lahiriPlacidusLayout {
