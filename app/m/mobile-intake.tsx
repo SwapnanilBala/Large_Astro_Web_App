@@ -18,8 +18,7 @@ import {
 } from "@/lib/intake-normalize";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
-import { profileScopedKey } from "@/lib/local-profiles";
-import { useProfile } from "@/lib/profile-context";
+import { localScopedKey } from "@/lib/local-scope";
 import styles from "./mobile.module.css";
 
 /*
@@ -76,7 +75,6 @@ function initialDraft(): ProfileQueryInput {
 export default function MobileIntake() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { profileId } = useProfile();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
@@ -92,10 +90,8 @@ export default function MobileIntake() {
 
   /* Share the desktop draft so switching trees mid-entry does not lose work. */
   useEffect(() => {
-    if (!profileId) return;
-
     try {
-      const stored = localStorage.getItem(profileScopedKey(STORAGE_PREFIX, profileId));
+      const stored = localStorage.getItem(localScopedKey(STORAGE_PREFIX));
       if (!stored) return;
       const parsed = JSON.parse(stored) as {
         draft?: Partial<ProfileQueryInput>;
@@ -108,16 +104,16 @@ export default function MobileIntake() {
     } catch {
       /* A corrupt draft is not worth failing the page over. */
     }
-  }, [profileId]);
+  }, []);
 
   /* Which profile this session has actually written a draft for, so an empty
      draft can tell "nothing typed yet" from "the visitor cleared the form". */
-  const persistedFor = useRef<string | null>(null);
+  /* Whether a draft has been written this session — so clearing an emptied
+     form only happens once there was something to clear. */
+  const persistedFor = useRef(false);
 
   useEffect(() => {
-    if (!profileId) return;
-
-    const key = profileScopedKey(STORAGE_PREFIX, profileId);
+    const key = localScopedKey(STORAGE_PREFIX);
     const hasContent = DRAFT_CONTENT_FIELDS.some((field) => draft[field].trim().length > 0);
 
     /* This runs on mount with the untouched initial draft, before the restore
@@ -126,21 +122,21 @@ export default function MobileIntake() {
        survivable in production only because the restored value is written
        again on the next commit, and not survivable at all under the double
        invoke React runs in development. So an empty draft is only written once
-       this profile has stored something, which is the visitor clearing it. */
-    if (!hasContent && persistedFor.current !== profileId) return;
+       something has actually been stored, which is the visitor clearing it. */
+    if (!hasContent && !persistedFor.current) return;
 
     try {
       if (hasContent) {
         localStorage.setItem(key, JSON.stringify({ draft, unknownTime, coarseTime }));
-        persistedFor.current = profileId;
+        persistedFor.current = true;
       } else {
         localStorage.removeItem(key);
-        persistedFor.current = null;
+        persistedFor.current = false;
       }
     } catch {
       /* Private mode and quota errors are non-fatal here. */
     }
-  }, [coarseTime, draft, profileId, unknownTime]);
+  }, [coarseTime, draft, unknownTime]);
 
   const set = (key: keyof ProfileQueryInput, value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));

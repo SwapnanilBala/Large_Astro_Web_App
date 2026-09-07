@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { useProfile } from "@/lib/profile-context";
 import { recordChartVisit } from "@/lib/chart-history-store";
 
 export type { ChartHistoryEntry } from "@/lib/chart-history-store";
@@ -21,17 +20,16 @@ export default function ChartHistorySaver({
   ascendantSign,
   queryString,
 }: ChartHistorySaverProps) {
-  const { profileId } = useProfile();
 
   useEffect(() => {
-    recordChartVisit(profileId, {
+    recordChartVisit({
       name,
       city,
       birthDate,
       ascendantSign,
       queryString,
     });
-  }, [ascendantSign, birthDate, city, name, profileId, queryString]);
+  }, [ascendantSign, birthDate, city, name, queryString]);
 
   return null;
 }

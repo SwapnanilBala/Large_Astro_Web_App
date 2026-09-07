@@ -1,9 +1,8 @@
 /**
- * Where to send someone after they pick a local profile.
+ * Where to send someone arriving at the app with history behind them.
  *
- * A returning profile with a usable chart goes straight back to engine
- * selection for their most recent chart; anyone else lands on the requested
- * fallback path.
+ * A device with a usable saved chart goes straight back to engine selection for
+ * the most recent one; anyone else lands on the requested fallback path.
  */
 
 import { readChartHistory } from "@/lib/chart-history-store";
@@ -52,8 +51,8 @@ function engineSelectDestination(queryString: string) {
   return `/engine-select?${params.toString()}`;
 }
 
-function getLatestHistoryQuery(profileId?: string | null): string | null {
-  const latest = readChartHistory(profileId ?? null)
+function getLatestHistoryQuery(): string | null {
+  const latest = readChartHistory()
     .filter((entry) => isCompleteChartQuery(entry.queryString))
     .sort((left, right) => {
       const leftTime = left.savedAt ? new Date(left.savedAt).getTime() : 0;
@@ -64,12 +63,9 @@ function getLatestHistoryQuery(profileId?: string | null): string | null {
   return latest?.queryString ?? null;
 }
 
-export function resolveProfileDestination(
-  profileId?: string | null,
-  fallbackPath?: string | null
-) {
+export function resolveLandingDestination(fallbackPath?: string | null) {
   const fallback = normalizeInternalPath(fallbackPath);
-  const queryString = getLatestHistoryQuery(profileId);
+  const queryString = getLatestHistoryQuery();
 
   return queryString ? engineSelectDestination(queryString) : fallback;
 }

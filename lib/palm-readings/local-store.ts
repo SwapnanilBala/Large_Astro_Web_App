@@ -1,5 +1,5 @@
 /**
- * Palm readings persisted on the device, scoped to a local profile.
+ * Palm readings persisted on the device.
  *
  * Replaces the former `/api/palm-readings` CRUD routes. The analysis itself
  * still runs server-side (`/api/palm-reading`); only the saved copy lives here.
@@ -7,12 +7,12 @@
  * Storage note: a raw palm photo data URL runs to several megabytes, and the
  * whole localStorage origin quota is typically 5–10MB. Saved images are
  * therefore downscaled to a display-sized JPEG before they are stored, and the
- * store keeps a bounded number of readings per profile, evicting the oldest
- * when the quota is hit. Line overlays are unaffected because
+ * store keeps a bounded number of readings, evicting the oldest when the quota
+ * is hit. Line overlays are unaffected because
  * `line_coordinates` are normalized 0–1.
  */
 
-import { profileScopedKey } from "@/lib/local-profiles";
+import { ensureLocalScope, localScopedKey } from "@/lib/local-scope";
 import type {
   JyotishContext,
   PalmReadingJSON,
@@ -26,8 +26,8 @@ const PALM_READINGS_PREFIX = "astro_palm_readings";
 const STORED_IMAGE_MAX_EDGE = 720;
 const STORED_IMAGE_QUALITY = 0.82;
 
-/** Hard cap per profile; older readings fall off the end. */
-const MAX_READINGS_PER_PROFILE = 25;
+/** Hard cap for the device; older readings fall off the end. */
+const MAX_READINGS = 25;
 
 export const PALM_READINGS_CHANGED_EVENT = "astro:palm-readings-changed";
 
@@ -40,8 +40,8 @@ export type SavePalmReadingInput = {
   notes?: string | null;
 };
 
-function storageKey(profileId: string) {
-  return profileScopedKey(PALM_READINGS_PREFIX, profileId);
+function storageKey() {
+  return localScopedKey(PALM_READINGS_PREFIX);
 }
 
 function nowIso() {
@@ -61,11 +61,12 @@ function isRecord(value: unknown): value is PalmReadingRecord {
   return typeof candidate.id === "string" && !!candidate.reading;
 }
 
-function readAll(profileId: string): PalmReadingRecord[] {
+function readAll(): PalmReadingRecord[] {
   if (typeof window === "undefined") return [];
+  ensureLocalScope();
 
   try {
-    const raw = window.localStorage.getItem(storageKey(profileId));
+    const raw = window.localStorage.getItem(storageKey());
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
@@ -91,11 +92,12 @@ function notifyChanged() {
  * Returns false only if even a single reading will not fit, which means the
  * image is too large for this browser's storage budget.
  */
-function writeAll(profileId: string, records: PalmReadingRecord[]): boolean {
+function writeAll(records: PalmReadingRecord[]): boolean {
   if (typeof window === "undefined") return false;
+  ensureLocalScope();
 
-  const key = storageKey(profileId);
-  const trimmed = records.slice(0, MAX_READINGS_PER_PROFILE);
+  const key = storageKey();
+  const trimmed = records.slice(0, MAX_READINGS);
 
   for (let attempt = trimmed.length; attempt > 0; attempt--) {
     try {
@@ -148,10 +150,8 @@ async function downscaleDataUrl(dataUrl: string): Promise<string> {
   }
 }
 
-export function listPalmReadings(profileId: string | null): PalmReadingSummary[] {
-  if (!profileId) return [];
-
-  return readAll(profileId).map((record) => ({
+export function listPalmReadings(): PalmReadingSummary[] {
+  return readAll().map((record) => ({
     id: record.id,
     created_at: record.created_at,
     title: record.title,
@@ -169,32 +169,20 @@ export function listPalmReadings(profileId: string | null): PalmReadingSummary[]
   }));
 }
 
-export function getPalmReading(
-  profileId: string | null,
-  id: string
-): PalmReadingRecord | null {
-  if (!profileId) return null;
-  return readAll(profileId).find((record) => record.id === id) ?? null;
+export function getPalmReading(id: string): PalmReadingRecord | null {
+  return readAll().find((record) => record.id === id) ?? null;
 }
 
-export function getPalmReadingsByIds(
-  profileId: string | null,
-  ids: string[]
-): PalmReadingRecord[] {
-  if (!profileId) return [];
-  const all = readAll(profileId);
+export function getPalmReadingsByIds(ids: string[]): PalmReadingRecord[] {
+  const all = readAll();
   return ids
     .map((id) => all.find((record) => record.id === id))
     .filter((record): record is PalmReadingRecord => !!record);
 }
 
 export async function savePalmReading(
-  profileId: string | null,
   input: SavePalmReadingInput
 ): Promise<PalmReadingRecord> {
-  if (!profileId) {
-    throw new Error("Choose a profile before saving readings.");
-  }
   if (!input.image_data_url?.startsWith("data:image/")) {
     throw new Error("A palm image is required to save a reading.");
   }
@@ -205,7 +193,6 @@ export async function savePalmReading(
 
   const record: PalmReadingRecord = {
     id: createId(),
-    profile_id: profileId,
     created_at: nowIso(),
     title,
     image_data_url: storedImage,
@@ -215,7 +202,7 @@ export async function savePalmReading(
     notes,
   };
 
-  const stored = writeAll(profileId, [record, ...readAll(profileId)]);
+  const stored = writeAll([record, ...readAll()]);
   if (!stored) {
     throw new Error(
       "This device is out of storage space for saved readings. Delete an older reading and try again."
@@ -226,13 +213,10 @@ export async function savePalmReading(
 }
 
 export function updatePalmReading(
-  profileId: string | null,
   id: string,
   updates: { title?: string | null; notes?: string | null }
 ): PalmReadingRecord | null {
-  if (!profileId) return null;
-
-  const records = readAll(profileId);
+  const records = readAll();
   let updated: PalmReadingRecord | null = null;
 
   const next = records.map((record) => {
@@ -256,29 +240,24 @@ export function updatePalmReading(
   });
 
   if (!updated) return null;
-  writeAll(profileId, next);
+  writeAll(next);
   return updated;
 }
 
-export function deletePalmReading(profileId: string | null, id: string): boolean {
-  if (!profileId) return false;
-
-  const records = readAll(profileId);
+export function deletePalmReading(id: string): boolean {
+  const records = readAll();
   const next = records.filter((record) => record.id !== id);
   if (next.length === records.length) return false;
 
-  writeAll(profileId, next);
+  writeAll(next);
   return true;
 }
 
 /** Subscribe to palm-reading changes from this tab and from other tabs. */
-export function subscribeToPalmReadings(
-  profileId: string | null,
-  listener: () => void
-): () => void {
+export function subscribeToPalmReadings(listener: () => void): () => void {
   if (typeof window === "undefined") return () => {};
 
-  const scopedKey = profileId ? storageKey(profileId) : null;
+  const scopedKey = storageKey();
   const onStorage = (event: StorageEvent) => {
     if (event.key === null || event.key === scopedKey) {
       listener();

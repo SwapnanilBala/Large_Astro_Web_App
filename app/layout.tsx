@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { ProfileProvider } from "@/lib/profile-context";
 
 /*
  * Root shell — deliberately almost empty.
@@ -11,13 +10,11 @@ import { ProfileProvider } from "@/lib/profile-context";
  * file was the only layout, which is why a phone downloaded 145KB of display
  * webfonts and 22KB gzipped of desktop CSS it never referenced.
  *
- * Only two things are shared, and both are load-bearing on every route:
- *
- * - ProfileProvider. app/m/mobile-intake.tsx calls useProfile, so one instance
- *   here serves both trees. ToastProvider is NOT here — nothing under /m uses
- *   it — and neither is LanguageProvider, which each tree now supplies with its
- *   own English baseline so /m does not ship strings only desktop can render.
- * - The service worker registration, which is device-independent.
+ * One thing is shared, and it is load-bearing on every route: the service
+ * worker registration, which is device-independent. ToastProvider is NOT here
+ * — nothing under /m uses it — and neither is LanguageProvider, which each tree
+ * supplies with its own English baseline so /m does not ship strings only
+ * desktop can render.
  *
  * No <main> and no skip link here either — each tree owns its own landmark so
  * the mobile one is not forced into the desktop page structure.
@@ -94,7 +91,7 @@ export default function RootLayout({
           desktop tree now, and the mobile sheet is a route chunk, so without
           this a handset flashes white before either arrives. */}
       <body style={{ background: "#0A0A0F" }}>
-        <ProfileProvider>{children}</ProfileProvider>
+        {children}
         {process.env.NODE_ENV === "production" && (
           <Script id="sw-register" strategy="afterInteractive">
             {`if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}`}

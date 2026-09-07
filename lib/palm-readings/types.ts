@@ -172,8 +172,6 @@ export type JyotishContext = {
 
 export type PalmReadingRecord = {
   id: string;
-  /** The local device profile this reading belongs to. */
-  profile_id: string;
   created_at: string;
   title: string | null;
   image_data_url: string;

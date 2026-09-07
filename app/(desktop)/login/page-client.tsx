@@ -1,11 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+/**
+ * The account page.
+ *
+ * This was the local profile picker — up to five named slots on the device,
+ * each with its own charts. That is gone: a Google account is the only identity
+ * the app has now, and everything kept on the device sits in one scope shared
+ * by whoever is using this browser.
+ *
+ * The page still carries the storage note and `ChartSyncSettings` underneath.
+ * Signing in is about reaching your charts from a second device; it is not what
+ * decides whether they leave the browser at all, and those two answers being
+ * separate is the thing this page has to keep making obvious.
+ */
+
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Pencil, Plus, Trash2, User, X } from "lucide-react";
-import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
-import { resolveProfileDestination } from "@/lib/profile-redirect";
+import { useAccount } from "@/lib/use-account";
+import { resolveLandingDestination } from "@/lib/landing-redirect";
 import PageTransition from "@/app/components/PageTransition";
 import ChartSyncSettings from "@/app/components/ChartSyncSettings";
 import BackButton from "@/app/components/BackButton";
@@ -14,7 +27,7 @@ import GoogleSignIn from "./GoogleSignIn";
 import ZodiacFloater from "./ZodiacFloater";
 import styles from "./login.module.css";
 
-type ProfilePickerClientProps = {
+type LoginPageClientProps = {
   returnTo?: string;
   skyLine?: string;
   /** False when the server has no Google credentials configured. */
@@ -23,110 +36,44 @@ type ProfilePickerClientProps = {
   signInError?: string;
 };
 
-export default function ProfilePickerClient({
+export default function LoginPageClient({
   returnTo,
   skyLine,
   googleEnabled = false,
   signInError,
-}: ProfilePickerClientProps) {
-  const {
-    profiles,
-    activeProfile,
-    isLoading,
-    maxProfiles,
-    canCreateProfile,
-    createProfile,
-    renameProfile,
-    deleteProfile,
-    switchProfile,
-  } = useProfile();
+}: LoginPageClientProps) {
   const { t } = useTranslation();
+  const { account, status } = useAccount();
   const router = useRouter();
 
-  const [newName, setNewName] = useState("");
-  const [error, setError] = useState("");
-  const [renamingId, setRenamingId] = useState<string | null>(null);
-  const [renameValue, setRenameValue] = useState("");
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [settling, setSettling] = useState(false);
   const [redirecting, setRedirecting] = useState(false);
 
   const destination = returnTo ?? "/";
 
-  useEffect(() => {
-    // A rename or delete elsewhere can invalidate the row being edited.
-    if (renamingId && !profiles.some((profile) => profile.profile_id === renamingId)) {
-      setRenamingId(null);
-    }
-    if (pendingDeleteId && !profiles.some((profile) => profile.profile_id === pendingDeleteId)) {
-      setPendingDeleteId(null);
-    }
-  }, [pendingDeleteId, profiles, renamingId]);
-
-  const goToProfile = async (profileId: string) => {
+  const goOn = async () => {
     setSettling(true);
-    const resolved = resolveProfileDestination(profileId, destination);
+    const resolved = resolveLandingDestination(destination);
     // Brief shimmer choreography before navigating away
     await new Promise((resolve) => setTimeout(resolve, 500));
     setRedirecting(true);
     router.push(resolved);
   };
 
-  const handleUse = async (profileId: string) => {
-    setError("");
-    const result = switchProfile(profileId);
-    if (!result.ok) {
-      setError(result.error ?? t("profiles.switchFailed"));
-      return;
-    }
-    await goToProfile(profileId);
-  };
-
-  const handleCreate = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError("");
-    const result = createProfile(newName);
-    if (!result.ok || !result.profile) {
-      setError(result.error ?? t("profiles.createFailed"));
-      return;
-    }
-    setNewName("");
-    await goToProfile(result.profile.profile_id);
-  };
-
-  const handleRenameSubmit = (event: React.FormEvent, profileId: string) => {
-    event.preventDefault();
-    setError("");
-    const result = renameProfile(profileId, renameValue);
-    if (!result.ok) {
-      setError(result.error ?? t("profiles.renameFailed"));
-      return;
-    }
-    setRenamingId(null);
-    setRenameValue("");
-  };
-
-  const handleDelete = (profileId: string) => {
-    setError("");
-    const result = deleteProfile(profileId);
-    if (!result.ok) {
-      setError(result.error ?? t("profiles.deleteFailed"));
-    }
-    setPendingDeleteId(null);
-  };
-
-  if (isLoading || redirecting) {
+  if (redirecting) {
     return (
       <PageTransition>
         <div className="home-shell" style={{ position: "relative" }}>
           <AuthAmbient />
           <section className={styles.panel} style={{ textAlign: "center" }}>
-            <p className="kicker">{t("profiles.opening")}</p>
+            <p className="kicker">{t("account.opening")}</p>
           </section>
         </div>
       </PageTransition>
     );
   }
+
+  const signedIn = status === "signed-in" && account;
 
   return (
     <PageTransition>
@@ -138,174 +85,59 @@ export default function ProfilePickerClient({
           {settling && <span className={styles.shimmerSweep} aria-hidden="true" />}
           <div className={styles.header}>
             {skyLine && <p className={styles.skyLine}>✦ {skyLine} ✦</p>}
-            <p className="kicker">{t("profiles.kicker")}</p>
-            <h1 className={styles.heading}>{t("profiles.heading")}</h1>
-            <p className={styles.lead}>{t("profiles.lead")}</p>
-          </div>
-
-          <GoogleSignIn
-            enabled={googleEnabled}
-            errorCode={signInError || undefined}
-            returnTo={returnTo}
-          />
-
-          <ul className={styles.profileList}>
-            {profiles.map((profile) => {
-              const isActive = profile.profile_id === activeProfile?.profile_id;
-              const isRenaming = renamingId === profile.profile_id;
-              const isConfirmingDelete = pendingDeleteId === profile.profile_id;
-
-              return (
-                <li
-                  key={profile.profile_id}
-                  className={`${styles.profileRow} ${isActive ? styles.profileRowActive : ""}`}
-                >
-                  {isRenaming ? (
-                    <form
-                      className={styles.renameForm}
-                      onSubmit={(event) => handleRenameSubmit(event, profile.profile_id)}
-                    >
-                      <input
-                        className={styles.renameInput}
-                        value={renameValue}
-                        onChange={(event) => setRenameValue(event.target.value)}
-                        maxLength={40}
-                        aria-label={t("profiles.renameLabel")}
-                        autoFocus
-                      />
-                      <button
-                        type="submit"
-                        className={styles.profileIconBtn}
-                        aria-label={t("profiles.saveName")}
-                      >
-                        <Check size={16} aria-hidden="true" />
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.profileIconBtn}
-                        onClick={() => setRenamingId(null)}
-                        aria-label={t("profiles.cancel")}
-                      >
-                        <X size={16} aria-hidden="true" />
-                      </button>
-                    </form>
-                  ) : (
-                    <>
-                      <button
-                        type="button"
-                        className={styles.profilePick}
-                        onClick={() => void handleUse(profile.profile_id)}
-                      >
-                        <span className={styles.profileAvatar} aria-hidden="true">
-                          {profile.display_name.slice(0, 1).toUpperCase()}
-                        </span>
-                        <span className={styles.profileName}>{profile.display_name}</span>
-                        {isActive && (
-                          <span className={styles.profileMeta}>{t("profiles.active")}</span>
-                        )}
-                      </button>
-
-                      <span className={styles.profileRowActions}>
-                        <button
-                          type="button"
-                          className={styles.profileIconBtn}
-                          onClick={() => {
-                            setRenamingId(profile.profile_id);
-                            setRenameValue(profile.display_name);
-                            setPendingDeleteId(null);
-                          }}
-                          aria-label={`${t("profiles.rename")} ${profile.display_name}`}
-                        >
-                          <Pencil size={16} aria-hidden="true" />
-                        </button>
-                        {profiles.length > 1 &&
-                          (isConfirmingDelete ? (
-                            <>
-                              <button
-                                type="button"
-                                className={`${styles.profileIconBtn} ${styles.profileIconBtnDanger}`}
-                                onClick={() => handleDelete(profile.profile_id)}
-                                aria-label={`${t("profiles.confirmDelete")} ${profile.display_name}`}
-                              >
-                                <Check size={16} aria-hidden="true" />
-                              </button>
-                              <button
-                                type="button"
-                                className={styles.profileIconBtn}
-                                onClick={() => setPendingDeleteId(null)}
-                                aria-label={t("profiles.cancel")}
-                              >
-                                <X size={16} aria-hidden="true" />
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              type="button"
-                              className={styles.profileIconBtn}
-                              onClick={() => {
-                                setPendingDeleteId(profile.profile_id);
-                                setRenamingId(null);
-                              }}
-                              aria-label={`${t("profiles.delete")} ${profile.display_name}`}
-                            >
-                              <Trash2 size={16} aria-hidden="true" />
-                            </button>
-                          ))}
-                      </span>
-                    </>
-                  )}
-
-                  {isConfirmingDelete && !isRenaming && (
-                    <p className={styles.profileWarning}>{t("profiles.deleteWarning")}</p>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-
-          {error && <p className={styles.error}>{error}</p>}
-
-          <div className={styles.divider}>
-            <span className={styles.dividerLine} />
-            <span className={styles.dividerText}>{t("profiles.addDivider")}</span>
-            <span className={styles.dividerLine} />
-          </div>
-
-          {canCreateProfile ? (
-            <form className={styles.form} onSubmit={handleCreate}>
-              <div className={styles.fieldGroup}>
-                <div className={styles.fieldWrap}>
-                  <User className={styles.fieldIcon} size={18} aria-hidden="true" />
-                  <input
-                    id="profile-name"
-                    type="text"
-                    placeholder=" "
-                    value={newName}
-                    onChange={(event) => setNewName(event.target.value)}
-                    className={styles.fieldInput}
-                    maxLength={40}
-                    required
-                  />
-                  <label htmlFor="profile-name" className={styles.floatingLabel}>
-                    {t("profiles.nameLabel")}
-                  </label>
-                </div>
-              </div>
-
-              <button type="submit" className={styles.submitBtn}>
-                <Plus size={16} aria-hidden="true" style={{ marginInlineEnd: 8 }} />
-                {t("profiles.create")}
-              </button>
-            </form>
-          ) : (
-            <p className={styles.profileCount}>
-              {t("profiles.full").replace("{max}", String(maxProfiles))}
+            <p className="kicker">{t("account.kicker")}</p>
+            <h1 className={styles.heading}>
+              {signedIn ? t("account.headingSignedIn") : t("account.heading")}
+            </h1>
+            <p className={styles.lead}>
+              {signedIn ? t("account.leadSignedIn") : t("account.lead")}
             </p>
+          </div>
+
+          {status === "loading" && <p className={styles.switchText}>{t("account.checking")}</p>}
+
+          {signedIn && (
+            <>
+              <p className={styles.accountIdentity}>
+                <span className={styles.accountAvatar} aria-hidden="true">
+                  {(account.displayName ?? account.email).slice(0, 1).toUpperCase()}
+                </span>
+                <span className={styles.accountName}>
+                  {account.displayName ?? account.email}
+                </span>
+                {account.displayName && (
+                  <span className={styles.accountEmail}>{account.email}</span>
+                )}
+              </p>
+
+              <button type="button" className={styles.submitBtn} onClick={() => void goOn()}>
+                {t("account.continue")}
+              </button>
+            </>
           )}
 
-          <p className={styles.switchText}>
-            {t("profiles.storageNote").replace("{max}", String(maxProfiles))}
-          </p>
+          {status === "signed-out" && (
+            <GoogleSignIn
+              enabled={googleEnabled}
+              errorCode={signInError || undefined}
+              returnTo={returnTo}
+            />
+          )}
+
+          {/* Google is the only way in, so a deployment without credentials has
+              no sign-in at all. GoogleSignIn renders nothing in that state —
+              saying so beats an unexplained gap where the button belongs. */}
+          {status === "signed-out" && !googleEnabled && !signInError && (
+            <p className={styles.error}>{t("signIn.error_not_configured")}</p>
+          )}
+
+          {/* Not the same as signed out, and rendering it as such invites
+              someone to sign in against a store that cannot answer. */}
+          {status === "unavailable" && (
+            <p className={styles.error}>{t("account.unavailable")}</p>
+          )}
+
+          <p className={styles.switchText}>{t("account.storageNote")}</p>
 
           {/* Sits under the storage note on purpose: that paragraph explains
               where data lives, and this is the control over the one part of it

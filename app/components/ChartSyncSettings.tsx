@@ -21,7 +21,6 @@
 
 import { useEffect, useState } from "react";
 
-import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { backfillCharts } from "@/lib/chart-sync-backfill";
 import {
@@ -37,7 +36,6 @@ type Result = { tone: "ok" | "error"; message: string } | null;
 
 export default function ChartSyncSettings() {
   const { t } = useTranslation();
-  const { profileId } = useProfile();
   const [state, setState] = useState<ChartSyncState | null>(null);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result>(null);
@@ -103,7 +101,7 @@ export default function ChartSyncSettings() {
     /* Turning it back on here means the charts already on this device, not
        just the next one opened. /insights back-fills on its own grant; this
        is the same job from the page that has no chart on screen. */
-    const outcome = await backfillCharts(profileId, { prompt, captureSource: "settings" });
+    const outcome = await backfillCharts({ prompt, captureSource: "settings" });
 
     setBusy(false);
     setResult({

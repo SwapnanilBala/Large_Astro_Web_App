@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useProfile } from "@/lib/profile-context";
 import {
   deletePalmReading,
   listPalmReadings,
@@ -43,8 +42,6 @@ function truncate(text: string, max = 180): string {
 export default function PalmHistoryClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isLoading: profileLoading, profileId } = useProfile();
-
   const compareWithId = searchParams?.get("compareWith") ?? null;
 
   const [readings, setReadings] = useState<PalmReadingSummary[] | null>(null);
@@ -57,28 +54,19 @@ export default function PalmHistoryClient() {
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // ── Load this profile's readings ──
+  // ── Load the saved readings ──
   useEffect(() => {
-    if (profileLoading) return;
-
-    // Clear first so a profile switch cannot show the previous archive.
-    setReadings(null);
     setSelected(compareWithId ? [compareWithId] : []);
 
-    if (!profileId) {
-      setLoading(false);
-      return;
-    }
-
     const load = () => {
-      setReadings(listPalmReadings(profileId));
+      setReadings(listPalmReadings());
       setLoadError(null);
       setLoading(false);
     };
 
     load();
-    return subscribeToPalmReadings(profileId, load);
-  }, [compareWithId, profileId, profileLoading]);
+    return subscribeToPalmReadings(load);
+  }, [compareWithId]);
 
   // ── Selection handling ──
   const toggleSelected = useCallback((id: string) => {
@@ -110,10 +98,9 @@ export default function PalmHistoryClient() {
   // ── Delete handling ──
   const confirmDelete = useCallback(
     (id: string) => {
-      if (!profileId) return;
       setDeletingId(id);
       try {
-        if (!deletePalmReading(profileId, id)) {
+        if (!deletePalmReading(id)) {
           throw new Error("Failed to delete reading.");
         }
         setReadings((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
@@ -127,7 +114,7 @@ export default function PalmHistoryClient() {
         setPendingDeleteId(null);
       }
     },
-    [profileId],
+    [],
   );
 
   const total = readings?.length ?? 0;
@@ -138,17 +125,6 @@ export default function PalmHistoryClient() {
     if (total === 1) return "1 saved reading.";
     return `${total} saved readings.`;
   }, [loading, total]);
-
-  if (profileLoading) {
-    return (
-      <section className="palm-history-shell">
-        <header className="palm-history-header">
-          <h1>Your Palm Readings</h1>
-          <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
-        </header>
-      </section>
-    );
-  }
 
   return (
     <section className="palm-history-shell">

@@ -15,15 +15,13 @@
  * they read it in a language other than English.
  */
 
-import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { useChartSync, type ChartToSync } from "@/lib/use-chart-sync";
 import styles from "./ChartSyncPrompt.module.css";
 
 export default function ChartSyncPrompt({ chart }: { chart: ChartToSync | null }) {
   const { t } = useTranslation();
-  const { profileId } = useProfile();
-  const { phase, grant, decline, dismissNudge } = useChartSync(chart, profileId);
+  const { phase, grant, decline, dismissNudge } = useChartSync(chart);
 
   if (phase === "idle") return null;
 

@@ -86,7 +86,7 @@ import type {
   LifeDomainInsightsResponse,
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
-import { useProfile } from "@/lib/profile-context";
+import { localScopedKey } from "@/lib/local-scope";
 import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
 
@@ -728,7 +728,6 @@ export default function InsightsContent({
 }: InsightsContentProps) {
   const { t } = useTranslation();
   const { pushToast } = useToast();
-  const { profileId } = useProfile();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
   const [isRouting, startRouting] = useTransition();
@@ -768,7 +767,7 @@ export default function InsightsContent({
   // Profile-scoped: the query string carries the subject's name and birth
   // details, so an unscoped key would leave one profile's charts listed in
   // storage for the next person on the device.
-  const sectionStateScope = `astro_insights_section_state:${profileId ?? "none"}:${historyQs}`;
+  const sectionStateScope = `${localScopedKey("astro_insights_section_state")}:${historyQs}`;
   const initialDomainInsights = payload.chart.life_domain_insights ?? [];
   const [domainInsights, setDomainInsights] = useState<LifeDomainInsight[]>(
     initialDomainInsights

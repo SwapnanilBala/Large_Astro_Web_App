@@ -1,20 +1,15 @@
 "use client";
 
-import { useState } from "react";
 import { useTranslation } from "@/lib/i18n-context";
+import { useGoogleSignIn } from "@/lib/use-google-signin";
 import styles from "./login.module.css";
 
 /**
- * The Google sign-in button.
+ * The Google sign-in button, desktop rendering.
  *
- * Reaches the API rather than linking straight to Google, because the server
- * has to mint the state, PKCE verifier and nonce and set them as httpOnly
- * cookies first. A plain `<a href>` to accounts.google.com would skip all
- * three and there would be nothing to validate on the way back.
- *
- * A form POST, so it also works with JavaScript disabled up to the point where
- * the redirect happens, and so the request cannot be triggered by a third-party
- * page embedding an image.
+ * The handshake itself lives in `useGoogleSignIn`, shared with the handset
+ * button — this file owns the desktop chrome and nothing else. The request is
+ * a POST so it cannot be triggered by a third-party page embedding an image.
  */
 
 /** Google's mark, per their branding requirements for sign-in buttons. */
@@ -62,45 +57,15 @@ const KNOWN_ERRORS = new Set([
 
 export default function GoogleSignIn({ enabled, errorCode, returnTo }: GoogleSignInProps) {
   const { t } = useTranslation();
-  const [busy, setBusy] = useState(false);
-  const [failure, setFailure] = useState<string | null>(null);
+  const { busy, failure, start } = useGoogleSignIn(returnTo);
 
+  /* An error bounced back from the callback outranks one raised here: it
+     describes a handshake that actually reached Google. */
   const message = errorCode
     ? t(`signIn.error_${KNOWN_ERRORS.has(errorCode) ? errorCode : "unknown"}`)
-    : failure;
-
-  const start = async () => {
-    setBusy(true);
-    setFailure(null);
-
-    try {
-      const query = returnTo ? `?returnTo=${encodeURIComponent(returnTo)}` : "";
-      const response = await fetch(`/api/auth/google/start${query}`, {
-        method: "POST",
-        headers: { Accept: "application/json" },
-      });
-
-      if (!response.ok) {
-        setFailure(t("signIn.error_not_configured"));
-        setBusy(false);
-        return;
-      }
-
-      const { authorizeUrl } = (await response.json()) as { authorizeUrl?: string };
-      if (!authorizeUrl) {
-        setFailure(t("signIn.error_signin_failed"));
-        setBusy(false);
-        return;
-      }
-
-      /* replace, not assign: leaving this page in history means Back lands on
-         a stale handshake whose cookies have already been spent. */
-      window.location.replace(authorizeUrl);
-    } catch {
-      setFailure(t("signIn.error_signin_failed"));
-      setBusy(false);
-    }
-  };
+    : failure
+      ? t(`signIn.error_${failure}`)
+      : null;
 
   if (!enabled && !message) return null;
 
@@ -125,12 +90,6 @@ export default function GoogleSignIn({ enabled, errorCode, returnTo }: GoogleSig
           </button>
 
           <p className={styles.googleNote}>{t("signIn.note")}</p>
-
-          <div className={styles.divider}>
-            <span className={styles.dividerLine} />
-            <span className={styles.dividerText}>{t("signIn.divider")}</span>
-            <span className={styles.dividerLine} />
-          </div>
         </>
       )}
     </>

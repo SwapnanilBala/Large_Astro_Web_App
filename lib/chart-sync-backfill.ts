@@ -8,10 +8,11 @@
  * hydration, because a visitor who signs in on a second device and finds one
  * chart there has been told their charts follow them and then shown otherwise.
  *
- * Scoped to one local profile, because that is what a chart list is. The
- * server stores per workspace and does not care which profile a chart was
- * filed under; sending another profile's charts would push one person's birth
- * details under a grant the other person gave.
+ * Sends what is in this browser, which is what the grant was given over. Data
+ * still sitting under the retired per-profile keys is deliberately not swept
+ * up: the migration adopts the one profile that was active, and anything it
+ * left behind may be another person's birth details on a shared browser —
+ * pushing those would be one person's data under the other's grant.
  *
  * Sequential on purpose. Twenty entries is the ceiling
  * (`MAX_ENTRIES` in chart-history-store), it runs once per visitor, and a
@@ -51,17 +52,15 @@ export type BackfillOptions = {
 const CONSECUTIVE_FAILURE_LIMIT = 2;
 
 export async function backfillCharts(
-  profileId: string | null,
   consent: BackfillConsent,
   options: BackfillOptions = {},
 ): Promise<BackfillResult> {
   const empty: BackfillResult = { attempted: 0, stored: 0, failed: 0 };
-  if (!profileId) return empty;
 
   const alreadyPushed = options.alreadyPushed ?? new Set<string>();
   const isCancelled = options.isCancelled ?? (() => false);
 
-  const pending = readChartHistory(profileId).filter(
+  const pending = readChartHistory().filter(
     (entry) => entry.queryString && !alreadyPushed.has(entry.queryString),
   );
 
