@@ -250,9 +250,19 @@
   backdrop-filter: blur(12px);
 }
 
+/*
+ * Carries its own bottom margin because it is not in the grid.
+ *
+ * `grid-column` reads like it is a full-width cell of .sectionGrid, and it
+ * would be, but the markup renders it as the next sibling *after* that grid --
+ * so the grid's 1.25rem `gap` never reaches it and it sat flush against the
+ * Gemstone Guidance card below. Every other block directly under .panel spaces
+ * itself with the same 1.25rem, and this is now one of them.
+ */
 .sectionFull {
   composes: section;
   grid-column: 1 / -1;
+  margin-bottom: 1.25rem;
 }
 
 .sectionTitle {
