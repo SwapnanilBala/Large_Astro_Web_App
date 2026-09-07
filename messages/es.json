@@ -3,8 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "Mi Carta",
     "menu": "Menú",
-    "switchProfile": "Cambiar de perfil",
-    "noProfile": "Sin perfil",
     "signOut": "Cerrar sesión"
   },
   "home": {
@@ -423,28 +421,5 @@
     "jupiter": "Jupiter",
     "saturn": "Saturno"
   },
-  "bottomNav": {},
-  "profiles": {
-    "kicker": "Este dispositivo",
-    "heading": "Elige un perfil",
-    "active": "Activo",
-    "opening": "Abriendo…",
-    "addDivider": "o añade a alguien",
-    "nameLabel": "Nombre del perfil",
-    "create": "Crear perfil",
-    "manage": "Administrar perfil",
-    "rename": "Renombrar",
-    "renameLabel": "Nuevo nombre del perfil",
-    "saveName": "Guardar nombre",
-    "cancel": "Cancelar",
-    "delete": "Eliminar",
-    "confirmDelete": "Confirmar eliminación",
-    "deleteWarning": "Esto borra todas las cartas y lecturas guardadas en este perfil.",
-    "full": "Este dispositivo ya tiene los {max} perfiles. Elimina uno para añadir otro.",
-    "storageNote": "Hasta {max} perfiles por dispositivo. Todo se guarda solo en este navegador.",
-    "switchFailed": "No se pudo cambiar de perfil.",
-    "createFailed": "No se pudo crear el perfil.",
-    "renameFailed": "No se pudo renombrar el perfil.",
-    "deleteFailed": "No se pudo eliminar el perfil."
-  }
+  "bottomNav": {}
 }

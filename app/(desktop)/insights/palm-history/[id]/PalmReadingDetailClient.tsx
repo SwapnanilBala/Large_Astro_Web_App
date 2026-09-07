@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
-import { useProfile } from "@/lib/profile-context";
 import { getPalmReading, updatePalmReading } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import type {
@@ -97,8 +96,6 @@ type Props = { id: string };
 
 export default function PalmReadingDetailClient({ id }: Props) {
   const router = useRouter();
-  const { isLoading: profileLoading, profileId } = useProfile();
-
   const [record, setRecord] = useState<PalmReadingRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -114,19 +111,11 @@ export default function PalmReadingDetailClient({ id }: Props) {
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
-  // ── Load reading from this profile's local archive ──
+  // ── Load the reading from the local archive ──
   useEffect(() => {
-    if (profileLoading) return;
-
-    setRecord(null);
     setError(null);
 
-    if (!profileId) {
-      setLoading(false);
-      return;
-    }
-
-    const found = getPalmReading(profileId, id);
+    const found = getPalmReading(id);
     if (!found) {
       setError("Reading not found.");
     } else {
@@ -135,7 +124,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       setNotesDraft(found.notes ?? "");
     }
     setLoading(false);
-  }, [id, profileId, profileLoading]);
+  }, [id]);
 
   useEffect(() => {
     if (editingTitle) {
@@ -150,12 +139,12 @@ export default function PalmReadingDetailClient({ id }: Props) {
       patch: { title?: string | null; notes?: string | null },
       kind: "title" | "notes",
     ) => {
-      if (!profileId || !record) return;
+      if (!record) return;
       const setState =
         kind === "title" ? setTitleSaveState : setNotesSaveState;
       setState("saving");
       try {
-        const updated = updatePalmReading(profileId, record.id, patch);
+        const updated = updatePalmReading(record.id, patch);
         if (!updated) {
           throw new Error(`Failed to save ${kind}.`);
         }
@@ -167,7 +156,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         setState("error");
       }
     },
-    [profileId, record],
+    [record],
   );
 
   const onTitleBlur = useCallback(() => {
@@ -200,14 +189,6 @@ export default function PalmReadingDetailClient({ id }: Props) {
       ),
     [lineCoordsObj],
   );
-
-  if (profileLoading) {
-    return (
-      <section className="palm-history-shell">
-        <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
-      </section>
-    );
-  }
 
   if (loading) {
     return (

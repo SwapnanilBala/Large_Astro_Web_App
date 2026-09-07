@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
-import { useProfile } from "@/lib/profile-context";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "./PalmAnnotation";
 
@@ -209,8 +208,6 @@ type PalmReadingPanelProps = {
 };
 
 export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelProps = {}) {
-  const { profileId } = useProfile();
-
   /* ── state ── */
   const [phase, setPhase] = useState<Phase>("idle");
   const [imageData, setImageData] = useState<string | null>(null);
@@ -592,17 +589,12 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const saveReading = async () => {
     if (!reading || !imagePreview) return;
     if (saveState === "saving" || saveState === "saved") return;
-    if (!profileId) {
-      setSaveError("Choose a profile before saving readings.");
-      setSaveState("error");
-      return;
-    }
     setSaveState("saving");
     setSaveError(null);
     try {
       // The store downscales the image before writing — a full-resolution palm
       // photo would exhaust the browser's storage quota on its own.
-      await savePalmReading(profileId, {
+      await savePalmReading({
         image_data_url: imagePreview,
         reading,
         jyotish_context: jyotishContext ?? null,

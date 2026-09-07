@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useProfile } from "@/lib/profile-context";
 import { getPalmReadingsByIds } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import { computeReadingDiff, type ComputedDiff } from "@/lib/palm-readings/diff";
@@ -48,8 +47,6 @@ type CompareResponse = {
 type Props = { ids: string };
 
 export default function PalmCompareClient({ ids }: Props) {
-  const { isLoading: profileLoading, profileId } = useProfile();
-
   const parsedIds = useMemo(() => {
     return ids
       .split(",")
@@ -66,10 +63,8 @@ export default function PalmCompareClient({ ids }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Load both readings from this profile's local archive ──
+  // ── Load both readings from the local archive ──
   useEffect(() => {
-    if (profileLoading) return;
-
     setData(null);
 
     if (!idsValid) {
@@ -78,31 +73,17 @@ export default function PalmCompareClient({ ids }: Props) {
       return;
     }
 
-    if (!profileId) {
-      setLoading(false);
-      setError("Choose a profile to compare its readings.");
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
-    const [a, b] = getPalmReadingsByIds(profileId, [parsedIds[0], parsedIds[1]]);
+    const [a, b] = getPalmReadingsByIds([parsedIds[0], parsedIds[1]]);
     if (!a || !b) {
       setError("One or both readings could not be found.");
     } else {
       setData({ a, b, diff: computeReadingDiff(a, b) });
     }
     setLoading(false);
-  }, [idsValid, parsedIds, profileId, profileLoading]);
-
-  if (profileLoading) {
-    return (
-      <section className="palm-history-shell">
-        <p className="palm-history-subtitle">Opening this device&apos;s archive…</p>
-      </section>
-    );
-  }
+  }, [idsValid, parsedIds]);
 
   if (!idsValid) {
     return (

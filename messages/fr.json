@@ -3,8 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "Ma Carte",
     "menu": "Menu",
-    "switchProfile": "Changer de profil",
-    "noProfile": "Aucun profil",
     "signOut": "Se déconnecter"
   },
   "home": {
@@ -423,28 +421,5 @@
     "jupiter": "Jupiter",
     "saturn": "Saturne"
   },
-  "bottomNav": {},
-  "profiles": {
-    "kicker": "Cet appareil",
-    "heading": "Choisissez un profil",
-    "active": "Actif",
-    "opening": "Ouverture…",
-    "addDivider": "ou ajoutez quelqu'un",
-    "nameLabel": "Nom du profil",
-    "create": "Créer un profil",
-    "manage": "Gérer le profil",
-    "rename": "Renommer",
-    "renameLabel": "Nouveau nom du profil",
-    "saveName": "Enregistrer le nom",
-    "cancel": "Annuler",
-    "delete": "Supprimer",
-    "confirmDelete": "Confirmer la suppression",
-    "deleteWarning": "Cela efface tous les thèmes et lectures enregistrés sous ce profil.",
-    "full": "Cet appareil contient déjà {max} profils. Supprimez-en un pour en ajouter un autre.",
-    "storageNote": "Jusqu'à {max} profils par appareil. Tout est stocké uniquement dans ce navigateur.",
-    "switchFailed": "Impossible de changer de profil.",
-    "createFailed": "Impossible de créer le profil.",
-    "renameFailed": "Impossible de renommer le profil.",
-    "deleteFailed": "Impossible de supprimer le profil."
-  }
+  "bottomNav": {}
 }

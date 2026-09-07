@@ -18,7 +18,6 @@
 
 import { useEffect } from "react";
 
-import { useProfile } from "@/lib/profile-context";
 import { useTranslation } from "@/lib/i18n-context";
 import { recordChartVisit } from "@/lib/chart-history-store";
 import { useChartSync, type ChartToSync } from "@/lib/use-chart-sync";
@@ -44,25 +43,24 @@ export default function MobileChartSync({
   sunSign,
   moonSign,
 }: Props) {
-  const { profileId } = useProfile();
   const { t } = useTranslation();
 
   useEffect(() => {
     if (!historyQs) return;
-    recordChartVisit(profileId, {
+    recordChartVisit({
       name,
       city,
       birthDate,
       ascendantSign,
       queryString: historyQs,
     });
-  }, [ascendantSign, birthDate, city, historyQs, name, profileId]);
+  }, [ascendantSign, birthDate, city, historyQs, name]);
 
   const chart: ChartToSync | null = historyQs
     ? { queryString: historyQs, ascendantSign, sunSign, moonSign }
     : null;
 
-  const { phase, grant, decline, dismissNudge } = useChartSync(chart, profileId);
+  const { phase, grant, decline, dismissNudge } = useChartSync(chart);
 
   if (phase === "idle") return null;
 

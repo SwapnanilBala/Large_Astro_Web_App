@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════
    SIGN IN — Premium Glassmorphism
    ═══════════════════════════════════════════════ */
-
 .panel {
   width: min(520px, calc(100% - 2rem));
   border-radius: 24px;
@@ -57,18 +56,19 @@
 }
 
 @media (hover: hover) {
-  .panel:hover {
+.panel:hover {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
   }
 
-  .panel:hover::before {
+.panel:hover::before {
     background: linear-gradient(
       135deg,
       rgba(200, 155, 60, 0.65),
       rgba(42, 139, 126, 0.42),
       rgba(200, 155, 60, 0.18)
     );
-  }}
+  }
+}
 
 /* ── Header Section ── */
 .header {
@@ -128,13 +128,15 @@
   100% { background-position: 150% 0; opacity: 0; }}
 
 @media (prefers-reduced-motion: reduce) {
-  .panelSettling,
-  .shimmerSweep {
+.panelSettling,
+.shimmerSweep {
     animation: none !important;
   }
-  .shimmerSweep {
+
+.shimmerSweep {
     display: none;
-  }}
+  }
+}
 
 .heading {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
@@ -164,9 +166,10 @@
 }
 
 @media (hover: hover) {
-  .panel:hover .heading {
+.panel:hover .heading {
     animation: authHeadingShimmer 6s ease-in-out infinite;
-  }}
+  }
+}
 
 @keyframes authHeadingShimmer {
   0%   { background-position: 0% 50%; }
@@ -179,99 +182,6 @@
   margin: 0.8rem 0 0;
   line-height: 1.65;
 }
-
-/* ── Form ── */
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: clamp(1.4rem, 3vw, 2rem);
-}
-
-/* ── Field Group (label + input) ── */
-.fieldGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-}
-
-
-.fieldInput {
-  width: 100%;
-  padding: 18px 16px 14px 44px;
-  border-radius: 14px;
-  border: 1px solid var(--line-soft);
-  background: var(--surface-soft);
-  color: var(--ink-main);
-  font-size: 1.28rem;
-  font-family: var(--font-body), 'Inter', sans-serif;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  outline: none;
-}
-
-.fieldInput::placeholder {
-  color: transparent;
-}
-
-.fieldInput:focus {
-  border-color: rgba(200, 155, 60, 0.60);
-  box-shadow:
-    0 0 0 2px rgba(200, 155, 60, 0.18),
-    0 0 0 5px rgba(42, 139, 126, 0.10);
-  background: var(--surface);
-}
-
-
-/* ── Floating Label Field ── */
-.fieldWrap {
-  position: relative;
-  display: block;
-}
-
-.fieldIcon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: rgba(200, 155, 60, 0.7);
-  pointer-events: none;
-  transition: color 0.2s ease, opacity 0.2s ease;
-  z-index: 2;
-}
-
-.fieldWrap:focus-within .fieldIcon {
-  color: rgba(200, 155, 60, 1);
-}
-
-.floatingLabel {
-  position: absolute;
-  left: 40px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--ink-soft);
-  opacity: 0.79;
-  pointer-events: none;
-  background: transparent;
-  padding: 0 6px;
-  transition: top 0.18s ease, font-size 0.18s ease, color 0.18s ease, opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
-  z-index: 2;
-}
-
-.fieldWrap:focus-within .floatingLabel,
-.fieldInput:not(:placeholder-shown) + .floatingLabel {
-  top: 0;
-  transform: translateY(-50%) scale(0.92);
-  left: 32px;
-  font-size: 0.82rem;
-  color: rgba(200, 155, 60, 1);
-  opacity: 1;
-  background: var(--bg-deep);
-}
-
 
 /* ── Error ── */
 .error {
@@ -358,40 +268,6 @@
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }}
 
-/* ── Divider ── */
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin: clamp(1.4rem, 3vw, 2rem) 0;
-}
-
-.dividerLine {
-  flex: 1;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--line-soft), transparent);
-}
-
-.dividerText {
-  /* Hide the inner "or" text and replace it with a constellation glyph
-     rendered via ::before, so the JSX stays untouched. */
-  font-size: 0;
-  color: transparent;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-}
-
-.dividerText::before {
-  content: "\2022 \00B7 \2022"; /* • · • */
-  font-size: 1.05rem;
-  letter-spacing: 0.4em;
-  color: rgba(200, 155, 60, 0.6);
-  font-weight: 600;
-  line-height: 1;
-}
-
-
 /* ── Switch Text ── */
 .switchText {
   margin: 0;
@@ -405,126 +281,58 @@
   color: var(--ink-soft);
 }
 
-.switchLink {
-  color: #C89B3C;
-  font-weight: 600;
-  text-decoration: none;
-  transition: color 0.2s ease, opacity 0.2s ease;
-}
-
-.switchLink:hover {
-  color: #d4aa50;
-  opacity: 0.9;
-}
-
 /* ── Mobile ── */
 @media (max-width: 768px) {
-  .panel {
+.panel {
     max-width: 100%;
     margin: 1rem;
     padding: clamp(1.5rem, 4vw, 2.2rem);
     border-radius: 20px;
   }
 
-  .heading {
+.heading {
     font-size: clamp(1.75rem, 4.5vw, 2.2rem);
   }
-
-  .form {
-    gap: 1.2rem;
-  }}
+}
 
 @media (max-width: 480px) {
-  .panel {
+.panel {
     margin: 0.5rem;
     padding: 1.2rem;
     border-radius: 16px;
   }
 
-  .heading {
+.heading {
     font-size: 1.85rem;
   }
 
-  .divider {
-    margin: 1.7rem 0;
-  }
-
-  .fieldInput {
-    padding: 16px 14px 12px 42px;
-    border-radius: 12px;
-  }
-
-
-  .fieldIcon {
-    left: 12px;
-  }
-
-  .floatingLabel {
-    left: 38px;
-  }
-
-  .fieldWrap:focus-within .floatingLabel,
-  .fieldInput:not(:placeholder-shown) + .floatingLabel {
-    left: 30px;
-  }
-
-  .submitBtn {
+.submitBtn {
     padding: 13px 20px;
     border-radius: 12px;
-  }}
+  }
+}
+
 /* ═══════════════════════════════════════════════
-   PROFILE PICKER — local device profiles
+   SIGNED-IN IDENTITY
    ═══════════════════════════════════════════════ */
 
-.profileList {
-  list-style: none;
-  margin: 0 0 0.4rem;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.7rem;
-}
-
-.profileRow {
+/* A <p>, so the avatar, name and address are one line of text to a screen
+   reader rather than three unrelated fragments. */
+.accountIdentity {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
   flex-wrap: wrap;
-  padding: 0.55rem 0.7rem;
+  gap: 0.6rem;
+  margin: 0 0 1.1rem;
+  padding: 0.9rem 1rem;
   border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  transition: border-color 0.2s ease, background 0.2s ease;
+  border: 1px solid rgba(200, 155, 60, 0.22);
+  background: rgba(200, 155, 60, 0.07);
+  text-align: center;
 }
 
-.profileRow:hover {
-  border-color: rgba(200, 155, 60, 0.34);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-.profileRowActive {
-  border-color: rgba(200, 155, 60, 0.5);
-  background:
-    linear-gradient(180deg, rgba(200, 155, 60, 0.12), rgba(200, 155, 60, 0.03)),
-    rgba(255, 255, 255, 0.05);
-}
-
-.profilePick {
-  flex: 1 1 auto;
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  padding: 0.35rem 0.15rem;
-  border: none;
-  background: transparent;
-  color: var(--ink-main);
-  cursor: pointer;
-  text-align: start;
-  font: inherit;
-}
-
-.profileAvatar {
+.accountAvatar {
   flex: 0 0 auto;
   display: inline-flex;
   align-items: center;
@@ -541,8 +349,7 @@
   line-height: 1;
 }
 
-.profileName {
-  flex: 1 1 auto;
+.accountName {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -552,104 +359,24 @@
   font-weight: 600;
 }
 
-.profileMeta {
-  flex: 0 0 auto;
-  padding: 0.15rem 0.55rem;
-  border-radius: 999px;
-  border: 1px solid rgba(200, 155, 60, 0.4);
-  color: #d4aa50;
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.profileRowActions {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-.profileIconBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 10px;
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--ink-soft);
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
-}
-
-.profileIconBtn:hover {
-  color: #d4aa50;
-  background: rgba(200, 155, 60, 0.1);
-}
-
-.profileIconBtn:focus-visible {
-  outline: none;
-  border-color: rgba(200, 155, 60, 0.55);
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.15);
-}
-
-.profileIconBtnDanger:hover {
-  color: #ff8f7a;
-  background: rgba(255, 143, 122, 0.12);
-}
-
-.profileWarning {
+/* Breaks to its own line: an address is long enough to push the name out of
+   an ellipsis on a narrow panel, and the name is the part being identified. */
+.accountEmail {
   flex: 1 0 100%;
-  margin: 0.2rem 0 0;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
-}
-
-.profileCount {
-  margin: 0 0 0.6rem;
-  text-align: center;
-  font-size: 1.05rem;
+  overflow-wrap: anywhere;
+  font-size: 1rem;
   color: var(--ink-soft);
 }
 
 @media (max-width: 480px) {
-  .profileName {
+.accountName {
     font-size: 1.1rem;
   }
 
-  .profileAvatar {
+.accountAvatar {
     width: 34px;
     height: 34px;
   }
-}
-
-.renameForm {
-  flex: 1 1 auto;
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.renameInput {
-  flex: 1 1 auto;
-  min-width: 0;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(200, 155, 60, 0.42);
-  background: rgba(0, 0, 0, 0.22);
-  color: var(--ink-main);
-  font-family: inherit;
-  font-size: 1.1rem;
-}
-
-.renameInput:focus {
-  outline: none;
-  border-color: rgba(200, 155, 60, 0.75);
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.15);
 }
 
 /* ── Google sign-in ── */
@@ -710,9 +437,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .googleBtn,
-  .googleBtn:hover:not(:disabled),
-  .googleBtn:active:not(:disabled) {
+.googleBtn,
+.googleBtn:hover:not(:disabled),
+.googleBtn:active:not(:disabled) {
     transition: none;
     transform: none;
   }

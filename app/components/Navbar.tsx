@@ -3,14 +3,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useProfile } from "@/lib/profile-context";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { readChartHistory } from "@/lib/chart-history-store";
 
 export default function Navbar() {
-  const { activeProfile, isLoading, profileId } = useProfile();
-  const { account, signOut } = useAccount();
+  const { account, status, signOut } = useAccount();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
@@ -35,12 +33,7 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    // A profile switch must not carry the previous profile's chart link over.
-    setLastChartUrl(null);
-
-    if (!profileId) return;
-
-    const entries = readChartHistory(profileId);
+    const entries = readChartHistory();
     const latest = [...entries].sort(
       (left, right) =>
         Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
@@ -48,7 +41,7 @@ export default function Navbar() {
     const queryString = latest?.queryString?.trim().replace(/^\?/, "");
 
     setLastChartUrl(queryString ? `/insights?${queryString}` : null);
-  }, [pathname, profileId]);
+  }, [pathname]);
 
   /* Track scroll position for glass effect */
   useEffect(() => {
@@ -122,7 +115,9 @@ export default function Navbar() {
     };
   }, [closeDrawer, drawerOpen]);
 
-  if (isLoading) return null;
+  /* The navbar used to be withheld until the local profiles hydrated. Nothing
+     in it waits on storage now — only the account badge does, and that gates
+     itself — so it renders on the first paint. */
 
   const handleLangSelect = (lang: Language) => {
     setLanguage(lang);
@@ -178,17 +173,20 @@ export default function Navbar() {
                   {t("navbar.myChart")}
                 </Link>
               )}
-              {/* Signed in, the account is the identity on show; the profile
-                  switcher stays reachable underneath because profiles are
-                  still what charts are filed under. */}
-              <Link href="/login" className="navbar-profile-link">
-                <strong>
-                  {account
-                    ? account.displayName ?? account.email
-                    : activeProfile?.display_name ?? t("navbar.noProfile")}
-                </strong>
-                <span className="navbar-profile-switch">{t("navbar.switchProfile")}</span>
-              </Link>
+              {/* Rendered only once the session is known. "loading" and
+                  "signed out" look identical here, so showing the signed-out
+                  state while the answer is still in flight flashes "Sign in" at
+                  someone who is already signed in, on every page load. */}
+              {status !== "loading" && (
+                <Link href="/login" className="navbar-profile-link">
+                  <strong>
+                    {account ? account.displayName ?? account.email : t("navbar.signIn")}
+                  </strong>
+                  {account && (
+                    <span className="navbar-profile-switch">{t("navbar.account")}</span>
+                  )}
+                </Link>
+              )}
               {account && (
                 <button
                   type="button"
@@ -270,9 +268,7 @@ export default function Navbar() {
         <div className="drawer-auth">
           <div className="drawer-user-info">
             <strong className="drawer-username">
-              {account
-                ? account.displayName ?? account.email
-                : activeProfile?.display_name ?? t("navbar.noProfile")}
+              {account ? account.displayName ?? account.email : t("navbar.signIn")}
             </strong>
             {/* The email is worth repeating here even when it is also the name
                 above: on a handset this drawer is the only place the account is
@@ -288,7 +284,7 @@ export default function Navbar() {
             onClick={closeDrawer}
             aria-current={pathname === "/login" ? "page" : undefined}
           >
-            {t("navbar.switchProfile")}
+            {account ? t("navbar.account") : t("navbar.signIn")}
           </Link>
           {account && (
             <button

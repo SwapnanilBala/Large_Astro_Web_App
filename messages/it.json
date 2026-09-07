@@ -3,8 +3,6 @@
     "brand": "Lagna Atelier",
     "myChart": "La Mia Carta",
     "menu": "Menu",
-    "switchProfile": "Cambia profilo",
-    "noProfile": "Nessun profilo",
     "signOut": "Esci"
   },
   "home": {
@@ -423,28 +421,5 @@
     "jupiter": "Giove",
     "saturn": "Saturno"
   },
-  "bottomNav": {},
-  "profiles": {
-    "kicker": "Questo dispositivo",
-    "heading": "Scegli un profilo",
-    "active": "Attivo",
-    "opening": "Apertura…",
-    "addDivider": "o aggiungi qualcuno",
-    "nameLabel": "Nome del profilo",
-    "create": "Crea profilo",
-    "manage": "Gestisci profilo",
-    "rename": "Rinomina",
-    "renameLabel": "Nuovo nome del profilo",
-    "saveName": "Salva nome",
-    "cancel": "Annulla",
-    "delete": "Elimina",
-    "confirmDelete": "Conferma eliminazione",
-    "deleteWarning": "Questo cancella ogni tema e lettura salvati con questo profilo.",
-    "full": "Questo dispositivo contiene già {max} profili. Eliminane uno per aggiungerne un altro.",
-    "storageNote": "Fino a {max} profili per dispositivo. Tutto è salvato solo in questo browser.",
-    "switchFailed": "Impossibile cambiare profilo.",
-    "createFailed": "Impossibile creare il profilo.",
-    "renameFailed": "Impossibile rinominare il profilo.",
-    "deleteFailed": "Impossibile eliminare il profilo."
-  }
+  "bottomNav": {}
 }

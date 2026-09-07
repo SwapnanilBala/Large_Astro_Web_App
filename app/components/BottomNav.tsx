@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { House, Sparkles } from 'lucide-react';
-import { useProfile } from '@/lib/profile-context';
 import { useTranslation } from '@/lib/i18n-context';
 import { chartHistoryKey, subscribeToChartHistory } from '@/lib/chart-history-store';
 import styles from './BottomNav.module.css';
@@ -24,11 +23,10 @@ function insightsUrl(queryString: unknown) {
   return query ? `/insights?${query}` : null;
 }
 
-function latestLocalChartUrl(profileId: string | null) {
-  if (!profileId) return null;
+function latestLocalChartUrl() {
 
   try {
-    const raw = window.localStorage.getItem(chartHistoryKey(profileId));
+    const raw = window.localStorage.getItem(chartHistoryKey());
     if (!raw) return null;
 
     const entries = JSON.parse(raw) as StoredChartHistoryEntry[];
@@ -48,7 +46,6 @@ function latestLocalChartUrl(profileId: string | null) {
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { profileId } = useProfile();
   const { t } = useTranslation();
   const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
   const isHidden = ["/login", "/engine-select"].some(
@@ -63,17 +60,12 @@ export default function BottomNav() {
   }, [isHidden]);
 
   useEffect(() => {
-    // A profile switch must not leave the previous profile's chart on the tab.
-    setLastChartUrl(null);
+    setLastChartUrl(latestLocalChartUrl());
 
-    if (!profileId) return;
-
-    setLastChartUrl(latestLocalChartUrl(profileId));
-
-    return subscribeToChartHistory(profileId, () => {
-      setLastChartUrl(latestLocalChartUrl(profileId));
+    return subscribeToChartHistory(() => {
+      setLastChartUrl(latestLocalChartUrl());
     });
-  }, [pathname, profileId]);
+  }, [pathname]);
 
   if (isHidden) return null;
 

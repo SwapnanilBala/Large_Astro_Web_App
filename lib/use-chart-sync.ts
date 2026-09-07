@@ -70,15 +70,9 @@ const MAX_PUSH_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 1200;
 
 /**
- * @param chart      what is on screen, or null when there is nothing to store.
- * @param profileId  whose history to back-fill on a first yes. Passed in
- *                   rather than read from context so the hook stays testable
- *                   without a ProfileProvider around it.
+ * @param chart  what is on screen, or null when there is nothing to store.
  */
-export function useChartSync(
-  chart: ChartToSync | null,
-  profileId: string | null = null,
-): ChartSyncController {
+export function useChartSync(chart: ChartToSync | null): ChartSyncController {
   const [state, setState] = useState<ChartSyncState>(() => readChartSyncState());
   const [stored, setStored] = useState(false);
 
@@ -153,14 +147,13 @@ export function useChartSync(
             setStored(true);
 
             /*
-             * The chart on screen is stored; now the rest of this profile's
+             * The chart on screen is stored; now the rest of this browser's
              * history, which the grant covers just as much. Deliberately after
              * the visible one so the thing they were looking at is safe first,
              * and deliberately not awaited into the caller — a twenty-chart
              * backfill must not hold up anything on the page.
              */
             void backfillCharts(
-              profileId,
               { prompt: evidence.prompt, captureSource: evidence.captureSource },
               {
                 alreadyPushed: pushed.current,
@@ -193,7 +186,7 @@ export function useChartSync(
       cancelled = true;
       if (retryTimer) clearTimeout(retryTimer);
     };
-  }, [chart, profileId, state.decision]);
+  }, [chart, state.decision]);
 
   const grant = useCallback((prompt: string, source: "intake" | "nudge") => {
     pendingConsent.current = { granted: true, prompt, captureSource: source };
