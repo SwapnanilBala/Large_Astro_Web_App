@@ -275,7 +275,11 @@ h3 {
  * token: the offsets that carry their own guess are the ones that drift.
  */
 .insights-shell.below-navbar {
-  padding-top: calc(var(--navbar-h) + 2.6rem + env(safe-area-inset-top));
+  /* Also has to clear the floating back button. That pill is positioned
+     against the navbar, so a padding that only cleared the bar left it
+     straddling the top edge of this card at every desktop width -- 47px
+     of pill in a 43px band. --back-btn-band reserves the difference. */
+  padding-top: calc(var(--navbar-h) + var(--back-btn-band) + env(safe-area-inset-top));
 }
 
 .insights-shell > * {
@@ -2748,6 +2752,14 @@ label:has(.autocomplete-wrapper.is-open) {
    drifted below the real height and were rendering underneath it. */
 :root {
   --navbar-h: 108px;
+
+  /* Vertical room the floating back button needs beneath the navbar:
+     its own 1.15rem offset plus a ~3rem pill plus breathing space.
+     Pages that float the button reserve this much above their card so
+     it sits in a band of its own. Kept as one value across breakpoints
+     -- the pill shrinks on phones, so the band is simply roomier there
+     rather than needing a second guess that can drift. */
+  --back-btn-band: 5rem;
 }
 
 /* The bar loses half its vertical padding and a font step below 768px, which
