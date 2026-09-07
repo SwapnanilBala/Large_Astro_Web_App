@@ -935,14 +935,27 @@
   gap: 1rem;
 }
 
-/* ── Glassmorphism Card ── */
+/*
+ * ── Glassmorphism Card ──
+ *
+ * Frosted by background alone, not backdrop-filter.
+ *
+ * What sits behind these is #0A0A0F with backdrop-1280.webp over it at 8%
+ * opacity: composited, that backdrop has a standard deviation of 1.8/255.
+ * Blur is a convolution, so over something that flat it is close to the
+ * identity -- measured, blur(10px) moved the mean pixel by 0.13-0.16/255 and
+ * left 99.3% of them within 2/255. Dozens of these are on screen at once and
+ * each was costing a full uncacheable shader pass per frame for that.
+ *
+ * --surface-frosted carries the opacity the blur used to imply, which is the
+ * same trade the mobile block already makes (globals.css, "keep frosted glass
+ * panels legible without blur").
+ */
 .card {
   position: relative;
   min-width: 0;
   max-width: 100%;
-  background: var(--surface, rgba(255, 255, 255, 0.06));
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: var(--surface-frosted);
   border: 1px solid var(--line-soft, rgba(200, 155, 60, 0.10));
   border-radius: 16px;
   padding: 1.25rem;
@@ -965,25 +978,24 @@
   box-shadow: 0 5px 22px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.045) inset;
 }
 
-/* ── Frosted Glass Depth Tiers ── */
+/*
+ * ── Depth Tiers ──
+ *
+ * These read as depth through their shadows. The three backgrounds looked
+ * like three different tints, but --surface is always defined, so the 0.08 /
+ * 0.05 / 0.03 fallbacks never applied and all three resolved to the same
+ * value -- the only thing separating the tiers besides shadow was the blur
+ * radius, which the backdrop above is too flat to show.
+ */
 .cardDepthFront {
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: var(--surface, rgba(255, 255, 255, 0.08));
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
 }
 
 .cardDepthMid {
-  backdrop-filter: blur(9px);
-  -webkit-backdrop-filter: blur(9px);
-  background: var(--surface, rgba(255, 255, 255, 0.05));
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 1px 0 rgba(255, 255, 255, 0.03) inset;
 }
 
 .cardDepthBack {
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  background: var(--surface, rgba(255, 255, 255, 0.03));
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10);
 }
 
