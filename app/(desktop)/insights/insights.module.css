@@ -351,6 +351,17 @@
      the pill sits in that band, so this is back to being ordinary spacing
      between the card's top edge and its first element. */
   margin-top: 0.9rem;
+  /*
+   * One rhythm value for the whole bar.
+   *
+   * The gap between two pills and the ring of bar showing around them were
+   * 4px and 6.4px against 16.32px of padding inside each pill, so the
+   * encirclements nearly touched each other while their own labels floated
+   * well clear of them. Driving both off one custom property is what makes
+   * the bar read as concentric with its contents instead of three unrelated
+   * spacings that happen to be small.
+   */
+  --anchor-rhythm: 0.3rem;
   position: sticky;
   /* Was 72px, which parked the bar behind a 108px navbar on every scroll --
      though it never got the chance, because `overflow: hidden` on
@@ -361,10 +372,26 @@
      way out rather than across it. */
   z-index: 60;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
-  justify-content: center;
-  padding: 0.4rem;
+  /*
+   * Never wraps now. The pills are equal flex tracks rather than natural
+   * width, so a narrow viewport shrinks them evenly instead of dropping one
+   * onto a second row -- and a fully rounded bar with a ragged second row was
+   * the other way this looked misshapen.
+   */
+  flex-wrap: nowrap;
+  /*
+   * Hug the pills instead of spanning the card.
+   *
+   * This was a full-width bar with `justify-content: center`, which at 1440
+   * measured 1162px wide around 514px of pills: 324px of empty bar inside
+   * each rounded end. A 999px radius that far from anything it encloses is
+   * not an encirclement, it is a racetrack. Capping the width and centring it
+   * puts the curve back around the contents.
+   */
+  width: min(100%, 40rem);
+  margin-inline: auto;
+  gap: var(--anchor-rhythm);
+  padding: var(--anchor-rhythm);
   /* A single hairline read as a flat outline against the card. Two tones --
      a brighter top edge over a receding bottom one -- give the bar an edge
      that catches light like the other raised surfaces on this page. */
@@ -385,6 +412,28 @@
 }
 
 .anchorLink {
+  /*
+   * Equal tracks, so every pill is the same shape whatever its label says.
+   *
+   * These were natural width: 80.7px for "More" against 119.6px for "Life
+   * areas", all at the same 37px height and the same 999px radius. The radius
+   * clamps to half the height on all five, so the corners matched while the
+   * aspect ratios ran 2.18 to 3.24 -- a 49% spread, which is why five
+   * identical controls read as five different shapes.
+   *
+   * `flex` rather than a fixed min-width because this nav filters itself:
+   * `availableAnchorIds` drops sections that are not on the page, so the
+   * count is 5 or fewer at runtime and the survivors still have to come out
+   * equal. A magic width per label could not do that, and would need
+   * revisiting every time a label changed.
+   */
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  /* Equal tracks are only equal shapes while the label stays on one line. */
+  white-space: nowrap;
   color: var(--ink-soft);
   text-decoration: none;
   font-family: var(--font-display), sans-serif;
@@ -395,9 +444,12 @@
   font-weight: 700;
   letter-spacing: 0.015em;
   line-height: 1;
-  /* Tracks the type up so the pills keep their proportions. The 44px touch
-     floor is set by min-height in the phone rule below, where it matters. */
-  padding: 0.62rem 1.02rem;
+  /*
+   * Vertical padding sets the height; the horizontal figure is now only a
+   * minimum inset for the text, because the flex track decides the width.
+   * The 44px touch floor is set by min-height in the phone rule below.
+   */
+  padding: 0.62rem 0.6rem;
   border-radius: 999px;
   border: 1px solid transparent;
   transition:
@@ -405,12 +457,29 @@
     box-shadow 0.2s ease;
 }
 
-.anchorLink:hover,
-.anchorLink:focus-visible {
+/* Hover and active differ in colour only, never in geometry. The border is
+   present-but-transparent at rest for the same reason: the pill must not
+   change size when it lights up. */
+.anchorLink:hover {
   color: var(--ink-main);
   border-color: rgba(108, 225, 212, 0.28);
   background: rgba(108, 225, 212, 0.08);
-  outline: none;
+}
+
+/*
+ * A real focus ring, and specifically the app's own focus ring.
+ *
+ * Focus used to be `outline: none` plus the hover border, which on a keyboard
+ * pass through the bar was almost indistinguishable from hover. globals.css
+ * settles every other focusable control on `2px solid var(--focus-ring)` at a
+ * 2px offset, but it does so through a list of element and class selectors
+ * that these anchors are not on -- so they were the one control here dressing
+ * focus differently from the rest of the app. Same values, deliberately.
+ */
+.anchorLink:focus-visible {
+  color: var(--ink-main);
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 
 .anchorLinkActive {
@@ -424,6 +493,15 @@
     0 0 0 1px rgba(200, 155, 60, 0.1) inset,
     0 1px 0 rgba(255, 246, 224, 0.08) inset,
     0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* The active pill keeps its gold edge on hover rather than picking up the
+   teal one, so moving the mouse across the bar cannot make two pills look
+   equally current. */
+.anchorLinkActive:hover {
+  border-color: rgba(200, 155, 60, 0.65);
+  background:
+    linear-gradient(135deg, rgba(206, 161, 66, 0.32), rgba(108, 225, 212, 0.18));
 }
 
 /* A gateway section is just its card -- no outer panel chrome, because the
@@ -3871,7 +3949,15 @@
   .anchorNav {
     margin-top: 0.75rem;
     top: calc(var(--navbar-h) + 0.4rem);
-    border-radius: 18px;
+    /* Was 18px against pills still at 999px, so the bar and the things inside
+       it curved to two different rules. Now that the pills cannot wrap onto a
+       second row, the bar can stay fully rounded at every width and the two
+       shapes belong to the same family. */
+    border-radius: 999px;
+    /* Below 900px there is no room to hold a 40rem bar clear of the card
+       edges, so it spans the column instead -- still hugging, just hugging
+       the full width. */
+    width: 100%;
   }
 
   .anchorTarget {
@@ -4131,11 +4217,21 @@
   .anchorLink {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     /* Keep the natural width. This row is a horizontal scroller; letting the
        pills shrink defeated that -- all five stayed on screen, each narrower
        than its own label, so the text ran through the padding and the labels
        touched. */
     flex: 0 0 auto;
+    /*
+     * A floor rather than equal flex tracks, which is the one place the two
+     * layouts have to differ: `flex: 1` divides a container, and a scroller
+     * has no width to divide. 7rem clears the longest label ("Life areas",
+     * ~5.4rem of Cinzel at this size) plus its inset, so every pill lands on
+     * the floor and comes out the same shape -- the point of the change --
+     * while a longer label would still grow past it rather than clip.
+     */
+    min-width: 7rem;
     min-height: 2.75rem;
     scroll-snap-align: start;
     white-space: nowrap;
