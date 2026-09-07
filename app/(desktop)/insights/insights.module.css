@@ -404,8 +404,15 @@
      straight through it. */
   background:
     linear-gradient(180deg, rgba(16, 23, 38, 0.94), rgba(8, 12, 24, 0.92));
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  /*
+   * No backdrop-filter, on purpose.
+   *
+   * This is `position: sticky`, so the content behind it moves on every scroll
+   * frame and a blur here can never be cached -- it re-rasterises the bar each
+   * frame. It was paying for blur(14px) plus a second saturate() pass behind
+   * the gradient above, which is 0.94 to 0.92 opaque. Under 8% of the blur was
+   * ever visible, and none of it survives the first stop.
+   */
   box-shadow:
     0 10px 26px rgba(0, 0, 0, 0.3),
     0 1px 0 rgba(255, 246, 224, 0.05) inset;
@@ -996,8 +1003,9 @@
 }
 
 .gridHero .cardMetric {
+  /* No will-change: box-shadow and border-color are paint properties, so
+     promoting a layer for them buys nothing and costs memory per card. */
   transform: translateZ(0);
-  will-change: box-shadow, border-color;
 }
 
 .gridHero .cardMetric:hover {

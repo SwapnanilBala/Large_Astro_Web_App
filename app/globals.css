@@ -2791,14 +2791,19 @@ label:has(.autocomplete-wrapper.is-open) {
   background-color: rgba(15, 17, 23, 0.70);
   border-bottom: 1px solid rgba(200, 155, 60, 0.08);
   box-shadow: 0 1px 12px rgba(0, 0, 0, 0.10);
-  transition: backdrop-filter 300ms ease, -webkit-backdrop-filter 300ms ease,
-    background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+  /* Deliberately does NOT transition backdrop-filter. Animating a blur radius
+     re-runs the shader with a different kernel every frame for the whole 300ms,
+     and .navbar-scrolled is toggled by scrolling (Navbar.tsx), so the cost
+     landed exactly when the scroll needed the frame budget. The tonal shift
+     reads the same from the background alone. */
+  transition: background-color 300ms ease, border-color 300ms ease,
+    box-shadow 300ms ease;
 }
 
 .site-navbar.navbar-scrolled {
   pointer-events: auto;
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  /* Blur stays at the base 20px. Going to 28 here meant every scroll past 40px
+     re-rasterised the full-width fixed bar at a new radius. */
   background-color: rgba(15, 17, 23, 0.88);
   border-bottom: 1px solid rgba(200, 155, 60, 0.12);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20), 0 1px 0 rgba(200, 155, 60, 0.06);

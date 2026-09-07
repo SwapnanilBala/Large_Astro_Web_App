@@ -342,7 +342,17 @@ function SectionAnchorNav() {
       const anchorIds = getAvailableAnchorIds();
       if (anchorIds.length === 0) return;
 
-      setAvailableAnchorIds(anchorIds);
+      // Bail out when the set of anchors has not actually changed. This runs
+      // once per animation frame for as long as the page is scrolling, and a
+      // fresh array is never Object.is-equal to the previous one, so passing it
+      // straight through re-rendered the bar on every frame -- 360 times a
+      // second on a high-refresh display -- to produce identical output.
+      setAvailableAnchorIds((previous) =>
+        previous.length === anchorIds.length &&
+        previous.every((id, index) => id === anchorIds[index])
+          ? previous
+          : anchorIds
+      );
 
       const hashId = window.location.hash.replace("#", "");
       if (anchorIds.includes(hashId)) {
