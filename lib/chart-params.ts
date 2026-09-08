@@ -4,7 +4,15 @@ import { BirthInputSchema, firstZodError } from "@/lib/schemas";
 import { makeCacheKey, serverCaches } from "@/lib/server-cache";
 import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import { LIFE_DOMAIN_RULES_VERSION } from "@/lib/engines/rule-engine";
-import type { ChartApiResponse, LifeDomainInsightsResponse } from "@/lib/astro-types";
+import type {
+  ChartApiResponse,
+  LifeDomainInsightsResponse,
+  WeeklyEnergyResponse,
+} from "@/lib/astro-types";
+import {
+  computeWeeklyEnergy,
+  WEEKLY_ENERGY_MODEL_VERSION,
+} from "@/lib/engines/weekly-energy-engine";
 
 /**
  * Turning URL parameters into a chart.
@@ -170,6 +178,69 @@ export function getLifeDomainPayload(
     insights: buildLifeDomainInsights(birth),
   };
   serverCaches.lifeDomains.set(cacheKey, result);
+  return result;
+}
+
+/**
+ * The weekly-energy reading for one chart and one week.
+ *
+ * Here rather than in the route for the same reason as getLifeDomainPayload:
+ * the cache key lives in exactly one place. Two implementations of this key
+ * would compute the same week twice under two entries and could disagree after
+ * a model bump.
+ *
+ * Deliberately does NOT read payload.transits. getChartPayload's key carries
+ * `transits: true` as a plain boolean against a one-hour chart TTL, so a cached
+ * payload can hold aspects computed up to an hour ago -- and reading them here
+ * would smear one moment's aspects across all seven days. The engine
+ * recomputes positions per day, at that day's sunrise.
+ */
+export function getWeeklyEnergyPayload(
+  chartParams: ChartParams,
+  weekStart: string,
+): WeeklyEnergyResponse {
+  const birth = chartParamsToBirthInput(chartParams);
+
+  /* No `name`: the reading does not depend on it, and including it would split
+     the cache per spelling of the same person. Follows getLifeDomainPayload,
+     not getChartPayload. `lng` is keyed even though the sunrise approximation
+     currently ignores longitude -- a later true-sunrise fix will use it, and
+     keying now avoids a silent stale-cache bug then. */
+  const cacheKey = makeCacheKey("weekly_energy", {
+    birth_date: birth.birth_date,
+    birth_time: birth.birth_time,
+    engine_id: birth.engine_id,
+    tz: birth.timezone_offset_minutes,
+    lat: birth.latitude,
+    lng: birth.longitude,
+    birth_time_accuracy: birth.birth_time_accuracy,
+    birth_time_fallback: birth.birth_time_fallback,
+    week_start: weekStart,
+    model: WEEKLY_ENERGY_MODEL_VERSION,
+  });
+
+  const cached = serverCaches.weeklyEnergy.get(cacheKey) as WeeklyEnergyResponse | null;
+  if (cached) return cached;
+
+  /* The natal chart itself comes from the shared cache, so a reader who has
+     already loaded /insights pays nothing extra for it here. */
+  const chart = getChartPayload(chartParams);
+
+  const week = computeWeeklyEnergy({
+    weekStart,
+    latitude: birth.latitude,
+    longitude: birth.longitude,
+    timezoneOffsetMinutes: birth.timezone_offset_minutes,
+    engineId: birth.engine_id,
+    natalPlanets: chart.chart.planets,
+    ascendantSign: chart.chart.ascendant.sign,
+  });
+
+  const result: WeeklyEnergyResponse = {
+    ...week,
+    generated_at_utc: new Date().toISOString(),
+  };
+  serverCaches.weeklyEnergy.set(cacheKey, result);
   return result;
 }
 

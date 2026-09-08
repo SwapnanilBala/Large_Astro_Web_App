@@ -667,6 +667,31 @@ export function getActivityLabel(activity: MuhurtaActivity): string {
  * @param latitude - Observer latitude in degrees.
  * @param timezoneOffsetMinutes - Minutes ahead of UTC (e.g., IST = 330).
  */
+/**
+ * Local sunrise for a date, as a UTC instant.
+ *
+ * Exposes the same approximation Rahukaala and Yamaghantaka are already built
+ * on. Sunrise matters to any caller that wants a day's panchanga rather than an
+ * hour's: the five limbs are classically quoted at sunrise, which is also where
+ * the Vedic day begins, so sampling there makes the day boundary agree with the
+ * weekday factor instead of with UTC midnight.
+ *
+ * Approximate, and knowingly so. Solar noon is fixed at 12:00 local, so this
+ * errs by up to ~30 min from the equation of time plus up to ~30 min for the
+ * observer's position within a wide timezone -- and `longitude` is not a
+ * parameter at all. Above |lat| 66 it returns the fixed 18h/6h day-length
+ * fallbacks, so a polar sunrise here is fictional. All of that is harmless for
+ * selecting a limb that lasts 20-26 hours; it is NOT harmless for Rahukaala,
+ * where an hour is the whole point, but that is pre-existing.
+ */
+export function getSunrise(
+  date: Date,
+  latitude: number,
+  timezoneOffsetMinutes = 0,
+): Date {
+  return new Date(approxSunriseSunset(date, latitude, timezoneOffsetMinutes).sunrise);
+}
+
 export function getRahukaala(
   date: Date,
   latitude: number,

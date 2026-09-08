@@ -556,6 +556,102 @@ export type CalendarPlannerResponse = {
   days: CalendarPlannerDay[];
 };
 
+// ---------------------------------------------------------------------------
+// Weekly energy
+// ---------------------------------------------------------------------------
+
+/*
+ * The wire contract for /api/chart/weekly-energy.
+ *
+ * Here rather than in the engine because this is what the panel imports, the
+ * same way every other panel takes its shape from this file. The engine owns
+ * the model -- weights, thresholds, WeeklyEnergyInput -- and imports these.
+ *
+ * Note this deliberately does NOT reuse CalendarPlannerDay above, which is
+ * declared but never implemented anywhere. That type requires per-day
+ * muhurta_windows (an hourly electional search, which is exactly the cost this
+ * feature is designed to avoid) plus a per-day headline and overview -- seven
+ * generated paragraphs to caption seven dots. Its `quality` is also a four-way
+ * ladder where the chart's bands are three-way, so folding one into the other
+ * would leave the API and the chart disagreeing about how many bands exist.
+ * Cards keep the four-way quality; days keep the three-way band. Different
+ * questions.
+ */
+
+export type EnergyBand = "high" | "balanced" | "low";
+
+export type EnergyFactorKind =
+  | "tithi"
+  | "nakshatra"
+  | "yoga"
+  | "karana"
+  | "weekday"
+  | "tarabala"
+  | "chandrabala"
+  | "transit_aspect";
+
+export type WeeklyEnergyFactor = {
+  kind: EnergyFactorKind;
+  label: string;
+  value: string;
+  /** Signed points this factor put into the day's score. */
+  contribution: number;
+};
+
+export type WeeklyEnergyDay = {
+  date: string;
+  /** 0=Sunday, matching Date.getDay(). */
+  weekday_index: number;
+  score: number;
+  band: EnergyBand;
+  factors: WeeklyEnergyFactor[];
+  tara: { number: number; name: string };
+  chandra_house: number;
+};
+
+export type WeeklyEnergyCard = {
+  intent: CalendarPlannerIntent;
+  title: string;
+  body: string;
+  /** Resolved to a component client-side; a ReactNode cannot cross JSON. */
+  icon_key: string;
+  quality: "excellent" | "good" | "fair" | "poor";
+  score: number;
+  best_day: string;
+};
+
+export type WeeklyEnergyHeadline = {
+  title: string;
+  paragraph: string;
+  /** A key under `quotes` in messages/*.json, not the text itself. */
+  quote_key: string;
+};
+
+export type WeeklyEnergyWeek = {
+  model_version: string;
+  week: { start_date: string; end_date: string; label: string };
+  /** Shipped so the chart's band geometry and the engine cannot drift apart. */
+  bands: { high_min: number; low_max: number };
+  days: WeeklyEnergyDay[];
+  peak: {
+    date: string;
+    weekday_index: number;
+    score: number;
+    label: string;
+    /** False when the week is flat enough that naming a peak would overclaim. */
+    is_significant: boolean;
+  };
+  trough: { date: string; score: number };
+  average_score: number;
+  headline: WeeklyEnergyHeadline;
+  cards: WeeklyEnergyCard[];
+  chart_alt_text: string;
+};
+
+export type WeeklyEnergyResponse = WeeklyEnergyWeek & {
+  generated_at_utc: string;
+};
+
 export type LuckyElementsInfo = {
   primary_colors: string[];
   secondary_colors: string[];

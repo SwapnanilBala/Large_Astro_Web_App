@@ -116,7 +116,12 @@ export function makeCacheKey(
 // Singleton instances (survive hot-reload in dev via globalThis)
 // ---------------------------------------------------------------------------
 
-const GLOBAL_KEY = "__serverCaches_v3";
+/* Bumped to v4 when the weeklyEnergy bucket was added. This has to move
+   whenever a bucket is added: the object is memoised on globalThis to survive
+   hot reload, so without a bump a dev process keeps handing back the previous
+   shape and the new bucket is undefined -- which surfaces as "Cannot read
+   properties of undefined (reading 'get')" from a route that looks correct. */
+const GLOBAL_KEY = "__serverCaches_v4";
 
 interface GlobalCaches {
   chart: ServerCache;
@@ -128,6 +133,7 @@ interface GlobalCaches {
   geocode: ServerCache;
   muhurta: ServerCache;
   varshaphal: ServerCache;
+  weeklyEnergy: ServerCache;
 }
 
 function createCaches(): GlobalCaches {
@@ -151,6 +157,11 @@ function createCaches(): GlobalCaches {
     muhurta: new ServerCache("muhurta", 100, 60 * 60 * 1000),
     /** 200 entries, 1 hour TTL — varshaphal / solar return */
     varshaphal: new ServerCache("varshaphal", 200, 60 * 60 * 1000),
+    /** 400 entries, 6 hour TTL. Keyed per chart AND per week, so one reader
+     *  paging through a year occupies 52 entries; the route bounds week_start
+     *  to ±2 years partly to keep that from being unbounded. A day's panchanga
+     *  does not change, hence the long TTL. */
+    weeklyEnergy: new ServerCache("weekly_energy_v1", 400, 6 * 60 * 60 * 1000),
   };
 }
 

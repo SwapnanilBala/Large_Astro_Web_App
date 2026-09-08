@@ -9,6 +9,7 @@
 
 import { z } from "zod";
 import { ENGINE_PRESETS } from "@/lib/engines/engine-registry";
+import { isWeekStart } from "@/lib/format-week";
 
 const validEngineIds = Object.keys(ENGINE_PRESETS);
 
@@ -115,6 +116,61 @@ const targetDateField = z
     },
     { message: "target_date is not a valid calendar date" },
   );
+
+/*
+ * The Saturday a weekly-energy week begins on.
+ *
+ * Same YYYY-MM-DD shape and real-calendar-date check as target_date, plus two
+ * refinements the weekly chart needs:
+ *
+ * 1. It has to BE a Saturday. The chart's axis runs Sat -> Fri, so a Wednesday
+ *    week_start would render a Wed -> Tue week underneath Sat -> Fri labels --
+ *    wrong, and wrong in a way that looks fine. Rejected rather than silently
+ *    normalised, because normalising would let the cache key and the pager
+ *    label disagree about which week is on screen. The Saturday rule itself is
+ *    imported rather than restated, so there is one definition of it.
+ *
+ * 2. Bounded to roughly two years either side of today. An unbounded date lets
+ *    a crafted URL walk the ephemeris one week at a time and flush a 400-entry
+ *    LRU, evicting real users' weeks. Same instinct as MAX_SEARCH_DAYS in the
+ *    muhurta engine and the 1900-2100 clamp on varshaphal.
+ */
+const WEEK_START_RANGE_DAYS = 730;
+
+const weekStartField = z
+  .string({ error: "week_start is required" })
+  .regex(/^\d{4}-\d{2}-\d{2}$/, "week_start must match YYYY-MM-DD format")
+  .refine(
+    (v) => {
+      const [y, m, d] = v.split("-").map(Number);
+      const date = new Date(y, m - 1, d);
+      return (
+        date.getFullYear() === y &&
+        date.getMonth() === m - 1 &&
+        date.getDate() === d
+      );
+    },
+    { message: "week_start is not a valid calendar date" },
+  )
+  .refine((v) => isWeekStart(v), {
+    message: "week_start must be a Saturday",
+  })
+  .refine(
+    (v) => {
+      const target = new Date(`${v}T12:00:00`).getTime();
+      const now = Date.now();
+      const limit = WEEK_START_RANGE_DAYS * 24 * 60 * 60 * 1000;
+      return Math.abs(target - now) <= limit;
+    },
+    { message: "week_start must be within two years of today" },
+  );
+
+/** Weekly energy. Birth details arrive via readChartParams, not this schema. */
+export const WeeklyEnergyInputSchema = z.object({
+  week_start: weekStartField,
+});
+
+export type WeeklyEnergyInputParams = z.infer<typeof WeeklyEnergyInputSchema>;
 
 // ---------------------------------------------------------------------------
 // Composite schemas
