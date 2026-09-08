@@ -35,6 +35,85 @@
   gap: clamp(1.05rem, 1.5vw, 1.5rem);
 }
 
+/* ═══ Band and row primitives ═══ */
+
+/*
+ * A band spans the page card edge to edge while its contents stay on the
+ * normal content column.
+ *
+ * NOT done by clipping .dashboard-shell. An `overflow` of anything but
+ * visible/clip on that element makes it the sticky scrollport for .anchorNav
+ * below, and because the card never scrolls the bar would pin to its offset
+ * inside the card instead of the viewport -- it stops sticking and lands on
+ * top of the hero. See the note at .anchorNav and app/globals.css:257. So the
+ * band pulls itself out with margins and the card is left unclipped.
+ *
+ * --shell-pad-inline is the card's own inline padding, published as a token by
+ * every one of the six places app/globals.css sets it. Pulling out by exactly
+ * that lands on the padding-box edge, just inside the card's hairline, so the
+ * border still draws an unbroken line down both sides of every band. The
+ * fallback is the base value and only fires for a band rendered outside a
+ * .dashboard-shell -- the skeleton is the realistic case.
+ *
+ * `overflow: hidden` here is safe in a way it is not on the shell: the sticky
+ * nav is a *sibling* of the bands, never a descendant.
+ */
+.band {
+  --band-pad: var(--shell-pad-inline, clamp(1.3rem, 2.7vw, 2.6rem));
+  position: relative;
+  /* Same pairing as .hero/.hero::before below: the band opens a stacking
+     context so decoration parked at z-index -1 sits behind the band's own
+     content without escaping behind the card's background. That is why the
+     decor needs no z-index co-operation from the content -- in-flow content
+     at z-index auto is already above it. */
+  isolation: isolate;
+  min-width: 0;
+  margin-inline: calc(-1 * var(--band-pad));
+  padding-inline: var(--band-pad);
+  padding-block: clamp(1.5rem, 3vw, 2.75rem);
+  overflow: hidden;
+}
+
+/* For bands whose own furniture -- the planet rail, the fortune hairlines --
+   should reach the card edge rather than stopping at the content column. */
+.bandFlush {
+  padding-inline: 0;
+}
+
+/*
+ * The three-column row: chart / weekly energy / vibe.
+ *
+ * fr rather than % so the gap comes out of the tracks instead of overflowing
+ * them, and minmax(0, ...) so one long unbroken word cannot push the row wider
+ * than its column -- the same failure .grid > * guards against further down.
+ */
+.cardRow3 {
+  display: grid;
+  min-width: 0;
+  gap: clamp(1.15rem, 1.8vw, 1.65rem);
+  grid-template-columns: minmax(0, 30fr) minmax(0, 42fr) minmax(0, 28fr);
+  align-items: start;
+}
+
+/*
+ * Equal-card row: the insight zone, the gateways, the continuation hub.
+ *
+ * auto-fit means this needs no breakpoint of its own at any width. The
+ * Declared rather than `composes: grid` on purpose -- .grid sits ~870 lines
+ * below this and would win the gap on source order. The
+ * min(100%, ...) is load-bearing for the reason spelled out at .gatewayGrid:
+ * without it a column narrower than the track minimum still asks for the wider
+ * track, and because the page clips its x-axis the card is silently cut off
+ * rather than producing a scrollbar.
+ */
+.cardRowAuto {
+  display: grid;
+  min-width: 0;
+  gap: clamp(0.85rem, 1.4vw, 1.15rem);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  align-items: stretch;
+}
+
 /* ── Hero Header ── */
 .hero {
   position: relative;
