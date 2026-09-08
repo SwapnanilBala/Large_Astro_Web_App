@@ -356,6 +356,10 @@
 
 .heroPlanetRail {
   position: relative;
+  /* Without this the rail's min-content width -- nine orbs -- overrides the
+     track it sits in, and the scroller inside never gets the chance to scroll.
+     The standard CSS-grid overflow trap. */
+  min-width: 0;
   overflow: hidden;
   border-top: 1px solid rgba(200, 155, 60, 0.14);
   border-bottom: 1px solid rgba(108, 225, 212, 0.12);
@@ -394,6 +398,15 @@
 }
 
 .heroPlanetRow {
+  /* `display: flex` and the gap were the only things missing from this block,
+     which is very likely why the whole strip was written and never wired: the
+     justify-content below does nothing without a flex or grid container, so the
+     orbs would have stacked. */
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(0.85rem, 1.6vw, 1.75rem);
+  list-style: none;
+  padding: 0;
   width: max-content;
   min-width: min(100%, 720px);
   margin: 0 auto;
@@ -422,6 +435,70 @@
 
 .heroPlanetRow > *:nth-child(5) {
   transform: translateY(-0.24rem);
+}
+
+/* ── Today's Sky band ── */
+
+/*
+ * Label, rail, note. The rail takes the middle track and the two ends size to
+ * their content, so the orbs stay centred in whatever is left rather than
+ * being pushed off-centre by a longer date or note.
+ */
+.skyBand {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: clamp(0.9rem, 2vw, 1.9rem);
+}
+
+.skyLabel {
+  display: grid;
+  gap: 0.2rem;
+  /* The band is .bandFlush so the rail can reach the card edge; the two text
+     ends put their own inset back. */
+  padding-inline-start: var(--band-pad);
+}
+
+.skyPlanet {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  min-width: 3.4rem;
+}
+
+.skyPlanetName {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.skyPlanetSign {
+  color: var(--ink-soft);
+  font-size: 0.7rem;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.skyNote {
+  display: grid;
+  gap: 0.15rem;
+  margin: 0;
+  padding-inline-end: var(--band-pad);
+  border-inline-start: 1px solid var(--line-soft);
+  padding-inline-start: clamp(0.9rem, 1.8vw, 1.6rem);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  max-width: 12rem;
+}
+
+.skyNote span {
+  color: var(--ink-main);
 }
 
 .anchorNav {
@@ -4076,6 +4153,42 @@
 @media (max-width: 900px) {
   .hero {
     align-items: center;
+  }
+
+  /*
+   * The sky band gives up its side columns before the rail gives up its orbs:
+   * the rail is the content, the label and the note are captions for it. Added
+   * inside this existing block rather than in a new one at the end of the file,
+   * because media queries carry no specificity and a later block matching the
+   * same width would win on source order alone.
+   */
+  .skyBand {
+    grid-template-columns: minmax(0, 1fr);
+    /*
+     * NOT justify-items: center. That sizes every grid item to its own
+     * max-content instead of to the track, which let the rail grow to the full
+     * width of nine orbs -- 623px inside a 350px card at 375. And because
+     * .insights-shell clips its x-axis rather than scrolling it, the overflow
+     * was silently cut off instead of producing a scrollbar: the last two
+     * planets simply were not reachable. The rail has to stretch; the text ends
+     * centre themselves.
+     */
+    text-align: center;
+    gap: 0.75rem;
+  }
+
+  .skyLabel {
+    justify-items: center;
+    padding-inline-start: 0;
+  }
+
+  .skyNote {
+    max-width: none;
+    padding-inline: var(--band-pad);
+    /* A vertical hairline makes no sense once this is a stacked row. */
+    border-inline-start: 0;
+    border-block-start: 1px solid var(--line-soft);
+    padding-block-start: 0.7rem;
   }
 
   .heroActions {

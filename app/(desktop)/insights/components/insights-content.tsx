@@ -17,6 +17,7 @@ import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import styles from "../insights.module.css";
 import SectionGateway from "./section-gateway";
+import TodaysSkyBand from "./todays-sky-band";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
@@ -1064,6 +1065,8 @@ export default function InsightsContent({
             />
           </div>
         </motion.header>
+
+        <TodaysSkyBand transits={payload.transits} />
 
         <TopTakeawaysModule payload={payloadWithDomainInsights} />
 
