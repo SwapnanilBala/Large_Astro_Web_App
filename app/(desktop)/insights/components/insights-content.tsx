@@ -1410,7 +1410,7 @@ export default function InsightsContent({
             id="fortune"
             kicker="Secondary details"
             title="Lucky elements and practical fortune"
-            defaultOpen={false}
+            defaultOpen={true}
             className={styles.cardRules}
             persistKey={`${sectionStateScope}:fortune`}
             summary={
