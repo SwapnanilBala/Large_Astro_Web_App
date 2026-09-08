@@ -17,6 +17,7 @@ import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import styles from "../insights.module.css";
 import SectionGateway from "./section-gateway";
+import WeeklyEnergyPanel from "./weekly-energy-panel";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
 
@@ -1516,6 +1517,12 @@ export default function InsightsContent({
             </Link>
           </div>
         </motion.section>
+
+        {/* Mounted full-width here for now. Row C of the new layout is
+            where it ends up; landing it on its own first means the chart, the
+            pager and the fetch all get verified before a three-column grid
+            can be blamed for anything. */}
+        <WeeklyEnergyPanel queryString={historyQs} />
 
         {/* â”€â”€â”€ Footer Actions â”€â”€â”€ */}
         <motion.div
