@@ -10,6 +10,19 @@
 
 import { computeTransitPositions } from "./swiss-ephemeris-engine";
 
+import {
+  computeNakshatraFromLongitude,
+  computeTithi,
+  computeYoga,
+  getKarana,
+  getKaranaHalf,
+  NAKSHATRA_QUALITY_LABELS,
+  TITHI_GROUP_LABELS,
+  WEEKDAY_NAMES,
+  type NakshatraQuality,
+  type TithiGroup,
+} from "./panchanga";
+
 // --------------------------------------------------------------------------
 // Types
 // --------------------------------------------------------------------------
@@ -41,181 +54,6 @@ export interface MuhurtaWindow {
   factors: MuhurtaFactor[];
   recommendation: string;
 }
-
-// --------------------------------------------------------------------------
-// Tithi (Lunar Day) Constants
-// --------------------------------------------------------------------------
-
-const TITHI_NAMES: string[] = [
-  "Pratipada", "Dwitiya", "Tritiya", "Chaturthi", "Panchami",
-  "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami",
-  "Ekadashi", "Dwadashi", "Trayodashi", "Chaturdashi", "Purnima",
-  "Pratipada", "Dwitiya", "Tritiya", "Chaturthi", "Panchami",
-  "Shashthi", "Saptami", "Ashtami", "Navami", "Dashami",
-  "Ekadashi", "Dwadashi", "Trayodashi", "Chaturdashi", "Amavasya",
-];
-
-type TithiGroup = "nanda" | "bhadra" | "jaya" | "rikta" | "purna";
-
-function getTithiGroup(tithiNum: number): TithiGroup {
-  // tithiNum is 1-30
-  const mod = ((tithiNum - 1) % 15) + 1;
-  if (mod === 1 || mod === 6 || mod === 11) return "nanda";
-  if (mod === 2 || mod === 7 || mod === 12) return "bhadra";
-  if (mod === 3 || mod === 8 || mod === 13) return "jaya";
-  if (mod === 4 || mod === 9 || mod === 14) return "rikta";
-  return "purna"; // 5, 10, 15
-}
-
-const TITHI_GROUP_LABELS: Record<TithiGroup, string> = {
-  nanda: "Nanda (joyful)",
-  bhadra: "Bhadra (auspicious)",
-  jaya: "Jaya (victorious)",
-  rikta: "Rikta (empty)",
-  purna: "Purna (full/complete)",
-};
-
-// --------------------------------------------------------------------------
-// Nakshatra quality classifications
-// --------------------------------------------------------------------------
-
-type NakshatraQuality = "fixed" | "movable" | "soft" | "sharp" | "mixed";
-
-const NAKSHATRAS: string[] = [
-  "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra",
-  "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni",
-  "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha",
-  "Jyeshtha", "Moola", "Purva Ashadha", "Uttara Ashadha", "Shravana",
-  "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
-];
-
-const NAKSHATRA_QUALITY: Record<string, NakshatraQuality> = {
-  // Fixed (Dhruva)
-  "Uttara Phalguni": "fixed",
-  "Uttara Ashadha": "fixed",
-  "Uttara Bhadrapada": "fixed",
-  "Rohini": "fixed",
-  // Movable (Chara)
-  "Ashwini": "movable",
-  "Pushya": "movable",
-  "Hasta": "movable",
-  "Swati": "movable",
-  "Punarvasu": "movable",
-  "Shravana": "movable",
-  "Dhanishta": "movable",
-  "Shatabhisha": "movable",
-  // Soft/Tender (Mridu)
-  "Mrigashira": "soft",
-  "Chitra": "soft",
-  "Anuradha": "soft",
-  "Revati": "soft",
-  // Sharp/Fierce (Tikshna)
-  "Ardra": "sharp",
-  "Ashlesha": "sharp",
-  "Jyeshtha": "sharp",
-  "Moola": "sharp",
-  // Mixed (Mishra/Sadharana)
-  "Krittika": "mixed",
-  "Vishakha": "mixed",
-  // Remaining default to mixed
-  "Bharani": "mixed",
-  "Magha": "mixed",
-  "Purva Phalguni": "mixed",
-  "Purva Ashadha": "mixed",
-  "Purva Bhadrapada": "mixed",
-};
-
-const NAKSHATRA_QUALITY_LABELS: Record<NakshatraQuality, string> = {
-  fixed: "Fixed (Dhruva)",
-  movable: "Movable (Chara)",
-  soft: "Soft/Tender (Mridu)",
-  sharp: "Sharp/Fierce (Tikshna)",
-  mixed: "Mixed (Sadharana)",
-};
-
-// --------------------------------------------------------------------------
-// Yoga (Sun + Moon combination)
-// --------------------------------------------------------------------------
-
-const YOGA_NAMES: string[] = [
-  "Vishkambha", "Priti", "Ayushman", "Saubhagya", "Shobhana",
-  "Atiganda", "Sukarma", "Dhriti", "Shoola", "Ganda",
-  "Vriddhi", "Dhruva", "Vyaghata", "Harshana", "Vajra",
-  "Siddhi", "Vyatipata", "Variyana", "Parigha", "Shiva",
-  "Siddha", "Sadhya", "Shubha", "Shukla", "Brahma",
-  "Indra", "Vaidhriti",
-];
-
-type YogaQuality = "auspicious" | "neutral" | "inauspicious";
-
-const YOGA_QUALITY: Record<string, YogaQuality> = {
-  Priti: "auspicious",
-  Ayushman: "auspicious",
-  Saubhagya: "auspicious",
-  Shobhana: "auspicious",
-  Sukarma: "auspicious",
-  Dhriti: "auspicious",
-  Vriddhi: "auspicious",
-  Harshana: "auspicious",
-  Siddhi: "auspicious",
-  Shiva: "auspicious",
-  Siddha: "auspicious",
-  Sadhya: "auspicious",
-  Shubha: "auspicious",
-  Shukla: "auspicious",
-  Brahma: "auspicious",
-  Indra: "auspicious",
-  // Inauspicious
-  Vishkambha: "inauspicious",
-  Atiganda: "inauspicious",
-  Shoola: "inauspicious",
-  Ganda: "inauspicious",
-  Vyaghata: "inauspicious",
-  Vajra: "inauspicious",
-  Vyatipata: "inauspicious",
-  Parigha: "inauspicious",
-  Vaidhriti: "inauspicious",
-  // Neutral
-  Dhruva: "neutral",
-  Variyana: "neutral",
-};
-
-// --------------------------------------------------------------------------
-// Karana (Half-tithi)
-// --------------------------------------------------------------------------
-
-const CYCLING_KARANAS = ["Bava", "Balava", "Kaulava", "Taitila", "Gara", "Vanija", "Vishti"];
-const FIXED_KARANAS = ["Shakuni", "Chatushpada", "Naga", "Kimstughna"];
-
-type KaranaQuality = "auspicious" | "neutral" | "inauspicious";
-
-function getKarana(tithiNum: number, half: 0 | 1): { name: string; quality: KaranaQuality } {
-  // Karanas 1 (Kimstughna) is the first half of tithi 1,
-  // then cycling karanas from 2nd half of tithi 1 through first half of tithi 30,
-  // then fixed karanas for the last half of tithi 30.
-  const karanaIndex = (tithiNum - 1) * 2 + half; // 0-59
-
-  if (karanaIndex === 0) return { name: "Kimstughna", quality: "neutral" };
-  if (karanaIndex >= 57) {
-    const fixedIdx = karanaIndex - 57;
-    const name = FIXED_KARANAS[fixedIdx] ?? "Kimstughna";
-    return { name, quality: name === "Kimstughna" ? "neutral" : "inauspicious" };
-  }
-
-  const cyclingIdx = (karanaIndex - 1) % 7;
-  const name = CYCLING_KARANAS[cyclingIdx];
-  if (name === "Vishti") return { name, quality: "inauspicious" };
-  if (name === "Bava" || name === "Balava" || name === "Kaulava" || name === "Taitila") {
-    return { name, quality: "auspicious" };
-  }
-  return { name, quality: "neutral" };
-}
-
-// --------------------------------------------------------------------------
-// Weekday
-// --------------------------------------------------------------------------
-
-const WEEKDAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 // --------------------------------------------------------------------------
 // Rahukaala & Yamaghantaka — inauspicious period slot indices (1-based)
@@ -531,44 +369,6 @@ const ACTIVITY_PREFERENCES: Record<MuhurtaActivity, ActivityPreferences> = {
 };
 
 // --------------------------------------------------------------------------
-// Panchanga calculation helpers
-// --------------------------------------------------------------------------
-
-function normalize(angle: number): number {
-  return ((angle % 360) + 360) % 360;
-}
-
-function computeTithi(moonLong: number, sunLong: number): { num: number; name: string; group: TithiGroup } {
-  const diff = normalize(moonLong - sunLong);
-  const num = Math.floor(diff / 12) + 1; // 1-30
-  return {
-    num,
-    name: TITHI_NAMES[num - 1] ?? `Tithi ${num}`,
-    group: getTithiGroup(num),
-  };
-}
-
-function computeNakshatraFromLongitude(moonLong: number): { name: string; quality: NakshatraQuality } {
-  const lon = normalize(moonLong);
-  const idx = Math.min(Math.floor(lon / (360 / 27)), 26);
-  const name = NAKSHATRAS[idx];
-  return {
-    name,
-    quality: NAKSHATRA_QUALITY[name] ?? "mixed",
-  };
-}
-
-function computeYoga(sunLong: number, moonLong: number): { name: string; quality: YogaQuality } {
-  const sum = normalize(sunLong + moonLong);
-  const idx = Math.min(Math.floor(sum / (360 / 27)), 26);
-  const name = YOGA_NAMES[idx];
-  return {
-    name,
-    quality: YOGA_QUALITY[name] ?? "neutral",
-  };
-}
-
-// --------------------------------------------------------------------------
 // Scoring
 // --------------------------------------------------------------------------
 
@@ -619,7 +419,7 @@ function scoreHour(
   });
 
   // 4. Karana
-  const karanaHalf: 0 | 1 = (normalize(moonLong - sunLong) % 12) < 6 ? 0 : 1;
+  const karanaHalf = getKaranaHalf(moonLong, sunLong);
   const karana = getKarana(tithi.num, karanaHalf);
   const karanaBonus = karana.quality === "auspicious" ? 8 : karana.quality === "inauspicious" ? -10 : 0;
   rawScore += karanaBonus;
