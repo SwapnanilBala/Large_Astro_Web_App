@@ -115,16 +115,32 @@
 }
 
 /* ── Hero Header ── */
+/*
+ * Two columns: the reading on the left, the chart's identity on the right.
+ *
+ * Was a centred flex column. Also now carries .band, so it bleeds to the card
+ * edges -- but only horizontally. It is deliberately NOT flush to the card's
+ * top edge: the sticky section nav is still the card's first child, and
+ * .insights-shell.below-navbar reserves --back-btn-band above the card for the
+ * floating back button, which a top-flush hero would crowd.
+ *
+ * The padding here overrides .band's own padding-inline, so it has to restate
+ * the bleed: --band-pad puts the content back on the content column while the
+ * background and ::before wash still reach the edges.
+ */
 .hero {
   position: relative;
   isolation: isolate;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
   align-items: center;
-  gap: 1.2rem;
+  gap: clamp(1.5rem, 3vw, 3rem);
   overflow: hidden;
-  text-align: center;
-  padding: clamp(2.25rem, 5vw, 4.5rem) clamp(1rem, 4vw, 3rem) clamp(1.5rem, 3vw, 2.5rem);
+  text-align: start;
+  padding:
+    clamp(2.25rem, 5vw, 4.5rem)
+    var(--band-pad)
+    clamp(1.5rem, 3vw, 2.5rem);
 }
 
 .hero::before {
@@ -146,9 +162,9 @@
 
 .heroCopy {
   display: grid;
-  justify-items: center;
+  justify-items: start;
   min-width: 0;
-  width: min(100%, 920px);
+  width: 100%;
 }
 
 .kicker {
@@ -183,7 +199,7 @@
 
 .title {
   display: grid;
-  justify-items: center;
+  justify-items: start;
   width: 100%;
   font-family: var(--font-display), sans-serif;
   font-size: clamp(2.35rem, 6vw, 4.75rem);
@@ -191,7 +207,7 @@
   color: var(--ink-main);
   margin: 0 0 1.15rem;
   line-height: 1.02;
-  text-align: center;
+  text-align: start;
   text-wrap: balance;
 }
 
@@ -224,36 +240,16 @@
   line-height: 1.62;
   max-width: 62ch;
   margin: 0;
-  text-align: center;
-}
-
-.heroFacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.55rem;
-  justify-content: center;
-  margin-top: 1rem;
-}
-
-.heroFacts span {
-  display: inline-flex;
-  align-items: center;
-  min-height: 2rem;
-  padding: 0.35rem 0.7rem;
-  border: 1px solid rgba(200, 155, 60, 0.18);
-  border-radius: 999px;
-  background: rgba(200, 155, 60, 0.06);
-  color: var(--ink-main);
-  font-size: 1.0rem;
-  font-weight: 650;
+  text-align: start;
 }
 
 .heroActions {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 0.65rem;
   flex-wrap: wrap;
+  margin-top: 1.4rem;
   padding-bottom: 0.15rem;
 }
 
@@ -436,6 +432,41 @@
 .heroPlanetRow > *:nth-child(5) {
   transform: translateY(-0.24rem);
 }
+
+/* ── Hero right column ── */
+
+.heroAside {
+  display: grid;
+  justify-items: end;
+  gap: 1rem;
+  min-width: 0;
+}
+
+/*
+ * Newsreader italic, not a handwriting face.
+ *
+ * The reference sets these accents in a script. Adding one costs another
+ * 30-50KB of preloaded woff2 on every desktop route to serve two lines, and
+ * --font-accent -- which the tree references but never defines -- has one
+ * existing consumer whose rendering would change the moment it resolved.
+ * Newsreader is already loaded with its italic, so this is free.
+ */
+.heroScript {
+  display: grid;
+  gap: 0.1rem;
+  margin: 0;
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1rem, 1.3vw, 1.18rem);
+  line-height: 1.35;
+  text-align: end;
+  color: var(--ink-soft);
+}
+
+.heroScript span {
+  color: var(--accent-gold);
+}
+
 
 /* ── Today's Sky band ── */
 
@@ -1353,6 +1384,60 @@
   max-width: min(100%, 840px);
   margin-inline: auto;
   width: 100%;
+}
+
+/*
+ * Everything below composes .card, so it has to sit AFTER .card in this file.
+ *
+ * CSS Modules `composes` puts the composed class in the element's class list;
+ * it does not merge declarations. Both classes therefore have one-class
+ * specificity and source order decides. Defined above .card, .heroArch's four
+ * corner longhands lost to .card's `border-radius` shorthand and the arch
+ * rendered as an ordinary 16px rectangle. Same trap the .cardRow3 comment
+ * warns about, one property along.
+ */
+/*
+ * The arch.
+ *
+ * A CSS shape rather than an SVG frame: an asymmetric radius scales with the
+ * content, needs no viewBox, and inherits the light-theme .card override for
+ * free. Only the sparkle inside it is drawn.
+ */
+.heroArch {
+  composes: card;
+  display: grid;
+  gap: 0.85rem;
+  width: min(100%, 13rem);
+  margin: 0;
+  padding: 1.6rem 1.15rem 1.25rem;
+  border-start-start-radius: 50% 6rem;
+  border-start-end-radius: 50% 6rem;
+  border-end-start-radius: var(--radius-lg, 18px);
+  border-end-end-radius: var(--radius-lg, 18px);
+  text-align: center;
+}
+
+.heroArchRow {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.heroArchRow dt {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+
+.heroArchRow dd {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 650;
+  line-height: 1.15;
+  color: var(--ink-main);
 }
 
 /* ── Planets Card ── */
@@ -4151,8 +4236,39 @@
    ═══════════════════════════════════════════════ */
 
 @media (max-width: 900px) {
+  /*
+   * One column, re-centred.
+   *
+   * This block used to be `align-items: center` alone, which centred a flex
+   * column horizontally. .hero is a grid now, so align-items is the BLOCK
+   * axis and that declaration silently stopped centring anything -- the fix
+   * is justify-items plus text-align, not a different align-items value.
+   */
   .hero {
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .heroCopy {
+    justify-items: center;
+  }
+
+  .title {
+    justify-items: center;
+    text-align: center;
+  }
+
+  .lead {
+    text-align: center;
+  }
+
+  .heroAside {
+    justify-items: center;
+  }
+
+  .heroScript {
+    text-align: center;
   }
 
   /*
@@ -4651,7 +4767,6 @@
   filter: none;
 }
 
-:global(html[data-theme="light"]) .heroFacts span,
 :global(html[data-theme="light"]) .heroDashaPill {
   border-color: rgba(173, 113, 56, 0.24);
   background: rgba(255, 247, 236, 0.76);

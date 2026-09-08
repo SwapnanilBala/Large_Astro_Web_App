@@ -947,6 +947,17 @@ export default function InsightsContent({
     };
   }, [domainRetryToken, historyQs, isLifeDomainLocked, payload.chart.life_domain_insights]);
 
+  /* The two signs the hero's arch shows alongside the rising sign. Read from
+     the natal placements, so they are the chart's own numbers rather than a
+     restatement of the summary sentence above them. */
+  const heroIdentity = useMemo(
+    () => ({
+      sun: payload.chart.planets.find((planet) => planet.name === "Sun")?.sign,
+      moon: payload.chart.planets.find((planet) => planet.name === "Moon")?.sign,
+    }),
+    [payload.chart.planets]
+  );
+
   const payloadWithDomainInsights: ChartApiResponse =
     domainInsights.length > 0
       ? {
@@ -1030,7 +1041,7 @@ export default function InsightsContent({
         {/* â”€â”€â”€ Hero Header â”€â”€â”€ */}
         <motion.header
           id="overview"
-          className={`${styles.hero} ${styles.anchorTarget}`}
+          className={`${styles.band} ${styles.hero} ${styles.anchorTarget}`}
           initial={shouldReduceMotion ? false : { opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 22 }}
@@ -1042,28 +1053,61 @@ export default function InsightsContent({
               <span className={styles.titleSuffix}>{t("insights.headingSuffix")}</span>
             </h1>
             <p className={styles.lead}>{payload.chart.summary}</p>
-            <div className={styles.heroFacts} aria-label="Key chart facts">
-              <span>{payload.chart.ascendant.sign} rising</span>
-              {payload.chart.dasha?.current_dasha && (
-                <span>{payload.chart.dasha.current_dasha} period</span>
-              )}
+            <div className={styles.heroActions} aria-label="Report actions">
+              <button
+                type="button"
+                className={styles.heroAction}
+                onClick={() => void copyCurrentChartLink()}
+              >
+                <FiCopy size={16} />
+                Copy link
+              </button>
+              <PersonalStory
+                payload={payloadWithDomainInsights}
+                compact
+                queryString={historyQs}
+              />
             </div>
           </div>
-          <div className={styles.heroActions} aria-label="Report actions">
-            <button
-              type="button"
-              className={styles.heroAction}
-              onClick={() => void copyCurrentChartLink()}
-            >
-              <FiCopy size={16} />
-              Copy link
-            </button>
-            <PersonalStory
-              payload={payloadWithDomainInsights}
-              compact
-              queryString={historyQs}
-            />
-          </div>
+
+          {/*
+            The hero's right column.
+            The arch carries the four facts that identify the chart rather than
+            four decorative words. Two of them -- rising sign and current
+            period -- used to be the .heroFacts chips directly above; they moved
+            in here rather than being duplicated, and Sun and Moon join them
+            because a reader naming their chart out loud names those four.
+          */}
+          <aside className={styles.heroAside}>
+            <p className={styles.heroScript}>
+              Read it as a map,
+              <span>not a verdict.</span>
+            </p>
+            <dl className={styles.heroArch} aria-label="Chart identity">
+              <div className={styles.heroArchRow}>
+                <dt>Rising</dt>
+                <dd>{payload.chart.ascendant.sign}</dd>
+              </div>
+              {heroIdentity.sun && (
+                <div className={styles.heroArchRow}>
+                  <dt>Sun</dt>
+                  <dd>{heroIdentity.sun}</dd>
+                </div>
+              )}
+              {heroIdentity.moon && (
+                <div className={styles.heroArchRow}>
+                  <dt>Moon</dt>
+                  <dd>{heroIdentity.moon}</dd>
+                </div>
+              )}
+              {payload.chart.dasha?.current_dasha && (
+                <div className={styles.heroArchRow}>
+                  <dt>Period</dt>
+                  <dd>{payload.chart.dasha.current_dasha}</dd>
+                </div>
+              )}
+            </dl>
+          </aside>
         </motion.header>
 
         <TodaysSkyBand transits={payload.transits} />
