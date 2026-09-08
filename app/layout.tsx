@@ -1,6 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 
+const THEME_BOOTSTRAP = `(() => {
+  try {
+    const theme = window.localStorage.getItem("lagna-theme") === "light" ? "light" : "dark";
+    const root = document.documentElement;
+    root.dataset.theme = theme;
+    root.style.colorScheme = theme;
+    document.body.style.background = theme === "light" ? "#fff8f5" : "#07111b";
+  } catch {}
+})();`;
+
 /*
  * Root shell — deliberately almost empty.
  *
@@ -90,7 +100,10 @@ export default function RootLayout({
           the first paint is dark on both trees. globals.css only loads on the
           desktop tree now, and the mobile sheet is a route chunk, so without
           this a handset flashes white before either arrives. */}
-      <body style={{ background: "#0A0A0F" }}>
+      <body style={{ background: "#07111B" }}>
+        <Script id="theme-bootstrap" strategy="beforeInteractive">
+          {THEME_BOOTSTRAP}
+        </Script>
         {children}
         {process.env.NODE_ENV === "production" && (
           <Script id="sw-register" strategy="afterInteractive">

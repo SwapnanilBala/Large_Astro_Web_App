@@ -4439,3 +4439,94 @@
   .heroPlanetRow > * {
     transform: none !important;
   }}
+
+/* ── Ethereal Dawn: insights surface refinements ── */
+:global(html[data-theme="light"]) .dashboard {
+  --ink-soft: #6f5967;
+}
+
+:global(html[data-theme="light"]) .hero::before {
+  background:
+    radial-gradient(ellipse at center, rgba(239, 175, 154, 0.26), transparent 54%),
+    radial-gradient(ellipse at 50% 68%, rgba(174, 148, 221, 0.16), transparent 66%);
+}
+
+:global(html[data-theme="light"]) .titleName {
+  background: linear-gradient(115deg, #3d2a40 12%, #ad7138 52%, #916fa8 88%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: none;
+}
+
+:global(html[data-theme="light"]) .heroFacts span,
+:global(html[data-theme="light"]) .heroDashaPill {
+  border-color: rgba(173, 113, 56, 0.24);
+  background: rgba(255, 247, 236, 0.76);
+  box-shadow: 0 5px 14px rgba(173, 113, 56, 0.07);
+}
+
+:global(html[data-theme="light"]) .heroPlanetRail {
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(223, 173, 132, 0.12) 18%, rgba(118, 178, 167, 0.1) 50%, rgba(223, 173, 132, 0.12) 82%, rgba(255, 255, 255, 0)),
+    rgba(255, 253, 251, 0.64);
+  border-top-color: rgba(173, 113, 56, 0.16);
+  border-bottom-color: rgba(67, 141, 129, 0.16);
+}
+
+:global(html[data-theme="light"]) .heroPlanetRail::before {
+  border-top-color: rgba(173, 113, 56, 0.28);
+}
+
+:global(html[data-theme="light"]) .card {
+  background: rgba(255, 253, 251, 0.82);
+  border-color: rgba(132, 86, 105, 0.14);
+  box-shadow: 0 7px 20px rgba(91, 55, 71, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+:global(html[data-theme="light"]) .card:hover {
+  border-color: rgba(173, 113, 56, 0.28);
+  box-shadow: 0 12px 28px rgba(91, 55, 71, 0.11), inset 0 1px 0 rgba(255, 255, 255, 0.94);
+}
+
+:global(html[data-theme="light"]) .cardDepthFront,
+:global(html[data-theme="light"]) .cardDepthMid,
+:global(html[data-theme="light"]) .cardDepthBack {
+  box-shadow: 0 9px 24px rgba(91, 55, 71, 0.09), inset 0 1px 0 rgba(255, 255, 255, 0.86);
+}
+
+:global(html[data-theme="light"]) .continuationHub {
+  background:
+    radial-gradient(circle at 5% 0%, rgba(239, 175, 154, 0.15), transparent 27%),
+    radial-gradient(circle at 95% 100%, rgba(174, 148, 221, 0.13), transparent 30%),
+    rgba(255, 253, 251, 0.86);
+  border-color: rgba(173, 113, 56, 0.22);
+  box-shadow: 0 12px 30px rgba(91, 55, 71, 0.09);
+}
+
+:global(html[data-theme="light"]) .continuationGroup {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(132, 86, 105, 0.12);
+}
+
+:global(html[data-theme="light"]) .continuationAction {
+  --continuation-ink: #347e75;
+  background: rgba(var(--continuation-accent), 0.09);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.76);
+}
+
+:global(html[data-theme="light"]) .continuationAction[data-tone="gold"] {
+  --continuation-ink: #805128;
+}
+
+:global(html[data-theme="light"]) .continuationAction[data-tone="rose"] {
+  --continuation-ink: #a04d65;
+}
+
+:global(html[data-theme="light"]) .continuationAction[data-tone="violet"] {
+  --continuation-ink: #655078;
+}
+
+:global(html[data-theme="light"]) .continuationAction[data-tone="green"] {
+  --continuation-ink: #356d50;
+}

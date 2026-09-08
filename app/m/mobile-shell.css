@@ -87,6 +87,39 @@
 
 }
 
+/* Ethereal Dawn follows the saved desktop preference on the dedicated mobile
+   tree as well. These are intentionally compact base tokens; route-level
+   mobile sheets continue to own their own layout and spacing. */
+html[data-theme="light"] {
+  --bg-deep: #fff8f5;
+  --bg-surface: #fffdfb;
+  --surface: rgba(255, 253, 251, 0.86);
+  --surface-strong: rgba(255, 247, 245, 0.94);
+  --text-primary: #36263a;
+  --text-secondary: #6f5967;
+  --text-tertiary: #866f7c;
+  --accent-gold: #ad7138;
+  --border-soft: rgba(126, 78, 98, 0.14);
+  --border-medium: rgba(173, 113, 56, 0.24);
+  --border-subtle: rgba(126, 78, 98, 0.18);
+  --focus-ring: rgba(91, 111, 181, 0.72);
+  --surface-lit:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 243, 240, 0.28) 48%),
+    #fffdfb;
+  --surface-lit-strong:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 237, 234, 0.34) 52%),
+    #fff7f5;
+  --edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  color-scheme: light;
+}
+
+html[data-theme="light"] body {
+  background:
+    radial-gradient(circle at 8% -4%, rgba(244, 185, 169, 0.25), transparent 22rem),
+    radial-gradient(circle at 95% 12%, rgba(188, 166, 229, 0.18), transparent 21rem),
+    var(--bg-deep);
+}
+
 /*
  * --font-display is defined on <main>, not :root, and that placement is load
  * bearing.
@@ -130,6 +163,15 @@ main {
 @supports (background-clip: text) or (-webkit-background-clip: text) {
   .mGold.mGold {
     background: linear-gradient(100deg, #f5f0e6 0%, #ecd3a6 52%, #c89b3c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@supports (background-clip: text) or (-webkit-background-clip: text) {
+  html[data-theme="light"] .mGold.mGold {
+    background: linear-gradient(100deg, #3d2a40 0%, #a7657b 52%, #ad7138 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;

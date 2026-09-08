@@ -169,6 +169,25 @@
   filter: blur(8px);
 }
 
+:global(html[data-theme="light"]) .datePickerWrapper {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(132, 86, 105, 0.17);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+:global(html[data-theme="light"]) .datePickerWrapper:hover {
+  border-color: rgba(173, 113, 56, 0.34);
+}
+
+:global(html[data-theme="light"]) .datePickerInput {
+  color: var(--ink-main);
+}
+
+:global(html[data-theme="light"]) .datePickerInput::placeholder,
+:global(html[data-theme="light"]) .datePickerInput:focus::placeholder {
+  color: rgba(111, 89, 103, 0.58);
+}
+
 /* Calendar popup styling */
 .calendarPopup {
   /* Two caps, whichever is smaller. --dp-available-height is published by the

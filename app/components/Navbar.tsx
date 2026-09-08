@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { readChartHistory } from "@/lib/chart-history-store";
+import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function Navbar() {
   const { account, status, signOut } = useAccount();
@@ -136,6 +137,8 @@ export default function Navbar() {
 
         {/* -- Right side: lang selector + auth (desktop) + hamburger (mobile) -- */}
         <div className="navbar-right">
+          <ThemeToggle />
+
           {/* Language Selector - always visible */}
           <div className="lang-selector" ref={langRef}>
             <button

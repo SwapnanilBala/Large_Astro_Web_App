@@ -181,6 +181,25 @@
   opacity: 0.45;
 }
 
+:global(html[data-theme="light"]) .inputWrapper {
+  background: rgba(255, 255, 255, 0.74);
+  border-color: rgba(132, 86, 105, 0.17);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+}
+
+:global(html[data-theme="light"]) .inputWrapper:hover {
+  border-color: rgba(173, 113, 56, 0.34);
+}
+
+:global(html[data-theme="light"]) .inputField {
+  color: var(--ink-main);
+}
+
+:global(html[data-theme="light"]) .inputField::placeholder,
+:global(html[data-theme="light"]) .inputField:focus::placeholder {
+  color: rgba(111, 89, 103, 0.58);
+}
+
 /* ── Typed-entry assistance ──
  * Reports what was tidied up once the visitor moves on, and offers the other
  * reading where one exists. Matches PremiumDatePicker so the two fields do not
