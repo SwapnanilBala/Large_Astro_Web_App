@@ -474,6 +474,130 @@
 }
 
 
+/* ── Connected Insight Zone ── */
+
+.zoneHeader {
+  display: grid;
+  justify-items: center;
+  gap: 0.25rem;
+  margin-bottom: clamp(1rem, 2vw, 1.6rem);
+  text-align: center;
+}
+
+.zoneTitle {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--ink-main);
+  margin: 0;
+}
+
+.zoneSubtitle {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  margin: 0;
+  max-width: 46ch;
+}
+
+/*
+ * Seven cards, laid out intrinsically.
+ *
+ * auto-fit means no breakpoint of its own: seven across at the widest, then
+ * five, four, two, one, wherever the track minimum lands. min(100%, ...) is
+ * load-bearing here for the reason .gatewayGrid documents -- without it a
+ * column narrower than the minimum still asks for the wider track, and because
+ * the page clips its x-axis the card is cut off rather than scrolling.
+ */
+.zoneCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+  gap: clamp(0.6rem, 1vw, 0.9rem);
+  min-width: 0;
+}
+
+.zoneCard {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border-radius: 16px;
+  border: 1px solid var(--line-soft);
+  background: var(--surface-soft);
+  text-align: start;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.zoneCard:hover,
+.zoneCard:focus-visible {
+  border-color: var(--accent-gold);
+  background: var(--surface-hover);
+}
+
+/*
+ * The selected state.
+ *
+ * Driven off aria-selected rather than a second class: the tablist already
+ * tracks which card is active for assistive tech, so a parallel styling flag
+ * could only ever get out of step with it.
+ */
+.zoneCard[aria-selected="true"] {
+  border-color: var(--accent-gold);
+  background: var(--chip-gold-surface);
+}
+
+.zoneCardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-gold) 14%, transparent);
+  color: var(--accent-gold);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.zoneCardText {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.zoneCardTitle {
+  font-family: var(--font-display), serif;
+  font-size: 0.88rem;
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--ink-main);
+}
+
+.zoneCardBody {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+  /* The headline is generated, so its length is not fixed. Two lines keeps
+     seven cards the same height without truncating anything that matters. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.zoneCardChevron {
+  color: var(--accent-gold);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
 /* ── Three-column row: column wrappers ── */
 
 /*
@@ -1930,11 +2054,6 @@
   margin: 0 0 1.25rem;
 }
 
-/* ── Section Header ── */
-.sectionHeader {
-  margin-bottom: 1rem;
-}
-
 /* ── Full-reading rules grid ── */
 .rulesScroll {
   display: grid;
@@ -3210,116 +3329,6 @@
 .domainScoreCard[data-domain]:hover {
   border-color: var(--domain-accent);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.domainSelectLabel {
-  margin: 0;
-  color: var(--ink-main);
-  font-size: 1rem;
-  font-weight: 700;
-}
-
-.domainSelectorHeader {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
-  margin: 1rem 0 0.6rem;
-}
-
-.domainSelectorHeader > span {
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-}
-
-.domainChips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.domainChip {
-  all: unset;
-  cursor: pointer;
-  padding: 0.55rem 0.9rem;
-  border-radius: 24px;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--ink-soft);
-  background: rgba(255, 243, 210, 0.04);
-  border: 1px solid rgba(200, 155, 60, 0.14);
-  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
-  transition-duration: 0.3s;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  box-sizing: border-box;
-}
-
-.domainChip::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 24px;
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.0), rgba(26, 123, 110, 0.0));
-  transition: background 0.3s ease;
-  z-index: 0;
-}
-
-.domainChip:hover {
-  color: var(--ink-main);
-  border-color: rgba(255, 255, 255, 0.16);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-}
-
-.domainChip:hover::before {
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.08), rgba(26, 123, 110, 0.08));
-}
-
-.domainChipActive {
-  composes: domainChip;
-  color: var(--accent-gold);
-  border-color: rgba(200, 155, 60, 0.4);
-  background: linear-gradient(135deg, rgba(200, 155, 60, 0.12), rgba(26, 123, 110, 0.08));
-  box-shadow:
-    0 0 20px rgba(200, 155, 60, 0.08),
-    inset 0 0 20px rgba(200, 155, 60, 0.03);
-  font-weight: 600;
-  transform: none;
-  padding: 0.55rem 0.9rem;
-}
-
-.domainChipActive:hover {
-  border-color: rgba(200, 155, 60, 0.5);
-  box-shadow:
-    0 4px 20px rgba(200, 155, 60, 0.12),
-    inset 0 0 20px rgba(200, 155, 60, 0.04);
-  transform: translateY(-1px);
-}
-
-/* Domain chip icon slot */
-.domainChipIcon {
-  display: inline-block;
-  margin-right: 0.35rem;
-  font-size: 1.1em;
-  vertical-align: middle;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.domainChipActive .domainChipIcon {
-  transform: scale(1.15);
-}
-
-.domainChip:active {
-  transform: scale(0.96);
-  transition: transform 80ms ease-out;
-}
-
-.domainChip:focus-visible {
-  outline: 2px solid var(--accent-gold);
-  outline-offset: 2px;
 }
 
 .domainModeTabs {
@@ -4766,10 +4775,6 @@
   .chartStarfield::after {
     animation: none;
     opacity: 0.4;
-  }
-
-  .domainChipActive {
-    transform: none;
   }
 
   .domainLoadingSteps span::before,
