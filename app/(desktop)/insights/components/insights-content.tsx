@@ -18,6 +18,15 @@ import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support
 import styles from "../insights.module.css";
 import SectionGateway from "./section-gateway";
 import TodaysSkyBand from "./todays-sky-band";
+import {
+  Flourish,
+  FoliageSprig,
+  LeafSprig,
+  ScriptRule,
+  Sparkle,
+  SunGlyph,
+} from "./decor/insights-decor";
+import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
@@ -940,6 +949,54 @@ export default function InsightsContent({
     payload.ashtakavarga?.sarvashtakavarga?.length === 12 &&
     payload.chart.houses?.length === 12;
 
+  /*
+   * The four tiles in the Practical Fortune strip.
+   *
+   * Each is gated on its own field rather than on the group, because
+   * LuckyElementsInfo carries arrays that can legitimately be empty -- a tile
+   * with a label and no value under it reads as a fault, whereas three tiles
+   * just reads as three tiles.
+   *
+   * Note the fourth is the gemstone, not an element: despite its name,
+   * lucky_elements has no Fire/Earth/Air/Water field at all, so the
+   * reference's "Lucky Element" tile has nothing behind it. Saying "Lucky
+   * stone" and showing the gemstone is the honest version.
+   */
+  const fortuneTiles = useMemo(() => {
+    const lucky = payload.chart.lucky_elements;
+    if (!lucky) return [];
+    const tiles: Array<{ label: string; value: string; caption: string }> = [];
+    if (lucky.primary_colors?.[0]) {
+      tiles.push({
+        label: "Lucky colour",
+        value: lucky.primary_colors[0],
+        caption: "Wear it when it matters.",
+      });
+    }
+    if (typeof lucky.lucky_numbers?.[0] === "number") {
+      tiles.push({
+        label: "Lucky number",
+        value: String(lucky.lucky_numbers[0]),
+        caption: "Turns tend to land on it.",
+      });
+    }
+    if (lucky.lucky_day) {
+      tiles.push({
+        label: "Lucky day",
+        value: lucky.lucky_day,
+        caption: "Begin things here.",
+      });
+    }
+    if (lucky.primary_gemstone) {
+      tiles.push({
+        label: "Lucky stone",
+        value: lucky.primary_gemstone,
+        caption: "Amplifies your intent.",
+      });
+    }
+    return tiles;
+  }, [payload.chart.lucky_elements]);
+
   const payloadWithDomainInsights: ChartApiResponse =
     domainInsights.length > 0
       ? {
@@ -1028,6 +1085,9 @@ export default function InsightsContent({
           animate={{ opacity: 1, y: 0 }}
           transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 22 }}
         >
+          <FoliageSprig className={`${decor.decor} ${decor.decorGold} ${decor.heroStart}`} />
+          <FoliageSprig className={`${decor.decor} ${decor.decorTeal} ${decor.heroEnd}`} />
+
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>{t("insights.kicker")}</p>
             <h1 className={styles.title}>
@@ -1065,7 +1125,11 @@ export default function InsightsContent({
               Read it as a map,
               <span>not a verdict.</span>
             </p>
+            <ScriptRule className={`${decor.inline} ${decor.decorGold} ${decor.rule}`} />
             <dl className={styles.heroArch} aria-label="Chart identity">
+              <Sparkle
+                className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm} ${styles.archSparkle}`}
+              />
               <div className={styles.heroArchRow}>
                 <dt>Rising</dt>
                 <dd>{payload.chart.ascendant.sign}</dd>
@@ -1184,7 +1248,11 @@ export default function InsightsContent({
                   now on the page that actually shows them. */}
               <div className={styles.zoneHeader}>
                 <p className={styles.kicker}>Ultimate Module</p>
-                <h2 className={styles.zoneTitle}>Connected Insight Zone</h2>
+                <h2 className={styles.zoneTitle}>
+                  <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
+                  Connected Insight Zone
+                  <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
+                </h2>
                 <p className={styles.zoneSubtitle}>
                   Seven areas, each read against its own evidence. Most active
                   first; the full workup opens on its own page.
@@ -1393,7 +1461,10 @@ export default function InsightsContent({
           </CollapsibleSection>
         )}
 
-        <div className={styles.gatewayGrid}>
+        {/* Row F. .gatewayGrid's own auto-fit rule was doing the same job as
+            .cardRowAuto; using the shared one means the gateways, the insight
+            zone and the continuation hub all break at the same widths. */}
+        <div className={`${styles.cardRowAuto} ${styles.gatewayGrid}`}>
           {/* ─── Timing & electional (gateway to its own page) ─── */}
           <GatewaySection id="timing" className={styles.timingSection}>
             <SectionGateway
@@ -1495,6 +1566,41 @@ export default function InsightsContent({
         </CollapsibleSection>
 
         {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
+        {payload.chart.lucky_elements && fortuneTiles.length > 0 && (
+          <section
+            className={`${styles.band} ${styles.fortuneBand}`}
+            aria-labelledby="fortune-band-heading"
+          >
+            <LeafSprig className={`${decor.decor} ${decor.decorGold} ${styles.fortuneLeaf}`} />
+
+            <div className={styles.fortuneIntro}>
+              <SunGlyph className={`${decor.inline} ${decor.decorGold} ${decor.sun}`} />
+              <h2 id="fortune-band-heading" className={styles.fortuneTitle}>
+                Your Practical Fortune
+              </h2>
+              <p className={styles.fortuneSubtitle}>Everyday magic, made simple.</p>
+              <Flourish className={`${decor.inline} ${decor.decorGold} ${decor.flourish}`} />
+            </div>
+
+            {/*
+              The four tiles the reference puts in this strip, read straight off
+              lucky_elements. The full panel is still underneath in its own
+              collapsible -- nothing was moved out of it, this is a summary of
+              what it already holds, so that section's saved open/closed state
+              keeps working exactly as before.
+            */}
+            <dl className={styles.fortuneTiles}>
+              {fortuneTiles.map((tile) => (
+                <div key={tile.label} className={styles.fortuneTile}>
+                  <dt className={styles.fortuneLabel}>{tile.label}</dt>
+                  <dd className={styles.fortuneValue}>{tile.value}</dd>
+                  <dd className={styles.fortuneCaption}>{tile.caption}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        )}
+
         {payload.chart.lucky_elements && (
           <CollapsibleSection
             id="fortune"

@@ -476,6 +476,105 @@
 
 /* ── Connected Insight Zone ── */
 
+/* ── Practical Fortune band ── */
+
+.fortuneBand {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+.fortuneIntro {
+  display: grid;
+  justify-items: start;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.fortuneTitle {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.15rem, 1.7vw, 1.5rem);
+  font-weight: 650;
+  line-height: 1.2;
+  color: var(--ink-main);
+  margin: 0;
+}
+
+.fortuneSubtitle {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+/*
+ * Four tiles with hairlines between them.
+ *
+ * A fixed track count rather than auto-fit, deliberately: the separators are
+ * inline-start borders on every tile but the first, and auto-fit cannot know
+ * which tile begins a wrapped row -- so a wrapped layout draws a stray
+ * hairline down the left edge of row two. Fixed tracks plus an explicit 2x2
+ * and then 1-up at narrow widths keeps the rhythm honest.
+ */
+.fortuneTiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: start;
+  gap: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.fortuneTile {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+  padding-inline: clamp(0.75rem, 1.5vw, 1.4rem);
+}
+
+.fortuneTile:not(:first-child) {
+  border-inline-start: 1px solid var(--line-soft);
+}
+
+.fortuneLabel {
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.fortuneValue {
+  margin: 0;
+  font-family: var(--font-display), serif;
+  font-size: clamp(1rem, 1.4vw, 1.25rem);
+  font-weight: 650;
+  line-height: 1.15;
+  color: var(--accent-gold);
+}
+
+.fortuneCaption {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+/* The sprig at the far end. Absolute, so it takes no grid track. */
+.fortuneLeaf {
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  inline-size: clamp(2.5rem, 5vw, 4rem);
+}
+
+.archSparkle {
+  justify-self: center;
+  margin-bottom: 0.15rem;
+}
+
 .zoneHeader {
   display: grid;
   justify-items: center;
@@ -4326,6 +4425,37 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .fortuneBand {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+
+  .fortuneIntro {
+    justify-items: center;
+  }
+
+  /* 2x2. The separators become block-start borders here, because a vertical
+     hairline on the third tile would be the left edge of a new row rather
+     than a divider between two neighbours. */
+  .fortuneTiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem 0;
+  }
+
+  .fortuneTile:not(:first-child) {
+    border-inline-start: 0;
+  }
+
+  .fortuneTile:nth-child(even) {
+    border-inline-start: 1px solid var(--line-soft);
+  }
+
+  .fortuneTile:nth-child(n + 3) {
+    border-block-start: 1px solid var(--line-soft);
+    padding-block-start: 0.9rem;
+  }
+
   /*
    * The sky band gives up its side columns before the rail gives up its orbs:
    * the rail is the content, the label and the note are captions for it. Added
@@ -4448,6 +4578,21 @@
 }
 
 @media (max-width: 600px) {
+  /* One column of tiles: at this width two columns of a serif value plus a
+     caption is narrower than the words in it. */
+  .fortuneTiles {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fortuneTile:nth-child(even) {
+    border-inline-start: 0;
+  }
+
+  .fortuneTile:not(:first-child) {
+    border-block-start: 1px solid var(--line-soft);
+    padding-block-start: 0.9rem;
+  }
+
   .dashboard {
     gap: 1rem;
   }

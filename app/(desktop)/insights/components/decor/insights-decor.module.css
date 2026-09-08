@@ -1,0 +1,98 @@
+/*
+ * Positioning and colour for the decorative glyphs.
+ *
+ * The glyphs themselves carry no colour -- they stroke `currentColor` -- so
+ * these wrappers are the only place a hue is chosen, and they choose it from a
+ * token that both themes redefine. That is the whole theming story for the
+ * decorative layer: no `html[data-theme="light"]` block needed.
+ */
+
+.decor {
+  position: absolute;
+  /* -1 rather than 0, paired with `isolation: isolate` on .band. That is the
+     same arrangement .hero/.hero::before already uses: in-flow content at
+     z-index auto sits above it for free, so the content needs no z-index of
+     its own, and the isolate keeps -1 from escaping behind the card. */
+  z-index: -1;
+  pointer-events: none;
+  inline-size: clamp(6rem, 12vw, 11rem);
+  block-size: auto;
+}
+
+.decorGold {
+  color: var(--accent-gold);
+  opacity: 0.26;
+}
+
+.decorTeal {
+  color: var(--accent-teal);
+  opacity: 0.2;
+}
+
+/*
+ * Light needs more of it.
+ *
+ * Gold on deep ink at 0.26 and gold on cream at 0.26 do not read as the same
+ * weight -- the cream has far less contrast to give, so decor tuned in dark
+ * looks washed out in light. Opacity only; the hue still comes from the token.
+ */
+:global(html[data-theme="light"]) .decorGold {
+  opacity: 0.34;
+}
+
+:global(html[data-theme="light"]) .decorTeal {
+  opacity: 0.28;
+}
+
+/* ── Hero corners ── */
+
+.heroStart {
+  inset-block-start: 0;
+  inset-inline-start: 0;
+}
+
+.heroEnd {
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  /* One drawing, mirrored, rather than a second nearly-identical path. */
+  transform: scaleX(-1);
+}
+
+/* ── Inline glyphs (not absolutely positioned) ── */
+
+.inline {
+  position: static;
+  z-index: auto;
+  display: inline-block;
+  vertical-align: middle;
+  pointer-events: none;
+}
+
+.sparkleSm {
+  inline-size: 0.85rem;
+}
+
+.sun {
+  inline-size: 2rem;
+}
+
+.leaf {
+  inline-size: 3.25rem;
+}
+
+.rule {
+  inline-size: 4.5rem;
+}
+
+.flourish {
+  inline-size: 5.5rem;
+}
+
+@media (max-width: 900px) {
+  /* The hero is one centred column below 900; corner sprigs would sit on top
+     of the copy rather than beside it. */
+  .heroStart,
+  .heroEnd {
+    display: none;
+  }
+}
