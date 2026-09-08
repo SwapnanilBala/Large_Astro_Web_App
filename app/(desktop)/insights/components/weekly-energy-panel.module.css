@@ -271,6 +271,31 @@
   line-height: 1.4;
 }
 
+/* ── This week's vibe ── */
+
+.vibe {
+  display: grid;
+  gap: 0.4rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line-soft);
+}
+
+.vibeTitle {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+  font-weight: 650;
+  color: var(--ink-main);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.vibeBody {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: 0;
+}
+
 /* ── Quote ── */
 
 .quote {
@@ -278,9 +303,7 @@
   font-style: italic;
   font-size: 0.95rem;
   color: var(--ink-soft);
-  margin: 0;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--line-soft);
+  margin: 0.35rem 0 0;
 }
 
 /* ── Load and error states ── */

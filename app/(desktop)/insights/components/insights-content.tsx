@@ -958,6 +958,12 @@ export default function InsightsContent({
     [payload.chart.planets]
   );
 
+  /* Hoisted out of the JSX because the three-column row has to know whether
+     its third column exists before it can choose a track count. */
+  const hasHouseSupport =
+    payload.ashtakavarga?.sarvashtakavarga?.length === 12 &&
+    payload.chart.houses?.length === 12;
+
   const payloadWithDomainInsights: ChartApiResponse =
     domainInsights.length > 0
       ? {
@@ -1116,13 +1122,19 @@ export default function InsightsContent({
 
         <motion.div
           id="chart-map"
-          className={`${styles.gridMain} ${styles.anchorTarget}`}
+          className={`${styles.cardRow3} ${styles.anchorTarget}`}
+          /* Two tracks rather than three when the Ashtakavarga block is absent,
+             so the row closes up instead of leaving a third of itself empty. */
+          data-columns={hasHouseSupport ? "three" : "two"}
           variants={bentoContainer}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          {/* Birth Chart â€” Large card spanning 2 columns */}
+          {/* Left: the wheel and the three signals read off it, one card.
+              These were two siblings in a one-column grid; the glance panel
+              held three short facts in a column half of which was empty, and
+              it belongs against the chart it describes. */}
           <motion.div
             className={`${styles.cardChart} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
@@ -1134,29 +1146,29 @@ export default function InsightsContent({
                 planets={payload.chart.planets}
               />
             </PanelErrorBoundary>
-          </motion.div>
-
-          <motion.div
-            className={styles.chartGlanceShell}
-            variants={bentoItemFromRight}
-          >
             <ChartAtAGlance payload={payload} />
           </motion.div>
-        </motion.div>
 
-        {/* Gated out here, not just inside the panel. The panel returns null
-            without an Ashtakavarga block, but the section wrapper would still
-            have drawn its heading and an empty body — a titled section with
-            nothing under it reads as a failure rather than as an omission. */}
-        {payload.ashtakavarga?.sarvashtakavarga?.length === 12 &&
-          payload.chart.houses?.length === 12 && (
-            <CollapsibleSection
+          {/* Centre: the week. */}
+          <motion.div className={styles.rowPanel} variants={bentoItemFromRight}>
+            <WeeklyEnergyPanel queryString={historyQs} />
+          </motion.div>
+
+          {/* Right: house support, promoted out of its collapsible so it can
+              hold a column. It keeps its id, so /insights#house-support still
+              resolves -- but it loses CollapsibleSection's force-open-on-hash,
+              so it now relies on .anchorTarget's scroll-margin-top alone. */}
+          {hasHouseSupport && (
+            <motion.section
               id="house-support"
-              kicker="House support"
-              title="How much support your chart receives from the houses"
-              defaultOpen={true}
-              persistKey={`${sectionStateScope}:house-support`}
+              className={`${styles.rowPanel} ${styles.card} ${styles.anchorTarget}`}
+              variants={bentoItemFromRight}
+              aria-labelledby="house-support-heading"
             >
+              <p className={styles.kicker}>House support</p>
+              <h2 id="house-support-heading" className={styles.rowPanelTitle}>
+                How much support your chart receives from the houses
+              </h2>
               <PanelErrorBoundary panelName="House Support">
                 <HouseSupportPanel
                   ashtakavarga={payload.ashtakavarga}
@@ -1168,8 +1180,9 @@ export default function InsightsContent({
                 What each house is responsible for
                 <span aria-hidden="true">&rarr;</span>
               </Link>
-            </CollapsibleSection>
+            </motion.section>
           )}
+        </motion.div>
 
         <CollapsibleSection
           kicker="Chart details"
@@ -1564,12 +1577,6 @@ export default function InsightsContent({
             </Link>
           </div>
         </motion.section>
-
-        {/* Mounted full-width here for now. Row C of the new layout is
-            where it ends up; landing it on its own first means the chart, the
-            pager and the fetch all get verified before a three-column grid
-            can be blamed for anything. */}
-        <WeeklyEnergyPanel queryString={historyQs} />
 
         {/* â”€â”€â”€ Footer Actions â”€â”€â”€ */}
         <motion.div

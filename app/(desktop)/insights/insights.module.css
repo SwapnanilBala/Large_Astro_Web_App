@@ -95,6 +95,12 @@
   align-items: start;
 }
 
+/* The third column is gated on the Ashtakavarga block, so the row has to be
+   able to close up rather than leave a third of itself blank. */
+.cardRow3[data-columns="two"] {
+  grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
+}
+
 /*
  * Equal-card row: the insight zone, the gateways, the continuation hub.
  *
@@ -467,6 +473,31 @@
   color: var(--accent-gold);
 }
 
+
+/* ── Three-column row: column wrappers ── */
+
+/*
+ * A column that is a panel in its own right.
+ *
+ * Not composing .card: the centre column's own component draws no surface and
+ * the right column composes .card explicitly in the markup, so putting a
+ * surface here would double the border on one of them.
+ */
+.rowPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.rowPanelTitle {
+  font-family: var(--font-display), serif;
+  font-size: clamp(1rem, 1.3vw, 1.2rem);
+  font-weight: 650;
+  line-height: 1.25;
+  color: var(--ink-main);
+  margin: 0;
+}
 
 /* ── Today's Sky band ── */
 
@@ -1101,16 +1132,6 @@
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
-.gridMain {
-  composes: grid;
-  /* One column: the chart gets the full content width rather than two thirds
-     of it. The glance panel that used to sit alongside held three short facts
-     and a sentence in a column half of which was empty, so it reads better as
-     a strip underneath. */
-  grid-template-columns: 1fr;
-  align-items: stretch;
-}
-
 .gridThemes {
   composes: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
@@ -1441,10 +1462,6 @@
 }
 
 /* ── Planets Card ── */
-.chartGlanceShell {
-  min-width: 0;
-}
-
 .chartGlance {
   composes: card;
   /* Was a tall column beside the chart; now a full-width strip below it. The
@@ -4235,6 +4252,30 @@
    Responsive Breakpoints
    ═══════════════════════════════════════════════ */
 
+/*
+ * ── 1200px ──
+ *
+ * Placed immediately before the 900px block, NOT appended at the end of the
+ * file. Media queries carry no specificity, so a max-width: 1200px block
+ * sitting after the 900 and 600 ones would also match at those widths and win
+ * on source order alone -- silently undoing both.
+ *
+ * Three columns of 30/42/28 stop working before they stop fitting: the wheel
+ * and the seven-day chart both need width more than the house-support rings
+ * do. So the rings drop to a full-width row underneath and the other two share
+ * the top.
+ */
+@media (max-width: 1200px) {
+  .cardRow3,
+  .cardRow3[data-columns="two"] {
+    grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
+  }
+
+  .cardRow3 > *:nth-child(3) {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 900px) {
   /*
    * One column, re-centred.
@@ -4269,6 +4310,11 @@
 
   .heroScript {
     text-align: center;
+  }
+
+  .cardRow3,
+  .cardRow3[data-columns="two"] {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   /*
@@ -4309,10 +4355,6 @@
 
   .heroActions {
     justify-content: center;
-  }
-
-  .gridMain {
-    grid-template-columns: 1fr;
   }
 
   .cardChart,

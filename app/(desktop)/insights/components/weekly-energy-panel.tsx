@@ -267,8 +267,17 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             </div>
           </div>
 
-          {/* The quote arrives as a key so it resolves through i18n. */}
-          <p className={styles.quote}>{t(`quotes.${data.headline.quote_key}`)}</p>
+          {/*
+            The week's own headline. Both of these come from the same response
+            as the chart, so they cost no second request and cannot describe a
+            different week from the line above them.
+          */}
+          <div className={styles.vibe}>
+            <h3 className={styles.vibeTitle}>{data.headline.title}</h3>
+            <p className={styles.vibeBody}>{data.headline.paragraph}</p>
+            {/* The quote arrives as a key so it resolves through i18n. */}
+            <p className={styles.quote}>{t(`quotes.${data.headline.quote_key}`)}</p>
+          </div>
         </div>
       )}
     </section>
