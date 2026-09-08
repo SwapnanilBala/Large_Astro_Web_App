@@ -358,6 +358,23 @@ h3 {
   -webkit-backdrop-filter: blur(20px);
   box-shadow: var(--shadow-card);
   padding: clamp(1.3rem, 2.7vw, 2.6rem);
+  /*
+   * The inline padding and the radius, restated as tokens.
+   *
+   * A full-bleed band inside this card has to pull itself back out by exactly
+   * the amount the card pads by, and that amount is redefined in five more
+   * places below (768/600/480 breakpoints, a dead 680 one, and the safe-area
+   * @supports block that sets left and right independently). A band that
+   * hardcoded the value here would overshoot the card edge by ~1.9rem on a
+   * small phone.
+   *
+   * These MIRROR the two declarations above them -- they do not replace them.
+   * Nineteen other pages use .dashboard-shell, so this file stays a no-op:
+   * change the padding and change the token, on the same line, every time.
+   * Read by .band in app/(desktop)/insights/insights.module.css.
+   */
+  --shell-pad-inline: clamp(1.3rem, 2.7vw, 2.6rem);
+  --shell-radius: 24px;
   z-index: 1;
   animation: rise 650ms ease-out;
 }
@@ -2655,6 +2672,7 @@ label:has(.autocomplete-wrapper.is-open) {
 
   .dashboard-shell {
     border-radius: 22px;
+    --shell-radius: 22px;
   }
 
   .metrics-grid {
@@ -6170,6 +6188,8 @@ textarea:focus-visible {
     margin: 0.75rem auto;
     padding: clamp(1rem, 3vw, 1.5rem);
     border-radius: 16px;
+    --shell-pad-inline: clamp(1rem, 3vw, 1.5rem);
+    --shell-radius: 16px;
   }
 
   .glass-section {
@@ -6254,6 +6274,8 @@ textarea:focus-visible {
     padding: clamp(0.75rem, 3vw, 1.2rem);
     border-radius: 14px;
     max-width: 100%;
+    --shell-pad-inline: clamp(0.75rem, 3vw, 1.2rem);
+    --shell-radius: 14px;
   }
 
   .glass-section {
@@ -6319,6 +6341,8 @@ textarea:focus-visible {
     margin: 0.35rem auto;
     padding: 0.7rem;
     border-radius: 12px;
+    --shell-pad-inline: 0.7rem;
+    --shell-radius: 12px;
   }
 
   .glass-section {
@@ -6370,6 +6394,11 @@ textarea:focus-visible {
     .dashboard-shell {
       padding-left: max(0.75rem, env(safe-area-inset-left));
       padding-right: max(0.75rem, env(safe-area-inset-right));
+      /* This block, not the breakpoint ones, is what a real browser under
+         768px actually resolves the inline padding to. One token for a pair
+         that can differ on a notched device in landscape: the start side is
+         the one a band's margin is measured from. */
+      --shell-pad-inline: max(0.75rem, env(safe-area-inset-left));
     }}}
 
 /* ── Touch target sizing for mobile ── */
