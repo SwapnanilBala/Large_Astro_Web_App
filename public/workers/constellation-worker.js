@@ -74,7 +74,7 @@ function computeStars(ascendantSign) {
     result.push({
       x: rng() * 600,
       y: rng() * 600,
-      r: 0.5 + rng() * 1.5,
+      r: 0.75 + rng() * 1.75,
       dur: 2 + rng() * 3,
       delay: rng() * 5,
     });

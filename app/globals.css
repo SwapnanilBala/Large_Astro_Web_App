@@ -4697,6 +4697,7 @@ a:focus-visible {
   width: 100%;
   border-radius: inherit;
   overflow: hidden;
+  background: #030a14;
 }
 
 .constellation-svg {
@@ -4704,28 +4705,31 @@ a:focus-visible {
   width: 100%;
   height: auto;
   border-radius: inherit;
+  background: #030a14;
 }
 
 /* Star twinkle animation */
 .constellation-star {
-  opacity: 0.3;
+  opacity: 0.55;
   animation: constellation-twinkle 3s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 2px rgba(208, 229, 255, 0.68));
 }
 
 @keyframes constellation-twinkle {
   0% {
-    opacity: 0.2;
+    opacity: 0.42;
   }
   50% {
-    opacity: 0.9;
+    opacity: 1;
   }
   100% {
-    opacity: 0.4;
+    opacity: 0.64;
   }}
 
 /* Planet dot pulse animation */
 .constellation-planet-dot {
   animation: constellation-pulse 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 2px rgba(235, 246, 255, 0.58));
 }
 
 @keyframes constellation-pulse {
@@ -4735,12 +4739,25 @@ a:focus-visible {
     r: inherit;
   }
   50% {
-    filter: brightness(1.3);
+    filter: drop-shadow(0 0 2px rgba(235, 246, 255, 0.58)) brightness(1.3);
   }}
 
 /* Planet glow */
 .constellation-planet-glow {
   transition: r 0.2s ease, opacity 0.2s ease;
+}
+
+/* A dim final twinkle is not useful to people who reduce motion. Freeze the
+   star field and markers at a clearly visible resting state instead. */
+@media (prefers-reduced-motion: reduce) {
+  .constellation-star {
+    animation: none !important;
+    opacity: 0.76;
+  }
+
+  .constellation-planet-dot {
+    animation: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

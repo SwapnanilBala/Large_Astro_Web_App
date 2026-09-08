@@ -5,7 +5,7 @@ import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
 import {
   CX, CY, ZODIAC_R, INNER_R, PLANET_R, HOUSE_NUM_R,
   PLANET_SYMBOLS, PLANET_COLORS, SIGN_SYMBOLS, SIGN_ORDER,
-  ELEMENT_MAP, ELEMENT_COLORS,
+  ELEMENT_MAP,
   lonToAngle, polarToCartesian, describeWedge, spreadAngles,
 } from "@/lib/constellation-geometry";
 import styles from "./mobile-chart.module.css";
@@ -40,6 +40,17 @@ type Placed = {
   angle: number;
 };
 
+// The mobile wheel has no stars or animation to lift the band from the sky,
+// so its elemental wash needs a little more presence than the shared chart
+// geometry defaults. It remains deliberately translucent to preserve the
+// calm, nocturnal treatment.
+const MOBILE_ELEMENT_COLORS: Record<"fire" | "earth" | "air" | "water", string> = {
+  fire: "rgba(255,100,80,0.13)",
+  earth: "rgba(100,200,120,0.12)",
+  air: "rgba(100,180,255,0.13)",
+  water: "rgba(160,100,220,0.13)",
+};
+
 export default function MobileChart({ ascendantSign, houses, planets = [] }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
 
@@ -72,7 +83,7 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
       >
         <defs>
           <radialGradient id="mcCore" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(212,165,116,0.16)" />
+            <stop offset="0%" stopColor="rgba(212,165,116,0.28)" />
             <stop offset="100%" stopColor="rgba(212,165,116,0)" />
           </radialGradient>
         </defs>
@@ -85,9 +96,9 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
             <path
               key={sign}
               d={describeWedge(CX, CY, INNER_R, ZODIAC_R, start, end)}
-              fill={ELEMENT_COLORS[ELEMENT_MAP[sign]]}
-              stroke="rgba(212,165,116,0.14)"
-              strokeWidth="0.75"
+              fill={MOBILE_ELEMENT_COLORS[ELEMENT_MAP[sign]]}
+              stroke="rgba(244,214,162,0.34)"
+              strokeWidth="1.1"
             />
           );
         })}
@@ -104,7 +115,9 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
               textAnchor="middle"
               dominantBaseline="central"
             >
-              {SIGN_SYMBOLS[sign]}
+              {/* Keep the glyphs in the wheel's gold ink instead of falling
+                  back to coloured emoji, which is harder to read at handset size. */}
+              {`${SIGN_SYMBOLS[sign]}\uFE0E`}
             </text>
           );
         })}
@@ -120,7 +133,7 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
             <g key={house.house_number}>
               <line
                 x1={inner.x} y1={inner.y} x2={outer.x} y2={outer.y}
-                stroke="rgba(212,165,116,0.12)" strokeWidth="0.75" strokeDasharray="3 5"
+                stroke="rgba(244,214,162,0.28)" strokeWidth="1" strokeDasharray="3 5"
               />
               <text
                 x={label.x} y={label.y}
@@ -133,7 +146,7 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
           );
         })}
 
-        <circle cx={CX} cy={CY} r={INNER_R} fill="none" stroke="rgba(212,165,116,0.16)" strokeWidth="1" />
+        <circle cx={CX} cy={CY} r={INNER_R} fill="none" stroke="rgba(244,214,162,0.38)" strokeWidth="1.25" />
         <circle cx={CX} cy={CY} r="88" fill="url(#mcCore)" />
 
         {/* Centre: the lagna */}
@@ -167,9 +180,9 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
               <circle cx={pos.x} cy={pos.y} r="30" fill="transparent" />
               <circle
                 cx={pos.x} cy={pos.y} r={isOn ? 20 : 16}
-                fill={`${colour}22`}
+                fill={`${colour}${isOn ? "55" : "33"}`}
                 stroke={colour}
-                strokeWidth={isOn ? 1.75 : 1}
+                strokeWidth={isOn ? 2.25 : 1.5}
               />
               <text
                 x={pos.x} y={pos.y}

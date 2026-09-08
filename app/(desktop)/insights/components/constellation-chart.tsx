@@ -64,10 +64,12 @@ const ELEMENT_MAP: Record<string, "fire" | "earth" | "air" | "water"> = {
 };
 
 const ELEMENT_COLORS: Record<string, string> = {
-  fire: "rgba(255,100,80,0.06)",
-  earth: "rgba(100,200,120,0.06)",
-  air: "rgba(100,180,255,0.06)",
-  water: "rgba(160,100,220,0.06)",
+  // Keep the elemental tint quiet enough to stay atmospheric, but strong
+  // enough to distinguish the zodiac band from the sky beneath it.
+  fire: "rgba(255,100,80,0.12)",
+  earth: "rgba(100,200,120,0.11)",
+  air: "rgba(100,180,255,0.12)",
+  water: "rgba(160,100,220,0.12)",
 };
 
 // Seeded random number generator for consistent star positions per chart
@@ -192,7 +194,7 @@ export default function ConstellationChart({
       result.push({
         x: rng() * 600,
         y: rng() * 600,
-        r: 0.5 + rng() * 1.5,
+        r: 0.75 + rng() * 1.75,
         dur: 2 + rng() * 3,
         delay: rng() * 5,
       });
@@ -364,21 +366,21 @@ export default function ConstellationChart({
         <defs>
           {/* Sky background gradient */}
           <radialGradient id="cSkyGrad" cx="50%" cy="50%" r="70%">
-            <stop offset="0%" stopColor="#0a1628" />
-            <stop offset="100%" stopColor="#020810" />
+            <stop offset="0%" stopColor="#132744" />
+            <stop offset="100%" stopColor="#030a14" />
           </radialGradient>
 
           {/* Center glow */}
           <radialGradient id="cCenterGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(242, 194, 108, 0.12)" />
+            <stop offset="0%" stopColor="rgba(242, 194, 108, 0.2)" />
             <stop offset="100%" stopColor="rgba(242, 194, 108, 0)" />
           </radialGradient>
 
           {/* Planet glow filters - one per planet color */}
           {Object.entries(PLANET_COLORS).map(([name, color]) => (
             <filter key={name} id={`cGlow-${name}`} x="-100%" y="-100%" width="300%" height="300%">
-              <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
-              <feFlood floodColor={color} floodOpacity="0.6" result="color" />
+              <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur" />
+              <feFlood floodColor={color} floodOpacity="0.78" result="color" />
               <feComposite in="color" in2="blur" operator="in" result="colorBlur" />
               <feMerge>
                 <feMergeNode in="colorBlur" />
@@ -446,8 +448,8 @@ export default function ConstellationChart({
                 <path
                   d={describeArc(CX, CY, ZODIAC_R, startAngle, endAngle)}
                   fill="none"
-                  stroke={isAsc ? "rgba(242,194,108,0.35)" : "rgba(255,255,255,0.08)"}
-                  strokeWidth={isAsc ? 1.5 : 0.5}
+                  stroke={isAsc ? "rgba(255,216,137,0.8)" : "rgba(220,234,248,0.2)"}
+                  strokeWidth={isAsc ? 2 : 1}
                   strokeDasharray={isAsc ? "none" : "2 4"}
                   filter={isAsc ? "url(#cAscGlow)" : "none"}
                 />
@@ -459,8 +461,8 @@ export default function ConstellationChart({
                     <line
                       x1={inner.x} y1={inner.y}
                       x2={outer.x} y2={outer.y}
-                      stroke="rgba(255,255,255,0.05)"
-                      strokeWidth="0.5"
+                      stroke="rgba(213,229,247,0.16)"
+                      strokeWidth="0.75"
                       strokeDasharray="2 4"
                     />
                   );
@@ -469,13 +471,15 @@ export default function ConstellationChart({
                 <text
                   x={labelPos.x}
                   y={labelPos.y}
-                  fill={isAsc ? "rgba(242,194,108,0.9)" : "rgba(255,255,255,0.35)"}
-                  fontSize="14"
+                  fill={isAsc ? "#ffe0a3" : "rgba(231,240,250,0.72)"}
+                  fontSize="16"
                   textAnchor="middle"
                   dominantBaseline="central"
                   style={{ fontFamily: "var(--font-display), serif" }}
                 >
-                  {SIGN_SYMBOLS[sign]}
+                  {/* Force text presentation: the colour emoji fallback ignores
+                      the high-contrast ink chosen for the zodiac rim. */}
+                  {`${SIGN_SYMBOLS[sign]}\uFE0E`}
                 </text>
               </g>
             );
@@ -503,16 +507,16 @@ export default function ConstellationChart({
                   y1={CY + (HOUSE_NUM_R - 20) * Math.sin(degToRad(houseStartAngle))}
                   x2={CX + INNER_R * Math.cos(degToRad(houseStartAngle))}
                   y2={CY + INNER_R * Math.sin(degToRad(houseStartAngle))}
-                  stroke="rgba(242,194,108,0.1)"
-                  strokeWidth="0.5"
+                  stroke="rgba(255,216,137,0.3)"
+                  strokeWidth="0.75"
                   strokeDasharray="3 6"
                 />
                 {/* House number */}
                 <text
                   x={numPos.x}
                   y={numPos.y}
-                  fill="rgba(242,194,108,0.2)"
-                  fontSize="10"
+                  fill="rgba(255,222,160,0.72)"
+                  fontSize="11"
                   textAnchor="middle"
                   dominantBaseline="central"
                   style={{
@@ -538,8 +542,8 @@ export default function ConstellationChart({
               key={`conj-${i}`}
               x1={line.x1} y1={line.y1}
               x2={line.x2} y2={line.y2}
-              stroke="rgba(255,255,255,0.15)"
-              strokeWidth="0.5"
+              stroke="rgba(218,235,250,0.38)"
+              strokeWidth="0.75"
               strokeDasharray="2 4"
             />
           ))}
@@ -583,9 +587,9 @@ export default function ConstellationChart({
               <circle
                 cx={p.cx}
                 cy={p.cy}
-                r={isHovered ? 10 : 7}
+                r={isHovered ? 12 : 9}
                 fill={color}
-                opacity={isHovered ? 0.25 : 0.12}
+                opacity={isHovered ? 0.48 : 0.28}
                 filter={`url(#cGlow-${p.name})`}
                 className="constellation-planet-glow"
               />
@@ -593,7 +597,7 @@ export default function ConstellationChart({
               <circle
                 cx={p.cx}
                 cy={p.cy}
-                r={isHovered ? 5 : 4}
+                r={isHovered ? 6 : 5}
                 fill={color}
                 className="constellation-planet-dot"
                 style={{
@@ -605,13 +609,17 @@ export default function ConstellationChart({
                 x={p.cx}
                 y={p.cy - 12}
                 fill={color}
-                fontSize={isHovered ? "13" : "11"}
+                fontSize={isHovered ? "15" : "13"}
                 textAnchor="middle"
                 dominantBaseline="central"
                 style={{
                   fontFamily: "var(--font-display), serif",
                   transition: "font-size 0.2s ease",
                   pointerEvents: "none",
+                  paintOrder: "stroke fill",
+                  stroke: "rgba(3,10,20,0.82)",
+                  strokeWidth: 1.25,
+                  strokeLinejoin: "round",
                 }}
               >
                 {symbol}
@@ -630,13 +638,13 @@ export default function ConstellationChart({
           <circle
             cx={CX} cy={CY} r="53"
             fill="none"
-            stroke="rgba(242,194,108,0.1)"
-            strokeWidth="0.5"
+            stroke="rgba(255,222,160,0.4)"
+            strokeWidth="1"
           />
           <text
             x={CX} y={CY - 14}
-            fill="rgba(242,194,108,0.7)"
-            fontSize="8"
+            fill="rgba(255,225,170,0.92)"
+            fontSize="9"
             textAnchor="middle"
             dominantBaseline="central"
             style={{
@@ -649,8 +657,8 @@ export default function ConstellationChart({
           </text>
           <text
             x={CX} y={CY + 6}
-            fill="#eef7ff"
-            fontSize="15"
+            fill="#f8fbff"
+            fontSize="16"
             fontWeight="bold"
             textAnchor="middle"
             dominantBaseline="central"
@@ -660,8 +668,8 @@ export default function ConstellationChart({
           </text>
           <text
             x={CX} y={CY + 24}
-            fill="rgba(185,208,225,0.5)"
-            fontSize="7"
+            fill="rgba(205,224,240,0.76)"
+            fontSize="8"
             textAnchor="middle"
             dominantBaseline="central"
             style={{

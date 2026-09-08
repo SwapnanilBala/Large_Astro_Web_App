@@ -19,8 +19,8 @@
   width: 100%;
   height: auto;
   border-radius: 12px;
-  background: radial-gradient(circle at 50% 45%, #101622 0%, #0b0d14 70%);
-  border: 1px solid var(--border-soft);
+  background: radial-gradient(circle at 50% 45%, #172844 0%, #060c17 72%);
+  border: 1px solid rgba(244, 214, 162, 0.32);
   /* Glyph sizes below are in viewBox units, so they must not inherit the page
      font — a 600-unit box scaled to 335px would render them unreadably small
      if they tracked rem instead. */
@@ -28,25 +28,33 @@
 }
 
 .signGlyph {
-  font-size: 20px;
-  fill: rgba(212, 165, 116, 0.75);
+  font-size: 23px;
+  fill: rgba(255, 226, 173, 0.96);
+  paint-order: stroke fill;
+  stroke: rgba(5, 11, 21, 0.76);
+  stroke-width: 1.4px;
+  stroke-linejoin: round;
 }
 
 .houseNum {
-  font-size: 17px;
-  fill: rgba(168, 160, 144, 0.65);
+  font-size: 19px;
+  fill: rgba(235, 225, 205, 0.84);
+  paint-order: stroke fill;
+  stroke: rgba(5, 11, 21, 0.78);
+  stroke-width: 1.2px;
+  stroke-linejoin: round;
 }
 
 .coreKicker {
   font-size: 13px;
   letter-spacing: 3px;
-  fill: rgba(212, 165, 116, 0.7);
+  fill: rgba(255, 226, 173, 0.92);
 }
 
 .coreSign {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 600;
-  fill: #f5f0e6;
+  fill: #fbf6ec;
 }
 
 .planet {
@@ -63,8 +71,12 @@
 }
 
 .planetGlyph {
-  font-size: 19px;
+  font-size: 22px;
   pointer-events: none;
+  paint-order: stroke fill;
+  stroke: rgba(5, 11, 21, 0.82);
+  stroke-width: 2px;
+  stroke-linejoin: round;
 }
 
 .retro {
