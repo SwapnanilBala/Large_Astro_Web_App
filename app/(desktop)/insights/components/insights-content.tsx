@@ -318,6 +318,21 @@ function CollapsibleSection({
   );
 }
 
+/*
+ * The five section anchors.
+ *
+ * This array's ORDER is not load-bearing -- getAvailableAnchorIds sorts what
+ * it finds into document order, and the bar renders from that. It used to be:
+ * resolveActiveAnchor walks the anchors in order and keeps the last one whose
+ * top has passed the scan line, which silently reports the wrong section the
+ * moment array order and document order disagree. Moving a band was therefore
+ * a two-file change with a failure mode nobody would notice. Now it is not.
+ *
+ * What IS load-bearing: every id here has to exist in the DOM, or its pill
+ * just disappears. Two of them sit on elements that are easy to lose track of
+ * -- `timing` rides a card *inside* the gateway grid rather than a top-level
+ * child, and `ultimate` is on the life-domain module.
+ */
 const SECTION_ANCHORS = [
   { id: "overview", label: "Overview" },
   { id: "chart-map", label: "Chart" },
@@ -326,6 +341,10 @@ const SECTION_ANCHORS = [
   { id: "continue-reading", label: "More" },
 ];
 
+const SECTION_ANCHOR_LABELS: Record<string, string> = Object.fromEntries(
+  SECTION_ANCHORS.map((anchor) => [anchor.id, anchor.label])
+);
+
 function SectionAnchorNav() {
   const [activeAnchorId, setActiveAnchorId] = useState(SECTION_ANCHORS[0].id);
   const [availableAnchorIds, setAvailableAnchorIds] = useState(
@@ -333,10 +352,26 @@ function SectionAnchorNav() {
   );
 
   useEffect(() => {
-    const getAvailableAnchorIds = () =>
-      SECTION_ANCHORS.map((anchor) => anchor.id).filter((id) =>
-        document.getElementById(id)
+    const getAvailableAnchorIds = () => {
+      // Resolve each id once and carry the node, rather than sorting ids and
+      // calling getElementById again inside the comparator -- that would be
+      // O(n log n) lookups per scroll frame instead of n.
+      const present: Array<{ id: string; node: HTMLElement }> = [];
+      for (const anchor of SECTION_ANCHORS) {
+        const node = document.getElementById(anchor.id);
+        if (node) present.push({ id: anchor.id, node });
+      }
+
+      // Document order, so this stays correct however the bands are arranged.
+      present.sort((a, b) =>
+        a.node.compareDocumentPosition(b.node) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+          ? -1
+          : 1
       );
+
+      return present.map((entry) => entry.id);
+    };
 
     const resolveActiveAnchor = () => {
       const anchorIds = getAvailableAnchorIds();
@@ -422,19 +457,23 @@ function SectionAnchorNav() {
 
   return (
     <nav className={styles.anchorNav} aria-label="Results page sections">
-      {SECTION_ANCHORS.filter((anchor) =>
-        availableAnchorIds.includes(anchor.id)
-      ).map((anchor) => {
-        const isActive = anchor.id === activeAnchorId;
+      {/* Rendered from availableAnchorIds, which is in document order, so the
+          pills read left to right in the order the reader will meet the
+          sections -- and cannot disagree with the scan line that highlights
+          them. */}
+      {availableAnchorIds.map((id) => {
+        const label = SECTION_ANCHOR_LABELS[id];
+        if (!label) return null;
+        const isActive = id === activeAnchorId;
         return (
           <a
-            key={anchor.id}
-            href={`#${anchor.id}`}
+            key={id}
+            href={`#${id}`}
             className={`${styles.anchorLink} ${isActive ? styles.anchorLinkActive : ""}`}
             aria-current={isActive ? "location" : undefined}
-            onClick={() => setActiveAnchorId(anchor.id)}
+            onClick={() => setActiveAnchorId(id)}
           >
-            {anchor.label}
+            {label}
           </a>
         );
       })}
