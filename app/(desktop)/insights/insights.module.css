@@ -4965,6 +4965,30 @@
   box-shadow: 0 5px 14px rgba(173, 113, 56, 0.07);
 }
 
+/*
+ * The section nav in Ethereal Dawn.
+ *
+ * .anchorNav's background is a hardcoded dark gradient -- deliberately opaque,
+ * because it is sticky and holds position over the report -- and it had no
+ * light counterpart. Its labels, though, come from tokens: --ink-soft resolves
+ * to #6f5967 in light, which put dark plum text on a #101726 bar at a measured
+ * contrast of 2.81:1, under the 4.5 AA needs. Legible in dark (about 8.8:1),
+ * not in light, and the brighter the rest of the page got the more the bar read
+ * as a foreign slab dropped onto it.
+ *
+ * Same two-tone edge and the same opacity floor as the dark version: this bar
+ * still has to sit over scrolling copy without it reading through.
+ */
+:global(html[data-theme="light"]) .anchorNav {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 251, 0.95), rgba(255, 246, 238, 0.93));
+  border-color: rgba(173, 113, 56, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 10px 26px rgba(91, 55, 71, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.7) inset;
+}
+
 :global(html[data-theme="light"]) .heroPlanetRail {
   background:
     linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(223, 173, 132, 0.12) 18%, rgba(118, 178, 167, 0.1) 50%, rgba(223, 173, 132, 0.12) 82%, rgba(255, 255, 255, 0)),
