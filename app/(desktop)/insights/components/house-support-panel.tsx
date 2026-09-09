@@ -1,24 +1,42 @@
+"use client";
+
 import type { AshtakavargaData, HousePlacement } from "@/lib/astro-types";
 import {
   AVERAGE_BINDUS_PER_HOUSE,
-  BHAVA_NAMES,
   HOUSE_GROUPS,
   SAV_TOTAL_BINDUS,
   computeHouseSupport,
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
-import { HOUSE_THEMES } from "@/lib/rules/tables";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import strengthMessages from "@/messages/en.strength.json";
 import styles from "./house-support-panel.module.css";
 
 /*
- * No "use client", no dynamic(), no LazyPanel.
+ * "use client" for the translator, but no dynamic() and no LazyPanel.
  *
- * This is a pure function of the chart — no clock, no randomness, no browser
- * API — so it server-renders and needs no hydration gate. It sits directly
- * under the constellation, near the top of the page, which is exactly where
- * the Major Life Shifts panel's two serial gates were costing a visible wait.
- * Repeating that here would be the same bug in a worse place.
+ * The copy here reads through useRouteMessages, which is a hook, so the panel
+ * has to sit in the client graph. Nothing else about it changed: it is still a
+ * pure function of the chart — no clock, no randomness, no browser API, no
+ * effect — so it pre-renders on the server in one pass and hydrates without
+ * waiting on anything. The results page already imported it from a client
+ * component, so only /insights/house-support gains a boundary, and its props
+ * (SAV totals, house placements, a variant string) are plain JSON.
+ *
+ * What must not come back is a lazy gate. This sits directly under the
+ * constellation, near the top of the page, which is exactly where the Major
+ * Life Shifts panel's two serial gates were costing a visible wait.
+ *
+ * The bhava names, house themes and group names used to be read straight off
+ * the shared tables in lib/. They are copy, so they now come from the catalog
+ * keyed by house number and by group name; the tables stay the source of the
+ * groupings themselves.
  */
+
+/** Sign names live in the baseline `zodiacSigns` namespace, not in this catalog. */
+function signLabel(t: (key: string) => string, sign: string): string {
+  return t(`zodiacSigns.${sign.toLowerCase()}`);
+}
 
 /* The ring is drawn to 150% rather than 100% so an above-average ascendant has
  * somewhere to go: capping at 100 would render every strong chart identically
@@ -54,6 +72,7 @@ function polarPoint(angleDeg: number, radius: number): [number, number] {
 }
 
 function AscendantRing({ support }: { support: HouseSupport }) {
+  const tr = useRouteMessages(strengthMessages);
   const fraction = Math.min(support.percent, RING_MAX_PERCENT) / RING_MAX_PERCENT;
   const dash = RING_CIRCUMFERENCE * fraction;
 
@@ -69,7 +88,11 @@ function AscendantRing({ support }: { support: HouseSupport }) {
         viewBox="0 0 140 140"
         className={styles.ring}
         role="img"
-        aria-label={`House 1 holds ${support.bindus} bindus, ${support.percent}% of the ${AVERAGE_BINDUS_PER_HOUSE.toFixed(1)} average.`}
+        aria-label={tr("strength.houseSupport.ringAriaLabel", {
+          bindus: String(support.bindus),
+          percent: String(support.percent),
+          average: AVERAGE_BINDUS_PER_HOUSE.toFixed(1),
+        })}
       >
         <defs>
           {/* Classed rather than left to `stopColor` alone: these three are
@@ -102,7 +125,7 @@ function AscendantRing({ support }: { support: HouseSupport }) {
           {support.percent}%
         </text>
         <text className={styles.ringCaption} x="70" y="86">
-          of average
+          {tr("strength.houseSupport.ringCaption")}
         </text>
       </svg>
     </div>
@@ -110,6 +133,7 @@ function AscendantRing({ support }: { support: HouseSupport }) {
 }
 
 function HouseBars({ houses }: { houses: HouseSupport[] }) {
+  const tr = useRouteMessages(strengthMessages);
   const width = 560;
   const height = 200;
   const padTop = 18;
@@ -125,7 +149,7 @@ function HouseBars({ houses }: { houses: HouseSupport[] }) {
       viewBox={`0 0 ${width} ${height}`}
       className={styles.bars}
       role="img"
-      aria-label="Bindus in each of the twelve houses, against the 28.1 average."
+      aria-label={tr("strength.houseSupport.barsAriaLabel")}
     >
       {houses.map((house, index) => {
         const barHeight = plotHeight * (Math.min(house.bindus, BAR_MAX_BINDUS) / BAR_MAX_BINDUS);
@@ -164,7 +188,7 @@ function HouseBars({ houses }: { houses: HouseSupport[] }) {
               x={x + barWidth / 2}
               y={height - padBottom + 27}
             >
-              {house.sign.slice(0, 3)}
+              {tr(`strength.signAbbr.${house.sign.toLowerCase()}`)}
             </text>
           </g>
         );
@@ -193,18 +217,19 @@ function HouseRoles({
   strongestHouse: number;
   weakestHouse: number;
 }) {
+  const { t } = useTranslation();
+  const tr = useRouteMessages(strengthMessages);
+
   return (
     <section className={styles.roles} aria-labelledby="house-support-roles-title">
       <div className={styles.rolesHead}>
-        <span className={styles.cardKicker}>What each house answers for</span>
+        <span className={styles.cardKicker}>{tr("strength.roles.kicker")}</span>
         <h3 className={styles.rolesTitle} id="house-support-roles-title">
-          Which house is responsible for what
+          {tr("strength.roles.title")}
         </h3>
         <p className={styles.rolesIntro}>
-          The bars above say how much support a house holds. This says what it
-          holds it <em>for</em>. Each row carries the sign your chart puts on
-          that house and the bindus that came with it, so a number above and a
-          subject here are the same house.
+          {tr("strength.roles.introA")} <em>{tr("strength.roles.introEm")}</em>
+          {tr("strength.roles.introB")}
         </p>
       </div>
 
@@ -227,47 +252,59 @@ function HouseRoles({
                 {house.house}
               </span>
               <span className={styles.roleName}>
-                <span className={styles.srOnly}>House {house.house}, </span>
-                {BHAVA_NAMES[house.house]} Bhava
+                <span className={styles.srOnly}>
+                  {tr("strength.roles.srHouse", { house: String(house.house) })}{" "}
+                </span>
+                {tr("strength.roles.bhavaLabel", {
+                  name: tr(`strength.bhavaNames.${house.house}`),
+                })}
               </span>
               <span className={styles.roleReadout}>
                 <span className={styles.srOnly}>
-                  {house.sign}, {house.bindus} bindus
+                  {tr("strength.roles.srReadout", {
+                    sign: signLabel(t, house.sign),
+                    bindus: String(house.bindus),
+                  })}
                 </span>
                 <span aria-hidden="true">
-                  {house.sign} · {house.bindus}
+                  {tr("strength.roles.readout", {
+                    sign: signLabel(t, house.sign),
+                    bindus: String(house.bindus),
+                  })}
                 </span>
               </span>
             </div>
 
-            <p className={styles.roleTheme}>{HOUSE_THEMES[house.house]}</p>
+            <p className={styles.roleTheme}>
+              {tr(`strength.houseThemes.${house.house}`)}
+            </p>
 
             <p className={styles.roleTags}>
               {HOUSE_GROUPS[house.house].map((group) => (
                 <span key={group} className={styles.roleTag}>
-                  {group}
+                  {tr(`strength.houseGroups.${group.toLowerCase()}`)}
                 </span>
               ))}
               {house.house === strongestHouse && (
-                <span className={styles.rolePeak}>best supported</span>
+                <span className={styles.rolePeak}>{tr("strength.roles.peakBest")}</span>
               )}
               {house.house === weakestHouse && (
-                <span className={styles.rolePeak}>least supported</span>
+                <span className={styles.rolePeak}>{tr("strength.roles.peakLeast")}</span>
               )}
             </p>
           </li>
         ))}
       </ul>
 
+      {/* Six segments rather than one string: the group names stay <b>, and a
+          translator cannot bold anything through t(), which returns a string. */}
       <p className={styles.rolesLegend}>
-        <b>Kendra</b> are the four angles the chart is built on;{" "}
-        <b>Panaphara</b> and <b>Apoklima</b> are the houses that follow them and
-        fall away from them. On top of that, <b>Trikona</b> houses are read as
-        where merit arrives, <b>Upachaya</b> as the ones that improve with age
-        and effort, and <b>Dusthana</b> as the ones that ask for something
-        first. A house can be more than one — the 6th is an Upachaya and a
-        Dusthana both, which is why difficulty there is usually read as the kind
-        you grow out of.
+        <b>{tr("strength.houseGroups.kendra")}</b> {tr("strength.roles.legendA")}{" "}
+        <b>{tr("strength.houseGroups.panaphara")}</b> {tr("strength.roles.legendB")}{" "}
+        <b>{tr("strength.houseGroups.apoklima")}</b> {tr("strength.roles.legendC")}{" "}
+        <b>{tr("strength.houseGroups.trikona")}</b> {tr("strength.roles.legendD")}{" "}
+        <b>{tr("strength.houseGroups.upachaya")}</b> {tr("strength.roles.legendE")}{" "}
+        <b>{tr("strength.houseGroups.dusthana")}</b> {tr("strength.roles.legendF")}
       </p>
     </section>
   );
@@ -291,6 +328,8 @@ export default function HouseSupportPanel({
   houses: HousePlacement[] | null | undefined;
   variant?: "brief" | "full";
 }) {
+  const { t } = useTranslation();
+  const tr = useRouteMessages(strengthMessages);
   const support = computeHouseSupport(ashtakavarga, houses);
   if (!support) return null;
 
@@ -301,32 +340,37 @@ export default function HouseSupportPanel({
     <div className={styles.panel}>
       {isBrief ? (
         <p className={styles.intro}>
-          Ashtakavarga splits a fixed pool of <code>{SAV_TOTAL_BINDUS}</code>{" "}
-          bindus across the twelve houses. Dead average is <code>28.1</code>, so
-          each house is read against that rather than against a maximum.
+          {tr("strength.houseSupport.introBriefA")}{" "}
+          <code>{SAV_TOTAL_BINDUS}</code>{" "}
+          {tr("strength.houseSupport.introBriefB")} <code>28.1</code>
+          {tr("strength.houseSupport.introBriefC")}
         </p>
       ) : (
         <p className={styles.intro}>
-          Ashtakavarga scores every sign out of a fixed pool of{" "}
-          <code>{SAV_TOTAL_BINDUS}</code> bindus — points of planetary support —
-          and each house inherits the score of the sign on it. Dead average is{" "}
-          <code>337 ÷ 12 = 28.1</code> bindus per house, so a house is read
-          against that number rather than against a maximum. On the left, the
-          first house alone: <code>bindus ÷ 28.1</code>, the support your chart
-          gives the self. On the right, all twelve added back up against the same
-          337 pool, which is where that support actually sits.
+          {tr("strength.houseSupport.introFullA")}{" "}
+          <code>{SAV_TOTAL_BINDUS}</code>{" "}
+          {tr("strength.houseSupport.introFullB")}{" "}
+          <code>337 ÷ 12 = 28.1</code>{" "}
+          {tr("strength.houseSupport.introFullC")}{" "}
+          <code>{tr("strength.houseSupport.introFullRatioFormula")}</code>
+          {tr("strength.houseSupport.introFullD")}
         </p>
       )}
 
       <div className={styles.columns}>
         <section className={styles.card} aria-labelledby="house-support-asc-title">
           <div className={styles.cardHead}>
-            <span className={styles.cardKicker}>First house</span>
+            <span className={styles.cardKicker}>
+              {tr("strength.houseSupport.ascKicker")}
+            </span>
             <h3 className={styles.cardTitle} id="house-support-asc-title">
-              Support for the self
+              {tr("strength.houseSupport.ascTitle")}
             </h3>
             <p className={styles.formula}>
-              {ascendant.bindus} bindus in {ascendant.sign} ÷ 28.1 average
+              {tr("strength.houseSupport.ascFormula", {
+                bindus: String(ascendant.bindus),
+                sign: signLabel(t, ascendant.sign),
+              })}
             </p>
           </div>
 
@@ -334,15 +378,25 @@ export default function HouseSupportPanel({
 
           <dl className={styles.facts}>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Sign on the 1st</dt>
-              <dd className={styles.factValue}>{ascendant.sign}</dd>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.ascSignLabel")}
+              </dt>
+              <dd className={styles.factValue}>{signLabel(t, ascendant.sign)}</dd>
             </div>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Bindus held</dt>
-              <dd className={styles.factValue}>{ascendant.bindus} of 337</dd>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.ascBindusLabel")}
+              </dt>
+              <dd className={styles.factValue}>
+                {tr("strength.houseSupport.ascBindusValue", {
+                  bindus: String(ascendant.bindus),
+                })}
+              </dd>
             </div>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Against average</dt>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.ascAgainstAverageLabel")}
+              </dt>
               <dd className={styles.factValue}>
                 {ascendant.bindus > AVERAGE_BINDUS_PER_HOUSE ? "+" : ""}
                 {Math.round((ascendant.bindus - AVERAGE_BINDUS_PER_HOUSE) * 10) / 10}
@@ -353,13 +407,22 @@ export default function HouseSupportPanel({
 
         <section className={styles.card} aria-labelledby="house-support-whole-title">
           <div className={styles.cardHead}>
-            <span className={styles.cardKicker}>All twelve houses</span>
+            <span className={styles.cardKicker}>
+              {tr("strength.houseSupport.wholeKicker")}
+            </span>
             <h3 className={styles.cardTitle} id="house-support-whole-title">
-              Where the {whole.bindus} bindus sit
+              {tr("strength.houseSupport.wholeTitle", {
+                bindus: String(whole.bindus),
+              })}
             </h3>
             <p className={styles.formula}>
-              {whole.bindus} bindus across 12 houses ÷ 337 pool = {whole.percent}%
-              {whole.totalIsExact ? " — the pool is fixed, so the reading is the spread" : ""}
+              {tr("strength.houseSupport.wholeFormula", {
+                bindus: String(whole.bindus),
+                percent: String(whole.percent),
+              })}
+              {whole.totalIsExact
+                ? ` ${tr("strength.houseSupport.wholeFormulaExact")}`
+                : ""}
             </p>
           </div>
 
@@ -373,42 +436,55 @@ export default function HouseSupportPanel({
                   data-band={band}
                   aria-hidden="true"
                 />
-                {band === "strong" && "28+ bindus"}
-                {band === "neutral" && "26–27 bindus"}
-                {band === "weak" && "25 or fewer"}
+                {band === "strong" && tr("strength.houseSupport.bandStrong")}
+                {band === "neutral" && tr("strength.houseSupport.bandNeutral")}
+                {band === "weak" && tr("strength.houseSupport.bandWeak")}
               </li>
             ))}
           </ul>
 
           <dl className={styles.facts}>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Above average</dt>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.aboveAverageLabel")}
+              </dt>
               <dd className={styles.factValue}>
-                {whole.housesAbove} of 12 houses
+                {tr("strength.houseSupport.aboveAverageValue", {
+                  count: String(whole.housesAbove),
+                })}
               </dd>
             </div>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Best supported</dt>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.bestSupportedLabel")}
+              </dt>
               <dd className={styles.factValue}>
-                House {whole.strongest.house} · {whole.strongest.sign} ·{" "}
-                {whole.strongest.bindus}
+                {tr("strength.houseSupport.houseReadout", {
+                  house: String(whole.strongest.house),
+                  sign: signLabel(t, whole.strongest.sign),
+                  bindus: String(whole.strongest.bindus),
+                })}
               </dd>
             </div>
             <div className={styles.fact}>
-              <dt className={styles.factLabel}>Least supported</dt>
+              <dt className={styles.factLabel}>
+                {tr("strength.houseSupport.leastSupportedLabel")}
+              </dt>
               <dd className={styles.factValue}>
-                House {whole.weakest.house} · {whole.weakest.sign} ·{" "}
-                {whole.weakest.bindus}
+                {tr("strength.houseSupport.houseReadout", {
+                  house: String(whole.weakest.house),
+                  sign: signLabel(t, whole.weakest.sign),
+                  bindus: String(whole.weakest.bindus),
+                })}
               </dd>
             </div>
           </dl>
 
           {!whole.totalIsExact && (
             <p className={styles.caveat}>
-              This chart&rsquo;s house system puts one sign on two cusps and
-              leaves another with none, so the twelve houses do not add back to
-              a clean 337 — {whole.bindus} here. The per-house figures stand;
-              the total is reporting the house division as much as the chart.
+              {tr("strength.houseSupport.caveat", {
+                bindus: String(whole.bindus),
+              })}
             </p>
           )}
         </section>
@@ -426,20 +502,20 @@ export default function HouseSupportPanel({
       )}
 
       <table className={styles.srOnly}>
-        <caption>Bindus and support percentage by house</caption>
+        <caption>{tr("strength.houseSupport.tableCaption")}</caption>
         <thead>
           <tr>
-            <th scope="col">House</th>
-            <th scope="col">Sign</th>
-            <th scope="col">Bindus</th>
-            <th scope="col">Percent of average</th>
+            <th scope="col">{tr("strength.houseSupport.tableHouse")}</th>
+            <th scope="col">{tr("strength.houseSupport.tableSign")}</th>
+            <th scope="col">{tr("strength.houseSupport.tableBindus")}</th>
+            <th scope="col">{tr("strength.houseSupport.tablePercent")}</th>
           </tr>
         </thead>
         <tbody>
           {support.houses.map((house) => (
             <tr key={house.house}>
               <th scope="row">{house.house}</th>
-              <td>{house.sign}</td>
+              <td>{signLabel(t, house.sign)}</td>
               <td>{house.bindus}</td>
               <td>{house.percent}%</td>
             </tr>

@@ -1,0 +1,264 @@
+{
+  "strength": {
+    "planets": {
+      "rahu": "Rahu",
+      "ketu": "Ketu"
+    },
+    "page": {
+      "missingLead": "Return to intake and provide complete birth details before opening the house support breakdown.",
+      "unavailableKicker": "House support",
+      "unavailableHeading": "The house support breakdown could not be prepared.",
+      "unavailableLead": "This chart did not return a complete Ashtakavarga, so the twelve houses cannot be scored.",
+      "calculationFailed": "Chart calculation failed",
+      "backToReading": "Back to your reading",
+      "heroTitle": "{name}'s house support in full",
+      "heroLead": "How much support each of the twelve houses holds, what each one is responsible for, and the arithmetic behind both."
+    },
+    "bhavaNames": {
+      "1": "Tanu",
+      "2": "Dhana",
+      "3": "Sahaja",
+      "4": "Bandhu",
+      "5": "Putra",
+      "6": "Ari",
+      "7": "Yuvati",
+      "8": "Randhra",
+      "9": "Dharma",
+      "10": "Karma",
+      "11": "Labha",
+      "12": "Vyaya"
+    },
+    "houseGroups": {
+      "kendra": "Kendra",
+      "panaphara": "Panaphara",
+      "apoklima": "Apoklima",
+      "trikona": "Trikona",
+      "upachaya": "Upachaya",
+      "dusthana": "Dusthana"
+    },
+    "houseThemes": {
+      "1": "identity, appearance and direction",
+      "2": "assets, income and values",
+      "3": "communication, learning and siblings",
+      "4": "home, roots and emotional foundations",
+      "5": "creativity, romance and children",
+      "6": "service, routines and health",
+      "7": "partnerships and agreements",
+      "8": "shared resources and transformation",
+      "9": "beliefs, wisdom and long-distance journeys",
+      "10": "career, authority and public standing",
+      "11": "community, networks and long goals",
+      "12": "retreat, subconscious and spiritual closure"
+    },
+    "signAbbr": {
+      "aries": "Ari",
+      "taurus": "Tau",
+      "gemini": "Gem",
+      "cancer": "Can",
+      "leo": "Leo",
+      "virgo": "Vir",
+      "libra": "Lib",
+      "scorpio": "Sco",
+      "sagittarius": "Sag",
+      "capricorn": "Cap",
+      "aquarius": "Aqu",
+      "pisces": "Pis"
+    },
+    "houseSupport": {
+      "introBriefA": "Ashtakavarga splits a fixed pool of",
+      "introBriefB": "bindus across the twelve houses. Dead average is",
+      "introBriefC": ", so each house is read against that rather than against a maximum.",
+      "introFullA": "Ashtakavarga scores every sign out of a fixed pool of",
+      "introFullB": "bindus — points of planetary support — and each house inherits the score of the sign on it. Dead average is",
+      "introFullC": "bindus per house, so a house is read against that number rather than against a maximum. On the left, the first house alone:",
+      "introFullRatioFormula": "bindus ÷ 28.1",
+      "introFullD": ", the support your chart gives the self. On the right, all twelve added back up against the same 337 pool, which is where that support actually sits.",
+      "ringAriaLabel": "House 1 holds {bindus} bindus, {percent}% of the {average} average.",
+      "ringCaption": "of average",
+      "barsAriaLabel": "Bindus in each of the twelve houses, against the 28.1 average.",
+      "ascKicker": "First house",
+      "ascTitle": "Support for the self",
+      "ascFormula": "{bindus} bindus in {sign} ÷ 28.1 average",
+      "ascSignLabel": "Sign on the 1st",
+      "ascBindusLabel": "Bindus held",
+      "ascBindusValue": "{bindus} of 337",
+      "ascAgainstAverageLabel": "Against average",
+      "wholeKicker": "All twelve houses",
+      "wholeTitle": "Where the {bindus} bindus sit",
+      "wholeFormula": "{bindus} bindus across 12 houses ÷ 337 pool = {percent}%",
+      "wholeFormulaExact": "— the pool is fixed, so the reading is the spread",
+      "bandStrong": "28+ bindus",
+      "bandNeutral": "26–27 bindus",
+      "bandWeak": "25 or fewer",
+      "aboveAverageLabel": "Above average",
+      "aboveAverageValue": "{count} of 12 houses",
+      "bestSupportedLabel": "Best supported",
+      "leastSupportedLabel": "Least supported",
+      "houseReadout": "House {house} · {sign} · {bindus}",
+      "caveat": "This chart’s house system puts one sign on two cusps and leaves another with none, so the twelve houses do not add back to a clean 337 — {bindus} here. The per-house figures stand; the total is reporting the house division as much as the chart.",
+      "tableCaption": "Bindus and support percentage by house",
+      "tableHouse": "House",
+      "tableSign": "Sign",
+      "tableBindus": "Bindus",
+      "tablePercent": "Percent of average"
+    },
+    "roles": {
+      "kicker": "What each house answers for",
+      "title": "Which house is responsible for what",
+      "introA": "The bars above say how much support a house holds. This says what it holds it",
+      "introEm": "for",
+      "introB": ". Each row carries the sign your chart puts on that house and the bindus that came with it, so a number above and a subject here are the same house.",
+      "srHouse": "House {house},",
+      "srReadout": "{sign}, {bindus} bindus",
+      "readout": "{sign} · {bindus}",
+      "bhavaLabel": "{name} Bhava",
+      "peakBest": "best supported",
+      "peakLeast": "least supported",
+      "legendA": "are the four angles the chart is built on;",
+      "legendB": "and",
+      "legendC": "are the houses that follow them and fall away from them. On top of that,",
+      "legendD": "houses are read as where merit arrives,",
+      "legendE": "as the ones that improve with age and effort, and",
+      "legendF": "as the ones that ask for something first. A house can be more than one — the 6th is an Upachaya and a Dusthana both, which is why difficulty there is usually read as the kind you grow out of."
+    },
+    "shadbala": {
+      "kicker": "Planetary Strength",
+      "heading": "Shadbala Analysis",
+      "intro": "Shadbala measures six-fold planetary strength. A strength ratio above 1.0 indicates the planet meets its required minimum; below 0.7 signals an area that may need conscious reinforcement. The summary normalizes each planet against its own required minimum before ranking it.",
+      "highestRatioLabel": "Highest ratio",
+      "lowestRatioLabel": "Lowest ratio",
+      "summaryValue": "{virupas} virupas ({ratio}x)",
+      "chartAriaLabel": "Shadbala strength chart",
+      "requiredMinimumTitle": "Required minimum: {value}",
+      "ratioBadge": "{ratio}x",
+      "components": {
+        "sthanaBala": {
+          "label": "Sthana Bala",
+          "description": "Positional strength from sign, house, decanate, and divisional chart placement"
+        },
+        "digBala": {
+          "label": "Dig Bala",
+          "description": "Directional strength based on angular house alignment"
+        },
+        "kalaBala": {
+          "label": "Kala Bala",
+          "description": "Temporal strength from day/night and lunar phase"
+        },
+        "cheshtaBala": {
+          "label": "Cheshta Bala",
+          "description": "Motional strength from planetary movement"
+        },
+        "naisargikaBala": {
+          "label": "Naisargika Bala",
+          "description": "Inherent natural strength (fixed value)"
+        },
+        "drikBala": {
+          "label": "Drik Bala",
+          "description": "Aspectual strength from benefic and malefic aspects"
+        }
+      },
+      "totalLabel": "Total:",
+      "totalSuffix": "virupas ({rupas} rupas)",
+      "requiredLabel": "Required:",
+      "strengthLabels": {
+        "veryStrong": "Very Strong",
+        "strong": "Strong",
+        "moderate": "Moderate",
+        "weak": "Weak"
+      },
+      "signContextKicker": "Sign-level context",
+      "signContextHeading": "Strongest and weakest sign",
+      "signContextSource": "Source: Sarvashtakavarga (SAV)",
+      "signContextIntro": "Shadbala ranks planets, not signs. The sign labels below come from Sarvashtakavarga totals: more bindus indicate relatively more support when that sign's field is activated, while fewer indicate a need for more care. They are not a verdict on a zodiac sign or a standalone prediction.",
+      "signSummaryAriaLabel": "Sarvashtakavarga sign strength summary",
+      "strongestSignLabel": "Strongest sign by SAV",
+      "strongestSignsLabel": "Joint strongest signs by SAV",
+      "weakestSignLabel": "Weakest sign by SAV",
+      "weakestSignsLabel": "Joint weakest signs by SAV",
+      "savBindus": "{bindus} SAV bindus",
+      "relatesLabel": "How this relates to Shadbala",
+      "highestRatioSentence": "has the highest Shadbala ratio ({ratio}x)",
+      "lowestRatioSentence": "has the lowest Shadbala ratio ({ratio}x)",
+      "placedIn": "and is placed in {sign}",
+      "sentenceEnd": ".",
+      "strongestSignMatch": "Its natal placement also falls in a highest-SAV sign. Treat both as separate contextual indicators, not a combined score.",
+      "strongestSignNoMatch": "This measures planetary capacity separately from the SAV sign score; the two should not be averaged.",
+      "weakestSignMatch": "Its natal placement also falls in a lowest-SAV sign. Treat both as separate contextual indicators, not a combined score.",
+      "weakestSignNoMatch": "A lower SAV sign is a different signal from a lower Shadbala planet, so read both in their own context.",
+      "unavailableTitle": "Sign-level context is unavailable for this reading.",
+      "unavailableBody": "Shadbala still identifies the strongest and weakest planets above, but it cannot by itself identify a strongest or weakest sign. SAV data was not included, so no sign-level conclusion is being inferred."
+    },
+    "ashtakavarga": {
+      "kicker": "Vedic Transit Strength",
+      "heading": "Ashtakavarga",
+      "intro": "Each sign is scored on how much planetary support it carries. Higher scores mark the areas where things tend to move more easily for you.",
+      "savTotalTab": "SAV Total",
+      "transitBadge": "{planet} transiting",
+      "mostSupportHeading": "Where you have the most support",
+      "morePatienceHeading": "Where you may need more patience"
+    },
+    "yogas": {
+      "kicker": "Classical Combinations",
+      "heading": "Planetary Yogas",
+      "intro": "Yogas are classical planetary combinations that shape life patterns. Each yoga below was detected in this natal chart based on planet positions, sign rulership, and house placement.",
+      "filterAriaLabel": "Yoga category filter",
+      "listAriaLabel": "Detected yogas",
+      "empty": "No yogas found in this category for this chart.",
+      "categories": {
+        "all": "All Yogas",
+        "mahapurusha": "Mahapurusha",
+        "wealth": "Wealth & Raja",
+        "benefic": "Benefic",
+        "challenging": "Challenging",
+        "viparita": "Viparita Raja",
+        "nabhasa": "Nabhasa"
+      },
+      "strengthAria": "Strength: {strength}",
+      "strengthLabels": {
+        "strong": "strong",
+        "moderate": "moderate",
+        "weak": "weak"
+      },
+      "topBadge": "Top {rank}",
+      "occurrenceChance": "{chance}% chance",
+      "detailFallback": "{name} is one of the strongest detected combinations in this chart, so its effects deserve more weight than the lighter matches below.",
+      "activationTimingLabel": "Activation timing",
+      "traitsAriaLabel": "{name} traits",
+      "activationStrong": "Most active during involved planet dashas and major transits to the yoga houses.",
+      "activationModerate": "Most noticeable when the involved planets are emphasized by dasha or transit.",
+      "activationWeak": "Usually situational, becoming visible during short transit triggers or focused life choices.",
+      "traits": {
+        "mahapurusha": {
+          "1": "command",
+          "2": "life direction",
+          "3": "visible strength"
+        },
+        "wealth": {
+          "1": "resources",
+          "2": "status",
+          "3": "opportunity"
+        },
+        "benefic": {
+          "1": "support",
+          "2": "growth",
+          "3": "ease"
+        },
+        "challenging": {
+          "1": "discipline",
+          "2": "repair",
+          "3": "self-awareness"
+        },
+        "viparita": {
+          "1": "resilience",
+          "2": "reversal",
+          "3": "recovery"
+        },
+        "nabhasa": {
+          "1": "patterning",
+          "2": "temperament",
+          "3": "life structure"
+        }
+      }
+    }
+  }
+}
