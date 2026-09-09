@@ -266,6 +266,24 @@ h3 {
 }
 
 /*
+ * The report pages are dashboards, not prose: rows of three cards, banded
+ * strips, a chart beside its readout. At the shared 1600 cap a 2560-wide
+ * monitor spent 484px per side on empty gutter and gave the content 62% of the
+ * screen, which read as one tall column adrift in the middle. Every block
+ * inside already stretches to the shell, so raising the cap is all that was
+ * needed.
+ *
+ * Set on .insights-shell alone rather than the .home-shell it is grouped with
+ * above: palm history and login carry no .dashboard-shell today, so including
+ * them would have been a no-op that silently widened whichever one grew a
+ * shell first. Capped rather than 100% -- past ~2560 the three-up rows stop
+ * being cards and start being billboards.
+ */
+.insights-shell {
+  --shell-max: 2560px;
+}
+
+/*
  * Navbar clearance for the pages that need it.
  *
  * .insights-shell's own 4.5rem is below --navbar-h, so its card lands under
@@ -349,7 +367,18 @@ h3 {
 
 .intake-panel,
 .dashboard-shell {
-  width: min(1600px, 100%);
+  /*
+   * The cap is a variable so a section can widen it without restating `width`
+   * and fighting this rule on specificity. .insights-shell raises it to 2560;
+   * everything outside that wrapper -- engine-select, the short form states --
+   * falls back to 1600, about as wide as a single column of prose should get.
+   *
+   * The default lives in the var() fallback rather than a `--shell-max: 1600px`
+   * declaration here. Declaring it on this element would set the element's own
+   * value, which beats the one inherited from .insights-shell, and the override
+   * would never apply.
+   */
+  width: min(var(--shell-max, 1600px), 100%);
   margin: 0 auto;
   border-radius: 24px;
   border: 1px solid var(--line-soft);
