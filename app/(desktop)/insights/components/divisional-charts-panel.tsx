@@ -2,6 +2,8 @@
 
 import { useState, memo } from "react";
 import type { DivisionalChartInfo } from "@/lib/astro-types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import divisionalMessages from "@/messages/en.divisional.json";
 
 // --------------------------------------------------------------------------
 // Props
@@ -15,27 +17,32 @@ type DivisionalChartsPanelProps = {
 // Chart metadata — what each division reveals
 // --------------------------------------------------------------------------
 
-const DIVISION_META: Record<number, { icon: string; theme: string }> = {
-  1:  { icon: "\u25C9", theme: "Overall life, identity, and the natal foundation" },
-  2:  { icon: "\u2600", theme: "Wealth and financial capacity" },
-  3:  { icon: "\u2694", theme: "Siblings, courage, and initiative" },
-  4:  { icon: "\u2302", theme: "Property, fortune, and fixed assets" },
-  5:  { icon: "\u265B", theme: "Authority, influence, and recognition" },
-  6:  { icon: "\u271A", theme: "Health patterns, routines, and everyday obstacles" },
-  7:  { icon: "\u2764", theme: "Children and progeny" },
-  8:  { icon: "\u21AF", theme: "Sudden change, transformation, and vulnerabilities" },
-  9:  { icon: "\u2638", theme: "Marriage, dharma, and inner nature" },
-  10: { icon: "\u2692", theme: "Career, profession, and public life" },
-  11: { icon: "\u2197", theme: "Gains, networks, and the fulfillment of ambitions" },
-  12: { icon: "\u2B50", theme: "Parents and ancestral lineage" },
-  16: { icon: "\u2708", theme: "Vehicles, comforts, and happiness" },
-  20: { icon: "\u2721", theme: "Spiritual progress and worship" },
-  24: { icon: "\u2710", theme: "Education, learning, and knowledge" },
-  27: { icon: "\u2726", theme: "Strengths and weaknesses" },
-  30: { icon: "\u26A0", theme: "Misfortune, disease, and challenges" },
-  40: { icon: "\u2728", theme: "Auspicious and inauspicious effects" },
-  45: { icon: "\u2605", theme: "General indications and character" },
-  60: { icon: "\u267E", theme: "Past life karma and general matters" },
+/* The prose that went with each icon now lives under
+   divisional.panel.themes.d<division> in messages/en.divisional.json. This map
+   stays the record of which divisions have a theme at all: a division absent
+   from it falls back to the engine's own description, rather than putting an
+   unresolved translation key on screen. */
+const DIVISION_META: Record<number, { icon: string }> = {
+  1:  { icon: "\u25C9" },
+  2:  { icon: "\u2600" },
+  3:  { icon: "\u2694" },
+  4:  { icon: "\u2302" },
+  5:  { icon: "\u265B" },
+  6:  { icon: "\u271A" },
+  7:  { icon: "\u2764" },
+  8:  { icon: "\u21AF" },
+  9:  { icon: "\u2638" },
+  10: { icon: "\u2692" },
+  11: { icon: "\u2197" },
+  12: { icon: "\u2B50" },
+  16: { icon: "\u2708" },
+  20: { icon: "\u2721" },
+  24: { icon: "\u2710" },
+  27: { icon: "\u2726" },
+  30: { icon: "\u26A0" },
+  40: { icon: "\u2728" },
+  45: { icon: "\u2605" },
+  60: { icon: "\u267E" },
 };
 
 // Planet Unicode glyphs (same as navamsa-chart.tsx)
@@ -59,6 +66,7 @@ const PLANET_GLYPHS: Record<string, string> = {
 function DivisionalChartsPanel({
   divisionalCharts,
 }: DivisionalChartsPanelProps) {
+  const tr = useRouteMessages(divisionalMessages);
   const divisionKeys = Object.keys(divisionalCharts)
     .map(Number)
     .sort((a, b) => a - b);
@@ -75,18 +83,18 @@ function DivisionalChartsPanel({
   return (
     <section className="divisional-panel">
       <div className="rules-header">
-        <p className="kicker">Varga Charts</p>
-        <h2>Divisional Charts</h2>
+        <p className="kicker">{tr("divisional.panel.kicker")}</p>
+        <h2>{tr("divisional.panel.heading")}</h2>
       </div>
 
-      <p className="section-intro">
-        D1 is the natal foundation; the remaining charts magnify specific life
-        themes by subdividing each sign. Select a chart below to see where each
-        planet lands in that division.
-      </p>
+      <p className="section-intro">{tr("divisional.panel.intro")}</p>
 
       {/* ── Division selector tabs ── */}
-      <div className="divisional-tabs" role="tablist" aria-label="Divisional chart selector">
+      <div
+        className="divisional-tabs"
+        role="tablist"
+        aria-label={tr("divisional.panel.selectorLabel")}
+      >
         {divisionKeys.map((div) => {
           const info = divisionalCharts[div];
           const isActive = div === selectedDivision;
@@ -112,17 +120,25 @@ function DivisionalChartsPanel({
       <div className="divisional-theme-card">
         <span className="divisional-theme-badge">{chart.label}</span>
         <p className="divisional-theme-text">
-          {meta?.theme ?? chart.description}
+          {meta
+            ? tr(`divisional.panel.themes.d${selectedDivision}`)
+            : chart.description}
         </p>
       </div>
 
       {/* ── Planet positions table ── */}
-      <div className="divisional-table" role="table" aria-label={`${chart.label} planetary positions`}>
+      <div
+        className="divisional-table"
+        role="table"
+        aria-label={tr("divisional.panel.tableLabel", { label: chart.label })}
+      >
         <div className="divisional-row divisional-row--header" role="row">
-          <span role="columnheader">Planet</span>
-          <span role="columnheader">Rashi Sign</span>
+          <span role="columnheader">{tr("divisional.panel.planet")}</span>
+          <span role="columnheader">{tr("divisional.panel.rashiSign")}</span>
           <span role="columnheader" aria-hidden="true"></span>
-          <span role="columnheader">{chart.label} Sign</span>
+          <span role="columnheader">
+            {tr("divisional.panel.vargaSign", { label: chart.label })}
+          </span>
         </div>
 
         {chart.positions.map((pos) => {
@@ -146,7 +162,9 @@ function DivisionalChartsPanel({
               <span className="divisional-sign" role="cell">
                 {pos.divisional_sign}
                 {isSameSign && (
-                  <small className="divisional-same-label">Same</small>
+                  <small className="divisional-same-label">
+                    {tr("divisional.panel.same")}
+                  </small>
                 )}
               </span>
             </div>
@@ -155,12 +173,7 @@ function DivisionalChartsPanel({
       </div>
 
       {/* ── Hint ── */}
-      <p className="divisional-hint">
-        Planets in the same sign as their rashi position are highlighted.
-        This repetition strengthens that planet&apos;s expression in the
-        corresponding life area. D5, D6, D8, and D11 use extended traditional
-        mappings; they sit outside the classical sixteen Parashari vargas.
-      </p>
+      <p className="divisional-hint">{tr("divisional.panel.hint")}</p>
     </section>
   );
 }

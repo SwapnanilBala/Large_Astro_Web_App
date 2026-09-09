@@ -1,5 +1,5 @@
-import Link from "next/link";
 import PageTransition from "@/app/components/PageTransition";
+import AtlasNotice from "./atlas-notice";
 import DivisionalChartsClient from "./divisional-charts-client";
 import {
   chartParamsToQuery,
@@ -24,19 +24,7 @@ export default async function DivisionalChartsPage({
   if (!hasAllChartParams(chartParams)) {
     return (
       <PageTransition>
-        <div className="insights-shell">
-          <section className="dashboard-shell">
-            <p className="kicker">Missing Input</p>
-            <h1>Chart details are incomplete.</h1>
-            <p className="lead">
-              Return to intake and provide complete birth details before opening
-              the divisional chart atlas.
-            </p>
-            <Link href="/" className="ghost-link">
-              Back to Intake
-            </Link>
-          </section>
-        </div>
+        <AtlasNotice variant="missing-input" />
       </PageTransition>
     );
   }
@@ -53,19 +41,11 @@ export default async function DivisionalChartsPage({
   if (!payload?.chart.divisional_charts) {
     return (
       <PageTransition>
-        <div className="insights-shell">
-          <section className="dashboard-shell">
-            <p className="kicker">Varga Atlas</p>
-            <h1>The divisional charts could not be prepared.</h1>
-            <p className="lead">{error || "No divisional chart data was returned."}</p>
-            <Link
-              href={`/insights?${chartParamsToQuery(chartParams)}`}
-              className="ghost-link"
-            >
-              Back to your reading
-            </Link>
-          </section>
-        </div>
+        <AtlasNotice
+          variant="unavailable"
+          backHref={`/insights?${chartParamsToQuery(chartParams)}`}
+          error={error}
+        />
       </PageTransition>
     );
   }
