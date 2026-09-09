@@ -12,10 +12,15 @@ import lifeAreasMessages from "@/messages/en.life-areas.json";
  * to stay a server component. Only the copy moved -- the page still decides
  * which state it is in, and still owns the shell around this section.
  *
- * The keys sit under the lifeAreas namespace rather than getting a catalog of
- * their own: this route's whole body is MajorShiftsPanel, which belongs to the
- * results page and is translated with it, so the eight strings below are all
- * this directory has and are not worth a fourth file to ship them.
+ * The route-local keys sit under the lifeAreas namespace rather than getting a
+ * catalog of their own: this route's whole body is MajorShiftsPanel, which
+ * belongs to the results page and is translated with it, so the few strings
+ * below are all this directory has and are not worth a fourth file to ship
+ * them.
+ *
+ * The three `insights` keys are the results page's own missing-input notice,
+ * word for word. That namespace is in the desktop baseline and already
+ * translated in all five languages, so it is read rather than copied.
  */
 
 type LifeShiftsNoticeProps =
@@ -29,11 +34,11 @@ export default function LifeShiftsNotice(props: LifeShiftsNoticeProps) {
   if (props.variant === "missingInput") {
     return (
       <section className="dashboard-shell">
-        <p className="kicker">{tr("lifeAreas.lifeShifts.missingKicker")}</p>
-        <h1>{tr("lifeAreas.lifeShifts.missingHeading")}</h1>
+        <p className="kicker">{tr("insights.missingKicker")}</p>
+        <h1>{tr("insights.missingHeading")}</h1>
         <p className="lead">{tr("lifeAreas.lifeShifts.missingLead")}</p>
         <Link href="/" className="ghost-link">
-          {tr("lifeAreas.lifeShifts.backToIntake")}
+          {tr("insights.backToIntake")}
         </Link>
       </section>
     );

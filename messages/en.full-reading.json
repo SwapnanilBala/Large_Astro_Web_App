@@ -25,10 +25,7 @@
     "backToReading": "Back to the reading",
 
     "notice": {
-      "missingKicker": "Missing Input",
-      "missingHeading": "Chart details are incomplete.",
       "missingLead": "Return to intake and provide complete birth details before opening the full reading.",
-      "backToIntake": "Back to Intake",
       "errorKicker": "Full reading",
       "errorHeading": "The full reading could not be prepared.",
       "errorFallback": "No chart data was returned.",

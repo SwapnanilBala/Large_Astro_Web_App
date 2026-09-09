@@ -33,10 +33,7 @@
     "longGameLabel": "Long game:",
 
     "notice": {
-      "missingKicker": "Missing Input",
-      "missingHeading": "Chart details are incomplete.",
       "missingLead": "Return to intake and provide complete birth details before opening the life areas.",
-      "backToIntake": "Back to Intake",
       "errorKicker": "Life areas",
       "errorHeading": "The life area readings could not be prepared.",
       "errorFallback": "No life domain data was returned.",
@@ -44,10 +41,7 @@
     },
 
     "lifeShifts": {
-      "missingKicker": "Missing Input",
-      "missingHeading": "Chart details are incomplete.",
       "missingLead": "Return to intake and provide complete birth details before opening the life chapters.",
-      "backToIntake": "Back to Intake",
       "errorKicker": "Life chapters",
       "errorHeading": "The life chapters could not be prepared.",
       "errorFallback": "No chart data was returned.",
