@@ -135,6 +135,23 @@
  * background and ::before wash still reach the edges.
  */
 .hero {
+  /*
+   * How wide the title-and-arch pair is allowed to get.
+   *
+   * The two columns are fr units, so they took the whole shell -- and once
+   * .insights-shell raised the shell cap to 2560px that meant 1740px of hero
+   * at 1920, with the title hard against the left edge, the arch against the
+   * right, and half the width empty between them. The text does not grow to
+   * fill that, so the pair stopped reading as a composition and started
+   * reading as two things pushed apart.
+   *
+   * Capping the pair and centring it is what closes the middle. Deliberately
+   * not a max-width on this element: .hero is also the .band, so a max-width
+   * would shrink the banded surface and its bleed to the card edge along with
+   * the content. Symmetric padding leaves the band full width and moves only
+   * what is inside it.
+   */
+  --hero-max: 1200px;
   position: relative;
   isolation: isolate;
   display: grid;
@@ -143,10 +160,16 @@
   gap: clamp(1.5rem, 3vw, 3rem);
   overflow: hidden;
   text-align: start;
-  padding:
+  padding-block:
     clamp(2.25rem, 5vw, 4.5rem)
-    var(--band-pad)
     clamp(1.5rem, 3vw, 2.5rem);
+  /*
+   * Equal on both sides, so the pair is centred whatever this resolves to.
+   * The max() keeps --band-pad wherever the shell is narrower than the cap
+   * -- the calc goes negative there -- so nothing changes below ~1200px and
+   * the one-column rule at 900px is untouched.
+   */
+  padding-inline: max(var(--band-pad), calc((100% - var(--hero-max)) / 2));
 }
 
 .hero::before {
