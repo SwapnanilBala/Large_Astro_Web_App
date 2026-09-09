@@ -30,6 +30,25 @@
 
 .dashboard {
   --ink-soft: #c7c2cc;
+
+  /*
+   * The distance from a section's header (or its control row) to the body
+   * underneath it.
+   *
+   * Measured across the page before this existed, that one relationship was
+   * 14.4px in the continuation hub, 16px in the weekly panel, 19.2px in the
+   * takeaways and 25.6px in the insight zone -- four values, none of them
+   * chosen against the others. Declared here so every section inherits it,
+   * including panels in their own CSS module: custom properties inherit
+   * through the DOM whatever file declared them.
+   *
+   * Deliberately NOT applied to label-to-heading or body-to-CTA gaps. A
+   * kicker belongs close to the heading it introduces and a CTA belongs
+   * further from the body it follows; flattening those to one number would
+   * make the page less readable rather than more consistent.
+   */
+  --section-rhythm: 1.25rem;
+
   display: flex;
   flex-direction: column;
   gap: clamp(1.05rem, 1.5vw, 1.5rem);
@@ -433,10 +452,17 @@
 /* Matches .kicker exactly -- same role, so same weight and same tracking.
    This was 800 with no letter-spacing against the house 700 at 0.14em, which
    read as a different label style two bands apart. */
+/*
+ * The .heroPlanet* rules below are the Today's Sky band and nothing else.
+ *
+ * They were written for the hero, never wired to it, and todays-sky-band.tsx
+ * is now the only file that references any of them -- so the whole group is
+ * scaled together here, about a sixth up, without touching the hero.
+ */
 .heroPlanetKicker {
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.86rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   line-height: 1.35;
@@ -453,7 +479,7 @@
 .heroPlanetTitle {
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 1.15rem;
+  font-size: 1.3rem;
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
@@ -509,10 +535,10 @@
   z-index: 1;
   overflow-x: auto;
   overflow-y: hidden;
-  padding: 0.74rem 1.4rem 0.58rem;
+  padding: 0.92rem 1.6rem 0.74rem;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-inline: contain;
-  scroll-padding-inline: 1.4rem;
+  scroll-padding-inline: 1.6rem;
   scroll-snap-type: x proximity;
   scrollbar-width: thin;
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
@@ -526,11 +552,13 @@
      orbs would have stacked. */
   display: flex;
   align-items: flex-end;
-  gap: clamp(0.85rem, 1.6vw, 1.75rem);
+  gap: clamp(1rem, 1.85vw, 2rem);
   list-style: none;
   padding: 0;
   width: max-content;
-  min-width: min(100%, 720px);
+  /* Tracks the wider cells: nine 3.9rem planets plus the new gaps need more
+     room before the row stops filling the rail and starts looking sparse. */
+  min-width: min(100%, 820px);
   margin: 0 auto;
   justify-content: center;
 }
@@ -540,23 +568,25 @@
   scroll-snap-align: center;
 }
 
+/* The arc the orbs sit on, scaled with them -- held flat it would read as a
+   shallower curve against the larger cells rather than the same one. */
 .heroPlanetRow > *:nth-child(1),
 .heroPlanetRow > *:nth-child(9) {
-  transform: translateY(0.42rem);
+  transform: translateY(0.48rem);
 }
 
 .heroPlanetRow > *:nth-child(2),
 .heroPlanetRow > *:nth-child(8) {
-  transform: translateY(0.16rem);
+  transform: translateY(0.18rem);
 }
 
 .heroPlanetRow > *:nth-child(4),
 .heroPlanetRow > *:nth-child(6) {
-  transform: translateY(-0.12rem);
+  transform: translateY(-0.14rem);
 }
 
 .heroPlanetRow > *:nth-child(5) {
-  transform: translateY(-0.24rem);
+  transform: translateY(-0.28rem);
 }
 
 /* ── Hero right column ── */
@@ -706,7 +736,6 @@
   display: grid;
   justify-items: center;
   gap: 0.25rem;
-  margin-bottom: clamp(1rem, 2vw, 1.6rem);
   text-align: center;
 }
 
@@ -882,14 +911,28 @@
 .skyPlanet {
   display: grid;
   justify-items: center;
-  gap: 0.2rem;
-  min-width: 3.4rem;
+  gap: 0.26rem;
+  min-width: 3.9rem;
+}
+
+/*
+ * 28px, between PlanetOrb's own sm (24) and md (36).
+ *
+ * The strip was scaled up by about a sixth and the orbs had to come with it,
+ * but the size prop only steps 24 -> 36, which is +50% and turns a reference
+ * strip into the loudest thing on the page. PlanetOrb takes a `className` for
+ * exactly this kind of case; two classes here so the rule wins on specificity
+ * rather than on which stylesheet the bundler happens to emit last.
+ */
+.skyPlanet .skyOrb {
+  width: 28px;
+  height: 28px;
 }
 
 .skyPlanetName {
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.76rem;
+  font-size: 0.87rem;
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -897,7 +940,7 @@
 
 .skyPlanetSign {
   color: var(--ink-soft);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -911,10 +954,12 @@
   padding-inline-start: clamp(0.9rem, 1.8vw, 1.6rem);
   font-family: var(--font-newsreader), Georgia, serif;
   font-style: italic;
-  font-size: 0.82rem;
+  font-size: 0.92rem;
   line-height: 1.35;
   color: var(--ink-soft);
-  max-width: 12rem;
+  /* Grows in step with the type -- held at 12rem the larger words would have
+     taken an extra line and made the note taller than the rail beside it. */
+  max-width: 13.5rem;
 }
 
 .skyNote span {
@@ -1183,7 +1228,7 @@
 
 .takeaways {
   display: grid;
-  gap: 1.2rem;
+  gap: var(--section-rhythm);
   margin: 0.25rem 0 0.35rem;
 }
 
@@ -2981,7 +3026,7 @@
   align-items: end;
   justify-content: space-between;
   gap: 0.8rem 1.5rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: var(--section-rhythm);
 }
 
 .continuationHeader .kicker {
@@ -3248,7 +3293,18 @@
   padding: 0;
 }
 
+/*
+ * A grid with a gap, not a plain block.
+ *
+ * As a block, the header carried its own margin-bottom while the tab row and
+ * the selected area's description card below it had no margin between them at
+ * all -- they met at exactly 0px, so the row read as welded to the card below
+ * it. One gap on the container spaces header, tabs and description alike, and
+ * takes the margin off the header.
+ */
 .cardDomains {
+  display: grid;
+  gap: var(--section-rhythm);
   padding: 1.5rem;
 }
 
@@ -4883,8 +4939,11 @@
     border-radius: 15px;
   }
 
+  /* The token, not 0.9rem. This narrow-width rule was putting the header back
+     to 14.4px while every other section held 20px -- the one gap that did not
+     follow --section-rhythm once the others did. */
   .continuationHeader {
-    margin-bottom: 0.9rem;
+    margin-bottom: var(--section-rhythm);
   }
 
   .continuationLead {

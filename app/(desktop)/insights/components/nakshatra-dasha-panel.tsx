@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import type { CSSProperties } from "react";
 import type {
   CalculationAuditInfo,
   NakshatraInfo,
@@ -9,6 +10,7 @@ import type {
   SubPeriodInfo,
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { PLANET_COLORS } from "@/lib/constellation-geometry";
 
 /* ────────────────────────────────────────────────
    Deterministic Dasha Interpretations
@@ -197,19 +199,21 @@ const DASHA_COMBO_EFFECTS: Record<string, string> = {
 };
 
 /* ────────────────────────────────────────────────
-   Planet color palette for the Gantt timeline
+   Planet colours for the timeline
+
+   From lib/constellation-geometry rather than a set of its own. The chart
+   wheel and the mobile chart already colour their grahas from there, and
+   this panel carried an unrelated flat palette -- so Mars was coral in the
+   wheel and a flat red in the timeline underneath it, and Rahu went from
+   grey to purple between the two. One planet, one colour.
+
+   Only the fallback stays local: an unrecognised lord gets the teal that
+   the rest of this panel uses for neutral furniture.
    ──────────────────────────────────────────────── */
-const DASHA_COLORS: Record<string, string> = {
-  Sun:     '#f5a623',
-  Moon:    '#a8d8ea',
-  Mars:    '#e74c3c',
-  Rahu:    '#8e44ad',
-  Jupiter: '#f1c40f',
-  Saturn:  '#7f8c8d',
-  Mercury: '#2ecc71',
-  Ketu:    '#e67e22',
-  Venus:   '#e91e8c',
-};
+const DASHA_FALLBACK_COLOR = '#6ce1d4';
+
+const dashaColor = (planet: string) =>
+  PLANET_COLORS[planet] ?? DASHA_FALLBACK_COLOR;
 
 const LEVEL_LABELS: Record<number, string> = {
   1: "Maha Dasha",
@@ -667,7 +671,7 @@ export default function NakshatraDashaPanel({
 
       <div className="dasha-active-stack" aria-label="Active dasha stack">
         {activeStack.map((step) => {
-          const color = DASHA_COLORS[step.planet] ?? "#6ce1d4";
+          const color = dashaColor(step.planet);
           return (
             <article key={`${step.label}-${step.planet}`} className="dasha-active-stack-card">
               <span className="dasha-active-stack-level">{step.label}</span>
@@ -890,7 +894,7 @@ export default function NakshatraDashaPanel({
               <span className="dasha-combo-label">Combined Influence</span>
               <div className="dasha-combo-lords">
                 {combinationInsight.lords.map((lord, idx) => (
-                  <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `${DASHA_COLORS[lord] ?? '#6ce1d4'}22`, color: DASHA_COLORS[lord] ?? '#6ce1d4', borderColor: `${DASHA_COLORS[lord] ?? '#6ce1d4'}44` }}>
+                  <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `${dashaColor(lord)}22`, color: dashaColor(lord), borderColor: `${dashaColor(lord)}44` }}>
                     {lord}
                     {idx < combinationInsight.lords.length - 1 && <span className="dasha-combo-arrow">&rarr;</span>}
                   </span>
@@ -942,7 +946,7 @@ export default function NakshatraDashaPanel({
                     const widthPct = ((pEnd   - pStart)   / totalMs) * 100;
                     const isCurrent = period.planet === currentPlanet;
                     const isActive  = popup?.planet === period.planet && popup?.level === 1;
-                    const baseColor = DASHA_COLORS[period.planet] ?? '#6ce1d4';
+                    const baseColor = dashaColor(period.planet);
 
                     return (
                       <div
@@ -951,11 +955,14 @@ export default function NakshatraDashaPanel({
                         style={{
                           left:  `${leftPct}%`,
                           width: `${widthPct}%`,
-                          backgroundColor: baseColor,
-                          boxShadow: isCurrent
-                            ? `0 0 12px 3px ${baseColor}88, inset 0 0 8px ${baseColor}44`
-                            : undefined,
-                        }}
+                          /*
+                           * The colour, not the finished background. CSS builds the
+                           * fill, the lit top edge and the current-period glow off
+                           * this, which an inline backgroundColor cannot do -- and an
+                           * inline background would win over those rules anyway.
+                           */
+                          "--dasha-color": baseColor,
+                        } as CSSProperties}
                         title={`${period.planet}: ${period.years} years (${period.start_date} – ${period.end_date})`}
                         onClick={(e) => {
                           handleBarClick(
@@ -1028,11 +1035,11 @@ export default function NakshatraDashaPanel({
               {activePeriod && (
                 <div
                   className="dasha-active-card"
-                  style={{ borderColor: `${DASHA_COLORS[activePeriod.planet] ?? '#6ce1d4'}44` }}
+                  style={{ borderColor: `${dashaColor(activePeriod.planet)}44` }}
                 >
                   <span
                     className="dasha-active-card-planet"
-                    style={{ color: DASHA_COLORS[activePeriod.planet] ?? '#6ce1d4' }}
+                    style={{ color: dashaColor(activePeriod.planet) }}
                   >
                     {activePeriod.planet}
                   </span>
@@ -1073,7 +1080,10 @@ export default function NakshatraDashaPanel({
                     style={{
                       width: `${widthPercent}%`,
                       borderColor: LEVEL_COLORS[sub.level] || LEVEL_COLORS[5],
-                    }}
+                      /* Sub-periods were one flat teal for every lord, so a run of
+                         nine of them said nothing about whose period it was. */
+                      "--dasha-color": dashaColor(sub.planet),
+                    } as CSSProperties}
                     title={`${sub.planet}: ${formatDate(sub.start_date)} – ${formatDate(sub.end_date)}`}
                     onClick={(e) => {
                       handleBarClick(
@@ -1167,7 +1177,7 @@ export default function NakshatraDashaPanel({
             <div className="dasha-lens-grid">
               {visiblePeriods.map((period, index) => {
                 const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
-                const color = DASHA_COLORS[period.planet] ?? "#6ce1d4";
+                const color = dashaColor(period.planet);
                 const theme = DASHA_LORD_THEMES[period.planet]?.theme ?? "Sub-period influence";
                 const duration = period.years
                   ? `${period.years.toFixed(2)} years`
@@ -1256,7 +1266,7 @@ export default function NakshatraDashaPanel({
                 <tbody>
                   {displayPeriods.map((period, index) => {
                     const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
-                    const color = DASHA_COLORS[period.planet] ?? "#6ce1d4";
+                    const color = dashaColor(period.planet);
                     return (
                       <tr key={`${period.planet}-${period.start_date}-${index}`} className={isCurrent ? "dasha-period-row--current" : ""}>
                         <td>
