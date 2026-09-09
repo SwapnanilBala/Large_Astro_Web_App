@@ -17,6 +17,7 @@ import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import styles from "../insights.module.css";
 import SectionGateway from "./section-gateway";
+import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import TodaysSkyBand from "./todays-sky-band";
 import {
   Flourish,
@@ -1126,33 +1127,53 @@ export default function InsightsContent({
               <span>not a verdict.</span>
             </p>
             <ScriptRule className={`${decor.inline} ${decor.decorGold} ${decor.rule}`} />
-            <dl className={styles.heroArch} aria-label="Chart identity">
-              <Sparkle
-                className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm} ${styles.archSparkle}`}
-              />
-              <div className={styles.heroArchRow}>
-                <dt>Rising</dt>
-                <dd>{payload.chart.ascendant.sign}</dd>
+            {/*
+              The rising sign as a medallion, rather than four words on a slab.
+              The arch it replaces was a 12%-white rectangle and the largest
+              element on this side of the hero, which made a placeholder the
+              focal point. The illustration is the reader's own ascendant, so
+              the biggest thing here is now the most specific thing here.
+
+              The remaining three facts sit under it in three equal columns.
+              Three items in two columns lands 2 + 1, which reads as a wrap
+              rather than a row.
+            */}
+            <div className={styles.heroMedallion}>
+              <div className={styles.medallionDisc}>
+                <ZodiacSignImage
+                  sign={payload.chart.ascendant.sign}
+                  size={168}
+                  className={styles.medallionImage}
+                />
+                <Sparkle
+                  className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm} ${styles.medallionSparkle}`}
+                />
+                <span className={styles.medallionSign}>
+                  {payload.chart.ascendant.sign} rising
+                </span>
               </div>
-              {heroIdentity.sun && (
-                <div className={styles.heroArchRow}>
-                  <dt>Sun</dt>
-                  <dd>{heroIdentity.sun}</dd>
-                </div>
-              )}
-              {heroIdentity.moon && (
-                <div className={styles.heroArchRow}>
-                  <dt>Moon</dt>
-                  <dd>{heroIdentity.moon}</dd>
-                </div>
-              )}
-              {payload.chart.dasha?.current_dasha && (
-                <div className={styles.heroArchRow}>
-                  <dt>Period</dt>
-                  <dd>{payload.chart.dasha.current_dasha}</dd>
-                </div>
-              )}
-            </dl>
+
+              <dl className={styles.medallionFacts} aria-label="Chart identity">
+                {heroIdentity.sun && (
+                  <div>
+                    <dt>Sun</dt>
+                    <dd>{heroIdentity.sun}</dd>
+                  </div>
+                )}
+                {heroIdentity.moon && (
+                  <div>
+                    <dt>Moon</dt>
+                    <dd>{heroIdentity.moon}</dd>
+                  </div>
+                )}
+                {payload.chart.dasha?.current_dasha && (
+                  <div>
+                    <dt>Period</dt>
+                    <dd>{payload.chart.dasha.current_dasha}</dd>
+                  </div>
+                )}
+              </dl>
+            </div>
           </aside>
         </motion.header>
 

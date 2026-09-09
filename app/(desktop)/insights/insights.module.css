@@ -170,6 +170,65 @@
    * the one-column rule at 900px is untouched.
    */
   padding-inline: max(var(--band-pad), calc((100% - var(--hero-max)) / 2));
+
+  /*
+   * The band's own surface.
+   *
+   * Four layers, bottom to top in `background` order means the LAST entry
+   * paints furthest back:
+   *   1. backdrop-1280.webp -- a zodiac wheel illustration already in public/,
+   *      previously only ever used at 8% on .insights-shell::before, where it
+   *      was invisible.
+   *   2. two accent radials, gold under the title and teal opposite.
+   *   3. a directional scrim, near-opaque on the left where the copy sits and
+   *      thinner on the right where the wheel is allowed through.
+   *
+   * `luminosity` on the image is what keeps the palette: the asset is mauve,
+   * and blended for luminance only it contributes its shape and shading while
+   * taking hue from the navy beneath it.
+   *
+   * Positioned at 46% -- the middle. That is deliberate and it is the whole
+   * reason this works next to the medallion: both are circular gold artwork,
+   * so the wheel is large, faint and central while the medallion is small,
+   * sharp and right. Put the wheel at 72% and the two compete for the same
+   * corner.
+   */
+  /*
+   * The scrim is built from --bg-deep via color-mix, not from a literal.
+   *
+   * That token is themed -- #07111b in Celestial Luxe, #fff8f5 in Ethereal
+   * Dawn -- so one definition covers both themes and there is no light-theme
+   * block to keep in sync. Writing it as rgba(9,13,26,...) is what the first
+   * attempt did, and it dropped a dark navy slab into the middle of a cream
+   * page. Same failure as the section nav's hardcoded gradient.
+   */
+  background-image:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--bg-deep) 97%, transparent) 0%,
+      color-mix(in srgb, var(--bg-deep) 90%, transparent) 34%,
+      color-mix(in srgb, var(--bg-deep) 66%, transparent) 58%,
+      color-mix(in srgb, var(--bg-deep) 74%, transparent) 100%
+    ),
+    radial-gradient(
+      68% 92% at 13% 24%,
+      color-mix(in srgb, var(--accent-gold) 16%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      58% 78% at 84% 72%,
+      color-mix(in srgb, var(--accent-teal) 9%, transparent),
+      transparent 62%
+    ),
+    url("/backdrop-1280.webp");
+  background-size: auto, auto, auto, 118% auto;
+  background-position: center, center, center, 46% 38%;
+  background-repeat: no-repeat;
+  background-blend-mode: normal, normal, normal, luminosity;
+  /* Falls away at the edges instead of ending on a hard line. */
+  box-shadow:
+    inset 0 -70px 90px -50px color-mix(in srgb, var(--bg-deep) 88%, transparent),
+    inset 0 0 150px 40px color-mix(in srgb, var(--bg-deep) 45%, transparent);
 }
 
 .hero::before {
@@ -641,11 +700,6 @@
   justify-self: end;
   align-self: end;
   inline-size: 3.25rem;
-}
-
-.archSparkle {
-  justify-self: center;
-  margin-bottom: 0.15rem;
 }
 
 .zoneHeader {
@@ -1442,7 +1496,7 @@
  * .takeawayCard and .strengthMap both `composes: card`. CSS Modules puts the
  * composed class in the element's class list rather than merging declarations,
  * so both classes have one-class specificity and source order decides -- the
- * same trap the .heroArch and .cardRow3 comments warn about.
+ * same trap the .cardChart and .cardRow3 comments warn about.
  *
  * Declared above .card, .takeawayCard lost its tone border, its tone wash and
  * its padding to .card's `border` / `background` / `padding`, and
@@ -1737,56 +1791,126 @@
 }
 
 /*
- * Everything below composes .card, so it has to sit AFTER .card in this file.
+ * Composers below .card, and they have to stay below it.
  *
  * CSS Modules `composes` puts the composed class in the element's class list;
  * it does not merge declarations. Both classes therefore have one-class
- * specificity and source order decides. Defined above .card, .heroArch's four
- * corner longhands lost to .card's `border-radius` shorthand and the arch
- * rendered as an ordinary 16px rectangle. Same trap the .cardRow3 comment
- * warns about, one property along.
+ * specificity and source order decides. The case that proved it here was the
+ * old .heroArch: declared above .card, its four corner radius longhands lost
+ * to .card's `border-radius` shorthand and the arch rendered as an ordinary
+ * 16px rectangle. That class is gone now -- the hero uses a medallion, which
+ * composes nothing -- but .cardChart and .chartGlance below still depend on
+ * this ordering. Same trap the .cardRow3 comment warns about, one property
+ * along.
  */
 /*
- * The arch.
+ * The rising-sign medallion.
  *
- * A CSS shape rather than an SVG frame: an asymmetric radius scales with the
- * content, needs no viewBox, and inherits the light-theme .card override for
- * free. Only the sparkle inside it is drawn.
+ * Replaces .heroArch, which was a 12%-white slab -- the largest element on
+ * this side of the hero and the least informative. Everything here composes
+ * from tokens, so it re-themes without a light-theme block of its own except
+ * for the ring, which needs a different weight on cream.
  */
-.heroArch {
-  composes: card;
+.heroMedallion {
   display: grid;
-  gap: 0.85rem;
-  width: min(100%, 13rem);
+  justify-items: center;
+  /* The sign pill hangs 13px below the disc, so the gap has to clear that
+     before the facts row starts, not just separate the two boxes. */
+  gap: 2.1rem;
+  min-width: 0;
+}
+
+.medallionDisc {
+  position: relative;
+  display: grid;
+  place-items: center;
+  inline-size: 168px;
+  block-size: 168px;
+}
+
+/*
+ * The glow. A conic sweep rather than a plain ring, so the gold is not flat --
+ * and blurred, so it reads as light coming off the disc rather than a second
+ * border. Behind the image via z-index on the image, not a negative one here:
+ * .hero is an isolation context and -1 would drop it behind the band's own
+ * background layers.
+ */
+.medallionDisc::before {
+  content: "";
+  position: absolute;
+  inset: -13px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 210deg,
+    color-mix(in srgb, var(--accent-gold) 60%, transparent),
+    color-mix(in srgb, var(--accent-teal) 34%, transparent),
+    color-mix(in srgb, var(--accent-gold) 60%, transparent)
+  );
+  filter: blur(10px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.medallionImage {
+  position: relative;
+  z-index: 1;
+  /* Ring, then a dark gap, then a hairline -- the gap is what separates the
+     illustration from the glow instead of letting them blend. */
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-gold) 75%, transparent),
+    0 0 0 7px var(--bg-deep, rgba(9, 13, 26, 0.92)),
+    0 0 0 8px color-mix(in srgb, var(--accent-gold) 32%, transparent),
+    0 18px 40px rgba(0, 0, 0, 0.45);
+}
+
+.medallionSparkle {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: -4px;
+  inset-inline-end: 6px;
+}
+
+.medallionSign {
+  position: absolute;
+  z-index: 2;
+  inset-block-end: -13px;
+  padding: 0.24rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--accent-gold) 45%, transparent);
+  background: var(--bg-deep, rgba(9, 13, 26, 0.95));
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+  white-space: nowrap;
+}
+
+/* Three equal columns. Three facts in two columns lands 2 + 1. */
+.medallionFacts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 clamp(0.6rem, 1.4vw, 1.25rem);
   margin: 0;
-  padding: 1.6rem 1.15rem 1.25rem;
-  border-start-start-radius: 50% 6rem;
-  border-start-end-radius: 50% 6rem;
-  border-end-start-radius: var(--radius-lg, 18px);
-  border-end-end-radius: var(--radius-lg, 18px);
   text-align: center;
 }
 
-.heroArchRow {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.heroArchRow dt {
+.medallionFacts dt {
   font-family: var(--font-display), sans-serif;
-  font-size: 0.66rem;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: var(--accent-gold);
 }
 
-.heroArchRow dd {
-  margin: 0;
-  font-family: var(--font-display), sans-serif;
+.medallionFacts dd {
+  margin: 0.15rem 0 0;
+  font-family: var(--font-display), serif;
   font-size: 0.95rem;
   font-weight: 650;
-  line-height: 1.15;
+  line-height: 1.2;
   color: var(--ink-main);
 }
 
