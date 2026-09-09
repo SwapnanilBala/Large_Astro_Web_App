@@ -4303,7 +4303,27 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .page-transition-enter {
   /* Animation now controlled by Framer Motion — no CSS animation */
-  will-change: opacity, transform;
+
+  /*
+   * No `will-change` here.
+   *
+   * It outlived the CSS animation it was for. Every page renders inside this
+   * wrapper, and a standing `will-change: transform` promotes the whole app to
+   * a compositing layer for the lifetime of the page. On Windows a composited
+   * layer over a non-opaque backdrop cannot use ClearType, so every glyph on
+   * the site fell back to greyscale antialiasing -- the heavy dark-on-gold
+   * handoff buttons showed it worst, but it was all text. Framer Motion sets
+   * its own will-change while a transition is actually running and clears it
+   * afterwards, which is the behaviour that was wanted.
+   *
+   * The two things it also did, incidentally, are now declared on purpose:
+   * `position: relative` keeps this element the containing block for .back-btn
+   * (see the note there), and `isolation` keeps the stacking context it formed,
+   * so z-indexes inside the page still resolve among themselves rather than
+   * against the navbar and drawer outside it. Neither forces a layer.
+   */
+  position: relative;
+  isolation: isolate;
 }
 
 /* ═══════════════════════════════════════════════
@@ -4963,11 +4983,14 @@ a:focus-visible {
    ═══════════════════════════════════════════════ */
 
 .back-btn {
-  /* Declared fixed, but `will-change: transform` on the page-transition
-     wrapper makes that wrapper the containing block, so this actually behaves
-     as absolute and scrolls away with the page. That is the behaviour we
-     want here; the offsets below are therefore document offsets. */
-  position: fixed;
+  /* Absolute, and says so. This used to be `fixed` while the page-transition
+     wrapper's `will-change: transform` quietly made that wrapper its
+     containing block -- so it already behaved as absolute and scrolled away
+     with the page, which is what we want. That will-change is gone now (it was
+     costing every glyph on the site its subpixel antialiasing), so the
+     positioning it was propping up is stated directly. Same containing block,
+     same offsets, same result. */
+  position: absolute;
   /* Was 5.5rem (88px) against a 108px navbar, so the top 20px of the pill sat
      behind it. Sits below the bar now, and indented to line up with the
      section nav underneath rather than hugging the viewport edge. */
