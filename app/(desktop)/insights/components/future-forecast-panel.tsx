@@ -4,25 +4,82 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { CalendarPlus } from "lucide-react";
 import type { ForecastAspectInsight, ForecastReading } from "@/lib/astro-types";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
+import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
+import timingMessages from "@/messages/en.timing.json";
 
 type FutureForecastPanelProps = {
   queryString: string;
 };
 
+type Translator = (key: string, params?: Record<string, string>) => string;
+
 const FORECAST_TIMEOUT_MS = 30_000;
 const DATE_STRIP_DAYS = 7;
 
+/*
+ * The failure, not a sentence about it.
+ *
+ * Holding the resolved English in state would freeze it at the moment of the
+ * request, so switching language afterwards would leave the error behind in the
+ * old one. Keeping the shape and translating at render also keeps `tr` out of
+ * the fetch callback's dependencies, which would otherwise re-fire the effect —
+ * and re-run the request — every time a translation file finished loading.
+ */
+type ForecastError =
+  | { kind: "api"; status: string }
+  | { kind: "timeout" }
+  | { kind: "loadFailed" }
+  | { kind: "message"; text: string };
+
+function forecastErrorText(error: ForecastError, tr: Translator): string {
+  switch (error.kind) {
+    case "api":
+      return tr("timing.forecast.apiError", { status: error.status });
+    case "timeout":
+      return tr("timing.forecast.timeoutMessage", {
+        seconds: String(Math.round(FORECAST_TIMEOUT_MS / 1000)),
+      });
+    case "loadFailed":
+      return tr("timing.forecast.loadFailed");
+    default:
+      return error.text;
+  }
+}
+
 type LifeArea = "all" | "career" | "relationships" | "wellbeing" | "finances" | "learning" | "spiritual";
 
-const LIFE_AREAS: Array<{ value: LifeArea; label: string; keywords: string[] }> = [
-  { value: "all", label: "All", keywords: [] },
-  { value: "career", label: "Career", keywords: ["career", "work", "leadership", "profession", "ambition", "authority", "achievement", "business"] },
-  { value: "relationships", label: "Relationships", keywords: ["relationship", "love", "partner", "marriage", "family", "social"] },
-  { value: "wellbeing", label: "Wellbeing", keywords: ["health", "wellbeing", "well-being", "rest", "healing", "emotional", "home", "inner"] },
-  { value: "finances", label: "Finances", keywords: ["money", "wealth", "finance", "financial", "resources", "income", "investment"] },
-  { value: "learning", label: "Learning", keywords: ["learning", "study", "education", "writing", "communication", "knowledge", "skill", "teaching"] },
-  { value: "spiritual", label: "Spiritual", keywords: ["spiritual", "spirituality", "reflection", "intuition", "meditation", "dharma", "release"] },
+/*
+ * `keywords` stay English on purpose: they are matched against the forecast
+ * text the API returns, which is English regardless of the interface language.
+ * Only `labelKey` is on screen.
+ */
+const LIFE_AREAS: Array<{ value: LifeArea; labelKey: string; keywords: string[] }> = [
+  { value: "all", labelKey: "timing.forecast.areas.all", keywords: [] },
+  { value: "career", labelKey: "timing.forecast.areas.career", keywords: ["career", "work", "leadership", "profession", "ambition", "authority", "achievement", "business"] },
+  { value: "relationships", labelKey: "timing.forecast.areas.relationships", keywords: ["relationship", "love", "partner", "marriage", "family", "social"] },
+  { value: "wellbeing", labelKey: "timing.forecast.areas.wellbeing", keywords: ["health", "wellbeing", "well-being", "rest", "healing", "emotional", "home", "inner"] },
+  { value: "finances", labelKey: "timing.forecast.areas.finances", keywords: ["money", "wealth", "finance", "financial", "resources", "income", "investment"] },
+  { value: "learning", labelKey: "timing.forecast.areas.learning", keywords: ["learning", "study", "education", "writing", "communication", "knowledge", "skill", "teaching"] },
+  { value: "spiritual", labelKey: "timing.forecast.areas.spiritual", keywords: ["spiritual", "spirituality", "reflection", "intuition", "meditation", "dharma", "release"] },
 ];
+
+/*
+ * The interface language as a BCP-47 tag for Intl.
+ *
+ * These formatters used to pass `undefined`, which means "whatever locale the
+ * runtime happens to have" — the server's and the browser's need not agree, so
+ * the same date could render two ways and React would report a hydration text
+ * mismatch. Pinning it to the selected language makes the output a function of
+ * app state instead of the environment.
+ */
+const LOCALE_TAGS: Record<Language, string> = {
+  en: "en-US",
+  es: "es-ES",
+  bn: "bn-IN",
+  hi: "hi-IN",
+  it: "it-IT",
+  fr: "fr-FR",
+};
 
 function localDateString(date = new Date()) {
   const year = date.getFullYear();
@@ -37,19 +94,26 @@ function addDays(dateString: string, offsetDays: number) {
   return localDateString(date);
 }
 
-function formatFriendlyDate(value: string) {
-  return new Intl.DateTimeFormat(undefined, {
+/*
+ * The values below are bare YYYY-MM-DD calendar dates, so they are read at UTC
+ * noon and formatted in UTC. Formatting an instant in the viewer's own zone
+ * would print the day before for anyone west of Greenwich, and the day after
+ * past UTC+12.
+ */
+function formatFriendlyDate(value: string, locale: string) {
+  return new Intl.DateTimeFormat(locale, {
     month: "long",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(`${value}T12:00:00`));
+    timeZone: "UTC",
+  }).format(new Date(`${value}T12:00:00Z`));
 }
 
-function formatDateButton(value: string) {
-  const date = new Date(`${value}T12:00:00`);
+function formatDateButton(value: string, locale: string) {
+  const date = new Date(`${value}T12:00:00Z`);
   return {
-    day: new Intl.DateTimeFormat(undefined, { weekday: "short" }).format(date),
-    date: new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" }).format(date),
+    day: new Intl.DateTimeFormat(locale, { weekday: "short", timeZone: "UTC" }).format(date),
+    date: new Intl.DateTimeFormat(locale, { month: "short", day: "numeric", timeZone: "UTC" }).format(date),
   };
 }
 
@@ -81,13 +145,32 @@ function escapeIcs(text: string) {
   return text.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\r?\n/g, "\\n");
 }
 
-function downloadForecastCalendarEvent(forecast: ForecastReading, lifeArea: LifeArea) {
+function downloadForecastCalendarEvent(
+  forecast: ForecastReading,
+  lifeArea: LifeArea,
+  tr: Translator,
+  locale: string
+) {
   const nextDate = addDays(forecast.target_date, 1).replaceAll("-", "");
-  const selectedArea = LIFE_AREAS.find((area) => area.value === lifeArea)?.label;
+  const areaLabelKey = LIFE_AREAS.find((area) => area.value === lifeArea)?.labelKey;
   const signals = getMajorSignals(forecast)
-    .map((signal) => `${signal.transit_planet} ${signal.aspect_type} natal ${signal.natal_planet} (${signal.orb.toFixed(2)}° orb)`)
+    .map((signal) =>
+      tr("timing.forecast.calendar.signalLine", {
+        transit: signal.transit_planet,
+        aspect: signal.aspect_type,
+        natal: signal.natal_planet,
+        orb: signal.orb.toFixed(2),
+      })
+    )
     .join("\n");
-  const description = [forecast.headline, forecast.overview, selectedArea === "All" ? "" : `Focus: ${selectedArea}`, signals ? `Major signals:\n${signals}` : ""]
+  const description = [
+    forecast.headline,
+    forecast.overview,
+    lifeArea === "all" || !areaLabelKey
+      ? ""
+      : tr("timing.forecast.calendar.focusLine", { area: tr(areaLabelKey) }),
+    signals ? tr("timing.forecast.calendar.signalsBlock", { signals }) : "",
+  ]
     .filter(Boolean)
     .join("\n\n");
   const dateStamp = forecast.target_date.replaceAll("-", "");
@@ -100,7 +183,11 @@ function downloadForecastCalendarEvent(forecast: ForecastReading, lifeArea: Life
     `DTSTAMP:${localDateString().replaceAll("-", "")}T000000Z`,
     `DTSTART;VALUE=DATE:${dateStamp}`,
     `DTEND;VALUE=DATE:${nextDate}`,
-    `SUMMARY:${escapeIcs(`Astrology forecast: ${formatFriendlyDate(forecast.target_date)}`)}`,
+    `SUMMARY:${escapeIcs(
+      tr("timing.forecast.calendar.summary", {
+        date: formatFriendlyDate(forecast.target_date, locale),
+      })
+    )}`,
     `DESCRIPTION:${escapeIcs(description)}`,
     "END:VEVENT",
     "END:VCALENDAR",
@@ -116,11 +203,23 @@ function downloadForecastCalendarEvent(forecast: ForecastReading, lifeArea: Life
 }
 
 function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <article className={`forecast-event ${signal.tone === "supportive" ? "forecast-event--supportive" : "forecast-event--challenging"}`}>
-      <span className="forecast-event-tone">{signal.tone === "supportive" ? "Support" : "Watch"}</span>
+      <span className="forecast-event-tone">
+        {signal.tone === "supportive"
+          ? tr("timing.forecast.signal.support")
+          : tr("timing.forecast.signal.watch")}
+      </span>
       <div>
-        <strong>{signal.transit_planet} {signal.aspect_type} natal {signal.natal_planet}</strong>
+        <strong>
+          {tr("timing.forecast.signal.title", {
+            transit: signal.transit_planet,
+            aspect: signal.aspect_type,
+            natal: signal.natal_planet,
+          })}
+        </strong>
         <p>{compactTransitText(signal.interpretation)}</p>
       </div>
       <span className="forecast-event-orb">{signal.orb.toFixed(2)}°</span>
@@ -129,17 +228,23 @@ function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
 }
 
 function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeArea: LifeArea }) {
+  const { language } = useTranslation();
+  const tr = useRouteMessages(timingMessages);
+  const locale = LOCALE_TAGS[language];
   const focusItems = forecast.focus_areas.filter((item) => matchesLifeArea(item, lifeArea));
   const openingItems = forecast.opportunities.filter((item) => matchesLifeArea(item, lifeArea));
   const cautionItems = forecast.cautions.filter((item) => matchesLifeArea(item, lifeArea));
   const majorSignals = getMajorSignals(forecast);
+  const emptyNote = tr("timing.forecast.card.filterEmpty", { area: lifeArea });
 
   return (
     <article className="forecast-card">
       <div className="forecast-card-header">
         <div>
           <p className="kicker">
-            Daily outlook - {formatFriendlyDate(forecast.target_date)}
+            {tr("timing.forecast.card.dailyOutlook", {
+              date: formatFriendlyDate(forecast.target_date, locale),
+            })}
           </p>
           <h3>{forecast.headline}</h3>
         </div>
@@ -152,42 +257,42 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
 
       <div className="forecast-grid">
         <section className="forecast-column">
-          <h4>Focus</h4>
+          <h4>{tr("timing.forecast.card.focus")}</h4>
           {focusItems.length > 0 ? (
             <ul className="domain-reading-list">
               {focusItems.map((item) => <li key={item}>{item}</li>)}
             </ul>
-          ) : <p className="forecast-filter-empty">No direct {lifeArea} themes surfaced for this date.</p>}
+          ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
 
         <section className="forecast-column">
-          <h4>Openings</h4>
+          <h4>{tr("timing.forecast.card.openings")}</h4>
           {openingItems.length > 0 ? (
             <ul className="domain-reading-list">
               {openingItems.map((item) => <li key={item}>{item}</li>)}
             </ul>
-          ) : <p className="forecast-filter-empty">No direct {lifeArea} themes surfaced for this date.</p>}
+          ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
 
         <section className="forecast-column">
-          <h4>Cautions</h4>
+          <h4>{tr("timing.forecast.card.cautions")}</h4>
           {cautionItems.length > 0 ? (
             <ul className="domain-reading-list">
               {cautionItems.map((item) => <li key={item}>{item}</li>)}
             </ul>
-          ) : <p className="forecast-filter-empty">No direct {lifeArea} themes surfaced for this date.</p>}
+          ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
       </div>
 
       <section className="forecast-events" aria-labelledby="forecast-major-events">
         <div className="forecast-events-header">
           <div>
-            <p className="kicker">Transit timeline</p>
-            <h4 id="forecast-major-events">Major signals for this date</h4>
+            <p className="kicker">{tr("timing.forecast.card.transitTimeline")}</p>
+            <h4 id="forecast-major-events">{tr("timing.forecast.card.majorSignals")}</h4>
           </div>
-          <button type="button" className="forecast-calendar-button" onClick={() => downloadForecastCalendarEvent(forecast, lifeArea)}>
+          <button type="button" className="forecast-calendar-button" onClick={() => downloadForecastCalendarEvent(forecast, lifeArea, tr, locale)}>
             <CalendarPlus size={16} aria-hidden="true" />
-            Save to calendar
+            {tr("timing.forecast.card.saveToCalendar")}
           </button>
         </div>
         {majorSignals.length > 0 ? (
@@ -196,19 +301,21 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
               <MajorSignal key={`${signal.transit_planet}-${signal.aspect_type}-${signal.natal_planet}`} signal={signal} />
             ))}
           </div>
-        ) : <p className="forecast-transit-empty">No major transit aspects are exact enough to highlight on this date.</p>}
+        ) : <p className="forecast-transit-empty">{tr("timing.forecast.card.noMajorTransits")}</p>}
       </section>
     </article>
   );
 }
 
 export default function FutureForecastPanel({ queryString }: FutureForecastPanelProps) {
+  const { language } = useTranslation();
+  const tr = useRouteMessages(timingMessages);
+  const locale = LOCALE_TAGS[language];
   const [selectedDate, setSelectedDate] = useState(() => localDateString());
   const [forecast, setForecast] = useState<ForecastReading | null>(null);
   const [lifeArea, setLifeArea] = useState<LifeArea>("all");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [isTimeout, setIsTimeout] = useState(false);
+  const [error, setError] = useState<ForecastError | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const dateOptions = Array.from(
     { length: DATE_STRIP_DAYS },
@@ -218,8 +325,7 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
   const loadForecast = useCallback(async (targetDate: string) => {
     abortControllerRef.current?.abort();
     setIsLoading(true);
-    setError("");
-    setIsTimeout(false);
+    setError(null);
 
     const controller = new AbortController();
     abortControllerRef.current = controller;
@@ -231,18 +337,25 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
 
     try {
       const response = await fetch(buildForecastUrl(queryString, targetDate), { signal: controller.signal });
-      if (!response.ok) throw new Error(`Forecast API error (${response.status})`);
+      if (!response.ok) {
+        setForecast(null);
+        setError({ kind: "api", status: String(response.status) });
+        return;
+      }
       setForecast(await response.json() as ForecastReading);
     } catch (fetchError) {
       if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
         if (didTimeout) {
           setForecast(null);
-          setIsTimeout(true);
-          setError(`Request timed out after ${Math.round(FORECAST_TIMEOUT_MS / 1000)} seconds. Please try again.`);
+          setError({ kind: "timeout" });
         }
       } else {
         setForecast(null);
-        setError(fetchError instanceof Error ? fetchError.message : "Could not load forecast.");
+        setError(
+          fetchError instanceof Error
+            ? { kind: "message", text: fetchError.message }
+            : { kind: "loadFailed" }
+        );
       }
     } finally {
       window.clearTimeout(timeoutId);
@@ -258,16 +371,14 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
   return (
     <section className="rules-panel forecast-panel">
       <div className="rules-header">
-        <p className="kicker">Forward Timing</p>
-        <h2>Future Date Forecast</h2>
+        <p className="kicker">{tr("timing.forecast.kicker")}</p>
+        <h2>{tr("timing.forecast.heading")}</h2>
       </div>
-      <p className="section-intro forecast-intro">
-        Choose a day to see the active timing cycle, practical themes, and strongest personal transit signals.
-      </p>
+      <p className="section-intro forecast-intro">{tr("timing.forecast.intro")}</p>
 
-      <div className="forecast-date-strip" role="group" aria-label="Choose a forecast date">
+      <div className="forecast-date-strip" role="group" aria-label={tr("timing.forecast.dateStripLabel")}>
         {dateOptions.map((date) => {
-          const label = formatDateButton(date);
+          const label = formatDateButton(date, locale);
           const isSelected = date === selectedDate;
           return (
             <button
@@ -277,15 +388,15 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
               onClick={() => setSelectedDate(date)}
               aria-pressed={isSelected}
             >
-              <span>{date === dateOptions[0] ? "Today" : label.day}</span>
+              <span>{date === dateOptions[0] ? tr("timing.forecast.today") : label.day}</span>
               <strong>{label.date}</strong>
             </button>
           );
         })}
       </div>
 
-      <div className="forecast-filter-bar" aria-label="Filter forecast themes">
-        <span>View themes:</span>
+      <div className="forecast-filter-bar" aria-label={tr("timing.forecast.filterBarLabel")}>
+        <span>{tr("timing.forecast.viewThemes")}</span>
         <div className="forecast-filter-list">
           {LIFE_AREAS.map((area) => (
             <button
@@ -295,19 +406,25 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
               onClick={() => setLifeArea(area.value)}
               aria-pressed={lifeArea === area.value}
             >
-              {area.label}
+              {tr(area.labelKey)}
             </button>
           ))}
         </div>
       </div>
 
-      {isLoading && <p className="forecast-loading" role="status">Reading {formatFriendlyDate(selectedDate)}...</p>}
+      {isLoading && (
+        <p className="forecast-loading" role="status">
+          {tr("timing.forecast.loading", { date: formatFriendlyDate(selectedDate, locale) })}
+        </p>
+      )}
 
       {error && (
         <div className="forecast-error">
           <p className="error-note">
-            {isTimeout ? "Timeout: " : "Error: "}
-            {error}
+            {error.kind === "timeout"
+              ? tr("timing.forecast.timeoutPrefix")
+              : tr("timing.forecast.errorPrefix")}
+            {forecastErrorText(error, tr)}
           </p>
           <button
             type="button"
@@ -315,7 +432,7 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
             onClick={() => void loadForecast(selectedDate)}
             disabled={isLoading}
           >
-            Retry
+            {tr("timing.forecast.retry")}
           </button>
         </div>
       )}

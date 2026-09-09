@@ -6,6 +6,8 @@ import {
   appendProfileLocationApiSearchParams,
   parseProfileQueryString,
 } from "@/lib/chart-query";
+import { useRouteMessages } from "@/lib/i18n-context";
+import timingMessages from "@/messages/en.timing.json";
 import styles from "./muhurta-panel.module.css";
 
 // --------------------------------------------------------------------------
@@ -48,34 +50,60 @@ type MuhurtaPanelProps = {
   queryString: string;
 };
 
+type Translator = (key: string, params?: Record<string, string>) => string;
+
 // --------------------------------------------------------------------------
 // Constants
 // --------------------------------------------------------------------------
 
+/* `value` is the API's activity id and stays English; `labelKey` is the copy. */
 const ACTIVITIES = [
-  { value: "general_auspicious", label: "General Auspicious" },
-  { value: "marriage", label: "Marriage / Ceremony" },
-  { value: "business_start", label: "Business Launch" },
-  { value: "travel", label: "Travel / Journey" },
-  { value: "education", label: "Education / Study" },
-  { value: "property_purchase", label: "Property / Real Estate" },
-  { value: "medical_procedure", label: "Medical / Surgery" },
-  { value: "job_interview", label: "Job Interview" },
-  { value: "investment", label: "Financial Investment" },
-  { value: "spiritual_practice", label: "Spiritual Practice" },
+  { value: "general_auspicious", labelKey: "timing.muhurta.activities.general_auspicious" },
+  { value: "marriage", labelKey: "timing.muhurta.activities.marriage" },
+  { value: "business_start", labelKey: "timing.muhurta.activities.business_start" },
+  { value: "travel", labelKey: "timing.muhurta.activities.travel" },
+  { value: "education", labelKey: "timing.muhurta.activities.education" },
+  { value: "property_purchase", labelKey: "timing.muhurta.activities.property_purchase" },
+  { value: "medical_procedure", labelKey: "timing.muhurta.activities.medical_procedure" },
+  { value: "job_interview", labelKey: "timing.muhurta.activities.job_interview" },
+  { value: "investment", labelKey: "timing.muhurta.activities.investment" },
+  { value: "spiritual_practice", labelKey: "timing.muhurta.activities.spiritual_practice" },
 ];
 
 const TIMEOUT_MS = 60_000;
 const MAX_RANGE_DAYS = 30;
 const PRESETS = [
-  { label: "3 Days", days: 3 },
-  { label: "7 Days", days: 7 },
-  { label: "14 Days", days: 14 },
-  { label: "30 Days", days: 30 },
+  { days: 3 },
+  { days: 7 },
+  { days: 14 },
+  { days: 30 },
 ] as const;
 const MIN_SCORE_FLOOR = 60;
 const MIN_SCORE_CEIL = 95;
 const STORAGE_KEY = "muhurta-prefs-v1";
+
+/* Translated at render rather than when the request fails, so the message
+   follows a language change instead of being frozen in the old one. */
+type MuhurtaError =
+  | { kind: "api"; status: string }
+  | { kind: "apiMessage"; text: string }
+  | { kind: "timeout" }
+  | { kind: "loadFailed" };
+
+function muhurtaErrorText(error: MuhurtaError, tr: Translator): string {
+  switch (error.kind) {
+    case "api":
+      return tr("timing.muhurta.apiError", { status: error.status });
+    case "apiMessage":
+      return error.text;
+    case "timeout":
+      return tr("timing.muhurta.timeoutMessage", {
+        seconds: String(Math.round(TIMEOUT_MS / 1000)),
+      });
+    default:
+      return tr("timing.muhurta.loadFailed");
+  }
+}
 
 interface StoredPrefs {
   activity?: string;
@@ -142,13 +170,14 @@ const DIAL_RADIUS = 20;
 const DIAL_CIRCUMFERENCE = 2 * Math.PI * DIAL_RADIUS;
 
 function ScoreDial({ score, quality }: { score: number; quality: MuhurtaWindow["quality"] }) {
+  const tr = useRouteMessages(timingMessages);
   const color = qualityColor(quality);
   const offset = DIAL_CIRCUMFERENCE * (1 - Math.max(0, Math.min(100, score)) / 100);
   return (
     <div
       className={styles.scoreDial}
       role="img"
-      aria-label={`Score ${score} out of 100, ${quality}`}
+      aria-label={tr("timing.muhurta.scoreDialLabel", { score: String(score), quality })}
     >
       <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
         <circle className={styles.dialTrack} cx="24" cy="24" r={DIAL_RADIUS} />
@@ -203,15 +232,15 @@ function formatTzOffset(minutes: number): string {
   return `UTC${sign}${Math.floor(abs / 60)}:${pad2(abs % 60)}`;
 }
 
-function buildLocationLabel(queryString: string): string {
+function buildLocationLabel(queryString: string, tr: Translator): string {
   const profile = parseProfileQueryString(queryString);
   const place = [profile.town || profile.city, profile.country]
     .map((p) => p?.trim())
     .filter(Boolean)
     .join(", ");
   const tz = formatTzOffset(Number(profile.timezoneOffsetMinutes || "0"));
-  const where = place || "your saved location";
-  return `Times shown for ${where} · ${tz}`;
+  const where = place || tr("timing.muhurta.savedLocation");
+  return tr("timing.muhurta.locationNote", { place: where, tz });
 }
 
 /** Floating (wall-clock) ICS stamp matching the times shown in the UI. */
@@ -237,13 +266,23 @@ function escapeIcs(text: string): string {
     .replace(/\r?\n/g, "\\n");
 }
 
-function buildIcs(w: MuhurtaWindow, activityLabel: string): string {
+function buildIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator): string {
   const start = new Date(w.start);
   const end = new Date(w.end);
   const uid = `muhurta-${start.getTime()}-${Math.round(w.score)}@astro-insights`;
-  const summary = `Auspicious window — ${activityLabel} (${w.score}/100 ${w.quality})`;
+  const summary = tr("timing.muhurta.calendar.summary", {
+    activity: activityLabel,
+    score: String(w.score),
+    quality: w.quality,
+  });
   const description = `${w.recommendation}\n\n${w.factors
-    .map((f) => `${f.name}: ${f.value} — ${f.quality}`)
+    .map((f) =>
+      tr("timing.muhurta.calendar.factor", {
+        name: f.name,
+        value: f.value,
+        quality: f.quality,
+      }),
+    )
     .join("\n")}`;
   return [
     "BEGIN:VCALENDAR",
@@ -261,8 +300,8 @@ function buildIcs(w: MuhurtaWindow, activityLabel: string): string {
   ].join("\r\n");
 }
 
-function downloadIcs(w: MuhurtaWindow, activityLabel: string): void {
-  const blob = new Blob([buildIcs(w, activityLabel)], {
+function downloadIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator): void {
+  const blob = new Blob([buildIcs(w, activityLabel, tr)], {
     type: "text/calendar;charset=utf-8",
   });
   const url = URL.createObjectURL(blob);
@@ -306,13 +345,14 @@ function groupWindowsByDay(windows: MuhurtaWindow[]): DayGroup[] {
 // --------------------------------------------------------------------------
 
 export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
+  const tr = useRouteMessages(timingMessages);
   const [activity, setActivity] = useState("general_auspicious");
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(() => futureStr(7));
   const [activePreset, setActivePreset] = useState<number>(7);
   const [result, setResult] = useState<MuhurtaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<MuhurtaError | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
   const [minScore, setMinScore] = useState(MIN_SCORE_FLOOR);
   const [daytimeOnly, setDaytimeOnly] = useState(false);
@@ -322,11 +362,24 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const copyWindow = useCallback(
     async (w: MuhurtaWindow, key: string, activityLabel: string) => {
       const text = [
-        `${activityLabel} — ${formatWindowDate(w.start)}`,
-        `${formatWindowTime(w.start)}–${formatWindowTime(w.end)} · ${w.score}/100 (${w.quality})`,
+        tr("timing.muhurta.clipboard.header", {
+          activity: activityLabel,
+          date: formatWindowDate(w.start),
+        }),
+        tr("timing.muhurta.clipboard.times", {
+          start: formatWindowTime(w.start),
+          end: formatWindowTime(w.end),
+          score: String(w.score),
+          quality: w.quality,
+        }),
         "",
-        ...w.factors.map(
-          (f) => `${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`,
+        ...w.factors.map((f) =>
+          tr("timing.muhurta.factorTitle", {
+            name: f.name,
+            value: f.value,
+            quality: f.quality,
+            score: formatScore(f.score),
+          }),
         ),
         "",
         w.recommendation,
@@ -339,7 +392,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         /* clipboard unavailable — silently ignore */
       }
     },
-    [],
+    [tr],
   );
 
   const handlePreset = (days: number) => {
@@ -365,7 +418,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
     abortRef.current?.abort();
     setIsLoading(true);
-    setError("");
+    setError(null);
 
     const controller = new AbortController();
     abortRef.current = controller;
@@ -385,7 +438,14 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       if (!response.ok) {
         const body = await response.json().catch(() => null);
-        throw new Error(body?.error?.message ?? `API error (${response.status})`);
+        const message = body?.error?.message;
+        setResult(null);
+        setError(
+          typeof message === "string" && message
+            ? { kind: "apiMessage", text: message }
+            : { kind: "api", status: String(response.status) }
+        );
+        return;
       }
 
       const data = (await response.json()) as MuhurtaResponse;
@@ -396,12 +456,12 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       setResult(null);
 
       if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
-        setError(
-          `Request timed out after ${Math.round(TIMEOUT_MS / 1000)} seconds. The server may be busy.`
-        );
+        setError({ kind: "timeout" });
       } else {
         setError(
-          fetchError instanceof Error ? fetchError.message : "Could not find auspicious times."
+          fetchError instanceof Error
+            ? { kind: "apiMessage", text: fetchError.message }
+            : { kind: "loadFailed" }
         );
       }
     } finally {
@@ -461,13 +521,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   return (
     <section className={styles.panel}>
       <div className={styles.header}>
-        <p className={styles.kicker}>Electional Astrology</p>
-        <h2 className={styles.heading}>Muhurta — Best Time Finder</h2>
+        <p className={styles.kicker}>{tr("timing.muhurta.kicker")}</p>
+        <h2 className={styles.heading}>{tr("timing.muhurta.heading")}</h2>
       </div>
 
-      <p className={styles.intro}>
-        Choose an activity and date range for ranked auspicious windows.
-      </p>
+      <p className={styles.intro}>{tr("timing.muhurta.intro")}</p>
 
       <div className={styles.presetRow}>
         {PRESETS.map((p) => (
@@ -477,7 +535,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             className={`${styles.presetBtn} ${activePreset === p.days ? styles.presetBtnActive : ""}`}
             onClick={() => handlePreset(p.days)}
           >
-            {p.label}
+            {tr("timing.muhurta.presetDays", { days: String(p.days) })}
           </button>
         ))}
       </div>
@@ -490,7 +548,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         }}
       >
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>Activity</span>
+          <span className={styles.fieldLabel}>{tr("timing.muhurta.activityLabel")}</span>
           <select
             className={styles.select}
             value={activity}
@@ -498,14 +556,14 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
           >
             {ACTIVITIES.map((a) => (
               <option key={a.value} value={a.value}>
-                {a.label}
+                {tr(a.labelKey)}
               </option>
             ))}
           </select>
         </div>
 
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>From</span>
+          <span className={styles.fieldLabel}>{tr("timing.muhurta.from")}</span>
           <input
             type="date"
             className={styles.dateInput}
@@ -516,7 +574,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         </div>
 
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>To</span>
+          <span className={styles.fieldLabel}>{tr("timing.muhurta.to")}</span>
           <input
             type="date"
             className={styles.dateInput}
@@ -528,20 +586,20 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         </div>
 
         <button type="submit" className={styles.submitBtn} disabled={isLoading}>
-          {isLoading ? "Searching..." : "Find Auspicious Times"}
+          {isLoading ? tr("timing.muhurta.searching") : tr("timing.muhurta.submit")}
         </button>
       </form>
 
       {error && (
         <div className={styles.error}>
-          <p className={styles.errorText}>{error}</p>
+          <p className={styles.errorText}>{muhurtaErrorText(error, tr)}</p>
           <button
             type="button"
             className={styles.retryBtn}
             onClick={() => void search()}
             disabled={isLoading}
           >
-            Retry
+            {tr("timing.muhurta.retry")}
           </button>
         </div>
       )}
@@ -550,7 +608,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         <div className={styles.firstRun}>
           <span className={styles.firstRunIcon} aria-hidden="true">✦</span>
           <span>
-            Set an activity and date range, then <strong>find the best times.</strong>
+            {tr("timing.muhurta.firstRun")}{" "}
+            <strong>{tr("timing.muhurta.firstRunEmphasis")}</strong>
           </span>
         </div>
       )}
@@ -558,20 +617,17 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       {isLoading && (
         <div className={styles.loading}>
           <div className={styles.spinner} />
-          <p className={styles.loadingText}>
-            Scanning Panchanga factors across your date range...
-          </p>
+          <p className={styles.loadingText}>{tr("timing.muhurta.loadingText")}</p>
         </div>
       )}
 
       {!isLoading && result && (
-        <p className={styles.locationNote}>{buildLocationLabel(queryString)}</p>
+        <p className={styles.locationNote}>{buildLocationLabel(queryString, tr)}</p>
       )}
 
       {!isLoading && result && result.windows.length === 0 && (
         <p className={styles.empty}>
-          No strongly auspicious windows found for {result.activity_label} in this date range.
-          Try expanding the search window or selecting a different activity.
+          {tr("timing.muhurta.emptyRange", { activity: result.activity_label })}
         </p>
       )}
 
@@ -584,8 +640,15 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             onClick={() => setResultsOpen((o) => !o)}
           >
             <span className={styles.resultsToggleText}>
-              Results: {visibleWindows.length} of {result.windows.length} window
-              {result.windows.length !== 1 ? "s" : ""} shown
+              {tr(
+                result.windows.length !== 1
+                  ? "timing.muhurta.resultsToggleMany"
+                  : "timing.muhurta.resultsToggleOne",
+                {
+                  visible: String(visibleWindows.length),
+                  total: String(result.windows.length),
+                }
+              )}
             </span>
             <span
               className={styles.resultsChevron}
@@ -601,7 +664,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
               <div className={styles.filterRow}>
             <label className={styles.filterField}>
               <span className={styles.filterLabel}>
-                Min score: {minScore}
+                {tr("timing.muhurta.minScore", { score: String(minScore) })}
               </span>
               <input
                 type="range"
@@ -619,21 +682,29 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                 checked={daytimeOnly}
                 onChange={(e) => setDaytimeOnly(e.target.checked)}
               />
-              <span>Daytime only (6 AM\u20136 PM)</span>
+              <span>{tr("timing.muhurta.daytimeOnly")}</span>
             </label>
           </div>
 
           <p className={styles.resultsSummary}>
-            {formatWindowDate(result.search_window.start_date)} &mdash; {formatWindowDate(result.search_window.end_date)}
-            {" \u00b7 "}
-            Showing {visibleWindows.length} of {result.windows.length} window
-            {result.windows.length !== 1 ? "s" : ""}
+            {tr(
+              result.windows.length !== 1
+                ? "timing.muhurta.resultsSummaryMany"
+                : "timing.muhurta.resultsSummaryOne",
+              {
+                start: formatWindowDate(result.search_window.start_date),
+                end: formatWindowDate(result.search_window.end_date),
+                visible: String(visibleWindows.length),
+                total: String(result.windows.length),
+              }
+            )}
           </p>
 
           {visibleWindows.length === 0 && (
             <p className={styles.empty}>
-              No windows match the current filters. Lower the minimum score
-              {daytimeOnly ? " or allow non-daytime windows" : ""}.
+              {daytimeOnly
+                ? tr("timing.muhurta.filtersEmptyDaytime")
+                : tr("timing.muhurta.filtersEmpty")}
             </p>
           )}
 
@@ -642,7 +713,12 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
               <h4 className={styles.dayHeading}>
                 <span>{group.label}</span>
                 <span className={styles.dayCount}>
-                  {group.windows.length} window{group.windows.length !== 1 ? "s" : ""}
+                  {tr(
+                    group.windows.length !== 1
+                      ? "timing.muhurta.dayCountMany"
+                      : "timing.muhurta.dayCountOne",
+                    { count: String(group.windows.length) }
+                  )}
                 </span>
               </h4>
               {group.windows.map((w, idx) => {
@@ -654,12 +730,15 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                     className={`${styles.windowCard} ${isBest ? styles.windowCardBest : ""}`}
                   >
                     {isBest && (
-                      <span className={styles.bestRibbon}>★ Best window</span>
+                      <span className={styles.bestRibbon}>{tr("timing.muhurta.bestWindow")}</span>
                     )}
                     <div className={styles.windowHeader}>
                       <div>
                         <p className={styles.windowTime}>
-                          {formatWindowTime(w.start)} &mdash; {formatWindowTime(w.end)}
+                          {tr("timing.muhurta.windowTime", {
+                            start: formatWindowTime(w.start),
+                            end: formatWindowTime(w.end),
+                          })}
                         </p>
                       </div>
                       <ScoreDial score={w.score} quality={w.quality} />
@@ -670,7 +749,12 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                         <div
                           key={f.name}
                           className={factorClass(f.score)}
-                          title={`${f.name}: ${f.value} — ${f.quality} (${formatScore(f.score)})`}
+                          title={tr("timing.muhurta.factorTitle", {
+                            name: f.name,
+                            value: f.value,
+                            quality: f.quality,
+                            score: formatScore(f.score),
+                          })}
                         >
                           <span className={styles.factorSign} aria-hidden="true">
                             {factorSign(f.score)}
@@ -693,9 +777,9 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                       <button
                         type="button"
                         className={styles.actionBtn}
-                        onClick={() => downloadIcs(w, result.activity_label)}
+                        onClick={() => downloadIcs(w, result.activity_label, tr)}
                       >
-                        Add to calendar
+                        {tr("timing.muhurta.addToCalendar")}
                       </button>
                       <button
                         type="button"
@@ -704,7 +788,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                           void copyWindow(w, key, result.activity_label)
                         }
                       >
-                        {copiedKey === key ? "Copied ✓" : "Copy"}
+                        {copiedKey === key ? tr("timing.muhurta.copied") : tr("timing.muhurta.copy")}
                       </button>
                     </div>
                   </article>
@@ -720,24 +804,27 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       {!isLoading && result && result.avoid_periods.length > 0 && (
         <div className={styles.avoidSection}>
           <h3 className={styles.avoidHeading}>
-            <span aria-hidden="true">⚠</span> Inauspicious periods to avoid
+            <span aria-hidden="true">⚠</span> {tr("timing.muhurta.avoidHeading")}
           </h3>
-          <p className={styles.avoidIntro}>
-            Daylight Rahukaala and Yamaghantaka for each day in range —
-            steer clear of these even outside the windows above.
-          </p>
+          <p className={styles.avoidIntro}>{tr("timing.muhurta.avoidIntro")}</p>
           <div className={styles.avoidGrid}>
             {result.avoid_periods.map((d) => (
               <div key={d.date} className={styles.avoidDay}>
                 <p className={styles.avoidDate}>{formatWindowDate(d.date)}</p>
                 <div className={styles.avoidPills}>
                   <span className={styles.avoidPill}>
-                    <span className={styles.avoidPillLabel}>Rahukaala</span>
-                    {formatWindowTime(d.rahukaala.start)} – {formatWindowTime(d.rahukaala.end)}
+                    <span className={styles.avoidPillLabel}>{tr("timing.muhurta.rahukaala")}</span>
+                    {tr("timing.muhurta.timeRange", {
+                      start: formatWindowTime(d.rahukaala.start),
+                      end: formatWindowTime(d.rahukaala.end),
+                    })}
                   </span>
                   <span className={styles.avoidPill}>
-                    <span className={styles.avoidPillLabel}>Yamaghantaka</span>
-                    {formatWindowTime(d.yamaghantaka.start)} – {formatWindowTime(d.yamaghantaka.end)}
+                    <span className={styles.avoidPillLabel}>{tr("timing.muhurta.yamaghantaka")}</span>
+                    {tr("timing.muhurta.timeRange", {
+                      start: formatWindowTime(d.yamaghantaka.start),
+                      end: formatWindowTime(d.yamaghantaka.end),
+                    })}
                   </span>
                 </div>
               </div>
