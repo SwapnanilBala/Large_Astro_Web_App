@@ -134,5 +134,39 @@
       "weeklyEnergyTableScore": "Punteggio",
       "weeklyEnergyTableBand": "Banda"
     }
+  },
+  "fr": {
+    "shared": {
+      "rootErrorHeading": "Les Étoiles se Sont Momentanément Désalignées",
+      "rootErrorDescription": "Une perturbation cosmique a interrompu votre expérience. La mécanique céleste est en cours de recalibrage.",
+      "rootErrorDetailsSummary": "Afficher les détails techniques",
+      "rootErrorDigest": "Digest : {digest}",
+      "rootErrorTryAgain": "Réessayer",
+      "rootErrorReturnHome": "Retour à l'Accueil",
+      "chartErrorKicker": "Erreur de Carte",
+      "chartErrorHeading": "Le calcul de la carte n'a pas pu être achevé.",
+      "chartErrorLead": "Le moteur de cartes n'a pas pu terminer cette requête. Veuillez vérifier les détails de naissance, le lieu et le moteur sélectionné, puis réessayer.",
+      "chartErrorLeadAdvanced": "Le moteur de cartes a rencontré une erreur. Veuillez vérifier que le paquet npm {package} est installé et que vos données sont valides, puis réessayer.",
+      "chartErrorDetail": "Erreur : {detail}",
+      "chartErrorNoData": "Aucune donnée reçue",
+      "chartErrorRetry": "Réessayer",
+      "chartRequestTimedOut": "La requête a expiré après {seconds} secondes. Le serveur est peut-être occupé. Veuillez réessayer.",
+      "chartUnknownApiError": "Erreur d'API inconnue",
+      "constellationAria": "Carte des constellations montrant les positions planétaires pour l'ascendant {ascendant}",
+      "constellationTitle": "Carte des constellations avec l'ascendant {ascendant}",
+      "constellationRasi": "Rashi",
+      "constellationLongitudeAbbrev": "long.",
+      "weeklyEnergyChartTitle": "Votre énergie hebdomadaire, {week}",
+      "weeklyEnergyBandHigh": "Élevée",
+      "weeklyEnergyBandBalanced": "Équilibrée",
+      "weeklyEnergyBandLow": "Faible",
+      "weeklyEnergySteadyWeek": "Semaine stable",
+      "weeklyEnergyNoStandoutDay": "aucun jour marquant",
+      "weeklyEnergyTableCaption": "Scores d'énergie hebdomadaire, {week}",
+      "weeklyEnergyTableDay": "Jour",
+      "weeklyEnergyTableDate": "Date",
+      "weeklyEnergyTableScore": "Score",
+      "weeklyEnergyTableBand": "Bande"
+    }
   }
 }
