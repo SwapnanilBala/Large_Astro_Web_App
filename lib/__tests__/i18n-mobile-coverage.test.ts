@@ -3,6 +3,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import mobileMessages from "@/messages/en.mobile.json";
 import engineSelectMessages from "@/messages/en.engine-select.json";
+import mobileInsightsMessages from "@/messages/en.mobile-insights.json";
 import fullMessages from "@/messages/en.json";
 
 /*
@@ -52,9 +53,26 @@ const T_CALL = /(?<![A-Za-z0-9_$])tr?\(\s*"([A-Za-z0-9_.]+)"/g;
  * of copy the intake never shows. A route with its own body of text passes it
  * to useRouteMessages instead, and the keys under that directory are checked
  * against the baseline plus its own catalog.
+ *
+ * `mirrorsFullFile` says whether the namespace also lives in messages/en.json.
+ * engineSelect does — its catalog is a slice cut out of the full file, and the
+ * desktop chooser renders the same strings from there, so the two must agree
+ * exactly. mobileInsights does not: this view exists only under /m, so the
+ * catalog is the sole English source and there is nothing to agree with. The
+ * two cases are asserted differently below, in opposite directions, so neither
+ * flag value is a way to opt out of being checked.
  */
 const ROUTE_CATALOGS = [
-  { dir: join(MOBILE_DIR, "engine-select"), messages: engineSelectMessages },
+  {
+    dir: join(MOBILE_DIR, "engine-select"),
+    messages: engineSelectMessages,
+    mirrorsFullFile: true,
+  },
+  {
+    dir: join(MOBILE_DIR, "insights"),
+    messages: mobileInsightsMessages,
+    mirrorsFullFile: false,
+  },
 ] as const;
 
 const mobileKeys = flatten(mobileMessages as Record<string, unknown>);
@@ -102,11 +120,37 @@ describe("mobile translation baseline", () => {
 });
 
 describe("route-local catalogs", () => {
-  it("say the same thing as the full English file", () => {
+  it("say the same thing as the full English file, where they overlap it", () => {
     for (const catalog of ROUTE_CATALOGS) {
+      if (!catalog.mirrorsFullFile) continue;
       const keys = flatten(catalog.messages as Record<string, unknown>);
       const drifted = Object.keys(keys).filter((key) => fullKeys[key] !== keys[key]);
       expect(drifted, `${catalog.dir} has drifted from en.json`).toEqual([]);
+    }
+  });
+
+  /*
+   * The mirror of the assertion above, for the catalogs that are the only
+   * English copy of their namespace.
+   *
+   * "Not in en.json" is the whole basis for not comparing them against it, so
+   * it gets checked rather than asserted in a comment. It also catches the
+   * drift this arrangement is actually exposed to: a namespace copied into
+   * en.json later would be loaded by the desktop provider, `t` would answer
+   * from there, and the route catalog — resolved second — would stop being
+   * consulted at all. Two sources for one string, and the one on screen would
+   * be whichever the layout happened to ship.
+   */
+  it("keep a sole-source catalog out of the full English file", () => {
+    for (const catalog of ROUTE_CATALOGS) {
+      if (catalog.mirrorsFullFile) continue;
+      const duplicated = Object.keys(flatten(catalog.messages as Record<string, unknown>))
+        .filter((key) => key in fullKeys);
+      expect(
+        duplicated,
+        `${catalog.dir} is meant to be the only English source for its keys, but ` +
+          `these are in messages/en.json too: ${duplicated.slice(0, 5).join(", ")}`,
+      ).toEqual([]);
     }
   });
 

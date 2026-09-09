@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FiTrendingUp } from "react-icons/fi";
 import PageTransition from "@/app/components/PageTransition";
 import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import MajorShiftsPanel from "@/app/(desktop)/insights/components/major-shifts-panel";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
+import LifeShiftsNotice from "./life-shifts-notice";
 import {
   chartParamsToQuery,
   getChartPayload,
@@ -33,17 +33,7 @@ export default async function LifeShiftsPage({ searchParams }: LifeShiftsPagePro
     return (
       <PageTransition>
         <div className="insights-shell below-navbar">
-          <section className="dashboard-shell">
-            <p className="kicker">Missing Input</p>
-            <h1>Chart details are incomplete.</h1>
-            <p className="lead">
-              Return to intake and provide complete birth details before opening
-              the life chapters.
-            </p>
-            <Link href="/" className="ghost-link">
-              Back to Intake
-            </Link>
-          </section>
+          <LifeShiftsNotice variant="missingInput" />
         </div>
       </PageTransition>
     );
@@ -63,14 +53,11 @@ export default async function LifeShiftsPage({ searchParams }: LifeShiftsPagePro
     return (
       <PageTransition>
         <div className="insights-shell below-navbar">
-          <section className="dashboard-shell">
-            <p className="kicker">Life chapters</p>
-            <h1>The life chapters could not be prepared.</h1>
-            <p className="lead">{error || "No chart data was returned."}</p>
-            <Link href={`/insights?${historyQs}`} className="ghost-link">
-              Back to your reading
-            </Link>
-          </section>
+          <LifeShiftsNotice
+            variant="error"
+            detail={error}
+            backHref={`/insights?${historyQs}`}
+          />
         </div>
       </PageTransition>
     );

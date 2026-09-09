@@ -6,6 +6,8 @@ import { FiArrowLeft, FiBookOpen } from "react-icons/fi";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import RuleCard, { bySelectionRank } from "../components/rule-card";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import fullReadingMessages from "@/messages/en.full-reading.json";
 import styles from "./full-reading.module.css";
 
 /*
@@ -21,13 +23,22 @@ import styles from "./full-reading.module.css";
  * standfirst rather than a single line of grey text.
  */
 
+/* A component rather than the <p> inline, so the placeholder can read the
+   catalog: dynamic()'s `loading` is evaluated at module scope, where a hook
+   cannot run, but what it returns is rendered inside the tree like anything
+   else. */
+function LoadingLine({ messageKey }: { messageKey: string }) {
+  const tr = useRouteMessages(fullReadingMessages);
+  return <p className={styles.loading}>{tr(messageKey)}</p>;
+}
+
 const YogaLifetimeSummary = dynamic(() => import("../components/yoga-lifetime-summary"), {
   ssr: false,
-  loading: () => <p className={styles.loading}>Preparing combinations…</p>,
+  loading: () => <LoadingLine messageKey="fullReading.loadingCombinations" />,
 });
 const PastLifeInsightsPanel = dynamic(() => import("../components/past-life-insights-panel"), {
   ssr: false,
-  loading: () => <p className={styles.loading}>Preparing the karmic reading…</p>,
+  loading: () => <LoadingLine messageKey="fullReading.loadingKarma" />,
 });
 
 type Props = {
@@ -36,6 +47,9 @@ type Props = {
 };
 
 export default function FullReadingClient({ payload, historyQs }: Props) {
+  /* tr, not t: this page's copy is a namespace of its own that ships with the
+     route rather than riding in the desktop baseline. */
+  const tr = useRouteMessages(fullReadingMessages);
   /* Most significant first. This page inherited the list from the results page
      but not its ordering, so the findings were arriving in raw engine order. */
   const rules = [...payload.chart.deterministic_rules].sort(bySelectionRank);
@@ -46,25 +60,22 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
       <header className={styles.header}>
         <Link href={`/insights?${historyQs}`} className={styles.back}>
           <FiArrowLeft aria-hidden="true" />
-          Back to {payload.client.name}&rsquo;s reading
+          {tr("fullReading.backToNamedReading", { name: payload.client.name })}
         </Link>
 
         <p className={styles.kicker}>
           <FiBookOpen aria-hidden="true" />
-          Full reading
+          {tr("fullReading.kicker")}
         </p>
-        <h1 className={styles.title}>Every finding in the chart</h1>
-        <p className={styles.lead}>
-          The three priorities at the top of your report are drawn from this set.
-          Everything the engine matched is here, each with the placement it rests
-          on, so you can see the reasoning rather than only the conclusion.
-        </p>
+        <h1 className={styles.title}>{tr("fullReading.title")}</h1>
+        <p className={styles.lead}>{tr("fullReading.lead")}</p>
         <p className={styles.count}>
-          <strong>{rules.length}</strong> findings
+          <strong>{rules.length}</strong> {tr("fullReading.findings")}
           {yogas.length > 0 && (
             <>
               {" · "}
-              <strong>{yogas.length}</strong> long-term combinations
+              <strong>{yogas.length}</strong>{" "}
+              {tr("fullReading.longTermCombinations")}
             </>
           )}
         </p>
@@ -73,13 +84,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
       {rules.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <p className={styles.sectionKicker}>Patterns</p>
-            <h2>What the placements say</h2>
-            <p className={styles.sectionLead}>
-              Each card states the reading, then the placement behind it. Open
-              &ldquo;Why this reading&rdquo; to see the technical basis and how
-              common the pattern is.
-            </p>
+            <p className={styles.sectionKicker}>{tr("fullReading.patternsKicker")}</p>
+            <h2>{tr("fullReading.patternsHeading")}</h2>
+            <p className={styles.sectionLead}>{tr("fullReading.patternsLead")}</p>
           </div>
 
           <div className={styles.ruleGrid}>
@@ -93,13 +100,11 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
       {yogas.length > 0 && (
         <section className={styles.section}>
           <div className={styles.sectionHead}>
-            <p className={styles.sectionKicker}>Combinations</p>
-            <h2>Patterns that run for a lifetime</h2>
-            <p className={styles.sectionLead}>
-              Yogas are combinations rather than single placements, and they
-              describe standing conditions in the chart rather than a passing
-              period.
+            <p className={styles.sectionKicker}>
+              {tr("fullReading.combinationsKicker")}
             </p>
+            <h2>{tr("fullReading.combinationsHeading")}</h2>
+            <p className={styles.sectionLead}>{tr("fullReading.combinationsLead")}</p>
           </div>
           <div className={styles.panel}>
             <PanelErrorBoundary panelName="Yoga Lifetime Summary">
@@ -111,12 +116,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
 
       <section id="karma" className={styles.section}>
         <div className={styles.sectionHead}>
-          <p className={styles.sectionKicker}>Karma</p>
-          <h2>Inherited patterns and vocation</h2>
-          <p className={styles.sectionLead}>
-            A secondary reading of what the chart suggests was carried in, where
-            it asks to be released, and the kind of work it points toward.
-          </p>
+          <p className={styles.sectionKicker}>{tr("fullReading.karmaKicker")}</p>
+          <h2>{tr("fullReading.karmaHeading")}</h2>
+          <p className={styles.sectionLead}>{tr("fullReading.karmaLead")}</p>
         </div>
         <div className={styles.panel}>
           <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
@@ -128,7 +130,7 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
       <footer className={styles.footer}>
         <Link href={`/insights?${historyQs}`} className={styles.back}>
           <FiArrowLeft aria-hidden="true" />
-          Back to the reading
+          {tr("fullReading.backToReading")}
         </Link>
       </footer>
     </div>

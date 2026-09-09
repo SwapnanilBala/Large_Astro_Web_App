@@ -1,0 +1,57 @@
+{
+  "lifeAreas": {
+    "navLabel": "Life areas",
+    "chooseArea": "Choose a life area",
+    "mostActiveFirst": "Most active first",
+
+    "activityBadge": "{band} activity",
+    "conclusionStrength": "{strength} conclusion",
+
+    "readingDepth": "Reading depth",
+    "modeDetailed": "Detailed",
+    "modeAction": "Action Plan",
+
+    "subthemesHeading": "What stands out within this area",
+    "subthemesRankNote": "Ranked from this chart's evidence",
+    "subthemeRank": "#{rank}",
+
+    "clarityStatement": "Clarity statement",
+    "decisionRule": "Decision rule",
+    "boundaryRule": "Boundary rule",
+
+    "support": "Support",
+    "watch": "Watch",
+    "timing": "Timing",
+
+    "evidenceSummary": "How this domain is being read",
+
+    "doNext": "Do next",
+    "keepInMind": "Keep in mind",
+    "decisionFilter": "Decision filter",
+    "decisionFilterFallback": "Move when the support, timing, and evidence point in the same direction.",
+    "guidanceLabel": "Guidance:",
+    "longGameLabel": "Long game:",
+
+    "notice": {
+      "missingKicker": "Missing Input",
+      "missingHeading": "Chart details are incomplete.",
+      "missingLead": "Return to intake and provide complete birth details before opening the life areas.",
+      "backToIntake": "Back to Intake",
+      "errorKicker": "Life areas",
+      "errorHeading": "The life area readings could not be prepared.",
+      "errorFallback": "No life domain data was returned.",
+      "backToReading": "Back to your reading"
+    },
+
+    "lifeShifts": {
+      "missingKicker": "Missing Input",
+      "missingHeading": "Chart details are incomplete.",
+      "missingLead": "Return to intake and provide complete birth details before opening the life chapters.",
+      "backToIntake": "Back to Intake",
+      "errorKicker": "Life chapters",
+      "errorHeading": "The life chapters could not be prepared.",
+      "errorFallback": "No chart data was returned.",
+      "backToReading": "Back to your reading"
+    }
+  }
+}

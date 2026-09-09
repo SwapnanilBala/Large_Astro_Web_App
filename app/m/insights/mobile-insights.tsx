@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import insightsMessages from "@/messages/en.mobile-insights.json";
 import shell from "../mobile.module.css";
 import { SIGN_SYMBOLS } from "@/lib/constellation-geometry";
 import {
@@ -37,6 +39,41 @@ type Props = {
   historyQs: string;
   birthDate: string;
 };
+
+/* The translator useRouteMessages hands back. Passed down rather than each
+   subcomponent calling the hook again: RuleCard renders once per finding, and
+   the hook flattens the catalog per mount. */
+type Translate = (key: string, params?: Record<string, string>) => string;
+
+/* Only these two tags, matched literally. */
+const EMPHASIS = /<(b|strong)>([\s\S]*?)<\/\1>/g;
+
+/**
+ * Renders a catalog string whose emphasis is marked up inside the string.
+ *
+ * The alternative is cutting the sentence at every tag boundary, which hands a
+ * translator " and " as a key of its own and pins the word order to English --
+ * the house-group legend below would arrive as twelve fragments. Keeping the
+ * markup in the string keeps it one sentence, and a language that emphasises a
+ * different word can move the tags.
+ *
+ * Real elements, not innerHTML: the tag set is fixed and the text between the
+ * tags is only ever inserted as a child, so a translation cannot bring markup
+ * of its own along.
+ */
+function Emphasise({ text }: { text: string }) {
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  for (const match of text.matchAll(EMPHASIS)) {
+    const at = match.index ?? 0;
+    if (at > cursor) parts.push(text.slice(cursor, at));
+    const Tag = match[1] as "b" | "strong";
+    parts.push(<Tag key={at}>{match[2]}</Tag>);
+    cursor = at + match[0].length;
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return <>{parts}</>;
+}
 
 function formatDegree(value: number): string {
   const degrees = Math.floor(value);
@@ -118,10 +155,12 @@ function RuleCard({
   rule,
   open,
   onToggle,
+  tr,
 }: {
   rule: DeterministicRule;
   open: boolean;
   onToggle: () => void;
+  tr: Translate;
 }) {
   return (
     <li className={styles.rule}>
@@ -136,7 +175,7 @@ function RuleCard({
         onClick={onToggle}
         aria-expanded={open}
       >
-        <span>Why this reading</span>
+        <span>{tr("mobileInsights.whyThisReading")}</span>
         <span
           className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`}
           aria-hidden="true"
@@ -177,14 +216,10 @@ function RuleCard({
  * too narrow to put a name and a readout side by side without one of them
  * wrapping mid-word.
  */
-function HouseRoleList({ houses }: { houses: HouseSupport[] }) {
+function HouseRoleList({ houses, tr }: { houses: HouseSupport[]; tr: Translate }) {
   return (
     <>
-      <p className={styles.legend}>
-        Bindus are Ashtakavarga&rsquo;s support score for the sign sitting on
-        that house, out of a fixed pool of 337. Dead average is 28.1, so a house
-        is read against that rather than against a maximum.
-      </p>
+      <p className={styles.legend}>{tr("mobileInsights.bindusLegend")}</p>
 
       <ul className={styles.roles}>
         {houses.map((house) => (
@@ -194,15 +229,23 @@ function HouseRoleList({ houses }: { houses: HouseSupport[] }) {
                 {house.house}
               </span>
               <span className={styles.roleName}>
-                <span className={styles.srOnly}>House {house.house}, </span>
-                {BHAVA_NAMES[house.house]} Bhava
+                <span className={styles.srOnly}>
+                  {tr("mobileInsights.srHouse", { house: String(house.house) })}
+                </span>
+                {tr("mobileInsights.bhava", { name: BHAVA_NAMES[house.house] })}
               </span>
               <span className={styles.roleReadout}>
                 <span className={styles.srOnly}>
-                  {house.sign}, {house.bindus} bindus
+                  {tr("mobileInsights.srSupport", {
+                    sign: house.sign,
+                    bindus: String(house.bindus),
+                  })}
                 </span>
                 <span aria-hidden="true">
-                  {house.sign} · {house.bindus}
+                  {tr("mobileInsights.supportReadout", {
+                    sign: house.sign,
+                    bindus: String(house.bindus),
+                  })}
                 </span>
               </span>
             </div>
@@ -221,12 +264,7 @@ function HouseRoleList({ houses }: { houses: HouseSupport[] }) {
       </ul>
 
       <p className={styles.legend}>
-        <b>Kendra</b> are the four angles the chart is built on; <b>Panaphara</b>{" "}
-        and <b>Apoklima</b> are the houses that follow them and fall away from
-        them. On top of that, <b>Trikona</b> houses are read as where merit
-        arrives, <b>Upachaya</b> as the ones that improve with age and effort,
-        and <b>Dusthana</b> as the ones that ask for something first. A house can
-        be more than one — the 6th is an Upachaya and a Dusthana both.
+        <Emphasise text={tr("mobileInsights.houseGroupLegend")} />
       </p>
     </>
   );
@@ -239,6 +277,11 @@ export default function MobileInsights({
   historyQs,
   birthDate,
 }: Props) {
+  /* tr, not t: this page's copy is a namespace of its own that ships with the
+     route rather than riding in the layout's baseline, where every mobile page
+     would download it. tr reads the shared baseline first and falls back to
+     that catalog. */
+  const tr = useRouteMessages(insightsMessages);
   // Keyed by "section:instance_key" so the same rule appearing in both the
   // above-the-fold list and the full list opens independently.
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
@@ -249,11 +292,11 @@ export default function MobileInsights({
     return (
       <div className={shell.page}>
         <header className={shell.header}>
-          <h1 className={`${shell.title} mGold`}>Could not build this chart</h1>
-          <p className={shell.lead}>{error || "The chart could not be calculated."}</p>
+          <h1 className={`${shell.title} mGold`}>{tr("mobileInsights.errorHeading")}</h1>
+          <p className={shell.lead}>{error || tr("mobileInsights.errorFallback")}</p>
         </header>
         <Link className={styles.textLink} href="/m">
-          Back to intake
+          {tr("mobileInsights.backToIntake")}
         </Link>
       </div>
     );
@@ -275,29 +318,38 @@ export default function MobileInsights({
         <span className={shell.step}>{[client.city, client.country].filter(Boolean).join(", ")}</span>
         <h1 className={shell.title}>{client.name}</h1>
         <p className={shell.lead}>
-          {ascendant.sign} ascendant
-          {nakshatra ? ` · ${nakshatra.name} nakshatra` : ""}
+          {tr("mobileInsights.ascendantLead", { sign: ascendant.sign })}
+          {nakshatra
+            ? ` · ${tr("mobileInsights.nakshatraLead", { name: nakshatra.name })}`
+            : ""}
         </p>
       </header>
 
       <div className={styles.keyFacts}>
         <div className={styles.fact}>
-          <span className={styles.factLabel}>Lagna</span>
+          <span className={styles.factLabel}>{tr("mobileInsights.factLagna")}</span>
           <span className={styles.factValue}>{ascendant.sign}</span>
           <span className={styles.factMeta}>{formatDegree(ascendant.degree_in_sign)}</span>
         </div>
         {nakshatra && (
           <div className={styles.fact}>
-            <span className={styles.factLabel}>Nakshatra</span>
+            <span className={styles.factLabel}>{tr("mobileInsights.factNakshatra")}</span>
             <span className={styles.factValue}>{nakshatra.name}</span>
-            <span className={styles.factMeta}>Pada {nakshatra.pada} · {nakshatra.lord}</span>
+            <span className={styles.factMeta}>
+              {tr("mobileInsights.padaLord", {
+                pada: String(nakshatra.pada),
+                lord: nakshatra.lord,
+              })}
+            </span>
           </div>
         )}
         {dasha && (
           <div className={styles.fact}>
-            <span className={styles.factLabel}>Mahadasha</span>
+            <span className={styles.factLabel}>{tr("mobileInsights.factMahadasha")}</span>
             <span className={styles.factValue}>{dasha.current_dasha}</span>
-            <span className={styles.factMeta}>to {formatDate(dasha.current_dasha_end)}</span>
+            <span className={styles.factMeta}>
+              {tr("mobileInsights.toDate", { date: formatDate(dasha.current_dasha_end) })}
+            </span>
           </div>
         )}
       </div>
@@ -311,14 +363,18 @@ export default function MobileInsights({
         planets={planets}
       />
 
-      <Section title="Planetary positions" subtitle={`${planets.length} grahas`} defaultOpen>
+      <Section
+        title={tr("mobileInsights.planetaryPositions")}
+        subtitle={tr("mobileInsights.grahaCount", { count: String(planets.length) })}
+        defaultOpen
+      >
         <table className={styles.table}>
           <thead>
             <tr>
-              <th scope="col">Graha</th>
-              <th scope="col">Sign</th>
-              <th scope="col" className={styles.numeric}>Deg</th>
-              <th scope="col" className={styles.numeric}>Hse</th>
+              <th scope="col">{tr("mobileInsights.colGraha")}</th>
+              <th scope="col">{tr("mobileInsights.colSign")}</th>
+              <th scope="col" className={styles.numeric}>{tr("mobileInsights.colDeg")}</th>
+              <th scope="col" className={styles.numeric}>{tr("mobileInsights.colHouse")}</th>
             </tr>
           </thead>
           <tbody>
@@ -328,8 +384,12 @@ export default function MobileInsights({
                     a touch screen, so the meaning goes in the legend below. */}
                 <th scope="row" className={styles.planetName}>
                   {planet.name}
-                  {planet.is_retrograde && <span className={styles.flag}>Rx</span>}
-                  {planet.is_combust && <span className={styles.flag}>Cmb</span>}
+                  {planet.is_retrograde && (
+                    <span className={styles.flag}>{tr("mobileInsights.flagRetrograde")}</span>
+                  )}
+                  {planet.is_combust && (
+                    <span className={styles.flag}>{tr("mobileInsights.flagCombust")}</span>
+                  )}
                 </th>
                 <td>
                   {/* The glyph is the fastest way to scan a column of signs;
@@ -351,25 +411,32 @@ export default function MobileInsights({
           </tbody>
         </table>
         {planets.some((p) => p.is_retrograde || p.is_combust) && (
-          <p className={styles.legend}>
-            Rx = moving backwards from here · Cmb = too close to the Sun to act freely
-          </p>
+          <p className={styles.legend}>{tr("mobileInsights.flagLegend")}</p>
         )}
       </Section>
 
       {houseSupport && (
         <Section
-          title="Which house is responsible for what"
-          subtitle="All twelve, and the support each holds"
+          title={tr("mobileInsights.houseRolesTitle")}
+          subtitle={tr("mobileInsights.houseRolesSubtitle")}
         >
-          <HouseRoleList houses={houseSupport.houses} />
+          <HouseRoleList houses={houseSupport.houses} tr={tr} />
         </Section>
       )}
 
       {highPriority.length > 0 && (
         <Section
-          title="What deserves attention"
-          subtitle={`${highPriority.length} high-priority reading${highPriority.length === 1 ? "" : "s"}`}
+          title={tr("mobileInsights.attentionTitle")}
+          /* Both keys spelled out rather than picked by expression: the mobile
+             coverage test reads plain-string arguments, and a key assembled
+             from a ternary inside the call would be invisible to it. */
+          subtitle={
+            highPriority.length === 1
+              ? tr("mobileInsights.attentionSubtitleOne", { count: "1" })
+              : tr("mobileInsights.attentionSubtitleOther", {
+                  count: String(highPriority.length),
+                })
+          }
           defaultOpen
         >
           <ul className={styles.rules}>
@@ -379,6 +446,7 @@ export default function MobileInsights({
                 rule={rule}
                 open={Boolean(openEvidence[`top:${rule.instance_key}`])}
                 onToggle={() => toggleEvidence(`top:${rule.instance_key}`)}
+                tr={tr}
               />
             ))}
           </ul>
@@ -386,18 +454,27 @@ export default function MobileInsights({
       )}
 
       {dasha && (
-        <Section title="Dasha timeline" subtitle={`${dasha.periods.length} periods`}>
+        <Section
+          title={tr("mobileInsights.dashaTitle")}
+          subtitle={tr("mobileInsights.dashaPeriodCount", {
+            count: String(dasha.periods.length),
+          })}
+        >
           <p className={styles.currentDasha}>
-            Currently <strong>{dasha.current_dasha}</strong>
-            {dasha.current_antardasha ? ` / ${dasha.current_antardasha}` : ""} until{" "}
-            {formatDate(dasha.current_antardasha_end || dasha.current_dasha_end)}
+            <Emphasise
+              text={tr("mobileInsights.dashaCurrent", {
+                dasha: dasha.current_dasha,
+                antardasha: dasha.current_antardasha ? ` / ${dasha.current_antardasha}` : "",
+                date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end),
+              })}
+            />
           </p>
           <table className={styles.table}>
             <thead>
               <tr>
-                <th scope="col">Period</th>
-                <th scope="col">From</th>
-                <th scope="col">To</th>
+                <th scope="col">{tr("mobileInsights.colPeriod")}</th>
+                <th scope="col">{tr("mobileInsights.colFrom")}</th>
+                <th scope="col">{tr("mobileInsights.colTo")}</th>
               </tr>
             </thead>
             <tbody>
@@ -417,15 +494,17 @@ export default function MobileInsights({
       )}
 
       {chart.summary && (
-        <Section title="Summary">
+        <Section title={tr("mobileInsights.summaryTitle")}>
           <p className={styles.summary}>{chart.summary}</p>
         </Section>
       )}
 
       {(rules ?? []).length > highPriority.length && (
         <Section
-          title="All readings"
-          subtitle={`${(rules ?? []).length} total`}
+          title={tr("mobileInsights.allReadingsTitle")}
+          subtitle={tr("mobileInsights.allReadingsSubtitle", {
+            count: String((rules ?? []).length),
+          })}
         >
           <ul className={styles.rules}>
             {(rules ?? []).map((rule) => (
@@ -434,6 +513,7 @@ export default function MobileInsights({
                 rule={rule}
                 open={Boolean(openEvidence[`all:${rule.instance_key}`])}
                 onToggle={() => toggleEvidence(`all:${rule.instance_key}`)}
+                tr={tr}
               />
             ))}
           </ul>
@@ -454,12 +534,12 @@ export default function MobileInsights({
 
       <footer className={styles.footer}>
         <Link className={styles.textLink} href="/m">
-          New chart
+          {tr("mobileInsights.newChart")}
         </Link>
         {/* ?view=desktop is honoured over the User-Agent guess and remembered,
             so this is a real escape hatch rather than a redirect loop. */}
         <Link className={styles.textLink} href={desktopHref} prefetch={false}>
-          Full desktop view
+          {tr("mobileInsights.desktopView")}
         </Link>
       </footer>
     </div>
