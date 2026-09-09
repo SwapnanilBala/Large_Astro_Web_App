@@ -30,6 +30,25 @@
 
 .dashboard {
   --ink-soft: #c7c2cc;
+
+  /*
+   * The distance from a section's header (or its control row) to the body
+   * underneath it.
+   *
+   * Measured across the page before this existed, that one relationship was
+   * 14.4px in the continuation hub, 16px in the weekly panel, 19.2px in the
+   * takeaways and 25.6px in the insight zone -- four values, none of them
+   * chosen against the others. Declared here so every section inherits it,
+   * including panels in their own CSS module: custom properties inherit
+   * through the DOM whatever file declared them.
+   *
+   * Deliberately NOT applied to label-to-heading or body-to-CTA gaps. A
+   * kicker belongs close to the heading it introduces and a CTA belongs
+   * further from the body it follows; flattening those to one number would
+   * make the page less readable rather than more consistent.
+   */
+  --section-rhythm: 1.25rem;
+
   display: flex;
   flex-direction: column;
   gap: clamp(1.05rem, 1.5vw, 1.5rem);
@@ -706,7 +725,6 @@
   display: grid;
   justify-items: center;
   gap: 0.25rem;
-  margin-bottom: clamp(1rem, 2vw, 1.6rem);
   text-align: center;
 }
 
@@ -1183,7 +1201,7 @@
 
 .takeaways {
   display: grid;
-  gap: 1.2rem;
+  gap: var(--section-rhythm);
   margin: 0.25rem 0 0.35rem;
 }
 
@@ -2981,7 +2999,7 @@
   align-items: end;
   justify-content: space-between;
   gap: 0.8rem 1.5rem;
-  margin-bottom: 0.9rem;
+  margin-bottom: var(--section-rhythm);
 }
 
 .continuationHeader .kicker {
@@ -3248,7 +3266,18 @@
   padding: 0;
 }
 
+/*
+ * A grid with a gap, not a plain block.
+ *
+ * As a block, the header carried its own margin-bottom while the tab row and
+ * the selected area's description card below it had no margin between them at
+ * all -- they met at exactly 0px, so the row read as welded to the card below
+ * it. One gap on the container spaces header, tabs and description alike, and
+ * takes the margin off the header.
+ */
 .cardDomains {
+  display: grid;
+  gap: var(--section-rhythm);
   padding: 1.5rem;
 }
 
@@ -4883,8 +4912,11 @@
     border-radius: 15px;
   }
 
+  /* The token, not 0.9rem. This narrow-width rule was putting the header back
+     to 14.4px while every other section held 20px -- the one gap that did not
+     follow --section-rhythm once the others did. */
   .continuationHeader {
-    margin-bottom: 0.9rem;
+    margin-bottom: var(--section-rhythm);
   }
 
   .continuationLead {
