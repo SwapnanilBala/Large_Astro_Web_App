@@ -406,7 +406,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(108, 225, 212, 0.15);
+  /*
+   * Every sub-period used to be this same teal regardless of its lord, so
+   * a drill-down showed nine bars that told you nothing about whose period
+   * each one was -- the level above it was already colour-coded.
+   *
+   * A translucent tint rather than the solid fill used at level 1: these
+   * bars keep light label text, and a solid pastel would take that with it.
+   * The fallback keeps the old teal for an unrecognised lord.
+   */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dasha-color, #6ce1d4) 46%, transparent),
+    color-mix(in srgb, var(--dasha-color, #6ce1d4) 27%, transparent)
+  );
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   transition: background 200ms ease;
   min-width: 0;
@@ -418,16 +431,19 @@
 }
 
 .dasha-bar:hover {
-  background: rgba(108, 225, 212, 0.28);
+  background: color-mix(in srgb, var(--dasha-color, #6ce1d4) 58%, transparent);
 }
 
 .dasha-bar--current {
-  background: rgba(242, 194, 108, 0.3);
+  /* Its own lord's colour, run stronger than its neighbours. The gold
+     label below still carries 'this is the one running now', so the fill
+     is free to say which planet it belongs to. */
+  background: color-mix(in srgb, var(--dasha-color, #f2c26c) 52%, transparent);
   border-color: rgba(242, 194, 108, 0.5);
 }
 
 .dasha-bar--current:hover {
-  background: rgba(242, 194, 108, 0.42);
+  background: color-mix(in srgb, var(--dasha-color, #f2c26c) 64%, transparent);
 }
 
 .dasha-label {
@@ -648,8 +664,11 @@
 .dasha-gantt-track {
   position: relative;
   width: 100%;
-  height: 48px;
-  background: rgba(6, 24, 38, 0.6);
+  height: 56px;
+  /* Sunk rather than flat, so the lit bars sitting in it read as objects on
+     a surface instead of blocks of colour on a panel. */
+  background: linear-gradient(180deg, rgba(4, 16, 28, 0.78), rgba(6, 24, 38, 0.55));
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
   animation: timelineReveal 1.2s ease forwards;
 }
 
@@ -661,31 +680,58 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  opacity: 0.78;
-  border-right: 1px solid rgba(0, 0, 0, 0.18);
-  transition: opacity 200ms ease, filter 200ms ease;
+  /*
+   * --dasha-color comes from the panel, which reads it from the same
+   * lib/constellation-geometry map the chart wheel uses.
+   *
+   * This was a flat inline background-color held at opacity 0.78. Nine
+   * lords washed 22% toward the same dark slate is most of why the strip
+   * read as one grey band with faint tinting. Full opacity now, with the
+   * hue doing the separating and a lit top edge giving it a surface.
+   */
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--dasha-color) 78%, #ffffff 22%) 0%,
+    var(--dasha-color) 46%,
+    color-mix(in srgb, var(--dasha-color) 80%, #05101c 20%) 100%
+  );
+  /* The lord's own colour darkened, rather than a black gap between bars. */
+  border-right: 1px solid color-mix(in srgb, var(--dasha-color) 45%, #05101c);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--dasha-color) 40%, #ffffff);
+  transition: filter 200ms ease, box-shadow 200ms ease;
   overflow: hidden;
   min-width: 0;
 }
 
 .dasha-gantt-bar:hover {
-  opacity: 1;
-  filter: brightness(1.18);
+  filter: brightness(1.1) saturate(1.08);
   z-index: 2;
 }
 
 .dasha-gantt-bar--current {
-  opacity: 1;
-  filter: brightness(1.22) saturate(1.3);
   z-index: 3;
+  /*
+   * Lit from within rather than merely brighter: a ring in its own colour
+   * plus a glow that spills onto the track. brightness()/saturate() alone
+   * could not distinguish the running period from a hovered one.
+   */
+  box-shadow:
+    inset 0 0 0 2px color-mix(in srgb, var(--dasha-color) 45%, #ffffff),
+    inset 0 1px 0 color-mix(in srgb, var(--dasha-color) 40%, #ffffff),
+    0 0 18px 2px color-mix(in srgb, var(--dasha-color) 55%, transparent);
 }
 
 .dasha-gantt-label {
   font-size: 1.16rem;
   font-weight: 700;
   letter-spacing: 0.03rem;
-  color: #fff;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+  /*
+   * Dark ink, not white. These fills are pastel now -- white on Jupiter's
+   * #ffd966 or the Moon's #c8d8e8 was unreadable, and the dark shadow that
+   * propped it up is what made the old labels look smudged.
+   */
+  color: #0b1420;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
