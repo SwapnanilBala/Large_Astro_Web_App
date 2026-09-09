@@ -3,7 +3,9 @@
     "brand": "Lagna Atelier",
     "myChart": "La Mia Carta",
     "menu": "Menu",
-    "signOut": "Esci"
+    "signOut": "Esci",
+    "signIn": "Accedi",
+    "account": "Account"
   },
   "home": {
     "kicker": "Motore di Intelligenza Vedica",
@@ -109,7 +111,31 @@
     "actionHintMissing": "Aggiungi {fields} per continuare.",
     "trustMicrocopy": "Cifrato · Mai condiviso · ~60 secondi",
     "stickyComplete": "{count}/{total} completo",
-    "stickyContinue": "Continua"
+    "stickyContinue": "Continua",
+    "mysticalPhrase1": "Scritto nelle stelle",
+    "mysticalPhrase2": "Decifra il tuo destino",
+    "mysticalPhrase3": "Il disegno cosmico svelato",
+    "mysticalPhrase4": "L'universo parla",
+    "mysticalPhrase5": "Allineati al tuo cammino",
+    "birthDateFormatHint": "Inserisci una data come 15/05/1990, 1990-05-15 o 15 May 1990.",
+    "birthTimeFormatHint": "Inserisci un'ora come 14:30 o 2:30 PM.",
+    "next": "Avanti",
+    "intakeLeadStepped": "Una domanda alla volta. Premi Enter per continuare, Shift + Enter per tornare indietro.",
+    "questionCounter": "Domanda {current} di {total}",
+    "keyboardHintNext": "Premi Enter",
+    "keyboardHintBack": "Shift + Enter per tornare indietro",
+    "askName": "Come possiamo chiamarti?",
+    "askNameHelper": "Il nome per cui viene scritta questa lettura.",
+    "askBirthDate": "Quando sei nato/a?",
+    "askBirthDateHelper": "La data di calendario, come era nel luogo in cui sei nato/a.",
+    "askBirthTime": "A che ora sei nato/a?",
+    "askBirthTimeHelper": "Un'ora esatta fissa le case. Se non la conosci, indica una parte approssimativa della giornata.",
+    "stepTabName": "Nome",
+    "stepTabBirthDate": "Data di nascita",
+    "stepTabBirthTime": "Ora di nascita",
+    "stepTabPlace": "Luogo di nascita",
+    "askPlace": "Dove sei nato/a?",
+    "askPlaceHelper": "Il luogo di nascita, non quello in cui vivi ora — è ciò che fissa le coordinate e il fuso orario."
   },
   "engineSelect": {
     "kicker": "Schema di calcolo",
@@ -290,7 +316,21 @@
     "advancedHeading": "Moduli Vedici Avanzati",
     "palmKicker": "Chiromanzia",
     "palmHeading": "Analisi della Lettura del Palmo",
-    "ascendantSign": "Segno Ascendente"
+    "ascendantSign": "Segno Ascendente",
+    "yogaKicker": "Yoga di una Vita",
+    "yogaHeading": "I Tuoi Yoga Planetari",
+    "yogaIntro": "Gli yoga sono combinazioni planetarie classiche che modellano gli schemi di una vita e influenzano i grandi esiti dell'esistenza. Di seguito tutti gli yoga rilevati nel tuo tema natale, ordinati per forza.",
+    "yogaStrong": "Yoga Forti",
+    "yogaStrongDesc": "Questi yoga potenti amplificano in modo netto i tuoi talenti naturali e lo schema della tua vita. Sono attivi e fortemente presenti nella tua carta.",
+    "yogaModerate": "Yoga Moderati",
+    "yogaModerateDesc": "Questi yoga moderati offrono influenze di sostegno. I loro effetti sono presenti, ma possono richiedere uno sviluppo consapevole per manifestarsi appieno.",
+    "yogaWeak": "Yoga Deboli",
+    "yogaWeakDesc": "Questi yoga sottili hanno un'influenza minima, ma possono comunque offrire qualità di sostegno in aree specifiche della vita.",
+    "yogaClassical": "Significato classico",
+    "yogaEffects": "Effetti nella vita",
+    "yogaCancellation": "Annullamento",
+    "yogaLifetime": "Implicazione per la vita",
+    "yogaNoYogas": "Nessuno yoga planetario rilevato in questa carta al momento."
   },
   "dasha": {
     "kicker": "SISTEMA DI TEMPO VEDICO",
@@ -421,5 +461,305 @@
     "jupiter": "Giove",
     "saturn": "Saturno"
   },
-  "bottomNav": {}
+  "bottomNav": {
+    "home": "Home",
+    "insights": "Analisi"
+  },
+  "errorBoundary": {
+    "heading": "Qualcosa è andato storto",
+    "description": "Un errore inatteso ha interrotto il flusso cosmico. Puoi riprovare o tornare alla pagina precedente.",
+    "tryAgain": "Riprova",
+    "copyError": "Segnala questo errore",
+    "copied": "Copiato!"
+  },
+  "zodiacElements": {
+    "fire": "Fuoco",
+    "earth": "Terra",
+    "air": "Aria",
+    "water": "Acqua"
+  },
+  "quotes": {
+    "1": "Le stelle inclinano, non obbligano",
+    "2": "Come in alto, così in basso",
+    "3": "Il cosmo è dentro di noi",
+    "4": "Siamo fatti di materia stellare",
+    "5": "L'anima del neonato porta per tutta la vita l'impronta della disposizione delle stelle",
+    "6": "Il saggio comanda le proprie stelle",
+    "7": "La volta stellata del cielo è in verità il libro aperto della proiezione cosmica",
+    "8": "Segui la luce della tua stella natale",
+    "9": "I pianeti parlano a bassa voce a chi sa ascoltare",
+    "10": "Ogni anima è segnata dalle stelle che ne hanno visto la nascita",
+    "11": "Nella danza dei pianeti trova il ritmo del tuo destino",
+    "12": "L'ascendente rivela ciò che l'anima già sa",
+    "13": "Saturno insegna con la pazienza ciò che Giove concede con la grazia",
+    "14": "La Luna ricorda ciò che la mente dimentica",
+    "15": "Attraverso le case del cielo, il sé scopre il proprio cammino",
+    "16": "Sotto ogni carta si nasconde un universo che attende di parlare",
+    "17": "I Nakshatra tessono il destino filo per filo",
+    "18": "Dove i pianeti convergono, si rivela lo scopo",
+    "19": "Il tuo Lagna è la porta della conoscenza di sé",
+    "20": "Il Navamsha sussurra ciò che il Rashi grida",
+    "21": "Il tempo è la tela; i pianeti sono il colore",
+    "22": "Nel Jyotish nulla è casuale — tutto è ritmo",
+    "23": "Il Dasha dispiega ciò che il karma ha scritto"
+  },
+  "account": {
+    "kicker": "Il Tuo Account",
+    "heading": "Accedi",
+    "headingSignedIn": "Hai effettuato l'accesso",
+    "lead": "Accedi con Google per conservare le carte salvate quando passi a un altro dispositivo. Tutto il resto resta in questo browser.",
+    "leadSignedIn": "Le tue carte salvate seguono questo account su qualsiasi dispositivo da cui accedi.",
+    "checking": "Verifica del tuo account…",
+    "opening": "Apertura…",
+    "continue": "Continua",
+    "unavailable": "Non riusciamo a raggiungere l'archivio degli account in questo momento. Nulla in questo browser è stato toccato — riprova tra poco.",
+    "storageNote": "Le tue carte, le letture e i dati di nascita recenti sono conservati in questo browser."
+  },
+  "signIn": {
+    "google": "Continua con Google",
+    "googleBusy": "Apertura di Google…",
+    "note": "Accedendo conservi le tue carte quando cambi dispositivo. Tutto il resto resta in questo browser.",
+    "errorHeading": "L'accesso non è stato completato",
+    "error_not_configured": "L'accesso con Google non è ancora configurato su questo server.",
+    "error_declined": "Quell'accesso è stato annullato. Se l'app è ancora in fase di test, l'account deve trovarsi anche nel suo elenco di utenti di prova.",
+    "error_expired": "Quel tentativo ha richiesto troppo tempo. Riprova.",
+    "error_state_mismatch": "Non è stato possibile verificare quell'accesso. Ricomincia da questa pagina.",
+    "error_exchange_failed": "Google non è riuscita a completare l'accesso. Riprova.",
+    "error_email_unverified": "Google non ha verificato l'email di quell'account, quindi non può essere usata per accedere.",
+    "error_signin_failed": "Qualcosa è andato storto nel completare l'accesso. Riprova.",
+    "error_unknown": "L'accesso non è stato completato. Riprova."
+  },
+  "chartSync": {
+    "kicker": "Salvataggio della tua carta",
+    "askQuestion": "Salvare le tue carte nel tuo account?",
+    "askDetail": "Le tue carte sono conservate in questo browser. Salvarle nel tuo account significa che tornano se cancelli la cronologia e che si aprono anche sugli altri tuoi dispositivi.",
+    "askNote": "In ogni caso questa carta resta sullo schermo e resta in questo browser. Puoi cambiare idea in qualsiasi momento.",
+    "accept": "Salva le mie carte",
+    "decline": "Tienile solo in questo browser",
+    "nudgeQuestion": "Questa carta vive solo in questo browser",
+    "nudgeDetail": "Cancellare la cronologia la elimina e non sarà sugli altri tuoi dispositivi. Salvarla nel tuo account è ciò che la fa tornare.",
+    "nudgeDismiss": "No, grazie",
+    "nudgeNote": "Non lo chiederemo più.",
+    "settingsHeading": "Carte salvate",
+    "statusSaving": "Le tue carte vengono salvate nel tuo account.",
+    "detailSaving": "Tornano se cancelli questo browser e si aprono sugli altri tuoi dispositivi. Accedi con Google per raggiungerle da un dispositivo diverso da questo.",
+    "statusLocal": "Le tue carte restano in questo browser.",
+    "detailLocal": "Nulla di esse si trova sui nostri server. Cancellare la cronologia le elimina e non sono sugli altri tuoi dispositivi.",
+    "withdraw": "Interrompi il salvataggio ed elimina quanto archiviato",
+    "withdrawing": "Eliminazione...",
+    "withdrawDone": "Eliminate. Le tue carte sono solo in questo browser.",
+    "withdrawFailed": "Non è stato possibile eliminarle in questo momento. Nulla è cambiato — riprova.",
+    "resume": "Salva le mie carte nel mio account",
+    "resumeDone": "Salvato. {stored} carta/e da questo browser sono ora nel tuo account.",
+    "resuming": "Salvataggio delle tue carte...",
+    "resumePartial": "Salvate {stored}, ma alcune non è stato possibile archiviarle. Restano in questo browser e riproveremo la prossima volta che ne aprirai una."
+  },
+  "palm": {
+    "common": {
+      "cancel": "Annulla",
+      "saving": "Salvataggio…",
+      "saved": "Salvato ✓",
+      "untitled": "Lettura senza titolo",
+      "backToReadings": "Torna alle tue letture",
+      "classicalBadge": "Hasta Samudrika Shastra"
+    },
+    "alt": {
+      "palm": "Palmo",
+      "captured": "Palmo acquisito",
+      "analyzing": "Analisi del palmo",
+      "yourPalm": "Il tuo palmo",
+      "saved": "Palmo salvato",
+      "comparePalm": "Palmo della {tag}"
+    },
+    "panel": {
+      "kicker": "Lettura della Mano",
+      "heading": "Analisi della Lettura della Mano",
+      "intro": "Usa la fotocamera o carica un'immagine del tuo palmo per un'analisi con IA delle tue linee, dei monti e dei segni particolari. Ricevi intuizioni personalizzate basate sulle antiche tradizioni della chiromanzia.",
+      "classicalToggleTitle": "Modalità Hasta Samudrika Shastra",
+      "classicalToggleSubtitle": "Solo chiromanzia vedica classica",
+      "openCamera": "Apri la Fotocamera",
+      "uploadImage": "Carica Immagine",
+      "tipHandFlat": "Tieni la mano dominante distesa, con il palmo verso la fotocamera",
+      "tipLighting": "Assicura una luce buona e uniforme, senza ombre nette",
+      "tipFingers": "Tieni le dita leggermente divaricate"
+    },
+    "camera": {
+      "noHand": "Nessuna mano rilevata",
+      "palmClear": "Palmo rilevato con chiarezza!",
+      "handSteady": "Mano rilevata — tienila ferma",
+      "confidence": "{pct}% di affidabilità",
+      "captureTitle": "Scatta"
+    },
+    "captured": {
+      "retake": "Riprova",
+      "uploadDifferent": "Carica un'Altra Immagine",
+      "analyze": "Analizza il Mio Palmo"
+    },
+    "analyzing": {
+      "text": "Lettura del tuo palmo"
+    },
+    "results": {
+      "newReading": "Nuova Lettura",
+      "saveReading": "Salva la lettura",
+      "saveTitle": "Salva questa lettura su questo dispositivo",
+      "alreadySavedTitle": "Già salvata",
+      "skipAnimations": "Salta le animazioni",
+      "savedToast": "Salvata tra le tue letture",
+      "viewHistory": "Vedi la cronologia ↗"
+    },
+    "warning": {
+      "hardTitle": "La qualità dell'immagine può incidere sulla precisione",
+      "softTitle": "L'immagine è al limite — interpretala con cautela",
+      "dismiss": "Chiudi l'avviso",
+      "markedAs": "La qualità dell'immagine è stata segnata come {rating} quando è stata fatta questa lettura"
+    },
+    "quality": {
+      "marginal": "al limite"
+    },
+    "sections": {
+      "overallSummary": "Sintesi Generale",
+      "annotatedPalm": "Palmo Annotato",
+      "palm": "Palmo",
+      "lifeTrajectory": "Traiettoria di Vita",
+      "jyotishSynthesis": "Sintesi Carta × Palmo",
+      "dashaLens": "Lente della Dasha Attiva",
+      "career": "Carriera e Scopo di Vita",
+      "relationships": "Relazioni e Paesaggio Emotivo",
+      "health": "Salute e Vitalità",
+      "mounts": "Monti",
+      "fingers": "Dita",
+      "specialMarkings": "Segni Particolari",
+      "classicalFramework": "Quadro Hasta Samudrika Shastra",
+      "guidance": "Indicazioni",
+      "yourNotes": "Le Tue Note"
+    },
+    "trajectory": {
+      "currentPhase": "Fase Attuale",
+      "nearFuture": "Futuro Prossimo",
+      "longTermPath": "Percorso a Lungo Termine",
+      "challenges": "Sfide",
+      "opportunities": "Opportunità"
+    },
+    "career": {
+      "naturalTalents": "Talenti Naturali",
+      "careerDirection": "Direzione Professionale",
+      "purposeAlignment": "Allineamento con lo Scopo"
+    },
+    "relationships": {
+      "emotionalState": "Stato Emotivo",
+      "relationshipDynamics": "Dinamiche Relazionali",
+      "connectionStyle": "Stile di Connessione"
+    },
+    "health": {
+      "energyLevels": "Livelli di Energia",
+      "stressIndicators": "Indicatori di Stress",
+      "wellnessAdvice": "Consigli per il Benessere"
+    },
+    "lines": {
+      "heartLine": "Linea del Cuore",
+      "headLine": "Linea della Testa",
+      "lifeLine": "Linea della Vita",
+      "fateLine": "Linea del Destino"
+    },
+    "annotation": {
+      "heart": "Cuore",
+      "head": "Testa",
+      "life": "Vita",
+      "fate": "Destino"
+    },
+    "visibility": {
+      "clear": "Chiara",
+      "partial": "Parziale",
+      "faint": "Tenue",
+      "notDetected": "Non rilevata",
+      "confidenceSuffix": " ({pct}%)"
+    },
+    "errors": {
+      "cameraDenied": "Accesso alla fotocamera negato. Usa invece l'opzione di caricamento.",
+      "captureTooLarge": "L'immagine del palmo è troppo grande. Scatta un'immagine più ravvicinata e a risoluzione più bassa, sotto i 5MB.",
+      "uploadTooLarge": "L'immagine del palmo è troppo grande. Carica un'immagine sotto i 5MB.",
+      "unsupportedType": "Carica un'immagine JPEG, PNG o WebP.",
+      "analysisFailed": "Analisi non riuscita",
+      "generic": "Qualcosa è andato storto",
+      "saveFailed": "Impossibile salvare la lettura"
+    },
+    "history": {
+      "kicker": "Il tuo archivio",
+      "title": "Le Tue Letture della Mano",
+      "loadingSubtitle": "Caricamento delle letture salvate…",
+      "emptySubtitle": "Qui non c'è ancora nulla.",
+      "oneSaved": "1 lettura salvata.",
+      "manySaved": "{count} letture salvate.",
+      "compareTwo": "Confronta due letture",
+      "cancelCompare": "Annulla il confronto",
+      "pickTwo": "Scegli 2 letture da confrontare.",
+      "pickOneMore": "Scegli 1 altra lettura.",
+      "readyToCompare": "Pronto al confronto.",
+      "compareThese": "Confronta queste →",
+      "emptyBody": "Non hai ancora salvato nessuna lettura della mano.",
+      "readYourPalm": "Leggi la tua mano",
+      "openReadingAria": "Apri la lettura del {date}",
+      "selectReadingAria": "Seleziona la lettura del {date}",
+      "deselectReadingAria": "Deseleziona la lettura del {date}",
+      "deleteConfirm": "Eliminare questa lettura?",
+      "deleting": "Eliminazione…",
+      "confirmDelete": "Sì, elimina",
+      "delete": "Elimina",
+      "deleteAria": "Elimina la lettura",
+      "deleteFailed": "Impossibile eliminare la lettura."
+    },
+    "detail": {
+      "loadingTitle": "Caricamento della lettura…",
+      "errorTitle": "Lettura della Mano",
+      "notFound": "Lettura non trovata.",
+      "loadFailed": "Non è stato possibile caricare questa lettura.",
+      "titleAria": "Titolo della lettura",
+      "editTitleTooltip": "Clicca per modificare il titolo",
+      "editHint": "Modifica",
+      "couldntSave": "Salvataggio non riuscito",
+      "confidenceLabel": "Affidabilità:",
+      "notesHelp": "Note private per te — tutto ciò che vuoi ricordare di questa lettura.",
+      "notesPlaceholder": "Aggiungi una nota…",
+      "notesSaved": "Note salvate ✓",
+      "couldntSaveNotes": "Salvataggio delle note non riuscito",
+      "compareCta": "Confronta con un'altra lettura →"
+    },
+    "compare": {
+      "title": "Confronta letture della mano",
+      "mustSelectTwo": "Devi selezionare due letture da confrontare.",
+      "pickReadings": "Scegli le letture",
+      "loadingTitle": "Confronto di due letture…",
+      "kicker": "Fianco a fianco",
+      "heading": "Confronto di due letture",
+      "takenDayApart": "Fatte a {count} giorno di distanza",
+      "takenDaysApart": "Fatte a {count} giorni di distanza",
+      "errorSelectTwo": "Seleziona esattamente due letture da confrontare.",
+      "errorNotFound": "Una o entrambe le letture non sono state trovate.",
+      "loadFailed": "Non abbiamo potuto caricare questo confronto.",
+      "readingA": "Lettura A",
+      "readingB": "Lettura B",
+      "openFull": "Apri la lettura completa →",
+      "lineStrength": "Forza delle linee",
+      "lineStrengthAria": "Confronto della forza delle linee",
+      "noStrengthChanges": "Nessun cambiamento di forza nelle quattro linee principali.",
+      "lineVisibility": "Visibilità delle linee",
+      "lineVisibilityAria": "Confronto della visibilità delle linee",
+      "colLine": "Linea",
+      "colChange": "Cambiamento",
+      "direction": {
+        "stronger": "più forte",
+        "weaker": "più debole",
+        "unchanged": "invariata"
+      },
+      "specialMarkings": "Segni particolari",
+      "newlyVisible": "Ora visibili",
+      "noLongerVisible": "Non più visibili",
+      "prominentMounts": "Monti prominenti",
+      "newlyProminent": "Ora prominenti",
+      "noLongerProminent": "Non più prominenti",
+      "none": "Nessuno",
+      "summaryContrast": "Confronto delle sintesi",
+      "noSummary": "(nessuna sintesi)"
+    }
+  }
 }

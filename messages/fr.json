@@ -3,7 +3,9 @@
     "brand": "Lagna Atelier",
     "myChart": "Ma Carte",
     "menu": "Menu",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "signIn": "Se connecter",
+    "account": "Compte"
   },
   "home": {
     "kicker": "Moteur d'Intelligence Védique",
@@ -109,7 +111,31 @@
     "actionHintMissing": "Ajoutez {fields} pour continuer.",
     "trustMicrocopy": "Chiffre · Jamais partage · ~60 secondes",
     "stickyComplete": "{count}/{total} complete",
-    "stickyContinue": "Continuer"
+    "stickyContinue": "Continuer",
+    "mysticalPhrase1": "Écrit dans les étoiles",
+    "mysticalPhrase2": "Décodez votre destin",
+    "mysticalPhrase3": "Le plan cosmique révélé",
+    "mysticalPhrase4": "L'univers parle",
+    "mysticalPhrase5": "Alignez-vous sur votre voie",
+    "birthDateFormatHint": "Entrez une date comme 15/05/1990, 1990-05-15 ou 15 May 1990.",
+    "birthTimeFormatHint": "Entrez une heure comme 14:30 ou 2:30 PM.",
+    "next": "Suivant",
+    "intakeLeadStepped": "Une question à la fois. Appuyez sur Entrée pour continuer, Maj + Entrée pour revenir.",
+    "questionCounter": "Question {current} sur {total}",
+    "keyboardHintNext": "Appuyez sur Entrée",
+    "keyboardHintBack": "Maj + Entrée pour revenir",
+    "askName": "Comment devons-nous vous appeler ?",
+    "askNameHelper": "Le nom pour lequel cette lecture est écrite.",
+    "askBirthDate": "Quand êtes-vous né(e) ?",
+    "askBirthDateHelper": "La date du calendrier, telle qu'elle était à votre lieu de naissance.",
+    "askBirthTime": "À quelle heure êtes-vous né(e) ?",
+    "askBirthTimeHelper": "Une heure exacte fixe les maisons. Si vous ne la connaissez pas, indiquez une partie approximative de la journée.",
+    "stepTabName": "Nom",
+    "stepTabBirthDate": "Date de naissance",
+    "stepTabBirthTime": "Heure de naissance",
+    "stepTabPlace": "Lieu de naissance",
+    "askPlace": "Où êtes-vous né(e) ?",
+    "askPlaceHelper": "Le lieu de naissance, pas celui où vous vivez aujourd'hui — c'est lui qui fixe les coordonnées et le fuseau horaire."
   },
   "engineSelect": {
     "kicker": "Cadre de calcul",
@@ -290,7 +316,21 @@
     "advancedHeading": "Modules Védiques Avancés",
     "palmKicker": "Chiromancie",
     "palmHeading": "Analyse de Lecture de Paume",
-    "ascendantSign": "Signe Ascendant"
+    "ascendantSign": "Signe Ascendant",
+    "yogaKicker": "Yogas d'une Vie",
+    "yogaHeading": "Vos Yogas Planétaires",
+    "yogaIntro": "Les yogas sont des combinaisons planétaires classiques qui façonnent les motifs de toute une vie et influencent les grands aboutissements. Voici tous les yogas détectés dans votre thème natal, classés par force.",
+    "yogaStrong": "Yogas Forts",
+    "yogaStrongDesc": "Ces yogas puissants amplifient nettement vos talents naturels et le motif de votre vie. Ils sont actifs et fortement présents dans votre carte.",
+    "yogaModerate": "Yogas Modérés",
+    "yogaModerateDesc": "Ces yogas modérés apportent des influences de soutien. Leurs effets sont présents, mais peuvent demander un développement conscient pour se manifester pleinement.",
+    "yogaWeak": "Yogas Faibles",
+    "yogaWeakDesc": "Ces yogas subtils n'ont qu'une influence minime, mais peuvent tout de même apporter des qualités de soutien dans des domaines précis de la vie.",
+    "yogaClassical": "Signification classique",
+    "yogaEffects": "Effets sur la vie",
+    "yogaCancellation": "Annulation",
+    "yogaLifetime": "Implication pour la vie",
+    "yogaNoYogas": "Aucun yoga planétaire détecté dans cette carte pour le moment."
   },
   "dasha": {
     "kicker": "SYSTÈME DE TEMPS VÉDIQUE",
@@ -421,5 +461,305 @@
     "jupiter": "Jupiter",
     "saturn": "Saturne"
   },
-  "bottomNav": {}
+  "bottomNav": {
+    "home": "Accueil",
+    "insights": "Analyses"
+  },
+  "errorBoundary": {
+    "heading": "Une erreur est survenue",
+    "description": "Une erreur inattendue a interrompu le flux cosmique. Vous pouvez réessayer ou revenir à la page précédente.",
+    "tryAgain": "Réessayer",
+    "copyError": "Signaler cette erreur",
+    "copied": "Copié !"
+  },
+  "zodiacElements": {
+    "fire": "Feu",
+    "earth": "Terre",
+    "air": "Air",
+    "water": "Eau"
+  },
+  "quotes": {
+    "1": "Les astres inclinent, ils ne contraignent pas",
+    "2": "Ce qui est en haut est comme ce qui est en bas",
+    "3": "Le cosmos est en nous",
+    "4": "Nous sommes faits de poussière d'étoiles",
+    "5": "L'âme du nouveau-né est marquée pour la vie par la configuration des astres",
+    "6": "Le sage gouverne ses astres",
+    "7": "La voûte étoilée du ciel est en vérité le livre ouvert de la projection cosmique",
+    "8": "Suivez la lumière de votre étoile natale",
+    "9": "Les planètes murmurent à qui sait écouter",
+    "10": "Chaque âme est promise aux astres qui ont vu sa naissance",
+    "11": "Dans la danse des planètes, trouvez le rythme de votre destin",
+    "12": "L'ascendant révèle ce que l'âme sait déjà",
+    "13": "Saturne enseigne par la patience ce que Jupiter accorde par la grâce",
+    "14": "La Lune se souvient de ce que l'esprit oublie",
+    "15": "À travers les maisons du ciel, le soi découvre sa voie",
+    "16": "Sous chaque carte dort un univers qui attend de parler",
+    "17": "Les Nakshatras tissent le destin fil à fil",
+    "18": "Là où les planètes convergent, le dessein se révèle",
+    "19": "Votre Lagna est la porte de la connaissance de soi",
+    "20": "Le Navamsha murmure ce que le Rashi clame",
+    "21": "Le temps est la toile ; les planètes, la peinture",
+    "22": "En Jyotish, rien n'est hasard — tout est rythme",
+    "23": "Le Dasha déploie ce que le karma a écrit"
+  },
+  "account": {
+    "kicker": "Votre Compte",
+    "heading": "Se connecter",
+    "headingSignedIn": "Vous êtes connecté",
+    "lead": "Connectez-vous avec Google pour conserver vos cartes enregistrées lorsque vous changez d'appareil. Tout le reste demeure dans ce navigateur.",
+    "leadSignedIn": "Vos cartes enregistrées suivent ce compte sur tout appareil où vous vous connectez.",
+    "checking": "Vérification de votre compte…",
+    "opening": "Ouverture…",
+    "continue": "Continuer",
+    "unavailable": "Nous ne parvenons pas à joindre le magasin de comptes pour le moment. Rien dans ce navigateur n'est affecté — réessayez dans un instant.",
+    "storageNote": "Vos cartes, vos lectures et vos données de naissance récentes sont conservées dans ce navigateur."
+  },
+  "signIn": {
+    "google": "Continuer avec Google",
+    "googleBusy": "Ouverture de Google…",
+    "note": "La connexion conserve vos cartes lorsque vous changez d'appareil. Tout le reste demeure dans ce navigateur.",
+    "errorHeading": "La connexion n'a pas abouti",
+    "error_not_configured": "La connexion Google n'est pas encore configurée sur ce serveur.",
+    "error_declined": "Cette connexion a été annulée. Si l'application est encore en phase de test, le compte doit aussi figurer sur sa liste d'utilisateurs de test.",
+    "error_expired": "Cette tentative a pris trop de temps. Réessayez.",
+    "error_state_mismatch": "Cette connexion n'a pas pu être vérifiée. Reprenez depuis cette page.",
+    "error_exchange_failed": "Google n'a pas pu terminer la connexion. Réessayez.",
+    "error_email_unverified": "Google n'a pas vérifié l'adresse e-mail de ce compte ; elle ne peut donc pas servir à se connecter.",
+    "error_signin_failed": "Une erreur est survenue lors de la finalisation de la connexion. Réessayez.",
+    "error_unknown": "La connexion n'a pas abouti. Réessayez."
+  },
+  "chartSync": {
+    "kicker": "Enregistrement de votre carte",
+    "askQuestion": "Enregistrer vos cartes dans votre compte ?",
+    "askDetail": "Vos cartes sont conservées dans ce navigateur. Les enregistrer dans votre compte signifie qu'elles reviennent si vous effacez votre historique, et qu'elles s'ouvrent aussi sur vos autres appareils.",
+    "askNote": "Dans tous les cas, cette carte reste à l'écran et reste dans ce navigateur. Vous pouvez changer d'avis à tout moment.",
+    "accept": "Enregistrer mes cartes",
+    "decline": "Les garder uniquement dans ce navigateur",
+    "nudgeQuestion": "Cette carte n'existe que dans ce navigateur",
+    "nudgeDetail": "Effacer votre historique la supprime, et elle ne sera pas sur vos autres appareils. L'enregistrer dans votre compte est ce qui la fait revenir.",
+    "nudgeDismiss": "Non merci",
+    "nudgeNote": "Nous ne le demanderons plus.",
+    "settingsHeading": "Cartes enregistrées",
+    "statusSaving": "Vos cartes sont enregistrées dans votre compte.",
+    "detailSaving": "Elles reviennent si vous effacez ce navigateur, et elles s'ouvrent sur vos autres appareils. Connectez-vous avec Google pour y accéder depuis un autre appareil que celui-ci.",
+    "statusLocal": "Vos cartes restent dans ce navigateur.",
+    "detailLocal": "Rien à leur sujet ne se trouve sur nos serveurs. Effacer votre historique les supprime, et elles ne sont pas sur vos autres appareils.",
+    "withdraw": "Arrêter l'enregistrement et supprimer ce qui est stocké",
+    "withdrawing": "Suppression...",
+    "withdrawDone": "Supprimé. Vos cartes sont uniquement dans ce navigateur.",
+    "withdrawFailed": "Impossible de les supprimer pour l'instant. Rien n'a changé — veuillez réessayer.",
+    "resume": "Enregistrer mes cartes dans mon compte",
+    "resumeDone": "Enregistré. {stored} carte(s) de ce navigateur sont maintenant dans votre compte.",
+    "resuming": "Enregistrement de vos cartes...",
+    "resumePartial": "{stored} enregistrée(s), mais certaines n'ont pu être stockées. Elles restent dans ce navigateur et nous réessaierons la prochaine fois que vous en ouvrirez une."
+  },
+  "palm": {
+    "common": {
+      "cancel": "Annuler",
+      "saving": "Enregistrement…",
+      "saved": "Enregistré ✓",
+      "untitled": "Lecture sans titre",
+      "backToReadings": "Retour à vos lectures",
+      "classicalBadge": "Hasta Samudrika Shastra"
+    },
+    "alt": {
+      "palm": "Paume",
+      "captured": "Paume capturée",
+      "analyzing": "Analyse de la paume",
+      "yourPalm": "Votre paume",
+      "saved": "Paume enregistrée",
+      "comparePalm": "Paume de la {tag}"
+    },
+    "panel": {
+      "kicker": "Lecture de la Paume",
+      "heading": "Analyse de Lecture de la Paume",
+      "intro": "Utilisez votre appareil photo ou téléversez une image de votre paume pour une analyse par IA de vos lignes, de vos monts et de vos signes particuliers. Recevez des éclairages personnalisés fondés sur les traditions anciennes de la chiromancie.",
+      "classicalToggleTitle": "Mode Hasta Samudrika Shastra",
+      "classicalToggleSubtitle": "Chiromancie védique classique uniquement",
+      "openCamera": "Ouvrir l'Appareil Photo",
+      "uploadImage": "Téléverser une Image",
+      "tipHandFlat": "Posez votre main dominante à plat, la paume face à l'objectif",
+      "tipLighting": "Veillez à une lumière bonne et régulière, sans ombres dures",
+      "tipFingers": "Gardez vos doigts légèrement écartés"
+    },
+    "camera": {
+      "noHand": "Aucune main détectée",
+      "palmClear": "Paume détectée nettement !",
+      "handSteady": "Main détectée — tenez-la immobile",
+      "confidence": "{pct}% de confiance",
+      "captureTitle": "Capturer"
+    },
+    "captured": {
+      "retake": "Reprendre",
+      "uploadDifferent": "Téléverser une Autre Image",
+      "analyze": "Analyser Ma Paume"
+    },
+    "analyzing": {
+      "text": "Lecture de votre paume"
+    },
+    "results": {
+      "newReading": "Nouvelle Lecture",
+      "saveReading": "Enregistrer la lecture",
+      "saveTitle": "Enregistrer cette lecture sur cet appareil",
+      "alreadySavedTitle": "Déjà enregistrée",
+      "skipAnimations": "Passer les animations",
+      "savedToast": "Enregistrée dans vos lectures",
+      "viewHistory": "Voir l'historique ↗"
+    },
+    "warning": {
+      "hardTitle": "La qualité de l'image peut nuire à la précision",
+      "softTitle": "L'image est limite — interprétez-la avec prudence",
+      "dismiss": "Fermer l'avertissement",
+      "markedAs": "La qualité de l'image a été notée {rating} au moment de cette lecture"
+    },
+    "quality": {
+      "marginal": "limite"
+    },
+    "sections": {
+      "overallSummary": "Synthèse Générale",
+      "annotatedPalm": "Paume Annotée",
+      "palm": "Paume",
+      "lifeTrajectory": "Trajectoire de Vie",
+      "jyotishSynthesis": "Synthèse Thème × Paume",
+      "dashaLens": "Prisme de la Dasha Active",
+      "career": "Carrière et Vocation",
+      "relationships": "Relations et Paysage Émotionnel",
+      "health": "Santé et Vitalité",
+      "mounts": "Monts",
+      "fingers": "Doigts",
+      "specialMarkings": "Signes Particuliers",
+      "classicalFramework": "Cadre Hasta Samudrika Shastra",
+      "guidance": "Conseils",
+      "yourNotes": "Vos Notes"
+    },
+    "trajectory": {
+      "currentPhase": "Phase Actuelle",
+      "nearFuture": "Avenir Proche",
+      "longTermPath": "Chemin à Long Terme",
+      "challenges": "Défis",
+      "opportunities": "Opportunités"
+    },
+    "career": {
+      "naturalTalents": "Talents Naturels",
+      "careerDirection": "Orientation Professionnelle",
+      "purposeAlignment": "Alignement avec la Vocation"
+    },
+    "relationships": {
+      "emotionalState": "État Émotionnel",
+      "relationshipDynamics": "Dynamique Relationnelle",
+      "connectionStyle": "Style de Lien"
+    },
+    "health": {
+      "energyLevels": "Niveaux d'Énergie",
+      "stressIndicators": "Indicateurs de Stress",
+      "wellnessAdvice": "Conseils de Bien-être"
+    },
+    "lines": {
+      "heartLine": "Ligne de Cœur",
+      "headLine": "Ligne de Tête",
+      "lifeLine": "Ligne de Vie",
+      "fateLine": "Ligne de Destin"
+    },
+    "annotation": {
+      "heart": "Cœur",
+      "head": "Tête",
+      "life": "Vie",
+      "fate": "Destin"
+    },
+    "visibility": {
+      "clear": "Nette",
+      "partial": "Partielle",
+      "faint": "Ténue",
+      "notDetected": "Non détectée",
+      "confidenceSuffix": " ({pct}%)"
+    },
+    "errors": {
+      "cameraDenied": "Accès à l'appareil photo refusé. Utilisez plutôt l'option de téléversement.",
+      "captureTooLarge": "L'image de la paume est trop volumineuse. Prenez une image plus rapprochée et de plus faible résolution, sous les 5MB.",
+      "uploadTooLarge": "L'image de la paume est trop volumineuse. Téléversez une image de moins de 5MB.",
+      "unsupportedType": "Téléversez une image JPEG, PNG ou WebP.",
+      "analysisFailed": "L'analyse a échoué",
+      "generic": "Une erreur est survenue",
+      "saveFailed": "Impossible d'enregistrer la lecture"
+    },
+    "history": {
+      "kicker": "Vos archives",
+      "title": "Vos Lectures de la Paume",
+      "loadingSubtitle": "Chargement de vos lectures enregistrées…",
+      "emptySubtitle": "Rien ici pour l'instant.",
+      "oneSaved": "1 lecture enregistrée.",
+      "manySaved": "{count} lectures enregistrées.",
+      "compareTwo": "Comparer deux lectures",
+      "cancelCompare": "Annuler la comparaison",
+      "pickTwo": "Choisissez 2 lectures à comparer.",
+      "pickOneMore": "Choisissez 1 lecture de plus.",
+      "readyToCompare": "Prêt à comparer.",
+      "compareThese": "Comparer celles-ci →",
+      "emptyBody": "Vous n'avez encore enregistré aucune lecture de la paume.",
+      "readYourPalm": "Faites lire votre paume",
+      "openReadingAria": "Ouvrir la lecture du {date}",
+      "selectReadingAria": "Sélectionner la lecture du {date}",
+      "deselectReadingAria": "Désélectionner la lecture du {date}",
+      "deleteConfirm": "Supprimer cette lecture ?",
+      "deleting": "Suppression…",
+      "confirmDelete": "Oui, supprimer",
+      "delete": "Supprimer",
+      "deleteAria": "Supprimer la lecture",
+      "deleteFailed": "Impossible de supprimer la lecture."
+    },
+    "detail": {
+      "loadingTitle": "Chargement de la lecture…",
+      "errorTitle": "Lecture de la Paume",
+      "notFound": "Lecture introuvable.",
+      "loadFailed": "Cette lecture n'a pas pu être chargée.",
+      "titleAria": "Titre de la lecture",
+      "editTitleTooltip": "Cliquez pour modifier le titre",
+      "editHint": "Modifier",
+      "couldntSave": "Enregistrement impossible",
+      "confidenceLabel": "Confiance :",
+      "notesHelp": "Notes privées pour vous — tout ce que vous voulez retenir de cette lecture.",
+      "notesPlaceholder": "Ajouter une note…",
+      "notesSaved": "Notes enregistrées ✓",
+      "couldntSaveNotes": "Impossible d'enregistrer les notes",
+      "compareCta": "Comparer avec une autre lecture →"
+    },
+    "compare": {
+      "title": "Comparer des lectures de la paume",
+      "mustSelectTwo": "Vous devez sélectionner deux lectures à comparer.",
+      "pickReadings": "Choisir des lectures",
+      "loadingTitle": "Comparaison de deux lectures…",
+      "kicker": "Côte à côte",
+      "heading": "Comparaison de deux lectures",
+      "takenDayApart": "Prises à {count} jour d'intervalle",
+      "takenDaysApart": "Prises à {count} jours d'intervalle",
+      "errorSelectTwo": "Sélectionnez exactement deux lectures à comparer.",
+      "errorNotFound": "Une des deux lectures, ou les deux, sont introuvables.",
+      "loadFailed": "Nous n'avons pas pu charger cette comparaison.",
+      "readingA": "Lecture A",
+      "readingB": "Lecture B",
+      "openFull": "Ouvrir la lecture complète →",
+      "lineStrength": "Force des lignes",
+      "lineStrengthAria": "Comparaison de la force des lignes",
+      "noStrengthChanges": "Aucun changement de force sur les quatre lignes majeures.",
+      "lineVisibility": "Visibilité des lignes",
+      "lineVisibilityAria": "Comparaison de la visibilité des lignes",
+      "colLine": "Ligne",
+      "colChange": "Changement",
+      "direction": {
+        "stronger": "plus forte",
+        "weaker": "plus faible",
+        "unchanged": "inchangée"
+      },
+      "specialMarkings": "Signes particuliers",
+      "newlyVisible": "Nouvellement visibles",
+      "noLongerVisible": "Plus visibles",
+      "prominentMounts": "Monts proéminents",
+      "newlyProminent": "Nouvellement proéminents",
+      "noLongerProminent": "Plus proéminents",
+      "none": "Aucun",
+      "summaryContrast": "Contraste des synthèses",
+      "noSummary": "(pas de synthèse)"
+    }
+  }
 }
