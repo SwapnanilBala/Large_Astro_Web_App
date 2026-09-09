@@ -1,0 +1,1297 @@
+{
+  "es": {
+    "divisional": {
+      "atlas": {
+        "missing": {
+          "kicker": "Datos Faltantes",
+          "title": "Los detalles de la carta están incompletos.",
+          "lead": "Vuelve al formulario y proporciona los datos de nacimiento completos antes de abrir el atlas de cartas divisionales.",
+          "back": "Volver al Formulario"
+        },
+        "unavailable": {
+          "kicker": "Atlas de Vargas",
+          "title": "No se pudieron preparar las cartas divisionales.",
+          "fallback": "No se devolvieron datos de cartas divisionales.",
+          "back": "Volver a tu lectura"
+        },
+        "backToReading": "Volver a tu lectura",
+        "returnToReading": "Regresar a tu lectura",
+        "hero": {
+          "kicker": "D1–D60 · Atlas de vargas",
+          "heading": "Las capas divisionales de la carta de {name}",
+          "lead": "La D1 es el fundamento. Cada varga superior amplía un área de la vida, ayudando a la lectura a confirmar, matizar o precisar un tema ya presente en la carta principal.",
+          "supportedCharts": "{count} cartas admitidas",
+          "exploratoryTime": "Hora de nacimiento exploratoria",
+          "exactTime": "Hora de nacimiento exacta registrada",
+          "timeWindow": "Ventana horaria {accuracy}"
+        },
+        "reliability": {
+          "label": "Fiabilidad de la hora de nacimiento",
+          "goodTitle": "Hora de nacimiento exacta registrada",
+          "goodBody": "El atlas puede mostrar todas las vargas admitidas. La D30 y la D60 aún merecen comprobaciones de límites porque sus divisiones son excepcionalmente finas.",
+          "cautionTitle": "Usa las divisiones superiores como capas exploratorias",
+          "cautionBody": "La hora registrada es aproximada o un valor de reserva. Se muestran las subdivisiones de signo planetarias, pero las conclusiones basadas en el ascendente y las casas en vargas superiores no deberían promoverse hasta que se rectifique la hora de nacimiento."
+        },
+        "sensitivity": {
+          "foundation": "Capa fundamental",
+          "exactTime": "Se recomienda hora exacta",
+          "rectifiedTime": "Se recomienda hora rectificada"
+        },
+        "important": {
+          "kicker": "Las diez capas clave",
+          "heading": "Comienza con las cartas que responden a una pregunta clara",
+          "lead": "Estas diez reciben una guía más amplia porque aportan el contexto más útil a una lectura centrada en el cliente. No son diez cartas natales que compiten entre sí.",
+          "previewLabel": "Previsualizar {label} {name} en el atlas",
+          "openDetails": "Abrir todos los detalles de {label}",
+          "showMore": "Mostrar más detalles"
+        },
+        "complete": {
+          "kicker": "Atlas completo admitido",
+          "heading": "Todas las vargas calculadas",
+          "lead": "Selecciona cualquier carta para inspeccionar las posiciones del cliente. Las diez cartas clave incluyen guía interpretativa adicional más abajo.",
+          "tablistLabel": "Cartas divisionales",
+          "keyBadge": "Clave"
+        },
+        "detail": {
+          "fallbackName": "Carta divisional",
+          "traditionNote": "Fuera de los dieciséis vargas de Parashara — léela como una capa complementaria, no como una autoridad clásica.",
+          "readWith": "Léela con",
+          "clientQuestion": "Pregunta del cliente",
+          "reliability": "Fiabilidad",
+          "secondaryNote": "Esta es una carta de apoyo dentro del atlas completo. Puede aportar contexto, pero el informe solo debería destacarla cuando la D1 y una varga clave relevante ya respalden la misma conclusión."
+        },
+        "snapshot": {
+          "divisionalAscendant": "Ascendente divisional",
+          "sun": "Sol",
+          "moon": "Luna",
+          "repeats": "Repeticiones del signo D1"
+        },
+        "positions": {
+          "kicker": "Tus posiciones",
+          "heading": "Mapa de posiciones {label}",
+          "count": "{count} puntos",
+          "tableLabel": "Posiciones {label}",
+          "point": "Punto",
+          "d1": "D1",
+          "repeats": "Se repite",
+          "note": "“Se repite” significa que el punto permanece en el mismo signo que en la D1. Es una señal de coherencia, no algo automáticamente positivo o negativo."
+        },
+        "footer": "Las cartas divisionales aumentan la especificidad solo cuando confirman la promesa natal, usan datos de nacimiento fiables y concuerdan con factores independientes de fuerza y tiempo."
+      },
+      "panel": {
+        "kicker": "Cartas Varga",
+        "heading": "Cartas Divisionales",
+        "intro": "La D1 es el fundamento natal; las demás cartas amplían temas de vida específicos subdividiendo cada signo. Selecciona una carta abajo para ver dónde cae cada planeta en esa división.",
+        "selectorLabel": "Selector de carta divisional",
+        "tableLabel": "Posiciones planetarias {label}",
+        "planet": "Planeta",
+        "rashiSign": "Signo Rashi",
+        "vargaSign": "Signo {label}",
+        "same": "Igual",
+        "hint": "Los planetas que están en el mismo signo que su posición rashi aparecen destacados. Esta repetición refuerza la expresión de ese planeta en el área de vida correspondiente. La D5, D6, D8 y D11 usan mapeos tradicionales extendidos; quedan fuera de los dieciséis vargas parasharis clásicos.",
+        "themes": {
+          "d1": "Vida en general, identidad y el fundamento natal",
+          "d2": "Riqueza y capacidad financiera",
+          "d3": "Hermanos, valor e iniciativa",
+          "d4": "Propiedad, fortuna y bienes inmuebles",
+          "d5": "Autoridad, influencia y reconocimiento",
+          "d6": "Patrones de salud, rutinas y obstáculos cotidianos",
+          "d7": "Hijos y descendencia",
+          "d8": "Cambio repentino, transformación y vulnerabilidades",
+          "d9": "Matrimonio, dharma y naturaleza interior",
+          "d10": "Carrera, profesión y vida pública",
+          "d11": "Ganancias, redes y el cumplimiento de las ambiciones",
+          "d12": "Padres y linaje ancestral",
+          "d16": "Vehículos, comodidades y felicidad",
+          "d20": "Progreso espiritual y devoción",
+          "d24": "Educación, aprendizaje y conocimiento",
+          "d27": "Fortalezas y debilidades",
+          "d30": "Desgracia, enfermedad y desafíos",
+          "d40": "Efectos auspiciosos e inauspiciosos",
+          "d45": "Indicaciones generales y carácter",
+          "d60": "Karma de vidas pasadas y asuntos generales"
+        }
+      },
+      "detail": {
+        "errors": {
+          "missingKicker": "{label} · Datos faltantes",
+          "missingTitle": "Se requieren los datos de nacimiento completos.",
+          "missingBody": "Vuelve al formulario y proporciona los datos de nacimiento completos antes de abrir el análisis de {label} {name}.",
+          "backToIntake": "Volver al formulario",
+          "returnToAtlas": "Regresar al atlas de vargas",
+          "unavailableKicker": "{label} · Cálculo no disponible",
+          "unavailableTitle": "No se pudo preparar el detalle de {name}.",
+          "unavailableBody": "El cálculo de la carta no devolvió {label}.",
+          "backToReading": "Volver a tu lectura"
+        },
+        "boundary": {
+          "unavailable": "No disponible",
+          "atBoundary": "En el límite"
+        },
+        "dates": {
+          "unavailable": "Fechas no disponibles"
+        },
+        "birthTime": {
+          "exploratory": "Exploratorio con esta hora de nacimiento",
+          "rectificationAdvised": "Aún se recomienda rectificación",
+          "foundation": "Capa fundamental",
+          "exact": "Hora exacta registrada"
+        },
+        "breadcrumb": {
+          "label": "Ruta de navegación",
+          "reading": "Lectura",
+          "atlas": "Cartas divisionales"
+        },
+        "backToAtlas": "Volver al atlas de vargas",
+        "hero": {
+          "kicker": "Varga clave · Detalle dedicado",
+          "badgesLabel": "Contexto de la carta",
+          "wholeSignHouses": "Casas varga de signo completo"
+        },
+        "purpose": {
+          "gridLabel": "Guía de lectura de {label}",
+          "purpose": "Propósito",
+          "clientQuestion": "Pregunta del cliente",
+          "clientQuestionHeading": "Qué ayuda a examinar esta capa",
+          "readWith": "Léela con",
+          "readWithHeading": "La base natal sigue siendo primordial"
+        },
+        "reliability": {
+          "kicker": "Fiabilidad",
+          "note": "La distancia al límite que aparece abajo describe la proximidad a la subdivisión del rashi de origen; no es una probabilidad ni una puntuación favorable o desfavorable."
+        },
+        "glance": {
+          "kicker": "De un vistazo",
+          "heading": "Los datos de la carta antes de la interpretación",
+          "divisionalAscendant": "Ascendente divisional",
+          "ascendantLord": "Señor del ascendente",
+          "unavailable": "No disponible",
+          "recurrences": "Repeticiones del signo D1",
+          "none": "Ninguna",
+          "nearestBoundary": "Límite de subdivisión más cercano",
+          "note": "La repetición de un signo D1 es solo un marcador de coherencia. No es automáticamente positiva, fuerte ni predictiva."
+        },
+        "map": {
+          "kicker": "Mapa de signo completo",
+          "heading": "Carta {label} de estilo sur de la India",
+          "methodTag": "Los signos permanecen fijos · las casas rotan",
+          "gridLabel": "Mapa de casas de signo completo de {label}",
+          "houseLabel": "{sign}, casa {house}, regida por {ruler}",
+          "lord": "Señor {ruler}",
+          "noPoints": "Sin puntos",
+          "centerCaption": "Casas de signo completo",
+          "invalidAscendant": "No se devolvió un ascendente divisional válido, por lo que se omite la asignación de casas.",
+          "note": "Este mapa deriva las casas de signo completo del ascendente divisional. No infiere aspectos exactos ni sustituye el sistema de casas natal."
+        },
+        "placements": {
+          "kicker": "Posiciones clave",
+          "heading": "Puntos vinculados al enfoque de esta carta",
+          "focusHouses": "Casas de enfoque {houses}",
+          "focusPlanet": "Planeta de enfoque",
+          "focusHouse": "Casa de enfoque",
+          "ascendantLord": "Señor del ascendente",
+          "mahadashaLord": "Señor de la Maha Dasha",
+          "antardashaLord": "Señor de la Antardasha",
+          "signLord": "Señor del signo",
+          "dignity": "Dignidad",
+          "boundary": "Límite",
+          "d1Repeat": "Repetición D1",
+          "notAssigned": "No asignada",
+          "yes": "Sí",
+          "no": "No",
+          "peers": "Compañía en el mismo signo: {peers}.",
+          "strength": "{ratio}× el mínimo Shadbala requerido",
+          "strengthNote": "Fuerza natal independiente de manifestación; no es una puntuación de dignidad de {label}."
+        },
+        "vargaSign": "Signo {label}",
+        "table": {
+          "kicker": "Mapa completo",
+          "heading": "Todos los puntos calculados",
+          "count": "{count} posiciones",
+          "caption": "Posiciones {label} comparadas con la D1, incluyendo casa de signo completo, señor del signo, dignidad, repetición y distancia al límite de la subdivisión de origen.",
+          "point": "Punto",
+          "d1Sign": "Signo D1",
+          "house": "Casa",
+          "signLord": "Señor del signo",
+          "dignity": "Dignidad",
+          "d1Repeat": "Repetición D1",
+          "boundaryDistance": "Distancia al límite",
+          "repeatYes": "Sí · coherencia",
+          "repeatNo": "No",
+          "boundaryTitle": "Límite del rashi de origen más cercano a {degree}°. Segmento {segment}.",
+          "note": "La dignidad clásica se muestra solo para los siete planetas clásicos. Aquí no se asigna dignidad al Ascendente, Rahu o Ketu. La distancia al límite se mide desde el grado natal de cada punto hasta el borde de subdivisión más cercano."
+        },
+        "timing": {
+          "kicker": "Contexto temporal actual",
+          "heading": "Señores de dasha dentro de {label}",
+          "mahadasha": "Maha Dasha actual",
+          "antardasha": "Antardasha actual",
+          "wholeSignHouse": "Casa de signo completo",
+          "boundary": "Límite",
+          "placementUnavailable": "Posición no disponible en esta carta.",
+          "dashaUnavailable": "No se devolvieron los datos de dasha actuales.",
+          "note": "Un período activo aumenta la relevancia temporal; no hace que una posición sea automáticamente favorable. Léela con la D1, la fuerza medida y la evidencia vivida."
+        },
+        "method": {
+          "kicker": "Método y procedencia",
+          "heading": "Cómo se calculó esta página",
+          "vargaMapping": "Mapeo de varga",
+          "engine": "Motor",
+          "ephemerisProvider": "Proveedor de efemérides",
+          "ayanamsha": "Ayanamsha",
+          "natalHouseMethod": "Método de casas natal",
+          "vargaHouseDisplay": "Visualización de casas varga",
+          "vargaHouseDisplayValue": "Casas de signo completo derivadas del Ascendente {label}",
+          "birthTimeStatus": "Estado de la hora de nacimiento",
+          "cautionTitle": "Límite interpretativo",
+          "cautionBody": "Esta página informa de signos calculados, casas de signo completo, regentes, dignidad clásica y la ubicación de los señores del tiempo. No infiere aspectos divisionales exactos, no trata la repetición de signo como automáticamente positiva, ni permite que {label} prevalezca sobre la D1."
+        },
+        "pager": {
+          "label": "Cartas divisionales clave adyacentes",
+          "previous": "Varga clave anterior",
+          "next": "Varga clave siguiente"
+        },
+        "footer": {
+          "note": "Las cartas divisionales refinan una promesa natal; no la sustituyen. Las conclusiones más firmes requieren datos de nacimiento fiables y concordancia con evidencia independiente.",
+          "returnLink": "Regresar a tu lectura completa"
+        }
+      }
+    }
+  },
+  "bn": {
+    "divisional": {
+      "atlas": {
+        "missing": {
+          "kicker": "অনুপস্থিত তথ্য",
+          "title": "কুণ্ডলীর বিবরণ অসম্পূর্ণ।",
+          "lead": "বিভাগীয় কুণ্ডলীর অ্যাটলাস খোলার আগে ফর্মে ফিরে গিয়ে সম্পূর্ণ জন্ম বিবরণ দিন।",
+          "back": "ফর্মে ফিরে যান"
+        },
+        "unavailable": {
+          "kicker": "বর্গ অ্যাটলাস",
+          "title": "বিভাগীয় কুণ্ডলীগুলি প্রস্তুত করা যায়নি।",
+          "fallback": "কোনো বিভাগীয় কুণ্ডলীর তথ্য পাওয়া যায়নি।",
+          "back": "আপনার পাঠে ফিরে যান"
+        },
+        "backToReading": "আপনার পাঠে ফিরে যান",
+        "returnToReading": "আপনার পাঠে ফিরুন",
+        "hero": {
+          "kicker": "D1–D60 · বর্গ অ্যাটলাস",
+          "heading": "{name}-এর বিভাগীয় কুণ্ডলীর স্তরসমূহ",
+          "lead": "D1 হল ভিত্তি। প্রতিটি উচ্চতর বর্গ জীবনের একটি ক্ষেত্রকে বড় করে দেখায়, যা মূল কুণ্ডলীতে ইতিমধ্যে উপস্থিত কোনো বিষয়কে নিশ্চিত করতে, সীমিত করতে বা সূক্ষ্ম করতে পাঠকে সাহায্য করে।",
+          "supportedCharts": "{count}টি সমর্থিত কুণ্ডলী",
+          "exploratoryTime": "অনুসন্ধানমূলক জন্মসময়",
+          "exactTime": "সঠিক জন্মসময় নথিভুক্ত",
+          "timeWindow": "{accuracy} সময়সীমা"
+        },
+        "reliability": {
+          "label": "জন্মসময়ের নির্ভরযোগ্যতা",
+          "goodTitle": "সঠিক জন্মসময় নথিভুক্ত",
+          "goodBody": "অ্যাটলাস প্রতিটি সমর্থিত বর্গ দেখাতে পারে। D30 ও D60-এর বিভাজন অত্যন্ত সূক্ষ্ম হওয়ায় সেগুলির সীমা যাচাই করা এখনও প্রয়োজন।",
+          "cautionTitle": "উচ্চতর বিভাগগুলিকে অনুসন্ধানমূলক স্তর হিসেবে ব্যবহার করুন",
+          "cautionBody": "নথিভুক্ত সময়টি আনুমানিক বা বিকল্প মান। গ্রহের রাশি-উপবিভাগ দেখানো হয়েছে, তবে জন্মসময় সংশোধিত না হওয়া পর্যন্ত উচ্চতর বর্গে লগ্ন ও ভাব-ভিত্তিক সিদ্ধান্তকে প্রাধান্য দেওয়া উচিত নয়।"
+        },
+        "sensitivity": {
+          "foundation": "ভিত্তি স্তর",
+          "exactTime": "সঠিক সময় বাঞ্ছনীয়",
+          "rectifiedTime": "সংশোধিত সময় বাঞ্ছনীয়"
+        },
+        "important": {
+          "kicker": "দশটি প্রধান স্তর",
+          "heading": "যে কুণ্ডলীগুলি স্পষ্ট প্রশ্নের উত্তর দেয়, সেগুলি দিয়ে শুরু করুন",
+          "lead": "এই দশটি বিস্তৃত নির্দেশনা পায় কারণ ক্লায়েন্ট-কেন্দ্রিক পাঠে এগুলিই সবচেয়ে কাজের প্রেক্ষাপট যোগ করে। এগুলি পরস্পর প্রতিযোগী দশটি জন্মকুণ্ডলী নয়।",
+          "previewLabel": "অ্যাটলাসে {label} {name} পূর্বরূপ দেখুন",
+          "openDetails": "{label}-এর সম্পূর্ণ বিবরণ খুলুন",
+          "showMore": "আরও বিবরণ দেখুন"
+        },
+        "complete": {
+          "kicker": "সম্পূর্ণ সমর্থিত অ্যাটলাস",
+          "heading": "সমস্ত গণিত বর্গ",
+          "lead": "ক্লায়েন্টের গ্রহাবস্থান দেখতে যেকোনো কুণ্ডলী নির্বাচন করুন। দশটি প্রধান কুণ্ডলীর জন্য নিচে অতিরিক্ত ব্যাখ্যামূলক নির্দেশনা রয়েছে।",
+          "tablistLabel": "বিভাগীয় কুণ্ডলী",
+          "keyBadge": "প্রধান"
+        },
+        "detail": {
+          "fallbackName": "বিভাগীয় কুণ্ডলী",
+          "traditionNote": "পরাশরের ষোলটি বর্গের বাইরে — এটিকে পরিপূরক স্তর হিসেবে পড়ুন, শাস্ত্রীয় প্রমাণ হিসেবে নয়।",
+          "readWith": "এর সঙ্গে মিলিয়ে পড়ুন",
+          "clientQuestion": "ক্লায়েন্টের প্রশ্ন",
+          "reliability": "নির্ভরযোগ্যতা",
+          "secondaryNote": "এটি সম্পূর্ণ অ্যাটলাসের একটি সহায়ক কুণ্ডলী। এটি প্রেক্ষাপট যোগ করতে পারে, তবে D1 এবং কোনো প্রাসঙ্গিক প্রধান বর্গ একই সিদ্ধান্ত সমর্থন করলেই রিপোর্টে এটিকে প্রাধান্য দেওয়া উচিত।"
+        },
+        "snapshot": {
+          "divisionalAscendant": "বিভাগীয় লগ্ন",
+          "sun": "সূর্য",
+          "moon": "চন্দ্র",
+          "repeats": "D1 রাশির পুনরাবৃত্তি"
+        },
+        "positions": {
+          "kicker": "আপনার গ্রহাবস্থান",
+          "heading": "{label} অবস্থান মানচিত্র",
+          "count": "{count}টি বিন্দু",
+          "tableLabel": "{label} গ্রহাবস্থান",
+          "point": "বিন্দু",
+          "d1": "D1",
+          "repeats": "পুনরাবৃত্তি",
+          "note": "“পুনরাবৃত্তি” মানে বিন্দুটি D1-এর একই রাশিতেই থেকে যায়। এটি সঙ্গতির সংকেত, স্বয়ংক্রিয়ভাবে শুভ বা অশুভ নয়।"
+        },
+        "footer": "বিভাগীয় কুণ্ডলী কেবল তখনই নির্দিষ্টতা বাড়ায়, যখন তা জন্মকুণ্ডলীর প্রতিশ্রুতি নিশ্চিত করে, নির্ভরযোগ্য জন্ম তথ্য ব্যবহার করে এবং স্বতন্ত্র বল ও সময়-নির্ধারক উপাদানের সঙ্গে মেলে।"
+      },
+      "panel": {
+        "kicker": "বর্গ কুণ্ডলী",
+        "heading": "বিভাগীয় কুণ্ডলী",
+        "intro": "D1 হল জন্মকুণ্ডলীর ভিত্তি; বাকি কুণ্ডলীগুলি প্রতিটি রাশিকে উপবিভাজন করে জীবনের নির্দিষ্ট বিষয়কে বড় করে দেখায়। সেই বিভাগে প্রতিটি গ্রহ কোথায় পড়ে তা দেখতে নিচে একটি কুণ্ডলী নির্বাচন করুন।",
+        "selectorLabel": "বিভাগীয় কুণ্ডলী নির্বাচক",
+        "tableLabel": "{label} গ্রহের অবস্থান",
+        "planet": "গ্রহ",
+        "rashiSign": "রাশি চিহ্ন",
+        "vargaSign": "{label} রাশি",
+        "same": "একই",
+        "hint": "যে গ্রহগুলি তাদের রাশি-অবস্থানের একই রাশিতে থাকে, সেগুলি চিহ্নিত করা হয়েছে। এই পুনরাবৃত্তি সংশ্লিষ্ট জীবনক্ষেত্রে সেই গ্রহের প্রকাশকে জোরদার করে। D5, D6, D8 ও D11 বিস্তৃত পারম্পরিক মানচিত্র ব্যবহার করে; এগুলি শাস্ত্রীয় ষোলটি পরাশরী বর্গের বাইরে।",
+        "themes": {
+          "d1": "সমগ্র জীবন, পরিচয় এবং জন্মকুণ্ডলীর ভিত্তি",
+          "d2": "সম্পদ ও আর্থিক সামর্থ্য",
+          "d3": "ভাইবোন, সাহস ও উদ্যোগ",
+          "d4": "সম্পত্তি, ভাগ্য ও স্থাবর সম্পদ",
+          "d5": "অধিকার, প্রভাব ও স্বীকৃতি",
+          "d6": "স্বাস্থ্যের ধরন, দৈনন্দিন রুটিন ও প্রতিদিনের বাধা",
+          "d7": "সন্তান ও বংশধর",
+          "d8": "আকস্মিক পরিবর্তন, রূপান্তর ও দুর্বলতা",
+          "d9": "বিবাহ, ধর্ম ও অন্তঃপ্রকৃতি",
+          "d10": "কর্মজীবন, পেশা ও সামাজিক জীবন",
+          "d11": "লাভ, সংযোগ ও আকাঙ্ক্ষার পূর্ণতা",
+          "d12": "পিতামাতা ও পূর্বপুরুষের ধারা",
+          "d16": "যানবাহন, আরাম ও সুখ",
+          "d20": "আধ্যাত্মিক অগ্রগতি ও উপাসনা",
+          "d24": "শিক্ষা, অধ্যয়ন ও জ্ঞান",
+          "d27": "শক্তি ও দুর্বলতা",
+          "d30": "দুর্ভাগ্য, রোগ ও প্রতিকূলতা",
+          "d40": "শুভ ও অশুভ ফল",
+          "d45": "সাধারণ সংকেত ও চরিত্র",
+          "d60": "পূর্বজন্মের কর্ম ও সাধারণ বিষয়"
+        }
+      },
+      "detail": {
+        "errors": {
+          "missingKicker": "{label} · অনুপস্থিত তথ্য",
+          "missingTitle": "সম্পূর্ণ জন্ম বিবরণ প্রয়োজন।",
+          "missingBody": "{label} {name} বিশ্লেষণ খোলার আগে ফর্মে ফিরে গিয়ে সম্পূর্ণ জন্ম বিবরণ দিন।",
+          "backToIntake": "ফর্মে ফিরে যান",
+          "returnToAtlas": "বর্গ অ্যাটলাসে ফিরুন",
+          "unavailableKicker": "{label} · গণনা অনুপলব্ধ",
+          "unavailableTitle": "{name}-এর বিবরণ প্রস্তুত করা যায়নি।",
+          "unavailableBody": "কুণ্ডলী গণনায় {label} পাওয়া যায়নি।",
+          "backToReading": "আপনার পাঠে ফিরে যান"
+        },
+        "boundary": {
+          "unavailable": "অনুপলব্ধ",
+          "atBoundary": "সীমানায়"
+        },
+        "dates": {
+          "unavailable": "তারিখ অনুপলব্ধ"
+        },
+        "birthTime": {
+          "exploratory": "এই জন্মসময়ে অনুসন্ধানমূলক",
+          "rectificationAdvised": "সংশোধন এখনও বাঞ্ছনীয়",
+          "foundation": "ভিত্তি স্তর",
+          "exact": "সঠিক সময় নথিভুক্ত"
+        },
+        "breadcrumb": {
+          "label": "পথনির্দেশ",
+          "reading": "পাঠ",
+          "atlas": "বিভাগীয় কুণ্ডলী"
+        },
+        "backToAtlas": "বর্গ অ্যাটলাসে ফিরে যান",
+        "hero": {
+          "kicker": "প্রধান বর্গ · নিবেদিত বিবরণ",
+          "badgesLabel": "কুণ্ডলীর প্রেক্ষাপট",
+          "wholeSignHouses": "পূর্ণ-রাশি বর্গ ভাব"
+        },
+        "purpose": {
+          "gridLabel": "{label} পাঠের নির্দেশনা",
+          "purpose": "উদ্দেশ্য",
+          "clientQuestion": "ক্লায়েন্টের প্রশ্ন",
+          "clientQuestionHeading": "এই স্তর কী পরীক্ষা করতে সাহায্য করে",
+          "readWith": "এর সঙ্গে মিলিয়ে পড়ুন",
+          "readWithHeading": "জন্মকুণ্ডলীর ভিত্তিই প্রধান থাকে"
+        },
+        "reliability": {
+          "kicker": "নির্ভরযোগ্যতা",
+          "note": "নিচের সীমা-দূরত্ব উৎস-রাশির উপবিভাগের কতটা কাছে তা বোঝায়; এটি কোনো সম্ভাবনা বা শুভ/অশুভ স্কোর নয়।"
+        },
+        "glance": {
+          "kicker": "এক নজরে",
+          "heading": "ব্যাখ্যার আগে কুণ্ডলীর তথ্য",
+          "divisionalAscendant": "বিভাগীয় লগ্ন",
+          "ascendantLord": "লগ্নেশ",
+          "unavailable": "অনুপলব্ধ",
+          "recurrences": "D1 রাশির পুনরাবৃত্তি",
+          "none": "কোনোটি নয়",
+          "nearestBoundary": "নিকটতম উপবিভাগ সীমা",
+          "note": "D1 রাশির পুনরাবৃত্তি কেবল সঙ্গতির একটি সূচক। এটি স্বয়ংক্রিয়ভাবে শুভ, বলবান বা ভবিষ্যৎসূচক নয়।"
+        },
+        "map": {
+          "kicker": "পূর্ণ-রাশি মানচিত্র",
+          "heading": "{label} দক্ষিণ-ভারতীয় ধাঁচের কুণ্ডলী",
+          "methodTag": "রাশি স্থির থাকে · ভাব ঘোরে",
+          "gridLabel": "{label} পূর্ণ-রাশি ভাব মানচিত্র",
+          "houseLabel": "{sign}, ভাব {house}, অধিপতি {ruler}",
+          "lord": "অধিপতি {ruler}",
+          "noPoints": "কোনো বিন্দু নেই",
+          "centerCaption": "পূর্ণ-রাশি ভাব",
+          "invalidAscendant": "বৈধ বিভাগীয় লগ্ন পাওয়া যায়নি, তাই ভাব নির্ধারণ দেখানো হচ্ছে না।",
+          "note": "এই মানচিত্র বিভাগীয় লগ্ন থেকে পূর্ণ-রাশি ভাব নির্ণয় করে। এটি সঠিক দৃষ্টি অনুমান করে না এবং জন্মকুণ্ডলীর ভাব ব্যবস্থার বিকল্প নয়।"
+        },
+        "placements": {
+          "kicker": "প্রধান গ্রহাবস্থান",
+          "heading": "এই কুণ্ডলীর কেন্দ্রবিন্দুর সঙ্গে যুক্ত বিন্দুসমূহ",
+          "focusHouses": "কেন্দ্রীয় ভাব {houses}",
+          "focusPlanet": "কেন্দ্রীয় গ্রহ",
+          "focusHouse": "কেন্দ্রীয় ভাব",
+          "ascendantLord": "লগ্নেশ",
+          "mahadashaLord": "মহাদশার অধিপতি",
+          "antardashaLord": "অন্তর্দশার অধিপতি",
+          "signLord": "রাশ্যধিপতি",
+          "dignity": "মর্যাদা",
+          "boundary": "সীমা",
+          "d1Repeat": "D1 পুনরাবৃত্তি",
+          "notAssigned": "নির্ধারিত নয়",
+          "yes": "হ্যাঁ",
+          "no": "না",
+          "peers": "একই রাশিতে সঙ্গী: {peers}।",
+          "strength": "প্রয়োজনীয় ষড়বল ন্যূনতমের {ratio}×",
+          "strengthNote": "স্বতন্ত্র জন্মকালীন ফলপ্রদানের বল; এটি {label}-এর মর্যাদা স্কোর নয়।"
+        },
+        "vargaSign": "{label} রাশি",
+        "table": {
+          "kicker": "সম্পূর্ণ মানচিত্র",
+          "heading": "প্রতিটি গণিত বিন্দু",
+          "count": "{count}টি অবস্থান",
+          "caption": "D1-এর সঙ্গে তুলনা করে {label} অবস্থান, সেই সঙ্গে পূর্ণ-রাশি ভাব, রাশ্যধিপতি, মর্যাদা, পুনরাবৃত্তি ও উৎস-উপবিভাগের সীমা-দূরত্ব।",
+          "point": "বিন্দু",
+          "d1Sign": "D1 রাশি",
+          "house": "ভাব",
+          "signLord": "রাশ্যধিপতি",
+          "dignity": "মর্যাদা",
+          "d1Repeat": "D1 পুনরাবৃত্তি",
+          "boundaryDistance": "সীমা-দূরত্ব",
+          "repeatYes": "হ্যাঁ · সঙ্গতি",
+          "repeatNo": "না",
+          "boundaryTitle": "নিকটতম উৎস-রাশি সীমা {degree}°-এ। খণ্ড {segment}।",
+          "note": "শাস্ত্রীয় মর্যাদা কেবল সাতটি শাস্ত্রীয় গ্রহের জন্য দেখানো হয়। এখানে লগ্ন, রাহু বা কেতুর কোনো মর্যাদা নির্ধারণ করা হয় না। সীমা-দূরত্ব প্রতিটি বিন্দুর জন্মকালীন অংশ থেকে নিকটতম উপবিভাগের প্রান্ত পর্যন্ত মাপা হয়।"
+        },
+        "timing": {
+          "kicker": "বর্তমান সময়ের প্রেক্ষাপট",
+          "heading": "{label}-এর মধ্যে দশার অধিপতিগণ",
+          "mahadasha": "বর্তমান মহাদশা",
+          "antardasha": "বর্তমান অন্তর্দশা",
+          "wholeSignHouse": "পূর্ণ-রাশি ভাব",
+          "boundary": "সীমা",
+          "placementUnavailable": "এই কুণ্ডলীতে অবস্থান অনুপলব্ধ।",
+          "dashaUnavailable": "বর্তমান দশার তথ্য পাওয়া যায়নি।",
+          "note": "সক্রিয় সময়কাল সময়-প্রাসঙ্গিকতা বাড়ায়; এটি কোনো অবস্থানকে স্বয়ংক্রিয়ভাবে শুভ করে না। এটি D1, পরিমাপকৃত বল ও বাস্তব অভিজ্ঞতার সঙ্গে মিলিয়ে পড়ুন।"
+        },
+        "method": {
+          "kicker": "পদ্ধতি ও উৎস",
+          "heading": "এই পৃষ্ঠাটি কীভাবে গণনা করা হয়েছে",
+          "vargaMapping": "বর্গ মানচিত্রণ",
+          "engine": "ইঞ্জিন",
+          "ephemerisProvider": "ইফিমেরিস প্রদানকারী",
+          "ayanamsha": "অয়নাংশ",
+          "natalHouseMethod": "জন্মকুণ্ডলীর ভাব পদ্ধতি",
+          "vargaHouseDisplay": "বর্গ ভাব প্রদর্শন",
+          "vargaHouseDisplayValue": "{label} লগ্ন থেকে নির্ণীত পূর্ণ-রাশি ভাব",
+          "birthTimeStatus": "জন্মসময়ের অবস্থা",
+          "cautionTitle": "ব্যাখ্যার সীমা",
+          "cautionBody": "এই পৃষ্ঠা গণিত রাশি, পূর্ণ-রাশি ভাব, অধিপতি, শাস্ত্রীয় মর্যাদা ও সময়-অধিপতির অবস্থান জানায়। এটি সঠিক বিভাগীয় দৃষ্টি অনুমান করে না, রাশির পুনরাবৃত্তিকে স্বয়ংক্রিয়ভাবে শুভ ধরে না, এবং {label}-কে D1-এর উপরে স্থান দেয় না।"
+        },
+        "pager": {
+          "label": "সংলগ্ন প্রধান বিভাগীয় কুণ্ডলী",
+          "previous": "পূর্ববর্তী প্রধান বর্গ",
+          "next": "পরবর্তী প্রধান বর্গ"
+        },
+        "footer": {
+          "note": "বিভাগীয় কুণ্ডলী জন্মকুণ্ডলীর প্রতিশ্রুতিকে সূক্ষ্ম করে; তার বিকল্প হয় না। দৃঢ়তর সিদ্ধান্তের জন্য নির্ভরযোগ্য জন্ম তথ্য এবং স্বতন্ত্র প্রমাণের সঙ্গে সঙ্গতি প্রয়োজন।",
+          "returnLink": "আপনার সম্পূর্ণ পাঠে ফিরুন"
+        }
+      }
+    }
+  },
+  "hi": {
+    "divisional": {
+      "atlas": {
+        "missing": {
+          "kicker": "अनुपलब्ध जानकारी",
+          "title": "कुंडली विवरण अपूर्ण हैं।",
+          "lead": "विभागीय कुंडली एटलस खोलने से पहले फॉर्म पर लौटें और पूर्ण जन्म विवरण दें।",
+          "back": "फॉर्म पर वापस जाएं"
+        },
+        "unavailable": {
+          "kicker": "वर्ग एटलस",
+          "title": "विभागीय कुंडलियाँ तैयार नहीं की जा सकीं।",
+          "fallback": "कोई विभागीय कुंडली डेटा प्राप्त नहीं हुआ।",
+          "back": "अपने पाठ पर वापस जाएं"
+        },
+        "backToReading": "अपने पाठ पर वापस जाएं",
+        "returnToReading": "अपने पाठ पर लौटें",
+        "hero": {
+          "kicker": "D1–D60 · वर्ग एटलस",
+          "heading": "{name} की विभागीय कुंडली परतें",
+          "lead": "D1 आधार है। प्रत्येक उच्च वर्ग जीवन के एक क्षेत्र को बड़ा करके दिखाता है, जिससे पाठ मुख्य कुंडली में पहले से मौजूद किसी विषय की पुष्टि, सीमा-निर्धारण या सूक्ष्म व्याख्या कर सकता है।",
+          "supportedCharts": "{count} समर्थित कुंडलियाँ",
+          "exploratoryTime": "अन्वेषणात्मक जन्म समय",
+          "exactTime": "सटीक जन्म समय दर्ज",
+          "timeWindow": "{accuracy} समय सीमा"
+        },
+        "reliability": {
+          "label": "जन्म समय की विश्वसनीयता",
+          "goodTitle": "सटीक जन्म समय दर्ज",
+          "goodBody": "एटलस प्रत्येक समर्थित वर्ग दिखा सकता है। D30 और D60 के विभाजन अत्यंत सूक्ष्म होने के कारण उनकी सीमाओं की जाँच अब भी आवश्यक है।",
+          "cautionTitle": "उच्च विभागों को अन्वेषणात्मक परतों के रूप में देखें",
+          "cautionBody": "दर्ज समय अनुमानित है या वैकल्पिक मान है। ग्रहों के राशि-उपविभाजन दिखाए गए हैं, परंतु जन्म समय के संशोधन तक उच्च वर्गों में लग्न और भाव आधारित निष्कर्षों को प्रमुखता नहीं देनी चाहिए।"
+        },
+        "sensitivity": {
+          "foundation": "आधार परत",
+          "exactTime": "सटीक समय वांछित",
+          "rectifiedTime": "संशोधित समय वांछित"
+        },
+        "important": {
+          "kicker": "दस प्रमुख परतें",
+          "heading": "उन कुंडलियों से शुरू करें जो स्पष्ट प्रश्न का उत्तर देती हैं",
+          "lead": "इन दस को अधिक विस्तृत मार्गदर्शन मिलता है क्योंकि ये क्लाइंट-केंद्रित पाठ में सबसे उपयोगी संदर्भ जोड़ती हैं। ये परस्पर प्रतिस्पर्धी दस जन्म कुंडलियाँ नहीं हैं।",
+          "previewLabel": "एटलस में {label} {name} का पूर्वावलोकन करें",
+          "openDetails": "{label} का पूरा विवरण खोलें",
+          "showMore": "अधिक विवरण दिखाएं"
+        },
+        "complete": {
+          "kicker": "संपूर्ण समर्थित एटलस",
+          "heading": "सभी गणित वर्ग",
+          "lead": "क्लाइंट की ग्रह स्थितियाँ देखने के लिए कोई भी कुंडली चुनें। दस प्रमुख कुंडलियों के लिए नीचे अतिरिक्त व्याख्या मार्गदर्शन दिया गया है।",
+          "tablistLabel": "विभागीय कुंडलियाँ",
+          "keyBadge": "प्रमुख"
+        },
+        "detail": {
+          "fallbackName": "विभागीय कुंडली",
+          "traditionNote": "पराशर के सोलह वर्गों से बाहर — इसे पूरक परत के रूप में पढ़ें, शास्त्रीय प्रमाण के रूप में नहीं।",
+          "readWith": "इसके साथ मिलाकर पढ़ें",
+          "clientQuestion": "क्लाइंट का प्रश्न",
+          "reliability": "विश्वसनीयता",
+          "secondaryNote": "यह संपूर्ण एटलस की एक सहायक कुंडली है। यह संदर्भ जोड़ सकती है, परंतु रिपोर्ट में इसे प्रमुखता तभी देनी चाहिए जब D1 और कोई प्रासंगिक प्रमुख वर्ग पहले से उसी निष्कर्ष का समर्थन करते हों।"
+        },
+        "snapshot": {
+          "divisionalAscendant": "विभागीय लग्न",
+          "sun": "सूर्य",
+          "moon": "चंद्र",
+          "repeats": "D1 राशि पुनरावृत्ति"
+        },
+        "positions": {
+          "kicker": "आपकी ग्रह स्थितियाँ",
+          "heading": "{label} स्थिति नक्शा",
+          "count": "{count} बिंदु",
+          "tableLabel": "{label} ग्रह स्थितियाँ",
+          "point": "बिंदु",
+          "d1": "D1",
+          "repeats": "पुनरावृत्ति",
+          "note": "“पुनरावृत्ति” का अर्थ है कि बिंदु D1 की उसी राशि में बना रहता है। यह संगति का संकेत है, स्वतः शुभ या अशुभ नहीं।"
+        },
+        "footer": "विभागीय कुंडलियाँ विशिष्टता तभी बढ़ाती हैं जब वे जन्म कुंडली के वचन की पुष्टि करें, विश्वसनीय जन्म डेटा का उपयोग करें और स्वतंत्र बल तथा समय-निर्धारक कारकों से सहमत हों।"
+      },
+      "panel": {
+        "kicker": "वर्ग कुंडलियाँ",
+        "heading": "विभागीय कुंडलियाँ",
+        "intro": "D1 जन्म कुंडली का आधार है; शेष कुंडलियाँ प्रत्येक राशि का उपविभाजन करके जीवन के विशिष्ट विषयों को बड़ा करके दिखाती हैं। उस विभाजन में प्रत्येक ग्रह कहाँ पड़ता है यह देखने के लिए नीचे एक कुंडली चुनें।",
+        "selectorLabel": "विभागीय कुंडली चयनकर्ता",
+        "tableLabel": "{label} ग्रह स्थितियाँ",
+        "planet": "ग्रह",
+        "rashiSign": "राशि चिह्न",
+        "vargaSign": "{label} राशि",
+        "same": "समान",
+        "hint": "जो ग्रह अपनी राशि स्थिति की उसी राशि में होते हैं, उन्हें चिह्नित किया गया है। यह पुनरावृत्ति संबंधित जीवन क्षेत्र में उस ग्रह की अभिव्यक्ति को सुदृढ़ करती है। D5, D6, D8 और D11 विस्तारित पारंपरिक मानचित्रण का उपयोग करते हैं; ये शास्त्रीय सोलह पराशरी वर्गों से बाहर हैं।",
+        "themes": {
+          "d1": "समग्र जीवन, पहचान और जन्म कुंडली का आधार",
+          "d2": "धन और आर्थिक सामर्थ्य",
+          "d3": "भाई-बहन, साहस और पहल",
+          "d4": "संपत्ति, भाग्य और अचल संपदा",
+          "d5": "अधिकार, प्रभाव और मान्यता",
+          "d6": "स्वास्थ्य के स्वरूप, दिनचर्या और रोज़मर्रा की बाधाएँ",
+          "d7": "संतान और वंश",
+          "d8": "आकस्मिक परिवर्तन, रूपांतरण और दुर्बलताएँ",
+          "d9": "विवाह, धर्म और अंतःप्रकृति",
+          "d10": "करियर, व्यवसाय और सार्वजनिक जीवन",
+          "d11": "लाभ, संपर्क और महत्वाकांक्षाओं की पूर्ति",
+          "d12": "माता-पिता और पितृ वंश",
+          "d16": "वाहन, सुख-सुविधाएँ और प्रसन्नता",
+          "d20": "आध्यात्मिक प्रगति और उपासना",
+          "d24": "शिक्षा, अध्ययन और ज्ञान",
+          "d27": "शक्तियाँ और दुर्बलताएँ",
+          "d30": "दुर्भाग्य, रोग और चुनौतियाँ",
+          "d40": "शुभ और अशुभ प्रभाव",
+          "d45": "सामान्य संकेत और चरित्र",
+          "d60": "पूर्वजन्म का कर्म और सामान्य विषय"
+        }
+      },
+      "detail": {
+        "errors": {
+          "missingKicker": "{label} · अनुपलब्ध जानकारी",
+          "missingTitle": "पूर्ण जन्म विवरण आवश्यक हैं।",
+          "missingBody": "{label} {name} विश्लेषण खोलने से पहले फॉर्म पर लौटें और पूर्ण जन्म विवरण दें।",
+          "backToIntake": "फॉर्म पर वापस जाएं",
+          "returnToAtlas": "वर्ग एटलस पर लौटें",
+          "unavailableKicker": "{label} · गणना अनुपलब्ध",
+          "unavailableTitle": "{name} का विवरण तैयार नहीं किया जा सका।",
+          "unavailableBody": "कुंडली गणना में {label} प्राप्त नहीं हुआ।",
+          "backToReading": "अपने पाठ पर वापस जाएं"
+        },
+        "boundary": {
+          "unavailable": "अनुपलब्ध",
+          "atBoundary": "सीमा पर"
+        },
+        "dates": {
+          "unavailable": "तिथियाँ अनुपलब्ध"
+        },
+        "birthTime": {
+          "exploratory": "इस जन्म समय के साथ अन्वेषणात्मक",
+          "rectificationAdvised": "संशोधन अब भी वांछित",
+          "foundation": "आधार परत",
+          "exact": "सटीक समय दर्ज"
+        },
+        "breadcrumb": {
+          "label": "पथ सूची",
+          "reading": "पाठ",
+          "atlas": "विभागीय कुंडलियाँ"
+        },
+        "backToAtlas": "वर्ग एटलस पर वापस जाएं",
+        "hero": {
+          "kicker": "प्रमुख वर्ग · समर्पित विवरण",
+          "badgesLabel": "कुंडली संदर्भ",
+          "wholeSignHouses": "पूर्ण-राशि वर्ग भाव"
+        },
+        "purpose": {
+          "gridLabel": "{label} पाठ मार्गदर्शन",
+          "purpose": "उद्देश्य",
+          "clientQuestion": "क्लाइंट का प्रश्न",
+          "clientQuestionHeading": "यह परत क्या जाँचने में सहायक है",
+          "readWith": "इसके साथ मिलाकर पढ़ें",
+          "readWithHeading": "जन्म कुंडली का आधार ही प्रमुख रहता है"
+        },
+        "reliability": {
+          "kicker": "विश्वसनीयता",
+          "note": "नीचे दी गई सीमा-दूरी स्रोत-राशि के उपविभाजन से निकटता बताती है; यह कोई संभावना या शुभ/अशुभ अंक नहीं है।"
+        },
+        "glance": {
+          "kicker": "एक नज़र में",
+          "heading": "व्याख्या से पहले कुंडली के तथ्य",
+          "divisionalAscendant": "विभागीय लग्न",
+          "ascendantLord": "लग्नेश",
+          "unavailable": "अनुपलब्ध",
+          "recurrences": "D1 राशि पुनरावृत्तियाँ",
+          "none": "कोई नहीं",
+          "nearestBoundary": "निकटतम उपविभाजन सीमा",
+          "note": "D1 राशि की पुनरावृत्ति केवल संगति का सूचक है। यह स्वतः शुभ, बलवान या भविष्यसूचक नहीं है।"
+        },
+        "map": {
+          "kicker": "पूर्ण-राशि नक्शा",
+          "heading": "{label} दक्षिण-भारतीय शैली की कुंडली",
+          "methodTag": "राशियाँ स्थिर रहती हैं · भाव घूमते हैं",
+          "gridLabel": "{label} पूर्ण-राशि भाव नक्शा",
+          "houseLabel": "{sign}, भाव {house}, स्वामी {ruler}",
+          "lord": "स्वामी {ruler}",
+          "noPoints": "कोई बिंदु नहीं",
+          "centerCaption": "पूर्ण-राशि भाव",
+          "invalidAscendant": "वैध विभागीय लग्न प्राप्त नहीं हुआ, इसलिए भाव निर्धारण नहीं दिखाया जा रहा है।",
+          "note": "यह नक्शा विभागीय लग्न से पूर्ण-राशि भाव निकालता है। यह सटीक दृष्टियों का अनुमान नहीं लगाता और जन्म कुंडली की भाव प्रणाली का विकल्प नहीं है।"
+        },
+        "placements": {
+          "kicker": "प्रमुख ग्रह स्थितियाँ",
+          "heading": "इस कुंडली के केंद्रबिंदु से जुड़े बिंदु",
+          "focusHouses": "केंद्रीय भाव {houses}",
+          "focusPlanet": "केंद्रीय ग्रह",
+          "focusHouse": "केंद्रीय भाव",
+          "ascendantLord": "लग्नेश",
+          "mahadashaLord": "महादशा स्वामी",
+          "antardashaLord": "अंतर्दशा स्वामी",
+          "signLord": "राशि स्वामी",
+          "dignity": "गरिमा",
+          "boundary": "सीमा",
+          "d1Repeat": "D1 पुनरावृत्ति",
+          "notAssigned": "निर्धारित नहीं",
+          "yes": "हाँ",
+          "no": "नहीं",
+          "peers": "समान राशि में साथी: {peers}।",
+          "strength": "आवश्यक षड्बल न्यूनतम का {ratio}×",
+          "strengthNote": "स्वतंत्र जन्मकालीन फलदायी बल; यह {label} की गरिमा का अंक नहीं है।"
+        },
+        "vargaSign": "{label} राशि",
+        "table": {
+          "kicker": "संपूर्ण नक्शा",
+          "heading": "प्रत्येक गणित बिंदु",
+          "count": "{count} स्थितियाँ",
+          "caption": "D1 से तुलना करते हुए {label} स्थितियाँ, साथ में पूर्ण-राशि भाव, राशि स्वामी, गरिमा, पुनरावृत्ति और स्रोत-उपविभाजन की सीमा-दूरी।",
+          "point": "बिंदु",
+          "d1Sign": "D1 राशि",
+          "house": "भाव",
+          "signLord": "राशि स्वामी",
+          "dignity": "गरिमा",
+          "d1Repeat": "D1 पुनरावृत्ति",
+          "boundaryDistance": "सीमा-दूरी",
+          "repeatYes": "हाँ · संगति",
+          "repeatNo": "नहीं",
+          "boundaryTitle": "निकटतम स्रोत-राशि सीमा {degree}° पर। खंड {segment}।",
+          "note": "शास्त्रीय गरिमा केवल सात शास्त्रीय ग्रहों के लिए दिखाई जाती है। यहाँ लग्न, राहु या केतु को कोई गरिमा नहीं दी जाती। सीमा-दूरी प्रत्येक बिंदु के जन्मकालीन अंश से निकटतम उपविभाजन किनारे तक मापी जाती है।"
+        },
+        "timing": {
+          "kicker": "वर्तमान समय संदर्भ",
+          "heading": "{label} के भीतर दशा स्वामी",
+          "mahadasha": "वर्तमान महादशा",
+          "antardasha": "वर्तमान अंतर्दशा",
+          "wholeSignHouse": "पूर्ण-राशि भाव",
+          "boundary": "सीमा",
+          "placementUnavailable": "इस कुंडली में स्थिति अनुपलब्ध।",
+          "dashaUnavailable": "वर्तमान दशा डेटा प्राप्त नहीं हुआ।",
+          "note": "सक्रिय अवधि समय-प्रासंगिकता बढ़ाती है; यह किसी स्थिति को स्वतः शुभ नहीं बनाती। इसे D1, मापे गए बल और वास्तविक अनुभव के साथ मिलाकर पढ़ें।"
+        },
+        "method": {
+          "kicker": "विधि और स्रोत",
+          "heading": "यह पृष्ठ कैसे गणित किया गया",
+          "vargaMapping": "वर्ग मानचित्रण",
+          "engine": "इंजन",
+          "ephemerisProvider": "इफेमेरिस प्रदाता",
+          "ayanamsha": "अयनांश",
+          "natalHouseMethod": "जन्म कुंडली भाव विधि",
+          "vargaHouseDisplay": "वर्ग भाव प्रदर्शन",
+          "vargaHouseDisplayValue": "{label} लग्न से निकाले गए पूर्ण-राशि भाव",
+          "birthTimeStatus": "जन्म समय की स्थिति",
+          "cautionTitle": "व्याख्या की सीमा",
+          "cautionBody": "यह पृष्ठ गणित राशियाँ, पूर्ण-राशि भाव, स्वामी, शास्त्रीय गरिमा और समय-स्वामी की स्थिति बताता है। यह सटीक विभागीय दृष्टियों का अनुमान नहीं लगाता, राशि पुनरावृत्ति को स्वतः शुभ नहीं मानता, और {label} को D1 पर वरीयता नहीं देता।"
+        },
+        "pager": {
+          "label": "निकटवर्ती प्रमुख विभागीय कुंडलियाँ",
+          "previous": "पिछला प्रमुख वर्ग",
+          "next": "अगला प्रमुख वर्ग"
+        },
+        "footer": {
+          "note": "विभागीय कुंडलियाँ जन्म कुंडली के वचन को सूक्ष्म बनाती हैं; उसका स्थान नहीं लेतीं। अधिक दृढ़ निष्कर्षों के लिए विश्वसनीय जन्म डेटा और स्वतंत्र प्रमाणों से सहमति आवश्यक है।",
+          "returnLink": "अपने संपूर्ण पाठ पर लौटें"
+        }
+      }
+    }
+  },
+  "it": {
+    "divisional": {
+      "atlas": {
+        "missing": {
+          "kicker": "Dati Mancanti",
+          "title": "I dettagli della carta sono incompleti.",
+          "lead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire l'atlante delle carte divisionali.",
+          "back": "Torna al Modulo"
+        },
+        "unavailable": {
+          "kicker": "Atlante dei Varga",
+          "title": "Non è stato possibile preparare le carte divisionali.",
+          "fallback": "Nessun dato di carta divisionale è stato restituito.",
+          "back": "Torna alla tua lettura"
+        },
+        "backToReading": "Torna alla tua lettura",
+        "returnToReading": "Ritorna alla tua lettura",
+        "hero": {
+          "kicker": "D1–D60 · Atlante dei varga",
+          "heading": "Gli strati divisionali della carta di {name}",
+          "lead": "La D1 è il fondamento. Ogni varga superiore ingrandisce un'area della vita, aiutando la lettura a confermare, qualificare o circoscrivere un tema già presente nella carta principale.",
+          "supportedCharts": "{count} carte supportate",
+          "exploratoryTime": "Ora di nascita esplorativa",
+          "exactTime": "Ora di nascita esatta registrata",
+          "timeWindow": "Finestra oraria {accuracy}"
+        },
+        "reliability": {
+          "label": "Affidabilità dell'ora di nascita",
+          "goodTitle": "Ora di nascita esatta registrata",
+          "goodBody": "L'atlante può mostrare ogni varga supportato. La D30 e la D60 meritano comunque verifiche dei confini perché le loro divisioni sono eccezionalmente fini.",
+          "cautionTitle": "Usa le divisioni superiori come strati esplorativi",
+          "cautionBody": "L'ora registrata è approssimativa o un valore di riserva. Le suddivisioni di segno dei pianeti sono mostrate, ma le conclusioni basate sull'ascendente e sulle case nei varga superiori non dovrebbero essere promosse fino alla rettifica dell'ora di nascita."
+        },
+        "sensitivity": {
+          "foundation": "Strato fondante",
+          "exactTime": "Consigliata ora esatta",
+          "rectifiedTime": "Consigliata ora rettificata"
+        },
+        "important": {
+          "kicker": "I dieci strati chiave",
+          "heading": "Inizia dalle carte che rispondono a una domanda chiara",
+          "lead": "Questi dieci ricevono una guida più ampia perché aggiungono il contesto più utile a una lettura centrata sul cliente. Non sono dieci temi natali in competizione.",
+          "previewLabel": "Anteprima di {label} {name} nell'atlante",
+          "openDetails": "Apri tutti i dettagli di {label}",
+          "showMore": "Mostra altri dettagli"
+        },
+        "complete": {
+          "kicker": "Atlante completo supportato",
+          "heading": "Tutti i varga calcolati",
+          "lead": "Seleziona una carta qualsiasi per esaminare le posizioni del cliente. Le dieci carte chiave includono ulteriori indicazioni interpretative più sotto.",
+          "tablistLabel": "Carte divisionali",
+          "keyBadge": "Chiave"
+        },
+        "detail": {
+          "fallbackName": "Carta divisionale",
+          "traditionNote": "Fuori dai sedici varga di Parashara — leggila come uno strato complementare, non come un'autorità classica.",
+          "readWith": "Leggila con",
+          "clientQuestion": "Domanda del cliente",
+          "reliability": "Affidabilità",
+          "secondaryNote": "Questa è una carta di supporto all'interno dell'atlante completo. Può aggiungere contesto, ma il report dovrebbe valorizzarla solo quando la D1 e un varga chiave pertinente sostengono già la stessa conclusione."
+        },
+        "snapshot": {
+          "divisionalAscendant": "Ascendente divisionale",
+          "sun": "Sole",
+          "moon": "Luna",
+          "repeats": "Ripetizioni del segno D1"
+        },
+        "positions": {
+          "kicker": "Le tue posizioni",
+          "heading": "Mappa delle posizioni {label}",
+          "count": "{count} punti",
+          "tableLabel": "Posizioni {label}",
+          "point": "Punto",
+          "d1": "D1",
+          "repeats": "Si ripete",
+          "note": "“Si ripete” significa che il punto rimane nello stesso segno della D1. È un segnale di coerenza, non automaticamente positivo o negativo."
+        },
+        "footer": "Le carte divisionali aumentano la specificità solo quando confermano la promessa natale, usano dati di nascita affidabili e concordano con fattori indipendenti di forza e tempo."
+      },
+      "panel": {
+        "kicker": "Carte Varga",
+        "heading": "Carte Divisionali",
+        "intro": "La D1 è il fondamento natale; le altre carte ingrandiscono temi di vita specifici suddividendo ogni segno. Seleziona una carta qui sotto per vedere dove cade ogni pianeta in quella divisione.",
+        "selectorLabel": "Selettore di carta divisionale",
+        "tableLabel": "Posizioni planetarie {label}",
+        "planet": "Pianeta",
+        "rashiSign": "Segno Rashi",
+        "vargaSign": "Segno {label}",
+        "same": "Uguale",
+        "hint": "I pianeti che si trovano nello stesso segno della loro posizione rashi sono evidenziati. Questa ripetizione rafforza l'espressione di quel pianeta nell'area di vita corrispondente. D5, D6, D8 e D11 usano mappature tradizionali estese; restano fuori dai sedici varga parashari classici.",
+        "themes": {
+          "d1": "Vita nel complesso, identità e fondamento natale",
+          "d2": "Ricchezza e capacità finanziaria",
+          "d3": "Fratelli, coraggio e iniziativa",
+          "d4": "Proprietà, fortuna e beni immobili",
+          "d5": "Autorità, influenza e riconoscimento",
+          "d6": "Schemi di salute, routine e ostacoli quotidiani",
+          "d7": "Figli e discendenza",
+          "d8": "Cambiamento improvviso, trasformazione e vulnerabilità",
+          "d9": "Matrimonio, dharma e natura interiore",
+          "d10": "Carriera, professione e vita pubblica",
+          "d11": "Guadagni, reti e realizzazione delle ambizioni",
+          "d12": "Genitori e lignaggio ancestrale",
+          "d16": "Veicoli, comfort e felicità",
+          "d20": "Progresso spirituale e devozione",
+          "d24": "Istruzione, apprendimento e conoscenza",
+          "d27": "Punti di forza e di debolezza",
+          "d30": "Sventura, malattia e difficoltà",
+          "d40": "Effetti auspicali e inauspicali",
+          "d45": "Indicazioni generali e carattere",
+          "d60": "Karma delle vite passate e questioni generali"
+        }
+      },
+      "detail": {
+        "errors": {
+          "missingKicker": "{label} · Dati mancanti",
+          "missingTitle": "Sono richiesti i dati di nascita completi.",
+          "missingBody": "Torna al modulo e fornisci i dati di nascita completi prima di aprire l'analisi di {label} {name}.",
+          "backToIntake": "Torna al modulo",
+          "returnToAtlas": "Ritorna all'atlante dei varga",
+          "unavailableKicker": "{label} · Calcolo non disponibile",
+          "unavailableTitle": "Non è stato possibile preparare il dettaglio di {name}.",
+          "unavailableBody": "Il calcolo della carta non ha restituito {label}.",
+          "backToReading": "Torna alla tua lettura"
+        },
+        "boundary": {
+          "unavailable": "Non disponibile",
+          "atBoundary": "Al confine"
+        },
+        "dates": {
+          "unavailable": "Date non disponibili"
+        },
+        "birthTime": {
+          "exploratory": "Esplorativo con questa ora di nascita",
+          "rectificationAdvised": "Rettifica ancora consigliata",
+          "foundation": "Strato fondante",
+          "exact": "Ora esatta registrata"
+        },
+        "breadcrumb": {
+          "label": "Percorso di navigazione",
+          "reading": "Lettura",
+          "atlas": "Carte divisionali"
+        },
+        "backToAtlas": "Torna all'atlante dei varga",
+        "hero": {
+          "kicker": "Varga chiave · Dettaglio dedicato",
+          "badgesLabel": "Contesto della carta",
+          "wholeSignHouses": "Case varga a segno intero"
+        },
+        "purpose": {
+          "gridLabel": "Guida alla lettura di {label}",
+          "purpose": "Scopo",
+          "clientQuestion": "Domanda del cliente",
+          "clientQuestionHeading": "Cosa aiuta a esaminare questo strato",
+          "readWith": "Leggila con",
+          "readWithHeading": "La base natale resta primaria"
+        },
+        "reliability": {
+          "kicker": "Affidabilità",
+          "note": "La distanza dal confine indicata sotto descrive la vicinanza alla suddivisione del rashi di origine; non è una probabilità né un punteggio favorevole o sfavorevole."
+        },
+        "glance": {
+          "kicker": "In sintesi",
+          "heading": "I dati della carta prima dell'interpretazione",
+          "divisionalAscendant": "Ascendente divisionale",
+          "ascendantLord": "Signore dell'ascendente",
+          "unavailable": "Non disponibile",
+          "recurrences": "Ripetizioni del segno D1",
+          "none": "Nessuna",
+          "nearestBoundary": "Confine di suddivisione più vicino",
+          "note": "La ripetizione di un segno D1 è solo un indicatore di coerenza. Non è automaticamente positiva, forte o predittiva."
+        },
+        "map": {
+          "kicker": "Mappa a segno intero",
+          "heading": "Carta {label} in stile sud-indiano",
+          "methodTag": "I segni restano fissi · le case ruotano",
+          "gridLabel": "Mappa delle case a segno intero di {label}",
+          "houseLabel": "{sign}, casa {house}, governata da {ruler}",
+          "lord": "Signore {ruler}",
+          "noPoints": "Nessun punto",
+          "centerCaption": "Case a segno intero",
+          "invalidAscendant": "Non è stato restituito un ascendente divisionale valido, quindi l'assegnazione delle case è omessa.",
+          "note": "Questa mappa deriva le case a segno intero dall'ascendente divisionale. Non deduce aspetti esatti né sostituisce il sistema di case natale."
+        },
+        "placements": {
+          "kicker": "Posizioni chiave",
+          "heading": "Punti collegati al focus di questa carta",
+          "focusHouses": "Case di focus {houses}",
+          "focusPlanet": "Pianeta di focus",
+          "focusHouse": "Casa di focus",
+          "ascendantLord": "Signore dell'ascendente",
+          "mahadashaLord": "Signore della Maha Dasha",
+          "antardashaLord": "Signore dell'Antardasha",
+          "signLord": "Signore del segno",
+          "dignity": "Dignità",
+          "boundary": "Confine",
+          "d1Repeat": "Ripetizione D1",
+          "notAssigned": "Non assegnata",
+          "yes": "Sì",
+          "no": "No",
+          "peers": "Compagnia nello stesso segno: {peers}.",
+          "strength": "{ratio}× il minimo Shadbala richiesto",
+          "strengthNote": "Forza natale indipendente di manifestazione; non è un punteggio di dignità di {label}."
+        },
+        "vargaSign": "Segno {label}",
+        "table": {
+          "kicker": "Mappa completa",
+          "heading": "Ogni punto calcolato",
+          "count": "{count} posizioni",
+          "caption": "Posizioni {label} confrontate con la D1, con casa a segno intero, signore del segno, dignità, ripetizione e distanza dal confine della suddivisione di origine.",
+          "point": "Punto",
+          "d1Sign": "Segno D1",
+          "house": "Casa",
+          "signLord": "Signore del segno",
+          "dignity": "Dignità",
+          "d1Repeat": "Ripetizione D1",
+          "boundaryDistance": "Distanza dal confine",
+          "repeatYes": "Sì · coerenza",
+          "repeatNo": "No",
+          "boundaryTitle": "Confine del rashi di origine più vicino a {degree}°. Segmento {segment}.",
+          "note": "La dignità classica è mostrata solo per i sette pianeti classici. Qui nessuna dignità è assegnata all'Ascendente, a Rahu o a Ketu. La distanza dal confine è misurata dal grado natale di ogni punto al bordo di suddivisione più vicino."
+        },
+        "timing": {
+          "kicker": "Contesto temporale attuale",
+          "heading": "Signori dasha all'interno di {label}",
+          "mahadasha": "Maha Dasha attuale",
+          "antardasha": "Antardasha attuale",
+          "wholeSignHouse": "Casa a segno intero",
+          "boundary": "Confine",
+          "placementUnavailable": "Posizione non disponibile in questa carta.",
+          "dashaUnavailable": "I dati della dasha attuale non sono stati restituiti.",
+          "note": "Un periodo attivo aumenta la rilevanza temporale; non rende una posizione automaticamente favorevole. Leggila con la D1, la forza misurata e l'evidenza vissuta."
+        },
+        "method": {
+          "kicker": "Metodo e provenienza",
+          "heading": "Come è stata calcolata questa pagina",
+          "vargaMapping": "Mappatura del varga",
+          "engine": "Motore",
+          "ephemerisProvider": "Fornitore di effemeridi",
+          "ayanamsha": "Ayanamsha",
+          "natalHouseMethod": "Metodo delle case natali",
+          "vargaHouseDisplay": "Visualizzazione delle case varga",
+          "vargaHouseDisplayValue": "Case a segno intero derivate dall'Ascendente {label}",
+          "birthTimeStatus": "Stato dell'ora di nascita",
+          "cautionTitle": "Confine interpretativo",
+          "cautionBody": "Questa pagina riporta segni calcolati, case a segno intero, governatori, dignità classica e posizione dei signori del tempo. Non deduce aspetti divisionali esatti, non tratta la ripetizione di segno come automaticamente positiva e non lascia che {label} prevalga sulla D1."
+        },
+        "pager": {
+          "label": "Carte divisionali chiave adiacenti",
+          "previous": "Varga chiave precedente",
+          "next": "Varga chiave successivo"
+        },
+        "footer": {
+          "note": "Le carte divisionali affinano una promessa natale; non la sostituiscono. Conclusioni più solide richiedono dati di nascita affidabili e accordo con evidenze indipendenti.",
+          "returnLink": "Ritorna alla tua lettura completa"
+        }
+      }
+    }
+  },
+  "fr": {
+    "divisional": {
+      "atlas": {
+        "missing": {
+          "kicker": "Données Manquantes",
+          "title": "Les détails de la carte sont incomplets.",
+          "lead": "Retournez au formulaire et fournissez les données de naissance complètes avant d'ouvrir l'atlas des cartes divisionnaires.",
+          "back": "Retour au Formulaire"
+        },
+        "unavailable": {
+          "kicker": "Atlas des Vargas",
+          "title": "Les cartes divisionnaires n'ont pas pu être préparées.",
+          "fallback": "Aucune donnée de carte divisionnaire n'a été renvoyée.",
+          "back": "Retour à votre lecture"
+        },
+        "backToReading": "Retour à votre lecture",
+        "returnToReading": "Revenir à votre lecture",
+        "hero": {
+          "kicker": "D1–D60 · Atlas des vargas",
+          "heading": "Les couches divisionnaires de la carte de {name}",
+          "lead": "La D1 est le fondement. Chaque varga supérieur amplifie un domaine de vie, aidant la lecture à confirmer, nuancer ou préciser un thème déjà présent dans la carte principale.",
+          "supportedCharts": "{count} cartes prises en charge",
+          "exploratoryTime": "Heure de naissance exploratoire",
+          "exactTime": "Heure de naissance exacte enregistrée",
+          "timeWindow": "Fenêtre horaire {accuracy}"
+        },
+        "reliability": {
+          "label": "Fiabilité de l'heure de naissance",
+          "goodTitle": "Heure de naissance exacte enregistrée",
+          "goodBody": "L'atlas peut afficher chaque varga pris en charge. La D30 et la D60 méritent toujours des vérifications de limites car leurs divisions sont exceptionnellement fines.",
+          "cautionTitle": "Utilisez les divisions supérieures comme couches exploratoires",
+          "cautionBody": "L'heure enregistrée est approximative ou une valeur de repli. Les subdivisions de signe des planètes sont affichées, mais les conclusions fondées sur l'ascendant et les maisons dans les vargas supérieurs ne devraient pas être privilégiées avant la rectification de l'heure de naissance."
+        },
+        "sensitivity": {
+          "foundation": "Couche fondatrice",
+          "exactTime": "Heure exacte conseillée",
+          "rectifiedTime": "Heure rectifiée conseillée"
+        },
+        "important": {
+          "kicker": "Les dix couches clés",
+          "heading": "Commencez par les cartes qui répondent à une question claire",
+          "lead": "Ces dix bénéficient d'indications plus complètes car elles apportent le contexte le plus utile à une lecture centrée sur le client. Ce ne sont pas dix thèmes natals concurrents.",
+          "previewLabel": "Aperçu de {label} {name} dans l'atlas",
+          "openDetails": "Ouvrir tous les détails de {label}",
+          "showMore": "Afficher plus de détails"
+        },
+        "complete": {
+          "kicker": "Atlas complet pris en charge",
+          "heading": "Tous les vargas calculés",
+          "lead": "Sélectionnez n'importe quelle carte pour examiner les positions du client. Les dix cartes clés comportent des indications d'interprétation supplémentaires ci-dessous.",
+          "tablistLabel": "Cartes divisionnaires",
+          "keyBadge": "Clé"
+        },
+        "detail": {
+          "fallbackName": "Carte divisionnaire",
+          "traditionNote": "Hors des seize vargas de Parashara — lisez-la comme une couche complémentaire, non comme une autorité classique.",
+          "readWith": "À lire avec",
+          "clientQuestion": "Question du client",
+          "reliability": "Fiabilité",
+          "secondaryNote": "Il s'agit d'une carte d'appoint dans l'atlas complet. Elle peut apporter du contexte, mais le rapport ne devrait la mettre en avant que lorsque la D1 et un varga clé pertinent soutiennent déjà la même conclusion."
+        },
+        "snapshot": {
+          "divisionalAscendant": "Ascendant divisionnaire",
+          "sun": "Soleil",
+          "moon": "Lune",
+          "repeats": "Répétitions du signe D1"
+        },
+        "positions": {
+          "kicker": "Vos positions",
+          "heading": "Carte des positions {label}",
+          "count": "{count} points",
+          "tableLabel": "Positions {label}",
+          "point": "Point",
+          "d1": "D1",
+          "repeats": "Se répète",
+          "note": "« Se répète » signifie que le point reste dans le même signe qu'en D1. C'est un signal de cohérence, ni automatiquement positif ni négatif."
+        },
+        "footer": "Les cartes divisionnaires n'augmentent la précision que lorsqu'elles confirment la promesse natale, s'appuient sur des données de naissance fiables et concordent avec des facteurs indépendants de force et de temps."
+      },
+      "panel": {
+        "kicker": "Cartes Varga",
+        "heading": "Cartes Divisionnaires",
+        "intro": "La D1 est le fondement natal ; les autres cartes amplifient des thèmes de vie précis en subdivisant chaque signe. Sélectionnez une carte ci-dessous pour voir où chaque planète tombe dans cette division.",
+        "selectorLabel": "Sélecteur de carte divisionnaire",
+        "tableLabel": "Positions planétaires {label}",
+        "planet": "Planète",
+        "rashiSign": "Signe Rashi",
+        "vargaSign": "Signe {label}",
+        "same": "Identique",
+        "hint": "Les planètes situées dans le même signe que leur position rashi sont mises en évidence. Cette répétition renforce l'expression de cette planète dans le domaine de vie correspondant. D5, D6, D8 et D11 utilisent des correspondances traditionnelles étendues ; elles se situent hors des seize vargas parasharis classiques.",
+        "themes": {
+          "d1": "La vie dans son ensemble, l'identité et le fondement natal",
+          "d2": "Richesse et capacité financière",
+          "d3": "Fratrie, courage et initiative",
+          "d4": "Propriété, fortune et biens immobiliers",
+          "d5": "Autorité, influence et reconnaissance",
+          "d6": "Schémas de santé, routines et obstacles quotidiens",
+          "d7": "Enfants et descendance",
+          "d8": "Changement soudain, transformation et vulnérabilités",
+          "d9": "Mariage, dharma et nature intérieure",
+          "d10": "Carrière, profession et vie publique",
+          "d11": "Gains, réseaux et réalisation des ambitions",
+          "d12": "Parents et lignée ancestrale",
+          "d16": "Véhicules, conforts et bonheur",
+          "d20": "Progrès spirituel et dévotion",
+          "d24": "Éducation, apprentissage et connaissance",
+          "d27": "Forces et faiblesses",
+          "d30": "Malheur, maladie et épreuves",
+          "d40": "Effets favorables et défavorables",
+          "d45": "Indications générales et caractère",
+          "d60": "Karma des vies passées et questions générales"
+        }
+      },
+      "detail": {
+        "errors": {
+          "missingKicker": "{label} · Données manquantes",
+          "missingTitle": "Les données de naissance complètes sont requises.",
+          "missingBody": "Retournez au formulaire et fournissez les données de naissance complètes avant d'ouvrir l'analyse de {label} {name}.",
+          "backToIntake": "Retour au formulaire",
+          "returnToAtlas": "Revenir à l'atlas des vargas",
+          "unavailableKicker": "{label} · Calcul indisponible",
+          "unavailableTitle": "Le détail de {name} n'a pas pu être préparé.",
+          "unavailableBody": "Le calcul de la carte n'a pas renvoyé {label}.",
+          "backToReading": "Retour à votre lecture"
+        },
+        "boundary": {
+          "unavailable": "Indisponible",
+          "atBoundary": "À la limite"
+        },
+        "dates": {
+          "unavailable": "Dates indisponibles"
+        },
+        "birthTime": {
+          "exploratory": "Exploratoire avec cette heure de naissance",
+          "rectificationAdvised": "Rectification toujours conseillée",
+          "foundation": "Couche fondatrice",
+          "exact": "Heure exacte enregistrée"
+        },
+        "breadcrumb": {
+          "label": "Fil d'Ariane",
+          "reading": "Lecture",
+          "atlas": "Cartes divisionnaires"
+        },
+        "backToAtlas": "Retour à l'atlas des vargas",
+        "hero": {
+          "kicker": "Varga clé · Détail dédié",
+          "badgesLabel": "Contexte de la carte",
+          "wholeSignHouses": "Maisons varga en signe entier"
+        },
+        "purpose": {
+          "gridLabel": "Guide de lecture de {label}",
+          "purpose": "Objet",
+          "clientQuestion": "Question du client",
+          "clientQuestionHeading": "Ce que cette couche aide à examiner",
+          "readWith": "À lire avec",
+          "readWithHeading": "La base natale reste primordiale"
+        },
+        "reliability": {
+          "kicker": "Fiabilité",
+          "note": "La distance à la limite indiquée ci-dessous décrit la proximité de la subdivision du rashi d'origine ; ce n'est ni une probabilité ni un score favorable ou défavorable."
+        },
+        "glance": {
+          "kicker": "En bref",
+          "heading": "Les faits de la carte avant l'interprétation",
+          "divisionalAscendant": "Ascendant divisionnaire",
+          "ascendantLord": "Seigneur de l'ascendant",
+          "unavailable": "Indisponible",
+          "recurrences": "Récurrences du signe D1",
+          "none": "Aucune",
+          "nearestBoundary": "Limite de subdivision la plus proche",
+          "note": "Une récurrence du signe D1 n'est qu'un marqueur de cohérence. Elle n'est pas automatiquement positive, forte ou prédictive."
+        },
+        "map": {
+          "kicker": "Carte en signe entier",
+          "heading": "Carte {label} de style sud-indien",
+          "methodTag": "Les signes restent fixes · les maisons tournent",
+          "gridLabel": "Carte des maisons en signe entier de {label}",
+          "houseLabel": "{sign}, maison {house}, gouvernée par {ruler}",
+          "lord": "Seigneur {ruler}",
+          "noPoints": "Aucun point",
+          "centerCaption": "Maisons en signe entier",
+          "invalidAscendant": "Aucun ascendant divisionnaire valide n'a été renvoyé, la répartition des maisons est donc omise.",
+          "note": "Cette carte déduit les maisons en signe entier de l'ascendant divisionnaire. Elle n'infère pas d'aspects exacts et ne remplace pas le système de maisons natal."
+        },
+        "placements": {
+          "kicker": "Positions clés",
+          "heading": "Points liés au focus de cette carte",
+          "focusHouses": "Maisons de focus {houses}",
+          "focusPlanet": "Planète de focus",
+          "focusHouse": "Maison de focus",
+          "ascendantLord": "Seigneur de l'ascendant",
+          "mahadashaLord": "Seigneur de la Maha Dasha",
+          "antardashaLord": "Seigneur de l'Antardasha",
+          "signLord": "Seigneur du signe",
+          "dignity": "Dignité",
+          "boundary": "Limite",
+          "d1Repeat": "Répétition D1",
+          "notAssigned": "Non attribuée",
+          "yes": "Oui",
+          "no": "Non",
+          "peers": "Compagnie dans le même signe : {peers}.",
+          "strength": "{ratio}× le minimum Shadbala requis",
+          "strengthNote": "Force natale indépendante de réalisation ; ce n'est pas un score de dignité de {label}."
+        },
+        "vargaSign": "Signe {label}",
+        "table": {
+          "kicker": "Carte complète",
+          "heading": "Chaque point calculé",
+          "count": "{count} positions",
+          "caption": "Positions {label} comparées à la D1, avec maison en signe entier, seigneur du signe, dignité, récurrence et distance à la limite de la subdivision d'origine.",
+          "point": "Point",
+          "d1Sign": "Signe D1",
+          "house": "Maison",
+          "signLord": "Seigneur du signe",
+          "dignity": "Dignité",
+          "d1Repeat": "Répétition D1",
+          "boundaryDistance": "Distance à la limite",
+          "repeatYes": "Oui · cohérence",
+          "repeatNo": "Non",
+          "boundaryTitle": "Limite du rashi d'origine la plus proche à {degree}°. Segment {segment}.",
+          "note": "La dignité classique n'est affichée que pour les sept planètes classiques. Aucune dignité n'est attribuée ici à l'Ascendant, à Rahu ou à Ketu. La distance à la limite est mesurée du degré natal de chaque point au bord de subdivision le plus proche."
+        },
+        "timing": {
+          "kicker": "Contexte temporel actuel",
+          "heading": "Seigneurs de dasha au sein de {label}",
+          "mahadasha": "Maha Dasha actuelle",
+          "antardasha": "Antardasha actuelle",
+          "wholeSignHouse": "Maison en signe entier",
+          "boundary": "Limite",
+          "placementUnavailable": "Position indisponible dans cette carte.",
+          "dashaUnavailable": "Les données de la dasha actuelle n'ont pas été renvoyées.",
+          "note": "Une période active accroît la pertinence temporelle ; elle ne rend pas une position automatiquement favorable. Lisez-la avec la D1, la force mesurée et l'expérience vécue."
+        },
+        "method": {
+          "kicker": "Méthode et provenance",
+          "heading": "Comment cette page a été calculée",
+          "vargaMapping": "Correspondance du varga",
+          "engine": "Moteur",
+          "ephemerisProvider": "Fournisseur d'éphémérides",
+          "ayanamsha": "Ayanamsha",
+          "natalHouseMethod": "Méthode des maisons natales",
+          "vargaHouseDisplay": "Affichage des maisons varga",
+          "vargaHouseDisplayValue": "Maisons en signe entier dérivées de l'Ascendant {label}",
+          "birthTimeStatus": "Statut de l'heure de naissance",
+          "cautionTitle": "Limite interprétative",
+          "cautionBody": "Cette page rapporte les signes calculés, les maisons en signe entier, les gouverneurs, la dignité classique et la position des seigneurs du temps. Elle n'infère pas d'aspects divisionnaires exacts, ne traite pas la récurrence de signe comme automatiquement positive et ne laisse pas {label} prévaloir sur la D1."
+        },
+        "pager": {
+          "label": "Cartes divisionnaires clés adjacentes",
+          "previous": "Varga clé précédent",
+          "next": "Varga clé suivant"
+        },
+        "footer": {
+          "note": "Les cartes divisionnaires affinent une promesse natale ; elles ne la remplacent pas. Des conclusions plus fermes exigent des données de naissance fiables et un accord avec des preuves indépendantes.",
+          "returnLink": "Revenir à votre lecture complète"
+        }
+      }
+    }
+  }
+}
