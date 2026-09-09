@@ -66,5 +66,39 @@
       "weeklyEnergyTableScore": "স্কোর",
       "weeklyEnergyTableBand": "ব্যান্ড"
     }
+  },
+  "hi": {
+    "shared": {
+      "rootErrorHeading": "तारे क्षण भर के लिए विचलित हो गए हैं",
+      "rootErrorDescription": "एक कॉस्मिक गड़बड़ी ने आपके अनुभव में बाधा डाल दी। आकाशीय गणनाएँ पुनः समायोजित की जा रही हैं।",
+      "rootErrorDetailsSummary": "तकनीकी विवरण देखें",
+      "rootErrorDigest": "डाइजेस्ट: {digest}",
+      "rootErrorTryAgain": "फिर कोशिश करें",
+      "rootErrorReturnHome": "होम पर लौटें",
+      "chartErrorKicker": "कुंडली त्रुटि",
+      "chartErrorHeading": "कुंडली की गणना पूरी नहीं हो सकी।",
+      "chartErrorLead": "कुंडली इंजन यह अनुरोध पूरा नहीं कर सका। कृपया जन्म विवरण, स्थान और चयनित इंजन की जाँच करें, फिर दोबारा कोशिश करें।",
+      "chartErrorLeadAdvanced": "कुंडली इंजन में एक त्रुटि आई। कृपया जाँचें कि {package} npm पैकेज इंस्टॉल है और आपका डेटा मान्य है, फिर दोबारा कोशिश करें।",
+      "chartErrorDetail": "त्रुटि: {detail}",
+      "chartErrorNoData": "कोई डेटा प्राप्त नहीं हुआ",
+      "chartErrorRetry": "पुनः प्रयास",
+      "chartRequestTimedOut": "{seconds} सेकंड बाद अनुरोध का समय समाप्त हो गया। सर्वर व्यस्त हो सकता है। कृपया दोबारा कोशिश करें।",
+      "chartUnknownApiError": "अज्ञात API त्रुटि",
+      "constellationAria": "{ascendant} लग्न के लिए ग्रहों की स्थिति दर्शाने वाला नक्षत्र चित्र",
+      "constellationTitle": "{ascendant} लग्न के साथ नक्षत्र मानचित्र",
+      "constellationRasi": "राशि",
+      "constellationLongitudeAbbrev": "देशां.",
+      "weeklyEnergyChartTitle": "आपकी साप्ताहिक ऊर्जा, {week}",
+      "weeklyEnergyBandHigh": "उच्च",
+      "weeklyEnergyBandBalanced": "संतुलित",
+      "weeklyEnergyBandLow": "निम्न",
+      "weeklyEnergySteadyWeek": "स्थिर सप्ताह",
+      "weeklyEnergyNoStandoutDay": "कोई विशेष दिन नहीं",
+      "weeklyEnergyTableCaption": "साप्ताहिक ऊर्जा स्कोर, {week}",
+      "weeklyEnergyTableDay": "दिन",
+      "weeklyEnergyTableDate": "तारीख",
+      "weeklyEnergyTableScore": "स्कोर",
+      "weeklyEnergyTableBand": "बैंड"
+    }
   }
 }
