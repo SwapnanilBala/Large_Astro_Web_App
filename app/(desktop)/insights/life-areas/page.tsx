@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FiCompass } from "react-icons/fi";
 import PageTransition from "@/app/components/PageTransition";
 import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import LifeAreasClient from "./life-areas-client";
+import LifeAreasNotice from "./life-areas-notice";
 import {
   chartParamsToQuery,
   getChartPayload,
@@ -34,17 +34,7 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
     return (
       <PageTransition>
         <div className="insights-shell">
-          <section className="dashboard-shell">
-            <p className="kicker">Missing Input</p>
-            <h1>Chart details are incomplete.</h1>
-            <p className="lead">
-              Return to intake and provide complete birth details before opening
-              the life areas.
-            </p>
-            <Link href="/" className="ghost-link">
-              Back to Intake
-            </Link>
-          </section>
+          <LifeAreasNotice variant="missingInput" />
         </div>
       </PageTransition>
     );
@@ -76,14 +66,11 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
     return (
       <PageTransition>
         <div className="insights-shell">
-          <section className="dashboard-shell">
-            <p className="kicker">Life areas</p>
-            <h1>The life area readings could not be prepared.</h1>
-            <p className="lead">{error || "No life domain data was returned."}</p>
-            <Link href={`/insights?${historyQs}`} className="ghost-link">
-              Back to your reading
-            </Link>
-          </section>
+          <LifeAreasNotice
+            variant="error"
+            detail={error}
+            backHref={`/insights?${historyQs}`}
+          />
         </div>
       </PageTransition>
     );

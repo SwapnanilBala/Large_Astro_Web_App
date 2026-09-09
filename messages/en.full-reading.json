@@ -1,0 +1,38 @@
+{
+  "fullReading": {
+    "loadingCombinations": "Preparing combinations…",
+    "loadingKarma": "Preparing the karmic reading…",
+
+    "backToNamedReading": "Back to {name}’s reading",
+    "kicker": "Full reading",
+    "title": "Every finding in the chart",
+    "lead": "The three priorities at the top of your report are drawn from this set. Everything the engine matched is here, each with the placement it rests on, so you can see the reasoning rather than only the conclusion.",
+    "findings": "findings",
+    "longTermCombinations": "long-term combinations",
+
+    "patternsKicker": "Patterns",
+    "patternsHeading": "What the placements say",
+    "patternsLead": "Each card states the reading, then the placement behind it. Open “Why this reading” to see the technical basis and how common the pattern is.",
+
+    "combinationsKicker": "Combinations",
+    "combinationsHeading": "Patterns that run for a lifetime",
+    "combinationsLead": "Yogas are combinations rather than single placements, and they describe standing conditions in the chart rather than a passing period.",
+
+    "karmaKicker": "Karma",
+    "karmaHeading": "Inherited patterns and vocation",
+    "karmaLead": "A secondary reading of what the chart suggests was carried in, where it asks to be released, and the kind of work it points toward.",
+
+    "backToReading": "Back to the reading",
+
+    "notice": {
+      "missingKicker": "Missing Input",
+      "missingHeading": "Chart details are incomplete.",
+      "missingLead": "Return to intake and provide complete birth details before opening the full reading.",
+      "backToIntake": "Back to Intake",
+      "errorKicker": "Full reading",
+      "errorHeading": "The full reading could not be prepared.",
+      "errorFallback": "No chart data was returned.",
+      "backToReading": "Back to your reading"
+    }
+  }
+}
