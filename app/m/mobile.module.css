@@ -125,8 +125,12 @@
   color: var(--text-tertiary, #9a918a);
 }
 
+/* --danger-text rather than --danger-line: that one is the faint wash outline
+   the login panel uses, and a field's boundary has to clear 3:1 against both
+   the fill and the page. The literal here was #f07068, which measured 2.77:1
+   against the page on Ethereal Dawn. */
 .input[aria-invalid="true"] {
-  border-color: #f07068;
+  border-color: var(--danger-text);
 }
 
 /* Native date/time controls render their own indicator; keep it visible on
@@ -380,8 +384,11 @@
   color: var(--accent-gold, #d4a574);
 }
 
+/* The message that goes with the invalid border above, on the same token.
+   #e84545 cleared neither theme at this size -- 3.71:1 on light, 4.39:1 on
+   dark, where AA asks 4.5:1. */
 .fieldNoteError {
-  color: #e84545;
+  color: var(--danger-text);
 }
 
 .noteChips {

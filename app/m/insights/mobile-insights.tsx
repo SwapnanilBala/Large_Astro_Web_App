@@ -45,13 +45,32 @@ function formatDegree(value: number): string {
   return minutes === 60 ? `${degrees + 1}°00'` : `${degrees}°${String(minutes).padStart(2, "0")}'`;
 }
 
+/*
+ * A dasha boundary, as the calendar date the engine emitted.
+ *
+ * Both the locale and the zone are pinned, and each one fixes a separate bug.
+ *
+ * An `undefined` locale means whatever the runtime's own is, and the server's
+ * is not the reader's: Node rendered "Feb 11, 2030" where the browser rendered
+ * "11 Feb 2030". React counts that as a text mismatch, so hydration of this
+ * page failed outright -- and that also discarded the theme bootstrap's writes
+ * in app/layout.tsx, leaving a reader who had chosen Ethereal Dawn with
+ * /m/insights in the dark theme and no toggle on a handset to change it.
+ *
+ * The zone matters because nakshatra-engine emits bare YYYY-MM-DD from UTC
+ * parts (msToDateStr), which `new Date` reads as UTC midnight; formatting that
+ * in the reader's own zone shows the day before anywhere west of Greenwich.
+ * Same trap lib/format-birth-date.ts documents, and the same pinning the
+ * desktop tree's formatMonthYear already does.
+ */
 function formatDate(value: string): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
+    timeZone: "UTC",
   }).format(date);
 }
 

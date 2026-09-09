@@ -55,6 +55,19 @@
      border scale is soft < subtle < medium rather than having a hole in it. */
   --border-subtle: rgba(212, 165, 116, 0.16);
 
+  /*
+   * Error states, as tokens rather than per-component literals.
+   *
+   * /m/login's .error hard-coded all three, and its surface is translucent
+   * over the page, so on Ethereal Dawn a role="alert" message rendered
+   * #f0a4a4 on near-white -- 1.78:1, where AA asks 4.5:1. The light values
+   * measure 5.1:1 on their own surface and the dark ones are the values
+   * .error already used, so Celestial Luxe is unchanged.
+   */
+  --danger-line: rgba(229, 139, 139, 0.28);
+  --danger-surface: rgba(229, 139, 139, 0.08);
+  --danger-text: #f0a4a4;
+
   /* Keyboard focus, for the whole tree. The value is the one /m/login already
      used; it is a token now because the rest of the tree had no focus styling
      at all and needed the same ring, not a second opinion. Teal rather than
@@ -102,6 +115,9 @@ html[data-theme="light"] {
   --border-soft: rgba(126, 78, 98, 0.14);
   --border-medium: rgba(173, 113, 56, 0.24);
   --border-subtle: rgba(126, 78, 98, 0.18);
+  --danger-line: rgba(176, 58, 68, 0.32);
+  --danger-surface: rgba(176, 58, 68, 0.07);
+  --danger-text: #b03a44;
   --focus-ring: rgba(91, 111, 181, 0.72);
   --surface-lit:
     linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 243, 240, 0.28) 48%),
