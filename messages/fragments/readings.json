@@ -411,5 +411,143 @@
       "newChart": "नई कुंडली",
       "desktopView": "पूर्ण डेस्कटॉप दृश्य"
     }
+  },
+
+  "it": {
+    "lifeAreas": {
+      "navLabel": "Aree della vita",
+      "chooseArea": "Scegli un'area della vita",
+      "mostActiveFirst": "Prima le più attive",
+
+      "activityBadge": "attività {band}",
+      "conclusionStrength": "conclusione {strength}",
+
+      "readingDepth": "Profondità della lettura",
+      "modeDetailed": "Dettagliato",
+      "modeAction": "Piano d'Azione",
+
+      "subthemesHeading": "Ciò che spicca in quest'area",
+      "subthemesRankNote": "Ordinato in base alle prove di questa carta",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "Dichiarazione di chiarezza",
+      "decisionRule": "Regola decisionale",
+      "boundaryRule": "Regola dei limiti",
+
+      "support": "Sostegno",
+      "watch": "Attenzione",
+      "timing": "Tempistica",
+
+      "evidenceSummary": "Come viene letto questo ambito",
+
+      "doNext": "Cosa fare ora",
+      "keepInMind": "Da tenere a mente",
+      "decisionFilter": "Filtro decisionale",
+      "decisionFilterFallback": "Muoviti quando sostegno, tempistica e prove indicano la stessa direzione.",
+      "guidanceLabel": "Indicazione:",
+      "longGameLabel": "A lungo termine:",
+
+      "notice": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire le aree della vita.",
+        "errorKicker": "Aree della vita",
+        "errorHeading": "Non è stato possibile preparare le letture delle aree della vita.",
+        "errorFallback": "Nessun dato sugli ambiti della vita è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      },
+
+      "lifeShifts": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire i capitoli della vita.",
+        "errorKicker": "Capitoli della vita",
+        "errorHeading": "Non è stato possibile preparare i capitoli della vita.",
+        "errorFallback": "Nessun dato della carta è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "Preparazione delle combinazioni…",
+      "loadingKarma": "Preparazione della lettura karmica…",
+
+      "backToNamedReading": "Torna alla lettura di {name}",
+      "kicker": "Lettura completa",
+      "title": "Ogni riscontro della carta",
+      "lead": "Le tre priorità in cima al tuo rapporto provengono da questo insieme. Qui c'è tutto ciò che il motore ha riscontrato, ognuno con la posizione su cui si fonda, così puoi vedere il ragionamento e non solo la conclusione.",
+      "findings": "riscontri",
+      "longTermCombinations": "combinazioni a lungo termine",
+
+      "patternsKicker": "Schemi",
+      "patternsHeading": "Cosa dicono le posizioni",
+      "patternsLead": "Ogni scheda espone la lettura e poi la posizione che la sostiene. Apri “Perché questa lettura” per vedere la base tecnica e quanto è comune lo schema.",
+
+      "combinationsKicker": "Combinazioni",
+      "combinationsHeading": "Schemi che durano una vita",
+      "combinationsLead": "Gli yoga sono combinazioni e non singole posizioni, e descrivono condizioni permanenti della carta più che un periodo passeggero.",
+
+      "karmaKicker": "Karma",
+      "karmaHeading": "Schemi ereditati e vocazione",
+      "karmaLead": "Una lettura secondaria di ciò che la carta suggerisce sia stato portato con sé, di dove chiede di essere liberato e del tipo di lavoro verso cui indica.",
+
+      "backToReading": "Torna alla lettura",
+
+      "notice": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire la lettura completa.",
+        "errorKicker": "Lettura completa",
+        "errorHeading": "Non è stato possibile preparare la lettura completa.",
+        "errorFallback": "Nessun dato della carta è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "Non è stato possibile costruire questa carta",
+      "errorFallback": "Non è stato possibile calcolare la carta.",
+      "backToIntake": "Torna al modulo",
+
+      "ascendantLead": "Ascendente {sign}",
+      "nakshatraLead": "Nakshatra {name}",
+      "factLagna": "Lagna",
+      "factNakshatra": "Nakshatra",
+      "padaLord": "Pada {pada} · {lord}",
+      "factMahadasha": "Mahadasha",
+      "toDate": "fino al {date}",
+
+      "planetaryPositions": "Posizioni planetarie",
+      "grahaCount": "{count} graha",
+      "colGraha": "Graha",
+      "colSign": "Segno",
+      "colDeg": "Gr.",
+      "colHouse": "Casa",
+      "flagRetrograde": "Rx",
+      "flagCombust": "Cmb",
+      "flagLegend": "Rx = si muove all'indietro da qui · Cmb = troppo vicino al Sole per agire liberamente",
+
+      "houseRolesTitle": "Quale casa risponde di cosa",
+      "houseRolesSubtitle": "Tutte e dodici, e il sostegno che ciascuna ha",
+      "bindusLegend": "I bindu sono il punteggio di sostegno dell'Ashtakavarga per il segno che occupa quella casa, su un totale fisso di 337. La media esatta è 28,1, quindi una casa si legge rispetto a quel valore e non rispetto a un massimo.",
+      "srHouse": "Casa {house}, ",
+      "bhava": "{name} Bhava",
+      "srSupport": "{sign}, {bindus} bindu",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "Le <b>Kendra</b> sono i quattro angoli su cui la carta è costruita; le <b>Panaphara</b> e le <b>Apoklima</b> sono le case che li seguono e quelle che se ne allontanano. Inoltre, le case <b>Trikona</b> si leggono come il luogo in cui arriva il merito, le <b>Upachaya</b> come quelle che migliorano con l'età e l'impegno, e le <b>Dusthana</b> come quelle che prima chiedono qualcosa. Una casa può essere più di una: la sesta è insieme Upachaya e Dusthana.",
+
+      "attentionTitle": "Ciò che merita attenzione",
+      "attentionSubtitleOne": "{count} lettura ad alta priorità",
+      "attentionSubtitleOther": "{count} letture ad alta priorità",
+      "whyThisReading": "Perché questa lettura",
+
+      "dashaTitle": "Linea temporale Dasha",
+      "dashaPeriodCount": "{count} periodi",
+      "dashaCurrent": "Attualmente <strong>{dasha}</strong>{antardasha} fino al {date}",
+      "colPeriod": "Periodo",
+      "colFrom": "Da",
+      "colTo": "A",
+
+      "summaryTitle": "Riepilogo",
+      "allReadingsTitle": "Tutte le letture",
+      "allReadingsSubtitle": "{count} in totale",
+
+      "newChart": "Nuova carta",
+      "desktopView": "Vista desktop completa"
+    }
   }
 }
