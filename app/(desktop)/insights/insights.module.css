@@ -249,14 +249,37 @@
   text-align: start;
 }
 
+/*
+ * Two pills, the same height.
+ *
+ * The global `button` rule carries `margin-top: 0.44rem` and
+ * `min-height: 3.2rem`. PersonalStory's trigger overrides both; .heroAction
+ * did not, so the two controls sitting side by side here measured 50px against
+ * 45.4px and their tops were 1.3px apart -- the taller one also pushed down by
+ * the inherited margin that `align-items: center` cannot cancel.
+ *
+ * `stretch` plus the wrapper rule below makes the row's height define both,
+ * whatever either component's own padding works out to.
+ */
 .heroActions {
   display: flex;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-start;
   gap: 0.65rem;
   flex-wrap: wrap;
   margin-top: 1.4rem;
   padding-bottom: 0.15rem;
+}
+
+/* PersonalStory renders its trigger inside a wrapper div, so the stretch has
+   to be passed through it to reach the button. */
+.heroActions > div {
+  display: flex;
+}
+
+.heroActions > div > button {
+  margin-top: 0;
+  height: 100%;
 }
 
 .heroAction {
@@ -274,6 +297,11 @@
   font-weight: 650;
   cursor: pointer;
   transition: border-color 180ms ease, background-color 180ms ease;
+}
+
+/* Cancels the global button margin, which `align-items` cannot. */
+.heroAction {
+  margin-top: 0;
 }
 
 .heroAction:hover,
@@ -320,22 +348,32 @@
   min-height: 1.7rem;
 }
 
+/* Matches .kicker exactly -- same role, so same weight and same tracking.
+   This was 800 with no letter-spacing against the house 700 at 0.14em, which
+   read as a different label style two bands apart. */
 .heroPlanetKicker {
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
   font-size: 0.78rem;
-  font-weight: 800;
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.35;
   margin: 0;
   text-transform: uppercase;
 }
 
+/*
+ * 1.15rem, not 0.98rem. This is an <h2>, and at 0.98rem (15.68px) it rendered
+ * SMALLER than the 16px body text around it -- a heading below body size reads
+ * as a caption and inverts the hierarchy. 1.15rem matches the smallest other
+ * h2 on the page.
+ */
 .heroPlanetTitle {
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.98rem;
-  font-weight: 750;
-  line-height: 1;
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.2;
   margin: 0;
 }
 
@@ -480,7 +518,8 @@
 
 .fortuneBand {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  /* intro | tiles | sprig */
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: clamp(1rem, 2.5vw, 2.5rem);
 }
@@ -538,11 +577,13 @@
   border-inline-start: 1px solid var(--line-soft);
 }
 
+ /* Same role as .kicker, so the same size, weight and tracking. Was
+    0.64rem/800/0.15em, which made these read as a third label style. */
 .fortuneLabel {
   font-family: var(--font-display), sans-serif;
-  font-size: 0.64rem;
-  font-weight: 800;
-  letter-spacing: 0.15em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-soft);
 }
@@ -563,11 +604,20 @@
   color: var(--ink-soft);
 }
 
-/* The sprig at the far end. Absolute, so it takes no grid track. */
+/*
+ * The sprig gets its own track at the end of the band.
+ *
+ * It was absolute with `inset-inline-end: 0`, which overlapped the last tile's
+ * value and caption by 134x64px -- and it rendered at 172.8px rather than the
+ * 4rem asked for here, because .decor in the decor module sets its own
+ * `inline-size` and the two classes tie on specificity, so the winner came
+ * down to which file the bundler emitted last. A grid track removes both
+ * problems: no overlap is possible, and the width is the track's.
+ */
 .fortuneLeaf {
-  inset-block-end: 0;
-  inset-inline-end: 0;
-  inline-size: clamp(2.5rem, 5vw, 4rem);
+  justify-self: end;
+  align-self: end;
+  inline-size: 3.25rem;
 }
 
 .archSparkle {
@@ -614,6 +664,14 @@
 .zoneCards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 13.5rem), 1fr));
+  /*
+   * Equal rows, not just equal columns. `align-items: stretch` equalises the
+   * cards within a row but says nothing across rows, so seven cards in five
+   * tracks gave a 93px first row (set by the one two-line title) against a
+   * 77px second row. 1fr makes every row take the tallest card's height, so
+   * all seven read as one set.
+   */
+  grid-auto-rows: 1fr;
   gap: clamp(0.6rem, 1vw, 0.9rem);
   min-width: 0;
 }
@@ -1712,14 +1770,30 @@
 /* ── Planets Card ── */
 .chartGlance {
   composes: card;
-  /* Was a tall column beside the chart; now a full-width strip below it. The
-     heading sits left, the three facts run across the remaining space. */
+  /*
+   * One column, under the wheel it describes.
+   *
+   * It has been three things: a tall column beside the chart, then a
+   * full-width strip below it with `minmax(14rem, 1fr) 1.6fr`. It now sits
+   * inside the three-column row's left track, about 370px wide, where those
+   * two tracks needed 224px + 176px + gap and overflowed the card by 98px --
+   * clipped, because .card carries `overflow: hidden`.
+   *
+   * minmax(0, 1fr) rather than 1fr: a single track still has to be allowed to
+   * be narrower than its content, or the facts grid below pushes it wide again.
+   */
   display: grid;
-  grid-template-columns: minmax(14rem, 1fr) 1.6fr;
+  grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
-  gap: 1.25rem clamp(1.5rem, 4vw, 3rem);
+  gap: 0.9rem;
   padding: clamp(1.1rem, 2vw, 1.5rem);
-  border-top: 2px solid var(--accent-teal);
+  /*
+   * No teal 2px top rule any more. It existed to separate this from the chart
+   * when it was a full-width strip directly underneath it. In the three-column
+   * row it is one of three peer cards, and it was the only one of the three
+   * with an accent edge -- 1.6px teal against its neighbours' 0.8px gold
+   * hairline, which read as an unexplained emphasis rather than a divider.
+   */
 }
 
 @media (max-width: 720px) {
@@ -1750,10 +1824,13 @@
 }
 
 .chartGlanceIntro,
+/* 0.95rem, down from 1.08rem. Sized for a full-width strip, it was the
+   largest body text in the three-column row -- 17.28px against the
+   house-support intro's 15.2px in the column beside it. */
 .chartGlanceNote {
   margin: 0.55rem 0 0;
   color: var(--ink-soft);
-  font-size: 1.08rem;
+  font-size: 0.95rem;
   line-height: 1.55;
 }
 
@@ -1763,9 +1840,15 @@
 
 .chartGlanceFacts {
   display: grid;
-  /* Three across in the strip layout, stacking on narrow viewports. */
-  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-  gap: 0 clamp(1rem, 3vw, 2rem);
+  /*
+   * min(100%, 8rem) rather than a bare 11rem. auto-fit picks its track count
+   * from the minimum, so an 11rem floor in a 340px column still asked for a
+   * 176px track and overflowed by 122px. The min() lets the track shrink below
+   * its preferred size instead of overflowing -- the same guard, and the same
+   * reason, as the note on .gatewayGrid.
+   */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.65rem clamp(0.75rem, 2vw, 1.5rem);
   margin: 0;
 }
 
@@ -4454,6 +4537,19 @@
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     text-align: center;
+  }
+
+  /*
+   * Stacked, the sprig would take a whole row to itself.
+   *
+   * Compound selector, not a bare `.fortuneLeaf`: the glyph also carries
+   * `.inline` from the decor module, which sets `display: inline-block`. Two
+   * single-class selectors in two different files tie on specificity and the
+   * winner is whichever the bundler emits last -- which it did, so the bare
+   * rule silently did nothing. `.fortuneBand .fortuneLeaf` cannot lose that.
+   */
+  .fortuneBand .fortuneLeaf {
+    display: none;
   }
 
   .fortuneIntro {

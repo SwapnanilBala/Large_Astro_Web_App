@@ -8,6 +8,23 @@
 .panel {
   display: grid;
   gap: 1.4rem;
+  /*
+   * A query container, because this panel is rendered at two very different
+   * widths: full-page on /insights/house-support, and a ~350px column in the
+   * results page's three-column row. The stacking rule below used to be a
+   * `@media (max-width: 900px)` viewport query, which cannot see the
+   * difference -- at a 1440 viewport the column is narrow but the query never
+   * fires, so the ring and the twelve-house distribution kept their
+   * side-by-side tracks and overflowed their container by 202px. `.card` has
+   * no overflow of its own but the column's does, so it was clipped rather
+   * than scrollable.
+   *
+   * inline-size containment is what we want here as well as what the query
+   * needs: the panel takes its width from the grid track instead of from its
+   * own contents.
+   */
+  container-type: inline-size;
+  container-name: house-support;
 }
 
 .intro {
@@ -36,7 +53,15 @@
   align-items: stretch;
 }
 
-@media (max-width: 900px) {
+/*
+ * Keyed to the panel's own width, not the window's. 620px is where 240px of
+ * ring plus the distribution's own minimum stop fitting side by side.
+ *
+ * This replaces the viewport query rather than joining it: on the dedicated
+ * page a narrow window also makes the panel narrow, so the container query
+ * covers that case too.
+ */
+@container house-support (max-width: 620px) {
   .columns {
     grid-template-columns: minmax(0, 1fr);
   }

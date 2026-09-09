@@ -96,8 +96,8 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
       </div>
 
       <p className={styles.skyNote}>
-        Where the planets are today
-        <span>not where they were at your birth</span>
+        Where the planets are today,
+        <span>not where they were at your birth.</span>
       </p>
     </section>
   );

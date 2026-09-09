@@ -968,7 +968,7 @@ export default function InsightsContent({
     const tiles: Array<{ label: string; value: string; caption: string }> = [];
     if (lucky.primary_colors?.[0]) {
       tiles.push({
-        label: "Lucky colour",
+        label: "Lucky color",
         value: lucky.primary_colors[0],
         caption: "Wear it when it matters.",
       });
@@ -1461,10 +1461,12 @@ export default function InsightsContent({
           </CollapsibleSection>
         )}
 
-        {/* Row F. .gatewayGrid's own auto-fit rule was doing the same job as
-            .cardRowAuto; using the shared one means the gateways, the insight
-            zone and the continuation hub all break at the same widths. */}
-        <div className={`${styles.cardRowAuto} ${styles.gatewayGrid}`}>
+        {/* Row F. .gatewayGrid keeps its own auto-fit rule: it wins over
+            .cardRowAuto on both columns and gap anyway (measured: 2 tracks at
+            25.92px, which is --gateway-gap), and it carries the
+            `:last-child:nth-child(odd)` full-width span that .cardRowAuto has
+            no equivalent for. Adding the shared class here changed nothing. */}
+        <div className={styles.gatewayGrid}>
           {/* ─── Timing & electional (gateway to its own page) ─── */}
           <GatewaySection id="timing" className={styles.timingSection}>
             <SectionGateway
@@ -1571,8 +1573,6 @@ export default function InsightsContent({
             className={`${styles.band} ${styles.fortuneBand}`}
             aria-labelledby="fortune-band-heading"
           >
-            <LeafSprig className={`${decor.decor} ${decor.decorGold} ${styles.fortuneLeaf}`} />
-
             <div className={styles.fortuneIntro}>
               <SunGlyph className={`${decor.inline} ${decor.decorGold} ${decor.sun}`} />
               <h2 id="fortune-band-heading" className={styles.fortuneTitle}>
@@ -1598,6 +1598,11 @@ export default function InsightsContent({
                 </div>
               ))}
             </dl>
+
+            {/* Last, so it lands in the band's third track. It used to be an
+                absolutely-positioned overlay and overlapped the final tile by
+                134x64px; a track of its own makes that impossible. */}
+            <LeafSprig className={`${decor.inline} ${decor.decorGold} ${styles.fortuneLeaf}`} />
           </section>
         )}
 

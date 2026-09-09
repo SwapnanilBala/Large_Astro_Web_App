@@ -59,12 +59,24 @@
   text-align: center;
 }
 
+/*
+ * Round, and the same height as its label.
+ *
+ * The global `button` rule sets `min-height: 3.2rem` and
+ * `margin-top: 0.44rem`. Setting `height` does not beat a `min-height`, so
+ * these measured 30.4 x 51.2 -- tall ovals under a 999px radius -- and the
+ * inherited margin pushed them 11.2px below the top of the date label beside
+ * them. Both have to be cancelled explicitly.
+ */
 .pagerButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
   width: 1.9rem;
   height: 1.9rem;
+  min-height: 0;
+  margin-top: 0;
   padding: 0;
   border-radius: 999px;
   border: 1px solid var(--line-soft);
@@ -226,7 +238,13 @@
   /* Four across where there is room, two when there is not. auto-fit needs no
      breakpoint of its own; min(100%, ...) keeps a narrow column from asking for
      a wider track and being clipped. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr));
+  /*
+   * 11rem, not 8.5rem. At 8.5rem the centre column fitted three tracks and the
+   * four cards wrapped 3 + 1, which reads as a mistake rather than a layout.
+   * An 11rem floor gives two tracks at this width, so they land as a 2x2 --
+   * and still collapse to one column when the panel is narrower.
+   */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
   gap: 0.6rem;
   min-width: 0;
 }
