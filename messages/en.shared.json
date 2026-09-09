@@ -18,6 +18,17 @@
     "constellationAria": "Constellation chart showing planetary positions for ascendant {ascendant}",
     "constellationTitle": "Constellation map with {ascendant} ascendant",
     "constellationRasi": "Rasi",
-    "constellationLongitudeAbbrev": "long."
+    "constellationLongitudeAbbrev": "long.",
+    "weeklyEnergyChartTitle": "Your weekly energy, {week}",
+    "weeklyEnergyBandHigh": "High",
+    "weeklyEnergyBandBalanced": "Balanced",
+    "weeklyEnergyBandLow": "Low",
+    "weeklyEnergySteadyWeek": "Steady week",
+    "weeklyEnergyNoStandoutDay": "no standout day",
+    "weeklyEnergyTableCaption": "Weekly energy scores, {week}",
+    "weeklyEnergyTableDay": "Day",
+    "weeklyEnergyTableDate": "Date",
+    "weeklyEnergyTableScore": "Score",
+    "weeklyEnergyTableBand": "Band"
   }
 }

@@ -18,6 +18,12 @@ import { useTranslation } from "@/lib/i18n-context";
 function useErrorCopy(): (key: string, english: string) => string {
   let translate: ((key: string) => string) | null = null;
   try {
+    /* rules-of-hooks reads the `try` as a branch, but there is no branch here:
+       useTranslation is called exactly once on every render, and the only hook
+       it calls -- useContext -- has already run by the time it decides to throw
+       on a missing provider. The hook count is invariant either way, and this
+       is the only hook the fallback uses. */
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     translate = useTranslation().t;
   } catch {
     /* No provider above us — fall through to the English defaults. */
