@@ -1082,85 +1082,9 @@
   gap: 1.1rem;
 }
 
-/*
- * These three are the first thing anyone reads, and they were the flattest
- * things on the page: the base card surface, a 2px top rule in the card's tone,
- * and everything else -- number, label -- hard-coded gold regardless of tone.
- * Against the dark backdrop the rule and the surface both disappeared, so three
- * "hero" cards read as three grey rectangles.
- *
- * Each card now carries its tone as a custom property and spends it in four
- * places: the rule, the number badge, the label and a wash behind the top of
- * the card. Same restraint, but the accent is actually visible.
- */
-.takeawayCard {
-  composes: card;
-  --tone: var(--accent-gold);
-  position: relative;
-  display: grid;
-  /* Body takes the slack so the meta line sits on the baseline of every card
-     instead of floating wherever the copy happens to end. */
-  grid-template-rows: auto auto 1fr auto;
-  gap: 0.7rem;
-  min-height: 15.5rem;
-  padding: 1.35rem 1.3rem 1.2rem;
-  border-color: color-mix(in srgb, var(--tone) 22%, transparent);
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--tone) 9%, transparent) 0%,
-      transparent 42%
-    ),
-    var(--surface, rgba(255, 255, 255, 0.06));
-  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
-}
-
-/* The tone rule, drawn as a gradient so it fades out rather than stopping. */
-.takeawayCard::after {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto;
-  height: 3px;
-  background: linear-gradient(
-    90deg,
-    var(--tone) 0%,
-    color-mix(in srgb, var(--tone) 45%, transparent) 55%,
-    transparent 100%
-  );
-}
-
-.takeawayCard:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--tone) 42%, transparent);
-  box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.3),
-    0 0 0 1px color-mix(in srgb, var(--tone) 14%, transparent);
-}
-
-.takeawayCard h3 {
-  color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.32rem, 1.55vw, 1.58rem);
-  font-weight: 800;
-  line-height: 1.22;
-  margin: 0;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-}
-
-.takeawayGold {
-  --tone: var(--accent-gold);
-}
-
-.takeawayTeal {
-  /* The token teal is dark enough to read as grey on this backdrop; the panel
-     accents elsewhere on the page use the brighter aqua for the same reason. */
-  --tone: #6CE1D4;
-}
-
-.takeawayCoral {
-  --tone: #E08A4C;
-}
+/* The .takeawayCard rules live below .card, together with the tone classes
+   that override their --tone default: they compose .card, so source order
+   decides which wins. See the note there. */
 
 .takeawayTop {
   display: flex;
@@ -1225,11 +1149,7 @@
   overflow-wrap: anywhere;
 }
 
-.strengthMap {
-  composes: card;
-  padding: 1.35rem;
-  border-top: 2px solid var(--accent-teal);
-}
+/* .strengthMap composes .card, so its own rule lives below .card. */
 
 .strengthMapHeader {
   display: flex;
@@ -1433,6 +1353,111 @@
 /* ── Full Width Cards ── */
 .cardFullWidth {
   grid-column: 1 / -1;
+}
+
+/*
+ * ── Composers that have to sit below .card ──
+ *
+ * .takeawayCard and .strengthMap both `composes: card`. CSS Modules puts the
+ * composed class in the element's class list rather than merging declarations,
+ * so both classes have one-class specificity and source order decides -- the
+ * same trap the .heroArch and .cardRow3 comments warn about.
+ *
+ * Declared above .card, .takeawayCard lost its tone border, its tone wash and
+ * its padding to .card's `border` / `background` / `padding`, and
+ * .takeawayCard:hover lost its tone border and lift shadow to .card:hover. The
+ * accents the block below exists to draw never painted: the cards rendered on
+ * the plain card surface, which is the exact thing its comment says to fix.
+ * .strengthMap lost its 2px teal top rule the same way.
+ *
+ * .takeawayGold / .takeawayTeal / .takeawayCoral come along because they
+ * override the --tone default .takeawayCard declares; left above it, that
+ * default would win and every card would read gold.
+ */
+/*
+ * These three are the first thing anyone reads, and they were the flattest
+ * things on the page: the base card surface, a 2px top rule in the card's tone,
+ * and everything else -- number, label -- hard-coded gold regardless of tone.
+ * Against the dark backdrop the rule and the surface both disappeared, so three
+ * "hero" cards read as three grey rectangles.
+ *
+ * Each card now carries its tone as a custom property and spends it in four
+ * places: the rule, the number badge, the label and a wash behind the top of
+ * the card. Same restraint, but the accent is actually visible.
+ */
+.takeawayCard {
+  composes: card;
+  --tone: var(--accent-gold);
+  position: relative;
+  display: grid;
+  /* Body takes the slack so the meta line sits on the baseline of every card
+     instead of floating wherever the copy happens to end. */
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.7rem;
+  min-height: 15.5rem;
+  padding: 1.35rem 1.3rem 1.2rem;
+  border-color: color-mix(in srgb, var(--tone) 22%, transparent);
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--tone) 9%, transparent) 0%,
+      transparent 42%
+    ),
+    var(--surface, rgba(255, 255, 255, 0.06));
+  transition: border-color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
+}
+
+/* The tone rule, drawn as a gradient so it fades out rather than stopping. */
+.takeawayCard::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(
+    90deg,
+    var(--tone) 0%,
+    color-mix(in srgb, var(--tone) 45%, transparent) 55%,
+    transparent 100%
+  );
+}
+
+.takeawayCard:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--tone) 42%, transparent);
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.3),
+    0 0 0 1px color-mix(in srgb, var(--tone) 14%, transparent);
+}
+
+.takeawayCard h3 {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.32rem, 1.55vw, 1.58rem);
+  font-weight: 800;
+  line-height: 1.22;
+  margin: 0;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+}
+
+.takeawayGold {
+  --tone: var(--accent-gold);
+}
+
+.takeawayTeal {
+  /* The token teal is dark enough to read as grey on this backdrop; the panel
+     accents elsewhere on the page use the brighter aqua for the same reason. */
+  --tone: #6CE1D4;
+}
+
+.takeawayCoral {
+  --tone: #E08A4C;
+}
+
+.strengthMap {
+  composes: card;
+  padding: 1.35rem;
+  border-top: 2px solid var(--accent-teal);
 }
 
 /* ── Metric Cards ── */
