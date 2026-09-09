@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import AdvancedContent from "./advanced-content";
@@ -10,6 +10,8 @@ import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { buildChartHistoryQuery } from "@/lib/chart-params";
+import { useRouteMessages } from "@/lib/i18n-context";
+import sharedMessages from "@/messages/en.shared.json";
 import type { AdvancedFocusView } from "./advanced-views";
 
 const REQUEST_TIMEOUT_MS = 55_000;
@@ -47,9 +49,19 @@ export default function AdvancedLoader({
   chartParams,
   focusView,
 }: AdvancedLoaderProps) {
+  const t = useRouteMessages(sharedMessages);
   const [payload, setPayload] = useState<ChartApiResponse | null>(null);
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+
+  /* `t` is read when a request fails, not when the callback is built, so it is
+     held in a ref rather than listed as a dependency: its identity changes on
+     every language switch, and re-creating fetchChart re-runs the effect below,
+     which would re-request the chart each time the visitor changes language. */
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
 
   const fetchChart = useCallback(async () => {
     setIsLoading(true);
@@ -87,11 +99,14 @@ export default function AdvancedLoader({
     } catch (err) {
       if (err instanceof DOMException && err.name === "AbortError") {
         setError(
-          `Request timed out after ${Math.round(REQUEST_TIMEOUT_MS / 1000)} seconds. ` +
-          "The server may be busy. Please try again."
+          tRef.current("shared.chartRequestTimedOut", {
+            seconds: String(Math.round(REQUEST_TIMEOUT_MS / 1000)),
+          })
         );
       } else {
-        setError(err instanceof Error ? err.message : "Unknown API error");
+        setError(
+          err instanceof Error ? err.message : tRef.current("shared.chartUnknownApiError")
+        );
       }
     } finally {
       setIsLoading(false);
@@ -103,6 +118,20 @@ export default function AdvancedLoader({
   }, [fetchChart]);
 
   const historyQs = payload ? buildChartHistoryQuery(chartParams) : "";
+
+  /* The package name is a literal in <code>, not something to translate, so the
+     sentence carries a {package} token and is split around it. One key keeps the
+     clause whole for a translator instead of handing them two half-sentences. */
+  const [leadBeforePackage, ...leadAfterPackage] = t("shared.chartErrorLeadAdvanced").split(
+    "{package}"
+  );
+  const advancedLead = (
+    <>
+      {leadBeforePackage}
+      <code>swisseph</code>
+      {leadAfterPackage.join("")}
+    </>
+  );
 
   return (
     <AnimatePresence mode="wait">
@@ -129,13 +158,14 @@ export default function AdvancedLoader({
           <div className="ambient ambient-left" />
           <div className="ambient ambient-right" />
           <section className="dashboard-shell">
-            <p className="kicker">Chart Error</p>
-            <h1>Chart calculation could not be completed.</h1>
-            <p className="lead">
-              The chart engine encountered an error. Please check that the <code>swisseph</code> npm
-              package is installed and your input data is valid, then try again.
+            <p className="kicker">{t("shared.chartErrorKicker")}</p>
+            <h1>{t("shared.chartErrorHeading")}</h1>
+            <p className="lead">{advancedLead}</p>
+            <p className="error-note">
+              {t("shared.chartErrorDetail", {
+                detail: error || t("shared.chartErrorNoData"),
+              })}
             </p>
-            <p className="error-note">Error: {error || "No data received"}</p>
             <div className="skel-error-actions">
               <button
                 type="button"
@@ -143,10 +173,10 @@ export default function AdvancedLoader({
                 onClick={() => void fetchChart()}
               >
                 <span className="skel-retry-icon">&#x21BB;</span>
-                Retry
+                {t("shared.chartErrorRetry")}
               </button>
               <Link href="/" className="ghost-link">
-                Edit Intake Data
+                {t("insights.editIntake")}
               </Link>
             </div>
           </section>

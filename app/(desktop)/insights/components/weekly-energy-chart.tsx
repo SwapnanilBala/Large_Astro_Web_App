@@ -12,6 +12,12 @@ import styles from "./weekly-energy-panel.module.css";
  * house-support-panel.tsx keeps its rings hook-free -- it stays
  * server-renderable and cannot get into a state its props do not describe.
  *
+ * `t` arrives the same way, and for the same reason. useRouteMessages is a hook
+ * and would end the guarantee above the moment it were called here, so the
+ * panel -- already a client component with the provider above it -- resolves
+ * the catalog and hands the translator down. The chart's copy lives in the
+ * "shared" namespace with the other desktop chart labels.
+ *
  * No ResizeObserver and no measured width. The viewBox is a fixed unit space
  * scaled by CSS, which is the idiom the other SVGs here use; measuring would
  * force client-only rendering and paint once at the wrong size first.
@@ -52,6 +58,8 @@ export type WeeklyEnergyChartProps = {
   animate: boolean;
   /** Namespaces the gradient and the a11y ids; two charts can share a page. */
   idPrefix: string;
+  /** The parent's translator, so this stays hook-free. See the note above. */
+  t: (key: string, params?: Record<string, string>) => string;
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -78,6 +86,7 @@ export default function WeeklyEnergyChart({
   weekLabel,
   animate,
   idPrefix,
+  t,
 }: WeeklyEnergyChartProps) {
   const titleId = `${idPrefix}-title`;
   const descId = `${idPrefix}-desc`;
@@ -120,7 +129,9 @@ export default function WeeklyEnergyChart({
         role="img"
         aria-labelledby={`${titleId} ${descId}`}
       >
-        <title id={titleId}>{`Your weekly energy, ${weekLabel}`}</title>
+        <title id={titleId}>
+          {t("shared.weeklyEnergyChartTitle", { week: weekLabel })}
+        </title>
         <desc id={descId}>{altText}</desc>
 
         <defs>
@@ -160,9 +171,15 @@ export default function WeeklyEnergyChart({
 
         {/* Band labels, in the right-hand pad. */}
         <g className={styles.bandLabels} aria-hidden="true">
-          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((topY + highY) / 2)}>High</text>
-          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((highY + lowY) / 2)}>Balanced</text>
-          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((lowY + bottomY) / 2)}>Low</text>
+          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((topY + highY) / 2)}>
+            {t("shared.weeklyEnergyBandHigh")}
+          </text>
+          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((highY + lowY) / 2)}>
+            {t("shared.weeklyEnergyBandBalanced")}
+          </text>
+          <text x={svgCoord(W - PAD.right + 10)} y={svgCoord((lowY + bottomY) / 2)}>
+            {t("shared.weeklyEnergyBandLow")}
+          </text>
         </g>
 
         <path d={areaPath} fill={`url(#${areaId})`} className={styles.area} aria-hidden="true" />
@@ -199,7 +216,9 @@ export default function WeeklyEnergyChart({
         {/* Real <text>, so the callout is already in the accessibility tree. */}
         <g className={styles.callout} transform={`translate(${peakPoint.x}, ${calloutY})`}>
           <text textAnchor={calloutAnchor} dx={calloutDx} className={styles.calloutDay}>
-            {peak.is_significant ? formatDayShort(peak.date) : "Steady week"}
+            {peak.is_significant
+              ? formatDayShort(peak.date)
+              : t("shared.weeklyEnergySteadyWeek")}
           </text>
           <text
             textAnchor={calloutAnchor}
@@ -207,7 +226,7 @@ export default function WeeklyEnergyChart({
             dy={calloutAbove ? -14 : 14}
             className={styles.calloutLabel}
           >
-            {peak.is_significant ? peak.label : "no standout day"}
+            {peak.is_significant ? peak.label : t("shared.weeklyEnergyNoStandoutDay")}
           </text>
         </g>
 
@@ -229,13 +248,13 @@ export default function WeeklyEnergyChart({
           a tooltip would need a keyboard equivalent, a focus ring per dot and a
           live region to say the same thing this already says. */}
       <table className={styles.srOnly}>
-        <caption>{`Weekly energy scores, ${weekLabel}`}</caption>
+        <caption>{t("shared.weeklyEnergyTableCaption", { week: weekLabel })}</caption>
         <thead>
           <tr>
-            <th scope="col">Day</th>
-            <th scope="col">Date</th>
-            <th scope="col">Score</th>
-            <th scope="col">Band</th>
+            <th scope="col">{t("shared.weeklyEnergyTableDay")}</th>
+            <th scope="col">{t("shared.weeklyEnergyTableDate")}</th>
+            <th scope="col">{t("shared.weeklyEnergyTableScore")}</th>
+            <th scope="col">{t("shared.weeklyEnergyTableBand")}</th>
           </tr>
         </thead>
         <tbody>

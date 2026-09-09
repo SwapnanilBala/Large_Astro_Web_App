@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useTranslation } from "@/lib/i18n-context";
+import { useRouteMessages } from "@/lib/i18n-context";
+import sharedMessages from "@/messages/en.shared.json";
 import { addWeeks, currentWeekStart, formatWeekRangeLabel } from "@/lib/format-week";
 import type { WeeklyEnergyResponse } from "@/lib/astro-types";
 import WeeklyEnergyChart from "./weekly-energy-chart";
@@ -43,7 +44,9 @@ export type WeeklyEnergyPanelProps = {
 };
 
 export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProps) {
-  const { t } = useTranslation();
+  /* Resolves both the baseline namespaces this panel reads (quotes.*) and the
+     "shared" catalog the chart below needs, which the layout does not ship. */
+  const t = useRouteMessages(sharedMessages);
   const shouldReduceMotion = useReducedMotion();
 
   const [weekStart, setWeekStart] = useState(() => currentWeekStart());
@@ -243,6 +246,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             weekLabel={data.week.label}
             animate={!shouldReduceMotion}
             idPrefix="weekly-energy"
+            t={t}
           />
 
           <div className={styles.forecast}>
