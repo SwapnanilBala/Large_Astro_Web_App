@@ -1,0 +1,36 @@
+{
+  "es": {
+    "shared": {
+      "rootErrorHeading": "Las Estrellas se Han Desalineado Momentáneamente",
+      "rootErrorDescription": "Una perturbación cósmica ha interrumpido tu experiencia. La mecánica celeste se está recalibrando.",
+      "rootErrorDetailsSummary": "Ver detalles técnicos",
+      "rootErrorDigest": "Resumen: {digest}",
+      "rootErrorTryAgain": "Intentar de Nuevo",
+      "rootErrorReturnHome": "Volver al Inicio",
+      "chartErrorKicker": "Error de Carta",
+      "chartErrorHeading": "No se pudo completar el cálculo de la carta.",
+      "chartErrorLead": "El motor de cartas no pudo completar esta solicitud. Revisa los datos de nacimiento, la ubicación y el motor seleccionado, e inténtalo de nuevo.",
+      "chartErrorLeadAdvanced": "El motor de cartas encontró un error. Comprueba que el paquete npm {package} esté instalado y que tus datos sean válidos, e inténtalo de nuevo.",
+      "chartErrorDetail": "Error: {detail}",
+      "chartErrorNoData": "No se recibieron datos",
+      "chartErrorRetry": "Reintentar",
+      "chartRequestTimedOut": "La solicitud expiró tras {seconds} segundos. El servidor puede estar ocupado. Inténtalo de nuevo.",
+      "chartUnknownApiError": "Error desconocido de la API",
+      "constellationAria": "Carta de constelaciones que muestra las posiciones planetarias para el ascendente {ascendant}",
+      "constellationTitle": "Mapa de constelaciones con ascendente {ascendant}",
+      "constellationRasi": "Rashi",
+      "constellationLongitudeAbbrev": "long.",
+      "weeklyEnergyChartTitle": "Tu energía semanal, {week}",
+      "weeklyEnergyBandHigh": "Alta",
+      "weeklyEnergyBandBalanced": "Equilibrada",
+      "weeklyEnergyBandLow": "Baja",
+      "weeklyEnergySteadyWeek": "Semana estable",
+      "weeklyEnergyNoStandoutDay": "sin día destacado",
+      "weeklyEnergyTableCaption": "Puntuaciones de energía semanal, {week}",
+      "weeklyEnergyTableDay": "Día",
+      "weeklyEnergyTableDate": "Fecha",
+      "weeklyEnergyTableScore": "Puntuación",
+      "weeklyEnergyTableBand": "Banda"
+    }
+  }
+}
