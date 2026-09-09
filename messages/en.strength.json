@@ -180,7 +180,6 @@
       "highestRatioSentence": "has the highest Shadbala ratio ({ratio}x)",
       "lowestRatioSentence": "has the lowest Shadbala ratio ({ratio}x)",
       "placedIn": "and is placed in {sign}",
-      "sentenceEnd": ".",
       "strongestSignMatch": "Its natal placement also falls in a highest-SAV sign. Treat both as separate contextual indicators, not a combined score.",
       "strongestSignNoMatch": "This measures planetary capacity separately from the SAV sign score; the two should not be averaged.",
       "weakestSignMatch": "Its natal placement also falls in a lowest-SAV sign. Treat both as separate contextual indicators, not a combined score.",

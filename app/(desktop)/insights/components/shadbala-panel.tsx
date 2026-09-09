@@ -406,6 +406,15 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
               <p className="shadbala-sign-planet-context-label">
                 {tr("strength.shadbala.relatesLabel")}
               </p>
+              {/* The full stop after the placement clause is the one piece of
+                  punctuation here that no catalog string can carry: the clause
+                  before it is optional, so the stop cannot live at the end of
+                  either the ratio sentence or the placement clause without
+                  doubling up or going missing. It stays a literal, which means
+                  Devanagari and Bengali get a Latin "." at this one spot
+                  rather than a danda. Splitting the two variants into four
+                  whole sentences would fix it and is the right move the next
+                  time this copy is edited. */}
               <div className="shadbala-sign-planet-context-grid">
                 <p>
                   <strong>{planetLabel(t, strongest.planet)}</strong>{" "}
