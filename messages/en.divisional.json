@@ -1,0 +1,259 @@
+{
+  "divisional": {
+    "atlas": {
+      "missing": {
+        "kicker": "Missing Input",
+        "title": "Chart details are incomplete.",
+        "lead": "Return to intake and provide complete birth details before opening the divisional chart atlas.",
+        "back": "Back to Intake"
+      },
+      "unavailable": {
+        "kicker": "Varga Atlas",
+        "title": "The divisional charts could not be prepared.",
+        "fallback": "No divisional chart data was returned.",
+        "back": "Back to your reading"
+      },
+      "backToReading": "Back to your reading",
+      "returnToReading": "Return to your reading",
+      "hero": {
+        "kicker": "D1–D60 · Varga atlas",
+        "heading": "{name}'s divisional chart layers",
+        "lead": "The D1 is the foundation. Each higher varga magnifies one life area, helping the reading confirm, qualify, or narrow a theme already present in the main chart.",
+        "supportedCharts": "{count} supported charts",
+        "exploratoryTime": "Exploratory birth time",
+        "exactTime": "Exact birth time recorded",
+        "timeWindow": "{accuracy} time window"
+      },
+      "reliability": {
+        "label": "Birth time reliability",
+        "goodTitle": "Exact birth time recorded",
+        "goodBody": "The atlas can display every supported varga. D30 and D60 still deserve boundary checks because their divisions are exceptionally fine.",
+        "cautionTitle": "Use higher divisions as exploratory layers",
+        "cautionBody": "The recorded time is approximate or a fallback. Planetary sign subdivisions are shown, but ascendant- and house-based conclusions in higher vargas should not be promoted until the birth time is rectified."
+      },
+      "sensitivity": {
+        "foundation": "Foundation layer",
+        "exactTime": "Exact time advised",
+        "rectifiedTime": "Rectified time advised"
+      },
+      "important": {
+        "kicker": "The ten key layers",
+        "heading": "Start with the charts that answer a clear question",
+        "lead": "These ten receive fuller guidance because they add the most useful context to a client-focused reading. They are not ten competing natal charts.",
+        "previewLabel": "Preview {label} {name} in the atlas",
+        "openDetails": "Open full {label} details",
+        "showMore": "Show more details"
+      },
+      "complete": {
+        "kicker": "Complete supported atlas",
+        "heading": "All calculated vargas",
+        "lead": "Select any chart to inspect the client's placements. The ten key charts include additional interpretation guidance below.",
+        "tablistLabel": "Divisional charts",
+        "keyBadge": "Key"
+      },
+      "detail": {
+        "fallbackName": "Divisional chart",
+        "traditionNote": "Outside Parashara’s sixteen vargas — read as a supplementary layer, not a classical authority.",
+        "readWith": "Read it with",
+        "clientQuestion": "Client question",
+        "reliability": "Reliability",
+        "secondaryNote": "This is a supporting chart in the complete atlas. It can add context, but the report should promote it only when the D1 and a relevant key varga already support the same conclusion."
+      },
+      "snapshot": {
+        "divisionalAscendant": "Divisional ascendant",
+        "sun": "Sun",
+        "moon": "Moon",
+        "repeats": "D1 sign repeats"
+      },
+      "positions": {
+        "kicker": "Your placements",
+        "heading": "{label} position map",
+        "count": "{count} points",
+        "tableLabel": "{label} placements",
+        "point": "Point",
+        "d1": "D1",
+        "repeats": "Repeats",
+        "note": "“Repeats” means the point remains in the same sign as D1. It is a consistency signal, not automatically positive or negative."
+      },
+      "footer": "Divisional charts increase specificity only when they confirm the natal promise, use reliable birth data, and agree with independent strength and timing factors."
+    },
+    "panel": {
+      "kicker": "Varga Charts",
+      "heading": "Divisional Charts",
+      "intro": "D1 is the natal foundation; the remaining charts magnify specific life themes by subdividing each sign. Select a chart below to see where each planet lands in that division.",
+      "selectorLabel": "Divisional chart selector",
+      "tableLabel": "{label} planetary positions",
+      "planet": "Planet",
+      "rashiSign": "Rashi Sign",
+      "vargaSign": "{label} Sign",
+      "same": "Same",
+      "hint": "Planets in the same sign as their rashi position are highlighted. This repetition strengthens that planet's expression in the corresponding life area. D5, D6, D8, and D11 use extended traditional mappings; they sit outside the classical sixteen Parashari vargas.",
+      "themes": {
+        "d1": "Overall life, identity, and the natal foundation",
+        "d2": "Wealth and financial capacity",
+        "d3": "Siblings, courage, and initiative",
+        "d4": "Property, fortune, and fixed assets",
+        "d5": "Authority, influence, and recognition",
+        "d6": "Health patterns, routines, and everyday obstacles",
+        "d7": "Children and progeny",
+        "d8": "Sudden change, transformation, and vulnerabilities",
+        "d9": "Marriage, dharma, and inner nature",
+        "d10": "Career, profession, and public life",
+        "d11": "Gains, networks, and the fulfillment of ambitions",
+        "d12": "Parents and ancestral lineage",
+        "d16": "Vehicles, comforts, and happiness",
+        "d20": "Spiritual progress and worship",
+        "d24": "Education, learning, and knowledge",
+        "d27": "Strengths and weaknesses",
+        "d30": "Misfortune, disease, and challenges",
+        "d40": "Auspicious and inauspicious effects",
+        "d45": "General indications and character",
+        "d60": "Past life karma and general matters"
+      }
+    },
+    "detail": {
+      "errors": {
+        "missingKicker": "{label} · Missing input",
+        "missingTitle": "Complete birth details are required.",
+        "missingBody": "Return to intake and provide the complete birth details before opening the {label} {name} analysis.",
+        "backToIntake": "Back to intake",
+        "returnToAtlas": "Return to the varga atlas",
+        "unavailableKicker": "{label} · Calculation unavailable",
+        "unavailableTitle": "The {name} detail could not be prepared.",
+        "unavailableBody": "{label} was not returned by the chart calculation.",
+        "backToReading": "Back to your reading"
+      },
+      "boundary": {
+        "unavailable": "Unavailable",
+        "atBoundary": "At boundary"
+      },
+      "dates": {
+        "unavailable": "Dates unavailable"
+      },
+      "birthTime": {
+        "exploratory": "Exploratory with this birth time",
+        "rectificationAdvised": "Rectification still advised",
+        "foundation": "Foundation layer",
+        "exact": "Exact time recorded"
+      },
+      "breadcrumb": {
+        "label": "Breadcrumb",
+        "reading": "Reading",
+        "atlas": "Divisional charts"
+      },
+      "backToAtlas": "Back to the varga atlas",
+      "hero": {
+        "kicker": "Key varga · Dedicated detail",
+        "badgesLabel": "Chart context",
+        "wholeSignHouses": "Whole-sign varga houses"
+      },
+      "purpose": {
+        "gridLabel": "{label} reading guidance",
+        "purpose": "Purpose",
+        "clientQuestion": "Client question",
+        "clientQuestionHeading": "What this layer helps examine",
+        "readWith": "Read it with",
+        "readWithHeading": "The natal baseline remains primary"
+      },
+      "reliability": {
+        "kicker": "Reliability",
+        "note": "Boundary distance below describes proximity to the source-rashi subdivision; it is not a probability or a favorable/unfavorable score."
+      },
+      "glance": {
+        "kicker": "At a glance",
+        "heading": "The chart facts before interpretation",
+        "divisionalAscendant": "Divisional ascendant",
+        "ascendantLord": "Ascendant lord",
+        "unavailable": "Unavailable",
+        "recurrences": "D1 sign recurrences",
+        "none": "None",
+        "nearestBoundary": "Nearest subdivision boundary",
+        "note": "A D1 sign recurrence is a consistency marker only. It is not automatically positive, strong, or predictive."
+      },
+      "map": {
+        "kicker": "Whole-sign map",
+        "heading": "{label} South-Indian-style chart",
+        "methodTag": "Signs stay fixed · houses rotate",
+        "gridLabel": "{label} whole-sign house map",
+        "houseLabel": "{sign}, house {house}, ruled by {ruler}",
+        "lord": "Lord {ruler}",
+        "noPoints": "No points",
+        "centerCaption": "Whole-sign houses",
+        "invalidAscendant": "A valid divisional ascendant was not returned, so house placement is withheld.",
+        "note": "This map derives whole-sign houses from the divisional ascendant. It does not infer exact aspects or replace the natal house system."
+      },
+      "placements": {
+        "kicker": "Key placements",
+        "heading": "Points connected to this chart's focus",
+        "focusHouses": "Focus houses {houses}",
+        "focusPlanet": "Focus planet",
+        "focusHouse": "Focus house",
+        "ascendantLord": "Ascendant lord",
+        "mahadashaLord": "Mahadasha lord",
+        "antardashaLord": "Antardasha lord",
+        "signLord": "Sign lord",
+        "dignity": "Dignity",
+        "boundary": "Boundary",
+        "d1Repeat": "D1 repeat",
+        "notAssigned": "Not assigned",
+        "yes": "Yes",
+        "no": "No",
+        "peers": "Same-sign company: {peers}.",
+        "strength": "{ratio}× required Shadbala minimum",
+        "strengthNote": "Independent natal delivery strength; this is not a {label} dignity score."
+      },
+      "vargaSign": "{label} sign",
+      "table": {
+        "kicker": "Complete map",
+        "heading": "Every calculated point",
+        "count": "{count} positions",
+        "caption": "{label} positions compared with D1, including whole-sign house, sign lord, dignity, recurrence, and source subdivision boundary distance.",
+        "point": "Point",
+        "d1Sign": "D1 sign",
+        "house": "House",
+        "signLord": "Sign lord",
+        "dignity": "Dignity",
+        "d1Repeat": "D1 repeat",
+        "boundaryDistance": "Boundary distance",
+        "repeatYes": "Yes · consistency",
+        "repeatNo": "No",
+        "boundaryTitle": "Nearest source-rashi boundary at {degree}°. Segment {segment}.",
+        "note": "Classical dignity is shown only for the seven classical planets. No dignity is assigned here to the Ascendant, Rahu, or Ketu. Boundary distance is measured from each point's natal degree to the nearest subdivision edge."
+      },
+      "timing": {
+        "kicker": "Current timing context",
+        "heading": "Dasha lords inside {label}",
+        "mahadasha": "Current mahadasha",
+        "antardasha": "Current antardasha",
+        "wholeSignHouse": "Whole-sign house",
+        "boundary": "Boundary",
+        "placementUnavailable": "Placement unavailable in this chart.",
+        "dashaUnavailable": "Current dasha data was not returned.",
+        "note": "An active period increases timing relevance; it does not make a placement automatically favorable. Read it with D1, measured strength, and lived evidence."
+      },
+      "method": {
+        "kicker": "Method and provenance",
+        "heading": "How this page was calculated",
+        "vargaMapping": "Varga mapping",
+        "engine": "Engine",
+        "ephemerisProvider": "Ephemeris provider",
+        "ayanamsha": "Ayanamsha",
+        "natalHouseMethod": "Natal house method",
+        "vargaHouseDisplay": "Varga house display",
+        "vargaHouseDisplayValue": "Whole-sign houses derived from the {label} Ascendant",
+        "birthTimeStatus": "Birth-time status",
+        "cautionTitle": "Interpretive boundary",
+        "cautionBody": "This page reports calculated signs, whole-sign houses, rulers, classical dignity, and timing-lord location. It does not infer exact divisional aspects, treat sign recurrence as automatically positive, or let {label} override D1."
+      },
+      "pager": {
+        "label": "Adjacent key divisional charts",
+        "previous": "Previous key varga",
+        "next": "Next key varga"
+      },
+      "footer": {
+        "note": "Divisional charts refine a natal promise; they do not replace it. Stronger conclusions require reliable birth data and agreement with independent evidence.",
+        "returnLink": "Return to your full reading"
+      }
+    }
+  }
+}
