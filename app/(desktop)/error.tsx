@@ -2,6 +2,16 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { useRouteMessages } from "@/lib/i18n-context";
+import sharedMessages from "@/messages/en.shared.json";
+
+/*
+ * Next.js renders a segment's error.tsx inside that segment's layout, so this
+ * sits under the DesktopLanguageProvider in app/(desktop)/layout.tsx and can
+ * read the catalog. The English copy rides in its own route catalog rather than
+ * the provider baseline, because only this page and the insights loaders read
+ * the "shared" namespace.
+ */
 
 export default function RootError({
   error,
@@ -10,6 +20,8 @@ export default function RootError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useRouteMessages(sharedMessages);
+
   useEffect(() => {
     console.error("[RootError]", error);
   }, [error]);
@@ -47,26 +59,25 @@ export default function RootError({
 
       <div className="error-card">
         <div className="error-icon" aria-hidden="true">&#x2604;</div>
-        <h1 className="error-title">The Stars Have Momentarily Misaligned</h1>
-        <p className="error-description">
-          A cosmic disturbance has disrupted your experience. The celestial
-          mechanics are being recalibrated.
-        </p>
+        <h1 className="error-title">{t("shared.rootErrorHeading")}</h1>
+        <p className="error-description">{t("shared.rootErrorDescription")}</p>
 
         <details className="error-details">
-          <summary>View technical details</summary>
+          <summary>{t("shared.rootErrorDetailsSummary")}</summary>
           <pre className="error-message">{error.message}</pre>
           {error.digest && (
-            <p className="error-digest">Digest: {error.digest}</p>
+            <p className="error-digest">
+              {t("shared.rootErrorDigest", { digest: error.digest })}
+            </p>
           )}
         </details>
 
         <div className="error-actions">
           <button onClick={reset} className="error-btn error-btn-primary">
-            <span aria-hidden="true">&#x21BB;</span> Try Again
+            <span aria-hidden="true">&#x21BB;</span> {t("shared.rootErrorTryAgain")}
           </button>
           <Link href="/" className="error-btn error-btn-secondary">
-            Return Home
+            {t("shared.rootErrorReturnHome")}
           </Link>
         </div>
       </div>

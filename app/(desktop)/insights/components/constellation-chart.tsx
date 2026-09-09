@@ -5,6 +5,8 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
 import { useChartWorker } from "@/lib/hooks/useChartWorker";
 import type { ChartWorkerOutput } from "@/lib/hooks/useChartWorker";
+import { useRouteMessages } from "@/lib/i18n-context";
+import sharedMessages from "@/messages/en.shared.json";
 
 type ConstellationChartProps = {
   ascendantSign: string;
@@ -174,6 +176,7 @@ export default function ConstellationChart({
   houses,
   planets,
 }: ConstellationChartProps) {
+  const t = useRouteMessages(sharedMessages);
   const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const [hoveredPlanet, setHoveredPlanet] = useState<string | null>(null);
   const svgRef = useRef<SVGSVGElement>(null);
@@ -358,11 +361,11 @@ export default function ConstellationChart({
         viewBox="0 0 600 600"
         className="constellation-svg"
         role="img"
-        aria-label={`Constellation chart showing planetary positions for ascendant ${ascendantSign}`}
+        aria-label={t("shared.constellationAria", { ascendant: ascendantSign })}
         initial="hidden"
         animate="visible"
       >
-        <title>Constellation map with {ascendantSign} ascendant</title>
+        <title>{t("shared.constellationTitle", { ascendant: ascendantSign })}</title>
         <defs>
           {/* Sky background gradient */}
           <radialGradient id="cSkyGrad" cx="50%" cy="50%" r="70%">
@@ -653,7 +656,7 @@ export default function ConstellationChart({
               fontFamily: "var(--font-body), sans-serif",
             }}
           >
-            Rasi
+            {t("shared.constellationRasi")}
           </text>
           <text
             x={CX} y={CY + 6}
@@ -678,7 +681,7 @@ export default function ConstellationChart({
               fontFamily: "var(--font-body), sans-serif",
             }}
           >
-            Lagna
+            {t("insights.lagna")}
           </text>
         </motion.g>
 
@@ -735,7 +738,9 @@ export default function ConstellationChart({
                       dominantBaseline="central"
                       style={{ fontFamily: "var(--font-body), sans-serif" }}
                     >
-                      House {tooltip.house} &middot; {tooltip.longitude.toFixed(1)}&deg; long.
+                      {t("insights.house")} {tooltip.house} &middot;{" "}
+                      {tooltip.longitude.toFixed(1)}&deg;{" "}
+                      {t("shared.constellationLongitudeAbbrev")}
                     </text>
                   </>
                 );
