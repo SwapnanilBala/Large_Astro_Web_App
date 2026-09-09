@@ -85,6 +85,10 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
                 <PlanetOrb
                   planet={position.name as PlanetName}
                   size="sm"
+                  /* Nudged to 28px in .skyPlanet .skyOrb. The size prop steps
+                     straight from sm (24) to md (36), and +50% overshoots a
+                     strip that is meant to be a quiet reference. */
+                  className={styles.skyOrb}
                   ariaLabel={`${position.name} in ${position.sign}`}
                 />
                 <span className={styles.skyPlanetName}>{position.name}</span>
