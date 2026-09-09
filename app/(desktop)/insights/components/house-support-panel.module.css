@@ -18,6 +18,17 @@
    */
   container-type: inline-size;
   container-name: houseSupport;
+
+  /*
+   * The three support bands, in one place.
+   *
+   * Read by the bars, the legend swatches beside them and the left rail on
+   * each role row, so a band is the same colour everywhere it appears. Light
+   * theme reassigns these three and all of it follows.
+   */
+  --band-strong: #7fd8c4;
+  --band-neutral: #d4a574;
+  --band-weak: #b98a86;
 }
 
 .intro {
@@ -207,9 +218,9 @@
   fill: rgba(255, 255, 255, 0.08);
 }
 
-.barStrong { fill: #7fd8c4; }
-.barNeutral { fill: #d4a574; }
-.barWeak { fill: #b98a86; }
+.barStrong { fill: var(--band-strong); }
+.barNeutral { fill: var(--band-neutral); }
+.barWeak { fill: var(--band-weak); }
 
 .barBaseline {
   stroke: rgba(245, 240, 230, 0.55);
@@ -261,6 +272,10 @@
   border-radius: 3px;
   flex: 0 0 auto;
 }
+
+.legendSwatch[data-band="strong"] { background: var(--band-strong); }
+.legendSwatch[data-band="neutral"] { background: var(--band-neutral); }
+.legendSwatch[data-band="weak"] { background: var(--band-weak); }
 
 .caveat {
   margin: 0;
@@ -346,9 +361,9 @@
 
 /* Same three colours as the bars, carried onto the left edge, so a row here
    is recognisable as the bar it came from without a second legend. */
-.role[data-band="strong"] { --role-accent: #7fd8c4; }
-.role[data-band="neutral"] { --role-accent: #d4a574; }
-.role[data-band="weak"] { --role-accent: #b98a86; }
+.role[data-band="strong"] { --role-accent: var(--band-strong); }
+.role[data-band="neutral"] { --role-accent: var(--band-neutral); }
+.role[data-band="weak"] { --role-accent: var(--band-weak); }
 
 /* The two houses already named in "Best supported" / "Least supported" above,
    so the fact and the subject can be found from either direction. */
@@ -455,4 +470,116 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* ═══════════════════════════════════════════════
+   ETHEREAL DAWN — the light theme
+   ═══════════════════════════════════════════════
+
+   The two reading cards carried the only hardcoded background on this panel:
+   an opaque near-black gradient, with no light counterpart. On a #fff8f5 page
+   that left them as two grey slabs sitting in a row beside cards that had
+   re-themed to near-white, which is what made the section read as grey-and-
+   white filler rather than the instruments it is built around.
+
+   Everything tuned to sit on black went with them. The ring track, the 100%
+   baseline, the bar tracks and the fact-row banding are all white at 3–9%
+   alpha, invisible over anything pale; the arc's own gradient starts at
+   #f8e3a8, which is roughly the page. Text was worse than invisible rather
+   than merely faint: --text-primary resolves to #36263a in light, so the
+   headline percentage was dark plum on near-black.
+
+   The interior is rose rather than the near-white .card uses in
+   insights.module.css. These two boxes have to hold their own next to the
+   plain cards beside them, and matching that white is what made them
+   disappear into the page in the first place. */
+
+:global(html[data-theme="light"]) .panel {
+  /* Deepened, not just re-tinted: the dark-theme mint and tan sit at about
+     1.5:1 on a pale card, and the bars are the reading. Weak stays in the
+     rose family it already implied. */
+  --band-strong: #2f8377;
+  --band-neutral: #a86f2e;
+  --band-weak: #a4506a;
+}
+
+:global(html[data-theme="light"]) .card {
+  border-color: rgba(179, 105, 132, 0.3);
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 46%),
+    linear-gradient(150deg, #fdeff1 0%, #fbe4ea 54%, #f6dbe4 100%);
+  box-shadow:
+    0 8px 22px rgba(146, 74, 100, 0.11),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+/* ── The instrument furniture, all of which was white-on-black ── */
+
+:global(html[data-theme="light"]) .ringTrack {
+  stroke: rgba(146, 74, 100, 0.16);
+}
+
+:global(html[data-theme="light"]) .barTrack {
+  fill: rgba(146, 74, 100, 0.13);
+}
+
+:global(html[data-theme="light"]) .ringBaseline {
+  stroke: rgba(84, 48, 64, 0.55);
+}
+
+:global(html[data-theme="light"]) .barBaseline {
+  stroke: rgba(84, 48, 64, 0.5);
+}
+
+:global(html[data-theme="light"]) .ringBaselineLabel {
+  fill: rgba(84, 48, 64, 0.75);
+}
+
+:global(html[data-theme="light"]) .barBaselineLabel {
+  fill: rgba(84, 48, 64, 0.82);
+}
+
+/* Was white at 3.5%, so the banding that separates one readout from the next
+   did not exist in light at all. */
+:global(html[data-theme="light"]) .fact {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+/* The arc. Its pale-gold start was lighter than the card it sat on. */
+:global(html[data-theme="light"]) .ringStopStart { stop-color: #c08532; }
+:global(html[data-theme="light"]) .ringStopMid { stop-color: #a86348; }
+:global(html[data-theme="light"]) .ringStopEnd { stop-color: #2f8377; }
+
+/* ── Below the seam: the twelve roles ── */
+
+:global(html[data-theme="light"]) .roles {
+  border-top-color: rgba(179, 105, 132, 0.22);
+}
+
+/* Deliberately quieter than .card above it: these twelve are a reference list
+   under the instruments, not a third instrument. Note this rule must not set
+   --role-accent -- it outranks .role[data-band="…"], and would flatten all
+   twelve rails to one colour. */
+:global(html[data-theme="light"]) .role {
+  border-color: rgba(179, 105, 132, 0.2);
+  background: rgba(255, 253, 251, 0.9);
+}
+
+:global(html[data-theme="light"]) .role[data-peak] {
+  background: color-mix(in srgb, var(--role-accent) 11%, rgba(255, 253, 251, 0.9));
+}
+
+:global(html[data-theme="light"]) .roleTag {
+  border-color: rgba(179, 105, 132, 0.26);
+}
+
+/* Two labels that were under AA on the rose card at their dark-theme tone:
+   the kicker measured 3.35:1 and the formula line 3.8:1, both small text. The
+   dimmer gold and the secondary ink take them to 5.56:1 and 5.27:1. */
+:global(html[data-theme="light"]) .cardKicker {
+  color: var(--accent-gold-dim, #805128);
+}
+
+:global(html[data-theme="light"]) .formula {
+  color: var(--text-secondary, #6f5967);
 }

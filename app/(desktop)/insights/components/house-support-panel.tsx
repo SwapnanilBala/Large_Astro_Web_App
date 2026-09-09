@@ -38,11 +38,15 @@ const BAND_CLASS: Record<HouseSupport["band"], string> = {
   weak: styles.barWeak,
 };
 
-const BAND_SWATCH: Record<HouseSupport["band"], string> = {
-  strong: "#7fd8c4",
-  neutral: "#d4a574",
-  weak: "#b98a86",
-};
+/*
+ * The band colours live in the stylesheet, not here.
+ *
+ * The legend swatches used to carry them as an inline `background`, which no
+ * stylesheet can override -- so when light theme deepened the three bands to
+ * hold contrast on a pale card, the bars moved and the legend beside them did
+ * not. `data-band` lets one `--band-*` triplet feed the bars, the legend and
+ * the role rails together.
+ */
 
 function polarPoint(angleDeg: number, radius: number): [number, number] {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
@@ -68,10 +72,14 @@ function AscendantRing({ support }: { support: HouseSupport }) {
         aria-label={`House 1 holds ${support.bindus} bindus, ${support.percent}% of the ${AVERAGE_BINDUS_PER_HOUSE.toFixed(1)} average.`}
       >
         <defs>
+          {/* Classed rather than left to `stopColor` alone: these three are
+              tuned to glow on a near-black card, and light theme has to be
+              able to reach them. The attributes stay as the dark values, so
+              the stops still render if the stylesheet has not applied. */}
           <linearGradient id="houseSupportRingGradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#f8e3a8" />
-            <stop offset="55%" stopColor="#d4a574" />
-            <stop offset="100%" stopColor="#6ce1d4" />
+            <stop className={styles.ringStopStart} offset="0%" stopColor="#f8e3a8" />
+            <stop className={styles.ringStopMid} offset="55%" stopColor="#d4a574" />
+            <stop className={styles.ringStopEnd} offset="100%" stopColor="#6ce1d4" />
           </linearGradient>
         </defs>
 
@@ -362,7 +370,7 @@ export default function HouseSupportPanel({
               <li key={band} className={styles.legendItem}>
                 <span
                   className={styles.legendSwatch}
-                  style={{ background: BAND_SWATCH[band] }}
+                  data-band={band}
                   aria-hidden="true"
                 />
                 {band === "strong" && "28+ bindus"}
