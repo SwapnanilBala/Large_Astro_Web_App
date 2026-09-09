@@ -8,6 +8,16 @@
 .panel {
   display: grid;
   gap: 1.4rem;
+  /*
+   * A container, because this panel is sized by its slot rather than by the
+   * window. It has its own full-width page, but /insights also drops it into
+   * one column of a three-up row, where it gets ~444px at any viewport. The
+   * stacking rule below used to be a viewport media query, so at 1920 it never
+   * fired and the second column was handed 104px for content that needs 201 --
+   * the distribution card was clipped by 98px with no way to scroll to it.
+   */
+  container-type: inline-size;
+  container-name: houseSupport;
 }
 
 .intro {
@@ -36,7 +46,15 @@
   align-items: stretch;
 }
 
-@media (max-width: 900px) {
+/*
+ * 820px of container, not 900px of viewport.
+ *
+ * On the standalone page the panel runs the width of .dashboard-shell less its
+ * padding, which at a 900px window is about 819px -- so this keeps the old
+ * breakpoint where it was there, and starts stacking correctly in the narrow
+ * slot on /insights, which no viewport width could ever have reached.
+ */
+@container houseSupport (max-width: 820px) {
   .columns {
     grid-template-columns: minmax(0, 1fr);
   }
