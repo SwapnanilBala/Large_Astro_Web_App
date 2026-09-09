@@ -1532,5 +1532,266 @@
     "allReadingsSubtitle": "{count} in totale",
     "newChart": "Nuova carta",
     "desktopView": "Vista desktop completa"
+  },
+  "strength": {
+    "planets": {
+      "rahu": "Rahu",
+      "ketu": "Ketu"
+    },
+    "page": {
+      "missingLead": "Torna al modulo e fornisci i dati completi di nascita prima di aprire l'analisi del sostegno delle case.",
+      "unavailableKicker": "Sostegno delle case",
+      "unavailableHeading": "Non è stato possibile preparare l'analisi del sostegno delle case.",
+      "unavailableLead": "Questa carta non ha restituito un Ashtakavarga completo, quindi le dodici case non possono essere valutate.",
+      "calculationFailed": "Calcolo della carta non riuscito",
+      "backToReading": "Torna alla tua lettura",
+      "heroTitle": "Il sostegno delle case di {name} nel dettaglio",
+      "heroLead": "Quanto sostegno ha ciascuna delle dodici case, di cosa risponde ognuna e l'aritmetica dietro entrambe le cose."
+    },
+    "bhavaNames": {
+      "1": "Tanu",
+      "2": "Dhana",
+      "3": "Sahaja",
+      "4": "Bandhu",
+      "5": "Putra",
+      "6": "Ari",
+      "7": "Yuvati",
+      "8": "Randhra",
+      "9": "Dharma",
+      "10": "Karma",
+      "11": "Labha",
+      "12": "Vyaya"
+    },
+    "houseGroups": {
+      "kendra": "Kendra",
+      "panaphara": "Panaphara",
+      "apoklima": "Apoklima",
+      "trikona": "Trikona",
+      "upachaya": "Upachaya",
+      "dusthana": "Dusthana"
+    },
+    "houseThemes": {
+      "1": "identità, aspetto e direzione",
+      "2": "beni, entrate e valori",
+      "3": "comunicazione, apprendimento e fratelli",
+      "4": "casa, radici e fondamenta emotive",
+      "5": "creatività, amore e figli",
+      "6": "servizio, routine e salute",
+      "7": "unioni e accordi",
+      "8": "risorse condivise e trasformazione",
+      "9": "credenze, saggezza e viaggi lontani",
+      "10": "carriera, autorità e posizione pubblica",
+      "11": "comunità, reti e obiettivi lunghi",
+      "12": "ritiro, subconscio e chiusura spirituale"
+    },
+    "signAbbr": {
+      "aries": "Ari",
+      "taurus": "Tor",
+      "gemini": "Gem",
+      "cancer": "Can",
+      "leo": "Leo",
+      "virgo": "Ver",
+      "libra": "Bil",
+      "scorpio": "Sco",
+      "sagittarius": "Sag",
+      "capricorn": "Cap",
+      "aquarius": "Acq",
+      "pisces": "Pes"
+    },
+    "houseSupport": {
+      "introBriefA": "L'Ashtakavarga distribuisce un totale fisso di",
+      "introBriefB": "bindu fra le dodici case. La media esatta è",
+      "introBriefC": ", quindi ogni casa si legge rispetto a quella cifra e non rispetto a un massimo.",
+      "introFullA": "L'Ashtakavarga assegna a ogni segno un punteggio su un totale fisso di",
+      "introFullB": "bindu — punti di sostegno planetario — e ogni casa eredita il punteggio del segno che la occupa. La media esatta è",
+      "introFullC": "bindu per casa, quindi una casa si legge rispetto a quel numero e non rispetto a un massimo. A sinistra, la sola prima casa:",
+      "introFullRatioFormula": "bindu ÷ 28.1",
+      "introFullD": ", il sostegno che la tua carta dà al sé. A destra, tutte e dodici risommate sullo stesso totale di 337, che è dove quel sostegno si trova davvero.",
+      "ringAriaLabel": "La casa 1 tiene {bindus} bindu, il {percent}% della media di {average}.",
+      "ringCaption": "della media",
+      "barsAriaLabel": "Bindu in ciascuna delle dodici case, rispetto alla media di 28.1.",
+      "ascKicker": "Prima casa",
+      "ascTitle": "Il sostegno al sé",
+      "ascFormula": "{bindus} bindu in {sign} ÷ 28.1 di media",
+      "ascSignLabel": "Segno sulla 1ª",
+      "ascBindusLabel": "Bindu accumulati",
+      "ascBindusValue": "{bindus} su 337",
+      "ascAgainstAverageLabel": "Rispetto alla media",
+      "wholeKicker": "Tutte e dodici le case",
+      "wholeTitle": "Dove stanno i {bindus} bindu",
+      "wholeFormula": "{bindus} bindu su 12 case ÷ 337 del totale = {percent}%",
+      "wholeFormulaExact": "— il totale è fisso, quindi la lettura sta nella distribuzione",
+      "bandStrong": "28+ bindu",
+      "bandNeutral": "26–27 bindu",
+      "bandWeak": "25 o meno",
+      "aboveAverageLabel": "Sopra la media",
+      "aboveAverageValue": "{count} case su 12",
+      "bestSupportedLabel": "Più sostenuta",
+      "leastSupportedLabel": "Meno sostenuta",
+      "houseReadout": "Casa {house} · {sign} · {bindus}",
+      "caveat": "Il sistema di case di questa carta mette un segno su due cuspidi e ne lascia un altro senza nessuna, quindi le dodici case non tornano a un 337 netto — qui {bindus}. Le cifre per casa restano valide; il totale racconta la divisione delle case tanto quanto la carta.",
+      "tableCaption": "Bindu e percentuale di sostegno per casa",
+      "tableHouse": "Casa",
+      "tableSign": "Segno",
+      "tableBindus": "Bindu",
+      "tablePercent": "Percentuale della media"
+    },
+    "roles": {
+      "kicker": "Di cosa risponde ogni casa",
+      "title": "Quale casa si occupa di cosa",
+      "introA": "Le barre qui sopra dicono quanto sostegno ha una casa. Questa sezione dice",
+      "introEm": "per cosa",
+      "introB": ". Ogni riga porta il segno che la tua carta mette su quella casa e i bindu arrivati con esso, così un numero sopra e un tema qui sono la stessa casa.",
+      "srHouse": "Casa {house},",
+      "srReadout": "{sign}, {bindus} bindu",
+      "readout": "{sign} · {bindus}",
+      "bhavaLabel": "{name} Bhava",
+      "peakBest": "più sostenuta",
+      "peakLeast": "meno sostenuta",
+      "legendA": "sono i quattro angoli su cui la carta è costruita;",
+      "legendB": "e",
+      "legendC": "sono le case che li seguono e quelle che se ne allontanano. Oltre a questo,",
+      "legendD": "sono le case in cui si legge l'arrivo del merito,",
+      "legendE": "quelle che migliorano con l'età e l'impegno, e",
+      "legendF": "quelle che prima chiedono qualcosa. Una casa può appartenere a più gruppi — la 6ª è insieme Upachaya e Dusthana, ed è per questo che la difficoltà lì si legge di solito come quella da cui si esce crescendo."
+    },
+    "shadbala": {
+      "kicker": "Forza Planetaria",
+      "heading": "Analisi Shadbala",
+      "intro": "Lo Shadbala misura la forza planetaria in sei parti. Un rapporto di forza sopra 1.0 indica che il pianeta raggiunge il minimo richiesto; sotto 0.7 segnala un'area che può aver bisogno di un rinforzo consapevole. Il riepilogo normalizza ogni pianeta sul proprio minimo richiesto prima di metterlo in classifica.",
+      "highestRatioLabel": "Rapporto più alto",
+      "lowestRatioLabel": "Rapporto più basso",
+      "summaryValue": "{virupas} virupa ({ratio}x)",
+      "chartAriaLabel": "Grafico della forza Shadbala",
+      "requiredMinimumTitle": "Minimo richiesto: {value}",
+      "ratioBadge": "{ratio}x",
+      "components": {
+        "sthanaBala": {
+          "label": "Sthana Bala",
+          "description": "Forza posizionale da segno, casa, decano e collocazione nelle carte divisionali"
+        },
+        "digBala": {
+          "label": "Dig Bala",
+          "description": "Forza direzionale basata sull'allineamento con le case angolari"
+        },
+        "kalaBala": {
+          "label": "Kala Bala",
+          "description": "Forza temporale da giorno/notte e fase lunare"
+        },
+        "cheshtaBala": {
+          "label": "Cheshta Bala",
+          "description": "Forza di moto data dal movimento planetario"
+        },
+        "naisargikaBala": {
+          "label": "Naisargika Bala",
+          "description": "Forza naturale intrinseca (valore fisso)"
+        },
+        "drikBala": {
+          "label": "Drik Bala",
+          "description": "Forza degli aspetti, benefici e malefici"
+        }
+      },
+      "totalLabel": "Totale:",
+      "totalSuffix": "virupa ({rupas} rupa)",
+      "requiredLabel": "Richiesto:",
+      "strengthLabels": {
+        "veryStrong": "Molto Forte",
+        "strong": "Forte",
+        "moderate": "Moderato",
+        "weak": "Debole"
+      },
+      "signContextKicker": "Contesto per segno",
+      "signContextHeading": "Segno più forte e più debole",
+      "signContextSource": "Fonte: Sarvashtakavarga (SAV)",
+      "signContextIntro": "Lo Shadbala mette in classifica i pianeti, non i segni. Le etichette di segno qui sotto vengono dai totali del Sarvashtakavarga: più bindu indicano relativamente più sostegno quando il campo di quel segno si attiva, meno bindu indicano che serve più cura. Non sono un verdetto su un segno zodiacale né una previsione a sé.",
+      "signSummaryAriaLabel": "Riepilogo della forza dei segni secondo il Sarvashtakavarga",
+      "strongestSignLabel": "Segno più forte secondo il SAV",
+      "strongestSignsLabel": "Segni a pari merito come più forti secondo il SAV",
+      "weakestSignLabel": "Segno più debole secondo il SAV",
+      "weakestSignsLabel": "Segni a pari merito come più deboli secondo il SAV",
+      "savBindus": "{bindus} bindu SAV",
+      "relatesLabel": "Come si lega allo Shadbala",
+      "highestRatioSentence": "ha il rapporto Shadbala più alto ({ratio}x)",
+      "lowestRatioSentence": "ha il rapporto Shadbala più basso ({ratio}x)",
+      "placedIn": "ed è collocato in {sign}",
+      "strongestSignMatch": "Anche la sua posizione natale cade in un segno con SAV più alto. Trattali come due indicatori di contesto separati, non come un punteggio combinato.",
+      "strongestSignNoMatch": "Questo misura la capacità planetaria separatamente dal punteggio SAV del segno; i due non vanno mediati.",
+      "weakestSignMatch": "Anche la sua posizione natale cade in un segno con SAV più basso. Trattali come due indicatori di contesto separati, non come un punteggio combinato.",
+      "weakestSignNoMatch": "Un segno con SAV più basso è un segnale diverso da un pianeta con Shadbala più basso, quindi leggi ciascuno nel proprio contesto.",
+      "unavailableTitle": "Il contesto per segno non è disponibile per questa lettura.",
+      "unavailableBody": "Lo Shadbala continua a indicare i pianeti più forti e più deboli qui sopra, ma da solo non può indicare un segno più forte o più debole. I dati SAV non erano inclusi, quindi non viene dedotta alcuna conclusione per segno."
+    },
+    "ashtakavarga": {
+      "kicker": "Forza di Transito Vedica",
+      "heading": "Ashtakavarga",
+      "intro": "Ogni segno riceve un punteggio in base a quanto sostegno planetario porta. I punteggi più alti segnano le aree in cui per te le cose tendono a muoversi più facilmente.",
+      "savTotalTab": "Totale SAV",
+      "transitBadge": "{planet} in transito",
+      "mostSupportHeading": "Dove hai più sostegno",
+      "morePatienceHeading": "Dove potresti aver bisogno di più pazienza"
+    },
+    "yogas": {
+      "kicker": "Combinazioni Classiche",
+      "heading": "Yoga Planetari",
+      "intro": "Gli yoga sono combinazioni planetarie classiche che danno forma a modelli di vita. Ogni yoga qui sotto è stato rilevato in questa carta natale in base alle posizioni dei pianeti, al governo dei segni e alla collocazione nelle case.",
+      "filterAriaLabel": "Filtro per categoria di yoga",
+      "listAriaLabel": "Yoga rilevati",
+      "empty": "Nessuno yoga di questa categoria trovato in questa carta.",
+      "categories": {
+        "all": "Tutti gli yoga",
+        "mahapurusha": "Mahapurusha",
+        "wealth": "Ricchezza e Raja",
+        "benefic": "Benefici",
+        "challenging": "Impegnativi",
+        "viparita": "Viparita Raja",
+        "nabhasa": "Nabhasa"
+      },
+      "strengthAria": "Forza: {strength}",
+      "strengthLabels": {
+        "strong": "forte",
+        "moderate": "moderato",
+        "weak": "debole"
+      },
+      "topBadge": "Top {rank}",
+      "occurrenceChance": "{chance}% di probabilità",
+      "detailFallback": "{name} è una delle combinazioni rilevate più forti in questa carta, quindi i suoi effetti meritano più peso delle corrispondenze più leggere qui sotto.",
+      "activationTimingLabel": "Momento di attivazione",
+      "traitsAriaLabel": "Tratti di {name}",
+      "activationStrong": "Più attivo durante le dasha dei pianeti coinvolti e nei transiti importanti sulle case dello yoga.",
+      "activationModerate": "Più percepibile quando la dasha o il transito mettono in risalto i pianeti coinvolti.",
+      "activationWeak": "Di solito situazionale; diventa visibile con brevi inneschi di transito o scelte di vita mirate.",
+      "traits": {
+        "mahapurusha": {
+          "1": "comando",
+          "2": "direzione di vita",
+          "3": "forza visibile"
+        },
+        "wealth": {
+          "1": "risorse",
+          "2": "status",
+          "3": "opportunità"
+        },
+        "benefic": {
+          "1": "sostegno",
+          "2": "crescita",
+          "3": "facilità"
+        },
+        "challenging": {
+          "1": "disciplina",
+          "2": "riparazione",
+          "3": "consapevolezza di sé"
+        },
+        "viparita": {
+          "1": "resilienza",
+          "2": "capovolgimento",
+          "3": "recupero"
+        },
+        "nabhasa": {
+          "1": "struttura ricorrente",
+          "2": "temperamento",
+          "3": "impianto di vita"
+        }
+      }
+    }
   }
 }
