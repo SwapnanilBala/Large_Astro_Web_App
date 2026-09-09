@@ -1,0 +1,23 @@
+{
+  "shared": {
+    "rootErrorHeading": "The Stars Have Momentarily Misaligned",
+    "rootErrorDescription": "A cosmic disturbance has disrupted your experience. The celestial mechanics are being recalibrated.",
+    "rootErrorDetailsSummary": "View technical details",
+    "rootErrorDigest": "Digest: {digest}",
+    "rootErrorTryAgain": "Try Again",
+    "rootErrorReturnHome": "Return Home",
+    "chartErrorKicker": "Chart Error",
+    "chartErrorHeading": "Chart calculation could not be completed.",
+    "chartErrorLead": "The chart engine could not finish this request. Please review the birth details, location, and selected engine, then try again.",
+    "chartErrorLeadAdvanced": "The chart engine encountered an error. Please check that the {package} npm package is installed and your input data is valid, then try again.",
+    "chartErrorDetail": "Error: {detail}",
+    "chartErrorNoData": "No data received",
+    "chartErrorRetry": "Retry",
+    "chartRequestTimedOut": "Request timed out after {seconds} seconds. The server may be busy. Please try again.",
+    "chartUnknownApiError": "Unknown API error",
+    "constellationAria": "Constellation chart showing planetary positions for ascendant {ascendant}",
+    "constellationTitle": "Constellation map with {ascendant} ascendant",
+    "constellationRasi": "Rasi",
+    "constellationLongitudeAbbrev": "long."
+  }
+}
