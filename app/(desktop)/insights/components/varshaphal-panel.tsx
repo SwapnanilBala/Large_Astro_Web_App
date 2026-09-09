@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
+import { useRouteMessages } from "@/lib/i18n-context";
+import timingMessages from "@/messages/en.timing.json";
 import styles from "./varshaphal-panel.module.css";
 
 type VarshaphalPanelProps = {
@@ -10,22 +12,66 @@ type VarshaphalPanelProps = {
   birthDate: string;
 };
 
+type Translator = (key: string, params?: Record<string, string>) => string;
+
 const TIMEOUT_MS = 45_000;
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const HOUSE_TIMELINE_LABELS: Record<number, string> = {
-  1: "Identity",
-  2: "Money",
-  3: "Voice",
-  4: "Home",
-  5: "Joy",
-  6: "Routines",
-  7: "Bonds",
-  8: "Change",
-  9: "Vision",
-  10: "Career",
-  11: "Allies",
-  12: "Closure",
+
+/* Keys rather than labels, in month order — the index is the calendar month,
+   so the array cannot be reordered. */
+const MONTH_LABEL_KEYS = [
+  "timing.varshaphal.months.jan",
+  "timing.varshaphal.months.feb",
+  "timing.varshaphal.months.mar",
+  "timing.varshaphal.months.apr",
+  "timing.varshaphal.months.may",
+  "timing.varshaphal.months.jun",
+  "timing.varshaphal.months.jul",
+  "timing.varshaphal.months.aug",
+  "timing.varshaphal.months.sep",
+  "timing.varshaphal.months.oct",
+  "timing.varshaphal.months.nov",
+  "timing.varshaphal.months.dec",
+];
+const HOUSE_TIMELINE_KEYS: Record<number, string> = {
+  1: "timing.varshaphal.houseThemes.1",
+  2: "timing.varshaphal.houseThemes.2",
+  3: "timing.varshaphal.houseThemes.3",
+  4: "timing.varshaphal.houseThemes.4",
+  5: "timing.varshaphal.houseThemes.5",
+  6: "timing.varshaphal.houseThemes.6",
+  7: "timing.varshaphal.houseThemes.7",
+  8: "timing.varshaphal.houseThemes.8",
+  9: "timing.varshaphal.houseThemes.9",
+  10: "timing.varshaphal.houseThemes.10",
+  11: "timing.varshaphal.houseThemes.11",
+  12: "timing.varshaphal.houseThemes.12",
 };
+
+/* Translated at render, not when the request fails, so a language change
+   carries the message with it. */
+type VarshaphalError =
+  | { kind: "api"; status: string }
+  | { kind: "apiMessage"; text: string }
+  | { kind: "timeout" }
+  | { kind: "loadFailed" };
+
+function varshaphalErrorText(error: VarshaphalError, tr: Translator): string {
+  switch (error.kind) {
+    case "api":
+      return tr("timing.varshaphal.apiError", { status: error.status });
+    case "apiMessage":
+      return error.text;
+    case "timeout":
+      return tr("timing.varshaphal.timeoutMessage");
+    default:
+      return tr("timing.varshaphal.loadFailed");
+  }
+}
+
+/** "H7" and friends — the abbreviation is copy, so it comes from the catalog. */
+function houseShort(house: number, tr: Translator): string {
+  return tr("timing.varshaphal.houseShort", { house: String(house) });
+}
 
 type TimelineTone = "setup" | "growth" | "peak" | "review";
 
@@ -57,6 +103,14 @@ type WeatherMeter = {
   note: string;
 };
 
+/* `trend` doubles as a CSS-module class suffix, so it stays an id and the copy
+   is looked up here. */
+const TREND_KEYS: Record<WeatherMeter["trend"], string> = {
+  rising: "timing.varshaphal.weather.trendRising",
+  steady: "timing.varshaphal.weather.trendSteady",
+  review: "timing.varshaphal.weather.trendReview",
+};
+
 function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   return buildBirthProfileApiUrl("/api/varshaphal", window.location.origin, queryString, {
     target_year: targetYear,
@@ -82,7 +136,11 @@ function wrapMonth(index: number): number {
   return ((index % 12) + 12) % 12;
 }
 
-function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
+function joinThemes(themes: string[], tr: Translator): string {
+  return themes.join(tr("timing.varshaphal.andSeparator"));
+}
+
+function buildYearTimeline(data: VarshaphalResult, tr: Translator): TimelineMonth[] {
   const returnMonth = wrapMonth(new Date(data.solarReturnMoment).getMonth());
   const activatedHouse = data.profection.activatedHouse;
   const munthaHouse = data.muntha.house;
@@ -90,16 +148,21 @@ function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
     [activatedHouse, munthaHouse, 10].map((house) => wrapMonth(returnMonth + house - 1))
   );
 
-  return MONTH_LABELS.map((month, index) => {
+  return MONTH_LABEL_KEYS.map((monthKey, index) => {
+    const month = tr(monthKey);
     const distanceFromReturn = wrapMonth(index - returnMonth);
     const house = ((activatedHouse + distanceFromReturn - 1) % 12) + 1;
-    const houseTheme = HOUSE_TIMELINE_LABELS[house] ?? "Focus";
+    const houseTheme = tr(
+      HOUSE_TIMELINE_KEYS[house] ?? "timing.varshaphal.houseThemes.fallback"
+    );
 
     if (index === returnMonth) {
       return {
         month,
-        title: "Solar return",
-        note: `${data.returnChart.ascendant.sign} rises; reset the year's operating rhythm.`,
+        title: tr("timing.varshaphal.timeline.solarReturn"),
+        note: tr("timing.varshaphal.timeline.solarReturnNote", {
+          sign: data.returnChart.ascendant.sign,
+        }),
         tone: "peak",
       };
     }
@@ -107,8 +170,8 @@ function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
     if (index === wrapMonth(returnMonth + 3) || index === wrapMonth(returnMonth + 9)) {
       return {
         month,
-        title: "Course correct",
-        note: `${houseTheme} themes ask for adjustment before the next push.`,
+        title: tr("timing.varshaphal.timeline.courseCorrect"),
+        note: tr("timing.varshaphal.timeline.courseCorrectNote", { theme: houseTheme }),
         tone: "review",
       };
     }
@@ -116,8 +179,8 @@ function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
     if (actionMonths.has(index)) {
       return {
         month,
-        title: "Visible movement",
-        note: `${houseTheme} matters become easier to act on and measure.`,
+        title: tr("timing.varshaphal.timeline.visibleMovement"),
+        note: tr("timing.varshaphal.timeline.visibleMovementNote", { theme: houseTheme }),
         tone: "growth",
       };
     }
@@ -125,41 +188,58 @@ function buildYearTimeline(data: VarshaphalResult): TimelineMonth[] {
     return {
       month,
       title: houseTheme,
-      note: `Work the house ${house} thread through steady, practical choices.`,
+      note: tr("timing.varshaphal.timeline.steadyNote", { house: String(house) }),
       tone: "setup",
     };
   });
 }
 
-function getAnnualTheme(data: VarshaphalResult): string {
-  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase();
-  return `${data.varshesh.planet} leads a house ${data.profection.activatedHouse} year, pulling ${themes || "personal timing"} into the foreground.`;
+function getAnnualTheme(data: VarshaphalResult, tr: Translator): string {
+  const themes = joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase();
+  return tr("timing.varshaphal.hero.theme", {
+    planet: data.varshesh.planet,
+    house: String(data.profection.activatedHouse),
+    themes: themes || tr("timing.varshaphal.hero.themesFallback"),
+  });
 }
 
 function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <section className={styles.themeHero} aria-labelledby="annual-compass-title">
       <div className={styles.themeHeroCopy}>
-        <span className={styles.eyebrow}>Annual Compass</span>
-        <h3 id="annual-compass-title">{getAnnualTheme(data)}</h3>
+        <span className={styles.eyebrow}>{tr("timing.varshaphal.hero.eyebrow")}</span>
+        <h3 id="annual-compass-title">{getAnnualTheme(data, tr)}</h3>
         <p>{data.yearSummary.yearLordInterpretation}</p>
         <span className={styles.cycleLabel}>
-          Active cycle: birthday {data.year} to birthday {data.year + 1}
+          {tr("timing.varshaphal.hero.cycle", {
+            from: String(data.year),
+            to: String(data.year + 1),
+          })}
         </span>
       </div>
-      <div className={styles.themeStats} aria-label={`${data.year} annual timing highlights`}>
+      <div
+        className={styles.themeStats}
+        aria-label={tr("timing.varshaphal.hero.highlightsLabel", { year: String(data.year) })}
+      >
         <div className={styles.themeStat}>
-          <span>Profection</span>
-          <strong>H{data.profection.activatedHouse}</strong>
-          <small>{data.profection.activatedSign} · age {data.profection.age}</small>
+          <span>{tr("timing.varshaphal.hero.profection")}</span>
+          <strong>{houseShort(data.profection.activatedHouse, tr)}</strong>
+          <small>
+            {tr("timing.varshaphal.hero.signAge", {
+              sign: data.profection.activatedSign,
+              age: String(data.profection.age),
+            })}
+          </small>
         </div>
         <div className={styles.themeStat}>
-          <span>Muntha</span>
-          <strong>H{data.muntha.house}</strong>
+          <span>{tr("timing.varshaphal.hero.muntha")}</span>
+          <strong>{houseShort(data.muntha.house, tr)}</strong>
           <small>{data.muntha.sign}</small>
         </div>
         <div className={styles.themeStat}>
-          <span>Year Lord</span>
+          <span>{tr("timing.varshaphal.hero.yearLord")}</span>
           <strong>{data.varshesh.planet}</strong>
           <small>{data.varshesh.reason}</small>
         </div>
@@ -169,31 +249,41 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
 }
 
 function YearInFocus({ data }: { data: VarshaphalResult }) {
-  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase() || "the matters in front of you";
+  const tr = useRouteMessages(timingMessages);
+  const themes =
+    joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase() ||
+    tr("timing.varshaphal.yearInFocus.themesFallback");
 
   return (
     <section className={styles.overviewCard} aria-labelledby="year-in-focus-title">
       <div className={styles.overviewHeader}>
         <div>
-          <span className={styles.eyebrow}>Your priorities</span>
-          <h3 id="year-in-focus-title">Year in Focus</h3>
+          <span className={styles.eyebrow}>{tr("timing.varshaphal.yearInFocus.eyebrow")}</span>
+          <h3 id="year-in-focus-title">{tr("timing.varshaphal.yearInFocus.title")}</h3>
         </div>
         <p>{data.yearSummary.ascendantComparison}</p>
       </div>
       <div className={styles.summaryCards}>
         <article className={styles.summaryCard}>
-          <span>Theme</span>
-          <strong>House {data.profection.activatedHouse}: {themes}</strong>
-          <p>Your annual profection makes these the work worth returning to all year.</p>
+          <span>{tr("timing.varshaphal.yearInFocus.themeLabel")}</span>
+          <strong>
+            {tr("timing.varshaphal.yearInFocus.themeValue", {
+              house: String(data.profection.activatedHouse),
+              themes,
+            })}
+          </strong>
+          <p>{tr("timing.varshaphal.yearInFocus.themeNote")}</p>
         </article>
         <article className={styles.summaryCard}>
-          <span>Best use</span>
-          <strong>Follow {data.varshesh.planet}&apos;s lead</strong>
+          <span>{tr("timing.varshaphal.yearInFocus.bestUseLabel")}</span>
+          <strong>
+            {tr("timing.varshaphal.yearInFocus.bestUseValue", { planet: data.varshesh.planet })}
+          </strong>
           <p>{data.yearSummary.yearLordInterpretation}</p>
         </article>
         <article className={styles.summaryCard}>
-          <span>Keep in mind</span>
-          <strong>Emotional climate</strong>
+          <span>{tr("timing.varshaphal.yearInFocus.keepInMindLabel")}</span>
+          <strong>{tr("timing.varshaphal.yearInFocus.keepInMindValue")}</strong>
           <p>{data.yearSummary.emotionalTone}</p>
         </article>
       </div>
@@ -208,36 +298,50 @@ type FocusCard = {
   prompt: string;
 };
 
-function buildFocusCards(data: VarshaphalResult): FocusCard[] {
-  const themes = data.profection.themes.slice(0, 2).join(" and ").toLowerCase() || "this house's themes";
+function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
+  const themes =
+    joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase() ||
+    tr("timing.varshaphal.focusAreas.themesFallback");
   const cards: FocusCard[] = [
     {
-      title: `House ${data.profection.activatedHouse}: ${themes}`,
-      source: "Annual Profection",
-      detail: `${data.profection.activatedSign} is activated, with ${data.profection.lordOfYear} as the Lord of the Year.`,
-      prompt: "What one recurring commitment would make this area feel more intentional?",
+      title: tr("timing.varshaphal.focusAreas.profectionTitle", {
+        house: String(data.profection.activatedHouse),
+        themes,
+      }),
+      source: tr("timing.varshaphal.focusAreas.profectionSource"),
+      detail: tr("timing.varshaphal.focusAreas.profectionDetail", {
+        sign: data.profection.activatedSign,
+        lord: data.profection.lordOfYear,
+      }),
+      prompt: tr("timing.varshaphal.focusAreas.profectionPrompt"),
     },
     {
-      title: `Muntha in house ${data.muntha.house}`,
-      source: "Muntha",
-      detail: `${data.muntha.sign} draws the year’s attention to the themes of this return-chart house.`,
-      prompt: "Where is steady attention more useful than a dramatic change?",
+      title: tr("timing.varshaphal.focusAreas.munthaTitle", {
+        house: String(data.muntha.house),
+      }),
+      source: tr("timing.varshaphal.focusAreas.munthaSource"),
+      detail: tr("timing.varshaphal.focusAreas.munthaDetail", { sign: data.muntha.sign }),
+      prompt: tr("timing.varshaphal.focusAreas.munthaPrompt"),
     },
   ];
 
   if (data.profection.activatedPlanets.length > 0) {
     cards.push({
-      title: `${data.profection.activatedPlanets.join(" and ")} activated`,
-      source: "Natal activation",
-      detail: `These natal planets sit in ${data.profection.activatedSign}, giving the profected house extra weight.`,
-      prompt: "How can you use these planetary strengths deliberately?",
+      title: tr("timing.varshaphal.focusAreas.activatedTitle", {
+        planets: joinThemes(data.profection.activatedPlanets, tr),
+      }),
+      source: tr("timing.varshaphal.focusAreas.activatedSource"),
+      detail: tr("timing.varshaphal.focusAreas.activatedDetail", {
+        sign: data.profection.activatedSign,
+      }),
+      prompt: tr("timing.varshaphal.focusAreas.activatedPrompt"),
     });
   } else {
     cards.push({
-      title: `${data.varshesh.planet} sets the pace`,
-      source: "Year Lord",
+      title: tr("timing.varshaphal.focusAreas.yearLordTitle", { planet: data.varshesh.planet }),
+      source: tr("timing.varshaphal.focusAreas.yearLordSource"),
       detail: data.varshesh.reason,
-      prompt: "Which decision would benefit from this planet’s qualities?",
+      prompt: tr("timing.varshaphal.focusAreas.yearLordPrompt"),
     });
   }
 
@@ -245,14 +349,16 @@ function buildFocusCards(data: VarshaphalResult): FocusCard[] {
 }
 
 function FocusAreas({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <section className={styles.prioritySection} aria-labelledby="focus-areas-title">
       <div className={styles.priorityHeader}>
-        <span className={styles.eyebrow}>Where to invest your attention</span>
-        <h3 id="focus-areas-title">Focus Areas</h3>
+        <span className={styles.eyebrow}>{tr("timing.varshaphal.focusAreas.eyebrow")}</span>
+        <h3 id="focus-areas-title">{tr("timing.varshaphal.focusAreas.title")}</h3>
       </div>
       <div className={styles.priorityGrid}>
-        {buildFocusCards(data).map((item, index) => (
+        {buildFocusCards(data, tr).map((item, index) => (
           <article key={item.source} className={styles.priorityCard}>
             <span className={styles.priorityNumber}>{String(index + 1).padStart(2, "0")}</span>
             <span className={styles.sourceLabel}>{item.source}</span>
@@ -273,7 +379,7 @@ type MajorForce = {
   detail: string;
 };
 
-function buildMajorForces(data: VarshaphalResult): MajorForce[] {
+function buildMajorForces(data: VarshaphalResult, tr: Translator): MajorForce[] {
   const placements = data.returnChart.planets;
   const seen = new Set<string>();
   const forces: MajorForce[] = [];
@@ -284,40 +390,54 @@ function buildMajorForces(data: VarshaphalResult): MajorForce[] {
     forces.push({
       planet,
       label,
-      placement: `${placement.sign} · house ${placement.house} · ${placement.degree_in_sign.toFixed(1)}°`,
+      placement: tr("timing.varshaphal.forces.placement", {
+        sign: placement.sign,
+        house: String(placement.house),
+        degree: placement.degree_in_sign.toFixed(1),
+      }),
       detail,
     });
   };
 
   addForce(
     data.varshesh.planet,
-    "Year Lord",
-    `${data.varshesh.planet} directs the year’s larger choices through its solar-return placement.`,
+    tr("timing.varshaphal.forces.yearLord"),
+    tr("timing.varshaphal.forces.yearLordDetail", { planet: data.varshesh.planet }),
   );
 
   const moon = placements.find((planet) => planet.name === "Moon");
   if (moon) {
-    addForce("Moon", "Emotional climate", `Your Moon in house ${moon.house} colors the habits and needs that feel most immediate.`);
+    addForce(
+      "Moon",
+      tr("timing.varshaphal.forces.emotionalClimate"),
+      tr("timing.varshaphal.forces.moonDetail", { house: String(moon.house) }),
+    );
   }
 
   placements
     .filter((planet) => [1, 4, 7, 10].includes(planet.house))
     .forEach((planet) => {
-      addForce(planet.name, `Angular · house ${planet.house}`, "Angular placements are especially visible and tend to shape the year’s events directly.");
+      addForce(
+        planet.name,
+        tr("timing.varshaphal.forces.angular", { house: String(planet.house) }),
+        tr("timing.varshaphal.forces.angularDetail"),
+      );
     });
 
   return forces.slice(0, 4);
 }
 
 function MajorForces({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <section className={styles.forceSection} aria-labelledby="major-forces-title">
       <div className={styles.priorityHeader}>
-        <span className={styles.eyebrow}>The signals that carry the most weight</span>
-        <h3 id="major-forces-title">Major Forces This Year</h3>
+        <span className={styles.eyebrow}>{tr("timing.varshaphal.forces.eyebrow")}</span>
+        <h3 id="major-forces-title">{tr("timing.varshaphal.forces.title")}</h3>
       </div>
       <div className={styles.forceGrid}>
-        {buildMajorForces(data).map((force) => (
+        {buildMajorForces(data, tr).map((force) => (
           <article key={force.planet} className={styles.forceCard}>
             <span className={styles.sourceLabel}>{force.label}</span>
             <h4>{force.planet}</h4>
@@ -330,15 +450,35 @@ function MajorForces({ data }: { data: VarshaphalResult }) {
   );
 }
 
-function buildSeasonalForecasts(data: VarshaphalResult): SeasonalForecast[] {
-  const timeline = buildYearTimeline(data);
+function buildSeasonalForecasts(data: VarshaphalResult, tr: Translator): SeasonalForecast[] {
+  const timeline = buildYearTimeline(data, tr);
   const strongestInfluence = data.yearSummary.strongInfluences[0] ?? data.yearSummary.ascendantComparison;
   const focusArea = data.yearSummary.focusAreas[0] ?? data.yearSummary.emotionalTone;
   const quarters = [
-    { label: "Q1", phase: "Setup", months: timeline.slice(0, 3), guidance: "Set the rhythm and choose what deserves attention first." },
-    { label: "Q2", phase: "Momentum", months: timeline.slice(3, 6), guidance: "Move visible priorities forward while support is easier to gather." },
-    { label: "Q3", phase: "Pressure Test", months: timeline.slice(6, 9), guidance: "Simplify commitments and correct what has drifted off course." },
-    { label: "Q4", phase: "Harvest", months: timeline.slice(9, 12), guidance: "Collect results, close loops, and prepare the next yearly cycle." },
+    {
+      label: tr("timing.varshaphal.seasons.q1Label"),
+      phase: tr("timing.varshaphal.seasons.q1Phase"),
+      months: timeline.slice(0, 3),
+      guidance: tr("timing.varshaphal.seasons.q1Guidance"),
+    },
+    {
+      label: tr("timing.varshaphal.seasons.q2Label"),
+      phase: tr("timing.varshaphal.seasons.q2Phase"),
+      months: timeline.slice(3, 6),
+      guidance: tr("timing.varshaphal.seasons.q2Guidance"),
+    },
+    {
+      label: tr("timing.varshaphal.seasons.q3Label"),
+      phase: tr("timing.varshaphal.seasons.q3Phase"),
+      months: timeline.slice(6, 9),
+      guidance: tr("timing.varshaphal.seasons.q3Guidance"),
+    },
+    {
+      label: tr("timing.varshaphal.seasons.q4Label"),
+      phase: tr("timing.varshaphal.seasons.q4Phase"),
+      months: timeline.slice(9, 12),
+      guidance: tr("timing.varshaphal.seasons.q4Guidance"),
+    },
   ];
 
   return quarters.map((quarter, index) => {
@@ -347,16 +487,22 @@ function buildSeasonalForecasts(data: VarshaphalResult): SeasonalForecast[] {
       label: quarter.label,
       phase: quarter.phase,
       focus: index % 2 === 0 ? focusArea : strongestInfluence,
-      guidance: `${peakMonth.month}: ${peakMonth.title}. ${quarter.guidance}`,
+      guidance: tr("timing.varshaphal.seasons.guidance", {
+        month: peakMonth.month,
+        title: peakMonth.title,
+        guidance: quarter.guidance,
+      }),
       tone: peakMonth.tone,
     };
   });
 }
 
 function SeasonalForecastCards({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <div className={styles.seasonGrid}>
-      {buildSeasonalForecasts(data).map((season) => (
+      {buildSeasonalForecasts(data, tr).map((season) => (
         <article
           key={season.label}
           className={`${styles.seasonCard} ${styles[`seasonCard${season.tone[0].toUpperCase()}${season.tone.slice(1)}`]}`}
@@ -373,8 +519,11 @@ function SeasonalForecastCards({ data }: { data: VarshaphalResult }) {
   );
 }
 
-function buildTimingWindows(data: VarshaphalResult): { best: TimingWindow[]; watch: TimingWindow[] } {
-  const timeline = buildYearTimeline(data);
+function buildTimingWindows(
+  data: VarshaphalResult,
+  tr: Translator,
+): { best: TimingWindow[]; watch: TimingWindow[] } {
+  const timeline = buildYearTimeline(data, tr);
   const best = timeline
     .filter((month) => month.tone === "peak" || month.tone === "growth")
     .slice(0, 4)
@@ -382,7 +531,9 @@ function buildTimingWindows(data: VarshaphalResult): { best: TimingWindow[]; wat
       month: month.month,
       title: month.title,
       note: month.tone === "peak"
-        ? `Launch or reset around the solar return signature: ${data.returnChart.ascendant.sign} rising.`
+        ? tr("timing.varshaphal.windows.launchNote", {
+            sign: data.returnChart.ascendant.sign,
+          })
         : month.note,
     }));
 
@@ -392,14 +543,14 @@ function buildTimingWindows(data: VarshaphalResult): { best: TimingWindow[]; wat
     .map((month) => ({
       month: month.month,
       title: month.title,
-      note: `${month.note} Avoid forcing outcomes before the signal is clear.`,
+      note: tr("timing.varshaphal.windows.watchNote", { note: month.note }),
     }));
 
   if (watch.length < 3) {
     watch.push({
       month: timeline[11].month,
-      title: "Close loops",
-      note: "Review unfinished commitments before the next solar return cycle starts.",
+      title: tr("timing.varshaphal.windows.closeLoops"),
+      note: tr("timing.varshaphal.windows.closeLoopsNote"),
     });
   }
 
@@ -407,13 +558,14 @@ function buildTimingWindows(data: VarshaphalResult): { best: TimingWindow[]; wat
 }
 
 function TimingWindows({ data }: { data: VarshaphalResult }) {
-  const windows = buildTimingWindows(data);
+  const tr = useRouteMessages(timingMessages);
+  const windows = buildTimingWindows(data, tr);
   return (
     <div className={styles.windowsGrid}>
       <div className={styles.windowColumn}>
         <div className={styles.windowColumnHeader}>
           <span className={styles.windowSignalBest} aria-hidden="true" />
-          <h3>Best Windows</h3>
+          <h3>{tr("timing.varshaphal.windows.best")}</h3>
         </div>
         {windows.best.map((window) => (
           <article key={`${window.month}-${window.title}`} className={styles.windowCard}>
@@ -426,7 +578,7 @@ function TimingWindows({ data }: { data: VarshaphalResult }) {
       <div className={styles.windowColumn}>
         <div className={styles.windowColumnHeader}>
           <span className={styles.windowSignalWatch} aria-hidden="true" />
-          <h3>Watch Windows</h3>
+          <h3>{tr("timing.varshaphal.windows.watch")}</h3>
         </div>
         {windows.watch.map((window) => (
           <article key={`${window.month}-${window.title}`} className={`${styles.windowCard} ${styles.windowCardWatch}`}>
@@ -454,43 +606,52 @@ function scoreDomain(data: VarshaphalResult, houses: number[], planets: string[]
   return clampScore(score);
 }
 
-function buildWeatherMeters(data: VarshaphalResult): WeatherMeter[] {
+function buildWeatherMeters(data: VarshaphalResult, tr: Translator): WeatherMeter[] {
+  /* `houses` and `planets` are engine identifiers, not copy. */
   const configs = [
-    { label: "Career", houses: [10, 6, 11], planets: ["Sun", "Saturn", "Mars"], note: "Visibility, responsibility, and execution power." },
-    { label: "Money", houses: [2, 8, 11], planets: ["Venus", "Jupiter", "Mercury"], note: "Resources, gains, shared assets, and trade." },
-    { label: "Relationships", houses: [5, 7], planets: ["Venus", "Moon", "Jupiter"], note: "Partnership clarity, romance, and emotional exchange." },
-    { label: "Health", houses: [1, 6, 12], planets: ["Moon", "Mars", "Saturn"], note: "Energy management, routines, and recovery needs." },
-    { label: "Inner Growth", houses: [4, 8, 9, 12], planets: ["Moon", "Jupiter", "Saturn", "Ketu"], note: "Reflection, faith, transformation, and closure." },
+    { labelKey: "timing.varshaphal.weather.careerLabel", noteKey: "timing.varshaphal.weather.careerNote", houses: [10, 6, 11], planets: ["Sun", "Saturn", "Mars"] },
+    { labelKey: "timing.varshaphal.weather.moneyLabel", noteKey: "timing.varshaphal.weather.moneyNote", houses: [2, 8, 11], planets: ["Venus", "Jupiter", "Mercury"] },
+    { labelKey: "timing.varshaphal.weather.relationshipsLabel", noteKey: "timing.varshaphal.weather.relationshipsNote", houses: [5, 7], planets: ["Venus", "Moon", "Jupiter"] },
+    { labelKey: "timing.varshaphal.weather.healthLabel", noteKey: "timing.varshaphal.weather.healthNote", houses: [1, 6, 12], planets: ["Moon", "Mars", "Saturn"] },
+    { labelKey: "timing.varshaphal.weather.innerGrowthLabel", noteKey: "timing.varshaphal.weather.innerGrowthNote", houses: [4, 8, 9, 12], planets: ["Moon", "Jupiter", "Saturn", "Ketu"] },
   ];
 
   return configs.map((config) => {
     const score = scoreDomain(data, config.houses, config.planets);
     return {
-      label: config.label,
+      label: tr(config.labelKey),
       score,
       trend: score >= 76 ? "rising" : score >= 58 ? "steady" : "review",
-      note: config.note,
+      note: tr(config.noteKey),
     };
   });
 }
 
 function PlanetaryWeatherMeters({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
+
   return (
     <div className={styles.weatherPanel}>
       <div className={styles.weatherHeader}>
-        <span className={styles.eyebrow}>Planetary Weather</span>
-        <h3>Domain Meters</h3>
+        <span className={styles.eyebrow}>{tr("timing.varshaphal.weather.eyebrow")}</span>
+        <h3>{tr("timing.varshaphal.weather.title")}</h3>
       </div>
       <div className={styles.weatherGrid}>
-        {buildWeatherMeters(data).map((meter) => (
+        {buildWeatherMeters(data, tr).map((meter) => (
           <article key={meter.label} className={styles.weatherMeter}>
             <div className={styles.weatherMeterTop}>
               <strong>{meter.label}</strong>
               <span className={styles[`weatherTrend${meter.trend[0].toUpperCase()}${meter.trend.slice(1)}`]}>
-                {meter.trend}
+                {tr(TREND_KEYS[meter.trend])}
               </span>
             </div>
-            <div className={styles.weatherTrack} aria-label={`${meter.label} score ${meter.score} percent`}>
+            <div
+              className={styles.weatherTrack}
+              aria-label={tr("timing.varshaphal.weather.trackLabel", {
+                label: meter.label,
+                score: String(meter.score),
+              })}
+            >
               <span style={{ width: `${meter.score}%` }} />
             </div>
             <p>{meter.note}</p>
@@ -526,6 +687,7 @@ function ProfectionWheel({
   signs: Record<number, string>;
   age: number;
 }) {
+  const tr = useRouteMessages(timingMessages);
   const cx = 50;
   const cy = 50;
   const outerR = 42;
@@ -582,7 +744,15 @@ function ProfectionWheel({
         }
         role="button"
         tabIndex={0}
-        aria-label={`House ${houseNum}, ${signs[houseNum] ?? "sign unavailable"}${isActive ? ", active now" : ""}`}
+        aria-label={tr(
+          isActive
+            ? "timing.varshaphal.wheel.segmentLabelActive"
+            : "timing.varshaphal.wheel.segmentLabel",
+          {
+            house: String(houseNum),
+            sign: signs[houseNum] ?? tr("timing.varshaphal.wheel.signUnavailable"),
+          }
+        )}
         onClick={() => setSelectedHouse(houseNum)}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
@@ -631,20 +801,25 @@ function ProfectionWheel({
   return (
     <div className={styles.wheelWrapper}>
       <svg viewBox="0 0 100 100" className={styles.wheel} aria-describedby="profection-wheel-help">
-        <title>Interactive annual profection wheel</title>
+        <title>{tr("timing.varshaphal.wheel.svgTitle")}</title>
         {segments}
         {labels}
         <text x={cx} y={cy - 2} className={styles.wheelCenter}>
-          H{selectedHouse}
+          {houseShort(selectedHouse, tr)}
         </text>
         <text x={cx} y={cy + 3} className={styles.wheelCenterSub}>
-          {selectedHouse === activatedHouse ? "Active now" : `Age ${selectedAge}`}
+          {selectedHouse === activatedHouse
+            ? tr("timing.varshaphal.wheel.activeNow")
+            : tr("timing.varshaphal.wheel.age", { age: String(selectedAge) })}
         </text>
       </svg>
       <p id="profection-wheel-help" className={styles.wheelHint}>
         {selectedHouse === activatedHouse
-          ? `House ${activatedHouse} is active in this birthday-to-birthday cycle.`
-          : `House ${selectedHouse} returns at age ${selectedAge}. Select a house to explore the 12-year rhythm.`}
+          ? tr("timing.varshaphal.wheel.hintActive", { house: String(activatedHouse) })
+          : tr("timing.varshaphal.wheel.hintSelected", {
+              house: String(selectedHouse),
+              age: String(selectedAge),
+            })}
       </p>
     </div>
   );
@@ -652,60 +827,103 @@ function ProfectionWheel({
 
 const RETURN_PLANET_ORDER = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
 
+/*
+ * Placement badges, as ids rather than sentences.
+ *
+ * The ranking below reads these to decide which planet leads the list, so they
+ * have to be stable across languages — comparing translated display text would
+ * silently reorder the cards the moment the interface stopped being English.
+ */
+type PlacementLabelId =
+  | "yearLord"
+  | "emotionalClimate"
+  | "angular"
+  | "solarReturnSun"
+  | "returnPlacement";
+
+type PlacementLabel = { id: PlacementLabelId; house?: number };
+
+const PLACEMENT_LABEL_KEYS: Record<PlacementLabelId, string> = {
+  yearLord: "timing.varshaphal.placements.yearLord",
+  emotionalClimate: "timing.varshaphal.placements.emotionalClimate",
+  angular: "timing.varshaphal.placements.angular",
+  solarReturnSun: "timing.varshaphal.placements.solarReturnSun",
+  returnPlacement: "timing.varshaphal.placements.returnPlacement",
+};
+
 function getPlacementLabels(
   planet: VarshaphalResult["returnChart"]["planets"][number],
   data: VarshaphalResult,
-): string[] {
-  const labels: string[] = [];
-  if (planet.name === data.varshesh.planet) labels.push("Year Lord");
-  if (planet.name === "Moon") labels.push("Emotional climate");
-  if ([1, 4, 7, 10].includes(planet.house)) labels.push(`Angular · H${planet.house}`);
-  if (planet.name === "Sun") labels.push("Solar return Sun");
-  return labels.length > 0 ? labels : ["Return placement"];
+): PlacementLabel[] {
+  const labels: PlacementLabel[] = [];
+  if (planet.name === data.varshesh.planet) labels.push({ id: "yearLord" });
+  if (planet.name === "Moon") labels.push({ id: "emotionalClimate" });
+  if ([1, 4, 7, 10].includes(planet.house)) labels.push({ id: "angular", house: planet.house });
+  if (planet.name === "Sun") labels.push({ id: "solarReturnSun" });
+  return labels.length > 0 ? labels : [{ id: "returnPlacement" }];
+}
+
+function placementLabelText(label: PlacementLabel, tr: Translator): string {
+  if (label.id === "angular") {
+    return tr(PLACEMENT_LABEL_KEYS.angular, {
+      house: houseShort(label.house ?? 0, tr),
+    });
+  }
+  return tr(PLACEMENT_LABEL_KEYS[label.id]);
 }
 
 function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
+  const tr = useRouteMessages(timingMessages);
   const placements = data.returnChart.planets
     .filter((planet) => RETURN_PLANET_ORDER.includes(planet.name))
     .sort((left, right) => {
       const leftLabels = getPlacementLabels(left, data);
       const rightLabels = getPlacementLabels(right, data);
-      const score = (labels: string[]) =>
-        labels.includes("Year Lord") ? 0 : labels.includes("Emotional climate") ? 1 : labels.some((label) => label.startsWith("Angular")) ? 2 : labels.includes("Solar return Sun") ? 3 : 4;
+      const score = (labels: PlacementLabel[]) =>
+        labels.some((label) => label.id === "yearLord") ? 0 : labels.some((label) => label.id === "emotionalClimate") ? 1 : labels.some((label) => label.id === "angular") ? 2 : labels.some((label) => label.id === "solarReturnSun") ? 3 : 4;
       return score(leftLabels) - score(rightLabels);
     });
 
   return (
     <div className={styles.placementContent}>
-      <p className={styles.sectionIntro}>
-        The placements with the clearest connection to this year&apos;s direction come first.
-      </p>
+      <p className={styles.sectionIntro}>{tr("timing.varshaphal.placements.intro")}</p>
       <div className={styles.placementGrid}>
         {placements.slice(0, 4).map((planet) => {
           const labels = getPlacementLabels(planet, data);
           return (
             <article key={planet.name} className={styles.placementCard}>
-              <span className={styles.sourceLabel}>{labels[0]}</span>
+              <span className={styles.sourceLabel}>{placementLabelText(labels[0], tr)}</span>
               <h4>{planet.name}</h4>
-              <strong>{planet.sign} · house {planet.house}</strong>
+              <strong>
+                {tr("timing.varshaphal.placements.signHouse", {
+                  sign: planet.sign,
+                  house: String(planet.house),
+                })}
+              </strong>
               <p>
-                {planet.degree_in_sign.toFixed(1)}° {planet.is_retrograde ? "· retrograde" : ""}
-                {labels.length > 1 ? ` · ${labels.slice(1).join(" · ")}` : ""}
+                {planet.degree_in_sign.toFixed(1)}° {planet.is_retrograde ? tr("timing.varshaphal.placements.retrograde") : ""}
+                {labels.length > 1
+                  ? ` · ${labels.slice(1).map((label) => placementLabelText(label, tr)).join(" · ")}`
+                  : ""}
               </p>
             </article>
           );
         })}
       </div>
       <details className={styles.allPlacements}>
-        <summary>View all return placements</summary>
+        <summary>{tr("timing.varshaphal.placements.viewAll")}</summary>
         <div className={styles.placementTable}>
           {placements.map((planet) => (
             <div key={planet.name} className={styles.placementRow}>
               <strong>{planet.name}</strong>
               <span>{planet.sign}</span>
-              <span>H{planet.house}</span>
+              <span>{houseShort(planet.house, tr)}</span>
               <span>{planet.degree_in_sign.toFixed(1)}°</span>
-              <span>{planet.is_retrograde ? "Retrograde" : "Direct"}</span>
+              <span>
+                {planet.is_retrograde
+                  ? tr("timing.varshaphal.placements.retrogradeLabel")
+                  : tr("timing.varshaphal.placements.directLabel")}
+              </span>
             </div>
           ))}
         </div>
@@ -719,6 +937,7 @@ function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
 // --------------------------------------------------------------------------
 
 export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPanelProps) {
+  const tr = useRouteMessages(timingMessages);
   const currentYear = new Date().getFullYear();
   const years = yearRange(birthDate);
   const minYear = years[0] ?? currentYear;
@@ -727,14 +946,14 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
   const [targetYear, setTargetYear] = useState(currentYear);
   const [data, setData] = useState<VarshaphalResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<VarshaphalError | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const loadData = useCallback(
     async (year: number) => {
       abortRef.current?.abort();
       setIsLoading(true);
-      setError("");
+      setError(null);
 
       const controller = new AbortController();
       abortRef.current = controller;
@@ -748,9 +967,14 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
 
         if (!res.ok) {
           const body = await res.json().catch(() => null);
-          throw new Error(
-            body?.error?.message ?? `API error (${res.status})`
+          const message = body?.error?.message;
+          setData(null);
+          setError(
+            typeof message === "string" && message
+              ? { kind: "apiMessage", text: message }
+              : { kind: "api", status: String(res.status) }
           );
+          return;
         }
         const json = (await res.json()) as VarshaphalResult;
         setData(json);
@@ -758,9 +982,13 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
         clearTimeout(timeout);
         setData(null);
         if (err instanceof DOMException && err.name === "AbortError") {
-          setError("Request timed out. The solar return search can be intensive. Please try again.");
+          setError({ kind: "timeout" });
         } else {
-          setError(err instanceof Error ? err.message : "Could not load Varshaphal data.");
+          setError(
+            err instanceof Error
+              ? { kind: "apiMessage", text: err.message }
+              : { kind: "loadFailed" }
+          );
         }
       } finally {
         setIsLoading(false);
@@ -800,13 +1028,10 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
   return (
     <section className={styles.panel}>
       <div className={styles.header}>
-        <p className={styles.kicker}>Annual Timing</p>
-        <h2 className={styles.heading}>Varshaphal &amp; Annual Profections</h2>
+        <p className={styles.kicker}>{tr("timing.varshaphal.kicker")}</p>
+        <h2 className={styles.heading}>{tr("timing.varshaphal.heading")}</h2>
       </div>
-      <p className={styles.intro}>
-        Select a year to see which house and sign are activated through annual profections,
-        plus the full Vedic solar return (Varshaphal) chart with Muntha and year lord analysis.
-      </p>
+      <p className={styles.intro}>{tr("timing.varshaphal.intro")}</p>
 
       {/* Year selector */}
       <form
@@ -816,15 +1041,15 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           void loadData(targetYear);
         }}
       >
-        <div className={styles.yearStepper} aria-label="Annual timing year controls">
+        <div className={styles.yearStepper} aria-label={tr("timing.varshaphal.yearControlsLabel")}>
           <button
             type="button"
             className={styles.yearStepBtn}
             onClick={() => chooseYear(targetYear - 1)}
             disabled={isLoading || targetYear <= minYear}
-            aria-label="Previous year"
+            aria-label={tr("timing.varshaphal.prevYear")}
           >
-            Prev
+            {tr("timing.varshaphal.prev")}
           </button>
           <div className={styles.yearQuickList}>
             {quickYears.map((year) => (
@@ -836,7 +1061,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                 disabled={isLoading}
               >
                 {year}
-                {year === currentYear && <span>Now</span>}
+                {year === currentYear && <span>{tr("timing.varshaphal.now")}</span>}
               </button>
             ))}
           </div>
@@ -845,13 +1070,13 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             className={styles.yearStepBtn}
             onClick={() => chooseYear(targetYear + 1)}
             disabled={isLoading || targetYear >= maxYear}
-            aria-label="Next year"
+            aria-label={tr("timing.varshaphal.nextYear")}
           >
-            Next
+            {tr("timing.varshaphal.next")}
           </button>
         </div>
         <label className={styles.yearField}>
-          Jump to year
+          {tr("timing.varshaphal.jumpToYear")}
           <select
             value={targetYear}
             onChange={(e) => chooseYear(Number(e.target.value))}
@@ -859,21 +1084,22 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           >
             {years.map((y) => (
               <option key={y} value={y}>
-                {y}
-                {y === currentYear ? " (current)" : ""}
+                {y === currentYear
+                  ? tr("timing.varshaphal.yearOptionCurrent", { year: String(y) })
+                  : y}
               </option>
             ))}
           </select>
         </label>
         <button type="submit" className={styles.yearBtn} disabled={isLoading}>
-          {isLoading ? "Calculating..." : "Read this year"}
+          {isLoading ? tr("timing.varshaphal.calculating") : tr("timing.varshaphal.readYear")}
         </button>
       </form>
 
-      {error && <div className={styles.error}>{error}</div>}
+      {error && <div className={styles.error}>{varshaphalErrorText(error, tr)}</div>}
 
       {isLoading && !data && (
-        <div className={styles.loading}>Calculating solar return...</div>
+        <div className={styles.loading}>{tr("timing.varshaphal.loading")}</div>
       )}
 
       {data && (
@@ -889,15 +1115,19 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           <div className={styles.timelineCard}>
             <div className={styles.timelineHeader}>
               <div>
-                <span className={styles.eyebrow}>Year Timeline</span>
-                <h3 className={styles.timelineTitle}>{data.year} Annual Arc</h3>
+                <span className={styles.eyebrow}>{tr("timing.varshaphal.timeline.eyebrow")}</span>
+                <h3 className={styles.timelineTitle}>
+                  {tr("timing.varshaphal.timeline.title", { year: String(data.year) })}
+                </h3>
               </div>
               <span className={styles.timelineBadge}>
-                Return {formatReturnMoment(data.solarReturnMoment).split(",")[0]}
+                {tr("timing.varshaphal.timeline.returnBadge", {
+                  date: formatReturnMoment(data.solarReturnMoment).split(",")[0],
+                })}
               </span>
             </div>
             <div className={styles.timelineTrack}>
-              {buildYearTimeline(data).map((item) => (
+              {buildYearTimeline(data, tr).map((item) => (
                 <article
                   key={item.month}
                   className={`${styles.timelineMonth} ${styles[`timelineMonth${item.tone[0].toUpperCase()}${item.tone.slice(1)}`]}`}
@@ -911,7 +1141,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             </div>
           </div>
           <div className={styles.sectionFull}>
-            <h3 className={styles.sectionTitle}>Seasonal Forecast</h3>
+            <h3 className={styles.sectionTitle}>{tr("timing.varshaphal.seasons.title")}</h3>
             <SeasonalForecastCards data={data} />
           </div>
 
@@ -920,37 +1150,46 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           <PlanetaryWeatherMeters data={data} />
 
           <div className={styles.exploreHeader}>
-            <span className={styles.eyebrow}>Explore the mechanics</span>
-            <h3>How this annual picture is built</h3>
+            <span className={styles.eyebrow}>{tr("timing.varshaphal.explore.eyebrow")}</span>
+            <h3>{tr("timing.varshaphal.explore.title")}</h3>
           </div>
 
           <div className={styles.sectionGrid}>
             <section className={styles.section}>
-              <span className={styles.eyebrow}>Annual Profection</span>
-              <h3 className={styles.sectionTitle}>Annual Profection</h3>
-              <p className={styles.sectionIntro}>
-                This birthday-to-birthday cycle activates one natal house and the planet that rules its sign.
-              </p>
+              <span className={styles.eyebrow}>{tr("timing.varshaphal.profection.eyebrow")}</span>
+              <h3 className={styles.sectionTitle}>{tr("timing.varshaphal.profection.title")}</h3>
+              <p className={styles.sectionIntro}>{tr("timing.varshaphal.profection.intro")}</p>
               <div className={styles.profectionFlow}>
                 <div>
-                  <span>Activated house</span>
-                  <strong>H{data.profection.activatedHouse}</strong>
-                  <small>Age {data.profection.age}</small>
+                  <span>{tr("timing.varshaphal.profection.activatedHouse")}</span>
+                  <strong>{houseShort(data.profection.activatedHouse, tr)}</strong>
+                  <small>
+                    {tr("timing.varshaphal.profection.age", {
+                      age: String(data.profection.age),
+                    })}
+                  </small>
                 </div>
                 <div>
-                  <span>Natal sign</span>
+                  <span>{tr("timing.varshaphal.profection.natalSign")}</span>
                   <strong>{data.profection.activatedSign}</strong>
-                  <small>The sign on H{data.profection.activatedHouse}</small>
+                  <small>
+                    {tr("timing.varshaphal.profection.signOnHouse", {
+                      house: houseShort(data.profection.activatedHouse, tr),
+                    })}
+                  </small>
                 </div>
                 <div>
-                  <span>Lord of the Year</span>
+                  <span>{tr("timing.varshaphal.profection.lordOfYear")}</span>
                   <strong>{data.profection.lordOfYear}</strong>
-                  <small>Directs the house&apos;s themes</small>
+                  <small>{tr("timing.varshaphal.profection.lordNote")}</small>
                 </div>
                 <div>
-                  <span>Natal activation</span>
-                  <strong>{data.profection.activatedPlanets.join(", ") || "None"}</strong>
-                  <small>Planets already in the activated sign</small>
+                  <span>{tr("timing.varshaphal.profection.natalActivation")}</span>
+                  <strong>
+                    {data.profection.activatedPlanets.join(", ") ||
+                      tr("timing.varshaphal.profection.none")}
+                  </strong>
+                  <small>{tr("timing.varshaphal.profection.natalActivationNote")}</small>
                 </div>
               </div>
               <div className={styles.profectionThemes}>
@@ -961,8 +1200,8 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             </section>
 
             <section className={styles.section}>
-              <span className={styles.eyebrow}>12-year rhythm</span>
-              <h3 className={styles.sectionTitle}>Profection Wheel</h3>
+              <span className={styles.eyebrow}>{tr("timing.varshaphal.wheel.eyebrow")}</span>
+              <h3 className={styles.sectionTitle}>{tr("timing.varshaphal.wheel.title")}</h3>
               <ProfectionWheel
                 activatedHouse={data.profection.activatedHouse}
                 signs={data.profection.natalHouseSigns}
@@ -973,32 +1212,41 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
 
           <div className={styles.sectionGrid}>
             <section className={styles.section}>
-              <span className={styles.eyebrow}>Return chart</span>
-              <h3 className={styles.sectionTitle}>Solar Return Snapshot</h3>
-              <p className={styles.sectionIntro}>
-                Cast for the precise moment the Sun returns to its natal position.
-              </p>
+              <span className={styles.eyebrow}>{tr("timing.varshaphal.returnChart.eyebrow")}</span>
+              <h3 className={styles.sectionTitle}>{tr("timing.varshaphal.returnChart.title")}</h3>
+              <p className={styles.sectionIntro}>{tr("timing.varshaphal.returnChart.intro")}</p>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Return Moment</span>
+                <span className={styles.detailLabel}>
+                  {tr("timing.varshaphal.returnChart.returnMoment")}
+                </span>
                 <span className={styles.detailValue}>
                   {formatReturnMoment(data.solarReturnMoment)}
                 </span>
               </div>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Return Ascendant</span>
+                <span className={styles.detailLabel}>
+                  {tr("timing.varshaphal.returnChart.returnAscendant")}
+                </span>
                 <span className={styles.detailValue}>
                   {data.returnChart.ascendant.sign}{" "}
                   {data.returnChart.ascendant.degree_in_sign.toFixed(2)}°
                 </span>
               </div>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Muntha</span>
+                <span className={styles.detailLabel}>
+                  {tr("timing.varshaphal.returnChart.muntha")}
+                </span>
                 <span className={styles.detailValue}>
-                  {data.muntha.sign} (House {data.muntha.house})
+                  {tr("timing.varshaphal.returnChart.munthaValue", {
+                    sign: data.muntha.sign,
+                    house: String(data.muntha.house),
+                  })}
                 </span>
               </div>
               <div className={styles.detailRow}>
-                <span className={styles.detailLabel}>Varshesh (Year Lord)</span>
+                <span className={styles.detailLabel}>
+                  {tr("timing.varshaphal.returnChart.varshesh")}
+                </span>
                 <span className={styles.detailValue}>
                   {data.varshesh.planet}
                 </span>
@@ -1009,8 +1257,8 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             </section>
 
             <section className={styles.section}>
-              <span className={styles.eyebrow}>Ranked signals</span>
-              <h3 className={styles.sectionTitle}>Key Return Placements</h3>
+              <span className={styles.eyebrow}>{tr("timing.varshaphal.placements.eyebrow")}</span>
+              <h3 className={styles.sectionTitle}>{tr("timing.varshaphal.placements.title")}</h3>
               <KeyReturnPlacements data={data} />
             </section>
           </div>
@@ -1018,7 +1266,11 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
           {/* ── Year Lord Interpretation ── */}
           <div className={styles.interpretation}>
             <p>
-              <strong>{data.varshesh.planet} as Year Lord:</strong>{" "}
+              <strong>
+                {tr("timing.varshaphal.interpretation.asYearLord", {
+                  planet: data.varshesh.planet,
+                })}
+              </strong>{" "}
               {data.yearSummary.yearLordInterpretation}
             </p>
           </div>
