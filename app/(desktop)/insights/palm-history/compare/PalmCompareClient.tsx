@@ -6,16 +6,11 @@ import { getPalmReadingsByIds } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import { computeReadingDiff, type ComputedDiff } from "@/lib/palm-readings/diff";
 import type { PalmReadingRecord } from "@/lib/palm-readings/types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const LINE_LABELS: Record<string, string> = {
-  heart_line: "Heart Line",
-  head_line: "Head Line",
-  life_line: "Life Line",
-  fate_line: "Fate Line",
-};
 
 function formatDate(iso: string): string {
   if (!iso) return "";
@@ -47,6 +42,31 @@ type CompareResponse = {
 type Props = { ids: string };
 
 export default function PalmCompareClient({ ids }: Props) {
+  const tr = useRouteMessages(palmMessages);
+
+  /* Row headings for the diff tables, and the one-word verdict beside each
+     arrow. Both are ours rather than the model's, so both are translated. */
+  const lineLabels = useMemo<Record<string, string>>(
+    () => ({
+      heart_line: tr("palm.lines.heartLine"),
+      head_line: tr("palm.lines.headLine"),
+      life_line: tr("palm.lines.lifeLine"),
+      fate_line: tr("palm.lines.fateLine"),
+    }),
+    [tr],
+  );
+
+  const directionLabels = useMemo<
+    Record<"stronger" | "weaker" | "unchanged", string>
+  >(
+    () => ({
+      stronger: tr("palm.compare.direction.stronger"),
+      weaker: tr("palm.compare.direction.weaker"),
+      unchanged: tr("palm.compare.direction.unchanged"),
+    }),
+    [tr],
+  );
+
   const parsedIds = useMemo(() => {
     return ids
       .split(",")
@@ -69,7 +89,7 @@ export default function PalmCompareClient({ ids }: Props) {
 
     if (!idsValid) {
       setLoading(false);
-      setError("Select exactly two readings to compare.");
+      setError(tr("palm.compare.errorSelectTwo"));
       return;
     }
 
@@ -78,25 +98,25 @@ export default function PalmCompareClient({ ids }: Props) {
 
     const [a, b] = getPalmReadingsByIds([parsedIds[0], parsedIds[1]]);
     if (!a || !b) {
-      setError("One or both readings could not be found.");
+      setError(tr("palm.compare.errorNotFound"));
     } else {
       setData({ a, b, diff: computeReadingDiff(a, b) });
     }
     setLoading(false);
-  }, [idsValid, parsedIds]);
+  }, [idsValid, parsedIds, tr]);
 
   if (!idsValid) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
-          <h1>Compare palm readings</h1>
+          <h1>{tr("palm.compare.title")}</h1>
           <p className="palm-history-subtitle">
-            You must select two readings to compare.
+            {tr("palm.compare.mustSelectTwo")}
           </p>
         </header>
         <div className="palm-history-empty-cta">
           <Link href="/insights/palm-history" className="palm-btn-camera">
-            Pick readings
+            {tr("palm.compare.pickReadings")}
           </Link>
         </div>
       </section>
@@ -107,7 +127,7 @@ export default function PalmCompareClient({ ids }: Props) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
-          <h1>Comparing two readings…</h1>
+          <h1>{tr("palm.compare.loadingTitle")}</h1>
         </header>
         <div className="palm-compare-grid" aria-hidden="true">
           <div className="palm-compare-side">
@@ -127,14 +147,14 @@ export default function PalmCompareClient({ ids }: Props) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
-          <h1>Compare palm readings</h1>
+          <h1>{tr("palm.compare.title")}</h1>
         </header>
         <div className="palm-error" role="alert">
-          {error ?? "We couldn't load this comparison."}
+          {error ?? tr("palm.compare.loadFailed")}
         </div>
         <div className="palm-history-empty-cta">
           <Link href="/insights/palm-history" className="palm-btn-upload">
-            Back to your readings
+            {tr("palm.common.backToReadings")}
           </Link>
         </div>
       </section>
@@ -150,15 +170,21 @@ export default function PalmCompareClient({ ids }: Props) {
     <section className="palm-history-shell">
       {/* Header */}
       <header className="palm-history-header">
-        <span className="palm-kicker">Side-by-side</span>
-        <h1>Comparing two readings</h1>
+        <span className="palm-kicker">{tr("palm.compare.kicker")}</span>
+        <h1>{tr("palm.compare.heading")}</h1>
         <p className="palm-history-subtitle">
           {formatDate(a.created_at)} &nbsp;·&nbsp; {formatDate(b.created_at)}
           {diff.days_apart > 0 && (
             <>
               {" "}
-              &nbsp;·&nbsp; Taken {diff.days_apart} day
-              {diff.days_apart === 1 ? "" : "s"} apart
+              &nbsp;·&nbsp;{" "}
+              {diff.days_apart === 1
+                ? tr("palm.compare.takenDayApart", {
+                    count: String(diff.days_apart),
+                  })
+                : tr("palm.compare.takenDaysApart", {
+                    count: String(diff.days_apart),
+                  })}
             </>
           )}
         </p>
@@ -171,7 +197,10 @@ export default function PalmCompareClient({ ids }: Props) {
           const hasCoords = Object.values(coords).some(
             (pts) => Array.isArray(pts) && pts.length > 0,
           );
-          const tag = idx === 0 ? "Reading A" : "Reading B";
+          const tag =
+            idx === 0
+              ? tr("palm.compare.readingA")
+              : tr("palm.compare.readingB");
           return (
             <div key={rec.id} className="palm-compare-side">
               <header className="palm-compare-side-header">
@@ -195,7 +224,10 @@ export default function PalmCompareClient({ ids }: Props) {
                   ) : (
                     <div className="palm-preview">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={rec.image_data_url} alt={`${tag} palm`} />
+                      <img
+                        src={rec.image_data_url}
+                        alt={tr("palm.alt.comparePalm", { tag })}
+                      />
                     </div>
                   )}
                 </div>
@@ -207,7 +239,7 @@ export default function PalmCompareClient({ ids }: Props) {
               )}
               <div className="palm-compare-side-link">
                 <Link href={`/insights/palm-history/${rec.id}`}>
-                  Open full reading &rarr;
+                  {tr("palm.compare.openFull")}
                 </Link>
               </div>
             </div>
@@ -219,34 +251,34 @@ export default function PalmCompareClient({ ids }: Props) {
       <div className="palm-compare-diff">
         {/* Line strength changes */}
         <section className="palm-section-card">
-          <h3>Line strength</h3>
+          <h3>{tr("palm.compare.lineStrength")}</h3>
           {allLinesUnchanged ? (
             <p className="palm-section-lead">
-              No strength changes across the four major lines.
+              {tr("palm.compare.noStrengthChanges")}
             </p>
           ) : (
-            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label="Line strength comparison">
+            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label={tr("palm.compare.lineStrengthAria")}>
               <table className="palm-compare-table">
                 <thead>
                   <tr>
-                    <th>Line</th>
-                    <th>Reading A</th>
-                    <th>Reading B</th>
-                    <th>Change</th>
+                    <th>{tr("palm.compare.colLine")}</th>
+                    <th>{tr("palm.compare.readingA")}</th>
+                    <th>{tr("palm.compare.readingB")}</th>
+                    <th>{tr("palm.compare.colChange")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {diff.line_strength_changes.map((c) => (
                     <tr key={c.line}>
-                      <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
+                      <th scope="row">{lineLabels[c.line] ?? c.line}</th>
                       <td>{c.from}</td>
                       <td>{c.to}</td>
                       <td>
                         <span
                           className={`palm-compare-arrow palm-compare-arrow--${c.direction}`}
-                          aria-label={c.direction}
+                          aria-label={directionLabels[c.direction]}
                         >
-                          {arrowFor(c.direction)} {c.direction}
+                          {arrowFor(c.direction)} {directionLabels[c.direction]}
                         </span>
                       </td>
                     </tr>
@@ -260,20 +292,20 @@ export default function PalmCompareClient({ ids }: Props) {
         {/* Line visibility changes */}
         {diff.line_visibility_changes.length > 0 && (
           <section className="palm-section-card">
-            <h3>Line visibility</h3>
-            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label="Line visibility comparison">
+            <h3>{tr("palm.compare.lineVisibility")}</h3>
+            <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label={tr("palm.compare.lineVisibilityAria")}>
               <table className="palm-compare-table">
                 <thead>
                   <tr>
-                    <th>Line</th>
-                    <th>Reading A</th>
-                    <th>Reading B</th>
+                    <th>{tr("palm.compare.colLine")}</th>
+                    <th>{tr("palm.compare.readingA")}</th>
+                    <th>{tr("palm.compare.readingB")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {diff.line_visibility_changes.map((c) => (
                     <tr key={c.line}>
-                      <th scope="row">{LINE_LABELS[c.line] ?? c.line}</th>
+                      <th scope="row">{lineLabels[c.line] ?? c.line}</th>
                       <td>{c.from}</td>
                       <td>{c.to}</td>
                     </tr>
@@ -288,12 +320,12 @@ export default function PalmCompareClient({ ids }: Props) {
         {(diff.new_special_markings.length > 0 ||
           diff.lost_special_markings.length > 0) && (
           <section className="palm-section-card">
-            <h3>Special markings</h3>
+            <h3>{tr("palm.compare.specialMarkings")}</h3>
             <div className="palm-compare-delta-grid">
               <div className="palm-compare-marking-list palm-compare-marking-list--new">
-                <h4>Newly visible</h4>
+                <h4>{tr("palm.compare.newlyVisible")}</h4>
                 {diff.new_special_markings.length === 0 ? (
-                  <p className="palm-compare-empty">None</p>
+                  <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
                   <ul>
                     {diff.new_special_markings.map((m) => (
@@ -303,9 +335,9 @@ export default function PalmCompareClient({ ids }: Props) {
                 )}
               </div>
               <div className="palm-compare-marking-list palm-compare-marking-list--lost">
-                <h4>No longer visible</h4>
+                <h4>{tr("palm.compare.noLongerVisible")}</h4>
                 {diff.lost_special_markings.length === 0 ? (
-                  <p className="palm-compare-empty">None</p>
+                  <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
                   <ul>
                     {diff.lost_special_markings.map((m) => (
@@ -322,12 +354,12 @@ export default function PalmCompareClient({ ids }: Props) {
         {(diff.new_prominent_mounts.length > 0 ||
           diff.lost_prominent_mounts.length > 0) && (
           <section className="palm-section-card">
-            <h3>Prominent mounts</h3>
+            <h3>{tr("palm.compare.prominentMounts")}</h3>
             <div className="palm-compare-delta-grid">
               <div className="palm-compare-marking-list palm-compare-marking-list--new">
-                <h4>Newly prominent</h4>
+                <h4>{tr("palm.compare.newlyProminent")}</h4>
                 {diff.new_prominent_mounts.length === 0 ? (
-                  <p className="palm-compare-empty">None</p>
+                  <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
                   <ul>
                     {diff.new_prominent_mounts.map((m) => (
@@ -337,9 +369,9 @@ export default function PalmCompareClient({ ids }: Props) {
                 )}
               </div>
               <div className="palm-compare-marking-list palm-compare-marking-list--lost">
-                <h4>No longer prominent</h4>
+                <h4>{tr("palm.compare.noLongerProminent")}</h4>
                 {diff.lost_prominent_mounts.length === 0 ? (
-                  <p className="palm-compare-empty">None</p>
+                  <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
                   <ul>
                     {diff.lost_prominent_mounts.map((m) => (
@@ -354,15 +386,23 @@ export default function PalmCompareClient({ ids }: Props) {
 
         {/* Summary contrast */}
         <section className="palm-section-card">
-          <h3>Summary contrast</h3>
+          <h3>{tr("palm.compare.summaryContrast")}</h3>
           <div className="palm-compare-summary-grid">
             <blockquote className="palm-compare-quote">
-              <span className="palm-compare-quote-tag">Reading A</span>
-              <p>{diff.summary_diff.a_summary || "(no summary)"}</p>
+              <span className="palm-compare-quote-tag">
+                {tr("palm.compare.readingA")}
+              </span>
+              <p>
+                {diff.summary_diff.a_summary || tr("palm.compare.noSummary")}
+              </p>
             </blockquote>
             <blockquote className="palm-compare-quote">
-              <span className="palm-compare-quote-tag">Reading B</span>
-              <p>{diff.summary_diff.b_summary || "(no summary)"}</p>
+              <span className="palm-compare-quote-tag">
+                {tr("palm.compare.readingB")}
+              </span>
+              <p>
+                {diff.summary_diff.b_summary || tr("palm.compare.noSummary")}
+              </p>
             </blockquote>
           </div>
         </section>

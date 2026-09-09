@@ -4,6 +4,8 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
+import { useRouteMessages } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 import PalmAnnotation from "./PalmAnnotation";
 
 /* ────────────────────────────────────────────────
@@ -148,13 +150,6 @@ const STRENGTH_COLORS: Record<LineReading["strength"], string> = {
   absent: "#888",
 };
 
-const LINE_LABELS: Record<string, string> = {
-  heart_line: "Heart Line",
-  head_line: "Head Line",
-  life_line: "Life Line",
-  fate_line: "Fate Line",
-};
-
 const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const REVEAL_DELAY_MS = 700;
@@ -185,13 +180,6 @@ const VISIBILITY_BADGE_COLORS: Record<LineConfidenceEntry["visibility"], string>
   not_detected: "#888",
 };
 
-const VISIBILITY_LABEL: Record<LineConfidenceEntry["visibility"], string> = {
-  clear: "Clear",
-  partial: "Partial",
-  faint: "Faint",
-  not_detected: "Not detected",
-};
-
 const REINFORCEMENT_COLORS: Record<JyotishCorrelationItem["reinforcement"], string> = {
   strong: "var(--accent-gold)",
   moderate: "var(--accent-aqua)",
@@ -208,6 +196,8 @@ type PalmReadingPanelProps = {
 };
 
 export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelProps = {}) {
+  const tr = useRouteMessages(palmMessages);
+
   /* ── state ── */
   const [phase, setPhase] = useState<Phase>("idle");
   const [imageData, setImageData] = useState<string | null>(null);
@@ -369,7 +359,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         setPhase("camera");
         detectLoop();
       } catch {
-        setError("Camera access denied. Please use the upload option instead.");
+        setError(tr("palm.errors.cameraDenied"));
       }
     }
   };
@@ -415,7 +405,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
     const base64 = dataUrl.split(",")[1];
     if (Math.floor((base64.length * 3) / 4) > MAX_PALM_IMAGE_BYTES) {
-      setError("Palm image is too large. Please capture a closer, lower-resolution image under 5MB.");
+      setError(tr("palm.errors.captureTooLarge"));
       return;
     }
 
@@ -433,13 +423,13 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     setError(null);
 
     if (file.size > MAX_PALM_IMAGE_BYTES) {
-      setError("Palm image is too large. Please upload an image under 5MB.");
+      setError(tr("palm.errors.uploadTooLarge"));
       return;
     }
 
     const mt = file.type as typeof mediaType;
     if (!["image/jpeg", "image/png", "image/webp"].includes(mt)) {
-      setError("Please upload a JPEG, PNG, or WebP image.");
+      setError(tr("palm.errors.unsupportedType"));
       return;
     }
 
@@ -475,7 +465,9 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       });
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.error?.message || err.detail || "Analysis failed");
+        throw new Error(
+          err.error?.message || err.detail || tr("palm.errors.analysisFailed"),
+        );
       }
       setReading(await res.json());
       setSaveState("idle");
@@ -483,7 +475,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       setImageQualityDismissed(false);
       setPhase("results");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong");
+      setError(e instanceof Error ? e.message : tr("palm.errors.generic"));
       setPhase("captured");
     }
   };
@@ -602,17 +594,46 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       });
       setSaveState("saved");
     } catch (e) {
-      setSaveError(e instanceof Error ? e.message : "Failed to save reading");
+      setSaveError(
+        e instanceof Error ? e.message : tr("palm.errors.saveFailed"),
+      );
       setSaveState("error");
     }
   };
 
+  /* ── copy keyed by a closed set of values ──
+     Built here rather than at module scope so both follow the selected
+     language. The strengths and reinforcements rendered further down are
+     left alone: those arrive verbatim in the model's JSON, alongside the
+     English prose this catalog cannot reach. */
+  const lineLabels = useMemo<Record<string, string>>(
+    () => ({
+      heart_line: tr("palm.lines.heartLine"),
+      head_line: tr("palm.lines.headLine"),
+      life_line: tr("palm.lines.lifeLine"),
+      fate_line: tr("palm.lines.fateLine"),
+    }),
+    [tr],
+  );
+
+  const visibilityLabels = useMemo<
+    Record<LineConfidenceEntry["visibility"], string>
+  >(
+    () => ({
+      clear: tr("palm.visibility.clear"),
+      partial: tr("palm.visibility.partial"),
+      faint: tr("palm.visibility.faint"),
+      not_detected: tr("palm.visibility.notDetected"),
+    }),
+    [tr],
+  );
+
   /* ── status helpers ── */
   const statusText = !handDetected
-    ? "No hand detected"
+    ? tr("palm.camera.noHand")
     : handScore > 0.7
-      ? "Palm detected clearly!"
-      : "Hand detected — hold steady";
+      ? tr("palm.camera.palmClear")
+      : tr("palm.camera.handSteady");
 
   const statusClass = !handDetected
     ? "palm-status"
@@ -648,7 +669,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       {phase === "idle" && (
         <div className="palm-idle">
           <div className="palm-header">
-            <span className="palm-kicker">Palm Reading</span>
+            <span className="palm-kicker">{tr("palm.panel.kicker")}</span>
             <h2 className="palm-heading">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 8, verticalAlign: "middle" }}>
                 <path d="M18 11V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v0" />
@@ -656,19 +677,20 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <path d="M10 10.5V6a2 2 0 0 0-2-2 2 2 0 0 0-2 2v8" />
                 <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 13" />
               </svg>
-              Palm Reading Analysis
+              {tr("palm.panel.heading")}
             </h2>
           </div>
-          <p className="palm-intro">
-            Use your camera or upload an image of your palm for an AI-powered analysis of your palm lines,
-            mounts, and special markings. Get personalized insights based on ancient palmistry traditions.
-          </p>
+          <p className="palm-intro">{tr("palm.panel.intro")}</p>
 
           {/* Classical mode toggle */}
           <label className="palm-toggle">
             <span className="palm-toggle-text">
-              <span className="palm-toggle-title">Hasta Samudrika Shastra mode</span>
-              <span className="palm-toggle-subtitle">Classical Vedic palmistry only</span>
+              <span className="palm-toggle-title">
+                {tr("palm.panel.classicalToggleTitle")}
+              </span>
+              <span className="palm-toggle-subtitle">
+                {tr("palm.panel.classicalToggleSubtitle")}
+              </span>
             </span>
             <span
               className={`palm-toggle-switch ${classicalMode ? "is-on" : ""}`}
@@ -691,7 +713,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
                 <circle cx="12" cy="13" r="4" />
               </svg>
-              Open Camera
+              {tr("palm.panel.openCamera")}
             </button>
             <button className="palm-btn-upload" onClick={() => fileInputRef.current?.click()}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -699,13 +721,13 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <polyline points="17 8 12 3 7 8" />
                 <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              Upload Image
+              {tr("palm.panel.uploadImage")}
             </button>
           </div>
           <ul className="palm-tips">
-            <li>Place your dominant hand flat, palm facing the camera</li>
-            <li>Ensure good, even lighting without harsh shadows</li>
-            <li>Keep your fingers slightly spread apart</li>
+            <li>{tr("palm.panel.tipHandFlat")}</li>
+            <li>{tr("palm.panel.tipLighting")}</li>
+            <li>{tr("palm.panel.tipFingers")}</li>
           </ul>
           {error && (
             <div className="palm-error">
@@ -737,16 +759,20 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
 
           <div className="palm-confidence">
             <div className="palm-confidence-bar" style={{ width: `${Math.round(handScore * 100)}%` }} />
-            <span className="palm-confidence-label">{Math.round(handScore * 100)}% confidence</span>
+            <span className="palm-confidence-label">
+              {tr("palm.camera.confidence", {
+                pct: String(Math.round(handScore * 100)),
+              })}
+            </span>
           </div>
 
           <div className="palm-actions">
-            <button className="palm-capture-btn" onClick={captureFrame} disabled={!handDetected || handScore <= 0.7} title="Capture">
+            <button className="palm-capture-btn" onClick={captureFrame} disabled={!handDetected || handScore <= 0.7} title={tr("palm.camera.captureTitle")}>
               <span className="palm-capture-inner" />
             </button>
           </div>
           <div className="palm-actions" style={{ marginTop: 8 }}>
-            <button className="palm-btn-upload" onClick={() => { stopCamera(); resetAll(); }}>Cancel</button>
+            <button className="palm-btn-upload" onClick={() => { stopCamera(); resetAll(); }}>{tr("palm.common.cancel")}</button>
           </div>
         </div>
       )}
@@ -756,17 +782,17 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         <div className="palm-captured-phase">
           {imagePreview && (
             <div className="palm-preview">
-              <img src={imagePreview} alt="Captured palm" />
+              <img src={imagePreview} alt={tr("palm.alt.captured")} />
             </div>
           )}
           <div className="palm-actions">
             <button className="palm-btn-camera" onClick={() => { setImageData(null); setImagePreview(null); startCamera(); }}>
-              Retake
+              {tr("palm.captured.retake")}
             </button>
-            <button className="palm-btn-upload" onClick={resetAll}>Upload Different Image</button>
+            <button className="palm-btn-upload" onClick={resetAll}>{tr("palm.captured.uploadDifferent")}</button>
           </div>
           <button className="palm-submit" onClick={analyzePalm}>
-            Analyze My Palm
+            {tr("palm.captured.analyze")}
           </button>
           {error && (
             <div className="palm-error">
@@ -781,7 +807,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         <div className="palm-loading">
           {imagePreview && (
             <div className="palm-preview palm-preview--dimmed">
-              <img src={imagePreview} alt="Analyzing palm" />
+              <img src={imagePreview} alt={tr("palm.alt.analyzing")} />
             </div>
           )}
           <div className="palm-loading-content">
@@ -793,7 +819,10 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 13" />
               </svg>
             </div>
-            <p className="palm-loading-text">Reading your palm<span className="palm-dots" /></p>
+            <p className="palm-loading-text">
+              {tr("palm.analyzing.text")}
+              <span className="palm-dots" />
+            </p>
           </div>
           {/* Skeleton layout */}
           <div className="palm-skeleton">
@@ -829,18 +858,22 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         return (
           <div className="palm-results">
             <div className="palm-results-top">
-              <button className="palm-btn-camera" onClick={resetAll}>New Reading</button>
+              <button className="palm-btn-camera" onClick={resetAll}>{tr("palm.results.newReading")}</button>
               <button
                 className="palm-save-btn"
                 onClick={saveReading}
                 disabled={saveState === "saving" || saveState === "saved"}
-                title={saveState === "saved" ? "Already saved" : "Save this reading to this device"}
+                title={
+                  saveState === "saved"
+                    ? tr("palm.results.alreadySavedTitle")
+                    : tr("palm.results.saveTitle")
+                }
               >
                 {saveState === "saving"
-                  ? "Saving…"
+                  ? tr("palm.common.saving")
                   : saveState === "saved"
-                  ? "Saved ✓"
-                  : "Save reading"}
+                  ? tr("palm.common.saved")
+                  : tr("palm.results.saveReading")}
               </button>
               {!allRevealed && (
                 <button
@@ -848,20 +881,20 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                   onClick={skipAnimations}
                   type="button"
                 >
-                  Skip animations
+                  {tr("palm.results.skipAnimations")}
                 </button>
               )}
               {imagePreview && (
                 <div className="palm-preview palm-preview--small">
-                  <img src={imagePreview} alt="Your palm" />
+                  <img src={imagePreview} alt={tr("palm.alt.yourPalm")} />
                 </div>
               )}
             </div>
             {saveState === "saved" && (
               <div className="palm-save-toast">
-                Saved to your readings{" "}
+                {tr("palm.results.savedToast")}{" "}
                 <a href="/insights/palm-history" className="palm-save-link">
-                  View history &#8599;
+                  {tr("palm.results.viewHistory")}
                 </a>
               </div>
             )}
@@ -883,13 +916,13 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <div className="palm-image-warning-head">
                   <AlertTriangle size={20} aria-hidden="true" />
                   <span className="palm-image-warning-title">
-                    Image quality may affect accuracy
+                    {tr("palm.warning.hardTitle")}
                   </span>
                   <button
                     type="button"
                     className="palm-image-warning-dismiss"
                     onClick={() => setImageQualityDismissed(true)}
-                    aria-label="Dismiss warning"
+                    aria-label={tr("palm.warning.dismiss")}
                   >
                     &times;
                   </button>
@@ -915,7 +948,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <div className="palm-image-warning-head">
                   <AlertTriangle size={18} aria-hidden="true" />
                   <span className="palm-image-warning-title">
-                    Image is marginal — interpret with care
+                    {tr("palm.warning.softTitle")}
                   </span>
                 </div>
                 {iq.notes && <p className="palm-image-warning-notes">{iq.notes}</p>}
@@ -930,7 +963,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Overall Summary</h3>
+                <h3>{tr("palm.sections.overallSummary")}</h3>
                 <p>{reading.overall_summary}</p>
                 {reading.dominant_hand_note && (
                   <p className="palm-hand-note">
@@ -948,7 +981,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Annotated Palm</h3>
+                <h3>{tr("palm.sections.annotatedPalm")}</h3>
                 <PalmAnnotation
                   imageDataUrl={imagePreview}
                   coordinates={lineCoords}
@@ -982,7 +1015,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                         style={{ borderLeftColor: STRENGTH_COLORS[line.strength] }}
                       >
                         <div className="palm-line-header">
-                          <h4>{LINE_LABELS[key] || key}</h4>
+                          <h4>{lineLabels[key] || key}</h4>
                           <span className={`palm-strength palm-strength--${line.strength}`}>
                             {line.strength}
                           </span>
@@ -996,8 +1029,12 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                               className="palm-line-confidence-dot"
                               style={{ background: VISIBILITY_BADGE_COLORS[visibility] }}
                             />
-                            {VISIBILITY_LABEL[visibility]}
-                            {visibility !== "not_detected" && pct !== null && ` (${pct}%)`}
+                            {visibilityLabels[visibility]}
+                            {visibility !== "not_detected" &&
+                              pct !== null &&
+                              tr("palm.visibility.confidenceSuffix", {
+                                pct: String(pct),
+                              })}
                           </div>
                         )}
                         <p className="palm-line-desc">{line.description}</p>
@@ -1017,26 +1054,36 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Life Trajectory</h3>
+                <h3>{tr("palm.sections.lifeTrajectory")}</h3>
                 <div className="palm-trajectory-grid">
                   <div className="palm-trajectory-item">
-                    <span className="palm-trajectory-label">Current Phase</span>
+                    <span className="palm-trajectory-label">
+                      {tr("palm.trajectory.currentPhase")}
+                    </span>
                     <p>{reading.life_trajectory.current_phase}</p>
                   </div>
                   <div className="palm-trajectory-item">
-                    <span className="palm-trajectory-label">Near Future</span>
+                    <span className="palm-trajectory-label">
+                      {tr("palm.trajectory.nearFuture")}
+                    </span>
                     <p>{reading.life_trajectory.near_future}</p>
                   </div>
                   <div className="palm-trajectory-item">
-                    <span className="palm-trajectory-label">Long-Term Path</span>
+                    <span className="palm-trajectory-label">
+                      {tr("palm.trajectory.longTermPath")}
+                    </span>
                     <p>{reading.life_trajectory.long_term_path}</p>
                   </div>
                   <div className="palm-trajectory-item palm-trajectory-item--challenge">
-                    <span className="palm-trajectory-label">Challenges</span>
+                    <span className="palm-trajectory-label">
+                      {tr("palm.trajectory.challenges")}
+                    </span>
                     <p>{reading.life_trajectory.challenges}</p>
                   </div>
                   <div className="palm-trajectory-item palm-trajectory-item--opportunity">
-                    <span className="palm-trajectory-label">Opportunities</span>
+                    <span className="palm-trajectory-label">
+                      {tr("palm.trajectory.opportunities")}
+                    </span>
                     <p>{reading.life_trajectory.opportunities}</p>
                   </div>
                 </div>
@@ -1051,7 +1098,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Chart &times; Palm Synthesis</h3>
+                <h3>{tr("palm.sections.jyotishSynthesis")}</h3>
                 {reading.jyotish_correlation.summary && (
                   <p className="palm-section-lead">
                     {reading.jyotish_correlation.summary}
@@ -1099,7 +1146,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Active Dasha Lens</h3>
+                <h3>{tr("palm.sections.dashaLens")}</h3>
                 {reading.dasha_relevance.active_period_summary && (
                   <p className="palm-section-lead">
                     {reading.dasha_relevance.active_period_summary}
@@ -1134,17 +1181,17 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Career &amp; Life Purpose</h3>
+                <h3>{tr("palm.sections.career")}</h3>
                 <div className="palm-subsection">
-                  <h4>Natural Talents</h4>
+                  <h4>{tr("palm.career.naturalTalents")}</h4>
                   <p>{reading.career_and_purpose.natural_talents}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Career Direction</h4>
+                  <h4>{tr("palm.career.careerDirection")}</h4>
                   <p>{reading.career_and_purpose.career_direction}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Purpose Alignment</h4>
+                  <h4>{tr("palm.career.purposeAlignment")}</h4>
                   <p>{reading.career_and_purpose.purpose_alignment}</p>
                 </div>
               </motion.div>
@@ -1158,17 +1205,17 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Relationships &amp; Emotional Landscape</h3>
+                <h3>{tr("palm.sections.relationships")}</h3>
                 <div className="palm-subsection">
-                  <h4>Emotional State</h4>
+                  <h4>{tr("palm.relationships.emotionalState")}</h4>
                   <p>{reading.relationships_and_emotional.emotional_state}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Relationship Dynamics</h4>
+                  <h4>{tr("palm.relationships.relationshipDynamics")}</h4>
                   <p>{reading.relationships_and_emotional.relationship_dynamics}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Connection Style</h4>
+                  <h4>{tr("palm.relationships.connectionStyle")}</h4>
                   <p>{reading.relationships_and_emotional.connection_style}</p>
                 </div>
               </motion.div>
@@ -1182,17 +1229,17 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Health &amp; Vitality</h3>
+                <h3>{tr("palm.sections.health")}</h3>
                 <div className="palm-subsection">
-                  <h4>Energy Levels</h4>
+                  <h4>{tr("palm.health.energyLevels")}</h4>
                   <p>{reading.health_and_vitality.energy_levels}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Stress Indicators</h4>
+                  <h4>{tr("palm.health.stressIndicators")}</h4>
                   <p>{reading.health_and_vitality.stress_indicators}</p>
                 </div>
                 <div className="palm-subsection">
-                  <h4>Wellness Advice</h4>
+                  <h4>{tr("palm.health.wellnessAdvice")}</h4>
                   <p>{reading.health_and_vitality.wellness_advice}</p>
                 </div>
               </motion.div>
@@ -1206,7 +1253,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Mounts</h3>
+                <h3>{tr("palm.sections.mounts")}</h3>
                 {Array.isArray(reading.mounts.prominent) && reading.mounts.prominent.length > 0 && (
                   <div className="palm-chips">
                     {reading.mounts.prominent.map((m) => (
@@ -1226,7 +1273,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Fingers</h3>
+                <h3>{tr("palm.sections.fingers")}</h3>
                 {reading.fingers.observation && (
                   <p className="palm-observation">{reading.fingers.observation}</p>
                 )}
@@ -1242,7 +1289,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Special Markings</h3>
+                <h3>{tr("palm.sections.specialMarkings")}</h3>
                 {Array.isArray(reading.special_markings.observed) &&
                   reading.special_markings.observed.length > 0 && (
                     <div className="palm-chips">
@@ -1265,7 +1312,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Hasta Samudrika Shastra Framework</h3>
+                <h3>{tr("palm.sections.classicalFramework")}</h3>
                 {Array.isArray(reading.classical_framework_notes.sanskrit_terms) &&
                   reading.classical_framework_notes.sanskrit_terms.length > 0 && (
                     <ul className="palm-sanskrit-list">
@@ -1305,7 +1352,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 initial="hidden"
                 animate="show"
               >
-                <h3>Guidance</h3>
+                <h3>{tr("palm.sections.guidance")}</h3>
                 <p>{reading.guidance}</p>
               </motion.div>
             )}

@@ -1,0 +1,1052 @@
+{
+  "es": {
+    "palm": {
+      "common": {
+        "cancel": "Cancelar",
+        "saving": "Guardando…",
+        "saved": "Guardado ✓",
+        "untitled": "Lectura sin título",
+        "backToReadings": "Volver a tus lecturas",
+        "classicalBadge": "Hasta Samudrika Shastra"
+      },
+      "alt": {
+        "palm": "Palma",
+        "captured": "Palma capturada",
+        "analyzing": "Analizando la palma",
+        "yourPalm": "Tu palma",
+        "saved": "Palma guardada",
+        "comparePalm": "Palma de la {tag}"
+      },
+      "panel": {
+        "kicker": "Lectura de la Palma",
+        "heading": "Análisis de Lectura de la Palma",
+        "intro": "Usa tu cámara o sube una imagen de tu palma para un análisis con IA de tus líneas, montes y marcas especiales. Recibe percepciones personalizadas basadas en las tradiciones milenarias de la quiromancia.",
+        "classicalToggleTitle": "Modo Hasta Samudrika Shastra",
+        "classicalToggleSubtitle": "Solo quiromancia védica clásica",
+        "openCamera": "Abrir Cámara",
+        "uploadImage": "Subir Imagen",
+        "tipHandFlat": "Coloca tu mano dominante plana, con la palma hacia la cámara",
+        "tipLighting": "Asegura una luz buena y uniforme, sin sombras marcadas",
+        "tipFingers": "Mantén los dedos ligeramente separados"
+      },
+      "camera": {
+        "noHand": "No se detecta ninguna mano",
+        "palmClear": "¡Palma detectada con claridad!",
+        "handSteady": "Mano detectada — mantenla firme",
+        "confidence": "{pct}% de confianza",
+        "captureTitle": "Capturar"
+      },
+      "captured": {
+        "retake": "Repetir",
+        "uploadDifferent": "Subir Otra Imagen",
+        "analyze": "Analizar Mi Palma"
+      },
+      "analyzing": {
+        "text": "Leyendo tu palma"
+      },
+      "results": {
+        "newReading": "Nueva Lectura",
+        "saveReading": "Guardar lectura",
+        "saveTitle": "Guardar esta lectura en este dispositivo",
+        "alreadySavedTitle": "Ya guardada",
+        "skipAnimations": "Omitir animaciones",
+        "savedToast": "Guardada en tus lecturas",
+        "viewHistory": "Ver historial ↗"
+      },
+      "warning": {
+        "hardTitle": "La calidad de la imagen puede afectar la precisión",
+        "softTitle": "La imagen es límite — interprétala con cuidado",
+        "dismiss": "Descartar aviso",
+        "markedAs": "La calidad de la imagen se marcó como {rating} cuando se tomó esta lectura"
+      },
+      "quality": {
+        "marginal": "límite"
+      },
+      "sections": {
+        "overallSummary": "Resumen General",
+        "annotatedPalm": "Palma Anotada",
+        "palm": "Palma",
+        "lifeTrajectory": "Trayectoria de Vida",
+        "jyotishSynthesis": "Síntesis Carta × Palma",
+        "dashaLens": "Lente de la Dasha Activa",
+        "career": "Carrera y Propósito de Vida",
+        "relationships": "Relaciones y Paisaje Emocional",
+        "health": "Salud y Vitalidad",
+        "mounts": "Montes",
+        "fingers": "Dedos",
+        "specialMarkings": "Marcas Especiales",
+        "classicalFramework": "Marco Hasta Samudrika Shastra",
+        "guidance": "Orientación",
+        "yourNotes": "Tus Notas"
+      },
+      "trajectory": {
+        "currentPhase": "Fase Actual",
+        "nearFuture": "Futuro Próximo",
+        "longTermPath": "Camino a Largo Plazo",
+        "challenges": "Desafíos",
+        "opportunities": "Oportunidades"
+      },
+      "career": {
+        "naturalTalents": "Talentos Naturales",
+        "careerDirection": "Dirección Profesional",
+        "purposeAlignment": "Alineación con el Propósito"
+      },
+      "relationships": {
+        "emotionalState": "Estado Emocional",
+        "relationshipDynamics": "Dinámica de las Relaciones",
+        "connectionStyle": "Estilo de Conexión"
+      },
+      "health": {
+        "energyLevels": "Niveles de Energía",
+        "stressIndicators": "Indicadores de Estrés",
+        "wellnessAdvice": "Consejos de Bienestar"
+      },
+      "lines": {
+        "heartLine": "Línea del Corazón",
+        "headLine": "Línea de la Cabeza",
+        "lifeLine": "Línea de la Vida",
+        "fateLine": "Línea del Destino"
+      },
+      "annotation": {
+        "heart": "Corazón",
+        "head": "Cabeza",
+        "life": "Vida",
+        "fate": "Destino"
+      },
+      "visibility": {
+        "clear": "Clara",
+        "partial": "Parcial",
+        "faint": "Tenue",
+        "notDetected": "No detectada",
+        "confidenceSuffix": " ({pct}%)"
+      },
+      "errors": {
+        "cameraDenied": "Acceso a la cámara denegado. Usa la opción de subir imagen.",
+        "captureTooLarge": "La imagen de la palma es demasiado grande. Captura una imagen más cercana y de menor resolución, por debajo de 5MB.",
+        "uploadTooLarge": "La imagen de la palma es demasiado grande. Sube una imagen de menos de 5MB.",
+        "unsupportedType": "Sube una imagen JPEG, PNG o WebP.",
+        "analysisFailed": "El análisis falló",
+        "generic": "Algo salió mal",
+        "saveFailed": "No se pudo guardar la lectura"
+      },
+      "history": {
+        "kicker": "Tu archivo",
+        "title": "Tus Lecturas de la Palma",
+        "loadingSubtitle": "Cargando tus lecturas guardadas…",
+        "emptySubtitle": "Aún no hay nada aquí.",
+        "oneSaved": "1 lectura guardada.",
+        "manySaved": "{count} lecturas guardadas.",
+        "compareTwo": "Comparar dos lecturas",
+        "cancelCompare": "Cancelar comparación",
+        "pickTwo": "Elige 2 lecturas para comparar.",
+        "pickOneMore": "Elige 1 lectura más.",
+        "readyToCompare": "Listo para comparar.",
+        "compareThese": "Comparar estas →",
+        "emptyBody": "Aún no has guardado ninguna lectura de la palma.",
+        "readYourPalm": "Lee tu palma",
+        "openReadingAria": "Abrir la lectura del {date}",
+        "selectReadingAria": "Seleccionar la lectura del {date}",
+        "deselectReadingAria": "Quitar la selección de la lectura del {date}",
+        "deleteConfirm": "¿Eliminar esta lectura?",
+        "deleting": "Eliminando…",
+        "confirmDelete": "Sí, eliminar",
+        "delete": "Eliminar",
+        "deleteAria": "Eliminar lectura",
+        "deleteFailed": "No se pudo eliminar la lectura."
+      },
+      "detail": {
+        "loadingTitle": "Cargando la lectura…",
+        "errorTitle": "Lectura de la Palma",
+        "notFound": "Lectura no encontrada.",
+        "loadFailed": "No se pudo cargar esta lectura.",
+        "titleAria": "Título de la lectura",
+        "editTitleTooltip": "Haz clic para editar el título",
+        "editHint": "Editar",
+        "couldntSave": "No se pudo guardar",
+        "confidenceLabel": "Confianza:",
+        "notesHelp": "Notas privadas para ti — cualquier cosa que quieras recordar sobre esta lectura.",
+        "notesPlaceholder": "Añade una nota…",
+        "notesSaved": "Notas guardadas ✓",
+        "couldntSaveNotes": "No se pudieron guardar las notas",
+        "compareCta": "Comparar con otra lectura →"
+      },
+      "compare": {
+        "title": "Comparar lecturas de la palma",
+        "mustSelectTwo": "Debes seleccionar dos lecturas para comparar.",
+        "pickReadings": "Elegir lecturas",
+        "loadingTitle": "Comparando dos lecturas…",
+        "kicker": "Lado a lado",
+        "heading": "Comparando dos lecturas",
+        "takenDayApart": "Tomadas con {count} día de diferencia",
+        "takenDaysApart": "Tomadas con {count} días de diferencia",
+        "errorSelectTwo": "Selecciona exactamente dos lecturas para comparar.",
+        "errorNotFound": "No se encontró una o ambas lecturas.",
+        "loadFailed": "No pudimos cargar esta comparación.",
+        "readingA": "Lectura A",
+        "readingB": "Lectura B",
+        "openFull": "Abrir la lectura completa →",
+        "lineStrength": "Fuerza de las líneas",
+        "lineStrengthAria": "Comparación de la fuerza de las líneas",
+        "noStrengthChanges": "Sin cambios de fuerza en las cuatro líneas principales.",
+        "lineVisibility": "Visibilidad de las líneas",
+        "lineVisibilityAria": "Comparación de la visibilidad de las líneas",
+        "colLine": "Línea",
+        "colChange": "Cambio",
+        "direction": {
+          "stronger": "más fuerte",
+          "weaker": "más débil",
+          "unchanged": "sin cambios"
+        },
+        "specialMarkings": "Marcas especiales",
+        "newlyVisible": "Recién visibles",
+        "noLongerVisible": "Ya no visibles",
+        "prominentMounts": "Montes prominentes",
+        "newlyProminent": "Recién prominentes",
+        "noLongerProminent": "Ya no prominentes",
+        "none": "Ninguna",
+        "summaryContrast": "Contraste de resúmenes",
+        "noSummary": "(sin resumen)"
+      }
+    }
+  },
+  "bn": {
+    "palm": {
+      "common": {
+        "cancel": "বাতিল",
+        "saving": "সংরক্ষণ হচ্ছে…",
+        "saved": "সংরক্ষিত ✓",
+        "untitled": "শিরোনামহীন পাঠ",
+        "backToReadings": "আপনার পাঠে ফিরে যান",
+        "classicalBadge": "হস্ত সামুদ্রিক শাস্ত্র"
+      },
+      "alt": {
+        "palm": "হাতের তালু",
+        "captured": "ধারণ করা হাতের তালু",
+        "analyzing": "হাতের তালু বিশ্লেষণ হচ্ছে",
+        "yourPalm": "আপনার হাতের তালু",
+        "saved": "সংরক্ষিত হাতের তালু",
+        "comparePalm": "{tag}-এর হাতের তালু"
+      },
+      "panel": {
+        "kicker": "হস্তরেখা পাঠ",
+        "heading": "হস্তরেখা পাঠ বিশ্লেষণ",
+        "intro": "আপনার ক্যামেরা ব্যবহার করুন বা হাতের তালুর একটি ছবি আপলোড করুন, আর AI-চালিত বিশ্লেষণে জানুন আপনার হস্তরেখা, পর্বত ও বিশেষ চিহ্নের কথা। প্রাচীন হস্তরেখা ঐতিহ্যের ভিত্তিতে পান আপনার নিজস্ব অন্তর্দৃষ্টি।",
+        "classicalToggleTitle": "হস্ত সামুদ্রিক শাস্ত্র মোড",
+        "classicalToggleSubtitle": "শুধুমাত্র শাস্ত্রীয় বৈদিক হস্তরেখা",
+        "openCamera": "ক্যামেরা খুলুন",
+        "uploadImage": "ছবি আপলোড করুন",
+        "tipHandFlat": "আপনার প্রধান হাতটি সমানভাবে রাখুন, তালু ক্যামেরার দিকে",
+        "tipLighting": "কড়া ছায়া ছাড়া ভালো ও সমান আলো নিশ্চিত করুন",
+        "tipFingers": "আঙুলগুলি কিছুটা ফাঁক করে রাখুন"
+      },
+      "camera": {
+        "noHand": "কোনো হাত শনাক্ত হয়নি",
+        "palmClear": "হাতের তালু স্পষ্টভাবে শনাক্ত হয়েছে!",
+        "handSteady": "হাত শনাক্ত হয়েছে — স্থির রাখুন",
+        "confidence": "{pct}% নিশ্চয়তা",
+        "captureTitle": "ধারণ করুন"
+      },
+      "captured": {
+        "retake": "আবার তুলুন",
+        "uploadDifferent": "অন্য ছবি আপলোড করুন",
+        "analyze": "আমার হাতের তালু বিশ্লেষণ করুন"
+      },
+      "analyzing": {
+        "text": "আপনার হাতের তালু পড়া হচ্ছে"
+      },
+      "results": {
+        "newReading": "নতুন পাঠ",
+        "saveReading": "পাঠ সংরক্ষণ করুন",
+        "saveTitle": "এই পাঠটি এই ডিভাইসে সংরক্ষণ করুন",
+        "alreadySavedTitle": "আগেই সংরক্ষিত",
+        "skipAnimations": "অ্যানিমেশন এড়িয়ে যান",
+        "savedToast": "আপনার পাঠে সংরক্ষিত হয়েছে",
+        "viewHistory": "ইতিহাস দেখুন ↗"
+      },
+      "warning": {
+        "hardTitle": "ছবির গুণমান নির্ভুলতাকে প্রভাবিত করতে পারে",
+        "softTitle": "ছবিটি প্রান্তিক মানের — সতর্কতার সঙ্গে বিচার করুন",
+        "dismiss": "সতর্কতা বন্ধ করুন",
+        "markedAs": "এই পাঠটি নেওয়ার সময় ছবির গুণমান {rating} হিসেবে চিহ্নিত হয়েছিল"
+      },
+      "quality": {
+        "marginal": "প্রান্তিক"
+      },
+      "sections": {
+        "overallSummary": "সামগ্রিক সারসংক্ষেপ",
+        "annotatedPalm": "চিহ্নিত হাতের তালু",
+        "palm": "হাতের তালু",
+        "lifeTrajectory": "জীবনের গতিপথ",
+        "jyotishSynthesis": "কুণ্ডলী × হস্তরেখা সমন্বয়",
+        "dashaLens": "সক্রিয় দশার দৃষ্টিকোণ",
+        "career": "কর্মজীবন ও জীবনের উদ্দেশ্য",
+        "relationships": "সম্পর্ক ও অনুভূতির জগৎ",
+        "health": "স্বাস্থ্য ও প্রাণশক্তি",
+        "mounts": "পর্বত",
+        "fingers": "আঙুল",
+        "specialMarkings": "বিশেষ চিহ্ন",
+        "classicalFramework": "হস্ত সামুদ্রিক শাস্ত্র কাঠামো",
+        "guidance": "দিশা",
+        "yourNotes": "আপনার নোট"
+      },
+      "trajectory": {
+        "currentPhase": "বর্তমান পর্যায়",
+        "nearFuture": "নিকট ভবিষ্যৎ",
+        "longTermPath": "দীর্ঘমেয়াদি পথ",
+        "challenges": "চ্যালেঞ্জ",
+        "opportunities": "সুযোগ"
+      },
+      "career": {
+        "naturalTalents": "স্বাভাবিক প্রতিভা",
+        "careerDirection": "কর্মজীবনের দিশা",
+        "purposeAlignment": "উদ্দেশ্যের সঙ্গে সামঞ্জস্য"
+      },
+      "relationships": {
+        "emotionalState": "মানসিক অবস্থা",
+        "relationshipDynamics": "সম্পর্কের গতিপ্রকৃতি",
+        "connectionStyle": "সংযোগের ধরন"
+      },
+      "health": {
+        "energyLevels": "শক্তির মাত্রা",
+        "stressIndicators": "চাপের লক্ষণ",
+        "wellnessAdvice": "সুস্থতার পরামর্শ"
+      },
+      "lines": {
+        "heartLine": "হৃদয় রেখা",
+        "headLine": "মস্তিষ্ক রেখা",
+        "lifeLine": "জীবন রেখা",
+        "fateLine": "ভাগ্য রেখা"
+      },
+      "annotation": {
+        "heart": "হৃদয়",
+        "head": "মস্তিষ্ক",
+        "life": "জীবন",
+        "fate": "ভাগ্য"
+      },
+      "visibility": {
+        "clear": "স্পষ্ট",
+        "partial": "আংশিক",
+        "faint": "ক্ষীণ",
+        "notDetected": "শনাক্ত হয়নি",
+        "confidenceSuffix": " ({pct}%)"
+      },
+      "errors": {
+        "cameraDenied": "ক্যামেরার অনুমতি পাওয়া যায়নি। বদলে আপলোডের বিকল্পটি ব্যবহার করুন।",
+        "captureTooLarge": "হাতের তালুর ছবিটি অতিরিক্ত বড়। 5MB-এর কম আকারে আরও কাছ থেকে, কম রেজোলিউশনে ছবি তুলুন।",
+        "uploadTooLarge": "হাতের তালুর ছবিটি অতিরিক্ত বড়। 5MB-এর কম আকারের একটি ছবি আপলোড করুন।",
+        "unsupportedType": "JPEG, PNG বা WebP ছবি আপলোড করুন।",
+        "analysisFailed": "বিশ্লেষণ ব্যর্থ হয়েছে",
+        "generic": "কিছু একটা ভুল হয়েছে",
+        "saveFailed": "পাঠটি সংরক্ষণ করা যায়নি"
+      },
+      "history": {
+        "kicker": "আপনার সংগ্রহ",
+        "title": "আপনার হস্তরেখা পাঠ",
+        "loadingSubtitle": "আপনার সংরক্ষিত পাঠ লোড হচ্ছে…",
+        "emptySubtitle": "এখনও কিছু নেই।",
+        "oneSaved": "১টি সংরক্ষিত পাঠ।",
+        "manySaved": "{count}টি সংরক্ষিত পাঠ।",
+        "compareTwo": "দুটি পাঠ তুলনা করুন",
+        "cancelCompare": "তুলনা বাতিল করুন",
+        "pickTwo": "তুলনার জন্য ২টি পাঠ বাছুন।",
+        "pickOneMore": "আরও ১টি পাঠ বাছুন।",
+        "readyToCompare": "তুলনার জন্য প্রস্তুত।",
+        "compareThese": "এগুলি তুলনা করুন →",
+        "emptyBody": "আপনি এখনও কোনো হস্তরেখা পাঠ সংরক্ষণ করেননি।",
+        "readYourPalm": "আপনার হস্তরেখা পড়ুন",
+        "openReadingAria": "{date}-এর পাঠ খুলুন",
+        "selectReadingAria": "{date}-এর পাঠ নির্বাচন করুন",
+        "deselectReadingAria": "{date}-এর পাঠের নির্বাচন সরান",
+        "deleteConfirm": "এই পাঠটি মুছে ফেলবেন?",
+        "deleting": "মুছে ফেলা হচ্ছে…",
+        "confirmDelete": "হ্যাঁ, মুছে ফেলুন",
+        "delete": "মুছুন",
+        "deleteAria": "পাঠ মুছুন",
+        "deleteFailed": "পাঠটি মুছে ফেলা যায়নি।"
+      },
+      "detail": {
+        "loadingTitle": "পাঠ লোড হচ্ছে…",
+        "errorTitle": "হস্তরেখা পাঠ",
+        "notFound": "পাঠটি পাওয়া যায়নি।",
+        "loadFailed": "এই পাঠটি লোড করা যায়নি।",
+        "titleAria": "পাঠের শিরোনাম",
+        "editTitleTooltip": "শিরোনাম সম্পাদনা করতে ক্লিক করুন",
+        "editHint": "সম্পাদনা",
+        "couldntSave": "সংরক্ষণ করা যায়নি",
+        "confidenceLabel": "নিশ্চয়তা:",
+        "notesHelp": "নিজের জন্য ব্যক্তিগত নোট — এই পাঠ সম্পর্কে যা কিছু মনে রাখতে চান।",
+        "notesPlaceholder": "একটি নোট যোগ করুন…",
+        "notesSaved": "নোট সংরক্ষিত ✓",
+        "couldntSaveNotes": "নোট সংরক্ষণ করা যায়নি",
+        "compareCta": "অন্য একটি পাঠের সঙ্গে তুলনা করুন →"
+      },
+      "compare": {
+        "title": "হস্তরেখা পাঠ তুলনা করুন",
+        "mustSelectTwo": "তুলনার জন্য আপনাকে দুটি পাঠ নির্বাচন করতে হবে।",
+        "pickReadings": "পাঠ বাছুন",
+        "loadingTitle": "দুটি পাঠ তুলনা করা হচ্ছে…",
+        "kicker": "পাশাপাশি",
+        "heading": "দুটি পাঠের তুলনা",
+        "takenDayApart": "{count} দিনের ব্যবধানে নেওয়া",
+        "takenDaysApart": "{count} দিনের ব্যবধানে নেওয়া",
+        "errorSelectTwo": "তুলনার জন্য ঠিক দুটি পাঠ নির্বাচন করুন।",
+        "errorNotFound": "একটি বা উভয় পাঠই পাওয়া যায়নি।",
+        "loadFailed": "এই তুলনাটি লোড করা গেল না।",
+        "readingA": "পাঠ ক",
+        "readingB": "পাঠ খ",
+        "openFull": "সম্পূর্ণ পাঠ খুলুন →",
+        "lineStrength": "রেখার শক্তি",
+        "lineStrengthAria": "রেখার শক্তির তুলনা",
+        "noStrengthChanges": "চারটি প্রধান রেখার শক্তিতে কোনো পরিবর্তন নেই।",
+        "lineVisibility": "রেখার স্পষ্টতা",
+        "lineVisibilityAria": "রেখার স্পষ্টতার তুলনা",
+        "colLine": "রেখা",
+        "colChange": "পরিবর্তন",
+        "direction": {
+          "stronger": "আরও শক্তিশালী",
+          "weaker": "দুর্বলতর",
+          "unchanged": "অপরিবর্তিত"
+        },
+        "specialMarkings": "বিশেষ চিহ্ন",
+        "newlyVisible": "নতুন করে দৃশ্যমান",
+        "noLongerVisible": "আর দৃশ্যমান নয়",
+        "prominentMounts": "প্রধান পর্বত",
+        "newlyProminent": "নতুন করে প্রকট",
+        "noLongerProminent": "আর প্রকট নয়",
+        "none": "কিছু নেই",
+        "summaryContrast": "সারসংক্ষেপের তুলনা",
+        "noSummary": "(কোনো সারসংক্ষেপ নেই)"
+      }
+    }
+  },
+  "hi": {
+    "palm": {
+      "common": {
+        "cancel": "रद्द करें",
+        "saving": "सहेजा जा रहा है…",
+        "saved": "सहेजा गया ✓",
+        "untitled": "बिना शीर्षक पठन",
+        "backToReadings": "अपने पठनों पर लौटें",
+        "classicalBadge": "हस्त सामुद्रिक शास्त्र"
+      },
+      "alt": {
+        "palm": "हथेली",
+        "captured": "ली गई हथेली",
+        "analyzing": "हथेली का विश्लेषण",
+        "yourPalm": "आपकी हथेली",
+        "saved": "सहेजी गई हथेली",
+        "comparePalm": "{tag} की हथेली"
+      },
+      "panel": {
+        "kicker": "हस्तरेखा पठन",
+        "heading": "हस्तरेखा पठन विश्लेषण",
+        "intro": "अपने कैमरे का उपयोग करें या हथेली की तस्वीर अपलोड करें और AI-आधारित विश्लेषण से जानें अपनी हस्तरेखाओं, पर्वतों और विशेष चिह्नों का अर्थ। प्राचीन हस्तरेखा परंपराओं पर आधारित व्यक्तिगत अंतर्दृष्टि प्राप्त करें।",
+        "classicalToggleTitle": "हस्त सामुद्रिक शास्त्र मोड",
+        "classicalToggleSubtitle": "केवल शास्त्रीय वैदिक हस्तरेखा",
+        "openCamera": "कैमरा खोलें",
+        "uploadImage": "तस्वीर अपलोड करें",
+        "tipHandFlat": "अपना प्रमुख हाथ सीधा रखें, हथेली कैमरे की ओर",
+        "tipLighting": "तेज़ छाया के बिना अच्छी और समान रोशनी सुनिश्चित करें",
+        "tipFingers": "अपनी उंगलियाँ थोड़ी फैलाकर रखें"
+      },
+      "camera": {
+        "noHand": "कोई हाथ नहीं मिला",
+        "palmClear": "हथेली स्पष्ट रूप से मिल गई!",
+        "handSteady": "हाथ मिल गया — स्थिर रखें",
+        "confidence": "{pct}% विश्वास",
+        "captureTitle": "तस्वीर लें"
+      },
+      "captured": {
+        "retake": "फिर से लें",
+        "uploadDifferent": "दूसरी तस्वीर अपलोड करें",
+        "analyze": "मेरी हथेली का विश्लेषण करें"
+      },
+      "analyzing": {
+        "text": "आपकी हथेली पढ़ी जा रही है"
+      },
+      "results": {
+        "newReading": "नया पठन",
+        "saveReading": "पठन सहेजें",
+        "saveTitle": "इस पठन को इस डिवाइस पर सहेजें",
+        "alreadySavedTitle": "पहले से सहेजा गया",
+        "skipAnimations": "एनिमेशन छोड़ें",
+        "savedToast": "आपके पठनों में सहेजा गया",
+        "viewHistory": "इतिहास देखें ↗"
+      },
+      "warning": {
+        "hardTitle": "तस्वीर की गुणवत्ता सटीकता को प्रभावित कर सकती है",
+        "softTitle": "तस्वीर सीमांत गुणवत्ता की है — सावधानी से समझें",
+        "dismiss": "चेतावनी हटाएँ",
+        "markedAs": "यह पठन लेते समय तस्वीर की गुणवत्ता {rating} अंकित की गई थी"
+      },
+      "quality": {
+        "marginal": "सीमांत"
+      },
+      "sections": {
+        "overallSummary": "समग्र सारांश",
+        "annotatedPalm": "चिह्नित हथेली",
+        "palm": "हथेली",
+        "lifeTrajectory": "जीवन का प्रवाह",
+        "jyotishSynthesis": "कुंडली × हस्तरेखा संयोजन",
+        "dashaLens": "सक्रिय दशा दृष्टि",
+        "career": "करियर और जीवन का उद्देश्य",
+        "relationships": "संबंध और भावनात्मक परिदृश्य",
+        "health": "स्वास्थ्य और प्राणशक्ति",
+        "mounts": "पर्वत",
+        "fingers": "उंगलियाँ",
+        "specialMarkings": "विशेष चिह्न",
+        "classicalFramework": "हस्त सामुद्रिक शास्त्र ढाँचा",
+        "guidance": "मार्गदर्शन",
+        "yourNotes": "आपके नोट्स"
+      },
+      "trajectory": {
+        "currentPhase": "वर्तमान चरण",
+        "nearFuture": "निकट भविष्य",
+        "longTermPath": "दीर्घकालिक मार्ग",
+        "challenges": "चुनौतियाँ",
+        "opportunities": "अवसर"
+      },
+      "career": {
+        "naturalTalents": "स्वाभाविक प्रतिभाएँ",
+        "careerDirection": "करियर की दिशा",
+        "purposeAlignment": "उद्देश्य के साथ तालमेल"
+      },
+      "relationships": {
+        "emotionalState": "भावनात्मक स्थिति",
+        "relationshipDynamics": "संबंधों की गतिशीलता",
+        "connectionStyle": "जुड़ाव की शैली"
+      },
+      "health": {
+        "energyLevels": "ऊर्जा का स्तर",
+        "stressIndicators": "तनाव के संकेत",
+        "wellnessAdvice": "स्वास्थ्य सलाह"
+      },
+      "lines": {
+        "heartLine": "हृदय रेखा",
+        "headLine": "मस्तिष्क रेखा",
+        "lifeLine": "जीवन रेखा",
+        "fateLine": "भाग्य रेखा"
+      },
+      "annotation": {
+        "heart": "हृदय",
+        "head": "मस्तिष्क",
+        "life": "जीवन",
+        "fate": "भाग्य"
+      },
+      "visibility": {
+        "clear": "स्पष्ट",
+        "partial": "आंशिक",
+        "faint": "धुँधली",
+        "notDetected": "नहीं मिली",
+        "confidenceSuffix": " ({pct}%)"
+      },
+      "errors": {
+        "cameraDenied": "कैमरे की अनुमति नहीं मिली। कृपया अपलोड विकल्प का उपयोग करें।",
+        "captureTooLarge": "हथेली की तस्वीर बहुत बड़ी है। कृपया 5MB से कम की, पास से ली गई कम रेज़ोल्यूशन वाली तस्वीर लें।",
+        "uploadTooLarge": "हथेली की तस्वीर बहुत बड़ी है। कृपया 5MB से कम की तस्वीर अपलोड करें।",
+        "unsupportedType": "कृपया JPEG, PNG या WebP तस्वीर अपलोड करें।",
+        "analysisFailed": "विश्लेषण विफल रहा",
+        "generic": "कुछ गलत हो गया",
+        "saveFailed": "पठन सहेजा नहीं जा सका"
+      },
+      "history": {
+        "kicker": "आपका संग्रह",
+        "title": "आपके हस्तरेखा पठन",
+        "loadingSubtitle": "आपके सहेजे गए पठन लोड हो रहे हैं…",
+        "emptySubtitle": "यहाँ अभी कुछ नहीं है।",
+        "oneSaved": "1 सहेजा गया पठन।",
+        "manySaved": "{count} सहेजे गए पठन।",
+        "compareTwo": "दो पठनों की तुलना करें",
+        "cancelCompare": "तुलना रद्द करें",
+        "pickTwo": "तुलना के लिए 2 पठन चुनें।",
+        "pickOneMore": "1 और पठन चुनें।",
+        "readyToCompare": "तुलना के लिए तैयार।",
+        "compareThese": "इनकी तुलना करें →",
+        "emptyBody": "आपने अभी तक कोई हस्तरेखा पठन नहीं सहेजा है।",
+        "readYourPalm": "अपनी हथेली पढ़वाएँ",
+        "openReadingAria": "{date} का पठन खोलें",
+        "selectReadingAria": "{date} का पठन चुनें",
+        "deselectReadingAria": "{date} के पठन का चयन हटाएँ",
+        "deleteConfirm": "यह पठन मिटाना है?",
+        "deleting": "मिटाया जा रहा है…",
+        "confirmDelete": "हाँ, मिटाएँ",
+        "delete": "मिटाएँ",
+        "deleteAria": "पठन मिटाएँ",
+        "deleteFailed": "पठन मिटाया नहीं जा सका।"
+      },
+      "detail": {
+        "loadingTitle": "पठन लोड हो रहा है…",
+        "errorTitle": "हस्तरेखा पठन",
+        "notFound": "पठन नहीं मिला।",
+        "loadFailed": "यह पठन लोड नहीं हो सका।",
+        "titleAria": "पठन का शीर्षक",
+        "editTitleTooltip": "शीर्षक बदलने के लिए क्लिक करें",
+        "editHint": "बदलें",
+        "couldntSave": "सहेजा नहीं जा सका",
+        "confidenceLabel": "विश्वास:",
+        "notesHelp": "अपने लिए निजी नोट्स — इस पठन के बारे में जो कुछ आप याद रखना चाहें।",
+        "notesPlaceholder": "एक नोट जोड़ें…",
+        "notesSaved": "नोट्स सहेजे गए ✓",
+        "couldntSaveNotes": "नोट्स सहेजे नहीं जा सके",
+        "compareCta": "किसी दूसरे पठन से तुलना करें →"
+      },
+      "compare": {
+        "title": "हस्तरेखा पठनों की तुलना करें",
+        "mustSelectTwo": "तुलना के लिए आपको दो पठन चुनने होंगे।",
+        "pickReadings": "पठन चुनें",
+        "loadingTitle": "दो पठनों की तुलना हो रही है…",
+        "kicker": "आमने-सामने",
+        "heading": "दो पठनों की तुलना",
+        "takenDayApart": "{count} दिन के अंतर पर लिए गए",
+        "takenDaysApart": "{count} दिन के अंतर पर लिए गए",
+        "errorSelectTwo": "तुलना के लिए ठीक दो पठन चुनें।",
+        "errorNotFound": "एक या दोनों पठन नहीं मिले।",
+        "loadFailed": "हम यह तुलना लोड नहीं कर सके।",
+        "readingA": "पठन क",
+        "readingB": "पठन ख",
+        "openFull": "पूरा पठन खोलें →",
+        "lineStrength": "रेखाओं की शक्ति",
+        "lineStrengthAria": "रेखाओं की शक्ति की तुलना",
+        "noStrengthChanges": "चारों प्रमुख रेखाओं की शक्ति में कोई बदलाव नहीं।",
+        "lineVisibility": "रेखाओं की स्पष्टता",
+        "lineVisibilityAria": "रेखाओं की स्पष्टता की तुलना",
+        "colLine": "रेखा",
+        "colChange": "बदलाव",
+        "direction": {
+          "stronger": "अधिक मजबूत",
+          "weaker": "कमज़ोर",
+          "unchanged": "अपरिवर्तित"
+        },
+        "specialMarkings": "विशेष चिह्न",
+        "newlyVisible": "नए दिखाई देने वाले",
+        "noLongerVisible": "अब दिखाई न देने वाले",
+        "prominentMounts": "प्रमुख पर्वत",
+        "newlyProminent": "नए उभरे",
+        "noLongerProminent": "अब उभरे नहीं",
+        "none": "कोई नहीं",
+        "summaryContrast": "सारांशों की तुलना",
+        "noSummary": "(कोई सारांश नहीं)"
+      }
+    }
+  },
+  "it": {
+    "palm": {
+      "common": {
+        "cancel": "Annulla",
+        "saving": "Salvataggio…",
+        "saved": "Salvato ✓",
+        "untitled": "Lettura senza titolo",
+        "backToReadings": "Torna alle tue letture",
+        "classicalBadge": "Hasta Samudrika Shastra"
+      },
+      "alt": {
+        "palm": "Palmo",
+        "captured": "Palmo acquisito",
+        "analyzing": "Analisi del palmo",
+        "yourPalm": "Il tuo palmo",
+        "saved": "Palmo salvato",
+        "comparePalm": "Palmo della {tag}"
+      },
+      "panel": {
+        "kicker": "Lettura della Mano",
+        "heading": "Analisi della Lettura della Mano",
+        "intro": "Usa la fotocamera o carica un'immagine del tuo palmo per un'analisi con IA delle tue linee, dei monti e dei segni particolari. Ricevi intuizioni personalizzate basate sulle antiche tradizioni della chiromanzia.",
+        "classicalToggleTitle": "Modalità Hasta Samudrika Shastra",
+        "classicalToggleSubtitle": "Solo chiromanzia vedica classica",
+        "openCamera": "Apri la Fotocamera",
+        "uploadImage": "Carica Immagine",
+        "tipHandFlat": "Tieni la mano dominante distesa, con il palmo verso la fotocamera",
+        "tipLighting": "Assicura una luce buona e uniforme, senza ombre nette",
+        "tipFingers": "Tieni le dita leggermente divaricate"
+      },
+      "camera": {
+        "noHand": "Nessuna mano rilevata",
+        "palmClear": "Palmo rilevato con chiarezza!",
+        "handSteady": "Mano rilevata — tienila ferma",
+        "confidence": "{pct}% di affidabilità",
+        "captureTitle": "Scatta"
+      },
+      "captured": {
+        "retake": "Riprova",
+        "uploadDifferent": "Carica un'Altra Immagine",
+        "analyze": "Analizza il Mio Palmo"
+      },
+      "analyzing": {
+        "text": "Lettura del tuo palmo"
+      },
+      "results": {
+        "newReading": "Nuova Lettura",
+        "saveReading": "Salva la lettura",
+        "saveTitle": "Salva questa lettura su questo dispositivo",
+        "alreadySavedTitle": "Già salvata",
+        "skipAnimations": "Salta le animazioni",
+        "savedToast": "Salvata tra le tue letture",
+        "viewHistory": "Vedi la cronologia ↗"
+      },
+      "warning": {
+        "hardTitle": "La qualità dell'immagine può incidere sulla precisione",
+        "softTitle": "L'immagine è al limite — interpretala con cautela",
+        "dismiss": "Chiudi l'avviso",
+        "markedAs": "La qualità dell'immagine è stata segnata come {rating} quando è stata fatta questa lettura"
+      },
+      "quality": {
+        "marginal": "al limite"
+      },
+      "sections": {
+        "overallSummary": "Sintesi Generale",
+        "annotatedPalm": "Palmo Annotato",
+        "palm": "Palmo",
+        "lifeTrajectory": "Traiettoria di Vita",
+        "jyotishSynthesis": "Sintesi Carta × Palmo",
+        "dashaLens": "Lente della Dasha Attiva",
+        "career": "Carriera e Scopo di Vita",
+        "relationships": "Relazioni e Paesaggio Emotivo",
+        "health": "Salute e Vitalità",
+        "mounts": "Monti",
+        "fingers": "Dita",
+        "specialMarkings": "Segni Particolari",
+        "classicalFramework": "Quadro Hasta Samudrika Shastra",
+        "guidance": "Indicazioni",
+        "yourNotes": "Le Tue Note"
+      },
+      "trajectory": {
+        "currentPhase": "Fase Attuale",
+        "nearFuture": "Futuro Prossimo",
+        "longTermPath": "Percorso a Lungo Termine",
+        "challenges": "Sfide",
+        "opportunities": "Opportunità"
+      },
+      "career": {
+        "naturalTalents": "Talenti Naturali",
+        "careerDirection": "Direzione Professionale",
+        "purposeAlignment": "Allineamento con lo Scopo"
+      },
+      "relationships": {
+        "emotionalState": "Stato Emotivo",
+        "relationshipDynamics": "Dinamiche Relazionali",
+        "connectionStyle": "Stile di Connessione"
+      },
+      "health": {
+        "energyLevels": "Livelli di Energia",
+        "stressIndicators": "Indicatori di Stress",
+        "wellnessAdvice": "Consigli per il Benessere"
+      },
+      "lines": {
+        "heartLine": "Linea del Cuore",
+        "headLine": "Linea della Testa",
+        "lifeLine": "Linea della Vita",
+        "fateLine": "Linea del Destino"
+      },
+      "annotation": {
+        "heart": "Cuore",
+        "head": "Testa",
+        "life": "Vita",
+        "fate": "Destino"
+      },
+      "visibility": {
+        "clear": "Chiara",
+        "partial": "Parziale",
+        "faint": "Tenue",
+        "notDetected": "Non rilevata",
+        "confidenceSuffix": " ({pct}%)"
+      },
+      "errors": {
+        "cameraDenied": "Accesso alla fotocamera negato. Usa invece l'opzione di caricamento.",
+        "captureTooLarge": "L'immagine del palmo è troppo grande. Scatta un'immagine più ravvicinata e a risoluzione più bassa, sotto i 5MB.",
+        "uploadTooLarge": "L'immagine del palmo è troppo grande. Carica un'immagine sotto i 5MB.",
+        "unsupportedType": "Carica un'immagine JPEG, PNG o WebP.",
+        "analysisFailed": "Analisi non riuscita",
+        "generic": "Qualcosa è andato storto",
+        "saveFailed": "Impossibile salvare la lettura"
+      },
+      "history": {
+        "kicker": "Il tuo archivio",
+        "title": "Le Tue Letture della Mano",
+        "loadingSubtitle": "Caricamento delle letture salvate…",
+        "emptySubtitle": "Qui non c'è ancora nulla.",
+        "oneSaved": "1 lettura salvata.",
+        "manySaved": "{count} letture salvate.",
+        "compareTwo": "Confronta due letture",
+        "cancelCompare": "Annulla il confronto",
+        "pickTwo": "Scegli 2 letture da confrontare.",
+        "pickOneMore": "Scegli 1 altra lettura.",
+        "readyToCompare": "Pronto al confronto.",
+        "compareThese": "Confronta queste →",
+        "emptyBody": "Non hai ancora salvato nessuna lettura della mano.",
+        "readYourPalm": "Leggi la tua mano",
+        "openReadingAria": "Apri la lettura del {date}",
+        "selectReadingAria": "Seleziona la lettura del {date}",
+        "deselectReadingAria": "Deseleziona la lettura del {date}",
+        "deleteConfirm": "Eliminare questa lettura?",
+        "deleting": "Eliminazione…",
+        "confirmDelete": "Sì, elimina",
+        "delete": "Elimina",
+        "deleteAria": "Elimina la lettura",
+        "deleteFailed": "Impossibile eliminare la lettura."
+      },
+      "detail": {
+        "loadingTitle": "Caricamento della lettura…",
+        "errorTitle": "Lettura della Mano",
+        "notFound": "Lettura non trovata.",
+        "loadFailed": "Non è stato possibile caricare questa lettura.",
+        "titleAria": "Titolo della lettura",
+        "editTitleTooltip": "Clicca per modificare il titolo",
+        "editHint": "Modifica",
+        "couldntSave": "Salvataggio non riuscito",
+        "confidenceLabel": "Affidabilità:",
+        "notesHelp": "Note private per te — tutto ciò che vuoi ricordare di questa lettura.",
+        "notesPlaceholder": "Aggiungi una nota…",
+        "notesSaved": "Note salvate ✓",
+        "couldntSaveNotes": "Salvataggio delle note non riuscito",
+        "compareCta": "Confronta con un'altra lettura →"
+      },
+      "compare": {
+        "title": "Confronta letture della mano",
+        "mustSelectTwo": "Devi selezionare due letture da confrontare.",
+        "pickReadings": "Scegli le letture",
+        "loadingTitle": "Confronto di due letture…",
+        "kicker": "Fianco a fianco",
+        "heading": "Confronto di due letture",
+        "takenDayApart": "Fatte a {count} giorno di distanza",
+        "takenDaysApart": "Fatte a {count} giorni di distanza",
+        "errorSelectTwo": "Seleziona esattamente due letture da confrontare.",
+        "errorNotFound": "Una o entrambe le letture non sono state trovate.",
+        "loadFailed": "Non abbiamo potuto caricare questo confronto.",
+        "readingA": "Lettura A",
+        "readingB": "Lettura B",
+        "openFull": "Apri la lettura completa →",
+        "lineStrength": "Forza delle linee",
+        "lineStrengthAria": "Confronto della forza delle linee",
+        "noStrengthChanges": "Nessun cambiamento di forza nelle quattro linee principali.",
+        "lineVisibility": "Visibilità delle linee",
+        "lineVisibilityAria": "Confronto della visibilità delle linee",
+        "colLine": "Linea",
+        "colChange": "Cambiamento",
+        "direction": {
+          "stronger": "più forte",
+          "weaker": "più debole",
+          "unchanged": "invariata"
+        },
+        "specialMarkings": "Segni particolari",
+        "newlyVisible": "Ora visibili",
+        "noLongerVisible": "Non più visibili",
+        "prominentMounts": "Monti prominenti",
+        "newlyProminent": "Ora prominenti",
+        "noLongerProminent": "Non più prominenti",
+        "none": "Nessuno",
+        "summaryContrast": "Confronto delle sintesi",
+        "noSummary": "(nessuna sintesi)"
+      }
+    }
+  },
+  "fr": {
+    "palm": {
+      "common": {
+        "cancel": "Annuler",
+        "saving": "Enregistrement…",
+        "saved": "Enregistré ✓",
+        "untitled": "Lecture sans titre",
+        "backToReadings": "Retour à vos lectures",
+        "classicalBadge": "Hasta Samudrika Shastra"
+      },
+      "alt": {
+        "palm": "Paume",
+        "captured": "Paume capturée",
+        "analyzing": "Analyse de la paume",
+        "yourPalm": "Votre paume",
+        "saved": "Paume enregistrée",
+        "comparePalm": "Paume de la {tag}"
+      },
+      "panel": {
+        "kicker": "Lecture de la Paume",
+        "heading": "Analyse de Lecture de la Paume",
+        "intro": "Utilisez votre appareil photo ou téléversez une image de votre paume pour une analyse par IA de vos lignes, de vos monts et de vos signes particuliers. Recevez des éclairages personnalisés fondés sur les traditions anciennes de la chiromancie.",
+        "classicalToggleTitle": "Mode Hasta Samudrika Shastra",
+        "classicalToggleSubtitle": "Chiromancie védique classique uniquement",
+        "openCamera": "Ouvrir l'Appareil Photo",
+        "uploadImage": "Téléverser une Image",
+        "tipHandFlat": "Posez votre main dominante à plat, la paume face à l'objectif",
+        "tipLighting": "Veillez à une lumière bonne et régulière, sans ombres dures",
+        "tipFingers": "Gardez vos doigts légèrement écartés"
+      },
+      "camera": {
+        "noHand": "Aucune main détectée",
+        "palmClear": "Paume détectée nettement !",
+        "handSteady": "Main détectée — tenez-la immobile",
+        "confidence": "{pct}% de confiance",
+        "captureTitle": "Capturer"
+      },
+      "captured": {
+        "retake": "Reprendre",
+        "uploadDifferent": "Téléverser une Autre Image",
+        "analyze": "Analyser Ma Paume"
+      },
+      "analyzing": {
+        "text": "Lecture de votre paume"
+      },
+      "results": {
+        "newReading": "Nouvelle Lecture",
+        "saveReading": "Enregistrer la lecture",
+        "saveTitle": "Enregistrer cette lecture sur cet appareil",
+        "alreadySavedTitle": "Déjà enregistrée",
+        "skipAnimations": "Passer les animations",
+        "savedToast": "Enregistrée dans vos lectures",
+        "viewHistory": "Voir l'historique ↗"
+      },
+      "warning": {
+        "hardTitle": "La qualité de l'image peut nuire à la précision",
+        "softTitle": "L'image est limite — interprétez-la avec prudence",
+        "dismiss": "Fermer l'avertissement",
+        "markedAs": "La qualité de l'image a été notée {rating} au moment de cette lecture"
+      },
+      "quality": {
+        "marginal": "limite"
+      },
+      "sections": {
+        "overallSummary": "Synthèse Générale",
+        "annotatedPalm": "Paume Annotée",
+        "palm": "Paume",
+        "lifeTrajectory": "Trajectoire de Vie",
+        "jyotishSynthesis": "Synthèse Thème × Paume",
+        "dashaLens": "Prisme de la Dasha Active",
+        "career": "Carrière et Vocation",
+        "relationships": "Relations et Paysage Émotionnel",
+        "health": "Santé et Vitalité",
+        "mounts": "Monts",
+        "fingers": "Doigts",
+        "specialMarkings": "Signes Particuliers",
+        "classicalFramework": "Cadre Hasta Samudrika Shastra",
+        "guidance": "Conseils",
+        "yourNotes": "Vos Notes"
+      },
+      "trajectory": {
+        "currentPhase": "Phase Actuelle",
+        "nearFuture": "Avenir Proche",
+        "longTermPath": "Chemin à Long Terme",
+        "challenges": "Défis",
+        "opportunities": "Opportunités"
+      },
+      "career": {
+        "naturalTalents": "Talents Naturels",
+        "careerDirection": "Orientation Professionnelle",
+        "purposeAlignment": "Alignement avec la Vocation"
+      },
+      "relationships": {
+        "emotionalState": "État Émotionnel",
+        "relationshipDynamics": "Dynamique Relationnelle",
+        "connectionStyle": "Style de Lien"
+      },
+      "health": {
+        "energyLevels": "Niveaux d'Énergie",
+        "stressIndicators": "Indicateurs de Stress",
+        "wellnessAdvice": "Conseils de Bien-être"
+      },
+      "lines": {
+        "heartLine": "Ligne de Cœur",
+        "headLine": "Ligne de Tête",
+        "lifeLine": "Ligne de Vie",
+        "fateLine": "Ligne de Destin"
+      },
+      "annotation": {
+        "heart": "Cœur",
+        "head": "Tête",
+        "life": "Vie",
+        "fate": "Destin"
+      },
+      "visibility": {
+        "clear": "Nette",
+        "partial": "Partielle",
+        "faint": "Ténue",
+        "notDetected": "Non détectée",
+        "confidenceSuffix": " ({pct}%)"
+      },
+      "errors": {
+        "cameraDenied": "Accès à l'appareil photo refusé. Utilisez plutôt l'option de téléversement.",
+        "captureTooLarge": "L'image de la paume est trop volumineuse. Prenez une image plus rapprochée et de plus faible résolution, sous les 5MB.",
+        "uploadTooLarge": "L'image de la paume est trop volumineuse. Téléversez une image de moins de 5MB.",
+        "unsupportedType": "Téléversez une image JPEG, PNG ou WebP.",
+        "analysisFailed": "L'analyse a échoué",
+        "generic": "Une erreur est survenue",
+        "saveFailed": "Impossible d'enregistrer la lecture"
+      },
+      "history": {
+        "kicker": "Vos archives",
+        "title": "Vos Lectures de la Paume",
+        "loadingSubtitle": "Chargement de vos lectures enregistrées…",
+        "emptySubtitle": "Rien ici pour l'instant.",
+        "oneSaved": "1 lecture enregistrée.",
+        "manySaved": "{count} lectures enregistrées.",
+        "compareTwo": "Comparer deux lectures",
+        "cancelCompare": "Annuler la comparaison",
+        "pickTwo": "Choisissez 2 lectures à comparer.",
+        "pickOneMore": "Choisissez 1 lecture de plus.",
+        "readyToCompare": "Prêt à comparer.",
+        "compareThese": "Comparer celles-ci →",
+        "emptyBody": "Vous n'avez encore enregistré aucune lecture de la paume.",
+        "readYourPalm": "Faites lire votre paume",
+        "openReadingAria": "Ouvrir la lecture du {date}",
+        "selectReadingAria": "Sélectionner la lecture du {date}",
+        "deselectReadingAria": "Désélectionner la lecture du {date}",
+        "deleteConfirm": "Supprimer cette lecture ?",
+        "deleting": "Suppression…",
+        "confirmDelete": "Oui, supprimer",
+        "delete": "Supprimer",
+        "deleteAria": "Supprimer la lecture",
+        "deleteFailed": "Impossible de supprimer la lecture."
+      },
+      "detail": {
+        "loadingTitle": "Chargement de la lecture…",
+        "errorTitle": "Lecture de la Paume",
+        "notFound": "Lecture introuvable.",
+        "loadFailed": "Cette lecture n'a pas pu être chargée.",
+        "titleAria": "Titre de la lecture",
+        "editTitleTooltip": "Cliquez pour modifier le titre",
+        "editHint": "Modifier",
+        "couldntSave": "Enregistrement impossible",
+        "confidenceLabel": "Confiance :",
+        "notesHelp": "Notes privées pour vous — tout ce que vous voulez retenir de cette lecture.",
+        "notesPlaceholder": "Ajouter une note…",
+        "notesSaved": "Notes enregistrées ✓",
+        "couldntSaveNotes": "Impossible d'enregistrer les notes",
+        "compareCta": "Comparer avec une autre lecture →"
+      },
+      "compare": {
+        "title": "Comparer des lectures de la paume",
+        "mustSelectTwo": "Vous devez sélectionner deux lectures à comparer.",
+        "pickReadings": "Choisir des lectures",
+        "loadingTitle": "Comparaison de deux lectures…",
+        "kicker": "Côte à côte",
+        "heading": "Comparaison de deux lectures",
+        "takenDayApart": "Prises à {count} jour d'intervalle",
+        "takenDaysApart": "Prises à {count} jours d'intervalle",
+        "errorSelectTwo": "Sélectionnez exactement deux lectures à comparer.",
+        "errorNotFound": "Une des deux lectures, ou les deux, sont introuvables.",
+        "loadFailed": "Nous n'avons pas pu charger cette comparaison.",
+        "readingA": "Lecture A",
+        "readingB": "Lecture B",
+        "openFull": "Ouvrir la lecture complète →",
+        "lineStrength": "Force des lignes",
+        "lineStrengthAria": "Comparaison de la force des lignes",
+        "noStrengthChanges": "Aucun changement de force sur les quatre lignes majeures.",
+        "lineVisibility": "Visibilité des lignes",
+        "lineVisibilityAria": "Comparaison de la visibilité des lignes",
+        "colLine": "Ligne",
+        "colChange": "Changement",
+        "direction": {
+          "stronger": "plus forte",
+          "weaker": "plus faible",
+          "unchanged": "inchangée"
+        },
+        "specialMarkings": "Signes particuliers",
+        "newlyVisible": "Nouvellement visibles",
+        "noLongerVisible": "Plus visibles",
+        "prominentMounts": "Monts proéminents",
+        "newlyProminent": "Nouvellement proéminents",
+        "noLongerProminent": "Plus proéminents",
+        "none": "Aucun",
+        "summaryContrast": "Contraste des synthèses",
+        "noSummary": "(pas de synthèse)"
+      }
+    }
+  }
+}

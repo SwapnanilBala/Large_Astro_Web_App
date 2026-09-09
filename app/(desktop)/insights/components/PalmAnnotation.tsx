@@ -1,6 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouteMessages } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 import styles from "./PalmAnnotation.module.css";
 
 type PalmLineCoords = Array<{ x: number; y: number }>;
@@ -29,13 +31,6 @@ const LINE_COLORS: Record<LineKey, string> = {
   head_line: "#C89B3C",
   life_line: "#2A8B7E",
   fate_line: "#7B6BA8",
-};
-
-const LINE_LABELS: Record<LineKey, string> = {
-  heart_line: "Heart",
-  head_line: "Head",
-  life_line: "Life",
-  fate_line: "Fate",
 };
 
 const LINE_DRAW_DURATION_MS = 900;
@@ -108,8 +103,21 @@ export default function PalmAnnotation({
   showLabels = true,
   highlightLine = null,
 }: PalmAnnotationProps) {
+  const tr = useRouteMessages(palmMessages);
   const [naturalSize, setNaturalSize] = useState<{ w: number; h: number } | null>(
     null,
+  );
+
+  /* The pill text beside each traced line. Built here rather than at module
+     scope so it follows the selected language. */
+  const lineLabels = useMemo<Record<LineKey, string>>(
+    () => ({
+      heart_line: tr("palm.annotation.heart"),
+      head_line: tr("palm.annotation.head"),
+      life_line: tr("palm.annotation.life"),
+      fate_line: tr("palm.annotation.fate"),
+    }),
+    [tr],
   );
 
   const presentLines = useMemo<LineKey[]>(
@@ -130,7 +138,7 @@ export default function PalmAnnotation({
     return (
       <div className={containerClass}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageDataUrl} alt="Palm" className={styles.image} />
+        <img src={imageDataUrl} alt={tr("palm.alt.palm")} className={styles.image} />
       </div>
     );
   }
@@ -177,19 +185,19 @@ export default function PalmAnnotation({
           key: l.key,
           cx: end.x + (dx / dist) * labelOffsetPx,
           cy: end.y + (dy / dist) * labelOffsetPx,
-          text: LINE_LABELS[l.key],
+          text: lineLabels[l.key],
           color: l.color,
         };
       });
     return deconflictLabels(raw, minLabelGapPx);
-  }, [lineData, w, h, showLabels, labelOffsetPx]);
+  }, [lineData, w, h, showLabels, labelOffsetPx, lineLabels]);
 
   return (
     <div className={containerClass}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageDataUrl}
-        alt="Palm"
+        alt={tr("palm.alt.palm")}
         className={styles.image}
         onLoad={(e) => {
           const target = e.currentTarget;
