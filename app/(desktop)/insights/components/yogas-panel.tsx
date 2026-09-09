@@ -2,6 +2,27 @@
 
 import { useState, memo } from "react";
 import type { YogaDetectionResult } from "@/lib/astro-types";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import strengthMessages from "@/messages/en.strength.json";
+
+type Translator = (key: string, params?: Record<string, string>) => string;
+
+/*
+ * The seven grahas live in the baseline `planetNames` namespace, which every
+ * page under this layout already loads; Rahu and Ketu are not in it, so the
+ * two nodes carry their own keys here. A name that is in neither — the API can
+ * name a lagna or a special point among `involved_planets` — renders as sent
+ * rather than as a raw key.
+ */
+function planetLabel(t: Translator, tr: Translator, planet: string): string {
+  const baseKey = `planetNames.${planet.toLowerCase()}`;
+  const base = t(baseKey);
+  if (base !== baseKey) return base;
+
+  const extraKey = `strength.planets.${planet.toLowerCase()}`;
+  const extra = tr(extraKey);
+  return extra === extraKey ? planet : extra;
+}
 
 // --------------------------------------------------------------------------
 // Planet glyph mapping
@@ -25,16 +46,8 @@ const PLANET_GLYPHS: Record<string, string> = {
 
 type CategoryKey = YogaDetectionResult["category"] | "all";
 
-const CATEGORY_META: Record<CategoryKey, { label: string; emoji: string }> = {
-  all: { label: "All Yogas", emoji: "\u2728" },
-  mahapurusha: { label: "Mahapurusha", emoji: "\uD83D\uDC51" },
-  wealth: { label: "Wealth & Raja", emoji: "\uD83D\uDCB0" },
-  benefic: { label: "Benefic", emoji: "\u2B50" },
-  challenging: { label: "Challenging", emoji: "\u26A0\uFE0F" },
-  viparita: { label: "Viparita Raja", emoji: "\uD83D\uDD04" },
-  nabhasa: { label: "Nabhasa", emoji: "\uD83C\uDF10" },
-};
-
+/* The labels moved to strength.yogas.categories. The emoji that used to sit
+   beside each one in this table was never rendered, so it went with them. */
 const CATEGORY_KEYS: CategoryKey[] = [
   "all",
   "mahapurusha",
@@ -50,38 +63,39 @@ const CATEGORY_KEYS: CategoryKey[] = [
 // --------------------------------------------------------------------------
 
 function StrengthIndicator({ strength }: { strength: "strong" | "moderate" | "weak" }) {
+  const tr = useRouteMessages(strengthMessages);
   const dots = strength === "strong" ? 3 : strength === "moderate" ? 2 : 1;
+  const label = tr(`strength.yogas.strengthLabels.${strength}`);
   return (
-    <span className="yoga-strength" aria-label={`Strength: ${strength}`}>
+    <span
+      className="yoga-strength"
+      aria-label={tr("strength.yogas.strengthAria", { strength: label })}
+    >
       {Array.from({ length: 3 }, (_, i) => (
         <span
           key={i}
           className={`yoga-strength-dot ${i < dots ? `yoga-strength-dot--active yoga-strength-dot--${strength}` : ""}`}
         />
       ))}
-      <span className="yoga-strength-label">{strength}</span>
+      <span className="yoga-strength-label">{label}</span>
     </span>
   );
 }
 
-function fallbackActivationTiming(yoga: YogaDetectionResult): string {
+function fallbackActivationTiming(yoga: YogaDetectionResult, tr: Translator): string {
   if (yoga.activation_timing) return yoga.activation_timing;
-  if (yoga.strength === "strong") return "Most active during involved planet dashas and major transits to the yoga houses.";
-  if (yoga.strength === "moderate") return "Most noticeable when the involved planets are emphasized by dasha or transit.";
-  return "Usually situational, becoming visible during short transit triggers or focused life choices.";
+  if (yoga.strength === "strong") return tr("strength.yogas.activationStrong");
+  if (yoga.strength === "moderate") return tr("strength.yogas.activationModerate");
+  return tr("strength.yogas.activationWeak");
 }
 
-function fallbackTraits(yoga: YogaDetectionResult): string[] {
+function fallbackTraits(yoga: YogaDetectionResult, tr: Translator): string[] {
   if (yoga.key_traits?.length) return yoga.key_traits;
-  const categoryTraits: Record<YogaDetectionResult["category"], string[]> = {
-    mahapurusha: ["command", "life direction", "visible strength"],
-    wealth: ["resources", "status", "opportunity"],
-    benefic: ["support", "growth", "ease"],
-    challenging: ["discipline", "repair", "self-awareness"],
-    viparita: ["resilience", "reversal", "recovery"],
-    nabhasa: ["patterning", "temperament", "life structure"],
-  };
-  return categoryTraits[yoga.category];
+  /* Three per category, numbered rather than an array: the flattener the
+     translator runs on would turn a JSON array into `.0`/`.1`/`.2` keys. */
+  return [1, 2, 3].map((slot) =>
+    tr(`strength.yogas.traits.${yoga.category}.${slot}`)
+  );
 }
 
 // --------------------------------------------------------------------------
@@ -89,11 +103,13 @@ function fallbackTraits(yoga: YogaDetectionResult): string[] {
 // --------------------------------------------------------------------------
 
 function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
+  const { t } = useTranslation();
+  const tr = useRouteMessages(strengthMessages);
   const isBenefic = ["mahapurusha", "wealth", "benefic", "viparita"].includes(yoga.category);
   const isChallenging = yoga.category === "challenging";
   const isPriority = rank <= 10;
-  const activationTiming = fallbackActivationTiming(yoga);
-  const traits = fallbackTraits(yoga);
+  const activationTiming = fallbackActivationTiming(yoga, tr);
+  const traits = fallbackTraits(yoga, tr);
 
   const borderClass = isBenefic
     ? "yoga-card--benefic"
@@ -107,7 +123,9 @@ function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
         <div className="yoga-card-titles">
           <div className="yoga-card-rank-row">
             {isPriority && (
-              <span className="yoga-priority-badge">Top {rank}</span>
+              <span className="yoga-priority-badge">
+                {tr("strength.yogas.topBadge", { rank: String(rank) })}
+              </span>
             )}
             <h3 className="yoga-card-name">{yoga.name}</h3>
           </div>
@@ -116,7 +134,9 @@ function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
         <div className="yoga-card-metrics">
           <StrengthIndicator strength={yoga.strength} />
           <span className="yoga-occurrence">
-            {yoga.occurrence_chance}% chance
+            {tr("strength.yogas.occurrenceChance", {
+              chance: String(yoga.occurrence_chance),
+            })}
           </span>
         </div>
       </header>
@@ -125,7 +145,7 @@ function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
         {yoga.involved_planets.map((planet) => (
           <span key={planet} className="yoga-planet-chip">
             <span className="yoga-planet-glyph">{PLANET_GLYPHS[planet] ?? ""}</span>
-            {planet}
+            {planetLabel(t, tr, planet)}
           </span>
         ))}
       </div>
@@ -137,13 +157,16 @@ function YogaCard({ yoga, rank }: { yoga: YogaDetectionResult; rank: number }) {
         <div className="yoga-card-deep-read">
           <p className="yoga-card-detail">
             {yoga.detailed_description ??
-              `${yoga.name} is one of the strongest detected combinations in this chart, so its effects deserve more weight than the lighter matches below.`}
+              tr("strength.yogas.detailFallback", { name: yoga.name })}
           </p>
           <div className="yoga-card-activation">
-            <span>Activation timing</span>
+            <span>{tr("strength.yogas.activationTimingLabel")}</span>
             <p>{activationTiming}</p>
           </div>
-          <div className="yoga-card-traits" aria-label={`${yoga.name} traits`}>
+          <div
+            className="yoga-card-traits"
+            aria-label={tr("strength.yogas.traitsAriaLabel", { name: yoga.name })}
+          >
             {traits.map((trait) => (
               <span key={trait}>{trait}</span>
             ))}
@@ -167,6 +190,7 @@ type YogasPanelProps = {
 };
 
 function YogasPanel({ yogas }: YogasPanelProps) {
+  const tr = useRouteMessages(strengthMessages);
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("all");
   const rankedYogas = [...yogas].sort((a, b) => {
     if (b.occurrence_chance !== a.occurrence_chance) {
@@ -205,18 +229,18 @@ function YogasPanel({ yogas }: YogasPanelProps) {
   return (
     <section className="yogas-panel">
       <div className="rules-header">
-        <p className="kicker">Classical Combinations</p>
-        <h2>Planetary Yogas</h2>
+        <p className="kicker">{tr("strength.yogas.kicker")}</p>
+        <h2>{tr("strength.yogas.heading")}</h2>
       </div>
 
-      <p className="yogas-intro">
-        Yogas are classical planetary combinations that shape life patterns.
-        Each yoga below was detected in this natal chart based on planet positions,
-        sign rulership, and house placement.
-      </p>
+      <p className="yogas-intro">{tr("strength.yogas.intro")}</p>
 
       {/* Category filter tabs */}
-      <div className="yogas-tabs" role="tablist" aria-label="Yoga category filter">
+      <div
+        className="yogas-tabs"
+        role="tablist"
+        aria-label={tr("strength.yogas.filterAriaLabel")}
+      >
         {CATEGORY_KEYS.map((key) => (
           <button
             key={key}
@@ -226,7 +250,7 @@ function YogasPanel({ yogas }: YogasPanelProps) {
             className={`yogas-tab ${activeCategory === key ? "yogas-tab--active" : ""}`}
             onClick={() => setActiveCategory(key)}
           >
-            {CATEGORY_META[key].label}
+            {tr(`strength.yogas.categories.${key}`)}
             {counts[key] > 0 && (
               <span className="yogas-tab-count">{counts[key]}</span>
             )}
@@ -236,7 +260,11 @@ function YogasPanel({ yogas }: YogasPanelProps) {
 
       {/* Yoga cards */}
       {filtered.length > 0 ? (
-        <div className="yogas-grid" role="list" aria-label="Detected yogas">
+        <div
+          className="yogas-grid"
+          role="list"
+          aria-label={tr("strength.yogas.listAriaLabel")}
+        >
           {filtered.map((yoga) => (
             <YogaCard
               key={yoga.yoga_id}
@@ -247,7 +275,7 @@ function YogasPanel({ yogas }: YogasPanelProps) {
         </div>
       ) : (
         <div className="yogas-empty">
-          <p>No yogas found in this category for this chart.</p>
+          <p>{tr("strength.yogas.empty")}</p>
         </div>
       )}
     </section>

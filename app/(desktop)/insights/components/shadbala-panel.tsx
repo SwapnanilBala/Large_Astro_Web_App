@@ -6,6 +6,8 @@ import type {
   PlanetPosition,
   ShadbalaResult,
 } from "@/lib/astro-types";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import strengthMessages from "@/messages/en.strength.json";
 
 type ShadbalaPanelProps = {
   shadbala: ShadbalaResult[];
@@ -99,13 +101,16 @@ export function getShadbalaRatioExtremes(
   };
 }
 
-const COMPONENT_LABELS: { key: keyof ShadbalaResult; label: string; description: string }[] = [
-  { key: "sthanaBala", label: "Sthana Bala", description: "Positional strength from sign, house, decanate, and divisional chart placement" },
-  { key: "digBala", label: "Dig Bala", description: "Directional strength based on angular house alignment" },
-  { key: "kalaBala", label: "Kala Bala", description: "Temporal strength from day/night and lunar phase" },
-  { key: "cheshtaBala", label: "Cheshta Bala", description: "Motional strength from planetary movement" },
-  { key: "naisargikaBala", label: "Naisargika Bala", description: "Inherent natural strength (fixed value)" },
-  { key: "drikBala", label: "Drik Bala", description: "Aspectual strength from benefic and malefic aspects" },
+/* The six components in reading order. Both the name and the one-line gloss
+   are copy, so they live under strength.shadbala.components keyed by this
+   same field name; only the field order is decided here. */
+const COMPONENT_KEYS: (keyof ShadbalaResult)[] = [
+  "sthanaBala",
+  "digBala",
+  "kalaBala",
+  "cheshtaBala",
+  "naisargikaBala",
+  "drikBala",
 ];
 
 function getStrengthColor(ratio: number): string {
@@ -114,11 +119,22 @@ function getStrengthColor(ratio: number): string {
   return "var(--accent-coral, #ff8f7e)";
 }
 
-function getStrengthLabel(ratio: number): string {
-  if (ratio >= 1.2) return "Very Strong";
-  if (ratio >= 1.0) return "Strong";
-  if (ratio >= 0.7) return "Moderate";
-  return "Weak";
+function strengthLabelKey(ratio: number): string {
+  if (ratio >= 1.2) return "veryStrong";
+  if (ratio >= 1.0) return "strong";
+  if (ratio >= 0.7) return "moderate";
+  return "weak";
+}
+
+/* Planet and sign names come from the baseline namespaces the layout already
+   loads, not from this route's catalog. Shadbala covers the seven grahas
+   only, so `planetNames` always answers. */
+function planetLabel(t: (key: string) => string, planet: string): string {
+  return t(`planetNames.${planet.toLowerCase()}`);
+}
+
+function signLabel(t: (key: string) => string, sign: string): string {
+  return t(`zodiacSigns.${sign.toLowerCase()}`);
 }
 
 function formatBindus(score: number): string {
@@ -133,6 +149,8 @@ function getPlanetPlacement(
 }
 
 function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) {
+  const { t } = useTranslation();
+  const tr = useRouteMessages(strengthMessages);
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
   if (!shadbala || shadbala.length === 0) return null;
@@ -146,51 +164,60 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
   const weakestPlacement = getPlanetPlacement(weakest.planet, planets);
   const strongestSignLabel =
     signExtremes && signExtremes.strongestSigns.length > 1
-      ? "Joint strongest signs by SAV"
-      : "Strongest sign by SAV";
+      ? tr("strength.shadbala.strongestSignsLabel")
+      : tr("strength.shadbala.strongestSignLabel");
   const weakestSignLabel =
     signExtremes && signExtremes.weakestSigns.length > 1
-      ? "Joint weakest signs by SAV"
-      : "Weakest sign by SAV";
+      ? tr("strength.shadbala.weakestSignsLabel")
+      : tr("strength.shadbala.weakestSignLabel");
 
   return (
     <section className="shadbala-panel">
       <div className="rules-header">
-        <p className="kicker">Planetary Strength</p>
-        <h2>Shadbala Analysis</h2>
+        <p className="kicker">{tr("strength.shadbala.kicker")}</p>
+        <h2>{tr("strength.shadbala.heading")}</h2>
       </div>
 
-      <p className="shadbala-intro">
-        Shadbala measures six-fold planetary strength. A strength ratio above
-        1.0 indicates the planet meets its required minimum; below 0.7 signals
-        an area that may need conscious reinforcement. The summary normalizes
-        each planet against its own required minimum before ranking it.
-      </p>
+      <p className="shadbala-intro">{tr("strength.shadbala.intro")}</p>
 
       {/* Summary strip */}
       <div className="shadbala-summary">
         <div className="shadbala-summary-item shadbala-summary-strong">
-          <span className="shadbala-summary-label">Highest ratio</span>
+          <span className="shadbala-summary-label">
+            {tr("strength.shadbala.highestRatioLabel")}
+          </span>
           <span className="shadbala-summary-planet">
-            {PLANET_SYMBOLS[strongest.planet] ?? ""} {strongest.planet}
+            {PLANET_SYMBOLS[strongest.planet] ?? ""} {planetLabel(t, strongest.planet)}
           </span>
           <span className="shadbala-summary-value">
-            {strongest.totalVirupas} virupas ({strongest.strengthRatio}x)
+            {tr("strength.shadbala.summaryValue", {
+              virupas: String(strongest.totalVirupas),
+              ratio: String(strongest.strengthRatio),
+            })}
           </span>
         </div>
         <div className="shadbala-summary-item shadbala-summary-weak">
-          <span className="shadbala-summary-label">Lowest ratio</span>
+          <span className="shadbala-summary-label">
+            {tr("strength.shadbala.lowestRatioLabel")}
+          </span>
           <span className="shadbala-summary-planet">
-            {PLANET_SYMBOLS[weakest.planet] ?? ""} {weakest.planet}
+            {PLANET_SYMBOLS[weakest.planet] ?? ""} {planetLabel(t, weakest.planet)}
           </span>
           <span className="shadbala-summary-value">
-            {weakest.totalVirupas} virupas ({weakest.strengthRatio}x)
+            {tr("strength.shadbala.summaryValue", {
+              virupas: String(weakest.totalVirupas),
+              ratio: String(weakest.strengthRatio),
+            })}
           </span>
         </div>
       </div>
 
       {/* Bar chart */}
-      <div className="shadbala-chart" role="list" aria-label="Shadbala strength chart">
+      <div
+        className="shadbala-chart"
+        role="list"
+        aria-label={tr("strength.shadbala.chartAriaLabel")}
+      >
         {shadbala.map((result) => {
           const barWidth = maxVirupas > 0 ? (result.totalVirupas / maxVirupas) * 100 : 0;
           const color = getStrengthColor(result.strengthRatio);
@@ -210,7 +237,7 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                   <span className="shadbala-planet-symbol">
                     {PLANET_SYMBOLS[result.planet] ?? ""}
                   </span>
-                  {result.planet}
+                  {planetLabel(t, result.planet)}
                 </span>
                 <div className="shadbala-bar-container">
                   <div
@@ -225,7 +252,9 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                     style={{
                       left: `${maxVirupas > 0 ? (result.requiredMinimum / maxVirupas) * 100 : 0}%`,
                     }}
-                    title={`Required minimum: ${result.requiredMinimum}`}
+                    title={tr("strength.shadbala.requiredMinimumTitle", {
+                      value: String(result.requiredMinimum),
+                    })}
                   />
                 </div>
                 <span className="shadbala-total" style={{ color }}>
@@ -240,7 +269,9 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                         : "shadbala-ratio-weak"
                   }`}
                 >
-                  {result.strengthRatio}x
+                  {tr("strength.shadbala.ratioBadge", {
+                    ratio: String(result.strengthRatio),
+                  })}
                 </span>
                 <span className={`shadbala-chevron ${isExpanded ? "shadbala-chevron-open" : ""}`}>
                   &#9662;
@@ -250,15 +281,19 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
               {isExpanded && (
                 <div className="shadbala-breakdown">
                   <div className="shadbala-breakdown-grid">
-                    {COMPONENT_LABELS.map(({ key, label, description }) => {
+                    {COMPONENT_KEYS.map((key) => {
                       const val = result[key] as number;
                       const maxComp = key === "sthanaBala" ? 195 : 60;
                       const compWidth = Math.min(100, (val / maxComp) * 100);
                       return (
                         <div key={key} className="shadbala-comp-row">
                           <div className="shadbala-comp-label">
-                            <span className="shadbala-comp-name">{label}</span>
-                            <span className="shadbala-comp-desc">{description}</span>
+                            <span className="shadbala-comp-name">
+                              {tr(`strength.shadbala.components.${key}.label`)}
+                            </span>
+                            <span className="shadbala-comp-desc">
+                              {tr(`strength.shadbala.components.${key}.description`)}
+                            </span>
                           </div>
                           <div className="shadbala-comp-bar-container">
                             <div
@@ -277,8 +312,17 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                     })}
                   </div>
                   <div className="shadbala-breakdown-footer">
-                    <span>Total: <strong>{result.totalVirupas}</strong> virupas ({result.totalRupas} rupas)</span>
-                    <span>Required: <strong>{result.requiredMinimum}</strong></span>
+                    <span>
+                      {tr("strength.shadbala.totalLabel")}{" "}
+                      <strong>{result.totalVirupas}</strong>{" "}
+                      {tr("strength.shadbala.totalSuffix", {
+                        rupas: String(result.totalRupas),
+                      })}
+                    </span>
+                    <span>
+                      {tr("strength.shadbala.requiredLabel")}{" "}
+                      <strong>{result.requiredMinimum}</strong>
+                    </span>
                     <span className={`shadbala-strength-label ${
                       result.strengthRatio >= 1
                         ? "shadbala-label-strong"
@@ -286,7 +330,9 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                           ? "shadbala-label-moderate"
                           : "shadbala-label-weak"
                     }`}>
-                      {getStrengthLabel(result.strengthRatio)}
+                      {tr(
+                        `strength.shadbala.strengthLabels.${strengthLabelKey(result.strengthRatio)}`
+                      )}
                     </span>
                   </div>
                 </div>
@@ -299,33 +345,43 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
       <section className="shadbala-sign-context" aria-labelledby="shadbala-sign-context-heading">
         <div className="shadbala-sign-context-header">
           <div>
-            <p className="shadbala-sign-context-kicker">Sign-level context</p>
-            <h3 id="shadbala-sign-context-heading">Strongest and weakest sign</h3>
+            <p className="shadbala-sign-context-kicker">
+              {tr("strength.shadbala.signContextKicker")}
+            </p>
+            <h3 id="shadbala-sign-context-heading">
+              {tr("strength.shadbala.signContextHeading")}
+            </h3>
           </div>
-          <span className="shadbala-sign-context-source">Source: Sarvashtakavarga (SAV)</span>
+          <span className="shadbala-sign-context-source">
+            {tr("strength.shadbala.signContextSource")}
+          </span>
         </div>
 
         <p className="shadbala-sign-context-intro">
-          Shadbala ranks planets, not signs. The sign labels below come from
-          Sarvashtakavarga totals: more bindus indicate relatively more
-          support when that sign&apos;s field is activated, while fewer indicate a
-          need for more care. They are not a verdict on a zodiac sign or a
-          standalone prediction.
+          {tr("strength.shadbala.signContextIntro")}
         </p>
 
         {signExtremes ? (
           <>
-            <div className="shadbala-sign-summary" aria-label="Sarvashtakavarga sign strength summary">
+            <div
+              className="shadbala-sign-summary"
+              aria-label={tr("strength.shadbala.signSummaryAriaLabel")}
+            >
               <article className="shadbala-sign-card shadbala-sign-card--strong">
                 <p>{strongestSignLabel}</p>
                 <div className="shadbala-sign-chip-list">
                   {signExtremes.strongestSigns.map((sign) => (
                     <span key={sign} className="shadbala-sign-chip">
-                      <span aria-hidden="true">{SIGN_GLYPHS[sign]}</span> {sign}
+                      <span aria-hidden="true">{SIGN_GLYPHS[sign]}</span>{" "}
+                      {signLabel(t, sign)}
                     </span>
                   ))}
                 </div>
-                <strong>{formatBindus(signExtremes.strongestScore)} SAV bindus</strong>
+                <strong>
+                  {tr("strength.shadbala.savBindus", {
+                    bindus: formatBindus(signExtremes.strongestScore),
+                  })}
+                </strong>
               </article>
 
               <article className="shadbala-sign-card shadbala-sign-card--weak">
@@ -333,44 +389,70 @@ function ShadbalaPanel({ shadbala, planets, ashtakavarga }: ShadbalaPanelProps) 
                 <div className="shadbala-sign-chip-list">
                   {signExtremes.weakestSigns.map((sign) => (
                     <span key={sign} className="shadbala-sign-chip">
-                      <span aria-hidden="true">{SIGN_GLYPHS[sign]}</span> {sign}
+                      <span aria-hidden="true">{SIGN_GLYPHS[sign]}</span>{" "}
+                      {signLabel(t, sign)}
                     </span>
                   ))}
                 </div>
-                <strong>{formatBindus(signExtremes.weakestScore)} SAV bindus</strong>
+                <strong>
+                  {tr("strength.shadbala.savBindus", {
+                    bindus: formatBindus(signExtremes.weakestScore),
+                  })}
+                </strong>
               </article>
             </div>
 
             <div className="shadbala-sign-planet-context">
-              <p className="shadbala-sign-planet-context-label">How this relates to Shadbala</p>
+              <p className="shadbala-sign-planet-context-label">
+                {tr("strength.shadbala.relatesLabel")}
+              </p>
+              {/* The full stop after the placement clause is the one piece of
+                  punctuation here that no catalog string can carry: the clause
+                  before it is optional, so the stop cannot live at the end of
+                  either the ratio sentence or the placement clause without
+                  doubling up or going missing. It stays a literal, which means
+                  Devanagari and Bengali get a Latin "." at this one spot
+                  rather than a danda. Splitting the two variants into four
+                  whole sentences would fix it and is the right move the next
+                  time this copy is edited. */}
               <div className="shadbala-sign-planet-context-grid">
                 <p>
-                  <strong>{strongest.planet}</strong> has the highest Shadbala ratio
-                  ({strongest.strengthRatio}x)
-                  {strongestPlacement ? ` and is placed in ${strongestPlacement.sign}` : ""}.
+                  <strong>{planetLabel(t, strongest.planet)}</strong>{" "}
+                  {tr("strength.shadbala.highestRatioSentence", {
+                    ratio: String(strongest.strengthRatio),
+                  })}
+                  {strongestPlacement
+                    ? ` ${tr("strength.shadbala.placedIn", {
+                        sign: signLabel(t, strongestPlacement.sign),
+                      })}`
+                    : ""}
+                  {"."}{" "}
                   {strongestPlacement && signExtremes.strongestSigns.includes(strongestPlacement.sign)
-                    ? " Its natal placement also falls in a highest-SAV sign. Treat both as separate contextual indicators, not a combined score."
-                    : " This measures planetary capacity separately from the SAV sign score; the two should not be averaged."}
+                    ? tr("strength.shadbala.strongestSignMatch")
+                    : tr("strength.shadbala.strongestSignNoMatch")}
                 </p>
                 <p>
-                  <strong>{weakest.planet}</strong> has the lowest Shadbala ratio
-                  ({weakest.strengthRatio}x)
-                  {weakestPlacement ? ` and is placed in ${weakestPlacement.sign}` : ""}.
+                  <strong>{planetLabel(t, weakest.planet)}</strong>{" "}
+                  {tr("strength.shadbala.lowestRatioSentence", {
+                    ratio: String(weakest.strengthRatio),
+                  })}
+                  {weakestPlacement
+                    ? ` ${tr("strength.shadbala.placedIn", {
+                        sign: signLabel(t, weakestPlacement.sign),
+                      })}`
+                    : ""}
+                  {"."}{" "}
                   {weakestPlacement && signExtremes.weakestSigns.includes(weakestPlacement.sign)
-                    ? " Its natal placement also falls in a lowest-SAV sign. Treat both as separate contextual indicators, not a combined score."
-                    : " A lower SAV sign is a different signal from a lower Shadbala planet, so read both in their own context."}
+                    ? tr("strength.shadbala.weakestSignMatch")
+                    : tr("strength.shadbala.weakestSignNoMatch")}
                 </p>
               </div>
             </div>
           </>
         ) : (
           <div className="shadbala-sign-unavailable" role="status">
-            <strong>Sign-level context is unavailable for this reading.</strong>
-            <span>
-              Shadbala still identifies the strongest and weakest planets above,
-              but it cannot by itself identify a strongest or weakest sign. SAV
-              data was not included, so no sign-level conclusion is being inferred.
-            </span>
+            <strong>{tr("strength.shadbala.unavailableTitle")}</strong>
+            <span>{tr("strength.shadbala.unavailableBody")}</span>
           </div>
         )}
       </section>

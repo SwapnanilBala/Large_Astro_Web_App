@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FiGrid } from "react-icons/fi";
 import PageTransition from "@/app/components/PageTransition";
 import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
+import {
+  HouseSupportHeroLead,
+  HouseSupportHeroTitle,
+  HouseSupportMissingState,
+  HouseSupportUnavailableState,
+} from "@/app/(desktop)/insights/components/house-support-page-copy";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import {
   chartParamsToQuery,
@@ -35,17 +40,7 @@ export default async function HouseSupportPage({ searchParams }: HouseSupportPag
     return (
       <PageTransition>
         <div className="insights-shell below-navbar">
-          <section className="dashboard-shell">
-            <p className="kicker">Missing Input</p>
-            <h1>Chart details are incomplete.</h1>
-            <p className="lead">
-              Return to intake and provide complete birth details before opening
-              the house support breakdown.
-            </p>
-            <Link href="/" className="ghost-link">
-              Back to Intake
-            </Link>
-          </section>
+          <HouseSupportMissingState />
         </div>
       </PageTransition>
     );
@@ -55,10 +50,16 @@ export default async function HouseSupportPage({ searchParams }: HouseSupportPag
 
   let payload: ChartApiResponse | null = null;
   let error = "";
+  let failed = false;
   try {
     payload = getChartPayload(chartParams);
   } catch (cause) {
-    error = cause instanceof Error ? cause.message : "Chart calculation failed";
+    /* A thrown message is English wherever it came from, so it is passed
+       through as-is. The "it threw and said nothing" case has no message to
+       pass through, and that sentence is ours, so it is translated in the
+       client child instead of being written here. */
+    failed = true;
+    error = cause instanceof Error ? cause.message : "";
   }
 
   /* Same gate the results page uses. Without twelve SAV totals and twelve
@@ -71,17 +72,11 @@ export default async function HouseSupportPage({ searchParams }: HouseSupportPag
     return (
       <PageTransition>
         <div className="insights-shell below-navbar">
-          <section className="dashboard-shell">
-            <p className="kicker">House support</p>
-            <h1>The house support breakdown could not be prepared.</h1>
-            <p className="lead">
-              {error ||
-                "This chart did not return a complete Ashtakavarga, so the twelve houses cannot be scored."}
-            </p>
-            <Link href={`/insights?${historyQs}`} className="ghost-link">
-              Back to your reading
-            </Link>
-          </section>
+          <HouseSupportUnavailableState
+            backHref={`/insights?${historyQs}`}
+            error={error}
+            failed={failed}
+          />
         </div>
       </PageTransition>
     );
@@ -92,8 +87,8 @@ export default async function HouseSupportPage({ searchParams }: HouseSupportPag
       <DetailPageShell
         backHref={`/insights?${historyQs}#house-support`}
         kicker="Ashtakavarga · House support"
-        title={`${payload.client.name}'s house support in full`}
-        lead="How much support each of the twelve houses holds, what each one is responsible for, and the arithmetic behind both."
+        title={<HouseSupportHeroTitle name={payload.client.name} />}
+        lead={<HouseSupportHeroLead />}
         icon={<FiGrid />}
       >
         <PanelErrorBoundary panelName="House Support">
