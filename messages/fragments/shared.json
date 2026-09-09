@@ -4,7 +4,7 @@
       "rootErrorHeading": "Las Estrellas se Han Desalineado Momentáneamente",
       "rootErrorDescription": "Una perturbación cósmica ha interrumpido tu experiencia. La mecánica celeste se está recalibrando.",
       "rootErrorDetailsSummary": "Ver detalles técnicos",
-      "rootErrorDigest": "Resumen: {digest}",
+      "rootErrorDigest": "Digest: {digest}",
       "rootErrorTryAgain": "Intentar de Nuevo",
       "rootErrorReturnHome": "Volver al Inicio",
       "chartErrorKicker": "Error de Carta",
