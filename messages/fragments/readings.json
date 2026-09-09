@@ -1,0 +1,691 @@
+{
+  "es": {
+    "lifeAreas": {
+      "navLabel": "Áreas de la vida",
+      "chooseArea": "Elige un área de la vida",
+      "mostActiveFirst": "Primero las más activas",
+
+      "activityBadge": "actividad {band}",
+      "conclusionStrength": "conclusión {strength}",
+
+      "readingDepth": "Profundidad de la lectura",
+      "modeDetailed": "Detallado",
+      "modeAction": "Plan de Acción",
+
+      "subthemesHeading": "Lo que destaca dentro de esta área",
+      "subthemesRankNote": "Ordenado según la evidencia de esta carta",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "Declaración de claridad",
+      "decisionRule": "Regla de decisión",
+      "boundaryRule": "Regla de límites",
+
+      "support": "Apoyo",
+      "watch": "Vigilar",
+      "timing": "Momento",
+
+      "evidenceSummary": "Cómo se está leyendo este ámbito",
+
+      "doNext": "Haz esto ahora",
+      "keepInMind": "Ten en cuenta",
+      "decisionFilter": "Filtro de decisión",
+      "decisionFilterFallback": "Actúa cuando el apoyo, el momento y la evidencia apunten en la misma dirección.",
+      "guidanceLabel": "Orientación:",
+      "longGameLabel": "A largo plazo:",
+
+      "notice": {
+        "missingLead": "Vuelve al formulario y proporciona los datos de nacimiento completos antes de abrir las áreas de la vida.",
+        "errorKicker": "Áreas de la vida",
+        "errorHeading": "No se pudieron preparar las lecturas de las áreas de la vida.",
+        "errorFallback": "No se devolvieron datos de ámbitos de la vida.",
+        "backToReading": "Volver a tu lectura"
+      },
+
+      "lifeShifts": {
+        "missingLead": "Vuelve al formulario y proporciona los datos de nacimiento completos antes de abrir los capítulos de la vida.",
+        "errorKicker": "Capítulos de la vida",
+        "errorHeading": "No se pudieron preparar los capítulos de la vida.",
+        "errorFallback": "No se devolvieron datos de la carta.",
+        "backToReading": "Volver a tu lectura"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "Preparando combinaciones…",
+      "loadingKarma": "Preparando la lectura kármica…",
+
+      "backToNamedReading": "Volver a la lectura de {name}",
+      "kicker": "Lectura completa",
+      "title": "Todos los hallazgos de la carta",
+      "lead": "Las tres prioridades que encabezan tu informe salen de este conjunto. Aquí está todo lo que el motor encontró, cada cosa con la posición en la que se apoya, para que puedas ver el razonamiento y no solo la conclusión.",
+      "findings": "hallazgos",
+      "longTermCombinations": "combinaciones a largo plazo",
+
+      "patternsKicker": "Patrones",
+      "patternsHeading": "Lo que dicen las posiciones",
+      "patternsLead": "Cada tarjeta expone la lectura y después la posición que la respalda. Abre “Por qué esta lectura” para ver la base técnica y con qué frecuencia aparece el patrón.",
+
+      "combinationsKicker": "Combinaciones",
+      "combinationsHeading": "Patrones que duran toda la vida",
+      "combinationsLead": "Los yogas son combinaciones y no posiciones aisladas, y describen condiciones permanentes de la carta más que un período pasajero.",
+
+      "karmaKicker": "Karma",
+      "karmaHeading": "Patrones heredados y vocación",
+      "karmaLead": "Una lectura secundaria de lo que la carta sugiere que se trajo, dónde pide ser liberado y el tipo de trabajo al que apunta.",
+
+      "backToReading": "Volver a la lectura",
+
+      "notice": {
+        "missingLead": "Vuelve al formulario y proporciona los datos de nacimiento completos antes de abrir la lectura completa.",
+        "errorKicker": "Lectura completa",
+        "errorHeading": "No se pudo preparar la lectura completa.",
+        "errorFallback": "No se devolvieron datos de la carta.",
+        "backToReading": "Volver a tu lectura"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "No se pudo construir esta carta",
+      "errorFallback": "No se pudo calcular la carta.",
+      "backToIntake": "Volver al formulario",
+
+      "ascendantLead": "Ascendente {sign}",
+      "nakshatraLead": "Nakshatra {name}",
+      "factLagna": "Lagna",
+      "factNakshatra": "Nakshatra",
+      "padaLord": "Pada {pada} · {lord}",
+      "factMahadasha": "Mahadasha",
+      "toDate": "hasta {date}",
+
+      "planetaryPositions": "Posiciones planetarias",
+      "grahaCount": "{count} grahas",
+      "colGraha": "Graha",
+      "colSign": "Signo",
+      "colDeg": "Gr.",
+      "colHouse": "Casa",
+      "flagRetrograde": "Rx",
+      "flagCombust": "Cmb",
+      "flagLegend": "Rx = se mueve hacia atrás desde aquí · Cmb = demasiado cerca del Sol para actuar con libertad",
+
+      "houseRolesTitle": "Qué casa se encarga de qué",
+      "houseRolesSubtitle": "Las doce, y el apoyo que tiene cada una",
+      "bindusLegend": "Los bindus son la puntuación de apoyo del Ashtakavarga para el signo que ocupa esa casa, sobre un total fijo de 337. La media exacta es 28,1, así que una casa se lee frente a ese valor y no frente a un máximo.",
+      "srHouse": "Casa {house}, ",
+      "bhava": "{name} Bhava",
+      "srSupport": "{sign}, {bindus} bindus",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "Las <b>Kendra</b> son los cuatro ángulos sobre los que se construye la carta; las <b>Panaphara</b> y las <b>Apoklima</b> son las casas que los siguen y las que se alejan de ellos. Además, las casas <b>Trikona</b> se leen como el lugar donde llega el mérito, las <b>Upachaya</b> como las que mejoran con la edad y el esfuerzo, y las <b>Dusthana</b> como las que primero piden algo. Una casa puede ser más de una: la sexta es Upachaya y Dusthana a la vez.",
+
+      "attentionTitle": "Lo que merece atención",
+      "attentionSubtitleOne": "{count} lectura de alta prioridad",
+      "attentionSubtitleOther": "{count} lecturas de alta prioridad",
+      "whyThisReading": "Por qué esta lectura",
+
+      "dashaTitle": "Línea de tiempo Dasha",
+      "dashaPeriodCount": "{count} períodos",
+      "dashaCurrent": "Actualmente <strong>{dasha}</strong>{antardasha} hasta {date}",
+      "colPeriod": "Período",
+      "colFrom": "Desde",
+      "colTo": "Hasta",
+
+      "summaryTitle": "Resumen",
+      "allReadingsTitle": "Todas las lecturas",
+      "allReadingsSubtitle": "{count} en total",
+
+      "newChart": "Nueva carta",
+      "desktopView": "Vista completa de escritorio"
+    }
+  },
+
+  "bn": {
+    "lifeAreas": {
+      "navLabel": "জীবনের ক্ষেত্র",
+      "chooseArea": "একটি জীবনক্ষেত্র বেছে নিন",
+      "mostActiveFirst": "সবচেয়ে সক্রিয় আগে",
+
+      "activityBadge": "{band} সক্রিয়তা",
+      "conclusionStrength": "{strength} সিদ্ধান্ত",
+
+      "readingDepth": "পাঠের গভীরতা",
+      "modeDetailed": "বিস্তারিত",
+      "modeAction": "কর্মপরিকল্পনা",
+
+      "subthemesHeading": "এই ক্ষেত্রের মধ্যে যা বিশেষভাবে চোখে পড়ে",
+      "subthemesRankNote": "এই কুণ্ডলীর প্রমাণ অনুসারে সাজানো",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "স্পষ্টতার বিবৃতি",
+      "decisionRule": "সিদ্ধান্তের নিয়ম",
+      "boundaryRule": "সীমার নিয়ম",
+
+      "support": "সহায়তা",
+      "watch": "নজর রাখুন",
+      "timing": "সময়",
+
+      "evidenceSummary": "এই ক্ষেত্রটি কীভাবে পড়া হচ্ছে",
+
+      "doNext": "এরপর যা করবেন",
+      "keepInMind": "মনে রাখবেন",
+      "decisionFilter": "সিদ্ধান্তের মাপকাঠি",
+      "decisionFilterFallback": "সহায়তা, সময় ও প্রমাণ যখন একই দিকে নির্দেশ করে, তখনই এগিয়ে যান।",
+      "guidanceLabel": "নির্দেশনা:",
+      "longGameLabel": "দীর্ঘমেয়াদে:",
+
+      "notice": {
+        "missingLead": "জীবনের ক্ষেত্রগুলি খোলার আগে ফর্মে ফিরে গিয়ে সম্পূর্ণ জন্ম বিবরণ দিন।",
+        "errorKicker": "জীবনের ক্ষেত্র",
+        "errorHeading": "জীবনক্ষেত্রের পাঠগুলি প্রস্তুত করা যায়নি।",
+        "errorFallback": "জীবনক্ষেত্রের কোনো তথ্য পাওয়া যায়নি।",
+        "backToReading": "আপনার পাঠে ফিরে যান"
+      },
+
+      "lifeShifts": {
+        "missingLead": "জীবনের অধ্যায়গুলি খোলার আগে ফর্মে ফিরে গিয়ে সম্পূর্ণ জন্ম বিবরণ দিন।",
+        "errorKicker": "জীবনের অধ্যায়",
+        "errorHeading": "জীবনের অধ্যায়গুলি প্রস্তুত করা যায়নি।",
+        "errorFallback": "কোনো কুণ্ডলীর তথ্য পাওয়া যায়নি।",
+        "backToReading": "আপনার পাঠে ফিরে যান"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "সংযোগগুলি প্রস্তুত হচ্ছে…",
+      "loadingKarma": "কর্মপাঠ প্রস্তুত হচ্ছে…",
+
+      "backToNamedReading": "{name}-এর পাঠে ফিরে যান",
+      "kicker": "সম্পূর্ণ পাঠ",
+      "title": "কুণ্ডলীর প্রতিটি ফলাফল",
+      "lead": "আপনার প্রতিবেদনের শীর্ষে থাকা তিনটি প্রাধান্য এই তালিকা থেকেই নেওয়া। ইঞ্জিন যা যা মিলিয়েছে সবই এখানে আছে, প্রতিটির সঙ্গে যে অবস্থানের উপর তা দাঁড়িয়ে আছে, যাতে আপনি কেবল সিদ্ধান্ত নয়, তার যুক্তিও দেখতে পান।",
+      "findings": "ফলাফল",
+      "longTermCombinations": "দীর্ঘমেয়াদি সংযোগ",
+
+      "patternsKicker": "ধরন",
+      "patternsHeading": "অবস্থানগুলি যা বলে",
+      "patternsLead": "প্রতিটি কার্ড প্রথমে পাঠটি বলে, তারপর তার পিছনের অবস্থান। কারিগরি ভিত্তি এবং ধরনটি কতটা সাধারণ, তা দেখতে “কেন এই পাঠ” খুলুন।",
+
+      "combinationsKicker": "সংযোগ",
+      "combinationsHeading": "সারা জীবন ধরে চলা ধরন",
+      "combinationsLead": "যোগ একক অবস্থান নয়, বরং সংযোগ, এবং এগুলি ক্ষণস্থায়ী কোনো সময়কাল নয়, কুণ্ডলীর স্থায়ী অবস্থা বর্ণনা করে।",
+
+      "karmaKicker": "কর্ম",
+      "karmaHeading": "উত্তরাধিকারে পাওয়া ধরন ও বৃত্তি",
+      "karmaLead": "কুণ্ডলী অনুযায়ী কী সঙ্গে বহন করে আনা হয়েছে, কোথায় তা মুক্তি চায়, এবং কোন ধরনের কাজের দিকে তা নির্দেশ করে — তার একটি গৌণ পাঠ।",
+
+      "backToReading": "পাঠে ফিরে যান",
+
+      "notice": {
+        "missingLead": "সম্পূর্ণ পাঠ খোলার আগে ফর্মে ফিরে গিয়ে সম্পূর্ণ জন্ম বিবরণ দিন।",
+        "errorKicker": "সম্পূর্ণ পাঠ",
+        "errorHeading": "সম্পূর্ণ পাঠ প্রস্তুত করা যায়নি।",
+        "errorFallback": "কোনো কুণ্ডলীর তথ্য পাওয়া যায়নি।",
+        "backToReading": "আপনার পাঠে ফিরে যান"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "এই কুণ্ডলী তৈরি করা যায়নি",
+      "errorFallback": "কুণ্ডলী গণনা করা যায়নি।",
+      "backToIntake": "ফর্মে ফিরে যান",
+
+      "ascendantLead": "{sign} লগ্ন",
+      "nakshatraLead": "{name} নক্ষত্র",
+      "factLagna": "লগ্ন",
+      "factNakshatra": "নক্ষত্র",
+      "padaLord": "পদ {pada} · {lord}",
+      "factMahadasha": "মহাদশা",
+      "toDate": "{date} পর্যন্ত",
+
+      "planetaryPositions": "গ্রহের অবস্থান",
+      "grahaCount": "{count}টি গ্রহ",
+      "colGraha": "গ্রহ",
+      "colSign": "রাশি",
+      "colDeg": "ডিগ্রি",
+      "colHouse": "ভাব",
+      "flagRetrograde": "বক্রী",
+      "flagCombust": "অস্ত",
+      "flagLegend": "বক্রী = এখান থেকে পিছনে চলছে · অস্ত = সূর্যের এত কাছে যে স্বাধীনভাবে কাজ করতে পারে না",
+
+      "houseRolesTitle": "কোন ভাব কিসের দায়িত্বে",
+      "houseRolesSubtitle": "বারোটিই, এবং প্রতিটি যতটা সহায়তা ধরে রাখে",
+      "bindusLegend": "বিন্দু হল সেই ভাবে বসা রাশির জন্য অষ্টকবর্গের সহায়তা-স্কোর, নির্দিষ্ট 337-এর একটি ভাণ্ডার থেকে। ঠিক মাঝামাঝি মান 28.1, তাই একটি ভাবকে সর্বোচ্চ মানের বিপরীতে নয়, ওই মানের বিপরীতেই পড়া হয়।",
+      "srHouse": "ভাব {house}, ",
+      "bhava": "{name} ভাব",
+      "srSupport": "{sign}, {bindus} বিন্দু",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "<b>কেন্দ্র</b> হল সেই চারটি কোণ, যার উপর কুণ্ডলী গড়ে ওঠে; <b>পণফর</b> ও <b>আপোক্লিম</b> হল সেই ভাবগুলি, যেগুলি এদের অনুসরণ করে এবং এদের থেকে সরে যায়। এর উপরে, <b>ত্রিকোণ</b> ভাবগুলিকে পড়া হয় যেখানে পুণ্য এসে পৌঁছায়, <b>উপচয়</b> সেগুলি যা বয়স ও পরিশ্রমের সঙ্গে উন্নত হয়, এবং <b>দুঃস্থান</b> সেগুলি যা আগে কিছু চেয়ে নেয়। একটি ভাব একাধিক হতে পারে — ষষ্ঠ ভাব উপচয় ও দুঃস্থান দুটোই।",
+
+      "attentionTitle": "যা মনোযোগ দাবি করে",
+      "attentionSubtitleOne": "{count}টি উচ্চ-প্রাধান্যের পাঠ",
+      "attentionSubtitleOther": "{count}টি উচ্চ-প্রাধান্যের পাঠ",
+      "whyThisReading": "কেন এই পাঠ",
+
+      "dashaTitle": "দশা সময়রেখা",
+      "dashaPeriodCount": "{count}টি সময়কাল",
+      "dashaCurrent": "বর্তমানে <strong>{dasha}</strong>{antardasha} চলছে, {date} পর্যন্ত",
+      "colPeriod": "সময়কাল",
+      "colFrom": "থেকে",
+      "colTo": "পর্যন্ত",
+
+      "summaryTitle": "সারসংক্ষেপ",
+      "allReadingsTitle": "সব পাঠ",
+      "allReadingsSubtitle": "মোট {count}টি",
+
+      "newChart": "নতুন কুণ্ডলী",
+      "desktopView": "সম্পূর্ণ ডেস্কটপ দৃশ্য"
+    }
+  },
+
+  "hi": {
+    "lifeAreas": {
+      "navLabel": "जीवन के क्षेत्र",
+      "chooseArea": "एक जीवन क्षेत्र चुनें",
+      "mostActiveFirst": "सर्वाधिक सक्रिय पहले",
+
+      "activityBadge": "{band} सक्रियता",
+      "conclusionStrength": "{strength} निष्कर्ष",
+
+      "readingDepth": "पाठ की गहराई",
+      "modeDetailed": "विस्तृत",
+      "modeAction": "कार्य योजना",
+
+      "subthemesHeading": "इस क्षेत्र में जो उभर कर आता है",
+      "subthemesRankNote": "इस कुंडली के प्रमाण के अनुसार क्रमबद्ध",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "स्पष्टता का कथन",
+      "decisionRule": "निर्णय का नियम",
+      "boundaryRule": "सीमा का नियम",
+
+      "support": "सहारा",
+      "watch": "सावधानी",
+      "timing": "समय",
+
+      "evidenceSummary": "यह क्षेत्र कैसे पढ़ा जा रहा है",
+
+      "doNext": "आगे यह करें",
+      "keepInMind": "ध्यान में रखें",
+      "decisionFilter": "निर्णय की कसौटी",
+      "decisionFilterFallback": "जब सहारा, समय और प्रमाण एक ही दिशा में संकेत करें, तब आगे बढ़ें।",
+      "guidanceLabel": "मार्गदर्शन:",
+      "longGameLabel": "दीर्घकाल में:",
+
+      "notice": {
+        "missingLead": "जीवन के क्षेत्र खोलने से पहले फॉर्म पर लौटें और पूर्ण जन्म विवरण दें।",
+        "errorKicker": "जीवन के क्षेत्र",
+        "errorHeading": "जीवन क्षेत्रों के पाठ तैयार नहीं किए जा सके।",
+        "errorFallback": "जीवन क्षेत्र का कोई डेटा प्राप्त नहीं हुआ।",
+        "backToReading": "अपने पाठ पर वापस जाएं"
+      },
+
+      "lifeShifts": {
+        "missingLead": "जीवन के अध्याय खोलने से पहले फॉर्म पर लौटें और पूर्ण जन्म विवरण दें।",
+        "errorKicker": "जीवन के अध्याय",
+        "errorHeading": "जीवन के अध्याय तैयार नहीं किए जा सके।",
+        "errorFallback": "कोई कुंडली डेटा प्राप्त नहीं हुआ।",
+        "backToReading": "अपने पाठ पर वापस जाएं"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "संयोग तैयार हो रहे हैं…",
+      "loadingKarma": "कार्मिक पाठ तैयार हो रहा है…",
+
+      "backToNamedReading": "{name} के पाठ पर वापस जाएं",
+      "kicker": "संपूर्ण पाठ",
+      "title": "कुंडली का प्रत्येक निष्कर्ष",
+      "lead": "आपकी रिपोर्ट के शीर्ष पर दी गई तीन प्राथमिकताएँ इसी समूह से ली गई हैं। इंजन ने जो कुछ मिलाया वह सब यहाँ है, हर एक के साथ वह स्थिति भी जिस पर वह टिका है, ताकि आप केवल निष्कर्ष नहीं, उसका तर्क भी देख सकें।",
+      "findings": "निष्कर्ष",
+      "longTermCombinations": "दीर्घकालिक संयोग",
+
+      "patternsKicker": "प्रतिरूप",
+      "patternsHeading": "स्थितियाँ क्या कहती हैं",
+      "patternsLead": "हर कार्ड पहले पाठ बताता है, फिर उसके पीछे की स्थिति। तकनीकी आधार और यह प्रतिरूप कितना सामान्य है, यह देखने के लिए “यह पाठ क्यों” खोलें।",
+
+      "combinationsKicker": "संयोग",
+      "combinationsHeading": "जीवन भर चलने वाले प्रतिरूप",
+      "combinationsLead": "योग एकल स्थितियाँ नहीं, बल्कि संयोग हैं, और ये किसी क्षणिक अवधि का नहीं, कुंडली की स्थायी दशाओं का वर्णन करते हैं।",
+
+      "karmaKicker": "कर्म",
+      "karmaHeading": "विरासत में मिले प्रतिरूप और वृत्ति",
+      "karmaLead": "कुंडली के अनुसार क्या साथ लाया गया, वह कहाँ मुक्त होना चाहता है, और किस प्रकार के कार्य की ओर संकेत करता है — इसका एक गौण पाठ।",
+
+      "backToReading": "पाठ पर वापस जाएं",
+
+      "notice": {
+        "missingLead": "संपूर्ण पाठ खोलने से पहले फॉर्म पर लौटें और पूर्ण जन्म विवरण दें।",
+        "errorKicker": "संपूर्ण पाठ",
+        "errorHeading": "संपूर्ण पाठ तैयार नहीं किया जा सका।",
+        "errorFallback": "कोई कुंडली डेटा प्राप्त नहीं हुआ।",
+        "backToReading": "अपने पाठ पर वापस जाएं"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "यह कुंडली नहीं बनाई जा सकी",
+      "errorFallback": "कुंडली की गणना नहीं की जा सकी।",
+      "backToIntake": "फॉर्म पर वापस जाएं",
+
+      "ascendantLead": "{sign} लग्न",
+      "nakshatraLead": "{name} नक्षत्र",
+      "factLagna": "लग्न",
+      "factNakshatra": "नक्षत्र",
+      "padaLord": "पद {pada} · {lord}",
+      "factMahadasha": "महादशा",
+      "toDate": "{date} तक",
+
+      "planetaryPositions": "ग्रहों की स्थिति",
+      "grahaCount": "{count} ग्रह",
+      "colGraha": "ग्रह",
+      "colSign": "राशि",
+      "colDeg": "अंश",
+      "colHouse": "भाव",
+      "flagRetrograde": "वक्री",
+      "flagCombust": "अस्त",
+      "flagLegend": "वक्री = यहाँ से पीछे की ओर चल रहा है · अस्त = सूर्य के इतने निकट कि स्वतंत्र रूप से कार्य नहीं कर सकता",
+
+      "houseRolesTitle": "कौन सा भाव किसके लिए उत्तरदायी है",
+      "houseRolesSubtitle": "सभी बारह, और प्रत्येक को मिला सहारा",
+      "bindusLegend": "बिंदु उस भाव पर बैठी राशि के लिए अष्टकवर्ग का सहारा-अंक है, 337 के एक निश्चित कोष में से। ठीक औसत मान 28.1 है, इसलिए किसी भाव को अधिकतम के मुकाबले नहीं, उसी मान के मुकाबले पढ़ा जाता है।",
+      "srHouse": "भाव {house}, ",
+      "bhava": "{name} भाव",
+      "srSupport": "{sign}, {bindus} बिंदु",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "<b>केंद्र</b> वे चार कोण हैं जिन पर कुंडली खड़ी होती है; <b>पणफर</b> और <b>आपोक्लिम</b> वे भाव हैं जो उनके पीछे आते हैं और उनसे दूर हटते हैं। इसके ऊपर, <b>त्रिकोण</b> भावों को वहाँ पढ़ा जाता है जहाँ पुण्य आता है, <b>उपचय</b> उन्हें जो आयु और परिश्रम के साथ सुधरते हैं, और <b>दुःस्थान</b> उन्हें जो पहले कुछ माँगते हैं। एक भाव एक से अधिक हो सकता है — छठा भाव उपचय और दुःस्थान दोनों है।",
+
+      "attentionTitle": "जो ध्यान देने योग्य है",
+      "attentionSubtitleOne": "{count} उच्च-प्राथमिकता वाला पाठ",
+      "attentionSubtitleOther": "{count} उच्च-प्राथमिकता वाले पाठ",
+      "whyThisReading": "यह पाठ क्यों",
+
+      "dashaTitle": "दशा समयरेखा",
+      "dashaPeriodCount": "{count} अवधियाँ",
+      "dashaCurrent": "वर्तमान में <strong>{dasha}</strong>{antardasha} चल रही है, {date} तक",
+      "colPeriod": "अवधि",
+      "colFrom": "से",
+      "colTo": "तक",
+
+      "summaryTitle": "सारांश",
+      "allReadingsTitle": "सभी पाठ",
+      "allReadingsSubtitle": "कुल {count}",
+
+      "newChart": "नई कुंडली",
+      "desktopView": "पूर्ण डेस्कटॉप दृश्य"
+    }
+  },
+
+  "it": {
+    "lifeAreas": {
+      "navLabel": "Aree della vita",
+      "chooseArea": "Scegli un'area della vita",
+      "mostActiveFirst": "Prima le più attive",
+
+      "activityBadge": "attività {band}",
+      "conclusionStrength": "conclusione {strength}",
+
+      "readingDepth": "Profondità della lettura",
+      "modeDetailed": "Dettagliato",
+      "modeAction": "Piano d'Azione",
+
+      "subthemesHeading": "Ciò che spicca in quest'area",
+      "subthemesRankNote": "Ordinato in base alle prove di questa carta",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "Dichiarazione di chiarezza",
+      "decisionRule": "Regola decisionale",
+      "boundaryRule": "Regola dei limiti",
+
+      "support": "Sostegno",
+      "watch": "Attenzione",
+      "timing": "Tempistica",
+
+      "evidenceSummary": "Come viene letto questo ambito",
+
+      "doNext": "Cosa fare ora",
+      "keepInMind": "Da tenere a mente",
+      "decisionFilter": "Filtro decisionale",
+      "decisionFilterFallback": "Muoviti quando sostegno, tempistica e prove indicano la stessa direzione.",
+      "guidanceLabel": "Indicazione:",
+      "longGameLabel": "A lungo termine:",
+
+      "notice": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire le aree della vita.",
+        "errorKicker": "Aree della vita",
+        "errorHeading": "Non è stato possibile preparare le letture delle aree della vita.",
+        "errorFallback": "Nessun dato sugli ambiti della vita è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      },
+
+      "lifeShifts": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire i capitoli della vita.",
+        "errorKicker": "Capitoli della vita",
+        "errorHeading": "Non è stato possibile preparare i capitoli della vita.",
+        "errorFallback": "Nessun dato della carta è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "Preparazione delle combinazioni…",
+      "loadingKarma": "Preparazione della lettura karmica…",
+
+      "backToNamedReading": "Torna alla lettura di {name}",
+      "kicker": "Lettura completa",
+      "title": "Ogni riscontro della carta",
+      "lead": "Le tre priorità in cima al tuo rapporto provengono da questo insieme. Qui c'è tutto ciò che il motore ha riscontrato, ognuno con la posizione su cui si fonda, così puoi vedere il ragionamento e non solo la conclusione.",
+      "findings": "riscontri",
+      "longTermCombinations": "combinazioni a lungo termine",
+
+      "patternsKicker": "Schemi",
+      "patternsHeading": "Cosa dicono le posizioni",
+      "patternsLead": "Ogni scheda espone la lettura e poi la posizione che la sostiene. Apri “Perché questa lettura” per vedere la base tecnica e quanto è comune lo schema.",
+
+      "combinationsKicker": "Combinazioni",
+      "combinationsHeading": "Schemi che durano una vita",
+      "combinationsLead": "Gli yoga sono combinazioni e non singole posizioni, e descrivono condizioni permanenti della carta più che un periodo passeggero.",
+
+      "karmaKicker": "Karma",
+      "karmaHeading": "Schemi ereditati e vocazione",
+      "karmaLead": "Una lettura secondaria di ciò che la carta suggerisce sia stato portato con sé, di dove chiede di essere liberato e del tipo di lavoro verso cui indica.",
+
+      "backToReading": "Torna alla lettura",
+
+      "notice": {
+        "missingLead": "Torna al modulo e fornisci i dati di nascita completi prima di aprire la lettura completa.",
+        "errorKicker": "Lettura completa",
+        "errorHeading": "Non è stato possibile preparare la lettura completa.",
+        "errorFallback": "Nessun dato della carta è stato restituito.",
+        "backToReading": "Torna alla tua lettura"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "Non è stato possibile costruire questa carta",
+      "errorFallback": "Non è stato possibile calcolare la carta.",
+      "backToIntake": "Torna al modulo",
+
+      "ascendantLead": "Ascendente {sign}",
+      "nakshatraLead": "Nakshatra {name}",
+      "factLagna": "Lagna",
+      "factNakshatra": "Nakshatra",
+      "padaLord": "Pada {pada} · {lord}",
+      "factMahadasha": "Mahadasha",
+      "toDate": "fino al {date}",
+
+      "planetaryPositions": "Posizioni planetarie",
+      "grahaCount": "{count} graha",
+      "colGraha": "Graha",
+      "colSign": "Segno",
+      "colDeg": "Gr.",
+      "colHouse": "Casa",
+      "flagRetrograde": "Rx",
+      "flagCombust": "Cmb",
+      "flagLegend": "Rx = si muove all'indietro da qui · Cmb = troppo vicino al Sole per agire liberamente",
+
+      "houseRolesTitle": "Quale casa risponde di cosa",
+      "houseRolesSubtitle": "Tutte e dodici, e il sostegno che ciascuna ha",
+      "bindusLegend": "I bindu sono il punteggio di sostegno dell'Ashtakavarga per il segno che occupa quella casa, su un totale fisso di 337. La media esatta è 28,1, quindi una casa si legge rispetto a quel valore e non rispetto a un massimo.",
+      "srHouse": "Casa {house}, ",
+      "bhava": "{name} Bhava",
+      "srSupport": "{sign}, {bindus} bindu",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "Le <b>Kendra</b> sono i quattro angoli su cui la carta è costruita; le <b>Panaphara</b> e le <b>Apoklima</b> sono le case che li seguono e quelle che se ne allontanano. Inoltre, le case <b>Trikona</b> si leggono come il luogo in cui arriva il merito, le <b>Upachaya</b> come quelle che migliorano con l'età e l'impegno, e le <b>Dusthana</b> come quelle che prima chiedono qualcosa. Una casa può essere più di una: la sesta è insieme Upachaya e Dusthana.",
+
+      "attentionTitle": "Ciò che merita attenzione",
+      "attentionSubtitleOne": "{count} lettura ad alta priorità",
+      "attentionSubtitleOther": "{count} letture ad alta priorità",
+      "whyThisReading": "Perché questa lettura",
+
+      "dashaTitle": "Linea temporale Dasha",
+      "dashaPeriodCount": "{count} periodi",
+      "dashaCurrent": "Attualmente <strong>{dasha}</strong>{antardasha} fino al {date}",
+      "colPeriod": "Periodo",
+      "colFrom": "Da",
+      "colTo": "A",
+
+      "summaryTitle": "Riepilogo",
+      "allReadingsTitle": "Tutte le letture",
+      "allReadingsSubtitle": "{count} in totale",
+
+      "newChart": "Nuova carta",
+      "desktopView": "Vista desktop completa"
+    }
+  },
+
+  "fr": {
+    "lifeAreas": {
+      "navLabel": "Domaines de vie",
+      "chooseArea": "Choisissez un domaine de vie",
+      "mostActiveFirst": "Les plus actifs d'abord",
+
+      "activityBadge": "activité {band}",
+      "conclusionStrength": "conclusion {strength}",
+
+      "readingDepth": "Profondeur de lecture",
+      "modeDetailed": "Détaillé",
+      "modeAction": "Plan d'Action",
+
+      "subthemesHeading": "Ce qui ressort dans ce domaine",
+      "subthemesRankNote": "Classé d'après les indices de cette carte",
+      "subthemeRank": "#{rank}",
+
+      "clarityStatement": "Énoncé de clarté",
+      "decisionRule": "Règle de décision",
+      "boundaryRule": "Règle de limite",
+
+      "support": "Soutien",
+      "watch": "À surveiller",
+      "timing": "Calendrier",
+
+      "evidenceSummary": "Comment ce domaine est lu",
+
+      "doNext": "À faire ensuite",
+      "keepInMind": "À garder en tête",
+      "decisionFilter": "Filtre de décision",
+      "decisionFilterFallback": "Avancez quand le soutien, le calendrier et les indices pointent dans la même direction.",
+      "guidanceLabel": "Orientation :",
+      "longGameLabel": "Sur le long terme :",
+
+      "notice": {
+        "missingLead": "Retournez au formulaire et fournissez les données de naissance complètes avant d'ouvrir les domaines de vie.",
+        "errorKicker": "Domaines de vie",
+        "errorHeading": "Les lectures des domaines de vie n'ont pas pu être préparées.",
+        "errorFallback": "Aucune donnée de domaine de vie n'a été renvoyée.",
+        "backToReading": "Retour à votre lecture"
+      },
+
+      "lifeShifts": {
+        "missingLead": "Retournez au formulaire et fournissez les données de naissance complètes avant d'ouvrir les chapitres de vie.",
+        "errorKicker": "Chapitres de vie",
+        "errorHeading": "Les chapitres de vie n'ont pas pu être préparés.",
+        "errorFallback": "Aucune donnée de carte n'a été renvoyée.",
+        "backToReading": "Retour à votre lecture"
+      }
+    },
+
+    "fullReading": {
+      "loadingCombinations": "Préparation des combinaisons…",
+      "loadingKarma": "Préparation de la lecture karmique…",
+
+      "backToNamedReading": "Retour à la lecture de {name}",
+      "kicker": "Lecture complète",
+      "title": "Chaque résultat de la carte",
+      "lead": "Les trois priorités en tête de votre rapport sont tirées de cet ensemble. Tout ce que le moteur a trouvé se trouve ici, chaque élément avec la position sur laquelle il repose, pour que vous puissiez voir le raisonnement et non seulement la conclusion.",
+      "findings": "résultats",
+      "longTermCombinations": "combinaisons à long terme",
+
+      "patternsKicker": "Motifs",
+      "patternsHeading": "Ce que disent les positions",
+      "patternsLead": "Chaque carte énonce la lecture, puis la position qui la sous-tend. Ouvrez « Pourquoi cette lecture » pour voir la base technique et la fréquence du motif.",
+
+      "combinationsKicker": "Combinaisons",
+      "combinationsHeading": "Des motifs qui durent toute une vie",
+      "combinationsLead": "Les yogas sont des combinaisons et non des positions isolées, et ils décrivent des conditions permanentes de la carte plutôt qu'une période passagère.",
+
+      "karmaKicker": "Karma",
+      "karmaHeading": "Motifs hérités et vocation",
+      "karmaLead": "Une lecture secondaire de ce que la carte suggère avoir été apporté, de l'endroit où cela demande à être libéré, et du genre de travail vers lequel cela pointe.",
+
+      "backToReading": "Retour à la lecture",
+
+      "notice": {
+        "missingLead": "Retournez au formulaire et fournissez les données de naissance complètes avant d'ouvrir la lecture complète.",
+        "errorKicker": "Lecture complète",
+        "errorHeading": "La lecture complète n'a pas pu être préparée.",
+        "errorFallback": "Aucune donnée de carte n'a été renvoyée.",
+        "backToReading": "Retour à votre lecture"
+      }
+    },
+
+    "mobileInsights": {
+      "errorHeading": "Impossible de construire cette carte",
+      "errorFallback": "La carte n'a pas pu être calculée.",
+      "backToIntake": "Retour au formulaire",
+
+      "ascendantLead": "Ascendant {sign}",
+      "nakshatraLead": "Nakshatra {name}",
+      "factLagna": "Lagna",
+      "factNakshatra": "Nakshatra",
+      "padaLord": "Pada {pada} · {lord}",
+      "factMahadasha": "Mahadasha",
+      "toDate": "jusqu'au {date}",
+
+      "planetaryPositions": "Positions planétaires",
+      "grahaCount": "{count} grahas",
+      "colGraha": "Graha",
+      "colSign": "Signe",
+      "colDeg": "Deg",
+      "colHouse": "Mais.",
+      "flagRetrograde": "Rx",
+      "flagCombust": "Cmb",
+      "flagLegend": "Rx = recule à partir d'ici · Cmb = trop près du Soleil pour agir librement",
+
+      "houseRolesTitle": "Quelle maison répond de quoi",
+      "houseRolesSubtitle": "Les douze, et le soutien que chacune détient",
+      "bindusLegend": "Les bindus sont le score de soutien de l'Ashtakavarga pour le signe qui occupe cette maison, sur un total fixe de 337. La moyenne exacte est de 28,1, une maison se lit donc par rapport à cette valeur et non par rapport à un maximum.",
+      "srHouse": "Maison {house}, ",
+      "bhava": "{name} Bhava",
+      "srSupport": "{sign}, {bindus} bindus",
+      "supportReadout": "{sign} · {bindus}",
+      "houseGroupLegend": "Les <b>Kendra</b> sont les quatre angles sur lesquels la carte est bâtie ; les <b>Panaphara</b> et les <b>Apoklima</b> sont les maisons qui les suivent et celles qui s'en éloignent. En plus de cela, les maisons <b>Trikona</b> se lisent comme le lieu où le mérite arrive, les <b>Upachaya</b> comme celles qui s'améliorent avec l'âge et l'effort, et les <b>Dusthana</b> comme celles qui demandent d'abord quelque chose. Une maison peut être plusieurs à la fois : la sixième est à la fois Upachaya et Dusthana.",
+
+      "attentionTitle": "Ce qui mérite attention",
+      "attentionSubtitleOne": "{count} lecture prioritaire",
+      "attentionSubtitleOther": "{count} lectures prioritaires",
+      "whyThisReading": "Pourquoi cette lecture",
+
+      "dashaTitle": "Chronologie Dasha",
+      "dashaPeriodCount": "{count} périodes",
+      "dashaCurrent": "Actuellement <strong>{dasha}</strong>{antardasha} jusqu'au {date}",
+      "colPeriod": "Période",
+      "colFrom": "De",
+      "colTo": "À",
+
+      "summaryTitle": "Résumé",
+      "allReadingsTitle": "Toutes les lectures",
+      "allReadingsSubtitle": "{count} au total",
+
+      "newChart": "Nouvelle carte",
+      "desktopView": "Vue bureau complète"
+    }
+  }
+}

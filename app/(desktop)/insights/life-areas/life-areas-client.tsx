@@ -8,6 +8,8 @@ import {
 } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import lifeAreasMessages from "@/messages/en.life-areas.json";
 import styles from "./life-areas.module.css";
 
 /*
@@ -37,6 +39,9 @@ export default function LifeAreasClient({
   dasha,
   initialDomainKey,
 }: LifeAreasClientProps) {
+  /* tr, not t: this page's copy is a namespace of its own that ships with the
+     route rather than riding in the desktop baseline. */
+  const tr = useRouteMessages(lifeAreasMessages);
   const ranked = useMemo(
     () =>
       [...insights].sort(
@@ -61,12 +66,16 @@ export default function LifeAreasClient({
 
   return (
     <>
-        <nav className={styles.domainNav} aria-label="Life areas">
+        <nav className={styles.domainNav} aria-label={tr("lifeAreas.navLabel")}>
           <p className={styles.domainNavLabel}>
-            Choose a life area
-            <span>Most active first</span>
+            {tr("lifeAreas.chooseArea")}
+            <span>{tr("lifeAreas.mostActiveFirst")}</span>
           </p>
-          <div className={styles.domainChips} role="tablist" aria-label="Life areas">
+          <div
+            className={styles.domainChips}
+            role="tablist"
+            aria-label={tr("lifeAreas.navLabel")}
+          >
             {ranked.map((entry) => (
               <button
                 key={entry.key}
@@ -97,7 +106,9 @@ export default function LifeAreasClient({
             </div>
             {domain.signal_profile?.activity_band && (
               <span className={styles.domainSignalBadge}>
-                {domain.signal_profile.activity_band} activity
+                {tr("lifeAreas.activityBadge", {
+                  band: domain.signal_profile.activity_band,
+                })}
               </span>
             )}
           </div>
@@ -111,14 +122,20 @@ export default function LifeAreasClient({
                   {domain.evidence_matrix.confirmation_status.replace("_", " ")}
                 </span>
                 <strong>
-                  {domain.evidence_matrix.conclusion_strength} conclusion
+                  {tr("lifeAreas.conclusionStrength", {
+                    strength: domain.evidence_matrix.conclusion_strength,
+                  })}
                 </strong>
               </div>
               <p>{domain.evidence_matrix.synthesis}</p>
             </div>
           )}
 
-          <div className={styles.modeTabs} role="tablist" aria-label="Reading depth">
+          <div
+            className={styles.modeTabs}
+            role="tablist"
+            aria-label={tr("lifeAreas.readingDepth")}
+          >
             {(["detailed", "action"] as ViewMode[]).map((mode) => (
               <button
                 key={mode}
@@ -128,7 +145,9 @@ export default function LifeAreasClient({
                 className={viewMode === mode ? styles.modeTabActive : styles.modeTab}
                 onClick={() => setViewMode(mode)}
               >
-                {mode === "detailed" ? "Detailed" : "Action Plan"}
+                {mode === "detailed"
+                  ? tr("lifeAreas.modeDetailed")
+                  : tr("lifeAreas.modeAction")}
               </button>
             ))}
           </div>
@@ -140,14 +159,16 @@ export default function LifeAreasClient({
             >
               <div className={styles.domainSubthemeHeader}>
                 <h3 id="domain-subthemes-heading">
-                  What stands out within this area
+                  {tr("lifeAreas.subthemesHeading")}
                 </h3>
-                <span>Ranked from this chart&apos;s evidence</span>
+                <span>{tr("lifeAreas.subthemesRankNote")}</span>
               </div>
               <div className={styles.domainSubthemeGrid}>
                 {domain.subthemes.slice(0, 6).map((subtheme, index) => (
                   <article key={subtheme.key} className={styles.domainSubthemeCard}>
-                    <span className={styles.domainSubthemeRank}>#{index + 1}</span>
+                    <span className={styles.domainSubthemeRank}>
+                      {tr("lifeAreas.subthemeRank", { rank: String(index + 1) })}
+                    </span>
                     <div>
                       <strong>{subtheme.label}</strong>
                       <small>{subtheme.band}</small>
@@ -173,15 +194,15 @@ export default function LifeAreasClient({
               <p className={styles.domainDeepDescription}>{copy.description}</p>
               <div className={styles.domainStatementGrid}>
                 <section className={styles.domainStatement}>
-                  <h3>Clarity statement</h3>
+                  <h3>{tr("lifeAreas.clarityStatement")}</h3>
                   <p>{domain.display.clarity ?? copy.clarity}</p>
                 </section>
                 <section className={styles.domainStatement}>
-                  <h3>Decision rule</h3>
+                  <h3>{tr("lifeAreas.decisionRule")}</h3>
                   <p>{domain.display.decision_rule ?? copy.decisionRule}</p>
                 </section>
                 <section className={styles.domainStatement}>
-                  <h3>Boundary rule</h3>
+                  <h3>{tr("lifeAreas.boundaryRule")}</h3>
                   <p>{domain.display.boundary_rule ?? copy.boundaryRule}</p>
                 </section>
               </div>
@@ -191,7 +212,7 @@ export default function LifeAreasClient({
           {viewMode === "detailed" && (
             <div className={styles.domainGrid}>
               <section className={styles.domainCol}>
-                <h3>Support</h3>
+                <h3>{tr("lifeAreas.support")}</h3>
                 <ul>
                   {domain.display.strengths.map((item) => (
                     <li key={item}>{item}</li>
@@ -200,7 +221,7 @@ export default function LifeAreasClient({
               </section>
               {domain.display.watchouts.length > 0 && (
                 <section className={styles.domainCol}>
-                  <h3>Watch</h3>
+                  <h3>{tr("lifeAreas.watch")}</h3>
                   <ul>
                     {domain.display.watchouts.map((item) => (
                       <li key={item}>{item}</li>
@@ -209,7 +230,7 @@ export default function LifeAreasClient({
                 </section>
               )}
               <section className={styles.domainCol}>
-                <h3>Timing</h3>
+                <h3>{tr("lifeAreas.timing")}</h3>
                 <ul>
                   {domain.display.timing.map((item) => (
                     <li key={item}>{item}</li>
@@ -225,7 +246,7 @@ export default function LifeAreasClient({
           {viewMode === "detailed" && (
             <details className={styles.evidence}>
               <summary className={styles.evidenceSummary}>
-                How this domain is being read
+                {tr("lifeAreas.evidenceSummary")}
               </summary>
               <div className={styles.evidenceBody}>
                 <p className={styles.ruleBasis}>{domain.evidence.technical_note}</p>
@@ -278,19 +299,19 @@ export default function LifeAreasClient({
           {viewMode === "action" && (
             <div className={styles.domainActionPanel}>
               <section>
-                <h3>Do next</h3>
+                <h3>{tr("lifeAreas.doNext")}</h3>
                 <p>{domain.display.guidance}</p>
               </section>
               <section>
-                <h3>Keep in mind</h3>
+                <h3>{tr("lifeAreas.keepInMind")}</h3>
                 <p>{domain.display.long_game}</p>
               </section>
               <section>
-                <h3>Decision filter</h3>
+                <h3>{tr("lifeAreas.decisionFilter")}</h3>
                 <p>
                   {domain.display.decision_rule ??
                     copy?.decisionRule ??
-                    "Move when the support, timing, and evidence point in the same direction."}
+                    tr("lifeAreas.decisionFilterFallback")}
                 </p>
               </section>
             </div>
@@ -299,10 +320,12 @@ export default function LifeAreasClient({
           {viewMode !== "action" && (
             <>
               <p className={styles.domainGuidance}>
-                <strong>Guidance:</strong> {domain.display.guidance}
+                <strong>{tr("lifeAreas.guidanceLabel")}</strong>{" "}
+                {domain.display.guidance}
               </p>
               <p className={styles.domainLongGame}>
-                <strong>Long game:</strong> {domain.display.long_game}
+                <strong>{tr("lifeAreas.longGameLabel")}</strong>{" "}
+                {domain.display.long_game}
               </p>
             </>
           )}
