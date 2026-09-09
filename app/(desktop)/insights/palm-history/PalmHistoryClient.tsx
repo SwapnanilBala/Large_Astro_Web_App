@@ -9,6 +9,8 @@ import {
   subscribeToPalmReadings,
 } from "@/lib/palm-readings/local-store";
 import type { PalmReadingSummary } from "@/lib/palm-readings/types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 
 /* ──────────────────────────────────────────────────────────
    Helpers
@@ -40,6 +42,7 @@ function truncate(text: string, max = 180): string {
    ────────────────────────────────────────────────────────── */
 
 export default function PalmHistoryClient() {
+  const tr = useRouteMessages(palmMessages);
   const router = useRouter();
   const searchParams = useSearchParams();
   const compareWithId = searchParams?.get("compareWith") ?? null;
@@ -101,36 +104,36 @@ export default function PalmHistoryClient() {
       setDeletingId(id);
       try {
         if (!deletePalmReading(id)) {
-          throw new Error("Failed to delete reading.");
+          throw new Error(tr("palm.history.deleteFailed"));
         }
         setReadings((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
         setSelected((prev) => prev.filter((x) => x !== id));
       } catch (e) {
         setLoadError(
-          e instanceof Error ? e.message : "Failed to delete reading.",
+          e instanceof Error ? e.message : tr("palm.history.deleteFailed"),
         );
       } finally {
         setDeletingId(null);
         setPendingDeleteId(null);
       }
     },
-    [],
+    [tr],
   );
 
   const total = readings?.length ?? 0;
 
   const subtitle = useMemo(() => {
-    if (loading) return "Loading your saved readings…";
-    if (total === 0) return "Nothing here yet.";
-    if (total === 1) return "1 saved reading.";
-    return `${total} saved readings.`;
-  }, [loading, total]);
+    if (loading) return tr("palm.history.loadingSubtitle");
+    if (total === 0) return tr("palm.history.emptySubtitle");
+    if (total === 1) return tr("palm.history.oneSaved");
+    return tr("palm.history.manySaved", { count: String(total) });
+  }, [loading, total, tr]);
 
   return (
     <section className="palm-history-shell">
       <header className="palm-history-header">
-        <span className="palm-kicker">Your archive</span>
-        <h1>Your Palm Readings</h1>
+        <span className="palm-kicker">{tr("palm.history.kicker")}</span>
+        <h1>{tr("palm.history.title")}</h1>
         <p className="palm-history-subtitle">{subtitle}</p>
       </header>
 
@@ -145,15 +148,17 @@ export default function PalmHistoryClient() {
             onClick={toggleCompareMode}
             aria-pressed={compareMode}
           >
-            {compareMode ? "Cancel compare" : "Compare two readings"}
+            {compareMode
+              ? tr("palm.history.cancelCompare")
+              : tr("palm.history.compareTwo")}
           </button>
           {compareMode && (
             <span className="palm-history-toolbar-hint">
               {selected.length === 0
-                ? "Pick 2 readings to compare."
+                ? tr("palm.history.pickTwo")
                 : selected.length === 1
-                  ? "Pick 1 more reading."
-                  : "Ready to compare."}
+                  ? tr("palm.history.pickOneMore")
+                  : tr("palm.history.readyToCompare")}
             </span>
           )}
           {compareMode && selected.length === 2 && (
@@ -162,7 +167,7 @@ export default function PalmHistoryClient() {
               className="palm-history-compare-cta"
               onClick={startCompare}
             >
-              Compare these &rarr;
+              {tr("palm.history.compareThese")}
             </button>
           )}
         </div>
@@ -192,10 +197,10 @@ export default function PalmHistoryClient() {
       {/* Empty state */}
       {!loading && readings && readings.length === 0 && (
         <div className="palm-history-empty">
-          <p>You haven't saved any palm readings yet.</p>
+          <p>{tr("palm.history.emptyBody")}</p>
           <div className="palm-history-empty-cta">
             <Link href="/insights/advanced" className="palm-btn-camera">
-              Read your palm
+              {tr("palm.history.readYourPalm")}
             </Link>
           </div>
         </div>
@@ -207,7 +212,7 @@ export default function PalmHistoryClient() {
           {readings.map((r) => {
             const isSelected = selected.includes(r.id);
             const summary = r.reading_summary?.overall_summary ?? "";
-            const title = r.title?.trim() || "Untitled reading";
+            const title = r.title?.trim() || tr("palm.common.untitled");
             const cardClass = [
               "palm-history-card",
               compareMode ? "is-selectable" : "",
@@ -239,8 +244,16 @@ export default function PalmHistoryClient() {
                   }}
                   aria-label={
                     compareMode
-                      ? `${isSelected ? "Deselect" : "Select"} reading from ${formatDate(r.created_at)}`
-                      : `Open reading from ${formatDate(r.created_at)}`
+                      ? isSelected
+                        ? tr("palm.history.deselectReadingAria", {
+                            date: formatDate(r.created_at),
+                          })
+                        : tr("palm.history.selectReadingAria", {
+                            date: formatDate(r.created_at),
+                          })
+                      : tr("palm.history.openReadingAria", {
+                          date: formatDate(r.created_at),
+                        })
                   }
                 >
                   {compareMode && (
@@ -264,7 +277,7 @@ export default function PalmHistoryClient() {
                   )}
                   {r.classical_mode && (
                     <span className="palm-history-card-badge">
-                      Hasta Samudrika Shastra
+                      {tr("palm.common.classicalBadge")}
                     </span>
                   )}
                 </div>
@@ -272,14 +285,16 @@ export default function PalmHistoryClient() {
                   <div className="palm-history-card-actions">
                     {pendingDeleteId === r.id ? (
                       <div className="palm-history-card-confirm">
-                        <span>Delete this reading?</span>
+                        <span>{tr("palm.history.deleteConfirm")}</span>
                         <button
                           type="button"
                           className="palm-history-card-delete"
                           onClick={() => confirmDelete(r.id)}
                           disabled={deletingId === r.id}
                         >
-                          {deletingId === r.id ? "Deleting…" : "Yes, delete"}
+                          {deletingId === r.id
+                            ? tr("palm.history.deleting")
+                            : tr("palm.history.confirmDelete")}
                         </button>
                         <button
                           type="button"
@@ -287,7 +302,7 @@ export default function PalmHistoryClient() {
                           onClick={() => setPendingDeleteId(null)}
                           disabled={deletingId === r.id}
                         >
-                          Cancel
+                          {tr("palm.common.cancel")}
                         </button>
                       </div>
                     ) : (
@@ -295,9 +310,9 @@ export default function PalmHistoryClient() {
                         type="button"
                         className="palm-history-card-delete"
                         onClick={() => setPendingDeleteId(r.id)}
-                        aria-label="Delete reading"
+                        aria-label={tr("palm.history.deleteAria")}
                       >
-                        Delete
+                        {tr("palm.history.delete")}
                       </button>
                     )}
                   </div>

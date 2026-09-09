@@ -11,6 +11,8 @@ import type {
   PalmReadingJSON,
   PalmReadingRecord,
 } from "@/lib/palm-readings/types";
+import { useRouteMessages } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 
 /* ──────────────────────────────────────────────────────────
    Helpers / constants (mirroring palm-reading-panel where useful)
@@ -21,13 +23,6 @@ const STRENGTH_COLORS: Record<PalmLineReading["strength"], string> = {
   moderate: "var(--accent-gold)",
   faint: "var(--accent-coral)",
   absent: "#888",
-};
-
-const LINE_LABELS: Record<string, string> = {
-  heart_line: "Heart Line",
-  head_line: "Head Line",
-  life_line: "Life Line",
-  fate_line: "Fate Line",
 };
 
 function formatDate(iso: string): string {
@@ -95,6 +90,7 @@ type ExtendedReading = PalmReadingJSON & {
 type Props = { id: string };
 
 export default function PalmReadingDetailClient({ id }: Props) {
+  const tr = useRouteMessages(palmMessages);
   const router = useRouter();
   const [record, setRecord] = useState<PalmReadingRecord | null>(null);
   const [loading, setLoading] = useState(true);
@@ -111,20 +107,33 @@ export default function PalmReadingDetailClient({ id }: Props) {
 
   const titleInputRef = useRef<HTMLInputElement>(null);
 
+  /* Card headings for the four major lines. In the component so they follow
+     the selected language; the strengths and visibilities rendered beside
+     them stay as stored, being the model's own words. */
+  const lineLabels = useMemo<Record<string, string>>(
+    () => ({
+      heart_line: tr("palm.lines.heartLine"),
+      head_line: tr("palm.lines.headLine"),
+      life_line: tr("palm.lines.lifeLine"),
+      fate_line: tr("palm.lines.fateLine"),
+    }),
+    [tr],
+  );
+
   // ── Load the reading from the local archive ──
   useEffect(() => {
     setError(null);
 
     const found = getPalmReading(id);
     if (!found) {
-      setError("Reading not found.");
+      setError(tr("palm.detail.notFound"));
     } else {
       setRecord(found);
       setTitleDraft(found.title ?? "");
       setNotesDraft(found.notes ?? "");
     }
     setLoading(false);
-  }, [id]);
+  }, [id, tr]);
 
   useEffect(() => {
     if (editingTitle) {
@@ -194,7 +203,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
-          <h1>Loading reading…</h1>
+          <h1>{tr("palm.detail.loadingTitle")}</h1>
         </header>
         <div className="palm-skeleton">
           <div className="palm-skel-block palm-skel-summary" />
@@ -213,14 +222,14 @@ export default function PalmReadingDetailClient({ id }: Props) {
     return (
       <section className="palm-history-shell">
         <header className="palm-history-header">
-          <h1>Palm Reading</h1>
+          <h1>{tr("palm.detail.errorTitle")}</h1>
         </header>
         <div className="palm-error" role="alert">
-          {error ?? "This reading could not be loaded."}
+          {error ?? tr("palm.detail.loadFailed")}
         </div>
         <div className="palm-history-empty-cta">
           <Link href="/insights/palm-history" className="palm-btn-upload">
-            Back to your readings
+            {tr("palm.common.backToReadings")}
           </Link>
         </div>
       </section>
@@ -249,7 +258,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
               className="palm-detail-title-input"
               value={titleDraft}
               maxLength={200}
-              placeholder="Untitled reading"
+              placeholder={tr("palm.common.untitled")}
               onChange={(e) => setTitleDraft(e.target.value)}
               onBlur={onTitleBlur}
               onKeyDown={(e) => {
@@ -261,36 +270,40 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   setEditingTitle(false);
                 }
               }}
-              aria-label="Reading title"
+              aria-label={tr("palm.detail.titleAria")}
             />
           ) : (
             <button
               type="button"
               className="palm-detail-title-button"
               onClick={() => setEditingTitle(true)}
-              title="Click to edit title"
+              title={tr("palm.detail.editTitleTooltip")}
             >
-              <h1>{record.title?.trim() || "Untitled reading"}</h1>
-              <span className="palm-detail-title-edit-hint">Edit</span>
+              <h1>{record.title?.trim() || tr("palm.common.untitled")}</h1>
+              <span className="palm-detail-title-edit-hint">
+                {tr("palm.detail.editHint")}
+              </span>
             </button>
           )}
           {titleSaveState === "saving" && (
-            <span className="palm-detail-save-state">Saving…</span>
+            <span className="palm-detail-save-state">
+              {tr("palm.common.saving")}
+            </span>
           )}
           {titleSaveState === "saved" && (
             <span className="palm-detail-save-state palm-detail-save-state--ok">
-              Saved ✓
+              {tr("palm.common.saved")}
             </span>
           )}
           {titleSaveState === "error" && (
             <span className="palm-detail-save-state palm-detail-save-state--err">
-              Couldn't save
+              {tr("palm.detail.couldntSave")}
             </span>
           )}
         </div>
         {record.classical_mode && (
           <span className="palm-history-card-badge">
-            Hasta Samudrika Shastra
+            {tr("palm.common.classicalBadge")}
           </span>
         )}
       </header>
@@ -304,8 +317,9 @@ export default function PalmReadingDetailClient({ id }: Props) {
           <div className="palm-image-warning-head">
             <AlertTriangle size={16} aria-hidden="true" />
             <span className="palm-image-warning-title">
-              Image quality was marked as{" "}
-              {iq.rating ? iq.rating : "marginal"} when this reading was taken
+              {tr("palm.warning.markedAs", {
+                rating: iq.rating ? iq.rating : tr("palm.quality.marginal"),
+              })}
             </span>
           </div>
           {iq.notes && <p className="palm-image-warning-notes">{iq.notes}</p>}
@@ -317,7 +331,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         <div className="palm-section-card palm-section-card--annotated">
           {hasAnyCoords ? (
             <>
-              <h3>Palm</h3>
+              <h3>{tr("palm.sections.palm")}</h3>
               <PalmAnnotation
                 imageDataUrl={record.image_data_url}
                 coordinates={lineCoordsObj}
@@ -328,7 +342,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
           ) : (
             <div className="palm-preview">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={record.image_data_url} alt="Saved palm" />
+              <img src={record.image_data_url} alt={tr("palm.alt.saved")} />
             </div>
           )}
         </div>
@@ -337,7 +351,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Summary */}
       {(reading.overall_summary || reading.dominant_hand_note) && (
         <div className="palm-summary-card">
-          <h3>Overall Summary</h3>
+          <h3>{tr("palm.sections.overallSummary")}</h3>
           {reading.overall_summary && <p>{reading.overall_summary}</p>}
           {reading.dominant_hand_note && (
             <p className="palm-hand-note">
@@ -364,14 +378,14 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   }}
                 >
                   <div className="palm-line-header">
-                    <h4>{LINE_LABELS[key] || key}</h4>
+                    <h4>{lineLabels[key] || key}</h4>
                     <span className={`palm-strength palm-strength--${line.strength}`}>
                       {line.strength}
                     </span>
                   </div>
                   {conf && (
                     <div className="palm-line-confidence">
-                      Confidence:{" "}
+                      {tr("palm.detail.confidenceLabel")}{" "}
                       <strong>
                         {conf.visibility.replace(/_/g, " ")}
                         {typeof conf.confidence === "number"
@@ -396,35 +410,45 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Trajectory */}
       {reading.life_trajectory && (
         <div className="palm-trajectory-hero">
-          <h3>Life Trajectory</h3>
+          <h3>{tr("palm.sections.lifeTrajectory")}</h3>
           <div className="palm-trajectory-grid">
             {reading.life_trajectory.current_phase && (
               <div className="palm-trajectory-item">
-                <span className="palm-trajectory-label">Current Phase</span>
+                <span className="palm-trajectory-label">
+                  {tr("palm.trajectory.currentPhase")}
+                </span>
                 <p>{reading.life_trajectory.current_phase}</p>
               </div>
             )}
             {reading.life_trajectory.near_future && (
               <div className="palm-trajectory-item">
-                <span className="palm-trajectory-label">Near Future</span>
+                <span className="palm-trajectory-label">
+                  {tr("palm.trajectory.nearFuture")}
+                </span>
                 <p>{reading.life_trajectory.near_future}</p>
               </div>
             )}
             {reading.life_trajectory.long_term_path && (
               <div className="palm-trajectory-item">
-                <span className="palm-trajectory-label">Long-Term Path</span>
+                <span className="palm-trajectory-label">
+                  {tr("palm.trajectory.longTermPath")}
+                </span>
                 <p>{reading.life_trajectory.long_term_path}</p>
               </div>
             )}
             {reading.life_trajectory.challenges && (
               <div className="palm-trajectory-item palm-trajectory-item--challenge">
-                <span className="palm-trajectory-label">Challenges</span>
+                <span className="palm-trajectory-label">
+                  {tr("palm.trajectory.challenges")}
+                </span>
                 <p>{reading.life_trajectory.challenges}</p>
               </div>
             )}
             {reading.life_trajectory.opportunities && (
               <div className="palm-trajectory-item palm-trajectory-item--opportunity">
-                <span className="palm-trajectory-label">Opportunities</span>
+                <span className="palm-trajectory-label">
+                  {tr("palm.trajectory.opportunities")}
+                </span>
                 <p>{reading.life_trajectory.opportunities}</p>
               </div>
             )}
@@ -435,7 +459,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Jyotish correlation */}
       {reading.jyotish_correlation && (
         <div className="palm-section-card palm-section-card--jyotish">
-          <h3>Chart &times; Palm Synthesis</h3>
+          <h3>{tr("palm.sections.jyotishSynthesis")}</h3>
           {reading.jyotish_correlation.summary && (
             <p className="palm-section-lead">
               {reading.jyotish_correlation.summary}
@@ -481,7 +505,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Dasha relevance */}
       {reading.dasha_relevance && (
         <div className="palm-section-card palm-section-card--dasha">
-          <h3>Active Dasha Lens</h3>
+          <h3>{tr("palm.sections.dashaLens")}</h3>
           {reading.dasha_relevance.active_period_summary && (
             <p className="palm-section-lead">
               {reading.dasha_relevance.active_period_summary}
@@ -517,22 +541,22 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Career */}
       {reading.career_and_purpose && (
         <div className="palm-section-card palm-section-card--career">
-          <h3>Career &amp; Life Purpose</h3>
+          <h3>{tr("palm.sections.career")}</h3>
           {reading.career_and_purpose.natural_talents && (
             <div className="palm-subsection">
-              <h4>Natural Talents</h4>
+              <h4>{tr("palm.career.naturalTalents")}</h4>
               <p>{reading.career_and_purpose.natural_talents}</p>
             </div>
           )}
           {reading.career_and_purpose.career_direction && (
             <div className="palm-subsection">
-              <h4>Career Direction</h4>
+              <h4>{tr("palm.career.careerDirection")}</h4>
               <p>{reading.career_and_purpose.career_direction}</p>
             </div>
           )}
           {reading.career_and_purpose.purpose_alignment && (
             <div className="palm-subsection">
-              <h4>Purpose Alignment</h4>
+              <h4>{tr("palm.career.purposeAlignment")}</h4>
               <p>{reading.career_and_purpose.purpose_alignment}</p>
             </div>
           )}
@@ -542,16 +566,16 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Relationships */}
       {reading.relationships_and_emotional && (
         <div className="palm-section-card palm-section-card--relationships">
-          <h3>Relationships &amp; Emotional Landscape</h3>
+          <h3>{tr("palm.sections.relationships")}</h3>
           {reading.relationships_and_emotional.emotional_state && (
             <div className="palm-subsection">
-              <h4>Emotional State</h4>
+              <h4>{tr("palm.relationships.emotionalState")}</h4>
               <p>{reading.relationships_and_emotional.emotional_state}</p>
             </div>
           )}
           {reading.relationships_and_emotional.relationship_dynamics && (
             <div className="palm-subsection">
-              <h4>Relationship Dynamics</h4>
+              <h4>{tr("palm.relationships.relationshipDynamics")}</h4>
               <p>
                 {reading.relationships_and_emotional.relationship_dynamics}
               </p>
@@ -559,7 +583,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
           )}
           {reading.relationships_and_emotional.connection_style && (
             <div className="palm-subsection">
-              <h4>Connection Style</h4>
+              <h4>{tr("palm.relationships.connectionStyle")}</h4>
               <p>{reading.relationships_and_emotional.connection_style}</p>
             </div>
           )}
@@ -569,22 +593,22 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Health */}
       {reading.health_and_vitality && (
         <div className="palm-section-card palm-section-card--health">
-          <h3>Health &amp; Vitality</h3>
+          <h3>{tr("palm.sections.health")}</h3>
           {reading.health_and_vitality.energy_levels && (
             <div className="palm-subsection">
-              <h4>Energy Levels</h4>
+              <h4>{tr("palm.health.energyLevels")}</h4>
               <p>{reading.health_and_vitality.energy_levels}</p>
             </div>
           )}
           {reading.health_and_vitality.stress_indicators && (
             <div className="palm-subsection">
-              <h4>Stress Indicators</h4>
+              <h4>{tr("palm.health.stressIndicators")}</h4>
               <p>{reading.health_and_vitality.stress_indicators}</p>
             </div>
           )}
           {reading.health_and_vitality.wellness_advice && (
             <div className="palm-subsection">
-              <h4>Wellness Advice</h4>
+              <h4>{tr("palm.health.wellnessAdvice")}</h4>
               <p>{reading.health_and_vitality.wellness_advice}</p>
             </div>
           )}
@@ -594,7 +618,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Mounts */}
       {reading.mounts && (
         <div className="palm-section-card">
-          <h3>Mounts</h3>
+          <h3>{tr("palm.sections.mounts")}</h3>
           {Array.isArray(reading.mounts.prominent) &&
             reading.mounts.prominent.length > 0 && (
               <div className="palm-chips">
@@ -614,7 +638,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Fingers */}
       {reading.fingers && (
         <div className="palm-section-card">
-          <h3>Fingers</h3>
+          <h3>{tr("palm.sections.fingers")}</h3>
           {reading.fingers.observation && (
             <p className="palm-observation">{reading.fingers.observation}</p>
           )}
@@ -627,7 +651,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Special markings */}
       {reading.special_markings && (
         <div className="palm-section-card">
-          <h3>Special Markings</h3>
+          <h3>{tr("palm.sections.specialMarkings")}</h3>
           {Array.isArray(reading.special_markings.observed) &&
             reading.special_markings.observed.length > 0 && (
               <div className="palm-chips">
@@ -650,7 +674,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         if (typeof cfn === "string") {
           return (
             <div className="palm-section-card palm-section-card--classical">
-              <h3>Hasta Samudrika Shastra Framework</h3>
+              <h3>{tr("palm.sections.classicalFramework")}</h3>
               <p>{cfn}</p>
             </div>
           );
@@ -666,7 +690,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         }
         return (
           <div className="palm-section-card palm-section-card--classical">
-            <h3>Hasta Samudrika Shastra Framework</h3>
+            <h3>{tr("palm.sections.classicalFramework")}</h3>
             {sanskritTerms.length > 0 && (
               <ul className="palm-sanskrit-list">
                 {sanskritTerms.map((t, i) => (
@@ -710,34 +734,37 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Guidance */}
       {reading.guidance && (
         <div className="palm-guidance">
-          <h3>Guidance</h3>
+          <h3>{tr("palm.sections.guidance")}</h3>
           <p>{reading.guidance}</p>
         </div>
       )}
 
       {/* Notes — editable */}
       <div className="palm-section-card palm-detail-notes-card">
-        <h3>Your Notes</h3>
+        <h3>{tr("palm.sections.yourNotes")}</h3>
         <p className="palm-section-lead palm-detail-notes-help">
-          Private notes for yourself — anything you want to remember about this
-          reading.
+          {tr("palm.detail.notesHelp")}
         </p>
         <textarea
           className="palm-detail-notes"
           value={notesDraft}
-          placeholder="Add a note…"
+          placeholder={tr("palm.detail.notesPlaceholder")}
           onChange={(e) => setNotesDraft(e.target.value)}
           onBlur={onNotesBlur}
           rows={5}
         />
         <div className="palm-detail-notes-state">
-          {notesSaveState === "saving" && <span>Saving…</span>}
+          {notesSaveState === "saving" && (
+            <span>{tr("palm.common.saving")}</span>
+          )}
           {notesSaveState === "saved" && (
-            <span className="palm-detail-save-state--ok">Notes saved ✓</span>
+            <span className="palm-detail-save-state--ok">
+              {tr("palm.detail.notesSaved")}
+            </span>
           )}
           {notesSaveState === "error" && (
             <span className="palm-detail-save-state--err">
-              Couldn't save notes
+              {tr("palm.detail.couldntSaveNotes")}
             </span>
           )}
         </div>
@@ -749,7 +776,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
           href={`/insights/palm-history?compareWith=${record.id}`}
           className="palm-history-compare-cta"
         >
-          Compare with another reading &rarr;
+          {tr("palm.detail.compareCta")}
         </Link>
       </div>
     </section>

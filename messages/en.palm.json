@@ -1,0 +1,210 @@
+{
+  "palm": {
+    "common": {
+      "cancel": "Cancel",
+      "saving": "Saving…",
+      "saved": "Saved ✓",
+      "untitled": "Untitled reading",
+      "backToReadings": "Back to your readings",
+      "classicalBadge": "Hasta Samudrika Shastra"
+    },
+    "alt": {
+      "palm": "Palm",
+      "captured": "Captured palm",
+      "analyzing": "Analyzing palm",
+      "yourPalm": "Your palm",
+      "saved": "Saved palm",
+      "comparePalm": "{tag} palm"
+    },
+    "panel": {
+      "kicker": "Palm Reading",
+      "heading": "Palm Reading Analysis",
+      "intro": "Use your camera or upload an image of your palm for an AI-powered analysis of your palm lines, mounts, and special markings. Get personalized insights based on ancient palmistry traditions.",
+      "classicalToggleTitle": "Hasta Samudrika Shastra mode",
+      "classicalToggleSubtitle": "Classical Vedic palmistry only",
+      "openCamera": "Open Camera",
+      "uploadImage": "Upload Image",
+      "tipHandFlat": "Place your dominant hand flat, palm facing the camera",
+      "tipLighting": "Ensure good, even lighting without harsh shadows",
+      "tipFingers": "Keep your fingers slightly spread apart"
+    },
+    "camera": {
+      "noHand": "No hand detected",
+      "palmClear": "Palm detected clearly!",
+      "handSteady": "Hand detected — hold steady",
+      "confidence": "{pct}% confidence",
+      "captureTitle": "Capture"
+    },
+    "captured": {
+      "retake": "Retake",
+      "uploadDifferent": "Upload Different Image",
+      "analyze": "Analyze My Palm"
+    },
+    "analyzing": {
+      "text": "Reading your palm"
+    },
+    "results": {
+      "newReading": "New Reading",
+      "saveReading": "Save reading",
+      "saveTitle": "Save this reading to this device",
+      "alreadySavedTitle": "Already saved",
+      "skipAnimations": "Skip animations",
+      "savedToast": "Saved to your readings",
+      "viewHistory": "View history ↗"
+    },
+    "warning": {
+      "hardTitle": "Image quality may affect accuracy",
+      "softTitle": "Image is marginal — interpret with care",
+      "dismiss": "Dismiss warning",
+      "markedAs": "Image quality was marked as {rating} when this reading was taken"
+    },
+    "quality": {
+      "marginal": "marginal"
+    },
+    "sections": {
+      "overallSummary": "Overall Summary",
+      "annotatedPalm": "Annotated Palm",
+      "palm": "Palm",
+      "lifeTrajectory": "Life Trajectory",
+      "jyotishSynthesis": "Chart × Palm Synthesis",
+      "dashaLens": "Active Dasha Lens",
+      "career": "Career & Life Purpose",
+      "relationships": "Relationships & Emotional Landscape",
+      "health": "Health & Vitality",
+      "mounts": "Mounts",
+      "fingers": "Fingers",
+      "specialMarkings": "Special Markings",
+      "classicalFramework": "Hasta Samudrika Shastra Framework",
+      "guidance": "Guidance",
+      "yourNotes": "Your Notes"
+    },
+    "trajectory": {
+      "currentPhase": "Current Phase",
+      "nearFuture": "Near Future",
+      "longTermPath": "Long-Term Path",
+      "challenges": "Challenges",
+      "opportunities": "Opportunities"
+    },
+    "career": {
+      "naturalTalents": "Natural Talents",
+      "careerDirection": "Career Direction",
+      "purposeAlignment": "Purpose Alignment"
+    },
+    "relationships": {
+      "emotionalState": "Emotional State",
+      "relationshipDynamics": "Relationship Dynamics",
+      "connectionStyle": "Connection Style"
+    },
+    "health": {
+      "energyLevels": "Energy Levels",
+      "stressIndicators": "Stress Indicators",
+      "wellnessAdvice": "Wellness Advice"
+    },
+    "lines": {
+      "heartLine": "Heart Line",
+      "headLine": "Head Line",
+      "lifeLine": "Life Line",
+      "fateLine": "Fate Line"
+    },
+    "annotation": {
+      "heart": "Heart",
+      "head": "Head",
+      "life": "Life",
+      "fate": "Fate"
+    },
+    "visibility": {
+      "clear": "Clear",
+      "partial": "Partial",
+      "faint": "Faint",
+      "notDetected": "Not detected",
+      "confidenceSuffix": " ({pct}%)"
+    },
+    "errors": {
+      "cameraDenied": "Camera access denied. Please use the upload option instead.",
+      "captureTooLarge": "Palm image is too large. Please capture a closer, lower-resolution image under 5MB.",
+      "uploadTooLarge": "Palm image is too large. Please upload an image under 5MB.",
+      "unsupportedType": "Please upload a JPEG, PNG, or WebP image.",
+      "analysisFailed": "Analysis failed",
+      "generic": "Something went wrong",
+      "saveFailed": "Failed to save reading"
+    },
+    "history": {
+      "kicker": "Your archive",
+      "title": "Your Palm Readings",
+      "loadingSubtitle": "Loading your saved readings…",
+      "emptySubtitle": "Nothing here yet.",
+      "oneSaved": "1 saved reading.",
+      "manySaved": "{count} saved readings.",
+      "compareTwo": "Compare two readings",
+      "cancelCompare": "Cancel compare",
+      "pickTwo": "Pick 2 readings to compare.",
+      "pickOneMore": "Pick 1 more reading.",
+      "readyToCompare": "Ready to compare.",
+      "compareThese": "Compare these →",
+      "emptyBody": "You haven't saved any palm readings yet.",
+      "readYourPalm": "Read your palm",
+      "openReadingAria": "Open reading from {date}",
+      "selectReadingAria": "Select reading from {date}",
+      "deselectReadingAria": "Deselect reading from {date}",
+      "deleteConfirm": "Delete this reading?",
+      "deleting": "Deleting…",
+      "confirmDelete": "Yes, delete",
+      "delete": "Delete",
+      "deleteAria": "Delete reading",
+      "deleteFailed": "Failed to delete reading."
+    },
+    "detail": {
+      "loadingTitle": "Loading reading…",
+      "errorTitle": "Palm Reading",
+      "notFound": "Reading not found.",
+      "loadFailed": "This reading could not be loaded.",
+      "titleAria": "Reading title",
+      "editTitleTooltip": "Click to edit title",
+      "editHint": "Edit",
+      "couldntSave": "Couldn't save",
+      "confidenceLabel": "Confidence:",
+      "notesHelp": "Private notes for yourself — anything you want to remember about this reading.",
+      "notesPlaceholder": "Add a note…",
+      "notesSaved": "Notes saved ✓",
+      "couldntSaveNotes": "Couldn't save notes",
+      "compareCta": "Compare with another reading →"
+    },
+    "compare": {
+      "title": "Compare palm readings",
+      "mustSelectTwo": "You must select two readings to compare.",
+      "pickReadings": "Pick readings",
+      "loadingTitle": "Comparing two readings…",
+      "kicker": "Side-by-side",
+      "heading": "Comparing two readings",
+      "takenDayApart": "Taken {count} day apart",
+      "takenDaysApart": "Taken {count} days apart",
+      "errorSelectTwo": "Select exactly two readings to compare.",
+      "errorNotFound": "One or both readings could not be found.",
+      "loadFailed": "We couldn't load this comparison.",
+      "readingA": "Reading A",
+      "readingB": "Reading B",
+      "openFull": "Open full reading →",
+      "lineStrength": "Line strength",
+      "lineStrengthAria": "Line strength comparison",
+      "noStrengthChanges": "No strength changes across the four major lines.",
+      "lineVisibility": "Line visibility",
+      "lineVisibilityAria": "Line visibility comparison",
+      "colLine": "Line",
+      "colChange": "Change",
+      "direction": {
+        "stronger": "stronger",
+        "weaker": "weaker",
+        "unchanged": "unchanged"
+      },
+      "specialMarkings": "Special markings",
+      "newlyVisible": "Newly visible",
+      "noLongerVisible": "No longer visible",
+      "prominentMounts": "Prominent mounts",
+      "newlyProminent": "Newly prominent",
+      "noLongerProminent": "No longer prominent",
+      "none": "None",
+      "summaryContrast": "Summary contrast",
+      "noSummary": "(no summary)"
+    }
+  }
+}
