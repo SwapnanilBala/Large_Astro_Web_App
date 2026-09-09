@@ -1018,5 +1018,37 @@
         "returnLink": "আপনার সম্পূর্ণ পাঠে ফিরুন"
       }
     }
+  },
+  "shared": {
+    "rootErrorHeading": "তারারা ক্ষণিকের জন্য বিচ্যুত হয়েছে",
+    "rootErrorDescription": "একটি মহাজাগতিক বিশৃঙ্খলা আপনার অভিজ্ঞতায় বিঘ্ন ঘটিয়েছে। মহাকাশীয় গণনা পুনরায় সমন্বয় করা হচ্ছে।",
+    "rootErrorDetailsSummary": "কারিগরি বিবরণ দেখুন",
+    "rootErrorDigest": "ডাইজেস্ট: {digest}",
+    "rootErrorTryAgain": "আবার চেষ্টা করুন",
+    "rootErrorReturnHome": "হোমে ফিরুন",
+    "chartErrorKicker": "কুণ্ডলী ত্রুটি",
+    "chartErrorHeading": "কুণ্ডলীর গণনা সম্পূর্ণ করা যায়নি।",
+    "chartErrorLead": "কুণ্ডলী ইঞ্জিন এই অনুরোধ শেষ করতে পারেনি। জন্ম বিবরণ, স্থান এবং নির্বাচিত ইঞ্জিন যাচাই করে আবার চেষ্টা করুন।",
+    "chartErrorLeadAdvanced": "কুণ্ডলী ইঞ্জিনে একটি ত্রুটি ঘটেছে। {package} npm প্যাকেজটি ইনস্টল করা আছে এবং আপনার তথ্য সঠিক কিনা যাচাই করে আবার চেষ্টা করুন।",
+    "chartErrorDetail": "ত্রুটি: {detail}",
+    "chartErrorNoData": "কোনো তথ্য পাওয়া যায়নি",
+    "chartErrorRetry": "পুনরায় চেষ্টা",
+    "chartRequestTimedOut": "{seconds} সেকেন্ড পরে অনুরোধের সময় শেষ হয়েছে। সার্ভার ব্যস্ত থাকতে পারে। আবার চেষ্টা করুন।",
+    "chartUnknownApiError": "অজানা API ত্রুটি",
+    "constellationAria": "{ascendant} লগ্নের জন্য গ্রহের অবস্থান দেখানো নক্ষত্রমণ্ডল চিত্র",
+    "constellationTitle": "{ascendant} লগ্ন সহ নক্ষত্রমণ্ডল মানচিত্র",
+    "constellationRasi": "রাশি",
+    "constellationLongitudeAbbrev": "দ্রাঘি.",
+    "weeklyEnergyChartTitle": "আপনার সাপ্তাহিক শক্তি, {week}",
+    "weeklyEnergyBandHigh": "উচ্চ",
+    "weeklyEnergyBandBalanced": "ভারসাম্যপূর্ণ",
+    "weeklyEnergyBandLow": "নিম্ন",
+    "weeklyEnergySteadyWeek": "স্থিতিশীল সপ্তাহ",
+    "weeklyEnergyNoStandoutDay": "কোনো বিশেষ দিন নেই",
+    "weeklyEnergyTableCaption": "সাপ্তাহিক শক্তির স্কোর, {week}",
+    "weeklyEnergyTableDay": "দিন",
+    "weeklyEnergyTableDate": "তারিখ",
+    "weeklyEnergyTableScore": "স্কোর",
+    "weeklyEnergyTableBand": "ব্যান্ড"
   }
 }
