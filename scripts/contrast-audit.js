@@ -27,9 +27,14 @@
  *     `color`, and it is not a surface behind its siblings
  *   - the AA floor follows the large-text rule (3:1 at >=24px, or >=18.66px bold)
  *   - disabled text is measured and reported under `inactive`, not dropped
+ *   - colours are read through a canvas unless they are plain rgb()/rgba(),
+ *     so color-mix() and mid-transition oklab() resolve rather than parse to
+ *     a number on the wrong scale
+ *   - the bottom of the backdrop stack is the document's own canvas colour,
+ *     so it is correct under [data-theme="light"] as well as the dark default
  *
- * That last one used to be a `continue`. WCAG 1.4.3 exempts inactive user
- * interface components, so skipping them is defensible for a greyed-out
+ * The `inactive` bucket used to be a `continue`. WCAG 1.4.3 exempts inactive
+ * user interface components, so skipping them is defensible for a greyed-out
  * button nobody needs to read — but the exemption is about controls, and
  * `:disabled` is not a reliable proxy for "nobody needs to read this". The
  * intake step rail is four disabled buttons whose labels are the only thing
@@ -45,6 +50,13 @@
  * page in a short viewport it is where the off-screen content goes when the
  * scroll does not flush, and a short `checked` count with a long
  * `unmeasurable` one means the page was not really audited.
+ *
+ * It is per-page and per-theme, not per-stylesheet: it sees whatever the
+ * page is painting at the moment it runs, so a theme-scoped rule is only
+ * covered if you toggle to that theme and run it again. Both themes, on every
+ * page you changed — a clean dark run says nothing about the light one, which
+ * is how eight hardcoded dark-theme text colours survived in the desktop
+ * intake sheet with a dark audit reporting zero failures.
  *
  * Caveat for headless/hidden viewports: rAF does not fire, so framer-motion
  * elements freeze at whatever inline opacity they stopped on and CSS
@@ -69,7 +81,32 @@ export const CONTRAST_AUDIT = String.raw`
   document.querySelectorAll('.scroll-reveal').forEach(e => e.classList.add('visible'));
   for (const a of document.getAnimations()) { try { a.finish(); } catch (e) {} }
 
-  const parse = c => { const m = (c.match(/[\d.]+/g) || [0,0,0]).map(Number); return m.length === 3 ? [...m,1] : m; };
+  /* getComputedStyle does not hand back rgb() for everything. A color-mix()
+     serialises as color(srgb 0 0 0 / a) with 0-1 channels, and a colour caught
+     mid-transition serialises as oklab(). Read either with the 0-255 regex and
+     you get a number that is not merely imprecise but inverted: color(srgb 1 1
+     1 / .9), pure white, comes out [1,1,1] — near-black — so white-on-white
+     scores as high contrast and the page is reported clean. That is the exact
+     failure this audit exists to catch, and this file's own subject uses
+     color-mix(). Plain rgb()/rgba() keeps the arithmetic path so its numbers
+     are unchanged; anything else is painted to a 1x1 canvas and read back,
+     which resolves every colour syntax the browser accepts at the cost of
+     +-1/255 of rounding. */
+  const cv = document.createElement('canvas'); cv.width = cv.height = 1;
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  const viaCanvas = c => {
+    ctx.clearRect(0,0,1,1);
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillStyle = c;
+    ctx.fillRect(0,0,1,1);
+    const d = ctx.getImageData(0,0,1,1).data;
+    return [d[0], d[1], d[2], d[3]/255];
+  };
+  const parse = c => {
+    if (!c) return [0,0,0,0];
+    if (/^rgba?\(/.test(c)) { const m = (c.match(/[\d.]+/g) || [0,0,0]).map(Number); return m.length === 3 ? [...m,1] : m; }
+    return viaCanvas(c);
+  };
   const over = (f,b) => { const a = f[3]; return [0,1,2].map(i => f[i]*a + b[i]*(1-a)).concat(1); };
   const chan = v => { v /= 255; return v <= 0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055, 2.4); };
   const lum = a => 0.2126*chan(a[0]) + 0.7152*chan(a[1]) + 0.0722*chan(a[2]);
@@ -87,7 +124,11 @@ export const CONTRAST_AUDIT = String.raw`
         if (bgImage[i] === '(') depth++; else if (bgImage[i] === ')') depth--;
         i++;
       }
-      for (const c of bgImage.slice(re.lastIndex, i - 1).match(/rgba?\([^)]*\)|#[0-9a-f]{3,8}/gi) || []) {
+      /* Same reason as parse(): a gradient stop written as color-mix() — this
+         codebase has several — serialises as color(srgb ...), and matching
+         only rgb/hex skipped it, so the gradient scored as though that stop
+         were not there. */
+      for (const c of bgImage.slice(re.lastIndex, i - 1).match(/(?:rgba?|color|oklab|oklch|lab|lch|hwb|hsla?)\([^)]*\)|#[0-9a-f]{3,8}/gi) || []) {
         const p = parse(c);
         if (p[3] > 0) out.push(p);
       }
@@ -102,6 +143,22 @@ export const CONTRAST_AUDIT = String.raw`
     range.selectNodeContents(node);
     const rects = [...range.getClientRects()].filter(r => r.width > 1 && r.height > 1);
     return rects.length ? rects[0] : el.getBoundingClientRect();
+  };
+
+  /* What the stack composites down onto. This was the constant [10,10,15] —
+     the dark page — which is right until the page is not dark: under
+     [data-theme="light"] every element whose ancestors are all transparent
+     would then be scored against near-black, turning unreadable light-on-light
+     text into a pass. The document canvas comes from html, or from body when
+     html is transparent, per CSS backgrounds; the old constant stays as the
+     fallback for when neither paints one. */
+  const pageBase = () => {
+    for (const el of [document.documentElement, document.body]) {
+      if (!el) continue;
+      const c = parse(getComputedStyle(el).backgroundColor);
+      if (c[3] > 0) return over(c, [10,10,15,1]);
+    }
+    return [10,10,15,1];
   };
 
   const backdrops = el => {
@@ -130,7 +187,7 @@ export const CONTRAST_AUDIT = String.raw`
        active chip on /m/engine-select is dark text on solid #d4a574 inside a
        card with a 0.08-alpha sheen; it was reported at 1.36:1 against the
        sheen, a colour it never touches. */
-    let variants = [[10,10,15,1]];
+    let variants = [pageBase()];
     for (let i = stack.length - 1; i >= 0; i--) {
       const cs = getComputedStyle(stack[i]);
       if (cs.webkitBackgroundClip === 'text' || cs.backgroundClip === 'text') continue;

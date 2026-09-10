@@ -2137,7 +2137,15 @@
      this rail sits on — which is #1c181f, not the page — leaving the live
      state less readable than the disabled one below. 0.62 gives 6.10:1 and
      keeps the four tiers ordered: current 13.32, answered 7.81, this 6.10,
-     disabled 5.09. */
+     disabled 5.09.
+
+     Those four are Celestial Luxe only: #1c181f is the dark card, and this ink
+     is a near-white. In Ethereal Dawn the same four declarations resolved to
+     1.29 / 1.15 / 1.13 / 1.11 — a flat white strip where the ordering did not
+     just weaken, it stopped existing. The light card is a different backdrop,
+     so the ladder is re-derived against it rather than re-pointed at a token
+     and assumed to survive; see "Step rail, re-tiered for Ethereal Dawn" at
+     the foot of this file. */
   color: rgba(231, 230, 236, 0.62);
   font-size: 0.76rem;
   font-weight: 600;
@@ -2200,9 +2208,12 @@
      tiers behind .questionDotAnswered at 8.4:1 and .questionDotCurrent at
      15.03:1.
 
-     scripts/contrast-audit.js does not cover this: it skips :disabled, which
-     WCAG 1.4.3 does exempt — correct for an inactive control, wrong for a
-     label whose whole job is to be read. */
+     scripts/contrast-audit.js used to skip :disabled — WCAG 1.4.3 does exempt
+     inactive controls, which is correct for a greyed-out button and wrong for
+     a label whose whole job is to be read. It no longer skips them: disabled
+     text is measured like anything else and returned under `inactive` for a
+     human to judge, which is how this tier's light-theme failure (1.11:1) was
+     caught rather than reported clean. */
   opacity: 1;
   color: rgba(231, 230, 236, 0.55);
 }
@@ -2871,4 +2882,117 @@
   color: var(--ink-main);
   border-color: rgba(132, 86, 105, 0.18);
   background: rgba(255, 255, 255, 0.68);
+}
+
+/* ── Ethereal Dawn: step rail, re-tiered ──────────────────────
+ *
+ * The rail's four tiers are an ink at four alphas over a backdrop, so both
+ * halves of the pair change with the theme and neither one can be swapped in
+ * isolation. Celestial Luxe paints #e7e6ec on the #1c181f card; Ethereal Dawn
+ * paints the same near-white on a card that composites to #fffcfa, which is
+ * how all four tiers arrived at 1.29 / 1.15 / 1.13 / 1.11 — not a ladder, a
+ * blank strip with the step names technically present in it.
+ *
+ * Re-derived here against the light card rather than re-pointed at a token:
+ * --text-secondary happens to land on 6.15 and would have served the reachable
+ * tier, but --text-tertiary is 4.44 and would have put the disabled tier under
+ * the AA floor while looking like the obvious choice. So one ink, four steps,
+ * matching how the dark side is built, with the percentages chosen to hold the
+ * dark ratios:
+ *
+ *                dark (#1c181f)   light (#fffcfa)      light worst case
+ *   current           13.34            13.77  --ink-main       13.58
+ *   answered           7.82             8.09  83%               7.97
+ *   reachable          6.12             6.26  75%               6.16
+ *   disabled           5.09             5.15  69%               5.11
+ *
+ * Both middle columns are measured rather than derived: the four states never
+ * coexist, so each was forced onto one segment in turn and read back off the
+ * composited card. The last column is the same four against #fffaf8 — the card
+ * over the peach wash at its strongest, which is the darkest it gets and so
+ * the worst case for dark ink. Every tier clears 4.5:1 at that end too.
+ *
+ * Current drops the gold rather than darkening it. No gold that still reads as
+ * gold gets near 13:1 on this card: --accent-gold-dim, the darkest one, is
+ * 6.50, which would have put the top tier *below* the answered tier and
+ * inverted the ladder it is supposed to head. The bar directly beneath the
+ * label already carries the state cue, so the label can just be ink.
+ */
+:global(html[data-theme="light"]) .questionDot {
+  color: color-mix(in srgb, var(--ink-main) 75%, transparent);
+}
+
+:global(html[data-theme="light"]) .questionDotAnswered {
+  color: color-mix(in srgb, var(--ink-main) 83%, transparent);
+}
+
+:global(html[data-theme="light"]) .questionDotCurrent {
+  color: var(--ink-main);
+}
+
+/* Same reasoning as the dark rule it mirrors: these three are disabled buttons
+   and the only thing saying the form has four steps, so they carry their own
+   dimming rather than inheriting the global 0.56 multiplier on top of it. */
+:global(html[data-theme="light"]) .questionDot:disabled {
+  opacity: 1;
+  color: color-mix(in srgb, var(--ink-main) 69%, transparent);
+}
+
+/* The bars are graphics, not text, so the floor that applies is 1.4.11's 3:1
+   for meaningful non-text — and the unfilled track does not meet it in either
+   theme (1.26 dark), because it is a groove rather than an indicator: what it
+   is filled with is what carries the state, and the label tier says the same
+   thing in text. These are matched to the dark theme's measured weights so the
+   rail reads the same in both, not raised to a floor dark never met:
+   track 1.27 (dark 1.26), answered 2.97 (dark 2.96). The current bar's palest
+   stop is 3.96 against dark's 6.85 — lower, because a light-theme gold has
+   less room to darken before it stops being gold, but still above 3:1 and
+   still clearly the strongest of the three. */
+:global(html[data-theme="light"]) .questionDotBar {
+  background: color-mix(in srgb, var(--ink-main) 13%, transparent);
+}
+
+:global(html[data-theme="light"]) .questionDotAnswered .questionDotBar {
+  background: color-mix(in srgb, var(--accent-gold) 82%, transparent);
+}
+
+:global(html[data-theme="light"]) .questionDotCurrent .questionDotBar {
+  background: linear-gradient(90deg, var(--accent-gold-dim), var(--accent-gold));
+  box-shadow: 0 0 10px var(--accent-gold-glow);
+}
+
+/* ── Ethereal Dawn: the rest of the near-white body copy ──────
+ *
+ * The same defect as the rail, without the ladder: one hardcoded near-white
+ * ink and no light counterpart, so each of these measured 1.09–1.13 against
+ * the surface it sits on. --text-secondary is the tone the light theme already
+ * uses for quiet copy, and it clears AA on both backdrops these use — 6.06 on
+ * the page and 6.24 on the card, 5.47 and 6.15 against the washed worst case.
+ */
+:global(html[data-theme="light"]) .streamlinedHeader p,
+:global(html[data-theme="light"]) .questionHelper,
+:global(html[data-theme="light"]) .keyHint {
+  color: var(--text-secondary);
+}
+
+/* .trustMicrocopy is the exception: the dark rule above deliberately bought
+   headroom over 4.5 rather than sitting on it, because this is the sentence
+   about what happens to someone's birth date, time and place. --text-secondary
+   would clear the floor at 6.06 and lose that intent, so the ink carries it
+   instead: 8.44, or 7.80 against the washed worst case. */
+:global(html[data-theme="light"]) .trustMicrocopy {
+  color: color-mix(in srgb, var(--ink-main) 85%, transparent);
+}
+
+/* The kbd chip was white on three counts — a 0.12 border, a 0.035 fill and
+   0.62-alpha label text — so on the page it disappeared outline and all, which
+   is worse than the text alone going faint: a key cap that reads as a key cap
+   is half of what tells you "↵" is a key and not punctuation. Ink at 6% keeps
+   the fill as quiet against the page as white is against the dark one — 1.12
+   here, 1.07 there — while giving the label something to sit on: 7.79,
+   against 6.14 in the dark theme. */
+:global(html[data-theme="light"]) .keyHint kbd {
+  border-color: var(--border-medium);
+  background: color-mix(in srgb, var(--ink-main) 6%, transparent);
+  color: color-mix(in srgb, var(--ink-main) 85%, transparent);
 }
