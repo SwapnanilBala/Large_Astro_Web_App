@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 import styles from "./varshaphal-panel.module.css";
 
@@ -117,9 +117,23 @@ function buildVarshaphalUrl(queryString: string, targetYear: number): string {
   });
 }
 
-function formatReturnMoment(iso: string): string {
+/*
+ * The interface language as a BCP-47 tag for Intl, mirroring
+ * future-forecast-panel. These formatters are module-level, so the locale
+ * arrives as an argument rather than from a hook.
+ */
+const LOCALE_TAGS: Record<Language, string> = {
+  en: "en-US",
+  es: "es-ES",
+  bn: "bn-IN",
+  hi: "hi-IN",
+  it: "it-IT",
+  fr: "fr-FR",
+};
+
+function formatReturnMoment(iso: string, locale: string): string {
   try {
-    return new Date(iso).toLocaleString("en-US", {
+    return new Date(iso).toLocaleString(locale, {
       month: "long",
       day: "numeric",
       year: "numeric",
@@ -127,6 +141,21 @@ function formatReturnMoment(iso: string): string {
       minute: "2-digit",
       timeZoneName: "short",
     });
+  } catch {
+    return iso;
+  }
+}
+
+/*
+ * The timeline badge wants just the day, not the whole moment. It used to take
+ * formatReturnMoment(...).split(",")[0], which only works because en-US puts a
+ * comma after the day; other locales place theirs elsewhere or omit it, so the
+ * split would slice the string at the wrong point. Asking Intl for the short
+ * form directly is correct in every locale.
+ */
+function formatReturnBadgeDate(iso: string, locale: string): string {
+  try {
+    return new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" }).format(new Date(iso));
   } catch {
     return iso;
   }
@@ -938,6 +967,8 @@ function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
 
 export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPanelProps) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const currentYear = new Date().getFullYear();
   const years = yearRange(birthDate);
   const minYear = years[0] ?? currentYear;
@@ -1122,7 +1153,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
               </div>
               <span className={styles.timelineBadge}>
                 {tr("timing.varshaphal.timeline.returnBadge", {
-                  date: formatReturnMoment(data.solarReturnMoment).split(",")[0],
+                  date: formatReturnBadgeDate(data.solarReturnMoment, locale),
                 })}
               </span>
             </div>
@@ -1220,7 +1251,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                   {tr("timing.varshaphal.returnChart.returnMoment")}
                 </span>
                 <span className={styles.detailValue}>
-                  {formatReturnMoment(data.solarReturnMoment)}
+                  {formatReturnMoment(data.solarReturnMoment, locale)}
                 </span>
               </div>
               <div className={styles.detailRow}>
