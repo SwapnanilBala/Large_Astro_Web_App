@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useRef } from "react";
 import { CalendarPlus } from "lucide-react";
 import type { ForecastAspectInsight, ForecastReading } from "@/lib/astro-types";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
-import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 
 type FutureForecastPanelProps = {
@@ -62,24 +62,6 @@ const LIFE_AREAS: Array<{ value: LifeArea; labelKey: string; keywords: string[] 
   { value: "learning", labelKey: "timing.forecast.areas.learning", keywords: ["learning", "study", "education", "writing", "communication", "knowledge", "skill", "teaching"] },
   { value: "spiritual", labelKey: "timing.forecast.areas.spiritual", keywords: ["spiritual", "spirituality", "reflection", "intuition", "meditation", "dharma", "release"] },
 ];
-
-/*
- * The interface language as a BCP-47 tag for Intl.
- *
- * These formatters used to pass `undefined`, which means "whatever locale the
- * runtime happens to have" — the server's and the browser's need not agree, so
- * the same date could render two ways and React would report a hydration text
- * mismatch. Pinning it to the selected language makes the output a function of
- * app state instead of the environment.
- */
-const LOCALE_TAGS: Record<Language, string> = {
-  en: "en-US",
-  es: "es-ES",
-  bn: "bn-IN",
-  hi: "hi-IN",
-  it: "it-IT",
-  fr: "fr-FR",
-};
 
 function localDateString(date = new Date()) {
   const year = date.getFullYear();

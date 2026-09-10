@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import insightsMessages from "@/messages/en.mobile-insights.json";
 import shell from "../mobile.module.css";
 import { SIGN_SYMBOLS } from "@/lib/constellation-geometry";
@@ -85,30 +85,25 @@ function formatDegree(value: number): string {
 /*
  * A dasha boundary, as the calendar date the engine emitted.
  *
- * Both the locale and the zone are pinned, and each one fixes a separate bug.
+ * The formatter is built by the component and handed in, because the locale
+ * has to follow the selected language: the prose around these dates is
+ * translated, so a hardcoded "en-US" left a Hindi reader with Devanagari
+ * wrapped around "12 Mar 2030". LOCALE_TAGS carries the note on why the tag is
+ * derived from `language` rather than left as `undefined`, which is what
+ * originally broke hydration on this page -- and, with it, the theme
+ * bootstrap's writes in app/layout.tsx, stranding a reader who had chosen
+ * Ethereal Dawn in the dark theme with no toggle on a handset to escape it.
  *
- * An `undefined` locale means whatever the runtime's own is, and the server's
- * is not the reader's: Node rendered "Feb 11, 2030" where the browser rendered
- * "11 Feb 2030". React counts that as a text mismatch, so hydration of this
- * page failed outright -- and that also discarded the theme bootstrap's writes
- * in app/layout.tsx, leaving a reader who had chosen Ethereal Dawn with
- * /m/insights in the dark theme and no toggle on a handset to change it.
- *
- * The zone matters because nakshatra-engine emits bare YYYY-MM-DD from UTC
- * parts (msToDateStr), which `new Date` reads as UTC midnight; formatting that
- * in the reader's own zone shows the day before anywhere west of Greenwich.
- * Same trap lib/format-birth-date.ts documents, and the same pinning the
- * desktop tree's formatMonthYear already does.
+ * The zone stays pinned to UTC for a separate reason: nakshatra-engine emits
+ * bare YYYY-MM-DD from UTC parts (msToDateStr), which `new Date` reads as UTC
+ * midnight, so formatting in the reader's own zone moves every period boundary
+ * to the day before anywhere west of Greenwich. Same trap
+ * lib/format-birth-date.ts documents.
  */
-function formatDate(value: string): string {
+function formatDate(value: string, format: Intl.DateTimeFormat): string {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    timeZone: "UTC",
-  }).format(date);
+  return format.format(date);
 }
 
 function Section({
@@ -282,6 +277,20 @@ export default function MobileInsights({
      would download it. tr reads the shared baseline first and falls back to
      that catalog. */
   const tr = useRouteMessages(insightsMessages);
+  /* One formatter for the whole page rather than one per date: the dasha table
+     alone prints two per period, and constructing an Intl.DateTimeFormat is
+     the expensive half of formatting one. */
+  const { language } = useTranslation();
+  const dateFormat = useMemo(
+    () =>
+      new Intl.DateTimeFormat(LOCALE_TAGS[language], {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        timeZone: "UTC",
+      }),
+    [language]
+  );
   // Keyed by "section:instance_key" so the same rule appearing in both the
   // above-the-fold list and the full list opens independently.
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
@@ -348,7 +357,7 @@ export default function MobileInsights({
             <span className={styles.factLabel}>{tr("mobileInsights.factMahadasha")}</span>
             <span className={styles.factValue}>{dasha.current_dasha}</span>
             <span className={styles.factMeta}>
-              {tr("mobileInsights.toDate", { date: formatDate(dasha.current_dasha_end) })}
+              {tr("mobileInsights.toDate", { date: formatDate(dasha.current_dasha_end, dateFormat) })}
             </span>
           </div>
         )}
@@ -465,7 +474,7 @@ export default function MobileInsights({
               text={tr("mobileInsights.dashaCurrent", {
                 dasha: dasha.current_dasha,
                 antardasha: dasha.current_antardasha ? ` / ${dasha.current_antardasha}` : "",
-                date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end),
+                date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end, dateFormat),
               })}
             />
           </p>
@@ -484,8 +493,8 @@ export default function MobileInsights({
                   className={period.planet === dasha.current_dasha ? styles.currentRow : undefined}
                 >
                   <th scope="row" className={styles.planetName}>{period.planet}</th>
-                  <td className={styles.numeric}>{formatDate(period.start_date)}</td>
-                  <td className={styles.numeric}>{formatDate(period.end_date)}</td>
+                  <td className={styles.numeric}>{formatDate(period.start_date, dateFormat)}</td>
+                  <td className={styles.numeric}>{formatDate(period.end_date, dateFormat)}</td>
                 </tr>
               ))}
             </tbody>

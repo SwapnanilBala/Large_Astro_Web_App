@@ -36,6 +36,31 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
 
 export const LANGUAGE_CODES: Language[] = ["en", "es", "bn", "hi", "it", "fr"];
 
+/*
+ * The interface language as a BCP-47 tag, for Intl formatters.
+ *
+ * `Intl` needs a region to pick a date order from: the bare subtag would work
+ * for most of these, but going through a table keeps the choice written down
+ * rather than left to ICU's default-region data.
+ *
+ * Passing one of these is not the same as passing nothing. `undefined` means
+ * whatever locale the runtime happens to have, and the server's need not match
+ * the browser's -- Node rendered "Feb 11, 2030" where the browser rendered
+ * "11 Feb 2030", which React counts as a text mismatch and repairs by throwing
+ * the server tree away. Deriving the tag from `language` instead makes the
+ * output a function of app state, and safe to render on both sides: the
+ * provider starts every visitor at "en" and only adopts the stored choice in
+ * an effect, so the first client render always agrees with the server's.
+ */
+export const LOCALE_TAGS: Record<Language, string> = {
+  en: "en-US",
+  es: "es-ES",
+  bn: "bn-IN",
+  hi: "hi-IN",
+  it: "it-IT",
+  fr: "fr-FR",
+};
+
 /* ── Flatten nested JSON into dot-notation keys ── */
 
 function flattenMessages(
