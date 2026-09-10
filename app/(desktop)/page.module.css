@@ -117,13 +117,73 @@
   height: 1rem;
 }
 
-.smartFillArrow {
+/*
+ * The disclosure arrow on the two quick-action bars.
+ *
+ * It was a bare chevron with a linear half-turn — the treatment a 2010s
+ * <select> got. Nothing marked it as a target, and the flip was the only sign
+ * the bar did anything at all. It sits in a chip now, which fills on hover so
+ * the glyph has somewhere for a hover state to land, and the turn overshoots a
+ * few degrees before settling so it reads as sprung rather than driven.
+ *
+ * currentColor throughout: the chip follows whatever colour the bar is using
+ * rather than pinning a second palette beside it, so one rule covers both the
+ * gold bar and the aqua one.
+ *
+ * Both classes together — they were two copies of the same four declarations,
+ * and .birthHistoryArrow only lacked the auto margin because a count badge can
+ * sit ahead of it. Pushing both to the far edge is what that margin does.
+ */
+.smartFillArrow,
+.birthHistoryArrow {
   margin-left: auto;
-  transition: transform 0.25s ease;
+  flex: none;
+  /* content-box so the padding grows the chip around the 1rem glyph the
+     `svg` rule above sizes, rather than eating into it. */
+  box-sizing: content-box;
+  padding: 0.22rem;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  transition:
+    transform 320ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    translate 200ms ease;
 }
 
-.smartFillArrow.expanded {
+/* The nudge points the way the panel is about to travel: down while the bar is
+   closed, back up once it is open. */
+.smartFillToggle:hover .smartFillArrow,
+.birthHistoryToggle:hover .birthHistoryArrow {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+  border-color: color-mix(in srgb, currentColor 30%, transparent);
+  translate: 0 1px;
+}
+
+.smartFillArrow.expanded,
+.birthHistoryArrow.expanded {
   transform: rotate(180deg);
+}
+
+.smartFillToggle:hover .smartFillArrow.expanded,
+.birthHistoryToggle:hover .birthHistoryArrow.expanded {
+  translate: 0 -1px;
+}
+
+/* The chip and the turn stay; the spring and the nudge are what go. */
+@media (prefers-reduced-motion: reduce) {
+  .smartFillArrow,
+  .birthHistoryArrow {
+    transition: background-color 200ms ease, border-color 200ms ease;
+  }
+
+  .smartFillToggle:hover .smartFillArrow,
+  .birthHistoryToggle:hover .birthHistoryArrow,
+  .smartFillToggle:hover .smartFillArrow.expanded,
+  .birthHistoryToggle:hover .birthHistoryArrow.expanded {
+    translate: none;
+  }
 }
 
 .smartFillContent {
@@ -242,13 +302,8 @@
   line-height: 1;
 }
 
-.birthHistoryArrow {
-  transition: transform 0.25s ease;
-}
-
-.birthHistoryArrow.expanded {
-  transform: rotate(180deg);
-}
+/* .birthHistoryArrow is styled with .smartFillArrow further up — the two bars
+   carry the same control and had two copies of its rules. */
 
 .birthHistoryPanel {
   margin-top: 0.75rem;
@@ -2070,6 +2125,9 @@
   all: unset;
 
   box-sizing: border-box;
+  /* Anchors the hover frame's two pseudo-elements. `all: unset` above resets
+     position to static, so this has to come after it. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -2155,6 +2213,91 @@
   border-radius: 4px;
 }
 
+/* The angle the travelling arc is drawn from. Registered rather than a plain
+   custom property because an unregistered one is not interpolatable — the
+   conic gradient would jump from 0deg to 360deg in a single frame instead of
+   sweeping. */
+@property --step-sweep-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* One lap, then out of the way. The arc fades over the last fifth so it hands
+   the edge to the frame below rather than parking somewhere on the perimeter,
+   which is what a single looping gradient border always ends up doing. */
+@keyframes stepSweepTravel {
+  from {
+    --step-sweep-angle: 0deg;
+    opacity: 1;
+  }
+
+  78% {
+    opacity: 1;
+  }
+
+  to {
+    --step-sweep-angle: 360deg;
+    opacity: 0;
+  }
+}
+
+/*
+ * The hover frame on a step.
+ *
+ * Hovering moved a label colour and a bar colour and nothing else, so the rail
+ * never read as four targets — just a row of words above a progress line.
+ *
+ * Two layers, because one cannot do both jobs: ::before is a quiet frame that
+ * stays for as long as the pointer does, ::after is the gradient arc that
+ * travels the perimeter once and then leaves. A single element would have to
+ * park its gradient somewhere along the edge to leave a frame behind it.
+ *
+ * Deliberately not extended to :focus-visible. That state already carries the
+ * ring every other control on this page uses, and a second frame sitting 4px
+ * inside the outline reads as two boxes arguing rather than one indicator.
+ */
+.questionDot::before,
+.questionDot::after {
+  content: "";
+  position: absolute;
+  box-sizing: border-box;
+  /* Wider than tall: 0.25rem a side leaves the 0.5rem grid gap exactly filled
+     by two neighbouring frames without them touching. */
+  inset: -0.3rem -0.25rem;
+  border-radius: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.questionDot::before {
+  border: 1px solid color-mix(in srgb, var(--accent-gold) 30%, transparent);
+}
+
+/* A masked ring. The gradient fills the whole box and the mask subtracts
+   everything but a 1px perimeter, which is how you get a gradient border
+   without wrapping the button in an extra element. */
+.questionDot::after {
+  padding: 1px;
+  background: conic-gradient(
+    from var(--step-sweep-angle),
+    transparent 0deg,
+    color-mix(in srgb, var(--accent-gold) 90%, transparent) 24deg,
+    color-mix(in srgb, var(--accent-aqua) 72%, transparent) 56deg,
+    transparent 92deg,
+    transparent 360deg
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
 @media (hover: hover) and (pointer: fine) {
   .questionDot:not(:disabled):hover {
     color: rgba(248, 227, 168, 0.9);
@@ -2162,6 +2305,21 @@
 
   .questionDot:not(:disabled):not(.questionDotCurrent):hover .questionDotBar {
     background: rgba(200, 155, 60, 0.4);
+  }
+
+  .questionDot:not(:disabled):hover::before {
+    opacity: 1;
+  }
+
+  .questionDot:not(:disabled):hover::after {
+    animation: stepSweepTravel 820ms cubic-bezier(0.32, 0, 0.24, 1) both;
+  }
+}
+
+/* The frame arrives, with nothing travelling around it. */
+@media (prefers-reduced-motion: reduce) {
+  .questionDot:not(:disabled):hover::after {
+    animation: none;
   }
 }
 
@@ -2414,6 +2572,13 @@
    column flex and each holds a disclosure panel as well as its button, so
    stretching them lets whichever panel is open set the row height and grows
    the closed button opposite to match. */
+/* The three colours here were white at low alpha over a dark page, which is
+   most of why these two bars read as stale: in Ethereal Dawn they resolved to
+   white-on-white and the control all but disappeared — a 1px border at 0.1
+   alpha and a 0.025 fill over a near-white card, carrying label text at
+   rgba(231, 230, 236, 0.66). Tokens instead, so both themes get a bar you can
+   see; --text-secondary and --border-soft are the pair the rest of the page
+   uses for a quiet surface. */
 .smartFillToggle,
 .birthHistoryToggle {
   align-self: stretch;
@@ -2421,13 +2586,23 @@
   min-height: 3.4rem;
   margin: 0;
   padding: 0.55rem 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.025);
-  color: rgba(231, 230, 236, 0.66);
+  background: color-mix(in srgb, var(--accent-gold) 5%, transparent);
+  color: var(--text-secondary);
   font-size: 0.77rem;
   font-weight: 650;
   box-shadow: none;
+  transition: border-color 200ms ease, background-color 200ms ease, color 200ms ease;
+}
+
+/* Warms toward the accent on hover, which is also what tints the arrow chip
+   below it — the chip reads currentColor, so the two move together. */
+.smartFillToggle:hover,
+.birthHistoryToggle:hover {
+  border-color: color-mix(in srgb, var(--accent-gold) 40%, transparent);
+  background: color-mix(in srgb, var(--accent-gold) 10%, transparent);
+  color: var(--accent-gold);
 }
 
 .smartFillContent,
