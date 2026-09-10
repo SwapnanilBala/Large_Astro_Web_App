@@ -1,0 +1,482 @@
+{
+  "es": {
+    "divisional": {
+      "guide": {
+        "d1": {
+          "name": "Rashi",
+          "focus": "Fundamento natal",
+          "summary": "La carta principal describe el patrón general: identidad, dirección de vida, casas y la promesa natal que cualquier otra varga debe matizar en lugar de reemplazar.",
+          "readWith": "Empieza aquí. Ninguna conclusión divisional debería contradecir una promesa débil o ausente en la D1.",
+          "clientQuestion": "¿Cuál es el patrón central a través del cual se despliega el resto de esta lectura?",
+          "sensitivityNote": "Los signos planetarios son comparativamente estables; el ascendente y las casas siguen dependiendo de la hora de nacimiento registrada.",
+          "mappingMethod": "Posición sidérea natal del signo, sin subdivisión."
+        },
+        "d2": {
+          "name": "Hora",
+          "focus": "Recursos y administración",
+          "summary": "La D2 matiza la manera en que los recursos se reúnen, se protegen, se comparten y se convierten en estabilidad material.",
+          "readWith": "Léela con las casas segunda y undécima de la D1, sus señores y la fuerza de Júpiter y Venus.",
+          "clientQuestion": "¿Qué estilo de construcción de recursos resulta más fácil de sostener con el tiempo?",
+          "sensitivityNote": "Usa una hora de nacimiento exacta antes de elevar el ascendente o las casas de la D2 a una conclusión firme.",
+          "mappingMethod": "Hora parashari: los signos impares van de Leo a Cáncer; los signos pares van de Cáncer a Leo."
+        },
+        "d4": {
+          "name": "Chaturthamsa",
+          "focus": "Hogar, propiedad y arraigo",
+          "summary": "La D4 matiza el hogar, la propiedad, el asentamiento, el arraigo emocional y las condiciones que hacen que un lugar se sienta seguro.",
+          "readWith": "Léela con la cuarta casa de la D1, la Luna, Marte y los periodos relevantes de propiedad o mudanza.",
+          "clientQuestion": "¿Qué condiciones ayudan a que el hogar y la seguridad a largo plazo lleguen a ser realmente reparadores?",
+          "sensitivityNote": "Una hora exacta es importante porque el ascendente divisional puede cambiar en un intervalo breve.",
+          "mappingMethod": "Los cuartos del Chaturthamsa corresponden a los signos 1.º, 4.º, 7.º y 10.º desde el signo natal."
+        },
+        "d7": {
+          "name": "Saptamsa",
+          "focus": "Hijos, cuidado y legado",
+          "summary": "La D7 matiza los temas de los hijos, el cuidado, la mentoría, la continuación creativa y lo que se transmite a la siguiente generación.",
+          "readWith": "Léela con la quinta casa de la D1, Júpiter, su señor y los periodos de tiempo favorables.",
+          "clientQuestion": "¿Cómo describe la carta el cuidado, la continuidad y el legado que cultivas?",
+          "sensitivityNote": "Trata las afirmaciones de la D7 basadas en casas como provisionales a menos que la hora registrada sea exacta.",
+          "mappingMethod": "Saptamsa parashari: los signos impares comienzan desde el signo natal; los pares comienzan desde su séptimo."
+        },
+        "d9": {
+          "name": "Navamsa",
+          "focus": "Pareja y madurez interior",
+          "summary": "La D9 matiza la madurez relacional, los compromisos, los valores, el dharma y cómo el potencial natal se desarrolla con la experiencia.",
+          "readWith": "Léela con la séptima casa de la D1, Venus, Júpiter, las reglas de relación y los señores de dasha activos.",
+          "clientQuestion": "¿Qué cualidades ayudan a que el compromiso sea más maduro y sostenible?",
+          "sensitivityNote": "La D9 es muy útil, pero solo debería confiarse en su ascendente cuando la hora de nacimiento es exacta.",
+          "mappingMethod": "Navamsa parashari: los signos móviles comienzan desde sí mismos, los fijos desde el noveno y los duales desde el quinto."
+        },
+        "d10": {
+          "name": "Dashamsa",
+          "focus": "Carrera y contribución pública",
+          "summary": "La D10 matiza la vocación, la responsabilidad, el liderazgo, la visibilidad profesional y la manera en que el trabajo llega al mundo más amplio.",
+          "readWith": "Léela con la décima casa de la D1, su señor, el Sol, Saturno, Mercurio y el momento profesional actual.",
+          "clientQuestion": "¿Dónde puede la competencia volverse visible, útil y cada vez más autorizada?",
+          "sensitivityNote": "Pequeños errores de hora pueden cambiar el ascendente de la D10; confírmalo antes de hacer afirmaciones profesionales específicas.",
+          "mappingMethod": "Dashamsa parashari: los signos impares comienzan desde el signo natal; los pares comienzan desde su noveno."
+        },
+        "d12": {
+          "name": "Dwadashamsa",
+          "focus": "Padres y patrones heredados",
+          "summary": "La D12 matiza la influencia parental, la ascendencia, los hábitos heredados y los patrones familiares que una persona lleva consigo o cambia conscientemente.",
+          "readWith": "Léela con las casas cuarta y novena de la D1, el Sol, la Luna y la evidencia del ámbito familiar.",
+          "clientQuestion": "¿Qué patrones heredados aportan apoyo y cuáles están listos para ser manejados de otra manera?",
+          "sensitivityNote": "Usa datos de hora exacta para el ascendente y el énfasis de casas de la D12.",
+          "mappingMethod": "Las porciones del Dwadashamsa avanzan zodiacalmente desde el signo natal."
+        },
+        "d24": {
+          "name": "Chaturvimshamsa",
+          "focus": "Aprendizaje y maestría",
+          "summary": "La D24 matiza la educación, el estilo de aprendizaje, el estudio disciplinado, los maestros y cómo el conocimiento se vuelve maestría utilizable.",
+          "readWith": "Léela con las casas cuarta, quinta y novena de la D1, más la fuerza de Mercurio y Júpiter.",
+          "clientQuestion": "¿Qué condiciones hacen que el aprendizaje sea más profundo, más constante y más fácil de aplicar?",
+          "sensitivityNote": "A esta resolución, la hora de nacimiento exacta y la atención a los límites son esenciales.",
+          "mappingMethod": "Las porciones del Chaturvimshamsa comienzan desde Leo en los signos impares y desde Cáncer en los pares."
+        },
+        "d30": {
+          "name": "Trimshamsa",
+          "focus": "Presión y resiliencia",
+          "summary": "La D30 matiza cómo se experimentan la tensión, el conflicto, la vulnerabilidad y la recuperación. Se usa mejor para una conciencia práctica del riesgo, no para una predicción basada en el miedo.",
+          "readWith": "Léela con las casas sexta, octava y duodécima de la D1, Saturno y Marte, y los factores de apoyo medidos.",
+          "clientQuestion": "¿Qué te ayuda a responder a la presión sin dejar que defina toda la historia?",
+          "sensitivityNote": "La alta sensibilidad hace necesaria una hora exacta para la interpretación a nivel de casas.",
+          "mappingMethod": "El Trimshamsa parashari usa cinco porciones planetarias desiguales cuyos límites difieren en los signos impares y pares."
+        },
+        "d60": {
+          "name": "Shashtiamsa",
+          "focus": "Patrones de grano fino",
+          "summary": "La D60 es una capa tradicional de grano muy fino que se usa para matizar patrones más profundos. Nunca debería tratarse como un veredicto independiente ni usarse para anular evidencia más estable.",
+          "readWith": "Úsala solo después de que la D1, la varga de dominio relevante, las medidas de fuerza y el momento apunten todos en la misma dirección.",
+          "clientQuestion": "¿Repite esta capa fina un tema ya bien respaldado, o solo introduce ruido?",
+          "sensitivityNote": "La D60 necesita una hora de nacimiento rectificada o excepcionalmente precisa; de lo contrario, trátala solo como exploratoria.",
+          "mappingMethod": "El Shashtiamsa divide cada signo natal en sesenta porciones de medio grado cuyos signos se ciclan zodiacalmente desde Aries."
+        }
+      }
+    }
+  },
+  "bn": {
+    "divisional": {
+      "guide": {
+        "d1": {
+          "name": "রাশি",
+          "focus": "জন্মভিত্তি",
+          "summary": "মূল কুণ্ডলী সমগ্র বিন্যাস বর্ণনা করে: পরিচয়, জীবনের অভিমুখ, ভাব এবং সেই জন্ম-সম্ভাবনা, যাকে অন্য প্রতিটি বর্গ প্রতিস্থাপন না করে সূক্ষ্ম করে।",
+          "readWith": "এখান থেকেই শুরু করুন। কোনো বর্গভিত্তিক সিদ্ধান্তেরই D1-এর দুর্বল বা অনুপস্থিত সম্ভাবনার বিরোধ করা উচিত নয়।",
+          "clientQuestion": "কোন কেন্দ্রীয় বিন্যাসের মধ্য দিয়ে এই পাঠের বাকি অংশ উন্মোচিত হয়?",
+          "sensitivityNote": "গ্রহের রাশি তুলনামূলকভাবে স্থির; লগ্ন ও ভাব এখনও নথিভুক্ত জন্মসময়ের উপর নির্ভর করে।",
+          "mappingMethod": "কোনো উপবিভাগ ছাড়াই জন্মের নিরয়ন রাশি অবস্থান।"
+        },
+        "d2": {
+          "name": "হোরা",
+          "focus": "সম্পদ ও পরিচালনা",
+          "summary": "D2 সূক্ষ্ম করে দেখায় কীভাবে সম্পদ সংগ্রহ করা, সুরক্ষিত রাখা, ভাগ করা এবং বস্তুগত স্থিরতায় রূপান্তরিত করা হয়।",
+          "readWith": "এটি D1-এর দ্বিতীয় ও একাদশ ভাব, তাদের অধিপতি এবং বৃহস্পতি ও শুক্রের বলের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "সময়ের সঙ্গে কোন ধরনের সম্পদ-গঠন সবচেয়ে সহজে ধরে রাখা যায়?",
+          "sensitivityNote": "D2-এর লগ্ন বা ভাবকে দৃঢ় সিদ্ধান্তে পরিণত করার আগে সঠিক জন্মসময় ব্যবহার করুন।",
+          "mappingMethod": "পরাশরী হোরা: বিষম রাশি সিংহ থেকে কর্কট পর্যন্ত চলে; সম রাশি কর্কট থেকে সিংহ পর্যন্ত।"
+        },
+        "d4": {
+          "name": "চতুর্থাংশ",
+          "focus": "গৃহ, সম্পত্তি ও শিকড়",
+          "summary": "D4 গৃহ, সম্পত্তি, বসতি, আবেগগত শিকড় এবং যে পরিস্থিতিগুলি কোনো স্থানকে নিরাপদ বোধ করায় — এগুলি সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর চতুর্থ ভাব, চন্দ্র, মঙ্গল এবং সম্পত্তি বা স্থান-পরিবর্তনের প্রাসঙ্গিক কালখণ্ডের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কোন পরিস্থিতিতে গৃহ ও দীর্ঘকালীন নিরাপত্তা সত্যিই স্বস্তিদায়ক হয়ে ওঠে?",
+          "sensitivityNote": "সঠিক সময় গুরুত্বপূর্ণ, কারণ বিভাগীয় লগ্ন অল্প সময়ের মধ্যেই বদলে যেতে পারে।",
+          "mappingMethod": "চতুর্থাংশের চারটি ভাগ জন্মরাশি থেকে ১ম, ৪র্থ, ৭ম ও ১০ম রাশিতে পড়ে।"
+        },
+        "d7": {
+          "name": "সপ্তাংশ",
+          "focus": "সন্তান, পরিচর্যা ও উত্তরাধিকার",
+          "summary": "D7 সন্তান, পরিচর্যা, পথপ্রদর্শন, সৃজনশীল ধারাবাহিকতা এবং পরবর্তী প্রজন্মে যা বাহিত হয় — এই বিষয়গুলি সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর পঞ্চম ভাব, বৃহস্পতি, তার অধিপতি এবং সহায়ক কালখণ্ডের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কুণ্ডলী পরিচর্যা, ধারাবাহিকতা এবং আপনি যে উত্তরাধিকার গড়ে তুলছেন তা কীভাবে বর্ণনা করে?",
+          "sensitivityNote": "নথিভুক্ত সময় সঠিক না হলে D7-এর ভাবভিত্তিক বক্তব্যকে সাময়িক হিসেবেই ধরুন।",
+          "mappingMethod": "পরাশরী সপ্তাংশ: বিষম রাশি জন্মরাশি থেকে শুরু হয়; সম রাশি তার সপ্তম রাশি থেকে।"
+        },
+        "d9": {
+          "name": "নবাংশ",
+          "focus": "সঙ্গীসম্পর্ক ও অন্তর্গত পরিপক্বতা",
+          "summary": "D9 সম্পর্কের পরিপক্বতা, প্রতিশ্রুতি, মূল্যবোধ, ধর্ম এবং অভিজ্ঞতার সঙ্গে জন্মসম্ভাবনার বিকাশ সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর সপ্তম ভাব, শুক্র, বৃহস্পতি, সম্পর্ক-বিধি এবং সক্রিয় দশার অধিপতিদের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কোন গুণগুলি প্রতিশ্রুতিকে আরও পরিপক্ব ও টিকে থাকার যোগ্য করে?",
+          "sensitivityNote": "D9 অত্যন্ত উপযোগী, তবে তার লগ্নে ভরসা কেবল তখনই করা উচিত যখন জন্মসময় সঠিক।",
+          "mappingMethod": "পরাশরী নবাংশ: চর রাশি নিজের থেকে, স্থির রাশি নবম থেকে এবং দ্বিস্বভাব রাশি পঞ্চম থেকে শুরু হয়।"
+        },
+        "d10": {
+          "name": "দশাংশ",
+          "focus": "কর্মজীবন ও সামাজিক অবদান",
+          "summary": "D10 বৃত্তি, দায়িত্ব, নেতৃত্ব, পেশাগত পরিচিতি এবং কাজ কীভাবে বৃহত্তর জগতে পৌঁছায় তা সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর দশম ভাব, তার অধিপতি, সূর্য, শনি, বুধ এবং বর্তমান কর্মজীবনের কালখণ্ডের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "দক্ষতা কোথায় দৃশ্যমান, উপযোগী এবং ক্রমশ প্রামাণিক হয়ে উঠতে পারে?",
+          "sensitivityNote": "সময়ের ছোট ত্রুটিও D10-এর লগ্ন বদলে দিতে পারে; নির্দিষ্ট কর্মজীবন-সংক্রান্ত দাবি করার আগে তা নিশ্চিত করুন।",
+          "mappingMethod": "পরাশরী দশাংশ: বিষম রাশি জন্মরাশি থেকে শুরু হয়; সম রাশি তার নবম রাশি থেকে।"
+        },
+        "d12": {
+          "name": "দ্বাদশাংশ",
+          "focus": "পিতামাতা ও উত্তরাধিকারসূত্রে পাওয়া প্রবণতা",
+          "summary": "D12 পিতামাতার প্রভাব, বংশপরম্পরা, উত্তরাধিকারসূত্রে পাওয়া অভ্যাস এবং যে পারিবারিক প্রবণতাগুলি কেউ বহন করে চলে বা সচেতনভাবে বদলায় — তা সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর চতুর্থ ও নবম ভাব, সূর্য, চন্দ্র এবং পারিবারিক ক্ষেত্রের প্রমাণের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কোন উত্তরাধিকারসূত্রে পাওয়া প্রবণতা সহায়তা দেয়, আর কোনগুলি এখন ভিন্নভাবে সামলানোর সময় এসেছে?",
+          "sensitivityNote": "D12-এর লগ্ন ও ভাব-প্রাধান্যের জন্য সঠিক সময়ের তথ্য ব্যবহার করুন।",
+          "mappingMethod": "দ্বাদশাংশের ভাগগুলি জন্মরাশি থেকে রাশিক্রমে অগ্রসর হয়।"
+        },
+        "d24": {
+          "name": "চতুর্বিংশাংশ",
+          "focus": "শিক্ষা ও দক্ষতা",
+          "summary": "D24 শিক্ষা, শেখার ধরন, নিয়মিত অধ্যয়ন, শিক্ষক এবং জ্ঞান কীভাবে ব্যবহারযোগ্য দক্ষতায় পরিণত হয় তা সূক্ষ্ম করে।",
+          "readWith": "এটি D1-এর চতুর্থ, পঞ্চম ও নবম ভাব এবং বুধ ও বৃহস্পতির বলের সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কোন পরিস্থিতিতে শেখা আরও গভীর, আরও ধারাবাহিক এবং প্রয়োগে সহজ হয়?",
+          "sensitivityNote": "এই সূক্ষ্মতায় সঠিক জন্মসময় এবং সীমা সম্পর্কে সচেতনতা অপরিহার্য।",
+          "mappingMethod": "চতুর্বিংশাংশের ভাগ বিষম রাশিতে সিংহ থেকে এবং সম রাশিতে কর্কট থেকে শুরু হয়।"
+        },
+        "d30": {
+          "name": "ত্রিংশাংশ",
+          "focus": "চাপ ও সহনশীলতা",
+          "summary": "D30 সূক্ষ্ম করে দেখায় কীভাবে চাপ, সংঘাত, দুর্বলতা ও পুনরুদ্ধার অনুভূত হয়। এটি ভয়ভিত্তিক ভবিষ্যদ্বাণীর জন্য নয়, বাস্তব ঝুঁকি-সচেতনতার জন্যই সবচেয়ে উপযুক্ত।",
+          "readWith": "এটি D1-এর ষষ্ঠ, অষ্টম ও দ্বাদশ ভাব, শনি ও মঙ্গল এবং পরিমাপ করা সহায়ক কারণগুলির সঙ্গে মিলিয়ে পড়ুন।",
+          "clientQuestion": "কী আপনাকে চাপের মুখে সাড়া দিতে সাহায্য করে, তাকে গোটা গল্প হয়ে উঠতে না দিয়ে?",
+          "sensitivityNote": "উচ্চ সংবেদনশীলতার কারণে ভাব-স্তরের ব্যাখ্যার জন্য সঠিক সময় প্রয়োজন হয়।",
+          "mappingMethod": "পরাশরী ত্রিংশাংশ পাঁচটি অসম গ্রহ-ভাগ ব্যবহার করে, যাদের সীমা বিষম ও সম রাশিতে ভিন্ন হয়।"
+        },
+        "d60": {
+          "name": "ষষ্ট্যংশ",
+          "focus": "অতিসূক্ষ্ম বিন্যাস",
+          "summary": "D60 অত্যন্ত সূক্ষ্ম একটি পারম্পরিক স্তর, যা গভীরতর বিন্যাসকে পরিমার্জিত করতে ব্যবহৃত হয়। এটিকে কখনও স্বতন্ত্র রায় হিসেবে ধরা উচিত নয়, বা আরও স্থির প্রমাণকে অগ্রাহ্য করতে ব্যবহার করা উচিত নয়।",
+          "readWith": "কেবল তখনই ব্যবহার করুন যখন D1, প্রাসঙ্গিক ক্ষেত্রের বর্গ, বল-পরিমাপ এবং কাল — সবই একই দিকে নির্দেশ করে।",
+          "clientQuestion": "এই সূক্ষ্ম স্তর কি আগে থেকেই সুপ্রতিষ্ঠিত কোনো বিষয়ের পুনরাবৃত্তি করে, নাকি কেবল বিভ্রান্তি যোগ করে?",
+          "sensitivityNote": "D60-এর জন্য সংশোধিত বা ব্যতিক্রমীভাবে নির্ভুল জন্মসময় দরকার; নইলে এটিকে কেবল অন্বেষণমূলক হিসেবেই ধরুন।",
+          "mappingMethod": "ষষ্ট্যংশ প্রতিটি জন্মরাশিকে আধা ডিগ্রির ষাটটি ভাগে বিভক্ত করে, যাদের রাশি মেষ থেকে রাশিক্রমে চলে।"
+        }
+      }
+    }
+  },
+  "hi": {
+    "divisional": {
+      "guide": {
+        "d1": {
+          "name": "राशि",
+          "focus": "जन्म आधार",
+          "summary": "मुख्य कुंडली समग्र स्वरूप बताती है: पहचान, जीवन दिशा, भाव और वह जन्म-संभावना जिसे प्रत्येक अन्य वर्ग बदलने के बजाय सूक्ष्म करता है।",
+          "readWith": "यहीं से आरंभ करें। कोई भी वर्ग-आधारित निष्कर्ष D1 में कमजोर या अनुपस्थित संभावना का खंडन नहीं करना चाहिए।",
+          "clientQuestion": "वह केंद्रीय स्वरूप क्या है जिसके माध्यम से इस पाठ का शेष भाग खुलता है?",
+          "sensitivityNote": "ग्रहों की राशियाँ तुलनात्मक रूप से स्थिर होती हैं; लग्न और भाव अब भी दर्ज जन्म समय पर निर्भर करते हैं।",
+          "mappingMethod": "बिना किसी उपविभाजन के जन्म की निरयन राशि स्थिति।"
+        },
+        "d2": {
+          "name": "होरा",
+          "focus": "संसाधन और प्रबंधन",
+          "summary": "D2 इस बात को सूक्ष्म करता है कि संसाधन कैसे जुटाए, सुरक्षित रखे, साझा किए और भौतिक स्थिरता में बदले जाते हैं।",
+          "readWith": "इसे D1 के द्वितीय और एकादश भाव, उनके स्वामियों तथा गुरु और शुक्र के बल के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "समय के साथ किस प्रकार का संसाधन-निर्माण सबसे सहजता से टिकाऊ रहता है?",
+          "sensitivityNote": "D2 के लग्न या भावों को दृढ़ निष्कर्ष बनाने से पहले सटीक जन्म समय का प्रयोग करें।",
+          "mappingMethod": "पराशरी होरा: विषम राशियाँ सिंह से कर्क तक चलती हैं; सम राशियाँ कर्क से सिंह तक चलती हैं।"
+        },
+        "d4": {
+          "name": "चतुर्थांश",
+          "focus": "घर, संपत्ति और जड़ों से जुड़ाव",
+          "summary": "D4 घर, संपत्ति, बसाव, भावनात्मक जुड़ाव और उन परिस्थितियों को सूक्ष्म करता है जो किसी स्थान को सुरक्षित अनुभव कराती हैं।",
+          "readWith": "इसे D1 के चतुर्थ भाव, चंद्र, मंगल तथा संपत्ति या स्थान-परिवर्तन से जुड़े प्रासंगिक कालखंडों के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "कौन-सी परिस्थितियाँ घर और दीर्घकालिक सुरक्षा को वास्तव में पुनर्जीवन देने वाला बनाती हैं?",
+          "sensitivityNote": "सटीक समय महत्वपूर्ण है क्योंकि विभागीय लग्न थोड़े ही अंतराल में बदल सकता है।",
+          "mappingMethod": "चतुर्थांश के चारों भाग जन्म राशि से 1ली, 4थी, 7वीं और 10वीं राशि पर पड़ते हैं।"
+        },
+        "d7": {
+          "name": "सप्तांश",
+          "focus": "संतान, देखभाल और विरासत",
+          "summary": "D7 संतान, देखभाल, मार्गदर्शन, सृजनात्मक निरंतरता और अगली पीढ़ी तक पहुँचने वाली बातों के विषयों को सूक्ष्म करता है।",
+          "readWith": "इसे D1 के पंचम भाव, गुरु, उसके स्वामी तथा सहायक कालखंडों के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "कुंडली देखभाल, निरंतरता और आपके द्वारा संजोई जा रही विरासत का वर्णन कैसे करती है?",
+          "sensitivityNote": "जब तक दर्ज समय सटीक न हो, D7 के भाव-आधारित कथनों को अस्थायी मानें।",
+          "mappingMethod": "पराशरी सप्तांश: विषम राशियाँ जन्म राशि से आरंभ होती हैं; सम राशियाँ उसकी सातवीं राशि से।"
+        },
+        "d9": {
+          "name": "नवांश",
+          "focus": "साझेदारी और आंतरिक परिपक्वता",
+          "summary": "D9 संबंधों की परिपक्वता, प्रतिबद्धताओं, मूल्यों, धर्म तथा अनुभव के साथ जन्म-क्षमता के विकसित होने को सूक्ष्म करता है।",
+          "readWith": "इसे D1 के सप्तम भाव, शुक्र, गुरु, संबंध-नियमों तथा सक्रिय दशा स्वामियों के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "कौन-से गुण प्रतिबद्धता को अधिक परिपक्व और टिकाऊ बनाते हैं?",
+          "sensitivityNote": "D9 अत्यंत उपयोगी है, परंतु उसके लग्न पर भरोसा केवल तब करें जब जन्म समय सटीक हो।",
+          "mappingMethod": "पराशरी नवांश: चर राशियाँ स्वयं से, स्थिर राशियाँ नवम से और द्विस्वभाव राशियाँ पंचम से आरंभ होती हैं।"
+        },
+        "d10": {
+          "name": "दशांश",
+          "focus": "करियर और सार्वजनिक योगदान",
+          "summary": "D10 वृत्ति, उत्तरदायित्व, नेतृत्व, व्यावसायिक प्रतिष्ठा तथा कार्य के व्यापक संसार तक पहुँचने के ढंग को सूक्ष्म करता है।",
+          "readWith": "इसे D1 के दशम भाव, उसके स्वामी, सूर्य, शनि, बुध तथा वर्तमान करियर काल के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "योग्यता कहाँ दृश्य, उपयोगी और उत्तरोत्तर प्रामाणिक बन सकती है?",
+          "sensitivityNote": "समय की छोटी त्रुटियाँ भी D10 का लग्न बदल सकती हैं; विशिष्ट करियर-संबंधी दावे करने से पहले इसकी पुष्टि करें।",
+          "mappingMethod": "पराशरी दशांश: विषम राशियाँ जन्म राशि से आरंभ होती हैं; सम राशियाँ उसकी नवम राशि से।"
+        },
+        "d12": {
+          "name": "द्वादशांश",
+          "focus": "माता-पिता और वंशानुगत प्रवृत्तियाँ",
+          "summary": "D12 माता-पिता के प्रभाव, वंश-परंपरा, वंशानुगत आदतों तथा उन पारिवारिक प्रवृत्तियों को सूक्ष्म करता है जिन्हें व्यक्ति आगे ले जाता है या सचेत रूप से बदलता है।",
+          "readWith": "इसे D1 के चतुर्थ और नवम भाव, सूर्य, चंद्र तथा पारिवारिक क्षेत्र के प्रमाणों के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "कौन-सी वंशानुगत प्रवृत्तियाँ सहारा देती हैं, और कौन-सी अब भिन्न ढंग से सँभालने योग्य हैं?",
+          "sensitivityNote": "D12 के लग्न और भाव-प्रधानता के लिए सटीक समय वाले आँकड़ों का प्रयोग करें।",
+          "mappingMethod": "द्वादशांश के भाग जन्म राशि से राशिक्रम में आगे बढ़ते हैं।"
+        },
+        "d24": {
+          "name": "चतुर्विंशांश",
+          "focus": "अध्ययन और प्रवीणता",
+          "summary": "D24 शिक्षा, सीखने की शैली, अनुशासित अध्ययन, गुरुजनों तथा ज्ञान के उपयोगी प्रवीणता में बदलने को सूक्ष्म करता है।",
+          "readWith": "इसे D1 के चतुर्थ, पंचम और नवम भाव तथा बुध और गुरु के बल के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "कौन-सी परिस्थितियाँ सीखने को अधिक गहरा, अधिक निरंतर और लागू करने में सहज बनाती हैं?",
+          "sensitivityNote": "इस सूक्ष्मता पर सटीक जन्म समय और सीमा-सजगता अनिवार्य हैं।",
+          "mappingMethod": "चतुर्विंशांश के भाग विषम राशियों में सिंह से और सम राशियों में कर्क से आरंभ होते हैं।"
+        },
+        "d30": {
+          "name": "त्रिंशांश",
+          "focus": "दबाव और सहनशीलता",
+          "summary": "D30 यह सूक्ष्म करता है कि तनाव, संघर्ष, दुर्बलता और पुनरुत्थान किस प्रकार अनुभव किए जाते हैं। इसका सर्वोत्तम उपयोग व्यावहारिक जोखिम-सजगता के लिए है, भय-आधारित भविष्यवाणी के लिए नहीं।",
+          "readWith": "इसे D1 के षष्ठ, अष्टम और द्वादश भाव, शनि और मंगल तथा मापे गए सहायक कारकों के साथ मिलाकर पढ़ें।",
+          "clientQuestion": "क्या आपको दबाव का सामना करने में सहायता देता है, बिना उसे पूरी कहानी बनने दिए?",
+          "sensitivityNote": "उच्च संवेदनशीलता के कारण भाव-स्तर की व्याख्या के लिए सटीक समय आवश्यक हो जाता है।",
+          "mappingMethod": "पराशरी त्रिंशांश पाँच असमान ग्रह-भागों का प्रयोग करता है, जिनकी सीमाएँ विषम और सम राशियों में भिन्न होती हैं।"
+        },
+        "d60": {
+          "name": "षष्ट्यंश",
+          "focus": "अति-सूक्ष्म स्वरूप",
+          "summary": "D60 एक अत्यंत सूक्ष्म पारंपरिक स्तर है, जिसका उपयोग गहरे स्वरूप को परिष्कृत करने के लिए किया जाता है। इसे कभी स्वतंत्र निर्णय नहीं मानना चाहिए, न ही अधिक स्थिर प्रमाणों को दरकिनार करने के लिए प्रयोग करना चाहिए।",
+          "readWith": "इसका प्रयोग केवल तब करें जब D1, संबंधित क्षेत्र का वर्ग, बल-मापन और काल — सभी एक ही दिशा की ओर संकेत करें।",
+          "clientQuestion": "क्या यह सूक्ष्म स्तर पहले से सुस्थापित किसी विषय को दोहराता है, या केवल भ्रम जोड़ता है?",
+          "sensitivityNote": "D60 के लिए संशोधित या असाधारण रूप से सटीक जन्म समय आवश्यक है; अन्यथा इसे केवल अन्वेषणात्मक मानें।",
+          "mappingMethod": "षष्ट्यंश प्रत्येक जन्म राशि को आधा-आधा अंश के साठ भागों में बाँटता है, जिनकी राशियाँ मेष से राशिक्रम में चलती हैं।"
+        }
+      }
+    }
+  },
+  "it": {
+    "divisional": {
+      "guide": {
+        "d1": {
+          "name": "Rashi",
+          "focus": "Fondamento natale",
+          "summary": "La carta principale descrive il quadro generale: identità, direzione di vita, case e la promessa natale che ogni altro varga deve qualificare anziché sostituire.",
+          "readWith": "Parti da qui. Nessuna conclusione divisionale dovrebbe contraddire una promessa debole o assente nella D1.",
+          "clientQuestion": "Qual è il quadro centrale attraverso cui si sviluppa il resto di questa lettura?",
+          "sensitivityNote": "I segni planetari sono relativamente stabili; l'ascendente e le case dipendono comunque dall'ora di nascita registrata.",
+          "mappingMethod": "Posizione natale del segno siderale, senza suddivisione."
+        },
+        "d2": {
+          "name": "Hora",
+          "focus": "Risorse e gestione",
+          "summary": "La D2 qualifica il modo in cui le risorse vengono raccolte, protette, condivise e convertite in stabilità materiale.",
+          "readWith": "Leggila con la seconda e l'undicesima casa della D1, i loro signori e la forza di Giove e Venere.",
+          "clientQuestion": "Quale stile di costruzione delle risorse è più facile da sostenere nel tempo?",
+          "sensitivityNote": "Usa un'ora di nascita esatta prima di promuovere l'ascendente o le case della D2 a conclusione ferma.",
+          "mappingMethod": "Hora parashari: i segni dispari vanno dal Leone al Cancro; i segni pari vanno dal Cancro al Leone."
+        },
+        "d4": {
+          "name": "Chaturthamsa",
+          "focus": "Casa, proprietà e radicamento",
+          "summary": "La D4 qualifica la casa, la proprietà, l'insediamento, il radicamento emotivo e le condizioni che rendono un luogo sicuro.",
+          "readWith": "Leggila con la quarta casa della D1, la Luna, Marte e i periodi rilevanti per proprietà o trasferimenti.",
+          "clientQuestion": "Quali condizioni aiutano la casa e la sicurezza di lungo periodo a diventare davvero rigeneranti?",
+          "sensitivityNote": "Un'ora esatta è importante perché l'ascendente divisionale può cambiare in un intervallo breve.",
+          "mappingMethod": "I quarti del Chaturthamsa corrispondono al 1°, 4°, 7° e 10° segno a partire dal segno natale."
+        },
+        "d7": {
+          "name": "Saptamsa",
+          "focus": "Figli, cura ed eredità",
+          "summary": "La D7 qualifica i temi dei figli, della cura, del mentoring, della continuazione creativa e di ciò che viene trasmesso alla generazione successiva.",
+          "readWith": "Leggila con la quinta casa della D1, Giove, il suo signore e i periodi di tempo favorevoli.",
+          "clientQuestion": "Come descrive la carta la cura, la continuità e l'eredità che coltivi?",
+          "sensitivityNote": "Considera provvisorie le affermazioni della D7 basate sulle case, a meno che l'ora registrata non sia esatta.",
+          "mappingMethod": "Saptamsa parashari: i segni dispari partono dal segno natale; i pari partono dal suo settimo."
+        },
+        "d9": {
+          "name": "Navamsa",
+          "focus": "Unione e maturità interiore",
+          "summary": "La D9 qualifica la maturità relazionale, gli impegni, i valori, il dharma e il modo in cui il potenziale natale si sviluppa con l'esperienza.",
+          "readWith": "Leggila con la settima casa della D1, Venere, Giove, le regole di relazione e i signori di dasha attivi.",
+          "clientQuestion": "Quali qualità aiutano l'impegno a diventare più maturo e sostenibile?",
+          "sensitivityNote": "La D9 è molto utile, ma il suo ascendente va ritenuto affidabile solo quando l'ora di nascita è esatta.",
+          "mappingMethod": "Navamsa parashari: i segni mobili partono da sé stessi, i fissi dal nono e i doppi dal quinto."
+        },
+        "d10": {
+          "name": "Dashamsa",
+          "focus": "Carriera e contributo pubblico",
+          "summary": "La D10 qualifica la vocazione, la responsabilità, la leadership, la visibilità professionale e il modo in cui il lavoro raggiunge il mondo più ampio.",
+          "readWith": "Leggila con la decima casa della D1, il suo signore, il Sole, Saturno, Mercurio e i tempi attuali di carriera.",
+          "clientQuestion": "Dove può la competenza diventare visibile, utile e via via più autorevole?",
+          "sensitivityNote": "Piccoli errori di orario possono cambiare l'ascendente della D10; verificalo prima di formulare affermazioni professionali specifiche.",
+          "mappingMethod": "Dashamsa parashari: i segni dispari partono dal segno natale; i pari partono dal suo nono."
+        },
+        "d12": {
+          "name": "Dwadashamsa",
+          "focus": "Genitori e schemi ereditati",
+          "summary": "La D12 qualifica l'influenza dei genitori, la discendenza, le abitudini ereditate e gli schemi familiari che una persona porta avanti o cambia consapevolmente.",
+          "readWith": "Leggila con la quarta e la nona casa della D1, il Sole, la Luna e gli indizi dell'ambito familiare.",
+          "clientQuestion": "Quali schemi ereditati offrono sostegno e quali sono pronti a essere gestiti diversamente?",
+          "sensitivityNote": "Usa dati con ora esatta per l'ascendente e l'enfasi sulle case della D12.",
+          "mappingMethod": "Le porzioni del Dwadashamsa procedono zodiacalmente dal segno natale."
+        },
+        "d24": {
+          "name": "Chaturvimshamsa",
+          "focus": "Apprendimento e padronanza",
+          "summary": "La D24 qualifica l'istruzione, lo stile di apprendimento, lo studio disciplinato, i maestri e il modo in cui la conoscenza diventa padronanza utilizzabile.",
+          "readWith": "Leggila con la quarta, la quinta e la nona casa della D1, oltre alla forza di Mercurio e Giove.",
+          "clientQuestion": "Quali condizioni rendono l'apprendimento più profondo, più costante e più facile da applicare?",
+          "sensitivityNote": "A questa risoluzione, un'ora di nascita esatta e l'attenzione ai confini sono essenziali.",
+          "mappingMethod": "Le porzioni del Chaturvimshamsa partono dal Leone nei segni dispari e dal Cancro nei pari."
+        },
+        "d30": {
+          "name": "Trimshamsa",
+          "focus": "Pressione e resilienza",
+          "summary": "La D30 qualifica il modo in cui si vivono tensione, conflitto, vulnerabilità e recupero. Si usa meglio per una consapevolezza pratica del rischio, non per una previsione basata sulla paura.",
+          "readWith": "Leggila con la sesta, l'ottava e la dodicesima casa della D1, Saturno e Marte, e i fattori di sostegno misurati.",
+          "clientQuestion": "Cosa ti aiuta a rispondere alla pressione senza lasciare che definisca tutta la storia?",
+          "sensitivityNote": "L'elevata sensibilità rende necessaria un'ora esatta per l'interpretazione a livello di case.",
+          "mappingMethod": "Il Trimshamsa parashari usa cinque porzioni planetarie disuguali i cui confini differiscono nei segni dispari e pari."
+        },
+        "d60": {
+          "name": "Shashtiamsa",
+          "focus": "Trama a grana fine",
+          "summary": "La D60 è uno strato tradizionale a grana molto fine, usato per qualificare una trama più profonda. Non dovrebbe mai essere trattato come un verdetto a sé stante né usato per scavalcare indizi più stabili.",
+          "readWith": "Usala solo dopo che la D1, il varga di dominio pertinente, le misure di forza e i tempi puntano tutti nella stessa direzione.",
+          "clientQuestion": "Questo strato fine ripete un tema già ben sostenuto, o introduce soltanto rumore?",
+          "sensitivityNote": "La D60 richiede un'ora di nascita rettificata o eccezionalmente precisa; altrimenti trattala solo come esplorativa.",
+          "mappingMethod": "Lo Shashtiamsa divide ogni segno natale in sessanta porzioni di mezzo grado, i cui segni si succedono zodiacalmente dall'Ariete."
+        }
+      }
+    }
+  },
+  "fr": {
+    "divisional": {
+      "guide": {
+        "d1": {
+          "name": "Rashi",
+          "focus": "Fondement natal",
+          "summary": "La carte principale décrit la configuration d'ensemble : identité, direction de vie, maisons et la promesse natale que tout autre varga doit nuancer plutôt que remplacer.",
+          "readWith": "Commencez ici. Aucune conclusion divisionnaire ne devrait contredire une promesse faible ou absente dans la D1.",
+          "clientQuestion": "Quelle est la configuration centrale à travers laquelle se déploie le reste de cette lecture ?",
+          "sensitivityNote": "Les signes planétaires sont relativement stables ; l'ascendant et les maisons dépendent toujours de l'heure de naissance enregistrée.",
+          "mappingMethod": "Position natale du signe sidéral, sans subdivision."
+        },
+        "d2": {
+          "name": "Hora",
+          "focus": "Ressources et gestion",
+          "summary": "La D2 précise la manière dont les ressources sont rassemblées, protégées, partagées et converties en stabilité matérielle.",
+          "readWith": "À lire avec les deuxième et onzième maisons de la D1, leurs seigneurs et la force de Jupiter et Vénus.",
+          "clientQuestion": "Quel style de constitution de ressources est le plus facile à maintenir dans le temps ?",
+          "sensitivityNote": "Utilisez une heure de naissance exacte avant d'ériger l'ascendant ou les maisons de la D2 en conclusion ferme.",
+          "mappingMethod": "Hora parashari : les signes impairs vont du Lion au Cancer ; les signes pairs vont du Cancer au Lion."
+        },
+        "d4": {
+          "name": "Chaturthamsa",
+          "focus": "Foyer, propriété et ancrage",
+          "summary": "La D4 précise le foyer, la propriété, l'installation, l'ancrage émotionnel et les conditions qui rendent un lieu sécurisant.",
+          "readWith": "À lire avec la quatrième maison de la D1, la Lune, Mars et les périodes pertinentes de propriété ou de déménagement.",
+          "clientQuestion": "Quelles conditions permettent au foyer et à la sécurité de long terme de devenir véritablement ressourçants ?",
+          "sensitivityNote": "Une heure exacte est importante car l'ascendant divisionnaire peut changer en peu de temps.",
+          "mappingMethod": "Les quarts du Chaturthamsa correspondent aux 1er, 4e, 7e et 10e signes à partir du signe natal."
+        },
+        "d7": {
+          "name": "Saptamsa",
+          "focus": "Enfants, soin et héritage",
+          "summary": "La D7 précise les thèmes des enfants, du soin, du mentorat, de la continuation créative et de ce qui est transmis à la génération suivante.",
+          "readWith": "À lire avec la cinquième maison de la D1, Jupiter, son seigneur et les périodes favorables.",
+          "clientQuestion": "Comment la carte décrit-elle le soin, la continuité et l'héritage que vous cultivez ?",
+          "sensitivityNote": "Considérez les affirmations de la D7 fondées sur les maisons comme provisoires, sauf si l'heure enregistrée est exacte.",
+          "mappingMethod": "Saptamsa parashari : les signes impairs commencent au signe natal ; les pairs commencent à son septième."
+        },
+        "d9": {
+          "name": "Navamsa",
+          "focus": "Union et maturité intérieure",
+          "summary": "La D9 précise la maturité relationnelle, les engagements, les valeurs, le dharma et la façon dont le potentiel natal se développe avec l'expérience.",
+          "readWith": "À lire avec la septième maison de la D1, Vénus, Jupiter, les règles de relation et les seigneurs de dasha actifs.",
+          "clientQuestion": "Quelles qualités aident l'engagement à devenir plus mûr et plus durable ?",
+          "sensitivityNote": "La D9 est très utile, mais son ascendant n'est fiable que lorsque l'heure de naissance est exacte.",
+          "mappingMethod": "Navamsa parashari : les signes mobiles commencent par eux-mêmes, les fixes au neuvième et les doubles au cinquième."
+        },
+        "d10": {
+          "name": "Dashamsa",
+          "focus": "Carrière et contribution publique",
+          "summary": "La D10 précise la vocation, la responsabilité, le leadership, la visibilité professionnelle et la manière dont le travail atteint le monde plus large.",
+          "readWith": "À lire avec la dixième maison de la D1, son seigneur, le Soleil, Saturne, Mercure et le calendrier de carrière actuel.",
+          "clientQuestion": "Où la compétence peut-elle devenir visible, utile et de plus en plus faisant autorité ?",
+          "sensitivityNote": "De petites erreurs d'heure peuvent changer l'ascendant de la D10 ; vérifiez-le avant d'avancer des affirmations professionnelles précises.",
+          "mappingMethod": "Dashamsa parashari : les signes impairs commencent au signe natal ; les pairs commencent à son neuvième."
+        },
+        "d12": {
+          "name": "Dwadashamsa",
+          "focus": "Parents et schémas hérités",
+          "summary": "La D12 précise l'influence parentale, l'ascendance, les habitudes héritées et les schémas familiaux qu'une personne perpétue ou change consciemment.",
+          "readWith": "À lire avec les quatrième et neuvième maisons de la D1, le Soleil, la Lune et les indices du domaine familial.",
+          "clientQuestion": "Quels schémas hérités apportent du soutien, et lesquels sont prêts à être abordés autrement ?",
+          "sensitivityNote": "Utilisez des données à heure exacte pour l'ascendant et l'accent sur les maisons de la D12.",
+          "mappingMethod": "Les portions du Dwadashamsa progressent zodiacalement à partir du signe natal."
+        },
+        "d24": {
+          "name": "Chaturvimshamsa",
+          "focus": "Apprentissage et maîtrise",
+          "summary": "La D24 précise l'éducation, le style d'apprentissage, l'étude disciplinée, les enseignants et la façon dont le savoir devient une maîtrise utilisable.",
+          "readWith": "À lire avec les quatrième, cinquième et neuvième maisons de la D1, ainsi que la force de Mercure et Jupiter.",
+          "clientQuestion": "Quelles conditions rendent l'apprentissage plus profond, plus constant et plus facile à appliquer ?",
+          "sensitivityNote": "À cette résolution, une heure de naissance exacte et l'attention aux limites sont essentielles.",
+          "mappingMethod": "Les portions du Chaturvimshamsa commencent au Lion dans les signes impairs et au Cancer dans les pairs."
+        },
+        "d30": {
+          "name": "Trimshamsa",
+          "focus": "Pression et résilience",
+          "summary": "La D30 précise la manière dont la tension, le conflit, la vulnérabilité et le rétablissement sont vécus. Elle sert mieux à une conscience pratique du risque qu'à une prédiction fondée sur la peur.",
+          "readWith": "À lire avec les sixième, huitième et douzième maisons de la D1, Saturne et Mars, et les facteurs de soutien mesurés.",
+          "clientQuestion": "Qu'est-ce qui vous aide à répondre à la pression sans la laisser définir toute l'histoire ?",
+          "sensitivityNote": "La forte sensibilité rend une heure exacte nécessaire pour l'interprétation au niveau des maisons.",
+          "mappingMethod": "Le Trimshamsa parashari utilise cinq portions planétaires inégales dont les limites diffèrent dans les signes impairs et pairs."
+        },
+        "d60": {
+          "name": "Shashtiamsa",
+          "focus": "Trame de grain fin",
+          "summary": "La D60 est une couche traditionnelle de grain très fin, utilisée pour nuancer une trame plus profonde. Elle ne devrait jamais être traitée comme un verdict autonome ni servir à écarter des indices plus stables.",
+          "readWith": "À utiliser seulement après que la D1, le varga de domaine pertinent, les mesures de force et le calendrier pointent tous dans la même direction.",
+          "clientQuestion": "Cette couche fine répète-t-elle un thème déjà bien étayé, ou introduit-elle seulement du bruit ?",
+          "sensitivityNote": "La D60 exige une heure de naissance rectifiée ou exceptionnellement précise ; sinon, traitez-la comme purement exploratoire.",
+          "mappingMethod": "Le Shashtiamsa divise chaque signe natal en soixante portions d'un demi-degré dont les signes défilent zodiacalement depuis le Bélier."
+        }
+      }
+    }
+  }
+}
