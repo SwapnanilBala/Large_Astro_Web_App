@@ -1,0 +1,62 @@
+{
+  "es": {
+    "shared": {
+      "weeklyEnergyTitle": "Tu Energía Semanal",
+      "weeklyEnergySubtitle": "Flujos, estados de ánimo e impulso",
+      "weeklyEnergyPreviousWeek": "Semana anterior",
+      "weeklyEnergyNextWeek": "Semana siguiente",
+      "weeklyEnergyErrorTitle": "No se pudo cargar la energía de esta semana",
+      "weeklyEnergyIdleNote": "La energía semanal está lista para cargarse",
+      "weeklyEnergyLoadingNote": "Leyendo la semana que viene",
+      "weeklyEnergyForecastTitle": "Pronóstico Semanal"
+    }
+  },
+  "bn": {
+    "shared": {
+      "weeklyEnergyTitle": "আপনার সাপ্তাহিক শক্তি",
+      "weeklyEnergySubtitle": "প্রবাহ, মনোভাব ও গতি",
+      "weeklyEnergyPreviousWeek": "আগের সপ্তাহ",
+      "weeklyEnergyNextWeek": "পরের সপ্তাহ",
+      "weeklyEnergyErrorTitle": "এই সপ্তাহের শক্তি লোড হয়নি",
+      "weeklyEnergyIdleNote": "সাপ্তাহিক শক্তি লোড করার জন্য প্রস্তুত",
+      "weeklyEnergyLoadingNote": "সামনের সপ্তাহ পড়া হচ্ছে",
+      "weeklyEnergyForecastTitle": "সাপ্তাহিক পূর্বাভাস"
+    }
+  },
+  "hi": {
+    "shared": {
+      "weeklyEnergyTitle": "आपकी साप्ताहिक ऊर्जा",
+      "weeklyEnergySubtitle": "प्रवाह, मनोदशा और गति",
+      "weeklyEnergyPreviousWeek": "पिछला सप्ताह",
+      "weeklyEnergyNextWeek": "अगला सप्ताह",
+      "weeklyEnergyErrorTitle": "इस सप्ताह की ऊर्जा लोड नहीं हुई",
+      "weeklyEnergyIdleNote": "साप्ताहिक ऊर्जा लोड होने के लिये तैयार है",
+      "weeklyEnergyLoadingNote": "आगामी सप्ताह पढ़ा जा रहा है",
+      "weeklyEnergyForecastTitle": "साप्ताहिक भविष्यवाणी"
+    }
+  },
+  "it": {
+    "shared": {
+      "weeklyEnergyTitle": "La Tua Energia Settimanale",
+      "weeklyEnergySubtitle": "Flussi, umori e slancio",
+      "weeklyEnergyPreviousWeek": "Settimana precedente",
+      "weeklyEnergyNextWeek": "Settimana successiva",
+      "weeklyEnergyErrorTitle": "L'energia di questa settimana non si è caricata",
+      "weeklyEnergyIdleNote": "L'energia settimanale è pronta per il caricamento",
+      "weeklyEnergyLoadingNote": "Lettura della settimana in arrivo",
+      "weeklyEnergyForecastTitle": "Previsione Settimanale"
+    }
+  },
+  "fr": {
+    "shared": {
+      "weeklyEnergyTitle": "Votre Énergie Hebdomadaire",
+      "weeklyEnergySubtitle": "Flux, humeurs et élan",
+      "weeklyEnergyPreviousWeek": "Semaine précédente",
+      "weeklyEnergyNextWeek": "Semaine suivante",
+      "weeklyEnergyErrorTitle": "L'énergie de cette semaine n'a pas pu être chargée",
+      "weeklyEnergyIdleNote": "L'énergie hebdomadaire est prête à être chargée",
+      "weeklyEnergyLoadingNote": "Lecture de la semaine à venir",
+      "weeklyEnergyForecastTitle": "Prévision Hebdomadaire"
+    }
+  }
+}

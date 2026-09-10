@@ -177,9 +177,9 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
       <header className={styles.header}>
         <div>
           <h2 id="weekly-energy-heading" className={styles.title}>
-            Your Weekly Energy
+            {t("shared.weeklyEnergyTitle")}
           </h2>
-          <p className={styles.subtitle}>Flows, moods and momentum</p>
+          <p className={styles.subtitle}>{t("shared.weeklyEnergySubtitle")}</p>
         </div>
 
         <div className={styles.pager}>
@@ -188,7 +188,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             className={styles.pagerButton}
             onClick={() => step(-1)}
             disabled={isBusy || weekStart <= earliest}
-            aria-label="Previous week"
+            aria-label={t("shared.weeklyEnergyPreviousWeek")}
           >
             <FiChevronLeft size={16} />
           </button>
@@ -198,7 +198,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             className={styles.pagerButton}
             onClick={() => step(1)}
             disabled={isBusy || weekStart >= latest}
-            aria-label="Next week"
+            aria-label={t("shared.weeklyEnergyNextWeek")}
           >
             <FiChevronRight size={16} />
           </button>
@@ -207,7 +207,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
 
       {loadState === "error" && !data && (
         <div className={styles.errorState} role="alert">
-          <p className={styles.errorTitle}>This week&apos;s energy did not load</p>
+          <p className={styles.errorTitle}>{t("shared.weeklyEnergyErrorTitle")}</p>
           <p className={styles.errorBody}>{errorMessage}</p>
           <button
             type="button"
@@ -215,7 +215,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             onClick={() => setRetryToken((n) => n + 1)}
           >
             <FiRefreshCw size={14} />
-            Try again
+            {t("errorBoundary.tryAgain")}
           </button>
         </div>
       )}
@@ -226,7 +226,9 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
           <span className={styles.loadingBar} />
           <span className={styles.loadingBar} />
           <p className={styles.loadingNote}>
-            {loadState === "idle" ? "Weekly energy is ready to load" : "Reading the week ahead"}
+            {loadState === "idle"
+              ? t("shared.weeklyEnergyIdleNote")
+              : t("shared.weeklyEnergyLoadingNote")}
           </p>
         </div>
       )}
@@ -250,7 +252,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
           />
 
           <div className={styles.forecast}>
-            <h3 className={styles.forecastTitle}>Weekly Forecast</h3>
+            <h3 className={styles.forecastTitle}>{t("shared.weeklyEnergyForecastTitle")}</h3>
             <div className={styles.cards}>
               {data.cards.map((card) => (
                 <motion.article
