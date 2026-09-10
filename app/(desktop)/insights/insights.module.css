@@ -5497,3 +5497,28 @@
 :global(html[data-theme="light"]) .continuationAction[data-tone="green"] {
   --continuation-ink: #356d50;
 }
+
+/* ── Ethereal Dawn: takeaway tones ──
+ *
+ * The note above .takeawayTeal explains why the token teal was passed over
+ * for a brighter hex: it read as grey on the dark card. The light card is the
+ * opposite problem -- #6CE1D4 sits at 1.18:1 on it, and the coral is barely
+ * better -- so the tone reverts to the themed accents here, which are chosen
+ * against a light surface. The gold variant already uses its token. */
+:global(html[data-theme="light"]) .takeawayTeal {
+  --tone: var(--accent-teal-dim);
+}
+
+:global(html[data-theme="light"]) .takeawayCoral {
+  --tone: var(--accent-coral);
+}
+
+/* The domain card and its two guidance blocks set a 90%-opaque ink panel and
+   take their copy from --ink-soft, which the light theme turns to plum: dark
+   on dark. .card above already had its light surface; these did not. */
+:global(html[data-theme="light"]) .domainCard,
+:global(html[data-theme="light"]) .domainGuidance,
+:global(html[data-theme="light"]) .domainLongGame {
+  background: var(--surface-frosted);
+  border-color: var(--border-soft);
+}

@@ -2996,3 +2996,74 @@
   background: color-mix(in srgb, var(--ink-main) 6%, transparent);
   color: color-mix(in srgb, var(--ink-main) 85%, transparent);
 }
+
+/* The step rail itself is re-tiered just above, against ratios measured on
+   this card. What follows is the rest of the intake ink -- the hints,
+   helpers, chips and labels that were pale-on-ink with no light value at
+   all. */
+/* ── Ethereal Dawn: intake ink ──
+ *
+ * the intake page was written in pale ink on ink: near-white and soft gold at
+ * a range of alphas, chosen against the dark tree. Ethereal Dawn keeps the
+ * surface light, so every one of them sat between 1.0 and 1.4:1 -- present
+ * in the DOM, invisible on screen.
+ *
+ * Restated as the themed ink tokens, one tier per alpha band the original
+ * was reaching for, so the dark theme keeps its exact values and only the
+ * light theme changes. */
+:global(html[data-theme="light"]) .actionHint svg,
+:global(html[data-theme="light"]) .approxTimeHint,
+:global(html[data-theme="light"]) .birthHistorySavedAt,
+:global(html[data-theme="light"]) .fieldLeadingIcon,
+:global(html[data-theme="light"]) .previewKicker {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .previewStatus {
+  color: var(--accent-teal-dim);
+}
+
+:global(html[data-theme="light"]) .autocompleteWrapper :global(input::placeholder),
+:global(html[data-theme="light"]) .smartFillTextarea::placeholder {
+  color: var(--text-muted);
+}
+
+:global(html[data-theme="light"]) .approxTimeLabel,
+:global(html[data-theme="light"]) .approxTimeOption,
+:global(html[data-theme="light"]) .backButton,
+:global(html[data-theme="light"]) .birthHistoryChip,
+:global(html[data-theme="light"]) .smartFillExampleChip {
+  color: var(--text-primary);
+}
+
+:global(html[data-theme="light"]) .birthHistoryToggle,
+:global(html[data-theme="light"]) .smartFillToggle {
+  color: var(--text-secondary);
+}
+
+
+
+/* The one rule the generated block above could not reach: it carries
+   !important (the field chrome fights the shared PremiumInput styles), so the
+   override has to as well. 1.09:1 -- the field labels were invisible. */
+:global(html[data-theme="light"]) .formSectionCard :global(label),
+:global(html[data-theme="light"]) .autocompleteWrapper label {
+  color: var(--text-primary) !important;
+}
+
+/* The disabled CTA keeps an ink slab; its label went dark with the theme. */
+
+
+/* --accent-gold-light is the lift-off-ink variant; on cream it drops to
+   2.7:1. The step label and the preview kicker want the base accent. */
+:global(html[data-theme="light"]) .stepLabel,
+:global(html[data-theme="light"]) .previewKicker {
+  color: var(--accent-gold);
+}
+
+/* Its own opacity: 0.75 multiplies whatever colour it is given, so the
+   override has to clear that as well or it lands short whatever it sets. */
+:global(html[data-theme="light"]) .actionHint {
+  color: var(--text-secondary);
+  opacity: 1;
+}

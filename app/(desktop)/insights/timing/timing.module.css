@@ -148,3 +148,21 @@
     border-radius: 14px;
   }
 }
+
+/* ── Ethereal Dawn: timing surface refinements ──
+ *
+ * .panel is a 55%-opaque ink slab and .sectionKicker is the bright aqua that
+ * only reads against one. Both were dark-tree decisions that the light theme
+ * inherited while flipping the copy to plum ink, which left the panel holding
+ * dark text on a dark slab and the kicker at 1.42:1 on cream. */
+:global(html[data-theme="light"]) .panel {
+  border-color: var(--border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0) 40%),
+    var(--surface-frosted);
+  box-shadow: var(--shadow-sm);
+}
+
+:global(html[data-theme="light"]) .sectionKicker {
+  color: var(--accent-teal-dim);
+}

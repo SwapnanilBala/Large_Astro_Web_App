@@ -1281,3 +1281,44 @@
 .interpretation strong {
   color: var(--accent-gold);
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the varshaphal panel was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys, and the ink either matches them or goes
+ * dark against them -- the copy measured between 1.0 and 2.5:1.
+ *
+ * Generated from this file's own declarations: every rule whose base
+ * background layer is dark, and every colour too pale to survive a light
+ * surface, mapped onto the themed tiers by the alpha each was reaching
+ * for. Decorative layers are excluded. */
+:global(html[data-theme="light"]) .forceCard,
+:global(html[data-theme="light"]) .placementCard,
+:global(html[data-theme="light"]) .priorityCard,
+:global(html[data-theme="light"]) .profectionFlow > div,
+:global(html[data-theme="light"]) .seasonCard,
+:global(html[data-theme="light"]) .summaryCard,
+:global(html[data-theme="light"]) .themeHero,
+:global(html[data-theme="light"]) .themeStat,
+:global(html[data-theme="light"]) .timelineMonth,
+:global(html[data-theme="light"]) .weatherMeter {
+  background: var(--surface);
+}
+
+:global(html[data-theme="light"]) .priorityNumber {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .windowCardWatch span {
+  color: var(--text-primary);
+}
+
+/* #F07068 is a dark-theme alert red, 2.47:1 on the light card. The generated
+   block above skipped it because the filter there looks for pale ink and this
+   is bright. */
+:global(html[data-theme="light"]) .error {
+  color: #b0322c;
+  background: var(--chip-coral-surface);
+  border-color: rgba(176, 50, 44, 0.28);
+}

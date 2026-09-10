@@ -717,3 +717,11 @@
   border-radius: 50%;
   border: 1px dashed rgba(212, 165, 116, 0.1);
 }
+
+/* ── Ethereal Dawn ──
+ * The loading skeleton is the first thing every streamed page shows, so a
+ * dark slab here reads as a broken light theme before the content arrives. */
+:global(html[data-theme="light"]) .card {
+  border-color: var(--border-soft);
+  background: var(--surface-frosted);
+}

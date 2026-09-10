@@ -673,3 +673,39 @@
   background: rgba(242, 194, 108, 0.2);
   border-color: rgba(242, 194, 108, 0.6);
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the date picker was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink either matches them or goes
+ * dark against them.
+ *
+ * Generated from this file's own declarations, mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .calendarPopup :global(.react-datepicker__header),
+:global(html[data-theme="light"]) .datePickerWrapper {
+  background: var(--surface-frosted);
+}
+
+:global(html[data-theme="light"]) .assistChip,
+:global(html[data-theme="light"]) .assistMessage,
+:global(html[data-theme="light"]) .leadingIcon,
+:global(html[data-theme="light"]) .premiumDatePicker.complete .fieldLabel {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .datePickerInput::placeholder,
+:global(html[data-theme="light"]) .datePickerInput:focus::placeholder {
+  color: var(--text-muted);
+}
+
+:global(html[data-theme="light"]) .calendarPopup :global(.react-datepicker__month-select),
+:global(html[data-theme="light"]) .calendarPopup :global(.react-datepicker__year-select) {
+  color: var(--text-primary) !important;
+}
+
+:global(html[data-theme="light"]) .datePickerInput {
+  color: var(--text-primary);
+}

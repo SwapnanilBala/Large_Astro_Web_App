@@ -716,3 +716,17 @@
     gap: 0.5rem;
   }
 }
+
+/* ── Ethereal Dawn ──
+ * #F07068 is a dark-theme alert red and measures 2.47:1 on this theme's
+ * surfaces -- the generated block above skipped it because it is bright
+ * rather than pale. Same hue, taken down far enough to read as a warning
+ * instead of a highlight. */
+:global(html[data-theme="light"]) .avoidHeading,
+:global(html[data-theme="light"]) .avoidPillLabel,
+:global(html[data-theme="light"]) .errorText,
+:global(html[data-theme="light"]) .factorNegative,
+:global(html[data-theme="light"]) .factorNegative .factorScore,
+:global(html[data-theme="light"]) .retryBtn {
+  color: #b0322c;
+}

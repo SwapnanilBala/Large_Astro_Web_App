@@ -112,3 +112,17 @@
     opacity: 1;
   }
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the palm annotation overlay was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink either matches them or goes
+ * dark against them.
+ *
+ * Generated from this file's own declarations, mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .container {
+  background: var(--surface-frosted);
+}

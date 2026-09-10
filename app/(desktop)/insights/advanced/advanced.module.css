@@ -218,3 +218,25 @@
   .focusWorkspacePanel {
     padding: 0.65rem;
   }}
+
+/* ── Ethereal Dawn ──
+ *
+ * the advanced views was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink either matches them or goes
+ * dark against them.
+ *
+ * Generated from this file's own declarations, mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .focusWorkspace {
+  background: var(--surface-strong);
+}
+
+/* Gradient-filled, so the contrast audit cannot see it: both stops are pale
+   and it read as a watermark on cream. */
+:global(html[data-theme="light"]) .heroTitle {
+  background: linear-gradient(135deg, #3d2a40 40%, #83532a);
+  -webkit-background-clip: text;
+  background-clip: text;
+}

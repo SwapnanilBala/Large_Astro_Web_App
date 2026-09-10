@@ -519,3 +519,28 @@
   .cautionGrid {
     grid-template-columns: 1fr;
   }}
+
+/* ── Ethereal Dawn ──
+ *
+ * the lucky-elements panel was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink either matches them or goes
+ * dark against them.
+ *
+ * Generated from this file's own declarations, mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .cautionChip,
+:global(html[data-theme="light"]) .domainCard,
+:global(html[data-theme="light"]) .weekAheadCard {
+  background: var(--surface);
+}
+
+:global(html[data-theme="light"]) .basisPlanet[data-yogakaraka="true"] {
+  color: var(--accent-gold);
+}
+
+/* Same dark-theme alert red as the muhurta panel; see the note there. */
+:global(html[data-theme="light"]) .cautionTitle {
+  color: #b0322c;
+}

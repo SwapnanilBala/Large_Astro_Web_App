@@ -792,3 +792,42 @@
   border-left: 2px solid rgba(212, 165, 116, 0.4);
   border-radius: 0 6px 6px 0;
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * The atlas paints its own backdrop -- a near-opaque ink wash over the
+ * photograph -- and reads its copy through four local tokens. That is
+ * internally consistent in either theme, so the page stayed legible on
+ * Ethereal Dawn while looking like a different app.
+ *
+ * The reason it still had to move: .site-navbar is translucent, so a light
+ * navbar over a dark page composites to a mid tone while its brand text
+ * stays the light theme's plum ink -- 1.19:1 on this page, and nothing in
+ * the navbar's own stylesheet can fix it. The wash lightens, the photograph
+ * stays, and the tokens invert with it. */
+:global(html[data-theme="light"]) .page {
+  --varga-gold: #96602e;
+  --varga-teal: #306b62;
+  --varga-ink: #36263a;
+  --varga-soft: #6f5967;
+  background:
+    linear-gradient(rgba(255, 248, 245, 0.9), rgba(255, 241, 239, 0.96)),
+    url('/background-1280.webp') center top / cover fixed;
+}
+
+/* The atlas title is gradient-filled -- ivory to gold to pale aqua -- so it
+   is invisible to the contrast audit and it survived the token swap above as
+   a watermark on the lightened backdrop. Same three hues, inked. */
+:global(html[data-theme="light"]) .hero h1 {
+  background: linear-gradient(115deg, #3d2a40 10%, #83532a 54%, #306b62 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+/* This page keeps its own copy of the back pill rather than the shared shell's. */
+:global(html[data-theme="light"]) .backButton,
+:global(html[data-theme="light"]) .backButtonBottom {
+  background: var(--surface-frosted);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-sm);
+}

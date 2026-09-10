@@ -122,3 +122,35 @@
     padding-top: calc(var(--navbar-h) + 1.5rem + env(safe-area-inset-top));
   }
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * The shell painted an opaque ink gradient and defined --detail-ink as
+ * near-white, which was right while everything inside it was dark too. The
+ * panels these pages host were converted to the light theme on their own
+ * (house-support-panel has its own light block), so on Ethereal Dawn the
+ * result was a light card sitting on a black page, with the hero title and
+ * the intro copy above it still taking the light theme's plum ink -- 1.33:1
+ * for the section titles and 2.93:1 for the intro.
+ *
+ * Restating the four local tokens and the backdrop fixes every child at
+ * once, because they all read through var(--detail-*) rather than naming
+ * colours themselves. */
+:global(html[data-theme="light"]) .page {
+  --detail-gold: #ad7138;
+  --detail-teal: #306b62;
+  --detail-ink: #36263a;
+  --detail-soft: #6f5967;
+  background:
+    radial-gradient(circle at 12% 6%, rgba(104, 169, 157, 0.13), transparent 26rem),
+    radial-gradient(circle at 88% 14%, rgba(199, 142, 88, 0.12), transparent 24rem),
+    linear-gradient(160deg, #fffdfb 0%, #fff1ef 45%, #fff8f5 100%);
+}
+
+/* The back pill was an ink chip for contrast against that black page. */
+:global(html[data-theme="light"]) .backButton,
+:global(html[data-theme="light"]) .backButtonBottom {
+  background: var(--surface-frosted);
+  border-color: var(--border-medium);
+  box-shadow: var(--shadow-sm);
+}

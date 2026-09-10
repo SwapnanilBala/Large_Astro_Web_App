@@ -7116,24 +7116,30 @@ html[data-theme="light"] {
   --heading-gradient: linear-gradient(135deg, #5d8f86, #b5743d 78%);
   --text-primary: #36263a;
   --text-secondary: #6f5967;
-  --text-tertiary: #866f7c;
+  --text-tertiary: #7a6472;
   --text-muted: #a3919a;
   --ink-main: #36263a;
   --ink-soft: #6f5967;
-  --accent-gold: #ad7138;
+  /* Deepened from #ad7138 / #438d81. Those were picked as hues against
+     cream and read correctly, but they land at 3.3-4.0:1 on the surfaces
+     this theme actually puts them on -- and almost every use is a kicker, a
+     dt, a tag or a number at 10-15px, where AA asks for 4.5. #83532a and
+     #306b62 are the same two hues taken far enough down to clear it on the
+     tinted chips as well as on the page. */
+  --accent-gold: #83532a;
   --accent-gold-light: #c78e58;
-  --accent-gold-dim: #805128;
+  --accent-gold-dim: #6d4522;
   --accent-gold-glow: rgba(189, 122, 64, 0.16);
   --accent-purple: #80689d;
   --accent-purple-light: #a78ac5;
   --accent-purple-dim: #5c4b72;
   --accent-purple-glow: rgba(128, 104, 157, 0.15);
-  --accent-teal: #438d81;
+  --accent-teal: #306b62;
   --accent-teal-light: #68a99d;
-  --accent-teal-dim: #306b62;
+  --accent-teal-dim: #275650;
   --accent-teal-glow: rgba(67, 141, 129, 0.15);
   --accent-aqua: #3f887d;
-  --accent-coral: #b95e73;
+  --accent-coral: #a8485c;
   --success: #438d81;
   --primary: #438d81;
   --secondary: #ad7138;
@@ -7244,4 +7250,168 @@ html[data-theme="light"] .navItem.active {
   html[data-theme="light"] .site-navbar.navbar-scrolled {
     background: rgba(255, 250, 248, 0.96);
   }
+}
+
+/* ──────────────────────────────────────────────
+   ETHEREAL DAWN — shared card surfaces
+
+   These card and panel classes were written for the dark tree, where a
+   40-90% ink wash is the surface and the body copy above it is pale. The
+   light theme keeps the copy but flips it to plum ink, so on Ethereal Dawn
+   the wash became a dark slab holding dark text: the /insights/timing
+   forecast card measured 1.17:1 for its headings and 1.01:1 for its body,
+   i.e. legible only as a smudge.
+
+   Restated as the themed frosted surface rather than patched per-selector,
+   because every one of them fails for the same reason and the tokens already
+   carry the right value in both themes.
+   ────────────────────────────────────────────── */
+html[data-theme="light"] .forecast-card,
+html[data-theme="light"] .forecast-timeline-item,
+html[data-theme="light"] .forecast-transit-card,
+html[data-theme="light"] .transit-card,
+html[data-theme="light"] .transit-aspect-item,
+html[data-theme="light"] .aspect-card,
+html[data-theme="light"] .aspect-card--conjunction,
+html[data-theme="light"] .aspect-card--sextile,
+html[data-theme="light"] .aspect-card--opposition,
+html[data-theme="light"] .palm-section-card,
+html[data-theme="light"] .surface-card,
+html[data-theme="light"] .elevated-card,
+html[data-theme="light"] .accent-card {
+  background: var(--surface-frosted);
+  border-color: var(--border-soft);
+  box-shadow: var(--shadow-sm);
+}
+
+html[data-theme="light"] .transit-aspect-item:hover {
+  background: var(--bg-glass-strong);
+  border-color: var(--border-medium);
+}
+
+/* The elevated and accent variants keep their step above the plain surface;
+   without this they flatten into one another once the wash is gone. */
+html[data-theme="light"] .elevated-card {
+  background: var(--bg-glass-strong);
+  box-shadow: var(--shadow-md);
+}
+
+html[data-theme="light"] .accent-card {
+  background: var(--chip-teal-surface);
+  border-color: rgba(67, 141, 129, 0.28);
+}
+
+/* "My Chart" is #F0B754 -- picked to glow on ink, and 1.58:1 on the light
+   navbar. The token is the same hue judged against a light surface. */
+html[data-theme="light"] .navbar-chart-link,
+html[data-theme="light"] .navbar-profile-link strong {
+  color: var(--accent-gold-dim);
+}
+
+/* Chrome and vendor surfaces with the same fault: a fixed ink background
+   under text that comes from a themed token, so the light theme darkened the
+   text and left the background alone. Found by scanning the loaded rules for
+   "dark background + color: var(--ink|--text|--accent)" rather than by eye. */
+html[data-theme="light"] .back-btn {
+  background: var(--surface-frosted);
+  border-color: var(--border-medium);
+}
+
+html[data-theme="light"] .dasha-popup {
+  background: var(--bg-glass-strong);
+  border-color: var(--border-medium);
+}
+
+html[data-theme="light"] .navamsa-row--header,
+html[data-theme="light"] .divisional-row--header {
+  background: var(--surface-strong);
+}
+
+html[data-theme="light"] .divisional-tab:hover,
+html[data-theme="light"] .ashtakavarga-tab:hover {
+  background: var(--surface-hover);
+}
+
+/* react-datepicker paints its own panel; the option list inherits the OS
+   menu colours, so both need restating rather than just the wrapper. */
+html[data-theme="light"] .react-datepicker {
+  /* The vendor block above is !important throughout, so matching it is the
+     only way to reach the wrapper. */
+  background: var(--bg-glass-strong) !important;
+  border-color: var(--border-medium) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+html[data-theme="light"] .react-datepicker__month-select option,
+html[data-theme="light"] .react-datepicker__year-select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+
+/* The rest of the dark surfaces in this file, found by generating the list
+   from the stylesheet rather than reading for them: any rule whose base
+   background layer is dark (luminance < 0.25) at an alpha that actually
+   covers, minus the ones that are meant to stay dark in both themes --
+   scrims, the starfield, the mobile drawer, ambient decor. */
+html[data-theme="light"] .aspect-card--square,
+html[data-theme="light"] .aspect-card--trine,
+html[data-theme="light"] .not-found-planet-body,
+html[data-theme="light"] .zpp-frame {
+  background: var(--surface-frosted);
+  border-color: var(--border-soft);
+}
+
+html[data-theme="light"] .domain-reading-column,
+html[data-theme="light"] .forecast-column,
+html[data-theme="light"] .forecast-transit-column,
+html[data-theme="light"] .forecast-date-option,
+html[data-theme="light"] .zpp-photo-wrap,
+html[data-theme="light"] .skel-metric-card,
+html[data-theme="light"] .skel-lead-block {
+  background: var(--surface-strong);
+  border-color: var(--border-soft);
+}
+
+/* Kept its own tint rather than the neutral wash: an error should not read as
+   an ordinary panel. */
+html[data-theme="light"] .error-message {
+  background: var(--chip-coral-surface);
+  border-color: rgba(185, 94, 115, 0.3);
+}
+
+/* A "challenging" tone marker in dark-theme coral, 1.97:1 on cream. Deeper
+   than --accent-coral, which only reaches 4.0:1 and this is 12px bold. */
+html[data-theme="light"] .forecast-event--challenging .forecast-event-tone {
+  color: #a8485c;
+}
+
+/* ──────────────────────────────────────────────
+   ETHEREAL DAWN — gradient-filled text
+
+   These are painted with background-clip: text, so their colour is a
+   gradient rather than a `color` value. scripts/contrast-audit.js skips them
+   for exactly that reason ("not measurable from `color`"), which is why they
+   survived the sweep: every stop in each of them is pale, chosen to glow on
+   ink, and on cream they read as a watermark.
+
+   Restated stop for stop in the same hue order, taken down to the light
+   theme's ink and accents -- the same treatment .titleName already had in
+   insights.module.css.
+   ────────────────────────────────────────────── */
+html[data-theme="light"] .btn-gradient-text {
+  background: linear-gradient(180deg, #a5702f 0%, #8d5c26 45%, #6d4522 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-theme="light"] .rules-header h2 {
+  background: linear-gradient(135deg, #4a3a6b, #6f5ba8);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+html[data-theme="light"] .compatibility-cta h3 {
+  background: linear-gradient(135deg, #a8485c, var(--accent-gold));
+  -webkit-background-clip: text;
+  background-clip: text;
 }

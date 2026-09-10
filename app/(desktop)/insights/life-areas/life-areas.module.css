@@ -557,3 +557,11 @@
     flex-direction: column;
   }
 }
+
+/* ── Ethereal Dawn ──
+ * Same fault as the dashboard's copy of this card: a 90%-opaque ink panel
+ * holding themed ink, which the light theme reads as dark on dark. */
+:global(html[data-theme="light"]) .domainCard {
+  border-color: var(--border-soft);
+  background: var(--surface-frosted);
+}

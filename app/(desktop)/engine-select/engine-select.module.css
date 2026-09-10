@@ -881,3 +881,57 @@
     width: 100%;
     padding-block: 0.62rem;
   }}
+
+/* ── Ethereal Dawn ──
+ *
+ * the method chooser was built for the dark tree: ink washes for surfaces, and
+ * pale or bright-accent ink on top of them. Under Ethereal Dawn those
+ * washes composite to mid greys, and the ink either matches them or goes
+ * dark against them -- the copy measured between 1.0 and 2.5:1.
+ *
+ * Generated from this file's own declarations: every rule whose base
+ * background layer is dark, and every colour too pale to survive a light
+ * surface, mapped onto the themed tiers by the alpha each was reaching
+ * for. Decorative layers are excluded. */
+:global(html[data-theme="light"]) .footer,
+:global(html[data-theme="light"]) .panel,
+:global(html[data-theme="light"]) .styleSelect,
+:global(html[data-theme="light"]) .styleSelect option {
+  background: var(--surface-frosted);
+}
+
+:global(html[data-theme="light"]) .cardDesc,
+:global(html[data-theme="light"]) .cardLabel,
+:global(html[data-theme="light"]) .footerContext strong,
+:global(html[data-theme="light"]) .groupDescription,
+:global(html[data-theme="light"]) .groupOrigin,
+:global(html[data-theme="light"]) .groupTitle,
+:global(html[data-theme="light"]) .guidanceStrip span,
+:global(html[data-theme="light"]) .heading,
+:global(html[data-theme="light"]) .houseChip,
+:global(html[data-theme="light"]) .houseChip:hover:not(:disabled),
+:global(html[data-theme="light"]) .houseSectionLead,
+:global(html[data-theme="light"]) .houseSectionTitle,
+:global(html[data-theme="light"]) .lead,
+:global(html[data-theme="light"]) .styleHint,
+:global(html[data-theme="light"]) .styleSelect,
+:global(html[data-theme="light"]) .styleSelect option,
+:global(html[data-theme="light"]) .summaryList dd,
+:global(html[data-theme="light"]) .summaryTitle {
+  color: var(--text-primary);
+}
+
+:global(html[data-theme="light"]) .cardBadgeAyanamsha,
+:global(html[data-theme="light"]) .cardDefaultTag,
+:global(html[data-theme="light"]) .footerContext span,
+:global(html[data-theme="light"]) .houseChip.houseChipActive:hover:not(:disabled),
+:global(html[data-theme="light"]) .houseChipActive,
+:global(html[data-theme="light"]) .kicker,
+:global(html[data-theme="light"]) .summaryKicker,
+:global(html[data-theme="light"]) .summaryList dt {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .styleLabel {
+  color: var(--text-secondary);
+}

@@ -10,9 +10,13 @@
 .card {
   margin: 1.5rem 0 0;
   padding: 1.25rem 1.4rem;
-  border: 1px solid rgba(200, 155, 60, 0.22);
+  border: 1px solid var(--border-medium);
   border-radius: 14px;
-  background: rgba(20, 18, 28, 0.72);
+  /* Themed, not a fixed ink wash: this card takes its copy from --ink-main
+     and --ink-soft, so a hard-coded dark surface put plum text on a dark
+     slab in the light theme. --bg-glass is the same 0.72 ink here and the
+     frosted white there. */
+  background: var(--bg-glass);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   display: flex;
@@ -67,7 +71,7 @@
 
 .button:hover {
   color: var(--ink-main);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: var(--border-strong);
 }
 
 /*
@@ -99,4 +103,12 @@
   .button {
     transition: none;
   }
+}
+
+/* .note dims --ink-soft to 0.75, which lands at 3.5:1 on the light card.
+   The text is a genuine caveat about where charts are stored, so it keeps
+   its de-emphasis through size rather than through opacity here. */
+:global(html[data-theme="light"]) .note {
+  opacity: 1;
+  color: var(--text-tertiary);
 }

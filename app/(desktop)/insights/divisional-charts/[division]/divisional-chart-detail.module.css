@@ -1056,3 +1056,23 @@
     scroll-behavior: auto;
   }
 }
+
+/* ── Ethereal Dawn ──
+ * Same local-token pattern as the atlas it hangs off, so the whole page
+ * inverts from these eight declarations. See the note in
+ * divisional-charts.module.css for why a self-consistent dark page still had
+ * to follow the theme: the translucent navbar above it cannot. */
+:global(html[data-theme="light"]) .page {
+  --detail-gold: #96602e;
+  --detail-gold-soft: #805128;
+  --detail-teal: #306b62;
+  --detail-ink: #36263a;
+  --detail-muted: #6f5967;
+  --detail-line: var(--border-medium);
+  --detail-surface: var(--surface-frosted);
+  --detail-surface-soft: rgba(107, 70, 91, 0.05);
+  background:
+    radial-gradient(circle at 14% 4%, rgba(104, 169, 157, 0.14), transparent 28rem),
+    radial-gradient(circle at 88% 12%, rgba(199, 142, 88, 0.13), transparent 26rem),
+    linear-gradient(160deg, #fffdfb 0%, #fff1ef 45%, #fff8f5 100%);
+}

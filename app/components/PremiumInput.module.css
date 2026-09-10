@@ -255,3 +255,25 @@
   background: rgba(242, 194, 108, 0.2);
   border-color: rgba(242, 194, 108, 0.6);
 }
+
+/* ── Ethereal Dawn: field ink ──
+ *
+ * the field chrome was written in pale ink on ink: near-white and soft gold at
+ * a range of alphas, chosen against the dark tree. Ethereal Dawn keeps the
+ * surface light, so every one of them sat between 1.0 and 1.4:1 -- present
+ * in the DOM, invisible on screen.
+ *
+ * Restated as the themed ink tokens, one tier per alpha band the original
+ * was reaching for, so the dark theme keeps its exact values and only the
+ * light theme changes. */
+:global(html[data-theme="light"]) .assistChip,
+:global(html[data-theme="light"]) .assistMessage,
+:global(html[data-theme="light"]) .leadingIcon,
+:global(html[data-theme="light"]) .premiumInput.complete .fieldLabel {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .inputField::placeholder,
+:global(html[data-theme="light"]) .inputField:focus::placeholder {
+  color: var(--text-muted);
+}
