@@ -4465,3 +4465,91 @@
   box-shadow: none;
   filter: none;
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the dasha, navamsa, yoga, rule and palm panels in this file were built for the dark tree: ink washes for
+ * surfaces, pale or bright-accent ink on top. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink goes dark against them.
+ *
+ * This sheet had no light block at all -- 4467 lines of dark-tree
+ * surfaces, which is why /insights/advanced still measured 36 failures
+ * after the rest of the theme was converted.
+ *
+ * Generated from this file's own declarations and mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+html[data-theme="light"] .ashtakavarga-cell,
+html[data-theme="light"] .ashtakavarga-tab,
+html[data-theme="light"] .ashtakavarga-tab:hover,
+html[data-theme="light"] .dasha-active-card,
+html[data-theme="light"] .dasha-audit,
+html[data-theme="light"] .dasha-audit-card,
+html[data-theme="light"] .dasha-command-hero,
+html[data-theme="light"] .dasha-gantt-bar,
+html[data-theme="light"] .dasha-gantt-track,
+html[data-theme="light"] .dasha-lens-card[role="button"]:focus-visible,
+html[data-theme="light"] .dasha-lens-card[role="button"]:hover,
+html[data-theme="light"] .dasha-popup,
+html[data-theme="light"] .divisional-row,
+html[data-theme="light"] .divisional-row--header,
+html[data-theme="light"] .divisional-row--header:hover,
+html[data-theme="light"] .divisional-row:hover,
+html[data-theme="light"] .divisional-tab,
+html[data-theme="light"] .divisional-tab:hover,
+html[data-theme="light"] .nakshatra-card,
+html[data-theme="light"] .navamsa-planet-cell[data-tooltip]:hover::after,
+html[data-theme="light"] .navamsa-row,
+html[data-theme="light"] .navamsa-row--header,
+html[data-theme="light"] .navamsa-row--header:hover,
+html[data-theme="light"] .navamsa-row:hover,
+html[data-theme="light"] .palm-camera-wrap,
+html[data-theme="light"] .palm-detail-notes:focus,
+html[data-theme="light"] .palm-history-card-check,
+html[data-theme="light"] .palm-line-card,
+html[data-theme="light"] .rule-card,
+html[data-theme="light"] .yoga-card,
+html[data-theme="light"] .yoga-card--priority {
+  background: var(--surface-frosted);
+}
+
+html[data-theme="light"] .dasha-lens-card,
+html[data-theme="light"] .navamsa-dignity-legend,
+html[data-theme="light"] .palm-compare-quote,
+html[data-theme="light"] .palm-detail-notes,
+html[data-theme="light"] .palm-detail-title-input,
+html[data-theme="light"] .skel-rule-card {
+  background: var(--surface-strong);
+}
+
+html[data-theme="light"] .shadbala-sign-card {
+  background: var(--surface);
+}
+
+html[data-theme="light"] .dasha-gantt-needle-label,
+html[data-theme="light"] .navamsa-planet-cell[data-tooltip]:hover::after {
+  color: var(--text-primary);
+}
+
+html[data-theme="light"] .dasha-subtle-details small {
+  color: var(--text-secondary);
+}
+
+html[data-theme="light"] .palm-status--clear {
+  color: var(--accent-teal-dim);
+}
+
+/* Two hints that dim themed ink with opacity. The multiplier is what makes
+   them fail: --ink-soft is fine on this card, and 0.5 of it is 2.18:1. The
+   de-emphasis moves to a lighter tier instead of a transparency. */
+html[data-theme="light"] .dasha-timeline-hint,
+html[data-theme="light"] .navamsa-click-hint {
+  opacity: 1;
+  color: var(--text-tertiary);
+}
+
+/* A dark-theme violet literal on the navamsa summary label: 1.56:1 on the
+   light chip it sits in. */
+html[data-theme="light"] .navamsa-summary-card h4 {
+  color: var(--accent-purple);
+}

@@ -498,9 +498,9 @@
   /* Deepened, not just re-tinted: the dark-theme mint and tan sit at about
      1.5:1 on a pale card, and the bars are the reading. Weak stays in the
      rose family it already implied. */
-  --band-strong: #2f8377;
+  --band-strong: #26695f;
   --band-neutral: #a86f2e;
-  --band-weak: #a4506a;
+  --band-weak: #8c3a53;
 }
 
 :global(html[data-theme="light"]) .card {

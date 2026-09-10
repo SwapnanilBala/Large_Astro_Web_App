@@ -10,14 +10,20 @@ type NavamsaChartProps = {
 };
 
 // ── Dignity color map ────────────────────────────────────────────────────────
+/*
+ * The seven dignities read through tokens now: the literals here were tuned
+ * for the dark grid and rendered as a bright palette on Ethereal Dawn's light
+ * card, where four of them measured under 2:1. globals.css carries both sets.
+ * The glow is derived from the same token so the two cannot drift.
+ */
 const DIGNITY_COLORS: Record<string, { color: string; label: string; glow: string }> = {
-  exalted:      { color: "#ffd700", label: "Exalted",      glow: "rgba(255, 215, 0, 0.4)" },
-  own:          { color: "#4ade80", label: "Own Sign",      glow: "rgba(74, 222, 128, 0.3)" },
-  moolatrikona: { color: "#86efac", label: "Moolatrikona",  glow: "rgba(134, 239, 172, 0.3)" },
-  friend:       { color: "#93c5fd", label: "Friend Sign",   glow: "rgba(147, 197, 253, 0.25)" },
-  neutral:      { color: "#d1d5db", label: "Neutral",       glow: "rgba(209, 213, 219, 0.15)" },
-  enemy:        { color: "#fb923c", label: "Enemy Sign",    glow: "rgba(251, 146, 60, 0.25)" },
-  debilitated:  { color: "#f87171", label: "Debilitated",   glow: "rgba(248, 113, 113, 0.4)" },
+  exalted:      { color: "var(--dignity-exalted)",      label: "Exalted",       glow: "color-mix(in srgb, var(--dignity-exalted) 40%, transparent)" },
+  own:          { color: "var(--dignity-own)",          label: "Own Sign",      glow: "color-mix(in srgb, var(--dignity-own) 30%, transparent)" },
+  moolatrikona: { color: "var(--dignity-moolatrikona)", label: "Moolatrikona",  glow: "color-mix(in srgb, var(--dignity-moolatrikona) 30%, transparent)" },
+  friend:       { color: "var(--dignity-friend)",       label: "Friend Sign",   glow: "color-mix(in srgb, var(--dignity-friend) 25%, transparent)" },
+  neutral:      { color: "var(--dignity-neutral)",      label: "Neutral",       glow: "color-mix(in srgb, var(--dignity-neutral) 15%, transparent)" },
+  enemy:        { color: "var(--dignity-enemy)",        label: "Enemy Sign",    glow: "color-mix(in srgb, var(--dignity-enemy) 25%, transparent)" },
+  debilitated:  { color: "var(--dignity-debilitated)",  label: "Debilitated",   glow: "color-mix(in srgb, var(--dignity-debilitated) 40%, transparent)" },
 };
 
 // Legend entries — only show dignities that need explanation (skip neutral by

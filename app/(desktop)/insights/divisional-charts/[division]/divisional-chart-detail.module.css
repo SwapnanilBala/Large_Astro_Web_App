@@ -1076,3 +1076,34 @@
     radial-gradient(circle at 88% 12%, rgba(199, 142, 88, 0.13), transparent 26rem),
     linear-gradient(160deg, #fffdfb 0%, #fff1ef 45%, #fff8f5 100%);
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the varga detail panels were built for the dark tree: ink washes for
+ * surfaces, pale or bright-accent ink on top. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink goes dark against them.
+ *
+ * Same as the atlas it hangs off: page tokens restated earlier, the
+ * panels inside them not.
+ *
+ * Generated from this file's own declarations and mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .chartGrid,
+:global(html[data-theme="light"]) .hero,
+:global(html[data-theme="light"]) .page {
+  background: var(--surface-frosted);
+}
+
+:global(html[data-theme="light"]) .backLink:hover,
+:global(html[data-theme="light"]) .breadcrumbs a:hover,
+:global(html[data-theme="light"]) .footer a:hover,
+:global(html[data-theme="light"]) .heroBadges span,
+:global(html[data-theme="light"]) .heroSummary,
+:global(html[data-theme="light"]) .houseOccupants span,
+:global(html[data-theme="light"]) .methodTag,
+:global(html[data-theme="light"]) .positionTable tbody td,
+:global(html[data-theme="light"]) .reasonChips span,
+:global(html[data-theme="light"]) .textLink:hover {
+  color: var(--text-primary);
+}

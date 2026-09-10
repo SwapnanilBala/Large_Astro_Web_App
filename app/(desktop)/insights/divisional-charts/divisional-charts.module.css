@@ -831,3 +831,32 @@
   border-color: var(--border-medium);
   box-shadow: var(--shadow-sm);
 }
+
+/* ── Ethereal Dawn ──
+ *
+ * the atlas cards and tabs were built for the dark tree: ink washes for
+ * surfaces, pale or bright-accent ink on top. Under Ethereal Dawn those
+ * washes composite to mid greys and the ink goes dark against them.
+ *
+ * The page tokens above were restated earlier; the cards inside it were
+ * not, so they stayed dark slabs holding the page's new plum ink.
+ *
+ * Generated from this file's own declarations and mapped onto the themed
+ * tiers by the alpha each original was reaching for. Decorative layers
+ * are excluded. */
+:global(html[data-theme="light"]) .backButton,
+:global(html[data-theme="light"]) .backButtonBottom,
+:global(html[data-theme="light"]) .detailIntro,
+:global(html[data-theme="light"]) .heroIcon,
+:global(html[data-theme="light"]) .importantCard,
+:global(html[data-theme="light"]) .importantCard:focus-within,
+:global(html[data-theme="light"]) .importantCard:hover,
+:global(html[data-theme="light"]) .importantCardActive,
+:global(html[data-theme="light"]) .page,
+:global(html[data-theme="light"]) .positionCard {
+  background: var(--surface-frosted);
+}
+
+:global(html[data-theme="light"]) .strict {
+  color: var(--accent-gold);
+}

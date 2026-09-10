@@ -57,18 +57,22 @@ function getActivationTimeWindow(strength: StrengthGroup): string {
 }
 
 function StrengthBadge({ strength }: { strength: StrengthGroup }) {
+  /* The tint stays a literal: a 0.15 wash reads as a faint warm, cool or
+     red panel over either backdrop, which is what it is for. The ink cannot --
+     these three were picked against ink and measured 1.18, 1.51 and 1.82 to 1
+     on the light card. Same three tiers, themed. */
   const colors: Record<StrengthGroup, { bg: string; text: string }> = {
     strong: {
       bg: "rgba(200, 155, 60, 0.15)",
-      text: "rgba(255, 215, 100, 0.9)",
+      text: "var(--accent-gold)",
     },
     moderate: {
       bg: "rgba(138, 146, 169, 0.15)",
-      text: "rgba(180, 190, 210, 0.9)",
+      text: "var(--accent-purple)",
     },
     weak: {
       bg: "rgba(200, 100, 100, 0.15)",
-      text: "rgba(220, 150, 150, 0.9)",
+      text: "var(--accent-coral)",
     },
   };
 
@@ -149,7 +153,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
               margin: "0 0 0.25rem 0",
               fontSize: "1.4rem",
               fontWeight: 700,
-              color: "#fff",
+              color: "var(--ink-main)",
               fontFamily: '"Plus Jakarta Sans", sans-serif',
             }}
           >
@@ -160,7 +164,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
               style={{
                 margin: 0,
                 fontSize: "0.95rem",
-                color: "rgba(200, 155, 60, 0.7)",
+                color: "var(--accent-gold)",
                 fontStyle: "italic",
                 fontFamily: '"Cormorant Garamond", serif',
               }}
@@ -185,18 +189,18 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
         }}
       >
         <div>
-          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "rgba(200, 155, 60, 0.7)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "var(--accent-gold)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
             Manifestation Chance
           </p>
-          <p style={{ margin: 0, fontSize: "1.35rem", fontWeight: 700, color: "rgba(255, 215, 100, 0.95)" }}>
+          <p style={{ margin: 0, fontSize: "1.35rem", fontWeight: 700, color: "var(--accent-gold)" }}>
             {yoga.occurrence_chance}%
           </p>
         </div>
         <div>
-          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "rgba(138, 146, 169, 0.7)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
             Activation Window
           </p>
-          <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600, color: "rgba(180, 190, 210, 0.9)" }}>
+          <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600, color: "var(--text-secondary)" }}>
             {getActivationTimeWindow(yoga.strength)}
           </p>
         </div>
@@ -222,7 +226,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
               background: "rgba(138, 146, 169, 0.15)",
               border: "1px solid rgba(138, 146, 169, 0.3)",
               borderRadius: "6px",
-              color: "rgba(180, 190, 210, 0.9)",
+              color: "var(--text-secondary)",
             }}
           >
             <span style={{ fontSize: "1rem" }}>
@@ -238,7 +242,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           style={{
             margin: "0 0 0.5rem 0",
             fontSize: "1.05rem",
-            color: "rgba(255, 255, 255, 0.75)",
+            color: "var(--ink-soft)",
             lineHeight: 1.6,
           }}
         >
@@ -248,7 +252,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           style={{
             margin: "0 0 0.5rem 0",
             fontSize: "1.05rem",
-            color: "rgba(255, 255, 255, 0.7)",
+            color: "var(--ink-soft)",
             lineHeight: 1.6,
           }}
         >
@@ -259,7 +263,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
             style={{
               margin: 0,
               fontSize: "0.95rem",
-              color: "rgba(200, 155, 60, 0.8)",
+              color: "var(--accent-gold)",
               lineHeight: 1.5,
             }}
           >
@@ -280,7 +284,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           style={{
             margin: 0,
             fontSize: "1rem",
-            color: "rgba(255, 220, 140, 0.9)",
+            color: "var(--accent-gold)",
             lineHeight: 1.6,
           }}
         >
@@ -309,11 +313,11 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
           borderRadius: "12px",
           background:
             "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)",
-          border: "1px solid rgba(255,255,255,0.1)",
+          border: "1px solid var(--border-soft)",
           textAlign: "center",
         }}
       >
-        <p style={{ color: "rgba(255, 255, 255, 0.6)", margin: 0 }}>
+        <p style={{ color: "var(--text-tertiary)", margin: 0 }}>
           No planetary yogas detected in this chart at this time.
         </p>
       </section>
@@ -356,7 +360,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
             fontSize: "0.85rem",
             textTransform: "uppercase",
             letterSpacing: "1.5px",
-            color: "rgba(200, 155, 60, 0.8)",
+            color: "var(--accent-gold)",
             fontWeight: 600,
           }}
         >
@@ -367,7 +371,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
             margin: 0,
             fontSize: "2rem",
             fontWeight: 700,
-            color: "#fff",
+            color: "var(--ink-main)",
             fontFamily: '"Plus Jakarta Sans", sans-serif',
           }}
         >
@@ -379,7 +383,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
         style={{
           margin: 0,
           fontSize: "1.2rem",
-          color: "rgba(255, 255, 255, 0.7)",
+          color: "var(--ink-soft)",
           lineHeight: 1.7,
           maxWidth: "900px",
         }}
@@ -406,7 +410,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                   margin: 0,
                   fontSize: "1.2rem",
                   fontWeight: 700,
-                  color: "rgba(255, 215, 100, 0.95)",
+                  color: "var(--accent-gold)",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.5rem",
@@ -418,7 +422,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "rgba(255, 215, 100, 0.95)",
+                    background: "var(--accent-gold)",
                   }}
                 />
                 Strong Yogas ({strongYogas.length})
@@ -428,7 +432,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
               style={{
                 margin: "0 0 1rem 0",
                 fontSize: "0.9rem",
-                color: "rgba(255, 255, 255, 0.6)",
+                color: "var(--text-tertiary)",
               }}
             >
               These powerful yogas significantly amplify your natural talents and
@@ -464,7 +468,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                   margin: 0,
                   fontSize: "1.2rem",
                   fontWeight: 700,
-                  color: "rgba(180, 190, 210, 0.9)",
+                  color: "var(--accent-purple)",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.5rem",
@@ -476,7 +480,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "rgba(180, 190, 210, 0.9)",
+                    background: "var(--accent-purple)",
                   }}
                 />
                 Moderate Yogas ({moderateYogas.length})
@@ -486,7 +490,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
               style={{
                 margin: "0 0 1rem 0",
                 fontSize: "0.9rem",
-                color: "rgba(255, 255, 255, 0.6)",
+                color: "var(--text-tertiary)",
               }}
             >
               These moderate yogas provide supportive influences. Their effects
@@ -522,7 +526,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                   margin: 0,
                   fontSize: "1.2rem",
                   fontWeight: 700,
-                  color: "rgba(220, 150, 150, 0.9)",
+                  color: "var(--accent-coral)",
                   display: "flex",
                   alignItems: "center",
                   gap: "0.5rem",
@@ -534,7 +538,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
                     width: "8px",
                     height: "8px",
                     borderRadius: "50%",
-                    background: "rgba(220, 150, 150, 0.9)",
+                    background: "var(--accent-coral)",
                   }}
                 />
                 Weak Yogas ({weakYogas.length})
@@ -544,7 +548,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
               style={{
                 margin: "0 0 1rem 0",
                 fontSize: "0.9rem",
-                color: "rgba(255, 255, 255, 0.6)",
+                color: "var(--text-tertiary)",
               }}
             >
               These subtle yogas have minimal influence but can still provide
@@ -579,7 +583,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
           style={{
             margin: 0,
             fontSize: "0.9rem",
-            color: "rgba(200, 200, 220, 0.8)",
+            color: "var(--text-secondary)",
             lineHeight: 1.6,
           }}
         >

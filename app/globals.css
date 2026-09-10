@@ -120,6 +120,18 @@
   --ink-soft: #BBB4AA;
   --accent-aqua: #65D2C5;
   --accent-coral: #D78368;
+
+  /* Planetary dignity, the one semantic palette in the app that is not a
+     brand accent: seven fixed meanings, read on the navamsa grid and its
+     legend. Lived inline in navamsa-chart.tsx, which meant /insights/advanced
+     rendered a bright dark-tree palette on Ethereal Dawn.s light card. */
+  --dignity-exalted: #ffd700;
+  --dignity-own: #4ade80;
+  --dignity-moolatrikona: #86efac;
+  --dignity-friend: #93c5fd;
+  --dignity-neutral: #d1d5db;
+  --dignity-enemy: #fb923c;
+  --dignity-debilitated: #f87171;
   --success: #4FB8AB;
   --primary: #4FB8AB;
   --secondary: #D2AC62;
@@ -7138,8 +7150,17 @@ html[data-theme="light"] {
   --accent-teal-light: #68a99d;
   --accent-teal-dim: #275650;
   --accent-teal-glow: rgba(67, 141, 129, 0.15);
-  --accent-aqua: #3f887d;
+  /* 3.5-4.1:1 on the teal chips and the card; same hue, deeper. */
+  --accent-aqua: #2f6b61;
   --accent-coral: #a8485c;
+  /* Measured against the light card, not derived: every one clears 5:1. */
+  --dignity-exalted: #8a6100;
+  --dignity-own: #1f7a3d;
+  --dignity-moolatrikona: #27734a;
+  --dignity-friend: #2563a8;
+  --dignity-neutral: #5c6270;
+  --dignity-enemy: #a1520c;
+  --dignity-debilitated: #b03030;
   --success: #438d81;
   --primary: #438d81;
   --secondary: #ad7138;
