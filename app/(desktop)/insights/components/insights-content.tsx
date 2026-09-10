@@ -31,7 +31,7 @@ import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import divisionalMessages from "@/messages/en.divisional.json";
-import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
+import { FiClock, FiBookOpen, FiLayers, FiArrowUpRight } from "react-icons/fi";
 
 /* Read as data rather than through useRouteMessages: the varga gateway that
    renders these chips is still hard-coded English down to its heading, blurb,
@@ -1260,7 +1260,7 @@ export default function InsightsContent({
               </PanelErrorBoundary>
               <Link href={houseSupportHref} className={styles.sectionOpenLink}>
                 What each house is responsible for
-                <span aria-hidden="true">&rarr;</span>
+                <FiArrowUpRight aria-hidden="true" />
               </Link>
             </motion.section>
           )}
@@ -1605,7 +1605,7 @@ export default function InsightsContent({
           </LazyPanel>
           <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>
             Every chapter, past and ahead
-            <span aria-hidden="true">&rarr;</span>
+            <FiArrowUpRight aria-hidden="true" />
           </Link>
         </CollapsibleSection>
 
