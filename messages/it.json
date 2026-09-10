@@ -1162,7 +1162,7 @@
       "resultsToggleOne": "Risultati: {visible} di {total} finestra mostrata",
       "resultsToggleMany": "Risultati: {visible} di {total} finestre mostrate",
       "minScore": "Punteggio min.: {score}",
-      "daytimeOnly": "Solo di giorno (6 AM–6 PM)",
+      "daytimeOnly": "Solo di giorno (6:00–18:00)",
       "resultsSummaryOne": "{start} — {end} · Mostrando {visible} di {total} finestra",
       "resultsSummaryMany": "{start} — {end} · Mostrando {visible} di {total} finestre",
       "filtersEmpty": "Nessuna finestra corrisponde ai filtri attuali. Abbassa il punteggio minimo.",

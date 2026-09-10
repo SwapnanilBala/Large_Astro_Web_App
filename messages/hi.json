@@ -1162,7 +1162,7 @@
       "resultsToggleOne": "परिणाम: {total} में से {visible} अवधि दिखाई गई",
       "resultsToggleMany": "परिणाम: {total} में से {visible} अवधियां दिखाई गईं",
       "minScore": "न्यूनतम स्कोर: {score}",
-      "daytimeOnly": "केवल दिन के समय (6 AM–6 PM)",
+      "daytimeOnly": "केवल दिन के समय (6:00 am–6:00 pm)",
       "resultsSummaryOne": "{start} — {end} · {total} में से {visible} अवधि दिखाई जा रही है",
       "resultsSummaryMany": "{start} — {end} · {total} में से {visible} अवधियां दिखाई जा रही हैं",
       "filtersEmpty": "वर्तमान छन्नों से कोई अवधि मेल नहीं खाती। न्यूनतम स्कोर कम करें।",

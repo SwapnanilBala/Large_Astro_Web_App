@@ -1162,7 +1162,7 @@
       "resultsToggleOne": "ফলাফল: {total}টির মধ্যে {visible}টি সময়কাল দেখানো হয়েছে",
       "resultsToggleMany": "ফলাফল: {total}টির মধ্যে {visible}টি সময়কাল দেখানো হয়েছে",
       "minScore": "সর্বনিম্ন স্কোর: {score}",
-      "daytimeOnly": "শুধু দিনের বেলা (6 AM–6 PM)",
+      "daytimeOnly": "শুধু দিনের বেলা (৬:০০ AM–৬:০০ PM)",
       "resultsSummaryOne": "{start} — {end} · {total}টির মধ্যে {visible}টি সময়কাল দেখানো হচ্ছে",
       "resultsSummaryMany": "{start} — {end} · {total}টির মধ্যে {visible}টি সময়কাল দেখানো হচ্ছে",
       "filtersEmpty": "বর্তমান ছাঁকনির সঙ্গে কোনো সময়কাল মেলে না। সর্বনিম্ন স্কোর কমান।",

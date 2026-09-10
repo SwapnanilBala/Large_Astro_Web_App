@@ -1162,7 +1162,7 @@
       "resultsToggleOne": "Résultats : {visible} fenêtre affichée sur {total}",
       "resultsToggleMany": "Résultats : {visible} fenêtres affichées sur {total}",
       "minScore": "Score min. : {score}",
-      "daytimeOnly": "Journée uniquement (6 AM–6 PM)",
+      "daytimeOnly": "Journée uniquement (6:00–18:00)",
       "resultsSummaryOne": "{start} — {end} · {visible} fenêtre affichée sur {total}",
       "resultsSummaryMany": "{start} — {end} · {visible} fenêtres affichées sur {total}",
       "filtersEmpty": "Aucune fenêtre ne correspond aux filtres actuels. Baissez le score minimum.",

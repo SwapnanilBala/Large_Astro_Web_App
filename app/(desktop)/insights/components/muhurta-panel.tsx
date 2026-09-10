@@ -6,7 +6,7 @@ import {
   appendProfileLocationApiSearchParams,
   parseProfileQueryString,
 } from "@/lib/chart-query";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 import styles from "./muhurta-panel.module.css";
 
@@ -112,6 +112,20 @@ interface StoredPrefs {
   daytimeOnly?: boolean;
 }
 
+/*
+ * The interface language as a BCP-47 tag for Intl, mirroring
+ * future-forecast-panel. These formatters are module-level, so the locale
+ * arrives as an argument rather than from a hook.
+ */
+const LOCALE_TAGS: Record<Language, string> = {
+  en: "en-US",
+  es: "es-ES",
+  bn: "bn-IN",
+  hi: "hi-IN",
+  it: "it-IT",
+  fr: "fr-FR",
+};
+
 function isDaytime(isoStr: string): boolean {
   const h = new Date(isoStr).getHours();
   return h >= 6 && h < 18;
@@ -137,18 +151,17 @@ function maxEndStr(start: string): string {
   return d.toISOString().split("T")[0] ?? "";
 }
 
-function formatWindowTime(isoStr: string): string {
+function formatWindowTime(isoStr: string, locale: string): string {
   const d = new Date(isoStr);
-  return d.toLocaleTimeString("en-US", {
+  return d.toLocaleTimeString(locale, {
     hour: "numeric",
     minute: "2-digit",
-    hour12: true,
   });
 }
 
-function formatWindowDate(isoStr: string): string {
+function formatWindowDate(isoStr: string, locale: string): string {
   const d = new Date(isoStr);
-  return d.toLocaleDateString("en-US", {
+  return d.toLocaleDateString(locale, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -320,10 +333,10 @@ interface DayGroup {
   windows: MuhurtaWindow[];
 }
 
-function groupWindowsByDay(windows: MuhurtaWindow[]): DayGroup[] {
+function groupWindowsByDay(windows: MuhurtaWindow[], locale: string): DayGroup[] {
   const groups = new Map<string, DayGroup>();
   for (const w of windows) {
-    const label = formatWindowDate(w.start);
+    const label = formatWindowDate(w.start, locale);
     const ts = new Date(w.start).getTime();
     const existing = groups.get(label);
     if (existing) {
@@ -346,6 +359,8 @@ function groupWindowsByDay(windows: MuhurtaWindow[]): DayGroup[] {
 
 export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const [activity, setActivity] = useState("general_auspicious");
   const [startDate, setStartDate] = useState(todayStr);
   const [endDate, setEndDate] = useState(() => futureStr(7));
@@ -364,11 +379,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
       const text = [
         tr("timing.muhurta.clipboard.header", {
           activity: activityLabel,
-          date: formatWindowDate(w.start),
+          date: formatWindowDate(w.start, locale),
         }),
         tr("timing.muhurta.clipboard.times", {
-          start: formatWindowTime(w.start),
-          end: formatWindowTime(w.end),
+          start: formatWindowTime(w.start, locale),
+          end: formatWindowTime(w.end, locale),
           score: String(w.score),
           quality: w.quality,
         }),
@@ -392,7 +407,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         /* clipboard unavailable — silently ignore */
       }
     },
-    [tr],
+    [tr, locale],
   );
 
   const handlePreset = (days: number) => {
@@ -692,8 +707,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                 ? "timing.muhurta.resultsSummaryMany"
                 : "timing.muhurta.resultsSummaryOne",
               {
-                start: formatWindowDate(result.search_window.start_date),
-                end: formatWindowDate(result.search_window.end_date),
+                start: formatWindowDate(result.search_window.start_date, locale),
+                end: formatWindowDate(result.search_window.end_date, locale),
                 visible: String(visibleWindows.length),
                 total: String(result.windows.length),
               }
@@ -708,7 +723,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
             </p>
           )}
 
-          {groupWindowsByDay(visibleWindows).map((group) => (
+          {groupWindowsByDay(visibleWindows, locale).map((group) => (
             <div key={group.label} className={styles.dayGroup}>
               <h4 className={styles.dayHeading}>
                 <span>{group.label}</span>
@@ -736,8 +751,8 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                       <div>
                         <p className={styles.windowTime}>
                           {tr("timing.muhurta.windowTime", {
-                            start: formatWindowTime(w.start),
-                            end: formatWindowTime(w.end),
+                            start: formatWindowTime(w.start, locale),
+                            end: formatWindowTime(w.end, locale),
                           })}
                         </p>
                       </div>
@@ -810,20 +825,20 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
           <div className={styles.avoidGrid}>
             {result.avoid_periods.map((d) => (
               <div key={d.date} className={styles.avoidDay}>
-                <p className={styles.avoidDate}>{formatWindowDate(d.date)}</p>
+                <p className={styles.avoidDate}>{formatWindowDate(d.date, locale)}</p>
                 <div className={styles.avoidPills}>
                   <span className={styles.avoidPill}>
                     <span className={styles.avoidPillLabel}>{tr("timing.muhurta.rahukaala")}</span>
                     {tr("timing.muhurta.timeRange", {
-                      start: formatWindowTime(d.rahukaala.start),
-                      end: formatWindowTime(d.rahukaala.end),
+                      start: formatWindowTime(d.rahukaala.start, locale),
+                      end: formatWindowTime(d.rahukaala.end, locale),
                     })}
                   </span>
                   <span className={styles.avoidPill}>
                     <span className={styles.avoidPillLabel}>{tr("timing.muhurta.yamaghantaka")}</span>
                     {tr("timing.muhurta.timeRange", {
-                      start: formatWindowTime(d.yamaghantaka.start),
-                      end: formatWindowTime(d.yamaghantaka.end),
+                      start: formatWindowTime(d.yamaghantaka.start, locale),
+                      end: formatWindowTime(d.yamaghantaka.end, locale),
                     })}
                   </span>
                 </div>
