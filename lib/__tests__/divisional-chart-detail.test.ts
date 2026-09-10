@@ -23,12 +23,12 @@ describe("key divisional chart focus", () => {
   it("defines complete focus metadata for exactly the ten important charts", () => {
     for (const division of IMPORTANT_DIVISION_NUMBERS) {
       const focus = getKeyDivisionalChartFocus(division);
+      /* Structure only. The name, focus and mapping-method prose live in the
+         divisional namespace now, and divisional-chart-guide.test.ts checks
+         that every key division has an entry there. */
       expect(focus).toMatchObject({ division, label: `D${division}` });
-      expect(focus?.name.length).toBeGreaterThan(2);
-      expect(focus?.focus.length).toBeGreaterThan(5);
       expect(focus?.focusPlanets.length).toBeGreaterThan(0);
       expect(focus?.focusHouses.length).toBeGreaterThan(0);
-      expect(focus?.mappingMethod.length).toBeGreaterThan(20);
     }
   });
 

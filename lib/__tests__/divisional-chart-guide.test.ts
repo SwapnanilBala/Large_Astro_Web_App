@@ -3,8 +3,35 @@ import { ALL_DIVISIONAL_CHARTS } from "../engines/divisional-engine";
 import {
   IMPORTANT_DIVISIONAL_CHARTS,
   IMPORTANT_DIVISION_NUMBERS,
+  divisionalGuideKey,
   getImportantDivisionalChartGuide,
+  type DivisionalGuideField,
 } from "../divisional-chart-guide";
+import divisionalMessages from "@/messages/en.divisional.json";
+
+/*
+ * The guidance prose moved into the divisional namespace, so these checks
+ * follow it there -- through divisionalGuideKey, the builder the components
+ * use, rather than by reading the JSON at a hand-written path.
+ *
+ * Worth asserting rather than trusting: the static key scan in
+ * i18n-mobile-coverage only sees keys written as plain strings, and every key
+ * here is assembled from a division at runtime. A varga missing from the
+ * catalog would reach the screen as a literal "divisional.guide.d9.focus".
+ */
+function guideText(division: number, field: DivisionalGuideField): string {
+  const value = divisionalGuideKey(division, field)
+    .split(".")
+    .reduce<unknown>(
+      (node, part) =>
+        node && typeof node === "object"
+          ? (node as Record<string, unknown>)[part]
+          : undefined,
+      divisionalMessages as unknown,
+    );
+  expect(typeof value).toBe("string");
+  return value as string;
+}
 
 describe("divisional chart client guide", () => {
   it("keeps a deliberate ten-chart client-facing hierarchy", () => {
@@ -24,11 +51,15 @@ describe("divisional chart client guide", () => {
   it("gives each key chart complete client guidance", () => {
     for (const chart of IMPORTANT_DIVISIONAL_CHARTS) {
       expect(chart.label).toBe(`D${chart.division}`);
-      expect(chart.focus.length).toBeGreaterThan(5);
-      expect(chart.summary.length).toBeGreaterThan(40);
-      expect(chart.readWith.length).toBeGreaterThan(20);
-      expect(chart.clientQuestion.endsWith("?")).toBe(true);
-      expect(chart.sensitivityNote.length).toBeGreaterThan(20);
+      expect(guideText(chart.division, "name").length).toBeGreaterThan(2);
+      expect(guideText(chart.division, "focus").length).toBeGreaterThan(5);
+      expect(guideText(chart.division, "summary").length).toBeGreaterThan(40);
+      expect(guideText(chart.division, "readWith").length).toBeGreaterThan(20);
+      expect(guideText(chart.division, "clientQuestion").endsWith("?")).toBe(true);
+      expect(
+        guideText(chart.division, "sensitivityNote").length,
+      ).toBeGreaterThan(20);
+      expect(guideText(chart.division, "mappingMethod").length).toBeGreaterThan(20);
       expect(getImportantDivisionalChartGuide(chart.division)).toBe(chart);
     }
   });

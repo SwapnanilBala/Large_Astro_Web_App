@@ -17,11 +17,8 @@ import {
 export type KeyDivisionalChartFocus = {
   division: number;
   label: string;
-  name: string;
-  focus: string;
   focusPlanets: string[];
   focusHouses: number[];
-  mappingMethod: string;
 };
 
 export type DivisionalDetailPosition = {
@@ -57,11 +54,7 @@ export type DivisionalConjunctionGroup = {
 
 export type DivisionalChartDetail = KeyDivisionalChartFocus & {
   description: string;
-  summary: string;
-  readWith: string;
-  clientQuestion: string;
   sensitivity: DivisionalChartSensitivity;
-  sensitivityNote: string;
   ascendantSign: string | null;
   hasValidAscendant: boolean;
   positions: DivisionalDetailPosition[];
@@ -84,106 +77,26 @@ export type DivisionalBoundaryDistance = {
   isAtBoundary: boolean;
 };
 
+/*
+ * Which points and houses each key varga is read through.
+ *
+ * Structure, not copy. Each varga's Sanskrit name, its focus, and the prose
+ * describing how the mapping works live in the `divisional.guide` namespace
+ * with the rest of its text; the focus planets and houses stay here because
+ * they decide which placements the detail page promotes rather than what it
+ * says about them.
+ */
 const KEY_DIVISIONAL_FOCUS: Record<number, KeyDivisionalChartFocus> = {
-  1: {
-    division: 1,
-    label: "D1",
-    name: "Rashi",
-    focus: "Natal foundation",
-    focusPlanets: ["Ascendant", "Sun", "Moon"],
-    focusHouses: [1, 4, 7, 10],
-    mappingMethod: "Natal sidereal sign placement without subdivision.",
-  },
-  2: {
-    division: 2,
-    label: "D2",
-    name: "Hora",
-    focus: "Resources and stewardship",
-    focusPlanets: ["Jupiter", "Venus", "Mercury"],
-    focusHouses: [2, 11],
-    mappingMethod:
-      "Parashari Hora: odd signs run from Leo to Cancer; even signs run from Cancer to Leo.",
-  },
-  4: {
-    division: 4,
-    label: "D4",
-    name: "Chaturthamsa",
-    focus: "Home, property, and rootedness",
-    focusPlanets: ["Moon", "Mars"],
-    focusHouses: [4, 11, 12],
-    mappingMethod:
-      "Chaturthamsa quarters map to the 1st, 4th, 7th, and 10th signs from the natal sign.",
-  },
-  7: {
-    division: 7,
-    label: "D7",
-    name: "Saptamsa",
-    focus: "Children, care, and legacy",
-    focusPlanets: ["Jupiter", "Moon"],
-    focusHouses: [1, 5, 9],
-    mappingMethod:
-      "Parashari Saptamsa: odd signs begin from the natal sign; even signs begin from its seventh.",
-  },
-  9: {
-    division: 9,
-    label: "D9",
-    name: "Navamsa",
-    focus: "Partnership and inner maturity",
-    focusPlanets: ["Venus", "Jupiter"],
-    focusHouses: [1, 7, 9],
-    mappingMethod:
-      "Parashari Navamsa: movable signs begin from themselves, fixed signs from the ninth, and dual signs from the fifth.",
-  },
-  10: {
-    division: 10,
-    label: "D10",
-    name: "Dashamsa",
-    focus: "Career and public contribution",
-    focusPlanets: ["Sun", "Saturn", "Mercury"],
-    focusHouses: [6, 10, 11],
-    mappingMethod:
-      "Parashari Dashamsa: odd signs begin from the natal sign; even signs begin from its ninth.",
-  },
-  12: {
-    division: 12,
-    label: "D12",
-    name: "Dwadashamsa",
-    focus: "Parents and inherited patterns",
-    focusPlanets: ["Sun", "Moon"],
-    focusHouses: [4, 9],
-    mappingMethod:
-      "Dwadashamsa portions proceed zodiacally from the natal sign.",
-  },
-  24: {
-    division: 24,
-    label: "D24",
-    name: "Chaturvimshamsa",
-    focus: "Learning and mastery",
-    focusPlanets: ["Mercury", "Jupiter"],
-    focusHouses: [4, 5, 9],
-    mappingMethod:
-      "Chaturvimshamsa portions begin from Leo in odd signs and Cancer in even signs.",
-  },
-  30: {
-    division: 30,
-    label: "D30",
-    name: "Trimshamsa",
-    focus: "Pressure and resilience",
-    focusPlanets: ["Saturn", "Mars"],
-    focusHouses: [6, 8, 12],
-    mappingMethod:
-      "Parashari Trimshamsa uses five unequal planetary portions whose boundaries differ in odd and even signs.",
-  },
-  60: {
-    division: 60,
-    label: "D60",
-    name: "Shashtiamsa",
-    focus: "Fine-grained patterning",
-    focusPlanets: ["Ascendant", "Sun", "Moon"],
-    focusHouses: [1, 5, 9],
-    mappingMethod:
-      "Shashtiamsa divides each natal sign into sixty half-degree portions whose signs cycle zodiacally from Aries.",
-  },
+  1: { division: 1, label: "D1", focusPlanets: ["Ascendant", "Sun", "Moon"], focusHouses: [1, 4, 7, 10] },
+  2: { division: 2, label: "D2", focusPlanets: ["Jupiter", "Venus", "Mercury"], focusHouses: [2, 11] },
+  4: { division: 4, label: "D4", focusPlanets: ["Moon", "Mars"], focusHouses: [4, 11, 12] },
+  7: { division: 7, label: "D7", focusPlanets: ["Jupiter", "Moon"], focusHouses: [1, 5, 9] },
+  9: { division: 9, label: "D9", focusPlanets: ["Venus", "Jupiter"], focusHouses: [1, 7, 9] },
+  10: { division: 10, label: "D10", focusPlanets: ["Sun", "Saturn", "Mercury"], focusHouses: [6, 10, 11] },
+  12: { division: 12, label: "D12", focusPlanets: ["Sun", "Moon"], focusHouses: [4, 9] },
+  24: { division: 24, label: "D24", focusPlanets: ["Mercury", "Jupiter"], focusHouses: [4, 5, 9] },
+  30: { division: 30, label: "D30", focusPlanets: ["Saturn", "Mars"], focusHouses: [6, 8, 12] },
+  60: { division: 60, label: "D60", focusPlanets: ["Ascendant", "Sun", "Moon"], focusHouses: [1, 5, 9] },
 };
 
 const CLASSICAL_PLANET_SET = new Set<string>(CLASSICAL_PLANETS);
@@ -298,11 +211,7 @@ export function buildDivisionalChartDetail(
   return {
     ...focus,
     description: chart.description,
-    summary: guide.summary,
-    readWith: guide.readWith,
-    clientQuestion: guide.clientQuestion,
     sensitivity: guide.sensitivity,
-    sensitivityNote: guide.sensitivityNote,
     ascendantSign,
     hasValidAscendant: ascendantSign !== null,
     positions,

@@ -13,9 +13,20 @@ import {
   getKeyDivisionalChartFocus,
 } from "@/lib/divisional-chart-detail";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
+import divisionalMessages from "@/messages/en.divisional.json";
 import DivisionDetailView, { DivisionDetailNotice } from "./division-detail-view";
 
 export const maxDuration = 60;
+
+/* The English catalog, read as data rather than through the i18n hook, which
+   needs a client component. Only generateMetadata below wants this; everything
+   this page renders resolves its own copy. Reading the catalog rather than
+   keeping a second English copy in the lib module means the tab title and the
+   page heading cannot drift into naming the same varga differently. */
+const ENGLISH_GUIDE = divisionalMessages.divisional.guide as Record<
+  string,
+  { name: string; focus: string }
+>;
 
 type DivisionalChartDetailPageProps = {
   params: Promise<{ division: string }>;
@@ -80,13 +91,14 @@ export async function generateMetadata({
   const division = requireKeyDivision(rawDivision);
   const focus = getKeyDivisionalChartFocus(division);
   if (!focus) notFound();
+  const guide = ENGLISH_GUIDE[`d${division}`];
 
   /* Not translated: generateMetadata runs on the server, where the client
      i18n hook cannot be called, and the language lives in localStorage rather
      than in the URL, so there is nothing here to select a catalog with. */
   return {
-    title: `${focus.label} ${focus.name} Divisional Chart`,
-    description: `${focus.label} ${focus.name} detail for ${focus.focus.toLowerCase()}, with whole-sign placements, reliability, and calculation context.`,
+    title: `${focus.label} ${guide.name} Divisional Chart`,
+    description: `${focus.label} ${guide.name} detail for ${guide.focus.toLowerCase()}, with whole-sign placements, reliability, and calculation context.`,
     robots: {
       index: false,
       follow: false,
@@ -113,7 +125,7 @@ export default async function DivisionalChartDetailPage({
       <DivisionDetailNotice
         variant="missing-input"
         label={focus.label}
-        name={focus.name}
+        division={division}
         atlasHref={atlasHref}
       />
     );
@@ -134,7 +146,7 @@ export default async function DivisionalChartDetailPage({
       <DivisionDetailNotice
         variant="unavailable"
         label={focus.label}
-        name={focus.name}
+        division={division}
         error={calculationError}
         atlasHref={atlasHref}
         readingHref={insightHref(historyQuery)}

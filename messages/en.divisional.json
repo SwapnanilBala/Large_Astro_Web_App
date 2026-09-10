@@ -1,5 +1,97 @@
 {
   "divisional": {
+    "guide": {
+      "d1": {
+        "name": "Rashi",
+        "focus": "Natal foundation",
+        "summary": "The main chart describes the overall pattern: identity, life direction, houses, and the natal promise that every other varga must refine rather than replace.",
+        "readWith": "Begin here. No divisional conclusion should contradict a weak or absent promise in D1.",
+        "clientQuestion": "What is the central pattern through which the rest of this reading unfolds?",
+        "sensitivityNote": "Planetary signs are comparatively stable; the ascendant and houses still depend on the recorded birth time.",
+        "mappingMethod": "Natal sidereal sign placement without subdivision."
+      },
+      "d2": {
+        "name": "Hora",
+        "focus": "Resources and stewardship",
+        "summary": "D2 refines the way resources are gathered, protected, shared, and converted into material stability.",
+        "readWith": "Read with the D1 second and eleventh houses, their lords, and Jupiter and Venus strength.",
+        "clientQuestion": "What style of resource-building is easiest to sustain over time?",
+        "sensitivityNote": "Use an exact birth time before promoting the D2 ascendant or houses into a firm conclusion.",
+        "mappingMethod": "Parashari Hora: odd signs run from Leo to Cancer; even signs run from Cancer to Leo."
+      },
+      "d4": {
+        "name": "Chaturthamsa",
+        "focus": "Home, property, and rootedness",
+        "summary": "D4 refines home, property, settlement, emotional rootedness, and the conditions that make a place feel secure.",
+        "readWith": "Read with the D1 fourth house, Moon, Mars, and relevant property or relocation periods.",
+        "clientQuestion": "What conditions help home and long-term security become genuinely restorative?",
+        "sensitivityNote": "An exact time is important because the divisional ascendant can change within a short interval.",
+        "mappingMethod": "Chaturthamsa quarters map to the 1st, 4th, 7th, and 10th signs from the natal sign."
+      },
+      "d7": {
+        "name": "Saptamsa",
+        "focus": "Children, care, and legacy",
+        "summary": "D7 refines themes of children, caregiving, mentorship, creative continuation, and what is carried into the next generation.",
+        "readWith": "Read with the D1 fifth house, Jupiter, its lord, and supportive timing periods.",
+        "clientQuestion": "How does the chart describe care, continuation, and the legacy you cultivate?",
+        "sensitivityNote": "Treat D7 house-based statements as provisional unless the recorded time is exact.",
+        "mappingMethod": "Parashari Saptamsa: odd signs begin from the natal sign; even signs begin from its seventh."
+      },
+      "d9": {
+        "name": "Navamsa",
+        "focus": "Partnership and inner maturity",
+        "summary": "D9 refines relationship maturity, commitments, values, dharma, and how natal potential develops with experience.",
+        "readWith": "Read with the D1 seventh house, Venus, Jupiter, relationship rules, and the active dasha lords.",
+        "clientQuestion": "What qualities help commitment become more mature and sustainable?",
+        "sensitivityNote": "D9 is highly useful, but its ascendant should be trusted only when the birth time is exact.",
+        "mappingMethod": "Parashari Navamsa: movable signs begin from themselves, fixed signs from the ninth, and dual signs from the fifth."
+      },
+      "d10": {
+        "name": "Dashamsa",
+        "focus": "Career and public contribution",
+        "summary": "D10 refines vocation, responsibility, leadership, professional visibility, and the way work reaches the wider world.",
+        "readWith": "Read with the D1 tenth house, its lord, Sun, Saturn, Mercury, and current career timing.",
+        "clientQuestion": "Where can competence become visible, useful, and increasingly authoritative?",
+        "sensitivityNote": "Small time errors can change the D10 ascendant; confirm it before making specific career claims.",
+        "mappingMethod": "Parashari Dashamsa: odd signs begin from the natal sign; even signs begin from its ninth."
+      },
+      "d12": {
+        "name": "Dwadashamsa",
+        "focus": "Parents and inherited patterns",
+        "summary": "D12 refines parental influence, ancestry, inherited habits, and the family patterns a person carries forward or consciously changes.",
+        "readWith": "Read with the D1 fourth and ninth houses, Sun, Moon, and family-domain evidence.",
+        "clientQuestion": "Which inherited patterns provide support, and which are ready to be handled differently?",
+        "sensitivityNote": "Use exact-time data for the D12 ascendant and house emphasis.",
+        "mappingMethod": "Dwadashamsa portions proceed zodiacally from the natal sign."
+      },
+      "d24": {
+        "name": "Chaturvimshamsa",
+        "focus": "Learning and mastery",
+        "summary": "D24 refines education, learning style, disciplined study, teachers, and how knowledge becomes usable mastery.",
+        "readWith": "Read with the D1 fourth, fifth, and ninth houses, plus Mercury and Jupiter strength.",
+        "clientQuestion": "Which conditions make learning deeper, more consistent, and easier to apply?",
+        "sensitivityNote": "At this resolution, exact birth time and boundary awareness are essential.",
+        "mappingMethod": "Chaturvimshamsa portions begin from Leo in odd signs and Cancer in even signs."
+      },
+      "d30": {
+        "name": "Trimshamsa",
+        "focus": "Pressure and resilience",
+        "summary": "D30 refines how strain, conflict, vulnerability, and recovery are experienced. It is best used for practical risk awareness, not fear-based prediction.",
+        "readWith": "Read with the D1 sixth, eighth, and twelfth houses, Saturn and Mars, and measured support factors.",
+        "clientQuestion": "What helps you respond to pressure without letting it define the whole story?",
+        "sensitivityNote": "High sensitivity makes exact-time input necessary for house-level interpretation.",
+        "mappingMethod": "Parashari Trimshamsa uses five unequal planetary portions whose boundaries differ in odd and even signs."
+      },
+      "d60": {
+        "name": "Shashtiamsa",
+        "focus": "Fine-grained patterning",
+        "summary": "D60 is a very fine-grained traditional layer used to qualify deeper patterning. It should never be treated as a standalone verdict or used to override more stable evidence.",
+        "readWith": "Use only after D1, the relevant domain varga, strength measures, and timing all point in the same direction.",
+        "clientQuestion": "Does this fine layer repeat an already well-supported theme, or merely introduce noise?",
+        "sensitivityNote": "D60 needs a rectified or exceptionally precise birth time; otherwise treat it as exploratory only.",
+        "mappingMethod": "Shashtiamsa divides each natal sign into sixty half-degree portions whose signs cycle zodiacally from Aries."
+      }
+    },
     "atlas": {
       "missing": {
         "kicker": "Missing Input",

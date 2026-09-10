@@ -16,8 +16,10 @@ import {
 import type { DivisionalChartInfo } from "@/lib/astro-types";
 import {
   IMPORTANT_DIVISIONAL_CHARTS,
+  divisionalGuideKey,
   getImportantDivisionalChartGuide,
   type DivisionalChartSensitivity,
+  type DivisionalGuideField,
 } from "@/lib/divisional-chart-guide";
 import { useRouteMessages } from "@/lib/i18n-context";
 import divisionalMessages from "@/messages/en.divisional.json";
@@ -121,6 +123,11 @@ export default function DivisionalChartsClient({
 
   const chart = charts[selectedDivision];
   const guide = getImportantDivisionalChartGuide(selectedDivision);
+  /* The selected varga's own prose. Only meaningful where `guide` is set --
+     the supporting charts have no catalog entry and fall back to the
+     description the engine returned. */
+  const guideText = (field: DivisionalGuideField) =>
+    tr(divisionalGuideKey(selectedDivision, field));
   const reliability = reliabilityCopy(tr, birthTimeAccuracy, birthTimeFallback);
   const backHref = `/insights?${historyQs}#divisional-charts`;
 
@@ -205,16 +212,22 @@ export default function DivisionalChartsClient({
                     aria-pressed={isSelected}
                     aria-label={tr("divisional.atlas.important.previewLabel", {
                       label: item.label,
-                      name: item.name,
+                      name: tr(divisionalGuideKey(item.division, "name")),
                     })}
                   >
                     <span className={styles.cardTopline}>
                       <strong>{item.label}</strong>
                       <small className={styles[sensitivity.className]}>{tr(sensitivity.labelKey)}</small>
                     </span>
-                    <span className={styles.cardName}>{item.name}</span>
-                    <span className={styles.cardFocus}>{item.focus}</span>
-                    <span className={styles.cardSummary}>{item.summary}</span>
+                    <span className={styles.cardName}>
+                      {tr(divisionalGuideKey(item.division, "name"))}
+                    </span>
+                    <span className={styles.cardFocus}>
+                      {tr(divisionalGuideKey(item.division, "focus"))}
+                    </span>
+                    <span className={styles.cardSummary}>
+                      {tr(divisionalGuideKey(item.division, "summary"))}
+                    </span>
                   </button>
                   <Link
                     href={detailHref(item.division, historyQs)}
@@ -271,9 +284,9 @@ export default function DivisionalChartsClient({
               <span className={styles.detailBadge}>{chart.label}</span>
               <div>
                 <p className={styles.kicker}>
-                  {guide?.name ?? tr("divisional.atlas.detail.fallbackName")}
+                  {guide ? guideText("name") : tr("divisional.atlas.detail.fallbackName")}
                 </p>
-                <h2>{guide?.focus ?? chart.description}</h2>
+                <h2>{guide ? guideText("focus") : chart.description}</h2>
                 {/* D5, D6, D8 and D11 are not among Parashara's sixteen. They
                     sit in the same atlas as the classical vargas, so say which
                     is which rather than letting the presentation imply equal
@@ -297,21 +310,21 @@ export default function DivisionalChartsClient({
               </div>
             </div>
 
-            <p className={styles.detailLead}>{guide?.summary ?? chart.description}</p>
+            <p className={styles.detailLead}>{guide ? guideText("summary") : chart.description}</p>
 
             {guide ? (
               <div className={styles.guidanceGrid}>
                 <article>
                   <FiBookOpen aria-hidden="true" />
-                  <div><h3>{tr("divisional.atlas.detail.readWith")}</h3><p>{guide.readWith}</p></div>
+                  <div><h3>{tr("divisional.atlas.detail.readWith")}</h3><p>{guideText("readWith")}</p></div>
                 </article>
                 <article>
                   <FiCompass aria-hidden="true" />
-                  <div><h3>{tr("divisional.atlas.detail.clientQuestion")}</h3><p>{guide.clientQuestion}</p></div>
+                  <div><h3>{tr("divisional.atlas.detail.clientQuestion")}</h3><p>{guideText("clientQuestion")}</p></div>
                 </article>
                 <article>
                   <FiClock aria-hidden="true" />
-                  <div><h3>{tr("divisional.atlas.detail.reliability")}</h3><p>{guide.sensitivityNote}</p></div>
+                  <div><h3>{tr("divisional.atlas.detail.reliability")}</h3><p>{guideText("sensitivityNote")}</p></div>
                 </article>
               </div>
             ) : (

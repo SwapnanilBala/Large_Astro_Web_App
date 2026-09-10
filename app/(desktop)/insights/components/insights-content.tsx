@@ -30,7 +30,18 @@ import {
 import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
+import divisionalMessages from "@/messages/en.divisional.json";
 import { FiClock, FiBookOpen, FiLayers } from "react-icons/fi";
+
+/* Read as data rather than through useRouteMessages: the varga gateway that
+   renders these chips is still hard-coded English down to its heading, blurb,
+   footnote and CTA, so translating the ten chip labels alone would leave one
+   card speaking two languages. They move with the rest of this file when it
+   is routed through i18n. */
+const ENGLISH_DIVISIONAL_GUIDE = divisionalMessages.divisional.guide as Record<
+  string,
+  { name: string; focus: string }
+>;
 
 // Lightweight skeleton for lazy-loaded panels
 function PanelSkeleton({ minHeight = 200 }: { minHeight?: number }) {
@@ -1535,8 +1546,8 @@ export default function InsightsContent({
                   chipsLabel="Ten key divisional charts"
                   chips={IMPORTANT_DIVISIONAL_CHARTS.map((chart) => ({
                     label: chart.label,
-                    note: chart.name,
-                    title: chart.focus,
+                    note: ENGLISH_DIVISIONAL_GUIDE[`d${chart.division}`].name,
+                    title: ENGLISH_DIVISIONAL_GUIDE[`d${chart.division}`].focus,
                   }))}
                   footnote="Higher divisions are shown with birth-time reliability guidance."
                   footnoteIcon={<FiClock aria-hidden="true" />}

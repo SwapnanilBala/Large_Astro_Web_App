@@ -3,7 +3,9 @@
 import Link from "next/link";
 import {
   IMPORTANT_DIVISIONAL_CHARTS,
+  divisionalGuideKey,
   type DivisionalChartSensitivity,
+  type DivisionalGuideField,
 } from "@/lib/divisional-chart-guide";
 import type {
   DivisionalBoundaryDistance,
@@ -171,13 +173,13 @@ export function DivisionDetailNotice(
     | {
         variant: "missing-input";
         label: string;
-        name: string;
+        division: number;
         atlasHref: string;
       }
     | {
         variant: "unavailable";
         label: string;
-        name: string;
+        division: number;
         /** The calculation's own message; falls back to translated copy. */
         error: string;
         atlasHref: string;
@@ -185,7 +187,8 @@ export function DivisionDetailNotice(
       },
 ) {
   const tr = useRouteMessages(divisionalMessages);
-  const { label, name } = props;
+  const { label, division } = props;
+  const name = tr(divisionalGuideKey(division, "name"));
 
   const copy =
     props.variant === "missing-input"
@@ -247,6 +250,8 @@ export default function DivisionDetailView({
   birthTimeFallback,
 }: DivisionDetailViewProps) {
   const tr = useRouteMessages(divisionalMessages);
+  const guideText = (field: DivisionalGuideField) =>
+    tr(divisionalGuideKey(detail.division, field));
 
   const rowByName = new Map(positionRows.map((row) => [row.position.name, row]));
   const houseBySign = new Map(detail.houses.map((house) => [house.sign, house]));
@@ -318,22 +323,22 @@ export default function DivisionDetailView({
           <div className={styles.heroCopy}>
             <p className={styles.kicker}>{tr("divisional.detail.hero.kicker")}</p>
             <h1>
-              {detail.label} <span>{detail.name}</span>
+              {detail.label} <span>{guideText("name")}</span>
             </h1>
-            <p className={styles.heroFocus}>{detail.focus}</p>
-            <p className={styles.heroSummary}>{detail.summary}</p>
+            <p className={styles.heroFocus}>{guideText("focus")}</p>
+            <p className={styles.heroSummary}>{guideText("summary")}</p>
             <div
               className={styles.heroBadges}
               aria-label={tr("divisional.detail.hero.badgesLabel")}
             >
               <span>{reliability}</span>
-              <span>{detail.mappingMethod}</span>
+              <span>{guideText("mappingMethod")}</span>
               <span>{tr("divisional.detail.hero.wholeSignHouses")}</span>
             </div>
           </div>
           <div className={styles.heroSeal} aria-hidden="true">
             <span>{detail.label}</span>
-            <small>{detail.name}</small>
+            <small>{guideText("name")}</small>
           </div>
         </header>
 
@@ -345,18 +350,18 @@ export default function DivisionDetailView({
         >
           <article>
             <span>{tr("divisional.detail.purpose.purpose")}</span>
-            <h2>{detail.focus}</h2>
+            <h2>{guideText("focus")}</h2>
             <p>{detail.description}</p>
           </article>
           <article>
             <span>{tr("divisional.detail.purpose.clientQuestion")}</span>
             <h2>{tr("divisional.detail.purpose.clientQuestionHeading")}</h2>
-            <p>{detail.clientQuestion}</p>
+            <p>{guideText("clientQuestion")}</p>
           </article>
           <article>
             <span>{tr("divisional.detail.purpose.readWith")}</span>
             <h2>{tr("divisional.detail.purpose.readWithHeading")}</h2>
-            <p>{detail.readWith}</p>
+            <p>{guideText("readWith")}</p>
           </article>
         </section>
 
@@ -375,7 +380,7 @@ export default function DivisionDetailView({
             <h2 id="reliability-title">{reliability}</h2>
           </div>
           <p>
-            {detail.sensitivityNote} {tr("divisional.detail.reliability.note")}
+            {guideText("sensitivityNote")} {tr("divisional.detail.reliability.note")}
           </p>
         </section>
 
@@ -483,7 +488,7 @@ export default function DivisionDetailView({
               })}
               <div className={styles.chartCenter} aria-hidden="true">
                 <strong>{detail.label}</strong>
-                <span>{detail.name}</span>
+                <span>{guideText("name")}</span>
                 <small>{tr("divisional.detail.map.centerCaption")}</small>
               </div>
             </div>
@@ -698,7 +703,7 @@ export default function DivisionDetailView({
             <h2 id="method-title">{tr("divisional.detail.method.heading")}</h2>
           </div>
           <dl className={styles.provenanceList}>
-            <div><dt>{tr("divisional.detail.method.vargaMapping")}</dt><dd>{detail.mappingMethod}</dd></div>
+            <div><dt>{tr("divisional.detail.method.vargaMapping")}</dt><dd>{guideText("mappingMethod")}</dd></div>
             <div><dt>{tr("divisional.detail.method.engine")}</dt><dd>{engine.engineLabel}</dd></div>
             <div><dt>{tr("divisional.detail.method.ephemerisProvider")}</dt><dd>{engine.ephemerisProvider}</dd></div>
             <div><dt>{tr("divisional.detail.method.ayanamsha")}</dt><dd>{engine.ayanamsha}</dd></div>
@@ -726,7 +731,10 @@ export default function DivisionDetailView({
               )}
             >
               <span>← {tr("divisional.detail.pager.previous")}</span>
-              <strong>{previousVarga.label} · {previousVarga.name}</strong>
+              <strong>
+                {previousVarga.label} ·{" "}
+                {tr(divisionalGuideKey(previousVarga.division, "name"))}
+              </strong>
             </Link>
           ) : (
             <span />
@@ -739,7 +747,10 @@ export default function DivisionDetailView({
               )}
             >
               <span>{tr("divisional.detail.pager.next")} →</span>
-              <strong>{nextVarga.label} · {nextVarga.name}</strong>
+              <strong>
+                {nextVarga.label} ·{" "}
+                {tr(divisionalGuideKey(nextVarga.division, "name"))}
+              </strong>
             </Link>
           ) : null}
         </nav>
