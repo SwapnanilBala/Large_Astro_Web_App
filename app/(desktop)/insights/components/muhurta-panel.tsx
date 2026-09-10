@@ -6,7 +6,7 @@ import {
   appendProfileLocationApiSearchParams,
   parseProfileQueryString,
 } from "@/lib/chart-query";
-import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 import styles from "./muhurta-panel.module.css";
 
@@ -111,20 +111,6 @@ interface StoredPrefs {
   minScore?: number;
   daytimeOnly?: boolean;
 }
-
-/*
- * The interface language as a BCP-47 tag for Intl, mirroring
- * future-forecast-panel. These formatters are module-level, so the locale
- * arrives as an argument rather than from a hook.
- */
-const LOCALE_TAGS: Record<Language, string> = {
-  en: "en-US",
-  es: "es-ES",
-  bn: "bn-IN",
-  hi: "hi-IN",
-  it: "it-IT",
-  fr: "fr-FR",
-};
 
 function isDaytime(isoStr: string): boolean {
   const h = new Date(isoStr).getHours();

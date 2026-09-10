@@ -104,6 +104,14 @@ function nextWeekday(day: string, from: Date): Date {
   return date;
 }
 
+/*
+ * Still en-US, deliberately, while the block around it is.
+ *
+ * The WeekAhead rows this feeds are built from literals rather than catalog
+ * keys -- "Primary opening", "Any day", and a detail sentence assembled in
+ * English -- so the date is not the thing making that block English. It wants
+ * LOCALE_TAGS[language] once those rows come from the catalog.
+ */
 function formatWeekAheadDate(date: Date): string {
   return date.toLocaleDateString("en-US", {
     weekday: "short",

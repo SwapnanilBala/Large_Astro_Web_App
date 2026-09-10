@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
-import { useRouteMessages, useTranslation, type Language } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 import styles from "./varshaphal-panel.module.css";
 
@@ -116,20 +116,6 @@ function buildVarshaphalUrl(queryString: string, targetYear: number): string {
     target_year: targetYear,
   });
 }
-
-/*
- * The interface language as a BCP-47 tag for Intl, mirroring
- * future-forecast-panel. These formatters are module-level, so the locale
- * arrives as an argument rather than from a hook.
- */
-const LOCALE_TAGS: Record<Language, string> = {
-  en: "en-US",
-  es: "es-ES",
-  bn: "bn-IN",
-  hi: "hi-IN",
-  it: "it-IT",
-  fr: "fr-FR",
-};
 
 function formatReturnMoment(iso: string, locale: string): string {
   try {

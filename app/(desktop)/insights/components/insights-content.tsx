@@ -564,6 +564,16 @@ type TopTakeaway = {
  * page. Month and year is the honest precision for a takeaway, and it sidesteps
  * the off-by-one entirely; the panel remains the place for day precision.
  */
+/*
+ * Still en-US, deliberately, while its callers are.
+ *
+ * Both of them wrap this in English the catalog has no key for -- "Runs
+ * through {date}" in buildTopTakeaways, and "<strong>{planet}</strong> maha
+ * dasha … to {date}" in the panel summary below. LOCALE_TAGS[language] is what
+ * this wants the day that copy moves into the catalog; localising the date on
+ * its own would only put "12 मार्च 2030" inside an English sentence, which is
+ * a worse mix than the uniform English it is today.
+ */
 function formatMonthYear(iso: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
   const date = new Date(`${iso}T00:00:00Z`);

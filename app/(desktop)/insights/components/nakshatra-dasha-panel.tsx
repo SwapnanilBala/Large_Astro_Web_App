@@ -9,7 +9,7 @@ import type {
   PlanetPosition,
   SubPeriodInfo,
 } from "@/lib/astro-types";
-import { useTranslation } from "@/lib/i18n-context";
+import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import { PLANET_COLORS } from "@/lib/constellation-geometry";
 
 /* ────────────────────────────────────────────────
@@ -280,7 +280,7 @@ export default function NakshatraDashaPanel({
   audit,
   planets,
 }: NakshatraDashaPanelProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const currentPlanet = dasha.current_dasha;
   const [showAudit, setShowAudit] = useState(false);
   const [popup, setPopup] = useState<PopupData | null>(null);
@@ -492,9 +492,13 @@ export default function NakshatraDashaPanel({
     return ms / (1000 * 60 * 60 * 24);
   };
 
-  /* Format date for display */
+  /* Format date for display, in the interface language.
+   *
+   * Parsed as local midnight and formatted in the local zone, so the two
+   * cancel out and the day cannot slip -- which is why there is no timeZone
+   * option here, unlike the /m twin that reads its boundaries as UTC. */
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr + "T00:00:00").toLocaleDateString("en-US", {
+    return new Date(dateStr + "T00:00:00").toLocaleDateString(LOCALE_TAGS[language], {
       month: "short",
       day: "numeric",
       year: "numeric",
