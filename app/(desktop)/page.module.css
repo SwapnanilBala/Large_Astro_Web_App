@@ -3067,3 +3067,12 @@
   color: var(--text-secondary);
   opacity: 1;
 }
+
+/* .questionDot takes `all: unset` and then draws its own four-tier rail, so
+   the leftover ripple and rotating halo from globals.css's button treatment
+   are not part of the design -- and `all: unset` cannot reach a pseudo-element. */
+.questionDot::before,
+.questionDot::after {
+  content: none;
+  display: none;
+}

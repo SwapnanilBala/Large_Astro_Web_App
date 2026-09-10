@@ -2368,6 +2368,9 @@
 
 .collapsibleTrigger {
   all: unset;
+  /* Anchors the hover hairline in ::before. `all: unset` sets position back
+     to static, so this has to come after it. */
+  position: relative;
   display: flex;
   align-items: center;
   /* The label takes what it needs, the summary takes the middle, the chevron
@@ -2419,6 +2422,81 @@
   }
 }
 
+/*
+ * The trigger is a <button>, so everything globals.css does to buttons lands
+ * on it. `all: unset` above is (0,1,0) and does not hold:
+ * `button:hover:where(:not(:disabled))` is (0,1,1), and ::before / ::after are
+ * pseudo-elements that `all: unset` cannot reach at all. Hovering a section
+ * header therefore lifted it 2px, wrapped it in the engraved-gold pill rim,
+ * brightened it and span a blurred halo behind it -- a treatment designed for
+ * a 140px pill, drawn on a 1300px bar, which is what made the row read as a
+ * highlighted slab with a hard outline inside it.
+ *
+ * Neutralised rather than out-specified one property at a time: these four are
+ * the whole of what the global hover sets.
+ */
+.collapsibleTrigger:hover,
+.collapsibleTrigger:focus-visible {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+  color: inherit;
+}
+
+.collapsibleTrigger::after {
+  content: none;
+  display: none;
+}
+
+/*
+ * Hover reads *along* the bar instead of around it: a warm hairline that grows
+ * from the label end. A wash or a rim on something 1300px wide and 115px tall
+ * only redraws the box, which is the thing that looked wrong.
+ *
+ * This reuses the ripple layer the global button rule already provides rather
+ * than adding a node -- every property of it is restated, so nothing of the
+ * original survives.
+ */
+.collapsibleTrigger::before {
+  content: "";
+  display: block;
+  position: absolute;
+  /* top: auto matters -- the global button::before sets `inset: 0`, and with
+     top, bottom and height all resolved the browser drops bottom, which pinned
+     this to the top edge right under the card border. */
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  border-radius: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-gold),
+    color-mix(in srgb, var(--accent-gold) 35%, transparent) 38%,
+    transparent 68%
+  );
+  opacity: 0;
+  transform: scaleX(0.3);
+  transform-origin: left center;
+  transition: opacity 200ms ease, transform 340ms cubic-bezier(0.2, 0.9, 0.3, 1);
+  animation: none;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.collapsibleTrigger:hover::before,
+.collapsibleTrigger:focus-visible::before {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+/* button:active::before is (0,1,1) and would run the pill ripple along the
+   hairline on click. */
+.collapsibleTrigger:active::before {
+  animation: none;
+}
+
 .collapsibleTrigger:hover .heading {
   color: var(--accent-gold);
 }
@@ -2433,15 +2511,29 @@
   color: var(--ink-soft);
   display: flex;
   align-items: center;
+  /* A round target rather than a bare glyph: the bar is wide and low, so the
+     far end needs something for the eye to land on. Fixed box so the row does
+     not reflow when the ring appears. */
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  border: 1px solid transparent;
   /* Sits at the end of the bar whether or not a summary is present. The
      trigger dropped space-between when the summary slot went in, which left
      the chevron tucked against the heading on sections that have none. */
   margin-left: auto;
-  transition: color 0.2s;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
 }
 
-.collapsibleTrigger:hover .chevron {
+/* No transform here: .chevron is a motion.span whose rotate is driven from
+   an inline style, and a transform in this rule would fight it. */
+.collapsibleTrigger:hover .chevron,
+.collapsibleTrigger:focus-visible .chevron {
   color: var(--accent-gold);
+  border-color: color-mix(in srgb, var(--accent-gold) 42%, transparent);
+  background: color-mix(in srgb, var(--accent-gold) 11%, transparent);
 }
 
 /* ── Section Intro ── */

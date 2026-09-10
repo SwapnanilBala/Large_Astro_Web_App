@@ -4441,3 +4441,27 @@
   text-transform: uppercase;
   color: var(--accent-gold);
 }
+
+/*
+ * Both take `all: unset` and then draw themselves, which leaves globals.css s
+ * ripple (::before) and rotating halo (::after) behind: `all: unset` cannot
+ * reach a pseudo-element.
+ *
+ * .shadbala-row-header additionally has no :hover of its own, so
+ * `button:hover:where(:not(:disabled))` -- (0,1,1), against the reset s
+ * (0,1,0) -- was still lifting it 2px and wrapping it in the pill rim shadow.
+ */
+.dasha-breadcrumb-item::before,
+.dasha-breadcrumb-item::after,
+.shadbala-row-header::before,
+.shadbala-row-header::after {
+  content: none;
+  display: none;
+}
+
+.shadbala-row-header:hover,
+.shadbala-row-header:focus-visible {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}

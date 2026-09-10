@@ -935,3 +935,27 @@
 :global(html[data-theme="light"]) .styleLabel {
   color: var(--text-secondary);
 }
+
+/*
+ * These five are <button>s that take `all: unset` and then draw themselves, so
+ * globals.css's ripple (::before) and rotating halo (::after) are left over
+ * from a treatment they opted out of -- and `all: unset` cannot reach a
+ * pseudo-element. Measured on hover: opacity 1, blur(8px), a conic gradient
+ * and btn-halo-spin running forever, 2px outside each edge. Clipped on .cta,
+ * which has overflow: hidden, and visible as a hue-rotating glow on the rest.
+ *
+ * Same idiom as .importantCardSelect / .chartTab in the varga atlas.
+ */
+.card::before,
+.card::after,
+.groupSelectButton::before,
+.groupSelectButton::after,
+.houseChip::before,
+.houseChip::after,
+.cardGoButton::before,
+.cardGoButton::after,
+.cta::before,
+.cta::after {
+  content: none;
+  display: none;
+}
