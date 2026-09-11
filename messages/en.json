@@ -354,7 +354,9 @@
     "years": "years",
     "currentSummaryLabel": "What This Means For You",
     "daysRemaining": "{days} days remaining",
-    "periodProgress": "Period Progress"
+    "periodProgress": "Period Progress",
+    "stepBack": "Back",
+    "stepBackTo": "Back to {level}"
   },
   "transits": {
     "kicker": "CURRENT SKY",
@@ -503,7 +505,7 @@
     "jupiter": "Jupiter",
     "saturn": "Saturn"
   },
-"account": {
+  "account": {
     "kicker": "Your Account",
     "heading": "Sign in",
     "headingSignedIn": "You’re signed in",

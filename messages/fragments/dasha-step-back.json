@@ -1,0 +1,32 @@
+{
+  "es": {
+    "dasha": {
+      "stepBack": "Atrás",
+      "stepBackTo": "Volver a {level}"
+    }
+  },
+  "bn": {
+    "dasha": {
+      "stepBack": "পিছনে",
+      "stepBackTo": "{level}-এ ফিরে যান"
+    }
+  },
+  "hi": {
+    "dasha": {
+      "stepBack": "वापस",
+      "stepBackTo": "{level} पर वापस जाएं"
+    }
+  },
+  "it": {
+    "dasha": {
+      "stepBack": "Indietro",
+      "stepBackTo": "Torna a {level}"
+    }
+  },
+  "fr": {
+    "dasha": {
+      "stepBack": "Retour",
+      "stepBackTo": "Retour à {level}"
+    }
+  }
+}

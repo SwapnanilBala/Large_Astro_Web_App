@@ -560,6 +560,57 @@
   color: var(--ink-main);
   background: var(--surface-strong);
 }
+/*
+ * Up one level. Reads as a control rather than a crumb -- a bordered chip
+ * ahead of the trail -- because the crumbs are the path and this is the way
+ * out of it, and five levels deep the two want telling apart at a glance.
+ */
+.dasha-breadcrumb-back {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: var(--accent-gold);
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+/* The global button treatment would otherwise land the engraved pill rim and
+   a blurred rotating halo on this; "all: unset" cannot reach a pseudo-element,
+   and button:hover:where(:not(:disabled)) outranks it. */
+.dasha-breadcrumb-back::before,
+.dasha-breadcrumb-back::after {
+  content: none;
+  display: none;
+}
+
+.dasha-breadcrumb-back:hover,
+.dasha-breadcrumb-back:focus-visible {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+  color: var(--ink-main);
+  background: var(--surface-strong);
+  border-color: var(--accent-gold);
+}
+
+.dasha-breadcrumb-back:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+.dasha-breadcrumb-divider {
+  width: 1px;
+  align-self: stretch;
+  margin: 0.1rem 0.45rem 0.1rem 0.3rem;
+  background: var(--line-soft);
+}
+
 
 /* ── Dasha Combination Insight Card ── */
 

@@ -415,6 +415,45 @@ export default function NakshatraDashaPanel({
     setPopup(null);
   };
 
+  /*
+   * Up one level.
+   *
+   * The breadcrumb could already do this, but only by aiming at the
+   * second-to-last crumb -- the last one is the level you are already on, so
+   * the obvious target is the one that does nothing. Five levels deep that is
+   * a lot of precision to ask for just to back out, which is why the way out
+   * was reading as "reload the page".
+   *
+   * Slicing to length - 2 lands on -1 when there is one step left, which
+   * handleBreadcrumbClick already treats as "back to the timeline".
+   */
+  const handleStepBack = useCallback(() => {
+    setDrillPath((prev) => {
+      if (prev.length === 0) return prev;
+      const next = prev.slice(0, prev.length - 1);
+      setViewMode(next.length === 0 ? "timeline" : "lens");
+      return next;
+    });
+    setPopup(null);
+  }, []);
+
+  /* Escape steps back out one level. The popup owns Escape while it is open
+     (see the effect above, which returns early when there is no popup), so
+     the two never both fire for one press. */
+  useEffect(() => {
+    if (popup || drillPath.length === 0) return;
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      const el = document.activeElement;
+      /* leave text entry alone */
+      if (el instanceof HTMLElement && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
+      e.preventDefault();
+      handleStepBack();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [popup, drillPath.length, handleStepBack]);
+
   const handleBarClick = (
     planet: string,
     isCurrent: boolean,
@@ -609,6 +648,9 @@ export default function NakshatraDashaPanel({
   const combinationInsight = getCombinationInsight();
   const currentProgress = getAntardashaProgress();
   const selectedParent = drillPath.length > 0 ? drillPath[drillPath.length - 1] : null;
+  /* One level shallower than what is on screen; at the first step that is the
+     Maha Dasha timeline itself. */
+  const stepBackTarget = LEVEL_LABELS[currentDrillLevel - 1] ?? LEVEL_LABELS[1];
   const displayLevel = currentSubPeriods ? currentDrillLevel : 1;
   const displayPeriods: DashaDisplayPeriod[] = currentSubPeriods
     ? currentSubPeriods
@@ -868,6 +910,19 @@ export default function NakshatraDashaPanel({
         {/* ── Breadcrumb Navigation ── */}
         {drillPath.length > 0 && (
           <nav className="dasha-breadcrumb anim-fade-in">
+            {/* Named after where it lands, not just "back": five levels in,
+                "Back" alone does not say how far. */}
+            <button
+              className="dasha-breadcrumb-back"
+              onClick={handleStepBack}
+              type="button"
+              title={t("dasha.stepBackTo", { level: stepBackTarget })}
+              aria-label={t("dasha.stepBackTo", { level: stepBackTarget })}
+            >
+              <span aria-hidden="true">&larr;</span>
+              {t("dasha.stepBack")}
+            </button>
+            <span className="dasha-breadcrumb-divider" aria-hidden="true" />
             <button
               className="dasha-breadcrumb-item"
               onClick={() => handleBreadcrumbClick(-1)}
