@@ -1,6 +1,8 @@
 import Link from "next/link";
 import AdvancedLoader from "./advanced-loader";
 import BackButton from "@/app/components/BackButton";
+import BackToReadingButton from "@/app/components/BackToReadingButton";
+import { buildChartHistoryQuery } from "@/lib/chart-params";
 import PageTransition from "@/app/components/PageTransition";
 import { getAdvancedFocusView } from "./advanced-views";
 
@@ -82,7 +84,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   return (
     <PageTransition>
     <div className="insights-shell below-navbar">
-      <BackButton href="/" />
+      <BackToReadingButton queryString={buildChartHistoryQuery(chartParams)} label="Back" />
       <AdvancedLoader chartParams={chartParams} focusView={focusView} />
     </div>
     </PageTransition>

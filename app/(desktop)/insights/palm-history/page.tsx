@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 
-import BackButton from "@/app/components/BackButton";
+import BackToReadingButton from "@/app/components/BackToReadingButton";
 import PalmHistoryClient from "./PalmHistoryClient";
 
 export const metadata = {
@@ -18,7 +18,7 @@ export const metadata = {
 export default function PalmHistoryPage() {
   return (
     <div className="home-shell">
-      <BackButton href="/insights/advanced" />
+      <BackToReadingButton path="/insights/advanced" label="Back to advanced" />
       <Suspense fallback={null}>
         <PalmHistoryClient />
       </Suspense>

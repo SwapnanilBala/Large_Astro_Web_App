@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
-import BackButton from "@/app/components/BackButton";
+import BackToReadingButton from "@/app/components/BackToReadingButton";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
@@ -648,7 +648,7 @@ export default function CompatibilityPageClient({
     <div className="insights-shell below-navbar">
       <div className="ambient ambient-left" />
       <div className="ambient ambient-right" />
-      <BackButton />
+      <BackToReadingButton />
 
       <section className="dashboard-shell">
         <p className="kicker">Synastry Analysis</p>
