@@ -160,7 +160,17 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
         <p className={shell.lead}>{tr("engineSelect.lead")}</p>
       </header>
 
-      <div className={styles.traditions}>
+      {/* Named once, over the list it labels -- a card is an option within
+          the main method, not the main method, so a copy per card read as six
+          separate settings. The sub label stays inside the open card because
+          that is the only place its chips exist. */}
+      <span className={styles.axisLabel} id="m-main-method-label">
+        {tr("engineSelect.mainMethodLabel")}
+        <span aria-hidden="true"> · </span>
+        {tr("engineSelect.summaryAyanamsha")}
+      </span>
+
+      <div className={styles.traditions} role="group" aria-labelledby="m-main-method-label">
         {TRADITION_ORDER.map((key) => {
           const group = groups.find((candidate) => candidate.key === key);
           if (!group) return null;
@@ -221,8 +231,14 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
                 </p>
                 <p className={styles.method}>{tr(`engineSelect.groups.${group.key}.method`)}</p>
 
-                <span className={styles.styleLabel} id={styleLabelId}>
-                  {tr("engineSelect.styleLabel")}
+                {/* summaryStyle, not styleLabel: this page's own summary at
+                    the foot already calls this axis "House style", and the
+                    card naming it something else would read as two settings.
+                    styleLabel stays for the desktop chooser. */}
+                <span className={`${styles.styleLabel} ${styles.axisLabel}`} id={styleLabelId}>
+                  {tr("engineSelect.subMethodLabel")}
+                  <span aria-hidden="true"> · </span>
+                  {tr("engineSelect.summaryStyle")}
                 </span>
                 <div className={styles.chips} role="radiogroup" aria-labelledby={styleLabelId}>
                   {group.engines.map((engine, engineIndex) => {

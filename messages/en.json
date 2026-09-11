@@ -146,6 +146,8 @@
     "guidanceStep3": "3. Generate the chart with that method",
     "recommended": "Recommended",
     "styleLabel": "Chart style",
+    "mainMethodLabel": "Main method",
+    "subMethodLabel": "Sub method",
     "selectedKicker": "Selected method",
     "summaryAyanamsha": "Ayanamsha",
     "summaryStyle": "House style",

@@ -1,0 +1,32 @@
+{
+  "es": {
+    "engineSelect": {
+      "mainMethodLabel": "Método principal",
+      "subMethodLabel": "Submétodo"
+    }
+  },
+  "bn": {
+    "engineSelect": {
+      "mainMethodLabel": "প্রধান পদ্ধতি",
+      "subMethodLabel": "উপ-পদ্ধতি"
+    }
+  },
+  "hi": {
+    "engineSelect": {
+      "mainMethodLabel": "मुख्य विधि",
+      "subMethodLabel": "उप विधि"
+    }
+  },
+  "it": {
+    "engineSelect": {
+      "mainMethodLabel": "Metodo principale",
+      "subMethodLabel": "Sottometodo"
+    }
+  },
+  "fr": {
+    "engineSelect": {
+      "mainMethodLabel": "Méthode principale",
+      "subMethodLabel": "Sous-méthode"
+    }
+  }
+}

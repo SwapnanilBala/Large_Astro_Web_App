@@ -173,6 +173,27 @@
   color: var(--text-secondary, #a8a090);
 }
 
+/* Both axes are named the same way, so they share one rule -- the main one
+   above the tradition list, the sub one above the chips inside the open card.
+   .styleLabel keeps its own margin because it follows a paragraph rather than
+   opening a block.
+
+   --text-secondary, not --accent-gold. Gold was the first try and it is the
+   accent this page uses everywhere else, but at 0.68rem it measured 3.85:1 in
+   Ethereal Dawn -- this tree's light --accent-gold is #ad7138 on a #fff8f5
+   page, and nothing here reaches the size where AA relaxes. It is also what
+   the same two labels use on /insights, where they are --ink-soft rather than
+   the accent. Measured after the change, main label then sub: 7.61 / 6.85
+   dark, 6.06 / 6.02 light. */
+.axisLabel {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-secondary, #a8a090);
+}
+
 .chips {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
