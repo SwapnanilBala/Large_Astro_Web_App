@@ -2084,7 +2084,10 @@
 .calculationPanel {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  /* start, not flex-end. The tiers are several rows of chips tall where the
+     fact list they replaced was one line, so bottom-alignment left the
+     method's own name stranded at the foot of a column of empty space. */
+  align-items: flex-start;
   gap: 1rem 1.6rem;
   border: 1px solid var(--line-soft);
   border-radius: 14px;
@@ -2099,7 +2102,7 @@
 }
 
 .calculationIdentity {
-  flex: 1 1 15rem;
+  flex: 0 1 14rem;
   min-width: 0;
 }
 
@@ -2109,6 +2112,136 @@
   font-family: var(--font-display), sans-serif;
   font-size: 1.25rem;
   line-height: 1.25;
+}
+
+/* The provider sits under the resolved name rather than in the fact list: it
+   is the one fact that is not a choice, and leaving it among the two that are
+   read as though you could change it too. */
+.calculationProvider {
+  margin: 0.3rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+}
+
+/* ── Method tiers ──────────────────────────────────────────────
+ *
+ * An engine is a pair -- tradition and house system -- joined into one label
+ * ("Lahiri Classic", "Krishnamurti Placidus"). Shown as that one name, with
+ * its two halves repeated beside it as flat facts and a 36-option select
+ * underneath, nothing tells you the name is two choices or which half a given
+ * option changes. These two tiers are the halves, in order: the tradition,
+ * then the style inside it.
+ */
+.methodTiers {
+  display: flex;
+  flex: 1 1 26rem;
+  flex-wrap: wrap;
+  gap: 0.9rem 2rem;
+  min-width: 0;
+}
+
+.methodTier {
+  display: flex;
+  flex: 1 1 16rem;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* The second tier is subordinate to the first, and a rule says so more
+   quietly than indenting it would -- these sit side by side when the panel is
+   wide enough, where an indent would read as a broken column. */
+.methodTier + .methodTier {
+  padding-left: 2rem;
+  border-left: 1px solid var(--line-soft);
+}
+
+.methodTierHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.methodTierKicker {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.methodTierValue {
+  color: var(--ink-main);
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.methodChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+/* Mirrors .houseChip on /engine-select, which is where this choice is first
+   offered, so the same decision looks the same in both places -- but built
+   from tokens rather than that rule's literal darks, which have no light
+   counterpart. */
+.methodChip {
+  all: unset;
+  box-sizing: border-box;
+  padding: 0.32rem 0.7rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition:
+    border-color 0.2s ease,
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.methodChip:hover:not(:disabled) {
+  border-color: var(--border-medium);
+  color: var(--ink-main);
+}
+
+.methodChip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+/* The active chip is the only thing marking which of six is current, so it
+   takes the accent rather than a heavier weight.
+
+   --accent-gold-light here rather than --accent-gold, because the 12% fill
+   lifts the backdrop toward the same gold the text is: measured, gold on that
+   fill came to 4.29:1, under the floor, while the unfilled chips beside it sat
+   at 6.13 -- the current one the least readable of the six. The lighter end of
+   the ramp measures 6.60 over the same fill, which also puts it back above its
+   neighbours. The light theme takes the opposite end below: its
+   --accent-gold-light is a pale tan on a near-white card, where --accent-gold
+   measures 6.24 against the inactive chips' 6.11. */
+.methodChipActive {
+  border-color: var(--border-strong);
+  background: color-mix(in srgb, var(--accent-gold) 12%, transparent);
+  color: var(--accent-gold-light);
+}
+
+:global(html[data-theme="light"]) .methodChipActive {
+  color: var(--accent-gold);
+}
+
+/* Routing is a page navigation, so every chip is inert until it lands. */
+.methodChip:disabled {
+  cursor: wait;
+  opacity: 0.62;
 }
 
 .calculationFacts {

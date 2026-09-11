@@ -110,6 +110,7 @@ import type {
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
+import { TRADITION_ORDER } from "@/lib/engines/engine-registry";
 import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
 
@@ -833,7 +834,66 @@ export default function InsightsContent({
   const rankedDomainInsights = [...domainInsights].sort(
     (left, right) => right.confidence_score - left.confidence_score
   );
-  const availableEngines = payload.engine.available_engines ?? [];
+  /* Memoised for its identity, not its cost: the ?? [] branch produces a fresh
+     array every render, which would re-run the methodAxes memo below on each
+     one. */
+  const availableEngines = useMemo(
+    () => payload.engine.available_engines ?? [],
+    [payload.engine.available_engines]
+  );
+
+  /* Every engine id is a (tradition, house system) pair -- "lahiri_classic",
+     "krishnamurti_placidus" -- and the label is just the two joined with a
+     space. The panel used to show that joined label plus a flat select of all
+     36 combinations, which asks the reader to already know that "Krishnamurti
+     Placidus" is two independent choices. Split back into its axes so the
+     panel can show them as what they are: the tradition, then the style
+     inside it.
+
+     Grouped by id prefix rather than by a hardcoded key list, so a tradition
+     added to the registry appears here with no change -- the same derivation
+     app/m/engine-select uses. */
+  const methodAxes = useMemo(() => {
+    const traditions = TRADITION_ORDER.map((key) => ({
+      key,
+      engines: availableEngines.filter((engine) =>
+        engine.engine_id.startsWith(`${key}_`)
+      ),
+    })).filter((tradition) => tradition.engines.length > 0);
+
+    const active =
+      traditions.find((tradition) =>
+        tradition.engines.some(
+          (engine) => engine.engine_id === payload.engine.engine_id
+        )
+      ) ?? traditions[0];
+
+    /* payload.engine carries the house system's display label but not its
+       code, and the code is what pairs the two axes. It is on the matching
+       available_engines entry, so read it from there rather than widening the
+       payload type for one field. */
+    const activeCode =
+      availableEngines.find(
+        (engine) => engine.engine_id === payload.engine.engine_id
+      )?.house_system_code ?? "whole_sign";
+
+    return { traditions, active, activeCode, styles: active?.engines ?? [] };
+  }, [availableEngines, payload.engine.engine_id]);
+
+  /* Changing one axis holds the other. Switching tradition keeps the house
+     system you were reading in if that pair exists -- it always does, the
+     registry builds a full cross-product -- and otherwise falls back to whole
+     sign, which is the Vedic default a tradition opens on. */
+  const engineForAxes = (traditionKey: string, houseSystemCode: string) => {
+    const within = availableEngines.filter((engine) =>
+      engine.engine_id.startsWith(`${traditionKey}_`)
+    );
+    return (
+      within.find((engine) => engine.house_system_code === houseSystemCode) ??
+      within.find((engine) => engine.house_system_code === "whole_sign") ??
+      within[0]
+    );
+  };
   const [selectedDomainKey, setSelectedDomainKey] = useState<
     LifeDomainInsight["key"]
   >(
@@ -1413,41 +1473,103 @@ export default function InsightsContent({
               <div className={styles.calculationIdentity}>
                 <p className={styles.kicker}>Calculation method</p>
                 <h3>{payload.engine.engine_label}</h3>
+                <p className={styles.calculationProvider}>
+                  {payload.engine.fallback_mode
+                    ? "Fallback calculation"
+                    : payload.engine.ephemeris_provider}
+                </p>
               </div>
 
-              <dl className={styles.calculationFacts}>
-                <div className={styles.calculationFact}>
-                  <dt>Ayanamsha</dt>
-                  <dd>{payload.engine.ayanamsha}</dd>
+              {/* Two tiers rather than one name: the tradition, then the style
+                  inside it. Each shows its own value and, when there is more
+                  than one engine to move between, the alternatives beside it. */}
+              <div className={styles.methodTiers}>
+                <div className={styles.methodTier}>
+                  <div className={styles.methodTierHead}>
+                    <span className={styles.methodTierKicker}>
+                      Main method <span aria-hidden="true">·</span> Ayanamsha
+                    </span>
+                    <span className={styles.methodTierValue}>
+                      {methodAxes.active
+                        ? t(`engineSelect.groups.${methodAxes.active.key}.label`)
+                        : payload.engine.ayanamsha}
+                    </span>
+                  </div>
+                  {methodAxes.traditions.length > 1 && (
+                    <div
+                      className={styles.methodChips}
+                      role="radiogroup"
+                      aria-label="Main method, ayanamsha"
+                    >
+                      {methodAxes.traditions.map((tradition) => {
+                        const isActive = tradition.key === methodAxes.active?.key;
+                        const target = engineForAxes(
+                          tradition.key,
+                          methodAxes.activeCode
+                        );
+                        return (
+                          <button
+                            key={tradition.key}
+                            type="button"
+                            role="radio"
+                            aria-checked={isActive}
+                            tabIndex={isActive ? 0 : -1}
+                            disabled={isRouting}
+                            className={`${styles.methodChip}${isActive ? ` ${styles.methodChipActive}` : ""}`}
+                            onClick={() => target && switchEngine(target.engine_id)}
+                          >
+                            {t(`engineSelect.groups.${tradition.key}.label`)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-                <div className={styles.calculationFact}>
-                  <dt>House system</dt>
-                  <dd>{payload.engine.house_system}</dd>
-                </div>
-                <div className={styles.calculationFact}>
-                  <dt>Mode</dt>
-                  <dd>
-                    {payload.engine.fallback_mode ? "Fallback calculation" : payload.engine.ephemeris_provider}
-                  </dd>
-                </div>
-              </dl>
 
-              {availableEngines.length > 1 && (
-                <label className={styles.engineSwitcher}>
-                  <span className={styles.claimLabel}>Change method</span>
-                  <select
-                    value={payload.engine.engine_id}
-                    onChange={(event) => switchEngine(event.target.value)}
-                    disabled={isRouting}
-                  >
-                    {availableEngines.map((engine) => (
-                      <option key={engine.engine_id} value={engine.engine_id}>
-                        {engine.label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
+                <div className={styles.methodTier}>
+                  <div className={styles.methodTierHead}>
+                    <span className={styles.methodTierKicker}>
+                      Sub method <span aria-hidden="true">·</span> House system
+                    </span>
+                    {/* The catalog label, not payload.engine.house_system:
+                        the registry calls whole sign "Whole Sign" and the
+                        chooser calls it "Classic Whole Sign", and the value
+                        sitting above a chip that names it differently reads
+                        as two settings rather than one. */}
+                    <span className={styles.methodTierValue}>
+                      {methodAxes.styles.length > 0
+                        ? t(`engineSelect.styles.${methodAxes.activeCode}.label`)
+                        : payload.engine.house_system}
+                    </span>
+                  </div>
+                  {methodAxes.styles.length > 1 && (
+                    <div
+                      className={styles.methodChips}
+                      role="radiogroup"
+                      aria-label="Sub method, house system"
+                    >
+                      {methodAxes.styles.map((engine) => {
+                        const isActive =
+                          engine.engine_id === payload.engine.engine_id;
+                        return (
+                          <button
+                            key={engine.engine_id}
+                            type="button"
+                            role="radio"
+                            aria-checked={isActive}
+                            tabIndex={isActive ? 0 : -1}
+                            disabled={isRouting}
+                            className={`${styles.methodChip}${isActive ? ` ${styles.methodChipActive}` : ""}`}
+                            onClick={() => switchEngine(engine.engine_id)}
+                          >
+                            {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
             </section>
 
             <div className={styles.cardPlanets}>
