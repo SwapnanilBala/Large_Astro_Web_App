@@ -457,6 +457,20 @@ export type ForecastAspectInsight = {
   orb: number;
   tone: "supportive" | "challenging" | "mixed";
   interpretation: string;
+  /*
+   * How the aspect is moving on the target day.
+   *
+   * These are what the day's lead is now chosen by — see forecast-novelty.ts —
+   * rather than tightest orb, which let a slow planet hold the slot for weeks.
+   * Carried on the payload because an orb alone cannot tell a reader whether
+   * they are looking at something arriving or something leaving.
+   */
+  /** True while still closing on exact. */
+  applying?: boolean;
+  /** Days until exact; absent once separating, or when motion is unreadable. */
+  days_to_exact?: number;
+  /** Roughly how long this aspect has already been within orb. */
+  days_in_orb?: number;
 };
 
 export type ForecastReading = {

@@ -425,5 +425,86 @@ describe("chart-service", () => {
         expect(t.tone).toBe("challenging");
       }
     });
+
+    /*
+     * Day-to-day variety.
+     *
+     * Everything below the dasha used to be keyed to the mahadasha and
+     * antardasha pair, which on this fixture holds for 879 days: the headline,
+     * overview, focus areas, opportunities and cautions were byte-identical
+     * for two and a half years with only the printed date moving, and the two
+     * transit lines were chosen by tightest orb, which a slow planet can own
+     * for weeks. These assert the outcome rather than the mechanism, and are
+     * deliberately loose -- they are here to catch the section going flat
+     * again, not to pin exact ephemeris values.
+     */
+    describe("gives the reader something that changes", () => {
+      const dayRange = (startIso: string, n: number) =>
+        Array.from({ length: n }, (_, i) => {
+          const d = new Date(`${startIso}T12:00:00Z`);
+          d.setUTCDate(d.getUTCDate() + i);
+          return d.toISOString().slice(0, 10);
+        });
+
+      it("varies the lead transit across a month instead of repeating one aspect", () => {
+        const leads = dayRange("2026-09-10", 30).map((date) => {
+          const f = buildForecast(BIRTH, date);
+          const c = f.challenging_transits[0];
+          return c ? `${c.transit_planet}|${c.natal_planet}|${c.aspect_type}` : "-";
+        });
+        /* Tightest-orb selection produced long identical runs here. */
+        expect(new Set(leads).size).toBeGreaterThan(8);
+      });
+
+      it("does not spend both transit lines on the same transiting body", () => {
+        /* One reading whose every line is "Moon something" reads as thin even
+           when the aspects differ. Allowed only when nothing else is in orb. */
+        let sameBody = 0;
+        const dates = dayRange("2026-09-10", 30);
+        for (const date of dates) {
+          const f = buildForecast(BIRTH, date);
+          const s = f.supportive_transits[0];
+          const c = f.challenging_transits[0];
+          if (s && c && s.transit_planet === c.transit_planet) sameBody++;
+        }
+        expect(sameBody).toBeLessThanOrEqual(3);
+      });
+
+      it("moves the headline as the pratyantardasha turns over", () => {
+        /* The antardasha does not change across this span; the third level
+           does, which is the point of reading it. */
+        const headlines = new Set(
+          Array.from({ length: 18 }, (_, m) => {
+            const iso = new Date(Date.UTC(2026, 8 + m, 1)).toISOString().slice(0, 10);
+            return buildForecast(BIRTH, iso).headline.split(iso).join("<DATE>");
+          })
+        );
+        expect(headlines.size).toBeGreaterThan(3);
+      });
+
+      it("never prints the same sentence twice in one list", () => {
+        /* DASHA_FORECAST_THEMES has one row per planet, so a cycle sharing a
+           lord with the mahadasha used to yield a duplicated bullet. */
+        for (const date of ["2024-12-01", "2026-09-10", "2028-01-15"]) {
+          const f = buildForecast(BIRTH, date);
+          expect(new Set(f.opportunities).size).toBe(f.opportunities.length);
+          expect(new Set(f.cautions).size).toBe(f.cautions.length);
+        }
+      });
+
+      it("says which way a surfaced aspect is moving", () => {
+        const f = buildForecast(BIRTH, "2026-09-10");
+        for (const t of [...f.supportive_transits, ...f.challenging_transits]) {
+          expect(typeof t.applying).toBe("boolean");
+          if (t.days_to_exact !== undefined) {
+            expect(t.days_to_exact).toBeGreaterThanOrEqual(0);
+          }
+          /* Infinity is a real ranking value but not a serialisable one. */
+          if (t.days_in_orb !== undefined) {
+            expect(Number.isFinite(t.days_in_orb)).toBe(true);
+          }
+        }
+      });
+    });
   });
 });

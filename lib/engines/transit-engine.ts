@@ -47,11 +47,20 @@ export function getCurrentTransitPositions(engineId?: string): TransitPosition[]
   return computeTransitPositions(new Date(), engineId);
 }
 
+/**
+ * How far from exact an aspect may be and still count.
+ *
+ * Exported because forecast-novelty.ts measures how long an aspect has already
+ * been inside this window, which is only meaningful against the same number
+ * the aspects were collected with.
+ */
+export const TRANSIT_ORB_LIMIT = 8;
+
 export function computeTransitAspects(
   natalPlanets: PlanetPosition[],
   transitPositions: TransitPosition[]
 ): TransitAspect[] {
-  const orbLimit = 8;
+  const orbLimit = TRANSIT_ORB_LIMIT;
   const aspects: TransitAspect[] = [];
 
   for (const transit of transitPositions) {

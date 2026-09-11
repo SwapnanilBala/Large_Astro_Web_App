@@ -33,6 +33,7 @@ import {
 } from "./divisional-engine";
 import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
+import { rankAspectsByNovelty, FORECAST_SAMPLE_SPACING_DAYS } from "./forecast-novelty";
 import { calculateShadbala } from "./shadbala-engine";
 import type { ShadbalaResult } from "./shadbala-engine";
 import { detectYogas } from "./yoga-engine";
@@ -203,14 +204,16 @@ export interface ForecastReading {
   challenging_transits: ForecastAspectInsight[];
 }
 
-interface ForecastAspectInsight {
-  transit_planet: string;
-  natal_planet: string;
-  aspect_type: string;
-  orb: number;
-  tone: "supportive" | "challenging" | "mixed";
-  interpretation: string;
-}
+/*
+ * The shared wire type, not a local copy.
+ *
+ * This file used to declare its own structurally identical
+ * ForecastAspectInsight while future-forecast-panel.tsx imported the one in
+ * astro-types.ts — two definitions of one payload, with nothing tying them
+ * together. Adding the motion fields to one would silently not reach the
+ * other, so the producer now names the same type the consumer reads.
+ */
+type ForecastAspectInsight = import("@/lib/astro-types").ForecastAspectInsight;
 
 // --------------------------------------------------------------------------
 // Constants
@@ -422,6 +425,18 @@ function isoMinute(date: Date): string {
   return date.toISOString().replace(/:\d{2}\.\d{3}Z$/, "").replace("Z", "");
 }
 
+/*
+ * Drops repeats while keeping order.
+ *
+ * The opportunity and caution lists draw one sentence from the fast cycle and
+ * one from the mahadasha, and DASHA_FORECAST_THEMES has a single row per
+ * planet — so whenever those two cycles share a lord the list was the same
+ * sentence twice. Two identical bullets read as a rendering bug.
+ */
+function dedupeSentences(items: string[]): string[] {
+  return [...new Set(items.filter(Boolean))];
+}
+
 function aspectTone(transitPlanet: string, aspectType: string): string {
   if (aspectType === "Conjunction") {
     if (["Jupiter", "Venus"].includes(transitPlanet)) return "supportive";
@@ -447,7 +462,17 @@ function forecastAspectInterpretation(
 }
 
 function toForecastAspect(
-  ta: { transit_planet: string; natal_planet: string; aspect_type: string; orb: number }
+  ta: {
+    transit_planet: string;
+    natal_planet: string;
+    aspect_type: string;
+    orb: number;
+    /* Present when the aspect came through rankAspectsByNovelty, which is
+       every forecast path; optional so the older call shape still type-checks. */
+    applying?: boolean;
+    daysToExact?: number | null;
+    ageInOrbDays?: number;
+  }
 ): ForecastAspectInsight {
   const tone = aspectTone(ta.transit_planet, ta.aspect_type) as ForecastAspectInsight["tone"];
   return {
@@ -461,6 +486,15 @@ function toForecastAspect(
       ta.aspect_type,
       ta.natal_planet
     ),
+    ...(ta.applying === undefined ? {} : { applying: ta.applying }),
+    ...(ta.daysToExact === undefined || ta.daysToExact === null
+      ? {}
+      : { days_to_exact: Math.round(ta.daysToExact * 10) / 10 }),
+    /* Infinity is how forecast-novelty says "stationary in orb, as old as it
+       gets" — real enough for ranking, not a number to serialise. */
+    ...(ta.ageInOrbDays === undefined || !Number.isFinite(ta.ageInOrbDays)
+      ? {}
+      : { days_in_orb: Math.round(ta.ageInOrbDays * 10) / 10 }),
   };
 }
 
@@ -1092,25 +1126,56 @@ export function buildForecast(
     targetDate.getTime() - (birth.timezone_offset_minutes ?? 0) * 60000
   );
 
-  const transitPositions = computeTransitPositions(targetUtc, birth.engine_id);
-  const transitAspects = computeTransitAspects(core.planets, transitPositions).map(
-    (a) => ({
-      transit_planet: a.transit_planet,
-      natal_planet: a.natal_planet,
-      aspect_type: a.aspect_type,
-      orb: a.orb,
-    })
+  /*
+   * Three snapshots, six hours apart, so the aspects can be ranked by how they
+   * are moving rather than by how tight they happen to be. The neighbours are
+   * only measured, never shown. See forecast-novelty.ts for why tightest-orb
+   * was the wrong question, and why the spacing is hours rather than a day.
+   */
+  const aspectsAt = (at: Date) =>
+    computeTransitAspects(core.planets, computeTransitPositions(at, birth.engine_id)).map(
+      (a) => ({
+        transit_planet: a.transit_planet,
+        natal_planet: a.natal_planet,
+        aspect_type: a.aspect_type,
+        orb: a.orb,
+      })
+    );
+
+  const sampleOffsetMs = FORECAST_SAMPLE_SPACING_DAYS * 86_400_000;
+  const transitAspects = aspectsAt(targetUtc);
+  const ranked = rankAspectsByNovelty(
+    transitAspects,
+    aspectsAt(new Date(targetUtc.getTime() - sampleOffsetMs)),
+    aspectsAt(new Date(targetUtc.getTime() + sampleOffsetMs)),
+    FORECAST_SAMPLE_SPACING_DAYS
   );
 
-  const supportiveTransits = transitAspects
-    .filter((a) => aspectTone(a.transit_planet, a.aspect_type) === "supportive")
-    .slice(0, 1)
-    .map(toForecastAspect);
+  /* Still one line each. The complaint was that the two lines repeated, not
+     that there were too few of them, so this changes which aspect wins rather
+     than how many are shown. */
+  const byTone = (tone: string) =>
+    ranked.filter((a) => aspectTone(a.transit_planet, a.aspect_type) === tone);
 
-  const challengingTransits = transitAspects
-    .filter((a) => aspectTone(a.transit_planet, a.aspect_type) === "challenging")
-    .slice(0, 1)
-    .map(toForecastAspect);
+  const supportivePick = byTone("supportive")[0];
+
+  /*
+   * The second line prefers a different transiting body.
+   *
+   * Ranking by novelty puts the Moon in front most days, which is right -- it
+   * is the fastest mover and the traditional daily timer -- but taken twice it
+   * made both lines "Moon something", and a day whose entire reading is the
+   * Moon reads as thin even when the aspects differ. Falls back to the plain
+   * top pick when the Moon is genuinely the only challenging aspect in orb.
+   */
+  const challengingCandidates = byTone("challenging");
+  const challengingPick =
+    challengingCandidates.find(
+      (a) => a.transit_planet !== supportivePick?.transit_planet
+    ) ?? challengingCandidates[0];
+
+  const supportiveTransits = supportivePick ? [toForecastAspect(supportivePick)] : [];
+  const challengingTransits = challengingPick ? [toForecastAspect(challengingPick)] : [];
 
   const currentDashaPlanet = core.planets.find(
     (p) => p.name === dashaInfo.current_dasha
@@ -1121,24 +1186,70 @@ export function buildForecast(
   const dashaTheme = DASHA_FORECAST_THEMES[dashaInfo.current_dasha];
   const antardashaTheme = DASHA_FORECAST_THEMES[dashaInfo.current_antardasha];
 
+  /*
+   * The third level of the tree, which is the fastest one this function has.
+   *
+   * Everything below used to be keyed to the mahadasha and antardasha pair.
+   * That pair is stable for a very long time -- on a real chart the antardasha
+   * ran 879 days, so the headline, overview, focus areas, opportunities and
+   * cautions were byte-identical for two and a half years, with only the
+   * printed date changing. Sampling the first of each month for three years
+   * produced three distinct headlines.
+   *
+   * The pratyantar was already being computed and returned in `dashaInfo`; it
+   * simply was not read for any copy. It turns over every few weeks to a few
+   * months, so keying the near-term half of the reading to it is what makes
+   * this section move at all.
+   *
+   * Optional on purpose: calculateDashaTimeline leaves current_pratyantar
+   * undefined at the ends of a sequence, and every use below falls back to the
+   * antardasha rather than printing "undefined".
+   */
+  const pratyantarLord = dashaInfo.current_pratyantar;
+  const pratyantarPlanet = pratyantarLord
+    ? core.planets.find((p) => p.name === pratyantarLord)
+    : undefined;
+  const pratyantarTheme = pratyantarLord
+    ? DASHA_FORECAST_THEMES[pratyantarLord]
+    : undefined;
+
+  /* A pratyantar under its own lord says nothing the antardasha line has not
+     already said, so the composed sentences below collapse to one. */
+  const pratyantarAddsALayer =
+    Boolean(pratyantarLord) && pratyantarLord !== dashaInfo.current_antardasha;
+
   const focusAreas: string[] = [
     `${dashaInfo.current_dasha} Mahadasha keeps the long-range focus on ${HOUSE_THEMES[currentDashaPlanet.house]} via natal house ${currentDashaPlanet.house}.`,
-    `${dashaInfo.current_antardasha} Antardasha sharpens the near-term story around ${HOUSE_THEMES[currentAntardashaPlanet.house]} via natal house ${currentAntardashaPlanet.house}.`,
+    pratyantarAddsALayer && pratyantarPlanet && pratyantarTheme
+      ? `${pratyantarLord} Pratyantardasha runs the current stretch, bringing ${pratyantarTheme.focus} to bear on ${HOUSE_THEMES[pratyantarPlanet.house]} via natal house ${pratyantarPlanet.house}.`
+      : `${dashaInfo.current_antardasha} Antardasha sharpens the near-term story around ${HOUSE_THEMES[currentAntardashaPlanet.house]} via natal house ${currentAntardashaPlanet.house}.`,
   ];
-  const opportunities: string[] = [
+  const opportunities: string[] = dedupeSentences([
+    pratyantarAddsALayer && pratyantarTheme
+      ? pratyantarTheme.opportunity
+      : antardashaTheme.opportunity,
     dashaTheme.opportunity,
-    antardashaTheme.opportunity,
-  ];
+  ]);
 
-  const cautions: string[] = [
+  const cautions: string[] = dedupeSentences([
+    pratyantarAddsALayer && pratyantarTheme
+      ? pratyantarTheme.caution
+      : antardashaTheme.caution,
     dashaTheme.caution,
-    antardashaTheme.caution,
-  ];
+  ]);
 
-  const headline = `${targetDateStr} falls in ${dashaInfo.current_dasha} / ${dashaInfo.current_antardasha}, a period centered on ${antardashaTheme.focus}.`;
+  const headline =
+    pratyantarAddsALayer && pratyantarTheme
+      ? `${targetDateStr} falls in ${dashaInfo.current_dasha} / ${dashaInfo.current_antardasha}, with ${pratyantarLord} running the current stretch — ${pratyantarTheme.focus} inside a season of ${antardashaTheme.focus}.`
+      : `${targetDateStr} falls in ${dashaInfo.current_dasha} / ${dashaInfo.current_antardasha}, a period centered on ${antardashaTheme.focus}.`;
+
   const overview =
     `On ${targetDateStr}, the broader timing cycle emphasizes ${dashaTheme.focus}, ` +
     `while the active sub-period concentrates on ${antardashaTheme.focus}. ` +
+    (pratyantarAddsALayer && pratyantarPlanet && pratyantarTheme
+      ? `Within it, ${pratyantarLord} holds the shorter cycle, which is what shifts the ` +
+        `emphasis toward ${pratyantarTheme.focus} and ${HOUSE_THEMES[pratyantarPlanet.house]} for now. `
+      : "") +
     `Natal house activation points toward ${HOUSE_THEMES[currentDashaPlanet.house]} and ` +
     `${HOUSE_THEMES[currentAntardashaPlanet.house]}, so this is best handled as a period of ` +
     `purposeful adjustment rather than passive waiting.`;
