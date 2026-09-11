@@ -38,6 +38,33 @@ export const PLANET_COLORS: Record<string, string> = {
   Ketu: "#c49a6c",
 };
 
+/**
+ * The same nine planets as text.
+ *
+ * PLANET_COLORS above is the graphic colour: wheel dots, gantt fills, glows.
+ * Those live on the starfield and on their own pastel bars, both of which are
+ * dark whatever the theme, so the pastels are right there and must not move --
+ * the wheel, the mobile chart and the dasha timeline are deliberately the same
+ * nine values.
+ *
+ * A planet name printed on a themed card is a different job. The pastels are
+ * 1.4-2.4:1 on Ethereal Dawn's light surface, so these resolve through CSS
+ * variables that carry the pastel in dark and a darker cut of the same hue in
+ * light. One palette, two roles, and the mapping is in globals.css rather than
+ * duplicated here.
+ */
+export const PLANET_INK: Record<string, string> = {
+  Sun: "var(--planet-sun)",
+  Moon: "var(--planet-moon)",
+  Mars: "var(--planet-mars)",
+  Mercury: "var(--planet-mercury)",
+  Jupiter: "var(--planet-jupiter)",
+  Venus: "var(--planet-venus)",
+  Saturn: "var(--planet-saturn)",
+  Rahu: "var(--planet-rahu)",
+  Ketu: "var(--planet-ketu)",
+};
+
 export const SIGN_SYMBOLS: Record<string, string> = {
   Aries: "♈",
   Taurus: "♉",

@@ -125,6 +125,23 @@
      brand accent: seven fixed meanings, read on the navamsa grid and its
      legend. Lived inline in navamsa-chart.tsx, which meant /insights/advanced
      rendered a bright dark-tree palette on Ethereal Dawn.s light card. */
+  /* Planet ink.
+     PLANET_COLORS in lib/constellation-geometry stays the graphic colour --
+     the wheel dots, the gantt fills -- because those sit on the starfield and
+     the pastel bars, which are dark in both themes. These are the same nine
+     hues at a weight that reads as *text* on a themed card, which the pastels
+     do not: Sun was 1.62:1 on the light card. Dark keeps the pastel, so the
+     two agree wherever the backdrop has not changed. */
+  --planet-sun: #f2c26c;
+  --planet-moon: #c8d8e8;
+  --planet-mars: #ff6b5b;
+  --planet-mercury: #6ce1a0;
+  --planet-jupiter: #ffd966;
+  --planet-venus: #f0a0c8;
+  --planet-saturn: #7eaadf;
+  --planet-rahu: #a0a8b0;
+  --planet-ketu: #c49a6c;
+
   --dignity-exalted: #ffd700;
   --dignity-own: #4ade80;
   --dignity-moolatrikona: #86efac;
@@ -7154,6 +7171,17 @@ html[data-theme="light"] {
   --accent-aqua: #2f6b61;
   --accent-coral: #a8485c;
   /* Measured against the light card, not derived: every one clears 5:1. */
+  /* Same nine hues, measured against the light card; every one clears 4.7:1. */
+  --planet-sun: #8a5e14;
+  --planet-moon: #4a6478;
+  --planet-mars: #b03325;
+  --planet-mercury: #1c7a4e;
+  --planet-jupiter: #8a6a10;
+  --planet-venus: #a63f70;
+  --planet-saturn: #33618f;
+  --planet-rahu: #4f565e;
+  --planet-ketu: #77522a;
+
   --dignity-exalted: #8a6100;
   --dignity-own: #1f7a3d;
   --dignity-moolatrikona: #27734a;
@@ -7435,4 +7463,11 @@ html[data-theme="light"] .compatibility-cta h3 {
   background: linear-gradient(135deg, #a8485c, var(--accent-gold));
   -webkit-background-clip: text;
   background-clip: text;
+}
+
+/* The one aspect badge written as a literal -- its three siblings read through
+   tokens. #c9a8ff is 1.56:1 on the violet chip once that chip goes light, and
+   --accent-purple only reaches 3.85, so this takes the dim tier. */
+html[data-theme="light"] .aspect-badge--vedic {
+  color: var(--accent-purple-dim);
 }

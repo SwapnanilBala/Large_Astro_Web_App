@@ -4602,5 +4602,23 @@ html[data-theme="light"] .navamsa-click-hint {
 /* A dark-theme violet literal on the navamsa summary label: 1.56:1 on the
    light chip it sits in. */
 html[data-theme="light"] .navamsa-summary-card h4 {
-  color: var(--accent-purple);
+  /* --accent-purple lands on 4.45 against this card; the dim tier clears. */
+  color: var(--accent-purple-dim);
+}
+
+/*
+ * The progress ring is a conic gauge with an opaque disc punched out of the
+ * middle, and the percentage sits on that disc. The disc was a fixed
+ * rgba(6, 24, 38, 0.94) while the numerals read through --ink-main, so on
+ * Ethereal Dawn it was plum ink on near-black: 1.02:1 for "complete".
+ *
+ * Only the disc and the gauge's empty remainder move. The gold-to-aqua sweep
+ * is the reading and it is already themed.
+ */
+html[data-theme="light"] .dasha-command-meter-ring {
+  border-color: var(--border-medium);
+  background:
+    radial-gradient(circle at center, var(--bg-surface) 0 54%, transparent 55%),
+    conic-gradient(var(--accent-gold), var(--accent-aqua), rgba(107, 70, 91, 0.16));
+  box-shadow: var(--shadow-sm);
 }

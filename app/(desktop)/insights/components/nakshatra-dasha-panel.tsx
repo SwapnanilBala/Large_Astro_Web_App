@@ -10,7 +10,7 @@ import type {
   SubPeriodInfo,
 } from "@/lib/astro-types";
 import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
-import { PLANET_COLORS } from "@/lib/constellation-geometry";
+import { PLANET_COLORS, PLANET_INK } from "@/lib/constellation-geometry";
 
 /* ────────────────────────────────────────────────
    Deterministic Dasha Interpretations
@@ -214,6 +214,13 @@ const DASHA_FALLBACK_COLOR = '#6ce1d4';
 
 const dashaColor = (planet: string) =>
   PLANET_COLORS[planet] ?? DASHA_FALLBACK_COLOR;
+
+/* The same planet as text. dashaColor is for fills, borders and glows, which
+   sit on the bars and the starfield and stay dark in either theme; a planet
+   name printed on a themed card needs the ink cut instead -- the pastels are
+   1.4-2.4:1 on the light one. */
+const dashaInk = (planet: string) =>
+  PLANET_INK[planet] ?? DASHA_FALLBACK_COLOR;
 
 const LEVEL_LABELS: Record<number, string> = {
   1: "Maha Dasha",
@@ -717,7 +724,7 @@ export default function NakshatraDashaPanel({
 
       <div className="dasha-active-stack" aria-label="Active dasha stack">
         {activeStack.map((step) => {
-          const color = dashaColor(step.planet);
+          const color = dashaInk(step.planet);
           return (
             <article key={`${step.label}-${step.planet}`} className="dasha-active-stack-card">
               <span className="dasha-active-stack-level">{step.label}</span>
@@ -953,7 +960,7 @@ export default function NakshatraDashaPanel({
               <span className="dasha-combo-label">Combined Influence</span>
               <div className="dasha-combo-lords">
                 {combinationInsight.lords.map((lord, idx) => (
-                  <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `${dashaColor(lord)}22`, color: dashaColor(lord), borderColor: `${dashaColor(lord)}44` }}>
+                  <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `color-mix(in srgb, ${dashaColor(lord)} 13%, transparent)`, color: dashaInk(lord), borderColor: `color-mix(in srgb, ${dashaColor(lord)} 27%, transparent)` }}>
                     {lord}
                     {idx < combinationInsight.lords.length - 1 && <span className="dasha-combo-arrow">&rarr;</span>}
                   </span>
@@ -1098,7 +1105,7 @@ export default function NakshatraDashaPanel({
                 >
                   <span
                     className="dasha-active-card-planet"
-                    style={{ color: dashaColor(activePeriod.planet) }}
+                    style={{ color: dashaInk(activePeriod.planet) }}
                   >
                     {activePeriod.planet}
                   </span>
@@ -1325,7 +1332,7 @@ export default function NakshatraDashaPanel({
                 <tbody>
                   {displayPeriods.map((period, index) => {
                     const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
-                    const color = dashaColor(period.planet);
+                    const color = dashaInk(period.planet);
                     return (
                       <tr key={`${period.planet}-${period.start_date}-${index}`} className={isCurrent ? "dasha-period-row--current" : ""}>
                         <td>
