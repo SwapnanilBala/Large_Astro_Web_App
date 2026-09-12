@@ -36,18 +36,48 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
  * reading is a great deal better than an error, and the response contract is
  * identical either way because both are driven by the same prompt.
  *
- * Timeouts differ because the calls differ -- Opus at high effort thinks before
- * it writes, and the request is streamed so the wall clock is not an HTTP
- * timeout risk. maxDuration below is the real ceiling on the platform.
+ * THE COST IS TIME, and it is a lot of time. Measured against this prompt,
+ * same image each run:
+ *
+ *   effort high,   max_tokens 6000  -> truncated mid-JSON at ~103s
+ *   effort medium, max_tokens 16000 -> still going at 120s
+ *   effort low,    max_tokens 16000 -> 116s, complete and valid
+ *   GPT-4o (what this replaced)     -> 20-30s
+ *
+ * So the ceiling below is 300 seconds and a reader waits about two minutes.
+ * That was a deliberate call: the reading is a thing someone does once, and
+ * two minutes for one that is about them beats twenty seconds for one that
+ * would fit anybody.
+ *
+ * EFFORT IS `low` AND THAT IS NOT A COST COMPROMISE -- it is what the
+ * measurement said. The bottleneck here is not reasoning, it is volume: the
+ * schema is roughly five thousand output tokens and Opus is far slower per
+ * token than GPT-4o was. Raising effort spends the budget on thinking and
+ * buys truncation, not insight; at `low` the output is already markedly more
+ * specific than the model it replaced. Raise this only with a fresh
+ * measurement in hand, because the first symptom of raising it is a reading
+ * that dies halfway through a sentence.
+ *
+ * max_tokens has to cover the thinking pass as well as the document, which
+ * is what the 6000 run discovered the hard way. 4500 was sized for a model
+ * that did neither.
+ *
+ * Streaming is what keeps a 116-second generation off the HTTP timeout.
+ *
+ * PLATFORM NOTE: maxDuration 300 needs a Vercel plan above Hobby, which caps
+ * at 60. On Hobby this route is killed mid-generation and every reading
+ * fails -- so if readings start timing out after a plan change, this line is
+ * the reason, and the fix is the two-call split (GPT-4o for the mechanical
+ * document, Opus for the interpretation) rather than a lower effort.
  */
-export const maxDuration = 60;
+export const maxDuration = 300;
 
-const ANTHROPIC_TIMEOUT_MS = 55_000;
+/* Leaves about 90 seconds inside maxDuration for the GPT-4o fallback to
+   still run after a hung Anthropic call, rather than both dying together. */
+const ANTHROPIC_TIMEOUT_MS = 200_000;
 const OPENAI_TIMEOUT_MS = 30_000;
 
-/* Opus 5 emits a thinking pass before the JSON, and the schema below is long.
-   4500 was sized for a model that did neither. */
-const MAX_READING_TOKENS = 6000;
+const MAX_READING_TOKENS = 16000;
 
 const MAX_JSON_BODY_BYTES = 7 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -467,11 +497,9 @@ async function readWithClaude({ image, mediaType, systemPrompt, userText }: Visi
     .stream({
       model: "claude-opus-5",
       max_tokens: MAX_READING_TOKENS,
-      /* The explicit default. Stated rather than omitted because this route
-         is the one place in the app where interpretive quality IS the
-         product -- a later cost pass should have to argue with this line
-         rather than discover the setting by its absence. */
-      output_config: { effort: "high" },
+      /* `low` on purpose, and measured -- see the header. Higher effort
+         spends the token budget on thinking and truncates the document. */
+      output_config: { effort: "low" },
       system: [
         { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
       ],

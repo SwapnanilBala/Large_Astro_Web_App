@@ -41,7 +41,13 @@
       "analyze": "Analyze My Palm"
     },
     "analyzing": {
-      "text": "Reading your palm"
+      "text": "Reading your palm",
+      "stageLines": "Tracing the major lines",
+      "stageMounts": "Reading the mounts and fingers",
+      "stageWeighing": "Weighing what the lines agree on",
+      "stageWriting": "Writing your reading",
+      "stageFinishing": "Finishing the last sections",
+      "patience": "A full reading takes about two minutes. It is being written for your hand, not picked from a shelf."
     },
     "results": {
       "newReading": "New Reading",

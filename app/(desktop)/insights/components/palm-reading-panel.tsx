@@ -152,6 +152,35 @@ const STRENGTH_COLORS: Record<LineReading["strength"], string> = {
   absent: "#888",
 };
 
+/*
+ * What to say while the reading is being written.
+ *
+ * The route takes about two minutes -- Claude Opus 5 composes the whole
+ * document before a byte of it is returned (see app/api/palm-reading/route.ts
+ * for the measurements). A spinner held for that long does not read as slow,
+ * it reads as broken, and the reader's next move is to reload and spend the
+ * call again.
+ *
+ * So the copy advances. The stages are not instrumentation -- nothing here
+ * knows what the model is actually doing -- they are an honest description of
+ * the work in the order the prompt asks for it, paced against the measured
+ * run. Overstating that would be worse than a spinner; what makes this fair
+ * is that the reader is also told the whole thing takes about two minutes,
+ * so the stages set the rhythm rather than making a promise.
+ *
+ * Timings sit a little ahead of the measured 116s so the last stage is still
+ * on screen when a slower run lands, rather than the copy finishing early and
+ * going back to looking stuck.
+ */
+const ANALYZING_STAGES = [
+  { after: 0, key: "palm.analyzing.text" },
+  { after: 15_000, key: "palm.analyzing.stageLines" },
+  { after: 38_000, key: "palm.analyzing.stageMounts" },
+  { after: 64_000, key: "palm.analyzing.stageWeighing" },
+  { after: 92_000, key: "palm.analyzing.stageWriting" },
+  { after: 125_000, key: "palm.analyzing.stageFinishing" },
+] as const;
+
 const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const REVEAL_DELAY_MS = 700;
@@ -210,6 +239,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const [handDetected, setHandDetected] = useState(false);
   const [handScore, setHandScore] = useState(0);
   const [classicalMode, setClassicalMode] = useState(false);
+  const [analyzingStage, setAnalyzingStage] = useState(0);
   const [imageQualityDismissed, setImageQualityDismissed] = useState(false);
   const [revealedSections, setRevealedSections] = useState<Set<RevealSection>>(new Set());
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -446,6 +476,27 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     };
     reader.readAsDataURL(file);
   };
+
+  /* Advances the loading copy. Restarted from zero each time the phase
+     becomes "analyzing", so a second reading does not open on the copy the
+     first one finished with. One second is plenty of resolution for stages
+     tens of seconds apart, and the interval is cleared on the way out. */
+  useEffect(() => {
+    if (phase !== "analyzing") {
+      setAnalyzingStage(0);
+      return;
+    }
+    const startedAt = Date.now();
+    const id = setInterval(() => {
+      const elapsed = Date.now() - startedAt;
+      let current = 0;
+      for (let i = 0; i < ANALYZING_STAGES.length; i += 1) {
+        if (elapsed >= ANALYZING_STAGES[i].after) current = i;
+      }
+      setAnalyzingStage(current);
+    }, 1000);
+    return () => clearInterval(id);
+  }, [phase]);
 
   /* ── API call ── */
   const analyzePalm = async () => {
@@ -826,10 +877,11 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 13" />
               </svg>
             </div>
-            <p className="palm-loading-text">
-              {tr("palm.analyzing.text")}
+            <p className="palm-loading-text" aria-live="polite">
+              {tr(ANALYZING_STAGES[analyzingStage].key)}
               <span className="palm-dots" />
             </p>
+            <p className="palm-loading-patience">{tr("palm.analyzing.patience")}</p>
           </div>
           {/* Skeleton layout */}
           <div className="palm-skeleton">

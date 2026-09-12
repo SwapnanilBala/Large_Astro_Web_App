@@ -2562,6 +2562,15 @@
   line-height: 1.65;
 }
 
+.palm-loading-patience {
+  margin: 0.5rem 0 0;
+  max-width: 34ch;
+  font-size: 1.18rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
 /* ── Follow-up questions ── */
 
 .palm-qa {

@@ -15,6 +15,14 @@
         "starterCareer": "¿Qué dice mi palma sobre hacia dónde va mi trabajo?",
         "starterTiming": "¿A qué debería prestar atención durante el próximo año?",
         "starterStrength": "¿Cuál es la línea más fuerte de mi mano y qué significa?"
+      },
+      "analyzing": {
+        "stageLines": "Siguiendo las líneas principales",
+        "stageMounts": "Leyendo los montes y los dedos",
+        "stageWeighing": "Sopesando en qué coinciden las líneas",
+        "stageWriting": "Escribiendo tu lectura",
+        "stageFinishing": "Terminando las últimas secciones",
+        "patience": "Una lectura completa tarda unos dos minutos. Se escribe para tu mano, no se saca de un cajón."
       }
     }
   },
@@ -34,6 +42,14 @@
         "starterCareer": "Que dit ma paume sur la direction que prend mon travail ?",
         "starterTiming": "À quoi devrais-je prêter attention au cours de l'année à venir ?",
         "starterStrength": "Quelle ligne de ma main est la plus forte, et que signifie-t-elle ?"
+      },
+      "analyzing": {
+        "stageLines": "Je suis les lignes principales",
+        "stageMounts": "Lecture des monts et des doigts",
+        "stageWeighing": "Je pèse ce sur quoi les lignes s'accordent",
+        "stageWriting": "Rédaction de votre lecture",
+        "stageFinishing": "Je termine les dernières sections",
+        "patience": "Une lecture complète prend environ deux minutes. Elle est écrite pour votre main, pas prise sur une étagère."
       }
     }
   },
@@ -53,6 +69,14 @@
         "starterCareer": "Cosa dice il mio palmo sulla direzione del mio lavoro?",
         "starterTiming": "A cosa dovrei prestare attenzione nel prossimo anno?",
         "starterStrength": "Qual è la linea più forte della mia mano e cosa significa?"
+      },
+      "analyzing": {
+        "stageLines": "Seguo le linee principali",
+        "stageMounts": "Leggo i monti e le dita",
+        "stageWeighing": "Valuto su cosa concordano le linee",
+        "stageWriting": "Scrivo la tua lettura",
+        "stageFinishing": "Completo le ultime sezioni",
+        "patience": "Una lettura completa richiede circa due minuti. Viene scritta per la tua mano, non presa da uno scaffale."
       }
     }
   },
@@ -72,6 +96,14 @@
         "starterCareer": "मेरी हथेली मेरे काम की दिशा के बारे में क्या कहती है?",
         "starterTiming": "अगले वर्ष मुझे किस बात पर ध्यान देना चाहिए?",
         "starterStrength": "मेरे हाथ की सबसे मजबूत रेखा कौन सी है, और उसका क्या अर्थ है?"
+      },
+      "analyzing": {
+        "stageLines": "मुख्य रेखाओं का अनुसरण",
+        "stageMounts": "पर्वतों और उंगलियों का अध्ययन",
+        "stageWeighing": "रेखाएँ किस पर सहमत हैं, यह तौला जा रहा है",
+        "stageWriting": "आपकी रीडिंग लिखी जा रही है",
+        "stageFinishing": "अंतिम भाग पूरे किए जा रहे हैं",
+        "patience": "पूरी रीडिंग में लगभग दो मिनट लगते हैं। यह आपके हाथ के लिए लिखी जा रही है, कहीं से उठाई नहीं गई।"
       }
     }
   },
@@ -91,6 +123,14 @@
         "starterCareer": "আমার কাজ কোন দিকে যাচ্ছে, সে বিষয়ে আমার হাতের তালু কী বলে?",
         "starterTiming": "আগামী এক বছরে আমার কীসের দিকে নজর দেওয়া উচিত?",
         "starterStrength": "আমার হাতের সবচেয়ে শক্তিশালী রেখা কোনটি, আর তার অর্থ কী?"
+      },
+      "analyzing": {
+        "stageLines": "প্রধান রেখাগুলি অনুসরণ করা হচ্ছে",
+        "stageMounts": "পর্বত ও আঙুল পড়া হচ্ছে",
+        "stageWeighing": "রেখাগুলি কীসে একমত, তা বিচার করা হচ্ছে",
+        "stageWriting": "আপনার রিডিং লেখা হচ্ছে",
+        "stageFinishing": "শেষ অংশগুলি সম্পূর্ণ করা হচ্ছে",
+        "patience": "সম্পূর্ণ রিডিং নিতে প্রায় দুই মিনিট লাগে। এটি আপনার হাতের জন্যই লেখা হচ্ছে, তাক থেকে তুলে আনা নয়।"
       }
     }
   }
