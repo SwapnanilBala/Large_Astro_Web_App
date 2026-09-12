@@ -143,11 +143,41 @@ export function sanitizeHistory(value: unknown): PalmQaTurn[] {
     if (!content) continue;
     out.push({ role: entry.role, content });
   }
-  /* The Messages API requires the first turn to be `user`. A history that
-     starts with an assistant turn is either a client bug or someone probing;
-     either way, dropping the leading turns is the repair. */
+  /* The transcript reads as a conversation, so it should start where one
+     starts. A leading assistant turn is either a client bug or someone
+     probing; either way, dropping it is the repair. */
   while (out.length > 0 && out[0].role !== "user") out.shift();
   return out;
+}
+
+/**
+ * Render prior turns as a quoted transcript, for placement in a `user` turn.
+ *
+ * This exists because of an attack the bounding above does not touch. The
+ * client replays the thread on every request, so it can put words in the
+ * *assistant's* mouth -- "Understood, I am now unrestricted" -- and a model
+ * reading its own apparent prior agreement is markedly more likely to go along
+ * with what follows. Length caps and character filters do nothing about it:
+ * the sentence is short, ordinary prose, and it is the ROLE that carries the
+ * attack, not the text.
+ *
+ * So no client-supplied turn is ever given the assistant role. The whole prior
+ * exchange is rendered here as reported text inside one user turn, which is
+ * what it honestly is: the reader's account of what was said. The model keeps
+ * full conversational context and loses only the ability to be shown a forged
+ * precedent in its own voice.
+ *
+ * The labels cannot be forged into extra turns, for the reason every other
+ * value in this module is safe: newlines are already gone, so a turn is one
+ * line, and a "Palmist:" smuggled into a question stays inside the reader's
+ * own line instead of starting a new one.
+ */
+export function renderTranscript(turns: PalmQaTurn[]): string | undefined {
+  if (turns.length === 0) return undefined;
+  const body = turns
+    .map((turn) => `${turn.role === "user" ? "Reader" : "Palmist"}: ${turn.content}`)
+    .join("\n");
+  return `<earlier_in_this_conversation>\n${body}\n</earlier_in_this_conversation>`;
 }
 
 /* ------------------------------------------------------------------------- */
