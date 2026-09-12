@@ -736,21 +736,33 @@ export const generatedArtifacts = pgTable(
       columns: [table.userId, table.clientId],
       foreignColumns: [clients.userId, clients.id],
     }).onDelete("cascade"),
+    /* Each optional link is guarded twice: by the leaf column's own
+       `onDelete: "set null"` above, and by the composite key here that makes an
+       artifact and the row it points at belong to the same account. The delete
+       rule has to be repeated on both. Postgres applies the strictest rule
+       declared over a column, so a bare `foreignKey({..})` defaults to NO
+       ACTION and quietly overrules the `set null` sitting beside the column --
+       deleting a chart then errors instead of clearing the link.
+
+       In the migration these read `SET NULL ("chart_id")`, naming the single
+       column to clear. Drizzle only emits the bare `SET NULL`, which on a
+       multi-column key clears every referencing column, `user_id` included,
+       and that one is NOT NULL. See `drizzle/0008_artifact_link_delete_rules.sql`. */
     foreignKey({
       name: "generated_artifacts_user_chart_fk",
       columns: [table.userId, table.chartId],
       foreignColumns: [chartCalculations.userId, chartCalculations.id],
-    }),
+    }).onDelete("set null"),
     foreignKey({
       name: "generated_artifacts_user_source_asset_fk",
       columns: [table.userId, table.sourceAssetId],
       foreignColumns: [assets.userId, assets.id],
-    }),
+    }).onDelete("set null"),
     foreignKey({
       name: "generated_artifacts_user_output_asset_fk",
       columns: [table.userId, table.outputAssetId],
       foreignColumns: [assets.userId, assets.id],
-    }),
+    }).onDelete("set null"),
     index("generated_artifacts_client_type_generated_idx").on(
       table.clientId,
       table.artifactType,
