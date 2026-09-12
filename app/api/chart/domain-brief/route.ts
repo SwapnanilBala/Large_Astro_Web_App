@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   chartParamsToBirthInput,
   getLifeDomainPayload,
@@ -268,11 +269,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const brief = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
+    const brief = stripInlineMarkdown(
+      response.content
+        .filter((block): block is Anthropic.TextBlock => block.type === "text")
+        .map((block) => block.text)
+        .join(""),
+    ).trim();
+
 
     if (!brief) {
       throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No brief was returned.");
