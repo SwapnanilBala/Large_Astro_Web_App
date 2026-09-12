@@ -18,6 +18,12 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart/forecast": { limit: 20, windowMs: 60_000 },
   "/api/chart/life-domains": { limit: 20, windowMs: 60_000 },
   "/api/chart/dasha-subperiods": { limit: 40, windowMs: 60_000 },
+  /* Paid LLM calls. Drilling through a dasha chain or clicking along the
+     Ultimate Module's seven cards fires these in quick succession, so the
+     window has to allow a real session; the spend ceiling that actually
+     protects the key is the per-day budget in lib/llm-budget.ts. */
+  "/api/chart/dasha-interpretation": { limit: 12, windowMs: 60_000 },
+  "/api/chart/domain-brief": { limit: 12, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   /* Tight: a POST here can insert a workspace row, so an unthrottled loop is a
      way to fill the table. A real visitor needs it once per device, ever. */
@@ -65,7 +71,14 @@ function normalizeIpHeader(value: string | null) {
   return candidate.replace(/[^0-9a-fA-F:.%]/g, "").slice(0, 80);
 }
 
-function getClientIp(request: Request): string {
+/**
+ * Best-effort caller identity from the proxy headers.
+ *
+ * Exported because lib/llm-budget.ts keys its per-caller ceilings on the same
+ * value: two different notions of "who is calling" would let a caller sit under
+ * one limit while blowing through the other.
+ */
+export function getClientIp(request: Request): string {
   const headers = request.headers;
   const candidates = [
     headers.get("cf-connecting-ip"),
