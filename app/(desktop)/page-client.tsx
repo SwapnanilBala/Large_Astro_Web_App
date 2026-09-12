@@ -36,6 +36,7 @@ import { useTranslation } from "@/lib/i18n-context";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import ChartHistory from "@/app/components/ChartHistory";
 import FormCelebration from "@/app/components/FormCelebration";
+import IntakeBackdrop from "@/app/components/IntakeBackdrop";
 import { hapticSuccess } from "@/lib/haptics";
 import PremiumInput from "@/app/components/PremiumInput";
 import PremiumButton from "@/app/components/PremiumButton";
@@ -944,6 +945,7 @@ export default function Home() {
 
   return (
     <div className={styles.professionalIntake}>
+      <IntakeBackdrop />
       <FormCelebration isComplete={canSubmit} />
 
       <header className={styles.streamlinedHeader}>

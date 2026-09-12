@@ -2850,6 +2850,24 @@
   opacity: 0.35;
 }
 
+/*
+ * The chart square was drawn in pale gold and pale aqua on a near-black page.
+ * Those are the correct values there and invisible on cream -- at 0.11 alpha,
+ * #E8C89A over #FFF8F5 is the same colour as the page. The geometry is worth
+ * keeping, so it is restated in this theme's own ink at an opacity that lets
+ * it read. It is the anchor of the top-right corner; without it that quadrant
+ * is the one part of the page IntakeBackdrop does not reach.
+ */
+:global(html[data-theme="light"]) .professionalIntake::before {
+  opacity: 0.5;
+  border-color: rgba(131, 83, 42, 0.2);
+  background:
+    linear-gradient(45deg, transparent 49.8%, rgba(131, 83, 42, 0.18) 50%, transparent 50.2%),
+    linear-gradient(-45deg, transparent 49.8%, rgba(131, 83, 42, 0.18) 50%, transparent 50.2%),
+    linear-gradient(90deg, transparent 49.8%, rgba(48, 107, 98, 0.14) 50%, transparent 50.2%),
+    linear-gradient(0deg, transparent 49.8%, rgba(48, 107, 98, 0.14) 50%, transparent 50.2%);
+}
+
 :global(html[data-theme="light"]) .formSectionCard {
   background: rgba(255, 253, 251, 0.86);
   border-color: rgba(132, 86, 105, 0.15);
