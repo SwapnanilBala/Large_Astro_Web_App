@@ -1,8 +1,9 @@
 /**
  * The moment a signed-out visitor runs out of free readings.
  *
- * Three panels can reach it — the dasha drill-down, the life-area briefs and
- * the palm reader — and none of them should carry its own copy of the wording
+ * Four panels can reach it — the dasha drill-down, the life-area briefs, the
+ * palm reader and its follow-up questions — and none of them should carry its
+ * own copy of the wording
  * or its own idea of what to do about it. So they announce, one component
  * mounted in the desktop shell listens, and the panels stay ignorant of the
  * prompt entirely.
@@ -13,8 +14,12 @@
  * than the thing being wired.
  */
 
-/** The three routes that spend money, named as the visitor met them. */
-export type PaidFeature = "dashaInterpretation" | "domainBrief" | "palmReading";
+/** The routes that spend money, named as the visitor met them. */
+export type PaidFeature =
+  | "dashaInterpretation"
+  | "domainBrief"
+  | "palmReading"
+  | "palmQuestions";
 
 const FREE_USAGE_EXHAUSTED_EVENT = "astro:free-usage-exhausted";
 

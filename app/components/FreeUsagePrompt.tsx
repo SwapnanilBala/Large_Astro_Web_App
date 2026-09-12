@@ -31,6 +31,7 @@ const FEATURE_KEY: Record<PaidFeature, string> = {
   dashaInterpretation: "freeUsage.featureDasha",
   domainBrief: "freeUsage.featureDomain",
   palmReading: "freeUsage.featurePalm",
+  palmQuestions: "freeUsage.featurePalmQuestions",
 };
 
 export default function FreeUsagePrompt() {

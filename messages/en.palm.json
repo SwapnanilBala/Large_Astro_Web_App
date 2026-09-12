@@ -205,6 +205,21 @@
       "none": "None",
       "summaryContrast": "Summary contrast",
       "noSummary": "(no summary)"
+    },
+    "qa": {
+      "heading": "Ask About Your Reading",
+      "lead": "Anything you want to understand better. Answers come from this reading and your chart, not from somewhere else.",
+      "placeholder": "Ask about a line, the timing, or what to do with it…",
+      "inputLabel": "Your question about this reading",
+      "send": "Ask",
+      "sending": "Asking…",
+      "thinking": "Looking at your palm again…",
+      "threadFull": "That's every question for this reading. Take a new reading to carry on.",
+      "errorGeneric": "That question could not be answered. Please try again.",
+      "footnote": "Tendencies and potentials, never fixed destiny.",
+      "starterCareer": "What does my palm say about where my work is heading?",
+      "starterTiming": "What should I be paying attention to over the next year?",
+      "starterStrength": "Which line on my hand is strongest, and what does it mean?"
     }
   }
 }

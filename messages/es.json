@@ -1802,6 +1802,7 @@
     "detail": "Sin cuenta puedes hacer dos lecturas de cada tipo al día. Al registrarte tendrás diez al día de cada una, en este dispositivo y en cualquier otro donde inicies sesión.",
     "register": "Regístrate para más",
     "later": "Ahora no",
-    "note": "No pierdes nada de lo que ya tienes. Tu carta, y todas las lecturas que ya están en pantalla, se quedan donde están."
+    "note": "No pierdes nada de lo que ya tienes. Tu carta, y todas las lecturas que ya están en pantalla, se quedan donde están.",
+    "featurePalmQuestions": "Preguntas sobre tu lectura"
   }
 }

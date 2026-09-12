@@ -1802,6 +1802,7 @@
     "detail": "Sans compte, vous avez droit à deux lectures de chaque type par jour. En vous inscrivant, vous en obtenez dix par jour, sur cet appareil comme sur tout autre où vous vous connectez.",
     "register": "S'inscrire pour en avoir plus",
     "later": "Pas maintenant",
-    "note": "Rien de ce que vous avez déjà ne disparaît. Votre thème, et toutes les lectures déjà à l'écran, restent exactement où ils sont."
+    "note": "Rien de ce que vous avez déjà ne disparaît. Votre thème, et toutes les lectures déjà à l'écran, restent exactement où ils sont.",
+    "featurePalmQuestions": "Questions sur votre lecture"
   }
 }

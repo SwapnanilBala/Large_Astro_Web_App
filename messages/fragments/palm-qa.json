@@ -1,0 +1,97 @@
+{
+  "es": {
+    "palm": {
+      "qa": {
+        "heading": "Pregunta sobre tu lectura",
+        "lead": "Lo que quieras entender mejor. Las respuestas salen de esta lectura y de tu carta, no de otro sitio.",
+        "placeholder": "Pregunta por una línea, por el momento o por qué hacer con ello…",
+        "inputLabel": "Tu pregunta sobre esta lectura",
+        "send": "Preguntar",
+        "sending": "Preguntando…",
+        "thinking": "Mirando tu palma de nuevo…",
+        "threadFull": "No quedan más preguntas para esta lectura. Haz una lectura nueva para seguir.",
+        "errorGeneric": "No se pudo responder a esa pregunta. Inténtalo de nuevo.",
+        "footnote": "Tendencias y potenciales, nunca un destino fijo.",
+        "starterCareer": "¿Qué dice mi palma sobre hacia dónde va mi trabajo?",
+        "starterTiming": "¿A qué debería prestar atención durante el próximo año?",
+        "starterStrength": "¿Cuál es la línea más fuerte de mi mano y qué significa?"
+      }
+    }
+  },
+  "fr": {
+    "palm": {
+      "qa": {
+        "heading": "Posez une question sur votre lecture",
+        "lead": "Tout ce que vous souhaitez mieux comprendre. Les réponses viennent de cette lecture et de votre thème, pas d'ailleurs.",
+        "placeholder": "Une ligne, le calendrier, ce qu'il faut en faire…",
+        "inputLabel": "Votre question sur cette lecture",
+        "send": "Demander",
+        "sending": "En cours…",
+        "thinking": "Je regarde votre paume à nouveau…",
+        "threadFull": "C'est tout pour cette lecture. Faites-en une nouvelle pour continuer.",
+        "errorGeneric": "Cette question n'a pas pu recevoir de réponse. Réessayez.",
+        "footnote": "Des tendances et des potentiels, jamais un destin figé.",
+        "starterCareer": "Que dit ma paume sur la direction que prend mon travail ?",
+        "starterTiming": "À quoi devrais-je prêter attention au cours de l'année à venir ?",
+        "starterStrength": "Quelle ligne de ma main est la plus forte, et que signifie-t-elle ?"
+      }
+    }
+  },
+  "it": {
+    "palm": {
+      "qa": {
+        "heading": "Fai una domanda sulla tua lettura",
+        "lead": "Tutto ciò che vuoi capire meglio. Le risposte nascono da questa lettura e dal tuo tema, non da altro.",
+        "placeholder": "Chiedi di una linea, dei tempi, o di cosa farne…",
+        "inputLabel": "La tua domanda su questa lettura",
+        "send": "Chiedi",
+        "sending": "Invio…",
+        "thinking": "Sto guardando di nuovo il tuo palmo…",
+        "threadFull": "Le domande per questa lettura sono finite. Fanne una nuova per continuare.",
+        "errorGeneric": "Non è stato possibile rispondere. Riprova.",
+        "footnote": "Tendenze e potenzialità, mai un destino fissato.",
+        "starterCareer": "Cosa dice il mio palmo sulla direzione del mio lavoro?",
+        "starterTiming": "A cosa dovrei prestare attenzione nel prossimo anno?",
+        "starterStrength": "Qual è la linea più forte della mia mano e cosa significa?"
+      }
+    }
+  },
+  "hi": {
+    "palm": {
+      "qa": {
+        "heading": "अपनी रीडिंग के बारे में पूछें",
+        "lead": "जो कुछ भी आप बेहतर समझना चाहते हैं। उत्तर इसी रीडिंग और आपकी कुंडली से आते हैं, कहीं और से नहीं।",
+        "placeholder": "किसी रेखा, समय, या उसका क्या करें — पूछिए…",
+        "inputLabel": "इस रीडिंग पर आपका प्रश्न",
+        "send": "पूछें",
+        "sending": "पूछा जा रहा है…",
+        "thinking": "आपकी हथेली फिर से देखी जा रही है…",
+        "threadFull": "इस रीडिंग के लिए इतने ही प्रश्न। आगे बढ़ने के लिए नई रीडिंग लें।",
+        "errorGeneric": "इस प्रश्न का उत्तर नहीं मिल सका। कृपया फिर प्रयास करें।",
+        "footnote": "प्रवृत्तियाँ और संभावनाएँ, निश्चित भाग्य कभी नहीं।",
+        "starterCareer": "मेरी हथेली मेरे काम की दिशा के बारे में क्या कहती है?",
+        "starterTiming": "अगले वर्ष मुझे किस बात पर ध्यान देना चाहिए?",
+        "starterStrength": "मेरे हाथ की सबसे मजबूत रेखा कौन सी है, और उसका क्या अर्थ है?"
+      }
+    }
+  },
+  "bn": {
+    "palm": {
+      "qa": {
+        "heading": "আপনার রিডিং নিয়ে প্রশ্ন করুন",
+        "lead": "যা কিছু আপনি আরও ভালো বুঝতে চান। উত্তর আসে এই রিডিং আর আপনার কুণ্ডলী থেকে, অন্য কোথাও থেকে নয়।",
+        "placeholder": "কোনও রেখা, সময়, বা তা নিয়ে কী করবেন — জিজ্ঞাসা করুন…",
+        "inputLabel": "এই রিডিং সম্পর্কে আপনার প্রশ্ন",
+        "send": "জিজ্ঞাসা",
+        "sending": "জিজ্ঞাসা করা হচ্ছে…",
+        "thinking": "আপনার হাতের তালু আবার দেখা হচ্ছে…",
+        "threadFull": "এই রিডিংয়ের জন্য এতগুলোই প্রশ্ন। চালিয়ে যেতে নতুন রিডিং নিন।",
+        "errorGeneric": "এই প্রশ্নের উত্তর দেওয়া গেল না। আবার চেষ্টা করুন।",
+        "footnote": "প্রবণতা আর সম্ভাবনা, কখনওই নির্দিষ্ট নিয়তি নয়।",
+        "starterCareer": "আমার কাজ কোন দিকে যাচ্ছে, সে বিষয়ে আমার হাতের তালু কী বলে?",
+        "starterTiming": "আগামী এক বছরে আমার কীসের দিকে নজর দেওয়া উচিত?",
+        "starterStrength": "আমার হাতের সবচেয়ে শক্তিশালী রেখা কোনটি, আর তার অর্থ কী?"
+      }
+    }
+  }
+}

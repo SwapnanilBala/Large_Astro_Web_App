@@ -8,6 +8,7 @@ import { useRouteMessages } from "@/lib/i18n-context";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import palmMessages from "@/messages/en.palm.json";
 import PalmAnnotation from "./PalmAnnotation";
+import PalmQaPanel from "./palm-qa-panel";
 
 /* ────────────────────────────────────────────────
    Types
@@ -1361,6 +1362,17 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                 <h3>{tr("palm.sections.guidance")}</h3>
                 <p>{reading.guidance}</p>
               </motion.div>
+            )}
+
+            {/* Follow-up questions. Gated on the last section having been
+                revealed so the thread does not appear mid-animation, while
+                the reader is still being shown the reading itself. */}
+            {isRevealed("guidance") && (
+              <PalmQaPanel
+                reading={reading}
+                jyotishContext={jyotishContext}
+                classicalMode={classicalMode}
+              />
             )}
           </div>
         );

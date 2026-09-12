@@ -566,6 +566,7 @@
     "detail": "Signed-out visitors get two of each reading a day. Register and you get ten a day of each, on this device and any other you sign in from.",
     "register": "Register for more",
     "later": "Not now",
-    "note": "Nothing you already have goes away. Your chart, and every reading already on screen, stay exactly where they are."
+    "note": "Nothing you already have goes away. Your chart, and every reading already on screen, stay exactly where they are.",
+    "featurePalmQuestions": "Questions about your reading"
   }
 }
