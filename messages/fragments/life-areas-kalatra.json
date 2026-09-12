@@ -1,0 +1,82 @@
+{
+  "es": {
+    "lifeAreas": {
+      "kalatraHeading": "La vida conyugal en detalle",
+      "kalatraNote": "Cinco facetas, cada una leída desde su propia casa",
+      "kalatraReadFrom": "Leído desde",
+      "kalatraMeterLabel": "{label}: {score} sobre 100 en relación con las demás facetas",
+      "kalatraMethodSummary": "Cómo se derivaron",
+      "kalatraMangalCaveat": "El Mangal dosha se evalúa solo a partir de esta carta. La anulación más citada de todas —que el dosha queda sin efecto cuando ambas personas lo tienen— requiere la otra carta, así que no se cuenta arriba.",
+      "kalatraMangalCancelled": "Anulaciones encontradas en esta carta: {list}.",
+      "kalatraBand": {
+        "strong": "Bien respaldada",
+        "mixed": "Mixta",
+        "tender": "Requiere cuidado"
+      }
+    }
+  },
+  "bn": {
+    "lifeAreas": {
+      "kalatraHeading": "বৈবাহিক জীবনের বিশদ",
+      "kalatraNote": "পাঁচটি দিক, প্রতিটি নিজের ঘর থেকে পড়া",
+      "kalatraReadFrom": "যেখান থেকে পড়া",
+      "kalatraMeterLabel": "{label}: অন্য দিকগুলির তুলনায় ১০০-এর মধ্যে {score}",
+      "kalatraMethodSummary": "কীভাবে নির্ণয় করা হয়েছে",
+      "kalatraMangalCaveat": "মঙ্গল দোষ কেবল এই কুণ্ডলী থেকেই বিচার করা হয়েছে। সবচেয়ে বেশি উল্লিখিত পরিহার — উভয়ের কুণ্ডলীতে দোষ থাকলে তা কেটে যায় — এর জন্য অন্য কুণ্ডলী প্রয়োজন, তাই তা উপরে গোনা হয়নি।",
+      "kalatraMangalCancelled": "এই কুণ্ডলীতে পাওয়া পরিহার: {list}।",
+      "kalatraBand": {
+        "strong": "ভালোভাবে সমর্থিত",
+        "mixed": "মিশ্র",
+        "tender": "যত্ন প্রয়োজন"
+      }
+    }
+  },
+  "hi": {
+    "lifeAreas": {
+      "kalatraHeading": "वैवाहिक जीवन विस्तार से",
+      "kalatraNote": "पाँच पहलू, हर एक अपने भाव से पढ़ा गया",
+      "kalatraReadFrom": "किससे पढ़ा गया",
+      "kalatraMeterLabel": "{label}: अन्य पहलुओं की तुलना में 100 में से {score}",
+      "kalatraMethodSummary": "ये कैसे निकाले गए",
+      "kalatraMangalCaveat": "मंगल दोष केवल इसी कुंडली से आँका गया है। सबसे अधिक उद्धृत परिहार — कि दोनों के दोष होने पर दोष निष्फल हो जाता है — के लिए दूसरी कुंडली चाहिए, इसलिए उसे ऊपर नहीं गिना गया।",
+      "kalatraMangalCancelled": "इस कुंडली में मिले परिहार: {list}।",
+      "kalatraBand": {
+        "strong": "भली प्रकार समर्थित",
+        "mixed": "मिश्रित",
+        "tender": "सावधानी अपेक्षित"
+      }
+    }
+  },
+  "it": {
+    "lifeAreas": {
+      "kalatraHeading": "La vita coniugale nel dettaglio",
+      "kalatraNote": "Cinque aspetti, ciascuno letto dalla propria casa",
+      "kalatraReadFrom": "Letto da",
+      "kalatraMeterLabel": "{label}: {score} su 100 rispetto agli altri aspetti",
+      "kalatraMethodSummary": "Come sono stati ricavati",
+      "kalatraMangalCaveat": "Il Mangal dosha è valutato solo da questa carta. L'annullamento più citato di tutti — che il dosha si annulla quando entrambi i partner lo portano — richiede l'altra carta, quindi non è conteggiato sopra.",
+      "kalatraMangalCancelled": "Annullamenti trovati in questa carta: {list}.",
+      "kalatraBand": {
+        "strong": "Ben sostenuto",
+        "mixed": "Misto",
+        "tender": "Richiede cura"
+      }
+    }
+  },
+  "fr": {
+    "lifeAreas": {
+      "kalatraHeading": "La vie conjugale en détail",
+      "kalatraNote": "Cinq facettes, chacune lue depuis sa propre maison",
+      "kalatraReadFrom": "Lu depuis",
+      "kalatraMeterLabel": "{label} : {score} sur 100 par rapport aux autres facettes",
+      "kalatraMethodSummary": "Comment elles ont été établies",
+      "kalatraMangalCaveat": "Le Mangal dosha est évalué à partir de ce thème seul. L'annulation la plus citée — le dosha s'annule lorsque les deux partenaires le portent — exige l'autre thème, elle n'est donc pas comptée ci-dessus.",
+      "kalatraMangalCancelled": "Annulations trouvées dans ce thème : {list}.",
+      "kalatraBand": {
+        "strong": "Bien soutenue",
+        "mixed": "Mitigée",
+        "tender": "Demande du soin"
+      }
+    }
+  }
+}

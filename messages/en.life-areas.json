@@ -3,35 +3,27 @@
     "navLabel": "Life areas",
     "chooseArea": "Choose a life area",
     "mostActiveFirst": "Most active first",
-
     "activityBadge": "{band} activity",
     "conclusionStrength": "{strength} conclusion",
-
     "readingDepth": "Reading depth",
     "modeDetailed": "Detailed",
     "modeAction": "Action Plan",
-
     "subthemesHeading": "What stands out within this area",
     "subthemesRankNote": "Ranked from this chart's evidence",
     "subthemeRank": "#{rank}",
-
     "clarityStatement": "Clarity statement",
     "decisionRule": "Decision rule",
     "boundaryRule": "Boundary rule",
-
     "support": "Support",
     "watch": "Watch",
     "timing": "Timing",
-
     "evidenceSummary": "How this domain is being read",
-
     "doNext": "Do next",
     "keepInMind": "Keep in mind",
     "decisionFilter": "Decision filter",
     "decisionFilterFallback": "Move when the support, timing, and evidence point in the same direction.",
     "guidanceLabel": "Guidance:",
     "longGameLabel": "Long game:",
-
     "notice": {
       "missingLead": "Return to intake and provide complete birth details before opening the life areas.",
       "errorKicker": "Life areas",
@@ -39,13 +31,24 @@
       "errorFallback": "No life domain data was returned.",
       "backToReading": "Back to your reading"
     },
-
     "lifeShifts": {
       "missingLead": "Return to intake and provide complete birth details before opening the life chapters.",
       "errorKicker": "Life chapters",
       "errorHeading": "The life chapters could not be prepared.",
       "errorFallback": "No chart data was returned.",
       "backToReading": "Back to your reading"
+    },
+    "kalatraHeading": "Married life in detail",
+    "kalatraNote": "Five facets, each read from its own house",
+    "kalatraReadFrom": "Read from",
+    "kalatraMeterLabel": "{label}: {score} out of 100 relative to the other facets",
+    "kalatraMethodSummary": "How these were derived",
+    "kalatraMangalCaveat": "Mangal dosha is assessed from this chart alone. The most commonly cited cancellation of all — that the dosha is void when both partners carry it — needs the other chart, so it is not counted above.",
+    "kalatraMangalCancelled": "Cancellations found in this chart: {list}.",
+    "kalatraBand": {
+      "strong": "Well supported",
+      "mixed": "Mixed",
+      "tender": "Needs care"
     }
   }
 }

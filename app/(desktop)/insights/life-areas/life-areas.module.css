@@ -565,3 +565,231 @@
   border-color: var(--border-soft);
   background: var(--surface-frosted);
 }
+
+/* ── Married-life detail (love_life only) ─────────────────────
+ *
+ * Sits under the domain body when the selected area is love_life. Built from
+ * the same --area-* tokens as the subtheme cards above so it reads as another
+ * block of this page rather than an imported widget, and so it follows the
+ * page into Ethereal Dawn without a second set of colours.
+ */
+.kalatra {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(200, 155, 60, 0.16);
+}
+
+.kalatraHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.9rem;
+}
+
+.kalatraHeader h3 {
+  margin: 0;
+  color: var(--area-ink);
+  font-size: 1.05rem;
+}
+
+.kalatraHeader span {
+  color: var(--area-soft);
+  font-size: 0.82rem;
+}
+
+/* Two columns from 900px. The findings are prose, so a third column would put
+   them at a measure that reads as a table of fragments. */
+.kalatraGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+@media (min-width: 900px) {
+  .kalatraGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* start, not stretch: the in-law facet routinely carries five findings
+       where the one beside it carries one, and stretching left the short card
+       as a box of empty space the height of the long one. */
+    align-items: start;
+  }
+}
+
+.kalatraCard {
+  min-width: 0;
+  padding: 0.95rem 1rem 0.85rem;
+  border: 1px solid rgba(200, 155, 60, 0.12);
+  border-radius: 10px;
+  background: rgba(255, 243, 210, 0.025);
+}
+
+.kalatraCardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.kalatraCardHead strong {
+  display: block;
+  color: var(--area-ink);
+  font-size: 1rem;
+}
+
+.kalatraCardHead small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--area-teal);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* A bar rather than a number: the figure is only meaningful next to the other
+   four facets, and a bar says "compare me" where "71" says "grade". */
+.kalatraMeter {
+  flex: 0 0 4.5rem;
+  height: 5px;
+  margin-top: 0.4rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.kalatraMeter span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--area-teal);
+}
+
+.kalatraMeter span[data-band="mixed"] { background: var(--area-gold); }
+.kalatraMeter span[data-band="tender"] { background: var(--accent-coral); }
+
+.kalatraSummary {
+  margin: 0.6rem 0 0;
+  color: var(--area-soft);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.kalatraFindings {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.kalatraFindings li {
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.kalatraFindings p {
+  margin: 0;
+  color: var(--area-ink);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+/* The chart fact the finding fired on. Small and set apart, because it is the
+   thing a reader checks rather than the thing they read. */
+.kalatraFindings cite {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--area-soft);
+  font-size: 0.78rem;
+  font-style: normal;
+  letter-spacing: 0.01em;
+}
+
+.kalatraMark {
+  flex: 0 0 1.15rem;
+  height: 1.15rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.kalatraFindings li[data-polarity="support"] .kalatraMark {
+  background: rgba(108, 225, 212, 0.14);
+  color: var(--area-teal);
+}
+
+/* --accent-coral, not a literal. The light coral this started as measured
+   1.86:1 on the Ethereal Dawn card — the mark is decorative and the finding's
+   own text carries the polarity, but an invisible one is still a signal the
+   reader paid for and did not get. The token is #D78368 dark, #b95e73 light. */
+.kalatraFindings li[data-polarity="pressure"] .kalatraMark {
+  background: color-mix(in srgb, var(--accent-coral) 14%, transparent);
+  color: var(--accent-coral);
+}
+
+.kalatraFindings li[data-polarity="context"] .kalatraMark {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--area-soft);
+}
+
+.kalatraSourcing {
+  margin: 0.85rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid rgba(200, 155, 60, 0.1);
+  color: var(--area-soft);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.kalatraSourcing span {
+  color: var(--area-gold);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kalatraMethod {
+  margin-top: 0.9rem;
+}
+
+.kalatraMethod summary {
+  color: var(--area-gold);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kalatraMethod > div {
+  margin-top: 0.6rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.kalatraMethod p {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+/* The two literal whites above are a meter groove and two chip fills, which
+   vanish on a near-white card. Everything else here is --area-*, which already
+   follows the theme. */
+:global(html[data-theme="light"]) .kalatraCard {
+  border-color: var(--border-soft);
+  background: var(--surface-frosted);
+}
+
+:global(html[data-theme="light"]) .kalatraMeter {
+  background: rgba(126, 78, 98, 0.14);
+}
+
+:global(html[data-theme="light"]) .kalatraFindings li[data-polarity="context"] .kalatraMark {
+  background: rgba(126, 78, 98, 0.1);
+}

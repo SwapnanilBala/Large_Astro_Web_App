@@ -12,6 +12,7 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse, LifeDomainInsight } from "@/lib/astro-types";
+import { computeKalatraDetail } from "@/lib/engines/kalatra-engine";
 
 export const maxDuration = 60;
 
@@ -81,6 +82,11 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
   const requested = rawParams.domain;
   const requestedKey = Array.isArray(requested) ? requested[0] : requested;
 
+  /* Computed here rather than in chart-service: it is read by one panel on one
+     page, and adding it to the chart payload would put it through four cache
+     layers and the rules schema version for no gain. */
+  const kalatra = computeKalatraDetail(payload.chart.planets, payload.chart.houses);
+
   return (
     <PageTransition>
       <DetailPageShell
@@ -94,6 +100,7 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
           insights={insights}
           dasha={payload.chart.dasha}
           initialDomainKey={requestedKey ?? ""}
+          kalatra={kalatra}
         />
       </DetailPageShell>
     </PageTransition>

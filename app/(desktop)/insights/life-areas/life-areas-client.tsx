@@ -10,6 +10,8 @@ import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
 import { useRouteMessages } from "@/lib/i18n-context";
 import lifeAreasMessages from "@/messages/en.life-areas.json";
+import KalatraPanel from "./kalatra-panel";
+import type { KalatraResult } from "@/lib/engines/kalatra-engine";
 import styles from "./life-areas.module.css";
 
 /*
@@ -32,12 +34,15 @@ type LifeAreasClientProps = {
   insights: LifeDomainInsight[];
   dasha?: DashaInfo | null;
   initialDomainKey: string;
+  /** Married-life detail. Only ever rendered under love_life. */
+  kalatra?: KalatraResult | null;
 };
 
 export default function LifeAreasClient({
   insights,
   dasha,
   initialDomainKey,
+  kalatra,
 }: LifeAreasClientProps) {
   /* tr, not t: this page's copy is a namespace of its own that ships with the
      route rather than riding in the desktop baseline. */
@@ -178,6 +183,14 @@ export default function LifeAreasClient({
                 ))}
               </div>
             </section>
+          )}
+
+          {/* Sits with the subthemes rather than behind the Detailed toggle:
+              the ranked subthemes above already name intimacy as one of the
+              four, and this is the read underneath it. Hiding the answer one
+              mode deeper than the question would be the wrong way round. */}
+          {domain.key === "love_life" && kalatra && (
+            <KalatraPanel detail={kalatra} tr={tr} />
           )}
 
           <div className={styles.domainTimingWindows}>
