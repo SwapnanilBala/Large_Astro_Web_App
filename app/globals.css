@@ -277,17 +277,11 @@ h3 {
 .insights-shell {
   min-height: var(--app-viewport-height);
   min-height: 100dvh;
-  /* The inline padding this shell puts around the card, named so .back-btn can
-     add it to the card's own padding and land on the hero's text edge. Kept
-     here as well as in the shorthand below because a shorthand cannot be read
-     back out in a calc(). */
+  /* The inline padding this shell puts around the card -- which is therefore
+     exactly where the card's left border lands. Named so .back-btn can sit
+     flush with it; kept here as well as in the shorthand below because a
+     shorthand cannot be read back out by var(). */
   --shell-pad-outer: max(1rem, env(safe-area-inset-left));
-  /* MIRRORS .dashboard-shell's own --shell-pad-inline (see the note there).
-     .dashboard-shell redeclares it on itself, so the card is unaffected by
-     this copy -- it exists for .back-btn, which is a child of this element and
-     a sibling of the card, so it cannot inherit the card's value. Change one,
-     change both. */
-  --shell-pad-inline: clamp(1.3rem, 2.7vw, 2.6rem);
   padding:
     calc(4.5rem + env(safe-area-inset-top))
     max(1rem, env(safe-area-inset-right))
@@ -2737,6 +2731,8 @@ label:has(.autocomplete-wrapper.is-open) {
   .home-shell,
   .insights-shell {
     padding: 2.8rem 0.65rem 1.8rem;
+    /* Mirrors the inline padding above; .back-btn reads it to stay flush. */
+    --shell-pad-outer: 0.65rem;
   }
 
   .dashboard-shell {
@@ -5035,14 +5031,13 @@ a:focus-visible {
      behind it. Sits below the bar now, and indented to line up with the
      section nav underneath rather than hugging the viewport edge. */
   top: calc(var(--navbar-h) + 1.15rem);
-  /* Lines up with the hero's text, not with a number that happened to match at
-     one width. This was a flat 3.5rem while the card's content edge slides with
-     clamp(1.3rem, 2.7vw, 2.6rem): measured, that put the pill 12.4px right of
-     the hero at 1024 and 1.6px LEFT of it from 1920 up, which is the offset
-     that reads as misaligned because the two edges sit directly above one
-     another. Shell padding plus card padding is what the hero's first pixel
-     actually is, so use that. */
-  left: calc(var(--shell-pad-outer, 1rem) + var(--shell-pad-inline, 2.6rem));
+  /* Flush with the card's left border, which is the strong vertical edge
+     directly underneath this pill. That border sits at exactly the shell's
+     inline padding, so read the same token rather than restating the number --
+     this was a flat 3.5rem before, which lined up with nothing and drifted from
+     12.4px right of the card's content edge at 1024 to 1.6px left of it at
+     1920, the offset that got noticed. */
+  left: var(--shell-pad-outer, 1rem);
   z-index: 40;
   /* Override `.insights-shell > * { width: 100% }`, which otherwise
      stretches this fixed button across the full viewport. */
@@ -5104,7 +5099,10 @@ a:focus-visible {
 @media (max-width: 680px) {
   .back-btn {
     top: calc(var(--navbar-h) + 0.6rem);
-    left: 1.1rem;
+    /* No `left` here on purpose. It was a hand-picked 1.1rem, which hugged the
+       edge but sat inside the card's border once the shell's padding dropped to
+       0.65rem at this width. The base rule already tracks that padding, so this
+       block only needs the vertical offset and the pill's own size. */
     padding: 0.45rem 0.85rem 0.45rem 0.65rem;
     font-size: 1rem;
   }
@@ -6328,6 +6326,8 @@ textarea:focus-visible {
 
   .home-shell {
     padding-inline: 0.5rem;
+    /* Mirrors the inline padding above; .back-btn reads it to stay flush. */
+    --shell-pad-outer: 0.5rem;
   }
 
   .intake-form {
@@ -6385,6 +6385,8 @@ textarea:focus-visible {
   .home-shell {
     padding-inline: 0.25rem;
     gap: 0.5rem;
+    /* Mirrors the inline padding above; .back-btn reads it to stay flush. */
+    --shell-pad-outer: 0.25rem;
   }
 
   .intake-form {
@@ -6478,6 +6480,8 @@ textarea:focus-visible {
 @media (max-width: 900px) and (orientation: landscape) {
   .home-shell {
     padding-inline: 1rem;
+    /* Mirrors the inline padding above; .back-btn reads it to stay flush. */
+    --shell-pad-outer: 1rem;
   }}
 
 /* ── Safe areas (notch devices) ── */
