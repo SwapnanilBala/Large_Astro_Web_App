@@ -1,11 +1,11 @@
-import { ArcFan, OrbitCluster, Ribbon, Rosette, StarField } from "@/app/components/intake-decor";
+import { ArcFan, OrbitCluster, Ribbon, Rosette, StarField } from "@/app/components/backdrop-figures";
 import styles from "./mobile-backdrop.module.css";
 
 /**
  * Abstract decorative backdrop for the handset landing intake.
  *
  * Sibling of app/components/IntakeBackdrop.tsx and drawn from the same figures
- * in intake-decor.tsx, but composed from scratch: the two canvases share no
+ * in backdrop-figures.tsx, but composed from scratch: the two canvases share no
  * usable geometry. Desktop has a wide top band, two outer gutters and a lower
  * band around a pair of cards. A handset has a single 390-wide column where
  * the fields run edge to edge, no gutters worth the name, and one large empty

@@ -5,7 +5,7 @@ import {
   Ribbon,
   Rosette,
   StarField,
-} from "./intake-decor";
+} from "./backdrop-figures";
 import styles from "./IntakeBackdrop.module.css";
 
 /**
@@ -17,7 +17,7 @@ import styles from "./IntakeBackdrop.module.css";
  * chart-square in `.professionalIntake::before`. Both pseudo-elements on that
  * selector are already spoken for, hence a real element.
  *
- * The figures live in intake-decor.tsx, which also carries the rules they are
+ * The figures live in backdrop-figures.tsx, which also carries the rules they are
  * drawn to. This file is placement, and placement is the whole of the
  * difference between this backdrop and the handset one in
  * app/m/mobile-backdrop.tsx — see there for the portrait composition.

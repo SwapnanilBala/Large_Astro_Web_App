@@ -330,9 +330,26 @@
   border-radius: 50%;
   border: 2px solid rgba(200, 155, 60, 0.35);
   background: rgba(200, 155, 60, 0.08);
-  color: var(--accent-gold);
+  /*
+   * The light end of the ramp, not --accent-gold.
+   *
+   * #D2AC62 numerals on this chip measure 3.02:1 against a floor of 3 -- the
+   * glyph is 22.7px at weight 700, so it takes the large-text floor, and it
+   * clears it by 0.02. That is a pass on paper and a coin toss in practice:
+   * any change to what is painted behind this card moves it, and adding the
+   * page backdrop in decor/insights-backdrop.tsx moved it to 2.98.
+   *
+   * #F2D89D on the same chip is 5.4:1, so the value stops being load-bearing.
+   * Light keeps --accent-gold below, which that theme already deepened to
+   * #83532a for exactly this reason -- see the note at the token.
+   */
+  color: var(--accent-gold-light);
   font-weight: 700;
   font-size: 1.42rem;
+}
+
+:global(html[data-theme="light"]) .numberBadge {
+  color: var(--accent-gold);
 }
 
 /* ── Gemstone Display ── */

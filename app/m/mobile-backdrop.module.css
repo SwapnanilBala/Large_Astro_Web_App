@@ -1,7 +1,7 @@
 /*
  * MOBILE BACKDROP — abstract decorative layer, handset landing page.
  *
- * Figures and the rules they are drawn to: app/components/intake-decor.tsx.
+ * Figures and the rules they are drawn to: app/components/backdrop-figures.tsx.
  * Why this composition rather than the desktop one: mobile-backdrop.tsx.
  * The desktop composition of the same figures:
  * app/components/IntakeBackdrop.module.css.
@@ -109,7 +109,7 @@
 }
 
 /* The portrait star field, down the right-hand side of the header. Turned on
-   its side by intake-decor's own coordinate list rather than by a rotation,
+   its side by backdrop-figures' own coordinate list rather than by a rotation,
    so the sparkles stay upright. */
 .stars {
   /*

@@ -1,12 +1,14 @@
 /**
- * The abstract figures the two intake backdrops are drawn from.
+ * The abstract figures the app's decorative backdrops are drawn from.
  *
  * Shapes only — no CSS import, no placement, no opinion about where any of
- * this goes. IntakeBackdrop.tsx composes them for the desktop landing page and
- * app/m/mobile-backdrop.tsx composes them for the handset one; the two canvases
- * have almost nothing in common (a 1440-wide page with two cards and wide
- * gutters, against a 390-wide column with a fixed action bar), so they share
- * the drawings and nothing else.
+ * this goes. Three callers compose them, and no two of their canvases have
+ * anything in common: IntakeBackdrop.tsx for the 1440-wide landing page with
+ * two cards and wide gutters, app/m/mobile-backdrop.tsx for a 390-wide column
+ * with a fixed action bar, and insights/components/decor/insights-backdrop.tsx
+ * for a viewport seen almost entirely through a frosted, 6.5%-opaque card. So
+ * they share the drawings and nothing else — placement, scale, hue and which
+ * figures appear at all are each caller's own.
  *
  * Follows app/(desktop)/insights/components/decor/insights-decor.tsx, which is
  * the existing pattern for this: one file of small named exports over a shared
@@ -22,15 +24,16 @@
  *    therefore ignores `data-theme` entirely.
  *
  * 2. NO `<linearGradient>`/`<radialGradient>`. SVG ids are document-global and
- *    ArcFan is rendered twice by both callers, so two instances would collide
- *    on one id and both take the first definition. Gradient stops cannot be
+ *    ArcFan is rendered twice by two of the three callers, so two instances
+ *    would collide on one id and both take the first definition. Gradient stops cannot be
  *    `currentColor` either, which would break rule 1. Where a soft wash is
  *    wanted, the caller's `::before` does it with a CSS radial-gradient.
  *
  * 3. STROKE WIDTH IS THE CALLER'S. `vector-effect: non-scaling-stroke` pins
  *    every stroke to the px width the caller's class asks for, whatever scale
- *    its viewBox is rendered at — otherwise the same drawing at 36rem on
- *    desktop and 20rem on a handset would come out at two different weights.
+ *    its viewBox is rendered at — otherwise the same drawing at 46rem on the
+ *    results page and 20rem on a handset would come out at two different
+ *    weights.
  *
  * Every figure is `aria-hidden` and `focusable="false"`, so none of them reach
  * the accessibility tree or the tab order.

@@ -1,0 +1,182 @@
+/*
+ * INSIGHTS BACKDROP — abstract decorative layer for the reading.
+ *
+ * Figures and the rules they are drawn to: app/components/backdrop-figures.tsx.
+ * Why this composition rather than the other two: insights-backdrop.tsx.
+ * Sibling compositions: app/components/IntakeBackdrop.module.css (landing),
+ * app/m/mobile-backdrop.module.css (handset).
+ *
+ * Not to be confused with insights-decor.module.css next door, which places the
+ * small glyphs *inside* the bands. This one is the page-level layer behind
+ * them.
+ */
+
+.backdrop {
+  /*
+   * Fixed, like `.insights-shell::before` above it. The reading runs to many
+   * viewports, so a layer pinned to the document would be a composition nobody
+   * ever sees whole -- and since the card it shows through scrolls over it,
+   * holding still is what makes it read as glass rather than as wallpaper.
+   *
+   * z-index:0 rather than -1: `.dashboard-shell` is z-index:1 and both sit in
+   * the root stacking context, so 0 is already below it. -1 would put this
+   * behind the page canvas instead, since nothing here isolates.
+   */
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: clip;
+  /* One dial for the whole layer; each figure's own opacity multiplies
+     through, so Ethereal Dawn is a single value rather than five. */
+  opacity: var(--decor-strength, 1);
+}
+
+/* ── Soft colour fields ──────────────────────────────────────────────────
+   Gentler than either sibling composition. On the landing page a wash sits
+   beside the content; here it sits *under* it, seen through a card that is
+   6.5% opaque, so every value chosen raises the composited backdrop beneath
+   several thousand words of body copy. These were measured, not eyeballed --
+   see the contrast note at the foot of this file. */
+.backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 4% -2%, rgba(232, 200, 154, 0.085), transparent 42%),
+    radial-gradient(circle at 98% 12%, rgba(74, 171, 158, 0.07), transparent 40%),
+    radial-gradient(circle at 2% 88%, rgba(150, 128, 214, 0.065), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(215, 131, 104, 0.055), transparent 40%);
+}
+
+/* ── Figures ─────────────────────────────────────────────────────────────
+   Height is left to the intrinsic ratio of each viewBox, so a figure is
+   scaled by exactly one number and can never be squashed. Strokes run a
+   little heavier than the siblings' 1px: a hairline behind a 20px blur is
+   gone, and the visible gutters are too narrow to carry the difference. */
+.shape {
+  position: absolute;
+  height: auto;
+  stroke-width: 1.2px;
+}
+
+/* Hues. The tokens are redefined by html[data-theme="light"], so these three
+   classes are most of this layer's theme handling. */
+.gold {
+  color: var(--accent-gold-light);
+}
+
+.teal {
+  color: var(--accent-teal-light);
+}
+
+.violet {
+  color: var(--accent-purple-light);
+}
+
+/* Top-left, hung off both edges. This one lands on real bare ground -- the
+   strip that carries the back button -- so it is the figure that does most of
+   the work before you scroll. */
+.rosette {
+  top: -11rem;
+  left: -9rem;
+  width: clamp(20rem, 27vw, 34rem);
+  rotate: -8deg;
+  opacity: 0.24;
+}
+
+/* Two corners on the diagonal, from one drawing. `-1 -1` swings the fan's
+   centre from its box's bottom-left to the screen's top-right; `1 1` leaves it
+   where it was drawn, at the bottom-left. */
+.arcsTop {
+  top: -6rem;
+  right: -6rem;
+  width: clamp(16rem, 23vw, 30rem);
+  scale: -1 -1;
+  opacity: 0.2;
+}
+
+.arcsBottom {
+  bottom: -7rem;
+  left: -7rem;
+  width: clamp(16rem, 23vw, 30rem);
+  opacity: 0.18;
+}
+
+/* The long sweep through the middle band, where the card is at its most
+   featureless. */
+.ribbon {
+  top: 34%;
+  left: -12%;
+  width: clamp(40rem, 72vw, 86rem);
+  opacity: 0.16;
+}
+
+/* Hung off the right edge at two-thirds height, so the card's widest, emptiest
+   stretch has one piece of structure behind it. */
+.orbits {
+  top: 46%;
+  right: -15rem;
+  width: clamp(26rem, 40vw, 46rem);
+  opacity: 0.17;
+}
+
+/* ── Ethereal Dawn ───────────────────────────────────────────────────────
+   Same two corrections as the sibling compositions: `--accent-*-light` is the
+   pale end of the ramp in both themes, which is right on near-black and
+   invisible on cream, so light points at the base tokens this theme already
+   deepened for AA -- and because those are ink, the layer comes down. */
+:global(html[data-theme="light"]) .backdrop {
+  --decor-strength: 0.6;
+}
+
+:global(html[data-theme="light"]) .gold {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .teal {
+  color: var(--accent-teal);
+}
+
+:global(html[data-theme="light"]) .violet {
+  color: var(--accent-purple);
+}
+
+:global(html[data-theme="light"]) .backdrop::before {
+  background:
+    radial-gradient(circle at 4% -2%, rgba(239, 171, 157, 0.22), transparent 42%),
+    radial-gradient(circle at 98% 12%, rgba(177, 149, 215, 0.16), transparent 40%),
+    radial-gradient(circle at 2% 88%, rgba(177, 149, 215, 0.13), transparent 38%),
+    radial-gradient(circle at 92% 100%, rgba(238, 176, 150, 0.14), transparent 40%);
+}
+
+/* ── Narrower viewports ──────────────────────────────────────────────────
+   The two figures that cross the middle are the ones sitting under the
+   densest copy, and a narrow window puts that copy in a single column right
+   over them. The corner work stays. */
+@media (max-width: 900px) {
+  .ribbon,
+  .orbits {
+    display: none;
+  }
+}
+
+/*
+ * ── Contrast ────────────────────────────────────────────────────────────
+ *
+ * Every value in this file passes under body text, because the card does not
+ * hide it. Measured with scripts/contrast-audit.js driven headlessly at
+ * 1440x1000 over /insights, before and after this layer existed:
+ *
+ *   dark   122 checked, 15 failures  ->  122 checked, 15 failures
+ *   light  123 checked,  3 failures  ->  123 checked,  3 failures
+ *
+ * Unchanged on both, and the fifteen and the three are pre-existing -- they
+ * are gold-on-gold button labels and teal kickers, none of which this layer
+ * is behind. If a value here is ever raised, re-run that comparison rather
+ * than assuming the margin held; `checked` has to match too, or the page was
+ * measured as a skeleton.
+ */
+
+/* No animation to disable — the layer is composed rather than animated, so
+   prefers-reduced-motion has nothing to switch off here. */
