@@ -4622,3 +4622,11 @@ html[data-theme="light"] .dasha-command-meter-ring {
     conic-gradient(var(--accent-gold), var(--accent-aqua), rgba(107, 70, 91, 0.16));
   box-shadow: var(--shadow-sm);
 }
+
+/* Shown only while a deeper chain is being read, next to the map sentence it
+   will replace. Quiet on purpose: the sentence underneath is already a real
+   answer, not a placeholder. */
+.dasha-combo-pending {
+  color: var(--text-tertiary);
+  font-style: italic;
+}

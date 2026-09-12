@@ -295,6 +295,11 @@ export default function NakshatraDashaPanel({
   const [subPeriodCache, setSubPeriodCache] = useState<Record<string, SubPeriodInfo[]>>({});
   const [loadingLevel, setLoadingLevel] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<DashaViewMode>("timeline");
+  /* Interpretations for chains the built-in map cannot express -- three lords
+     and deeper. Keyed by the chain plus its window, which is what the route
+     keys on too, so drilling back and forth costs one request per chain. */
+  const [chainInsights, setChainInsights] = useState<Record<string, string>>({});
+  const [chainInsightLoading, setChainInsightLoading] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
@@ -460,6 +465,49 @@ export default function NakshatraDashaPanel({
     document.addEventListener("keydown", handleKey);
     return () => document.removeEventListener("keydown", handleKey);
   }, [popup, drillPath.length, handleStepBack]);
+
+  /*
+   * Ask the API for the chains DASHA_COMBO_EFFECTS cannot express.
+   *
+   * That map is 81 strings -- every maha/antar pair -- and the lookup below
+   * keys on first-and-last lord, so at three lords and deeper the middle of
+   * the chain is dropped and a four-lord period reads exactly like its
+   * two-lord parent. Two lords stay on the map: it is written, it is
+   * reviewed, and it costs nothing.
+   */
+  useEffect(() => {
+    if (drillPath.length < 3) return;
+    const deepest = drillPath[drillPath.length - 1];
+    if (!deepest.startDate || !deepest.endDate) return;
+
+    const lords = drillPath.map((step) => step.planet);
+    const key = `${lords.join(">")}|${deepest.startDate}|${deepest.endDate}`;
+    if (chainInsights[key]) return;
+
+    let cancelled = false;
+    setChainInsightLoading(true);
+    fetch("/api/chart/dasha-interpretation", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lords, startDate: deepest.startDate, endDate: deepest.endDate }),
+    })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.interpretation) return;
+        setChainInsights((prev) => ({ ...prev, [key]: data.interpretation }));
+      })
+      .catch(() => {
+        /* The deterministic sentence is still on screen; a failed request
+           leaves the panel exactly as it was before this feature existed. */
+      })
+      .finally(() => {
+        if (!cancelled) setChainInsightLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [drillPath, chainInsights]);
 
   const handleBarClick = (
     planet: string,
@@ -631,7 +679,7 @@ export default function NakshatraDashaPanel({
   };
 
   /* Build combination insight from the current drill path */
-  const getCombinationInsight = (): { lords: string[]; effect: string; themes: string[] } | null => {
+  const getCombinationInsight = (): { lords: string[]; effect: string; themes: string[]; generated: boolean } | null => {
     if (drillPath.length === 0) return null;
 
     const lords = drillPath.map((step) => step.planet);
@@ -643,10 +691,17 @@ export default function NakshatraDashaPanel({
     const mahaLord = lords[0];
     const deepestLord = lords[lords.length - 1];
     const comboKey = `${mahaLord}-${deepestLord}`;
-    const effect = DASHA_COMBO_EFFECTS[comboKey]
+    const fallback = DASHA_COMBO_EFFECTS[comboKey]
       ?? `${DASHA_LORD_THEMES[mahaLord]?.theme ?? mahaLord} energy is filtered through ${DASHA_LORD_THEMES[deepestLord]?.theme ?? deepestLord} at the ${LEVEL_LABELS[drillPath.length + 1] ?? "sub-period"} level.`;
 
-    return { lords, effect, themes };
+    /* Three lords and deeper, prefer the generated reading -- it is the only
+       one that has seen the middle of the chain. Until it arrives, and if it
+       never does, the map sentence stands. */
+    const deepest = drillPath[drillPath.length - 1];
+    const chainKey = `${lords.join(">")}|${deepest.startDate}|${deepest.endDate}`;
+    const generated = lords.length >= 3 ? chainInsights[chainKey] : undefined;
+
+    return { lords, effect: generated ?? fallback, themes, generated: Boolean(generated) };
   };
 
   const interpretation = popup ? getInterpretation(popup.planet) : null;
@@ -967,7 +1022,12 @@ export default function NakshatraDashaPanel({
                 ))}
               </div>
             </div>
-            <p className="dasha-combo-effect">{combinationInsight.effect}</p>
+            <p className="dasha-combo-effect">
+              {combinationInsight.effect}
+              {chainInsightLoading && !combinationInsight.generated && (
+                <span className="dasha-combo-pending"> Reading this chain…</span>
+              )}
+            </p>
             <div className="dasha-combo-themes">
               {combinationInsight.themes.map((theme, idx) => (
                 <span key={theme} className="dasha-combo-theme-tag">
