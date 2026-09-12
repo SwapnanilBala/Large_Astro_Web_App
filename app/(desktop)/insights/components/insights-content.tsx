@@ -907,6 +907,20 @@ export default function InsightsContent({
   const [domainLoadError, setDomainLoadError] = useState("");
   const [domainRetryToken, setDomainRetryToken] = useState(0);
   const domainSectionRef = useRef<HTMLDivElement>(null);
+  /* Written briefs, keyed by domain. The engine's display.body stays on screen
+     until one arrives and stays for good if none does, so this is additive:
+     nothing here can leave the panel emptier than it was. */
+  const [domainBriefs, setDomainBriefs] = useState<
+    Partial<Record<LifeDomainInsight["key"], string>>
+  >({});
+  const [domainBriefPending, setDomainBriefPending] = useState(false);
+  /* Latched once the endpoint reports the feature is not configured. Without
+     it a deployment with no ANTHROPIC_API_KEY fires one doomed request per tab
+     click -- seven per reader, every reader, for a paragraph that was never
+     going to arrive. The engine's body is the answer in that case, and asking
+     again cannot change it. */
+  const [domainBriefsOffline, setDomainBriefsOffline] = useState(false);
+  const domainBriefAbortRef = useRef<AbortController | null>(null);
 
   /*
    * Warm the Major Life Shifts chunk while the visitor is still at the top of
@@ -1013,6 +1027,66 @@ export default function InsightsContent({
       controller.abort();
     };
   }, [domainRetryToken, historyQs, isLifeDomainLocked, payload.chart.life_domain_insights]);
+
+  /*
+   * Ask for a written brief for whichever life area is open.
+   *
+   * The rule engine's display.body states what it found; this weighs those
+   * findings against each other, which is the part the engine cannot do because
+   * the combinations do not enumerate. It is a separate request rather than
+   * part of the life-domains payload on purpose: that payload is rendered
+   * server-side on /insights/life-areas and is on the critical path here, and
+   * seven model calls do not belong in front of either. One area is fetched,
+   * the one being read.
+   *
+   * Aborting on change is not optional. The zone is a tab strip, so clicking
+   * along the row issues a request per card, and without the abort the slowest
+   * response wins and lands its paragraph under a different area's heading.
+   */
+  useEffect(() => {
+    if (domainLoadState !== "ready") return;
+    if (!selectedDomainKey) return;
+    if (domainBriefsOffline) return;
+    if (domainBriefs[selectedDomainKey]) return;
+
+    const controller = new AbortController();
+    domainBriefAbortRef.current?.abort();
+    domainBriefAbortRef.current = controller;
+
+    setDomainBriefPending(true);
+    fetch(`/api/chart/domain-brief?${historyQs}&domain=${selectedDomainKey}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        /* 503 is specifically "ANTHROPIC_API_KEY is not configured", and no
+           number of retries will change that. A 502 is a provider error --
+           a timeout, a refusal -- which says nothing about the next domain,
+           so it falls through and the next selection may still try. */
+        if (response.status === 503) {
+          setDomainBriefsOffline(true);
+          return null;
+        }
+        return response.ok ? response.json() : null;
+      })
+      .then((data: { brief?: string } | null) => {
+        if (controller.signal.aborted || !data?.brief) return;
+        setDomainBriefs((previous) => ({
+          ...previous,
+          [selectedDomainKey]: data.brief,
+        }));
+      })
+      .catch(() => {
+        /* The engine's own body is still on screen; a failed request leaves
+           the panel exactly as it was before this feature existed. */
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setDomainBriefPending(false);
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [domainBriefs, domainBriefsOffline, domainLoadState, historyQs, selectedDomainKey]);
 
   /* The two signs the hero's arch shows alongside the rising sign. Read from
      the natal placements, so they are the chart's own numbers rather than a
@@ -1426,8 +1500,21 @@ export default function InsightsContent({
                     )}
                   </div>
 
-                  <p className={styles.domainOverview}>
-                    {selectedDomainInsight.display.body}
+                  {/* The written brief when one has arrived, the engine's own
+                      body until then and for good if none ever does. */}
+                  <p
+                    className={styles.domainOverview}
+                    data-refining={
+                      domainBriefPending && !domainBriefs[selectedDomainInsight.key]
+                        ? "true"
+                        : undefined
+                    }
+                    aria-busy={
+                      domainBriefPending && !domainBriefs[selectedDomainInsight.key]
+                    }
+                  >
+                    {domainBriefs[selectedDomainInsight.key] ??
+                      selectedDomainInsight.display.body}
                   </p>
 
                   <Link

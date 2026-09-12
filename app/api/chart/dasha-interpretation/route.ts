@@ -132,6 +132,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "Dasha interpretation is unavailable: ANTHROPIC_API_KEY is not configured.",
+        { statusCode: 503 },
       );
     }
 
