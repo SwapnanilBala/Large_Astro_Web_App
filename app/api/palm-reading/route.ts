@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
@@ -18,7 +19,36 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
   }));
 }
 
+/*
+ * Claude Opus 5 reads the palm; GPT-4o is the fallback.
+ *
+ * It was GPT-4o alone, and the reading it produced was accurate about the hand
+ * and generic about the person -- the failure mode being that palmistry prose
+ * which would fit anybody is indistinguishable from prose about nobody. The
+ * interpretive sections are the whole product here, and they are a synthesis
+ * job: weigh what the lines show against the natal chart and the active dasha,
+ * then say what THIS combination asks of THIS reader. Opus 5 at high effort is
+ * markedly better at exactly that, which is why the swap is worth the cost.
+ *
+ * OpenAI stays wired as a fallback rather than being deleted. A palm reading is
+ * a one-shot thing a visitor does after pointing a camera at their hand: if the
+ * Anthropic key is missing or the provider is down at that moment, a GPT-4o
+ * reading is a great deal better than an error, and the response contract is
+ * identical either way because both are driven by the same prompt.
+ *
+ * Timeouts differ because the calls differ -- Opus at high effort thinks before
+ * it writes, and the request is streamed so the wall clock is not an HTTP
+ * timeout risk. maxDuration below is the real ceiling on the platform.
+ */
+export const maxDuration = 60;
+
+const ANTHROPIC_TIMEOUT_MS = 55_000;
 const OPENAI_TIMEOUT_MS = 30_000;
+
+/* Opus 5 emits a thinking pass before the JSON, and the schema below is long.
+   4500 was sized for a model that did neither. */
+const MAX_READING_TOKENS = 6000;
+
 const MAX_JSON_BODY_BYTES = 7 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -223,17 +253,44 @@ const CLASSICAL_GUIDELINES = `Important guidelines (Hasta Samudrika Shastra mode
 - ALWAYS provide line_coordinates as normalized [0,1] points (origin top-left). 3-6 points per detected line. OMIT a line's coordinate key entirely when its visibility is "not_detected".
 - classical_framework_notes MUST be included in this mode.`;
 
+/*
+ * Appended to both prompts, and the reason this route moved to Opus 5.
+ *
+ * The complaint that prompted the change was that readings came back
+ * basic -- which on inspection was not shallowness about the hand but
+ * sameness about the person: accurate line descriptions wrapped in
+ * interpretation that would fit any reader. Prose that fits everybody is
+ * this genre's default failure, so it has to be named as a failure
+ * outright; a model merely told to be 'insightful' will produce the
+ * horoscope voice and believe it complied.
+ *
+ * The instruction underneath is the one that actually moves the output:
+ * every interpretive claim must cite the feature it came from. A claim
+ * forced to name its evidence cannot be generic, because the evidence is
+ * specific to this hand.
+ */
+const SPECIFICITY_GUIDELINES = `Specificity requirements (these decide whether the reading is worth anything):
+- Every interpretive claim must be traceable to something you actually observed. Name the feature in the same sentence: "your head line separates from the life line at its start, which is why..." rather than "the palm suggests independence".
+- Reject your first phrasing if it would fit any hand. A sentence equally true of a stranger's palm is filler; replace it with something only this palm supports.
+- Prefer a specific observation you are moderately confident about over a safe generality you are certain of. Hedge the confidence in words rather than by retreating into vagueness.
+- Where the palm and the chart disagree, say so and sit with the tension. A contradiction honestly reported is more useful than a synthesis that smooths it away, and it is the strongest signal that this reading is about one particular person.
+- Address the reader as "you" throughout. Never describe them in the third person.`;
+
 const STANDARD_SYSTEM_PROMPT = `You are an expert palmist well-versed in both Western and Vedic (Samudrika Shastra) palmistry traditions. Analyze the provided palm image and return a detailed, comprehensive reading that gives the person a thorough understanding of their present life situation and life trajectory.
 
 ${BASE_SCHEMA_BLOCK}
 
-${STANDARD_GUIDELINES}`;
+${STANDARD_GUIDELINES}
+
+${SPECIFICITY_GUIDELINES}`;
 
 const CLASSICAL_SYSTEM_PROMPT = `You are a traditional Vedic palmist (Samudrika-shastri) reading strictly within the Hasta Samudrika Shastra framework. You do NOT use Western palmistry concepts, vocabulary, or interpretive models. All observations and readings are grounded in classical Indian palmistry as preserved in texts such as Brihat Samhita (Ch. 68), Samudrika Lakshana, and Hasta Sanjeevani.
 
 ${BASE_SCHEMA_BLOCK}
 
-${CLASSICAL_GUIDELINES}`;
+${CLASSICAL_GUIDELINES}
+
+${SPECIFICITY_GUIDELINES}`;
 
 // ---------------------------------------------------------------------------
 // Accepted media types
@@ -382,6 +439,101 @@ function buildUserMessage(
 }
 
 // ---------------------------------------------------------------------------
+// Providers
+//
+// Both return the model's raw text, which the caller parses as JSON. Keeping
+// the parse in one place downstream is what makes the two interchangeable: the
+// response contract belongs to the prompt, not to whoever served it.
+// ---------------------------------------------------------------------------
+
+type VisionRequest = {
+  image: string;
+  mediaType: "image/jpeg" | "image/png" | "image/webp";
+  systemPrompt: string;
+  userText: string;
+};
+
+async function readWithClaude({ image, mediaType, systemPrompt, userText }: VisionRequest) {
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: ANTHROPIC_TIMEOUT_MS,
+  });
+
+  /* Streamed because max_tokens is 6000 and high effort thinks before it
+     writes: the SDK asks for streaming at this size precisely so a long
+     generation cannot trip an HTTP timeout. finalMessage() hands back the
+     assembled message, since nothing here renders token by token. */
+  const response = await client.messages
+    .stream({
+      model: "claude-opus-5",
+      max_tokens: MAX_READING_TOKENS,
+      /* The explicit default. Stated rather than omitted because this route
+         is the one place in the app where interpretive quality IS the
+         product -- a later cost pass should have to argue with this line
+         rather than discover the setting by its absence. */
+      output_config: { effort: "high" },
+      system: [
+        { type: "text", text: systemPrompt, cache_control: { type: "ephemeral" } },
+      ],
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "image", source: { type: "base64", media_type: mediaType, data: image } },
+            { type: "text", text: userText },
+          ],
+        },
+      ],
+    })
+    .finalMessage();
+
+  if (response.stop_reason === "refusal") {
+    throw new ApiError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      "This image could not be read.",
+      { details: { category: response.stop_details?.category ?? null } },
+    );
+  }
+
+  return response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+}
+
+async function readWithGpt4o({ image, mediaType, systemPrompt, userText }: VisionRequest) {
+  const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const dataUrl = `data:${mediaType};base64,${image}`;
+
+  /* The OpenAI SDK takes no timeout option on this path, so the abort
+     controller is the timeout. */
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
+  try {
+    const response = await client.chat.completions.create(
+      {
+        model: "gpt-4o",
+        max_tokens: 4500,
+        messages: [
+          { role: "system", content: systemPrompt },
+          {
+            role: "user",
+            content: [
+              { type: "image_url", image_url: { url: dataUrl, detail: "high" } },
+              { type: "text", text: userText },
+            ],
+          },
+        ],
+      },
+      { signal: controller.signal },
+    );
+    return response.choices[0]?.message?.content ?? "";
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // POST /api/palm-reading
 // ---------------------------------------------------------------------------
 
@@ -441,8 +593,10 @@ export async function POST(request: NextRequest) {
     const isClassicalMode = classicalMode === true;
     const sanitizedJyotish = sanitizeJyotishContext(jyotishContext);
 
-    // -- Check API key --
-    if (!process.env.OPENAI_API_KEY) {
+    // -- Check API keys --
+    /* Either provider can serve this, so the route is only down when neither
+       key is configured. */
+    if (!process.env.ANTHROPIC_API_KEY && !process.env.OPENAI_API_KEY) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "Palm reading service is temporarily unavailable.",
@@ -475,53 +629,48 @@ export async function POST(request: NextRequest) {
     }
 
     // -- Call OpenAI Vision API --
-    const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    const visionRequest: VisionRequest = {
+      image,
+      mediaType: mediaType as VisionRequest["mediaType"],
+      systemPrompt: isClassicalMode ? CLASSICAL_SYSTEM_PROMPT : STANDARD_SYSTEM_PROMPT,
+      userText: buildUserMessage(isClassicalMode, sanitizedJyotish),
+    };
 
-    const dataUrl = `data:${mediaType};base64,${image}`;
+    let rawText = "";
+    let servedBy: "anthropic" | "openai" = "anthropic";
 
-    const systemPrompt = isClassicalMode
-      ? CLASSICAL_SYSTEM_PROMPT
-      : STANDARD_SYSTEM_PROMPT;
-
-    const userText = buildUserMessage(isClassicalMode, sanitizedJyotish);
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), OPENAI_TIMEOUT_MS);
-    let response: OpenAI.Chat.Completions.ChatCompletion;
-    try {
-      response = await client.chat.completions.create(
-        {
-          model: "gpt-4o",
-          max_tokens: 4500,
-          messages: [
-            { role: "system", content: systemPrompt },
-            {
-              role: "user",
-              content: [
-                {
-                  type: "image_url",
-                  image_url: { url: dataUrl, detail: "high" },
-                },
-                {
-                  type: "text",
-                  text: userText,
-                },
-              ],
-            },
-          ],
-        },
-        { signal: controller.signal },
-      );
-    } finally {
-      clearTimeout(timeout);
+    if (process.env.ANTHROPIC_API_KEY) {
+      try {
+        rawText = await readWithClaude(visionRequest);
+      } catch (error) {
+        /* With no second provider configured there is nothing to fall back
+           to, so the error is the answer. */
+        if (!process.env.OPENAI_API_KEY) throw error;
+        /* Otherwise: record what went wrong and read the palm anyway. A
+           visitor who has just photographed their hand should not be told to
+           come back later because one provider had a bad minute. */
+        logApiError("/api/palm-reading", error, {
+          type: "anthropic_failed_falling_back",
+        });
+        rawText = "";
+      }
     }
 
-    // -- Extract text from response --
-    const rawText = response.choices[0]?.message?.content;
+    if (!rawText) {
+      if (!process.env.OPENAI_API_KEY) {
+        throw new ApiError(
+          ErrorCode.EXTERNAL_SERVICE_ERROR,
+          "No reading was returned.",
+        );
+      }
+      rawText = await readWithGpt4o(visionRequest);
+      servedBy = "openai";
+    }
+
     if (!rawText) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "No text response received from OpenAI",
+        "No reading was returned.",
       );
     }
 
@@ -541,7 +690,10 @@ export async function POST(request: NextRequest) {
       reading = JSON.parse(match[0]);
     }
 
-    return NextResponse.json(reading);
+    /* Not decorative: when a reading comes back thinner than the panel
+       expects, the first question is which model wrote it, and without this
+       the answer is unknowable after the fact. */
+    return NextResponse.json({ ...reading, served_by: servedBy });
   } catch (error) {
     const isTimeout =
       (error instanceof DOMException && error.name === "AbortError") ||

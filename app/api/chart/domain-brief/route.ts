@@ -33,7 +33,8 @@ import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
  * was before this route existed.
  *
  * Provider note: Anthropic, reading ANTHROPIC_API_KEY, shared with the dasha
- * route. /api/palm-reading is OpenAI and stays that way.
+ * route and, since palm reading moved to Opus 5, with /api/palm-reading and
+ * /api/palm-reading/ask. OpenAI survives only as the palm route's fallback.
  *
  * Abuse note: the only thing a caller controls here is the birth parameters and
  * a domain key from a closed set of seven. Everything in the prompt is rebuilt

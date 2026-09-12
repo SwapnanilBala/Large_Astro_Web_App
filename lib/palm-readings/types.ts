@@ -145,6 +145,16 @@ export type PalmReadingJSON = {
   dasha_relevance?: PalmDashaRelevance;
   /** Commentary in the classical Samudrika framework. */
   classical_framework_notes?: PalmClassicalFrameworkNotes;
+
+  /**
+   * Which model produced this reading.
+   *
+   * Optional because readings saved before the route moved to Claude Opus 5
+   * do not carry it, and those are all GPT-4o. Worth persisting rather than
+   * logging: a reading lives on the device indefinitely, so months later this
+   * is the only way to know whether a thin one came from the fallback path.
+   */
+  served_by?: "anthropic" | "openai";
 };
 
 // ---------------------------------------------------------------------------

@@ -74,7 +74,8 @@ import { getClientIp } from "@/lib/rate-limiter";
 export type LlmRouteKey =
   | "/api/chart/dasha-interpretation"
   | "/api/chart/domain-brief"
-  | "/api/palm-reading";
+  | "/api/palm-reading"
+  | "/api/palm-reading/ask";
 
 type LlmBudgetConfig = {
   /** Paid calls this route may make in one UTC day, across every caller. */
@@ -90,10 +91,17 @@ type LlmBudgetConfig = {
  *
  * The route totals are whole-deployment numbers rather than per-instance ones,
  * so they bite where they read. They are sized by what a call costs: the two
- * text routes are Claude Opus 5 at low effort with max_tokens 1000 and a cached
- * system prefix, fractions of a cent each, while palm reading is GPT-4o vision
- * over a 5MB image at detail "high" with max_tokens 4500 and nothing cached --
- * an order of magnitude dearer, hence 200 a day against 2500.
+ * chart routes are Claude Opus 5 at low effort with max_tokens 1000 and a
+ * cached system prefix, fractions of a cent each, while palm reading is Opus 5
+ * vision over a 5MB image at high effort with max_tokens 6000 and nothing
+ * cached -- an order of magnitude dearer, hence 200 a day against 2500.
+ *
+ * Follow-up questions sit between the two: Opus 5 at medium effort, max_tokens
+ * 700, with a cached system prefix but a per-reading context that cannot be
+ * shared between callers. Cheap per call, but a conversation is many calls
+ * where a reading is one, so the route total is set well above palm reading's
+ * while the per-caller number stays the same -- the ceiling that matters for a
+ * question thread is the daily allowance, not the route's.
  *
  * THE TWO TIERS are 2 free, then 10 once registered, on each of the three
  * routes. An address is a weak name for a person in both directions at once --
@@ -115,14 +123,22 @@ type LlmBudgetConfig = {
  * dasha ceiling in one sitting. If that shows up, raise
  * `/api/chart/dasha-interpretation` first: it is the cheapest of the three per
  * call (Opus at low effort, 1000 max tokens, cached system prefix) and the one
- * a real session burns fastest. Palm reading is the opposite -- GPT-4o vision
+ * a real session burns fastest. Palm reading is the opposite -- Opus 5 vision
  * over a 5MB image with nothing cached -- so its 10 is the expensive one, and
  * the route's own 200/day total is what actually bounds that exposure.
+ *
+ * Follow-up questions are the one place where 10 is a *conversation* rather
+ * than 10 features used, so it will chafe first and most legibly: a reader with
+ * six real questions has four left for the rest of the day. It is set to 10
+ * anyway, for now, because the alternative is guessing -- and because an
+ * endpoint that accepts free text is the one whose ceiling should be raised
+ * deliberately, after watching it, rather than set generously on day one.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   "/api/chart/dasha-interpretation": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
   "/api/chart/domain-brief": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
   "/api/palm-reading": { perDay: 200, perCallerPerDay: 10, perAnonPerDay: 2 },
+  "/api/palm-reading/ask": { perDay: 1500, perCallerPerDay: 10, perAnonPerDay: 2 },
 };
 
 const MS_PER_DAY = 86_400_000;

@@ -19,9 +19,11 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  * The engine decides *what is true* -- which lords, in which order, over which
  * window -- and the model is only allowed to phrase it.
  *
- * Provider note: this route is Anthropic. /api/palm-reading is OpenAI and stays
- * that way; the two read different environment variables and neither falls back
- * to the other, so a missing key degrades one feature rather than both.
+ * Provider note: this route is Anthropic, and so is every LLM route here
+ * now -- /api/palm-reading moved to Opus 5 and keeps OpenAI only as a
+ * fallback for when ANTHROPIC_API_KEY is missing or the provider is down.
+ * A missing Anthropic key therefore takes this route and the domain brief
+ * with it, while palm reading degrades to GPT-4o rather than failing.
  */
 
 export const maxDuration = 30;
