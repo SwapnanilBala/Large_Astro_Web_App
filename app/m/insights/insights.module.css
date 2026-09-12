@@ -422,3 +422,132 @@
   font-size: 0.9375rem;
   color: var(--accent-gold, #d4a574);
 }
+
+/* ── Married life in detail ───────────────────────────────────
+ *
+ * The handset rendering of the kalatra panel on /insights/life-areas. Same
+ * five facets and the same per-finding citations; the score meter is dropped
+ * because at this width a bar beside a wrapping title is two things competing
+ * for one line, and the band label says what the bar said.
+ */
+.facets {
+  display: grid;
+  gap: 0.7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.facet {
+  padding: 0.75rem 0.8rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.facetTitle {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.facetTitle span {
+  flex: 0 0 auto;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/*
+ * Gold and danger, not the desktop panel's teal and coral.
+ *
+ * mobile-shell.css is explicit that it defines only the tokens this tree
+ * actually reads, and --accent-teal and --accent-coral are not among them.
+ * Writing them with literal fallbacks would have shipped two dark-theme hexes
+ * that resolve the same way in Ethereal Dawn -- #6ce1d4 on a near-white card.
+ * --danger-text is the tree's own negative tone and is themed in both, so the
+ * three states read correctly here at the cost of one hue against the desktop
+ * rendering. Adding two accent tokens to the shell for one panel is the change
+ * that file is written to discourage.
+ *
+ * Gold then came out of the small text as well. This tree's light --accent-gold
+ * is #ad7138, which measured 3.96:1 at 0.62rem on the card -- under the floor,
+ * and the same trap app/m/engine-select hit at 0.68rem. The band label and the
+ * "read from" label are distinguished by caps and weight instead, which costs
+ * nothing at this size. Gold survives on the left rules, which are borders
+ * rather than text.
+ */
+.facetTitle span[data-band="strong"] { color: var(--text-primary); }
+.facetTitle span[data-band="mixed"] { color: var(--text-secondary); }
+.facetTitle span[data-band="tender"] { color: var(--danger-text); }
+
+.facetSummary {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.facetFindings {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* A left rule rather than the desktop's chip: a 1.15rem circle plus a gap is
+   most of a line's worth of indent on a 375px column, and the rule carries the
+   same three states in none of the width. */
+.facetFindings > li {
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--border-soft);
+}
+
+.facetFindings > li[data-polarity="support"] { border-left-color: var(--accent-gold); }
+.facetFindings > li[data-polarity="pressure"] { border-left-color: var(--danger-line); }
+
+.facetFindings p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.facetFindings cite {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+
+.facetSourcing {
+  margin: 0.7rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.facetSourcing span {
+  color: var(--text-primary);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.facetMethod {
+  margin: 0.7rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}

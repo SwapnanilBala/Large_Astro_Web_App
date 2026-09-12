@@ -7,6 +7,7 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { computeKalatraDetail } from "@/lib/engines/kalatra-engine";
 import MobileInsights from "./mobile-insights";
 import styles from "../mobile.module.css";
 
@@ -54,10 +55,17 @@ export default async function MobileInsightsPage({ searchParams }: PageProps) {
     error = caught instanceof Error ? caught.message : "Chart calculation failed";
   }
 
+  /* Server-side so the engine and its rule prose stay out of the handset
+     bundle -- this tree pays for every kilobyte it ships. */
+  const kalatra = payload
+    ? computeKalatraDetail(payload.chart.planets, payload.chart.houses)
+    : null;
+
   return (
     <MobileInsights
       payload={payload}
       error={error}
+      kalatra={kalatra}
       desktopHref={`/insights?${chartParamsToQuery(chartParams)}&view=desktop`}
       /* The same string the desktop tree files a chart under, so a chart cast
          on a phone and one cast on a laptop are one entry, not two. */

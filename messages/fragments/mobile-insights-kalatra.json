@@ -1,0 +1,67 @@
+{
+  "es": {
+    "mobileInsights": {
+      "kalatraTitle": "La vida conyugal en detalle",
+      "kalatraSubtitle": "{count} facetas, cada una leída desde su propia casa",
+      "kalatraReadFrom": "Leído desde",
+      "kalatraMangalCaveat": "El Mangal dosha se evalúa solo a partir de esta carta. La anulación más citada —que el dosha queda sin efecto cuando ambas personas lo tienen— requiere la otra carta.",
+      "kalatraBand": {
+        "strong": "Bien respaldada",
+        "mixed": "Mixta",
+        "tender": "Requiere cuidado"
+      }
+    }
+  },
+  "bn": {
+    "mobileInsights": {
+      "kalatraTitle": "বৈবাহিক জীবনের বিশদ",
+      "kalatraSubtitle": "{count}টি দিক, প্রতিটি নিজের ঘর থেকে পড়া",
+      "kalatraReadFrom": "যেখান থেকে পড়া",
+      "kalatraMangalCaveat": "মঙ্গল দোষ কেবল এই কুণ্ডলী থেকেই বিচার করা হয়েছে। সবচেয়ে বেশি উল্লিখিত পরিহার — উভয়ের কুণ্ডলীতে দোষ থাকলে তা কেটে যায় — এর জন্য অন্য কুণ্ডলী প্রয়োজন।",
+      "kalatraBand": {
+        "strong": "ভালোভাবে সমর্থিত",
+        "mixed": "মিশ্র",
+        "tender": "যত্ন প্রয়োজন"
+      }
+    }
+  },
+  "hi": {
+    "mobileInsights": {
+      "kalatraTitle": "वैवाहिक जीवन विस्तार से",
+      "kalatraSubtitle": "{count} पहलू, हर एक अपने भाव से पढ़ा गया",
+      "kalatraReadFrom": "किससे पढ़ा गया",
+      "kalatraMangalCaveat": "मंगल दोष केवल इसी कुंडली से आँका गया है। सबसे अधिक उद्धृत परिहार — कि दोनों के दोष होने पर दोष निष्फल हो जाता है — के लिए दूसरी कुंडली चाहिए।",
+      "kalatraBand": {
+        "strong": "भली प्रकार समर्थित",
+        "mixed": "मिश्रित",
+        "tender": "सावधानी अपेक्षित"
+      }
+    }
+  },
+  "it": {
+    "mobileInsights": {
+      "kalatraTitle": "La vita coniugale nel dettaglio",
+      "kalatraSubtitle": "{count} aspetti, ciascuno letto dalla propria casa",
+      "kalatraReadFrom": "Letto da",
+      "kalatraMangalCaveat": "Il Mangal dosha è valutato solo da questa carta. L'annullamento più citato — che il dosha si annulla quando entrambi i partner lo portano — richiede l'altra carta.",
+      "kalatraBand": {
+        "strong": "Ben sostenuto",
+        "mixed": "Misto",
+        "tender": "Richiede cura"
+      }
+    }
+  },
+  "fr": {
+    "mobileInsights": {
+      "kalatraTitle": "La vie conjugale en détail",
+      "kalatraSubtitle": "{count} facettes, chacune lue depuis sa propre maison",
+      "kalatraReadFrom": "Lu depuis",
+      "kalatraMangalCaveat": "Le Mangal dosha est évalué à partir de ce thème seul. L'annulation la plus citée — le dosha s'annule lorsque les deux partenaires le portent — exige l'autre thème.",
+      "kalatraBand": {
+        "strong": "Bien soutenue",
+        "mixed": "Mitigée",
+        "tender": "Demande du soin"
+      }
+    }
+  }
+}

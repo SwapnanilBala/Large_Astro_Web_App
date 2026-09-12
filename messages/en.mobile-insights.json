@@ -3,7 +3,6 @@
     "errorHeading": "Could not build this chart",
     "errorFallback": "The chart could not be calculated.",
     "backToIntake": "Back to intake",
-
     "ascendantLead": "{sign} ascendant",
     "nakshatraLead": "{name} nakshatra",
     "factLagna": "Lagna",
@@ -11,7 +10,6 @@
     "padaLord": "Pada {pada} · {lord}",
     "factMahadasha": "Mahadasha",
     "toDate": "to {date}",
-
     "planetaryPositions": "Planetary positions",
     "grahaCount": "{count} grahas",
     "colGraha": "Graha",
@@ -21,7 +19,6 @@
     "flagRetrograde": "Rx",
     "flagCombust": "Cmb",
     "flagLegend": "Rx = moving backwards from here · Cmb = too close to the Sun to act freely",
-
     "houseRolesTitle": "Which house is responsible for what",
     "houseRolesSubtitle": "All twelve, and the support each holds",
     "bindusLegend": "Bindus are Ashtakavarga’s support score for the sign sitting on that house, out of a fixed pool of 337. Dead average is 28.1, so a house is read against that rather than against a maximum.",
@@ -30,24 +27,29 @@
     "srSupport": "{sign}, {bindus} bindus",
     "supportReadout": "{sign} · {bindus}",
     "houseGroupLegend": "<b>Kendra</b> are the four angles the chart is built on; <b>Panaphara</b> and <b>Apoklima</b> are the houses that follow them and fall away from them. On top of that, <b>Trikona</b> houses are read as where merit arrives, <b>Upachaya</b> as the ones that improve with age and effort, and <b>Dusthana</b> as the ones that ask for something first. A house can be more than one — the 6th is an Upachaya and a Dusthana both.",
-
     "attentionTitle": "What deserves attention",
     "attentionSubtitleOne": "{count} high-priority reading",
     "attentionSubtitleOther": "{count} high-priority readings",
     "whyThisReading": "Why this reading",
-
     "dashaTitle": "Dasha timeline",
     "dashaPeriodCount": "{count} periods",
     "dashaCurrent": "Currently <strong>{dasha}</strong>{antardasha} until {date}",
     "colPeriod": "Period",
     "colFrom": "From",
     "colTo": "To",
-
     "summaryTitle": "Summary",
     "allReadingsTitle": "All readings",
     "allReadingsSubtitle": "{count} total",
-
     "newChart": "New chart",
-    "desktopView": "Full desktop view"
+    "desktopView": "Full desktop view",
+    "kalatraTitle": "Married life in detail",
+    "kalatraSubtitle": "{count} facets, each read from its own house",
+    "kalatraReadFrom": "Read from",
+    "kalatraMangalCaveat": "Mangal dosha is assessed from this chart alone. The most commonly cited cancellation — that the dosha is void when both partners carry it — needs the other chart.",
+    "kalatraBand": {
+      "strong": "Well supported",
+      "mixed": "Mixed",
+      "tender": "Needs care"
+    }
   }
 }

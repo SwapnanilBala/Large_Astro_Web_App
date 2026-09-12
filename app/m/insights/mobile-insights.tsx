@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
+import type { KalatraFacet, KalatraResult } from "@/lib/engines/kalatra-engine";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import insightsMessages from "@/messages/en.mobile-insights.json";
 import shell from "../mobile.module.css";
@@ -38,6 +39,8 @@ type Props = {
   desktopHref: string;
   historyQs: string;
   birthDate: string;
+  /** Married-life detail, computed on the server. */
+  kalatra: KalatraResult | null;
 };
 
 /* The translator useRouteMessages hands back. Passed down rather than each
@@ -136,6 +139,51 @@ function Section({
       </button>
       {open && <div className={styles.sectionBody}>{children}</div>}
     </section>
+  );
+}
+
+/**
+ * One married-life facet.
+ *
+ * Flatter than the desktop card: no score meter, because at this width a
+ * 4.5rem bar beside a wrapping title is two things fighting for one line and
+ * the band label already says what the bar would. The per-finding citation
+ * stays -- it is the reason this reading is worth more than a horoscope, and
+ * dropping it on mobile would be dropping the part that is hard to fake.
+ */
+function KalatraFacetCard({ facet, tr }: { facet: KalatraFacet; tr: Translate }) {
+  /* Spelled out rather than interpolated, for the same reason the attention
+     section spells its two out: the mobile coverage test matches plain-string
+     arguments, so `tr(`...${band}`)` is invisible to it and would pass by not
+     being seen rather than by being covered. */
+  const bandLabel =
+    facet.band === "strong"
+      ? tr("mobileInsights.kalatraBand.strong")
+      : facet.band === "mixed"
+        ? tr("mobileInsights.kalatraBand.mixed")
+        : tr("mobileInsights.kalatraBand.tender");
+
+  return (
+    <li className={styles.facet}>
+      <p className={styles.facetTitle}>
+        {facet.label}
+        <span data-band={facet.band}>{bandLabel}</span>
+      </p>
+      <p className={styles.facetSummary}>{facet.summary}</p>
+      {facet.findings.length > 0 && (
+        <ul className={styles.facetFindings}>
+          {facet.findings.map((finding) => (
+            <li key={finding.basis} data-polarity={finding.polarity}>
+              <p>{finding.text}</p>
+              <cite>{finding.basis}</cite>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className={styles.facetSourcing}>
+        <span>{tr("mobileInsights.kalatraReadFrom")}</span> {facet.sourcing}
+      </p>
+    </li>
   );
 }
 
@@ -271,6 +319,7 @@ export default function MobileInsights({
   desktopHref,
   historyQs,
   birthDate,
+  kalatra,
 }: Props) {
   /* tr, not t: this page's copy is a namespace of its own that ships with the
      route rather than riding in the layout's baseline, where every mobile page
@@ -499,6 +548,28 @@ export default function MobileInsights({
               ))}
             </tbody>
           </table>
+        </Section>
+      )}
+
+      {/* After the dasha table and before the summary: it is a deep read rather
+          than a headline, and the sections above it are the ones somebody opens
+          the page for. Closed by default like its neighbours. */}
+      {kalatra && (
+        <Section
+          title={tr("mobileInsights.kalatraTitle")}
+          subtitle={tr("mobileInsights.kalatraSubtitle", {
+            count: String(kalatra.facets.length),
+          })}
+        >
+          <ul className={styles.facets}>
+            {kalatra.facets.map((facet) => (
+              <KalatraFacetCard key={facet.key} facet={facet} tr={tr} />
+            ))}
+          </ul>
+          <p className={styles.facetMethod}>{kalatra.method}</p>
+          {kalatra.mangal.present && (
+            <p className={styles.facetMethod}>{tr("mobileInsights.kalatraMangalCaveat")}</p>
+          )}
         </Section>
       )}
 
