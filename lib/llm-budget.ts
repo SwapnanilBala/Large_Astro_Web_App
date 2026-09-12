@@ -12,16 +12,48 @@
  * ceiling per UTC day, counted both globally per route and per caller, checked
  * immediately before the provider call and never on a cache hit.
  *
- * LIMITATION, stated plainly rather than discovered later: the counters live in
- * process memory. On a serverless deployment each warm instance keeps its own
- * tally, so the real ceiling is (instances x limit), not the number below. That
- * still bounds a runaway client loop and a single determined abuser -- which is
- * what empties a key in practice -- but it is not a hard global cap. A hard cap
- * needs shared state; this app already runs Neon, so a counter table keyed on
- * (utc_day, route) with an atomic upsert is the upgrade path, at the cost of one
- * round trip per paid call.
+ * TWO LAYERS, AND WHY BOTH
+ *
+ * The counters live in Postgres (`llm_budget_counters`, incremented by a single
+ * atomic upsert in lib/db/llm-budget-counters.ts), which is what makes the
+ * number below a real ceiling rather than a per-instance one. They are also
+ * mirrored in process memory, and the mirror is consulted first.
+ *
+ * The mirror is a *fast rejection* layer, and it is sound as one for a specific
+ * reason: an instance's local tally only ever counts calls that instance made,
+ * so it is a lower bound on the shared total. Local >= limit therefore implies
+ * shared >= limit, and the refusal needs no round trip. The converse does not
+ * hold, so local < limit proves nothing and the shared counter is consulted.
+ * An allowed call pays one round trip; a refused one, after the first, pays
+ * nothing -- which is the right way round, because the traffic being refused is
+ * by definition the traffic there is a lot of.
+ *
+ * Mirroring the returned count back into memory is what closes the loop: once
+ * the shared counter has told an instance the route is spent, that instance
+ * refuses locally from then on, and stops writing rows for callers it has never
+ * seen. The table cannot be inflated by the abuse it is there to stop.
+ *
+ * WHEN NEON IS DOWN
+ *
+ * The failure mode is a deliberate choice, so: **a database error degrades to
+ * the process-local ceiling. It does not block the call.** The degraded state
+ * is not "no ceiling" -- it is exactly the (instances x limit) ceiling this
+ * module shipped with, which still bounds a runaway client loop and a single
+ * determined abuser, i.e. the ways a key is actually emptied. Failing closed
+ * would trade a bounded, time-limited overspend for a certain and immediate
+ * outage of three user-facing features every time Neon hiccups, which is the
+ * worse trade for an app whose LLM output is an enrichment on top of chart
+ * arithmetic that still works. A failing round trip is also not retried on
+ * every subsequent call: the first error opens a short circuit breaker so an
+ * outage does not add a database timeout to every LLM request's latency.
  */
 
+import {
+  bumpSharedLlmCounters,
+  isSharedLlmCounterConfigured,
+  pruneSharedLlmCounters,
+  type SharedLlmCounts,
+} from "@/lib/db/llm-budget-counters";
 import { getClientIp } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
@@ -49,6 +81,9 @@ type LlmBudgetConfig = {
  * Palm reading is a different order of magnitude: GPT-4o vision over a 5MB image
  * at detail "high" with max_tokens 4500, and nothing about it is cached. A real
  * visitor uploads a palm once or twice, ever, so the ceiling is tight on purpose.
+ *
+ * These are now whole-deployment numbers rather than per-instance ones, so they
+ * bite where they read.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   "/api/chart/dasha-interpretation": { perDay: 2500, perCallerPerDay: 80 },
@@ -58,12 +93,35 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
 
 const MS_PER_DAY = 86_400_000;
 
-/** Counts for the current UTC day only; the whole map is dropped on rollover. */
+/** Days of spent counters to keep for reading back; today is day zero of these. */
+const COUNTER_RETENTION_DAYS = 7;
+
+/** How long one database error suppresses the round trip on this instance. */
+const SHARED_OUTAGE_COOLDOWN_MS = 30_000;
+
+/**
+ * This instance's view of the counters, for the current UTC day only.
+ *
+ * Holds the larger of what this instance has spent and what the shared counter
+ * last reported, so it is always a lower bound on the true total -- which is
+ * the property the fast rejection above depends on.
+ */
 const counters = new Map<string, number>();
 let countersDay = -1;
 
+/** Set on a database error; the shared counter is skipped until `now` passes it. */
+let sharedUnavailableUntil = 0;
+
+/** The UTC day whose prune has already been issued by this instance. */
+let prunedDay = -1;
+
 function utcDayNumber(now: number) {
   return Math.floor(now / MS_PER_DAY);
+}
+
+/** The `utc_day` key: the UTC calendar date, derived from the day number. */
+function utcDayKey(dayNumber: number) {
+  return new Date(dayNumber * MS_PER_DAY).toISOString().slice(0, 10);
 }
 
 function secondsUntilUtcMidnight(now: number) {
@@ -75,8 +133,8 @@ function rollOver(now: number) {
   const day = utcDayNumber(now);
   if (day !== countersDay) {
     /* A new UTC day makes every existing count meaningless, so there is nothing
-       to scan or filter -- the map goes. This is also the only pruning this
-       module needs, which is why there is no cleanup timer here. */
+       to scan or filter -- the map goes. Postgres cannot do the same trick
+       because the rows outlive the process, hence the prune below. */
     counters.clear();
     countersDay = day;
   }
@@ -91,6 +149,27 @@ export type LlmBudgetResult =
       retryAfterSeconds: number;
     };
 
+function refuse(scope: "global" | "caller", now: number): LlmBudgetResult {
+  return { allowed: false, scope, retryAfterSeconds: secondsUntilUtcMidnight(now) };
+}
+
+/**
+ * Ask for the old days to go, once per process per day, without blocking.
+ *
+ * Deliberately not awaited and deliberately swallowing its error: a failed
+ * prune means seven-day-old rows live a little longer, which is not a reason to
+ * fail or slow down the request that happened to trigger it. `prunedDay` is set
+ * before the call, not after, so a burst of concurrent requests issues one
+ * delete rather than one each.
+ */
+function schedulePrune(day: number) {
+  if (prunedDay === day) {
+    return;
+  }
+  prunedDay = day;
+  void pruneSharedLlmCounters(utcDayKey(day - COUNTER_RETENTION_DAYS)).catch(() => {});
+}
+
 /**
  * Reserve one paid call against `route`'s daily budget.
  *
@@ -100,46 +179,98 @@ export type LlmBudgetResult =
  * the safe direction, because a provider erroring after it has already billed
  * us is exactly the case a budget is for.
  */
-export function consumeLlmBudget(
+export async function consumeLlmBudget(
   route: LlmRouteKey,
   request: Request,
   now: number = Date.now(),
-): LlmBudgetResult {
+): Promise<LlmBudgetResult> {
   rollOver(now);
 
   const config = LLM_BUDGETS[route];
+  const caller = getClientIp(request);
   const globalKey = route;
-  const callerKey = `${route}::${getClientIp(request)}`;
+  const callerKey = `${route}::${caller}`;
 
-  const globalUsed = counters.get(globalKey) ?? 0;
-  if (globalUsed >= config.perDay) {
-    return {
-      allowed: false,
-      scope: "global",
-      retryAfterSeconds: secondsUntilUtcMidnight(now),
-    };
+  /* Layer one: this instance's mirror. A refusal here is free and correct --
+     see the header on why a local count can only understate the shared one. */
+  const localGlobal = counters.get(globalKey) ?? 0;
+  if (localGlobal >= config.perDay) {
+    return refuse("global", now);
   }
 
-  const callerUsed = counters.get(callerKey) ?? 0;
-  if (callerUsed >= config.perCallerPerDay) {
-    return {
-      allowed: false,
-      scope: "caller",
-      retryAfterSeconds: secondsUntilUtcMidnight(now),
-    };
+  const localCaller = counters.get(callerKey) ?? 0;
+  if (localCaller >= config.perCallerPerDay) {
+    return refuse("caller", now);
   }
 
-  counters.set(globalKey, globalUsed + 1);
-  counters.set(callerKey, callerUsed + 1);
+  /* Reserved locally before the await, so that concurrent calls on this
+     instance cannot all pass the check above on the same stale reading, and so
+     the ceiling still exists at all if the round trip below never happens. */
+  counters.set(globalKey, localGlobal + 1);
+  counters.set(callerKey, localCaller + 1);
+
+  const localResult: LlmBudgetResult = {
+    allowed: true,
+    remaining: config.perDay - localGlobal - 1,
+    callerRemaining: config.perCallerPerDay - localCaller - 1,
+  };
+
+  if (!isSharedLlmCounterConfigured() || now < sharedUnavailableUntil) {
+    return localResult;
+  }
+
+  const day = utcDayNumber(now);
+  let shared: SharedLlmCounts;
+  try {
+    shared = await bumpSharedLlmCounters(utcDayKey(day), route, caller);
+  } catch (error) {
+    sharedUnavailableUntil = now + SHARED_OUTAGE_COOLDOWN_MS;
+    console.warn(JSON.stringify({
+      timestamp: new Date(now).toISOString(),
+      route,
+      event: "llm_budget_shared_counter_unavailable",
+      /* Named so the log reads as the decision it is, not as a bare error. */
+      degradedTo: "per-instance ceiling",
+      cooldownSeconds: SHARED_OUTAGE_COOLDOWN_MS / 1000,
+      error: error instanceof Error ? error.message : String(error),
+    }));
+    return localResult;
+  }
+
+  sharedUnavailableUntil = 0;
+  schedulePrune(day);
+
+  /* The shared totals include every other instance, so they can only be larger.
+     Taking the max both keeps the mirror a valid lower bound and arms the fast
+     rejection above: once the shared counter says the route is spent, this
+     instance stops asking. */
+  counters.set(globalKey, Math.max(counters.get(globalKey) ?? 0, shared.routeTotal));
+  counters.set(callerKey, Math.max(counters.get(callerKey) ?? 0, shared.caller));
+
+  /* Strictly greater, because the returned counts already include this call. */
+  if (shared.routeTotal > config.perDay) {
+    return refuse("global", now);
+  }
+  if (shared.caller > config.perCallerPerDay) {
+    return refuse("caller", now);
+  }
 
   return {
     allowed: true,
-    remaining: config.perDay - globalUsed - 1,
-    callerRemaining: config.perCallerPerDay - callerUsed - 1,
+    remaining: config.perDay - shared.routeTotal,
+    callerRemaining: config.perCallerPerDay - shared.caller,
   };
 }
 
-/** Current usage for one route, for logging and for the tests. */
+/**
+ * Current usage for one route, for logging and for the tests.
+ *
+ * This instance's view, which is the shared total as of its last round trip and
+ * never higher than the truth. Synchronous on purpose: the callers of this are
+ * log lines and assertions, and neither is worth a query. `used` can read above
+ * `limit` once the ceiling has been hit, because a refused attempt is counted
+ * before it is refused.
+ */
 export function readLlmBudgetUsage(route: LlmRouteKey, now: number = Date.now()) {
   rollOver(now);
   return {
@@ -152,4 +283,6 @@ export function readLlmBudgetUsage(route: LlmRouteKey, now: number = Date.now())
 export function __resetLlmBudgetForTests() {
   counters.clear();
   countersDay = -1;
+  sharedUnavailableUntil = 0;
+  prunedDay = -1;
 }

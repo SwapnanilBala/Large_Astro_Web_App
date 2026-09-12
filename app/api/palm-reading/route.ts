@@ -455,7 +455,7 @@ export async function POST(request: NextRequest) {
        detail "high", with no cache behind it. The proxy's 5-per-minute limit
        still allows 7,200 a day from one address, so the daily ceiling is the
        one that bounds the bill. */
-    const budget = consumeLlmBudget("/api/palm-reading", request);
+    const budget = await consumeLlmBudget("/api/palm-reading", request);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),

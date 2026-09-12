@@ -775,6 +775,43 @@ export const generatedArtifacts = pgTable(
   ],
 );
 
+/**
+ * One row per (UTC day, route, caller) for the paid-LLM daily ceilings.
+ *
+ * The only table here that is not part of the tenant graph, and deliberately
+ * so: it has no `user_id` and no foreign keys, because the traffic it has to
+ * count is mostly anonymous and the point of counting it is that it has not
+ * been vouched for by anything. See `lib/llm-budget.ts` for the policy; this is
+ * just where the number lives so that every serverless instance reads the same
+ * one.
+ *
+ * `utc_day` is computed in the application from `Date.now()`, never from the
+ * server's `current_date`. That is not an accident to be tidied up later: the
+ * ceiling is defined on the UTC day, and a Postgres `date` carries no zone, so
+ * letting the database pick the day would silently key the counter on whatever
+ * the instance's clock zone happened to be.
+ *
+ * `caller` holds the client IP, or `*` for the row that totals the whole route.
+ * Folding both into one table is what lets a single statement increment both
+ * counters and return both values in one round trip.
+ */
+export const llmBudgetCounters = pgTable(
+  "llm_budget_counters",
+  {
+    utcDay: date("utc_day", { mode: "string" }).notNull(),
+    route: varchar("route", { length: 120 }).notNull(),
+    caller: varchar("caller", { length: 100 }).notNull(),
+    count: integer("count").default(0).notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    /* The conflict target of the increment upsert. Ordered day-first so the
+       weekly prune is a range scan on the same index. */
+    primaryKey({ columns: [table.utcDay, table.route, table.caller] }),
+    check("llm_budget_counters_count_check", sql`${table.count} >= 0`),
+  ],
+);
+
 export type Client = typeof clients.$inferSelect;
 export type NewClient = typeof clients.$inferInsert;
 export type BirthProfile = typeof birthProfiles.$inferSelect;

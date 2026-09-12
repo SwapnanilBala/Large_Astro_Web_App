@@ -25,6 +25,10 @@ const expectedTables = [
   "consent_records",
   "dasha_periods",
   "generated_artifacts",
+  /* Joins the list in 0007. Its absence is silent at runtime by design — the
+     daily LLM ceiling degrades to the per-instance one it used to be — so this
+     check is the only thing that would notice the migration had not run. */
+  "llm_budget_counters",
 ];
 
 /**

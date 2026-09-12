@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
        limit in the proxy has already run; this is the daily ceiling, and it is
        checked here rather than in the proxy precisely because the proxy cannot
        see that the cache above served the last four requests for free. */
-    const budget = consumeLlmBudget("/api/chart/dasha-interpretation", request);
+    const budget = await consumeLlmBudget("/api/chart/dasha-interpretation", request);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),

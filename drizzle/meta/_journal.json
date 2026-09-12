@@ -50,6 +50,13 @@
       "when": 1788747841418,
       "tag": "0006_user_scoped_tenancy",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1789239192706,
+      "tag": "0007_llm_budget_counters",
+      "breakpoints": true
     }
   ]
 }

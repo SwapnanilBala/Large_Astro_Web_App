@@ -228,7 +228,7 @@ export async function GET(request: NextRequest) {
     }
 
     /* Past the cache, so this request is about to cost money. */
-    const budget = consumeLlmBudget("/api/chart/domain-brief", request);
+    const budget = await consumeLlmBudget("/api/chart/domain-brief", request);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
