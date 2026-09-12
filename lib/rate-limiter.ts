@@ -67,21 +67,50 @@ function ensureCleanupTimer() {
 }
 
 function normalizeIpHeader(value: string | null) {
-  const candidate = value?.split(",")[0]?.trim() ?? "";
+  /* The RIGHTMOST entry, not the leftmost. A forwarding header is a chain that
+     each proxy appends to, so the last entry is the one written by the hop
+     closest to us and the first is whatever the client opened with. Reading
+     the left end lets a caller pick their own identity by sending
+     `x-forwarded-for: <anything>`; reading the right end is correct whether
+     the platform appends to the header or replaces it outright. */
+  const parts = value?.split(",") ?? [];
+  const candidate = parts[parts.length - 1]?.trim() ?? "";
   return candidate.replace(/[^0-9a-fA-F:.%]/g, "").slice(0, 80);
 }
 
 /**
- * Best-effort caller identity from the proxy headers.
+ * Caller identity from the headers the platform sets, and only those.
  *
  * Exported because lib/llm-budget.ts keys its per-caller ceilings on the same
  * value: two different notions of "who is calling" would let a caller sit under
  * one limit while blowing through the other.
+ *
+ * THE RULE, because getting this wrong is silent: a forwarding header is only
+ * evidence of anything if something we trust wrote it. Every header below is
+ * one the serving platform sets and overwrites, so a client sending its own
+ * copy cannot choose what we read.
+ *
+ * `cf-connecting-ip` used to be first in this list and is now behind a flag.
+ * Nothing here runs behind Cloudflare -- deployment is Vercel, see vercel.json
+ * -- so that header was never set by a proxy and arrived verbatim from
+ * whoever sent the request. One extra header per request bought a brand new
+ * identity, which silently emptied both this module's per-minute window and
+ * the per-caller half of the daily LLM budget. Set TRUST_CLOUDFLARE_CLIENT_IP
+ * only if Cloudflare is genuinely terminating in front of the app, because
+ * that is the one arrangement in which the header means something.
+ *
+ * `x-vercel-forwarded-for` leads because the `x-vercel-*` namespace is
+ * Vercel's own and it replaces anything a client puts there. The two generic
+ * names below it are the fallback for a different host, and they are weaker:
+ * they are only as good as that host's willingness to overwrite them.
  */
+const TRUST_CLOUDFLARE_CLIENT_IP = process.env.TRUST_CLOUDFLARE_CLIENT_IP === "true";
+
 export function getClientIp(request: Request): string {
   const headers = request.headers;
   const candidates = [
-    headers.get("cf-connecting-ip"),
+    TRUST_CLOUDFLARE_CLIENT_IP ? headers.get("cf-connecting-ip") : null,
+    headers.get("x-vercel-forwarded-for"),
     headers.get("x-real-ip"),
     headers.get("x-forwarded-for"),
   ];
@@ -93,6 +122,9 @@ export function getClientIp(request: Request): string {
     }
   }
 
+  /* No forwarding header at all means local dev, or a platform that sets none.
+     One shared bucket is the deliberate answer: handing every unattributable
+     request a fresh allowance is the same as having no per-caller limit. */
   return "unknown";
 }
 

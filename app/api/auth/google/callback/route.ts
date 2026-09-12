@@ -15,6 +15,7 @@ import {
   safeEquals,
   sessionCookieOptions,
 } from "@/lib/identity/session";
+import { getClientIp } from "@/lib/rate-limiter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -131,10 +132,10 @@ export async function GET(request: NextRequest) {
 
     const { token, expiresAt } = await createSession(result.userId, {
       userAgent: request.headers.get("user-agent"),
-      ipAddress:
-        request.headers.get("cf-connecting-ip") ??
-        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-        null,
+      /* Shared with the rate limiter and the LLM budget rather than re-derived:
+         this one is only an audit record, but a second opinion on "who is
+         calling" is how the two drift apart. */
+      ipAddress: getClientIp(request),
     });
 
     const returnTo = request.cookies.get(GOOGLE_RETURN_COOKIE)?.value;
