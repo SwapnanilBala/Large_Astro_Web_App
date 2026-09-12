@@ -27,6 +27,19 @@
   padding: 1.25rem 1rem 0;
   /* Room for the sticky action bar so the last field is never trapped behind it. */
   padding-bottom: 7.5rem;
+  /*
+   * Holds <MobileBackdrop />, which sits at z-index:-1. Without a stacking
+   * context here that resolves against the root and the layer disappears
+   * behind .shell's opaque background; with one it lands between this form's
+   * background and its content, which is the only place it can go -- a
+   * positioned layer at z-index:0 would paint over the fields, since they are
+   * not positioned themselves.
+   *
+   * Safe for .actions below: its z-index:20 and the --layer-overlay:10 the
+   * suggestion list sits on are both inside this form, so they are still
+   * ordered against each other and nothing outside competes.
+   */
+  isolation: isolate;
 }
 
 .header {

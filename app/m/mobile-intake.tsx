@@ -19,6 +19,7 @@ import {
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
+import MobileBackdrop from "./mobile-backdrop";
 import styles from "./mobile.module.css";
 
 /*
@@ -369,6 +370,8 @@ export default function MobileIntake() {
 
   return (
     <form className={styles.page} onSubmit={onSubmit} noValidate>
+      <MobileBackdrop />
+
       <header className={styles.header}>
         <span className={styles.step}>Step {step} of 2</span>
         <h1 className={`${styles.title} mGold`}>

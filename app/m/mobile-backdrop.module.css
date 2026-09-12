@@ -1,0 +1,208 @@
+/*
+ * MOBILE BACKDROP — abstract decorative layer, handset landing page.
+ *
+ * Figures and the rules they are drawn to: app/components/intake-decor.tsx.
+ * Why this composition rather than the desktop one: mobile-backdrop.tsx.
+ * The desktop composition of the same figures:
+ * app/components/IntakeBackdrop.module.css.
+ *
+ * Self-contained, like every sheet in this tree. It reads one token from
+ * mobile-shell.css (--accent-gold) and declares the other two hues itself,
+ * because that sheet has no teal or violet and its own header asks callers not
+ * to grow it for something one route needs.
+ */
+
+.backdrop {
+  /*
+   * Fixed, not absolute. The form changes height as it is filled in -- step two
+   * swaps the fields out, and the unknown-birth-time toggle removes one -- so a
+   * composition pinned to the document would drift under the content as it
+   * grows. Pinned to the viewport it holds.
+   *
+   * z-index:-1 needs `isolation: isolate` on .page, which mobile.module.css
+   * sets: without it this would resolve against the root stacking context and
+   * disappear behind .shell's opaque background.
+   */
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  /* `clip` rather than `hidden`: every figure is deliberately hung past an
+     edge, and `hidden` would make this a scroll container for them. */
+  overflow: clip;
+  /* One dial for the whole layer; each figure's own opacity multiplies
+     through, so Ethereal Dawn is a single value rather than five. */
+  opacity: var(--decor-strength, 1);
+
+  /*
+   * The decorative palette.
+   *
+   * Gold comes from the tree's own token so it swaps with the theme for free.
+   * The other two are the values app/globals.css gives --accent-teal-light and
+   * --accent-purple-light; they are literals here only because the mobile
+   * token sheet does not carry those two hues at all.
+   */
+  --decor-gold: var(--accent-gold, #d4a574);
+  --decor-teal: #7ad5ca;
+  --decor-violet: #b8afe8;
+}
+
+/* ── Soft colour fields ──────────────────────────────────────────────────
+   Three rather than the desktop's four: on a 390-wide canvas a fourth centre
+   has nowhere to sit that is not already lit by one of the others. */
+.backdrop::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
+  background:
+    radial-gradient(circle at 6% 1%, rgba(212, 165, 116, 0.15), transparent 44%),
+    radial-gradient(circle at 98% 22%, rgba(150, 128, 214, 0.12), transparent 40%),
+    radial-gradient(circle at 86% 98%, rgba(74, 171, 158, 0.095), transparent 46%);
+}
+
+/* ── Edge grain ──────────────────────────────────────────────────────────
+   Masked away from the column of fields, which on a handset is most of the
+   middle of the screen. It gives the top and bottom a texture to read
+   against, so the colour fields do not look like a rendering artefact. */
+.backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  color: rgba(212, 165, 116, 0.5);
+  background-image: radial-gradient(currentColor 0.8px, transparent 0.9px);
+  background-size: 26px 26px;
+  opacity: 0.15;
+  mask-image: radial-gradient(ellipse 84% 40% at 50% 41%, transparent 46%, #000 100%);
+  -webkit-mask-image: radial-gradient(ellipse 84% 40% at 50% 41%, transparent 46%, #000 100%);
+}
+
+/* ── Figures ─────────────────────────────────────────────────────────────
+   Height is left to the intrinsic ratio of each viewBox, so a figure is
+   scaled by exactly one number and can never be squashed. */
+.shape {
+  position: absolute;
+  height: auto;
+  stroke-width: 1px;
+}
+
+.gold {
+  color: var(--decor-gold);
+}
+
+.teal {
+  color: var(--decor-teal);
+}
+
+.violet {
+  color: var(--decor-violet);
+}
+
+/* Top-left corner, cropped by both edges so it reads as a fragment. It sits
+   behind the step label and the first word of the title, which is why it is
+   the faintest thing here. */
+.rosette {
+  top: -5.5rem;
+  left: -5rem;
+  width: 12rem;
+  rotate: -10deg;
+  opacity: 0.2;
+}
+
+/* The portrait star field, down the right-hand side of the header. Turned on
+   its side by intake-decor's own coordinate list rather than by a rotation,
+   so the sparkles stay upright. */
+.stars {
+  /*
+   * The 0.4rem is doing real work. At 0 the middle sparkle lands on the
+   * right-hand end of the progress bar, where a four-pointed star stops
+   * reading as decoration and starts reading as a control. Nudged down, all
+   * three sit in gaps: beside the step label, between the progress bar and
+   * the Name label, and between the Name and Birth Date fields.
+   *
+   * Tuned against step one, which is the screen that is arrived at; step two
+   * has different field heights and the sparkles land wherever they land
+   * there. That is fine -- over a field they are a faint mark on a surface
+   * that has its own fill, which was never the problem.
+   */
+  top: 0.4rem;
+  right: -2rem;
+  width: 10.5rem;
+  opacity: 0.4;
+  stroke-width: 1.1px;
+}
+
+/* ── The open block ──────────────────────────────────────────────────────
+   Between the last field and the fixed action bar there is one large empty
+   area, and it is the only part of a handset screen with room for a figure at
+   a size worth drawing. These two share it: the sweep on the left, the orbits
+   on the right, hung off opposite edges so neither is centred in it. */
+.ribbon {
+  bottom: 11rem;
+  left: -8rem;
+  width: 24rem;
+  opacity: 0.24;
+}
+
+.orbits {
+  bottom: 4.5rem;
+  right: -7rem;
+  width: 18rem;
+  opacity: 0.22;
+}
+
+/* Bottom-left corner, fanning up and to the right out from behind the action
+   bar. The bar is opaque, so the lower arcs are simply cropped by it — which
+   is what gives the fan something to emerge from. */
+.arcs {
+  bottom: -2rem;
+  left: -4rem;
+  width: 14rem;
+  opacity: 0.28;
+}
+
+/* ── Ethereal Dawn ───────────────────────────────────────────────────────
+   Same two corrections as the desktop layer. The pale end of a hue ramp is
+   right on near-black and invisible on cream, so teal and violet are restated
+   at the depths app/globals.css gives --accent-teal and --accent-purple; gold
+   needs nothing, since this tree's --accent-gold already swaps to #ad7138.
+   And because those are ink, the layer as a whole comes down. */
+:global(html[data-theme="light"]) .backdrop {
+  --decor-strength: 0.72;
+  --decor-teal: #306b62;
+  --decor-violet: #80689d;
+}
+
+:global(html[data-theme="light"]) .backdrop::before {
+  background:
+    radial-gradient(circle at 6% 1%, rgba(239, 171, 157, 0.34), transparent 44%),
+    radial-gradient(circle at 98% 22%, rgba(177, 149, 215, 0.24), transparent 40%),
+    radial-gradient(circle at 78% 92%, rgba(122, 190, 179, 0.16), transparent 46%);
+}
+
+:global(html[data-theme="light"]) .backdrop::after {
+  color: rgba(132, 86, 105, 0.55);
+  opacity: 0.12;
+}
+
+/* The two nearest the copy, held back a little further. */
+:global(html[data-theme="light"]) .stars {
+  opacity: 0.26;
+}
+
+:global(html[data-theme="light"]) .rosette {
+  opacity: 0.16;
+}
+
+/* ── Short viewports ─────────────────────────────────────────────────────
+   Under about 700px of height the open block closes up entirely and the two
+   figures in it would sit behind the fields instead. The corner work is what
+   survives; it is placed against edges, which a short screen still has. */
+@media (max-height: 700px) {
+  .ribbon,
+  .orbits {
+    display: none;
+  }
+}
+
+/* No animation to disable — the layer is composed rather than animated, so
+   prefers-reduced-motion has nothing to switch off here. */

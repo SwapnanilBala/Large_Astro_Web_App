@@ -1,6 +1,8 @@
 /* ═══════════════════════════════════════════════
-   INTAKE BACKDROP — abstract decorative layer
-   See IntakeBackdrop.tsx for the four rules this obeys.
+   INTAKE BACKDROP — abstract decorative layer, desktop landing page
+   Figures and the rules they are drawn to: intake-decor.tsx.
+   Why this composition: IntakeBackdrop.tsx.
+   The handset composition of the same figures: app/m/mobile-backdrop.module.css.
    ═══════════════════════════════════════════════ */
 
 .backdrop {
