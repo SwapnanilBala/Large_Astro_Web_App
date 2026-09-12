@@ -113,6 +113,7 @@ import { localScopedKey } from "@/lib/local-scope";
 import { TRADITION_ORDER } from "@/lib/engines/engine-registry";
 import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
+import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 
 type InsightsContentProps = {
   payload: ChartApiResponse;
@@ -1066,7 +1067,11 @@ export default function InsightsContent({
           setDomainBriefsOffline(true);
           return null;
         }
-        return response.ok ? response.json() : null;
+        if (response.ok) return response.json();
+        /* A refused free allowance raises the sign-in prompt. It is not
+           `offline`: the feature works, this visitor has just had their two. */
+        void announceIfFreeUsageExhausted(response, "domainBrief");
+        return null;
       })
       .then((data: { brief?: string } | null) => {
         if (controller.signal.aborted || !data?.brief) return;

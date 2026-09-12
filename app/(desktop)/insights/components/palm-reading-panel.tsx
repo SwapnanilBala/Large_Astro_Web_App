@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import palmMessages from "@/messages/en.palm.json";
 import PalmAnnotation from "./PalmAnnotation";
 
@@ -464,6 +465,11 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         body: JSON.stringify(body),
       });
       if (!res.ok) {
+        /* Before reading the body, because this clones it: a refused free
+           allowance raises the sign-in dialog. The inline message below still
+           appears -- the dialog is the call to action, the banner is what is
+           left on screen once it has been dismissed. */
+        void announceIfFreeUsageExhausted(res, "palmReading");
         const err = await res.json();
         throw new Error(
           err.error?.message || err.detail || tr("palm.errors.analysisFailed"),

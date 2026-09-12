@@ -11,6 +11,7 @@ import type {
 } from "@/lib/astro-types";
 import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import { PLANET_COLORS, PLANET_INK } from "@/lib/constellation-geometry";
+import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 
 /* ────────────────────────────────────────────────
    Deterministic Dasha Interpretations
@@ -491,7 +492,13 @@ export default function NakshatraDashaPanel({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lords, startDate: deepest.startDate, endDate: deepest.endDate }),
     })
-      .then((res) => (res.ok ? res.json() : null))
+      .then(async (res) => {
+        if (res.ok) return res.json();
+        /* A refused free allowance raises the sign-in prompt; every other
+           failure stays silent, as it did before this feature existed. */
+        await announceIfFreeUsageExhausted(res, "dashaInterpretation");
+        return null;
+      })
       .then((data) => {
         if (cancelled || !data?.interpretation) return;
         setChainInsights((prev) => ({ ...prev, [key]: data.interpretation }));

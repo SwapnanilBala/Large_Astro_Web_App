@@ -4,6 +4,7 @@ import "../globals.css";
 import GradientBlobs from "@/app/components/GradientBlobs";
 import Navbar from "@/app/components/Navbar";
 import BottomNav from "@/app/components/BottomNav";
+import FreeUsagePrompt from "@/app/components/FreeUsagePrompt";
 import ViewportScaler from "@/app/components/ViewportScaler";
 import { ToastProvider } from "@/lib/toast-context";
 import DesktopLanguageProvider from "@/lib/i18n-desktop";
@@ -60,6 +61,10 @@ export default function DesktopLayout({
             {children}
           </main>
           <BottomNav />
+          {/* Mounted once for the whole shell rather than per panel: the three
+              features that can raise it sit on two different routes, and one
+              of them is a lazily-imported child several levels down. */}
+          <FreeUsagePrompt />
         </ToastProvider>
       </DesktopLanguageProvider>
     </div>
