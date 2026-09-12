@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
+import { consumeLlmBudget } from "@/lib/llm-budget";
 
 /*
  * Interpretation for one Vimshottari lord chain.
@@ -131,6 +132,26 @@ export async function POST(request: NextRequest) {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "Dasha interpretation is unavailable: ANTHROPIC_API_KEY is not configured.",
+        { statusCode: 503 },
+      );
+    }
+
+    /* Past the cache, so this request is about to cost money. The per-minute
+       limit in the proxy has already run; this is the daily ceiling, and it is
+       checked here rather than in the proxy precisely because the proxy cannot
+       see that the cache above served the last four requests for free. */
+    const budget = consumeLlmBudget("/api/chart/dasha-interpretation", request);
+    if (!budget.allowed) {
+      console.warn(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/chart/dasha-interpretation",
+        event: "llm_budget_exhausted",
+        scope: budget.scope,
+      }));
+      throw new ApiError(
+        ErrorCode.RATE_LIMITED,
+        "Dasha interpretations are rate limited for today.",
+        { details: { retryAfterSeconds: budget.retryAfterSeconds } },
       );
     }
 

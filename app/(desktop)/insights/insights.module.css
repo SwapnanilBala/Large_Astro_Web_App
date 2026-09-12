@@ -4244,6 +4244,21 @@
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 0 0 1.25rem;
+  transition: opacity 0.25s ease;
+}
+
+/* The engine's own reading is already on screen and stays readable while the
+   written brief is in flight; this only signals that it is about to be
+   refined. Anything stronger -- a skeleton, a spinner -- would replace real
+   text with a placeholder, which is worse than what it interrupts. */
+.domainOverview[data-refining="true"] {
+  opacity: 0.62;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .domainOverview {
+    transition: none;
+  }
 }
 
 .domainEvidenceVerdict {

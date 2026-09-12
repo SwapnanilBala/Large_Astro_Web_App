@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
+import { consumeLlmBudget } from "@/lib/llm-budget";
+import { safeLabel, safeNumber } from "@/lib/prompt-input";
 
 // ---------------------------------------------------------------------------
 // Structured error logger
@@ -260,68 +262,64 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/*
+ * Every string in the context below is interpolated into the user turn by
+ * buildUserMessage, so `typeof x === "string"` is not enough on its own: the
+ * body cap is 7MB, and a caller who puts 7MB of their own instructions in
+ * `moonSign` gets a free GPT-4o call on our key and a shot at talking over the
+ * system prompt. safeLabel/safeNumber in lib/prompt-input.ts are the boundary.
+ */
+
 function sanitizeJyotishContext(raw: unknown): JyotishContext | undefined {
   if (!isPlainObject(raw)) return undefined;
   const out: JyotishContext = {};
 
   const ascendant = raw.ascendant;
-  if (
-    isPlainObject(ascendant) &&
-    typeof ascendant.sign === "string" &&
-    typeof ascendant.degree === "number" &&
-    typeof ascendant.nakshatra === "string"
-  ) {
-    out.ascendant = {
-      sign: ascendant.sign,
-      degree: ascendant.degree,
-      nakshatra: ascendant.nakshatra,
-    };
+  if (isPlainObject(ascendant)) {
+    const sign = safeLabel(ascendant.sign);
+    const degree = safeNumber(ascendant.degree, 0, 360);
+    const nakshatra = safeLabel(ascendant.nakshatra);
+    if (sign && degree !== undefined && nakshatra) {
+      out.ascendant = { sign, degree, nakshatra };
+    }
   }
 
-  if (typeof raw.moonSign === "string") out.moonSign = raw.moonSign;
-  if (typeof raw.moonNakshatra === "string") out.moonNakshatra = raw.moonNakshatra;
-  if (typeof raw.sunSign === "string") out.sunSign = raw.sunSign;
+  const moonSign = safeLabel(raw.moonSign);
+  if (moonSign) out.moonSign = moonSign;
+  const moonNakshatra = safeLabel(raw.moonNakshatra);
+  if (moonNakshatra) out.moonNakshatra = moonNakshatra;
+  const sunSign = safeLabel(raw.sunSign);
+  if (sunSign) out.sunSign = sunSign;
 
   const maha = raw.currentMahadasha;
-  if (
-    isPlainObject(maha) &&
-    typeof maha.lord === "string" &&
-    typeof maha.remaining_years === "number"
-  ) {
-    out.currentMahadasha = {
-      lord: maha.lord,
-      remaining_years: maha.remaining_years,
-    };
+  if (isPlainObject(maha)) {
+    const lord = safeLabel(maha.lord);
+    const remainingYears = safeNumber(maha.remaining_years, 0, 120);
+    if (lord && remainingYears !== undefined) {
+      out.currentMahadasha = { lord, remaining_years: remainingYears };
+    }
   }
 
   const antar = raw.currentAntardasha;
-  if (
-    isPlainObject(antar) &&
-    typeof antar.lord === "string" &&
-    typeof antar.remaining_months === "number"
-  ) {
-    out.currentAntardasha = {
-      lord: antar.lord,
-      remaining_months: antar.remaining_months,
-    };
+  if (isPlainObject(antar)) {
+    const lord = safeLabel(antar.lord);
+    const remainingMonths = safeNumber(antar.remaining_months, 0, 360);
+    if (lord && remainingMonths !== undefined) {
+      out.currentAntardasha = { lord, remaining_months: remainingMonths };
+    }
   }
 
   if (Array.isArray(raw.keyPlacements)) {
     const placements: JyotishPlacement[] = [];
     for (const p of raw.keyPlacements) {
-      if (
-        isPlainObject(p) &&
-        typeof p.planet === "string" &&
-        typeof p.sign === "string" &&
-        typeof p.house === "number" &&
-        typeof p.nakshatra === "string"
-      ) {
-        placements.push({
-          planet: p.planet,
-          sign: p.sign,
-          house: p.house,
-          nakshatra: p.nakshatra,
-        });
+      if (isPlainObject(p)) {
+        const planet = safeLabel(p.planet);
+        const sign = safeLabel(p.sign);
+        const house = safeNumber(p.house, 1, 12);
+        const nakshatra = safeLabel(p.nakshatra);
+        if (planet && sign && house !== undefined && nakshatra) {
+          placements.push({ planet, sign, house, nakshatra });
+        }
       }
       if (placements.length >= 12) break; // hard ceiling — spec mentions ~9
     }
@@ -449,6 +447,28 @@ export async function POST(request: NextRequest) {
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "Palm reading service is temporarily unavailable.",
         { statusCode: 503 },
+      );
+    }
+
+    /* Nothing above this line costs money; everything below it does, and this
+       is the most expensive call in the app -- vision over a 5MB image at
+       detail "high", with no cache behind it. The proxy's 5-per-minute limit
+       still allows 7,200 a day from one address, so the daily ceiling is the
+       one that bounds the bill. */
+    const budget = consumeLlmBudget("/api/palm-reading", request);
+    if (!budget.allowed) {
+      console.warn(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/palm-reading",
+        event: "llm_budget_exhausted",
+        scope: budget.scope,
+      }));
+      throw new ApiError(
+        ErrorCode.RATE_LIMITED,
+        budget.scope === "caller"
+          ? "You have reached today's palm reading limit. Please try again tomorrow."
+          : "Palm reading is at capacity for today. Please try again tomorrow.",
+        { details: { retryAfterSeconds: budget.retryAfterSeconds } },
       );
     }
 
