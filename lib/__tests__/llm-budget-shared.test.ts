@@ -77,6 +77,20 @@ vi.mock("@/lib/db/llm-budget-counters", () => ({
   },
 }));
 
+const TOKEN_PREFIX = "session-for-";
+
+vi.mock("@/lib/identity/session", () => ({
+  SESSION_COOKIE: "astro_session",
+  resolveSession: async (token: string | null | undefined) =>
+    token?.startsWith(TOKEN_PREFIX)
+      ? { sessionId: "session-1", userId: token.slice(TOKEN_PREFIX.length) }
+      : null,
+}));
+
+/* Two free, then ten once registered. */
+const PER_ACCOUNT = 10;
+const PER_ADDRESS = 2;
+
 /* Same clock as llm-budget.test.ts: midday, so nothing straddles midnight by
    accident and the day key is unambiguously 2026-09-12. */
 const NOON = Date.UTC(2026, 8, 12, 12, 0, 0);
@@ -108,6 +122,23 @@ function requestFrom(ip: string, path = "/api/palm-reading") {
   });
 }
 
+function signedInAs(userId: string, path = "/api/palm-reading") {
+  return new Request(`https://example.test${path}`, {
+    headers: { cookie: `astro_session=${TOKEN_PREFIX}${userId}`, "x-real-ip": "203.0.113.1" },
+  });
+}
+
+/**
+ * Let every in-flight call reach the fake table.
+ *
+ * Resolving the caller is asynchronous now (it may consult the session store),
+ * so a call no longer runs straight from `consumeLlmBudget` into the increment
+ * the way it did when the identity was just a header read. Draining the
+ * microtask queue is what puts all of them at the gate together, which is the
+ * precondition the concurrency assertions below depend on.
+ */
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 function openGate() {
   const current = gate;
   gate = null;
@@ -130,11 +161,11 @@ afterEach(() => {
 describe("one ceiling across instances", () => {
   it("refuses a fresh instance once another has spent the route total", async () => {
     const first = await newInstance();
-    /* 40 addresses at 5 each is palm reading's whole day, with nobody tripping
+    /* 20 accounts at 10 each is palm reading's whole day, with nobody tripping
        their own limit — the distributed case, now spent on one instance. */
-    for (let n = 0; n < 40; n += 1) {
-      const caller = requestFrom(`203.0.113.${n}`);
-      for (let i = 0; i < 5; i += 1) {
+    for (let n = 0; n < 20; n += 1) {
+      const caller = signedInAs(`user-${n}`);
+      for (let i = 0; i < PER_ACCOUNT; i += 1) {
         expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
       }
     }
@@ -145,7 +176,7 @@ describe("one ceiling across instances", () => {
     const second = await newInstance();
     const refused = await second.consumeLlmBudget(
       "/api/palm-reading",
-      requestFrom("198.51.100.200"),
+      signedInAs("user-late"),
       NOON,
     );
     expect(refused.allowed).toBe(false);
@@ -154,17 +185,18 @@ describe("one ceiling across instances", () => {
   });
 
   it("carries one caller's allowance from instance to instance", async () => {
-    const caller = requestFrom("203.0.113.5");
+    const caller = signedInAs("user-a");
 
     const first = await newInstance();
-    for (let i = 0; i < 3; i += 1) {
+    for (let i = 0; i < 6; i += 1) {
       expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
     }
 
-    /* Two left, not five: the same person routed to a different instance. */
+    /* Four left, not ten: the same person routed to a different instance. */
     const second = await newInstance();
-    expect((await second.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
-    expect((await second.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+    for (let i = 0; i < PER_ACCOUNT - 6; i += 1) {
+      expect((await second.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+    }
 
     const refused = await second.consumeLlmBudget("/api/palm-reading", caller, NOON);
     expect(refused.allowed).toBe(false);
@@ -176,9 +208,9 @@ describe("one ceiling across instances", () => {
     seed("/api/palm-reading", ROUTE_TOTAL_CALLER, 150);
 
     const instance = await newInstance();
-    const result = await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.5"), NOON);
+    const result = await instance.consumeLlmBudget("/api/palm-reading", signedInAs("user-a"), NOON);
 
-    expect(result).toEqual({ allowed: true, remaining: 49, callerRemaining: 4 });
+    expect(result).toEqual({ allowed: true, remaining: 49, callerRemaining: PER_ACCOUNT - 1 });
   });
 
   it("keys the counter on the UTC day, not on the process's idea of today", async () => {
@@ -189,8 +221,9 @@ describe("one ceiling across instances", () => {
     await instance.consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY);
 
     expect(bumpCalls.map((call) => call.utcDay)).toEqual(["2026-09-12", "2026-09-13"]);
-    /* A new day is a new row, so the allowance is whole again. */
-    expect(rows.get(rowKey("2026-09-13", "/api/palm-reading", "203.0.113.5"))).toBe(1);
+    /* A new day is a new row, so the allowance is whole again. The caller is
+       namespaced `ip:` so an address and an account can never share a row. */
+    expect(rows.get(rowKey("2026-09-13", "/api/palm-reading", "ip:203.0.113.5"))).toBe(1);
   });
 });
 
@@ -198,10 +231,10 @@ describe("concurrent increments", () => {
   it("does not let two instances race one caller past the per-caller ceiling", async () => {
     const first = await newInstance();
     const second = await newInstance();
-    const caller = requestFrom("203.0.113.5");
+    const caller = signedInAs("user-a");
 
-    /* Four in flight on each: under the per-caller limit of 5 as far as either
-       instance's own memory can tell, and eight between them. */
+    /* Six in flight on each: under the per-account limit of 10 as far as either
+       instance's own memory can tell, and twelve between them. */
     gate = (() => {
       let open!: () => void;
       const promise = new Promise<void>((resolve) => {
@@ -211,24 +244,25 @@ describe("concurrent increments", () => {
     })();
 
     const inFlight = [
-      ...Array.from({ length: 4 }, () =>
+      ...Array.from({ length: 6 }, () =>
         first.consumeLlmBudget("/api/palm-reading", caller, NOON),
       ),
-      ...Array.from({ length: 4 }, () =>
+      ...Array.from({ length: 6 }, () =>
         second.consumeLlmBudget("/api/palm-reading", caller, NOON),
       ),
     ];
 
-    /* All eight got past their in-memory check before any counter moved. That
-       is the race; if this is not 8 the test below proves nothing. */
-    expect(bumpCalls).toHaveLength(8);
+    /* All twelve got past their in-memory check before any counter moved. That
+       is the race; if this is not 12 the test below proves nothing. */
+    await flush();
+    expect(bumpCalls).toHaveLength(12);
 
     openGate();
     const results = await Promise.all(inFlight);
 
-    expect(results.filter((result) => result.allowed)).toHaveLength(5);
+    expect(results.filter((result) => result.allowed)).toHaveLength(PER_ACCOUNT);
     const refused = results.filter((result) => !result.allowed);
-    expect(refused).toHaveLength(3);
+    expect(refused).toHaveLength(2);
     for (const result of refused) {
       if (result.allowed) throw new Error("unreachable");
       expect(result.scope).toBe("caller");
@@ -253,6 +287,7 @@ describe("concurrent increments", () => {
     const inFlight = Array.from({ length: 10 }, (_unused, n) =>
       instance.consumeLlmBudget("/api/palm-reading", requestFrom(`203.0.113.${n}`), NOON),
     );
+    await flush();
     expect(bumpCalls).toHaveLength(10);
 
     openGate();
@@ -289,10 +324,10 @@ describe("when the shared counter is unreachable", () => {
     failWith = new Error("connection terminated unexpectedly");
 
     const instance = await newInstance();
-    const caller = requestFrom("203.0.113.5");
+    const caller = signedInAs("user-a");
 
     /* The route still works — degraded to what it was before the table. */
-    for (let i = 0; i < 5; i += 1) {
+    for (let i = 0; i < PER_ACCOUNT; i += 1) {
       expect((await instance.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
     }
     /* And degraded is not absent: the in-memory ceiling is still a ceiling. */
@@ -323,7 +358,7 @@ describe("when the shared counter is unreachable", () => {
     failWith = new Error("connection terminated unexpectedly");
 
     const instance = await newInstance();
-    const caller = requestFrom("203.0.113.5");
+    const caller = signedInAs("user-a");
     await instance.consumeLlmBudget("/api/palm-reading", caller, NOON);
     expect(bumpCalls).toHaveLength(1);
 
@@ -332,7 +367,7 @@ describe("when the shared counter is unreachable", () => {
     expect(bumpCalls).toHaveLength(2);
     /* The call made during the outage never reached the table, so the shared
        count starts from this one. Undercounting is the cost of degrading. */
-    expect(recovered).toEqual({ allowed: true, remaining: 199, callerRemaining: 4 });
+    expect(recovered).toEqual({ allowed: true, remaining: 199, callerRemaining: PER_ACCOUNT - 1 });
   });
 });
 
@@ -359,7 +394,7 @@ describe("pruning spent days", () => {
        caller nor escape as an unhandled rejection — which vitest fails on, so
        the second half of that is asserted by this test simply finishing. */
     expect(pruneCalls).toEqual(["2026-09-05"]);
-    expect(result).toEqual({ allowed: true, remaining: 199, callerRemaining: 4 });
+    expect(result).toEqual({ allowed: true, remaining: 199, callerRemaining: PER_ADDRESS - 1 });
     await Promise.resolve();
   });
 });

@@ -151,8 +151,10 @@ export async function POST(request: NextRequest) {
       }));
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
-        "Dasha interpretations are rate limited for today.",
-        { details: { retryAfterSeconds: budget.retryAfterSeconds } },
+        budget.scope === "anonymous"
+          ? "Sign in to keep reading dasha interpretations today."
+          : "Dasha interpretations are rate limited for today.",
+        { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
       );
     }
 

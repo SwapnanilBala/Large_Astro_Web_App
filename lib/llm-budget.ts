@@ -12,6 +12,20 @@
  * ceiling per UTC day, counted both globally per route and per caller, checked
  * immediately before the provider call and never on a cache hit.
  *
+ * WHO A CALLER IS
+ *
+ * A signed-in account and a signed-out address are both callers here, but they
+ * are not the same kind of thing and they do not get the same allowance. An
+ * address is a weak name for a person in both directions at once -- a proxy
+ * pool makes one abuser look like thousands, a campus NAT makes thousands of
+ * people look like one -- so no single number set on it is right. The signed-out
+ * tier is therefore sized as a taste of the feature, and the full allowance is
+ * attached to an account, which is a name a caller cannot mint by the thousand
+ * and cannot have imposed on them by their employer's router.
+ *
+ * A refusal at the signed-out tier reports `scope: "anonymous"` rather than
+ * `"caller"`, because it is the one refusal the visitor can lift themselves.
+ *
  * TWO LAYERS, AND WHY BOTH
  *
  * The counters live in Postgres (`llm_budget_counters`, incremented by a single
@@ -54,6 +68,7 @@ import {
   pruneSharedLlmCounters,
   type SharedLlmCounts,
 } from "@/lib/db/llm-budget-counters";
+import { SESSION_COOKIE, resolveSession } from "@/lib/identity/session";
 import { getClientIp } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
@@ -64,31 +79,50 @@ export type LlmRouteKey =
 type LlmBudgetConfig = {
   /** Paid calls this route may make in one UTC day, across every caller. */
   perDay: number;
-  /** Paid calls one caller may make against this route in one UTC day. */
+  /** Paid calls one signed-in account may make in one UTC day. */
   perCallerPerDay: number;
+  /** Paid calls one signed-out address may make in one UTC day. */
+  perAnonPerDay: number;
 };
 
 /*
  * Sized by what the call costs, not by what feels generous.
  *
- * The two text routes are Claude Opus 5 at low effort with max_tokens 1000 and a
- * cached system prefix -- fractions of a cent each, and both cache their result,
- * so a user who revisits a chain or a domain pays nothing. The per-caller number
- * is set above what a thorough session looks like (a five-level dasha drill-down
- * is at most a few dozen distinct chains; the Ultimate Module has exactly seven
- * domains) so a real reader never meets it.
+ * The route totals are whole-deployment numbers rather than per-instance ones,
+ * so they bite where they read. They are sized by what a call costs: the two
+ * text routes are Claude Opus 5 at low effort with max_tokens 1000 and a cached
+ * system prefix, fractions of a cent each, while palm reading is GPT-4o vision
+ * over a 5MB image at detail "high" with max_tokens 4500 and nothing cached --
+ * an order of magnitude dearer, hence 200 a day against 2500.
  *
- * Palm reading is a different order of magnitude: GPT-4o vision over a 5MB image
- * at detail "high" with max_tokens 4500, and nothing about it is cached. A real
- * visitor uploads a palm once or twice, ever, so the ceiling is tight on purpose.
+ * THE TWO TIERS are 2 free, then 10 once registered, on each of the three
+ * routes. An address is a weak name for a person in both directions at once --
+ * a proxy pool makes one abuser look like thousands, a campus NAT makes
+ * thousands of people look like one -- so no number set on it is right, and the
+ * signed-out one is set to a taste of the feature rather than a working
+ * allowance. Registering is what buys a real one, because an account is a name
+ * a caller cannot mint by the thousand and cannot have imposed on them by their
+ * employer's router.
  *
- * These are now whole-deployment numbers rather than per-instance ones, so they
- * bite where they read.
+ * Two is deliberately enough to see what the feature does and not enough to use
+ * it, which is what makes the sign-in prompt land at a moment the visitor has
+ * already decided they want more.
+ *
+ * WHERE 10 WILL CHAFE, said now rather than discovered from a support message:
+ * the two text routes cache, so only *distinct* requests count -- revisiting a
+ * dasha chain or a domain is free. Even so, a five-level drill-down reaches
+ * dozens of distinct chains, so a thorough reader on /insights will meet the
+ * dasha ceiling in one sitting. If that shows up, raise
+ * `/api/chart/dasha-interpretation` first: it is the cheapest of the three per
+ * call (Opus at low effort, 1000 max tokens, cached system prefix) and the one
+ * a real session burns fastest. Palm reading is the opposite -- GPT-4o vision
+ * over a 5MB image with nothing cached -- so its 10 is the expensive one, and
+ * the route's own 200/day total is what actually bounds that exposure.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
-  "/api/chart/dasha-interpretation": { perDay: 2500, perCallerPerDay: 80 },
-  "/api/chart/domain-brief": { perDay: 2500, perCallerPerDay: 60 },
-  "/api/palm-reading": { perDay: 200, perCallerPerDay: 5 },
+  "/api/chart/dasha-interpretation": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
+  "/api/chart/domain-brief": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
+  "/api/palm-reading": { perDay: 200, perCallerPerDay: 10, perAnonPerDay: 2 },
 };
 
 const MS_PER_DAY = 86_400_000;
@@ -140,17 +174,80 @@ function rollOver(now: number) {
   }
 }
 
+/**
+ * Which ceiling refused.
+ *
+ * `anonymous` is split out from `caller` because it is the only one of the
+ * three a visitor can do something about right now, and "rate limited, try
+ * again tomorrow" is the wrong thing to tell someone whose actual position is
+ * "sign in and carry on". The routes pass this through to the client so the
+ * refusal can read as an invitation rather than a wall.
+ */
+export type LlmBudgetScope = "global" | "caller" | "anonymous";
+
 export type LlmBudgetResult =
   | { allowed: true; remaining: number; callerRemaining: number }
   | {
       allowed: false;
-      /** Which ceiling refused: the route's day total, or this caller's. */
-      scope: "global" | "caller";
+      scope: LlmBudgetScope;
       retryAfterSeconds: number;
     };
 
-function refuse(scope: "global" | "caller", now: number): LlmBudgetResult {
+function refuse(scope: LlmBudgetScope, now: number): LlmBudgetResult {
   return { allowed: false, scope, retryAfterSeconds: secondsUntilUtcMidnight(now) };
+}
+
+/**
+ * Who is spending, and therefore which allowance applies.
+ *
+ * `user:` and `ip:` are namespaced rather than bare so the two can never name
+ * the same bucket, and so a row in `llm_budget_counters` says which kind of
+ * caller it counted without anyone having to infer it from the shape.
+ */
+type LlmCaller = {
+  key: string;
+  signedIn: boolean;
+};
+
+/** The session cookie's value, without parsing the whole jar. */
+function sessionTokenFrom(request: Request): string | null {
+  const header = request.headers.get("cookie");
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const separator = part.indexOf("=");
+    if (separator === -1) continue;
+    if (part.slice(0, separator).trim() === SESSION_COOKIE) {
+      return decodeURIComponent(part.slice(separator + 1).trim()) || null;
+    }
+  }
+  return null;
+}
+
+/**
+ * Resolve the caller, falling back to the address on any doubt.
+ *
+ * No cookie means no query -- `resolveSession` returns on a null token before
+ * it touches the database -- so the signed-out path, which is the one abuse
+ * arrives on, costs nothing extra.
+ *
+ * A failed lookup is treated as signed out rather than propagated. These three
+ * routes have never required an account and must not start 500ing because the
+ * session store is unreachable; the cost of guessing wrong is the smaller
+ * allowance, which is the safe direction to be wrong in.
+ */
+async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
+  const token = sessionTokenFrom(request);
+  if (token) {
+    try {
+      const session = await resolveSession(token);
+      if (session) {
+        return { key: `user:${session.userId}`, signedIn: true };
+      }
+    } catch {
+      /* Fall through to the address. */
+    }
+  }
+  return { key: `ip:${getClientIp(request)}`, signedIn: false };
 }
 
 /**
@@ -187,9 +284,13 @@ export async function consumeLlmBudget(
   rollOver(now);
 
   const config = LLM_BUDGETS[route];
-  const caller = getClientIp(request);
+  const caller = await resolveLlmCaller(request);
+  /* One number or the other, chosen once, so every check below and the
+     `remaining` reported back all speak about the same allowance. */
+  const callerLimit = caller.signedIn ? config.perCallerPerDay : config.perAnonPerDay;
+  const callerScope: LlmBudgetScope = caller.signedIn ? "caller" : "anonymous";
   const globalKey = route;
-  const callerKey = `${route}::${caller}`;
+  const callerKey = `${route}::${caller.key}`;
 
   /* Layer one: this instance's mirror. A refusal here is free and correct --
      see the header on why a local count can only understate the shared one. */
@@ -199,8 +300,8 @@ export async function consumeLlmBudget(
   }
 
   const localCaller = counters.get(callerKey) ?? 0;
-  if (localCaller >= config.perCallerPerDay) {
-    return refuse("caller", now);
+  if (localCaller >= callerLimit) {
+    return refuse(callerScope, now);
   }
 
   /* Reserved locally before the await, so that concurrent calls on this
@@ -212,7 +313,7 @@ export async function consumeLlmBudget(
   const localResult: LlmBudgetResult = {
     allowed: true,
     remaining: config.perDay - localGlobal - 1,
-    callerRemaining: config.perCallerPerDay - localCaller - 1,
+    callerRemaining: callerLimit - localCaller - 1,
   };
 
   if (!isSharedLlmCounterConfigured() || now < sharedUnavailableUntil) {
@@ -222,7 +323,7 @@ export async function consumeLlmBudget(
   const day = utcDayNumber(now);
   let shared: SharedLlmCounts;
   try {
-    shared = await bumpSharedLlmCounters(utcDayKey(day), route, caller);
+    shared = await bumpSharedLlmCounters(utcDayKey(day), route, caller.key);
   } catch (error) {
     sharedUnavailableUntil = now + SHARED_OUTAGE_COOLDOWN_MS;
     console.warn(JSON.stringify({
@@ -251,14 +352,14 @@ export async function consumeLlmBudget(
   if (shared.routeTotal > config.perDay) {
     return refuse("global", now);
   }
-  if (shared.caller > config.perCallerPerDay) {
-    return refuse("caller", now);
+  if (shared.caller > callerLimit) {
+    return refuse(callerScope, now);
   }
 
   return {
     allowed: true,
     remaining: config.perDay - shared.routeTotal,
-    callerRemaining: config.perCallerPerDay - shared.caller,
+    callerRemaining: callerLimit - shared.caller,
   };
 }
 

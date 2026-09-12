@@ -238,8 +238,10 @@ export async function GET(request: NextRequest) {
       }));
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
-        "Life-area briefs are rate limited for today.",
-        { details: { retryAfterSeconds: budget.retryAfterSeconds } },
+        budget.scope === "anonymous"
+          ? "Sign in to read the rest of the life-area briefs today."
+          : "Life-area briefs are rate limited for today.",
+        { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
       );
     }
 

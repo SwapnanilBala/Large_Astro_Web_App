@@ -465,10 +465,12 @@ export async function POST(request: NextRequest) {
       }));
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
-        budget.scope === "caller"
-          ? "You have reached today's palm reading limit. Please try again tomorrow."
-          : "Palm reading is at capacity for today. Please try again tomorrow.",
-        { details: { retryAfterSeconds: budget.retryAfterSeconds } },
+        budget.scope === "anonymous"
+          ? "Sign in to read another palm today."
+          : budget.scope === "caller"
+            ? "You have reached today's palm reading limit. Please try again tomorrow."
+            : "Palm reading is at capacity for today. Please try again tomorrow.",
+        { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
       );
     }
 
