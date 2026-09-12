@@ -240,5 +240,27 @@ describe("compatibility-service", () => {
       const parsed = new Date(result.generated_at_utc);
       expect(parsed.getTime()).not.toBeNaN();
     });
+
+    /* The seam, not the rules — those are covered against hand-built charts in
+       kalatra-synastry-engine.test.ts. What this asserts is that the two real
+       charts buildCompatibility already has actually reach the engine, and that
+       both names survive into the copy. */
+    it("carries the married-life synastry read, named for both people", () => {
+      const result = buildCompatibility(PRIMARY, PARTNER);
+      expect(result.kalatra_synastry).not.toBeNull();
+      expect(result.kalatra_synastry!.facets.map((f) => f.key)).toEqual([
+        "mangal_matching",
+        "moon_doshas",
+        "physical_chemistry",
+        "in_law_crosscheck",
+        "privacy_overlay",
+      ]);
+      const prose = result
+        .kalatra_synastry!.facets.flatMap((f) => f.findings)
+        .map((f) => `${f.text} ${f.basis}`)
+        .join(" ");
+      expect(prose).toContain("Alice");
+      expect(prose).toContain("Bob");
+    });
   });
 });

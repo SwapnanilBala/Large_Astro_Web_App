@@ -769,6 +769,50 @@ export default function CompatibilityPageClient({
               </div>
             </section>
 
+            {/* Between the themes and the raw aspect list on purpose: it is
+                the same order of specificity, and the aspect grid below is the
+                working that this section already summarises in prose. */}
+            {result.kalatra_synastry && (
+              <section className="rules-panel">
+                <div className="rules-header">
+                  <p className="kicker">Synastry</p>
+                  <h2>Married life, across the two charts</h2>
+                </div>
+                <p className="section-intro">
+                  The married-life read on each person&rsquo;s own page can only use one chart.
+                  These are the parts that need both — including the Mangal cancellation a
+                  single chart cannot evaluate.
+                </p>
+                <div className="kalatra-syn-grid">
+                  {result.kalatra_synastry.facets.map((facet) => (
+                    <article key={facet.key} className="kalatra-syn-card">
+                      <header>
+                        <h3>{facet.label}</h3>
+                        <span className="kalatra-syn-verdict">{facet.verdict}</span>
+                      </header>
+                      {facet.findings.length > 0 && (
+                        <ul className="kalatra-syn-findings">
+                          {facet.findings.map((finding) => (
+                            <li key={finding.basis} data-polarity={finding.polarity}>
+                              <p>{finding.text}</p>
+                              <cite>{finding.basis}</cite>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <p className="kalatra-syn-sourcing">
+                        <span>Read from</span> {facet.sourcing}
+                      </p>
+                    </article>
+                  ))}
+                </div>
+                <details className="kalatra-syn-method">
+                  <summary>How these were derived</summary>
+                  <p>{result.kalatra_synastry.method}</p>
+                </details>
+              </section>
+            )}
+
             <section className="rules-panel">
               <div className="rules-header">
                 <p className="kicker">Synastry</p>

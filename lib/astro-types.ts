@@ -857,6 +857,12 @@ export type CompatibilityApiResponse = {
   summary: string;
   themes: CompatibilityTheme[];
   synastry_aspects: SynastryAspect[];
+  /* Optional rather than nullable: an entry served from the compatibility
+     cache before this field shipped simply will not have the key, and the
+     panel is meant to be absent in that case rather than empty. */
+  kalatra_synastry?:
+    | import("@/lib/engines/kalatra-synastry-engine").KalatraSynastryResult
+    | null;
   saved_comparison_id?: string | null;
 };
 

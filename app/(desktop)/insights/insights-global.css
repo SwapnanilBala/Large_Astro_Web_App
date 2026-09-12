@@ -4630,3 +4630,130 @@ html[data-theme="light"] .dasha-command-meter-ring {
   color: var(--text-tertiary);
   font-style: italic;
 }
+
+/* ── Married life across two charts (/insights/compatibility) ──
+ *
+ * The pair-level counterpart to the kalatra panel on /insights/life-areas.
+ * Its own classes rather than .rule-card, because these carry a verdict chip
+ * and a per-finding citation the rule cards have no slot for — but built from
+ * the same tokens, so the two pages read as one product.
+ */
+.kalatra-syn-grid {
+  display: grid;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .kalatra-syn-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.kalatra-syn-card {
+  min-width: 0;
+  padding: 1rem 1.1rem 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.kalatra-syn-card > header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.kalatra-syn-card h3 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 1.02rem;
+}
+
+/* The facet's headline is computed, not scored — there is no meter here
+   because "Mutually cancelled" is a fact and a bar would imply a degree. */
+.kalatra-syn-verdict {
+  flex: 0 0 auto;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  color: var(--accent-gold);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.kalatra-syn-findings {
+  margin: 0.8rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.65rem;
+}
+
+.kalatra-syn-findings li {
+  padding-left: 0.7rem;
+  border-left: 2px solid var(--border-soft);
+}
+
+.kalatra-syn-findings li[data-polarity="clear"] {
+  border-left-color: var(--accent-teal);
+}
+
+.kalatra-syn-findings li[data-polarity="caution"] {
+  border-left-color: var(--accent-coral);
+}
+
+.kalatra-syn-findings p {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 0.93rem;
+  line-height: 1.5;
+}
+
+.kalatra-syn-findings cite {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.kalatra-syn-sourcing {
+  margin: 0.85rem 0 0;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.kalatra-syn-sourcing span {
+  color: var(--accent-gold);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kalatra-syn-method {
+  margin-top: 0.9rem;
+}
+
+.kalatra-syn-method summary {
+  color: var(--accent-gold);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.kalatra-syn-method p {
+  margin: 0.6rem 0 0;
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}

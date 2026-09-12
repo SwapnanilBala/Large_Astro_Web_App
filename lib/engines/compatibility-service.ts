@@ -2,6 +2,10 @@
 import type { PlanetPosition } from "./swiss-ephemeris-engine";
 import { buildChart } from "./chart-service";
 import { resolveBirthMoment } from "../birth-moment";
+import {
+  computeKalatraSynastry,
+  type KalatraSynastryResult,
+} from "./kalatra-synastry-engine";
 
 // --------------------------------------------------------------------------
 // Types
@@ -41,6 +45,15 @@ export interface CompatibilityResponse {
   summary: string;
   themes: CompatibilityTheme[];
   synastry_aspects: SynastryAspectInfo[];
+  /*
+   * The married-life read across the two charts.
+   *
+   * Nullable because the engine declines rather than guesses when either chart
+   * comes back without planets or houses -- and because the in-memory
+   * compatibility cache can still be holding entries built before this field
+   * existed, which the page has to survive rather than crash on.
+   */
+  kalatra_synastry: KalatraSynastryResult | null;
   saved_comparison_id: string | null;
 }
 
@@ -240,6 +253,21 @@ export function buildCompatibility(
 
   const summary = `${primary.name} and ${partner.name} show a compatibility score of ${score.toFixed(1)}/100. The connection is shaped by ${harmoniousCount} supportive synastry contacts and ${tenseCount} high-friction contacts.`;
 
+  /* Both charts are already built above for the aspect pass, so this is a read
+     over data in hand rather than a second pair of ephemeris calls. */
+  const kalatraSynastry = computeKalatraSynastry(
+    {
+      name: primary.name,
+      planets: primaryChart.chart.planets,
+      houses: primaryChart.chart.houses,
+    },
+    {
+      name: partner.name,
+      planets: partnerChart.chart.planets,
+      houses: partnerChart.chart.houses,
+    }
+  );
+
   return {
     generated_at_utc: new Date().toISOString(),
     primary_client: clientProfileFromBirth(primary),
@@ -248,6 +276,7 @@ export function buildCompatibility(
     summary,
     themes,
     synastry_aspects: synastryAspects,
+    kalatra_synastry: kalatraSynastry,
     saved_comparison_id: null,
   };
 }
