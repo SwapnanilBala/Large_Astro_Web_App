@@ -14,6 +14,7 @@
  *
  * These live here rather than beside one route so the boundary is a named,
  * tested thing instead of a private helper that the next route forgets to copy.
+ * stripInlineMarkdown below is the same boundary in the other direction.
  */
 
 /** Longest label that legitimately arrives: "Purva Bhadrapada" is 16. */
@@ -46,4 +47,23 @@ export function safeNumber(value: unknown, min: number, max: number): number | u
   if (typeof value !== "number" || !Number.isFinite(value)) return undefined;
   if (value < min || value > max) return undefined;
   return value;
+}
+
+/**
+ * Remove inline markdown emphasis from generated prose.
+ *
+ * Both Anthropic routes tell the model "no markdown", and both render the
+ * result as plain text into a <p>. A prompt is a request, not a guarantee --
+ * an observed brief came back with `*stick*` in it, which renders as literal
+ * asterisks on the page. Since the instruction is already there, any emphasis
+ * marker that survives is unintended, so stripping it cannot lose meaning.
+ *
+ * Only paired markers are touched, and only when they wrap non-space text, so
+ * a lone asterisk or an arithmetic expression is left alone.
+ */
+export function stripInlineMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(?=\S)([^*]+?)(?<=\S)\*\*/g, "$1")
+    .replace(/\*(?=\S)([^*]+?)(?<=\S)\*/g, "$1")
+    .replace(/_(?=\S)([^_]+?)(?<=\S)_/g, "$1");
 }

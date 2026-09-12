@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { stripInlineMarkdown } from "@/lib/prompt-input";
 
 /*
  * Interpretation for one Vimshottari lord chain.
@@ -190,11 +191,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const interpretation = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("")
-      .trim();
+    const interpretation = stripInlineMarkdown(
+      response.content
+        .filter((block): block is Anthropic.TextBlock => block.type === "text")
+        .map((block) => block.text)
+        .join(""),
+    ).trim();
+
 
     if (!interpretation) {
       throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No interpretation was returned.");

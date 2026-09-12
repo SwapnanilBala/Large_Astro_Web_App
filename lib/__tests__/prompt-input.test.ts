@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { MAX_LABEL_CHARS, safeLabel, safeNumber } from "@/lib/prompt-input";
+import {
+  MAX_LABEL_CHARS,
+  safeLabel,
+  safeNumber,
+  stripInlineMarkdown,
+} from "@/lib/prompt-input";
 
 /**
  * The boundary between client-supplied values and an LLM prompt.
@@ -67,5 +72,34 @@ describe("safeNumber", () => {
   it("rejects non-numbers", () => {
     expect(safeNumber("12", 0, 360)).toBeUndefined();
     expect(safeNumber(null, 0, 360)).toBeUndefined();
+  });
+});
+
+describe("stripInlineMarkdown", () => {
+  it("removes emphasis the model was told not to emit", () => {
+    /* Observed live: a brief came back with `*stick*` in it, which renders as
+       literal asterisks in the <p> the panel puts it in. */
+    expect(
+      stripInlineMarkdown("machinery that makes a move *stick* is thinner"),
+    ).toBe("machinery that makes a move stick is thinner");
+    expect(stripInlineMarkdown("this is **important** here")).toBe(
+      "this is important here",
+    );
+    expect(stripInlineMarkdown("an _emphasised_ word")).toBe("an emphasised word");
+  });
+
+  it("leaves prose without markers untouched", () => {
+    const plain = "Movement toward a new place is the loudest theme in your chart.";
+    expect(stripInlineMarkdown(plain)).toBe(plain);
+  });
+
+  it("leaves an unpaired marker alone", () => {
+    expect(stripInlineMarkdown("a lone * asterisk")).toBe("a lone * asterisk");
+    expect(stripInlineMarkdown("2 * 3 = 6")).toBe("2 * 3 = 6");
+  });
+
+  it("does not strip markers that wrap whitespace", () => {
+    /* `a * b * c` is arithmetic, not emphasis; the \S guards keep it. */
+    expect(stripInlineMarkdown("a * b * c")).toBe("a * b * c");
   });
 });

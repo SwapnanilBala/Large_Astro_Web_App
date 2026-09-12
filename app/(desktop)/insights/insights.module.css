@@ -276,7 +276,7 @@
 
 .kicker {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -462,7 +462,7 @@
 .heroPlanetKicker {
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.86rem;
+  font-size: 0.94rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   line-height: 1.35;
@@ -495,7 +495,7 @@
   box-shadow: 0 0 18px rgba(200, 155, 60, 0.08);
   color: var(--accent-gold);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 800;
   line-height: 1;
   padding: 0.32rem 0.62rem;
@@ -655,7 +655,7 @@
 .fortuneSubtitle {
   font-family: var(--font-newsreader), Georgia, serif;
   font-style: italic;
-  font-size: 0.92rem;
+  font-size: 1rem;
   color: var(--ink-soft);
   margin: 0;
 }
@@ -693,7 +693,7 @@
     0.64rem/800/0.15em, which made these read as a third label style. */
 .fortuneLabel {
   font-family: var(--font-display), sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -711,7 +711,7 @@
 
 .fortuneCaption {
   margin: 0;
-  font-size: 0.76rem;
+  font-size: 0.84rem;
   line-height: 1.35;
   color: var(--ink-soft);
 }
@@ -741,7 +741,7 @@
 
 .zoneTitle {
   font-family: var(--font-display), serif;
-  font-size: clamp(1.35rem, 2.2vw, 1.95rem);
+  font-size: clamp(1.52rem, 2.5vw, 2.18rem);
   font-weight: 650;
   line-height: 1.2;
   color: var(--ink-main);
@@ -751,7 +751,7 @@
 .zoneSubtitle {
   font-family: var(--font-newsreader), Georgia, serif;
   font-style: italic;
-  font-size: 0.95rem;
+  font-size: 1.05rem;
   line-height: 1.45;
   color: var(--ink-soft);
   margin: 0;
@@ -837,20 +837,24 @@
 
 .zoneCardTitle {
   font-family: var(--font-display), serif;
-  font-size: 0.88rem;
+  font-size: 1rem;
   font-weight: 650;
   line-height: 1.2;
   color: var(--ink-main);
 }
 
 .zoneCardBody {
-  font-size: 0.78rem;
+  font-size: 0.88rem;
   line-height: 1.35;
   color: var(--ink-soft);
-  /* The headline is generated, so its length is not fixed. Two lines keeps
-     seven cards the same height without truncating anything that matters. */
+  /* The headline is generated, so its length is not fixed. The clamp keeps the
+     seven cards the same height; the grid stretches the row to whichever card
+     is tallest, so the number here only decides where truncation starts.
+     Three, not two: at 0.88rem four of the seven generated headlines no longer
+     fit two lines and were being cut mid-word, which is a worse outcome than a
+     row that is one line taller. */
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -932,7 +936,7 @@
 .skyPlanetName {
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.87rem;
+  font-size: 0.96rem;
   font-weight: 700;
   line-height: 1.1;
   white-space: nowrap;
@@ -940,7 +944,7 @@
 
 .skyPlanetSign {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 0.88rem;
   line-height: 1.1;
   white-space: nowrap;
 }
@@ -954,7 +958,7 @@
   padding-inline-start: clamp(0.9rem, 1.8vw, 1.6rem);
   font-family: var(--font-newsreader), Georgia, serif;
   font-style: italic;
-  font-size: 0.92rem;
+  font-size: 1rem;
   line-height: 1.35;
   color: var(--ink-soft);
   /* Grows in step with the type -- held at 12rem the larger words would have
@@ -1285,7 +1289,7 @@
   background: color-mix(in srgb, var(--tone) 14%, transparent);
   color: var(--tone);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.9rem;
+  font-size: 1rem;
   font-weight: 800;
   line-height: 1;
 }
@@ -1295,7 +1299,7 @@
   margin: 0;
   color: var(--tone);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.86rem;
+  font-size: 0.95rem;
   font-weight: 800;
   letter-spacing: 0.1em;
   line-height: 1.2;
@@ -1321,7 +1325,7 @@
   border-top: 1px solid var(--line-soft, rgba(200, 155, 60, 0.1));
   color: var(--ink-main);
   font-family: var(--font-display), sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.03rem;
   font-weight: 700;
   letter-spacing: 0.02em;
   line-height: 1.35;
@@ -1429,7 +1433,7 @@
 
 .heading {
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-size: clamp(1.4rem, 2.25vw, 1.75rem);
   font-weight: 600;
   margin: 0;
   line-height: 1.42;
@@ -1924,7 +1928,7 @@
   border: 1px solid color-mix(in srgb, var(--accent-gold) 45%, transparent);
   background: var(--bg-deep, rgba(9, 13, 26, 0.95));
   font-family: var(--font-display), sans-serif;
-  font-size: 0.66rem;
+  font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1943,7 +1947,7 @@
 
 .medallionFacts dt {
   font-family: var(--font-display), sans-serif;
-  font-size: 0.62rem;
+  font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -1953,7 +1957,7 @@
 .medallionFacts dd {
   margin: 0.15rem 0 0;
   font-family: var(--font-display), serif;
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-weight: 650;
   line-height: 1.2;
   color: var(--ink-main);
@@ -2431,7 +2435,7 @@
 }
 
 .timingSection .heading {
-  font-size: clamp(1.25rem, 2vw, 1.55rem);
+  font-size: clamp(1.4rem, 2.25vw, 1.75rem);
 }
 
 .timingPanels {
@@ -2452,7 +2456,7 @@
 
 .chartHighlightsHeader .kicker {
   margin-bottom: 0.35rem;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
 }
 
 .chartHighlightsTitle {
@@ -3101,7 +3105,7 @@
 
 .insightHubHeader .kicker {
   margin-bottom: 0.38rem;
-  font-size: 0.82rem;
+  font-size: 0.89rem;
 }
 
 .insightHubTitle {
@@ -3256,7 +3260,7 @@
 
 .continuationHeader .kicker {
   margin-bottom: 0.38rem;
-  font-size: 0.82rem;
+  font-size: 0.89rem;
 }
 
 .continuationTitle {
@@ -4019,7 +4023,7 @@
 
 .domainHeader h3 {
   font-family: var(--font-display), sans-serif;
-  font-size: 1.32rem;
+  font-size: 1.5rem;
   color: var(--ink-main);
   margin: 0.25rem 0 0;
 }
