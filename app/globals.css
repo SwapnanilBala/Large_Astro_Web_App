@@ -3405,6 +3405,150 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 /* The one action that matters on this page. */
+/* ── Synastry bridge ──
+   The inter-chart aspects drawn as a bipartite graph. See
+   app/(desktop)/insights/compatibility/synastry-bridge.tsx for why. */
+
+.bridge {
+  margin-top: 0.5rem;
+}
+
+.bridge-rail-heads {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 0.25rem 0.6rem;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.28rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bridge-rail-head--primary { color: var(--accent-aqua); }
+.bridge-rail-head--partner { color: var(--accent-coral); }
+
+.bridge-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.bridge-node {
+  fill: var(--ink-soft);
+  opacity: 0.85;
+}
+
+.bridge-label {
+  fill: var(--ink-soft);
+  font-family: inherit;
+  font-size: 12px;
+  dominant-baseline: middle;
+}
+
+.bridge-label--left { text-anchor: end; }
+.bridge-label--right { text-anchor: start; }
+
+.bridge-link-line {
+  fill: none;
+  stroke-linecap: round;
+  transition: opacity 0.15s ease;
+}
+
+/* The pointer target. Transparent, fat, and never painted. */
+.bridge-link-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 12;
+}
+
+.bridge-link.is-supportive .bridge-link-line {
+  stroke: var(--accent-aqua);
+  opacity: 0.62;
+}
+
+.bridge-link.is-friction .bridge-link-line {
+  stroke: var(--accent-coral);
+  opacity: 0.5;
+  stroke-dasharray: 5 4;
+}
+
+/* Hovering one line dims the rest, so a single contact can be traced across a
+   crowded field without any JavaScript holding state. */
+.bridge-links:hover .bridge-link-line { opacity: 0.12; }
+.bridge-links .bridge-link:hover .bridge-link-line { opacity: 1; }
+
+.bridge-legend {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  margin: 0.9rem 0 0;
+  font-size: 1.22rem;
+  color: var(--ink-soft);
+}
+
+.bridge-key {
+  display: inline-block;
+  width: 22px;
+  height: 0;
+  border-top-width: 3px;
+  border-top-style: solid;
+  border-radius: 2px;
+}
+
+.bridge-key--supportive { border-top-color: var(--accent-aqua); }
+
+.bridge-key--friction {
+  border-top-style: dashed;
+  border-top-color: var(--accent-coral);
+}
+
+.bridge-legend-note {
+  margin-left: auto;
+  opacity: 0.8;
+}
+
+.bridge-table {
+  margin-top: 0.9rem;
+  font-size: 1.22rem;
+  color: var(--ink-soft);
+}
+
+.bridge-table summary {
+  cursor: pointer;
+  padding: 0.35rem 0;
+}
+
+.bridge-table ul {
+  list-style: none;
+  margin: 0.4rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.15rem 1.2rem;
+}
+
+.bridge-table li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.3rem 0.5rem;
+  border-left: 2px solid transparent;
+  border-radius: 4px;
+}
+
+.bridge-table li[data-polarity="supportive"] { border-left-color: var(--accent-aqua); }
+.bridge-table li[data-polarity="friction"] { border-left-color: var(--accent-coral); }
+
+.bridge-table-orb {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bridge-link-line { transition: none; }
+}
+
 .compat-primary-action {
   font-weight: 650;
 }

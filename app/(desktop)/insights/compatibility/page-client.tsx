@@ -6,6 +6,7 @@ import Link from "next/link";
 import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
+import SynastryBridge from "./synastry-bridge";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
@@ -951,24 +952,16 @@ export default function CompatibilityPageClient({
                 <p className="kicker">Synastry</p>
                 <h2>Inter-chart aspects</h2>
               </div>
-              <div className="synastry-card-grid">
-                {result.synastry_aspects.map((aspect) => (
-                  <article key={`${aspect.primary_planet}-${aspect.partner_planet}-${aspect.aspect_type}`} className="synastry-card">
-                    <div className="synastry-card-header">
-                      <div>
-                        <h3>
-                          {aspect.primary_planet} to {aspect.partner_planet}
-                        </h3>
-                        <p>{aspect.aspect_type}</p>
-                      </div>
-                      <span className={`access-pill ${aspect.harmonious ? "access-pill--premium" : "access-pill--limited"}`}>
-                        {aspect.harmonious ? "Supportive" : "Friction"}
-                      </span>
-                    </div>
-                    <p className="synastry-card-meta">Orb: {aspect.orb.toFixed(2)} degrees</p>
-                  </article>
-                ))}
-              </div>
+              <p className="section-intro">
+                Every contact between one chart and the other. The line is the aspect:
+                heavier means a tighter orb, dashed means the contact pulls rather than
+                helps.
+              </p>
+              <SynastryBridge
+                aspects={result.synastry_aspects}
+                primaryName={result.primary_client.name}
+                partnerName={result.partner_client.name}
+              />
             </section>
           </>
         )}
