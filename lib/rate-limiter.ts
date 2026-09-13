@@ -24,6 +24,11 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      protects the key is the per-day budget in lib/llm-budget.ts. */
   "/api/chart/dasha-interpretation": { limit: 12, windowMs: 60_000 },
   "/api/chart/domain-brief": { limit: 12, windowMs: 60_000 },
+  /* The atlas asks once per chart and then reads from cache, so a real visitor
+     needs this a handful of times an hour at most. Low enough that a loop is
+     stopped at the minute rather than at the day, which is the one place the
+     other two LLM routes cannot be: they are driven by clicking. */
+  "/api/chart/varga-commentary": { limit: 6, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   /* Tight: a POST here can insert a workspace row, so an unthrottled loop is a
      way to fill the table. A real visitor needs it once per device, ever. */

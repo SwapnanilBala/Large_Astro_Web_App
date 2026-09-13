@@ -76,6 +76,7 @@ export type LlmRouteKey =
   | "/api/chart/dasha-interpretation"
   | "/api/chart/domain-brief"
   | "/api/chart/advanced-story"
+  | "/api/chart/varga-commentary"
   | "/api/palm-reading"
   | "/api/palm-reading/ask";
 
@@ -104,6 +105,19 @@ type LlmBudgetConfig = {
  * where a reading is one, so the route total is set well above palm reading's
  * while the per-caller number stays the same -- the ceiling that matters for a
  * question thread is the daily allowance, not the route's.
+ *
+ * The varga commentary is the dearest of the text routes and the one a visitor
+ * can only spend once. Opus 5 at medium effort, ten notes in a single response
+ * against the same cached system prefix: 2831 input and 1799 output tokens
+ * measured, which is $0.055 a call -- six times a dasha chain. The atlas asks
+ * for all ten key vargas at once, on mount, so one atlas visit is one call and
+ * there is no drill-down that could make it many.
+ *
+ * That makes 400 a count of distinct charts per day rather than of
+ * interactions, and it is set from the price: 400 x $0.055 is about $22, which
+ * is the same daily exposure palm reading's 200 already buys. The two cheap
+ * text routes can afford 2500 because they cost fractions of a cent; this one
+ * cannot, and sizing it like them would have put a $50 day one cache miss away.
  *
  * THE TWO TIERS are 5 free, then 15 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --
@@ -152,6 +166,11 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      a single page view. */
   "/api/chart/advanced-story": {
     perDay: 2000,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  "/api/chart/varga-commentary": {
+    perDay: 400,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
