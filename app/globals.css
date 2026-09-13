@@ -2619,6 +2619,24 @@ label:has(.autocomplete-wrapper.is-open) {
 
 /* ── Aspect Card Enhancements ── */
 
+/* The two planets and the symbol between them. Wrapping is allowed here, and
+   only here: .aspect-planet below is what stops it happening mid-name. */
+.aspect-card-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 0.45rem;
+  min-width: 0;
+}
+
+.aspect-planet {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
 .aspect-symbol {
   margin: 0 0.3rem;
   font-size: 1.2rem;

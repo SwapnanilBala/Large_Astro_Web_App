@@ -297,3 +297,73 @@
   width: 100%;
   min-width: 0;
 }
+
+/* ─── The wait, made legible ─── */
+
+.storyProgress {
+  position: fixed;
+  inset-block-end: clamp(1rem, 3vw, 2rem);
+  inset-inline-end: clamp(1rem, 3vw, 2rem);
+  z-index: 60;
+  width: min(20rem, calc(100vw - 2rem));
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 16px;
+  background: var(--surface-raised, rgba(10, 22, 38, 0.96));
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.38);
+  animation: storyProgressIn 280ms ease-out;
+}
+
+@keyframes storyProgressIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+
+.storyProgressTitle {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--ink-main);
+}
+
+.storyProgressNote {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--accent-gold);
+}
+
+.storyProgressTrack {
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-main) 12%, transparent);
+  overflow: hidden;
+}
+
+/* Width is set inline from the elapsed time; the transition smooths the 250ms
+   ticks into something continuous rather than stepping. */
+.storyProgressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent-gold);
+  transition: width 260ms linear;
+}
+
+.storyProgressHint {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .storyProgress {
+    animation: none;
+  }
+  .storyProgressFill {
+    transition: none;
+  }
+}

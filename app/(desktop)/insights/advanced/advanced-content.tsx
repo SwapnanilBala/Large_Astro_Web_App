@@ -16,6 +16,7 @@ import { useTranslation } from "@/lib/i18n-context";
 import type { AdvancedFocusView } from "./advanced-views";
 import {
   StoryOpening,
+  StoryProgress,
   StorySection,
   useAdvancedStory,
 } from "./advanced-story";
@@ -486,6 +487,7 @@ export default function AdvancedContent({
           >
             {/* The whole section, said plainly, before any of the tables. */}
             <StoryOpening state={storyState} />
+            <StoryProgress state={storyState} />
             <div className={styles.gridAdvanced}>
               {/* Nakshatra & Dasha */}
               <motion.div
