@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import AdvancedLoader from "./advanced-loader";
+import { sessionFromCookieStore } from "@/lib/identity/require-session";
 import BackButton from "@/app/components/BackButton";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
 import { buildChartHistoryQuery } from "@/lib/chart-params";
@@ -80,6 +82,61 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
     birthTimeSource,
     birthTimeFallback,
   };
+
+  /*
+   * Signed in, or a gate.
+   *
+   * Checked after the parameters, so somebody arriving with a broken link is
+   * told the link is broken rather than told to sign in and then told the link
+   * is broken. /api/chart/advanced-story enforces the same rule on its own --
+   * this is the part a visitor sees, not the part that holds.
+   */
+  const session = await sessionFromCookieStore(await cookies());
+  if (!session) {
+    /* Rebuilt from the parameters rather than read off the request, so the
+       sign-in round trip returns to this exact chart. Only a path is sent, and
+       the start route refuses anything that is not one. */
+    const returnTo = `/insights/advanced?${new URLSearchParams(
+      Object.entries({ ...chartParams, view: getSingle(rawParams.view) }).filter(
+        ([, value]) => typeof value === "string" && value.length > 0,
+      ) as [string, string][],
+    ).toString()}`;
+
+    return (
+      <PageTransition>
+        <div className="insights-shell below-navbar">
+          <BackToReadingButton
+            queryString={buildChartHistoryQuery(chartParams)}
+            label="Back"
+          />
+          <section className="dashboard-shell advanced-gate">
+            <p className="kicker">Members only</p>
+            <h1>The advanced reading needs an account</h1>
+            <p className="lead">
+              This section writes a full reading of your chart -- the timing, the
+              aspects, the harmonics and the strengths -- and keeps every table
+              behind it. It is the most expensive thing the app does, so it is
+              kept for people who have signed in.
+            </p>
+            <div className="advanced-gate-actions">
+              <Link
+                href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
+                className="ghost-link advanced-gate-primary"
+              >
+                Sign in to continue
+              </Link>
+              <Link
+                href={`/insights?${buildChartHistoryQuery(chartParams)}`}
+                className="ghost-link"
+              >
+                Back to your reading
+              </Link>
+            </div>
+          </section>
+        </div>
+      </PageTransition>
+    );
+  }
 
   return (
     <PageTransition>

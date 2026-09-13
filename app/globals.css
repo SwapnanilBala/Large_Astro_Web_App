@@ -7962,3 +7962,41 @@ html[data-theme="light"] .compatibility-cta h3 {
 html[data-theme="light"] .aspect-badge--vedic {
   color: var(--accent-purple-dim);
 }
+
+/* ─── The advanced section's sign-in gate ─── */
+
+.advanced-gate {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+  max-width: 46rem;
+}
+
+.advanced-gate .lead {
+  max-width: 54ch;
+}
+
+.advanced-gate-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.4rem;
+}
+
+/* Built on .ghost-link rather than beside it: there is no .primary-btn in this
+   codebase, and inventing one for a single gate would leave a class nobody
+   else can find. This is that link, filled. */
+.advanced-gate-primary {
+  color: #1a1206;
+  border-color: rgba(242, 194, 108, 0.55);
+  background: linear-gradient(135deg, #f2c26c, #d2ac62);
+  font-weight: 650;
+}
+
+.advanced-gate-primary:hover,
+.advanced-gate-primary:focus-visible {
+  color: #1a1206;
+  border-color: rgba(242, 194, 108, 0.85);
+  background: linear-gradient(135deg, #f7d089, #dcb972);
+}

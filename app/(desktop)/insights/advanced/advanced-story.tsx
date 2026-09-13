@@ -52,6 +52,7 @@ const inFlight = new Map<string, Promise<AdvancedStoryOutcome>>();
 type AdvancedStoryOutcome =
   | { kind: "story"; story: AdvancedStory }
   | { kind: "limit" }
+  | { kind: "signedOut" }
   | { kind: "off" };
 
 export type StoryState =
@@ -60,7 +61,7 @@ export type StoryState =
   /* `limit` and `unavailable` are the two the reader can act on -- one by
      signing in, one by trying again. `off` is a deployment with no key, where
      there is nothing to say and nothing to retry. */
-  | { status: "failed"; reason: "limit" | "unavailable"; retry: () => void }
+  | { status: "failed"; reason: "limit" | "unavailable" | "signedOut"; retry: () => void }
   | { status: "off" };
 
 /**
@@ -111,10 +112,14 @@ export function useAdvancedStory(queryString: string): StoryState {
         try {
           const response = await fetch(`/api/chart/advanced-story?${queryString}`);
 
-          /* 503 is "no key configured" and 429 is "you have used today's".
-             Neither improves by asking again, so neither is retried. */
+          /* None of these three improve by asking again: 503 is "no key
+             configured", 429 is "you have used today's", and 401 is a session
+             that has gone. The page gate means a signed-out visitor normally
+             never gets here -- 401 is the expiry case, reached by sitting on
+             the page long enough. */
           if (response.status === 503) return { kind: "off" };
           if (response.status === 429) return { kind: "limit" };
+          if (response.status === 401) return { kind: "signedOut" };
           if (!response.ok) throw new Error(`status ${response.status}`);
 
           return { kind: "story", story: (await response.json()) as AdvancedStory };
@@ -165,6 +170,8 @@ export function useAdvancedStory(queryString: string): StoryState {
         stopTicking();
         if (outcome.kind === "story") setState({ status: "ready", story: outcome.story });
         else if (outcome.kind === "limit") setState({ status: "failed", reason: "limit", retry });
+        else if (outcome.kind === "signedOut")
+          setState({ status: "failed", reason: "signedOut", retry });
         else setState({ status: "off" });
       })
       .catch(() => {
@@ -246,7 +253,15 @@ export function StoryOpening({ state }: { state: StoryState }) {
   if (state.status === "failed") {
     return (
       <p className={advStyles.storyOpening}>
-        {state.reason === "limit" ? (
+        {state.reason === "signedOut" ? (
+          <>
+            Your session ended.{" "}
+            <a className={advStyles.storyToggle} href="/login">
+              Sign in again
+            </a>{" "}
+            to rewrite this reading. Every table is still here, below.
+          </>
+        ) : state.reason === "limit" ? (
           <>You have used today&#39;s readings. Every table is still here, below.</>
         ) : (
           <>

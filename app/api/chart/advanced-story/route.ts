@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { sessionFromRequest } from "@/lib/identity/require-session";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   chartParamsToBirthInput,
@@ -30,11 +31,14 @@ import {
  * move behind a disclosure and the passage stands in front.
  *
  * ONE call, not one per module, and this is a constraint rather than a
- * preference: lib/llm-budget.ts allows ten calls per account per day, so a
- * per-module call would spend a signed-in visitor's entire allowance on a page
- * and a half. Writing the passages together is also the better shape -- they
- * are one reading of one chart, so the timing passage can lean on what the
- * strength passage established, which six independent calls cannot do.
+ * preference: there are eight modules against a per-account daily allowance in
+ * the low tens (lib/llm-budget-tiers.ts), so a per-module call would spend over
+ * half a signed-in visitor's day on one page view. Writing the passages
+ * together is also the better shape -- they are one reading of one chart, so
+ * the timing passage can lean on what the strength passage established, which
+ * eight independent calls cannot do.
+ *
+ * Signed in only. The page in front shows a gate; this route enforces it.
  *
  * Abuse note: as with its siblings, the only caller input is birth parameters.
  * The digest is rebuilt server-side from getChartPayload, so no string from the
@@ -130,6 +134,18 @@ export async function GET(request: NextRequest) {
       throw new ApiError(
         ErrorCode.VALIDATION_FAILED,
         error instanceof Error ? error.message : "Invalid birth details.",
+      );
+    }
+
+    /* Signed in, or nothing. The page in front of this shows a sign-in gate,
+       but a gate the API does not enforce is decoration -- the route is a URL
+       and anyone can fetch it. Checked before the chart is built so an
+       anonymous caller costs an auth lookup and not an ephemeris run. */
+    const session = await sessionFromRequest(request);
+    if (!session) {
+      throw new ApiError(
+        ErrorCode.UNAUTHORIZED,
+        "Sign in to open the advanced reading.",
       );
     }
 

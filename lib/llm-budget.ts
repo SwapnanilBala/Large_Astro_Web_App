@@ -68,7 +68,7 @@ import {
   pruneSharedLlmCounters,
   type SharedLlmCounts,
 } from "@/lib/db/llm-budget-counters";
-import { SESSION_COOKIE, resolveSession } from "@/lib/identity/session";
+import { sessionFromRequest } from "@/lib/identity/require-session";
 import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
 import { getClientIp } from "@/lib/rate-limiter";
 
@@ -295,18 +295,6 @@ type LlmCaller = {
 };
 
 /** The session cookie's value, without parsing the whole jar. */
-function sessionTokenFrom(request: Request): string | null {
-  const header = request.headers.get("cookie");
-  if (!header) return null;
-  for (const part of header.split(";")) {
-    const separator = part.indexOf("=");
-    if (separator === -1) continue;
-    if (part.slice(0, separator).trim() === SESSION_COOKIE) {
-      return decodeURIComponent(part.slice(separator + 1).trim()) || null;
-    }
-  }
-  return null;
-}
 
 /**
  * Resolve the caller, falling back to the address on any doubt.
@@ -321,16 +309,9 @@ function sessionTokenFrom(request: Request): string | null {
  * allowance, which is the safe direction to be wrong in.
  */
 async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
-  const token = sessionTokenFrom(request);
-  if (token) {
-    try {
-      const session = await resolveSession(token);
-      if (session) {
-        return { key: `user:${session.userId}`, signedIn: true };
-      }
-    } catch {
-      /* Fall through to the address. */
-    }
+  const session = await sessionFromRequest(request);
+  if (session) {
+    return { key: `user:${session.userId}`, signedIn: true };
   }
   return { key: `ip:${getClientIp(request)}`, signedIn: false };
 }
