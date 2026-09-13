@@ -4756,8 +4756,18 @@ html[data-theme="light"] .navamsa-dignity-legend,
 html[data-theme="light"] .palm-compare-quote,
 html[data-theme="light"] .palm-detail-notes,
 html[data-theme="light"] .palm-detail-title-input,
+html[data-theme="light"] .palm-qa-input,
+html[data-theme="light"] .palm-qa-starter,
+html[data-theme="light"] .palm-qa-turn--assistant,
 html[data-theme="light"] .skel-rule-card {
   background: var(--surface-strong);
+}
+
+/* The off-topic aside is a dashed outline over white in the dark theme,
+   which is invisible on cream. Ink at low alpha reads the same way round. */
+html[data-theme="light"] .palm-qa-turn--offtopic {
+  background: transparent;
+  border-color: rgba(54, 38, 58, 0.28);
 }
 
 html[data-theme="light"] .shadbala-sign-card {
