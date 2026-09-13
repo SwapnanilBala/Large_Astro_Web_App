@@ -3,9 +3,11 @@
 import { useEffect, useId, useRef, useState } from "react";
 import type { IntakeFieldResult } from "@/lib/intake-normalize";
 
-interface Suggestion {
+export interface Suggestion {
   name: string;
   displayName: string;
+  state?: string;
+  country?: string;
 }
 
 interface AutocompleteInputProps {
@@ -15,6 +17,14 @@ interface AutocompleteInputProps {
   value: string;
   onChange: (value: string) => void;
   onSelect: (value: string) => void;
+  /**
+   * Fires alongside `onSelect` with the whole chosen suggestion, so a caller
+   * that wants the parent place names does not have to ask for them again.
+   *
+   * Optional and additive: `onSelect` still fires first and still carries just
+   * the name, so every existing caller behaves exactly as before.
+   */
+  onSelectSuggestion?: (suggestion: Suggestion) => void;
   placeholder?: string;
   suggestType: "country" | "state" | "city";
   required?: boolean;
@@ -50,6 +60,7 @@ export default function AutocompleteInput({
   value,
   onChange,
   onSelect,
+  onSelectSuggestion,
   placeholder,
   suggestType,
   required,
@@ -136,8 +147,9 @@ export default function AutocompleteInput({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSelect = (name: string) => {
+  const handleSelect = (name: string, suggestion?: Suggestion) => {
     onSelect(name);
+    if (suggestion) onSelectSuggestion?.(suggestion);
     setIsOpen(false);
     setSuggestions([]);
     setActiveIndex(-1);
@@ -154,7 +166,7 @@ export default function AutocompleteInput({
       setActiveIndex((prev) => (prev > 0 ? prev - 1 : suggestions.length - 1));
     } else if (e.key === "Enter" && activeIndex >= 0) {
       e.preventDefault();
-      handleSelect(suggestions[activeIndex].name);
+      handleSelect(suggestions[activeIndex].name, suggestions[activeIndex]);
     } else if (e.key === "Escape") {
       setIsOpen(false);
       setActiveIndex(-1);
@@ -226,7 +238,7 @@ export default function AutocompleteInput({
               aria-selected={i === activeIndex}
               onMouseDown={(event) => {
                 event.preventDefault();
-                handleSelect(s.name);
+                handleSelect(s.name, s);
               }}
               onMouseEnter={() => setActiveIndex(i)}
             >

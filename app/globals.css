@@ -3285,11 +3285,134 @@ label:has(.autocomplete-wrapper.is-open) {
 .compatibility-grid {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* Asymmetric on purpose: the left card is a summary of a chart that is
+     already known, the right one is the only thing anybody has to fill in. */
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: start;
 }
 
 .compatibility-profile-card {
   height: 100%;
+}
+
+/* ── Compatibility: your chart, as a card rather than a second form ── */
+
+.compat-summary {
+  display: grid;
+  gap: 0.85rem;
+  align-content: start;
+  height: auto;
+}
+
+.compat-summary-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.compat-summary-text {
+  min-width: 0;
+}
+
+.compat-summary-name {
+  margin: 0 0 0.15rem;
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  color: var(--ink-main);
+}
+
+.compat-summary-meta {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+/* One link style for both "Change" and "Adjust": they are the same kind of
+   thing -- a quiet way into detail that most visitors never need. */
+.compat-inline-link {
+  all: unset;
+  cursor: pointer;
+  justify-self: start;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent-gold);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-gold) 40%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.compat-inline-link:hover,
+.compat-inline-link:focus-visible {
+  color: var(--ink-main);
+  border-bottom-color: var(--ink-main);
+}
+
+.compat-form-head {
+  margin-bottom: 1.1rem;
+}
+
+.compat-form-title {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0;
+  min-width: 0;
+}
+
+.compat-fields {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.compat-row-2 {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* What the geocoder worked out, as a sentence. */
+.compat-derived {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem 0.85rem;
+  min-height: 1.4rem;
+}
+
+.compat-derived-line {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+.compat-derived-warn {
+  color: var(--accent-coral, #e08a76);
+}
+
+.compat-derived-fields {
+  display: grid;
+  gap: 0.85rem;
+  padding: 0.9rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--ink-main) 3%, transparent);
+}
+
+/* The one action that matters on this page. */
+.compat-primary-action {
+  font-weight: 650;
+}
+
+@media (max-width: 860px) {
+  .compat-row-2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 .danger-btn {

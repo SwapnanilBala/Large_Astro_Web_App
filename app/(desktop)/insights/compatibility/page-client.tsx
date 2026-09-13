@@ -130,6 +130,18 @@ function CompatibilityRing({ score }: { score: number }) {
 
 const ASTRO_API = "";
 
+/*
+ * What a profile needs before it can be submitted.
+ *
+ * Deliberately no `country` or `state`. BirthInputSchema declares both as
+ * `z.string().default("")` and refines on `city || state || country`, so the
+ * server is happy with a city alone -- and this list being stricter than the
+ * server is a trap once the form asks for a place rather than three fields:
+ * Nominatim returns no state for a city-state like Singapore, which would
+ * leave the button inert with no visible field to fix and no message saying
+ * why. The place picker fills city, and the geocoder fills the coordinates and
+ * the offset, so everything here is either typed or derived.
+ */
 const requiredFields: Array<keyof ProfileQueryInput> = [
   "name",
   "birthDate",
@@ -137,8 +149,6 @@ const requiredFields: Array<keyof ProfileQueryInput> = [
   "timezoneOffsetMinutes",
   "latitude",
   "longitude",
-  "country",
-  "state",
   "city",
 ];
 
@@ -151,7 +161,25 @@ type ProfileCardProps = {
   profile: ProfileQueryInput;
   setProfile: Dispatch<SetStateAction<ProfileQueryInput>>;
   accentColor: "aqua" | "coral";
+  /**
+   * `summary` collapses a complete profile to an identity card with a Change
+   * button. You arrive on this page from your own reading, so your own details
+   * are already known and asking for them again is most of what made this form
+   * feel like paperwork.
+   */
+  variant?: "summary" | "form";
 };
+
+/** "330" or "-300" as the UTC offset a person would recognise. */
+function formatUtcOffset(minutes: string): string {
+  const value = Number(minutes);
+  if (!Number.isFinite(value)) return "";
+  const sign = value < 0 ? "-" : "+";
+  const abs = Math.abs(value);
+  const hh = String(Math.floor(abs / 60)).padStart(2, "0");
+  const mm = String(abs % 60).padStart(2, "0");
+  return `UTC${sign}${hh}:${mm}`;
+}
 
 function profileFromParams(
   params: Record<string, string>,
@@ -189,7 +217,13 @@ function profileFromParams(
   };
 }
 
-function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardProps) {
+function ProfileCard({
+  title,
+  profile,
+  setProfile,
+  accentColor,
+  variant = "form",
+}: ProfileCardProps) {
   const { t } = useTranslation();
   const signBorderColor = accentColor === "aqua"
     ? "rgba(100,200,255,0.5)"
@@ -202,6 +236,15 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
     Partial<Record<keyof ProfileQueryInput, IntakeFieldResult | undefined>>
   >({});
   const [geoStatus, setGeoStatus] = useState<"idle" | "loading" | "found" | "not-found">("idle");
+  /* The summary card opens into the full form on request; a profile that
+     arrived incomplete has nothing to summarise, so it starts open. */
+  const isComplete = Boolean(
+    profile.name.trim() && profile.birthDate.trim() && profile.birthTime.trim() && profile.city.trim(),
+  );
+  const [isEditing, setIsEditing] = useState(false);
+  /* The geocoder's own output -- coordinates, offset, time zone id. Shown as a
+     line of text, editable only for the visitor who has to override it. */
+  const [showDerived, setShowDerived] = useState(false);
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -348,30 +391,68 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
     );
   };
 
+  /* Consecutive repeats dropped: a city and its state often share a name, and
+     "New York, New York, United States" reads like a mistake. */
+  const placeLine = [profile.city, profile.state, profile.country]
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .filter((part, index, parts) => part.toLowerCase() !== parts[index - 1]?.toLowerCase())
+    .join(", ");
+
+  const zodiacBadge = profileSign ? (
+    <ZodiacSignImage
+      sign={profileSign}
+      size={40}
+      style={{
+        border: `2px solid ${signBorderColor}`,
+        boxShadow: `0 0 12px ${signShadowColor}`,
+        flexShrink: 0,
+      }}
+    />
+  ) : null;
+
+  /* Your own chart, already known. A card, not a form. */
+  if (variant === "summary" && isComplete && !isEditing) {
+    return (
+      <section className="rules-panel compatibility-profile-card compat-summary">
+        <p className="kicker">{title}</p>
+        <div className="compat-summary-identity">
+          {zodiacBadge}
+          <div className="compat-summary-text">
+            <h2 className="compat-summary-name">{profile.name}</h2>
+            <p className="compat-summary-meta">
+              {formatBirthDateDisplay(profile.birthDate)}
+              {profile.birthTime ? ` · ${formatClockDisplay(profile.birthTime)}` : ""}
+            </p>
+            {placeLine && <p className="compat-summary-meta">{placeLine}</p>}
+          </div>
+        </div>
+        <button
+          type="button"
+          className="compat-inline-link"
+          onClick={() => setIsEditing(true)}
+        >
+          Change
+        </button>
+      </section>
+    );
+  }
+
   return (
     <section className="rules-panel compatibility-profile-card">
-      <div className="rules-header">
-        <p className="kicker">Profile</p>
-        <h2 style={{ display: "flex", alignItems: "center", gap: "0.65rem" }}>
-          {profileSign && (
-            <ZodiacSignImage
-              sign={profileSign}
-              size={36}
-              style={{
-                border: `2px solid ${signBorderColor}`,
-                boxShadow: `0 0 12px ${signShadowColor}`,
-                flexShrink: 0,
-              }}
-            />
-          )}
-          {profile.name || title}
-        </h2>
+      <div className="compat-form-head">
+        <p className="kicker">{title}</p>
+        {/* Only once there is a name to show. Before that the heading was the
+            kicker again, one line below the kicker. */}
+        {profile.name.trim() && (
+          <h2 className="compat-form-title">
+            {zodiacBadge}
+            {profile.name}
+          </h2>
+        )}
       </div>
-      <p className="section-intro">
-        Fine-tune the birth profile and let the app resolve coordinates plus historical timezone context automatically.
-      </p>
 
-      <div className="input-grid">
+      <div className="compat-fields">
         <label className="input-glow-gold">
           Name
           <input
@@ -379,142 +460,183 @@ function ProfileCard({ title, profile, setProfile, accentColor }: ProfileCardPro
             value={profile.name}
             onChange={updateField("name")}
             onBlur={commit("name", normalizePersonName)}
+            placeholder="Their name"
           />
           {renderNote("name")}
         </label>
+
+        <div className="compat-row-2">
+          <label className="input-glow-aqua">
+            Birth date
+            <div className="datetime-field">
+              <input
+                type="date"
+                value={profile.birthDate}
+                onChange={updateField("birthDate")}
+                onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
+              />
+              <HiOutlineCalendarDays className="datetime-icon datetime-icon-aqua" />
+            </div>
+            {fieldNotes.birthDate ? (
+              renderNote("birthDate")
+            ) : profile.birthDate ? (
+              <span className="field-note">{formatBirthDateDisplay(profile.birthDate)}</span>
+            ) : null}
+          </label>
+          <label className="input-glow-aqua">
+            Birth time
+            <div className="datetime-field">
+              <input
+                type="time"
+                value={profile.birthTime}
+                onChange={updateField("birthTime")}
+                onBlur={commit("birthTime", normalizeBirthTime)}
+              />
+              <HiOutlineClock className="datetime-icon datetime-icon-aqua" />
+            </div>
+            {fieldNotes.birthTime ? (
+              renderNote("birthTime")
+            ) : profile.birthTime ? (
+              <span className="field-note">{formatClockDisplay(profile.birthTime)}</span>
+            ) : null}
+          </label>
+        </div>
+
+        {/* One question, because a birth place is one fact. Choosing a city
+            fills the state and the country from the same result, which is why
+            /api/suggest now returns them. */}
         <label className="input-glow-aqua">
-          Birth date
-          <div className="datetime-field">
-            <input
-              type="date"
-              value={profile.birthDate}
-              onChange={updateField("birthDate")}
-              onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
-            />
-            <HiOutlineCalendarDays className="datetime-icon datetime-icon-aqua" />
-          </div>
-          {fieldNotes.birthDate ? (
-            renderNote("birthDate")
-          ) : profile.birthDate ? (
-            <span className="field-note">{formatBirthDateDisplay(profile.birthDate)}</span>
-          ) : null}
-        </label>
-      </div>
-
-      <div className="input-grid">
-        <label className="input-glow-coral">
-          Birth time
-          <div className="datetime-field">
-            <input
-              type="time"
-              value={profile.birthTime}
-              onChange={updateField("birthTime")}
-              onBlur={commit("birthTime", normalizeBirthTime)}
-            />
-            <HiOutlineClock className="datetime-icon datetime-icon-coral" />
-          </div>
-          {fieldNotes.birthTime ? (
-            renderNote("birthTime")
-          ) : profile.birthTime ? (
-            <span className="field-note">{formatClockDisplay(profile.birthTime)}</span>
-          ) : null}
-        </label>
-        <label className="input-glow-violet">
-          UTC offset (minutes)
-          {/* Text, not number: half the world writes this offset as "+05:30",
-              and a number field discards that keystroke by keystroke. */}
-          <input
-            type="text"
-            inputMode="text"
-            value={profile.timezoneOffsetMinutes}
-            onChange={updateField("timezoneOffsetMinutes")}
-            onBlur={commit("timezoneOffsetMinutes", normalizeUtcOffsetMinutes)}
-            placeholder="330 or +05:30"
-          />
-          {renderNote("timezoneOffsetMinutes")}
-        </label>
-      </div>
-
-      <div className="input-grid two-col">
-        <label className="input-glow-gold">
-          Country
+          Birth place
           <AutocompleteInput
-            value={profile.country}
-            onChange={setField("country")}
-            onSelect={setField("country")}
+            value={profile.city}
+            onChange={setField("city")}
+            onSelect={setField("city")}
+            onSelectSuggestion={(suggestion) =>
+              setProfile((previous) => ({
+                ...previous,
+                city: suggestion.name,
+                state: suggestion.state ?? "",
+                country: suggestion.country ?? "",
+              }))
+            }
             normalize={normalizePlaceName}
-            placeholder="Country"
-            suggestType="country"
+            placeholder="City of birth"
+            suggestType="city"
             required
           />
         </label>
-        <label className="input-glow-rose">
-          State
-          <AutocompleteInput
-            value={profile.state}
-            onChange={setField("state")}
-            onSelect={setField("state")}
-            normalize={normalizePlaceName}
-            placeholder="State or province"
-            suggestType="state"
-            required
-          />
-        </label>
-      </div>
 
-      <label className="input-glow-aqua">
-        City
-        <AutocompleteInput
-          value={profile.city}
-          onChange={setField("city")}
-          onSelect={setField("city")}
-          normalize={normalizePlaceName}
-          placeholder="City"
-          suggestType="city"
-          required
-        />
-      </label>
+        {/* The geocoder's answer as a sentence rather than four text boxes.
+            Everything here is derived from the place above. */}
+        <div className="compat-derived" aria-live="polite">
+          {geoStatus === "loading" && (
+            <p className="compat-derived-line">{t("compatibility.resolving")}</p>
+          )}
+          {geoStatus === "not-found" && (
+            <p className="compat-derived-line compat-derived-warn">
+              {t("compatibility.locationError")}
+            </p>
+          )}
+          {geoStatus === "found" && (
+            <p className="compat-derived-line">
+              {placeLine}
+              {profile.timezoneOffsetMinutes
+                ? ` · ${formatUtcOffset(profile.timezoneOffsetMinutes)}`
+                : ""}
+              {profile.latitude && profile.longitude
+                ? ` · ${Number(profile.latitude).toFixed(2)}, ${Number(profile.longitude).toFixed(2)}`
+                : ""}
+            </p>
+          )}
+          <button
+            type="button"
+            className="compat-inline-link"
+            aria-expanded={showDerived}
+            onClick={() => setShowDerived((open) => !open)}
+          >
+            {showDerived ? "Hide details" : "Adjust"}
+          </button>
+        </div>
 
-      {geoStatus !== "idle" && (
-        <p className={`geo-status ${geoStatus}`}>
-          {geoStatus === "loading" && t("compatibility.resolving")}
-          {geoStatus === "found" &&
-            `Location resolved: ${Number(profile.latitude).toFixed(4)}, ${Number(profile.longitude).toFixed(4)}${
-              profile.timeZoneId ? ` • ${profile.timeZoneId}` : ""
-            }`}
-          {geoStatus === "not-found" && t("compatibility.locationError")}
-        </p>
-      )}
-
-      <div className="input-grid three-col">
-        <label className="input-glow-aqua">
-          Latitude
-          <input
-            type="text"
-            inputMode="text"
-            value={profile.latitude}
-            onChange={updateCoordinate("latitude")}
-            onBlur={commit("latitude", (value) => normalizeCoordinate(value, "latitude"))}
-            placeholder="12.9716"
-          />
-          {renderNote("latitude")}
-        </label>
-        <label className="input-glow-coral">
-          Longitude
-          <input
-            type="text"
-            inputMode="text"
-            value={profile.longitude}
-            onChange={updateCoordinate("longitude")}
-            onBlur={commit("longitude", (value) => normalizeCoordinate(value, "longitude"))}
-            placeholder="77.5946"
-          />
-          {renderNote("longitude")}
-        </label>
-        <label className="input-glow-violet">
-          Time zone ID
-          <input type="text" value={profile.timeZoneId} onChange={updateField("timeZoneId")} />
-        </label>
+        {showDerived && (
+          <div className="compat-derived-fields">
+            <div className="compat-row-2">
+              <label className="input-glow-gold">
+                Country
+                <AutocompleteInput
+                  value={profile.country}
+                  onChange={setField("country")}
+                  onSelect={setField("country")}
+                  normalize={normalizePlaceName}
+                  placeholder="Country"
+                  suggestType="country"
+                />
+              </label>
+              <label className="input-glow-gold">
+                State
+                <AutocompleteInput
+                  value={profile.state}
+                  onChange={setField("state")}
+                  onSelect={setField("state")}
+                  normalize={normalizePlaceName}
+                  placeholder="State or province"
+                  suggestType="state"
+                />
+              </label>
+            </div>
+            <div className="compat-row-2">
+              <label className="input-glow-gold">
+                Latitude
+                <input
+                  type="text"
+                  inputMode="text"
+                  value={profile.latitude}
+                  onChange={updateCoordinate("latitude")}
+                  onBlur={commit("latitude", (value) => normalizeCoordinate(value, "latitude"))}
+                  placeholder="12.9716"
+                />
+                {renderNote("latitude")}
+              </label>
+              <label className="input-glow-gold">
+                Longitude
+                <input
+                  type="text"
+                  inputMode="text"
+                  value={profile.longitude}
+                  onChange={updateCoordinate("longitude")}
+                  onBlur={commit("longitude", (value) => normalizeCoordinate(value, "longitude"))}
+                  placeholder="77.5946"
+                />
+                {renderNote("longitude")}
+              </label>
+            </div>
+            <div className="compat-row-2">
+              <label className="input-glow-gold">
+                UTC offset (minutes)
+                {/* Text, not number: half the world writes this offset as
+                    "+05:30", and a number field discards that keystroke by
+                    keystroke. */}
+                <input
+                  type="text"
+                  inputMode="text"
+                  value={profile.timezoneOffsetMinutes}
+                  onChange={updateField("timezoneOffsetMinutes")}
+                  onBlur={commit("timezoneOffsetMinutes", normalizeUtcOffsetMinutes)}
+                  placeholder="330 or +05:30"
+                />
+                {renderNote("timezoneOffsetMinutes")}
+              </label>
+              <label className="input-glow-gold">
+                Time zone ID
+                <input
+                  type="text"
+                  value={profile.timeZoneId}
+                  onChange={updateField("timeZoneId")}
+                />
+              </label>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
@@ -654,26 +776,41 @@ export default function CompatibilityPageClient({
         <p className="kicker">Synastry Analysis</p>
         <h1>Compatibility</h1>
         <p className="lead">
-          Compare two full birth profiles, inspect the strongest synastry links, and share the
-          report as a link.
+          Your chart is already here. Add theirs and see how the two read together.
         </p>
 
         <div className="compatibility-grid">
-          <ProfileCard title="Primary profile" profile={primary} setProfile={setPrimary} accentColor="aqua" />
-          <ProfileCard title="Partner profile" profile={partner} setProfile={setPartner} accentColor="coral" />
+          <ProfileCard
+            title="Your chart"
+            profile={primary}
+            setProfile={setPrimary}
+            accentColor="aqua"
+            variant="summary"
+          />
+          <ProfileCard
+            title="Their chart"
+            profile={partner}
+            setProfile={setPartner}
+            accentColor="coral"
+          />
         </div>
 
         <div className="compatibility-actions">
-          <button type="button" onClick={() => void submitCompatibility()} disabled={isSubmitting}>
-            {isSubmitting ? "Calculating..." : "Run compatibility"}
-          </button>
           <button
             type="button"
-            onClick={() => void shareCompatibility()}
-            disabled={isSubmitting || !result}
+            className="compat-primary-action"
+            onClick={() => void submitCompatibility()}
+            disabled={isSubmitting}
           >
-            Share compatibility
+            {isSubmitting ? "Comparing…" : "Compare charts"}
           </button>
+          {/* Only once there is something to share. Before that it was a
+              second button of equal weight that could not do anything. */}
+          {result && (
+            <button type="button" onClick={() => void shareCompatibility()} disabled={isSubmitting}>
+              Share this reading
+            </button>
+          )}
         </div>
 
         {error && <p className="error-note">{error}</p>}

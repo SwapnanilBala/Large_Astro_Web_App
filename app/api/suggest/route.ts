@@ -90,6 +90,17 @@ const featureMap: Record<string, string> = {
 type Suggestion = {
   name: string;
   displayName: string;
+  /*
+   * The place this result sits inside, when Nominatim gave it to us.
+   *
+   * Purely additive: every existing caller reads `name` and `displayName` and
+   * is unaffected. It exists so one "birth place" field can fill city, state
+   * and country from a single choice -- without it `onSelect` hands back the
+   * bare city name and the other two have to be typed again, which is the
+   * whole reason that form asks three questions to learn one fact.
+   */
+  state?: string;
+  country?: string;
 };
 
 function normalizeLocationName(value: string) {
@@ -236,6 +247,10 @@ export async function GET(request: NextRequest) {
         return {
           name,
           displayName: item.display_name ?? name,
+          /* `county` is the fallback Nominatim uses where a place has no
+             administrative state, which is common outside the US. */
+          state: item.address?.state ?? item.address?.county ?? undefined,
+          country: item.address?.country ?? undefined,
         };
       }
     );
