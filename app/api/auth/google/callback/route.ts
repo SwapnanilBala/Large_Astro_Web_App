@@ -130,6 +130,24 @@ export async function GET(request: NextRequest) {
       name: identity.name,
     });
 
+    if (result.createdUser) {
+      /* An account coming into existence is the one thing in this flow worth a
+         line that is not a failure, and until now `createdUser` was computed
+         and dropped on the floor. The id and nothing else: the address is
+         already in `auth_identities`, and a log is a poor second home for it.
+         The greeting the new account sees is decided on the page from whether
+         it has any charts, not from this — a first sign-in and a first visit
+         from a new device want the same thing, so there is nothing here for
+         the redirect to carry. */
+      console.info(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/auth/google/callback",
+        event: "account_created",
+        provider: "google",
+        userId: result.userId,
+      }));
+    }
+
     const { token, expiresAt } = await createSession(result.userId, {
       userAgent: request.headers.get("user-agent"),
       /* Shared with the rate limiter and the LLM budget rather than re-derived:

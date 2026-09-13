@@ -614,13 +614,6 @@
   letter-spacing: 0.02em;
 }
 
-/* === FOOTER === */
-.intakeFooter {
-  padding: 2rem 1rem;
-  text-align: center;
-}
-
-
 @media (min-width: 769px) {
   .mobileStickyBar {
     display: none;
@@ -1606,10 +1599,6 @@
   outline-offset: 2px;
 }
 
-.intakeFooter {
-  display: none;
-}
-
 @media (max-width: 600px) {
   .streamlinedHeader {
     width: min(100% - 2rem, 38rem);
@@ -2051,6 +2040,25 @@
   max-width: var(--intake-cap);
   margin: 0 auto;
   padding: 0 var(--intake-gutter) 4rem;
+}
+
+/*
+ * The sign-in greeting, between the header and the form.
+ *
+ * It takes the same column as those two so the three read as one stack, and it
+ * centres its child: .chart-history-panel caps itself at 1200px, which is
+ * narrower than --intake-cap, so left alignment inside this row would hang it
+ * off the form it sits above.
+ */
+.intakeWelcome {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: var(--intake-cap);
+  margin: 0 auto;
+  padding: 0 var(--intake-gutter);
+  display: flex;
+  justify-content: center;
 }
 
 .formLayout {

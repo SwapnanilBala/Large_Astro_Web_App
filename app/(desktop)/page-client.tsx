@@ -207,7 +207,7 @@ export default function Home() {
   const [questionIndex, setQuestionIndex] = useState(0);
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
-  const { account } = useAccount();
+  const { account, status: accountStatus } = useAccount();
   const { t } = useTranslation();
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -961,6 +961,20 @@ export default function Home() {
         </p>
       </header>
 
+      {/*
+        * The one acknowledgement that a sign-in just happened.
+        *
+        * Signed in only: the panel says "your profile is ready", which is true
+        * of an account and not of a visitor. And above the form rather than
+        * below it, because the sentence it carries points at the form — a
+        * greeting under the thing it is pointing at is worse than no greeting.
+        */}
+      {accountStatus === "signed-in" && (
+        <div className={styles.intakeWelcome}>
+          <ChartHistory userName={account?.displayName ?? undefined} welcomeOnly />
+        </div>
+      )}
+
       {/* === MAIN CONTENT === */}
       <div className={styles.mainContent}>
         <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
@@ -1550,11 +1564,6 @@ export default function Home() {
 
         </form>
       </div>
-
-      {/* === FOOTER === */}
-      <footer className={styles.intakeFooter}>
-        <ChartHistory userName={account?.displayName ?? undefined} />
-      </footer>
 
     </div>
   );

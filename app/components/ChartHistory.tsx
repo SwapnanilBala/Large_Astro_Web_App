@@ -13,6 +13,16 @@ import { HiOutlineSparkles } from "react-icons/hi2";
 
 type ChartHistoryProps = {
   userName?: string;
+  /**
+   * Render the empty-state welcome and nothing else.
+   *
+   * The intake page wants the greeting for someone who has just signed in and
+   * has no chart yet. It does not want the hero and the carousel — those are
+   * what "Simplify birth chart intake" took off that page, and this is not an
+   * attempt to put them back. The hydration below is wanted either way, so the
+   * switch is on what gets rendered rather than on whether this mounts.
+   */
+  welcomeOnly?: boolean;
 };
 
 /* ── Zodiac sign to planet color mapping ── */
@@ -99,19 +109,21 @@ function TiltCard({
   );
 }
 
-export default function ChartHistory({ userName }: ChartHistoryProps) {
+export default function ChartHistory({ userName, welcomeOnly = false }: ChartHistoryProps) {
   const { t } = useTranslation();
   const [entries, setEntries] = useState<ChartHistoryEntry[]>([]);
-  /* localStorage is unreadable during render, so the first paint has to be
-     nothing rather than an empty history — which renders as the welcome panel
-     and would flash it at everyone who does have charts. */
+  /* Nothing is rendered until "does this person have a chart" has a final
+     answer, because every branch below is that question and a provisional
+     answer shows the wrong one. localStorage is the first half and cannot be
+     read during render; the account is the second half and takes a round trip.
+     Setting this after the local read alone was enough to flash the welcome
+     panel at someone whose charts were about to arrive from the server. */
   const [hydrated, setHydrated] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
     const local = readChartHistory();
     setEntries(local);
-    setHydrated(true);
 
     /*
      * Hydration: the browser is empty, so ask the account whether it is.
@@ -121,7 +133,10 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
      * device, so the two line up exactly. Filling a browser that already has
      * charts would interleave two histories under one list.
      */
-    if (local.length > 0) return;
+    if (local.length > 0) {
+      setHydrated(true);
+      return;
+    }
 
     let cancelled = false;
 
@@ -162,6 +177,10 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
       } catch {
         /* Offline, or the account store is down. The welcome panel is the
            honest thing to show; it is what a genuinely new visitor sees. */
+      } finally {
+        /* Every path above ends the question, including the early returns and
+           the failure: none of them is going to produce charts later. */
+        if (!cancelled) setHydrated(true);
       }
     };
 
@@ -198,6 +217,8 @@ export default function ChartHistory({ userName }: ChartHistoryProps) {
   }
 
   /* ── Has chart history ── */
+  if (welcomeOnly) return null;
+
   const [hero, ...rest] = entries;
   const heroSignColor = getSignColor(hero.ascendantSign);
 
