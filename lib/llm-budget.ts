@@ -109,15 +109,26 @@ type LlmBudgetConfig = {
  * The varga commentary is the dearest of the text routes and the one a visitor
  * can only spend once. Opus 5 at medium effort, ten notes in a single response
  * against the same cached system prefix: 2831 input and 1799 output tokens
- * measured, which is $0.055 a call -- six times a dasha chain. The atlas asks
- * for all ten key vargas at once, on mount, so one atlas visit is one call and
- * there is no drill-down that could make it many.
+ * measured, which is $0.0596 a call -- about seven times a dasha chain. The
+ * atlas asks for all ten key vargas at once, on mount, so one atlas visit is
+ * one call and there is no drill-down that could make it many.
+ *
+ * Roughly three quarters of that is output tokens, which is the number to watch
+ * if the notes are ever allowed to run longer: the first draft came back at
+ * ~600 characters each and cost $0.0733.
+ *
+ * (This said $0.055 until the arithmetic was checked. `usage.input_tokens`
+ * already excludes the cached prefix -- cache reads and writes are reported
+ * separately -- and subtracting the 964-token prefix from it again discounted
+ * the same tokens twice. Worth knowing before quoting any of these figures:
+ * total prompt is input_tokens + cache_read + cache_creation, not input_tokens.)
  *
  * That makes 400 a count of distinct charts per day rather than of
- * interactions, and it is set from the price: 400 x $0.055 is about $22, which
- * is the same daily exposure palm reading's 200 already buys. The two cheap
+ * interactions, and it is a ceiling rather than a forecast: 400 x $0.0596 is
+ * about $24, and only a day that exhausts the route reaches it. The two cheap
  * text routes can afford 2500 because they cost fractions of a cent; this one
- * cannot, and sizing it like them would have put a $50 day one cache miss away.
+ * cannot, and sizing it like them would have put a $150 day one cache miss
+ * away.
  *
  * THE TWO TIERS are 5 free, then 15 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --
