@@ -50,12 +50,12 @@ const {
 const NOON = Date.UTC(2026, 8, 12, 12, 0, 0);
 const NEXT_DAY = NOON + 86_400_000;
 
-/* Five free, then fifteen once registered, the same on every route. */
-const PER_ACCOUNT = 15;
-const PER_ADDRESS = 5;
+/* Four free, then eight once registered, the same on every route. */
+const PER_ACCOUNT = 8;
+const PER_ADDRESS = 4;
 
 /* Palm reading's whole-deployment ceiling for one day. */
-const PALM_ROUTE_TOTAL = 200;
+const PALM_ROUTE_TOTAL = 100;
 
 function requestFrom(ip: string, path = "/api/chart/domain-brief") {
   return new Request(`https://example.test${path}`, {
@@ -193,14 +193,16 @@ describe("the signed-out tier", () => {
 
 describe("route ceiling", () => {
   it("refuses a caller who has never called once the route total is spent", async () => {
-    /* Palm reading is 200 a day globally, so it takes ceil(200 / PER_ACCOUNT)
-       distinct accounts to spend the whole route budget without any one of
-       them tripping its per-caller limit. This is the distributed case the
-       per-IP sliding window cannot see at all.
+    /* It takes ceil(PALM_ROUTE_TOTAL / PER_ACCOUNT) distinct accounts to spend
+       the whole route budget without any one of them tripping its per-caller
+       limit. This is the distributed case the per-IP sliding window cannot see
+       at all.
 
        Derived from PER_ACCOUNT rather than written out as "20 accounts at 10
        each": that arithmetic was true only while the per-account number was a
-       divisor of 200, and it broke the day the tier was raised. */
+       divisor of 200, and it broke the day the tier was raised. The two
+       literal 200s below this comment survived that lesson and broke the day
+       the route total was halved; they are PALM_ROUTE_TOTAL now too. */
     let spent = 0;
     for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
       const caller = signedInAs(`user-${n}`, "/api/palm-reading");
@@ -212,8 +214,8 @@ describe("route ceiling", () => {
     }
 
     expect(readLlmBudgetUsage("/api/palm-reading", NOON)).toEqual({
-      used: 200,
-      limit: 200,
+      used: PALM_ROUTE_TOTAL,
+      limit: PALM_ROUTE_TOTAL,
     });
 
     const fresh = signedInAs("user-late", "/api/palm-reading");
@@ -224,7 +226,7 @@ describe("route ceiling", () => {
   });
 
   it("stops signed-out callers too, however many addresses they have", async () => {
-    for (let n = 0; n < 200; n += 1) {
+    for (let n = 0; n < PALM_ROUTE_TOTAL; n += 1) {
       const caller = requestFrom(`198.51.${Math.floor(n / 256)}.${n % 256}`, "/api/palm-reading");
       expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
     }

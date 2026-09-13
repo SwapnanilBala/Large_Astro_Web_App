@@ -87,12 +87,12 @@ vi.mock("@/lib/identity/session", () => ({
       : null,
 }));
 
-/* Five free, then fifteen once registered. */
-const PER_ACCOUNT = 15;
-const PER_ADDRESS = 5;
+/* Four free, then eight once registered. */
+const PER_ACCOUNT = 8;
+const PER_ADDRESS = 4;
 
 /* Palm reading's whole-deployment ceiling for one day. */
-const PALM_ROUTE_TOTAL = 200;
+const PALM_ROUTE_TOTAL = 100;
 
 /* Calls each instance puts in flight in the race below: enough that the two
    together exceed the per-account ceiling, while each instance's own memory
@@ -171,8 +171,10 @@ describe("one ceiling across instances", () => {
     const first = await newInstance();
     /* Enough accounts to spend palm reading's whole day with nobody tripping
        their own limit — the distributed case, now spent on one instance.
-       Derived from PER_ACCOUNT: the old "20 accounts at 10 each" only held
-       while the per-account number divided 200. */
+       Derived from PER_ACCOUNT and PALM_ROUTE_TOTAL: the old "20 accounts at
+       10 each" only held while the per-account number divided the total, and
+       every literal in this file has now outlived the number it described at
+       least once. */
     let spent = 0;
     for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
       const caller = signedInAs(`user-${n}`);
@@ -185,7 +187,8 @@ describe("one ceiling across instances", () => {
     expect(rows.get(rowKey(TODAY, "/api/palm-reading", ROUTE_TOTAL_CALLER))).toBe(PALM_ROUTE_TOTAL);
 
     /* The instance that has counted nothing. Under the old per-instance
-       ceiling this was another 200 calls; the table is what stops it. */
+       ceiling this was a second whole route total; the table is what stops
+       it. */
     const second = await newInstance();
     const refused = await second.consumeLlmBudget(
       "/api/palm-reading",
@@ -218,12 +221,19 @@ describe("one ceiling across instances", () => {
   });
 
   it("reports remaining from the shared total, not from what it spent itself", async () => {
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, 150);
+    /* Three quarters of the route's day already spent by other instances,
+       while this one has counted nothing. */
+    const spentElsewhere = Math.floor(PALM_ROUTE_TOTAL * 0.75);
+    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, spentElsewhere);
 
     const instance = await newInstance();
     const result = await instance.consumeLlmBudget("/api/palm-reading", signedInAs("user-a"), NOON);
 
-    expect(result).toEqual({ allowed: true, remaining: 49, callerRemaining: PER_ACCOUNT - 1 });
+    expect(result).toEqual({
+      allowed: true,
+      remaining: PALM_ROUTE_TOTAL - spentElsewhere - 1,
+      callerRemaining: PER_ACCOUNT - 1,
+    });
   });
 
   it("keys the counter on the UTC day, not on the process's idea of today", async () => {
@@ -285,7 +295,9 @@ describe("concurrent increments", () => {
 
   it("does not let concurrent callers race past the route ceiling", async () => {
     /* Two left in the day, spent by other instances. */
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, 198);
+    /* Two short of the route total, so exactly two of the ten below can win
+       however they interleave. */
+    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, PALM_ROUTE_TOTAL - 2);
 
     const instance = await newInstance();
     gate = (() => {
@@ -315,7 +327,7 @@ describe("concurrent increments", () => {
   });
 
   it("stops paying for round trips once the shared counter says the route is spent", async () => {
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, 200);
+    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, PALM_ROUTE_TOTAL);
 
     const instance = await newInstance();
     const first = await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.1"), NOON);
@@ -381,7 +393,11 @@ describe("when the shared counter is unreachable", () => {
     expect(bumpCalls).toHaveLength(2);
     /* The call made during the outage never reached the table, so the shared
        count starts from this one. Undercounting is the cost of degrading. */
-    expect(recovered).toEqual({ allowed: true, remaining: 199, callerRemaining: PER_ACCOUNT - 1 });
+    expect(recovered).toEqual({
+      allowed: true,
+      remaining: PALM_ROUTE_TOTAL - 1,
+      callerRemaining: PER_ACCOUNT - 1,
+    });
   });
 });
 
@@ -408,7 +424,11 @@ describe("pruning spent days", () => {
        caller nor escape as an unhandled rejection — which vitest fails on, so
        the second half of that is asserted by this test simply finishing. */
     expect(pruneCalls).toEqual(["2026-09-05"]);
-    expect(result).toEqual({ allowed: true, remaining: 199, callerRemaining: PER_ADDRESS - 1 });
+    expect(result).toEqual({
+      allowed: true,
+      remaining: PALM_ROUTE_TOTAL - 1,
+      callerRemaining: PER_ADDRESS - 1,
+    });
     await Promise.resolve();
   });
 });

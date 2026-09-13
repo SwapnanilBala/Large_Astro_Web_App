@@ -96,8 +96,14 @@ type LlmBudgetConfig = {
  * so they bite where they read. They are sized by what a call costs: the two
  * chart routes are Claude Opus 5 at low effort with max_tokens 1000 and a
  * cached system prefix, fractions of a cent each, while palm reading is Opus 5
- * vision over a 5MB image at high effort with max_tokens 6000 and nothing
- * cached -- an order of magnitude dearer, hence 200 a day against 2500.
+ * vision over an image with nothing cached, and the reading it writes is about
+ * five thousand output tokens -- $0.125 of output alone, so roughly $0.15 a
+ * call. An order of magnitude dearer, hence 100 a day against 2500.
+ *
+ * (This said "high effort with max_tokens 6000" until 2026-09-13. That route
+ * settled on `low` and 16000 after measuring -- higher effort spends the budget
+ * on thinking and truncates the reading mid-JSON; see its own header. The
+ * conclusion drawn here was right and the reason given for it had gone stale.)
  *
  * Follow-up questions sit between the two: Opus 5 at medium effort, max_tokens
  * 700, with a cached system prefix but a per-reading context that cannot be
@@ -130,7 +136,7 @@ type LlmBudgetConfig = {
  * cannot, and sizing it like them would have put a $150 day one cache miss
  * away.
  *
- * THE TWO TIERS are 5 free, then 15 once registered, on every route in the
+ * THE TWO TIERS are 4 free, then 8 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --
  * a proxy pool makes one abuser look like thousands, a campus NAT makes
  * thousands of people look like one -- so no number set on it is right, and the
@@ -138,27 +144,34 @@ type LlmBudgetConfig = {
  * buys a real one, because an account is a name a caller cannot mint by the
  * thousand and cannot have imposed on them by their employer's router.
  *
- * These were 2 and 10. Both were raised deliberately, after the note below
- * predicted where 10 would chafe: a five-level dasha drill-down reaches dozens
- * of distinct chains, so the ceiling a real session met first was the one on
- * the cheapest route. The shape of the tiers is unchanged -- signed-out is a
- * taste, an account is the working allowance -- and the sign-in prompt still
- * lands at a moment the visitor has decided they want more; it now lands after
- * five uses rather than two.
+ * These were 2 and 10, then 5 and 15, and are now 4 and 8. The first move was a
+ * raise, because the ceiling a real session met first was the one on the
+ * cheapest route -- a five-level dasha drill-down reaches dozens of distinct
+ * chains. This one is a cut, because the mix stopped being cheap: the varga
+ * commentary is $0.0596 a call, and an allowance sized against routes that cost
+ * fractions of a cent stopped describing what a caller can actually spend.
  *
- * WHAT THE RAISE COSTS is bounded by route rather than by caller. The two text
- * routes cache, so only *distinct* requests count -- revisiting a dasha chain
- * or a domain is free -- and both sit under a 2500/day route total that did not
- * move. Palm reading is the one where a per-caller number is real money: Opus 5
- * vision over a 5MB image with nothing cached, so 5 signed-out calls is five
- * times the worst case of 1. Its own 200/day total is unchanged and is what
- * actually bounds the deployment's exposure; a single address can now take
- * 2.5% of that day instead of 1%.
+ * The shape is unchanged -- signed-out is a taste, an account is the working
+ * allowance -- but the gap between them narrowed from threefold to twofold. So
+ * registering now buys twice as much rather than three times as much, and the
+ * sign-in prompt lands one reading earlier than it used to.
+ *
+ * WHAT THE CUT BUYS is mostly bounded at the route rather than at the caller.
+ * The text routes cache, so only *distinct* requests count -- revisiting a
+ * dasha chain or a domain is free -- and their totals did not move. Palm
+ * reading is where a per-caller number is real money, and its total halved:
+ * 100 a day is about $15 of exposure where 200 was about $30.
+ *
+ * Note which way the *proportions* went. A signed-out address can now take 4%
+ * of palm reading's day and an account 8%, up from 2.5% and 7.5%, because the
+ * route total came down further than the tiers did. That is the intended shape
+ * -- the number that bounds the bill is the route's, and the per-caller tiers
+ * exist to stop one visitor eating it, which 8 out of 100 still does.
  *
  * Follow-up questions remain the one place where the per-caller number is a
- * *conversation* rather than that many features used. Fifteen is roughly a
- * session's worth of real questions rather than the six-then-stop that 10 gave,
- * which was the most legible way the old number chafed.
+ * *conversation* rather than that many features used, and eight is where this
+ * change will be felt first: it is a short thread where fifteen was a session's
+ * worth. That is the trade, made deliberately.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   "/api/chart/dasha-interpretation": {
@@ -186,7 +199,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
   "/api/palm-reading": {
-    perDay: 200,
+    perDay: 100,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
