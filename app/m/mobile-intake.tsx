@@ -82,6 +82,11 @@ export default function MobileIntake() {
   const [step, setStep] = useState<1 | 2>(1);
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
   const [unknownTime, setUnknownTime] = useState(false);
+  /* Whether the birthplace is being detected from one search rather than
+     answered as three questions. Typed entry stays the default here too, and
+     the choice rides along in the shared draft so switching trees mid-entry
+     does not silently change the shape of the form. */
+  const [autoPlace, setAutoPlace] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
   const [fieldNotes, setFieldNotes] = useState<
     Partial<Record<keyof ProfileQueryInput, IntakeFieldResult | undefined>>
@@ -100,10 +105,12 @@ export default function MobileIntake() {
         draft?: Partial<ProfileQueryInput>;
         unknownTime?: boolean;
         coarseTime?: string;
+        autoPlace?: boolean;
       };
       if (parsed.draft) setDraft((prev) => ({ ...prev, ...parsed.draft }));
       if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
       if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
+      if (typeof parsed.autoPlace === "boolean") setAutoPlace(parsed.autoPlace);
     } catch {
       /* A corrupt draft is not worth failing the page over. */
     }
@@ -130,7 +137,7 @@ export default function MobileIntake() {
 
     try {
       if (hasContent) {
-        localStorage.setItem(key, JSON.stringify({ draft, unknownTime, coarseTime }));
+        localStorage.setItem(key, JSON.stringify({ draft, unknownTime, coarseTime, autoPlace }));
         persistedFor.current = true;
       } else {
         localStorage.removeItem(key);
@@ -139,7 +146,7 @@ export default function MobileIntake() {
     } catch {
       /* Private mode and quota errors are non-fatal here. */
     }
-  }, [coarseTime, draft, unknownTime]);
+  }, [autoPlace, coarseTime, draft, unknownTime]);
 
   const set = (key: keyof ProfileQueryInput, value: string) =>
     setDraft((prev) => ({ ...prev, [key]: value }));
@@ -190,45 +197,36 @@ export default function MobileIntake() {
     setGeoStatus("idle");
   };
 
-  /* Whether the country and state below were filled by a city choice rather
-     than answered directly, so that retyping the city can hand them back.
-     app/(desktop)/page-client.tsx carries the reasoning; the short version is
-     that those two also scope the city lookup, so a city that filled them has
-     trapped the next search inside its own country. */
-  const placeCameFromCity = useRef(false);
-
   const changeCountry = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined, city: undefined }));
     clearResolvedLocation();
   };
 
-  /* The other direction of the cascade: the city already knows its state and
-   * country, so choosing one fills both instead of sending the visitor off to
-   * look them up — the slowest thing to do on a phone. */
+  /* Automatic mode only: the chosen place carries its own state and country,
+   * so one answer fills all three instead of sending the visitor off to look
+   * them up — the slowest thing to do on a phone. */
   const chooseCity = (suggestion: PlaceSuggestion) => {
-    placeCameFromCity.current = true;
     setDraft((prev) => ({ ...prev, ...applyPlaceSuggestion(prev, suggestion) }));
     setFieldNotes((prev) => ({ ...prev, city: undefined, state: undefined, country: undefined }));
     clearResolvedLocation();
   };
 
-  /* Retyping the city gives back the country and state it filled, so the
-     next lookup is not scoped to the place that was abandoned. */
-  const changeCity = (value: string) => {
-    if (!placeCameFromCity.current) {
-      edit("city", value);
-      return;
-    }
-    placeCameFromCity.current = false;
-    setDraft((prev) => ({ ...prev, city: value, state: "", country: "" }));
-    setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined, city: undefined }));
+  /* Turning detection on drops whatever was typed into the two boxes it is
+   * about to hide -- /api/geocode searches "city, state, country" joined, so
+   * a half-finished manual answer left behind would be read as though it
+   * described the place about to be given, with no box on screen to correct
+   * it. Turning it off keeps what was found: those boxes come back, already
+   * answered. */
+  const changeAutoPlace = (next: boolean) => {
+    setAutoPlace(next);
+    if (!next) return;
+    setDraft((prev) => ({ ...prev, country: "", state: "" }));
+    setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined }));
     clearResolvedLocation();
   };
 
   const changeState = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
     setFieldNotes((prev) => ({ ...prev, state: undefined, city: undefined }));
     clearResolvedLocation();
@@ -293,10 +291,15 @@ export default function MobileIntake() {
   const hasTime = unknownTime ? hasCoarseTimeFallback(coarseTime) : exactBirthTime.trim().length > 0;
   const canContinue = hasName && hasDate && hasTime;
 
-  const hasPlace =
-    draft.country.trim().length > 0 &&
-    draft.state.trim().length > 0 &&
-    draft.city.trim().length > 0;
+  /* Detected, the country and the state are never shown, so they cannot be
+     required: a place with no administrative state would block the form with
+     no box on screen to unblock it. The coordinates are required either way
+     and are what the chart is cast from. */
+  const hasPlace = autoPlace
+    ? draft.city.trim().length > 0
+    : draft.country.trim().length > 0 &&
+      draft.state.trim().length > 0 &&
+      draft.city.trim().length > 0;
   const hasCoords = draft.latitude.trim().length > 0 && draft.longitude.trim().length > 0;
   const canSubmit = canContinue && hasPlace && hasCoords;
 
@@ -356,11 +359,13 @@ export default function MobileIntake() {
       return gaps;
     }
     const gaps: string[] = [];
-    if (!draft.country.trim()) gaps.push(t("home.formCountry"));
-    if (!draft.state.trim()) gaps.push(t("home.formState"));
-    if (!draft.city.trim()) gaps.push(t("home.formCity"));
+    /* Naming a box that is not on screen would be an instruction nobody can
+       follow, so detected mode has one gap to close, not three. */
+    if (!autoPlace && !draft.country.trim()) gaps.push(t("home.formCountry"));
+    if (!autoPlace && !draft.state.trim()) gaps.push(t("home.formState"));
+    if (!draft.city.trim()) gaps.push(t(autoPlace ? "home.formBirthplace" : "home.formCity"));
     return gaps;
-  }, [step, hasName, hasDate, hasTime, draft.country, draft.state, draft.city, t]);
+  }, [step, hasName, hasDate, hasTime, autoPlace, draft.country, draft.state, draft.city, t]);
 
   /* Step 1's fields unmount when step 2 opens, and an unmounted input never
    * fires the blur its normaliser hangs off — so the whole draft goes through
@@ -533,6 +538,35 @@ export default function MobileIntake() {
         </div>
       ) : (
         <div className={styles.fields}>
+          {/* Detected: one search answers the whole place. The country and
+              the state are still filled behind it -- the geocoder is given
+              all three -- but neither is asked for or shown, which is the
+              point of the mode. No contextCountry or contextState: those
+              scope the lookup, so carrying them over would pin the next
+              search inside the last place chosen. */}
+          {autoPlace ? (
+            <div className={styles.field}>
+              <label className={styles.label} htmlFor="m-birthplace">
+                {t("home.formBirthplace")}
+                <span className={styles.required} aria-hidden="true">*</span>
+              </label>
+              <AutocompleteInput
+                id="m-birthplace"
+                className={styles.input}
+                value={draft.city}
+                onChange={(value) => edit("city", value)}
+                onSelect={(value) => edit("city", value)}
+                onSelectSuggestion={chooseCity}
+                normalize={normalizePlaceName}
+                onNormalized={commitPlace("city")}
+                placeholder={t("home.formCityPlaceholder")}
+                suggestType="city"
+                required
+              />
+              {renderNote("city")}
+            </div>
+          ) : (
+          <>
           {/* One cascading answer, same as the desktop tree: the country
               narrows the state list, the state narrows the city list, and the
               city fixes the coordinates. Typing a place name on a phone is the
@@ -588,9 +622,8 @@ export default function MobileIntake() {
               id="m-city"
               className={styles.input}
               value={draft.city}
-              onChange={changeCity}
+              onChange={(value) => edit("city", value)}
               onSelect={(value) => edit("city", value)}
-              onSelectSuggestion={chooseCity}
               normalize={normalizePlaceName}
               onNormalized={commitPlace("city")}
               placeholder={t("home.formCityPlaceholder")}
@@ -600,6 +633,21 @@ export default function MobileIntake() {
               required
             />
             {renderNote("city")}
+          </div>
+          </>
+          )}
+
+          <div className={styles.toggleRow}>
+            <input
+              id="m-auto-place"
+              className={styles.checkbox}
+              type="checkbox"
+              checked={autoPlace}
+              onChange={(event) => changeAutoPlace(event.target.checked)}
+            />
+            <label className={styles.toggleLabel} htmlFor="m-auto-place">
+              {t("home.autoPlaceToggle")}
+            </label>
           </div>
 
           <p className={styles.status} role="status" aria-live="polite">

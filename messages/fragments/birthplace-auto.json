@@ -1,0 +1,37 @@
+{
+  "es": {
+    "home": {
+      "formBirthplace": "Lugar de nacimiento",
+      "autoPlaceToggle": "Detectar mi lugar de nacimiento automáticamente",
+      "autoPlaceHint": "Indica la ciudad y el resto del lugar se deduce solo."
+    }
+  },
+  "fr": {
+    "home": {
+      "formBirthplace": "Lieu de naissance",
+      "autoPlaceToggle": "Détecter automatiquement mon lieu de naissance",
+      "autoPlaceHint": "Donnez la ville et le reste du lieu se déduit tout seul."
+    }
+  },
+  "it": {
+    "home": {
+      "formBirthplace": "Luogo di nascita",
+      "autoPlaceToggle": "Rileva automaticamente il mio luogo di nascita",
+      "autoPlaceHint": "Indica la città e il resto del luogo viene ricavato da solo."
+    }
+  },
+  "hi": {
+    "home": {
+      "formBirthplace": "जन्म स्थान",
+      "autoPlaceToggle": "मेरा जन्म स्थान अपने आप पहचानें",
+      "autoPlaceHint": "शहर बता दीजिए, बाकी जगह अपने आप निकल आएगी।"
+    }
+  },
+  "bn": {
+    "home": {
+      "formBirthplace": "জন্মস্থান",
+      "autoPlaceToggle": "আমার জন্মস্থান নিজে থেকে খুঁজে নিন",
+      "autoPlaceHint": "শহরটা বলে দিন, বাকি জায়গা নিজে থেকেই বেরিয়ে আসবে।"
+    }
+  }
+}

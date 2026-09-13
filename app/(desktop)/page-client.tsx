@@ -64,17 +64,28 @@ const PremiumDatePicker = dynamic(loadDatePicker, {
   loading: () => <div className={styles.pickerPlaceholder} aria-hidden="true" />,
 });
 
-const requiredFields: Array<keyof ProfileQueryInput> = [
+const baseRequiredFields: Array<keyof ProfileQueryInput> = [
   "name",
   "birthDate",
   // "birthTime", // Will handle requiredness conditionally
   "timezoneOffsetMinutes",
   "latitude",
   "longitude",
-  "country",
-  "state",
   "city",
 ];
+
+/*
+ * The birthplace is asked for in one of two shapes, so what is required
+ * depends on which one is on screen.
+ *
+ * Automatically detected, the country and the state are never shown, and so
+ * they cannot be required: a place with no administrative state -- Singapore,
+ * Monaco, Vatican City -- would leave the form blocked with no box anywhere
+ * on it to unblock. The coordinates are what the chart is actually cast from
+ * and they stay required either way.
+ */
+const requiredFieldsFor = (autoPlace: boolean): Array<keyof ProfileQueryInput> =>
+  autoPlace ? baseRequiredFields : [...baseRequiredFields, "country", "state"];
 // Coarse time options for unknown birth time
 const SMART_FILL_EXAMPLES = [
   {
@@ -101,6 +112,9 @@ type StoredIntakeDraft = {
   draft: ProfileQueryInput;
   unknownTime: boolean;
   coarseTime: string;
+  /* Optional: drafts saved before the automatic birthplace existed do not
+     carry it, and those must still restore. */
+  autoPlace?: boolean;
 };
 
 type BirthDetailsHistoryEntry = StoredIntakeDraft & {
@@ -214,6 +228,11 @@ export default function Home() {
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latLonExpanded, setLatLonExpanded] = useState(false);
+  /* Whether the birthplace is being detected from one search rather than
+     answered as three separate questions. Typed entry stays the default: it
+     is the one that shows the visitor everything the chart will be cast
+     from. */
+  const [autoPlace, setAutoPlace] = useState(false);
   const [birthDetailsHistory, setBirthDetailsHistory] = useState<BirthDetailsHistoryEntry[]>([]);
   const [historyExpanded, setHistoryExpanded] = useState(false);
   const geoTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -250,6 +269,7 @@ export default function Home() {
       if (!isValid) return;
       setDraft({ ...profileInitialState, ...savedDraft } as ProfileQueryInput);
       if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
+      if (typeof parsed.autoPlace === "boolean") setAutoPlace(parsed.autoPlace);
       if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
     } catch {
       // localStorage may throw in private browsing or if data is corrupt
@@ -281,6 +301,7 @@ export default function Home() {
           draft,
           unknownTime,
           coarseTime,
+          autoPlace,
         };
         localStorage.setItem(draftKey, JSON.stringify(storedDraft));
         setDraftSaved(true);
@@ -375,12 +396,14 @@ export default function Home() {
   }, [draftBirthDate, draftCity, draftCountry, draftState, effectiveBirthTime]);
 
   const canSubmit = useMemo(() => {
-    const hasRequiredProfile = requiredFields.every((field) => draft[field].trim().length > 0);
+    const hasRequiredProfile = requiredFieldsFor(autoPlace).every(
+      (field) => draft[field].trim().length > 0,
+    );
     const hasUsableBirthTime = unknownTime
       ? hasCoarseTimeFallback(coarseTime)
       : draft.birthTime.trim().length > 0;
     return hasRequiredProfile && hasUsableBirthTime;
-  }, [coarseTime, draft, unknownTime]);
+  }, [autoPlace, coarseTime, draft, unknownTime]);
 
   const previewReadiness = useMemo(() => {
     const locationFieldsFilled = [draft.country, draft.state, draft.city].filter(
@@ -423,13 +446,16 @@ export default function Home() {
     if (!hasName) missing.push(t("home.formName"));
     if (!hasBirthDate) missing.push(t("home.formBirthDate"));
     if (!hasBirthTimeSignal) missing.push(t("home.formBirthTime"));
-    if (!hasCountry) missing.push(t("home.formCountry"));
-    if (!hasState) missing.push(t("home.formState"));
-    if (!hasCity) missing.push(t("home.formCity"));
+    /* Naming a box that is not on screen would be an instruction nobody can
+       follow, so in automatic mode the place is one thing to add, not three. */
+    if (!autoPlace && !hasCountry) missing.push(t("home.formCountry"));
+    if (!autoPlace && !hasState) missing.push(t("home.formState"));
+    if (!hasCity) missing.push(t(autoPlace ? "home.formBirthplace" : "home.formCity"));
     if (!hasLatitude) missing.push(t("home.formLatitude"));
     if (!hasLongitude) missing.push(t("home.formLongitude"));
     return missing;
   }, [
+    autoPlace,
     hasBirthDate,
     hasBirthTimeSignal,
     hasCity,
@@ -760,62 +786,47 @@ export default function Home() {
     }));
   };
 
-  /* Whether the country and state below were filled by a city choice rather
-     than answered directly. It decides what happens when the city is then
-     retyped: those two are also what narrows the city lookup, so a city that
-     filled them has narrowed the search to its own country, and the next
-     search is trapped there. Typing "Brooklyn" after choosing Pune offered
-     an apartment block in Maharashtra called Brooklyn -- not no results,
-     which would at least have looked like a problem, but a confident wrong
-     answer on the wrong continent. So a city choice owns the two boxes it
-     filled and lets go of them the moment the city is edited; a country or
-     state the visitor set themselves is theirs and is never cleared here. */
-  const placeCameFromCity = useRef(false);
-
   // Cascading handlers: changing a parent clears its children
   const handleCountryChange = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
   };
 
   const handleCountrySelect = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
   };
 
   const handleStateChange = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
     clearGeoResults();
   };
 
   const handleStateSelect = (value: string) => {
-    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
     clearGeoResults();
   };
 
-  /* The other direction of the cascade: a chosen city already knows its state
-   * and its country, so it fills them rather than leaving them to be looked up.
-   * Deliberately not routed through handleCountrySelect, which clears the state
-   * and the city — that would throw away the city just chosen. */
+  /* Automatic mode only: the chosen place carries its own state and country,
+   * so one answer fills all three. Deliberately not routed through
+   * handleCountrySelect, which clears the state and the city — that would
+   * throw away the place just chosen. */
   const handleCitySuggestion = (suggestion: PlaceSuggestion) => {
-    placeCameFromCity.current = true;
     setDraft((previous) => ({ ...previous, ...applyPlaceSuggestion(previous, suggestion) }));
     clearGeoResults();
   };
 
-  /* Retyping the city gives back the country and state it filled, so the
-     next lookup is not scoped to the place that was abandoned. */
-  const handleCityChange = (value: string) => {
-    if (!placeCameFromCity.current) {
-      setField("city")(value);
-      return;
-    }
-    placeCameFromCity.current = false;
-    setDraft((prev) => ({ ...prev, city: value, state: "", country: "" }));
+  /* Turning detection on drops whatever was typed into the two boxes it is
+   * about to hide. They are not dead weight once hidden: /api/geocode looks
+   * the place up as "city, state, country" joined, so a half-finished manual
+   * answer left behind would be searched as though it described the place
+   * about to be given -- and there would be no box on screen to correct it
+   * with. Turning detection off keeps what it found, which is the opposite
+   * case: those boxes come back, and come back already answered. */
+  const handleAutoPlaceChange = (next: boolean) => {
+    setAutoPlace(next);
+    if (!next) return;
+    setDraft((previous) => ({ ...previous, country: "", state: "" }));
     clearGeoResults();
   };
 
@@ -1198,9 +1209,54 @@ export default function Home() {
 
                   {activeQuestion.id === "place" && (
                     <>
-                      {/* One cascading answer: country narrows the state list,
-                          state narrows the city list, and the city fixes the
-                          coordinates. Side by side so the chain is visible. */}
+                      {/* Detected: one search answers the whole place. The
+                          country and the state are still filled behind this
+                          -- the geocoder is given all three -- but they are
+                          not asked for and not shown, which is the point of
+                          the mode. No contextCountry or contextState either:
+                          those scope the lookup, so carrying them over would
+                          pin the next search inside the last place chosen. */}
+                      {autoPlace ? (
+                        <div className={styles.premiumField}>
+                          <div className={styles.autocompleteWrapper}>
+                            <label id="birth-place-label" htmlFor="birth-place">
+                              {t("home.formBirthplace")}
+                            </label>
+                            <div
+                              className={`${styles.autocompleteFrame} ${hasCity ? styles.autocompleteFrameComplete : ""}`}
+                            >
+                              <span className={styles.fieldLeadingIcon} aria-hidden="true">
+                                <HiOutlineMapPin />
+                              </span>
+                              <AutocompleteInput
+                                id="birth-place"
+                                name="city"
+                                ariaLabelledBy="birth-place-label"
+                                value={draft.city}
+                                onChange={setField("city")}
+                                onSelect={setField("city")}
+                                onSelectSuggestion={handleCitySuggestion}
+                                normalize={normalizePlaceName}
+                                placeholder={t("home.formCityPlaceholder")}
+                                suggestType="city"
+                                required
+                              />
+                              {hasCity && (
+                                <span
+                                  className={styles.fieldCompleteBadge}
+                                  aria-label={t("home.fieldComplete", { field: t("home.formBirthplace") })}
+                                  role="status"
+                                >
+                                  <HiOutlineCheckCircle />
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                      /* One cascading answer: country narrows the state list,
+                         state narrows the city list, and the city fixes the
+                         coordinates. Side by side so the chain is visible. */
                       <div className={styles.placeGrid}>
                         <div className={styles.premiumField}>
                           <div className={styles.autocompleteWrapper}>
@@ -1293,9 +1349,8 @@ export default function Home() {
                                 name="city"
                                 ariaLabelledBy="birth-city-label"
                                 value={draft.city}
-                                onChange={handleCityChange}
+                                onChange={setField("city")}
                                 onSelect={setField("city")}
-                                onSelectSuggestion={handleCitySuggestion}
                                 normalize={normalizePlaceName}
                                 placeholder={t("home.formCityPlaceholder")}
                                 suggestType="city"
@@ -1315,6 +1370,16 @@ export default function Home() {
                             </div>
                           </div>
                         </div>
+                      </div>
+                      )}
+
+                      <div className={styles.autoPlaceOption}>
+                        <PremiumToggle
+                          label={t("home.autoPlaceToggle")}
+                          checked={autoPlace}
+                          onChange={handleAutoPlaceChange}
+                        />
+                        <p className={styles.autoPlaceHint}>{t("home.autoPlaceHint")}</p>
                       </div>
 
                       {/* ── Lat/Lon escape hatch, for when the geocoder misses ── */}

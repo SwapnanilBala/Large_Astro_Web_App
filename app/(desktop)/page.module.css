@@ -1322,6 +1322,31 @@
   margin-top: 0;
 }
 
+/* The birthplace mode switch. Deliberately quieter than a field and set a
+   little apart from the boxes above it: it does not answer the question, it
+   changes which boxes the question is asked with. */
+.autoPlaceOption {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+  margin-top: -0.2rem;
+  margin-bottom: clamp(1.2rem, 2vw, 1.75rem);
+}
+
+.autoPlaceOption :global(button) {
+  max-width: 100%;
+}
+
+.autoPlaceHint {
+  margin: 0;
+  padding-left: 0.15rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-tertiary);
+}
+
 .approxTimePanel {
   position: relative;
   min-height: 100%;
