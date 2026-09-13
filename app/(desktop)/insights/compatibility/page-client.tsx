@@ -7,6 +7,7 @@ import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
 import SynastryBridge from "./synastry-bridge";
+import { ResultTabs, VerdictTiles, type ResultTab } from "./compatibility-verdict";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
@@ -814,9 +815,9 @@ export default function CompatibilityPageClient({
 
         {result && (
           <>
-            <div className="compatibility-summary-grid">
-              <article className="metric-card metric-card--score-ring">
-                <h3>Compatibility score</h3>
+            <section className="verdict-band">
+              <div className="verdict-hero">
+                <h3 className="verdict-heading">Compatibility score</h3>
                 <div style={{
                   display: "flex",
                   alignItems: "center",
@@ -853,116 +854,147 @@ export default function CompatibilityPageClient({
                   </div>
                 </div>
                 <CompatibilityRing score={result.compatibility_score} />
-                <small>Composite synastry score from aspects and elemental fit.</small>
-              </article>
-            </div>
-
-            <section className="rules-panel">
-              <div className="rules-header">
-                <p className="kicker">Summary</p>
-                <h2>Relationship themes</h2>
+                <small className="verdict-caption">
+                  Composite synastry score from aspects and elemental fit.
+                </small>
               </div>
-              <p className="section-intro">{result.summary}</p>
-              <div className="rules-list">
-                {result.themes.map((theme) => {
-                  const ZODIAC_SIGNS = [
-                    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-                    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
-                  ];
-                  const signsInTitle = ZODIAC_SIGNS.filter((s) =>
-                    theme.title.includes(s)
-                  );
-                  const signsInInsight = ZODIAC_SIGNS.filter((s) =>
-                    theme.insight.includes(s)
-                  );
-                  return (
-                    <article key={theme.title} className="rule-card rule-medium">
-                      <header>
-                        <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
-                          {signsInTitle.map((s) => (
-                            <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
-                          ))}
-                          {theme.title}
-                        </h3>
-                        {/* The "86%" badge is gone. CompatibilityTheme.
-                            confidence_score is a hardcoded constant in
-                            compatibility-service.ts -- the same species of
-                            number the rule engine just stopped asserting --
-                            and rendering it as a percentage presented an
-                            authored guess as a measurement. */}
-                      </header>
-                      <p style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
-                        {signsInInsight.length > 0 && signsInInsight.map((s) => (
-                          <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
-                        ))}
-                        {theme.insight}
-                      </p>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
 
-            {/* Between the themes and the raw aspect list on purpose: it is
-                the same order of specificity, and the aspect grid below is the
-                working that this section already summarises in prose. */}
-            {result.kalatra_synastry && (
-              <section className="rules-panel">
-                <div className="rules-header">
-                  <p className="kicker">Synastry</p>
-                  <h2>Married life, across the two charts</h2>
-                </div>
-                <p className="section-intro">
-                  The married-life read on each person&rsquo;s own page can only use one chart.
-                  These are the parts that need both — including the Mangal cancellation a
-                  single chart cannot evaluate.
-                </p>
-                <div className="kalatra-syn-grid">
-                  {result.kalatra_synastry.facets.map((facet) => (
-                    <article key={facet.key} className="kalatra-syn-card">
-                      <header>
-                        <h3>{facet.label}</h3>
-                        <span className="kalatra-syn-verdict">{facet.verdict}</span>
-                      </header>
-                      {facet.findings.length > 0 && (
-                        <ul className="kalatra-syn-findings">
-                          {facet.findings.map((finding) => (
-                            <li key={finding.basis} data-polarity={finding.polarity}>
-                              <p>{finding.text}</p>
-                              <cite>{finding.basis}</cite>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      <p className="kalatra-syn-sourcing">
-                        <span>Read from</span> {facet.sourcing}
-                      </p>
-                    </article>
-                  ))}
-                </div>
-                <details className="kalatra-syn-method">
-                  <summary>How these were derived</summary>
-                  <p>{result.kalatra_synastry.method}</p>
-                </details>
-              </section>
-            )}
-
-            <section className="rules-panel">
-              <div className="rules-header">
-                <p className="kicker">Synastry</p>
-                <h2>Inter-chart aspects</h2>
-              </div>
-              <p className="section-intro">
-                Every contact between one chart and the other. The line is the aspect:
-                heavier means a tighter orb, dashed means the contact pulls rather than
-                helps.
-              </p>
-              <SynastryBridge
+              {/* What the score is made of, counted from the same arrays the
+                  tabs below render in full. */}
+              <VerdictTiles
                 aspects={result.synastry_aspects}
-                primaryName={result.primary_client.name}
-                partnerName={result.partner_client.name}
+                kalatra={result.kalatra_synastry}
               />
             </section>
+
+            {/* Themes, married life and the aspect graph are three altitudes
+                of one answer rather than a sequence, so they are alternatives
+                rather than four screens of scrolling. */}
+            <ResultTabs
+              tabs={[
+                {
+                  id: "themes",
+                  label: "Themes",
+                  panel: (
+                      <section className="rules-panel">
+                        <div className="rules-header">
+                          <p className="kicker">Summary</p>
+                          <h2>Relationship themes</h2>
+                        </div>
+                        <p className="section-intro">{result.summary}</p>
+                        <div className="rules-list">
+                          {result.themes.map((theme) => {
+                            const ZODIAC_SIGNS = [
+                              "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+                              "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+                            ];
+                            const signsInTitle = ZODIAC_SIGNS.filter((s) =>
+                              theme.title.includes(s)
+                            );
+                            const signsInInsight = ZODIAC_SIGNS.filter((s) =>
+                              theme.insight.includes(s)
+                            );
+                            return (
+                              <article key={theme.title} className="rule-card rule-medium">
+                                <header>
+                                  <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+                                    {signsInTitle.map((s) => (
+                                      <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
+                                    ))}
+                                    {theme.title}
+                                  </h3>
+                                  {/* The "86%" badge is gone. CompatibilityTheme.
+                                      confidence_score is a hardcoded constant in
+                                      compatibility-service.ts -- the same species of
+                                      number the rule engine just stopped asserting --
+                                      and rendering it as a percentage presented an
+                                      authored guess as a measurement. */}
+                                </header>
+                                <p style={{ display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                                  {signsInInsight.length > 0 && signsInInsight.map((s) => (
+                                    <ZodiacSignImage key={s} sign={s} size={24} style={{ flexShrink: 0 }} />
+                                  ))}
+                                  {theme.insight}
+                                </p>
+                              </article>
+                            );
+                          })}
+                        </div>
+                      </section>
+                  ),
+                },
+                ...(result.kalatra_synastry
+                  ? [
+                      {
+                        id: "married-life",
+                        label: "Married life",
+                        panel: (
+                      <section className="rules-panel">
+                        <div className="rules-header">
+                          <p className="kicker">Synastry</p>
+                          <h2>Married life, across the two charts</h2>
+                        </div>
+                        <p className="section-intro">
+                          The married-life read on each person&rsquo;s own page can only use one chart.
+                          These are the parts that need both — including the Mangal cancellation a
+                          single chart cannot evaluate.
+                        </p>
+                        <div className="kalatra-syn-grid">
+                          {result.kalatra_synastry.facets.map((facet) => (
+                            <article key={facet.key} className="kalatra-syn-card">
+                              <header>
+                                <h3>{facet.label}</h3>
+                                <span className="kalatra-syn-verdict">{facet.verdict}</span>
+                              </header>
+                              {facet.findings.length > 0 && (
+                                <ul className="kalatra-syn-findings">
+                                  {facet.findings.map((finding) => (
+                                    <li key={finding.basis} data-polarity={finding.polarity}>
+                                      <p>{finding.text}</p>
+                                      <cite>{finding.basis}</cite>
+                                    </li>
+                                  ))}
+                                </ul>
+                              )}
+                              <p className="kalatra-syn-sourcing">
+                                <span>Read from</span> {facet.sourcing}
+                              </p>
+                            </article>
+                          ))}
+                        </div>
+                        <details className="kalatra-syn-method">
+                          <summary>How these were derived</summary>
+                          <p>{result.kalatra_synastry.method}</p>
+                        </details>
+                      </section>
+                        ),
+                      } satisfies ResultTab,
+                    ]
+                  : []),
+                {
+                  id: "aspects",
+                  label: "Aspects",
+                  panel: (
+                      <section className="rules-panel">
+                        <div className="rules-header">
+                          <p className="kicker">Synastry</p>
+                          <h2>Inter-chart aspects</h2>
+                        </div>
+                        <p className="section-intro">
+                          Every contact between one chart and the other. The line is the aspect:
+                          heavier means a tighter orb, dashed means the contact pulls rather than
+                          helps.
+                        </p>
+                        <SynastryBridge
+                          aspects={result.synastry_aspects}
+                          primaryName={result.primary_client.name}
+                          partnerName={result.partner_client.name}
+                        />
+                      </section>
+                  ),
+                },
+              ]}
+            />
           </>
         )}
       </section>

@@ -3405,6 +3405,157 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 /* The one action that matters on this page. */
+/* ── Verdict band ──
+   The judgement, and what it is made of. See
+   app/(desktop)/insights/compatibility/compatibility-verdict.tsx. */
+
+.verdict-band {
+  display: grid;
+  grid-template-columns: minmax(200px, auto) 1fr;
+  gap: 1.6rem 2rem;
+  align-items: center;
+  margin-top: 1.25rem;
+  padding: 1.5rem;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border-soft, rgba(210, 172, 98, 0.18));
+}
+
+.verdict-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.verdict-heading {
+  margin: 0;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.28rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--accent-gold);
+}
+
+.verdict-caption {
+  max-width: 26ch;
+  text-align: center;
+  font-size: 1.16rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+}
+
+/* Tiles read as a row on a wide panel and stack under the ring on a narrow
+   one, which is also the order they should be read in. */
+.verdict-tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: 0;
+}
+
+/* flex rather than an auto-fit grid: with three tiles and room for two per
+   row, a grid leaves the last one at one column width beside a hole. Letting
+   them grow means the odd tile finishes its row. */
+.verdict-tile {
+  flex: 1 1 190px;
+}
+
+.verdict-tile {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border-soft, rgba(210, 172, 98, 0.16));
+}
+
+.verdict-tile dt {
+  margin: 0 0 0.3rem;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.verdict-tile dd {
+  margin: 0;
+  font-size: 1.26rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+.verdict-tile-strong {
+  color: var(--ink-main);
+  font-weight: 600;
+}
+
+.verdict-tile-sep {
+  padding: 0 0.4rem;
+  opacity: 0.5;
+}
+
+/* ── Evidence tabs ── */
+
+.verdict-tabs {
+  margin-top: 1.5rem;
+}
+
+.verdict-tablist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  border-bottom: 1px solid var(--border-soft, rgba(210, 172, 98, 0.16));
+  padding-bottom: 0.5rem;
+}
+
+.verdict-tab {
+  appearance: none;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-family: inherit;
+  font-size: 1.26rem;
+  letter-spacing: 0.03em;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: color 0.16s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.verdict-tab:hover {
+  color: var(--ink-main);
+  background: var(--surface);
+}
+
+.verdict-tab.is-active {
+  color: var(--accent-gold);
+  background: var(--surface);
+  border-color: rgba(210, 172, 98, 0.35);
+}
+
+/* The panel takes focus when a tab is chosen, so it needs a ring of its own --
+   and it is a scroll container's worth of content, so the ring goes on the
+   panel rather than being inherited from the button. */
+.verdict-tabpanel:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+/* The panels already carry .rules-panel, which brings its own top margin. */
+.verdict-tabpanel > .rules-panel {
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .verdict-band {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .verdict-tab { transition: none; }
+}
+
 /* ── Synastry bridge ──
    The inter-chart aspects drawn as a bipartite graph. See
    app/(desktop)/insights/compatibility/synastry-bridge.tsx for why. */
