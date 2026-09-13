@@ -240,3 +240,60 @@
   -webkit-background-clip: text;
   background-clip: text;
 }
+
+/* ─── The prose that stands in front of the advanced panels ─── */
+
+.storyOpening {
+  margin: 0 0 1.6rem;
+  max-width: 68ch;
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.22rem;
+  line-height: 1.7;
+  color: var(--ink-main);
+}
+
+.storySection {
+  display: grid;
+  gap: 0.9rem;
+  justify-items: start;
+}
+
+.storyPassage {
+  margin: 0;
+  max-width: 68ch;
+  font-size: 1.12rem;
+  line-height: 1.7;
+  color: var(--ink-soft);
+}
+
+/* The wait is real -- the whole page's prose is one model call, and it takes
+   the better part of half a minute. Say so quietly rather than shimmer. */
+.storyPending {
+  color: var(--ink-soft);
+  opacity: 0.7;
+  font-style: italic;
+}
+
+.storyToggle {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-display), sans-serif;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent-gold);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-gold) 40%, transparent);
+  padding-bottom: 1px;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.storyToggle:hover,
+.storyToggle:focus-visible {
+  color: var(--ink-main);
+  border-bottom-color: var(--ink-main);
+}
+
+.storyDetail {
+  width: 100%;
+  min-width: 0;
+}

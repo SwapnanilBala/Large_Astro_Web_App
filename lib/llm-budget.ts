@@ -75,6 +75,7 @@ import { getClientIp } from "@/lib/rate-limiter";
 export type LlmRouteKey =
   | "/api/chart/dasha-interpretation"
   | "/api/chart/domain-brief"
+  | "/api/chart/advanced-story"
   | "/api/palm-reading"
   | "/api/palm-reading/ask";
 
@@ -142,6 +143,15 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   },
   "/api/chart/domain-brief": {
     perDay: 2500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* One call writes every passage on the advanced page, and that is a
+     constraint rather than a preference: there are eight modules, so a call
+     per module would spend over half a signed-in visitor's daily allowance on
+     a single page view. */
+  "/api/chart/advanced-story": {
+    perDay: 2000,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
