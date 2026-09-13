@@ -1,646 +1,469 @@
 /* ═══════════════════════════════════════════════
    ENGINE SELECT PAGE
+
+   A list of traditions down the side, one panel describing whichever is
+   selected. The page is the surface: no 1120px card floating in the middle of
+   a 1600px window, which is what left this page 2,585px tall with the same six
+   style chips drawn six times.
+
+   Colours come from the theme tokens rather than the hex values this file used
+   to carry, so the page follows light and dark instead of only dark.
    ═══════════════════════════════════════════════ */
 
 .shell {
   min-height: var(--app-viewport-height);
   min-height: 100dvh;
+  /*
+   * A px floor on the top, not rem alone. The navbar is position:fixed at
+   * 108px and content flows under it; 5rem resolved to 80px and put the
+   * eyebrow behind it. Measured on the rendered page, not inferred.
+   */
   padding:
-    calc(4.5rem + env(safe-area-inset-top))
-    max(1rem, env(safe-area-inset-right))
-    calc(3rem + env(safe-area-inset-bottom))
-    max(1rem, env(safe-area-inset-left));
+    calc(max(8rem, 140px) + env(safe-area-inset-top))
+    max(1.25rem, env(safe-area-inset-right))
+    calc(2.5rem + env(safe-area-inset-bottom))
+    max(1.25rem, env(safe-area-inset-left));
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 .panel {
-  width: min(1120px, 100%);
-  border-radius: 20px;
-  border: 1px solid rgba(200, 155, 60, 0.10);
-  /* Translucent (not opaque #161922) so the app's globally-mounted ambient
-     GradientBlobs background shows through the glass instead of being
-     fully occluded. */
-  background:
-    linear-gradient(130deg, rgba(255, 243, 210, 0.04), rgba(255, 243, 210, 0.04)),
-    rgba(22, 25, 34, 0.78);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  padding: 2.5rem 2.5rem 2rem;
-  margin: 1.5rem auto;
+  width: 100%;
+  max-width: 96rem;
+  margin: 0 auto;
   position: relative;
-  overflow: hidden;
 }
 
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: url('/background-1280.webp') center / cover no-repeat;
-  opacity: 0.04;
-  z-index: -1;
-  border-radius: 20px;
-  pointer-events: none;
-}
+/* ── Hero ── */
 
 .hero {
   text-align: center;
-  margin-bottom: 2rem;
+  max-width: 56rem;
+  margin: 0 auto 1.75rem;
 }
 
 .kicker {
   font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.12rem;
+  font-size: 0.95rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: #C89B3C;
-  margin: 0 0 0.5rem;
+  letter-spacing: 0.16em;
+  color: var(--accent-gold);
+  margin: 0 0 0.4rem;
 }
 
 .heading {
   font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.55rem, 3vw, 2rem);
+  font-size: clamp(1.7rem, 2.6vw, 2.35rem);
   font-weight: 700;
   text-align: center;
   /* globals.css makes every h1 a flex container, which parks the text at
      flex-start and leaves text-align with nothing to act on. Center the
      anonymous flex item so the heading sits under the kicker. */
   justify-content: center;
-  color: #EAEDF3;
-  margin: 0 0 0.75rem;
-  line-height: 1.2;
-  background: linear-gradient(135deg, #EAEDF3 40%, #C89B3C);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--text-primary);
+  margin: 0 0 0.6rem;
+  line-height: 1.18;
 }
 
 .lead {
-  font-size: 1.28rem;
-  color: #9AA0B4;
-  line-height: 1.65;
-  max-width: 760px;
-  margin: 0 auto;
+  font-size: 1.1rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
 }
 
-.guidanceStrip {
+/* ── The two axes ── */
+
+.split {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-  margin-bottom: 1.35rem;
+  grid-template-columns: minmax(16rem, 22rem) minmax(0, 1fr);
+  gap: 1.35rem;
+  align-items: start;
 }
 
-.guidanceStrip span {
-  min-width: 0;
-  border: 1px solid rgba(26, 123, 110, 0.16);
-  border-radius: 12px;
-  background: rgba(26, 123, 110, 0.08);
-  color: rgba(234, 237, 243, 0.82);
-  font-size: 1.08rem;
-  font-weight: 650;
-  line-height: 1.4;
-  padding: 0.85rem 1rem;
-}
+/* ── Left rail: the tradition ── */
 
-.engineGroups {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.25rem;
-}
-
-.engineGroup {
-  position: relative;
+.rail {
   display: flex;
   flex-direction: column;
+  gap: 0.45rem;
   min-width: 0;
-  gap: 1rem;
-  padding: 1.35rem;
-  border-radius: 16px;
-  border: 1.5px solid rgba(200, 155, 60, 0.10);
-  background:
-    linear-gradient(145deg, rgba(255, 243, 210, 0.045), rgba(26, 123, 110, 0.035)),
-    rgba(255, 243, 210, 0.025);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  transition:
-    border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    background 0.3s ease,
-    transform 0.3s ease;
 }
 
-.engineGroup:hover,
-.engineGroupSelected {
-  border-color: rgba(200, 155, 60, 0.38);
-  background:
-    linear-gradient(145deg, rgba(200, 155, 60, 0.10), rgba(26, 123, 110, 0.055)),
-    rgba(255, 243, 210, 0.035);
-  box-shadow:
-    0 14px 34px rgba(0, 0, 0, 0.22),
-    0 0 24px rgba(200, 155, 60, 0.10);
-  transform: translateY(-1px);
-}
-
-.groupSelectButton {
+.railItem {
   all: unset;
   box-sizing: border-box;
   cursor: pointer;
-  display: block;
-  min-width: 0;
-  padding-right: 2.2rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 12px;
+  background: var(--surface-soft);
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
 }
 
-.groupSelectButton:focus-visible {
-  outline: 2px solid #C89B3C;
-  outline-offset: 4px;
-  border-radius: 10px;
+/*
+ * globals.css gives every <button> an engraved rim and a rotating halo through
+ * ::before/::after, and `button:hover:where(:not(:disabled))` at (0,1,1)
+ * outranks a class at (0,1,0). `all: unset` reaches neither, so both are
+ * turned off by hand here and the hover below is written fresh.
+ */
+.railItem::before,
+.railItem::after {
+  content: none;
+  display: none;
 }
 
-.groupText,
-.groupTitleRow {
-  display: flex;
-  min-width: 0;
+.railItem:hover,
+.railItem:focus-visible {
+  transform: none;
+  box-shadow: none;
+  filter: none;
 }
 
-.groupText {
-  flex-direction: column;
-  gap: 0.45rem;
+.railItem:hover {
+  background: var(--surface-strong);
+  border-color: rgba(var(--tradition-accent-rgb), 0.4);
 }
 
-.groupTitleRow {
-  align-items: flex-start;
-  gap: 0.6rem;
-  flex-wrap: wrap;
+.railItem:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
 }
 
-.groupGlyph {
-  display: inline-flex;
-  width: 14px;
-  height: 14px;
+.railItemActive {
+  background: rgba(var(--tradition-accent-rgb), 0.12);
+  border-color: rgba(var(--tradition-accent-rgb), 0.55);
+}
+
+.railGlyph {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: rgba(var(--tradition-accent-rgb), 1);
   flex-shrink: 0;
 }
 
-.groupGlyph svg {
-  width: 100%;
-  height: 100%;
-}
-
-.groupTitle {
-  color: #EAEDF3;
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.55rem;
-  font-weight: 750;
-  line-height: 1.22;
-}
-
-.groupDescription,
-.groupOrigin,
-.styleHint {
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-
-.groupDescription {
-  color: rgba(234, 237, 243, 0.82);
-  font-size: 1.16rem;
-  font-weight: 520;
-  line-height: 1.6;
-}
-
-.groupOrigin,
-.styleHint {
-  color: #9AA0B4;
-  font-size: 1.06rem;
-  line-height: 1.58;
-}
-
-.styleLabel {
-  margin-top: auto;
-  color: rgba(234, 237, 243, 0.78);
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.35;
-  text-transform: uppercase;
-}
-
-.styleSelect {
-  width: 100%;
-  min-height: 3rem;
-  border: 1.5px solid rgba(200, 155, 60, 0.18);
-  border-radius: 12px;
-  background: rgba(15, 17, 23, 0.68);
-  color: #EAEDF3;
-  font: inherit;
-  font-size: 1.16rem;
-  font-weight: 700;
-  line-height: 1.3;
-  padding: 0.65rem 0.85rem;
-  outline: none;
-}
-
-.styleSelect:focus {
-  border-color: rgba(200, 155, 60, 0.68);
-  box-shadow: 0 0 0 3px rgba(200, 155, 60, 0.14);
-}
-
-.styleSelect option {
-  background: #161922;
-  color: #EAEDF3;
-}
-
-.summarySection {
+.railText {
   display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  gap: 1.25rem;
-  margin-bottom: 2rem;
-  padding: 1.35rem;
-  border-radius: 16px;
-  background:
-    linear-gradient(135deg, rgba(200, 155, 60, 0.10), rgba(26, 123, 110, 0.08)),
-    rgba(255, 243, 210, 0.04);
-  border: 1px solid rgba(200, 155, 60, 0.16);
+  gap: 0.1rem;
+  min-width: 0;
 }
 
-.summaryKicker {
-  margin: 0 0 0.4rem;
-  color: #C89B3C;
-  font-size: 0.95rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  line-height: 1.35;
-  text-transform: uppercase;
-}
-
-.summaryTitle {
-  margin: 0;
-  color: #EAEDF3;
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.28rem, 2vw, 1.7rem);
-  line-height: 1.3;
-}
-
-.summaryList {
-  display: grid;
-  gap: 0.85rem;
-  margin: 0;
-}
-
-.summaryList div {
-  display: grid;
-  gap: 0.2rem;
-}
-
-.summaryList dt {
-  color: #C89B3C;
-  font-size: 0.9rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  line-height: 1.35;
-  text-transform: uppercase;
-}
-
-.summaryList dd {
-  margin: 0;
-  color: #9AA0B4;
-  font-size: 1.08rem;
-  line-height: 1.55;
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.card {
-  all: unset;
-  box-sizing: border-box;
-  cursor: pointer;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  padding: 1.5rem;
-  border-radius: 16px;
-  background: rgba(255, 243, 210, 0.04);
-  border: 1.5px solid rgba(200, 155, 60, 0.10);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  transition:
-    border-color 0.35s ease,
-    box-shadow 0.35s ease,
-    background 0.35s ease;
-  text-align: left;
-}
-
-.card:hover {
-  border-color: rgba(200, 155, 60, 0.40);
-  box-shadow: 0 0 20px rgba(200, 155, 60, 0.15), 0 8px 32px rgba(0, 0, 0, 0.25);
-}
-
-.card:focus-visible {
-  outline: 2px solid #C89B3C;
-  outline-offset: 3px;
-}
-
-.cardSelected {
-  border-color: rgba(200, 155, 60, 0.40);
-  background:
-    linear-gradient(135deg, rgba(200, 155, 60, 0.10), rgba(200, 155, 60, 0.05)),
-    rgba(255, 243, 210, 0.04);
-  box-shadow:
-    0 0 20px rgba(200, 155, 60, 0.15),
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    inset 0 0 30px rgba(200, 155, 60, 0.03);
-}
-
-.cardSelected:hover {
-  border-color: rgba(200, 155, 60, 0.55);
-  box-shadow:
-    0 0 28px rgba(200, 155, 60, 0.20),
-    0 8px 32px rgba(0, 0, 0, 0.25),
-    inset 0 0 30px rgba(200, 155, 60, 0.04);
-}
-
-.cardCheck {
-  position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
+.railName {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1.5px solid rgba(200, 155, 60, 0.10);
-  background: rgba(255, 243, 210, 0.04);
-  color: transparent;
-  transition-property: background, border-color, color, box-shadow, transform, opacity, filter;
-  transition-duration: 0.3s;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.cardCheckVisible {
-  border-color: #C89B3C;
-  background: linear-gradient(135deg, #C89B3C, #a07828);
-  color: #0F1117;
-  box-shadow: 0 0 12px rgba(200, 155, 60, 0.30);
-}
-
-.cardLabel {
+  gap: 0.45rem;
   font-family: var(--font-display), sans-serif;
-  font-size: 1.5rem;
+  font-size: 1.08rem;
   font-weight: 700;
-  color: #EAEDF3;
-  margin: 0;
-  padding-right: 2rem;
-  line-height: 1.3;
-  display: flex;
-  align-items: baseline;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  color: var(--text-primary);
+  line-height: 1.25;
 }
 
-.cardDefaultTag {
+.railTag {
   font-family: var(--font-body), sans-serif;
-  font-size: 1.12rem;
-  font-weight: 600;
+  font-size: 0.68rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #C89B3C;
-  background: rgba(200, 155, 60, 0.12);
-  border: 1px solid rgba(200, 155, 60, 0.20);
-  padding: 0.15rem 0.5rem;
-  border-radius: 8px;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+  padding: 0.12rem 0.42rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-medium);
+  background: var(--accent-gold-glow);
+  color: var(--accent-gold);
+}
+
+.railOrigin {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.cardBadges {
+.railCheck {
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  color: var(--bg-deep);
+  background: rgba(var(--tradition-accent-rgb), 1);
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.railItemActive .railCheck {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── Right panel: what it is, and the style ── */
+
+.detail {
+  min-width: 0;
   display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.5rem 1.6rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 18px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(var(--tradition-accent-rgb), 0.07),
+      transparent 60%
+    ),
+    var(--surface-soft);
 }
 
-.cardBadge {
-  font-size: 1.22rem;
-  font-weight: 600;
+.detailHead {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.detailGlyph {
+  width: 2.35rem;
+  height: 2.35rem;
+  color: rgba(var(--tradition-accent-rgb), 1);
+  flex-shrink: 0;
+}
+
+.detailHeadText {
+  min-width: 0;
+}
+
+.detailOrigin {
+  font-size: 0.82rem;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 0.2rem 0.6rem;
-  border-radius: 8px;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin: 0 0 0.15rem;
 }
 
-.cardBadgeAyanamsha {
-  background: rgba(200, 155, 60, 0.12);
-  color: #C89B3C;
-  border: 1px solid rgba(200, 155, 60, 0.20);
+.detailTitle {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.72rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.15;
+  margin: 0;
 }
 
-.cardBadgeHouse {
-  background: rgba(26, 123, 110, 0.10);
-  color: rgba(26, 123, 110, 1);
-  border: 1px solid rgba(26, 123, 110, 0.20);
-}
-
-.cardDesc {
-  font-size: 1.22rem;
-  color: #9AA0B4;
+.detailLead {
+  font-size: 1.18rem;
+  color: var(--text-secondary);
   line-height: 1.6;
   margin: 0;
-  font-weight: 300;
+  max-width: 44rem;
 }
 
-/* ── House System Selector ── */
+/* ── Technical detail, closed by default ── */
 
-.houseSection {
-  margin-bottom: 2rem;
-  padding: 1.5rem;
-  border-radius: 16px;
-  background: rgba(255, 243, 210, 0.04);
-  border: 1px solid rgba(200, 155, 60, 0.10);
+.tech {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 0.9rem;
 }
 
-.houseSectionTitle {
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.32rem;
+.techSummary {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  list-style: none;
+  transition: color 150ms ease;
+}
+
+.techSummary::-webkit-details-marker {
+  display: none;
+}
+
+.techSummary::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 0.34rem solid currentColor;
+  border-top: 0.26rem solid transparent;
+  border-bottom: 0.26rem solid transparent;
+  transition: transform 160ms ease;
+}
+
+.tech[open] .techSummary::before {
+  transform: rotate(90deg);
+}
+
+.techSummary:hover {
+  color: var(--accent-gold);
+}
+
+.techSummary:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.techBody {
+  font-size: 0.98rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0.6rem 0 0;
+  max-width: 48rem;
+}
+
+/* ── Chart style ── */
+
+.styleBlock {
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1rem;
+}
+
+.styleLabel {
+  display: block;
+  font-size: 0.82rem;
   font-weight: 700;
-  color: #EAEDF3;
-  margin: 0 0 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 0.6rem;
 }
 
-.houseSectionLead {
-  font-size: 1.18rem;
-  color: #9AA0B4;
-  line-height: 1.55;
-  margin: 0 0 1rem;
-}
-
-.houseGrid {
+.styleChips {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.45rem;
 }
 
 .houseChip {
   all: unset;
   box-sizing: border-box;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.9rem;
-  border-radius: 8px;
-  font-family: var(--font-body), sans-serif;
-  font-size: 1.28rem;
+  padding: 0.48rem 0.9rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-size: 1rem;
   font-weight: 600;
-  letter-spacing: 0.3px;
-  color: #9AA0B4;
-  background: rgba(255, 243, 210, 0.04);
-  border: 1.5px solid rgba(200, 155, 60, 0.10);
+  color: var(--text-secondary);
+  white-space: nowrap;
   transition:
-    border-color 0.3s ease,
-    background 0.3s ease,
-    color 0.3s ease,
-    box-shadow 0.3s ease;
+    background 150ms ease,
+    border-color 150ms ease,
+    color 150ms ease;
 }
 
-.houseChip:hover:not(:disabled) {
-  border-color: rgba(200, 155, 60, 0.30);
-  color: #EAEDF3;
+.houseChip::before,
+.houseChip::after {
+  content: none;
+  display: none;
+}
+
+.houseChip:hover,
+.houseChip:focus-visible {
+  transform: none;
+  box-shadow: none;
+  filter: none;
+}
+
+.houseChip:hover {
+  background: var(--surface-strong);
+  border-color: var(--border-medium);
+  color: var(--text-primary);
 }
 
 .houseChip:focus-visible {
-  outline: 2px solid #C89B3C;
+  outline: 2px solid var(--accent-gold);
   outline-offset: 2px;
 }
 
 .houseChipActive {
-  border-color: rgba(200, 155, 60, 0.40);
-  background: rgba(200, 155, 60, 0.10);
-  color: #C89B3C;
-  box-shadow: 0 0 12px rgba(200, 155, 60, 0.08);
+  background: var(--accent-gold-glow);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
 }
 
-.houseChipActive:hover {
-  border-color: rgba(200, 155, 60, 0.55);
-}
-
-/* .houseChip:hover:not(:disabled) (above) is *more* specific — (0,3,0) vs
-   .houseChipActive:hover's (0,2,0) — since the button carries both
-   classes. Without this compound selector its color:#EAEDF3 wins outright
-   regardless of source order, flashing the active chip's gold text white
-   on hover. This CSS was unused before .houseChip became a real
-   interactive element in this change, so the conflict was dormant. */
-.houseChip.houseChipActive:hover:not(:disabled) {
-  color: #C89B3C;
-}
-
-.houseChipDisabled {
-  opacity: 0.35;
-  cursor: not-allowed;
-}
-
-.houseChipLabel {
-  white-space: nowrap;
-}
-
-/* Denser sizing for the per-tradition chip row (six repeated instances,
-   inside a narrower card) vs. the wider standalone house-system section
-   .houseChip/.houseGrid were originally built for. */
-.compactChips {
-  gap: 0.4rem;
-}
-
-.compactChips .houseChip {
-  padding: 0.35rem 0.7rem;
-  font-size: 1.06rem;
-}
-
-.engineChoiceRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 0.65rem;
-}
-
-.cardGoButton {
-  all: unset;
-  box-sizing: border-box;
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.38rem;
-  min-height: 2.7rem;
-  padding: 0.55rem 0.78rem;
-  border: 1px solid rgba(255, 225, 148, 0.5);
-  border-radius: 10px;
-  color: #0F1117;
-  background: linear-gradient(135deg, #e1bb62, #C89B3C 55%, #a87a24);
-  box-shadow:
-    0 7px 18px rgba(0, 0, 0, 0.22),
-    0 0 18px rgba(var(--tradition-accent-rgb), 0.15),
-    inset 0 1px 0 rgba(255, 255, 255, 0.34);
-  font-family: var(--font-body), sans-serif;
+.styleHint {
   font-size: 1rem;
-  font-weight: 850;
-  letter-spacing: 0.02em;
-  line-height: 1;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0.7rem 0 0;
+  max-width: 44rem;
+}
+
+/* ── What the two choices actually do ── */
+
+/* --text-tertiary, not --text-muted: muted is for placeholders and measured
+   2.88 against this panel, under the 4.5 floor for body text at this size. */
+.impact {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  margin: 0;
+  max-width: 48rem;
+}
+
+.impactLabel {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+  margin-bottom: 0.2rem;
+}
+
+/* ── Selection and the one call to action ── */
+
+.detailFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid var(--line-soft);
+  padding-top: 1.1rem;
+  margin-top: auto;
+}
+
+.selection {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.selection span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-secondary);
+}
+
+.selection strong {
+  font-family: var(--font-display), sans-serif;
+  font-size: 1.22rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  transition:
-    transform 0.22s ease,
-    filter 0.22s ease,
-    box-shadow 0.22s ease;
-}
-
-.cardGoButton svg {
-  width: 1rem;
-  height: 1rem;
-  transition: transform 0.22s ease;
-}
-
-.cardGoButton:hover:not(:disabled) {
-  transform: translateY(-2px);
-  filter: brightness(1.08) saturate(1.05);
-  box-shadow:
-    0 11px 24px rgba(0, 0, 0, 0.26),
-    0 0 24px rgba(var(--tradition-accent-rgb), 0.24),
-    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
-}
-
-.cardGoButton:hover:not(:disabled) svg {
-  transform: translateX(2px);
-}
-
-.cardGoButton:active:not(:disabled) {
-  transform: translateY(0) scale(0.97);
-}
-
-.cardGoButton:focus-visible {
-  outline: 2px solid #f4d07b;
-  outline-offset: 3px;
-}
-
-.cardGoButton:disabled {
-  cursor: wait;
-  filter: saturate(0.6);
-  opacity: 0.64;
-}
-
-.footer {
-  text-align: center;
-}
-
-.footerContext {
-  display: none;
 }
 
 .cta {
@@ -651,311 +474,153 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  width: 100%;
-  max-width: 400px;
-  padding: 1rem 2rem;
+  padding: 0.85rem 1.8rem;
   border-radius: 12px;
+  border: 1px solid var(--accent-gold-light);
+  /*
+   * The gradient stops at --accent-gold rather than running down to
+   * --accent-gold-dim. Dark ink over that last stop measured 3.45, and a
+   * gradient is only as readable as its worst stop -- which is the end of the
+   * button the label actually sits on.
+   */
+  background: linear-gradient(135deg, var(--accent-gold-light), var(--accent-gold));
+  color: var(--bg-deep);
   font-family: var(--font-body), sans-serif;
-  font-size: 1.32rem;
-  font-weight: 700;
-  color: #0F1117;
-  background: linear-gradient(110deg, #C89B3C, #d4aa50, #C89B3C, #a07828);
-  background-size: 300% 100%;
-  animation: submitGradientShift 4s ease infinite;
-  transition:
-    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
-    box-shadow 0.3s ease,
-    filter 0.2s ease;
-  position: relative;
-  overflow: hidden;
+  font-size: 1.14rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  line-height: 1;
+  white-space: nowrap;
+  transition: transform 200ms ease, filter 200ms ease, box-shadow 200ms ease;
 }
 
-.cta:hover:not(:disabled) {
-  transform: translateY(-3px) scale(1.02);
-  /* !important: globals.css's light-theme button:hover:not(...) default
-     (a dozen chained :not() clauses) outranks this by specificity and
-     would otherwise replace this gold glow with its generic purple one. */
-  box-shadow:
-    0 28px 52px rgba(200, 155, 60, 0.28),
-    0 0 40px rgba(200, 155, 60, 0.20),
-    0 0 80px rgba(200, 155, 60, 0.10) !important;
-  filter: saturate(1.1) brightness(1.05);
-}
-
-.cta:active:not(:disabled) {
-  transform: translateY(0) scale(0.97);
-  transition: transform 80ms ease-out;
-  box-shadow:
-    0 8px 20px rgba(200, 155, 60, 0.20),
-    inset 0 2px 4px rgba(0, 0, 0, 0.15);
-}
-
-.cta:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  animation-play-state: paused;
-}
-
-.cta:focus-visible {
-  outline: 2px solid #C89B3C;
-  outline-offset: 3px;
-}
-
-/* ── Engine Select Entrance Animations ── */
-@keyframes engineHeroIn {
-  from { opacity: 0; transform: translateY(-16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes engineCardIn {
-  from { opacity: 0; transform: translateY(24px) scale(0.96); }
-  to { opacity: 1; transform: translateY(0) scale(1); }}
-
-@keyframes engineFooterIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }}
-
-.animHero {
-  animation: engineHeroIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animCard {
-  animation: engineCardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-.animFooter {
-  animation: engineFooterIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.5s both;
-}
-
-/* ── Engine Select Responsive ── */
-@media (max-width: 840px) {
-  .grid,
-  .engineGroups,
-  .guidanceStrip,
-  .summarySection {
-    grid-template-columns: 1fr;
-  }
-
-  .panel {
-    padding: 1.8rem 1.5rem 1.5rem;
-    border-radius: 16px;
-  }}
-
-@media (max-width: 480px) {
-  .panel {
-    padding: 1.5rem 1rem 1.2rem;
-  }
-
-  .card {
-    padding: 1.2rem;
-  }
-
-  .cardLabel {
-    font-size: 1.38rem;
-  }}
-
-@media (max-width: 768px) {
-  .shell {
-    justify-content: flex-start;
-    padding-bottom: calc(var(--mobile-nav-height) + 6.5rem);
-  }
-
-  .panel {
-    width: 100%;
-    margin: 0;
-    overflow: visible;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-
-  .hero {
-    margin-bottom: 1.4rem;
-  }
-
-  .guidanceStrip span {
-    padding: 0.8rem 0.9rem;
-  }
-
-  .engineGroup {
-    gap: 0.85rem;
-    padding: 1.1rem;
-  }
-
-  .groupSelectButton {
-    min-height: 2.75rem;
-  }
-
-  .houseGrid {
-    gap: 0.45rem;
-  }
-
-  .houseChip,
-  .compactChips .houseChip {
-    min-height: 2.75rem;
-    padding: 0.45rem 0.7rem;
-  }
-
-  .summarySection {
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-    padding: 1.1rem;
-  }
-
-  .footer {
-    position: fixed;
-    right: max(0.75rem, env(safe-area-inset-right));
-    bottom: calc(var(--mobile-nav-height) + 0.5rem);
-    left: max(0.75rem, env(safe-area-inset-left));
-    z-index: 95;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 0.75rem;
-    max-width: 1080px;
-    margin-inline: auto;
-    padding: 0.65rem;
-    border: 1px solid rgba(200, 155, 60, 0.22);
-    border-radius: 14px;
-    background: rgba(15, 17, 23, 0.97);
-    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.3);
-    text-align: left;
-  }
-
-  .footerContext {
-    display: grid;
-    min-width: 0;
-    gap: 0.12rem;
-    margin: 0;
-  }
-
-  .footerContext span {
-    color: #C89B3C;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    line-height: 1.2;
-    text-transform: uppercase;
-  }
-
-  .footerContext strong {
-    overflow: hidden;
-    color: #EAEDF3;
-    font-size: 0.92rem;
-    line-height: 1.3;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .cta {
-    min-height: 3rem;
-    width: auto;
-    max-width: none;
-    padding: 0.78rem 1.1rem;
-    font-size: 1.02rem;
-    white-space: nowrap;
-  }}
-
-@media (max-width: 480px) {
-  .shell {
-    padding-bottom: calc(var(--mobile-nav-height) + 8rem);
-  }
-
-  .footer {
-    grid-template-columns: 1fr;
-    gap: 0.45rem;
-    padding: 0.55rem 0.65rem;
-  }
-
-  .footerContext {
-    grid-template-columns: auto minmax(0, 1fr);
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  .footerContext strong {
-    font-size: 0.86rem;
-  }
-
-  .cta {
-    min-height: 2.75rem;
-    width: 100%;
-    padding-block: 0.62rem;
-  }}
-
-/* ── Ethereal Dawn ──
- *
- * the method chooser was built for the dark tree: ink washes for surfaces, and
- * pale or bright-accent ink on top of them. Under Ethereal Dawn those
- * washes composite to mid greys, and the ink either matches them or goes
- * dark against them -- the copy measured between 1.0 and 2.5:1.
- *
- * Generated from this file's own declarations: every rule whose base
- * background layer is dark, and every colour too pale to survive a light
- * surface, mapped onto the themed tiers by the alpha each was reaching
- * for. Decorative layers are excluded. */
-:global(html[data-theme="light"]) .footer,
-:global(html[data-theme="light"]) .panel,
-:global(html[data-theme="light"]) .styleSelect,
-:global(html[data-theme="light"]) .styleSelect option {
-  background: var(--surface-frosted);
-}
-
-:global(html[data-theme="light"]) .cardDesc,
-:global(html[data-theme="light"]) .cardLabel,
-:global(html[data-theme="light"]) .footerContext strong,
-:global(html[data-theme="light"]) .groupDescription,
-:global(html[data-theme="light"]) .groupOrigin,
-:global(html[data-theme="light"]) .groupTitle,
-:global(html[data-theme="light"]) .guidanceStrip span,
-:global(html[data-theme="light"]) .heading,
-:global(html[data-theme="light"]) .houseChip,
-:global(html[data-theme="light"]) .houseChip:hover:not(:disabled),
-:global(html[data-theme="light"]) .houseSectionLead,
-:global(html[data-theme="light"]) .houseSectionTitle,
-:global(html[data-theme="light"]) .lead,
-:global(html[data-theme="light"]) .styleHint,
-:global(html[data-theme="light"]) .styleSelect,
-:global(html[data-theme="light"]) .styleSelect option,
-:global(html[data-theme="light"]) .summaryList dd,
-:global(html[data-theme="light"]) .summaryTitle {
-  color: var(--text-primary);
-}
-
-:global(html[data-theme="light"]) .cardBadgeAyanamsha,
-:global(html[data-theme="light"]) .cardDefaultTag,
-:global(html[data-theme="light"]) .footerContext span,
-:global(html[data-theme="light"]) .houseChip.houseChipActive:hover:not(:disabled),
-:global(html[data-theme="light"]) .houseChipActive,
-:global(html[data-theme="light"]) .kicker,
-:global(html[data-theme="light"]) .summaryKicker,
-:global(html[data-theme="light"]) .summaryList dt {
-  color: var(--accent-gold);
-}
-
-:global(html[data-theme="light"]) .styleLabel {
-  color: var(--text-secondary);
-}
-
-/*
- * These five are <button>s that take `all: unset` and then draw themselves, so
- * globals.css's ripple (::before) and rotating halo (::after) are left over
- * from a treatment they opted out of -- and `all: unset` cannot reach a
- * pseudo-element. Measured on hover: opacity 1, blur(8px), a conic gradient
- * and btn-halo-spin running forever, 2px outside each edge. Clipped on .cta,
- * which has overflow: hidden, and visible as a hue-rotating glow on the rest.
- *
- * Same idiom as .importantCardSelect / .chartTab in the varga atlas.
- */
-.card::before,
-.card::after,
-.groupSelectButton::before,
-.groupSelectButton::after,
-.houseChip::before,
-.houseChip::after,
-.cardGoButton::before,
-.cardGoButton::after,
 .cta::before,
 .cta::after {
   content: none;
   display: none;
+}
+
+.cta svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  transition: transform 200ms ease;
+}
+
+.cta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.07) saturate(1.04);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+}
+
+.cta:hover:not(:disabled) svg {
+  transform: translateX(2px);
+}
+
+.cta:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--accent-gold-light);
+  outline-offset: 3px;
+}
+
+.cta:disabled {
+  cursor: wait;
+  filter: saturate(0.6);
+  opacity: 0.64;
+}
+
+/*
+ * The gold ramp flips lightness between the themes -- pale gold on dark, a
+ * mid-to-dark brown on light -- so the ink cannot be the same on both.
+ * --bg-deep resolves light under this theme and measured 2.69 against the
+ * gradient's pale end, so here the button takes the darker end of the ramp
+ * and a light ink to sit on it.
+ */
+:global(html[data-theme="light"]) .cta {
+  border-color: var(--accent-gold);
+  background: linear-gradient(135deg, var(--accent-gold), var(--accent-gold-dim));
+  color: #FFF6E8;
+}
+
+/* ── Entrance ── */
+
+.animHero,
+.animRail,
+.animDetail {
+  animation: engineFadeUp 0.5s ease both;
+}
+
+.animRail {
+  animation-delay: 0.1s;
+}
+
+.animDetail {
+  animation-delay: 0.18s;
+}
+
+@keyframes engineFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animHero,
+  .animRail,
+  .animDetail {
+    animation: none;
+  }
+}
+
+/* ── Narrow ── */
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /*
+   * The rail becomes a horizontal strip of the same rows. Six full-width
+   * stacked rows would push the panel that describes them off the screen,
+   * which is the failure this layout exists to avoid.
+   */
+  .rail {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .railItem {
+    width: auto;
+    flex: 1 1 13rem;
+  }
+
+  .railOrigin {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .shell {
+    padding-top: calc(4.5rem + env(safe-area-inset-top));
+  }
+
+  .detail {
+    padding: 1.15rem 1.1rem;
+  }
+
+  .detailFoot {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cta {
+    justify-content: center;
+  }
 }

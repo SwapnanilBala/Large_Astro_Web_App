@@ -20,6 +20,17 @@ import { useTranslation } from "@/lib/i18n-context";
 import TraditionGlyph from "@/app/components/TraditionGlyph";
 import styles from "./engine-select.module.css";
 
+/*
+ * Two axes, not twelve cards.
+ *
+ * Every tradition offers the same six house systems, so the old layout drew
+ * the same six chips and the same style sentence inside each of six cards --
+ * and a Go button in each, plus one more at the foot of the page. What the
+ * visitor is actually doing is picking a point on a 6x6 grid, so the tradition
+ * is a list down the side and the style is chosen once, in the panel that
+ * describes whichever tradition is selected.
+ */
+
 type EngineSelectClientProps = {
   profileParams: Record<string, string>;
   defaultEngineId: string;
@@ -51,6 +62,17 @@ function ayanamshaKeyFor(engine: EnginePreset | undefined): AyanamshaKey {
   return "lahiri";
 }
 
+/* Which index the arrow keys should land on, or null for a key we do not
+   handle. Shared by both radiogroups, which have the same behaviour and no
+   reason to hold two copies of it. */
+function nextRovingIndex(key: string, current: number, length: number): number | null {
+  if (key === "ArrowRight" || key === "ArrowDown") return (current + 1) % length;
+  if (key === "ArrowLeft" || key === "ArrowUp") return (current - 1 + length) % length;
+  if (key === "Home") return 0;
+  if (key === "End") return length - 1;
+  return null;
+}
+
 export default function EngineSelectClient({
   profileParams,
   defaultEngineId,
@@ -75,44 +97,58 @@ export default function EngineSelectClient({
           groupEngines.find((engine) => engine.house_system_code === "whole_sign") ??
           groupEngines[0];
 
-        return {
-          key,
-          engines: groupEngines,
-          defaultEngine,
-        };
+        return { key, engines: groupEngines, defaultEngine };
       }),
     []
   );
 
-  const handleSelectEngine = (engineId: string) => {
-    setSelectedId(engineId);
+  const selectedGroup =
+    engineGroups.find((group) => group.key === selectedAyanamshaKey) ?? engineGroups[0];
+
+  /*
+   * Switching tradition keeps the house system you were already on.
+   *
+   * The two choices are independent -- someone who has deliberately picked
+   * Placidus has not changed their mind about it by looking at what Raman
+   * says -- so resetting to the group default would quietly undo a decision
+   * every time they compared. Only when a group lacks that system at all does
+   * it fall back.
+   */
+  const handleSelectTradition = (groupKey: AyanamshaKey) => {
+    const group = engineGroups.find((entry) => entry.key === groupKey);
+    if (!group) return;
+    const keepStyle = group.engines.find(
+      (engine) => engine.house_system_code === selectedEngine?.house_system_code
+    );
+    const next = keepStyle ?? group.defaultEngine;
+    if (next) setSelectedId(next.engine_id);
   };
 
-  /* Roving-tabindex arrow-key navigation for the house-style radiogroup,
-     matching what a native <select> gives keyboard users for free. */
-  const handleChipKeyDown = (
+  /* Roving-tabindex arrow-key navigation, matching what a native <select>
+     gives keyboard users for free. */
+  const handleRailKeyDown = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number
+  ) => {
+    const nextIndex = nextRovingIndex(event.key, currentIndex, engineGroups.length);
+    if (nextIndex === null) return;
+    event.preventDefault();
+    handleSelectTradition(engineGroups[nextIndex].key);
+    const rail = event.currentTarget.closest<HTMLElement>('[role="radiogroup"]');
+    rail?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex]?.focus();
+  };
+
+  const handleStyleKeyDown = (
     event: KeyboardEvent<HTMLButtonElement>,
     groupEngines: EnginePreset[],
     currentIndex: number
   ) => {
-    let nextIndex: number;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") {
-      nextIndex = (currentIndex + 1) % groupEngines.length;
-    } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
-      nextIndex = (currentIndex - 1 + groupEngines.length) % groupEngines.length;
-    } else if (event.key === "Home") {
-      nextIndex = 0;
-    } else if (event.key === "End") {
-      nextIndex = groupEngines.length - 1;
-    } else {
-      return;
-    }
-
+    const nextIndex = nextRovingIndex(event.key, currentIndex, groupEngines.length);
+    if (nextIndex === null) return;
     event.preventDefault();
-    handleSelectEngine(groupEngines[nextIndex].engine_id);
+    setSelectedId(groupEngines[nextIndex].engine_id);
     const radiogroup = event.currentTarget.closest<HTMLElement>('[role="radiogroup"]');
-    const radios = radiogroup?.querySelectorAll<HTMLButtonElement>('[role="radio"]');
-    radios?.[nextIndex]?.focus();
+    radiogroup?.querySelectorAll<HTMLButtonElement>('[role="radio"]')[nextIndex]?.focus();
   };
 
   const handleGenerate = (engineId: string) => {
@@ -128,182 +164,156 @@ export default function EngineSelectClient({
     : "";
   const selectedGroupLabel = t(`engineSelect.groups.${selectedAyanamshaKey}.label`);
 
+  const detailAccent = {
+    "--tradition-accent-rgb": TRADITION_ACCENT_RGB[selectedAyanamshaKey],
+  } as CSSProperties;
+
   return (
     <section className={styles.panel}>
-      {/* --- Hero --- */}
-      <div className={`${styles.hero} ${styles.animHero}`}>
+      <header className={`${styles.hero} ${styles.animHero}`}>
         <p className={styles.kicker}>{t("engineSelect.kicker")}</p>
         <h1 className={styles.heading}>{t("engineSelect.heading")}</h1>
-        <p className={styles.lead}>
-          {t("engineSelect.lead")}
-        </p>
-      </div>
+        <p className={styles.lead}>{t("engineSelect.lead")}</p>
+      </header>
 
-      <div className={styles.guidanceStrip}>
-        <span>{t("engineSelect.guidanceStep1")}</span>
-        <span>{t("engineSelect.guidanceStep2")}</span>
-        <span>{t("engineSelect.guidanceStep3")}</span>
-      </div>
+      <div className={styles.split}>
+        {/* --- Left rail: the tradition --- */}
+        <div
+          className={`${styles.rail} ${styles.animRail}`}
+          role="radiogroup"
+          aria-label={t("engineSelect.heading")}
+        >
+          {engineGroups.map((group, index) => {
+            const isSelected = group.key === selectedAyanamshaKey;
+            const isRecommended = group.defaultEngine?.engine_id === DEFAULT_ENGINE_ID;
+            const accent = {
+              "--tradition-accent-rgb": TRADITION_ACCENT_RGB[group.key],
+            } as CSSProperties;
 
-      {/* --- Tradition Groups --- */}
-      <div className={styles.engineGroups}>
-        {engineGroups.map((group, index) => {
-          const activeEngine =
-            group.engines.find((engine) => engine.engine_id === selectedId) ??
-            group.defaultEngine;
-          const isGroupSelected = group.key === selectedAyanamshaKey;
-          const isRecommended = group.defaultEngine?.engine_id === DEFAULT_ENGINE_ID;
-
-          const styleGroupLabelId = `engine-style-label-${group.key}`;
-          const accentStyle = {
-            animationDelay: `${0.15 + index * 0.1}s`,
-            "--tradition-accent-rgb": TRADITION_ACCENT_RGB[group.key],
-          } as CSSProperties;
-
-          return (
-            <article
-              key={group.key}
-              className={`${styles.engineGroup} ${styles.animCard}${isGroupSelected ? ` ${styles.engineGroupSelected}` : ""}`}
-              style={accentStyle}
-            >
+            return (
               <button
+                key={group.key}
                 type="button"
-                className={styles.groupSelectButton}
-                onClick={() => activeEngine && handleSelectEngine(activeEngine.engine_id)}
-                aria-pressed={isGroupSelected}
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                style={accent}
+                className={`${styles.railItem}${isSelected ? ` ${styles.railItemActive}` : ""}`}
+                onClick={() => handleSelectTradition(group.key)}
+                onKeyDown={(event) => handleRailKeyDown(event, index)}
               >
-                <span
-                  className={`${styles.cardCheck}${isGroupSelected ? ` ${styles.cardCheckVisible}` : ""}`}
-                  aria-hidden="true"
-                >
-                  <FiCheck size={16} strokeWidth={3} />
-                </span>
-
-                <span className={styles.groupText}>
-                  <span className={`${styles.cardBadge} ${styles.groupOriginBadge}`}>
-                    <TraditionGlyph tradition={group.key} className={styles.groupGlyph} />
-                    {t(`engineSelect.groups.${group.key}.origin`)}
-                  </span>
-                  <span className={styles.groupTitleRow}>
-                    <span className={styles.groupTitle}>
-                      {t(`engineSelect.groups.${group.key}.label`)}
-                    </span>
+                <TraditionGlyph tradition={group.key} className={styles.railGlyph} />
+                <span className={styles.railText}>
+                  <span className={styles.railName}>
+                    {t(`engineSelect.groups.${group.key}.label`)}
                     {isRecommended && (
-                      <span className={styles.cardDefaultTag}>
-                        {t("engineSelect.recommended")}
-                      </span>
+                      <span className={styles.railTag}>{t("engineSelect.recommended")}</span>
                     )}
                   </span>
+                  <span className={styles.railOrigin}>
+                    {t(`engineSelect.groups.${group.key}.origin`)}
+                  </span>
+                </span>
+                <span className={styles.railCheck} aria-hidden="true">
+                  <FiCheck size={15} strokeWidth={3} />
                 </span>
               </button>
-
-              <p className={styles.groupDescription}>
-                {t(`engineSelect.groups.${group.key}.description`)}
-              </p>
-              <p className={styles.groupOrigin}>
-                {t(`engineSelect.groups.${group.key}.method`)}
-              </p>
-
-              <span className={styles.styleLabel} id={styleGroupLabelId}>
-                {t("engineSelect.styleLabel")}
-              </span>
-              <div className={styles.engineChoiceRow}>
-                <div
-                  className={`${styles.houseGrid} ${styles.compactChips}`}
-                  role="radiogroup"
-                  aria-labelledby={styleGroupLabelId}
-                >
-                  {group.engines.map((engine, engineIndex) => {
-                    const isChipActive = engine.engine_id === activeEngine?.engine_id;
-                    return (
-                      <button
-                        key={engine.engine_id}
-                        type="button"
-                        role="radio"
-                        className={`${styles.houseChip}${isChipActive ? ` ${styles.houseChipActive}` : ""}`}
-                        aria-checked={isChipActive}
-                        tabIndex={isChipActive ? 0 : -1}
-                        onClick={() => handleSelectEngine(engine.engine_id)}
-                        onKeyDown={(event) => handleChipKeyDown(event, group.engines, engineIndex)}
-                      >
-                        <span className={styles.houseChipLabel}>
-                          {t(`engineSelect.styles.${engine.house_system_code}.label`)}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.cardGoButton}
-                  onClick={() => activeEngine && handleGenerate(activeEngine.engine_id)}
-                  disabled={!activeEngine || isPending}
-                  aria-label={`${t("engineSelect.goWith")} ${t(`engineSelect.groups.${group.key}.label`)} - ${activeEngine ? t(`engineSelect.styles.${activeEngine.house_system_code}.label`) : ""}`}
-                >
-                  <span>{t("engineSelect.go")}</span>
-                  <FiArrowRight aria-hidden="true" />
-                </button>
-              </div>
-
-              <p className={styles.styleHint}>
-                {activeEngine
-                  ? t(`engineSelect.styles.${activeEngine.house_system_code}.description`)
-                  : ""}
-              </p>
-            </article>
-          );
-        })}
-      </div>
-
-      {/* --- Selected Method Summary --- */}
-      <div className={`${styles.summarySection} ${styles.animCard}`} style={{ animationDelay: "0.45s" }}>
-        <div>
-          <p className={styles.summaryKicker}>{t("engineSelect.selectedKicker")}</p>
-          <h3 className={styles.summaryTitle}>
-            {selectedGroupLabel} - {selectedHouseLabel}
-          </h3>
+            );
+          })}
         </div>
-        <dl className={styles.summaryList}>
-          <div>
-            <dt>{t("engineSelect.summaryAyanamsha")}</dt>
-            <dd>{t(`engineSelect.groups.${selectedAyanamshaKey}.summary`)}</dd>
+
+        {/* --- Right panel: what it is, and the style --- */}
+        <div className={`${styles.detail} ${styles.animDetail}`} style={detailAccent}>
+          <div className={styles.detailHead}>
+            <TraditionGlyph
+              tradition={selectedAyanamshaKey}
+              className={styles.detailGlyph}
+            />
+            <div className={styles.detailHeadText}>
+              <p className={styles.detailOrigin}>
+                {t(`engineSelect.groups.${selectedAyanamshaKey}.origin`)}
+              </p>
+              <h2 className={styles.detailTitle}>{selectedGroupLabel}</h2>
+            </div>
           </div>
-          <div>
-            <dt>{t("engineSelect.summaryStyle")}</dt>
-            <dd>
+
+          <p className={styles.detailLead}>
+            {t(`engineSelect.groups.${selectedAyanamshaKey}.description`)}
+          </p>
+
+          {/* The reference values and ephemeris constants. Kept, because a
+              practitioner checking which ayanamsha this is needs them, and
+              closed, because nobody else does. */}
+          <details className={styles.tech} key={selectedAyanamshaKey}>
+            <summary className={styles.techSummary}>
+              {t("engineSelect.technicalDetail")}
+            </summary>
+            <p className={styles.techBody}>
+              {t(`engineSelect.groups.${selectedAyanamshaKey}.method`)}
+            </p>
+          </details>
+
+          <div className={styles.styleBlock}>
+            <span className={styles.styleLabel} id="engine-style-label">
+              {t("engineSelect.styleLabel")}
+            </span>
+            <div
+              className={styles.styleChips}
+              role="radiogroup"
+              aria-labelledby="engine-style-label"
+            >
+              {selectedGroup?.engines.map((engine, engineIndex) => {
+                const isActive = engine.engine_id === selectedId;
+                return (
+                  <button
+                    key={engine.engine_id}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    tabIndex={isActive ? 0 : -1}
+                    className={`${styles.houseChip}${isActive ? ` ${styles.houseChipActive}` : ""}`}
+                    onClick={() => setSelectedId(engine.engine_id)}
+                    onKeyDown={(event) =>
+                      handleStyleKeyDown(event, selectedGroup.engines, engineIndex)
+                    }
+                  >
+                    {t(`engineSelect.styles.${engine.house_system_code}.label`)}
+                  </button>
+                );
+              })}
+            </div>
+            <p className={styles.styleHint}>
               {selectedEngine
                 ? t(`engineSelect.styles.${selectedEngine.house_system_code}.description`)
                 : ""}
-            </dd>
+            </p>
           </div>
-          <div>
-            <dt>{t("engineSelect.summaryImpact")}</dt>
-            <dd>{t("engineSelect.summaryImpactText")}</dd>
-          </div>
-        </dl>
-      </div>
 
-      {/* --- CTA Button --- */}
-      <div className={`${styles.footer} ${styles.animFooter}`}>
-        <p className={styles.footerContext} aria-live="polite">
-          <span>{t("engineSelect.selectedKicker")}</span>
-          <strong title={`${selectedGroupLabel} - ${selectedHouseLabel}`}>
-            {selectedGroupLabel} - {selectedHouseLabel}
-          </strong>
-        </p>
-        <button
-          type="button"
-          className={styles.cta}
-          onClick={() => handleGenerate(selectedId)}
-          disabled={isPending}
-        >
-          {isPending ? (
-            <>{t("engineSelect.computing")}</>
-          ) : (
-            <>{t("engineSelect.generate")}</>
-          )}
-        </button>
+          <p className={styles.impact}>
+            <span className={styles.impactLabel}>{t("engineSelect.summaryImpact")}</span>
+            {t("engineSelect.summaryImpactText")}
+          </p>
+
+          <div className={styles.detailFoot}>
+            <p className={styles.selection} aria-live="polite">
+              <span>{t("engineSelect.selectedKicker")}</span>
+              <strong title={`${selectedGroupLabel} - ${selectedHouseLabel}`}>
+                {selectedGroupLabel} &middot; {selectedHouseLabel}
+              </strong>
+            </p>
+            <button
+              type="button"
+              className={styles.cta}
+              onClick={() => handleGenerate(selectedId)}
+              disabled={isPending}
+            >
+              <span>
+                {isPending ? t("engineSelect.computing") : t("engineSelect.generate")}
+              </span>
+              {!isPending && <FiArrowRight aria-hidden="true" />}
+            </button>
+          </div>
+        </div>
       </div>
     </section>
   );
