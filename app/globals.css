@@ -7419,20 +7419,6 @@ html[data-theme="light"] .navbar-profile-link strong {
   color: var(--accent-gold);
 }
 
-html[data-theme="light"] .bottomNav {
-  background: rgba(255, 250, 248, 0.94);
-  border-top-color: rgba(173, 113, 56, 0.16);
-  box-shadow: 0 -4px 24px rgba(91, 55, 71, 0.1);
-}
-
-html[data-theme="light"] .navItem {
-  color: #876f7d;
-}
-
-html[data-theme="light"] .navItem.active {
-  color: var(--accent-gold);
-}
-
 @media (max-width: 768px) {
   html[data-theme="light"] {
     --surface: rgba(255, 253, 251, 0.82);

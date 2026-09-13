@@ -89,8 +89,14 @@
   transition: opacity 0.2s ease;
 }
 
+/* This dimmed the inactive label to 0.7 and cost it the contrast it needed in
+   both themes: 3.51:1 on the ink panel, 3.15:1 on the cream one, against a
+   floor of 4.5 at 11px/500. The same conclusion FreeUsagePrompt.module.css
+   reached about its own .note -- de-emphasise by colour and weight, not by
+   opacity. Nothing is lost: the active tab is a different colour, 700 rather
+   than 500, underlined, and its icon carries a glow. */
 .navItem:not(.active) .label {
-  opacity: 0.7;
+  opacity: 1;
 }
 
 /* Only show on mobile */
@@ -106,3 +112,43 @@
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
   }}
+
+/* ── Ethereal Dawn ─────────────────────────────
+
+   This lived in app/globals.css as `html[data-theme="light"] .bottomNav`,
+   which never matched anything: this file is a CSS module, so the class in
+   the markup is BottomNav-module__<hash>__bottomNav and a bare .bottomNav
+   selector cannot reach it. The light theme therefore left the panel at
+   rgba(13, 12, 20, 0.94) while the page behind it turned cream, and the
+   labels -- which are #8B8FA3 dimmed to 0.7 -- measured 3.31:1 on it.
+
+   Restated here with :global(), the way every other module in this tree
+   reaches the theme. The colours are not the ones the dead rule carried:
+   its #876f7d measures 4.36:1 on this panel, still short of the 4.5 an 11px
+   label needs, so it would not have passed had it ever applied.
+   --text-secondary is the token that does.
+   ────────────────────────────────────────────── */
+:global(html[data-theme="light"]) .bottomNav {
+  background: rgba(255, 250, 248, 0.94);
+  border-top-color: rgba(173, 113, 56, 0.16);
+  box-shadow: 0 -4px 24px rgba(91, 55, 71, 0.1);
+}
+
+:global(html[data-theme="light"]) .navItem {
+  color: var(--text-secondary);
+}
+
+:global(html[data-theme="light"]) .navItem.active {
+  color: var(--accent-gold);
+}
+
+/* The indicator and the icon glow are lit for ink -- #C89B3C over cream is
+   2.3:1, under the 3:1 that non-text UI needs to read as a boundary. */
+:global(html[data-theme="light"]) .navItem.active::after {
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
+  box-shadow: 0 0 8px rgba(131, 83, 42, 0.3);
+}
+
+:global(html[data-theme="light"]) .active .icon {
+  filter: drop-shadow(0 0 10px rgba(131, 83, 42, 0.28));
+}
