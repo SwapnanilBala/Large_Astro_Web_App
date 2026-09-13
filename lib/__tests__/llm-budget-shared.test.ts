@@ -87,9 +87,17 @@ vi.mock("@/lib/identity/session", () => ({
       : null,
 }));
 
-/* Two free, then ten once registered. */
-const PER_ACCOUNT = 10;
-const PER_ADDRESS = 2;
+/* Five free, then fifteen once registered. */
+const PER_ACCOUNT = 15;
+const PER_ADDRESS = 5;
+
+/* Palm reading's whole-deployment ceiling for one day. */
+const PALM_ROUTE_TOTAL = 200;
+
+/* Calls each instance puts in flight in the race below: enough that the two
+   together exceed the per-account ceiling, while each instance's own memory
+   still sees itself comfortably under it. */
+const RACE_PER_INSTANCE = Math.ceil((PER_ACCOUNT + 1) / 2);
 
 /* Same clock as llm-budget.test.ts: midday, so nothing straddles midnight by
    accident and the day key is unambiguously 2026-09-12. */
@@ -161,15 +169,20 @@ afterEach(() => {
 describe("one ceiling across instances", () => {
   it("refuses a fresh instance once another has spent the route total", async () => {
     const first = await newInstance();
-    /* 20 accounts at 10 each is palm reading's whole day, with nobody tripping
-       their own limit — the distributed case, now spent on one instance. */
-    for (let n = 0; n < 20; n += 1) {
+    /* Enough accounts to spend palm reading's whole day with nobody tripping
+       their own limit — the distributed case, now spent on one instance.
+       Derived from PER_ACCOUNT: the old "20 accounts at 10 each" only held
+       while the per-account number divided 200. */
+    let spent = 0;
+    for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
       const caller = signedInAs(`user-${n}`);
-      for (let i = 0; i < PER_ACCOUNT; i += 1) {
+      const take = Math.min(PER_ACCOUNT, PALM_ROUTE_TOTAL - spent);
+      for (let i = 0; i < take; i += 1) {
         expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+        spent += 1;
       }
     }
-    expect(rows.get(rowKey(TODAY, "/api/palm-reading", ROUTE_TOTAL_CALLER))).toBe(200);
+    expect(rows.get(rowKey(TODAY, "/api/palm-reading", ROUTE_TOTAL_CALLER))).toBe(PALM_ROUTE_TOTAL);
 
     /* The instance that has counted nothing. Under the old per-instance
        ceiling this was another 200 calls; the table is what stops it. */
@@ -233,8 +246,8 @@ describe("concurrent increments", () => {
     const second = await newInstance();
     const caller = signedInAs("user-a");
 
-    /* Six in flight on each: under the per-account limit of 10 as far as either
-       instance's own memory can tell, and twelve between them. */
+    /* RACE_PER_INSTANCE in flight on each: under the per-account limit as far
+       as either instance's own memory can tell, and over it between them. */
     gate = (() => {
       let open!: () => void;
       const promise = new Promise<void>((resolve) => {
@@ -244,25 +257,26 @@ describe("concurrent increments", () => {
     })();
 
     const inFlight = [
-      ...Array.from({ length: 6 }, () =>
+      ...Array.from({ length: RACE_PER_INSTANCE }, () =>
         first.consumeLlmBudget("/api/palm-reading", caller, NOON),
       ),
-      ...Array.from({ length: 6 }, () =>
+      ...Array.from({ length: RACE_PER_INSTANCE }, () =>
         second.consumeLlmBudget("/api/palm-reading", caller, NOON),
       ),
     ];
 
-    /* All twelve got past their in-memory check before any counter moved. That
-       is the race; if this is not 12 the test below proves nothing. */
+    /* All of them got past their in-memory check before any counter moved.
+       That is the race; if this is not the full in-flight count the test
+       below proves nothing. */
     await flush();
-    expect(bumpCalls).toHaveLength(12);
+    expect(bumpCalls).toHaveLength(RACE_PER_INSTANCE * 2);
 
     openGate();
     const results = await Promise.all(inFlight);
 
     expect(results.filter((result) => result.allowed)).toHaveLength(PER_ACCOUNT);
     const refused = results.filter((result) => !result.allowed);
-    expect(refused).toHaveLength(2);
+    expect(refused).toHaveLength(RACE_PER_INSTANCE * 2 - PER_ACCOUNT);
     for (const result of refused) {
       if (result.allowed) throw new Error("unreachable");
       expect(result.scope).toBe("caller");

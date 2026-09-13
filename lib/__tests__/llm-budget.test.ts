@@ -50,9 +50,12 @@ const {
 const NOON = Date.UTC(2026, 8, 12, 12, 0, 0);
 const NEXT_DAY = NOON + 86_400_000;
 
-/* Two free, then ten once registered, the same on all three routes. */
-const PER_ACCOUNT = 10;
-const PER_ADDRESS = 2;
+/* Five free, then fifteen once registered, the same on all four routes. */
+const PER_ACCOUNT = 15;
+const PER_ADDRESS = 5;
+
+/* Palm reading's whole-deployment ceiling for one day. */
+const PALM_ROUTE_TOTAL = 200;
 
 function requestFrom(ip: string, path = "/api/chart/domain-brief") {
   return new Request(`https://example.test${path}`, {
@@ -190,14 +193,21 @@ describe("the signed-out tier", () => {
 
 describe("route ceiling", () => {
   it("refuses a caller who has never called once the route total is spent", async () => {
-    /* Palm reading is 200 a day globally at 10 per account, so 20 distinct
-       accounts spend the whole route budget without any one of them tripping
-       its per-caller limit. This is the distributed case the per-IP sliding
-       window cannot see at all. */
-    for (let n = 0; n < 20; n += 1) {
+    /* Palm reading is 200 a day globally, so it takes ceil(200 / PER_ACCOUNT)
+       distinct accounts to spend the whole route budget without any one of
+       them tripping its per-caller limit. This is the distributed case the
+       per-IP sliding window cannot see at all.
+
+       Derived from PER_ACCOUNT rather than written out as "20 accounts at 10
+       each": that arithmetic was true only while the per-account number was a
+       divisor of 200, and it broke the day the tier was raised. */
+    let spent = 0;
+    for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
       const caller = signedInAs(`user-${n}`, "/api/palm-reading");
-      for (let i = 0; i < PER_ACCOUNT; i += 1) {
+      const take = Math.min(PER_ACCOUNT, PALM_ROUTE_TOTAL - spent);
+      for (let i = 0; i < take; i += 1) {
         expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+        spent += 1;
       }
     }
 

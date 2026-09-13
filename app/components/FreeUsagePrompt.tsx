@@ -24,6 +24,7 @@ import Link from "next/link";
 
 import { useTranslation } from "@/lib/i18n-context";
 import { subscribeToFreeUsage, type PaidFeature } from "@/lib/free-usage-store";
+import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
 import styles from "./FreeUsagePrompt.module.css";
 
 /** Which feature ran out, so the copy names the thing they were doing. */
@@ -88,7 +89,13 @@ export default function FreeUsagePrompt() {
           {t("freeUsage.title")}
         </h2>
         <p id="free-usage-detail" className={styles.detail}>
-          {t("freeUsage.detail")}
+          {/* Interpolated rather than spelled out in the catalogs: the numbers
+              are a config value, and six translations of the word "two" do not
+              change when that value does. */}
+          {t("freeUsage.detail", {
+            free: String(LLM_FREE_PER_DAY),
+            account: String(LLM_ACCOUNT_PER_DAY),
+          })}
         </p>
 
         <div className={styles.actions}>

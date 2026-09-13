@@ -69,6 +69,7 @@ import {
   type SharedLlmCounts,
 } from "@/lib/db/llm-budget-counters";
 import { SESSION_COOKIE, resolveSession } from "@/lib/identity/session";
+import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
 import { getClientIp } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
@@ -103,42 +104,57 @@ type LlmBudgetConfig = {
  * while the per-caller number stays the same -- the ceiling that matters for a
  * question thread is the daily allowance, not the route's.
  *
- * THE TWO TIERS are 2 free, then 10 once registered, on each of the three
+ * THE TWO TIERS are 5 free, then 15 once registered, on each of the four
  * routes. An address is a weak name for a person in both directions at once --
  * a proxy pool makes one abuser look like thousands, a campus NAT makes
  * thousands of people look like one -- so no number set on it is right, and the
- * signed-out one is set to a taste of the feature rather than a working
- * allowance. Registering is what buys a real one, because an account is a name
- * a caller cannot mint by the thousand and cannot have imposed on them by their
- * employer's router.
+ * signed-out one is still set below a working allowance. Registering is what
+ * buys a real one, because an account is a name a caller cannot mint by the
+ * thousand and cannot have imposed on them by their employer's router.
  *
- * Two is deliberately enough to see what the feature does and not enough to use
- * it, which is what makes the sign-in prompt land at a moment the visitor has
- * already decided they want more.
+ * These were 2 and 10. Both were raised deliberately, after the note below
+ * predicted where 10 would chafe: a five-level dasha drill-down reaches dozens
+ * of distinct chains, so the ceiling a real session met first was the one on
+ * the cheapest route. The shape of the tiers is unchanged -- signed-out is a
+ * taste, an account is the working allowance -- and the sign-in prompt still
+ * lands at a moment the visitor has decided they want more; it now lands after
+ * five uses rather than two.
  *
- * WHERE 10 WILL CHAFE, said now rather than discovered from a support message:
- * the two text routes cache, so only *distinct* requests count -- revisiting a
- * dasha chain or a domain is free. Even so, a five-level drill-down reaches
- * dozens of distinct chains, so a thorough reader on /insights will meet the
- * dasha ceiling in one sitting. If that shows up, raise
- * `/api/chart/dasha-interpretation` first: it is the cheapest of the three per
- * call (Opus at low effort, 1000 max tokens, cached system prefix) and the one
- * a real session burns fastest. Palm reading is the opposite -- Opus 5 vision
- * over a 5MB image with nothing cached -- so its 10 is the expensive one, and
- * the route's own 200/day total is what actually bounds that exposure.
+ * WHAT THE RAISE COSTS is bounded by route rather than by caller. The two text
+ * routes cache, so only *distinct* requests count -- revisiting a dasha chain
+ * or a domain is free -- and both sit under a 2500/day route total that did not
+ * move. Palm reading is the one where a per-caller number is real money: Opus 5
+ * vision over a 5MB image with nothing cached, so 5 signed-out calls is five
+ * times the worst case of 1. Its own 200/day total is unchanged and is what
+ * actually bounds the deployment's exposure; a single address can now take
+ * 2.5% of that day instead of 1%.
  *
- * Follow-up questions are the one place where 10 is a *conversation* rather
- * than 10 features used, so it will chafe first and most legibly: a reader with
- * six real questions has four left for the rest of the day. It is set to 10
- * anyway, for now, because the alternative is guessing -- and because an
- * endpoint that accepts free text is the one whose ceiling should be raised
- * deliberately, after watching it, rather than set generously on day one.
+ * Follow-up questions remain the one place where the per-caller number is a
+ * *conversation* rather than that many features used. Fifteen is roughly a
+ * session's worth of real questions rather than the six-then-stop that 10 gave,
+ * which was the most legible way the old number chafed.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
-  "/api/chart/dasha-interpretation": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
-  "/api/chart/domain-brief": { perDay: 2500, perCallerPerDay: 10, perAnonPerDay: 2 },
-  "/api/palm-reading": { perDay: 200, perCallerPerDay: 10, perAnonPerDay: 2 },
-  "/api/palm-reading/ask": { perDay: 1500, perCallerPerDay: 10, perAnonPerDay: 2 },
+  "/api/chart/dasha-interpretation": {
+    perDay: 2500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  "/api/chart/domain-brief": {
+    perDay: 2500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  "/api/palm-reading": {
+    perDay: 200,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  "/api/palm-reading/ask": {
+    perDay: 1500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
 };
 
 const MS_PER_DAY = 86_400_000;
