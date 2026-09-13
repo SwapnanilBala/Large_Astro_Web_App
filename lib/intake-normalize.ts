@@ -627,6 +627,55 @@ export function normalizePlaceName(raw: string): IntakeFieldResult {
   return settled(cased, cased, notes);
 }
 
+/* ── A chosen place answers all three boxes ──────────────────────────────── */
+
+/** The three boxes every intake form keeps for what is really one fact. */
+export interface PlaceFields {
+  city: string;
+  state: string;
+  country: string;
+}
+
+/** A chosen suggestion, and as much of the place around it as Nominatim knew. */
+export interface PlaceSuggestion {
+  name: string;
+  state?: string;
+  country?: string;
+}
+
+/**
+ * Fold a chosen city back into the city, state and country boxes.
+ *
+ * The forms ask three questions to learn one fact, and someone who knows the
+ * city often has to go and look up which state it is in to get past the other
+ * two. They never had to: the suggestion the city was picked from carries its
+ * own state and country, so choosing it answers all three at once.
+ *
+ * The suggestion is taken as the whole truth about the place, including where
+ * a box already has something in it and where the suggestion is silent. That
+ * is deliberate, and it is the more destructive of the two readings, so:
+ * /api/geocode looks the place up as "city, state, country" joined into one
+ * string, which means a state left behind by a previously chosen city does not
+ * sit there harmlessly — it is fed to the geocoder as though it described this
+ * one. Picking Singapore after Pune would otherwise search "Singapore,
+ * Maharashtra, Singapore". Keeping the stale value is the likelier mistake and
+ * the one with the worse ending, so an empty answer is allowed to empty the
+ * box; the visitor can still type into it, and a blank required field asks to
+ * be filled where a wrong one does not.
+ */
+export function applyPlaceSuggestion(
+  current: PlaceFields,
+  suggestion: PlaceSuggestion,
+): PlaceFields {
+  return {
+    /* The one exception: the city is the thing that was actually clicked, so
+       a nameless suggestion leaves it alone rather than blanking it. */
+    city: suggestion.name.trim() || current.city,
+    state: (suggestion.state ?? "").trim(),
+    country: (suggestion.country ?? "").trim(),
+  };
+}
+
 /* ── Coordinates ─────────────────────────────────────────────────────────── */
 
 export type CoordinateAxis = "latitude" | "longitude";

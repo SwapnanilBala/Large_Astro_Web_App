@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
   normalizeBirthDate,
@@ -342,5 +343,48 @@ describe("normalizeUtcOffsetMinutes", () => {
   it("rejects an offset no time zone uses", () => {
     expect(normalizeUtcOffsetMinutes("900").status).toBe("invalid");
     expect(normalizeUtcOffsetMinutes("nonsense").status).toBe("invalid");
+  });
+});
+
+
+describe("applyPlaceSuggestion", () => {
+  const blank = { city: "", state: "", country: "" };
+
+  it("answers the state and the country from the chosen city", () => {
+    expect(
+      applyPlaceSuggestion(blank, { name: "Pune", state: "Maharashtra", country: "India" }),
+    ).toEqual({ city: "Pune", state: "Maharashtra", country: "India" });
+  });
+
+  it("replaces what a previously chosen city left behind", () => {
+    /* The case this rule exists for. /api/geocode joins the three into one
+       query, so a stale "Maharashtra" would have it search for Singapore in
+       the wrong half of the world. */
+    const afterPune = { city: "Pune", state: "Maharashtra", country: "India" };
+    expect(
+      applyPlaceSuggestion(afterPune, { name: "Singapore", country: "Singapore" }),
+    ).toEqual({ city: "Singapore", state: "", country: "Singapore" });
+  });
+
+  it("overwrites a country the visitor had guessed at", () => {
+    const guessed = { city: "", state: "", country: "India" };
+    expect(
+      applyPlaceSuggestion(guessed, { name: "Brooklyn", state: "New York", country: "United States" }),
+    ).toEqual({ city: "Brooklyn", state: "New York", country: "United States" });
+  });
+
+  it("keeps the city when the suggestion carries no name", () => {
+    const typed = { city: "Pune", state: "", country: "" };
+    expect(applyPlaceSuggestion(typed, { name: "   ", country: "India" })).toEqual({
+      city: "Pune",
+      state: "",
+      country: "India",
+    });
+  });
+
+  it("trims what it is handed", () => {
+    expect(
+      applyPlaceSuggestion(blank, { name: " Pune ", state: " Maharashtra ", country: " India " }),
+    ).toEqual({ city: "Pune", state: "Maharashtra", country: "India" });
   });
 });

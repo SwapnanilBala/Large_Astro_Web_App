@@ -10,6 +10,7 @@ import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import type { CompatibilityApiResponse, ProfileQueryInput } from "@/lib/astro-types";
 import { buildBirthDetailsPayload, parseProfileQueryString } from "@/lib/chart-query";
 import {
+  applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
   normalizeBirthDate,
@@ -512,12 +513,7 @@ function ProfileCard({
             onChange={setField("city")}
             onSelect={setField("city")}
             onSelectSuggestion={(suggestion) =>
-              setProfile((previous) => ({
-                ...previous,
-                city: suggestion.name,
-                state: suggestion.state ?? "",
-                country: suggestion.country ?? "",
-              }))
+              setProfile((previous) => ({ ...previous, ...applyPlaceSuggestion(previous, suggestion) }))
             }
             normalize={normalizePlaceName}
             placeholder="City of birth"

@@ -22,6 +22,7 @@ import {
   hasCoarseTimeFallback,
 } from "@/lib/birth-time";
 import {
+  applyPlaceSuggestion,
   normalizeBirthDate,
   normalizeBirthTime,
   normalizeCoordinate,
@@ -29,6 +30,7 @@ import {
   normalizePersonName,
   normalizePlaceName,
   type IntakeFieldResult,
+  type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import { useAccount } from "@/lib/use-account";
 import { localScopedKey } from "@/lib/local-scope";
@@ -758,24 +760,62 @@ export default function Home() {
     }));
   };
 
+  /* Whether the country and state below were filled by a city choice rather
+     than answered directly. It decides what happens when the city is then
+     retyped: those two are also what narrows the city lookup, so a city that
+     filled them has narrowed the search to its own country, and the next
+     search is trapped there. Typing "Brooklyn" after choosing Pune offered
+     an apartment block in Maharashtra called Brooklyn -- not no results,
+     which would at least have looked like a problem, but a confident wrong
+     answer on the wrong continent. So a city choice owns the two boxes it
+     filled and lets go of them the moment the city is edited; a country or
+     state the visitor set themselves is theirs and is never cleared here. */
+  const placeCameFromCity = useRef(false);
+
   // Cascading handlers: changing a parent clears its children
   const handleCountryChange = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
   };
 
   const handleCountrySelect = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     clearGeoResults();
   };
 
   const handleStateChange = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
     clearGeoResults();
   };
 
   const handleStateSelect = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
+    clearGeoResults();
+  };
+
+  /* The other direction of the cascade: a chosen city already knows its state
+   * and its country, so it fills them rather than leaving them to be looked up.
+   * Deliberately not routed through handleCountrySelect, which clears the state
+   * and the city — that would throw away the city just chosen. */
+  const handleCitySuggestion = (suggestion: PlaceSuggestion) => {
+    placeCameFromCity.current = true;
+    setDraft((previous) => ({ ...previous, ...applyPlaceSuggestion(previous, suggestion) }));
+    clearGeoResults();
+  };
+
+  /* Retyping the city gives back the country and state it filled, so the
+     next lookup is not scoped to the place that was abandoned. */
+  const handleCityChange = (value: string) => {
+    if (!placeCameFromCity.current) {
+      setField("city")(value);
+      return;
+    }
+    placeCameFromCity.current = false;
+    setDraft((prev) => ({ ...prev, city: value, state: "", country: "" }));
     clearGeoResults();
   };
 
@@ -1253,8 +1293,9 @@ export default function Home() {
                                 name="city"
                                 ariaLabelledBy="birth-city-label"
                                 value={draft.city}
-                                onChange={setField("city")}
+                                onChange={handleCityChange}
                                 onSelect={setField("city")}
+                                onSelectSuggestion={handleCitySuggestion}
                                 normalize={normalizePlaceName}
                                 placeholder={t("home.formCityPlaceholder")}
                                 suggestType="city"

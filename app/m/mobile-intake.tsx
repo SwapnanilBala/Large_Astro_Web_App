@@ -6,6 +6,7 @@ import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
 import { COARSE_TIME_OPTIONS, hasCoarseTimeFallback } from "@/lib/birth-time";
 import { buildChartQuery } from "@/lib/intake-query";
 import {
+  applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
   normalizeBirthDate,
@@ -15,6 +16,7 @@ import {
   normalizePersonName,
   normalizePlaceName,
   type IntakeFieldResult,
+  type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
@@ -188,13 +190,45 @@ export default function MobileIntake() {
     setGeoStatus("idle");
   };
 
+  /* Whether the country and state below were filled by a city choice rather
+     than answered directly, so that retyping the city can hand them back.
+     app/(desktop)/page-client.tsx carries the reasoning; the short version is
+     that those two also scope the city lookup, so a city that filled them has
+     trapped the next search inside its own country. */
+  const placeCameFromCity = useRef(false);
+
   const changeCountry = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, country: value, state: "", city: "" }));
     setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined, city: undefined }));
     clearResolvedLocation();
   };
 
+  /* The other direction of the cascade: the city already knows its state and
+   * country, so choosing one fills both instead of sending the visitor off to
+   * look them up — the slowest thing to do on a phone. */
+  const chooseCity = (suggestion: PlaceSuggestion) => {
+    placeCameFromCity.current = true;
+    setDraft((prev) => ({ ...prev, ...applyPlaceSuggestion(prev, suggestion) }));
+    setFieldNotes((prev) => ({ ...prev, city: undefined, state: undefined, country: undefined }));
+    clearResolvedLocation();
+  };
+
+  /* Retyping the city gives back the country and state it filled, so the
+     next lookup is not scoped to the place that was abandoned. */
+  const changeCity = (value: string) => {
+    if (!placeCameFromCity.current) {
+      edit("city", value);
+      return;
+    }
+    placeCameFromCity.current = false;
+    setDraft((prev) => ({ ...prev, city: value, state: "", country: "" }));
+    setFieldNotes((prev) => ({ ...prev, country: undefined, state: undefined, city: undefined }));
+    clearResolvedLocation();
+  };
+
   const changeState = (value: string) => {
+    placeCameFromCity.current = false;
     setDraft((prev) => ({ ...prev, state: value, city: "" }));
     setFieldNotes((prev) => ({ ...prev, state: undefined, city: undefined }));
     clearResolvedLocation();
@@ -554,8 +588,9 @@ export default function MobileIntake() {
               id="m-city"
               className={styles.input}
               value={draft.city}
-              onChange={(value) => edit("city", value)}
+              onChange={changeCity}
               onSelect={(value) => edit("city", value)}
+              onSelectSuggestion={chooseCity}
               normalize={normalizePlaceName}
               onNormalized={commitPlace("city")}
               placeholder={t("home.formCityPlaceholder")}

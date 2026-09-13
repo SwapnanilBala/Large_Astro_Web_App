@@ -77,6 +77,12 @@ export default function AutocompleteInput({
   const abortRef = useRef<AbortController | null>(null);
   const requestSeq = useRef(0);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  /* Whether the visitor is actually in this box. A ref rather than state so
+     the lookup effect can read it without re-running every time focus moves. */
+  const focusedRef = useRef(false);
+  /* The value this box last handed back by selection, so the change that
+     causes can be told apart from something typed. */
+  const justSelectedRef = useRef<string | null>(null);
   const generatedId = useId();
   const inputId = id ?? `autocomplete-${generatedId}`;
   const listboxId = `${inputId}-listbox`;
@@ -92,6 +98,37 @@ export default function AutocompleteInput({
       requestSeq.current += 1;
       setSuggestions([]);
       setIsOpen(false);
+      return;
+    }
+
+    /* Two ways a value arrives that is an answer rather than a question, and
+       neither should reopen the list.
+
+       One this box just produced: choosing a suggestion changes the value,
+       which re-queried it and popped the same list straight back open over
+       the answer.
+
+       One another box wrote here: choosing a city now fills the state and the
+       country from the same result, and each of those would otherwise run its
+       own lookup and open its own list -- three dropdowns for one click, two
+       of them over fields nobody is typing in. Only the box with the caret
+       may open, which is what the focus check is for; it also spares those
+       two a network round trip apiece for a value they never had to ask
+       about. */
+    const closeQuietly = () => {
+      requestSeq.current += 1;
+      setSuggestions([]);
+      setIsOpen(false);
+    };
+
+    if (justSelectedRef.current === query) {
+      justSelectedRef.current = null;
+      closeQuietly();
+      return;
+    }
+
+    if (!focusedRef.current) {
+      closeQuietly();
       return;
     }
 
@@ -148,6 +185,7 @@ export default function AutocompleteInput({
   }, []);
 
   const handleSelect = (name: string, suggestion?: Suggestion) => {
+    justSelectedRef.current = name.trim();
     onSelect(name);
     if (suggestion) onSelectSuggestion?.(suggestion);
     setIsOpen(false);
@@ -190,9 +228,11 @@ export default function AutocompleteInput({
         }}
         onKeyDown={handleKeyDown}
         onFocus={() => {
+          focusedRef.current = true;
           if (suggestions.length > 0) setIsOpen(true);
         }}
         onBlur={(event) => {
+          focusedRef.current = false;
           if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {
             setIsOpen(false);
             setActiveIndex(-1);
