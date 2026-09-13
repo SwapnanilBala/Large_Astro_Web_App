@@ -105,8 +105,8 @@ type LlmBudgetConfig = {
  * while the per-caller number stays the same -- the ceiling that matters for a
  * question thread is the daily allowance, not the route's.
  *
- * THE TWO TIERS are 5 free, then 15 once registered, on each of the four
- * routes. An address is a weak name for a person in both directions at once --
+ * THE TWO TIERS are 5 free, then 15 once registered, on every route in the
+ * table. An address is a weak name for a person in both directions at once --
  * a proxy pool makes one abuser look like thousands, a campus NAT makes
  * thousands of people look like one -- so no number set on it is right, and the
  * signed-out one is still set below a working allowance. Registering is what

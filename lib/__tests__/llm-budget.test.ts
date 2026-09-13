@@ -50,7 +50,7 @@ const {
 const NOON = Date.UTC(2026, 8, 12, 12, 0, 0);
 const NEXT_DAY = NOON + 86_400_000;
 
-/* Five free, then fifteen once registered, the same on all four routes. */
+/* Five free, then fifteen once registered, the same on every route. */
 const PER_ACCOUNT = 15;
 const PER_ADDRESS = 5;
 
@@ -108,7 +108,7 @@ describe("per-account ceiling", () => {
     expect((await consumeLlmBudget("/api/chart/domain-brief", bystander, NOON)).allowed).toBe(true);
   });
 
-  it("counts the two LLM routes separately", async () => {
+  it("counts each LLM route separately", async () => {
     const caller = signedInAs("user-a");
     for (let i = 0; i < PER_ACCOUNT; i += 1) {
       await consumeLlmBudget("/api/chart/domain-brief", caller, NOON);
@@ -137,7 +137,7 @@ describe("the signed-out tier", () => {
     expect(refused.scope).toBe("anonymous");
   });
 
-  it("gives palm reading the same two, on the dearest route of the three", async () => {
+  it("gives palm reading the same allowance, on the dearest route of them all", async () => {
     const caller = requestFrom("203.0.113.5", "/api/palm-reading");
     for (let i = 0; i < PER_ADDRESS; i += 1) {
       expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
