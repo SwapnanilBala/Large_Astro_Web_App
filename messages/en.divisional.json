@@ -167,7 +167,13 @@
         "repeats": "Repeats",
         "note": "“Repeats” means the point remains in the same sign as D1. It is a consistency signal, not automatically positive or negative."
       },
-      "footer": "Divisional charts increase specificity only when they confirm the natal promise, use reliable birth data, and agree with independent strength and timing factors."
+      "footer": "Divisional charts increase specificity only when they confirm the natal promise, use reliable birth data, and agree with independent strength and timing factors.",
+      "notes": {
+        "kicker": "Read for this chart",
+        "pending": "Reading your placements…",
+        "failed": "Notes for this chart are unavailable right now. The guidance above still applies.",
+        "attribution": "Written for your placements by Claude (Opus 5). Read it alongside the guidance above, not instead of it."
+      }
     },
     "panel": {
       "kicker": "Varga Charts",

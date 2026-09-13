@@ -92,6 +92,14 @@
           "sensitivityNote": "La D60 necesita una hora de nacimiento rectificada o excepcionalmente precisa; de lo contrario, trátala solo como exploratoria.",
           "mappingMethod": "El Shashtiamsa divide cada signo natal en sesenta porciones de medio grado cuyos signos se ciclan zodiacalmente desde Aries."
         }
+      },
+      "atlas": {
+        "notes": {
+          "kicker": "Leído para esta carta",
+          "pending": "Leyendo tus posiciones…",
+          "failed": "Las notas para esta carta no están disponibles ahora mismo. La guía anterior sigue siendo válida.",
+          "attribution": "Escrito para tus posiciones por Claude (Opus 5). Léelo junto a la guía anterior, no en su lugar."
+        }
       }
     }
   },
@@ -187,6 +195,14 @@
           "clientQuestion": "এই সূক্ষ্ম স্তর কি আগে থেকেই সুপ্রতিষ্ঠিত কোনো বিষয়ের পুনরাবৃত্তি করে, নাকি কেবল বিভ্রান্তি যোগ করে?",
           "sensitivityNote": "D60-এর জন্য সংশোধিত বা ব্যতিক্রমীভাবে নির্ভুল জন্মসময় দরকার; নইলে এটিকে কেবল অন্বেষণমূলক হিসেবেই ধরুন।",
           "mappingMethod": "ষষ্ট্যংশ প্রতিটি জন্মরাশিকে আধা ডিগ্রির ষাটটি ভাগে বিভক্ত করে, যাদের রাশি মেষ থেকে রাশিক্রমে চলে।"
+        }
+      },
+      "atlas": {
+        "notes": {
+          "kicker": "এই কুণ্ডলীর জন্য পড়া",
+          "pending": "আপনার অবস্থানগুলি পড়া হচ্ছে…",
+          "failed": "এই কুণ্ডলীর নোট এই মুহূর্তে পাওয়া যাচ্ছে না। উপরের নির্দেশনা এখনও প্রযোজ্য।",
+          "attribution": "আপনার অবস্থানের জন্য Claude (Opus 5) লিখেছে। উপরের নির্দেশনার পরিবর্তে নয়, তার পাশাপাশি পড়ুন।"
         }
       }
     }
@@ -284,6 +300,14 @@
           "sensitivityNote": "D60 के लिए संशोधित या असाधारण रूप से सटीक जन्म समय आवश्यक है; अन्यथा इसे केवल अन्वेषणात्मक मानें।",
           "mappingMethod": "षष्ट्यंश प्रत्येक जन्म राशि को आधा-आधा अंश के साठ भागों में बाँटता है, जिनकी राशियाँ मेष से राशिक्रम में चलती हैं।"
         }
+      },
+      "atlas": {
+        "notes": {
+          "kicker": "इस कुंडली के लिए पढ़ा गया",
+          "pending": "आपकी स्थितियाँ पढ़ी जा रही हैं…",
+          "failed": "इस कुंडली की टिप्पणियाँ अभी उपलब्ध नहीं हैं। ऊपर दी गई मार्गदर्शिका अब भी लागू होती है।",
+          "attribution": "आपकी स्थितियों के लिए Claude (Opus 5) द्वारा लिखा गया। इसे ऊपर दी गई मार्गदर्शिका के साथ पढ़ें, उसके बदले नहीं।"
+        }
       }
     }
   },
@@ -380,6 +404,14 @@
           "sensitivityNote": "La D60 richiede un'ora di nascita rettificata o eccezionalmente precisa; altrimenti trattala solo come esplorativa.",
           "mappingMethod": "Lo Shashtiamsa divide ogni segno natale in sessanta porzioni di mezzo grado, i cui segni si succedono zodiacalmente dall'Ariete."
         }
+      },
+      "atlas": {
+        "notes": {
+          "kicker": "Letto per questa carta",
+          "pending": "Lettura delle tue posizioni…",
+          "failed": "Le note per questa carta non sono disponibili al momento. La guida qui sopra resta valida.",
+          "attribution": "Scritto per le tue posizioni da Claude (Opus 5). Leggilo insieme alla guida qui sopra, non al suo posto."
+        }
       }
     }
   },
@@ -475,6 +507,14 @@
           "clientQuestion": "Cette couche fine répète-t-elle un thème déjà bien étayé, ou introduit-elle seulement du bruit ?",
           "sensitivityNote": "La D60 exige une heure de naissance rectifiée ou exceptionnellement précise ; sinon, traitez-la comme purement exploratoire.",
           "mappingMethod": "Le Shashtiamsa divise chaque signe natal en soixante portions d'un demi-degré dont les signes défilent zodiacalement depuis le Bélier."
+        }
+      },
+      "atlas": {
+        "notes": {
+          "kicker": "Lu pour ce thème",
+          "pending": "Lecture de vos positions…",
+          "failed": "Les notes pour ce thème ne sont pas disponibles pour le moment. Les indications ci-dessus restent valables.",
+          "attribution": "Rédigé pour vos positions par Claude (Opus 5). À lire avec les indications ci-dessus, et non à leur place."
         }
       }
     }

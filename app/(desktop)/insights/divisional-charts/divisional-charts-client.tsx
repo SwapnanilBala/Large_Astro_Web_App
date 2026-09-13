@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import {
   FiAlertCircle,
@@ -10,19 +10,18 @@ import {
   FiCheckCircle,
   FiClock,
   FiCompass,
-  FiGrid,
   FiLayers,
 } from "react-icons/fi";
 import type { DivisionalChartInfo } from "@/lib/astro-types";
 import {
-  IMPORTANT_DIVISIONAL_CHARTS,
   divisionalGuideKey,
   getImportantDivisionalChartGuide,
   type DivisionalChartSensitivity,
   type DivisionalGuideField,
 } from "@/lib/divisional-chart-guide";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
 import divisionalMessages from "@/messages/en.divisional.json";
+import { useVargaCommentary } from "./use-varga-commentary";
 import styles from "./divisional-charts.module.css";
 
 /** What useRouteMessages hands back — a translator with interpolation. */
@@ -103,6 +102,30 @@ function detailHref(division: number, historyQs: string) {
   return `/insights/divisional-charts/${division}${query}`;
 }
 
+/**
+ * The varga atlas.
+ *
+ * ── LAYOUT ─────────────────────────────────────────────────────────────────
+ *
+ * One DOM, two shapes. On a computer this is a board that fills the viewport
+ * and does not scroll the page: a slim bar across the top, then three columns
+ * -- the list of vargas, the reading for the selected one, and its position
+ * table -- each scrolling inside itself if it needs to. Below 1100px the same
+ * markup falls back to a normal stacked page, which is what a narrow window can
+ * actually carry.
+ *
+ * It used to be one column, 3651px tall at 1440 wide: hero, reliability banner,
+ * a ten-card grid, a tab strip, then the detail. Four viewports of scrolling to
+ * reach a table, and the ten-card grid said in full what the rail now says in a
+ * line, so it was also the longest part. Nothing was dropped -- every field
+ * those cards carried is in the reading column when its varga is selected -- but
+ * the page no longer prints all ten at once to make the point that there are
+ * ten.
+ *
+ * The one real loss is the at-a-glance comparison the grid allowed. The rail
+ * keeps what that was actually used for (which vargas are the key ones, and how
+ * much each depends on an exact birth time) and the rest is a click away.
+ */
 export default function DivisionalChartsClient({
   clientName,
   engineLabel,
@@ -112,6 +135,7 @@ export default function DivisionalChartsClient({
   birthTimeFallback,
 }: DivisionalChartsClientProps) {
   const tr = useRouteMessages(divisionalMessages);
+  const { language } = useTranslation();
   const divisionNumbers = useMemo(
     () => Object.keys(charts).map(Number).sort((left, right) => left - right),
     [charts],
@@ -119,7 +143,10 @@ export default function DivisionalChartsClient({
   const [selectedDivision, setSelectedDivision] = useState(
     divisionNumbers.includes(9) ? 9 : (divisionNumbers[0] ?? 1),
   );
-  const detailRef = useRef<HTMLElement>(null);
+
+  /* Fired once on mount for all ten key vargas, in the reader's language;
+     see the hook. */
+  const commentary = useVargaCommentary(charts, language);
 
   const chart = charts[selectedDivision];
   const guide = getImportantDivisionalChartGuide(selectedDivision);
@@ -139,15 +166,7 @@ export default function DivisionalChartsClient({
   const repeatedPositions = chart.positions.filter(
     (position) => position.rashi_sign === position.divisional_sign,
   );
-
-  const selectChart = (division: number, moveToDetail = false) => {
-    setSelectedDivision(division);
-    if (moveToDetail) {
-      window.requestAnimationFrame(() => {
-        detailRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
-    }
-  };
+  const note = commentary.notes.get(selectedDivision);
 
   return (
     <main className={styles.page}>
@@ -155,162 +174,155 @@ export default function DivisionalChartsClient({
       <div className={styles.ambientTwo} aria-hidden="true" />
 
       <div className={styles.shell}>
-        <Link href={backHref} className={styles.backButton}>
-          <FiArrowLeft aria-hidden="true" />
-          {tr("divisional.atlas.backToReading")}
-        </Link>
+        <header className={styles.topBar}>
+          <Link href={backHref} className={styles.backButton}>
+            <FiArrowLeft aria-hidden="true" />
+            {tr("divisional.atlas.backToReading")}
+          </Link>
 
-        <header className={styles.hero}>
-          <div className={styles.heroIcon} aria-hidden="true">
-            <FiLayers />
+          <div className={styles.topTitle}>
+            <span className={styles.topIcon} aria-hidden="true"><FiLayers /></span>
+            <div>
+              <p className={styles.kicker}>{tr("divisional.atlas.hero.kicker")}</p>
+              <h1>{tr("divisional.atlas.hero.heading", { name: clientName })}</h1>
+            </div>
           </div>
-          <p className={styles.kicker}>{tr("divisional.atlas.hero.kicker")}</p>
-          <h1>{tr("divisional.atlas.hero.heading", { name: clientName })}</h1>
-          <p className={styles.lead}>{tr("divisional.atlas.hero.lead")}</p>
-          <div className={styles.heroFacts}>
-            <span><FiGrid aria-hidden="true" /> {tr("divisional.atlas.hero.supportedCharts", { count: String(divisionNumbers.length) })}</span>
+
+          {/*
+            Two chips, not three. `hero.exactTime` and `reliability.goodTitle`
+            are the same sentence -- "Exact birth time recorded" -- so a bar
+            that printed both said it twice whenever the news was good. The
+            birth-time chip carries the reliability tone and the reliability
+            body as its tooltip, and the separate warning appears only in the
+            caution case, where its title is genuinely different information
+            ("Use higher divisions as exploratory layers") rather than an echo.
+          */}
+          <div className={styles.topFacts}>
             <span><FiCompass aria-hidden="true" /> {engineLabel}</span>
-            <span><FiClock aria-hidden="true" /> {birthTimeQualityLabel(tr, birthTimeAccuracy, birthTimeFallback)}</span>
+            <span
+              className={reliability.tone === "good" ? styles.factGood : styles.factCaution}
+              title={reliability.body}
+            >
+              {reliability.tone === "good" ? (
+                <FiCheckCircle aria-hidden="true" />
+              ) : (
+                <FiClock aria-hidden="true" />
+              )}
+              {birthTimeQualityLabel(tr, birthTimeAccuracy, birthTimeFallback)}
+            </span>
+            {reliability.tone === "caution" && (
+              <span className={styles.factCaution} title={reliability.body}>
+                <FiAlertCircle aria-hidden="true" />
+                {reliability.title}
+              </span>
+            )}
           </div>
         </header>
 
-        <section
-          className={`${styles.reliability} ${reliability.tone === "good" ? styles.reliabilityGood : styles.reliabilityCaution}`}
-          aria-label={tr("divisional.atlas.reliability.label")}
-        >
-          {reliability.tone === "good" ? (
-            <FiCheckCircle aria-hidden="true" />
-          ) : (
-            <FiAlertCircle aria-hidden="true" />
-          )}
-          <div>
-            <h2>{reliability.title}</h2>
-            <p>{reliability.body}</p>
-          </div>
-        </section>
-
-        <section className={styles.importantSection} aria-labelledby="important-vargas-title">
-          <div className={styles.sectionHeading}>
-            <p className={styles.kicker}>{tr("divisional.atlas.important.kicker")}</p>
-            <h2 id="important-vargas-title">{tr("divisional.atlas.important.heading")}</h2>
-            <p>{tr("divisional.atlas.important.lead")}</p>
-          </div>
-
-          <div className={styles.importantGrid}>
-            {IMPORTANT_DIVISIONAL_CHARTS.filter((item) => charts[item.division]).map((item) => {
-              const sensitivity = SENSITIVITY_COPY[item.sensitivity];
-              const isSelected = item.division === selectedDivision;
-              return (
-                <article
-                  key={item.division}
-                  className={`${styles.importantCard} ${isSelected ? styles.importantCardActive : ""}`}
-                >
-                  <button
-                    type="button"
-                    className={styles.importantCardSelect}
-                    onClick={() => selectChart(item.division, true)}
-                    aria-pressed={isSelected}
-                    aria-label={tr("divisional.atlas.important.previewLabel", {
-                      label: item.label,
-                      name: tr(divisionalGuideKey(item.division, "name")),
-                    })}
-                  >
-                    <span className={styles.cardTopline}>
-                      <strong>{item.label}</strong>
-                      <small className={styles[sensitivity.className]}>{tr(sensitivity.labelKey)}</small>
-                    </span>
-                    <span className={styles.cardName}>
-                      {tr(divisionalGuideKey(item.division, "name"))}
-                    </span>
-                    <span className={styles.cardFocus}>
-                      {tr(divisionalGuideKey(item.division, "focus"))}
-                    </span>
-                    <span className={styles.cardSummary}>
-                      {tr(divisionalGuideKey(item.division, "summary"))}
-                    </span>
-                  </button>
-                  <Link
-                    href={detailHref(item.division, historyQs)}
-                    className={styles.importantCardLink}
-                    aria-label={tr("divisional.atlas.important.openDetails", {
-                      label: item.label,
-                    })}
-                  >
-                    {tr("divisional.atlas.important.showMore")}
-                    <FiArrowRight aria-hidden="true" />
-                  </Link>
-                </article>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className={styles.atlasSection} aria-labelledby="complete-atlas-title">
-          <div className={styles.sectionHeading}>
-            <p className={styles.kicker}>{tr("divisional.atlas.complete.kicker")}</p>
-            <h2 id="complete-atlas-title">{tr("divisional.atlas.complete.heading")}</h2>
-            <p>{tr("divisional.atlas.complete.lead")}</p>
-          </div>
-
-          <div
-            className={styles.chartTabs}
+        <div className={styles.board}>
+          {/* ── Column 1: every calculated varga ── */}
+          <nav
+            className={styles.rail}
             role="tablist"
             aria-label={tr("divisional.atlas.complete.tablistLabel")}
           >
+            <p className={styles.railLead}>{tr("divisional.atlas.complete.lead")}</p>
             {divisionNumbers.map((division) => {
               const item = charts[division];
               const isSelected = division === selectedDivision;
-              const isImportant = Boolean(getImportantDivisionalChartGuide(division));
+              const entry = getImportantDivisionalChartGuide(division);
+              const sensitivity = entry ? SENSITIVITY_COPY[entry.sensitivity] : null;
               return (
                 <button
                   key={division}
                   type="button"
                   role="tab"
                   aria-selected={isSelected}
-                  className={`${styles.chartTab} ${isSelected ? styles.chartTabActive : ""}`}
-                  onClick={() => selectChart(division)}
+                  className={`${styles.railItem} ${isSelected ? styles.railItemActive : ""}`}
+                  onClick={() => setSelectedDivision(division)}
                 >
-                  <strong>{item.label}</strong>
-                  {isImportant && <span>{tr("divisional.atlas.complete.keyBadge")}</span>}
+                  <span className={styles.railLabel}>
+                    <strong>{item.label}</strong>
+                    {entry && <span className={styles.railKey}>{tr("divisional.atlas.complete.keyBadge")}</span>}
+                  </span>
+                  {entry && (
+                    <>
+                      <span className={styles.railName}>
+                        {tr(divisionalGuideKey(division, "name"))}
+                      </span>
+                      {sensitivity && (
+                        <span className={styles[sensitivity.className]}>
+                          {tr(sensitivity.labelKey)}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </button>
               );
             })}
-          </div>
-        </section>
+          </nav>
 
-        <section ref={detailRef} className={styles.detailSection} aria-live="polite">
-          <div className={styles.detailIntro}>
-            <div className={styles.detailTitleRow}>
+          {/* ── Column 2: the reading for the selected varga ── */}
+          <section className={styles.readingPane} aria-live="polite">
+            <div className={styles.readingHead}>
               <span className={styles.detailBadge}>{chart.label}</span>
               <div>
                 <p className={styles.kicker}>
                   {guide ? guideText("name") : tr("divisional.atlas.detail.fallbackName")}
                 </p>
                 <h2>{guide ? guideText("focus") : chart.description}</h2>
-                {/* D5, D6, D8 and D11 are not among Parashara's sixteen. They
-                    sit in the same atlas as the classical vargas, so say which
-                    is which rather than letting the presentation imply equal
-                    authority. */}
-                {chart.tradition === "extended" && (
-                  <p className={styles.traditionNote}>
-                    {tr("divisional.atlas.detail.traditionNote")}
-                  </p>
-                )}
-                {guide && (
-                  <Link
-                    href={detailHref(selectedDivision, historyQs)}
-                    className={styles.detailPageLink}
-                  >
-                    {tr("divisional.atlas.important.openDetails", {
-                      label: chart.label,
-                    })}
-                    <FiArrowRight aria-hidden="true" />
-                  </Link>
-                )}
               </div>
+              {guide && (
+                <Link
+                  href={detailHref(selectedDivision, historyQs)}
+                  className={styles.detailPageLink}
+                >
+                  {tr("divisional.atlas.important.showMore")}
+                  <FiArrowRight aria-hidden="true" />
+                </Link>
+              )}
             </div>
 
-            <p className={styles.detailLead}>{guide ? guideText("summary") : chart.description}</p>
+            {/* D5, D6, D8 and D11 are not among Parashara's sixteen. They sit in
+                the same atlas as the classical vargas, so say which is which
+                rather than letting the presentation imply equal authority. */}
+            {chart.tradition === "extended" && (
+              <p className={styles.traditionNote}>
+                {tr("divisional.atlas.detail.traditionNote")}
+              </p>
+            )}
+
+            <p className={styles.detailLead}>
+              {guide ? guideText("summary") : chart.description}
+            </p>
+
+            {/*
+              Claude's note on this chart's placements.
+              Only the ten key vargas get one -- the route refuses any other
+              division -- so a supporting chart shows nothing here rather than an
+              empty frame. It is written in the reader's own language -- the
+              model is told which -- so the label below it is provenance, not a
+              warning that this one paragraph is in English.
+            */}
+            {guide && (
+              <div className={styles.notePanel}>
+                <p className={styles.noteKicker}>{tr("divisional.atlas.notes.kicker")}</p>
+                {note ? (
+                  <>
+                    <p className={styles.noteBody}>{note}</p>
+                    <p className={styles.noteAttribution}>
+                      {tr("divisional.atlas.notes.attribution")}
+                    </p>
+                  </>
+                ) : (
+                  <p className={styles.noteStatus}>
+                    {commentary.state === "pending"
+                      ? tr("divisional.atlas.notes.pending")
+                      : tr("divisional.atlas.notes.failed")}
+                  </p>
+                )}
+              </div>
+            )}
 
             {guide ? (
               <div className={styles.guidanceGrid}>
@@ -339,9 +351,10 @@ export default function DivisionalChartsClient({
               <article><span>{tr("divisional.atlas.snapshot.moon")}</span><strong>{moon?.divisional_sign ?? "—"}</strong></article>
               <article><span>{tr("divisional.atlas.snapshot.repeats")}</span><strong>{repeatedPositions.length}</strong></article>
             </div>
-          </div>
+          </section>
 
-          <div className={styles.positionCard}>
+          {/* ── Column 3: the placements themselves ── */}
+          <section className={styles.tablePane}>
             <div className={styles.positionHeader}>
               <div>
                 <p className={styles.kicker}>{tr("divisional.atlas.positions.kicker")}</p>
@@ -387,19 +400,9 @@ export default function DivisionalChartsClient({
                 );
               })}
             </div>
-            <p className={styles.tableNote}>
-              {tr("divisional.atlas.positions.note")}
-            </p>
-          </div>
-        </section>
-
-        <footer className={styles.footer}>
-          <p>{tr("divisional.atlas.footer")}</p>
-          <Link href={backHref} className={styles.backButtonBottom}>
-            <FiArrowLeft aria-hidden="true" />
-            {tr("divisional.atlas.returnToReading")}
-          </Link>
-        </footer>
+            <p className={styles.tableNote}>{tr("divisional.atlas.positions.note")}</p>
+          </section>
+        </div>
       </div>
     </main>
   );
