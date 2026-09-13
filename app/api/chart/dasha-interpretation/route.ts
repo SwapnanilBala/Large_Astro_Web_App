@@ -26,6 +26,39 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  * with it, while palm reading degrades to GPT-4o rather than failing.
  */
 
+/*
+ * EFFORT -- medium, measured rather than assumed.
+ *
+ * Raised from low after running the shipped prompt at three levels over the
+ * three chain shapes this route accepts (scripts/effort-compare.mjs). What the
+ * numbers said, per call, on Opus 5:
+ *
+ *     low     ~205-241 output tokens   ~5.4s   $0.0075
+ *     medium  ~247-293 output tokens   ~6.1s   $0.0090
+ *     high    ~281     output tokens   ~6.6s   $0.0094
+ *
+ * Medium is 1.2x low, not the 4-10x that reasoning about thinking-token spend
+ * predicts. Adaptive thinking barely engages on a job this small however the
+ * effort dial is set, so effort here buys care in the answer rather than a
+ * large hidden reasoning budget.
+ *
+ * What it buys, concretely: at low the reading does not use the date window it
+ * was handed; at medium and high it does ("mid-to-late February 2029"). That
+ * is the difference worth 0.15 of a cent, and it is checkable rather than a
+ * matter of taste. High is a further 0.04 cents for a slightly more specific
+ * version of the same gain -- worth revisiting, not obviously worth taking.
+ *
+ * `max_tokens` went 1000 -> 8000 on the theory that thinking counts against it
+ * and could crowd out the answer. Measurement says nothing here comes close to
+ * 1000, so that ceiling was never the risk it looked like -- it stays raised
+ * because headroom is free (billing is per token generated) and because the
+ * next person to move this dial should not have to rediscover the question.
+ * The timeouts went back to what they were: 20s was never tight against a
+ * 6-second call, and a longer one only makes a genuinely stuck request take
+ * longer to fall back to the deterministic sentence.
+ */
+const EFFORT = "medium" as const;
+
 export const maxDuration = 30;
 
 const REQUEST_TIMEOUT_MS = 20_000;
@@ -171,11 +204,11 @@ export async function POST(request: NextRequest) {
 
     const response = await client.messages.create({
       model: "claude-opus-5",
-      /* Deliberately short output: 2-3 sentences. */
-      max_tokens: 1000,
-      /* Low effort suits a short phrasing job and keeps the panel responsive;
-         thinking is omitted, which on this model runs adaptive by default. */
-      output_config: { effort: "low" },
+      /* Headroom for thinking, not a target. The visible answer is still 2-3
+         sentences; see the note on EFFORT above for why this is not 1000. */
+      max_tokens: 8000,
+      /* thinking is omitted, which on this model runs adaptive by default. */
+      output_config: { effort: EFFORT },
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],
@@ -187,11 +220,56 @@ export async function POST(request: NextRequest) {
       ],
     });
 
+    /*
+     * What the effort experiment is actually measured on.
+     *
+     * Estimating the spend from prompt sizes gets the input side about right
+     * and tells you nothing about the output side, which is where the money is
+     * -- thinking is billed at the output rate and is most of what a request at
+     * this effort generates. One line per uncached call, so the question can be
+     * settled from logs rather than from arithmetic.
+     */
+    console.info(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/dasha-interpretation",
+      event: "llm_usage",
+      effort: EFFORT,
+      depth: lords.length,
+      stopReason: response.stop_reason,
+      inputTokens: response.usage.input_tokens,
+      outputTokens: response.usage.output_tokens,
+      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+      cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+    }));
+
     if (response.stop_reason === "refusal") {
       throw new ApiError(
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "The interpretation was declined.",
         { details: { category: response.stop_details?.category ?? null } },
+      );
+    }
+
+    /*
+     * Truncation is a failure, not a short answer.
+     *
+     * Thinking counts against `max_tokens` here, so a run that reasons past the
+     * ceiling returns whatever prose it had reached -- which is a sentence
+     * ending mid-clause, and which would otherwise be cached and shown as if it
+     * were the reading. The panel falls back to its deterministic sentence on a
+     * non-OK response, so failing is the better of the two.
+     */
+    if (response.stop_reason === "max_tokens") {
+      console.warn(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/chart/dasha-interpretation",
+        event: "llm_output_truncated",
+        effort: EFFORT,
+        outputTokens: response.usage.output_tokens,
+      }));
+      throw new ApiError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        "The interpretation ran past its token ceiling.",
       );
     }
 
