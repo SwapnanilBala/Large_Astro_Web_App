@@ -95,12 +95,40 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="dark" style={{ colorScheme: "dark" }}>
+    /* suppressHydrationWarning on both elements, and it silences a warning
+       rather than fixing a bug -- worth stating plainly, because the attribute
+       looks like it is papering over something.
+
+       THEME_BOOTSTRAP above runs beforeInteractive and rewrites exactly the
+       three attributes below from localStorage. For anyone whose stored theme
+       is "light", the DOM React hydrates into therefore disagrees with this
+       JSX, and React logs a mismatch on <html> and <body>.
+
+       Nothing breaks. Measured over twelve runs, light and dark, with and
+       without this attribute: every page rendered, byte-identical, effects and
+       event handlers ran, and React kept the bootstrap's value rather than
+       reverting it -- which for attributes is what "won't be patched up"
+       means, and is the behaviour we want. ThemeToggle reads the same value
+       through useSyncExternalStore with a "dark" server snapshot, so app state
+       agrees with the DOM.
+
+       What it costs unsuppressed is a permanent "1 Issue" badge in the dev
+       overlay for every light-theme session -- the same channel a real
+       hydration bug would use, so a standing false positive there teaches
+       people to ignore it. The attribute covers only these two elements' own
+       attributes, one level deep, so it cannot hide a mismatch anywhere else
+       in the tree. */
+    <html
+      lang="en"
+      data-theme="dark"
+      style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
+    >
       {/* The background is repeated here rather than left to a stylesheet so
           the first paint is dark on both trees. globals.css only loads on the
           desktop tree now, and the mobile sheet is a route chunk, so without
           this a handset flashes white before either arrives. */}
-      <body style={{ background: "#07111B" }}>
+      <body style={{ background: "#07111B" }} suppressHydrationWarning>
         <Script id="theme-bootstrap" strategy="beforeInteractive">
           {THEME_BOOTSTRAP}
         </Script>
