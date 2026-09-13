@@ -7373,10 +7373,32 @@ html[data-theme="light"] .accent-card {
 }
 
 /* "My Chart" is #F0B754 -- picked to glow on ink, and 1.58:1 on the light
-   navbar. The token is the same hue judged against a light surface. */
+   navbar. The token is the same hue judged against a light surface.
+
+   .navbar-profile-switch is the "Account" kicker inside the same pill. It
+   takes its gold from `.navbar-profile-link span` rather than from its own
+   rule, which is why the class has to be named here to reach it -- 1.54:1
+   before this. It lands on the same token as the name beside it because the
+   dark theme already paints the two the same gold; the kicker is separated by
+   size and letter-spacing, not by hue. */
 html[data-theme="light"] .navbar-chart-link,
+html[data-theme="light"] .navbar-profile-switch,
 html[data-theme="light"] .navbar-profile-link strong {
   color: var(--accent-gold-dim);
+}
+
+/* Sign out is meant to be the quietest thing in the navbar, and #8B8FA3 is how
+   the dark theme says that; on a near-white surface it says it at 2.88:1.
+   --ink-soft is the same intent measured against this theme. The hover needs
+   restating too: #EAEDF3 is near-white, so the dark theme brightens on hover
+   into less contrast than it started with, and the light-theme resting rule
+   above would otherwise outrank the shared :hover anyway. */
+html[data-theme="light"] .navbar-signout {
+  color: var(--ink-soft);
+}
+
+html[data-theme="light"] .navbar-signout:hover {
+  color: var(--ink-main);
 }
 
 /* Chrome and vendor surfaces with the same fault: a fixed ink background
@@ -7391,6 +7413,30 @@ html[data-theme="light"] .back-btn {
 html[data-theme="light"] .dasha-popup {
   background: var(--bg-glass-strong);
   border-color: var(--border-medium);
+}
+
+/* The drawer is named on the exclusion list below as a surface meant to stay
+   dark in both themes. It is not one: every label in it -- the title, the
+   account name and email, the links -- is a themed --ink token, so a dark
+   panel put #36263a on #13151b and the entire menu measured 1.3:1. It was
+   missed because opening it takes a click and no sweep ever clicked.
+
+   High alpha rather than one of the lighter glass tokens, for the reason
+   FreeUsagePrompt.module.css gives about its own panel: this sits on a 0.6
+   black scrim, and a translucent surface composites that scrim into itself
+   and drags the text back down. */
+html[data-theme="light"] .mobile-drawer {
+  background: var(--bg-glass-strong);
+  box-shadow: var(--shadow-xl);
+}
+
+/* The close glyph carries its own colour rather than inheriting one, and the
+   base rule is !important throughout, so it has to be restated to follow the
+   surface instead of staying a light grey on light. */
+html[data-theme="light"] .drawer-close-btn {
+  background: var(--surface-frosted) !important;
+  border-color: var(--border-medium) !important;
+  color: var(--ink-soft) !important;
 }
 
 html[data-theme="light"] .navamsa-row--header,
@@ -7423,7 +7469,8 @@ html[data-theme="light"] .react-datepicker__year-select option {
    from the stylesheet rather than reading for them: any rule whose base
    background layer is dark (luminance < 0.25) at an alpha that actually
    covers, minus the ones that are meant to stay dark in both themes --
-   scrims, the starfield, the mobile drawer, ambient decor. */
+   scrims, the starfield, ambient decor. The mobile drawer was on this list
+   and has been taken off it -- see the rule above. */
 html[data-theme="light"] .aspect-card--square,
 html[data-theme="light"] .aspect-card--trine,
 html[data-theme="light"] .not-found-planet-body,
