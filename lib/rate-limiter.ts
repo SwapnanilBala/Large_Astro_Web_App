@@ -29,6 +29,11 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      stopped at the minute rather than at the day, which is the one place the
      other two LLM routes cannot be: they are driven by clicking. */
   "/api/chart/varga-commentary": { limit: 6, windowMs: 60_000 },
+  /* Same shape as the atlas: asked once per chart on mount and then served
+     from cache. Slightly higher because the panel mounts on two pages, so a
+     visitor who opens the results page and then /insights/life-shifts
+     legitimately asks twice for overlapping chapters. */
+  "/api/chart/life-shifts": { limit: 8, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
   /* Tight: a POST here can insert a workspace row, so an unthrottled loop is a
      way to fill the table. A real visitor needs it once per device, ever. */

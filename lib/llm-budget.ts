@@ -77,6 +77,7 @@ export type LlmRouteKey =
   | "/api/chart/domain-brief"
   | "/api/chart/advanced-story"
   | "/api/chart/varga-commentary"
+  | "/api/chart/life-shifts"
   | "/api/palm-reading"
   | "/api/palm-reading/ask";
 
@@ -195,6 +196,23 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   },
   "/api/chart/varga-commentary": {
     perDay: 400,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* Sized by where it renders rather than by what one call costs, which is
+     the opposite way round from the atlas above it. A call here is cheaper
+     -- at most five short readings against varga's ten -- but the brief
+     variant of the panel sits on the results page, which is the most
+     visited surface in the app, where the atlas is two navigations deep.
+     Against that, the panel asks only for the chapters it actually renders
+     (one on the results page, up to five on /insights/life-shifts) and the
+     route caches by chapter set, so a chart costs one call rather than one
+     per view. 1200 is roughly half the chart routes' ceiling: enough that a
+     normal day never touches it, low enough that a bad day is a section
+     falling back to its templates rather than a bill. Revisit it against
+     the llm_usage lines once this has run for a week. */
+  "/api/chart/life-shifts": {
+    perDay: 1200,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },

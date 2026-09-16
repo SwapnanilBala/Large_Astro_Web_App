@@ -88,6 +88,89 @@ function renderVargaFacts(facts) {
     .join("\n\n");
 }
 
+/* One synthetic reader, so every run sweeps the same chapters. The shapes are
+   the ones lib/engines/major-shifts-engine.ts actually emits: mahadasha
+   openings plus the Saturn, Jupiter and nodal returns nearest to now, ordered
+   by pivot and spanning past, active and upcoming. */
+function lifeShiftFacts() {
+  return [
+    {
+      id: "jupiter-return-2009-04-02T00:00:00.000Z",
+      label: "Jupiter return (second)",
+      planet: "Jupiter",
+      theme: "expansion, meaning, and a wider field of play",
+      status: "past",
+      ageAtPivot: 24,
+      pivot: "April 2009",
+      window: "Aug 2008 → Dec 2009",
+      evidence: "Cycle: ~11.9 years | Natal Jupiter: Gemini / H2",
+    },
+    {
+      id: "saturn-return-2014-09-18T00:00:00.000Z",
+      label: "Saturn return (first)",
+      planet: "Saturn",
+      theme: "structure, responsibility, and the cost of choices",
+      status: "past",
+      ageAtPivot: 29,
+      pivot: "September 2014",
+      window: "Sep 2013 → Sep 2015",
+      evidence: "Cycle: ~29.5 years | Natal Saturn: Capricorn / H9",
+    },
+    {
+      id: "mahadasha-2023-11-06T00:00:00.000Z",
+      label: "Venus mahadasha begins",
+      planet: "Venus",
+      theme: "love, partnership, money, and pleasure",
+      status: "active",
+      ageAtPivot: 38,
+      pivot: "November 2023",
+      window: "Feb 2023 → Aug 2024",
+      evidence: "Mahadasha lord: Venus | Lasts ~20 years | Natal Venus: Aquarius / H10",
+    },
+    {
+      id: "nodal-return-2026-12-11T00:00:00.000Z",
+      label: "Nodal return (second)",
+      planet: "Rahu / Ketu",
+      theme: "fate axis — what you reach for and what you release",
+      status: "upcoming",
+      ageAtPivot: 41,
+      pivot: "December 2026",
+      window: "Mar 2026 → Sep 2027",
+      evidence: "Cycle: ~18.6 years | Rahu: Capricorn / H9 | Ketu: Cancer / H3",
+    },
+    {
+      id: "jupiter-return-2033-01-20T00:00:00.000Z",
+      label: "Jupiter return (fourth)",
+      planet: "Jupiter",
+      theme: "expansion, meaning, and a wider field of play",
+      status: "upcoming",
+      ageAtPivot: 47,
+      pivot: "January 2033",
+      window: "May 2032 → Sep 2033",
+      evidence: "Cycle: ~11.9 years | Natal Jupiter: Gemini / H2",
+    },
+  ];
+}
+
+function renderLifeShiftFacts(facts) {
+  return facts
+    .map((fact) =>
+      [
+        `id: ${fact.id}`,
+        `chapter: ${fact.label}`,
+        `planet: ${fact.planet}`,
+        `standing theme: ${fact.theme}`,
+        `where it sits: ${fact.status}`,
+        `pivot: ${fact.pivot} (age ${fact.ageAtPivot})`,
+        `window: ${fact.window}`,
+        fact.evidence ? `evidence: ${fact.evidence}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
+    )
+    .join("\n\n");
+}
+
 const ROUTES = {
   dasha: {
     file: routeFile("chart", "dasha-interpretation"),
@@ -114,6 +197,22 @@ const ROUTES = {
     userTurn: ({ facts }) =>
       `Write exactly ${facts.length} notes, one for each of these vargas: ` +
       `${facts.map((fact) => fact.label).join(", ")}.\n\n${renderVargaFacts(facts)}`,
+  },
+  "life-shifts": {
+    file: routeFile("chart", "life-shifts"),
+    maxTokens: 12000,
+    /* Two shapes the panel actually produces: the results page asks for the
+       one chapter it shows, and /insights/life-shifts asks for the full set.
+       Set size is the only thing that varies in the user turn, so it is the
+       only axis worth sweeping. */
+    cases: [
+      { label: "one active chapter", facts: lifeShiftFacts().slice(2, 3) },
+      { label: "five chapters", facts: lifeShiftFacts() },
+    ],
+    userTurn: ({ facts }) =>
+      `Write exactly ${facts.length} reading${facts.length === 1 ? "" : "s"}, ` +
+      `one for each of these chapter ids: ${facts.map((fact) => fact.id).join(", ")}.\n\n` +
+      renderLifeShiftFacts(facts),
   },
 };
 

@@ -7,6 +7,12 @@ import {
   type MajorLifeShift,
   type MajorShiftStatus,
 } from "@/lib/engines/major-shifts-engine";
+import {
+  formatShiftPivot,
+  formatShiftWindow,
+  lifeShiftId,
+} from "@/lib/life-shift-reading";
+import { useLifeShiftReadings } from "./use-life-shift-readings";
 import styles from "../insights.module.css";
 
 const STATUS_LABEL: Record<MajorShiftStatus, string> = {
@@ -15,21 +21,10 @@ const STATUS_LABEL: Record<MajorShiftStatus, string> = {
   upcoming: "Upcoming",
 };
 
-function formatRange(startIso: string, endIso: string): string {
-  const start = new Date(startIso);
-  const end = new Date(endIso);
-  const fmt = (date: Date) =>
-    date.toLocaleDateString("en-US", { month: "short", year: "numeric" });
-  return `${fmt(start)} → ${fmt(end)}`;
-}
-
-function formatPivot(pivotIso: string): string {
-  const date = new Date(pivotIso);
-  return date.toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
-}
+/* formatShiftPivot and formatShiftWindow live in lib/life-shift-reading.ts
+   because the prompt needs the identical words: a reading that says "late
+   2028" under a card headed "March 2029" reads as a contradiction rather
+   than as two roundings of one date. */
 
 function statusClass(status: MajorShiftStatus): string {
   if (status === "past") return styles.lifeShiftCardPast;
@@ -37,7 +32,16 @@ function statusClass(status: MajorShiftStatus): string {
   return styles.lifeShiftCardUpcoming;
 }
 
-function ShiftCard({ shift }: { shift: MajorLifeShift }) {
+/*
+ * `reading` is what /api/chart/life-shifts wrote for this chapter, and the
+ * engine's own `narrative` is what shows until it lands -- and instead of it
+ * if the route is unavailable, out of budget, or declines. The template is
+ * never removed from the page, only covered: nine planet tones and three
+ * return shapes is thin enough that two charts get the same paragraph, which
+ * is what the route is for, but it is a complete answer and a blank card is
+ * not.
+ */
+function ShiftCard({ shift, reading }: { shift: MajorLifeShift; reading?: string }) {
   return (
     <article className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}>
       <header className={styles.lifeShiftHeader}>
@@ -47,11 +51,12 @@ function ShiftCard({ shift }: { shift: MajorLifeShift }) {
       <p className={styles.lifeShiftLabel}>{shift.label}</p>
       <h3>{shift.theme}</h3>
       <p className={styles.lifeShiftWindow}>
-        <strong>Pivot:</strong> {formatPivot(shift.pivotIso)} · age {shift.ageAtPivot}
+        <strong>Pivot:</strong> {formatShiftPivot(shift.pivotIso)} · age {shift.ageAtPivot}
         <br />
-        <strong>Window:</strong> {formatRange(shift.windowStartIso, shift.windowEndIso)}
+        <strong>Window:</strong>{" "}
+        {formatShiftWindow(shift.windowStartIso, shift.windowEndIso)}
       </p>
-      <p>{shift.narrative}</p>
+      <p>{reading ?? shift.narrative}</p>
       {shift.evidence && <small>{shift.evidence}</small>}
     </article>
   );
@@ -79,6 +84,27 @@ export default function MajorShiftsPanel({
     [payload],
   );
 
+  const forwardShifts = shifts
+    .filter((shift) => shift.status === "active" || shift.status === "upcoming")
+    .slice(0, isBrief ? 1 : 2);
+  const featuredShifts = forwardShifts.length > 0 ? forwardShifts : shifts.slice(-1);
+  const featuredKeys = new Set(featuredShifts.map(lifeShiftId));
+  const pastShifts = shifts.filter(
+    (shift) => shift.status === "past" && !featuredKeys.has(lifeShiftId(shift)),
+  );
+
+  /* Only the chapters actually on the page are asked for, which is what
+     keeps the results page cheap: the brief variant renders one chapter and
+     buys one reading, where the full page renders up to five.
+
+     This selection sits above the empty-chart return because the hook below
+     it cannot be conditional -- and it has to be above the hook rather than
+     after it, because the hook is the thing that spends money. Handing it
+     `shifts` instead was a five-chapter call on the most visited page in
+     the app, four fifths of it for cards that page never draws. */
+  const renderedShifts = isBrief ? featuredShifts : [...featuredShifts, ...pastShifts];
+  const { readings } = useLifeShiftReadings(renderedShifts);
+
   if (shifts.length === 0) {
     return (
       <div className={styles.lifeShiftsPanel}>
@@ -90,19 +116,6 @@ export default function MajorShiftsPanel({
     );
   }
 
-  const forwardShifts = shifts
-    .filter((shift) => shift.status === "active" || shift.status === "upcoming")
-    .slice(0, isBrief ? 1 : 2);
-  const featuredShifts = forwardShifts.length > 0 ? forwardShifts : shifts.slice(-1);
-  const featuredKeys = new Set(
-    featuredShifts.map((shift) => `${shift.kind}-${shift.pivotIso}`),
-  );
-  const pastShifts = shifts.filter(
-    (shift) =>
-      shift.status === "past" &&
-      !featuredKeys.has(`${shift.kind}-${shift.pivotIso}`),
-  );
-
   return (
     <div className={styles.lifeShiftsPanel}>
       <p className={styles.sectionIntro}>
@@ -113,7 +126,11 @@ export default function MajorShiftsPanel({
 
       <div className={styles.lifeShiftsTimeline}>
         {featuredShifts.map((shift) => (
-          <ShiftCard key={`${shift.kind}-${shift.pivotIso}`} shift={shift} />
+          <ShiftCard
+            key={lifeShiftId(shift)}
+            shift={shift}
+            reading={readings.get(lifeShiftId(shift))}
+          />
         ))}
       </div>
 
@@ -127,7 +144,11 @@ export default function MajorShiftsPanel({
           </summary>
           <div className={styles.lifeShiftsTimeline}>
             {pastShifts.map((shift) => (
-              <ShiftCard key={`${shift.kind}-${shift.pivotIso}`} shift={shift} />
+              <ShiftCard
+                key={lifeShiftId(shift)}
+                shift={shift}
+                reading={readings.get(lifeShiftId(shift))}
+              />
             ))}
           </div>
         </details>
