@@ -517,6 +517,10 @@ export default function MobileInsights({
           subtitle={tr("mobileInsights.dashaPeriodCount", {
             count: String(dasha.periods.length),
           })}
+          /* Open, to match the timing detail on the desktop page: the current
+             dasha is the timing answer both pages exist to give, and it was
+             the one thing you had to tap for. */
+          defaultOpen
         >
           <p className={styles.currentDasha}>
             <Emphasise
@@ -553,7 +557,8 @@ export default function MobileInsights({
 
       {/* After the dasha table and before the summary: it is a deep read rather
           than a headline, and the sections above it are the ones somebody opens
-          the page for. Closed by default like its neighbours. */}
+          the page for. Closed by default -- unlike the dasha table above it,
+          which is one of those headlines. */}
       {kalatra && (
         <Section
           title={tr("mobileInsights.kalatraTitle")}
