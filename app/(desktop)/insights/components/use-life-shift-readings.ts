@@ -19,13 +19,23 @@ export type LifeShiftReadings = {
 /**
  * The written reading for each chapter the panel is about to render.
  *
- * Fetched exactly once per mount, and guarded twice, because the two ways it
- * could fire twice are unrelated:
+ * Fetched once per mounted lifetime, and the bookkeeping is fussier than it
+ * looks because reactStrictMode is on:
  *
- *   `startedRef` covers React's development double-invoke of effects. Without
- *   it every local page load would bill two calls -- and they would not even
- *   dedupe against each other, because both would miss the server's cache on
- *   the way in.
+ *   `startedRef` stops a second request inside one lifetime. It is reset in
+ *   the cleanup rather than left latched, and that reset is the whole reason
+ *   this works in development. StrictMode mounts, unmounts and remounts; the
+ *   unmount aborts the in-flight request, and a latched ref then refuses to
+ *   start another on the remount. The section sat on its template forever
+ *   locally -- the server never saw a single request, because the only one
+ *   ever made was cancelled before it left the browser. It came back clean in
+ *   production, where there is no second invoke, which is exactly the shape
+ *   of bug that survives review.
+ *
+ *   Resetting it does not buy a double call. The aborted request never
+ *   reaches the route, so the remount's request is the first and only one to
+ *   be billed. In production the cleanup runs on a real navigation, where
+ *   clearing the ref is meaningless anyway.
  *
  *   The empty dependency array covers re-renders. Depending on `shifts` looks
  *   more correct and is worse: the array is rebuilt by a useMemo in the panel,
@@ -70,9 +80,7 @@ export function useLifeShiftReadings(
     }
 
     /* Aborted on unmount so navigating away does not land a setState on a dead
-       component. The request itself is already in flight and the server will
-       finish and cache it, which is the right outcome -- coming back to the
-       section then costs nothing. */
+       component. */
     const controller = new AbortController();
 
     (async () => {
@@ -103,7 +111,11 @@ export function useLifeShiftReadings(
       }
     })();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      /* So the StrictMode remount can ask again; see the note above. */
+      startedRef.current = false;
+    };
   }, []);
 
   return { state, readings };

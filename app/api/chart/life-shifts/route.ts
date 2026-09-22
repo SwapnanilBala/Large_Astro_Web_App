@@ -39,48 +39,50 @@ import {
  */
 
 /*
- * ── EFFORT -- medium, by analogy rather than by measurement ────────────────
+ * ── EFFORT -- medium, measured, and the same at both lengths ──────────────
  *
- * Not measured here: this worktree has no .env.local, so there is no
- * ANTHROPIC_API_KEY to sweep with and any numbers in this comment would be
- * invented. Saying so is the point -- the file's neighbours carry real
- * per-effort token counts and costs, and a fabricated table next to them would
- * be worse than an empty one.
+ * This started as two dials -- high for the single headline reading, medium
+ * for the row of five -- on the reasoning that one chapter is cheap enough to
+ * lavish effort on. Measurement said no, so there is one dial again.
  *
- * Medium is taken from /api/chart/varga-commentary, which is the same shape of
- * job: a handful of short notes returned together under an output schema.
- * There, medium was the highest setting that fit inside the request timeout,
- * and the schema itself cut output tokens by doing the structuring the model
- * would otherwise spend tokens inventing. This route asks for at most five
- * notes against varga's ten, so it should sit comfortably inside the same
- * envelope.
+ * The sweep, both shapes, no output schema
+ * (scripts/effort-compare.mjs --route life-shifts --efforts low,medium,high):
  *
- * Settle it with the repo's script, which reads the SYSTEM_PROMPT below out of
- * this file so the sweep cannot drift from what ships:
+ *     one chapter, headline     low  7.8s  351 out  $0.0144
+ *                               med  7.8s  407 out  $0.0158
+ *                               high 12.5s 627 out  $0.0213
+ *     five chapters, compact    low  13.1s 778 out  $0.0285
+ *                               med  14.6s 801 out  $0.0291
+ *                               high 20.5s 1206 out $0.0392
  *
- *     ANTHROPIC_API_KEY=… node scripts/effort-compare.mjs --route life-shifts \
- *       --efforts low,medium,high
+ * And the headline shape again through the shipped path, schema included,
+ * which is what the numbers above do not cover:
  *
- * The question worth asking of the numbers is the one the dasha route asked:
- * not whether the prose is nicer, but whether a cheaper setting drops a fact
- * it was handed. Here that is the window -- a reading that never names the
- * planning window is a reading the card above it already gave.
+ *     low   9.8s  397 out  $0.0110  195 words  ~7 sentences
+ *     med   8.5s  381 out  $0.0106  197 words  ~7 sentences
+ *     high  9.0s  462 out  $0.0126  197 words  ~7 sentences
  *
- * The headline shape is set one notch higher, and that is a reasoned bet
- * rather than a measured result, so here is the reasoning and the exposure.
- * It is one chapter, not five: the varga finding that high ran to 52s was a
- * ten-item job, and the dasha route measured high at 6.6s for a single short
- * note. A single longer note at high should land well inside the 40s timeout
- * even at several times that. Cost is not the constraint either -- on the
- * dasha route high was $0.0094 against medium's $0.0090. And the failure
- * mode is bounded: a run that overruns times out and the card keeps its
- * template, which is the same place a missing key leaves it. Settle it for
- * real with the sweep above, which now covers both shapes.
+ * Two things in there settled it. Latency is flat across the dial on a
+ * single chapter -- 8.5s to 9.8s, with high not the slowest -- so the timeout
+ * argument that would have justified caution, and the one that would have
+ * justified spending, both evaporate. And the discriminator the dasha route
+ * used, whether a cheaper setting drops a fact it was handed, finds nothing
+ * here: every level named the window, named Venus in Aquarius in the tenth,
+ * and covered what the chapter asks, eases, hardens and is a poor time to
+ * force. There was no fact left on the floor at low, so there was nothing for
+ * high to buy, and it wanted about 19% more to not buy it.
+ *
+ * The corollary is the useful part: the length instruction is doing the work,
+ * not the effort dial. The same chapter at the same effort came back at 197
+ * words for "headline" and 79 for "compact". If a future reading feels thin,
+ * the lever is the LENGTH block in the system prompt below, not this constant.
+ *
+ * Medium over low is a narrower call than usual, since low was within noise on
+ * both cost and time. It stays at medium to match the other chart routes
+ * rather than on evidence from this sweep; low is a defensible saving if the
+ * route total ever comes under pressure.
  */
-const EFFORT_BY_DEPTH = {
-  headline: "high",
-  compact: "medium",
-} as const;
+const EFFORT = "medium" as const;
 
 export const maxDuration = 60;
 
@@ -256,8 +258,6 @@ export async function POST(request: NextRequest) {
        limit in the proxy has already run; this is the daily ceiling, and it is
        checked here precisely because the proxy cannot see that the cache above
        served the last four requests for free. */
-    const effort = EFFORT_BY_DEPTH[depth];
-
     const budget = await consumeLlmBudget("/api/chart/life-shifts", request);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
@@ -293,7 +293,7 @@ export async function POST(request: NextRequest) {
       max_tokens: 12000,
       /* thinking is omitted, which on this model runs adaptive by default. */
       output_config: {
-        effort,
+        effort: EFFORT,
         format: zodOutputFormat(ReadingsSchema),
       },
       system: [
@@ -321,7 +321,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       route: "/api/chart/life-shifts",
       event: "llm_usage",
-      effort,
+      effort: EFFORT,
       depth,
       shifts: facts.length,
       stopReason: response.stop_reason,
@@ -351,7 +351,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_output_truncated",
-        effort,
+        effort: EFFORT,
         depth,
         outputTokens: response.usage.output_tokens,
       }));
@@ -401,7 +401,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_short_set",
-        effort,
+        effort: EFFORT,
         depth,
         asked: facts.length,
         returned: readings.length,
