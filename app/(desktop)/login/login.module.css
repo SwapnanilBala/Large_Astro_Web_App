@@ -395,8 +395,8 @@
   border: 1px solid rgba(232, 237, 247, 0.22);
   background: rgba(232, 237, 247, 0.06);
   color: #EAEDF3;
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.28rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-ui);
   font-weight: 650;
   cursor: pointer;
   transition: border-color 0.2s ease, background-color 0.2s ease, transform 0.2s ease;

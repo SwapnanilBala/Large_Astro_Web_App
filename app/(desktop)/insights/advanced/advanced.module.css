@@ -50,8 +50,8 @@
 }
 
 .heroKicker {
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1.15rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-ui);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -150,7 +150,7 @@
   border-radius: 999px;
   background: rgba(200, 155, 60, 0.15);
   color: var(--accent-gold);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;

@@ -105,7 +105,7 @@
 .kicker {
   margin: 0 0 0.55rem;
   color: var(--detail-gold);
-  font-size: 0.7rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0.15em;
   text-transform: uppercase;
@@ -164,7 +164,7 @@
   border-radius: 999px;
   color: #d8d4ca;
   background: rgba(229, 189, 104, 0.07);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   line-height: 1.2;
 }
 
@@ -216,7 +216,7 @@
   max-width: 7rem;
   margin: 0.2rem auto 0;
   color: var(--detail-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -378,7 +378,7 @@
   margin-top: 0.45rem;
   overflow-wrap: anywhere;
   color: var(--detail-muted);
-  font-size: 0.73rem;
+  font-size: var(--text-meta);
   line-height: 1.4;
 }
 
@@ -594,7 +594,7 @@
 .timingGrid dt,
 .provenanceList dt {
   color: var(--detail-muted);
-  font-size: 0.66rem;
+  font-size: var(--text-meta);
 }
 
 .placementFacts dd,
@@ -608,7 +608,7 @@
 
 .peerNote {
   margin: 0.75rem 0 0;
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
 }
 
 .strengthNote {
@@ -626,13 +626,13 @@
 
 .strengthNote strong {
   color: var(--detail-teal);
-  font-size: 0.76rem;
+  font-size: var(--text-meta);
 }
 
 .strengthNote span {
   margin-top: 0.25rem;
   color: var(--detail-muted);
-  font-size: 0.65rem;
+  font-size: var(--text-meta);
   line-height: 1.45;
 }
 
@@ -795,7 +795,7 @@
 
 .vargaPager span {
   color: var(--detail-muted);
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.09em;
   text-transform: uppercase;
 }
@@ -820,7 +820,7 @@
 .footer p {
   max-width: 48rem;
   margin: 0;
-  font-size: 0.76rem;
+  font-size: var(--text-meta);
 }
 
 .footer a {

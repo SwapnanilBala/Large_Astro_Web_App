@@ -88,7 +88,7 @@
 
 .tag {
   padding: 0.05rem 0.4rem;
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -106,7 +106,7 @@
  * method aside instead of by dimming text below legibility.
  */
 .origin {
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   color: var(--text-secondary, #a8a090);
 }
 
@@ -166,7 +166,7 @@
 
 .styleLabel {
   margin-top: 0.25rem;
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -233,7 +233,7 @@
 
 .noteTitle {
   margin: 0 0 0.25rem;
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;

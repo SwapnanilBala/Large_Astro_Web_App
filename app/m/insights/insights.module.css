@@ -18,7 +18,7 @@
 }
 
 .factLabel {
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   color: var(--text-tertiary, #9a918a);
 }
 
@@ -120,11 +120,13 @@
 }
 
 .table thead th {
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-family: var(--font-display);
+  /* Not the display face. mobile-shell.css states the rule -- Cinzel is for
+     titles and section labels, "never for body copy, data, or anything a
+     person has to read at length" -- and a table header is data. */
   color: var(--text-secondary, #a8a090);
 }
 
@@ -149,7 +151,7 @@
 .flag {
   margin-left: 0.3rem;
   padding: 0 0.25rem;
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   border-radius: 4px;
   text-decoration: none;
   color: var(--accent-gold, #d4a574);
@@ -191,7 +193,7 @@
 
 /* Replaces the raw lowercase "high" badge with the measured rarity phrase. */
 .rarity {
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.02em;
   color: var(--text-tertiary, #9a918a);
 }
@@ -281,14 +283,14 @@
 .claimDetail {
   display: block;
   width: 100%;
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--text-tertiary, #9a918a);
 }
 
 .legend {
   margin: 0.6rem 0 0;
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--text-tertiary, #9a918a);
 }
@@ -357,7 +359,7 @@
 
 .roleReadout {
   flex: 0 0 auto;
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   color: var(--text-tertiary, #9a918a);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -388,7 +390,7 @@
   padding: 0.1rem 0.4rem;
   border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
   border-radius: 999px;
-  font-size: 0.6875rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.04em;
   color: var(--text-tertiary, #9a918a);
   white-space: nowrap;
@@ -525,7 +527,7 @@
   display: block;
   margin-top: 0.2rem;
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   font-style: normal;
 }
 
@@ -534,7 +536,7 @@
   padding-top: 0.5rem;
   border-top: 1px solid var(--border-soft);
   color: var(--text-secondary);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   line-height: 1.45;
 }
 
@@ -548,6 +550,6 @@
 .facetMethod {
   margin: 0.7rem 0 0;
   color: var(--text-secondary);
-  font-size: 0.74rem;
+  font-size: var(--text-meta);
   line-height: 1.5;
 }

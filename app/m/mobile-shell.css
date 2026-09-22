@@ -19,6 +19,16 @@
   --bg-surface: #12121a;
   --surface: rgba(255, 243, 210, 0.03);
   --surface-strong: rgba(255, 243, 210, 0.05);
+  /*
+   * The type scale, same values as the desktop tree's. Declared again because
+   * app/m loads mobile-shell.css and nothing else -- globals.css, where these
+   * live for the desktop tree, never reaches this one. Same numbers on purpose:
+   * two scales would drift.
+   */
+  --text-meta: 0.78rem;    /* 12.5px -- table numbers, fine print */
+  --text-label: 0.8125rem; /* 13px  -- uppercase labels and badges */
+  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, tabs */
+
   --text-primary: #f5f0e6;
   --text-secondary: #a8a090;
   /*

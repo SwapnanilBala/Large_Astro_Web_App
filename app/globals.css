@@ -773,7 +773,16 @@ button {
   color: var(--button-color);
   border-radius: 12px;
   padding: var(--btn-pad-y) var(--btn-pad-x);
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  /*
+   * Buttons are interface, not titles.
+   *
+   * This was --font-display, which put every button in the app into Cinzel --
+   * and Cinzel has no lowercase, so every label rendered as small caps:
+   * "Compare charts", "Show the aspect table", "Download reading". A button
+   * says what it does and wants to be read at a glance, which is the one thing
+   * an inscriptional face is worst at. The display face stays on headings.
+   */
+  font-family: var(--font-body);
   font-weight: 600;
   letter-spacing: 0.01em;
   text-transform: none;

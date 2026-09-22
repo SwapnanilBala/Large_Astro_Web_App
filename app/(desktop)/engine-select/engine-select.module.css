@@ -43,8 +43,8 @@
 }
 
 .kicker {
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.16em;
@@ -170,7 +170,7 @@
 
 .railTag {
   font-family: var(--font-body), sans-serif;
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
