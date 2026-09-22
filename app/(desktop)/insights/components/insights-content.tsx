@@ -1681,9 +1681,14 @@ export default function InsightsContent({
             id="vimshottari-dashas"
             kicker="Timing detail"
             title="Dasha periods and sub-periods"
-            defaultOpen={false}
+            defaultOpen={true}
             className={`${styles.cardRules} ${styles.cardDasha}`}
-            persistKey={`${sectionStateScope}:vimshottari-dashas`}
+            /* `:open-default` retires the keys written while this section
+               defaulted closed. The section persists on every mount, not only
+               on a click, so every earlier visitor has "closed" stored whether
+               they chose it or not -- reusing the old key would leave the new
+               default visible to first-time readers only. */
+            persistKey={`${sectionStateScope}:vimshottari-dashas:open-default`}
             summary={
               <>
                 <span>
