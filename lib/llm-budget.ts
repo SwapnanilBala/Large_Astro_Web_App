@@ -74,6 +74,7 @@ import { getClientIp } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
   | "/api/chart/dasha-interpretation"
+  | "/api/chart/current-period"
   | "/api/chart/domain-brief"
   | "/api/chart/advanced-story"
   | "/api/chart/varga-commentary"
@@ -177,6 +178,25 @@ type LlmBudgetConfig = {
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   "/api/chart/dasha-interpretation": {
     perDay: 2500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* The same arithmetic as life-shifts below, and the same answer, reached
+     from the other direction. A call here is about what the drill-down above
+     costs -- $0.0115 measured against its $0.0090, one paragraph either way
+     against the same cached prefix -- but it is not driven by clicking: the
+     panel asks on mount, and the panel is on the results page, so this is
+     bought by *visitors* rather than by the few who drill. That is the whole
+     difference between 2500 and 1200, which is about $14 of exposure on a day
+     that exhausts the route.
+
+     What holds it there is the cache key, which is the stack plus a coarse
+     progress band rather than the live percentage the card prints. A chart
+     costs one call and keeps costing nothing for the months until its
+     antardasha changes band; keying on the percentage would have re-bought
+     every reading at midnight and made this number a per-day-per-chart one. */
+  "/api/chart/current-period": {
+    perDay: 1200,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },

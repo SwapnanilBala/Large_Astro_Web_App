@@ -359,6 +359,7 @@
     "drillDeeper": "Click the bar again to drill into {level}",
     "years": "years",
     "currentSummaryLabel": "What This Means For You",
+    "currentReadingPending": "Reading your current period…",
     "daysRemaining": "{days} days remaining",
     "periodProgress": "Period Progress",
     "stepBack": "Back",

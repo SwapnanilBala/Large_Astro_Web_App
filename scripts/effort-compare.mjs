@@ -171,6 +171,37 @@ function renderLifeShiftFacts(facts) {
     .join("\n\n");
 }
 
+/* The same synthetic chart the life-shift facts above are cut from -- Venus
+   mahadasha, natal Venus in Aquarius / H10, Saturn in Capricorn / H9 -- so the
+   two routes are measured against one reader rather than two. */
+const CURRENT_PERIOD_LEVELS = ["Maha Dasha", "Antardasha", "Pratyantardasha"];
+
+/* Mirrors renderCurrentPeriodFacts and currentPeriodPhase in
+   lib/current-period-reading.ts. Duplicated for the same reason the other two
+   render helpers here are: this file is .mjs and cannot import the TypeScript.
+   The SYSTEM_PROMPT is still read from the route, so only the user turn can
+   drift -- check it against the lib if a sweep reads oddly. */
+function renderCurrentPeriodFacts({ stack, nakshatra, phase }) {
+  const rows = stack.map((step, index) => {
+    const level = CURRENT_PERIOD_LEVELS[index] ?? `level ${index + 1}`;
+    const placement =
+      step.sign && step.house ? `, natal ${step.lord} in ${step.sign}, house ${step.house}` : "";
+    return `${level}: ${step.lord} (${step.window})${placement}`;
+  });
+  const innermost = CURRENT_PERIOD_LEVELS[stack.length - 1] ?? "innermost period";
+  return [
+    rows.join("\n"),
+    `Birth nakshatra: ${nakshatra.name}, pada ${nakshatra.pada}, ruled by ${nakshatra.lord}.`,
+    `The ${innermost} ${phase}.`,
+  ].join("\n\n");
+}
+
+const CURRENT_PERIOD_STACK = [
+  { lord: "Venus", window: "Nov 6, 2023 - Nov 6, 2043", sign: "Aquarius", house: 10 },
+  { lord: "Saturn", window: "Jan 6, 2027 - Mar 8, 2030", sign: "Capricorn", house: 9 },
+  { lord: "Mercury", window: "Aug 14, 2027 - Jan 11, 2028", sign: "Aries", house: 12 },
+];
+
 const ROUTES = {
   dasha: {
     file: routeFile("chart", "dasha-interpretation"),
@@ -217,6 +248,37 @@ const ROUTES = {
       `LENGTH "${depth}", one for each of these chapter ids: ` +
       `${facts.map((fact) => fact.id).join(", ")}.\n\n` +
       renderLifeShiftFacts(facts),
+  },
+  "current-period": {
+    file: routeFile("chart", "current-period"),
+    maxTokens: 8000,
+    /* The two shapes the card actually renders. Stack depth is one axis: a
+       chart without a pratyantardasha sends two lords. The other is whether
+       the chart carried positions at all, which is what decides if the
+       placements -- the input this route exists for -- are in the prompt; the
+       third case is the same stack with them stripped, so a sweep shows
+       directly what they buy. */
+    cases: [
+      {
+        label: "two lords, with placements",
+        stack: CURRENT_PERIOD_STACK.slice(0, 2),
+        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
+        phase: "is around its midpoint",
+      },
+      {
+        label: "three lords, with placements",
+        stack: CURRENT_PERIOD_STACK,
+        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
+        phase: "is in its closing stretch",
+      },
+      {
+        label: "three lords, no placements",
+        stack: CURRENT_PERIOD_STACK.map(({ lord, window }) => ({ lord, window })),
+        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
+        phase: "has only just opened",
+      },
+    ],
+    userTurn: renderCurrentPeriodFacts,
   },
 };
 

@@ -12,6 +12,7 @@ import type {
 import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import { PLANET_COLORS, PLANET_INK } from "@/lib/constellation-geometry";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
+import { useCurrentPeriodReading } from "./use-current-period-reading";
 
 /* ────────────────────────────────────────────────
    Deterministic Dasha Interpretations
@@ -716,6 +717,29 @@ export default function NakshatraDashaPanel({
   const currentDrillLevel = drillPath.length > 0 ? drillPath[drillPath.length - 1].level + 1 : 1;
   const combinationInsight = getCombinationInsight();
   const currentProgress = getAntardashaProgress();
+  /*
+   * The written reading for the stack the reader is standing in.
+   *
+   * Below currentProgress because it needs the progress figure, and above
+   * everything that renders because this is a hook -- there is no conditional
+   * return between here and the top of the component, and there must not be
+   * one, or this stops being called on some renders.
+   *
+   * It is also the one call in this panel that fires without a click, so it is
+   * the one worth reading twice before changing: whatever is passed here is
+   * bought, once per mount, for every visitor who opens the timing section.
+   */
+  const currentPeriodReading = useCurrentPeriodReading(
+    dasha,
+    nakshatra,
+    planets,
+    currentProgress.progressPercent,
+  );
+  /* The template stays the fallback rather than the thing replaced: it is on
+     screen from the first paint, and it is what remains if the reading never
+     arrives. */
+  const templateSummary = getCurrentPeriodSummary();
+  const currentPeriodCopy = currentPeriodReading.reading ?? templateSummary;
   const selectedParent = drillPath.length > 0 ? drillPath[drillPath.length - 1] : null;
   /* One level shallower than what is on screen; at the first step that is the
      Maha Dasha timeline itself. */
@@ -767,8 +791,11 @@ export default function NakshatraDashaPanel({
             {dasha.current_dasha} <span>to</span> {dasha.current_antardasha}
             {dasha.current_pratyantar ? <span> to {dasha.current_pratyantar}</span> : null}
           </h3>
-          {getCurrentPeriodSummary() && (
-            <p className="dasha-command-summary">{getCurrentPeriodSummary()}</p>
+          {/* The orienting line, not the reading. The written paragraph goes in
+              the Current Period card below, where it has room; the two used to
+              print the same sentence twice on one screen. */}
+          {templateSummary && (
+            <p className="dasha-command-summary">{templateSummary}</p>
           )}
         </div>
 
@@ -928,10 +955,17 @@ export default function NakshatraDashaPanel({
             </span>
           </div>
 
-          {getCurrentPeriodSummary() && (
+          {currentPeriodCopy && (
             <div className="dasha-current-summary">
               <h4>{t("dasha.currentSummaryLabel")}</h4>
-              <p>{getCurrentPeriodSummary()}</p>
+              <p>
+                {currentPeriodCopy}
+                {/* Quiet, and only while the template is what is showing: once
+                    the reading has landed there is nothing still coming. */}
+                {currentPeriodReading.state === "pending" && (
+                  <span className="dasha-combo-pending"> {t("dasha.currentReadingPending")}</span>
+                )}
+              </p>
             </div>
           )}
 

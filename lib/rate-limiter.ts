@@ -23,6 +23,11 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      window has to allow a real session; the spend ceiling that actually
      protects the key is the per-day budget in lib/llm-budget.ts. */
   "/api/chart/dasha-interpretation": { limit: 12, windowMs: 60_000 },
+  /* Longest-prefix match puts this ahead of "/api/chart", which is the point
+     of the sort below. Asked once per chart on mount and then served from
+     cache, so a real visitor needs it a handful of times an hour at most --
+     six is the atlas's number, for the same reason. */
+  "/api/chart/current-period": { limit: 6, windowMs: 60_000 },
   "/api/chart/domain-brief": { limit: 12, windowMs: 60_000 },
   /* The atlas asks once per chart and then reads from cache, so a real visitor
      needs this a handful of times an hour at most. Low enough that a loop is
