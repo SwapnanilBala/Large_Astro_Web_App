@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MajorLifeShift } from "@/lib/engines/major-shifts-engine";
 import {
   buildLifeShiftFacts,
+  type LifeShiftDepth,
   type LifeShiftReading,
 } from "@/lib/life-shift-reading";
 
@@ -40,9 +41,14 @@ export type LifeShiftReadings = {
  *
  * Only the chapters the caller passes are asked for, which is what keeps the
  * results page cheap: the brief variant renders one chapter and so buys one
- * reading, where /insights/life-shifts renders up to five.
+ * reading, where /insights/life-shifts renders up to five. `depth` is the
+ * other half of that trade -- the one chapter the results page does buy is
+ * the one worth writing at length.
  */
-export function useLifeShiftReadings(shifts: MajorLifeShift[]): LifeShiftReadings {
+export function useLifeShiftReadings(
+  shifts: MajorLifeShift[],
+  depth: LifeShiftDepth,
+): LifeShiftReadings {
   const [state, setState] = useState<LifeShiftReadingsState>("pending");
   const [readings, setReadings] = useState<Map<string, string>>(() => new Map());
   const startedRef = useRef(false);
@@ -50,6 +56,8 @@ export function useLifeShiftReadings(shifts: MajorLifeShift[]): LifeShiftReading
      above holds without the effect closing over a stale first render. */
   const shiftsRef = useRef(shifts);
   shiftsRef.current = shifts;
+  const depthRef = useRef(depth);
+  depthRef.current = depth;
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -72,7 +80,7 @@ export function useLifeShiftReadings(shifts: MajorLifeShift[]): LifeShiftReading
         const response = await fetch("/api/chart/life-shifts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ shifts: facts }),
+          body: JSON.stringify({ shifts: facts, depth: depthRef.current }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);

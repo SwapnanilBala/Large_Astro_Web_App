@@ -103,7 +103,10 @@ export default function MajorShiftsPanel({
      `shifts` instead was a five-chapter call on the most visited page in
      the app, four fifths of it for cards that page never draws. */
   const renderedShifts = isBrief ? featuredShifts : [...featuredShifts, ...pastShifts];
-  const { readings } = useLifeShiftReadings(renderedShifts);
+  const { readings } = useLifeShiftReadings(
+    renderedShifts,
+    isBrief ? "headline" : "compact",
+  );
 
   if (shifts.length === 0) {
     return (

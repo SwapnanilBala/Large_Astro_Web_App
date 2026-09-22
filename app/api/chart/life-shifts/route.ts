@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
@@ -8,7 +7,9 @@ import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   MAX_LIFE_SHIFTS,
+  lifeShiftCacheKey,
   renderLifeShiftFacts,
+  type LifeShiftDepth,
   type LifeShiftFacts,
   type LifeShiftReading,
 } from "@/lib/life-shift-reading";
@@ -64,8 +65,22 @@ import {
  * not whether the prose is nicer, but whether a cheaper setting drops a fact
  * it was handed. Here that is the window -- a reading that never names the
  * planning window is a reading the card above it already gave.
+ *
+ * The headline shape is set one notch higher, and that is a reasoned bet
+ * rather than a measured result, so here is the reasoning and the exposure.
+ * It is one chapter, not five: the varga finding that high ran to 52s was a
+ * ten-item job, and the dasha route measured high at 6.6s for a single short
+ * note. A single longer note at high should land well inside the 40s timeout
+ * even at several times that. Cost is not the constraint either -- on the
+ * dasha route high was $0.0094 against medium's $0.0090. And the failure
+ * mode is bounded: a run that overruns times out and the card keeps its
+ * template, which is the same place a missing key leaves it. Settle it for
+ * real with the sweep above, which now covers both shapes.
  */
-const EFFORT = "medium" as const;
+const EFFORT_BY_DEPTH = {
+  headline: "high",
+  compact: "medium",
+} as const;
 
 export const maxDuration = 60;
 
@@ -103,8 +118,14 @@ You are given the handful of chapters that matter most for one birth chart, each
 
 Return exactly one reading for every chapter you are given -- no more, no fewer -- and set the "id" field on each to that chapter's id exactly as given. The user turn names the count and lists the ids; check your output against that list before you finish.
 
-Rules for each reading:
-- Three sentences, 70 words at the outside. No heading, no preamble, no list, no markdown, no chapter label and no date heading -- the card prints the label, the pivot and the window itself.
+The user turn also names a length, and it is the one rule here you must not round off:
+
+LENGTH "headline" -- six to eight sentences, 190 words at the outside. This is the single chapter on the reader's results page and the only reading most of them will ever see from this section, so it is the long form. The extra room is for substance and not for adjectives or throat-clearing. Use it to cover, in whatever order reads best: what this chapter asks of the reader in practice; what it makes easier and what it makes harder; what it is a poor time to force; and how the natal placement in the evidence colours all of that for this chart specifically. A longer reading that says the same thing three ways is worse than a short one.
+
+LENGTH "compact" -- three sentences, 70 words at the outside. This chapter sits in a row with several others, and five long readings is a wall rather than a page.
+
+Rules for each reading, at either length:
+- No heading, no preamble, no list, no markdown, no chapter label and no date heading -- the card prints the label, the pivot and the window itself.
 - Name the planning window or the pivot month once, in words, as part of a sentence. A reading that never touches the timing is a reading the card above it already gave.
 - Say what this chapter asks of this reader: what it makes heavier, what it makes possible, what it is a poor time to force. Address the reader as "you".
 - Use the natal placement in the evidence where there is one. That is the single most chart-specific fact you have, and a reading that ignores it would read the same for anyone with the same planet.
@@ -137,6 +158,19 @@ function text(row: Record<string, unknown>, field: string, required = true): str
     throw new ApiError(
       ErrorCode.VALIDATION_FAILED,
       `\`${field}\` may be at most ${MAX_FIELD_LENGTH} characters.`,
+    );
+  }
+  return value;
+}
+
+function parseDepth(value: unknown): LifeShiftDepth {
+  /* Defaulted rather than required, so a caller written before this split
+     keeps working and gets the shape the section had then. */
+  if (value === undefined || value === null) return "compact";
+  if (value !== "headline" && value !== "compact") {
+    throw new ApiError(
+      ErrorCode.VALIDATION_FAILED,
+      "`depth` must be either headline or compact.",
     );
   }
   return value;
@@ -191,19 +225,18 @@ function parseShifts(value: unknown): LifeShiftFacts[] {
 
 export async function POST(request: NextRequest) {
   try {
-    let body: { shifts?: unknown };
+    let body: { shifts?: unknown; depth?: unknown };
     try {
-      body = (await request.json()) as { shifts?: unknown };
+      body = (await request.json()) as { shifts?: unknown; depth?: unknown };
     } catch {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, "Request body must be JSON.");
     }
 
     const facts = parseShifts(body.shifts);
+    const depth = parseDepth(body.depth);
 
-    /* Hashed rather than concatenated: the facts carry free text, and a key
-       built by joining them would collide on any value containing the
-       separator. */
-    const key = createHash("sha256").update(JSON.stringify(facts)).digest("hex");
+    /* Depth included; see lifeShiftCacheKey for why that matters. */
+    const key = lifeShiftCacheKey(depth, facts);
     const cached = cache.get(key);
     if (cached) {
       return NextResponse.json({ readings: cached, cached: true });
@@ -223,6 +256,8 @@ export async function POST(request: NextRequest) {
        limit in the proxy has already run; this is the daily ceiling, and it is
        checked here precisely because the proxy cannot see that the cache above
        served the last four requests for free. */
+    const effort = EFFORT_BY_DEPTH[depth];
+
     const budget = await consumeLlmBudget("/api/chart/life-shifts", request);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
@@ -258,7 +293,7 @@ export async function POST(request: NextRequest) {
       max_tokens: 12000,
       /* thinking is omitted, which on this model runs adaptive by default. */
       output_config: {
-        effort: EFFORT,
+        effort,
         format: zodOutputFormat(ReadingsSchema),
       },
       system: [
@@ -268,8 +303,9 @@ export async function POST(request: NextRequest) {
         {
           role: "user",
           content:
-            `Write exactly ${facts.length} reading${facts.length === 1 ? "" : "s"}, ` +
-            `one for each of these chapter ids: ${facts.map((fact) => fact.id).join(", ")}.\n\n` +
+            `Write exactly ${facts.length} reading${facts.length === 1 ? "" : "s"} at ` +
+            `LENGTH "${depth}", one for each of these chapter ids: ` +
+            `${facts.map((fact) => fact.id).join(", ")}.\n\n` +
             renderLifeShiftFacts(facts),
         },
       ],
@@ -285,7 +321,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       route: "/api/chart/life-shifts",
       event: "llm_usage",
-      effort: EFFORT,
+      effort,
+      depth,
       shifts: facts.length,
       stopReason: response.stop_reason,
       inputTokens: response.usage.input_tokens,
@@ -314,7 +351,8 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        effort,
+        depth,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(
@@ -363,7 +401,8 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_short_set",
-        effort: EFFORT,
+        effort,
+        depth,
         asked: facts.length,
         returned: readings.length,
         missing: facts.filter((fact) => !byId.has(fact.id)).map((fact) => fact.id),

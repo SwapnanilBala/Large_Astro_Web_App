@@ -201,17 +201,21 @@ const ROUTES = {
   "life-shifts": {
     file: routeFile("chart", "life-shifts"),
     maxTokens: 12000,
-    /* Two shapes the panel actually produces: the results page asks for the
-       one chapter it shows, and /insights/life-shifts asks for the full set.
-       Set size is the only thing that varies in the user turn, so it is the
-       only axis worth sweeping. */
+    /* The two shapes the panel actually produces, and they differ on both
+       axes at once because the page decides both: the results page asks for
+       the one chapter it shows and asks for it at length, while
+       /insights/life-shifts asks for the full set in the short form. Sweeping
+       them as one case each is what makes the numbers comparable to what
+       ships -- a long single reading is the expensive one to get wrong, since
+       it is on the most visited page. */
     cases: [
-      { label: "one active chapter", facts: lifeShiftFacts().slice(2, 3) },
-      { label: "five chapters", facts: lifeShiftFacts() },
+      { label: "one chapter, headline", depth: "headline", facts: lifeShiftFacts().slice(2, 3) },
+      { label: "five chapters, compact", depth: "compact", facts: lifeShiftFacts() },
     ],
-    userTurn: ({ facts }) =>
-      `Write exactly ${facts.length} reading${facts.length === 1 ? "" : "s"}, ` +
-      `one for each of these chapter ids: ${facts.map((fact) => fact.id).join(", ")}.\n\n` +
+    userTurn: ({ facts, depth }) =>
+      `Write exactly ${facts.length} reading${facts.length === 1 ? "" : "s"} at ` +
+      `LENGTH "${depth}", one for each of these chapter ids: ` +
+      `${facts.map((fact) => fact.id).join(", ")}.\n\n` +
       renderLifeShiftFacts(facts),
   },
 };

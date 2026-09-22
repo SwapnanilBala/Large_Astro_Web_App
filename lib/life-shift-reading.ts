@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import type { MajorLifeShift, MajorShiftStatus } from "./engines/major-shifts-engine";
 
 /**
@@ -42,6 +44,17 @@ export type LifeShiftReadingResponse = {
   cached: boolean;
 };
 
+/**
+ * How much room a reading gets, which is a property of the page rather than
+ * of the chapter.
+ *
+ * "headline" is the results page: one chapter, alone, the only reading most
+ * visitors will ever see from this section. It gets the long form.
+ * "compact" is /insights/life-shifts, where up to five sit in a row and five
+ * long readings would be a wall rather than a page.
+ */
+export type LifeShiftDepth = "headline" | "compact";
+
 /** The most chapters the engine ever produces, and so the most one call takes. */
 export const MAX_LIFE_SHIFTS = 5;
 
@@ -81,6 +94,28 @@ export function buildLifeShiftFacts(shifts: MajorLifeShift[]): LifeShiftFacts[] 
     window: formatShiftWindow(shift.windowStartIso, shift.windowEndIso),
     evidence: shift.evidence,
   }));
+}
+
+/**
+ * The cache key for one request.
+ *
+ * Hashed rather than concatenated: the facts carry free text, and a key
+ * built by joining them would collide on any value containing the separator.
+ *
+ * The depth is part of the key rather than a detail of it, and that is the
+ * whole reason this is a function with a test rather than three lines inside
+ * the route. The two pages ask about overlapping chapters, so leaving it out
+ * lets whichever page is visited first decide how long the other one's
+ * readings are -- a results page warmed by a visit to /insights/life-shifts
+ * would quietly serve the three-sentence version of the very reading the
+ * headline length exists to lengthen. That failure is invisible: the card
+ * renders a perfectly good reading, just the wrong one.
+ */
+export function lifeShiftCacheKey(
+  depth: LifeShiftDepth,
+  facts: LifeShiftFacts[],
+): string {
+  return createHash("sha256").update(JSON.stringify({ depth, facts })).digest("hex");
 }
 
 /** How the facts are laid out for the model, shared with scripts/effort-compare.mjs. */
