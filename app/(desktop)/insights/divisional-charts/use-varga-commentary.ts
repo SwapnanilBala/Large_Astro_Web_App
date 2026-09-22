@@ -13,15 +13,29 @@ export type VargaCommentary = {
 };
 
 /**
- * The atlas's chart-specific notes, fetched exactly once per mount.
+ * The atlas's chart-specific notes, fetched once per mounted lifetime.
  *
  * "Once" is the whole point of this hook and it is guarded twice, because the
  * two ways it could fire twice are unrelated:
  *
- *   `startedRef` covers React's development double-invoke of effects. Without
- *   it, every local page load would bill two calls -- and they would not even
- *   dedupe against each other, because both would miss the server's cache on
- *   the way in.
+ *   `startedRef` stops a second request inside one lifetime, and is cleared
+ *   in the cleanup rather than left latched. Latching it is what deadlocks
+ *   this shape: if anything unmounts and remounts the hook on the same
+ *   instance, the cleanup aborts the in-flight request and the ref then
+ *   refuses to start another, so the only request ever made is one that was
+ *   cancelled before it left the browser -- and the server never sees a
+ *   request at all. That is what had happened to the sibling
+ *   `useLifeShiftReadings` (bdf8dce).
+ *
+ *   It is not what happens here, which is worth writing down because the two
+ *   hooks look identical. Measured on this page, the effect runs once and this
+ *   cleanup does not run before the notes arrive: the atlas client is rendered
+ *   straight from the server page, where the brief life-shifts panel is
+ *   reached through `dynamic(..., { ssr: false })`. So the reset is insurance
+ *   for the day the atlas moves behind a lazy boundary rather than a fix for
+ *   anything visible today, and it is free either way -- an aborted request
+ *   never reaches the route, so clearing the ref cannot buy a second billed
+ *   call.
  *
  *   The empty dependency array covers re-renders. The obvious alternative,
  *   depending on `charts`, looks more correct and is worse: the atlas re-renders
@@ -53,9 +67,7 @@ export function useVargaCommentary(
     }
 
     /* Aborted on unmount so a navigation away does not land a setState on a
-       dead component. The request itself is already in flight and the server
-       will finish and cache it, which is the right outcome -- coming back to
-       the atlas then costs nothing. */
+       dead component. */
     const controller = new AbortController();
 
     (async () => {
@@ -87,7 +99,11 @@ export function useVargaCommentary(
       }
     })();
 
-    return () => controller.abort();
+    return () => {
+      controller.abort();
+      /* So a remount can ask again; see the note above. */
+      startedRef.current = false;
+    };
     /* eslint-disable-next-line react-hooks/exhaustive-deps -- once per mount; see above.
        `language` is read at fire time on purpose: a locale switch mid-page does
        not re-fetch, because that would spend a second call to re-word a note
