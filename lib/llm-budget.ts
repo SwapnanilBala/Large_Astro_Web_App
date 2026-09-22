@@ -140,22 +140,26 @@ type LlmBudgetConfig = {
  * away.
  *
  * The written PDF report is the dearest call in the app by a wide margin, and
- * the only one where the reader is watching a progress dialog rather than a
- * page. Opus 5 at HIGH effort over the whole nine-chapter document, streamed,
- * max_tokens 32000. Measured on the sample chart, three runs:
+ * the only one whose effort is set by who is asking. Opus 5 over the whole
+ * nine-chapter document, streamed, max_tokens 32000, at HIGH for an account
+ * and MEDIUM for a signed-out address. Measured on the sample chart:
  *
- *     ~186s   4,467 input   ~13,700 output   ~$0.37
+ *     high     186s   4,467 input   13,700 output   $0.37   2,897 words
+ *     medium    97s   4,467 input    6,112 output   $0.18   2,673 words
  *
- * Output is 94% of that, and most of the output is thinking -- 13,700 tokens
- * for 2,900 words of prose. That ratio is what high effort buys here, and it
- * is why this route cannot be sized like the others: one call costs six times
- * a varga atlas and two and a half times a palm reading.
+ * Output is 94% of the cost either way, and almost all of the difference is
+ * thinking rather than prose -- the two tiers write the same amount. So the
+ * split saves half the price of the dearest route for the callers whose
+ * identity is cheapest to mint, and what it costs them is the cross-chapter
+ * care that no single paragraph shows.
  *
- * 60 a day is therefore about $22, which is deliberately the same daily
- * exposure as palm reading's 100 and the varga atlas's 400. Three routes, one
- * ceiling on what a bad day costs. It is also a count of distinct reports:
- * the route caches on the facts, so a reader who downloads the same reading
- * twice pays once.
+ * 60 a day is the worst case -- sixty accounts each taking a high-effort
+ * report -- which is about $22, deliberately the same daily exposure as palm
+ * reading's 100 and the varga atlas's 400. Three routes, one ceiling on what a
+ * bad day costs. A realistic mix lands well under it. It is also a count of
+ * distinct reports per tier: the cache is keyed by the facts *and* the tier,
+ * so a second download of the same reading is free, and an account is never
+ * served the medium report a passing visitor paid for.
  *
  * THE TWO TIERS are 4 free, then 8 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --

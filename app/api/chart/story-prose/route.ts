@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
+import { sessionFromRequest } from "@/lib/identity/require-session";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
@@ -21,23 +22,41 @@ import {
  * lib/story-prose.ts carries what this may and may not rewrite, and why. This
  * file is the call.
  *
- * ── EFFORT -- high, and this is the route that earns it ────────────────────
+ * ── EFFORT -- high for an account, medium for an address ──────────────────
  *
- * Every other LLM route here writes two or three sentences about one thing.
- * This one writes a whole document: nine chapters that have to agree with each
- * other, each grounded in its own placements, over about 2,900 words. That is
- * the shape of job where effort buys something real rather than a slightly
- * more careful sentence -- the model has to hold the whole report in view to
- * avoid saying the same thing in the marriage chapter and the family one.
+ * This is the route where effort buys the most and costs the most, so it is
+ * the one where the two are worth splitting by who is asking.
  *
- * It is also the one route where latency is explicitly not a constraint: the
- * reader has pressed a button marked "download" and is watching a progress
- * dialog. So this is allowed to take a minute or two, and `maxDuration` is
- * 300 rather than 60 -- the same ceiling palm reading uses, and for the same
- * reason.
+ * Why it buys anything at all: every other LLM route here writes two or three
+ * sentences about one thing. This writes a document whose nine chapters have
+ * to agree with each other, each grounded in its own placements, over about
+ * 2,900 words. The model has to hold the whole report in view to avoid saying
+ * the same thing in the marriage chapter and the family one, and that is the
+ * part a lower setting drops first.
  *
- * Measured numbers are in the llm_usage line below rather than asserted here;
- * see the header note in lib/llm-budget.ts for what the call costs.
+ * Why it is split: at high this is by far the most expensive call in the app.
+ * Measured on the sample chart, three runs each:
+ *
+ *     high     186s   4,467 input   13,700 output   $0.37   2,897 words
+ *     medium    97s   4,467 input    6,112 output   $0.18   2,673 words
+ *
+ * Read the last two columns together: medium is 2.1x cheaper and 1.9x faster
+ * and writes the same amount of prose. The whole difference is thinking, which
+ * is 94% of the cost and none of the output the reader sees. That is what
+ * makes this dial worth splitting rather than simply lowering -- the saving is
+ * real and what it costs is invisible in any single paragraph.
+ * An account is a name a caller cannot mint by the thousand, so it is the one
+ * identity worth spending twice as much on; a signed-out address is the tier
+ * where a proxy pool turns one abuser into a thousand callers.
+ *
+ * A signed-out reader is not getting a worse report -- they get the same nine
+ * chapters, the same length, written at medium. What they do not get is the
+ * cross-chapter care that the extra thinking buys, which is real and is also
+ * the hardest thing to see in any one paragraph.
+ *
+ * Both tiers are allowed the same latency budget: `maxDuration` is 300, which
+ * high needs and medium does not. The reader has pressed download and is
+ * watching a progress dialog either way.
  *
  * ── WHY IT STREAMS ────────────────────────────────────────────────────────
  *
@@ -62,7 +81,18 @@ import {
  * page is.
  */
 
-const EFFORT = "high" as const;
+/*
+ * Keyed by whether the caller has an account. `sessionFromRequest` is the same
+ * helper lib/llm-budget.ts resolves its caller with, so the tier here and the
+ * allowance there cannot disagree within one request -- and asking twice costs
+ * one session lookup on a route that is about to spend three minutes.
+ */
+const EFFORT_BY_TIER = {
+  account: "high",
+  address: "medium",
+} as const;
+
+type ProseTier = keyof typeof EFFORT_BY_TIER;
 
 export const maxDuration = 300;
 
@@ -199,8 +229,16 @@ function parseFacts(value: unknown): StoryProseFacts {
   };
 }
 
-/** Canonical, so the same report hits the same entry however it arrives. */
-function cacheKey(facts: StoryProseFacts): string {
+/**
+ * Canonical, so the same report hits the same entry however it arrives.
+ *
+ * The tier is part of the key. Without it the first reader of a chart decides
+ * which effort every later reader of that chart gets -- an account arriving
+ * second would be served the medium report it did not ask for, and an address
+ * arriving second would be handed the expensive one for free. Two entries per
+ * chart is the cost of the answer matching the asker.
+ */
+function cacheKey(facts: StoryProseFacts, tier: ProseTier): string {
   const canonical = [
     facts.headline,
     facts.subtitle,
@@ -217,7 +255,7 @@ function cacheKey(facts: StoryProseFacts): string {
         ].join("|"),
       ),
   ].join(";");
-  return createHash("sha1").update(canonical).digest("hex");
+  return `${tier}:${createHash("sha1").update(canonical).digest("hex")}`;
 }
 
 /* Markdown is forbidden by the prompt; this is what makes that true rather
@@ -236,7 +274,10 @@ export async function POST(request: NextRequest) {
     }
 
     const facts = parseFacts(body.facts);
-    const key = cacheKey(facts);
+    const session = await sessionFromRequest(request);
+    const tier: ProseTier = session ? "account" : "address";
+    const effort = EFFORT_BY_TIER[tier];
+    const key = cacheKey(facts, tier);
 
     const cached = cache.get(key);
     if (cached) {
@@ -284,7 +325,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 32000,
         /* thinking is omitted, which on this model runs adaptive by default. */
         output_config: {
-          effort: EFFORT,
+          effort,
           format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
         },
         system: [
@@ -300,7 +341,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       route: "/api/chart/story-prose",
       event: "llm_usage",
-      effort: EFFORT,
+      effort,
+      tier,
       chapters: facts.chapters.length,
       elapsedMs,
       stopReason: response.stop_reason,
@@ -326,7 +368,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/story-prose",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        effort,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(
@@ -381,7 +423,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/story-prose",
         event: "llm_chapters_incomplete",
-        effort: EFFORT,
+        effort,
         asked: facts.chapters.length,
         returned: cleaned.chapters.length,
         missing,

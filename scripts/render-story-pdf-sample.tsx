@@ -44,11 +44,18 @@ import { PersonalStoryPdfDocument } from "@/app/(desktop)/insights/components/pe
 const root = process.env.STORY_PDF_ROOT || path.resolve(__dirname, "..");
 const fonts = path.join(root, "public", "fonts");
 const outputDir = path.join(root, "output", "pdf");
-const proseCachePath = path.join(outputDir, "sample-prose.json");
+const proseCachePath = () => path.join(outputDir, `sample-prose-${effort}.json`);
 const routePath = path.join(root, "app", "api", "chart", "story-prose", "route.ts");
 
 const wantProse = process.argv.includes("--prose");
 const wantFresh = process.argv.includes("--fresh");
+/*
+ * Which tier to render. The route picks this from the session -- high for an
+ * account, medium for an address -- and a script has no session, so it is a
+ * flag. Both cache separately, the way the route keys them separately.
+ */
+const effort = (process.argv.find((a) => a.startsWith("--effort="))?.slice(9)
+  ?? "high") as "low" | "medium" | "high" | "xhigh" | "max";
 
 Font.register({
   family: "Cinzel",
@@ -119,10 +126,10 @@ function readSystemPrompt(): string {
 }
 
 async function writtenProse(story: PersonalStory) {
-  if (!wantFresh && existsSync(proseCachePath)) {
-    const cached = parseStoryProse(JSON.parse(readFileSync(proseCachePath, "utf8")));
+  if (!wantFresh && existsSync(proseCachePath())) {
+    const cached = parseStoryProse(JSON.parse(readFileSync(proseCachePath(), "utf8")));
     if (cached) {
-      console.log(`prose: reusing ${path.relative(root, proseCachePath)} (pass --fresh to re-bill)`);
+      console.log(`prose: reusing ${path.relative(root, proseCachePath())} (pass --fresh to re-bill)`);
       return cached;
     }
   }
@@ -137,14 +144,14 @@ async function writtenProse(story: PersonalStory) {
   const client = new Anthropic({ apiKey, timeout: 250_000 });
   const facts = buildStoryProseFacts(story, birth.name);
 
-  console.log("prose: calling claude-opus-5 at high effort, one call, please wait...");
+  console.log(`prose: calling claude-opus-5 at ${effort} effort, one call, please wait...`);
   const startedAt = Date.now();
   const response = await client.messages
     .stream({
       model: "claude-opus-5",
       max_tokens: 32000,
       output_config: {
-        effort: "high",
+        effort,
         format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
       },
       system: [{ type: "text", text: readSystemPrompt() }],
@@ -185,7 +192,7 @@ async function writtenProse(story: PersonalStory) {
   console.log(`prose: ${prose.chapters.length} chapters, ${total} words written`);
 
   mkdirSync(outputDir, { recursive: true });
-  writeFileSync(proseCachePath, JSON.stringify(prose, null, 2));
+  writeFileSync(proseCachePath(), JSON.stringify(prose, null, 2));
   return prose;
 }
 
@@ -209,7 +216,7 @@ async function main() {
   mkdirSync(outputDir, { recursive: true });
   const outputPath = path.join(
     outputDir,
-    wantProse ? "sample-client-personal-story-written.pdf" : "sample-client-personal-story.pdf",
+    wantProse ? `sample-client-personal-story-${effort}.pdf` : "sample-client-personal-story.pdf",
   );
 
   await renderToFile(
