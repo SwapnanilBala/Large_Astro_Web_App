@@ -45,6 +45,10 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },
   "/api/palm-reading": { limit: 5, windowMs: 60_000 },
+  /* A minute is longer than the call, so this is really "one download at a
+     time, plus room for a retry after a failure". The report is cached by its
+     facts, so a second download of the same reading never reaches here. */
+  "/api/chart/story-prose": { limit: 3, windowMs: 60_000 },
   "/api/suggest": { limit: 60, windowMs: 60_000 },
 };
 

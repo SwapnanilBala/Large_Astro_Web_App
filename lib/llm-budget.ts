@@ -79,6 +79,7 @@ export type LlmRouteKey =
   | "/api/chart/advanced-story"
   | "/api/chart/varga-commentary"
   | "/api/chart/life-shifts"
+  | "/api/chart/story-prose"
   | "/api/palm-reading"
   | "/api/palm-reading/ask";
 
@@ -137,6 +138,24 @@ type LlmBudgetConfig = {
  * text routes can afford 2500 because they cost fractions of a cent; this one
  * cannot, and sizing it like them would have put a $150 day one cache miss
  * away.
+ *
+ * The written PDF report is the dearest call in the app by a wide margin, and
+ * the only one where the reader is watching a progress dialog rather than a
+ * page. Opus 5 at HIGH effort over the whole nine-chapter document, streamed,
+ * max_tokens 32000. Measured on the sample chart, three runs:
+ *
+ *     ~186s   4,467 input   ~13,700 output   ~$0.37
+ *
+ * Output is 94% of that, and most of the output is thinking -- 13,700 tokens
+ * for 2,900 words of prose. That ratio is what high effort buys here, and it
+ * is why this route cannot be sized like the others: one call costs six times
+ * a varga atlas and two and a half times a palm reading.
+ *
+ * 60 a day is therefore about $22, which is deliberately the same daily
+ * exposure as palm reading's 100 and the varga atlas's 400. Three routes, one
+ * ceiling on what a bad day costs. It is also a count of distinct reports:
+ * the route caches on the facts, so a reader who downloads the same reading
+ * twice pays once.
  *
  * THE TWO TIERS are 4 free, then 8 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --
@@ -233,6 +252,11 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      the llm_usage lines once this has run for a week. */
   "/api/chart/life-shifts": {
     perDay: 1200,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  "/api/chart/story-prose": {
+    perDay: 60,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
