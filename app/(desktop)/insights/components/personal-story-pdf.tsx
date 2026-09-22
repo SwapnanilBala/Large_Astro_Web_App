@@ -1,3 +1,4 @@
+import React from "react";
 import { Document, Font, Page, StyleSheet, Text, View } from "@react-pdf/renderer";
 import type {
   PersonalStory,
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.paper,
     color: COLORS.ink,
     fontFamily: "EBGaramond",
-    fontSize: 11.5,
+    fontSize: 13.5,
   },
   cover: {
     paddingTop: 62,
@@ -82,13 +83,13 @@ const styles = StyleSheet.create({
   brand: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 9.5,
+    fontSize: 11.5,
     letterSpacing: 1.8,
     textTransform: "uppercase",
   },
   edition: {
     color: COLORS.faint,
-    fontSize: 9,
+    fontSize: 11,
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
@@ -107,16 +108,16 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 9.5,
+    fontSize: 11.5,
     letterSpacing: 2,
     marginBottom: 16,
     textTransform: "uppercase",
   },
   coverName: {
-    maxWidth: 410,
+    maxWidth: 450,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 36,
+    fontSize: 38,
     lineHeight: 1.14,
     marginBottom: 13,
     textTransform: "uppercase",
@@ -124,14 +125,14 @@ const styles = StyleSheet.create({
   coverTitle: {
     color: COLORS.gold,
     fontFamily: "Cinzel",
-    fontSize: 19,
+    fontSize: 22,
     letterSpacing: 0.8,
     marginBottom: 21,
   },
   coverDeck: {
     width: 360,
     color: COLORS.muted,
-    fontSize: 14,
+    fontSize: 16,
     lineHeight: 1.55,
   },
   coverMeta: {
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
   coverMetaText: {
     width: 330,
     color: COLORS.muted,
-    fontSize: 9.5,
+    fontSize: 11.5,
     lineHeight: 1.45,
   },
   verificationBadge: {
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     color: COLORS.green,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 7.5,
+    fontSize: 9.5,
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: COLORS.line,
     color: COLORS.faint,
-    fontSize: 7.5,
+    fontSize: 9.5,
     letterSpacing: 0.8,
     textTransform: "uppercase",
   },
@@ -183,14 +184,14 @@ const styles = StyleSheet.create({
     left: 52,
     right: 52,
     color: COLORS.faint,
-    fontSize: 8,
+    fontSize: 10,
     textAlign: "right",
   },
   sectionKicker: {
     color: COLORS.gold,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 8.5,
+    fontSize: 10.5,
     letterSpacing: 1.5,
     marginBottom: 8,
     textTransform: "uppercase",
@@ -198,14 +199,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 24,
+    fontSize: 26,
     lineHeight: 1.2,
     marginBottom: 10,
   },
   sectionIntro: {
-    width: 410,
+    width: 460,
     color: COLORS.muted,
-    fontSize: 12.5,
+    fontSize: 14.5,
     lineHeight: 1.55,
     marginBottom: 22,
   },
@@ -218,7 +219,7 @@ const styles = StyleSheet.create({
   },
   prefaceParagraph: {
     color: COLORS.ink,
-    fontSize: 13,
+    fontSize: 15,
     lineHeight: 1.62,
     marginBottom: 9,
   },
@@ -241,7 +242,7 @@ const styles = StyleSheet.create({
     color: COLORS.faint,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 7.5,
+    fontSize: 9.5,
     letterSpacing: 0.8,
     marginBottom: 5,
     textTransform: "uppercase",
@@ -249,12 +250,12 @@ const styles = StyleSheet.create({
   glanceValue: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 13,
+    fontSize: 15,
     marginBottom: 4,
   },
   glanceContext: {
     color: COLORS.muted,
-    fontSize: 9.5,
+    fontSize: 11.5,
     lineHeight: 1.35,
   },
   themeList: {
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 8,
+    fontSize: 10,
     letterSpacing: 1,
     marginBottom: 8,
     textTransform: "uppercase",
@@ -279,18 +280,18 @@ const styles = StyleSheet.create({
     width: 22,
     color: COLORS.gold,
     fontFamily: "Cinzel",
-    fontSize: 9,
+    fontSize: 11,
   },
   themeText: {
     flex: 1,
-    fontSize: 11,
+    fontSize: 13,
     lineHeight: 1.42,
   },
   chapterNumber: {
     color: COLORS.goldSoft,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 39,
+    fontSize: 42,
     lineHeight: 1,
     marginBottom: 2,
   },
@@ -298,16 +299,16 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 8.5,
+    fontSize: 10.5,
     letterSpacing: 1.4,
     marginBottom: 9,
     textTransform: "uppercase",
   },
   chapterTitle: {
-    maxWidth: 430,
+    maxWidth: 470,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 23,
+    fontSize: 25,
     lineHeight: 1.22,
     marginBottom: 15,
   },
@@ -323,7 +324,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 7,
+    fontSize: 9.5,
     letterSpacing: 0.6,
     textTransform: "uppercase",
   },
@@ -342,7 +343,7 @@ const styles = StyleSheet.create({
   supportNote: {
     flex: 1,
     color: COLORS.faint,
-    fontSize: 8.5,
+    fontSize: 10.5,
     lineHeight: 1.35,
   },
   chapterOpening: {
@@ -350,14 +351,14 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: COLORS.gold,
     color: COLORS.ink,
-    fontSize: 14,
+    fontSize: 16,
     fontStyle: "italic",
     lineHeight: 1.55,
     marginBottom: 17,
   },
   narrativeParagraph: {
     color: COLORS.ink,
-    fontSize: 12.2,
+    fontSize: 14,
     lineHeight: 1.62,
     marginBottom: 11,
   },
@@ -378,11 +379,11 @@ const styles = StyleSheet.create({
     color: COLORS.gold,
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 8,
+    fontSize: 10,
   },
   practiceText: {
     flex: 1,
-    fontSize: 10.3,
+    fontSize: 12.5,
     lineHeight: 1.4,
   },
   reflectionBox: {
@@ -393,7 +394,7 @@ const styles = StyleSheet.create({
   },
   reflectionText: {
     color: COLORS.muted,
-    fontSize: 11,
+    fontSize: 13,
     fontStyle: "italic",
     lineHeight: 1.45,
   },
@@ -410,12 +411,12 @@ const styles = StyleSheet.create({
   evidenceLabel: {
     width: 102,
     color: COLORS.faint,
-    fontSize: 8.5,
+    fontSize: 10.5,
   },
   evidenceValue: {
     flex: 1,
     color: COLORS.muted,
-    fontSize: 8.5,
+    fontSize: 10.5,
     lineHeight: 1.35,
   },
   timeline: {
@@ -455,15 +456,15 @@ const styles = StyleSheet.create({
   timelineLabel: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 9,
+    fontSize: 11,
   },
   timelineWindow: {
     color: COLORS.gold,
-    fontSize: 8.5,
+    fontSize: 10.5,
   },
   timelineNarrative: {
     color: COLORS.muted,
-    fontSize: 9.5,
+    fontSize: 11.5,
     lineHeight: 1.4,
   },
   verificationSummary: {
@@ -482,12 +483,12 @@ const styles = StyleSheet.create({
   metricValue: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 18,
+    fontSize: 21,
     marginBottom: 3,
   },
   metricLabel: {
     color: COLORS.faint,
-    fontSize: 8,
+    fontSize: 10,
     textTransform: "uppercase",
   },
   methodTable: {
@@ -504,11 +505,11 @@ const styles = StyleSheet.create({
   methodLabel: {
     width: 125,
     color: COLORS.faint,
-    fontSize: 9,
+    fontSize: 11,
   },
   methodValue: {
     flex: 1,
-    fontSize: 9.5,
+    fontSize: 11.5,
   },
   checkRow: {
     width: 152,
@@ -527,7 +528,7 @@ const styles = StyleSheet.create({
   checkStatus: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 6.5,
+    fontSize: 9,
     letterSpacing: 0.5,
     marginBottom: 4,
     textTransform: "uppercase",
@@ -538,12 +539,12 @@ const styles = StyleSheet.create({
   checkLabel: {
     fontFamily: "Cinzel",
     fontWeight: 700,
-    fontSize: 8,
+    fontSize: 10,
     marginBottom: 2,
   },
   checkDetail: {
     color: COLORS.muted,
-    fontSize: 7.6,
+    fontSize: 9.5,
     lineHeight: 1.3,
   },
   closingNote: {
@@ -552,8 +553,82 @@ const styles = StyleSheet.create({
     borderLeftWidth: 2,
     borderLeftColor: COLORS.gold,
     color: COLORS.muted,
-    fontSize: 9.5,
+    fontSize: 11.5,
     lineHeight: 1.45,
+  },
+  /* The apparatus page's heading. Smaller than a chapter title -- it is a
+     continuation, not a new chapter -- but present, which is the whole point
+     of it. */
+  apparatusTitle: {
+    maxWidth: 470,
+    fontFamily: "Cinzel",
+    fontWeight: 700,
+    fontSize: 18,
+    lineHeight: 1.24,
+    marginBottom: 20,
+  },
+  /* ── The closing page ──
+     Replaces a calculation appendix. See the page itself for why. */
+  closingLead: {
+    color: COLORS.ink,
+    fontSize: 15,
+    lineHeight: 1.62,
+    marginBottom: 26,
+  },
+  closingList: {
+    paddingTop: 16,
+    borderTopWidth: 0.75,
+    borderTopColor: COLORS.line,
+  },
+  closingRow: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 16,
+  },
+  closingMark: {
+    width: 22,
+    color: COLORS.gold,
+    fontFamily: "Cinzel",
+    fontWeight: 700,
+    fontSize: 13,
+  },
+  closingCopy: {
+    flex: 1,
+  },
+  closingHeading: {
+    fontFamily: "Cinzel",
+    fontWeight: 700,
+    fontSize: 12.5,
+    lineHeight: 1.3,
+    marginBottom: 4,
+  },
+  closingText: {
+    color: COLORS.muted,
+    fontSize: 13,
+    lineHeight: 1.55,
+  },
+  signOff: {
+    marginTop: 30,
+    paddingTop: 18,
+    borderTopWidth: 0.75,
+    borderTopColor: COLORS.line,
+    color: COLORS.ink,
+    fontFamily: "EBGaramond",
+    fontSize: 14,
+    fontStyle: "italic",
+    lineHeight: 1.55,
+  },
+  /* The whole calculation record, as one line of small print. A reader who
+     wants the provenance gets it; a reader who does not is not handed a page
+     of tables on the way out. */
+  provenance: {
+    marginTop: "auto",
+    paddingTop: 14,
+    borderTopWidth: 0.75,
+    borderTopColor: COLORS.line,
+    color: COLORS.faint,
+    fontSize: 9.5,
+    lineHeight: 1.5,
   },
 });
 
@@ -591,15 +666,29 @@ function RunningElements({ clientName }: { clientName?: string }) {
   );
 }
 
-function ChapterPage({
+/*
+ * A chapter is two pages, and that is a decision rather than an overflow.
+ *
+ * It used to be one `<Page>` holding everything, which fitted because the
+ * engine's prose was a single short paragraph -- and left the page forty per
+ * cent blank. With written prose and readable type it cannot fit, and the
+ * arithmetic says so plainly: an A4 page carries 732pt between the margins,
+ * the chapter furniture and the opening take about 220 of it, and the worst
+ * case apparatus (four practices, a reflection, an evidence table) takes about
+ * 350. That leaves 160pt for the reading itself -- seven lines, one paragraph,
+ * which is the document we were trying to get away from.
+ *
+ * So the prose gets a page and the apparatus gets a page. The second one
+ * carries its own heading, because the difference between a designed page and
+ * a spill is entirely whether it announces itself.
+ */
+function ChapterProsePage({
   chapter,
   index,
-  story,
   clientName,
 }: {
   chapter: PersonalStoryChapter;
   index: number;
-  story: PersonalStory;
   clientName?: string;
 }) {
   const narrative = chapter.narrative?.length ? chapter.narrative : [chapter.body];
@@ -607,8 +696,6 @@ function ChapterPage({
   const paragraphs = narrative
     .map(cleanText)
     .filter((paragraph) => paragraph && paragraph !== opening);
-  const practices = chapter.practices?.length ? chapter.practices : chapter.highlights;
-  const isTiming = chapter.id === "timing" && story.timeline.length > 0;
 
   return (
     <Page size="A4" style={styles.page}>
@@ -628,6 +715,31 @@ function ChapterPage({
       {paragraphs.map((paragraph) => (
         <Text key={paragraph} style={styles.narrativeParagraph}>{paragraph}</Text>
       ))}
+    </Page>
+  );
+}
+
+function ChapterApparatusPage({
+  chapter,
+  index,
+  story,
+  clientName,
+}: {
+  chapter: PersonalStoryChapter;
+  index: number;
+  story: PersonalStory;
+  clientName?: string;
+}) {
+  const practices = chapter.practices?.length ? chapter.practices : chapter.highlights;
+  const isTiming = chapter.id === "timing" && story.timeline.length > 0;
+
+  return (
+    <Page size="A4" style={styles.page}>
+      <RunningElements clientName={clientName} />
+      <Text style={styles.sectionKicker}>
+        {`Chapter ${String(index + 1).padStart(2, "0")} - working with it`}
+      </Text>
+      <Text style={styles.apparatusTitle}>{cleanText(chapter.title)}</Text>
 
       {isTiming && (
         <View style={styles.timeline}>
@@ -669,7 +781,7 @@ function ChapterPage({
         </View>
       )}
 
-      {chapter.signals.length > 0 && !isTiming && (
+      {chapter.signals.length > 0 && (
         <View style={styles.evidenceBox} wrap={false}>
           <Text style={styles.miniHeading}>Why this chapter appears</Text>
           {chapter.signals.slice(0, 4).map((signal) => (
@@ -684,6 +796,62 @@ function ChapterPage({
   );
 }
 
+
+/*
+ * The closing page's three notes.
+ *
+ * Fixed copy rather than generated: this is the publisher talking about how to
+ * use the document, not the reading talking about the reader, and it is the
+ * same in every report. Keeping it out of the model's hands also keeps it out
+ * of the prose budget.
+ */
+const CLOSING_NOTES = [
+  {
+    heading: "Take one chapter at a time",
+    body:
+      "Each was written to stand on its own. The report is not an argument that "
+      + "has to be followed end to end, and the chapter that matters most to you "
+      + "this year may not be the first one.",
+  },
+  {
+    heading: "Trust the note under each title",
+    body:
+      "Where a chapter is marked exploratory, it rests on thinner evidence and is "
+      + "worth holding lightly. That label is calculated, not editorial, and it is "
+      + "the most useful thing on the page.",
+  },
+  {
+    heading: "Come back to the questions",
+    body:
+      "The question at the end of each chapter is the part only you can answer. "
+      + "They are worth returning to, because the answers move even when the chart "
+      + "does not.",
+  },
+];
+
+/**
+ * The calculation record, as one sentence.
+ *
+ * Everything the appendix used to tabulate, in the order a reader would ask
+ * for it, and phrased so the qualification count is a fact about the report
+ * rather than a warning about the reader.
+ */
+function provenanceLine(story: PersonalStory): string {
+  const profile = story.verification.calculationProfile;
+  const total =
+    story.verification.passedCount
+    + story.verification.warningCount
+    + story.verification.failedCount;
+  const checks = story.verification.warningCount > 0
+    ? `${story.verification.passedCount} of ${total} internal consistency checks passed cleanly; `
+      + `${story.verification.warningCount} returned a qualification, which is reflected in the `
+      + `support note of the chapters it affects.`
+    : `All ${total} internal consistency checks passed.`;
+  return `Calculated with ${profile.provider} (${profile.engine}), ${profile.ayanamsha} ayanamsha, `
+    + `${profile.houseSystem} houses, from a birth time recorded as `
+    + `${profile.birthTimeReliability.toLowerCase()}. ${checks}`;
+}
+
 export function PersonalStoryPdfDocument({
   story,
   clientName,
@@ -696,7 +864,6 @@ export function PersonalStoryPdfDocument({
     locationLabel,
     generatedOn ? `Prepared ${generatedOn}` : undefined,
   ].filter((part): part is string => Boolean(part));
-  const profile = story.verification.calculationProfile;
 
   return (
     <Document
@@ -762,80 +929,56 @@ export function PersonalStoryPdfDocument({
       </Page>
 
       {story.chapters.map((chapter, index) => (
-        <ChapterPage
-          key={chapter.id}
-          chapter={chapter}
-          index={index}
-          story={story}
-          clientName={clientName}
-        />
+        <React.Fragment key={chapter.id}>
+          <ChapterProsePage chapter={chapter} index={index} clientName={clientName} />
+          <ChapterApparatusPage
+            chapter={chapter}
+            index={index}
+            story={story}
+            clientName={clientName}
+          />
+        </React.Fragment>
       ))}
 
+      {/*
+        THE CLOSING PAGE.
+
+        This was a calculation appendix: a three-metric scoreboard, a five-row
+        method table, and every consistency check the verifier ran, each with
+        its status and detail. All of it true, none of it what a reader wants
+        on the last page of something written about them -- they close the
+        document on an audit log.
+
+        The provenance is still here. It is one line of small print at the
+        foot, which is where the same information lives in a printed book, and
+        it says the same things: which engine, which ayanamsha, which house
+        system, how the birth time was recorded, and whether the checks passed.
+        What is gone is the presentation of that as the report's final word.
+      */}
       <Page size="A4" style={styles.page}>
         <RunningElements clientName={clientName} />
-        <Text style={styles.sectionKicker}>Calculation appendix</Text>
-        <Text style={styles.sectionTitle}>How this report was checked</Text>
-        <Text style={styles.sectionIntro}>
-          {cleanText(`${story.verification.summary} ${story.reflectionNote}`)}
-        </Text>
+        <Text style={styles.sectionKicker}>Before you close this</Text>
+        <Text style={styles.sectionTitle}>How to keep using it</Text>
+        <Text style={styles.closingLead}>{cleanText(story.reflectionNote)}</Text>
 
-        <View style={styles.verificationSummary}>
-          <View style={styles.verificationMetric}>
-            <Text style={[styles.metricValue, { color: COLORS.green }]}>
-              {story.verification.passedCount}
-            </Text>
-            <Text style={styles.metricLabel}>Checks passed</Text>
-          </View>
-          <View style={styles.verificationMetric}>
-            <Text style={[styles.metricValue, { color: COLORS.gold }]}>
-              {story.verification.warningCount}
-            </Text>
-            <Text style={styles.metricLabel}>Qualifications</Text>
-          </View>
-          <View style={styles.verificationMetric}>
-            <Text style={[styles.metricValue, { color: COLORS.rose }]}>
-              {story.verification.failedCount}
-            </Text>
-            <Text style={styles.metricLabel}>Failed checks</Text>
-          </View>
-        </View>
-
-        <Text style={styles.miniHeading}>Calculation profile</Text>
-        <View style={styles.methodTable}>
-          {[
-            ["Provider", profile.provider],
-            ["Engine", profile.engine],
-            ["Ayanamsha", profile.ayanamsha],
-            ["House system", profile.houseSystem],
-            ["Birth time", profile.birthTimeReliability],
-          ].map(([label, value]) => (
-            <View key={label} style={styles.methodRow}>
-              <Text style={styles.methodLabel}>{label}</Text>
-              <Text style={styles.methodValue}>{cleanText(value)}</Text>
-            </View>
-          ))}
-        </View>
-
-        <Text style={styles.miniHeading}>Consistency checks</Text>
-        <View style={styles.checkGrid}>
-          {story.verification.checks.map((item) => (
-            <View key={item.id} style={styles.checkRow} wrap={false}>
-              <Text
-                style={[
-                  styles.checkStatus,
-                  { color: item.status === "passed" ? COLORS.green : item.status === "warning" ? COLORS.gold : COLORS.rose },
-                ]}
-              >
-                {item.status}
-              </Text>
-              <View style={styles.checkCopy}>
-                <Text style={styles.checkLabel}>{cleanText(item.label)}</Text>
-                <Text style={styles.checkDetail}>{cleanText(item.detail)}</Text>
+        <View style={styles.closingList}>
+          {CLOSING_NOTES.map((note, index) => (
+            <View key={note.heading} style={styles.closingRow} wrap={false}>
+              <Text style={styles.closingMark}>{String(index + 1).padStart(2, "0")}</Text>
+              <View style={styles.closingCopy}>
+                <Text style={styles.closingHeading}>{note.heading}</Text>
+                <Text style={styles.closingText}>{note.body}</Text>
               </View>
             </View>
           ))}
         </View>
 
+        <Text style={styles.signOff}>
+          Nothing here is a verdict. A chart describes the weather you were born
+          into, not what you will do about it.
+        </Text>
+
+        <Text style={styles.provenance}>{cleanText(provenanceLine(story))}</Text>
       </Page>
     </Document>
   );
