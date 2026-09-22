@@ -259,9 +259,10 @@
 }
 
 .storyPassage {
+  font-family: var(--font-newsreader), Georgia, serif;
   margin: 0;
   max-width: 68ch;
-  font-size: 1.12rem;
+  font-size: var(--text-body);
   line-height: 1.7;
   color: var(--ink-soft);
 }
@@ -277,8 +278,8 @@
 .storyToggle {
   all: unset;
   cursor: pointer;
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.92rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--accent-gold);
@@ -323,8 +324,8 @@
 
 .storyProgressTitle {
   margin: 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
   font-weight: 700;
   letter-spacing: 0.02em;
   color: var(--ink-main);

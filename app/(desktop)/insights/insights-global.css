@@ -2910,8 +2910,8 @@
   min-width: 0;
 }
 .palm-toggle-title {
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-ui);
   font-weight: 600;
   letter-spacing: 0.01em;
   color: var(--ink-main);
@@ -3047,8 +3047,8 @@
   gap: 0.55rem;
 }
 .palm-image-warning-title {
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 1rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-ui);
   font-weight: 600;
   letter-spacing: 0.01em;
   flex: 1;
@@ -3095,7 +3095,7 @@
   align-items: center;
   padding: 0.18rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
@@ -3160,7 +3160,7 @@
   align-items: center;
   padding: 0.16rem 0.55rem;
   border-radius: 999px;
-  font-size: 0.7rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -3187,8 +3187,8 @@
 }
 .palm-dasha-indicator {
   margin: 0 0 0.3rem;
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
+  font-size: var(--text-label);
   font-weight: 600;
   color: var(--ink-main);
 }
@@ -3217,9 +3217,9 @@
   border: 1px solid rgba(200, 155, 60, 0.18);
 }
 .palm-sanskrit-term {
-  font-family: var(--font-display), 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
   font-style: italic;
-  font-size: 1rem;
+  font-size: var(--text-ui);
   font-weight: 600;
   color: var(--accent-gold);
   margin-right: 0.45rem;
@@ -4260,7 +4260,7 @@
   background: rgba(200, 155, 60, 0.16);
   color: var(--accent-gold);
   border: 1px solid rgba(200, 155, 60, 0.40);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
@@ -4381,7 +4381,7 @@
 }
 
 .palm-detail-title-edit-hint {
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   color: var(--ink-soft);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -4477,7 +4477,7 @@
 }
 
 .palm-compare-side-tag {
-  font-size: 0.75rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-gold);
@@ -4674,7 +4674,7 @@
 }
 
 .palm-compare-quote-tag {
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--accent-gold);
@@ -4876,7 +4876,7 @@ html[data-theme="light"] .dasha-command-meter-ring {
   border: 1px solid var(--border-medium);
   border-radius: 999px;
   color: var(--accent-gold);
-  font-size: 0.7rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;

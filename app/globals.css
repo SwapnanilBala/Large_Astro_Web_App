@@ -1,4 +1,40 @@
 :root {
+  /*
+   * ── Type ──
+   *
+   * Three roles, and the point of naming them is that each face does one job.
+   *
+   * --font-display is Cinzel, loaded in app/(desktop)/layout.tsx. Cinzel has no
+   * lowercase: its lowercase glyphs are small caps. That is right for a title
+   * and wrong for everything else, so it belongs on headings at roughly 1.3rem
+   * and up and nowhere near a label. It was on 111 rules under 1.3rem before
+   * this, which is why so much of the app read as unbroken small caps.
+   *
+   * --font-newsreader is Newsreader, also loaded there. It is the prose face:
+   * leads, paragraphs, the written readings.
+   *
+   * --font-body was referenced by 36 rules and defined nowhere, so all 36 fell
+   * past an unloaded 'Inter' to generic sans-serif. Every one of those
+   * fallbacks named a sans, so that is what it is -- the UI face, for labels,
+   * kickers, buttons, badges and numbers. Plus Jakarta Sans leads the stack
+   * because 13 rules already name it; it is not loaded, so today this resolves
+   * to the platform UI font. Loading Jakarta later needs no CSS change.
+   */
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  /*
+   * ── Type scale ──
+   *
+   * The floor exists because the results page had 36 elements at 10px and 22
+   * at 11px. Nothing that carries meaning goes below --text-meta.
+   */
+  --text-meta: 0.78rem;    /* 12.5px -- table numbers, fine print */
+  --text-label: 0.8125rem; /* 13px  -- uppercase kickers and badges */
+  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, nav pills */
+  --text-body: 1.0625rem;  /* 17px  -- prose */
+  --text-lead: 1.1875rem;  /* 19px  -- the lead under a title */
+
   /* ── Premium Cosmic Design Tokens ── */
   
   /* Backgrounds */
@@ -202,7 +238,9 @@ html,
 body {
   margin: 0;
   min-height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* The UI face, via the token, so there is one place to change it. Prose sets
+     --font-newsreader explicitly; this is everything else. */
+  font-family: var(--font-body);
   color: var(--text-primary);
   line-height: 1.6;
   text-rendering: optimizeLegibility;
@@ -515,7 +553,10 @@ h1 {
   margin: 0;
   max-width: 72ch;
   color: var(--ink-soft);
-  font-size: 1.32rem;
+  /* Prose. This inherited the UI sans from body, which is why the lead read as
+     interface copy rather than as the opening line of a reading. */
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: var(--text-lead);
   font-weight: 400;
   line-height: 1.6;
   padding: 1rem 1.1rem;
@@ -2078,7 +2119,7 @@ label:has(.autocomplete-wrapper.is-open) {
 }
 
 .forecast-date-option span {
-  font-size: 0.76rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -2418,7 +2459,7 @@ label:has(.autocomplete-wrapper.is-open) {
 .forecast-event-tone {
   margin-top: 0.1rem;
   color: var(--accent-teal);
-  font-size: 0.74rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -3354,8 +3395,8 @@ label:has(.autocomplete-wrapper.is-open) {
   all: unset;
   cursor: pointer;
   justify-self: start;
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.92rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--accent-gold);
@@ -7023,7 +7064,7 @@ textarea:focus-visible {
 
   .navamsa-vargottama-label,
   .divisional-same-label {
-    font-size: 0.7rem;
+    font-size: var(--text-meta);
   }}
 
 /* ═══════════════════════════════════════════════════════════════════

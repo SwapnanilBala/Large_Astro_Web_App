@@ -232,8 +232,8 @@
 }
 
 .forecastTitle {
-  font-family: var(--font-display), serif;
-  font-size: 1rem;
+  font-family: var(--font-body), serif;
+  font-size: var(--text-ui);
   font-weight: 650;
   color: var(--ink-main);
   margin: 0 0 0.6rem;
@@ -282,8 +282,8 @@
 }
 
 .cardTitle {
-  font-family: var(--font-display), serif;
-  font-size: 0.86rem;
+  font-family: var(--font-body), serif;
+  font-size: var(--text-ui);
   font-weight: 650;
   color: var(--ink-main);
   line-height: 1.25;
@@ -366,8 +366,8 @@
 }
 
 .errorTitle {
-  font-family: var(--font-display), serif;
-  font-size: 0.95rem;
+  font-family: var(--font-body), serif;
+  font-size: var(--text-ui);
   font-weight: 650;
   color: var(--ink-main);
   margin: 0;

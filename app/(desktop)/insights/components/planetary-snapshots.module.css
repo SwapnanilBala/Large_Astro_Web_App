@@ -29,8 +29,8 @@
 
 .kicker {
   margin: 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: 0.78rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.14em;
@@ -163,8 +163,8 @@
 .name {
   flex: 1;
   min-width: 0;
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.12rem;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
   font-weight: 650;
   line-height: 1.2;
   /* The raw accent keeps the planet identity but bottoms out at 3.4:1 for the

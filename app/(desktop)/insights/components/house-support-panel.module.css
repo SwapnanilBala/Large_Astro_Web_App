@@ -90,7 +90,7 @@
 }
 
 .cardKicker {
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -397,7 +397,7 @@
 
 .roleReadout {
   flex: 0 0 auto;
-  font-size: 0.74rem;
+  font-size: var(--text-meta);
   color: var(--text-tertiary, #9a918a);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -428,7 +428,7 @@
   padding: 0.1rem 0.4rem;
   border: 1px solid rgba(232, 200, 154, 0.16);
   border-radius: 999px;
-  font-size: 0.66rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.05em;
   color: var(--text-tertiary, #9a918a);
   white-space: nowrap;
@@ -438,7 +438,7 @@
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
   background: color-mix(in srgb, var(--role-accent) 16%, transparent);
-  font-size: 0.66rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.05em;
   color: var(--role-accent);

@@ -371,7 +371,7 @@
 }
 
 .label {
-  font-size: 0.65rem;
+  font-size: var(--text-label);
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0.06em;
@@ -380,14 +380,16 @@
   white-space: nowrap;
 }
 
+/* Still the smaller of the two, but both are now above the 12.5px floor. This
+   was 0.55rem -- 8.8px -- which is not a size text can be read at. */
 .wrapper:has(.sm) .label {
-  font-size: 0.55rem;
+  font-size: var(--text-meta);
 }
 
 @media (max-width: 768px) {
   .label,
   .wrapper:has(.sm) .label {
-    font-size: 0.75rem;
+    font-size: var(--text-meta);
   }
 }
 
@@ -406,7 +408,7 @@
     0 12px 28px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
   color: rgba(255, 244, 222, 0.92);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   line-height: 1.35;
   text-align: left;
   white-space: normal;

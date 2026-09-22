@@ -44,7 +44,7 @@
 .kicker {
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.7rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent-gold);

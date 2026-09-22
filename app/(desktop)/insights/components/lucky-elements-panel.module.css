@@ -80,7 +80,7 @@
 .sectionEyebrow {
   display: block;
   color: var(--accent-teal);
-  font-size: 0.72rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0.11em;
   line-height: 1.15;
@@ -124,7 +124,7 @@
 .domainCard > span {
   display: block;
   color: var(--accent-teal);
-  font-size: 0.67rem;
+  font-size: var(--text-meta);
   font-weight: 900;
   letter-spacing: 0.09em;
   line-height: 1.2;
@@ -182,7 +182,7 @@
 
 .guidanceCard dt {
   color: var(--ink-soft);
-  font-size: 0.64rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   letter-spacing: 0.07em;
   line-height: 1.2;
