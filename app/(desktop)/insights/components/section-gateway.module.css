@@ -45,9 +45,10 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: clamp(1.2rem, 2vw, 1.48rem);
   line-height: 1.25;
+  font-weight: 600;
 }
 
 .copy p,

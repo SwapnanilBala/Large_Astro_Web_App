@@ -2883,7 +2883,7 @@
 }
 
 .palm-subsection h4 {
-  font-family: var(--font-display), Georgia, serif;
+  font-family: var(--font-newsreader), Georgia, serif, Georgia, serif;
   margin: 0 0 0.3rem;
   font-size: 1.28rem;
   font-weight: 600;

@@ -882,9 +882,9 @@
 }
 
 .rowPanelTitle {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: clamp(1rem, 1.3vw, 1.2rem);
-  font-weight: 650;
+  font-weight: 600;
   line-height: 1.25;
   color: var(--ink-main);
   margin: 0;
@@ -1618,9 +1618,9 @@
 
 .takeawayCard h3 {
   color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: clamp(1.32rem, 1.55vw, 1.58rem);
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.22;
   margin: 0;
   text-wrap: balance;
@@ -2489,7 +2489,10 @@
 
 .chartHighlightsList strong {
   color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
+  /* Inline emphasis follows its sentence. A different face for the
+     emphasised words than for the words around them reads as a
+     rendering fault, whichever face is "better". */
+  font-family: inherit;
   font-size: 1.08rem;
   line-height: 1.35;
 }
@@ -2769,7 +2772,7 @@
 }
 
 .ruleHeader h3 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.35rem;
   font-weight: 600;
   color: var(--ink-main);
@@ -2871,13 +2874,14 @@
 }
 
 .evidenceSummary {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.22rem;
   color: var(--ink-soft);
   cursor: pointer;
   list-style: none;
   padding: 0.35rem 0;
   user-select: none;
+  font-weight: 600;
 }
 
 .evidenceSummary::-webkit-details-marker {
@@ -2979,10 +2983,11 @@
 }
 
 .themeSummary h4 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.4rem;
+  font-weight: 600;
 }
 
 .themeSummary p {
@@ -3211,7 +3216,10 @@
 
 .insightHubCardBody strong {
   color: var(--hub-ink);
-  font-family: var(--font-display), sans-serif;
+  /* Inline emphasis follows its sentence. A different face for the
+     emphasised words than for the words around them reads as a
+     rendering fault, whichever face is "better". */
+  font-family: inherit;
   font-size: 1.2rem;
   line-height: 1.15;
 }
@@ -3407,7 +3415,10 @@
 
 .continuationActionBody strong {
   color: var(--continuation-ink);
-  font-family: var(--font-display), sans-serif;
+  /* Inline emphasis follows its sentence. A different face for the
+     emphasised words than for the words around them reads as a
+     rendering fault, whichever face is "better". */
+  font-family: inherit;
   font-size: 1.12rem;
   line-height: 1.2;
 }
@@ -3732,10 +3743,11 @@
 }
 
 .lockedPreview h3 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.35rem;
   color: var(--ink-main);
   margin: 0 0 0.5rem;
+  font-weight: 600;
 }
 
 .lockedPreview p {
@@ -3762,10 +3774,11 @@
 
 .domainPriorityPanel h3 {
   color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.55rem;
   line-height: 1.25;
   margin: 0.15rem 0 0.45rem;
+  font-weight: 600;
 }
 
 .domainPriorityPanel p {
@@ -3840,7 +3853,10 @@
 .domainScoreCardActive strong {
   grid-area: score;
   color: var(--accent-gold);
-  font-family: var(--font-display), sans-serif;
+  /* Inline emphasis follows its sentence. A different face for the
+     emphasised words than for the words around them reads as a
+     rendering fault, whichever face is "better". */
+  font-family: inherit;
   font-size: 1.2rem;
   line-height: 1.1;
 }
@@ -4025,10 +4041,11 @@
 }
 
 .domainHeader h3 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.5rem;
   color: var(--ink-main);
   margin: 0.25rem 0 0;
+  font-weight: 600;
 }
 
 /* The way out of the brief. The domain card on the results page is now a
@@ -4282,7 +4299,10 @@
 }
 
 .domainEvidenceVerdict > div { display: grid; gap: 0.25rem; }
-.domainEvidenceVerdict strong { color: var(--ink-main); font-family: var(--font-display), sans-serif; font-size: 1.1rem; text-transform: capitalize; }
+.domainEvidenceVerdict strong { color: var(--ink-main); /* Inline emphasis follows its sentence. A different face for the
+     emphasised words than for the words around them reads as a
+     rendering fault, whichever face is "better". */
+  font-family: inherit; font-size: 1.1rem; text-transform: capitalize; }
 .domainEvidenceVerdict p { color: var(--ink-soft); line-height: 1.55; margin: 0; }
 .domainVerdictLabel { color: var(--accent-teal); font-size: var(--text-meta); font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 
@@ -4326,9 +4346,9 @@
 .domainTimingWindows h4,
 .domainActionPanel h4 {
   color: var(--accent-teal);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.02rem;
-  font-weight: 800;
+  font-weight: 600;
   letter-spacing: 0.06em;
   line-height: 1.25;
   margin: 0 0 0.45rem;
@@ -4372,11 +4392,11 @@
 
 .domainStatement h4,
 .domainRulesPanel h4 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.24rem;
   color: var(--accent-gold);
   margin: 0 0 0.45rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .domainStatement p {
@@ -4420,7 +4440,7 @@
 }
 
 .domainCol h4 {
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.5rem;
@@ -4804,11 +4824,12 @@
 
 .pastLifeCard h3 {
   color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.42rem;
   line-height: 1.28;
   margin: 0;
   overflow-wrap: anywhere;
+  font-weight: 600;
 }
 
 .pastLifeCard p {
@@ -4956,11 +4977,12 @@
 
 .lifeShiftCard h3 {
   color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.42rem;
   line-height: 1.28;
   margin: 0;
   overflow-wrap: anywhere;
+  font-weight: 600;
 }
 
 .lifeShiftCard p {

@@ -229,8 +229,9 @@
 .domainSubthemeHeader h3 {
   margin: 0;
   color: var(--area-gold);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.05rem;
+  font-weight: 600;
 }
 
 .domainSubthemeHeader span {
@@ -340,9 +341,9 @@
 .domainStatement h3 {
   margin: 0 0 0.4rem;
   color: var(--area-gold);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.05rem;
-  font-weight: 650;
+  font-weight: 600;
 }
 
 .domainStatement p {
@@ -361,8 +362,9 @@
 .domainCol h3 {
   margin: 0 0 0.5rem;
   color: var(--area-gold);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1rem;
+  font-weight: 600;
 }
 
 .domainCol ul {
@@ -392,8 +394,9 @@
 .domainActionPanel h3 {
   margin: 0 0 0.4rem;
   color: var(--area-gold);
-  font-family: var(--font-display), sans-serif;
+  font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.02rem;
+  font-weight: 600;
 }
 
 .domainActionPanel p {
