@@ -8,12 +8,15 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
 
 type DivisionalChartsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export const generateMetadata = chartPageMetadata("Divisional charts");
 
 export default async function DivisionalChartsPage({
   searchParams,

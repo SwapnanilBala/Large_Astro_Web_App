@@ -13,7 +13,7 @@ type PageProps = {
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
   const query = chartParamsToQuery(readChartParams(await searchParams));
   return {
-    title: "Choose a method · Lagna Atelier",
+    title: "Choose a method",
     alternates: { canonical: query ? `/engine-select?${query}` : "/engine-select" },
   };
 }

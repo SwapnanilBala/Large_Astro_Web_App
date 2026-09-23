@@ -12,7 +12,10 @@
  * The two differ in dress only. The words are the same in both, so a mistyped
  * URL and a bad chart link say the same thing -- keep them in step.
  */
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = { title: "Page not found" };
 
 const page: React.CSSProperties = {
   minHeight: "100dvh",

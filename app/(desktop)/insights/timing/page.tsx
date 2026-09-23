@@ -8,6 +8,7 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { chartPageMetadata } from "@/lib/page-metadata";
 
 /* The three panels each hit their own API route, so allow the same budget the
    varga atlas gets. */
@@ -16,6 +17,8 @@ export const maxDuration = 60;
 type TimingPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export const generateMetadata = chartPageMetadata("Timing");
 
 export default async function TimingPage({ searchParams }: TimingPageProps) {
   const rawParams = await searchParams;

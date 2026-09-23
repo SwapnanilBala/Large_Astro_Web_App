@@ -4,7 +4,7 @@ import BackToReadingButton from "@/app/components/BackToReadingButton";
 import PalmHistoryClient from "./PalmHistoryClient";
 
 export const metadata = {
-  title: "Your Palm Readings — Lagna Atelier",
+  title: "Your palm readings",
 };
 
 /**

@@ -8,12 +8,15 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
 
 type InsightsPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 };
+
+export const generateMetadata = chartPageMetadata("Chart");
 
 export default async function InsightsPage({ searchParams }: InsightsPageProps) {
   const rawParams = await searchParams;

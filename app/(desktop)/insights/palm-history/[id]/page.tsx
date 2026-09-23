@@ -2,7 +2,7 @@ import BackButton from "@/app/components/BackButton";
 import PalmReadingDetailClient from "./PalmReadingDetailClient";
 
 export const metadata = {
-  title: "Palm Reading — Lagna Atelier",
+  title: "Palm reading",
 };
 
 export default async function PalmReadingDetailPage({

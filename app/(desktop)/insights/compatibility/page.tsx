@@ -1,4 +1,5 @@
 import CompatibilityPageClient from "./page-client";
+import { chartPageMetadata } from "@/lib/page-metadata";
 
 type CompatibilityPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
@@ -6,6 +7,8 @@ type CompatibilityPageProps = {
 
 const getSingle = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
+
+export const generateMetadata = chartPageMetadata("Compatibility");
 
 export default async function CompatibilityPage({ searchParams }: CompatibilityPageProps) {
   const params = await searchParams;

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import BackButton from "@/app/components/BackButton";
 import EngineSelectClient from "@/app/(desktop)/engine-select/engine-select-client";
@@ -23,6 +24,13 @@ const requiredParams = [
 
 const getSingle = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
+
+export const metadata: Metadata = {
+  title: "Choose a method",
+  /* Carries the chart's birth details in its query, like /insights. */
+  robots: { index: false, follow: true },
+  description: "Choose how your chart is calculated: the tradition that fixes where each sign begins, and how the twelve houses are drawn.",
+};
 
 export default async function EngineSelectPage({
   searchParams,

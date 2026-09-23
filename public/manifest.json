@@ -1,7 +1,7 @@
 {
   "name": "Lagna Atelier",
   "short_name": "Lagna",
-  "description": "Swiss Ephemeris astrology intelligence workspace",
+  "description": "Create your Vedic birth chart and get a clear, personal reading: your rising sign, the areas of your life, and the timing of the chapters ahead.",
   "start_url": "/",
   "display": "standalone",
   "orientation": "any",
@@ -16,14 +16,14 @@
       "purpose": "any"
     },
     {
-      "src": "/icon.svg",
+      "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
     },
     {
-      "src": "/icon.svg",
+      "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png"
     }
   ],
   "screenshots": [],

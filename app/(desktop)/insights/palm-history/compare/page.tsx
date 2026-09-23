@@ -2,7 +2,7 @@ import BackButton from "@/app/components/BackButton";
 import PalmCompareClient from "./PalmCompareClient";
 
 export const metadata = {
-  title: "Compare Palm Readings — Lagna Atelier",
+  title: "Compare palm readings",
 };
 
 export default async function PalmComparePage({

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import LoginPageClient from "./page-client";
 import { getDailySkyLine } from "./dailySky";
 import { missingGoogleConfig } from "@/lib/identity/google-oauth";
@@ -8,6 +9,13 @@ type LoginPageProps = {
 
 const getSingle = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
+
+export const metadata: Metadata = {
+  title: "Your account",
+  /* Nothing to rank, and ?returnTo= can carry a chart's birth details. */
+  robots: { index: false, follow: true },
+  description: "Sign in with Google to keep your charts on your account and open the advanced reading.",
+};
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;

@@ -86,8 +86,10 @@ function formatDateRange(start?: string, end?: string): string {
 
 export async function generateMetadata({
   params,
+  searchParams,
 }: DivisionalChartDetailPageProps): Promise<Metadata> {
   const { division: rawDivision } = await params;
+  const name = readChartParams(await searchParams).name.trim();
   const division = requireKeyDivision(rawDivision);
   const focus = getKeyDivisionalChartFocus(division);
   if (!focus) notFound();
@@ -97,7 +99,8 @@ export async function generateMetadata({
      i18n hook cannot be called, and the language lives in localStorage rather
      than in the URL, so there is nothing here to select a catalog with. */
   return {
-    title: `${focus.label} ${guide.name} Divisional Chart`,
+    /* "<name> — D9 Navamsa", like every other chart page; the layout adds the brand. */
+    title: name ? `${name} — ${focus.label} ${guide.name}` : `${focus.label} ${guide.name} divisional chart`,
     description: `${focus.label} ${guide.name} detail for ${guide.focus.toLowerCase()}, with whole-sign placements, reliability, and calculation context.`,
     robots: {
       index: false,

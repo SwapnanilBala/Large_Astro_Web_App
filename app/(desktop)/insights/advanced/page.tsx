@@ -7,6 +7,7 @@ import BackToReadingButton from "@/app/components/BackToReadingButton";
 import { buildChartHistoryQuery } from "@/lib/chart-params";
 import PageTransition from "@/app/components/PageTransition";
 import { getAdvancedFocusView } from "./advanced-views";
+import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
 
@@ -28,6 +29,8 @@ const requiredParams = [
 
 const getSingle = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] ?? "" : value ?? "";
+
+export const generateMetadata = chartPageMetadata("Advanced reading");
 
 export default async function AdvancedPage({ searchParams }: AdvancedPageProps) {
   const rawParams = await searchParams;

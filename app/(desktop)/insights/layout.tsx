@@ -18,8 +18,22 @@
  * `.dashboard-shell`'s `z-index: 1` from there. Out here it is a plain sibling
  * ahead of it, which is all it needs to be.
  */
+import type { Metadata } from "next";
 import InsightsBackdrop from "./components/decor/insights-backdrop";
 import "./insights-global.css";
+
+/*
+ * Kept out of search results, the whole subtree.
+ *
+ * Every page here is one person's chart, and the URL carries their name,
+ * birth date and birthplace -- a link someone posts publicly should not turn
+ * into an indexed page about them. The division pages already said this for
+ * themselves; saying it here covers the rest, and the /m tree has done the
+ * same since it was split out. follow stays on so links out still count.
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 export default function InsightsLayout({ children }: { children: React.ReactNode }) {
   return (

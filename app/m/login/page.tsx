@@ -5,7 +5,7 @@ import MobileLogin from "./mobile-login";
 
 /* The desktop route is the canonical one; /m/login is the handset rendering. */
 export const metadata: Metadata = {
-  title: "Your account · Lagna Atelier",
+  title: "Your account",
   alternates: { canonical: "/login" },
 };
 
