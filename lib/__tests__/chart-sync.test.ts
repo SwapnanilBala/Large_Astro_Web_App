@@ -40,7 +40,17 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
+
+/*
+ * Past the hook's 1200ms retry delay. The retry tests used to wait it out in
+ * real time -- about 7s for this file -- so they jump the fake clock instead.
+ * shouldAdvanceTime keeps the clock moving on its own too, which is what lets
+ * Testing Library's waitFor, itself timer-driven, keep polling.
+ */
+const PAST_RETRY_DELAY_MS = 1500;
+const skipRetryDelay = () => act(() => vi.advanceTimersByTimeAsync(PAST_RETRY_DELAY_MS));
 
 describe("the decision this browser remembers", () => {
   it("starts with no answer on file", () => {
@@ -165,6 +175,7 @@ describe("granting", () => {
   });
 
   it("retries once when the server is briefly unavailable", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     fetchMock
       .mockResolvedValueOnce({ ok: false, status: 503 })
       .mockResolvedValueOnce({ ok: true, status: 200 });
@@ -172,11 +183,14 @@ describe("granting", () => {
     const { result } = renderHook(() => useChartSync(CHART));
     act(() => result.current.grant("Save your charts?", "intake"));
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2), { timeout: 5000 });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await skipRetryDelay();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
     await waitFor(() => expect(result.current.stored).toBe(true));
   });
 
   it("retries a thrown request too", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     fetchMock
       .mockRejectedValueOnce(new Error("offline"))
       .mockResolvedValueOnce({ ok: true, status: 200 });
@@ -184,13 +198,16 @@ describe("granting", () => {
     const { result } = renderHook(() => useChartSync(CHART));
     act(() => result.current.grant("Save your charts?", "intake"));
 
-    await waitFor(() => expect(result.current.stored).toBe(true), { timeout: 5000 });
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await skipRetryDelay();
+    await waitFor(() => expect(result.current.stored).toBe(true));
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("does not retry a chart the server refuses", async () => {
     /* A 400 means this chart cannot be stored at all — a birth date outside
        what the table accepts, say. Retrying is a loop against a wall. */
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     fetchMock.mockResolvedValue({ ok: false, status: 400 });
 
     const { result, rerender } = renderHook(() => useChartSync(CHART));
@@ -199,20 +216,23 @@ describe("granting", () => {
 
     rerender();
     rerender();
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await skipRetryDelay();
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
     expect(result.current.stored).toBe(false);
   });
 
   it("gives up after two attempts and leaves it for the next visit", async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     fetchMock.mockResolvedValue({ ok: false, status: 503 });
 
     const first = renderHook(() => useChartSync(CHART));
     act(() => first.result.current.grant("Save your charts?", "intake"));
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2), { timeout: 5000 });
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await skipRetryDelay();
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+    await skipRetryDelay();
     expect(fetchMock).toHaveBeenCalledTimes(2);
 
     /* A fresh view starts a fresh pair of attempts, because the chart is
