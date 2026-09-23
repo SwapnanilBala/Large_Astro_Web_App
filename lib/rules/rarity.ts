@@ -13,7 +13,7 @@
  *      sorts on it.
  */
 
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import type { RarityBand, RuleRarity } from "@/lib/astro-types";
 import rarityData from "./rarity.json";
 

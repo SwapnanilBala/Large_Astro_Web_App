@@ -18,7 +18,7 @@
  *   - Conditionals are expressed as `variants`, not as `if`.
  */
 
-import { z } from "zod";
+import { z } from "@/lib/zod";
 
 export const RULE_CATEGORIES = ["core", "career", "love"] as const;
 export const RULE_PRIORITIES = ["high", "medium", "low"] as const;

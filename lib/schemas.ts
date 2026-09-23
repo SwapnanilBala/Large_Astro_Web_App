@@ -7,7 +7,7 @@
  * since been deleted.
  */
 
-import { z } from "zod";
+import { z } from "@/lib/zod";
 import { ENGINE_PRESETS } from "@/lib/engines/engine-registry";
 import { isWeekStart } from "@/lib/format-week";
 
