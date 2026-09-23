@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
-import AdvancedLoader from "./advanced-loader";
+import dynamic from "next/dynamic";
 import { sessionFromCookieStore } from "@/lib/identity/require-session";
 import BackButton from "@/app/components/BackButton";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
@@ -10,6 +10,13 @@ import { getAdvancedFocusView } from "./advanced-views";
 import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
+
+/* Imported through next/dynamic, not statically, because a page downloads
+   the JavaScript of every client component its file imports whether or not
+   it renders one. Statically, the members-only gate below shipped the
+   advanced reading's loader to every signed-out visitor who reached it.
+   Server rendering is unchanged; the chunk now loads only for a member. */
+const AdvancedLoader = dynamic(() => import("./advanced-loader"));
 
 type AdvancedPageProps = {
   searchParams: Promise<Record<string, string | string[] | undefined>>;
