@@ -36,7 +36,21 @@ const birthDateField = z
       );
     },
     { message: "birth_date is not a valid calendar date" },
-  );
+  )
+  /* Not in the future. The forms already stop it (the pickers cap at today),
+     but a hand-edited link did not: "2999-01-01" drew a chart for a birth
+     that has not happened, where a slip of one digit in the year should be a
+     readable 400. The ceiling is tomorrow in UTC so that "today" passes in
+     every timezone. (The floor is only the calendar check above, which is
+     why 0001 fails -- Date maps years under 100 into the 1900s -- and is
+     left alone: a chart from before 1900 is a legitimate link.) */
+  .refine((v) => v <= latestBirthDate(), {
+    message: "birth_date cannot be in the future",
+  });
+
+function latestBirthDate(): string {
+  return new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
 
 const birthTimeField = z
   .string({ error: "birth_time is required" })
