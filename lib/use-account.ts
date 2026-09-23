@@ -24,6 +24,42 @@ export type AccountStatus = "loading" | "signed-in" | "signed-out" | "unavailabl
 
 type SessionResponse = { user: Account | null };
 
+type SessionResult = { status: Exclude<AccountStatus, "loading">; account: Account | null };
+
+/*
+ * One /api/auth/session request per page load, however many components ask.
+ *
+ * The navbar asks on every page, and the home and sign-in pages ask as well,
+ * so those two made the same request twice on every load. Components that
+ * mount together now share one in-flight request. It is forgotten as soon as
+ * it settles, so anything mounting later -- after a navigation, or a sign-in
+ * that has not reloaded -- still asks afresh rather than reading a stale
+ * answer. Nothing aborts it: a shared request outlives any one caller, and a
+ * caller that leaves just ignores the result.
+ */
+let inflight: Promise<SessionResult> | null = null;
+
+function requestSession(): Promise<SessionResult> {
+  inflight ??= fetch("/api/auth/session", {
+    headers: { Accept: "application/json" },
+    /* The session cookie is httpOnly and same-origin; this is explicit so a
+       future move to a different origin does not silently sign everyone out. */
+    credentials: "same-origin",
+  })
+    .then(async (response): Promise<SessionResult> => {
+      /* 503 means the account store is down, which is not the same as being
+         signed out. Keep the navbar quiet rather than claiming either. */
+      if (!response.ok) return { status: "unavailable", account: null };
+      const { user } = (await response.json()) as SessionResponse;
+      return { status: user ? "signed-in" : "signed-out", account: user };
+    })
+    .catch((): SessionResult => ({ status: "unavailable", account: null }))
+    .finally(() => {
+      inflight = null;
+    });
+  return inflight;
+}
+
 export function useAccount() {
   const [account, setAccount] = useState<Account | null>(null);
   const [status, setStatus] = useState<AccountStatus>("loading");
@@ -33,36 +69,11 @@ export function useAccount() {
        state setter fires against a dead component. */
     let cancelled = false;
 
-    const load = async () => {
-      try {
-        const response = await fetch("/api/auth/session", {
-          headers: { Accept: "application/json" },
-          /* The session cookie is httpOnly and same-origin; this is explicit so
-             a future move to a different origin does not silently sign
-             everyone out. */
-          credentials: "same-origin",
-        });
-
-        if (cancelled) return;
-
-        if (!response.ok) {
-          /* 503 means the account store is down, which is not the same as being
-             signed out. Keep the navbar quiet rather than claiming either. */
-          setStatus("unavailable");
-          return;
-        }
-
-        const { user } = (await response.json()) as SessionResponse;
-        if (cancelled) return;
-
-        setAccount(user);
-        setStatus(user ? "signed-in" : "signed-out");
-      } catch {
-        if (!cancelled) setStatus("unavailable");
-      }
-    };
-
-    void load();
+    void requestSession().then((result) => {
+      if (cancelled) return;
+      setAccount(result.account);
+      setStatus(result.status);
+    });
 
     return () => {
       cancelled = true;
