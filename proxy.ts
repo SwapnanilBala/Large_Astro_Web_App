@@ -7,6 +7,7 @@ import {
   readViewPreference,
   resolveRoute,
 } from "@/lib/device";
+import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 
 /**
  * Route a page request to the mobile or desktop tree.
@@ -65,6 +66,34 @@ function routeByDevice(request: NextRequest): NextResponse {
   return response;
 }
 
+const DIVISION_PATH = /^\/insights\/divisional-charts\/([^/]+)\/?$/;
+const KEY_DIVISIONS = new Set(IMPORTANT_DIVISIONAL_CHARTS.map((chart) => String(chart.division)));
+
+/**
+ * The 404 the division page cannot give itself.
+ *
+ * Only the key vargas have a page, and the page calls notFound() for anything
+ * else -- but by then the insights loading.tsx has started streaming a 200,
+ * and a status cannot change mid-stream. So /insights/divisional-charts/999
+ * drew a not-found page under a 200, which link checkers and monitors read as
+ * a working page. (Next also marks it noindex, so search was only half the
+ * problem.) Route-level dynamicParams does not help: the page reads the chart
+ * from the query string, so it renders per request and the list is ignored.
+ *
+ * Deciding here, before anything renders, gives a real 404. The rewrite goes
+ * to a path no route matches, which is the app's own not-found page; the
+ * address bar keeps what the visitor typed. Valid divisions pass straight
+ * through, as they did before this ran on them.
+ */
+function refuseUnknownDivision(request: NextRequest): NextResponse {
+  const match = DIVISION_PATH.exec(request.nextUrl.pathname);
+  if (!match || KEY_DIVISIONS.has(match[1])) return NextResponse.next();
+  const target = request.nextUrl.clone();
+  target.pathname = "/__unknown-division";
+  target.search = "";
+  return NextResponse.rewrite(target);
+}
+
 function rateLimitApi(request: NextRequest): NextResponse {
   const result = checkRateLimit(request);
 
@@ -104,6 +133,9 @@ export function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return rateLimitApi(request);
   }
+  if (request.nextUrl.pathname.startsWith("/insights/divisional-charts/")) {
+    return refuseUnknownDivision(request);
+  }
   return routeByDevice(request);
 }
 
@@ -115,6 +147,7 @@ export const config = {
     "/api/:path*",
     "/",
     "/insights",
+    "/insights/divisional-charts/:division",
     "/login",
     "/engine-select",
     "/m",

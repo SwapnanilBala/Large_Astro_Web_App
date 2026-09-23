@@ -27,11 +27,9 @@ export default function NotFound() {
 
       <div className="not-found-content">
         <p className="not-found-code">404</p>
-        <h1 className="not-found-title">Lost in the Cosmos</h1>
-        <p className="not-found-description">
-          The celestial coordinates you seek do not correspond to any known
-          destination in our astral map. Perhaps the stars will guide you back.
-        </p>
+        {/* Same words as app/not-found.tsx, which serves URLs outside this tree. */}
+        <h1 className="not-found-title">This chart has no house here</h1>
+        <p className="not-found-description">The page you asked for does not exist.</p>
 
         <div className="not-found-orbit-divider" aria-hidden="true">
           <span className="not-found-orbit-dot" />
@@ -40,7 +38,7 @@ export default function NotFound() {
         </div>
 
         <Link href="/" className="not-found-home-btn">
-          Return to Observatory
+          Start a new reading
         </Link>
       </div>
     </div>

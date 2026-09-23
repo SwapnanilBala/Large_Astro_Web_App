@@ -8,7 +8,11 @@
  * globals.css; importing that sheet here would attach 22KB gzipped to *every*
  * route in the app, mobile included, because this file sits in the root
  * segment. That is exactly the coupling the shell split removes.
+ *
+ * The two differ in dress only. The words are the same in both, so a mistyped
+ * URL and a bad chart link say the same thing -- keep them in step.
  */
+import Link from "next/link";
 
 const page: React.CSSProperties = {
   minHeight: "100dvh",
@@ -27,7 +31,8 @@ const page: React.CSSProperties = {
 
 export default function NotFound() {
   return (
-    <div style={page}>
+    /* Outside both trees, so it owns its own landmark (see app/layout.tsx). */
+    <main style={page}>
       <p style={{ margin: 0, fontSize: "2.5rem", color: "#D4A574" }} aria-hidden="true">
         ✦
       </p>
@@ -37,7 +42,7 @@ export default function NotFound() {
       <p style={{ margin: 0, maxWidth: "32ch", color: "#A8A090", lineHeight: 1.6 }}>
         The page you asked for does not exist.
       </p>
-      <a
+      <Link
         href="/"
         style={{
           marginTop: "0.5rem",
@@ -53,7 +58,7 @@ export default function NotFound() {
         }}
       >
         Start a new reading
-      </a>
-    </div>
+      </Link>
+    </main>
   );
 }
