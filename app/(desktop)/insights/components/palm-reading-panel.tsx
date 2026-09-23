@@ -1,9 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
+import type { DrawingUtils, HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
+import { MEDIAPIPE_HAND_MODEL_URL, MEDIAPIPE_WASM_BASE } from "@/lib/palm-readings/mediapipe";
 import { useRouteMessages } from "@/lib/i18n-context";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import palmMessages from "@/messages/en.palm.json";
@@ -185,24 +188,23 @@ const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
 
 const REVEAL_DELAY_MS = 700;
 
-const REVEAL_SEQUENCE = [
-  "image_quality_warning",
-  "summary",
-  "annotated_image",
-  "lines",
-  "trajectory",
-  "jyotish_correlation",
-  "dasha_relevance",
-  "career",
-  "relationships",
-  "health",
-  "mounts",
-  "fingers",
-  "markings",
-  "classical_framework",
-  "guidance",
-] as const;
-type RevealSection = (typeof REVEAL_SEQUENCE)[number];
+/** The reading's sections, listed in the order they reveal. */
+type RevealSection =
+  | "image_quality_warning"
+  | "summary"
+  | "annotated_image"
+  | "lines"
+  | "trajectory"
+  | "jyotish_correlation"
+  | "dasha_relevance"
+  | "career"
+  | "relationships"
+  | "health"
+  | "mounts"
+  | "fingers"
+  | "markings"
+  | "classical_framework"
+  | "guidance";
 
 const VISIBILITY_BADGE_COLORS: Record<LineConfidenceEntry["visibility"], string> = {
   clear: "var(--accent-aqua)",
@@ -252,12 +254,12 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const captureCanvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
-  const handLandmarkerRef = useRef<any>(null);
-  const drawingUtilsRef = useRef<any>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const drawingUtilsRef = useRef<DrawingUtils | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const lastLandmarksRef = useRef<any>(null);
-  const handConnectionsRef = useRef<any>(null);
-  const DrawingUtilsClassRef = useRef<any>(null);
+  const lastLandmarksRef = useRef<NormalizedLandmark[] | null>(null);
+  const handConnectionsRef = useRef<typeof HandLandmarker.HAND_CONNECTIONS | null>(null);
+  const DrawingUtilsClassRef = useRef<typeof DrawingUtils | null>(null);
 
   /* ── MediaPipe initialization ── */
   const initMediaPipe = useCallback(async () => {
@@ -265,14 +267,11 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       const vision = await import("@mediapipe/tasks-vision");
       const { HandLandmarker, FilesetResolver, DrawingUtils } = vision;
 
-      const filesetResolver = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
-      );
+      const filesetResolver = await FilesetResolver.forVisionTasks(MEDIAPIPE_WASM_BASE);
 
       const handLandmarker = await HandLandmarker.createFromOptions(filesetResolver, {
         baseOptions: {
-          modelAssetPath:
-            "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task",
+          modelAssetPath: MEDIAPIPE_HAND_MODEL_URL,
           delegate: "GPU",
         },
         runningMode: "VIDEO",
@@ -346,7 +345,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         setHandScore(score);
         lastLandmarksRef.current = results.landmarks[0];
 
-        du.drawConnectors(results.landmarks[0], handConnectionsRef.current, {
+        du.drawConnectors(results.landmarks[0], handConnectionsRef.current ?? undefined, {
           color: "#6ce1d4",
           lineWidth: 2,
         });
@@ -699,17 +698,6 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       ? "palm-status palm-status--clear"
       : "palm-status palm-status--detected";
 
-  /* ── stagger animation variants ── */
-  const containerVariants = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.1 } },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
-  };
-
   /* ── render ── */
   return (
     <section className="palm-panel">
@@ -799,7 +787,6 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       {phase === "camera" && (
         <div className="palm-camera-phase">
           <div className="palm-camera-wrap">
-            {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
             <video
               ref={videoRef}
               playsInline
@@ -840,6 +827,8 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         <div className="palm-captured-phase">
           {imagePreview && (
             <div className="palm-preview">
+              {/* A data URL of the photo just taken: there is nothing for next/image to optimise. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={imagePreview} alt={tr("palm.alt.captured")} />
             </div>
           )}
@@ -865,6 +854,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
         <div className="palm-loading">
           {imagePreview && (
             <div className="palm-preview palm-preview--dimmed">
+              {/* eslint-disable-next-line @next/next/no-img-element -- a data URL, as above */}
               <img src={imagePreview} alt={tr("palm.alt.analyzing")} />
             </div>
           )}
@@ -945,6 +935,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
               )}
               {imagePreview && (
                 <div className="palm-preview palm-preview--small">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- a data URL, as above */}
                   <img src={imagePreview} alt={tr("palm.alt.yourPalm")} />
                 </div>
               )}
@@ -952,9 +943,9 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
             {saveState === "saved" && (
               <div className="palm-save-toast">
                 {tr("palm.results.savedToast")}{" "}
-                <a href="/insights/palm-history" className="palm-save-link">
+                <Link href="/insights/palm-history" className="palm-save-link">
                   {tr("palm.results.viewHistory")}
-                </a>
+                </Link>
               </div>
             )}
             {saveState === "error" && saveError && (
