@@ -224,9 +224,10 @@ function HouseRoles({
     <section className={styles.roles} aria-labelledby="house-support-roles-title">
       <div className={styles.rolesHead}>
         <span className={styles.cardKicker}>{tr("strength.roles.kicker")}</span>
-        <h3 className={styles.rolesTitle} id="house-support-roles-title">
+        {/* h2: this block only renders on the standalone page, under its h1. */}
+        <h2 className={styles.rolesTitle} id="house-support-roles-title">
           {tr("strength.roles.title")}
-        </h3>
+        </h2>
         <p className={styles.rolesIntro}>
           {tr("strength.roles.introA")} <em>{tr("strength.roles.introEm")}</em>
           {tr("strength.roles.introB")}
@@ -335,6 +336,9 @@ export default function HouseSupportPanel({
 
   const { ascendant, whole } = support;
   const isBrief = variant === "brief";
+  /* The brief variant sits inside an /insights section, which supplies the h2;
+     the full one stands directly under the page's h1. */
+  const CardHeading = isBrief ? "h3" : "h2";
 
   return (
     <div className={styles.panel}>
@@ -363,9 +367,9 @@ export default function HouseSupportPanel({
             <span className={styles.cardKicker}>
               {tr("strength.houseSupport.ascKicker")}
             </span>
-            <h3 className={styles.cardTitle} id="house-support-asc-title">
+            <CardHeading className={styles.cardTitle} id="house-support-asc-title">
               {tr("strength.houseSupport.ascTitle")}
-            </h3>
+            </CardHeading>
             <p className={styles.formula}>
               {tr("strength.houseSupport.ascFormula", {
                 bindus: String(ascendant.bindus),
@@ -410,11 +414,11 @@ export default function HouseSupportPanel({
             <span className={styles.cardKicker}>
               {tr("strength.houseSupport.wholeKicker")}
             </span>
-            <h3 className={styles.cardTitle} id="house-support-whole-title">
+            <CardHeading className={styles.cardTitle} id="house-support-whole-title">
               {tr("strength.houseSupport.wholeTitle", {
                 bindus: String(whole.bindus),
               })}
-            </h3>
+            </CardHeading>
             <p className={styles.formula}>
               {tr("strength.houseSupport.wholeFormula", {
                 bindus: String(whole.bindus),

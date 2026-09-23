@@ -169,7 +169,7 @@ export default function DivisionalChartsClient({
   const note = commentary.notes.get(selectedDivision);
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page} /* the desktop layout owns <main> */>
       <div className={styles.ambientOne} aria-hidden="true" />
       <div className={styles.ambientTwo} aria-hidden="true" />
 
@@ -404,6 +404,6 @@ export default function DivisionalChartsClient({
           </section>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

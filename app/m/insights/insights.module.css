@@ -42,6 +42,13 @@
 
 /* The whole header is the control — a 44px+ target rather than a small
    chevron, since precise tapping is harder than clicking. */
+/* The h2 around each section's toggle: a heading in the outline, and nothing
+   on screen -- the button inside carries all of the styling. */
+.sectionHeading {
+  margin: 0;
+  font: inherit;
+}
+
 .sectionHeader {
   width: 100%;
   min-height: 3.25rem;

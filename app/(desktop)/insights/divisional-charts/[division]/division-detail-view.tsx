@@ -214,7 +214,7 @@ export function DivisionDetailNotice(
         };
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page} /* the desktop layout owns <main> */>
       <section className={styles.errorCard}>
         <p className={styles.kicker}>{copy.kicker}</p>
         <h1>{copy.title}</h1>
@@ -230,7 +230,7 @@ export function DivisionDetailNotice(
           ) : null}
         </div>
       </section>
-    </main>
+    </div>
   );
 }
 
@@ -302,7 +302,7 @@ export default function DivisionDetailView({
   );
 
   return (
-    <main className={styles.page}>
+    <div className={styles.page} /* the desktop layout owns <main> */>
       <div className={styles.shell}>
         <nav
           className={styles.breadcrumbs}
@@ -760,6 +760,6 @@ export default function DivisionDetailView({
           <Link href={readingHref}>{tr("divisional.detail.footer.returnLink")}</Link>
         </footer>
       </div>
-    </main>
+    </div>
   );
 }

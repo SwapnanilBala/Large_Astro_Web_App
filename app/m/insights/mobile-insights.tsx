@@ -123,20 +123,24 @@ function Section({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <section className={styles.section}>
-      <button
-        type="button"
-        className={styles.sectionHeader}
-        onClick={() => setOpen((prev) => !prev)}
-        aria-expanded={open}
-      >
-        <span className={styles.sectionTitles}>
-          <span className={styles.sectionTitle}>{title}</span>
-          {subtitle && <span className={styles.sectionSubtitle}>{subtitle}</span>}
-        </span>
-        <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden="true">
-          ⌄
-        </span>
-      </button>
+      {/* The heading wraps the toggle, the accessible accordion pattern: each
+          section is an h2 in the outline, and its findings' h3s sit under it. */}
+      <h2 className={styles.sectionHeading}>
+        <button
+          type="button"
+          className={styles.sectionHeader}
+          onClick={() => setOpen((prev) => !prev)}
+          aria-expanded={open}
+        >
+          <span className={styles.sectionTitles}>
+            <span className={styles.sectionTitle}>{title}</span>
+            {subtitle && <span className={styles.sectionSubtitle}>{subtitle}</span>}
+          </span>
+          <span className={`${styles.chevron} ${open ? styles.chevronOpen : ""}`} aria-hidden="true">
+            ⌄
+          </span>
+        </button>
+      </h2>
       {open && <div className={styles.sectionBody}>{children}</div>}
     </section>
   );

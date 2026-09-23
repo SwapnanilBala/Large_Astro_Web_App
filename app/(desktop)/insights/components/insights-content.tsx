@@ -1281,7 +1281,9 @@ export default function InsightsContent({
             in here rather than being duplicated, and Sun and Moon join them
             because a reader naming their chart out loud names those four.
           */}
-          <aside className={styles.heroAside}>
+          {/* A div, not an <aside>: this is the hero's own content, and a
+              complementary landmark may not sit inside <main>. */}
+          <div className={styles.heroAside}>
             <p className={styles.heroScript}>
               Read it as a map,
               <span>not a verdict.</span>
@@ -1334,7 +1336,7 @@ export default function InsightsContent({
                 )}
               </dl>
             </div>
-          </aside>
+          </div>
         </motion.header>
 
         <TodaysSkyBand transits={payload.transits} />

@@ -41,7 +41,18 @@ function statusClass(status: MajorShiftStatus): string {
  * is what the route is for, but it is a complete answer and a blank card is
  * not.
  */
-function ShiftCard({ shift, reading }: { shift: MajorLifeShift; reading?: string }) {
+function ShiftCard({
+  shift,
+  reading,
+  headingLevel,
+}: {
+  shift: MajorLifeShift;
+  reading?: string;
+  /* 3 inside an /insights section, which supplies the h2; 2 on the life-shifts
+     page, where the cards sit directly under the h1. */
+  headingLevel: 2 | 3;
+}) {
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}>
       <header className={styles.lifeShiftHeader}>
@@ -49,7 +60,7 @@ function ShiftCard({ shift, reading }: { shift: MajorLifeShift; reading?: string
         <span className={styles.lifeShiftStatus}>{STATUS_LABEL[shift.status]}</span>
       </header>
       <p className={styles.lifeShiftLabel}>{shift.label}</p>
-      <h3>{shift.theme}</h3>
+      <Heading>{shift.theme}</Heading>
       <p className={styles.lifeShiftWindow}>
         <strong>Pivot:</strong> {formatShiftPivot(shift.pivotIso)} · age {shift.ageAtPivot}
         <br />
@@ -133,6 +144,7 @@ export default function MajorShiftsPanel({
             key={lifeShiftId(shift)}
             shift={shift}
             reading={readings.get(lifeShiftId(shift))}
+            headingLevel={isBrief ? 3 : 2}
           />
         ))}
       </div>
@@ -151,6 +163,7 @@ export default function MajorShiftsPanel({
                 key={lifeShiftId(shift)}
                 shift={shift}
                 reading={readings.get(lifeShiftId(shift))}
+                headingLevel={isBrief ? 3 : 2}
               />
             ))}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, useId } from "react";
 import {
   appendChartApiSearchParams,
   appendProfileLocationApiSearchParams,
@@ -345,6 +345,11 @@ function groupWindowsByDay(windows: MuhurtaWindow[], locale: string): DayGroup[]
 
 export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const tr = useRouteMessages(timingMessages);
+  /* The visible labels name their controls through these, so a screen reader
+     announces "Activity" rather than an unnamed combo box. */
+  const activityId = useId();
+  const fromId = useId();
+  const toId = useId();
   const { language } = useTranslation();
   const locale = LOCALE_TAGS[language];
   const [activity, setActivity] = useState("general_auspicious");
@@ -549,8 +554,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         }}
       >
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>{tr("timing.muhurta.activityLabel")}</span>
+          <label className={styles.fieldLabel} htmlFor={activityId}>
+            {tr("timing.muhurta.activityLabel")}
+          </label>
           <select
+            id={activityId}
             className={styles.select}
             value={activity}
             onChange={(e) => setActivity(e.target.value)}
@@ -564,8 +572,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         </div>
 
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>{tr("timing.muhurta.from")}</span>
+          <label className={styles.fieldLabel} htmlFor={fromId}>
+            {tr("timing.muhurta.from")}
+          </label>
           <input
+            id={fromId}
             type="date"
             className={styles.dateInput}
             value={startDate}
@@ -575,8 +586,11 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
         </div>
 
         <div className={styles.field}>
-          <span className={styles.fieldLabel}>{tr("timing.muhurta.to")}</span>
+          <label className={styles.fieldLabel} htmlFor={toId}>
+            {tr("timing.muhurta.to")}
+          </label>
           <input
+            id={toId}
             type="date"
             className={styles.dateInput}
             value={endDate}

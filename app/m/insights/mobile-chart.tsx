@@ -78,7 +78,9 @@ export default function MobileChart({ ascendantSign, houses, planets = [] }: Pro
       <svg
         viewBox="0 0 600 600"
         className={styles.svg}
-        role="img"
+        /* group, not img: the planets inside are buttons, and img would make
+           every child presentational -- invisible to a screen reader. */
+        role="group"
         aria-label={`Birth wheel for ${ascendantSign} ascendant with ${placed.length} grahas`}
       >
         <defs>

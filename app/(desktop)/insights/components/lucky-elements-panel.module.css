@@ -561,3 +561,28 @@
 :global(html[data-theme="light"]) .cautionTitle {
   color: #b0322c;
 }
+
+/*
+ * Small text on this panel's lifted cards, dark theme only.
+ *
+ * The base accents are tuned for the page background. Against these cards
+ * axe measured the gold at 3.6-4.0:1, the teal at 3.4-3.6:1 and the coral at
+ * 3.1:1, all under the 4.5:1 minimum for text this size. The light end of
+ * each ramp clears it -- the trade .numberBadge above already makes -- and
+ * light theme keeps its base tokens, which that theme had already deepened.
+ */
+:global(html:not([data-theme="light"])) .sectionTitle,
+:global(html:not([data-theme="light"])) .detailLabel,
+:global(html:not([data-theme="light"])) .directionTag {
+  color: var(--accent-gold-light); /* 5.6-6.7:1 on these cards */
+}
+
+:global(html:not([data-theme="light"])) .sectionEyebrow {
+  color: var(--accent-teal-light); /* 4.7-5.1:1 */
+}
+
+/* There is no lighter coral token: this is #F07068 raised in lightness only
+   (OKLCH, same hue), 4.84:1 on the caution card. */
+:global(html:not([data-theme="light"])) .cautionTitle {
+  color: #fea79f;
+}

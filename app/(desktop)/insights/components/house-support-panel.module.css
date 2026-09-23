@@ -39,6 +39,12 @@
   color: var(--text-secondary, #a8a090);
 }
 
+/* The bindu figures sit on their own gold tint, where the base gold measured
+   4.34:1; the light end clears it. Light theme keeps the base token. */
+:global(html:not([data-theme="light"])) .intro code {
+  color: var(--accent-gold-light);
+}
+
 .intro code {
   padding: 0.05em 0.4em;
   border-radius: 5px;
@@ -101,6 +107,8 @@
   margin: 0;
   font-size: 1.08rem;
   font-weight: 600;
+  /* Pinned to the global h3 value, so the h2 the full page uses looks the same. */
+  letter-spacing: 0.04em;
   line-height: 1.3;
   color: var(--text-primary, #f5f0e6);
 }
@@ -310,6 +318,7 @@
   margin: 0;
   font-size: 1.02rem;
   font-weight: 600;
+  letter-spacing: 0.04em;
   line-height: 1.3;
   color: var(--text-primary, #f5f0e6);
 }

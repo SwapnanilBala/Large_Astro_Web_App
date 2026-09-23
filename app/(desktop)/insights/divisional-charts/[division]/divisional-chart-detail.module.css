@@ -476,7 +476,9 @@
 
 .houseOccupants .emptyHouse {
   padding-left: 0;
-  color: #777681;
+  /* Was #777681, 4.07:1 at this size; raised in lightness only (OKLCH), 4.81:1.
+     Light theme sets its own colour for these spans further down. */
+  color: #83828d;
   background: transparent;
 }
 

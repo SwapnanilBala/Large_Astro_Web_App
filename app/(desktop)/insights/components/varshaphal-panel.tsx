@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useId } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
@@ -662,6 +662,8 @@ function PlanetaryWeatherMeters({ data }: { data: VarshaphalResult }) {
             </div>
             <div
               className={styles.weatherTrack}
+              /* img, so the label is announced: a plain div's aria-label is ignored. */
+              role="img"
               aria-label={tr("timing.varshaphal.weather.trackLabel", {
                 label: meter.label,
                 score: String(meter.score),
@@ -953,6 +955,7 @@ function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
 
 export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPanelProps) {
   const tr = useRouteMessages(timingMessages);
+  const timelineTitleId = useId();
   const { language } = useTranslation();
   const locale = LOCALE_TAGS[language];
   const currentYear = new Date().getFullYear();
@@ -1133,7 +1136,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             <div className={styles.timelineHeader}>
               <div>
                 <span className={styles.eyebrow}>{tr("timing.varshaphal.timeline.eyebrow")}</span>
-                <h3 className={styles.timelineTitle}>
+                <h3 className={styles.timelineTitle} id={timelineTitleId}>
                   {tr("timing.varshaphal.timeline.title", { year: String(data.year) })}
                 </h3>
               </div>
@@ -1143,7 +1146,15 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                 })}
               </span>
             </div>
-            <div className={styles.timelineTrack}>
+            {/* The strip scrolls sideways, so it takes focus: without it a
+                keyboard cannot reach the months past the edge. Named by the
+                title above rather than by a new string. */}
+            <div
+              className={styles.timelineTrack}
+              role="region"
+              aria-labelledby={timelineTitleId}
+              tabIndex={0}
+            >
               {buildYearTimeline(data, tr).map((item) => (
                 <article
                   key={item.month}

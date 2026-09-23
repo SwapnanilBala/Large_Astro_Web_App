@@ -274,6 +274,12 @@
   width: 100%;
 }
 
+/* On the lifted glance card the base gold measured 3.75:1; the light end of the
+   ramp clears 4.5:1. Dark theme only -- light's --accent-gold is already deep. */
+:global(html:not([data-theme="light"])) .chartGlance .kicker {
+  color: var(--accent-gold-light);
+}
+
 .kicker {
   font-family: var(--font-body), 'Plus Jakarta Sans', sans-serif;
   font-size: var(--text-label);
@@ -4051,6 +4057,13 @@
 /* The way out of the brief. The domain card on the results page is now a
    headline and a paragraph, so this is the only thing under it -- it has to
    read as the continuation, not as a footnote. */
+/* Light theme: --accent-gold-light is the pale end of the ramp there, 2.51:1 on
+   this card. The base gold reads 5.78:1, and its states only move the
+   border and background, so this holds for them too. */
+:global(html[data-theme="light"]) .domainOpenLink {
+  color: var(--accent-gold);
+}
+
 .domainOpenLink {
   display: inline-flex;
   align-items: center;
@@ -4975,7 +4988,10 @@
   text-transform: uppercase;
 }
 
-.lifeShiftCard h3 {
+/* h2 on the life-shifts page, h3 inside /insights; letter-spacing pins the
+   global h3 value so both levels look alike. */
+.lifeShiftCard :is(h2, h3) {
+  letter-spacing: 0.04em;
   color: var(--ink-main);
   font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.42rem;

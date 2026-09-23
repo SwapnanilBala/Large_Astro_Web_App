@@ -30,7 +30,7 @@ export default function DetailPageShell({
   children,
 }: DetailPageShellProps) {
   return (
-    <main className={styles.page}>
+    <div className={styles.page} /* the desktop layout owns <main> */>
       <div className={styles.shell}>
         <Link href={backHref} className={styles.backButton}>
           <FiArrowLeft aria-hidden="true" />
@@ -53,6 +53,6 @@ export default function DetailPageShell({
           Back to your reading
         </Link>
       </div>
-    </main>
+    </div>
   );
 }
