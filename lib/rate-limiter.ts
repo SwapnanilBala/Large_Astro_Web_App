@@ -12,15 +12,27 @@
  * limits slow a runaway client; they are not a ceiling on anything.
  *
  * What does bound each kind of route:
+ * - All of /api/, before any code here runs: a Vercel Firewall rate-limit
+ *   rule, live since 2026-09-23. Vercel counts requests per IP at its edge,
+ *   in one count shared by every instance (kept per region, so a caller
+ *   spread over several regions can get a little past it). When the rule's
+ *   action is 429 rather than Log, an over-limit request is answered by Vercel
+ *   and the function never starts, so a flood costs no compute, no Neon query
+ *   and no geocoder call. It is one count for the whole prefix, not one per
+ *   route. The rule is dashboard config, not code: its limit and its action
+ *   live under Project -> Firewall and are not repeated here. Every 429 the
+ *   app sends itself has a JSON body, so a 429 without one is that rule.
  * - The paid LLM routes: lib/llm-budget.ts, a daily count shared through Neon
  *   across every instance. That is the number that caps the bill.
  * - Nominatim: lib/nominatim-throttle.ts spaces calls 1s apart per instance,
  *   the server cache absorbs repeats, and since typeahead moved to Photon it
  *   is called about once per chart.
- * - Everything else (chart calculation, compatibility, forecasts): only this.
- *   A global limit for those needs state shared between instances -- a
- *   platform firewall rule, or a counter table like the LLM budget's -- and
- *   is deliberately not faked here.
+ * - Everything else (chart calculation, compatibility, forecasts): the
+ *   firewall's one per-IP count, and the per-instance numbers below. A shared
+ *   limit per route needs a firewall rule per route -- Vercel allows one
+ *   rate-limit rule per project on Hobby and 40 on Pro, and @vercel/firewall's
+ *   checkRateLimit is how code would use one -- or a counter table like the
+ *   LLM budget's, and is deliberately not faked here.
  */
 
 type RateLimitConfig = {
