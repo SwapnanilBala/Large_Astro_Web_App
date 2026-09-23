@@ -44,7 +44,7 @@ const ENGLISH_DIVISIONAL_GUIDE = divisionalMessages.divisional.guide as Record<
 >;
 
 // Lightweight skeleton for lazy-loaded panels
-function PanelSkeleton({ minHeight = 200 }: { minHeight?: number }) {
+function PanelSkeleton({ minHeight = 200 }: { minHeight?: number | string }) {
   const { t } = useTranslation();
   return <div className={styles.card} style={{ minHeight, display: "flex", alignItems: "center", justifyContent: "center", opacity: 0.4 }}>{t("insights.loading")}</div>;
 }
@@ -55,14 +55,44 @@ function LazyPanel({
   fallback,
   rootMargin = "200px",
   minHeight = 200,
+  mountWhenIdle = false,
 }: {
   children: React.ReactNode;
   fallback?: React.ReactNode;
   rootMargin?: string;
-  minHeight?: number;
+  /* A number is pixels; a string is any CSS length, for a reservation that has
+     to follow the viewport. */
+  minHeight?: number | string;
+  /* Also mount once the browser is idle after load, not only on arrival. See
+     the effect below for when that is the right trade. */
+  mountWhenIdle?: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+  /*
+   * Mounting on arrival is a layout shift whenever the real panel is a very
+   * different height from the placeholder, because it happens in view. Lucky
+   * Elements is the case that measured: a 200px placeholder became a 2,060px
+   * panel, so jumping to it from the section tabs moved everything beneath
+   * it by nearly 1,900px (CLS 0.647). Mounted at idle it grows while it is
+   * still thousands of pixels below the fold, where a shift is invisible and
+   * uncounted.
+   *
+   * Only for panels that cost nothing to mount. A panel whose mount fires a
+   * paid request -- the dasha panel's current-period reading -- must stay
+   * on-arrival, or every visitor would pay for a section most never reach.
+   */
+  useEffect(() => {
+    if (!mountWhenIdle) return;
+    const show = () => setIsVisible(true);
+    if (typeof window !== "undefined" && "requestIdleCallback" in window) {
+      const handle = window.requestIdleCallback(show, { timeout: 2500 });
+      return () => window.cancelIdleCallback(handle);
+    }
+    const timer = setTimeout(show, 1200);
+    return () => clearTimeout(timer);
+  }, [mountWhenIdle]);
 
   useEffect(() => {
     const el = ref.current;
@@ -1711,7 +1741,13 @@ export default function InsightsContent({
               </>
             }
           >
-            <LazyPanel>
+            {/* Mounted on arrival, not at idle: its mount fires the paid
+                current-period reading. So the placeholder reserves the height
+                instead. Measured 1,553 / 1,459 / 1,391 / 1,285px at 1024 / 1280 /
+                1440 / 1920 wide -- roughly 1860px - 30vw -- where a 200px default
+                made the Timing tab's jump a 0.66 CLS. This tracks it about 60-100px
+                under, so a chart with less to say still never leaves a gap. */}
+            <LazyPanel minHeight="clamp(1150px, calc(1760px - 30vw), 1500px)">
               <PanelErrorBoundary panelName="Vimshottari Dashas">
                   <NakshatraDashaPanel
                     nakshatra={payload.chart.nakshatra}
@@ -1886,7 +1922,8 @@ export default function InsightsContent({
               </>
             }
           >
-            <LazyPanel>
+            {/* Idle-mounted: no requests, and a height the placeholder cannot guess. */}
+            <LazyPanel mountWhenIdle>
               <PanelErrorBoundary panelName="Lucky Elements">
                 <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
               </PanelErrorBoundary>

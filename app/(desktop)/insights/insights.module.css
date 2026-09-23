@@ -3567,6 +3567,12 @@
 .domainLoading {
   display: grid;
   align-content: center;
+  /* Near the loaded section's height, so the Life areas tab does not land on a
+     card that then grows under the reader: loaded measured 771 / 681 / 658 /
+     573px at 1024 / 1280 / 1440 / 1920 wide, against 430-454px for this state.
+     Tracks that about 40-85px under, so it never leaves a gap; the content
+     centres in whatever it reserves. */
+  min-height: clamp(520px, calc(870px - 18vw), 760px);
   gap: 1.4rem;
   overflow: hidden;
   background:
