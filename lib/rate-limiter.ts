@@ -4,6 +4,23 @@
  * Uses only standard Web APIs (Map, Date) so it works in the Next.js Edge runtime.
  * Each entry stores an array of request timestamps within the current window.
  * Expired entries are cleaned up every 5 minutes automatically.
+ *
+ * PER INSTANCE, which is worth knowing before trusting a number below. The
+ * store is this process's memory, so on Vercel every running instance counts
+ * on its own and a cold start begins from zero: "20 a minute" is 20 a minute
+ * per instance per caller, and under load the platform adds instances. These
+ * limits slow a runaway client; they are not a ceiling on anything.
+ *
+ * What does bound each kind of route:
+ * - The paid LLM routes: lib/llm-budget.ts, a daily count shared through Neon
+ *   across every instance. That is the number that caps the bill.
+ * - Nominatim: lib/nominatim-throttle.ts spaces calls 1s apart per instance,
+ *   the server cache absorbs repeats, and since typeahead moved to Photon it
+ *   is called about once per chart.
+ * - Everything else (chart calculation, compatibility, forecasts): only this.
+ *   A global limit for those needs state shared between instances -- a
+ *   platform firewall rule, or a counter table like the LLM budget's -- and
+ *   is deliberately not faked here.
  */
 
 type RateLimitConfig = {
