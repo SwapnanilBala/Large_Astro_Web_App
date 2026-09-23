@@ -69,8 +69,11 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      legitimately asks twice for overlapping chapters. */
   "/api/chart/life-shifts": { limit: 8, windowMs: 60_000 },
   "/api/chart": { limit: 30, windowMs: 60_000 },
-  /* Tight: a POST here can insert a workspace row, so an unthrottled loop is a
-     way to fill the table. A real visitor needs it once per device, ever. */
+  /* Each call builds two full charts and compares them, and writes nothing. A
+     visitor sends one per pairing they ask about, plus one when a shared link
+     opens with both people filled in, so ten a minute is room for a person
+     and not for a loop. A repeat pairing is answered from the server cache
+     but still counts here: this check runs before the route does. */
   "/api/compatibility": { limit: 10, windowMs: 60_000 },
   "/api/geocode": { limit: 20, windowMs: 60_000 },
   "/api/palm-reading": { limit: 5, windowMs: 60_000 },
