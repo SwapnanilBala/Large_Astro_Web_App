@@ -135,96 +135,102 @@
     "stepTabBirthTime": "Ora di nascita",
     "stepTabPlace": "Luogo di nascita",
     "askPlace": "Dove sei nato/a?",
-    "askPlaceHelper": "Il luogo di nascita, non quello in cui vivi ora — è ciò che fissa le coordinate e il fuso orario."
+    "askPlaceHelper": "Il luogo di nascita, non quello in cui vivi ora — è ciò che fissa le coordinate e il fuso orario.",
+    "formBirthplace": "Luogo di nascita",
+    "autoPlaceToggle": "Rileva automaticamente il mio luogo di nascita",
+    "autoPlaceHint": "Indica la città e il resto del luogo viene ricavato da solo."
   },
   "engineSelect": {
-    "kicker": "Schema di calcolo",
-    "heading": "Scegli una tradizione, poi uno stile",
-    "lead": "Invece di mostrare tutti i motori insieme, scegli prima la tradizione siderale. Ogni tradizione spiega la propria origine e poi offre uno stile di case.",
+    "kicker": "Impostazioni del tema",
+    "heading": "Scegli come calcolare il tuo tema",
+    "lead": "Gli astrologi non concordano del tutto su dove inizi lo zodiaco e su come si tracciano le dodici case. Non sei sicuro? Lascia Lahiri, quello usato dalla maggior parte degli astrologi indiani.",
     "guidanceStep1": "1. Scegli la tradizione ayanamsha",
     "guidanceStep2": "2. Seleziona lo stile di case dal menu",
     "guidanceStep3": "3. Genera la carta con quel metodo",
     "recommended": "Consigliato",
     "styleLabel": "Stile carta",
-    "selectedKicker": "Metodo selezionato",
-    "summaryAyanamsha": "Ayanamsha",
-    "summaryStyle": "Stile di case",
+    "selectedKicker": "La tua scelta",
+    "summaryAyanamsha": "Tradizione",
+    "summaryStyle": "Stile del tema",
     "summaryImpact": "Cosa cambia",
-    "summaryImpactText": "L'ayanamsha sposta i gradi siderali dei pianeti; lo stile di case cambia come le aree della vita vengono divise attorno all'ascendente.",
-    "computing": "Calcolo della carta...",
-    "generate": "Genera intelligenza della carta ->",
+    "summaryImpactText": "La tradizione stabilisce dove inizia ogni segno, così un pianeta può cadere un grado o due da una parte o dall'altra di un confine. Lo stile cambia dove cadono le linee delle case.",
+    "computing": "Creazione del tema...",
+    "generate": "Vedi il mio tema",
     "go": "Vai",
     "goWith": "Visualizza i risultati con",
     "groups": {
       "lahiri": {
         "label": "Lahiri",
         "origin": "Standard nazionale indiano",
-        "description": "L'ayanamsha vedico moderno più usato. È una scelta equilibrata per temi natali, dasha e report per clienti.",
+        "description": "Lo standard in tutta l'India. Se non sei sicuro, usa questo.",
         "method": "Lahiri ancora lo zodiaco siderale al riferimento tradizionale Chitra/Spica usato in panchang ed effemeridi indiane.",
-        "summary": "Riferimento vedico principale, ideale per interpretazioni generali."
+        "summary": "La scelta vedica principale, e la più sicura per uso generale."
       },
       "raman": {
         "label": "Raman",
         "origin": "Linea di B. V. Raman",
-        "description": "Un quadro vedico comparativo associato alla scuola del Dr. B. V. Raman. Utile per controllare una diversa correzione siderale.",
+        "description": "Un piccolo scostamento da Lahiri, insegnato nella scuola di B. V. Raman.",
         "method": "Raman usa uno scarto di precessione diverso da Lahiri, quindi pianeti e cuspidi possono spostarsi vicino ai confini.",
-        "summary": "Riferimento vedico comparativo per verificare tradizioni di timing alternative."
+        "summary": "Una lettura vedica alternativa, per il confronto con Lahiri."
       },
       "krishnamurti": {
         "label": "Krishnamurti",
         "origin": "Tradizione astrologica KP",
-        "description": "Krishnamurti Paddhati supporta un lavoro predittivo dettagliato, soprattutto con case Placidus.",
+        "description": "Il sistema KP, usato per definire tempi ed eventi precisi.",
         "method": "KP combina il proprio ayanamsha con cuspidi di casa e analisi dei sub-lord, utile per letture orientate agli eventi.",
-        "summary": "Riferimento KP per predizione dettagliata e analisi degli eventi."
+        "summary": "Pensato per previsioni dettagliate e datazione degli eventi."
       },
       "fagan_bradley": {
         "label": "Fagan-Bradley",
         "origin": "Standard siderale occidentale",
-        "description": "Ayanamsha siderale occidentale per confronti tropicale-siderale e letture siderali storiche.",
+        "description": "Lo standard siderale occidentale, usato per confronti affiancati.",
         "method": "Fagan-Bradley segue il valore Swiss Ephemeris di 24.042044444 gradi al JD 2433282.42346.",
-        "summary": "Riferimento siderale occidentale per analisi comparativa."
+        "summary": "Il riferimento siderale occidentale, per il lavoro comparativo."
       },
       "pushyapaksha": {
         "label": "Pushyapaksha",
         "origin": "Ancora della stella Pushya",
-        "description": "Ayanamsha a stella fissa che ancora Pushya tramite delta Cancri per un quadro siderale stellare.",
+        "description": "Ancorato alla stella Pushya anziché a un valore calcolato.",
         "method": "Pushyapaksha segue la regola True Pushya: Asellus Australis / delta Cancri ? fissata a 16 gradi del Cancro.",
-        "summary": "Riferimento stellare con delta Cancri a 16 gradi del Cancro."
+        "summary": "Un riferimento ancorato a una stella, fissato su Pushya."
       },
       "yukteshwar": {
         "label": "Yukteshwar",
         "origin": "Tradizione di Sri Yukteshwar",
-        "description": "Opzione siderale comparativa ispirata a Sri Yukteshwar per clienti o praticanti che richiedono questa linea.",
+        "description": "Segue il lignaggio di Sri Yukteshwar.",
         "method": "Yukteshwar segue il valore Swiss Ephemeris: 360 - 338.917778 gradi a J1900.0.",
-        "summary": "Riferimento ispirato a Sri Yukteshwar per confronto siderale alternativo."
+        "summary": "Una lettura siderale alternativa nel lignaggio di Sri Yukteshwar."
       }
     },
     "styles": {
       "whole_sign": {
         "label": "Whole Sign classico",
-        "description": "Ogni segno diventa una casa completa dal segno ascendente. È il default vedico più chiaro."
+        "description": "Un segno intero per casa, a partire dal tuo segno ascendente. La scelta vedica abituale."
       },
       "equal": {
         "label": "Case uguali",
-        "description": "Ogni casa misura esattamente 30 gradi dal grado ascendente. Mantiene dimensioni uniformi."
+        "description": "Dodici case di esattamente 30 gradi, misurate dal tuo grado ascendente."
       },
       "placidus": {
         "label": "Placidus",
-        "description": "Sistema a quadranti basato sul tempo, popolare in astrologia occidentale e centrale in molti flussi KP."
+        "description": "La dimensione delle case varia con l'ora del giorno. Standard nell'astrologia occidentale e nel KP."
       },
       "koch": {
         "label": "Koch",
-        "description": "Sistema a quadranti basato sul luogo di nascita che evidenzia il moto locale dell'ascendente."
+        "description": "Come Placidus, ma calcolato a partire dal tuo luogo di nascita."
       },
       "campanus": {
         "label": "Campanus",
-        "description": "Divide il primo verticale in archi uguali, offrendo una lettura spaziale delle case."
+        "description": "Case divise per direzione nel cielo anziché per tempo."
       },
       "regiomontanus": {
         "label": "Regiomontanus",
-        "description": "Usa divisioni uguali dell'equatore celeste, storicamente importante nell'astrologia medievale."
+        "description": "Un sistema medievale, diviso lungo l'equatore celeste."
       }
-    }
+    },
+    "mainMethodLabel": "Metodo principale",
+    "subMethodLabel": "Sottometodo",
+    "technicalDetail": "Dettaglio tecnico"
   },
   "chartHistory": {
     "welcomeHeading": "Benvenuto",
@@ -354,7 +360,10 @@
     "years": "anni",
     "currentSummaryLabel": "Cosa Significa Per Te",
     "daysRemaining": "{days} giorni rimanenti",
-    "periodProgress": "Progresso del Periodo"
+    "periodProgress": "Progresso del Periodo",
+    "currentReadingPending": "Interpretazione del tuo periodo attuale…",
+    "stepBack": "Indietro",
+    "stepBackTo": "Torna a {level}"
   },
   "transits": {
     "kicker": "CIELO ATTUALE",
@@ -596,7 +605,13 @@
       "analyze": "Analizza il Mio Palmo"
     },
     "analyzing": {
-      "text": "Lettura del tuo palmo"
+      "text": "Lettura del tuo palmo",
+      "stageLines": "Seguo le linee principali",
+      "stageMounts": "Leggo i monti e le dita",
+      "stageWeighing": "Valuto su cosa concordano le linee",
+      "stageWriting": "Scrivo la tua lettura",
+      "stageFinishing": "Completo le ultime sezioni",
+      "patience": "Una lettura completa richiede circa due minuti. Viene scritta per la tua mano, non presa da uno scaffale."
     },
     "results": {
       "newReading": "Nuova Lettura",
@@ -760,6 +775,21 @@
       "none": "Nessuno",
       "summaryContrast": "Confronto delle sintesi",
       "noSummary": "(nessuna sintesi)"
+    },
+    "qa": {
+      "heading": "Fai una domanda sulla tua lettura",
+      "lead": "Tutto ciò che vuoi capire meglio. Le risposte nascono da questa lettura e dal tuo tema, non da altro.",
+      "placeholder": "Chiedi di una linea, dei tempi, o di cosa farne…",
+      "inputLabel": "La tua domanda su questa lettura",
+      "send": "Chiedi",
+      "sending": "Invio…",
+      "thinking": "Sto guardando di nuovo il tuo palmo…",
+      "threadFull": "Le domande per questa lettura sono finite. Fanne una nuova per continuare.",
+      "errorGeneric": "Non è stato possibile rispondere. Riprova.",
+      "footnote": "Tendenze e potenzialità, mai un destino fissato.",
+      "starterCareer": "Cosa dice il mio palmo sulla direzione del mio lavoro?",
+      "starterTiming": "A cosa dovrei prestare attenzione nel prossimo anno?",
+      "starterStrength": "Qual è la linea più forte della mia mano e cosa significa?"
     }
   },
   "divisional": {
@@ -838,7 +868,13 @@
         "repeats": "Si ripete",
         "note": "“Si ripete” significa che il punto rimane nello stesso segno della D1. È un segnale di coerenza, non automaticamente positivo o negativo."
       },
-      "footer": "Le carte divisionali aumentano la specificità solo quando confermano la promessa natale, usano dati di nascita affidabili e concordano con fattori indipendenti di forza e tempo."
+      "footer": "Le carte divisionali aumentano la specificità solo quando confermano la promessa natale, usano dati di nascita affidabili e concordano con fattori indipendenti di forza e tempo.",
+      "notes": {
+        "kicker": "Letto per questa carta",
+        "pending": "Lettura delle tue posizioni…",
+        "failed": "Le note per questa carta non sono disponibili al momento. La guida qui sopra resta valida.",
+        "attribution": "Scritto per le tue posizioni da Claude (Opus 5). Leggilo insieme alla guida qui sopra, non al suo posto."
+      }
     },
     "panel": {
       "kicker": "Carte Varga",
@@ -1017,6 +1053,98 @@
         "note": "Le carte divisionali affinano una promessa natale; non la sostituiscono. Conclusioni più solide richiedono dati di nascita affidabili e accordo con evidenze indipendenti.",
         "returnLink": "Ritorna alla tua lettura completa"
       }
+    },
+    "guide": {
+      "d1": {
+        "name": "Rashi",
+        "focus": "Fondamento natale",
+        "summary": "La carta principale descrive il quadro generale: identità, direzione di vita, case e la promessa natale che ogni altro varga deve qualificare anziché sostituire.",
+        "readWith": "Parti da qui. Nessuna conclusione divisionale dovrebbe contraddire una promessa debole o assente nella D1.",
+        "clientQuestion": "Qual è il quadro centrale attraverso cui si sviluppa il resto di questa lettura?",
+        "sensitivityNote": "I segni planetari sono relativamente stabili; l'ascendente e le case dipendono comunque dall'ora di nascita registrata.",
+        "mappingMethod": "Posizione natale del segno siderale, senza suddivisione."
+      },
+      "d2": {
+        "name": "Hora",
+        "focus": "Risorse e gestione",
+        "summary": "La D2 qualifica il modo in cui le risorse vengono raccolte, protette, condivise e convertite in stabilità materiale.",
+        "readWith": "Leggila con la seconda e l'undicesima casa della D1, i loro signori e la forza di Giove e Venere.",
+        "clientQuestion": "Quale stile di costruzione delle risorse è più facile da sostenere nel tempo?",
+        "sensitivityNote": "Usa un'ora di nascita esatta prima di promuovere l'ascendente o le case della D2 a conclusione ferma.",
+        "mappingMethod": "Hora parashari: i segni dispari vanno dal Leone al Cancro; i segni pari vanno dal Cancro al Leone."
+      },
+      "d4": {
+        "name": "Chaturthamsa",
+        "focus": "Casa, proprietà e radicamento",
+        "summary": "La D4 qualifica la casa, la proprietà, l'insediamento, il radicamento emotivo e le condizioni che rendono un luogo sicuro.",
+        "readWith": "Leggila con la quarta casa della D1, la Luna, Marte e i periodi rilevanti per proprietà o trasferimenti.",
+        "clientQuestion": "Quali condizioni aiutano la casa e la sicurezza di lungo periodo a diventare davvero rigeneranti?",
+        "sensitivityNote": "Un'ora esatta è importante perché l'ascendente divisionale può cambiare in un intervallo breve.",
+        "mappingMethod": "I quarti del Chaturthamsa corrispondono al 1°, 4°, 7° e 10° segno a partire dal segno natale."
+      },
+      "d7": {
+        "name": "Saptamsa",
+        "focus": "Figli, cura ed eredità",
+        "summary": "La D7 qualifica i temi dei figli, della cura, del mentoring, della continuazione creativa e di ciò che viene trasmesso alla generazione successiva.",
+        "readWith": "Leggila con la quinta casa della D1, Giove, il suo signore e i periodi di tempo favorevoli.",
+        "clientQuestion": "Come descrive la carta la cura, la continuità e l'eredità che coltivi?",
+        "sensitivityNote": "Considera provvisorie le affermazioni della D7 basate sulle case, a meno che l'ora registrata non sia esatta.",
+        "mappingMethod": "Saptamsa parashari: i segni dispari partono dal segno natale; i pari partono dal suo settimo."
+      },
+      "d9": {
+        "name": "Navamsa",
+        "focus": "Unione e maturità interiore",
+        "summary": "La D9 qualifica la maturità relazionale, gli impegni, i valori, il dharma e il modo in cui il potenziale natale si sviluppa con l'esperienza.",
+        "readWith": "Leggila con la settima casa della D1, Venere, Giove, le regole di relazione e i signori di dasha attivi.",
+        "clientQuestion": "Quali qualità aiutano l'impegno a diventare più maturo e sostenibile?",
+        "sensitivityNote": "La D9 è molto utile, ma il suo ascendente va ritenuto affidabile solo quando l'ora di nascita è esatta.",
+        "mappingMethod": "Navamsa parashari: i segni mobili partono da sé stessi, i fissi dal nono e i doppi dal quinto."
+      },
+      "d10": {
+        "name": "Dashamsa",
+        "focus": "Carriera e contributo pubblico",
+        "summary": "La D10 qualifica la vocazione, la responsabilità, la leadership, la visibilità professionale e il modo in cui il lavoro raggiunge il mondo più ampio.",
+        "readWith": "Leggila con la decima casa della D1, il suo signore, il Sole, Saturno, Mercurio e i tempi attuali di carriera.",
+        "clientQuestion": "Dove può la competenza diventare visibile, utile e via via più autorevole?",
+        "sensitivityNote": "Piccoli errori di orario possono cambiare l'ascendente della D10; verificalo prima di formulare affermazioni professionali specifiche.",
+        "mappingMethod": "Dashamsa parashari: i segni dispari partono dal segno natale; i pari partono dal suo nono."
+      },
+      "d12": {
+        "name": "Dwadashamsa",
+        "focus": "Genitori e schemi ereditati",
+        "summary": "La D12 qualifica l'influenza dei genitori, la discendenza, le abitudini ereditate e gli schemi familiari che una persona porta avanti o cambia consapevolmente.",
+        "readWith": "Leggila con la quarta e la nona casa della D1, il Sole, la Luna e gli indizi dell'ambito familiare.",
+        "clientQuestion": "Quali schemi ereditati offrono sostegno e quali sono pronti a essere gestiti diversamente?",
+        "sensitivityNote": "Usa dati con ora esatta per l'ascendente e l'enfasi sulle case della D12.",
+        "mappingMethod": "Le porzioni del Dwadashamsa procedono zodiacalmente dal segno natale."
+      },
+      "d24": {
+        "name": "Chaturvimshamsa",
+        "focus": "Apprendimento e padronanza",
+        "summary": "La D24 qualifica l'istruzione, lo stile di apprendimento, lo studio disciplinato, i maestri e il modo in cui la conoscenza diventa padronanza utilizzabile.",
+        "readWith": "Leggila con la quarta, la quinta e la nona casa della D1, oltre alla forza di Mercurio e Giove.",
+        "clientQuestion": "Quali condizioni rendono l'apprendimento più profondo, più costante e più facile da applicare?",
+        "sensitivityNote": "A questa risoluzione, un'ora di nascita esatta e l'attenzione ai confini sono essenziali.",
+        "mappingMethod": "Le porzioni del Chaturvimshamsa partono dal Leone nei segni dispari e dal Cancro nei pari."
+      },
+      "d30": {
+        "name": "Trimshamsa",
+        "focus": "Pressione e resilienza",
+        "summary": "La D30 qualifica il modo in cui si vivono tensione, conflitto, vulnerabilità e recupero. Si usa meglio per una consapevolezza pratica del rischio, non per una previsione basata sulla paura.",
+        "readWith": "Leggila con la sesta, l'ottava e la dodicesima casa della D1, Saturno e Marte, e i fattori di sostegno misurati.",
+        "clientQuestion": "Cosa ti aiuta a rispondere alla pressione senza lasciare che definisca tutta la storia?",
+        "sensitivityNote": "L'elevata sensibilità rende necessaria un'ora esatta per l'interpretazione a livello di case.",
+        "mappingMethod": "Il Trimshamsa parashari usa cinque porzioni planetarie disuguali i cui confini differiscono nei segni dispari e pari."
+      },
+      "d60": {
+        "name": "Shashtiamsa",
+        "focus": "Trama a grana fine",
+        "summary": "La D60 è uno strato tradizionale a grana molto fine, usato per qualificare una trama più profonda. Non dovrebbe mai essere trattato come un verdetto a sé stante né usato per scavalcare indizi più stabili.",
+        "readWith": "Usala solo dopo che la D1, il varga di dominio pertinente, le misure di forza e i tempi puntano tutti nella stessa direzione.",
+        "clientQuestion": "Questo strato fine ripete un tema già ben sostenuto, o introduce soltanto rumore?",
+        "sensitivityNote": "La D60 richiede un'ora di nascita rettificata o eccezionalmente precisa; altrimenti trattala solo come esplorativa.",
+        "mappingMethod": "Lo Shashtiamsa divide ogni segno natale in sessanta porzioni di mezzo grado, i cui segni si succedono zodiacalmente dall'Ariete."
+      }
     }
   },
   "shared": {
@@ -1049,7 +1177,15 @@
     "weeklyEnergyTableDay": "Giorno",
     "weeklyEnergyTableDate": "Data",
     "weeklyEnergyTableScore": "Punteggio",
-    "weeklyEnergyTableBand": "Banda"
+    "weeklyEnergyTableBand": "Banda",
+    "weeklyEnergyTitle": "La Tua Energia Settimanale",
+    "weeklyEnergySubtitle": "Flussi, umori e slancio",
+    "weeklyEnergyPreviousWeek": "Settimana precedente",
+    "weeklyEnergyNextWeek": "Settimana successiva",
+    "weeklyEnergyErrorTitle": "L'energia di questa settimana non si è caricata",
+    "weeklyEnergyIdleNote": "L'energia settimanale è pronta per il caricamento",
+    "weeklyEnergyLoadingNote": "Lettura della settimana in arrivo",
+    "weeklyEnergyForecastTitle": "Previsione Settimanale"
   },
   "timing": {
     "page": {
@@ -1460,6 +1596,18 @@
       "errorHeading": "Non è stato possibile preparare i capitoli della vita.",
       "errorFallback": "Nessun dato della carta è stato restituito.",
       "backToReading": "Torna alla tua lettura"
+    },
+    "kalatraHeading": "La vita coniugale nel dettaglio",
+    "kalatraNote": "Cinque aspetti, ciascuno letto dalla propria casa",
+    "kalatraReadFrom": "Letto da",
+    "kalatraMeterLabel": "{label}: {score} su 100 rispetto agli altri aspetti",
+    "kalatraMethodSummary": "Come sono stati ricavati",
+    "kalatraMangalCaveat": "Il Mangal dosha è valutato solo da questa carta. L'annullamento più citato di tutti — che il dosha si annulla quando entrambi i partner lo portano — richiede l'altra carta, quindi non è conteggiato sopra.",
+    "kalatraMangalCancelled": "Annullamenti trovati in questa carta: {list}.",
+    "kalatraBand": {
+      "strong": "Ben sostenuto",
+      "mixed": "Misto",
+      "tender": "Richiede cura"
     }
   },
   "fullReading": {
@@ -1531,7 +1679,16 @@
     "allReadingsTitle": "Tutte le letture",
     "allReadingsSubtitle": "{count} in totale",
     "newChart": "Nuova carta",
-    "desktopView": "Vista desktop completa"
+    "desktopView": "Vista desktop completa",
+    "kalatraTitle": "La vita coniugale nel dettaglio",
+    "kalatraSubtitle": "{count} aspetti, ciascuno letto dalla propria casa",
+    "kalatraReadFrom": "Letto da",
+    "kalatraMangalCaveat": "Il Mangal dosha è valutato solo da questa carta. L'annullamento più citato — che il dosha si annulla quando entrambi i partner lo portano — richiede l'altra carta.",
+    "kalatraBand": {
+      "strong": "Ben sostenuto",
+      "mixed": "Misto",
+      "tender": "Richiede cura"
+    }
   },
   "strength": {
     "planets": {
