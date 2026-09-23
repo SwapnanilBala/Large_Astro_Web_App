@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 
 import type { MajorLifeShift, MajorShiftStatus } from "./engines/major-shifts-engine";
 
@@ -96,27 +95,8 @@ export function buildLifeShiftFacts(shifts: MajorLifeShift[]): LifeShiftFacts[] 
   }));
 }
 
-/**
- * The cache key for one request.
- *
- * Hashed rather than concatenated: the facts carry free text, and a key
- * built by joining them would collide on any value containing the separator.
- *
- * The depth is part of the key rather than a detail of it, and that is the
- * whole reason this is a function with a test rather than three lines inside
- * the route. The two pages ask about overlapping chapters, so leaving it out
- * lets whichever page is visited first decide how long the other one's
- * readings are -- a results page warmed by a visit to /insights/life-shifts
- * would quietly serve the three-sentence version of the very reading the
- * headline length exists to lengthen. That failure is invisible: the card
- * renders a perfectly good reading, just the wrong one.
- */
-export function lifeShiftCacheKey(
-  depth: LifeShiftDepth,
-  facts: LifeShiftFacts[],
-): string {
-  return createHash("sha256").update(JSON.stringify({ depth, facts })).digest("hex");
-}
+/* lifeShiftCacheKey lives in ./life-shift-reading-server: it needs node:crypto,
+   and this module is also bundled for the browser. */
 
 /** How the facts are laid out for the model, shared with scripts/effort-compare.mjs. */
 export function renderLifeShiftFacts(facts: LifeShiftFacts[]): string {

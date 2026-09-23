@@ -5,9 +5,9 @@ import { z } from "zod";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
+import { lifeShiftCacheKey } from "@/lib/life-shift-reading-server";
 import {
   MAX_LIFE_SHIFTS,
-  lifeShiftCacheKey,
   renderLifeShiftFacts,
   type LifeShiftDepth,
   type LifeShiftFacts,

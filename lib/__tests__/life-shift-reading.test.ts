@@ -3,12 +3,12 @@ import {
   buildLifeShiftFacts,
   formatShiftPivot,
   formatShiftWindow,
-  lifeShiftCacheKey,
   lifeShiftId,
   MAX_LIFE_SHIFTS,
   renderLifeShiftFacts,
   type LifeShiftFacts,
 } from "../life-shift-reading";
+import { lifeShiftCacheKey } from "../life-shift-reading-server";
 import type { MajorLifeShift } from "../engines/major-shifts-engine";
 
 function shift(overrides: Partial<MajorLifeShift> = {}): MajorLifeShift {

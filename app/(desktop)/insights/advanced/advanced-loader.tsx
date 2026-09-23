@@ -9,7 +9,7 @@ import ErrorBoundary from "@/app/components/ErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
-import { buildChartHistoryQuery } from "@/lib/chart-params";
+import { buildChartHistoryQuery } from "@/lib/chart-params-url";
 import { useRouteMessages } from "@/lib/i18n-context";
 import sharedMessages from "@/messages/en.shared.json";
 import type { AdvancedFocusView } from "./advanced-views";
