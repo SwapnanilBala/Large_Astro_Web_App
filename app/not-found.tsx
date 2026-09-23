@@ -13,7 +13,6 @@
  * URL and a bad chart link say the same thing -- keep them in step.
  */
 import type { Metadata } from "next";
-import Link from "next/link";
 
 export const metadata: Metadata = { title: "Page not found" };
 
@@ -45,7 +44,13 @@ export default function NotFound() {
       <p style={{ margin: 0, maxWidth: "32ch", color: "#A8A090", lineHeight: 1.6 }}>
         The page you asked for does not exist.
       </p>
-      <Link
+      {/* A plain <a> on purpose. A <Link> prefetches its target once it is on
+          screen, and this one points into the desktop tree: every 404 then
+          downloaded the home page's stylesheet, fonts and scripts in the
+          background, about 250KB -- the coupling described above, by a
+          different route. */}
+      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+      <a
         href="/"
         style={{
           marginTop: "0.5rem",
@@ -61,7 +66,7 @@ export default function NotFound() {
         }}
       >
         Start a new reading
-      </Link>
+      </a>
     </main>
   );
 }
