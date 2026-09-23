@@ -192,7 +192,6 @@ export default function ZodiacFloater() {
     };
     // Effect intentionally runs once on mount; the timer chain re-schedules
     // itself, so we deliberately avoid re-binding on slot updates.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const slotClass = (slot: SlotIndex): string => {

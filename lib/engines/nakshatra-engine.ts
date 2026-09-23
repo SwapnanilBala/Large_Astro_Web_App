@@ -290,8 +290,6 @@ export function calculateDashaTimeline(
   let currentDasha: DashaPeriod | null = null;
   let currentDashaSeqStartStr: string | null = null;
   let currentDashaSeqEndStr: string | null = null;
-  let currentDashaSeqStartMs = 0;
-  let currentDashaSeqEndMs = 0;
 
   for (let i = 0; i < lookupPeriods.length; i++) {
     const { period, sequenceStartMs, sequenceEndMs } = lookupPeriods[i];
@@ -301,8 +299,6 @@ export function calculateDashaTimeline(
       currentDasha = period;
       currentDashaSeqStartStr = msToDateStr(sequenceStartMs);
       currentDashaSeqEndStr = msToDateStr(sequenceEndMs);
-      currentDashaSeqStartMs = sequenceStartMs;
-      currentDashaSeqEndMs = sequenceEndMs;
       break;
     }
   }
@@ -311,8 +307,6 @@ export function calculateDashaTimeline(
   let currentAntardasha: AntarDashaPeriod | null = null;
   let currentAntardashaStart: string | null = null;
   let currentAntardashaEnd: string | null = null;
-  let currentAntarSeqStartMs = 0;
-  let currentAntarSeqEndMs = 0;
 
   if (currentDasha) {
     const subPeriods = buildSubPeriodWindows(
@@ -338,8 +332,6 @@ export function calculateDashaTimeline(
         };
         currentAntardashaStart = sp.sequence_start_date;
         currentAntardashaEnd = sp.sequence_end_date;
-        currentAntarSeqStartMs = sp.sequence_start_ms;
-        currentAntarSeqEndMs = sp.sequence_end_ms;
         break;
       }
     }

@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
 import { getPalmReading, updatePalmReading } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
@@ -91,7 +90,6 @@ type Props = { id: string };
 
 export default function PalmReadingDetailClient({ id }: Props) {
   const tr = useRouteMessages(palmMessages);
-  const router = useRouter();
   const [record, setRecord] = useState<PalmReadingRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

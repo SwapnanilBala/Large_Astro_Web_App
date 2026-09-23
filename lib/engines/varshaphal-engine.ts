@@ -204,21 +204,6 @@ function getPlanetStrengthScore(planet: string, sign: string): number {
 }
 
 /**
- * Find the Sun's sidereal longitude from a natal chart computation.
- */
-function getNatalSunLongitude(birth: BirthDetailsInput): number {
-  const utc = parseBirthUTC(birth);
-  const result = calculate({
-    ...utc,
-    latitude: birth.latitude,
-    longitude: birth.longitude,
-    engine_id: birth.engine_id,
-  });
-  const sun = result.planets.find((p) => p.name === "Sun");
-  return sun?.longitude ?? 0;
-}
-
-/**
  * Binary-search for the exact moment the transiting Sun reaches a given
  * sidereal longitude in a target year.
  *

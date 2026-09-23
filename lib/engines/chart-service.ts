@@ -5,7 +5,6 @@ import {
   type PlanetPosition,
   type HousePlacement,
   type AscendantData,
-  type SwissEngineResult,
 } from "./swiss-ephemeris-engine";
 import {
   generateRules,
@@ -24,14 +23,12 @@ import {
   NAKSHATRA_SPAN,
   YEAR_DAYS,
 } from "./nakshatra-engine";
-import type { NakshatraData } from "./nakshatra-engine";
 import { calculateAspects } from "./aspect-engine";
 import { calculateNavamsa } from "./navamsa-engine";
 import {
   computeMultipleDivisionalCharts,
   ALL_DIVISIONAL_CHARTS,
 } from "./divisional-engine";
-import type { DivisionalChartResult } from "./divisional-engine";
 import { computeTransitAspects } from "./transit-engine";
 import { rankAspectsByNovelty, FORECAST_SAMPLE_SPACING_DAYS } from "./forecast-novelty";
 import { calculateShadbala } from "./shadbala-engine";
@@ -44,7 +41,6 @@ import {
   getEnginePreset,
   listEnginePresets,
   presetToMetadata,
-  type EnginePreset,
 } from "./engine-registry";
 import type { BirthDetailsInput } from "./compatibility-service";
 import { computeLuckyElements } from "./lucky-elements-engine";

@@ -39,7 +39,6 @@ import {
   getCurrentTransitPositions,
   computeTransitAspects,
   type TransitPosition,
-  type TransitAspect,
 } from "../engines/transit-engine";
 import type { PlanetPosition } from "../engines/swiss-ephemeris-engine";
 

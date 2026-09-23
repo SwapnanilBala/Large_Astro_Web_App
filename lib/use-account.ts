@@ -88,6 +88,7 @@ export function useAccount() {
     /* A full reload rather than a client transition: server-rendered pages may
        have been produced for the signed-in visitor, and this is the one moment
        where paying for a reload buys certainty that none of them linger. */
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- the reload is the point; see above
     window.location.assign("/");
   }, []);
 

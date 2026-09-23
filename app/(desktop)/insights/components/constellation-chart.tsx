@@ -233,7 +233,6 @@ export default function ConstellationChart({
         const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < MIN_DIST) {
           // Offset radially
-          const midAngle = (positions[i].angle + positions[j].angle) / 2;
           positions[i] = {
             ...positions[i],
             ...polarToCartesian(CX, CY, PLANET_R - 16, positions[i].angle),

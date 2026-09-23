@@ -315,7 +315,9 @@ export default function Home() {
     return () => {
       if (draftSaveTimer.current) clearTimeout(draftSaveTimer.current);
     };
-  }, [coarseTime, draft, unknownTime]);
+    /* autoPlace is stored in the draft, so toggling it alone has to re-save --
+       without it here, a reload restored whichever value was saved last. */
+  }, [autoPlace, coarseTime, draft, unknownTime]);
 
   const draftCountry = draft.country;
   const draftState = draft.state;

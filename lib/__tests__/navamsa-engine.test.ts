@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateNavamsa, type NavamsaPosition } from "../engines/navamsa-engine";
+import { calculateNavamsa } from "../engines/navamsa-engine";
 import type { PlanetPosition } from "../engines/swiss-ephemeris-engine";
 
 // ---------------------------------------------------------------------------

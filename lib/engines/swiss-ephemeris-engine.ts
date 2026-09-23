@@ -2,7 +2,7 @@
 // Replaces the native swisseph C addon for Vercel compatibility
 
 import * as Astronomy from "astronomy-engine";
-import { getEnginePreset, type EnginePreset } from "./engine-registry";
+import { getEnginePreset } from "./engine-registry";
 
 // --------------------------------------------------------------------------
 // Types
@@ -393,7 +393,7 @@ function computeGMST(jd_ut: number): number {
   // Greenwich Mean Sidereal Time in degrees
   const T = (jd_ut - J2000) / 36525.0;
   // GMST at 0h UT in seconds
-  let gmst =
+  const gmst =
     280.46061837 +
     360.98564736629 * (jd_ut - J2000) +
     0.000387933 * T * T -
@@ -420,7 +420,7 @@ function computeAscendantLongitude(
   // we add 180° to obtain the Ascendant.
   const y = -Math.cos(lst);
   const x = Math.sin(lst) * Math.cos(obliquity) + Math.tan(lat) * Math.sin(obliquity);
-  let asc = radToDeg(Math.atan2(y, x)) + 180;
+  const asc = radToDeg(Math.atan2(y, x)) + 180;
   return normalize(asc);
 }
 
@@ -445,7 +445,7 @@ function computeMC(obliquityDeg: number, lstDeg: number): number {
   const lst = degToRad(lstDeg);
   // MC = atan2(sin(LST), cos(LST) * cos(ε))
   // This gives the ecliptic longitude of the meridian
-  let mc = radToDeg(Math.atan2(Math.sin(lst), Math.cos(lst) * Math.cos(eps)));
+  const mc = radToDeg(Math.atan2(Math.sin(lst), Math.cos(lst) * Math.cos(eps)));
   return normalize(mc);
 }
 
@@ -524,15 +524,6 @@ function computePlacidus(
 
   // Iterative method: start with a guess, compute the cusp RA that would
   // be needed, convert to ecliptic longitude, check if consistent.
-
-  function eclipticLonToRA(lonDeg: number): number {
-    const lon = degToRad(lonDeg);
-    const ra = Math.atan2(
-      Math.sin(lon) * Math.cos(eps),
-      Math.cos(lon)
-    );
-    return normalize(radToDeg(ra));
-  }
 
   function eclipticLonToDecl(lonDeg: number): number {
     const lon = degToRad(lonDeg);
@@ -1069,10 +1060,6 @@ export function computeTransitPositions(
 ): Array<{ name: string; longitude: number; sign: string; degree_in_sign: number }> {
   const preset = getEnginePreset(engineId);
 
-  const decimalHour =
-    utcDate.getUTCHours() +
-    utcDate.getUTCMinutes() / 60 +
-    utcDate.getUTCSeconds() / 3600;
   const jd_ut = datetimeToJulian(
     utcDate.getUTCFullYear(),
     utcDate.getUTCMonth() + 1,

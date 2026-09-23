@@ -7,8 +7,6 @@ import {
   HOUSE_SYSTEMS,
   DEFAULT_ENGINE_ID,
   TRADITION_ORDER,
-  type EnginePreset,
-  type EnginePresetInfo,
 } from "../engines/engine-registry";
 
 describe("engine-registry", () => {

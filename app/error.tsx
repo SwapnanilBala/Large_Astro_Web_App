@@ -69,6 +69,9 @@ export default function RootError({
         <button type="button" onClick={reset} style={control}>
           Try again
         </button>
+        {/* A hard navigation on purpose: after an error, a full reload is what
+            clears whatever client state broke. A <Link> would keep it. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/" style={control}>
           Start over
         </a>

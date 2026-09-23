@@ -133,16 +133,6 @@ export default function PalmAnnotation({
     ? `${styles.container} ${className}`
     : styles.container;
 
-  // Empty state: render image alone
-  if (presentLines.length === 0) {
-    return (
-      <div className={containerClass}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={imageDataUrl} alt={tr("palm.alt.palm")} className={styles.image} />
-      </div>
-    );
-  }
-
   const w = naturalSize?.w ?? 0;
   const h = naturalSize?.h ?? 0;
   const diagonal = w && h ? Math.sqrt(w * w + h * h) : 0;
@@ -191,6 +181,20 @@ export default function PalmAnnotation({
       });
     return deconflictLabels(raw, minLabelGapPx);
   }, [lineData, w, h, showLabels, labelOffsetPx, lineLabels]);
+
+  /* Empty state: the image alone. This return sits below every hook on
+     purpose -- above them, a reading whose lines went from none to some would
+     change the hook count between renders, which React treats as a crash.
+     Both memos above already come back empty when there is nothing to draw,
+     so running them first costs nothing. */
+  if (presentLines.length === 0) {
+    return (
+      <div className={containerClass}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={imageDataUrl} alt={tr("palm.alt.palm")} className={styles.image} />
+      </div>
+    );
+  }
 
   return (
     <div className={containerClass}>

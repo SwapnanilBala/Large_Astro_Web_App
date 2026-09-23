@@ -37,8 +37,6 @@ import {
   buildChart,
   buildForecast,
   buildLifeDomainInsights,
-  type ChartResponse,
-  type ForecastReading,
 } from "../engines/chart-service";
 import type { BirthDetailsInput } from "../engines/compatibility-service";
 import { makeCacheKey } from "../server-cache";

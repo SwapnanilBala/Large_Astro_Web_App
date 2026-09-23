@@ -5,7 +5,6 @@ import {
   computeSubPeriods,
   DASHA_YEARS,
   NAKSHATRA_SPAN,
-  YEAR_DAYS,
   type NakshatraData,
 } from "../engines/nakshatra-engine";
 
@@ -180,7 +179,7 @@ describe("nakshatra-engine", () => {
     });
 
     it("total period durations approximate 120 years", () => {
-      const timeline = calculateDashaTimeline(nakshatra, birthDate, currentDate);
+      calculateDashaTimeline(nakshatra, birthDate, currentDate);
       // Sum all periods' years (some may be partial)
       // Use sequence dates to get full unclipped years
       const totalDays = Object.values(DASHA_YEARS).reduce((sum, y) => sum + y, 0);

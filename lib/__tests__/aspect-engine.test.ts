@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateAspects, type AspectData } from "../engines/aspect-engine";
+import { calculateAspects } from "../engines/aspect-engine";
 import type { PlanetPosition } from "../engines/swiss-ephemeris-engine";
 
 // ---------------------------------------------------------------------------
@@ -171,8 +171,7 @@ describe("aspect-engine", () => {
         makePlanet("Mars", 0),
         makePlanet("Moon", 121), // near 120 (4th house from Mars)
       ];
-      const aspects = calculateAspects(planets, true);
-      const vedicAspect = aspects.find((a) => a.vedic === true);
+      calculateAspects(planets, true);
       // Since Mars-Moon at 121 degrees is also a Trine (western), vedic won't fire for already-seen pair.
       // But if western already caught it, the pair is seen. Let's use a position that avoids western aspects.
 
@@ -202,7 +201,7 @@ describe("aspect-engine", () => {
         makePlanet("Saturn", 0),
         makePlanet("Moon", 90), // 3rd house = 3*30 = 90
       ];
-      const aspects = calculateAspects(planets, true);
+      calculateAspects(planets, true);
       // 90 degrees is also a western Square, so the pair is already seen.
       // Use 10th house offset instead: 10*30 = 300
       const planets2 = [

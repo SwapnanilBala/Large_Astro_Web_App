@@ -2,7 +2,6 @@
 
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
 import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
@@ -725,7 +724,7 @@ export default function CompatibilityPageClient({
     } finally {
       setIsSubmitting(false);
     }
-  }, [canSubmit, partner, primary, pushToast]);
+  }, [canSubmit, partner, primary, pushToast, t]);
 
   const shareCompatibility = async () => {
     const url = `${window.location.origin}/insights/compatibility?${buildCompatibilityQueryString(primary, partner)}`;

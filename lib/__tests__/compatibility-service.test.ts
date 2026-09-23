@@ -7,7 +7,6 @@ vi.mock("swisseph", () => {
   // Two different charts: primary and partner get different positions
   // based on the julian day. Since the mock swe_julday returns different
   // values for different birth dates, we use that to distinguish.
-  let callCount = 0;
 
   const PRIMARY_LONGITUDES: Record<number, number> = {
     0: 45.5,    // Sun - Taurus
@@ -39,7 +38,6 @@ vi.mock("swisseph", () => {
       SE_SIDM_LAHIRI: 1, SE_SIDM_RAMAN: 3, SE_SIDM_KRISHNAMURTI: 5,
 
       swe_julday: vi.fn((year: number) => {
-        callCount++;
         return 2451545.0 + (year - 2000) * 365.25;
       }),
       swe_set_sid_mode: vi.fn(),
@@ -62,7 +60,6 @@ vi.mock("swisseph", () => {
 import {
   buildCompatibility,
   type BirthDetailsInput,
-  type CompatibilityResponse,
 } from "../engines/compatibility-service";
 
 // ---------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 
-import type { PlanetPosition, HousePlacement } from "./swiss-ephemeris-engine";
+import type { PlanetPosition } from "./swiss-ephemeris-engine";
 import { SIGNS } from "./swiss-ephemeris-engine";
 import type { NavamsaPosition } from "./navamsa-engine";
 import type { AspectData } from "./aspect-engine";
@@ -169,10 +169,6 @@ function normalize(angle: number): number {
 function angularDistance(lon1: number, lon2: number): number {
   const diff = normalize(lon1 - lon2);
   return diff <= 180 ? diff : 360 - diff;
-}
-
-function signIndex(sign: string): number {
-  return SIGNS.indexOf(sign);
 }
 
 function getDignityScore(planetName: string, sign: string, degreeInSign?: number): number {

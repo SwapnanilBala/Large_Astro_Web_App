@@ -312,7 +312,7 @@ export default function PastLifeInsightsPanel({
     <div className={styles.pastLifePanel}>
       <p className={styles.sectionIntro}>
         A symbolic past-life layer drawn from your specific lagna, nodal axis,
-        Moon's nakshatra, dasha timing, yogas, and vocation houses — read for
+        Moon&apos;s nakshatra, dasha timing, yogas, and vocation houses — read for
         you, not as a generic template. This is separate from palm reading and
         uses only the birth chart results already on the page.
       </p>

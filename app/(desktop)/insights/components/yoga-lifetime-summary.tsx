@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, memo } from "react";
+import { memo } from "react";
 import type { YogaDetectionResult } from "@/lib/astro-types";
-import { useTranslation } from "@/lib/i18n-context";
 
 const PLANET_GLYPHS: Record<string, string> = {
   Sun: "\u2609",
@@ -300,10 +299,6 @@ type YogaLifetimeSummaryProps = {
 };
 
 function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
-  const { t } = useTranslation();
-  const [expandedStrength, setExpandedStrength] = useState<
-    StrengthGroup | "all"
-  >("all");
 
   if (!yogas || yogas.length === 0) {
     return (
@@ -391,7 +386,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
         Yogas are classical planetary combinations that shape your lifetime
         patterns and influence major life outcomes. Below are all the yogas
         detected in your birth chart, organized by strength. Each yoga carries
-        specific implications for your life's trajectory.
+        specific implications for your life&apos;s trajectory.
       </p>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>

@@ -3,7 +3,6 @@ import {
   generateRules,
   generateLifeDomainInsights,
   HOUSE_THEMES,
-  type DeterministicRule,
   type LifeDomainInsight,
 } from "../engines/rule-engine";
 import type { PlanetPosition, HousePlacement } from "../engines/swiss-ephemeris-engine";

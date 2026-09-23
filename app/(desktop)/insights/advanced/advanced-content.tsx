@@ -301,11 +301,9 @@ const FOCUS_WORKSPACE_COPY: Record<AdvancedFocusView, FocusWorkspaceCopy> = {
 
 function LiveTransitsModule({
   payload,
-  lockedFeatures,
   rootMargin,
 }: {
   payload: ChartApiResponse;
-  lockedFeatures: Set<string>;
   rootMargin?: string;
 }) {
   return (
@@ -325,11 +323,9 @@ function LiveTransitsModule({
 }
 
 function PalmReadingModule({
-  lockedFeatures,
   jyotishContext,
   rootMargin,
 }: {
-  lockedFeatures: Set<string>;
   jyotishContext: JyotishContext | undefined;
   rootMargin?: string;
 }) {
@@ -345,12 +341,10 @@ function PalmReadingModule({
 function FocusWorkspace({
   focusView,
   payload,
-  lockedFeatures,
   jyotishContext,
 }: {
   focusView: AdvancedFocusView;
   payload: ChartApiResponse;
-  lockedFeatures: Set<string>;
   jyotishContext: JyotishContext | undefined;
 }) {
   const copy = FOCUS_WORKSPACE_COPY[focusView];
@@ -369,12 +363,10 @@ function FocusWorkspace({
         {focusView === "transits" ? (
           <LiveTransitsModule
             payload={payload}
-            lockedFeatures={lockedFeatures}
             rootMargin="900px"
           />
         ) : (
           <PalmReadingModule
-            lockedFeatures={lockedFeatures}
             jyotishContext={jyotishContext}
             rootMargin="900px"
           />
@@ -404,7 +396,6 @@ export default function AdvancedContent({
   /* One request writes every passage on this page; see the route for why it
      cannot be one per module. */
   const storyState = useAdvancedStory(historyQs);
-  const lockedFeatures = new Set(payload.access.locked_features);
   const jyotishContext = buildJyotishContext(payload);
   const insightsHref = historyQs ? `/insights?${historyQs}` : "/insights";
   const returnToReadingHref = focusView
@@ -473,7 +464,6 @@ export default function AdvancedContent({
             <FocusWorkspace
               focusView={focusView}
               payload={payload}
-              lockedFeatures={lockedFeatures}
               jyotishContext={jyotishContext}
             />
           )}
