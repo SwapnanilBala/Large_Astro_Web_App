@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { nominatimFetch } from "@/lib/nominatim-throttle";
+import { outboundUserAgent } from "@/lib/site-url";
 import { SuggestInputSchema } from "@/lib/schemas";
 import { serverCaches, makeCacheKey } from "@/lib/server-cache";
 
@@ -17,10 +17,31 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
   }));
 }
 
-const NOMINATIM_TIMEOUT_MS = 10_000;
+/*
+ * Place suggestions as the visitor types, from Photon.
+ *
+ * These used to come from the public Nominatim server, whose usage policy
+ * lists autocomplete among the uses that are "strictly forbidden and will get
+ * you banned", and caps any client at one request a second -- a single person
+ * typing a city fired several. A ban would land on the server's address, and
+ * on Vercel that address is shared, so the failure would have been nobody
+ * able to enter a birthplace at all.
+ *
+ * Photon is komoot's OpenStreetMap geocoder built for exactly this ("search-
+ * as-you-type"), and its public API asks only that use be fair. It promises
+ * no availability, so a failure here returns an empty list: the field still
+ * takes typed text, and the one-off lookup that places the chart
+ * (/api/geocode, still Nominatim, once per chart) is unaffected.
+ *
+ * Both are OpenStreetMap data, credited under the suggestion list (see
+ * .autocomplete-dropdown::after).
+ */
+const PHOTON_URL = "https://photon.komoot.io/api/";
+const SUGGEST_TIMEOUT_MS = 6_000;
 const MAX_PARAM_LENGTH = 200;
 
-// Map of common country names to ISO 3166-1 alpha-2 codes for Nominatim countrycodes filter
+// Map of common country names to ISO 3166-1 alpha-2 codes, for keeping
+// suggestions inside a country the visitor has already chosen.
 const countryCodeMap: Record<string, string> = {
   india: "in",
   "united states": "us",
@@ -81,17 +102,50 @@ const countryCodeMap: Record<string, string> = {
   cambodia: "kh",
 };
 
-const featureMap: Record<string, string> = {
+/* Photon's layer per field. "city" covers towns and villages too. */
+const layerFor: Record<string, string> = {
   country: "country",
   state: "state",
   city: "city",
 };
 
+type PhotonFeature = {
+  properties?: {
+    name?: string;
+    state?: string;
+    county?: string;
+    country?: string;
+    countrycode?: string;
+    osm_key?: string;
+    osm_value?: string;
+  };
+};
+
+/*
+ * Photon matches a partial word by prefix first, so for "Mumb" a town in
+ * Angola came back ahead of Mumbai. Its results carry the OSM place class,
+ * and for a birthplace the bigger settlement is the likelier answer, so city
+ * sorts before town before village. Ties keep Photon's own order.
+ */
+const SETTLEMENT_RANK: Record<string, number> = {
+  city: 0,
+  town: 1,
+  village: 2,
+  suburb: 3,
+  hamlet: 4,
+  locality: 5,
+};
+
+function settlementRank(p: NonNullable<PhotonFeature["properties"]>): number {
+  if (p.osm_key !== "place") return 7;
+  return SETTLEMENT_RANK[p.osm_value ?? ""] ?? 6;
+}
+
 type Suggestion = {
   name: string;
   displayName: string;
   /*
-   * The place this result sits inside, when Nominatim gave it to us.
+   * The place this result sits inside, when the geocoder gave it to us.
    *
    * Purely additive: every existing caller reads `name` and `displayName` and
    * is unaffected. It exists so one "birth place" field can fill city, state
@@ -179,43 +233,24 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Build a hierarchical query string so Nominatim scopes results correctly
-    let fullQuery = query;
-    if (type === "state" && contextCountry.trim()) {
-      fullQuery = `${query}, ${contextCountry.trim()}`;
-    } else if (type === "city") {
-      const parts = [query];
-      if (contextState.trim()) parts.push(contextState.trim());
-      if (contextCountry.trim()) parts.push(contextCountry.trim());
-      fullQuery = parts.join(", ");
-    }
+    const countryName = contextCountry.trim();
+    const countryCode = countryCodeMap[countryName.toLowerCase()]?.toUpperCase();
+    const wantState = normalizeLocationName(contextState);
 
-    const nominatimUrl = new URL("https://nominatim.openstreetmap.org/search");
-    nominatimUrl.searchParams.set("q", fullQuery);
-    nominatimUrl.searchParams.set("format", "json");
-    nominatimUrl.searchParams.set("limit", type === "state" ? "8" : "5");
-    nominatimUrl.searchParams.set("addressdetails", "1");
-
-    if (featureMap[type]) {
-      nominatimUrl.searchParams.set("featuretype", featureMap[type]);
-    }
-
-    // Apply countrycodes filter when we know the country
-    if (contextCountry.trim()) {
-      const code = countryCodeMap[contextCountry.trim().toLowerCase()];
-      if (code) {
-        nominatimUrl.searchParams.set("countrycodes", code);
-      }
-    }
+    const photonUrl = new URL(PHOTON_URL);
+    photonUrl.searchParams.set("q", query);
+    photonUrl.searchParams.set("lang", "en");
+    photonUrl.searchParams.set("layer", layerFor[type] ?? "city");
+    /* More than will be shown when a country is fixed: those are filtered
+       down below, and Photon ranks worldwide. */
+    photonUrl.searchParams.set("limit", countryName && type !== "country" ? "15" : "8");
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), NOMINATIM_TIMEOUT_MS);
+    const timeout = setTimeout(() => controller.abort(), SUGGEST_TIMEOUT_MS);
     let response: Response;
     try {
-      response = await nominatimFetch(nominatimUrl.toString(), {
-        headers: {
-          "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
-        },
+      response = await fetch(photonUrl.toString(), {
+        headers: { "User-Agent": outboundUserAgent() },
         signal: controller.signal,
       });
     } finally {
@@ -223,37 +258,57 @@ export async function GET(request: NextRequest) {
     }
 
     if (!response.ok) {
-      logApiError("/api/suggest", new Error(`Nominatim returned ${response.status}`), {
-        url: nominatimUrl.toString(),
+      logApiError("/api/suggest", new Error(`Photon returned ${response.status}`), {
+        url: photonUrl.toString(),
         status: response.status,
       });
       return NextResponse.json({ error: "Suggestion service temporarily unavailable", results: [] });
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as { features?: PhotonFeature[] };
 
-    const suggestions: Suggestion[] = data.map(
-      (item: { display_name?: string; name?: string; address?: Record<string, string> }) => {
-        let name = item.name ?? "";
+    const inCountry = (p: NonNullable<PhotonFeature["properties"]>) => {
+      if (!countryName || type === "country") return true;
+      if (countryCode && p.countrycode) return p.countrycode.toUpperCase() === countryCode;
+      return normalizeLocationName(p.country ?? "") === normalizeLocationName(countryName);
+    };
 
-        if (type === "country" && item.address?.country) {
-          name = item.address.country;
-        } else if (type === "state" && item.address?.state) {
-          name = item.address.state;
-        } else if (type === "city") {
-          name = item.address?.city ?? item.address?.town ?? item.name ?? "";
+    const suggestions: Suggestion[] = (data.features ?? [])
+      .map((feature) => feature.properties ?? {})
+      .filter(inCountry)
+      .sort((a, b) => (type === "city" ? settlementRank(a) - settlementRank(b) : 0))
+      .map((p) => {
+        const name = p.name ?? "";
+        if (type === "country") {
+          return { name, displayName: name, country: p.country ?? name };
         }
-
+        if (type === "state") {
+          return {
+            name,
+            displayName: [name, p.country].filter(Boolean).join(", "),
+            state: name,
+            country: p.country ?? undefined,
+          };
+        }
+        /* `county` is the fallback where a place has no administrative
+           state, which is common outside the US. */
+        const state = p.state ?? p.county ?? undefined;
         return {
           name,
-          displayName: item.display_name ?? name,
-          /* `county` is the fallback Nominatim uses where a place has no
-             administrative state, which is common outside the US. */
-          state: item.address?.state ?? item.address?.county ?? undefined,
-          country: item.address?.country ?? undefined,
+          displayName: [name, state, p.country].filter(Boolean).join(", "),
+          state,
+          country: p.country ?? undefined,
         };
-      }
-    );
+      })
+      /* A state already chosen ranks its own places first, without hiding the
+         rest -- spellings of a state differ, and hiding on a near miss would
+         leave the list empty. */
+      .sort((a, b) => {
+        if (type !== "city" || !wantState) return 0;
+        const aHit = normalizeLocationName(a.state ?? "") === wantState ? 0 : 1;
+        const bHit = normalizeLocationName(b.state ?? "") === wantState ? 0 : 1;
+        return aHit - bHit;
+      });
 
     const rankedSuggestions: Suggestion[] = type === "state"
       ? suggestions
@@ -266,10 +321,16 @@ export async function GET(request: NextRequest) {
           .map(({ score: _score, ...suggestion }) => suggestion)
       : suggestions;
 
-    const uniqueNames = new Set<string>();
+    /* One entry per place, not per name: keyed on the name alone, the five
+       Springfields collapsed into whichever came first, so someone born in
+       Springfield, Ohio could only choose Massachusetts -- and the chart is
+       then built from the wrong coordinates. */
+    const seen = new Set<string>();
     const unique = rankedSuggestions.filter((s) => {
-      if (!s.name || uniqueNames.has(s.name)) return false;
-      uniqueNames.add(s.name);
+      if (!s.name) return false;
+      const key = [s.name, s.state, s.country].map((part) => normalizeLocationName(part ?? "")).join("|");
+      if (seen.has(key)) return false;
+      seen.add(key);
       return true;
     }).slice(0, 5);
 

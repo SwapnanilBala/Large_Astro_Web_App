@@ -336,6 +336,24 @@ button:focus-visible {
   font-size: var(--font-mobile-meta);
 }
 
+/* OpenStreetMap's attribution; see the matching rule in app/globals.css.
+   7.2:1 dark, 6.3:1 light. */
+.autocomplete-dropdown::after {
+  content: "© OpenStreetMap contributors";
+  content: "© OpenStreetMap contributors" / "";
+  display: block;
+  position: sticky;
+  bottom: -0.25rem;
+  margin: 0.25rem -0.25rem -0.25rem;
+  padding: 0.35rem 0.7rem;
+  font-size: var(--font-mobile-meta);
+  text-align: right;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-medium);
+  pointer-events: none;
+}
+
 /*
  * One entrance, for the page as a whole.
  *

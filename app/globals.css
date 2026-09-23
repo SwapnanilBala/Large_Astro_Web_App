@@ -5495,6 +5495,33 @@ a:focus-visible {
   z-index: 1;
 }
 
+/*
+ * OpenStreetMap's attribution, which the licence of the place data requires
+ * wherever it is shown -- both suggestion sources (Photon, Nominatim) are OSM.
+ * Pinned to the bottom of the list as it scrolls, on a solid strip so options
+ * never show through the words (8.7:1 dark, 5.4:1 light). The empty alt text
+ * after the slash keeps a screen reader from reading it among the options; the
+ * first declaration is the fallback where that syntax is unknown.
+ */
+.autocomplete-dropdown::after {
+  content: "© OpenStreetMap contributors";
+  content: "© OpenStreetMap contributors" / "";
+  display: block;
+  position: sticky;
+  bottom: 0;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.68rem;
+  text-align: right;
+  color: var(--ink-soft);
+  background: #17161f;
+  border-top: 1px solid var(--line-soft);
+  pointer-events: none;
+}
+
+html[data-theme="light"] .autocomplete-dropdown::after {
+  background: #f4ecde;
+}
+
 @keyframes autocompleteShimmer {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }}

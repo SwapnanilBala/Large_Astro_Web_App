@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import tzLookup from "tz-lookup";
 import { nominatimFetch } from "@/lib/nominatim-throttle";
+import { outboundUserAgent } from "@/lib/site-url";
 import { resolveZonedLocalMoment } from "@/lib/birth-moment";
 import { GeocodeInputSchema, firstZodError } from "@/lib/schemas";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
@@ -85,7 +86,9 @@ export async function GET(request: NextRequest) {
     try {
       response = await nominatimFetch(nominatimUrl.toString(), {
         headers: {
-          "User-Agent": "AstroIntelligenceStudio/1.0 (educational-astrology-app)",
+          /* Nominatim's policy wants an agent that identifies the app; this
+             one names it and says where to find it. */
+          "User-Agent": outboundUserAgent(),
         },
         signal: controller.signal,
       });

@@ -32,3 +32,15 @@ export function siteOrigin(): URL {
     return new URL("http://localhost:7001");
   }
 }
+
+/**
+ * The User-Agent every call to an OpenStreetMap service sends.
+ *
+ * Nominatim's usage policy asks for one "identifying the application" -- a
+ * stock library agent is not enough -- and Photon's operators throttle by
+ * client, so both are better able to reach a real person than to guess. The
+ * site URL is the contact: it is where a maintainer would look first.
+ */
+export function outboundUserAgent(): string {
+  return `LagnaAtelier/1.0 (+${siteOrigin().origin})`;
+}
