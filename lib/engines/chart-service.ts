@@ -1,4 +1,5 @@
 
+import { formatInTimeZone } from "date-fns-tz";
 import {
   calculate,
   computeTransitPositions,
@@ -46,6 +47,7 @@ import type { BirthDetailsInput } from "./compatibility-service";
 import { computeLuckyElements } from "./lucky-elements-engine";
 import { ServerCache, makeCacheKey } from "../server-cache";
 import { resolveBirthMoment } from "../birth-moment";
+import type { ResolvedBirthMoment } from "../birth-moment";
 
 // --------------------------------------------------------------------------
 // Response types (matching ChartApiResponse in astro-types.ts)
@@ -304,7 +306,8 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 interface StageCaches {
   positions: ServerCache<CorePositionsResult>;
-  dasha: ServerCache<DashaStageResult>;
+  /* No dasha stage: its result depends on the current instant. See
+     computeDashaTimeline. */
   aspects: ServerCache<AspectStageResult>;
   navamsa: ServerCache<NavamsaStageResult>;
   insights: ServerCache<InsightsStageResult>;
@@ -315,7 +318,6 @@ function createStageCaches(): StageCaches {
     // Renamed alongside the rule-shape change so an already-warm process
     // starts cold rather than serving pre-migration rule objects.
     positions: new ServerCache<CorePositionsResult>("stage_positions_v2", 500, DAY_MS),
-    dasha: new ServerCache<DashaStageResult>("stage_dasha", 300, DAY_MS),
     aspects: new ServerCache<AspectStageResult>("stage_aspects", 300, DAY_MS),
     navamsa: new ServerCache<NavamsaStageResult>("stage_navamsa", 300, DAY_MS),
     insights: new ServerCache<InsightsStageResult>("stage_insights", 300, DAY_MS),
@@ -397,28 +399,23 @@ function birthInstantMs(birth: BirthDetailsInput): number {
   return resolveBirthMoment(birth).utcDate.getTime();
 }
 
-function currentLocalDateStr(birth: BirthDetailsInput): string {
-  const birthMoment = resolveBirthMoment(birth);
-  if (birthMoment.timeZoneId) {
-    const parts = new Intl.DateTimeFormat("en-US", {
-      timeZone: birthMoment.timeZoneId,
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(new Date());
-    const part = (type: Intl.DateTimeFormatPartTypes) =>
-      parts.find((item) => item.type === type)?.value ?? "";
-    return `${part("year")}-${part("month")}-${part("day")}`;
-  }
-
-  const now = new Date();
-  const localMs = now.getTime() + birthMoment.timezoneOffsetMinutes * 60000;
-  const local = new Date(localMs);
-  return local.toISOString().split("T")[0];
-}
-
 function isoMinute(date: Date): string {
   return date.toISOString().replace(/:\d{2}\.\d{3}Z$/, "").replace("Z", "");
+}
+
+/**
+ * `instant` as wall-clock time at the birthplace, to the minute.
+ *
+ * Through the zone's own rules rather than the birth moment's offset: that
+ * offset is the one in force *at birth*, so a New York winter birth carries
+ * -300, and adding it to a September instant printed an hour New York was not
+ * keeping. The numeric offset is only the fallback for a chart with no zone.
+ */
+function birthplaceWallClockIso(instant: Date, birthMoment: ResolvedBirthMoment): string {
+  if (birthMoment.timeZoneId) {
+    return formatInTimeZone(instant, birthMoment.timeZoneId, "yyyy-MM-dd'T'HH:mm");
+  }
+  return isoMinute(new Date(instant.getTime() + birthMoment.timezoneOffsetMinutes * 60000));
 }
 
 /*
@@ -562,34 +559,35 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
 // Stage B: Dasha timeline (nakshatra + dasha periods + calculation audit)
 // --------------------------------------------------------------------------
 
+/**
+ * The current period is looked up at the moment of the request.
+ *
+ * It used to be looked up at midnight UTC of today's date *at the
+ * birthplace*, and the stage was then cached for the day. So "current" could
+ * be up to a day off: for a chart born in India, read in New York between
+ * 2:30 and 8pm, the lookup ran up to 5.5 hours ahead of the clock and could
+ * name the next pratyantardasha before it began. And the audit's
+ * "Timing Check" printed a now that was neither the lookup instant nor the
+ * reader's clock -- birthplace wall time with no zone beside it, 9.5 hours
+ * ahead of a reader in New York, and frozen at whenever the cache filled.
+ *
+ * Nothing here is cached any more. It is a few dozen additions, and the
+ * lookup is the one part that must not be reused.
+ */
 function computeDashaTimeline(
   birth: BirthDetailsInput,
   planets: PlanetPosition[],
-  currentLocalStr: string,
 ): DashaStageResult {
   const moon = planets.find((p) => p.name === "Moon")!;
-  // Round Moon longitude to 0.001 degrees for cache key stability
-  const moonLngRounded = Math.round(moon.longitude * 1000) / 1000;
   const birthMoment = resolveBirthMoment(birth);
-
-  const cacheKey = makeCacheKey("dasha_stage", {
-    moon_lng: moonLngRounded,
-    birth_date: birth.birth_date,
-    birth_time: birth.birth_time,
-    birth_utc: birthMoment.utcDate.toISOString(),
-    time_zone_id: birthMoment.timeZoneId,
-    ref_date: currentLocalStr,
-  });
-
-  const cached = stageCaches.dasha.get(cacheKey);
-  if (cached) return cached;
+  const lookedUpAt = new Date();
 
   const birthLocalStr = birthLocalMomentStr(birth);
   const nakData = calculateNakshatra(moon.longitude);
   const dashaTimeline = calculateDashaTimeline(
     nakData,
     birthLocalStr,
-    currentLocalStr,
+    lookedUpAt.getTime(),
     birthInstantMs(birth),
   );
 
@@ -637,10 +635,6 @@ function computeDashaTimeline(
 
   const birthLocalDate = birthMoment.localWallClockDate;
   const birthUtcDate = birthMoment.utcDate;
-  const nowUtc = new Date();
-  const nowLocal = new Date(
-    nowUtc.getTime() + birthMoment.timezoneOffsetMinutes * 60000
-  );
 
   const dashaSeedStartLocal = new Date(
     birthLocalDate.getTime() - dashaSeedElapsedYears * YEAR_DAYS * 86400000
@@ -661,8 +655,11 @@ function computeDashaTimeline(
     longitude: Math.round(birth.longitude * 1000000) / 1000000,
     birth_local_iso: isoMinute(birthLocalDate),
     birth_utc_iso: isoMinute(birthUtcDate),
-    reference_local_iso: isoMinute(nowLocal),
-    reference_utc_iso: isoMinute(nowUtc),
+    /* The lookup instant, twice: UTC is what readers see beside their own
+       clock; the birthplace wall time is kept for anyone comparing with a
+       chart printed there. */
+    reference_local_iso: birthplaceWallClockIso(lookedUpAt, birthMoment),
+    reference_utc_iso: isoMinute(lookedUpAt),
     moon_sidereal_longitude: moon.longitude,
     moon_sign: moon.sign,
     moon_degree_in_sign: moon.degree_in_sign,
@@ -679,9 +676,7 @@ function computeDashaTimeline(
     dasha_seed_end_local_iso: isoMinute(dashaSeedEndLocal),
   };
 
-  const result: DashaStageResult = { nakshatraInfo, dashaInfo, calculationAudit };
-  stageCaches.dasha.set(cacheKey, result);
-  return result;
+  return { nakshatraInfo, dashaInfo, calculationAudit };
 }
 
 // --------------------------------------------------------------------------
@@ -792,11 +787,7 @@ export function buildLifeDomainInsights(
     ],
     ALL_DIVISIONAL_CHARTS
   );
-  const dashaStage = computeDashaTimeline(
-    birth,
-    core.planets,
-    currentLocalDateStr(birth)
-  );
+  const dashaStage = computeDashaTimeline(birth, core.planets);
   const transits = computeTransitPositions(new Date(), birth.engine_id);
   const extendedEvidence: LifeDomainExtendedEvidence = {
     divisionalCharts,
@@ -866,10 +857,8 @@ export function buildChart(
   let ashtakavargaData: AshtakavargaResult | null = null;
 
   if (includePremium) {
-    const currentLocalStr = currentLocalDateStr(birth);
-
     // Stage B: dasha timeline
-    const dashaStage = computeDashaTimeline(birth, core.planets, currentLocalStr);
+    const dashaStage = computeDashaTimeline(birth, core.planets);
     nakshatraInfo = dashaStage.nakshatraInfo;
     dashaInfo = dashaStage.dashaInfo;
     calculationAudit = dashaStage.calculationAudit;

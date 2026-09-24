@@ -657,6 +657,27 @@ export default function NakshatraDashaPanel({
     return `${AUDIT_MONTHS[Number(month) - 1]} ${Number(day)}, ${year}, ${twelveHour}:${minute} ${suffix}`;
   };
 
+  /*
+   * The lookup instant on the reader's own clock, with the zone named.
+   *
+   * Not the audit's local field: that is birthplace wall time, and printed
+   * bare it read as a "now" 9.5 hours ahead to someone in New York looking at
+   * a chart born in India. This panel only renders in the browser, so the
+   * browser's zone is the reader's.
+   */
+  const formatReaderTime = (utcIso: string) => {
+    const instant = new Date(`${utcIso}:00Z`);
+    if (Number.isNaN(instant.getTime())) return `${formatAuditTimestamp(utcIso)} UTC`;
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      timeZoneName: "short",
+    }).format(instant);
+  };
+
   const formatUtcOffset = (minutes: number) => {
     const sign = minutes >= 0 ? "+" : "-";
     const absolute = Math.abs(minutes);
@@ -911,8 +932,8 @@ export default function NakshatraDashaPanel({
 
                 <article className="dasha-audit-card">
                   <span className="dasha-audit-label">Timing Check</span>
-                  <strong>{formatAuditTimestamp(audit.reference_local_iso)}</strong>
-                  <small>Current period lookup time used by this chart</small>
+                  <strong>{formatReaderTime(audit.reference_utc_iso)}</strong>
+                  <small>When the current period was looked up, on your clock</small>
                   <small>UTC: {formatAuditTimestamp(audit.reference_utc_iso)} UTC</small>
                 </article>
               </div>

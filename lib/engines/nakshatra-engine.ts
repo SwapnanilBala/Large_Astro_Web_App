@@ -212,7 +212,16 @@ function buildSubPeriodWindows(
 export function calculateDashaTimeline(
   nakshatra: NakshatraData,
   birthDateStr: string,
-  currentDateStr?: string,
+  /**
+   * When to look the current period up.
+   *
+   * A YYYY-MM-DD date means midnight UTC of that day, which suits "the dasha
+   * on this date" (forecasts, fixtures). An epoch-ms number is an exact
+   * instant, which is what "right now" needs: period boundaries are instants,
+   * and rounding now to a date moves it by up to a day -- enough to name the
+   * next pratyantardasha before it has begun. Omitted, it is Date.now().
+   */
+  current?: string | number,
   /**
    * The true birth instant in epoch ms.
    *
@@ -234,9 +243,12 @@ export function calculateDashaTimeline(
   const birthMs = Number.isFinite(birthInstantMs)
     ? (birthInstantMs as number)
     : dateToMs(birthDateStr);
-  const currentMs = currentDateStr
-    ? dateToMs(currentDateStr)
-    : Date.now();
+  const currentMs =
+    typeof current === "number"
+      ? Number.isFinite(current) ? current : Date.now()
+      : current
+        ? dateToMs(current)
+        : Date.now();
 
   // Anchor the birth lord dasha to its true start
   const birthLord = nakshatra.lord;
