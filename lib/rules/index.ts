@@ -64,8 +64,14 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * the old list of yogas for the rest of its hour. rarity.json is untouched:
  * yogas are scored by the engine's own occurrence_chance and have never had
  * rarity keys.
+ *
+ * v5: again no rule changed. The yoga engine gained the five navamsa
+ * combinations, Kurma widened to the dignity test its source actually states,
+ * and Kalpadruma, Gauri and Bharathi all became rarer once they stopped
+ * being satisfiable by a planet joining itself. Same reasoning as v4: that
+ * output rides inside the cached chart and life-domain payloads.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-09-v4";
+export const RULES_SCHEMA_VERSION = "rules-2026-09-v5";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop

@@ -1,5 +1,6 @@
 
 import type { PlanetPosition, HousePlacement } from "./swiss-ephemeris-engine";
+import { calculateNavamsa } from "./navamsa-engine";
 
 // --------------------------------------------------------------------------
 // Types
@@ -9,6 +10,16 @@ export interface YogaChartInput {
   planets: PlanetPosition[];
   houses: HousePlacement[];
   ascendantSign: string;
+  /**
+   * Degree of the ascendant within `ascendantSign`, 0 to 30.
+   *
+   * Optional because every yoga here predates it and none of them needed it:
+   * a planet's navamsa follows from its own sign and degree, both of which
+   * `planets` already carries, but the ascendant arrives as a bare sign.
+   * Lagna Vargottama is the only definition that requires this, and it simply
+   * does not fire when the field is absent rather than guessing a degree.
+   */
+  ascendantDegreeInSign?: number;
 }
 
 export interface YogaDetectionResult {
@@ -2105,13 +2116,11 @@ const CLASSICAL_RELATIVE_RECIPES: RelativePlanetRecipe[] = [
  * Six combinations that none of the recipe templates can express, because each
  * makes a claim about several houses at once with different conditions on each.
  *
- * The list is short on purpose. The literature names hundreds more, but a large
- * share of the famous ones -- Kalpadruma, Parijata, Gauri, Bharathi -- are
- * defined through the navamsa dispositor, and `YogaChartInput` carries the rasi
- * chart only. Computing a navamsa here would mean a second definition of the
- * divisional chart living in this file, which is exactly the drift the
- * divisional engine exists to prevent. They are left out rather than
- * approximated, and anything approximated says so in its own description.
+ * The list is short on purpose. The literature names hundreds more, and the
+ * famous ones that read the navamsa -- Kalpadruma, Parijata, Gauri, Bharathi
+ * -- now have a section of their own below; they were added once it was clear
+ * that calling the existing navamsa engine is not the same thing as
+ * redefining a divisional chart here.
  */
 
 function planetsInHouse(chart: YogaChartInput, house: number): PlanetPosition[] {
@@ -2339,7 +2348,7 @@ const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
     sanskrit: "कूर्म योग",
     category: "benefic",
     source: "Jataka Parijata (benefics in the 5th/6th/7th, malefics in the 1st/3rd/11th, all dignified)",
-    description: "Every benefic occupies the 5th, 6th or 7th, every classical malefic the 1st, 3rd or 11th, and all of them are exalted or in their own sign. Stated more strictly than the source, which also admits dignity in the navamsa -- this engine reads the rasi chart only, so the navamsa alternative is dropped rather than guessed at.",
+    description: "Every benefic occupies the 5th, 6th or 7th, every classical malefic the 1st, 3rd or 11th, and all of them are exalted or in their own sign -- in the birth chart or in the navamsa, which is how the source states it.",
     effects: "The rarest combination in this file, and rated accordingly: steadiness that other people organise themselves around, a reputation for fairness, and work that serves more than the person doing it.",
     detect: (chart) => {
       const benefics = chart.planets.filter((planet) => NATURAL_BENEFICS.includes(planet.name));
@@ -2350,9 +2359,7 @@ const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
       if (!benefics.every((planet) => [5, 6, 7].includes(planet.house))) return null;
       if (!malefics.every((planet) => [1, 3, 11].includes(planet.house))) return null;
       const involved = [...benefics, ...malefics];
-      const dignified = involved.every(
-        (planet) => isExalted(planet.name, planet.sign) || isOwnSign(planet.name, planet.sign)
-      );
+      const dignified = involved.every((planet) => dignifiedInRasiOrNavamsa(chart, planet));
       if (!dignified) return null;
       return {
         yoga_id: "kurma",
@@ -2362,7 +2369,7 @@ const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
         present: true,
         strength: "strong",
         involved_planets: uniquePlanetNames(involved),
-        description: `The benefics (${uniquePlanetNames(benefics).join(", ")}) hold the 5th to 7th and the classical malefics (${uniquePlanetNames(malefics).join(", ")}) the 1st, 3rd and 11th, every one of them exalted or in its own sign.`,
+        description: `The benefics (${uniquePlanetNames(benefics).join(", ")}) hold the 5th to 7th and the classical malefics (${uniquePlanetNames(malefics).join(", ")}) the 1st, 3rd and 11th, every one of them exalted or in its own sign in the birth chart or the navamsa.`,
         effects: "The rarest combination in this file, and rated accordingly: steadiness that other people organise themselves around, a reputation for fairness that survives contact with power, and work that serves more than the person doing it.",
         activation_timing: "any period, since every planet involved is dignified; most visibly in stretches of public responsibility",
         key_traits: ["steadiness", "integrity", "renown"],
@@ -2393,6 +2400,320 @@ const CLASSICAL_2026_YOGA_DEFINITIONS: YogaDefinition[] = [
   ...CLASSICAL_CONJUNCTION_RECIPES.map(createConjunctionYoga),
   ...CLASSICAL_RELATIVE_RECIPES.map(createRelativePlanetYoga),
   ...NAMED_CLASSICAL_YOGA_DEFINITIONS,
+];
+
+// --------------------------------------------------------------------------
+// Navamsa yogas
+// --------------------------------------------------------------------------
+/*
+ * The combinations that read the D9 as well as the rasi chart.
+ *
+ * These were left out when the catalogue doubled, on the grounds that
+ * computing a navamsa here would put a second definition of a divisional
+ * chart in this file. That objection was about *recomputing* it. Calling
+ * `calculateNavamsa`, which is the engine the rest of the app already uses,
+ * raises no such problem -- and it needs nothing that `YogaChartInput` was not
+ * already carrying, since the D9 sign of a planet follows from its rasi sign
+ * and its degree within that sign.
+ *
+ * The one thing the input did lack is the ascendant's degree. `ascendantSign`
+ * alone cannot yield a navamsa, so `ascendantDegreeInSign` is a new optional
+ * field and Lagna Vargottama is the only record that requires it; every other
+ * yoga in this file behaves exactly as before when it is absent.
+ *
+ * A note on which navamsa. There are two implementations in the tree --
+ * `navamsa-engine.calculateNavamsa` and `divisional-engine.computeD9` -- and
+ * as of 2026-09-26 they agree exactly, which they did not before (see the
+ * comment on NAVAMSA_SPAN). This file uses the former, because life-domain
+ * rules already do, so a yoga and a life-area reading cannot disagree about
+ * the same planet.
+ */
+
+/* One chart is put through every definition in the catalogue, so the D9 is
+   computed once per chart rather than once per navamsa yoga. Keyed on the
+   planets array itself, which detectYogas passes through unchanged. */
+const navamsaCache = new WeakMap<PlanetPosition[], Map<string, string>>();
+
+function navamsaSigns(chart: YogaChartInput): Map<string, string> {
+  const cached = navamsaCache.get(chart.planets);
+  if (cached) return cached;
+  const signs = new Map<string, string>();
+  for (const position of calculateNavamsa(chart.planets)) {
+    signs.set(position.name, position.navamsa_sign);
+  }
+  navamsaCache.set(chart.planets, signs);
+  return signs;
+}
+
+/** The lord of the sign a planet holds in the D9. */
+function navamsaDispositor(chart: YogaChartInput, planetName: string): string | null {
+  const sign = navamsaSigns(chart).get(planetName);
+  return sign ? getSignLord(sign) : null;
+}
+
+/** The ascendant's own D9 sign, which needs a degree the caller may not supply. */
+function ascendantNavamsaSign(chart: YogaChartInput): string | null {
+  const degree = chart.ascendantDegreeInSign;
+  if (degree === undefined || !Number.isFinite(degree) || degree < 0 || degree >= 30) {
+    return null;
+  }
+  const [position] = calculateNavamsa([
+    { name: "Ascendant", longitude: 0, sign: chart.ascendantSign, degree_in_sign: degree, house: 1 },
+  ]);
+  return position?.navamsa_sign ?? null;
+}
+
+/** Dignity counted in either chart, which is how the texts state it. */
+function dignifiedInRasiOrNavamsa(chart: YogaChartInput, planet: PlanetPosition): boolean {
+  if (isExalted(planet.name, planet.sign) || isOwnSign(planet.name, planet.sign)) return true;
+  const navamsa = navamsaSigns(chart).get(planet.name);
+  if (!navamsa) return false;
+  return isExalted(planet.name, navamsa) || isOwnSign(planet.name, navamsa);
+}
+
+const NAVAMSA_YOGA_DEFINITIONS: YogaDefinition[] = [
+  {
+    id: "vargottama",
+    name: "Vargottama Yoga",
+    sanskrit: "वर्गोत्तम योग",
+    category: "benefic",
+    source: "BPHS and Saravali (a graha holding the same sign in rasi and navamsa)",
+    description: "One or more of the seven classical planets hold the same sign in the birth chart and in the navamsa.",
+    effects: "A planet that repeats its sign in the D9 is doing the same thing at both levels, and the tradition reads that as doubled strength.",
+    detect: (chart) => {
+      const navamsa = navamsaSigns(chart);
+      const repeated = chart.planets.filter(
+        (planet) =>
+          CLASSICAL_PLANETS.includes(planet.name) && navamsa.get(planet.name) === planet.sign
+      );
+      if (repeated.length === 0) return null;
+      const names = uniquePlanetNames(repeated);
+      /* Graded by how many repeat rather than by dignity: vargottama is
+         itself a strength claim, and one planet repeating is a much smaller
+         statement than three doing it. */
+      const strength = repeated.length >= 3 ? "strong" : repeated.length === 2 ? "moderate" : "weak";
+      const effects =
+        repeated.length >= 3
+          ? "Three or more planets carry the same sign in both charts, so the chart says the same thing twice over. What these planets govern is unusually consistent -- it holds up under pressure instead of shifting when circumstances do."
+          : "What this planet governs is stable rather than situational: the outer life and the inner one point the same way, and the trait shows up again under pressure rather than falling away.";
+      const timing = `the periods of ${names.join(", ")}, when the doubling is most visible`;
+      const traits = ["consistency", "strength", "reliability"];
+      return {
+        yoga_id: "vargottama",
+        name: "Vargottama Yoga",
+        sanskrit: "वर्गोत्तम योग",
+        category: "benefic",
+        present: true,
+        strength,
+        involved_planets: names,
+        description:
+          names.length === 1
+            ? `${names[0]} holds ${navamsa.get(names[0])} in both the birth chart and the navamsa.`
+            : `${names.join(", ")} each hold the same sign in the birth chart and the navamsa (${names.map((name) => navamsa.get(name)).join(", ")}).`,
+        effects,
+        activation_timing: timing,
+        key_traits: traits,
+        source: "BPHS and Saravali (a graha holding the same sign in rasi and navamsa)",
+        detailed_description: richYogaDetail("Vargottama Yoga", effects, names, timing, traits),
+      };
+    },
+  },
+  {
+    id: "lagna_vargottama",
+    name: "Lagna Vargottama Yoga",
+    sanskrit: "लग्न वर्गोत्तम योग",
+    category: "benefic",
+    source: "BPHS and Saravali (the ascendant holding the same sign in rasi and navamsa)",
+    description: "The ascendant falls in the same sign in the birth chart and in the navamsa. Needs the ascendant's exact degree, so it is only assessed when the caller supplies one.",
+    effects: "The rising sign is reinforced rather than reinterpreted, so the way you come across and the way you actually are do not pull in different directions.",
+    detect: (chart) => {
+      const navamsaSign = ascendantNavamsaSign(chart);
+      if (!navamsaSign || navamsaSign !== chart.ascendantSign) return null;
+      const lord = houseLordPlanet(1, chart);
+      if (!lord.planet) return null;
+      const effects =
+        "The rising sign is reinforced rather than reinterpreted. How you come across and how you actually are do not pull in different directions, which makes first impressions unusually accurate and the whole chart harder to knock off its footing.";
+      const timing = `the period of the ascendant lord (${lord.lordName}), and any stretch that tests the chart as a whole`;
+      const traits = ["integrity", "steadiness", "self-consistency"];
+      return {
+        yoga_id: "lagna_vargottama",
+        name: "Lagna Vargottama Yoga",
+        sanskrit: "लग्न वर्गोत्तम योग",
+        category: "benefic",
+        present: true,
+        strength: "strong",
+        involved_planets: [lord.lordName],
+        description: `The ascendant falls in ${chart.ascendantSign} in both the birth chart and the navamsa.`,
+        effects,
+        activation_timing: timing,
+        key_traits: traits,
+        source: "BPHS and Saravali (the ascendant holding the same sign in rasi and navamsa)",
+        detailed_description: richYogaDetail("Lagna Vargottama Yoga", effects, [lord.lordName], timing, traits),
+      };
+    },
+  },
+  {
+    id: "kalpadruma",
+    name: "Kalpadruma Yoga",
+    sanskrit: "कल्पद्रुम योग",
+    category: "wealth",
+    source: "Jataka Parijata (also called Parijata Yoga: the ascendant lord, its dispositor, that dispositor's dispositor, and the last one's navamsa dispositor)",
+    description: "Four planets in a chain -- the ascendant lord, the lord of the sign it occupies, the lord of the sign that planet occupies, and the navamsa dispositor of the third -- with every one of them both angular or trinal and either exalted or in its own sign.",
+    effects: "Named for the wish-fulfilling tree. Support arrives at every level the chart is examined at, so what is attempted tends to find backing from some direction.",
+    detect: (chart) => {
+      const first = houseLordPlanet(1, chart);
+      if (!first.planet) return null;
+      const dispositorOne = findPlanet(chart.planets, getSignLord(first.planet.sign));
+      if (!dispositorOne) return null;
+      const dispositorTwo = findPlanet(chart.planets, getSignLord(dispositorOne.sign));
+      if (!dispositorTwo) return null;
+      const navamsaLord = navamsaDispositor(chart, dispositorTwo.name);
+      if (!navamsaLord) return null;
+      const fourth = findPlanet(chart.planets, navamsaLord);
+      if (!fourth) return null;
+
+      const chain = [first.planet, dispositorOne, dispositorTwo, fourth];
+      /*
+       * Both conditions, not either. The rule is quoted loosely often enough
+       * that "in kendras or trikonas, or exalted" reads as a choice, and taken
+       * that way it fires on a quarter of all charts -- which cannot be right
+       * for a combination the texts hold up as exceptional. Jataka Parijata
+       * asks for both: each of the four well placed *and* well dignified.
+       *
+       * The source also admits a friendly sign alongside exaltation and own
+       * sign. There is a natural-friendship table in shadbala-engine, but it
+       * is private to that file, and importing it to widen a rule would be the
+       * wrong trade -- omitting it makes this stricter, which is the only
+       * direction a definition here is allowed to differ in.
+       */
+      const supported = chain.every(
+        (planet) =>
+          (isInKendra(planet.house) || isInTrikona(planet.house)) &&
+          (isExalted(planet.name, planet.sign) || isOwnSign(planet.name, planet.sign))
+      );
+      if (!supported) return null;
+
+      const names = uniquePlanetNames(chain);
+      /* A planet in its own sign disposes itself, so the raw chain can read
+         "through Moon and Moon". Collapsing repeats keeps the sentence honest
+         about the path without pretending there are four distinct planets. */
+      const chainPath = [first.lordName, dispositorOne.name, dispositorTwo.name, fourth.name]
+        .filter((name, index, all) => index === 0 || name !== all[index - 1]);
+      const effects =
+        "Named for the wish-fulfilling tree, and the reason is structural rather than poetic: the chain that defines the chart's own ruler holds up at every link. Support arrives at whichever level the chart is examined at, so what is attempted tends to find backing from some direction.";
+      const timing = `the periods of ${names.join(", ")}, which between them cover the chain`;
+      const traits = ["support", "abundance", "resilience"];
+      return {
+        yoga_id: "kalpadruma",
+        name: "Kalpadruma Yoga",
+        sanskrit: "कल्पद्रुम योग",
+        category: "wealth",
+        present: true,
+        strength: overallStrength(chain.map((planet) => planetStrength(planet.name, planet.sign))),
+        involved_planets: names,
+        description: `The ascendant lord ${first.lordName} leads a dispositor chain ${chainPath.join(" -> ")}, the last step taken in the navamsa; every link is angular or trinal and either exalted or in its own sign.`,
+        effects,
+        activation_timing: timing,
+        key_traits: traits,
+        source: "Jataka Parijata (also called Parijata Yoga: the ascendant lord, its dispositor, that dispositor's dispositor, and the last one's navamsa dispositor)",
+        detailed_description: richYogaDetail("Kalpadruma Yoga", effects, names, timing, traits),
+      };
+    },
+  },
+  {
+    id: "gauri",
+    name: "Gauri Yoga",
+    sanskrit: "गौरी योग",
+    category: "wealth",
+    source: "Jataka Parijata (navamsa dispositor of the 10th lord exalted in the 10th with the ascendant lord)",
+    description: "The navamsa dispositor of the 10th lord is exalted and stands in the 10th house together with the ascendant lord.",
+    effects: "Standing that is both earned and acknowledged: the work and the person doing it are recognised together rather than one at the expense of the other.",
+    detect: (chart) => {
+      const tenth = houseLordPlanet(10, chart);
+      const first = houseLordPlanet(1, chart);
+      if (!tenth.planet || !first.planet) return null;
+      const dispositorName = navamsaDispositor(chart, tenth.lordName);
+      if (!dispositorName) return null;
+      const dispositor = findPlanet(chart.planets, dispositorName);
+      if (!dispositor) return null;
+      if (!isExalted(dispositor.name, dispositor.sign)) return null;
+      if (dispositor.house !== 10 || first.planet.house !== 10) return null;
+      /* "Joins the ascendant lord" needs two planets. When the navamsa
+         dispositor turns out to be the ascendant lord, the condition is
+         satisfied by one planet standing next to itself. */
+      if (dispositor.name === first.lordName) return null;
+
+      const involved = uniquePlanetNames([dispositor, first.planet, tenth.planet]);
+      const effects =
+        "Standing that is both earned and acknowledged. The work and the person doing it are recognised together rather than one at the expense of the other, and the reputation that results is difficult to dislodge.";
+      const timing = `the periods of ${dispositor.name} and ${first.lordName}, and the stretches that confer public position`;
+      const traits = ["renown", "merit", "position"];
+      return {
+        yoga_id: "gauri",
+        name: "Gauri Yoga",
+        sanskrit: "गौरी योग",
+        category: "wealth",
+        present: true,
+        strength: "strong",
+        involved_planets: involved,
+        description: `The 10th lord (${tenth.lordName}) has ${dispositor.name} as its navamsa dispositor; ${dispositor.name} is exalted in ${dispositor.sign} in the 10th, alongside the ascendant lord ${first.lordName}.`,
+        effects,
+        activation_timing: timing,
+        key_traits: traits,
+        source: "Jataka Parijata (navamsa dispositor of the 10th lord exalted in the 10th with the ascendant lord)",
+        detailed_description: richYogaDetail("Gauri Yoga", effects, involved, timing, traits),
+      };
+    },
+  },
+  {
+    id: "bharathi",
+    name: "Bharathi Yoga",
+    sanskrit: "भारती योग",
+    category: "benefic",
+    source: "Jataka Parijata (navamsa dispositor of the 2nd, 5th or 11th lord exalted and joined to the 9th lord)",
+    description: "The navamsa dispositor of the 2nd, 5th or 11th lord is exalted and shares a sign with the 9th lord.",
+    effects: "Learning that is recognised: command of a subject, a name attached to it, and an ease of expression that makes the knowledge travel.",
+    detect: (chart) => {
+      const ninth = houseLordPlanet(9, chart);
+      if (!ninth.planet) return null;
+      for (const house of [2, 5, 11]) {
+        const lord = houseLordPlanet(house, chart);
+        if (!lord.planet) continue;
+        const dispositorName = navamsaDispositor(chart, lord.lordName);
+        if (!dispositorName) continue;
+        const dispositor = findPlanet(chart.planets, dispositorName);
+        if (!dispositor) continue;
+        if (!isExalted(dispositor.name, dispositor.sign)) continue;
+        /* Conjunction with the 9th lord, which a planet cannot form with
+           itself -- without this the rule collapses to "the 9th lord is
+           exalted" whenever it is its own navamsa dispositor. */
+        if (dispositor.name === ninth.lordName) continue;
+        if (dispositor.sign !== ninth.planet.sign) continue;
+
+        const involved = uniquePlanetNames([dispositor, ninth.planet, lord.planet]);
+        const effects =
+          "Learning that is recognised rather than merely held: command of a subject, a name attached to it, and an ease of expression that makes the knowledge travel further than the person does.";
+        const timing = `the periods of ${dispositor.name} and ${ninth.lordName}, and stretches of study, teaching or publication`;
+        const traits = ["eloquence", "scholarship", "renown"];
+        return {
+          yoga_id: "bharathi",
+          name: "Bharathi Yoga",
+          sanskrit: "भारती योग",
+          category: "benefic",
+          present: true,
+          strength: "strong",
+          involved_planets: involved,
+          description: `The ${ordinal(house)} lord (${lord.lordName}) has ${dispositor.name} as its navamsa dispositor; ${dispositor.name} is exalted in ${dispositor.sign} and shares that sign with the 9th lord ${ninth.lordName}.`,
+          effects,
+          activation_timing: timing,
+          key_traits: traits,
+          source: "Jataka Parijata (navamsa dispositor of the 2nd, 5th or 11th lord exalted and joined to the 9th lord)",
+          detailed_description: richYogaDetail("Bharathi Yoga", effects, involved, timing, traits),
+        };
+      }
+      return null;
+    },
+  },
 ];
 
 const YOGA_DEFINITIONS: YogaDefinition[] = [
@@ -3144,6 +3465,7 @@ const YOGA_DEFINITIONS: YogaDefinition[] = [
   ...GENERATED_YOGA_DEFINITIONS,
   ...ADDITIONAL_YOGA_DEFINITIONS,
   ...CLASSICAL_2026_YOGA_DEFINITIONS,
+  ...NAVAMSA_YOGA_DEFINITIONS,
 ];
 
 // --------------------------------------------------------------------------

@@ -799,6 +799,8 @@ export function buildLifeDomainInsights(
       planets: core.planets,
       houses: core.houses,
       ascendantSign: core.ascendant.sign,
+      /* Lagna Vargottama needs the degree, not just the sign. */
+      ascendantDegreeInSign: core.ascendant.degree_in_sign,
     }),
     timingLords: [
       dashaStage.dashaInfo.current_dasha,
@@ -894,6 +896,8 @@ export function buildChart(
       planets: core.planets,
       houses: core.houses,
       ascendantSign: core.ascendant.sign,
+      /* Lagna Vargottama needs the degree, not just the sign. */
+      ascendantDegreeInSign: core.ascendant.degree_in_sign,
     });
 
     // Stage D5: ashtakavarga

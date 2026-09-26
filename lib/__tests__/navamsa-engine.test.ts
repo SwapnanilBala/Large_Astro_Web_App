@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { calculateNavamsa } from "../engines/navamsa-engine";
+import { computeDivisionalChart } from "../engines/divisional-engine";
 import type { PlanetPosition } from "../engines/swiss-ephemeris-engine";
 
 // ---------------------------------------------------------------------------
@@ -213,5 +214,50 @@ describe("navamsa-engine", () => {
         expect(divisions[i]).toBeGreaterThanOrEqual(divisions[i - 1]);
       }
     });
+  });
+});
+
+/*
+ * There are two implementations of the D9 in this tree: this one, and
+ * divisional-engine's computeD9, which is what the varga atlas draws. They
+ * are supposed to agree, and life-domain-rules.ts states in a comment that
+ * they do -- but this file used to divide by the literal 3.333333333, which
+ * is slightly smaller than 30/9, so it crossed each pada boundary a fraction
+ * early. Over a dense sweep the two differed on 276 positions, every one of
+ * them within about 3e-10 of a boundary.
+ *
+ * Nothing observable depended on it. The test exists because two
+ * implementations of one quantity should not be able to drift at all, and
+ * because yoga-engine now reads this one while the atlas draws the other.
+ */
+describe("navamsa-engine agrees with divisional-engine", () => {
+  const ALL_SIGNS = [
+    "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+    "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+  ];
+
+  it("matches computeD9 across a dense sweep and at every pada boundary", () => {
+    const degrees: number[] = [];
+    for (let d = 0; d < 30; d += 0.05) degrees.push(Number(d.toFixed(4)));
+    for (let pada = 1; pada <= 8; pada++) {
+      const edge = (pada * 30) / 9;
+      for (const delta of [-1e-9, -1e-10, -1e-12, 0, 1e-12, 1e-10, 1e-9]) {
+        degrees.push(edge + delta);
+      }
+    }
+
+    const mismatches: string[] = [];
+    for (const sign of ALL_SIGNS) {
+      for (const degree of degrees) {
+        if (degree < 0 || degree >= 30) continue;
+        const planet: PlanetPosition = {
+          name: "Probe", longitude: 0, sign, degree_in_sign: degree, house: 1,
+        };
+        const mine = calculateNavamsa([planet])[0].navamsa_sign;
+        const theirs = computeDivisionalChart([planet], 9)[0].divisional_sign;
+        if (mine !== theirs) mismatches.push(sign + " @ " + degree + ": " + mine + " vs " + theirs);
+      }
+    }
+    expect(mismatches).toEqual([]);
   });
 });
