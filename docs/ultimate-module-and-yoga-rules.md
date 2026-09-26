@@ -2,7 +2,7 @@
 
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
-- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v6`.
+- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v7`.
 - Yogas: `lib/engines/yoga-engine.ts` (200 yogas).
 
 Both are fully deterministic. The same birth details always give the same result. No AI model decides anything here.
@@ -209,11 +209,11 @@ A divisional chart confirms or qualifies the birth chart. It never overrides it.
 The yoga lists are:
 
 - **Love Life**: 7th-lord yogas (Yuvati Kendra, Yuvati-Karma Parivartana, Yuvati Swagruhi), Sukha-Yuvati Parivartana, Venus yogas (Shukra Kendra Saundarya, Shukra Digbala, Shukra Vyaya Sthana, Shukra-Shani), Malavya, Hamsa.
-- **Career**: 10th-lord yogas (Karma Kendra, Karma Trikona, Karma-Labha Parivartana, Karma Swagruhi, Karma-Sukha Sthana), Artha Support, Dharma-Karmadhipati, Parakrama-Karma Parivartana, Saturn yogas (Shani Upachaya, Shani-Budha, Shani Digbala), Mercury yogas (Budha Upachaya, Budha-Shukra, Budha Digbala), all nine Sun yogas whose names start with Surya, Kahala, Bheri, Akhanda Samrajya, Bhadra, Hamsa. The list also names `sasa`, which matches nothing (see Known quirks).
+- **Career**: 10th-lord yogas (Karma Kendra, Karma Trikona, Karma-Labha Parivartana, Karma Swagruhi, Karma-Sukha Sthana), Artha Support, Dharma-Karmadhipati, Parakrama-Karma Parivartana, Saturn yogas (Shani Upachaya, Shani-Budha, Shani Digbala), Mercury yogas (Budha Upachaya, Budha-Shukra, Budha Digbala), all nine Sun yogas whose names start with Surya, Kahala, Bheri, Akhanda Samrajya, Bhadra, Hamsa, Shasha.
 - **Family**: all 4th-lord yogas (names starting with Sukha), all thirteen Moon yogas whose names start with Chandra, Moksha Support, all 5th-lord yogas (names starting with Vidya), Hamsa.
-- **Inheritance**: Randhra Transformation, all 2nd-lord yogas (names starting with Dhana), Dhanakaraka, Shatru Vijaya, Shatru-Vyaya Parivartana, Bhrigu-Mangal, Hamsa. Also `sasa`, which matches nothing.
+- **Inheritance**: Randhra Transformation, all 2nd-lord yogas (names starting with Dhana), Dhanakaraka, Shatru Vijaya, Shatru-Vyaya Parivartana, Bhrigu-Mangal, Hamsa, Shasha.
 - **Influence**: all 3rd-lord yogas (names starting with Parakrama), 10th-lord yogas, 11th-lord yogas (Labha Upachaya, Labha Swagruhi, Labha-Dhana Sthana), Mercury yogas, Sun yogas, Dharma-Karma Parivartana, Bhadra, Hamsa.
-- **Life Cycle**: all fourteen yogas whose ids start with `lagna_` (1st-lord yogas, plus Lagna Benefic Flank and Lagna Adhi), Randhra Transformation, Vyaya Release, Moksha Support, Shatru Vijaya, Shatru-Vyaya Parivartana. Also `sasa`, which matches nothing.
+- **Life Cycle**: all fourteen yogas whose ids start with `lagna_` (1st-lord yogas, plus Lagna Benefic Flank and Lagna Adhi), Randhra Transformation, Vyaya Release, Moksha Support, Shatru Vijaya, Shatru-Vyaya Parivartana, Shasha.
 - **Travel & Destinations**: 9th-lord yogas (Bhagya Trikona, Bhagya Kendra, Bhagya-Labha Parivartana, Bhagya Swagruhi, Bhagya-Vidya Sthana), Vyaya Release, Dharma Support, Hamsa.
 
 **The current dasha.**
@@ -654,17 +654,18 @@ These look at the shape of the whole chart. They use only the seven classical pl
 
 # Known quirks
 
-These are notes on how the code behaves today. They are not fixed here.
+These are notes on how the code behaves today. None of them is fixed yet.
 
-1. **`sasa` matches no yoga.** Career, Inheritance and Life Cycle list the yoga id `sasa`, but the Saturn great-person yoga's id is `shasha`. So Shasha Yoga never counts as yoga support for those three areas. (`lib/engines/life-domain-rules.ts`, `LIFE_DOMAIN_EVIDENCE_CONFIG`.)
-2. **Every chart gets exactly one "how many signs" pattern.** Seven planets always fill between one and seven signs, so one of Gola, Yuga, Shula, Kedara, Pasa, Damini or Veena is always present. The code comment notes that the old texts use these only when no other pattern applies. The code does not apply that rule.
-3. **Three yogas can never happen.** Mercury counts as a good planet here, and Mercury is never more than one sign away from the Sun. That makes these impossible:
+One earlier quirk is fixed. Career, Inheritance and Life Cycle used to name the Saturn yoga `sasa` instead of `shasha`, so Shasha Yoga never counted for them. Rules version v7 fixes this, and a test now fails if any area names a yoga that does not exist.
+
+1. **Every chart gets exactly one "how many signs" pattern.** Seven planets always fill between one and seven signs, so one of Gola, Yuga, Shula, Kedara, Pasa, Damini or Veena is always present. The code comment notes that the old texts use these only when no other pattern applies. The code does not apply that rule.
+2. **Three yogas can never happen.** Mercury counts as a good planet here, and Mercury is never more than one sign away from the Sun. That makes these impossible:
    - Vajra (Mercury in 1st or 7th with the Sun in 4th or 10th).
    - Dhwaja (Mercury in the 1st with the Sun in the 8th).
    - Kurma (Mercury in 5th, 6th or 7th with the Sun in 1st, 3rd or 11th).
 
    In 20,000 random charts these three never appeared. Shakata (pattern), Vihaga, Kamala, Nauka, Chhatra and Gola also never appeared, but they are possible, just very rare.
-4. **Some cancellations are never shown.** A weak yoga that is also cancelled scores below 30 and is hidden. So a cancelled Kemadruma, a combust Budhaditya, a Jupiter-softened Vish and a reduced Shakata never reach the page. The yoga simply disappears.
-5. **Yava is not the classical Yava.** Here it means "at least three signs with exactly two planets each". Any chart like that also has Kedara.
-6. **Very common yogas.** In 20,000 random charts, Dhanakaraka appeared about 96% of the time, Raja about 94%, and Chandra Malefic Upachaya about 90%. On their own they do not say much about one chart.
-7. **The two modules use different good and hard planet lists** (see the table at the top). A planet can count as hard in a yoga and not count at all in the Ultimate Module. The Sun is the main example.
+3. **Some cancellations are never shown.** A weak yoga that is also cancelled scores below 30 and is hidden. So a cancelled Kemadruma, a combust Budhaditya, a Jupiter-softened Vish and a reduced Shakata never reach the page. The yoga simply disappears.
+4. **Yava is not the classical Yava.** Here it means "at least three signs with exactly two planets each". Any chart like that also has Kedara.
+5. **Very common yogas.** In 20,000 random charts, Dhanakaraka appeared about 96% of the time, Raja about 94%, and Chandra Malefic Upachaya about 90%. On their own they do not say much about one chart.
+6. **The two modules use different good and hard planet lists** (see the table at the top). A planet can count as hard in a yoga and not count at all in the Ultimate Module. The Sun is the main example.

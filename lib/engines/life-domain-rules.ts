@@ -19,8 +19,10 @@ import type {
 } from "./swiss-ephemeris-engine";
 
 /* v5: kartari hemming, and the primary lord counted from its own house.
-   v6: the primary lord's company, vargottama, and cancelled debilitation. */
-export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v6";
+   v6: the primary lord's company, vargottama, and cancelled debilitation.
+   v7: Shasha Yoga reaches career, inheritance and life cycle -- their lists
+       named it "sasa", which no yoga id matches. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v7";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -71,7 +73,7 @@ export const LIFE_DOMAIN_EVIDENCE_CONFIG: Record<LifeDomainKey, DomainEvidenceCo
     houses: [2, 6, 10, 11],
     planets: ["Saturn", "Mercury", "Sun", "Jupiter"],
     divisionScopes: [{ division: 10, subthemes: ["vocation", "daily_work", "leadership", "entrepreneurship", "recognition"], domainWide: true, method: "classical" }],
-    yogaIdPrefixes: ["karma_", "artha_support", "dharma_karmadhipati", "parakrama_karma_", "shani_", "budha_", "surya_", "kahala", "bheri", "akhanda_samrajya", "bhadra", "hamsa", "sasa"],
+    yogaIdPrefixes: ["karma_", "artha_support", "dharma_karmadhipati", "parakrama_karma_", "shani_", "budha_", "surya_", "kahala", "bheri", "akhanda_samrajya", "bhadra", "hamsa", "shasha"],
   },
   family: {
     houses: [2, 4],
@@ -87,7 +89,7 @@ export const LIFE_DOMAIN_EVIDENCE_CONFIG: Record<LifeDomainKey, DomainEvidenceCo
     houses: [2, 8],
     planets: ["Jupiter", "Saturn"],
     divisionScopes: [{ division: 2, subthemes: ["ownership", "transfers", "shared_assets"], domainWide: false, method: "classical" }],
-    yogaIdPrefixes: ["randhra_", "dhana_", "dhanakaraka", "shatru_", "bhrigu_mangal", "hamsa", "sasa"],
+    yogaIdPrefixes: ["randhra_", "dhana_", "dhanakaraka", "shatru_", "bhrigu_mangal", "hamsa", "shasha"],
   },
   influence: {
     houses: [3, 10, 11],
@@ -107,7 +109,7 @@ export const LIFE_DOMAIN_EVIDENCE_CONFIG: Record<LifeDomainKey, DomainEvidenceCo
       { division: 27, subthemes: ["recovery", "resilience"], domainWide: false, method: "classical" },
       { division: 30, subthemes: ["recovery", "endings"], domainWide: false, method: "classical" },
     ],
-    yogaIdPrefixes: ["lagna_", "randhra_", "vyaya_", "moksha_", "shatru_", "sasa"],
+    yogaIdPrefixes: ["lagna_", "randhra_", "vyaya_", "moksha_", "shatru_", "shasha"],
   },
   travel_destinations: {
     houses: [3, 4, 9, 12],

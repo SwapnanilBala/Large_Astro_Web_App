@@ -745,7 +745,7 @@ function computeInsights(
   const evidenceSignature = extendedEvidence
     ? `${extendedEvidence.birthTimeAccuracy ?? "exact"}_${extendedEvidence.birthTimeFallback ? "fallback" : "recorded"}_${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
     : "natal";
-  const cacheKey = `ins_v4_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
+  const cacheKey = `ins_v5_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
 
   const cached = stageCaches.insights.get(cacheKey);
   if (cached) return cached;

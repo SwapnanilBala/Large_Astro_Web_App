@@ -19,8 +19,8 @@ import {
   ZODIAC_SIGNS,
 } from "../rules/context";
 import { evaluateRules } from "../rules";
-import { detectYogas } from "../engines/yoga-engine";
-import { evaluateLifeDomainRules } from "../engines/life-domain-rules";
+import { detectYogas, YOGA_DEFINITIONS } from "../engines/yoga-engine";
+import { evaluateLifeDomainRules, LIFE_DOMAIN_EVIDENCE_CONFIG } from "../engines/life-domain-rules";
 import { buildLifeDomainInsights } from "../engines/chart-service";
 import { calculateNavamsa } from "../engines/navamsa-engine";
 import { mulberry32 } from "../../scripts/rarity/prng";
@@ -474,6 +474,59 @@ describe("the life-area evidence list", () => {
           expect(filed, `${domain.key}: ${hit.id} is missing from the evidence list`).toContain(hit.technical_note);
         }
       }
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Every yoga a life area names has to exist
+// ---------------------------------------------------------------------------
+
+describe("the life-area yoga lists", () => {
+  /*
+   * Each area names its yogas by id prefix. A prefix that matches no id fails
+   * nothing and changes nothing -- the yoga simply never counts. Career,
+   * inheritance and life cycle named the Saturn mahapurusha "sasa" while the
+   * yoga engine calls it "shasha", so Shasha Yoga never reached them.
+   */
+  it("name only prefixes that match a real yoga", () => {
+    const ids = YOGA_DEFINITIONS.map((yoga) => yoga.id);
+    for (const [key, config] of Object.entries(LIFE_DOMAIN_EVIDENCE_CONFIG)) {
+      for (const prefix of config.yogaIdPrefixes) {
+        expect(
+          ids.some((id) => id === prefix || id.startsWith(prefix)),
+          `${key} names "${prefix}", which matches no yoga`,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("count Shasha Yoga for career, inheritance and life cycle", () => {
+    const withShasha = SAMPLE.find((s) => s.panel.has("shasha"));
+    expect(withShasha, "no sampled chart has Shasha Yoga").toBeDefined();
+    const chart = withShasha!.chart;
+    const f = facts(chart);
+    const shasha = detectYogas({
+      planets: chart.planets,
+      houses: chart.houses,
+      ascendantSign: chart.ascendant.sign,
+    }).filter((yoga) => yoga.yoga_id === "shasha");
+
+    for (const key of ["career", "inheritance", "life_cycle"] as const) {
+      const { rules } = evaluateLifeDomainRules({
+        key,
+        label: "Test area",
+        primaryHouse: chart.houses.find((h) => h.house_number === 1)!,
+        secondaryHouse: chart.houses.find((h) => h.house_number === 2)!,
+        primaryLord: f.lordOf(1),
+        secondaryLord: f.lordOf(2),
+        anchorPlanet: f.planet("Moon"),
+        planets: chart.planets,
+        houses: chart.houses,
+        evidence: { birthTimeAccuracy: "exact", yogas: shasha },
+      });
+      const support = rules.find((rule) => rule.id === "domain_yoga_support");
+      expect(support?.label ?? "no yoga support at all", `${key} ignores Shasha Yoga`).toContain("Shasha Yoga");
     }
   });
 });
