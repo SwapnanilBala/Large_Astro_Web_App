@@ -2811,17 +2811,37 @@
 
 /* ── Life Trajectory Hero ── */
 
+/* The same fault as .palm-summary-card had, and the same repair. The
+   gradient border was the padding-box/border-box trick over a 6%-opaque
+   --surface, so the full aqua-gold-coral gradient filled the card, and the
+   gold labels and pale copy sat on it unread. It also overrode the faint 8%
+   tint set by `background` just above it, which is now the fill again. The
+   rim is ::after, since ::before is the accent bar, and it sits at inset 0
+   because overflow: hidden would clip it at -1px, as on the sign-in panel. */
 .palm-trajectory-hero {
   border-radius: 16px;
   padding: 1.4rem;
-  background: linear-gradient(135deg, rgba(108, 225, 212, 0.08), rgba(242, 194, 108, 0.08));
   border: 1px solid transparent;
-  background-image: linear-gradient(var(--surface), var(--surface)),
-    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold), var(--accent-coral));
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  background-image:
+    linear-gradient(135deg, rgba(108, 225, 212, 0.08), rgba(242, 194, 108, 0.08)),
+    linear-gradient(var(--surface), var(--surface));
   position: relative;
   overflow: hidden;
+}
+
+.palm-trajectory-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold), var(--accent-coral));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
 }
 
 .palm-trajectory-hero::before {
