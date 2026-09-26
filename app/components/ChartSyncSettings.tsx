@@ -44,14 +44,19 @@ export default function ChartSyncSettings() {
    * rendering it on the first paint would make the server and the client
    * disagree. useSyncExternalStore renders the server's `null` through
    * hydration and the stored answer on the render after.
+   *
+   * Until then the card is laid out in its on-this-device state and not shown.
+   * It used to render nothing, so all ~210px of it arrived after hydration,
+   * and /login centres its panel: everything above the card slid up the
+   * screen. Laid out but hidden, the page has its final height from the
+   * first paint and nobody is shown a decision they may not have made.
    */
   const state = useSyncExternalStore(subscribeToChartSync, readChartSyncSnapshot, nothingReadYet);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result>(null);
 
-  if (!state) return null;
-
-  const saving = state.decision === "granted";
+  const pending = state === null;
+  const saving = state?.decision === "granted";
 
   const withdraw = async () => {
     setBusy(true);
@@ -113,7 +118,11 @@ export default function ChartSyncSettings() {
   };
 
   return (
-    <section className={styles.panel} aria-labelledby="chart-sync-settings-heading">
+    <section
+      className={pending ? `${styles.panel} ${styles.pending}` : styles.panel}
+      aria-labelledby="chart-sync-settings-heading"
+      inert={pending}
+    >
       <h2 id="chart-sync-settings-heading" className={styles.heading}>
         {t("chartSync.settingsHeading")}
       </h2>

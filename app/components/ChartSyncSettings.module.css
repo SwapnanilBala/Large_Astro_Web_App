@@ -10,6 +10,12 @@
   text-align: left;
 }
 
+/* Before the stored decision has been read (ChartSyncSettings.tsx): the card
+   takes its room and shows nothing. */
+.pending {
+  visibility: hidden;
+}
+
 .heading {
   margin: 0;
   font-family: var(--font-body), sans-serif;

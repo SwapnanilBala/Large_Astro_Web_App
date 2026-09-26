@@ -94,8 +94,6 @@ export default function LoginPageClient({
             </p>
           </div>
 
-          {status === "loading" && <p className={styles.switchText}>{t("account.checking")}</p>}
-
           {signedIn && (
             <>
               <p className={styles.accountIdentity}>
@@ -116,19 +114,33 @@ export default function LoginPageClient({
             </>
           )}
 
-          {status === "signed-out" && (
-            <GoogleSignIn
-              enabled={googleEnabled}
-              errorCode={signInError || undefined}
-              returnTo={returnTo}
-            />
-          )}
+          {/* While the session is checked, the signed-out block is laid out
+              but not shown, and "Checking…" sits over the room it takes. This
+              panel is centred on the page, so a block arriving late moved
+              everything above it: the one-line "Checking…" used to give way
+              to the button and its note, and the heading jumped 80px. Most
+              people who reach this page are signed out, and for them the
+              panel now has its final height from the first paint. */}
+          {(status === "loading" || status === "signed-out") && (
+            <div className={status === "loading" ? styles.signInPending : undefined}>
+              <GoogleSignIn
+                enabled={googleEnabled}
+                errorCode={signInError || undefined}
+                returnTo={returnTo}
+              />
 
-          {/* Google is the only way in, so a deployment without credentials has
-              no sign-in at all. GoogleSignIn renders nothing in that state —
-              saying so beats an unexplained gap where the button belongs. */}
-          {status === "signed-out" && !googleEnabled && !signInError && (
-            <p className={styles.error}>{t("signIn.error_not_configured")}</p>
+              {/* Google is the only way in, so a deployment without credentials
+                  has no sign-in at all. GoogleSignIn renders nothing in that
+                  state — saying so beats an unexplained gap where the button
+                  belongs. */}
+              {!googleEnabled && !signInError && (
+                <p className={styles.error}>{t("signIn.error_not_configured")}</p>
+              )}
+
+              {status === "loading" && (
+                <p className={`${styles.switchText} ${styles.checking}`}>{t("account.checking")}</p>
+              )}
+            </div>
           )}
 
           {/* Not the same as signed out, and rendering it as such invites

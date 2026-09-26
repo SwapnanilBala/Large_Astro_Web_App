@@ -445,6 +445,23 @@
   }
 }
 
+/* While the session is checked (page-client.tsx), the sign-in block takes its
+   room without being shown, and "Checking…" is laid over that room instead of
+   standing in a line of its own. */
+.signInPending {
+  position: relative;
+}
+
+.signInPending > * {
+  visibility: hidden;
+}
+
+.signInPending > .checking {
+  visibility: visible;
+  position: absolute;
+  inset: 0;
+}
+
 /* ── Ethereal Dawn ──
  *
  * the sign-in page was built for the dark tree: ink washes for surfaces, and

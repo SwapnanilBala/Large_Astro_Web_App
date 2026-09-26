@@ -13,11 +13,16 @@
   background-color: var(--bg-deep, #0A0A0F);
 }
 
-/* ── Layer A: nebula glow + drifting starfield ── */
+/* ── Layer A: nebula glow + drifting starfield ──
+   Both are oversized so the drift never reveals an edge, but their top edge is
+   a length where the other sides are -10%. .root is the page's height, so a
+   percentage top moved both layers whenever the page grew: a signed-in
+   visitor's panel settles 46px taller, the page with it, and a full-screen
+   layer moving 5px in the same frame as the navbar's toggles scored 0.175 of
+   layout shift. 6rem is about where -10% sat on a one-screen page. */
 .nebula {
   position: absolute;
-  /* Oversized so the drift translation never reveals an edge */
-  inset: -10%;
+  inset: -6rem -10% -10%;
   background-image:
     radial-gradient(circle at 22% 28%, rgba(123, 107, 168, 0.22) 0%, transparent 42%),
     radial-gradient(circle at 78% 18%, rgba(212, 165, 116, 0.16) 0%, transparent 38%),
@@ -31,7 +36,7 @@
 
 .starfield {
   position: absolute;
-  inset: -10%;
+  inset: -6rem -10% -10%;
   /* Tiny radial-gradient "stars" tiled across the layer */
   background-image:
     radial-gradient(1.2px 1.2px at 12% 18%, rgba(245, 240, 230, 0.85), transparent 60%),
@@ -50,10 +55,13 @@
   will-change: transform;
 }
 
-/* ── Layer B: zodiac chart silhouette ── */
+/* ── Layer B: zodiac chart silhouette ──
+   Centred on the first screen rather than on the page, for the same reason as
+   the top edges above: 50% of a page that grows after load moved the wheel
+   down by half the growth. On a one-screen page the two are the same place. */
 .wheelWrap {
   position: absolute;
-  top: 50%;
+  top: 50vh;
   left: 50%;
   width: min(700px, 90vmin);
   height: min(700px, 90vmin);
