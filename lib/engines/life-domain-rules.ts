@@ -9,14 +9,18 @@ import type {
 } from "@/lib/astro-types";
 import {
   planetDignity,
+  PLANET_EXALTATIONS,
+  SIGN_RULERS,
 } from "@/lib/rules/context";
+import { calculateNavamsa } from "./navamsa-engine";
 import type {
   HousePlacement,
   PlanetPosition,
 } from "./swiss-ephemeris-engine";
 
-/* v5: kartari hemming, and the primary lord counted from its own house. */
-export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v5";
+/* v5: kartari hemming, and the primary lord counted from its own house.
+   v6: the primary lord's company, vargottama, and cancelled debilitation. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v6";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -421,6 +425,102 @@ function addLordFromHouseRules(rules: RuleDraft[], input: LifeDomainRuleInput): 
           : `Primary lord ${primaryLord.name} in house ${primaryLord.house} aspects its own house ${house}.`,
     });
   }
+}
+
+/**
+ * Who the primary lord shares a house with: the association (yuti) half of
+ * how classical texts judge a house lord, beside its sign and its house.
+ * Jupiter or Venus alongside strengthens it; Mars, Saturn, Rahu or Ketu
+ * alongside strains it. Both are counted when both are present -- a ruler
+ * sitting with Jupiter and Saturn gets both, and the weights settle it.
+ */
+function addRulerCompanyRules(rules: RuleDraft[], input: LifeDomainRuleInput): void {
+  const { label, primaryLord, planets } = input;
+  const topic = domainName(label);
+  const company = planets.filter(
+    (planet) => planet.name !== primaryLord.name && planet.house === primaryLord.house
+  );
+  const benefics = uniquePlanetNames(company.filter((planet) => NATURAL_BENEFICS.has(planet.name)));
+  const malefics = uniquePlanetNames(company.filter((planet) => NATURAL_MALEFICS.has(planet.name)));
+
+  if (benefics.length > 0) {
+    addRule(rules, {
+      id: "ruler_with_benefic",
+      label: "Its ruler keeps good company",
+      impact: "support",
+      weight: Math.min(0.09, 0.05 + benefics.length * 0.02),
+      summary: `The planet responsible for ${topic} sits alongside ${benefics.join(" and ")}, which tends to soften its harder edges and bring help, goodwill or better timing to this area.`,
+      technical_note: `Primary lord ${primaryLord.name} conjunct ${benefics.join(", ")} in house ${primaryLord.house}.`,
+    });
+  }
+
+  if (malefics.length > 0) {
+    addRule(rules, {
+      id: "ruler_with_malefic",
+      label: "Its ruler works under pressure",
+      impact: "pressure",
+      weight: Math.min(0.09, 0.05 + malefics.length * 0.02),
+      summary: `The planet responsible for ${topic} sits alongside ${malefics.join(" and ")}, so results here tend to arrive with friction, delay or extra effort before they settle.`,
+      technical_note: `Primary lord ${primaryLord.name} conjunct ${malefics.join(", ")} in house ${primaryLord.house}.`,
+    });
+  }
+}
+
+/**
+ * Vargottama: the primary lord in the same sign in the birth chart and the
+ * navamsa (D9), one of the strongest states classical texts give a planet --
+ * what it promises in one chart it keeps in the other. The navamsa comes from
+ * calculateNavamsa, so this agrees with the D9 the app draws. The Moon changes
+ * navamsa roughly every six hours, so without a reliable birth time it is not
+ * claimed for the Moon.
+ */
+function addVargottamaRule(rules: RuleDraft[], input: LifeDomainRuleInput): void {
+  const { label, primaryLord, evidence } = input;
+  if (primaryLord.name === "Moon" && evidence && !hasReliableBirthTime(evidence)) return;
+  const [navamsa] = calculateNavamsa([primaryLord]);
+  if (navamsa.navamsa_sign !== primaryLord.sign) return;
+
+  const topic = domainName(label);
+  addRule(rules, {
+    id: "ruler_vargottama",
+    label: "Its ruler holds its ground",
+    impact: "support",
+    weight: 0.07,
+    summary: `The planet responsible for ${topic} sits in the same sign in the birth chart and in the chart classically used to judge how a planet's promise holds up, so what this area offers tends to last rather than fade.`,
+    technical_note: `Primary lord ${primaryLord.name} is vargottama: ${primaryLord.sign} in both D1 and D9.`,
+  });
+}
+
+/**
+ * Neecha bhanga: the primary lord is debilitated, but the lord of the sign it
+ * sits in, or the lord of its exaltation sign, is on an angle. The same two
+ * conditions as neecha_bhanga_raja in yoga-engine.ts, so the reading and the
+ * yoga panel agree. It sits beside the dignity rule's pressure rather than
+ * erasing it -- the weakness is real -- and records that the chart carries
+ * its repair.
+ */
+function addDebilitationCancelledRule(rules: RuleDraft[], input: LifeDomainRuleInput): void {
+  const { label, primaryLord, planets } = input;
+  if (dignityOf(primaryLord) !== "debilitated") return;
+
+  const find = (name: string | undefined) => planets.find((planet) => planet.name === name);
+  const signLord = find(SIGN_RULERS[primaryLord.sign]);
+  const exaltationSign = PLANET_EXALTATIONS[primaryLord.name];
+  const exaltationLord = exaltationSign ? find(SIGN_RULERS[exaltationSign]) : undefined;
+  const canceller = [signLord, exaltationLord].find(
+    (planet): planet is PlanetPosition => Boolean(planet) && ANGULAR_HOUSES.has(planet!.house)
+  );
+  if (!canceller) return;
+
+  const topic = domainName(label);
+  addRule(rules, {
+    id: "ruler_debilitation_cancelled",
+    label: "Its ruler's weakness has a built-in repair",
+    impact: "support",
+    weight: 0.08,
+    summary: `The planet responsible for ${topic} starts out weak, but the chart carries the classical cancellation for that weakness, so this area tends to improve markedly with age and effort -- often further than areas that started easier.`,
+    technical_note: `Neecha bhanga: ${primaryLord.name} is debilitated in ${primaryLord.sign}; ${canceller.name}, ${canceller === signLord ? "its sign lord" : "lord of its exaltation sign"}, is in kendra house ${canceller.house}.`,
+  });
 }
 
 function addConnectionRules(rules: RuleDraft[], input: LifeDomainRuleInput): void {
@@ -894,6 +994,9 @@ export function evaluateLifeDomainRules(input: LifeDomainRuleInput): {
   addOccupancyAndAspectRules(rules, input);
   addKartariRules(rules, input);
   addLordFromHouseRules(rules, input);
+  addRulerCompanyRules(rules, input);
+  addVargottamaRule(rules, input);
+  addDebilitationCancelledRule(rules, input);
   addConnectionRules(rules, input);
   addMatrixNatalRules(rules, input);
   addExtendedEvidenceRules(rules, input);

@@ -613,7 +613,11 @@ function buildEvidenceMatrix(
   rules: DomainRuleHit[]
 ): DomainEvidenceMatrix {
   const groups: Array<[DomainEvidenceFamily, string, (rule: DomainRuleHit) => boolean, string]> = [
-    ["primary", "Natal promise", (rule) => /^(primary_|delivery_|primary_house_|benefic_|malefic_|matrix_primary_)/.test(rule.id), "The natal house and its ruler remain the baseline evidence."],
+    // lord_ and ruler_ are the primary lord's own rules (its house, company,
+    // vargottama, cancelled debilitation). A rule no family names still
+    // moves the scores but never reaches this list, so any new prefix in
+    // life-domain-rules.ts must be added to a family here.
+    ["primary", "Natal promise", (rule) => /^(primary_|delivery_|primary_house_|benefic_|malefic_|matrix_primary_|lord_|ruler_)/.test(rule.id), "The natal house and its ruler remain the baseline evidence."],
     ["supporting", "Supporting factors", (rule) => /^(supporting_|anchor_|primary_secondary_|shared_domain_|domain_yoga|matrix_support_)/.test(rule.id), "No dominant supporting factor overrides the natal baseline."],
     ["divisional", "Divisional confirmation", (rule) => rule.id.startsWith("divisional_"), "No relevant divisional confirmation was available."],
     ["strength", "Delivery capacity", (rule) => rule.id.startsWith("shadbala_"), "Measured Shadbala was not available for this calculation."],

@@ -10,10 +10,19 @@
 
 import { describe, expect, it } from "vitest";
 import { calculate, type PlanetPosition } from "../engines/swiss-ephemeris-engine";
-import { buildRuleContext, planetDignity, signDistance, SIGN_RULERS } from "../rules/context";
+import {
+  buildRuleContext,
+  planetDignity,
+  signDistance,
+  PLANET_EXALTATIONS,
+  SIGN_RULERS,
+  ZODIAC_SIGNS,
+} from "../rules/context";
 import { evaluateRules } from "../rules";
 import { detectYogas } from "../engines/yoga-engine";
 import { evaluateLifeDomainRules } from "../engines/life-domain-rules";
+import { buildLifeDomainInsights } from "../engines/chart-service";
+import { calculateNavamsa } from "../engines/navamsa-engine";
 import { mulberry32 } from "../../scripts/rarity/prng";
 
 // ---------------------------------------------------------------------------
@@ -312,9 +321,22 @@ const BENEFICS = ["Jupiter", "Venus"];
 const MALEFICS = ["Mars", "Saturn", "Rahu", "Ketu"];
 const ASPECTS: Record<string, number[]> = { Mars: [4, 7, 8], Jupiter: [5, 7, 9], Saturn: [3, 7, 10] };
 const fromHouse = (from: number, to: number) => ((to - from + 12) % 12) + 1;
+const LIFE_RULE_IDS = [
+  "primary_house_hemmed_malefic",
+  "primary_house_hemmed_benefic",
+  "lord_strained_from_house",
+  "lord_guards_house",
+  "ruler_with_benefic",
+  "ruler_with_malefic",
+  "ruler_vargottama",
+  "ruler_debilitation_cancelled",
+];
+
+/** The navamsa from the textbook formula: 3 deg 20' parts counted on from Aries. */
+const navamsaSignIndex = (longitude: number) => Math.floor(longitude / (30 / 9)) % 12;
 
 describe("the added life-area rules", () => {
-  it("fire on kartari hemming and on the ruler counted from its own house, for every house", () => {
+  it("fire exactly on their classical condition, for every house of every chart", () => {
     const counts: Record<string, number> = {};
     let evaluations = 0;
     for (const s of SAMPLE.slice(0, 300)) {
@@ -348,26 +370,110 @@ describe("the added life-area rules", () => {
           primaryLord.house === n ||
           (ASPECTS[primaryLord.name] ?? [7]).includes(fromHouse(primaryLord.house, n));
 
+        const beside = (set: string[]) =>
+          set.some((name) => name !== primaryLord.name && f.house(name) === primaryLord.house);
+        const vargottama = navamsaSignIndex(primaryLord.longitude) === ZODIAC_SIGNS.indexOf(primaryLord.sign);
+        const signLord = f.planet(SIGN_RULERS[primaryLord.sign]);
+        const exaltationLord = f.planet(SIGN_RULERS[PLANET_EXALTATIONS[primaryLord.name]]);
+        const cancelled =
+          f.dignity(primaryLord) === "debilitated" &&
+          [signLord, exaltationLord].some((planet) => [1, 4, 7, 10].includes(planet.house));
+
         const expectations: Record<string, boolean> = {
           primary_house_hemmed_malefic: papa,
           primary_house_hemmed_benefic: shubha,
           lord_strained_from_house: strained,
           lord_guards_house: guards,
+          ruler_with_benefic: beside(BENEFICS),
+          ruler_with_malefic: beside(MALEFICS),
+          ruler_vargottama: vargottama,
+          ruler_debilitation_cancelled: cancelled,
         };
         for (const [id, want] of Object.entries(expectations)) {
           expect(ids.has(id), `${id} for house ${n}, ${s.chart.ascendant.sign} rising`).toBe(want);
           if (want) counts[id] = (counts[id] ?? 0) + 1;
         }
+
+        // A cancelled debilitation is a neecha bhanga the yoga panel must also show.
+        if (cancelled) {
+          expect(s.panel.has("neecha_bhanga_raja"), "the reading cancels a debilitation the panel does not").toBe(true);
+        }
       }
     }
-    for (const id of Object.keys({
-      primary_house_hemmed_malefic: 0,
-      primary_house_hemmed_benefic: 0,
-      lord_strained_from_house: 0,
-      lord_guards_house: 0,
-    })) {
+    for (const id of LIFE_RULE_IDS) {
       expect(counts[id] ?? 0, `${id} never fired`).toBeGreaterThan(0);
       expect(counts[id] ?? 0, `${id} fired every time`).toBeLessThan(evaluations);
+    }
+  });
+
+  it("uses the same navamsa as the textbook formula, for every planet", () => {
+    for (const s of SAMPLE) {
+      for (const [planet, navamsa] of s.chart.planets.map((p) => [p, calculateNavamsa([p])[0]] as const)) {
+        expect(navamsa.navamsa_sign, `${planet.name} at ${planet.longitude}`).toBe(
+          ZODIAC_SIGNS[navamsaSignIndex(planet.longitude)],
+        );
+      }
+    }
+  });
+
+  it("does not claim the Moon is vargottama on an approximate birth time", () => {
+    for (const s of SAMPLE.slice(0, 300)) {
+      const f = facts(s.chart);
+      const moon = f.planet("Moon");
+      if (navamsaSignIndex(moon.longitude) !== ZODIAC_SIGNS.indexOf(moon.sign)) continue;
+      const moonHouse = s.chart.houses.find((h) => h.house_number === moon.house)!;
+      const input = {
+        key: "family" as const,
+        label: "Test area",
+        primaryHouse: moonHouse,
+        secondaryHouse: moonHouse,
+        primaryLord: moon,
+        secondaryLord: moon,
+        anchorPlanet: moon,
+        planets: s.chart.planets,
+        houses: s.chart.houses,
+      };
+      const exact = evaluateLifeDomainRules({ ...input, evidence: { birthTimeAccuracy: "exact" } });
+      const rough = evaluateLifeDomainRules({ ...input, evidence: { birthTimeAccuracy: "unknown" } });
+      expect(exact.rules.some((r) => r.id === "ruler_vargottama")).toBe(true);
+      expect(rough.rules.some((r) => r.id === "ruler_vargottama")).toBe(false);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Every life-area rule has to reach the page's evidence list
+// ---------------------------------------------------------------------------
+
+describe("the life-area evidence list", () => {
+  /*
+   * buildEvidenceMatrix in rule-engine.ts files rule hits into families by id
+   * prefix. A hit whose prefix no family names still moves the scores but is
+   * silently left out of the evidence the page shows -- which is what happened
+   * to the lord_ rules until the family pattern was widened.
+   */
+  it("files every rule hit under one of its families", () => {
+    const rng = mulberry32(20260926);
+    const start = Date.UTC(1940, 0, 1);
+    for (let i = 0; i < 40; i++) {
+      const city = CITIES[Math.floor(rng() * CITIES.length)];
+      const day = new Date(start + Math.floor(rng() * 27_000) * 86_400_000);
+      const minutes = Math.floor(rng() * 1440);
+      const birth = {
+        name: "Sample",
+        birth_date: day.toISOString().slice(0, 10),
+        birth_time: `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`,
+        timezone_offset_minutes: 0,
+        latitude: city.lat,
+        longitude: city.lng,
+        birth_time_accuracy: "exact" as const,
+      };
+      for (const domain of buildLifeDomainInsights(birth)) {
+        const filed = domain.evidence_matrix.entries.map((entry) => entry.technical_note).join(" ");
+        for (const hit of domain.rule_hits) {
+          expect(filed, `${domain.key}: ${hit.id} is missing from the evidence list`).toContain(hit.technical_note);
+        }
+      }
     }
   });
 });
