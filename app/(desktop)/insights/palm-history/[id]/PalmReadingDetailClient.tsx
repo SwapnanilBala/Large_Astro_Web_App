@@ -332,7 +332,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         <div className="palm-section-card palm-section-card--annotated">
           {hasAnyCoords ? (
             <>
-              <h3>{tr("palm.sections.palm")}</h3>
+              <h2>{tr("palm.sections.palm")}</h2>
               <PalmAnnotation
                 imageDataUrl={record.image_data_url}
                 coordinates={lineCoordsObj}
@@ -352,7 +352,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Summary */}
       {(reading.overall_summary || reading.dominant_hand_note) && (
         <div className="palm-summary-card">
-          <h3>{tr("palm.sections.overallSummary")}</h3>
+          <h2>{tr("palm.sections.overallSummary")}</h2>
           {reading.overall_summary && <p>{reading.overall_summary}</p>}
           {reading.dominant_hand_note && (
             <p className="palm-hand-note">
@@ -379,7 +379,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   }}
                 >
                   <div className="palm-line-header">
-                    <h4>{lineLabels[key] || key}</h4>
+                    <h3>{lineLabels[key] || key}</h3>
                     <span className={`palm-strength palm-strength--${line.strength}`}>
                       {line.strength}
                     </span>
@@ -411,7 +411,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Trajectory */}
       {reading.life_trajectory && (
         <div className="palm-trajectory-hero">
-          <h3>{tr("palm.sections.lifeTrajectory")}</h3>
+          <h2>{tr("palm.sections.lifeTrajectory")}</h2>
           <div className="palm-trajectory-grid">
             {reading.life_trajectory.current_phase && (
               <div className="palm-trajectory-item">
@@ -460,7 +460,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Jyotish correlation */}
       {reading.jyotish_correlation && (
         <div className="palm-section-card palm-section-card--jyotish">
-          <h3>{tr("palm.sections.jyotishSynthesis")}</h3>
+          <h2>{tr("palm.sections.jyotishSynthesis")}</h2>
           {reading.jyotish_correlation.summary && (
             <p className="palm-section-lead">
               {reading.jyotish_correlation.summary}
@@ -506,7 +506,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Dasha relevance */}
       {reading.dasha_relevance && (
         <div className="palm-section-card palm-section-card--dasha">
-          <h3>{tr("palm.sections.dashaLens")}</h3>
+          <h2>{tr("palm.sections.dashaLens")}</h2>
           {reading.dasha_relevance.active_period_summary && (
             <p className="palm-section-lead">
               {reading.dasha_relevance.active_period_summary}
@@ -519,9 +519,9 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   (item, i) => (
                     <li key={i} className="palm-dasha-item">
                       {item.indicator && (
-                        <h4 className="palm-dasha-indicator">
+                        <h3 className="palm-dasha-indicator">
                           {item.indicator}
-                        </h4>
+                        </h3>
                       )}
                       {item.relevance_to_dasha && (
                         <p>{item.relevance_to_dasha}</p>
@@ -542,22 +542,22 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Career */}
       {reading.career_and_purpose && (
         <div className="palm-section-card palm-section-card--career">
-          <h3>{tr("palm.sections.career")}</h3>
+          <h2>{tr("palm.sections.career")}</h2>
           {reading.career_and_purpose.natural_talents && (
             <div className="palm-subsection">
-              <h4>{tr("palm.career.naturalTalents")}</h4>
+              <h3>{tr("palm.career.naturalTalents")}</h3>
               <p>{reading.career_and_purpose.natural_talents}</p>
             </div>
           )}
           {reading.career_and_purpose.career_direction && (
             <div className="palm-subsection">
-              <h4>{tr("palm.career.careerDirection")}</h4>
+              <h3>{tr("palm.career.careerDirection")}</h3>
               <p>{reading.career_and_purpose.career_direction}</p>
             </div>
           )}
           {reading.career_and_purpose.purpose_alignment && (
             <div className="palm-subsection">
-              <h4>{tr("palm.career.purposeAlignment")}</h4>
+              <h3>{tr("palm.career.purposeAlignment")}</h3>
               <p>{reading.career_and_purpose.purpose_alignment}</p>
             </div>
           )}
@@ -567,16 +567,16 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Relationships */}
       {reading.relationships_and_emotional && (
         <div className="palm-section-card palm-section-card--relationships">
-          <h3>{tr("palm.sections.relationships")}</h3>
+          <h2>{tr("palm.sections.relationships")}</h2>
           {reading.relationships_and_emotional.emotional_state && (
             <div className="palm-subsection">
-              <h4>{tr("palm.relationships.emotionalState")}</h4>
+              <h3>{tr("palm.relationships.emotionalState")}</h3>
               <p>{reading.relationships_and_emotional.emotional_state}</p>
             </div>
           )}
           {reading.relationships_and_emotional.relationship_dynamics && (
             <div className="palm-subsection">
-              <h4>{tr("palm.relationships.relationshipDynamics")}</h4>
+              <h3>{tr("palm.relationships.relationshipDynamics")}</h3>
               <p>
                 {reading.relationships_and_emotional.relationship_dynamics}
               </p>
@@ -584,7 +584,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
           )}
           {reading.relationships_and_emotional.connection_style && (
             <div className="palm-subsection">
-              <h4>{tr("palm.relationships.connectionStyle")}</h4>
+              <h3>{tr("palm.relationships.connectionStyle")}</h3>
               <p>{reading.relationships_and_emotional.connection_style}</p>
             </div>
           )}
@@ -594,22 +594,22 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Health */}
       {reading.health_and_vitality && (
         <div className="palm-section-card palm-section-card--health">
-          <h3>{tr("palm.sections.health")}</h3>
+          <h2>{tr("palm.sections.health")}</h2>
           {reading.health_and_vitality.energy_levels && (
             <div className="palm-subsection">
-              <h4>{tr("palm.health.energyLevels")}</h4>
+              <h3>{tr("palm.health.energyLevels")}</h3>
               <p>{reading.health_and_vitality.energy_levels}</p>
             </div>
           )}
           {reading.health_and_vitality.stress_indicators && (
             <div className="palm-subsection">
-              <h4>{tr("palm.health.stressIndicators")}</h4>
+              <h3>{tr("palm.health.stressIndicators")}</h3>
               <p>{reading.health_and_vitality.stress_indicators}</p>
             </div>
           )}
           {reading.health_and_vitality.wellness_advice && (
             <div className="palm-subsection">
-              <h4>{tr("palm.health.wellnessAdvice")}</h4>
+              <h3>{tr("palm.health.wellnessAdvice")}</h3>
               <p>{reading.health_and_vitality.wellness_advice}</p>
             </div>
           )}
@@ -619,7 +619,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Mounts */}
       {reading.mounts && (
         <div className="palm-section-card">
-          <h3>{tr("palm.sections.mounts")}</h3>
+          <h2>{tr("palm.sections.mounts")}</h2>
           {Array.isArray(reading.mounts.prominent) &&
             reading.mounts.prominent.length > 0 && (
               <div className="palm-chips">
@@ -639,7 +639,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Fingers */}
       {reading.fingers && (
         <div className="palm-section-card">
-          <h3>{tr("palm.sections.fingers")}</h3>
+          <h2>{tr("palm.sections.fingers")}</h2>
           {reading.fingers.observation && (
             <p className="palm-observation">{reading.fingers.observation}</p>
           )}
@@ -652,7 +652,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Special markings */}
       {reading.special_markings && (
         <div className="palm-section-card">
-          <h3>{tr("palm.sections.specialMarkings")}</h3>
+          <h2>{tr("palm.sections.specialMarkings")}</h2>
           {Array.isArray(reading.special_markings.observed) &&
             reading.special_markings.observed.length > 0 && (
               <div className="palm-chips">
@@ -675,7 +675,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         if (typeof cfn === "string") {
           return (
             <div className="palm-section-card palm-section-card--classical">
-              <h3>{tr("palm.sections.classicalFramework")}</h3>
+              <h2>{tr("palm.sections.classicalFramework")}</h2>
               <p>{cfn}</p>
             </div>
           );
@@ -691,7 +691,7 @@ export default function PalmReadingDetailClient({ id }: Props) {
         }
         return (
           <div className="palm-section-card palm-section-card--classical">
-            <h3>{tr("palm.sections.classicalFramework")}</h3>
+            <h2>{tr("palm.sections.classicalFramework")}</h2>
             {sanskritTerms.length > 0 && (
               <ul className="palm-sanskrit-list">
                 {sanskritTerms.map((t, i) => (
@@ -735,14 +735,14 @@ export default function PalmReadingDetailClient({ id }: Props) {
       {/* Guidance */}
       {reading.guidance && (
         <div className="palm-guidance">
-          <h3>{tr("palm.sections.guidance")}</h3>
+          <h2>{tr("palm.sections.guidance")}</h2>
           <p>{reading.guidance}</p>
         </div>
       )}
 
       {/* Notes — editable */}
       <div className="palm-section-card palm-detail-notes-card">
-        <h3>{tr("palm.sections.yourNotes")}</h3>
+        <h2>{tr("palm.sections.yourNotes")}</h2>
         <p className="palm-section-lead palm-detail-notes-help">
           {tr("palm.detail.notesHelp")}
         </p>

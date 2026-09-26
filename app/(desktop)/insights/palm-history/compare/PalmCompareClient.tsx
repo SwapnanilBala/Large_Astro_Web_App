@@ -220,7 +220,7 @@ export default function PalmCompareClient({ ids }: Props) {
                 </span>
               </header>
               {rec.title && (
-                <h3 className="palm-compare-side-title">{rec.title}</h3>
+                <h2 className="palm-compare-side-title">{rec.title}</h2>
               )}
               {rec.image_data_url && (
                 <div className="palm-compare-side-image">
@@ -261,7 +261,7 @@ export default function PalmCompareClient({ ids }: Props) {
       <div className="palm-compare-diff">
         {/* Line strength changes */}
         <section className="palm-section-card">
-          <h3>{tr("palm.compare.lineStrength")}</h3>
+          <h2>{tr("palm.compare.lineStrength")}</h2>
           {allLinesUnchanged ? (
             <p className="palm-section-lead">
               {tr("palm.compare.noStrengthChanges")}
@@ -302,7 +302,7 @@ export default function PalmCompareClient({ ids }: Props) {
         {/* Line visibility changes */}
         {diff.line_visibility_changes.length > 0 && (
           <section className="palm-section-card">
-            <h3>{tr("palm.compare.lineVisibility")}</h3>
+            <h2>{tr("palm.compare.lineVisibility")}</h2>
             <div className="palm-compare-table-scroll" tabIndex={0} role="region" aria-label={tr("palm.compare.lineVisibilityAria")}>
               <table className="palm-compare-table">
                 <thead>
@@ -330,10 +330,10 @@ export default function PalmCompareClient({ ids }: Props) {
         {(diff.new_special_markings.length > 0 ||
           diff.lost_special_markings.length > 0) && (
           <section className="palm-section-card">
-            <h3>{tr("palm.compare.specialMarkings")}</h3>
+            <h2>{tr("palm.compare.specialMarkings")}</h2>
             <div className="palm-compare-delta-grid">
               <div className="palm-compare-marking-list palm-compare-marking-list--new">
-                <h4>{tr("palm.compare.newlyVisible")}</h4>
+                <h3>{tr("palm.compare.newlyVisible")}</h3>
                 {diff.new_special_markings.length === 0 ? (
                   <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
@@ -345,7 +345,7 @@ export default function PalmCompareClient({ ids }: Props) {
                 )}
               </div>
               <div className="palm-compare-marking-list palm-compare-marking-list--lost">
-                <h4>{tr("palm.compare.noLongerVisible")}</h4>
+                <h3>{tr("palm.compare.noLongerVisible")}</h3>
                 {diff.lost_special_markings.length === 0 ? (
                   <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
@@ -364,10 +364,10 @@ export default function PalmCompareClient({ ids }: Props) {
         {(diff.new_prominent_mounts.length > 0 ||
           diff.lost_prominent_mounts.length > 0) && (
           <section className="palm-section-card">
-            <h3>{tr("palm.compare.prominentMounts")}</h3>
+            <h2>{tr("palm.compare.prominentMounts")}</h2>
             <div className="palm-compare-delta-grid">
               <div className="palm-compare-marking-list palm-compare-marking-list--new">
-                <h4>{tr("palm.compare.newlyProminent")}</h4>
+                <h3>{tr("palm.compare.newlyProminent")}</h3>
                 {diff.new_prominent_mounts.length === 0 ? (
                   <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
@@ -379,7 +379,7 @@ export default function PalmCompareClient({ ids }: Props) {
                 )}
               </div>
               <div className="palm-compare-marking-list palm-compare-marking-list--lost">
-                <h4>{tr("palm.compare.noLongerProminent")}</h4>
+                <h3>{tr("palm.compare.noLongerProminent")}</h3>
                 {diff.lost_prominent_mounts.length === 0 ? (
                   <p className="palm-compare-empty">{tr("palm.compare.none")}</p>
                 ) : (
@@ -396,7 +396,7 @@ export default function PalmCompareClient({ ids }: Props) {
 
         {/* Summary contrast */}
         <section className="palm-section-card">
-          <h3>{tr("palm.compare.summaryContrast")}</h3>
+          <h2>{tr("palm.compare.summaryContrast")}</h2>
           <div className="palm-compare-summary-grid">
             <blockquote className="palm-compare-quote">
               <span className="palm-compare-quote-tag">
