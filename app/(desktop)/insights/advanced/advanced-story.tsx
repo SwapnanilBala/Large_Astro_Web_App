@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
+import { useHydrated } from "@/lib/use-hydrated";
 import advStyles from "./advanced.module.css";
 import type { AdvancedModuleKey } from "@/lib/engines/advanced-digest";
 
@@ -201,9 +202,9 @@ export function StoryProgress({ state }: { state: StoryState }) {
      at `matrix(1, 0, 0, 1, 0, 0)`. An identity transform still establishes a
      containing block, so the panel was laid out against a div a thousand pixels
      down the document: measured at top 1640 in a 1000px viewport, present in
-     the DOM, correct in every computed style, and entirely off screen. */
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+     the DOM, correct in every computed style, and entirely off screen.
+     The portal needs document.body, so nothing renders until hydration. */
+  const mounted = useHydrated();
 
   if (state.status !== "loading" || !mounted) return null;
 

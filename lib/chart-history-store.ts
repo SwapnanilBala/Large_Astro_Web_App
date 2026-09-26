@@ -48,6 +48,14 @@ export function readChartHistory(): ChartHistoryEntry[] {
   }
 }
 
+/** The most recently saved chart's query string, without its "?"; "" when there is none. */
+export function latestChartQuery(): string {
+  const latest = [...readChartHistory()].sort(
+    (left, right) => Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
+  )[0];
+  return latest?.queryString?.trim().replace(/^\?/, "") ?? "";
+}
+
 function writeChartHistory(entries: ChartHistoryEntry[]) {
   if (typeof window === "undefined") return;
   ensureLocalScope();

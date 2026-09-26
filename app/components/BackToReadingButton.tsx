@@ -1,8 +1,7 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
 import BackButton from "@/app/components/BackButton";
-import { readChartHistory, subscribeToChartHistory } from "@/lib/chart-history-store";
+import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 
 /*
  * "Back" on a page that hangs off the reading.
@@ -21,23 +20,6 @@ import { readChartHistory, subscribeToChartHistory } from "@/lib/chart-history-s
  * up on intake, and for them that is the right place to be.
  */
 
-/** The query of the most recently saved chart, or "" if there is none. */
-function latestChartQuery(): string {
-  const latest = [...readChartHistory()].sort(
-    (left, right) => Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
-  )[0];
-  return latest?.queryString?.trim().replace(/^\?/, "") ?? "";
-}
-
-/*
- * The store is read through useSyncExternalStore rather than an effect: it
- * lives in localStorage, so the server cannot see it, and getServerSnapshot
- * lets React render the fallback during hydration and swap in the real target
- * afterwards without a mismatch. Strings compare by value, so returning a
- * fresh one from getSnapshot does not loop.
- */
-const serverSnapshot = () => "";
-
 type BackToReadingButtonProps = {
   /** The chart query for this page, when the route already carries one. */
   queryString?: string;
@@ -52,11 +34,7 @@ export default function BackToReadingButton({
   label = "Back to your reading",
 }: BackToReadingButtonProps) {
   const own = queryString?.trim().replace(/^\?/, "") ?? "";
-  const remembered = useSyncExternalStore(
-    subscribeToChartHistory,
-    latestChartQuery,
-    serverSnapshot
-  );
+  const remembered = useLatestChartQuery();
 
   const query = own || remembered;
   const href = query ? `${path}?${query}` : "/";

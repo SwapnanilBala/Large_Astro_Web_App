@@ -130,8 +130,30 @@ export default function BirthChartTeaser({
     [name, birthDate, birthTime, country, state, city]
   );
 
-  const [sunSign, setSunSign] = useState<SunSignPreview | null>(null);
-  const [isSunSignLoading, setIsSunSignLoading] = useState(false);
+  /* The sun-sign lookup this form currently implies, or null with no date. */
+  const sunSignQuery = useMemo(() => {
+    if (!birthDate?.trim()) return null;
+    return new URLSearchParams({
+      birth_date: birthDate.trim(),
+      birth_time: birthTime?.trim() || "12:00",
+      engine_id: engineId?.trim() || "lahiri_classic",
+      timezone_offset_minutes: timezoneOffsetMinutes?.trim() || "0",
+    }).toString();
+  }, [birthDate, birthTime, engineId, timezoneOffsetMinutes]);
+
+  /*
+   * The last answer the API gave, tagged with the query it answered. Loading
+   * and the sign on show are derived from it and the shared cache rather than
+   * set from the effect: a query the cache already holds shows at once, and
+   * one in flight keeps the last answer on screen until its own arrives.
+   */
+  const [fetched, setFetched] = useState<{ query: string; preview: SunSignPreview | null } | null>(null);
+  const cachedPreview =
+    sunSignQuery !== null && sunSignPreviewCache.has(sunSignQuery)
+      ? sunSignPreviewCache.get(sunSignQuery) ?? null
+      : undefined;
+  const sunSign = sunSignQuery === null ? null : cachedPreview !== undefined ? cachedPreview : fetched?.preview ?? null;
+  const isSunSignLoading = sunSignQuery !== null && cachedPreview === undefined && fetched?.query !== sunSignQuery;
   const hasName = Boolean(name?.trim());
   const hasDate = Boolean(birthDate?.trim());
   const hasExactTime = Boolean(birthTime?.trim());
@@ -147,27 +169,10 @@ export default function BirthChartTeaser({
   const displaySunElement = sunSign ? t(`zodiacElements.${sunSign.element.toLowerCase()}`) : null;
 
   useEffect(() => {
-    if (!birthDate?.trim()) {
-      setSunSign(null);
-      setIsSunSignLoading(false);
-      return;
-    }
+    if (sunSignQuery === null || sunSignPreviewCache.has(sunSignQuery)) return;
 
     const controller = new AbortController();
-    const params = new URLSearchParams({
-      birth_date: birthDate.trim(),
-      birth_time: birthTime?.trim() || "12:00",
-      engine_id: engineId?.trim() || "lahiri_classic",
-      timezone_offset_minutes: timezoneOffsetMinutes?.trim() || "0",
-    });
-    const cacheKey = params.toString();
-    if (sunSignPreviewCache.has(cacheKey)) {
-      setSunSign(sunSignPreviewCache.get(cacheKey) ?? null);
-      setIsSunSignLoading(false);
-      return;
-    }
-
-    setIsSunSignLoading(true);
+    const cacheKey = sunSignQuery;
     fetch(`/api/chart/sun-sign?${cacheKey}`, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error("Sun sign lookup failed");
@@ -187,19 +192,16 @@ export default function BirthChartTeaser({
           const oldestKey = sunSignPreviewCache.keys().next().value;
           if (oldestKey) sunSignPreviewCache.delete(oldestKey);
         }
-        setSunSign(preview);
+        setFetched({ query: cacheKey, preview });
       })
       .catch((error) => {
         if ((error as Error).name !== "AbortError") {
-          setSunSign(null);
+          setFetched({ query: cacheKey, preview: null });
         }
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setIsSunSignLoading(false);
       });
 
     return () => controller.abort();
-  }, [birthDate, birthTime, engineId, timezoneOffsetMinutes]);
+  }, [sunSignQuery, birthTime]);
 
   const astrolabeMarkers = [
     { label: "SUN", angle: -55, radius: 33, active: hasDate, className: styles.sunMarker },

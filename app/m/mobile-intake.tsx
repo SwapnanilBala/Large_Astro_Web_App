@@ -21,6 +21,7 @@ import {
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
+import { useHydrated } from "@/lib/use-hydrated";
 import MobileBackdrop from "./mobile-backdrop";
 import styles from "./mobile.module.css";
 
@@ -67,6 +68,23 @@ type GeocodeApiResponse = {
   timeZoneId?: string;
 };
 
+type SharedDraft = {
+  draft?: Partial<ProfileQueryInput>;
+  unknownTime?: boolean;
+  coarseTime?: string;
+  autoPlace?: boolean;
+};
+
+function readSharedDraft(): SharedDraft | null {
+  try {
+    const stored = localStorage.getItem(localScopedKey(STORAGE_PREFIX));
+    return stored ? (JSON.parse(stored) as SharedDraft) : null;
+  } catch {
+    /* A corrupt draft is not worth failing the page over. */
+    return null;
+  }
+}
+
 function initialDraft(): ProfileQueryInput {
   return {
     ...profileInitialState,
@@ -96,25 +114,25 @@ export default function MobileIntake() {
   const [submitting, setSubmitting] = useState(false);
   const geoAbort = useRef<AbortController | null>(null);
 
-  /* Share the desktop draft so switching trees mid-entry does not lose work. */
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(localScopedKey(STORAGE_PREFIX));
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as {
-        draft?: Partial<ProfileQueryInput>;
-        unknownTime?: boolean;
-        coarseTime?: string;
-        autoPlace?: boolean;
-      };
-      if (parsed.draft) setDraft((prev) => ({ ...prev, ...parsed.draft }));
-      if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
-      if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
-      if (typeof parsed.autoPlace === "boolean") setAutoPlace(parsed.autoPlace);
-    } catch {
-      /* A corrupt draft is not worth failing the page over. */
-    }
-  }, []);
+  /*
+   * Share the desktop draft so switching trees mid-entry does not lose work.
+   *
+   * Restored once, in the first render after hydration. The server has no
+   * localStorage, so it and the hydrating render show the empty form, and the
+   * stored draft lands on the render after -- adjusting state during that
+   * render rather than in an effect, so it arrives before the commit instead
+   * of one commit later.
+   */
+  const hydrated = useHydrated();
+  const [draftRestored, setDraftRestored] = useState(false);
+  if (hydrated && !draftRestored) {
+    setDraftRestored(true);
+    const stored = readSharedDraft();
+    if (stored?.draft) setDraft((prev) => ({ ...prev, ...stored.draft }));
+    if (typeof stored?.unknownTime === "boolean") setUnknownTime(stored.unknownTime);
+    if (typeof stored?.coarseTime === "string") setCoarseTime(stored.coarseTime);
+    if (typeof stored?.autoPlace === "boolean") setAutoPlace(stored.autoPlace);
+  }
 
   /* Which profile this session has actually written a draft for, so an empty
      draft can tell "nothing typed yet" from "the visitor cleared the form". */

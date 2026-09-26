@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import Link from "next/link";
+import { useHydrated } from "@/lib/use-hydrated";
 import { getPalmReadingsByIds } from "@/lib/palm-readings/local-store";
 import PalmAnnotation from "@/app/(desktop)/insights/components/PalmAnnotation";
 import { computeReadingDiff, type ComputedDiff } from "@/lib/palm-readings/diff";
@@ -79,31 +80,28 @@ export default function PalmCompareClient({ ids }: Props) {
     parsedIds[0] !== parsedIds[1] &&
     parsedIds.every((id) => UUID_RE.test(id));
 
-  const [data, setData] = useState<CompareResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // ── Load both readings from the local archive ──
-  useEffect(() => {
-    setData(null);
-
-    if (!idsValid) {
-      setLoading(false);
-      setError(tr("palm.compare.errorSelectTwo"));
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
+  /*
+   * Both readings come from the local archive, which only the browser has, so
+   * nothing is read until hydration -- the server and the hydrating render
+   * both show the loading state, as the effect this replaced did. After that
+   * the comparison is a plain function of the two ids: computed during
+   * render, not copied into state from an effect.
+   */
+  const hydrated = useHydrated();
+  const comparison = useMemo(() => {
+    if (!hydrated || !idsValid) return null;
     const [a, b] = getPalmReadingsByIds([parsedIds[0], parsedIds[1]]);
-    if (!a || !b) {
-      setError(tr("palm.compare.errorNotFound"));
-    } else {
-      setData({ a, b, diff: computeReadingDiff(a, b) });
-    }
-    setLoading(false);
-  }, [idsValid, parsedIds, tr]);
+    return a && b ? { a, b, diff: computeReadingDiff(a, b) } : "not-found";
+  }, [hydrated, idsValid, parsedIds]);
+
+  const loading = idsValid && !hydrated;
+  const data: CompareResponse | null =
+    comparison && comparison !== "not-found" ? comparison : null;
+  const error = !idsValid
+    ? tr("palm.compare.errorSelectTwo")
+    : comparison === "not-found"
+      ? tr("palm.compare.errorNotFound")
+      : null;
 
   if (!idsValid) {
     return (

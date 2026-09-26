@@ -18,16 +18,19 @@
  * answer has to predate the visit for the nudge to be due.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 
 import { backfillCharts } from "@/lib/chart-sync-backfill";
 import {
   markNudgeShown,
-  readChartSyncState,
+  readChartSyncSnapshot,
   recordDecision,
   subscribeToChartSync,
   type ChartSyncState,
 } from "@/lib/chart-sync-store";
+
+/** What the server sees, and what hydration assumes: nothing read yet. */
+const nothingReadYet = (): ChartSyncState | null => null;
 
 export type ChartToSync = {
   queryString: string;
@@ -83,35 +86,38 @@ export function useChartSync(chart: ChartToSync | null): ChartSyncController {
    * React reports as a text mismatch and which broke hydration on every
    * results page. Both sides now render nothing until the answer is in hand,
    * so the first client render agrees with the HTML it is hydrating.
+   *
+   * Read through useSyncExternalStore, whose server snapshot is that `null`:
+   * the server and the hydrating render get it, and the stored answer
+   * arrives on the next render, without the effect that used to copy it into
+   * state.
    */
-  const [state, setState] = useState<ChartSyncState | null>(null);
+  const state = useSyncExternalStore(subscribeToChartSync, readChartSyncSnapshot, nothingReadYet);
   const [stored, setStored] = useState(false);
 
   /**
-   * When this view began. Anything decided after it was decided *here*, and a
-   * nudge for an answer given seconds ago is the thing this exists to prevent.
+   * The answer as it stood when this view began: the first one read.
    *
-   * State rather than a ref, and stamped on mount rather than during render.
-   * The phase is read off it, which makes it render data and so the wrong job
-   * for a ref; and reading the clock while rendering is the same impurity that
-   * the decision above was guilty of. It is set in the effect that reads the
-   * decision, which is what makes the two timestamps comparable at all — and
-   * it stays put afterwards, so a decline recorded in this view can never be
+   * A decline only earns the nudge if it was already on file then. Anything
+   * decided after that was decided *here*, and a nudge for an answer given
+   * seconds ago is the thing this exists to prevent. This used to compare
+   * the decline's timestamp with a mount time stamped in an effect; holding
+   * the first answer read says the same thing without reading the clock, and
+   * without setting state in an effect body. It is adopted once, during the
+   * render that first sees an answer, and never changes after -- so a
+   * decline recorded in this view, in this tab or another, can never be
    * mistaken for one that predates it.
    */
-  const [viewStartedAt, setViewStartedAt] = useState(0);
+  const [stateAtViewStart, setStateAtViewStart] = useState<ChartSyncState | null>(null);
+  if (state !== null && stateAtViewStart === null) {
+    setStateAtViewStart(state);
+  }
 
   /** Query strings already sent in this view, so a re-render is not a re-POST. */
   const pushed = useRef(new Set<string>());
 
   /** The wording to record as evidence, set when the visitor says yes. */
   const pendingConsent = useRef<PushBody["consent"] | null>(null);
-
-  useEffect(() => {
-    setViewStartedAt(Date.now());
-    setState(readChartSyncState());
-    return subscribeToChartSync(() => setState(readChartSyncState()));
-  }, []);
 
   useEffect(() => {
     if (state?.decision !== "granted" || !chart?.queryString) return;
@@ -230,11 +236,15 @@ export function useChartSync(chart: ChartToSync | null): ChartSyncController {
     if (state.decision === null) return "asking";
     if (state.decision === "granted") return "idle";
 
-    /* Declined. One nudge, ever, and never in the view it was declined in. */
+    /* Declined. One nudge, ever, and never in the view it was declined in:
+       it has to be the same decline that was on file when the view began. */
     if (state.nudgeShownAt) return "idle";
-    const decidedAt = state.decidedAt ? Date.parse(state.decidedAt) : 0;
-    return decidedAt && decidedAt < viewStartedAt ? "nudging" : "idle";
-  }, [chart?.queryString, state, viewStartedAt]);
+    const declinedBeforeThisView =
+      state.decidedAt !== null &&
+      stateAtViewStart?.decision === "declined" &&
+      stateAtViewStart.decidedAt === state.decidedAt;
+    return declinedBeforeThisView ? "nudging" : "idle";
+  }, [chart?.queryString, state, stateAtViewStart]);
 
   return { phase, stored, grant, decline, dismissNudge };
 }

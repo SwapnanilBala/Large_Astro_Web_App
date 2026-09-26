@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 /* 
  * Constellation star-field background with time-of-day color shifting
@@ -17,61 +17,79 @@ interface TimeOfDay {
   glowOpacity: number;
 }
 
-function getTimeOfDay(): TimeOfDay {
+type Phase = TimeOfDay["phase"];
+
+const TIME_OF_DAY: Record<Phase, TimeOfDay> = {
+  dawn: {
+    phase: "dawn",
+    accentColor: "#E8A87C", // Coral/gold
+    secondaryColor: "#F2C26C",
+    glowOpacity: 0.15,
+  },
+  day: {
+    phase: "day",
+    accentColor: "#1A7B6E", // Aqua/teal
+    secondaryColor: "#6CE1D4",
+    glowOpacity: 0.12,
+  },
+  dusk: {
+    phase: "dusk",
+    accentColor: "#B85C8A", // Rose/violet
+    secondaryColor: "#8C64DC",
+    glowOpacity: 0.15,
+  },
+  night: {
+    phase: "night",
+    accentColor: "#4A3B7A", // Deep purple/indigo
+    secondaryColor: "#1A7B6E",
+    glowOpacity: 0.18,
+  },
+};
+
+function currentPhase(): Phase {
   const hour = new Date().getHours();
-  
-  if (hour >= 5 && hour < 8) {
-    return {
-      phase: "dawn",
-      accentColor: "#E8A87C", // Coral/gold
-      secondaryColor: "#F2C26C",
-      glowOpacity: 0.15,
-    };
-  } else if (hour >= 8 && hour < 17) {
-    return {
-      phase: "day",
-      accentColor: "#1A7B6E", // Aqua/teal
-      secondaryColor: "#6CE1D4",
-      glowOpacity: 0.12,
-    };
-  } else if (hour >= 17 && hour < 20) {
-    return {
-      phase: "dusk",
-      accentColor: "#B85C8A", // Rose/violet
-      secondaryColor: "#8C64DC",
-      glowOpacity: 0.15,
-    };
-  } else {
-    return {
-      phase: "night",
-      accentColor: "#4A3B7A", // Deep purple/indigo
-      secondaryColor: "#1A7B6E",
-      glowOpacity: 0.18,
-    };
-  }
+  if (hour >= 5 && hour < 8) return "dawn";
+  if (hour >= 8 && hour < 17) return "day";
+  if (hour >= 17 && hour < 20) return "dusk";
+  return "night";
 }
 
+/* Re-read once a minute, as the interval this replaced did. */
+function subscribeToClock(onChange: () => void) {
+  const timer = setInterval(onChange, 60_000);
+  return () => clearInterval(timer);
+}
+
+/*
+ * The server renders night, and so does hydration; the visitor's own hour
+ * arrives on the next render. The server used to render the phase for its
+ * own clock -- UTC on Vercel -- which a visitor in another hour hydrated
+ * against, and a mismatched attribute is not patched, so the wrong palette
+ * could sit there until the phase next changed.
+ */
+const phaseOnTheServer = (): Phase => "night";
+
+const COARSE_POINTER = "(pointer: coarse)";
+
+/* Mobile is a coarse pointer or a narrow window. The width half is why this
+   listens to resize as well as to the pointer query. */
+function subscribeToViewport(onChange: () => void) {
+  const list = window.matchMedia(COARSE_POINTER);
+  list.addEventListener("change", onChange);
+  window.addEventListener("resize", onChange);
+  return () => {
+    list.removeEventListener("change", onChange);
+    window.removeEventListener("resize", onChange);
+  };
+}
+
+const readIsMobile = () => window.matchMedia(COARSE_POINTER).matches || window.innerWidth < 768;
+const desktopOnTheServer = () => false;
+
 export default function GradientBlobs() {
-  const [isMobile, setIsMobile] = useState(false);
-  const [timeOfDay, setTimeOfDay] = useState<TimeOfDay>(getTimeOfDay());
-
-  useEffect(() => {
-    // Update time of day
-    const updateTimeOfDay = () => setTimeOfDay(getTimeOfDay());
-    updateTimeOfDay();
-    const timeInterval = setInterval(updateTimeOfDay, 60000); // Check every minute
-
-    // Detect mobile via pointer capability (more reliable than width)
-    const mql = window.matchMedia("(pointer: coarse)");
-    setIsMobile(mql.matches || window.innerWidth < 768);
-    const handleChange = () => setIsMobile(mql.matches || window.innerWidth < 768);
-    mql.addEventListener("change", handleChange);
-
-    return () => {
-      mql.removeEventListener("change", handleChange);
-      clearInterval(timeInterval);
-    };
-  }, []);
+  const isMobile = useSyncExternalStore(subscribeToViewport, readIsMobile, desktopOnTheServer);
+  const phase = useSyncExternalStore(subscribeToClock, currentPhase, phaseOnTheServer);
+  const timeOfDay = TIME_OF_DAY[phase];
 
   const accentFill = useMemo(() => timeOfDay.accentColor, [timeOfDay]);
   const secondaryFill = useMemo(() => timeOfDay.secondaryColor, [timeOfDay]);

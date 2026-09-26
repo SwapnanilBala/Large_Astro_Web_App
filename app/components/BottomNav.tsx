@@ -1,10 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { House, Sparkles } from 'lucide-react';
 import { useTranslation } from '@/lib/i18n-context';
-import { chartHistoryKey, subscribeToChartHistory } from '@/lib/chart-history-store';
+import { useLatestChartQuery } from '@/lib/use-latest-chart-query';
 import styles from './BottomNav.module.css';
 
 const NAV_ITEMS = [
@@ -12,42 +12,11 @@ const NAV_ITEMS = [
   { href: '/insights', labelKey: 'bottomNav.insights', Icon: Sparkles },
 ];
 
-type StoredChartHistoryEntry = {
-  queryString?: unknown;
-  savedAt?: unknown;
-};
-
-function insightsUrl(queryString: unknown) {
-  if (typeof queryString !== 'string') return null;
-  const query = queryString.trim().replace(/^\?/, '');
-  return query ? `/insights?${query}` : null;
-}
-
-function latestLocalChartUrl() {
-
-  try {
-    const raw = window.localStorage.getItem(chartHistoryKey());
-    if (!raw) return null;
-
-    const entries = JSON.parse(raw) as StoredChartHistoryEntry[];
-    if (!Array.isArray(entries)) return null;
-
-    const latest = [...entries].sort((left, right) => {
-      const leftTime = typeof left.savedAt === 'string' ? Date.parse(left.savedAt) : 0;
-      const rightTime = typeof right.savedAt === 'string' ? Date.parse(right.savedAt) : 0;
-      return rightTime - leftTime;
-    })[0];
-
-    return insightsUrl(latest?.queryString);
-  } catch {
-    return null;
-  }
-}
-
 export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useTranslation();
-  const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
+  const lastChartQuery = useLatestChartQuery();
+  const lastChartUrl = lastChartQuery ? `/insights?${lastChartQuery}` : null;
   const isHidden = ["/login", "/engine-select"].some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -58,14 +27,6 @@ export default function BottomNav() {
       document.documentElement.removeAttribute("data-bottom-nav-hidden");
     };
   }, [isHidden]);
-
-  useEffect(() => {
-    setLastChartUrl(latestLocalChartUrl());
-
-    return subscribeToChartHistory(() => {
-      setLastChartUrl(latestLocalChartUrl());
-    });
-  }, [pathname]);
 
   if (isHidden) return null;
 

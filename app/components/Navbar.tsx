@@ -5,14 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
-import { readChartHistory } from "@/lib/chart-history-store";
+import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function Navbar() {
   const { account, status, signOut } = useAccount();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
-  const [lastChartUrl, setLastChartUrl] = useState<string | null>(null);
+  const lastChartQuery = useLatestChartQuery();
+  const lastChartUrl = lastChartQuery ? `/insights?${lastChartQuery}` : null;
   const [langOpen, setLangOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -32,17 +33,6 @@ export default function Navbar() {
       hamburgerRef.current?.focus({ preventScroll: true });
     });
   }, []);
-
-  useEffect(() => {
-    const entries = readChartHistory();
-    const latest = [...entries].sort(
-      (left, right) =>
-        Date.parse(right.savedAt || "") - Date.parse(left.savedAt || "")
-    )[0];
-    const queryString = latest?.queryString?.trim().replace(/^\?/, "");
-
-    setLastChartUrl(queryString ? `/insights?${queryString}` : null);
-  }, [pathname]);
 
   /* Track scroll position for glass effect */
   useEffect(() => {

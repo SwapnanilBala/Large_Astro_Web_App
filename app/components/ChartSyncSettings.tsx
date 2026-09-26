@@ -19,12 +19,12 @@
  * consent was about.
  */
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { useTranslation } from "@/lib/i18n-context";
 import { backfillCharts } from "@/lib/chart-sync-backfill";
 import {
-  readChartSyncState,
+  readChartSyncSnapshot,
   recordDecision,
   recordWithdrawal,
   subscribeToChartSync,
@@ -34,21 +34,20 @@ import styles from "./ChartSyncSettings.module.css";
 
 type Result = { tone: "ok" | "error"; message: string } | null;
 
+/** What the server sees, and what hydration assumes: nothing read yet. */
+const nothingReadYet = (): ChartSyncState | null => null;
+
 export default function ChartSyncSettings() {
   const { t } = useTranslation();
-  const [state, setState] = useState<ChartSyncState | null>(null);
+  /*
+   * The stored decision is in localStorage, which the server cannot see, so
+   * rendering it on the first paint would make the server and the client
+   * disagree. useSyncExternalStore renders the server's `null` through
+   * hydration and the stored answer on the render after.
+   */
+  const state = useSyncExternalStore(subscribeToChartSync, readChartSyncSnapshot, nothingReadYet);
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result>(null);
-
-  /*
-   * Read after mount, not during render. The stored decision is in
-   * localStorage, which the server cannot see, so rendering it directly would
-   * make the server and the client disagree on the first paint.
-   */
-  useEffect(() => {
-    setState(readChartSyncState());
-    return subscribeToChartSync(() => setState(readChartSyncState()));
-  }, []);
 
   if (!state) return null;
 

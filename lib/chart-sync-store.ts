@@ -61,6 +61,29 @@ export function readChartSyncState(): ChartSyncState {
   }
 }
 
+/*
+ * The same read, cached on the raw stored string, for useSyncExternalStore.
+ * React calls a snapshot function on every render and compares results by
+ * reference, so a fresh object each time would re-render forever; unchanged
+ * storage returns the identical object instead.
+ */
+let snapshotRaw: string | null | undefined;
+let snapshot: ChartSyncState = EMPTY;
+
+export function readChartSyncSnapshot(): ChartSyncState {
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(STORAGE_KEY);
+  } catch {
+    raw = null;
+  }
+  if (raw !== snapshotRaw) {
+    snapshotRaw = raw;
+    snapshot = readChartSyncState();
+  }
+  return snapshot;
+}
+
 function write(state: ChartSyncState) {
   if (typeof window === "undefined") return;
 

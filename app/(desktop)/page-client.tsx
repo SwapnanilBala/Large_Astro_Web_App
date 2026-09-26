@@ -33,6 +33,7 @@ import {
   type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import { useAccount } from "@/lib/use-account";
+import { useHydrated } from "@/lib/use-hydrated";
 import { localScopedKey } from "@/lib/local-scope";
 import { useTranslation } from "@/lib/i18n-context";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
@@ -174,6 +175,39 @@ function createHistoryId() {
   return globalThis.crypto?.randomUUID?.() ?? `history-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 }
 
+type SavedIntake = {
+  draft: ProfileQueryInput;
+  unknownTime?: boolean;
+  autoPlace?: boolean;
+  coarseTime?: string;
+};
+
+/** The draft this browser saved last, or null when there is none worth restoring. */
+function readSavedIntake(): SavedIntake | null {
+  try {
+    const stored = localStorage.getItem(localScopedKey(INTAKE_DRAFT_PREFIX));
+    if (!stored) return null;
+    const parsed = JSON.parse(stored) as Record<string, unknown>;
+    const savedDraft =
+      parsed.draft && typeof parsed.draft === "object"
+        ? (parsed.draft as Record<string, unknown>)
+        : parsed;
+    // Merge with current defaults so older saved drafts survive new metadata fields.
+    const keys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
+    const isValid = keys.every((k) => savedDraft[k] === undefined || typeof savedDraft[k] === "string");
+    if (!isValid) return null;
+    return {
+      draft: { ...profileInitialState, ...savedDraft } as ProfileQueryInput,
+      unknownTime: typeof parsed.unknownTime === "boolean" ? parsed.unknownTime : undefined,
+      autoPlace: typeof parsed.autoPlace === "boolean" ? parsed.autoPlace : undefined,
+      coarseTime: typeof parsed.coarseTime === "string" ? parsed.coarseTime : undefined,
+    };
+  } catch {
+    // localStorage may throw in private browsing or if data is corrupt
+    return null;
+  }
+}
+
 function parseBirthDetailsHistory(): BirthDetailsHistoryEntry[] {
   try {
     const stored = localStorage.getItem(
@@ -248,37 +282,32 @@ export default function Home() {
   const [smartFillExpanded, setSmartFillExpanded] = useState(false);
 
 
-  useEffect(() => {
-    const clientOffset = String(-new Date().getTimezoneOffset());
-    setDraft((previous) => ({ ...previous, timezoneOffsetMinutes: clientOffset }));
-  }, []);
-
-  /* ── Restore draft from localStorage on mount (runs after timezone default) ── */
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(localScopedKey(INTAKE_DRAFT_PREFIX));
-      if (!stored) return;
-      const parsed = JSON.parse(stored) as Record<string, unknown>;
-      const savedDraft =
-        parsed.draft && typeof parsed.draft === "object"
-          ? (parsed.draft as Record<string, unknown>)
-          : parsed;
-      // Merge with current defaults so older saved drafts survive new metadata fields.
-      const keys = Object.keys(profileInitialState) as Array<keyof ProfileQueryInput>;
-      const isValid = keys.every((k) => savedDraft[k] === undefined || typeof savedDraft[k] === "string");
-      if (!isValid) return;
-      setDraft({ ...profileInitialState, ...savedDraft } as ProfileQueryInput);
-      if (typeof parsed.unknownTime === "boolean") setUnknownTime(parsed.unknownTime);
-      if (typeof parsed.autoPlace === "boolean") setAutoPlace(parsed.autoPlace);
-      if (typeof parsed.coarseTime === "string") setCoarseTime(parsed.coarseTime);
-    } catch {
-      // localStorage may throw in private browsing or if data is corrupt
+  /*
+   * What only the browser knows -- its timezone offset, the saved draft and
+   * the birth-details history -- restored once, in the first render after
+   * hydration. The server has neither localStorage nor the visitor's clock,
+   * so it and the hydrating render show the defaults, and these land on the
+   * render after: adjusted during that render rather than set from three
+   * effects, so they arrive before its commit instead of one commit later.
+   */
+  const hydrated = useHydrated();
+  const [browserStateRestored, setBrowserStateRestored] = useState(false);
+  if (hydrated && !browserStateRestored) {
+    setBrowserStateRestored(true);
+    const saved = readSavedIntake();
+    if (saved) {
+      /* A saved draft replaces the defaults outright, offset included -- as
+         the restore effect used to overwrite the offset effect run before it. */
+      setDraft(saved.draft);
+      if (saved.unknownTime !== undefined) setUnknownTime(saved.unknownTime);
+      if (saved.autoPlace !== undefined) setAutoPlace(saved.autoPlace);
+      if (saved.coarseTime !== undefined) setCoarseTime(saved.coarseTime);
+    } else {
+      const clientOffset = String(-new Date().getTimezoneOffset());
+      setDraft((previous) => ({ ...previous, timezoneOffsetMinutes: clientOffset }));
     }
-  }, []);
-
-  useEffect(() => {
     setBirthDetailsHistory(parseBirthDetailsHistory());
-  }, []);
+  }
 
   /* ── Auto-save draft to localStorage (debounced 500ms) ── */
   useEffect(() => {

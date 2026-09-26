@@ -3,27 +3,14 @@
 import { type ReactNode, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
+import { useHydrated } from "@/lib/use-hydrated";
+import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import CosmicTransitionOverlay from "./CosmicTransitionOverlay";
 
 type PageTransitionProps = {
   children: ReactNode;
   className?: string;
 };
-
-/* ── Detect prefers-reduced-motion ── */
-function usePrefersReducedMotion(): boolean {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-
-  return reduced;
-}
 
 /* ── Animation variants ── */
 const DURATION = 0.4; // 400ms
@@ -92,22 +79,28 @@ const instantVariants = {
 export default function PageTransition({ children, className }: PageTransitionProps) {
   const pathname = usePathname();
   const prefersReduced = usePrefersReducedMotion();
-  const [cosmicActive, setCosmicActive] = useState(false);
+  const hydrated = useHydrated();
 
-  // Fire cosmic overlay on pathname change
+  /*
+   * The path whose cosmic overlay has run its course. The overlay is on
+   * whenever the current path is not that one -- from the render that first
+   * sees a new path until the timer below records it, 500ms later -- which is
+   * the old "on for 500ms after every navigation, and on first load" without
+   * setting state in an effect body. Off until hydration, as it always was.
+   */
+  const [settledPath, setSettledPath] = useState<string | null>(null);
   useEffect(() => {
     if (prefersReduced) return;
-    // Trigger cosmic particles on every render (which happens on navigation)
-    setCosmicActive(true);
-    const timer = setTimeout(() => setCosmicActive(false), 500);
+    const timer = setTimeout(() => setSettledPath(pathname), 500);
     return () => clearTimeout(timer);
   }, [pathname, prefersReduced]);
+  const cosmicActive = hydrated && !prefersReduced && settledPath !== pathname;
 
   const variants = prefersReduced ? instantVariants : pageVariants;
 
   return (
     <>
-      {!prefersReduced && <CosmicTransitionOverlay isActive={cosmicActive} />}
+      {!prefersReduced && <CosmicTransitionOverlay isActive={cosmicActive} seed={pathname} />}
 
       <AnimatePresence mode="wait" initial={false}>
         <motion.div
