@@ -124,8 +124,16 @@ export default function PalmCompareClient({ ids }: Props) {
   if (loading) {
     return (
       <section className="palm-history-shell">
+        {/* The comparison's own header, line for line -- kicker, title, and a
+            line held for the two dates -- so the grid below starts where the
+            real one will. With the title alone the placeholder panels sat
+            80px higher and dropped into place when the readings arrived. */}
         <header className="palm-history-header">
+          <span className="palm-kicker">{tr("palm.compare.kicker")}</span>
           <h1>{tr("palm.compare.loadingTitle")}</h1>
+          <p className="palm-history-subtitle" aria-hidden="true">
+            &nbsp;
+          </p>
         </header>
         <div className="palm-compare-grid" aria-hidden="true">
           <div className="palm-compare-side">
@@ -142,8 +150,12 @@ export default function PalmCompareClient({ ids }: Props) {
   }
 
   if (error || !data) {
+    /* Keyed, so React builds this view afresh rather than reusing the loading
+       placeholder's elements for it. Reused, the placeholder's panel became
+       the error box and was reported as moving 68px up; a message replacing a
+       placeholder is not the placeholder moving. */
     return (
-      <section className="palm-history-shell">
+      <section key="not-found" className="palm-history-shell">
         <header className="palm-history-header">
           <h1>{tr("palm.compare.title")}</h1>
         </header>

@@ -7574,6 +7574,25 @@ textarea:focus-visible {
    PALM HISTORY — list, detail, compare
    ═══════════════════════════════════════════════ */
 
+/*
+ * The shell of all three palm pages, pinned to the top rather than centred.
+ *
+ * The readings live in this browser, so the server renders a placeholder and
+ * the page fills in after hydration. Centred, that placeholder sat mid-screen
+ * and whatever replaced it moved: a saved reading, thousands of pixels tall,
+ * snapped up to the top (0.09 of layout shift, on every reading opened), and a
+ * short "not found" dropped down to the middle. Pinned, the placeholder sits
+ * where the content will start.
+ *
+ * The padding is .insights-shell.below-navbar's, for the same reason: at
+ * .home-shell's 4.5rem a tall reading started 88px down, under the 108px bar,
+ * with its date behind the bar and its title level with the back button.
+ */
+.home-shell.palm-page {
+  place-items: start center;
+  padding-top: calc(var(--navbar-h) + var(--back-btn-band) + env(safe-area-inset-top));
+}
+
 .palm-history-shell {
   width: 100%;
   max-width: 1080px;

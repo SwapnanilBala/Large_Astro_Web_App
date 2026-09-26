@@ -217,8 +217,11 @@ export default function PalmReadingDetailClient({ id }: Props) {
   }
 
   if (error || !record || !reading) {
+    /* Keyed, so React builds this view afresh rather than turning the loading
+       skeleton into it: reused, the skeleton's block became the error box and
+       was reported as a layout shift, though nothing the reader saw moved. */
     return (
-      <section className="palm-history-shell">
+      <section key="not-found" className="palm-history-shell">
         <header className="palm-history-header">
           <h1>{tr("palm.detail.errorTitle")}</h1>
         </header>
