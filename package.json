@@ -50,7 +50,10 @@
   },
   "overrides": {
     "tar": ">=7.5.11",
-    "@tootallnate/once": ">=3.0.1"
+    "@tootallnate/once": ">=3.0.1",
+    "@esbuild-kit/core-utils": {
+      "esbuild": "^0.25.4"
+    }
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",
@@ -66,6 +69,6 @@
     "jsdom": "^25.0.1",
     "tsx": "^4.23.11",
     "typescript": "^5.8.2",
-    "vitest": "^3.0.9"
+    "vitest": "^4.1.11"
   }
 }
