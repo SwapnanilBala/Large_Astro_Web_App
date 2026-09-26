@@ -496,10 +496,10 @@ function addVargottamaRule(rules: RuleDraft[], input: LifeDomainRuleInput): void
 /**
  * Neecha bhanga: the primary lord is debilitated, but the lord of the sign it
  * sits in, or the lord of its exaltation sign, is on an angle. The same two
- * conditions as neecha_bhanga_raja in yoga-engine.ts, so the reading and the
- * yoga panel agree. It sits beside the dignity rule's pressure rather than
- * erasing it -- the weakness is real -- and records that the chart carries
- * its repair.
+ * conditions as neecha_bhanga_raja in yoga/definitions/additional.ts, so the
+ * reading and the yoga panel agree. It sits beside the dignity rule's pressure
+ * rather than erasing it -- the weakness is real -- and records that the chart
+ * carries its repair.
  */
 function addDebilitationCancelledRule(rules: RuleDraft[], input: LifeDomainRuleInput): void {
   const { label, primaryLord, planets } = input;

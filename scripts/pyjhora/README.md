@@ -1,6 +1,6 @@
 # Comparing our yogas with PyJHora
 
-A local check of `lib/engines/yoga-engine.ts` against [PyJHora](https://pypi.org/project/PyJHora/), the open-source Python port of Jagannatha Hora. It runs on your own machine only. Nothing here is deployed, and the site never runs Python.
+A local check of our yoga engine — `lib/engines/yoga/`, re-exported from `lib/engines/yoga-engine.ts` — against [PyJHora](https://pypi.org/project/PyJHora/), the open-source Python port of Jagannatha Hora. It runs on your own machine only. Nothing here is deployed, and the site never runs Python.
 
 ## Run it
 

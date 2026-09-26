@@ -200,10 +200,10 @@ export const YOGA_RULES: RuleDefinitionInput[] = [
   // -------------------------------------------------------------------------
   // Pancha Mahapurusha (BPHS ch. 75): Mars, Mercury, Jupiter, Venus or Saturn
   // in its own or exaltation sign AND on an angle from the lagna. The same
-  // test as detectMahapurusha in lib/engines/yoga-engine.ts, so the reading
-  // and the yoga panel cannot disagree. Split by category the way dignity is:
-  // Bhadra (Mercury), Hamsa (Jupiter) and Sasa (Saturn) here, Ruchaka (Mars)
-  // and Malavya (Venus) in the love record below.
+  // test as detectMahapurusha in lib/engines/yoga/definitions/core.ts, so the
+  // reading and the yoga panel cannot disagree. Split by category the way
+  // dignity is: Bhadra (Mercury), Hamsa (Jupiter) and Sasa (Saturn) here,
+  // Ruchaka (Mars) and Malavya (Venus) in the love record below.
   {
     id: "yoga.mahapurusha_career",
     tier: "signature",
@@ -331,8 +331,8 @@ export const YOGA_RULES: RuleDefinitionInput[] = [
     // Kemadruma: nothing but the Sun and the nodes in the 2nd or 12th sign
     // from the Moon. Only the uncancelled form fires -- the Moon off the
     // angles, and Jupiter neither with it nor opposite -- which is the case
-    // lib/engines/yoga-engine.ts reports at full strength. The cancelled form
-    // is common and says little, so it stays in the yoga panel.
+    // lib/engines/yoga/definitions/core.ts reports at full strength. The
+    // cancelled form is common and says little, so it stays in the yoga panel.
     when: {
       op: "all",
       of: [
@@ -415,11 +415,12 @@ export const YOGA_RULES: RuleDefinitionInput[] = [
     },
 
     // The 9th lord (purpose, fortune) and the 10th lord (work) conjunct or in
-    // mutual 7th aspect. lib/engines/yoga-engine.ts also accepts a looser
-    // kendra relationship, so the yoga panel can name this yoga where the
-    // reading stays silent, never the other way round -- which is also why an
-    // exchange of houses is not counted here. Taurus rising gives both houses
-    // to Saturn, the yogakaraka, which counts as the yoga on its own.
+    // mutual 7th aspect. lib/engines/yoga/definitions/additional.ts also
+    // accepts a looser kendra relationship, so the yoga panel can name this
+    // yoga where the reading stays silent, never the other way round -- which
+    // is also why an exchange of houses is not counted here. Taurus rising
+    // gives both houses to Saturn, the yogakaraka, which counts as the yoga on
+    // its own.
     when: { op: "signDistance", from: "$lord9", to: "$lord10", oneOf: [1, 7] },
     rarity_key: "yoga.dharma_karmadhipati",
 

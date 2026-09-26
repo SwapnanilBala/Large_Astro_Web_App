@@ -3,7 +3,23 @@
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
 - Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v7`.
-- Yogas: `lib/engines/yoga-engine.ts` (205 yogas).
+- Yogas: `lib/engines/yoga-engine.ts` (205 yogas). That file is only a re-export; the code is in `lib/engines/yoga/`. `index.ts` holds the detector and the assembled list, and `definitions/` holds the 205 records in seven files, grouped by how each one is built rather than by what it means:
+
+| file | yogas | this document |
+| --- | --- | --- |
+| `definitions/core.ts` | 22 | sections 1 and 2 |
+| `definitions/generated.ts` | 50 | sections 4 to 10 |
+| `definitions/additional.ts` | 28 | section 3 |
+| `definitions/nabhasa.ts` | 30 | section 11 |
+| `definitions/classical.ts` | 64 | sections 4 to 10 |
+| `definitions/named.ts` | 6 | section 12 |
+| `definitions/navamsa.ts` | 5 | section 13 |
+
+Two of those rows need a footnote. Section 11 describes all 32 whole-chart patterns, but only 30 are in `definitions/nabhasa.ts` — Kedara and Yava were in the engine before the rest of the family arrived, and they stayed in `core.ts` rather than being moved. And sections 4 to 10 each draw on both `generated.ts` and `classical.ts`, because those two files are the same six recipe shapes filled in at different times.
+
+The supporting code sits beside them: `types.ts` (the shapes), `tables.ts` (signs, rulers and dignities), `helpers.ts` (the shared tests), `factories.ts` (the builders the recipe-based yogas run through) and `navamsa.ts` (the only place the engine reads a second chart).
+
+The order the seven files are assembled in, at the top of `index.ts`, is not cosmetic: results are sorted by strength and then by percentage, and ties fall back to that order. It is therefore the order the page lists equally-rated yogas in.
 
 Both are fully deterministic. The same birth details always give the same result. No AI model decides anything here.
 
@@ -335,8 +351,8 @@ Sub-themes are listed highest score first.
 
 ## General rules
 
-- There are **200** yogas. Each one has a fixed test.
-- Yogas are checked on the birth chart only (D1). No yoga uses the navamsa.
+- There are **205** yogas. Each one has a fixed test.
+- Most yogas are checked on the birth chart only (D1). Five also read the navamsa (D9); they are in section 13. Kurma, in section 12, accepts a strong sign in either chart.
 - Houses are whole signs counted from the Ascendant.
 - "Looks at" in this part has a simpler meaning than in Part 1. Planet A fully aspects planet B if B is in the same sign as A, or in the 5th, 7th or 9th sign from A. This is the same for every planet.
 
@@ -648,7 +664,19 @@ These look at the shape of the whole chart. They use only the seven classical pl
 - **Kusuma** (wealth): Venus is in an angle and in a fixed sign, the Moon is in the 5th or 9th house with a good planet sharing its sign or fully aspecting it, and Saturn is in the 10th house. Strength combines Venus, the Moon and Saturn.
 - **Matsya** (benefic): hard planets are in the 1st and the 9th, the 5th has both a good and a hard planet, and there is no good planet in the 4th or the 8th. An empty 4th or 8th is fine.
 - **Dhwaja** (wealth): every good planet is in the 1st house, and every classical hard planet (Sun, Mars, Saturn) is in the 8th. Strength comes from the good planets only.
-- **Kurma** (benefic): every good planet is in house 5, 6 or 7, every classical hard planet is in house 1, 3 or 11, and every one of them is in a strong sign. Always strong. The old text also allows strength in the navamsa; this engine reads only the birth chart, so that option is left out.
+- **Kurma** (benefic): every good planet is in house 5, 6 or 7, every classical hard planet is in house 1, 3 or 11, and every one of them is in a strong sign — in the birth chart or in the navamsa, which is how the old text states it. Always strong.
+
+## 13. The five yogas that read the navamsa
+
+These are the only tests that look at a second chart. The navamsa sign of a planet follows from its own sign and its degree, so nothing extra is needed for them — except for Lagna Vargottama, which needs the Ascendant's exact degree.
+
+- **Vargottama** (benefic): one or more of the seven classical planets is in the same sign in the birth chart and in the navamsa. Strength is **strong** for three or more such planets, **moderate** for two and **weak** for one. Seen in about 56% of charts, which is what the arithmetic predicts — each planet has a one-in-nine chance, and there are seven of them.
+- **Lagna Vargottama** (benefic): the Ascendant falls in the same sign in both charts. Always strong. This is the one test that needs the Ascendant's exact degree; where that is not supplied the yoga is skipped rather than guessed at. Seen in about 11% of charts, which is exactly one navamsa in nine.
+- **Kalpadruma** (wealth), also called Parijata: a chain of four — the 1st lord, the lord of the sign it sits in, the lord of the sign *that* planet sits in, and the navamsa lord of the third. Every one of the four must be in an angle or a trine **and** in a strong sign. Seen in about 2.7% of charts.
+- **Gauri** (wealth): the navamsa lord of the 10th lord is exalted and sits in the 10th house alongside the 1st lord. They must be two different planets. Always strong. Seen in about 0.08% of charts.
+- **Bharathi** (benefic): the navamsa lord of the 2nd, 5th or 11th lord is exalted and shares a sign with the 9th lord. They must be two different planets. Always strong. Seen in about 2.1% of charts.
+
+The "two different planets" conditions on Gauri and Bharathi are not decoration. Both tests ask one planet to join another, and a planet is always in its own sign — so without that check, a chart where the navamsa lord turns out to be the very lord it should be joining satisfied the test on its own. Gauri fired about three times too often and Bharathi about twice before it was added.
 
 ---
 
