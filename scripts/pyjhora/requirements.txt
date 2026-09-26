@@ -1,0 +1,15 @@
+# PyJHora plus only the packages its calculation code imports. Versions follow
+# the requirements.txt that ships inside PyJHora 4.8.7. PyQt6, pyqtgraph and
+# img2pdf are left out: they serve PyJHora's desktop window, which this
+# comparison never opens.
+PyJHora==4.8.7
+pyswisseph==2.10.3.2
+numpy==2.1.1
+pytz==2024.1
+requests==2.32.3
+geopy==2.4.1
+geocoder==1.38.1
+timezonefinder==6.5.2
+reverse_geocode==1.6.6
+# Imported by jhora/utils.py but missing from PyJHora's own list.
+python-dateutil==2.9.0.post0

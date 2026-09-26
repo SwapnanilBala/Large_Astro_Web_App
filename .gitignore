@@ -33,3 +33,8 @@ public/fonts/
 output/
 tmp/
 tsconfig.tsbuildinfo
+
+# PyJHora comparison intermediates (scripts/pyjhora). The report it writes,
+# docs/pyjhora-yoga-comparison.md, is kept.
+scripts/pyjhora/out/
+scripts/pyjhora/__pycache__/
