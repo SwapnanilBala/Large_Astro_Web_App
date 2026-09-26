@@ -3,7 +3,7 @@
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
 - Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v7`.
-- Yogas: `lib/engines/yoga-engine.ts` (200 yogas).
+- Yogas: `lib/engines/yoga-engine.ts` (205 yogas).
 
 Both are fully deterministic. The same birth details always give the same result. No AI model decides anything here.
 
@@ -213,7 +213,7 @@ The yoga lists are:
 - **Family**: all 4th-lord yogas (names starting with Sukha), all thirteen Moon yogas whose names start with Chandra, Moksha Support, all 5th-lord yogas (names starting with Vidya), Hamsa.
 - **Inheritance**: Randhra Transformation, all 2nd-lord yogas (names starting with Dhana), Dhanakaraka, Shatru Vijaya, Shatru-Vyaya Parivartana, Bhrigu-Mangal, Hamsa, Shasha.
 - **Influence**: all 3rd-lord yogas (names starting with Parakrama), 10th-lord yogas, 11th-lord yogas (Labha Upachaya, Labha Swagruhi, Labha-Dhana Sthana), Mercury yogas, Sun yogas, Dharma-Karma Parivartana, Bhadra, Hamsa.
-- **Life Cycle**: all fourteen yogas whose ids start with `lagna_` (1st-lord yogas, plus Lagna Benefic Flank and Lagna Adhi), Randhra Transformation, Vyaya Release, Moksha Support, Shatru Vijaya, Shatru-Vyaya Parivartana, Shasha.
+- **Life Cycle**: all fifteen yogas whose ids start with `lagna_` (1st-lord yogas, plus Lagna Benefic Flank, Lagna Adhi and Lagna Vargottama), Randhra Transformation, Vyaya Release, Moksha Support, Shatru Vijaya, Shatru-Vyaya Parivartana, Shasha.
 - **Travel & Destinations**: 9th-lord yogas (Bhagya Trikona, Bhagya Kendra, Bhagya-Labha Parivartana, Bhagya Swagruhi, Bhagya-Vidya Sthana), Vyaya Release, Dharma Support, Hamsa.
 
 **The current dasha.**
