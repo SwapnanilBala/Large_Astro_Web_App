@@ -4,10 +4,11 @@ import BackButton from "@/app/components/BackButton";
 import PageTransition from "@/app/components/PageTransition";
 import {
   getChartPayload,
+  getTopLifeDomainSummary,
   hasAllChartParams,
   readChartParams,
 } from "@/lib/chart-params";
-import type { ChartApiResponse } from "@/lib/astro-types";
+import type { ChartApiResponse, TopLifeDomainSummary } from "@/lib/astro-types";
 import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
@@ -51,6 +52,19 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
     initialError = error instanceof Error ? error.message : "Chart calculation failed";
   }
 
+  /* The Top Takeaways card's life area, so it is final at first paint rather
+     than swapped in (and taller) once the deferred domains arrive: see
+     getTopLifeDomainSummary. Skipped where the client would not load the
+     domains either. A failure here only costs the card its life area. */
+  let initialTopLifeDomain: TopLifeDomainSummary | null = null;
+  if (initialPayload && !initialPayload.access.locked_features.includes("life_domain_readings")) {
+    try {
+      initialTopLifeDomain = getTopLifeDomainSummary(chartParams);
+    } catch {
+      initialTopLifeDomain = null;
+    }
+  }
+
   return (
     <PageTransition>
     <div className="insights-shell below-navbar">
@@ -59,6 +73,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
         chartParams={chartParams}
         initialPayload={initialPayload}
         initialError={initialError}
+        initialTopLifeDomain={initialTopLifeDomain}
       />
     </div>
     </PageTransition>

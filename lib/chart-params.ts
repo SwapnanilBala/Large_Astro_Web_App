@@ -7,6 +7,7 @@ import { LIFE_DOMAIN_RULES_VERSION } from "@/lib/engines/rule-engine";
 import type {
   ChartApiResponse,
   LifeDomainInsightsResponse,
+  TopLifeDomainSummary,
   WeeklyEnergyResponse,
 } from "@/lib/astro-types";
 import {
@@ -141,6 +142,36 @@ export function getLifeDomainPayload(
   };
   serverCaches.lifeDomains.set(cacheKey, result);
   return result;
+}
+
+/**
+ * The strongest life area, reduced to the three strings the results page's
+ * Top Takeaways card shows.
+ *
+ * The page renders with the domains deferred, so that card used to open on
+ * "Strongest planet" and turn into the top life area once the domains arrived,
+ * which happens as the reader scrolls toward their section, long after they
+ * have scrolled past the takeaways. The longer guidance grew the row by ~30px
+ * and pushed everything they were reading down: most of /insights' layout
+ * shift. Built from getLifeDomainPayload, so it is the same record the
+ * client's later fetch ranks first, picked by the same comparator
+ * (buildTopTakeaways): the card does not change when the full insights land.
+ * Costs one cached build, ~6-14ms the first time for a chart, and warms the
+ * cache that fetch then hits.
+ */
+export function getTopLifeDomainSummary(
+  chartParams: ChartParams,
+): TopLifeDomainSummary | null {
+  const [top] = [...getLifeDomainPayload(chartParams).insights].sort(
+    (left, right) => right.confidence_score - left.confidence_score,
+  );
+  if (!top) return null;
+  return {
+    key: top.key,
+    label: top.label,
+    headline: top.display.headline,
+    guidance: top.display.guidance,
+  };
 }
 
 /**

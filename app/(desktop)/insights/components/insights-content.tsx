@@ -137,6 +137,7 @@ import type {
   ChartApiResponse,
   LifeDomainInsight,
   LifeDomainInsightsResponse,
+  TopLifeDomainSummary,
 } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
@@ -149,6 +150,8 @@ type InsightsContentProps = {
   payload: ChartApiResponse;
   birthDate: string;
   historyQs: string;
+  /** The server's pick of the strongest life area, for Top Takeaways. */
+  topLifeDomain?: TopLifeDomainSummary | null;
 };
 
 /* â”€â”€â”€ Animated Section Header â”€â”€â”€ */
@@ -628,7 +631,10 @@ function formatMonthYear(iso: string): string | null {
   });
 }
 
-function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
+function buildTopTakeaways(
+  payload: ChartApiResponse,
+  serverTopDomain: TopLifeDomainSummary | null = null,
+): TopTakeaway[] {
   const priorityRank = { high: 0, medium: 1, low: 2 };
   const sortedRules = [...payload.chart.deterministic_rules].sort(
     (left, right) =>
@@ -636,9 +642,20 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
   );
   const primaryRule = sortedRules[0];
   const dasha = payload.chart.dasha;
-  const topDomain = [...(payload.chart.life_domain_insights ?? [])].sort(
+  const loadedTopDomain = [...(payload.chart.life_domain_insights ?? [])].sort(
     (left, right) => right.confidence_score - left.confidence_score
   )[0];
+  /* The loaded domains when they are here, the server's pick of the same
+     record until then (getTopLifeDomainSummary): the two agree, so the card
+     is the same before and after the domains arrive and nothing below it
+     moves. */
+  const topDomain = loadedTopDomain
+    ? {
+        label: loadedTopDomain.label,
+        headline: loadedTopDomain.display.headline,
+        guidance: loadedTopDomain.display.guidance,
+      }
+    : serverTopDomain;
   const strongestPlanet = [...(payload.chart.shadbala ?? [])].sort(
     (left, right) => right.strengthRatio - left.strengthRatio
   )[0];
@@ -670,8 +687,8 @@ function buildTopTakeaways(payload: ChartApiResponse): TopTakeaway[] {
   if (topDomain) {
     takeaways.push({
       label: topDomain.label,
-      title: topDomain.display.headline,
-      body: topDomain.display.guidance,
+      title: topDomain.headline,
+      body: topDomain.guidance,
       /* No meta: this used to repeat topDomain.label, which is already the
          card's label, so the same words appeared twice on one card. */
       tone: "coral",
@@ -707,9 +724,15 @@ function getTakeawayToneClass(tone: TopTakeaway["tone"]) {
   return styles.takeawayGold;
 }
 
-function TopTakeawaysModule({ payload }: { payload: ChartApiResponse }) {
+function TopTakeawaysModule({
+  payload,
+  serverTopDomain,
+}: {
+  payload: ChartApiResponse;
+  serverTopDomain: TopLifeDomainSummary | null;
+}) {
   const shouldReduceMotion = useReducedMotion();
-  const takeaways = buildTopTakeaways(payload);
+  const takeaways = buildTopTakeaways(payload, serverTopDomain);
 
   return (
     <motion.section
@@ -815,6 +838,7 @@ export default function InsightsContent({
   payload,
   birthDate,
   historyQs,
+  topLifeDomain = null,
 }: InsightsContentProps) {
   const { t } = useTranslation();
   const { pushToast } = useToast();
@@ -1371,7 +1395,10 @@ export default function InsightsContent({
 
         <TodaysSkyBand transits={payload.transits} />
 
-        <TopTakeawaysModule payload={payloadWithDomainInsights} />
+        <TopTakeawaysModule
+          payload={payloadWithDomainInsights}
+          serverTopDomain={isLifeDomainLocked ? null : topLifeDomain}
+        />
 
         <motion.div
           id="chart-map"

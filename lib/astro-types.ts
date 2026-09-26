@@ -441,6 +441,18 @@ export type LifeDomainInsightsResponse = {
   insights: LifeDomainInsight[];
 };
 
+/**
+ * The strongest life area, cut down to what the results page's Top Takeaways
+ * card shows. The server sends this with the page so the card is final at first
+ * paint; the full insights (about 100KB) still load lazily for their section.
+ */
+export type TopLifeDomainSummary = {
+  key: LifeDomainKey;
+  label: string;
+  headline: string;
+  guidance: string;
+};
+
 export type EnginePresetInfo = {
   engine_id: string;
   label: string;

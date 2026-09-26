@@ -6,7 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import InsightsContent from "@/app/(desktop)/insights/components/insights-content";
 import InsightsSkeleton from "@/app/(desktop)/insights/components/insights-skeleton";
 import ErrorBoundary from "@/app/components/ErrorBoundary";
-import type { ChartApiResponse } from "@/lib/astro-types";
+import type { ChartApiResponse, TopLifeDomainSummary } from "@/lib/astro-types";
 import { chartCache, ChartCache } from "@/lib/chart-cache";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { buildChartHistoryQuery } from "@/lib/chart-params-url";
@@ -37,6 +37,8 @@ type InsightsLoaderProps = {
   chartParams: ChartParams;
   initialPayload?: ChartApiResponse | null;
   initialError?: string;
+  /** The Top Takeaways card's life area, computed with initialPayload. */
+  initialTopLifeDomain?: TopLifeDomainSummary | null;
 };
 
 function buildChartApiUrl(params: ChartParams): string {
@@ -49,6 +51,7 @@ export default function InsightsLoader({
   chartParams,
   initialPayload = null,
   initialError = "",
+  initialTopLifeDomain = null,
 }: InsightsLoaderProps) {
   const t = useRouteMessages(sharedMessages);
   const [payload, setPayload] = useState<ChartApiResponse | null>(initialPayload);
@@ -199,6 +202,7 @@ export default function InsightsLoader({
               payload={payload}
               birthDate={chartParams.birthDate}
               historyQs={historyQs}
+              topLifeDomain={initialTopLifeDomain}
             />
           </ErrorBoundary>
         </motion.div>
