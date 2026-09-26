@@ -14,7 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { ACCOUNT_LABEL_KEY, accountLabel } from "@/lib/account-label";
+import { ACCOUNT_LABEL_KEY, accountLabel, type StoredAccountLabel } from "@/lib/account-label";
 
 export type Account = {
   email: string;
@@ -35,15 +35,19 @@ type SessionResult = { status: Exclude<AccountStatus, "loading">; account: Accou
  * opened on the signed-out pill and widened by ~250px when the answer came,
  * pushing the theme and language toggles along the bar.
  *
- * It is only ever the label the navbar already puts on screen. It is written
- * when a session check says signed in, and removed when one says signed out or
- * the reader signs out, so a stale guess costs at most one shift. It is left
- * alone when the check fails (503), since that answers neither way.
+ * It is only ever the label the navbar already puts on screen, with the time
+ * it was confirmed. It is rewritten on every check that says signed in, and
+ * removed when one says signed out or the reader signs out. The pre-paint
+ * script also ignores it once it is older than a session could be
+ * (ACCOUNT_LABEL_MAX_AGE_MS), so a stale guess costs at most one shift, and
+ * only when a session is revoked early. It is left alone when the check fails
+ * (503), since that answers neither way.
  */
 function rememberAccountLabel(result: SessionResult) {
   try {
     if (result.status === "signed-in" && result.account) {
-      window.localStorage.setItem(ACCOUNT_LABEL_KEY, accountLabel(result.account));
+      const stored: StoredAccountLabel = { label: accountLabel(result.account), at: Date.now() };
+      window.localStorage.setItem(ACCOUNT_LABEL_KEY, JSON.stringify(stored));
     } else if (result.status === "signed-out") {
       window.localStorage.removeItem(ACCOUNT_LABEL_KEY);
     }

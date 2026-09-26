@@ -5766,6 +5766,22 @@ html[data-theme="light"] .autocomplete-dropdown::after {
   margin-inline: auto;
 }
 
+/* The welcome panel's stand-in (ChartHistory.tsx). It takes up room, unseen,
+   only where the pre-paint marks say signed in with no saved chart, the one
+   case the panel appears for. Anywhere else it is not there at all. */
+.chart-history-panel--pending {
+  display: none;
+  visibility: hidden;
+}
+
+html[data-account-label]:not([data-chart-history]) .chart-history-panel--pending {
+  display: block;
+}
+
+.chart-history-welcome-name::before {
+  content: ", " var(--account-label, "");
+}
+
 .chart-history-grid {
   display: grid;
   gap: 0.65rem;

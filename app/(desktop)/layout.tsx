@@ -9,7 +9,7 @@ import ViewportScaler from "@/app/components/ViewportScaler";
 import { ToastProvider } from "@/lib/toast-context";
 import DesktopLanguageProvider from "@/lib/i18n-desktop";
 import { chartHistoryKey } from "@/lib/chart-history-store";
-import { ACCOUNT_LABEL_KEY } from "@/lib/account-label";
+import { ACCOUNT_LABEL_KEY, ACCOUNT_LABEL_MAX_AGE_MS } from "@/lib/account-label";
 
 /*
  * Desktop shell.
@@ -54,11 +54,14 @@ const newsreader = Newsreader({
  *   page load, for anyone who had ever cast a chart
  *   (.navbar-chart-link--pending).
  * - data-account-label and --account-label when the last session on this
- *   device was signed in (lib/use-account.ts writes it). The account pill
- *   waits for /api/auth/session, and for a signed-in reader it used to open at
- *   the signed-out width and widen by ~250px when the answer came, on every
- *   page (.navbar-pending-account). The label reaches CSS as a string through
- *   JSON.stringify, whose quoting is also valid CSS string syntax.
+ *   device was signed in and is recent enough to still be live
+ *   (lib/use-account.ts writes it, lib/account-label.ts says how recent). The
+ *   account pill waits for /api/auth/session, and for a signed-in reader it
+ *   used to open at the signed-out width and widen by ~250px when the answer
+ *   came, on every page (.navbar-pending-account). The intake page's welcome
+ *   panel holds its room off the same mark (WelcomePanelStandIn). The label
+ *   reaches CSS as a string through JSON.stringify, whose quoting is also
+ *   valid CSS string syntax.
  *
  * A plain inline script, run by the parser before the navbar's markup exists,
  * rather than a next/script like the root layout's theme bootstrap: in the App
@@ -77,10 +80,10 @@ const NAVBAR_MARKS = `(() => {
     }
   } catch {}
   try {
-    const label = window.localStorage.getItem(${JSON.stringify(ACCOUNT_LABEL_KEY)});
-    if (label) {
+    const stored = JSON.parse(window.localStorage.getItem(${JSON.stringify(ACCOUNT_LABEL_KEY)}) || "null");
+    if (stored && typeof stored.label === "string" && stored.label && typeof stored.at === "number" && Date.now() - stored.at < ${ACCOUNT_LABEL_MAX_AGE_MS}) {
       root.dataset.accountLabel = "";
-      root.style.setProperty("--account-label", JSON.stringify(label));
+      root.style.setProperty("--account-label", JSON.stringify(stored.label));
     }
   } catch {}
 })();`;

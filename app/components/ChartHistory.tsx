@@ -25,6 +25,37 @@ type ChartHistoryProps = {
   welcomeOnly?: boolean;
 };
 
+/**
+ * An invisible copy of the welcome panel, holding its room until the panel can
+ * decide whether to appear.
+ *
+ * It appears only for a signed-in reader with no chart, and both halves of
+ * that arrive late: the session is a round trip, and the history is read after
+ * hydration and may wait on /api/sync/charts as well. On the intake page it
+ * used to arrive above the form and push the form 258px down, on every visit
+ * by a signed-in reader without a chart (0.106 CLS). CSS shows this copy only
+ * where app/(desktop)/layout.tsx marked <html> with a signed-in account label
+ * and no saved chart before first paint, which is exactly the case the panel
+ * appears for. The intake page renders it while the session is loading, and
+ * the panel below renders it while the history is. The name is drawn from the
+ * same stored label the navbar uses.
+ */
+export function WelcomePanelStandIn() {
+  const { t } = useTranslation();
+  return (
+    <section className="chart-history-panel chart-history-panel--pending" aria-hidden="true">
+      <div className="chart-history-welcome">
+        <HiOutlineSparkles className="chart-history-welcome-icon" />
+        <h2 className="chart-history-welcome-heading">
+          {t("chartHistory.welcomeHeading")}
+          <span className="chart-history-welcome-name" />!
+        </h2>
+        <p className="chart-history-welcome-text">{t("chartHistory.welcomeText")}</p>
+      </div>
+    </section>
+  );
+}
+
 /* ── Zodiac sign to planet color mapping ── */
 const SIGN_COLORS: Record<string, string> = {
   Aries: "#e74c3c",       // Mars red
@@ -192,7 +223,7 @@ export default function ChartHistory({ userName, welcomeOnly = false }: ChartHis
   }, []);
 
   if (!hydrated) {
-    return null;
+    return welcomeOnly ? <WelcomePanelStandIn /> : null;
   }
 
   const handleCardClick = (queryString: string) => {

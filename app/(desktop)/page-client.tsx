@@ -37,7 +37,7 @@ import { useHydrated } from "@/lib/use-hydrated";
 import { localScopedKey } from "@/lib/local-scope";
 import { useTranslation } from "@/lib/i18n-context";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
-import ChartHistory from "@/app/components/ChartHistory";
+import ChartHistory, { WelcomePanelStandIn } from "@/app/components/ChartHistory";
 import FormCelebration from "@/app/components/FormCelebration";
 import IntakeBackdrop from "@/app/components/IntakeBackdrop";
 import { hapticSuccess } from "@/lib/haptics";
@@ -1050,10 +1050,19 @@ export default function Home() {
         * of an account and not of a visitor. And above the form rather than
         * below it, because the sentence it carries points at the form — a
         * greeting under the thing it is pointing at is worse than no greeting.
+        *
+        * While the session is still loading, the wrapper holds the panel's
+        * stand-in, which CSS shows only for a device whose last session was
+        * signed in and which has no chart (see WelcomePanelStandIn). Anyone
+        * else gets an empty wrapper with no height, as before.
         */}
-      {accountStatus === "signed-in" && (
+      {(accountStatus === "loading" || accountStatus === "signed-in") && (
         <div className={styles.intakeWelcome}>
-          <ChartHistory userName={account?.displayName ?? undefined} welcomeOnly />
+          {accountStatus === "loading" ? (
+            <WelcomePanelStandIn />
+          ) : (
+            <ChartHistory userName={account?.displayName ?? undefined} welcomeOnly />
+          )}
         </div>
       )}
 
