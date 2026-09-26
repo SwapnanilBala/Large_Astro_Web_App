@@ -420,4 +420,179 @@ export const CORE_RULES: RuleDefinitionInput[] = [
       ],
     },
   },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "core.jupiter_on_ascendant",
+    tier: "signature",
+    category: "core",
+    priority: "medium",
+    instance_key: "core.jupiter_on_ascendant:{$jupiter.house}",
+    for_each: null,
+
+    bind: {
+      asc: { from: "ascendant" },
+      jupiter: { from: "planet", name: "Jupiter" },
+    },
+
+    // In the 1st, or reaching it by one of Jupiter's three aspects: its 9th
+    // from the 5th, its 7th from the 7th, its 5th from the 9th. Guru drishti on
+    // the lagna, the classical protection for the self. About a third of charts.
+    when: { op: "in", left: "$jupiter.house", values: [1, 5, 7, 9] },
+    rarity_key: "core.jupiter_on_ascendant",
+
+    strength: {
+      base: 0.55,
+      bonuses: [
+        { when: { op: "eq", left: "$jupiter.house", right: 1 }, add: 0.15 },
+        { when: { op: "dignity", planet: "$jupiter", is: ["exalted", "own_sign"] }, add: 0.15 },
+        { when: { op: "dignity", planet: "$jupiter", is: ["debilitated"] }, add: -0.1 },
+      ],
+    },
+
+    display: {
+      headline: "People tend to meet you with goodwill",
+      body:
+        "Jupiter -- the planet classically read as protection, good judgement and generosity -- falls directly on " +
+        "the part of your chart that describes you. In practice that tends to show up as people giving you the " +
+        "benefit of the doubt, second chances arriving when you need them, and a habit of looking for the meaning " +
+        "in a setback before looking for someone to blame. It is one of the quieter advantages a chart can carry.",
+      tension: [
+        {
+          when: { op: "dignity", planet: "$jupiter", is: ["debilitated"] },
+          text:
+            "Jupiter is in its weakest sign here, so the goodwill is real but easy to overspend: promising more " +
+            "than you can carry, or trusting a plan because it feels right rather than because it has been checked.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note:
+        "Jupiter in house {$jupiter.house} ({$jupiter.sign}): in the lagna, or aspecting it by its 5th, 7th or " +
+        "9th drishti.",
+      claims: [
+        { label: "Jupiter's house", path: "$jupiter.house", kind: "placement", format: "ordinal_house" },
+        { label: "Jupiter's sign", path: "$jupiter.sign", kind: "placement" },
+        { label: "Jupiter's dignity", path: "$jupiter.dignity", kind: "dignity", format: "dignity" },
+        { label: "Rising sign", path: "$asc.sign", kind: "placement" },
+      ],
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "core.saturn_on_ascendant",
+    tier: "signature",
+    category: "core",
+    priority: "high",
+    instance_key: "core.saturn_on_ascendant:{$saturn.sign}",
+    for_each: null,
+
+    bind: {
+      asc: { from: "ascendant" },
+      saturn: { from: "planet", name: "Saturn" },
+    },
+
+    // Saturn in the 1st house: about one chart in twelve.
+    when: { op: "eq", left: "$saturn.house", right: 1 },
+    rarity_key: "core.saturn_on_ascendant",
+
+    strength: {
+      base: 0.65,
+      // Strength is how pronounced the pattern is, not how pleasant: a
+      // dignified Saturn (Sasa, in its own signs) and a debilitated one both
+      // make it louder.
+      bonuses: [
+        { when: { op: "dignity", planet: "$saturn", is: ["exalted", "own_sign"] }, add: 0.15 },
+        { when: { op: "dignity", planet: "$saturn", is: ["debilitated"] }, add: 0.1 },
+      ],
+    },
+
+    display: {
+      headline: "You grow into yourself later than most, and more durably",
+      body:
+        "Saturn -- the planet of patience, limits and slow results -- sits on the part of your chart that " +
+        "describes you. Classically that is read as seriousness and endurance. In practice it often means being " +
+        "handed responsibility early, taking a long time to trust your own authority, and coming across as older " +
+        "or more reserved than you feel. The trade is durability: what you build, your confidence included, " +
+        "tends to last.",
+      tension: [
+        {
+          when: { op: "dignity", planet: "$saturn", is: ["debilitated"] },
+          text:
+            "Saturn is in its weakest sign here, so the patience has to be learned rather than assumed. Early " +
+            "setbacks can look like proof that effort does not pay. They are closer to the opposite: this " +
+            "placement rewards the people who keep going past the point where it stopped being enjoyable.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note: "Saturn in the lagna: house 1 in {$saturn.sign}, rising sign {$asc.sign}.",
+      claims: [
+        { label: "Saturn's sign", path: "$saturn.sign", kind: "placement" },
+        { label: "Saturn's dignity", path: "$saturn.dignity", kind: "dignity", format: "dignity" },
+        { label: "Rising sign", path: "$asc.sign", kind: "placement" },
+      ],
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "core.full_moon",
+    tier: "signature",
+    category: "core",
+    priority: "medium",
+    instance_key: "core.full_moon:{$moon.sign}",
+    for_each: null,
+
+    bind: {
+      sun: { from: "planet", name: "Sun" },
+      moon: { from: "planet", name: "Moon" },
+    },
+
+    // The Moon in the sign opposite the Sun: born at or near the full Moon,
+    // where the Moon's phase strength (paksha bala) peaks. By whole signs that
+    // is within about two and a half days of it. About one chart in twelve.
+    when: { op: "signDistance", from: "$sun", to: "$moon", oneOf: [7] },
+    rarity_key: "core.full_moon",
+
+    strength: {
+      base: 0.55,
+      bonuses: [
+        { when: { op: "dignity", planet: "$moon", is: ["exalted", "own_sign"] }, add: 0.15 },
+        { when: { op: "in", left: "$moon.house", values: [1, 4, 7, 10] }, add: 0.1 },
+      ],
+    },
+
+    display: {
+      headline: "What you feel, you tend to show",
+      body:
+        "You were born with the Moon opposite the Sun -- at or near a full Moon, the phase classically counted as " +
+        "the Moon at its strongest. The Sun describes what you are driving at and the Moon what you need, and here " +
+        "they face each other across the chart, so the pull between them is out in the open rather than buried. " +
+        "That tends to make your feelings visible and your relationships a mirror, and it gives you an unusually " +
+        "clear read on how other people are reacting to you.",
+      tension: [
+        {
+          when: { op: "always" },
+          text:
+            "The cost is swing. When what you want and what you need point different ways you feel it fully, and " +
+            "you may reach for another person to settle a question that is really between you and yourself.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note:
+        "Sun in {$sun.sign}, Moon in {$moon.sign}: the Moon is 7 signs from the Sun (purnima, paksha bala at " +
+        "its peak).",
+      claims: [
+        { label: "Sun sign", path: "$sun.sign", kind: "placement" },
+        { label: "Moon sign", path: "$moon.sign", kind: "placement" },
+        { label: "Moon's house", path: "$moon.house", kind: "placement", format: "ordinal_house" },
+      ],
+    },
+  },
 ];

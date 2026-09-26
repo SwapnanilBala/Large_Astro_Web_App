@@ -167,4 +167,275 @@ export const COMBINATION_RULES: RuleDefinitionInput[] = [
       ],
     },
   },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "combo.steady_partnership",
+    tier: "combination",
+    category: "love",
+    priority: "high",
+    instance_key: "combo.steady_partnership:{$lord7.house}:{$jupiter.house}",
+    for_each: null,
+
+    bind: {
+      h7: { from: "house", number: 7 },
+      lord7: { from: "house_lord", house: 7 },
+      venus: { from: "planet", name: "Venus" },
+      jupiter: { from: "planet", name: "Jupiter" },
+      mars: { from: "planet", name: "Mars" },
+      saturn: { from: "planet", name: "Saturn" },
+      rahu: { from: "planet", name: "Rahu" },
+      ketu: { from: "planet", name: "Ketu" },
+    },
+
+    // Four clauses, the mirror image of late_partnership. Independent
+    // estimates: 7th lord on an angle or trine ~0.5, no natural malefic in the
+    // 7th ~0.7, Jupiter in or aspecting the 7th ~0.33, Venus neither
+    // debilitated nor combust ~0.75 => roughly 9%.
+    when: {
+      op: "all",
+      of: [
+        { op: "in", left: "$lord7.house", values: [1, 4, 5, 7, 9, 10] },
+        {
+          op: "all",
+          of: [
+            { op: "neq", left: "$mars.house", right: 7 },
+            { op: "neq", left: "$saturn.house", right: 7 },
+            { op: "neq", left: "$rahu.house", right: 7 },
+            { op: "neq", left: "$ketu.house", right: 7 },
+          ],
+        },
+        { op: "in", left: "$jupiter.house", values: [1, 3, 7, 11] },
+        {
+          op: "all",
+          of: [
+            { op: "not", of: { op: "dignity", planet: "$venus", is: ["debilitated"] } },
+            { op: "eq", left: "$venus.is_combust", right: false },
+          ],
+        },
+      ],
+    },
+
+    rarity_key: "combo.steady_partnership",
+
+    strength: {
+      base: 0.68,
+      bonuses: [
+        { when: { op: "dignity", planet: "$venus", is: ["exalted", "own_sign"] }, add: 0.15 },
+        { when: { op: "eq", left: "$jupiter.house", right: 7 }, add: 0.1 },
+      ],
+    },
+
+    display: {
+      headline: "Partnership is one of the steadier parts of your chart",
+      body:
+        "Four separate signals agree here. The planet that governs your partnerships is well placed, none of the " +
+        "harder planets sit in the partnership house, Jupiter's protective influence falls on it, and Venus is in " +
+        "working order. None of that guarantees an easy relationship. What it describes is good ground: you tend " +
+        "to choose people you can build something with, conflict is more repairable than average, and a " +
+        "commitment, once made, is one of the things in your life most likely to hold.",
+      tension: [
+        {
+          when: { op: "always" },
+          text:
+            "The risk with good ground is taking it for granted. The pattern gives you a better than average " +
+            "starting point, and it still needs the ordinary maintenance every relationship does.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note:
+        "7th lord {$lord7.name} in house {$lord7.house} (kendra or trikona). No natural malefic in the 7th " +
+        "({$h7.sign}). Jupiter in house {$jupiter.house}, in or aspecting the 7th. Venus " +
+        "{$venus.dignity|dignity} in {$venus.sign}, not combust.",
+      claims: [
+        { label: "7th lord placement", path: "$lord7.house", kind: "placement", format: "ordinal_house" },
+        { label: "7th house occupants", path: "$h7.occupants", kind: "count", format: "list" },
+        {
+          label: "Jupiter placement",
+          path: "$jupiter.house",
+          kind: "placement",
+          format: "ordinal_house",
+          detail: "Jupiter reaches the 7th from the 1st, 3rd, 7th and 11th houses.",
+        },
+        { label: "Venus dignity", path: "$venus.dignity", kind: "dignity", format: "dignity" },
+      ],
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "combo.compounding_career",
+    tier: "combination",
+    category: "career",
+    priority: "high",
+    instance_key: "combo.compounding_career:{$saturn.house}:{$mars.house}",
+    for_each: null,
+
+    bind: {
+      ruler: { from: "ascendant_lord" },
+      lord10: { from: "house_lord", house: 10 },
+      mars: { from: "planet", name: "Mars" },
+      saturn: { from: "planet", name: "Saturn" },
+    },
+
+    // Four clauses. Independent estimates: Saturn in an upachaya ~0.33, Mars
+    // in an upachaya ~0.33, 10th lord on an angle or in the 11th ~0.42, chart
+    // ruler outside the 6th/8th/12th ~0.75 => roughly 3.5%.
+    when: {
+      op: "all",
+      of: [
+        { op: "in", left: "$saturn.house", values: [3, 6, 10, 11] },
+        { op: "in", left: "$mars.house", values: [3, 6, 10, 11] },
+        { op: "in", left: "$lord10.house", values: [1, 4, 7, 10, 11] },
+        { op: "notIn", left: "$ruler.house", values: [6, 8, 12] },
+      ],
+    },
+
+    rarity_key: "combo.compounding_career",
+
+    strength: {
+      base: 0.7,
+      bonuses: [
+        { when: { op: "dignity", planet: "$saturn", is: ["exalted", "own_sign"] }, add: 0.15 },
+        { when: { op: "dignity", planet: "$mars", is: ["exalted", "own_sign"] }, add: 0.1 },
+      ],
+    },
+
+    display: {
+      headline: "Your career gets stronger with every decade",
+      body:
+        "Several separate parts of this chart agree. The two planets classically tied to effort and pressure -- " +
+        "Saturn and Mars -- both sit in the chart's growth houses, the positions where hard planets improve with " +
+        "age instead of wearing you down. The planet that runs your working life is on firm ground, and the " +
+        "planet that runs your chart as a whole is not undermined. The shape this produces is slow early and " +
+        "compounding later: competition, deadlines and difficulty tend to feed the rise rather than stall it.",
+      tension: [
+        {
+          when: { op: "always" },
+          text:
+            "The early years can feel like pushing uphill while other people coast. That is the pattern working " +
+            "as described, not a sign you are in the wrong place -- the gap usually closes, and then reverses.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note:
+        "Saturn in house {$saturn.house} and Mars in house {$mars.house}, both upachaya. 10th lord " +
+        "{$lord10.name} in house {$lord10.house}. Chart ruler {$ruler.name} in house {$ruler.house}, outside " +
+        "the dusthanas.",
+      claims: [
+        {
+          label: "Saturn placement",
+          path: "$saturn.house",
+          kind: "placement",
+          format: "ordinal_house",
+          detail: "The 3rd, 6th, 10th and 11th are the growth (upachaya) houses.",
+        },
+        { label: "Mars placement", path: "$mars.house", kind: "placement", format: "ordinal_house" },
+        { label: "10th lord placement", path: "$lord10.house", kind: "placement", format: "ordinal_house" },
+        { label: "Chart ruler placement", path: "$ruler.house", kind: "placement", format: "ordinal_house" },
+      ],
+    },
+  },
+
+  // -------------------------------------------------------------------------
+  {
+    id: "combo.strong_foundation",
+    tier: "combination",
+    category: "core",
+    priority: "high",
+    instance_key: "combo.strong_foundation:{$ruler.name}:{$ruler.house}",
+    for_each: null,
+
+    bind: {
+      asc: { from: "ascendant" },
+      ruler: { from: "ascendant_lord" },
+      jupiter: { from: "planet", name: "Jupiter" },
+      mars: { from: "planet", name: "Mars" },
+      saturn: { from: "planet", name: "Saturn" },
+      rahu: { from: "planet", name: "Rahu" },
+      ketu: { from: "planet", name: "Ketu" },
+    },
+
+    // Four clauses: a classically strong lagna. Independent estimates: chart
+    // ruler dignified ~0.2, on an angle or trine ~0.5, Jupiter in or aspecting
+    // the 1st ~0.33, no natural malefic in the 1st ~0.7 => roughly 2%, before
+    // the first two correlate (a ruler in its own sign often sits in the 1st).
+    // Mars or Saturn in the 1st is allowed when it is the ruler itself -- a
+    // dignified ruler rising is the strong lagna, not an affliction of it.
+    when: {
+      op: "all",
+      of: [
+        { op: "dignity", planet: "$ruler", is: ["exalted", "own_sign"] },
+        { op: "in", left: "$ruler.house", values: [1, 4, 5, 7, 9, 10] },
+        { op: "in", left: "$jupiter.house", values: [1, 5, 7, 9] },
+        {
+          op: "all",
+          of: [
+            {
+              op: "any",
+              of: [
+                { op: "neq", left: "$mars.house", right: 1 },
+                { op: "eq", left: "$ruler.name", right: "Mars" },
+              ],
+            },
+            {
+              op: "any",
+              of: [
+                { op: "neq", left: "$saturn.house", right: 1 },
+                { op: "eq", left: "$ruler.name", right: "Saturn" },
+              ],
+            },
+            { op: "neq", left: "$rahu.house", right: 1 },
+            { op: "neq", left: "$ketu.house", right: 1 },
+          ],
+        },
+      ],
+    },
+
+    rarity_key: "combo.strong_foundation",
+
+    strength: {
+      base: 0.7,
+      bonuses: [
+        { when: { op: "dignity", planet: "$ruler", is: ["exalted"] }, add: 0.1 },
+        { when: { op: "eq", left: "$jupiter.house", right: 1 }, add: 0.1 },
+      ],
+    },
+
+    display: {
+      headline: "You have a stronger base to work from than most people",
+      body:
+        "Four separate signals agree that the part of your chart describing you is well supported. The planet " +
+        "that runs your chart is in one of its best signs and well placed, Jupiter's protective influence falls " +
+        "directly on you, and none of the harder planets sit on your ascendant to complicate it. Classically " +
+        "this is read as vitality, confidence and the capacity to recover. In practice it tends to mean you " +
+        "know roughly who you are, you bounce back from setbacks faster than you expect to, and people find " +
+        "you easier to trust than you realise.",
+      tension: [
+        {
+          when: { op: "always" },
+          text:
+            "The risk of a strong base is impatience with people who do not have one. What comes easily to you " +
+            "here is genuinely hard for others, which is worth remembering before offering advice.",
+        },
+      ],
+    },
+
+    evidence: {
+      technical_note:
+        "Chart ruler {$ruler.name} {$ruler.dignity|dignity} in {$ruler.sign}, house {$ruler.house}. Jupiter in " +
+        "house {$jupiter.house}, in or aspecting the lagna ({$asc.sign}). No natural malefic but the ruler in " +
+        "the 1st.",
+      claims: [
+        { label: "Chart ruler", path: "$ruler.name", kind: "lordship" },
+        { label: "Ruler dignity", path: "$ruler.dignity", kind: "dignity", format: "dignity" },
+        { label: "Ruler placement", path: "$ruler.house", kind: "placement", format: "ordinal_house" },
+        { label: "Jupiter placement", path: "$jupiter.house", kind: "placement", format: "ordinal_house" },
+      ],
+    },
+  },
 ];

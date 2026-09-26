@@ -58,6 +58,17 @@ export const CLASSICAL_PLANETS = [
 ];
 
 /**
+ * The house where each planet gains directional strength (dig bala): Jupiter
+ * and Mercury in the 1st (east), the Moon and Venus in the 4th (north), Saturn
+ * in the 7th (west), the Sun and Mars in the 10th (south). Precomputed into
+ * `has_directional_strength` because a rule cannot say "this planet's own
+ * target house" -- the target differs per planet, and rules do no lookups.
+ */
+export const DIRECTIONAL_STRENGTH_HOUSE: Record<string, number> = {
+  Sun: 10, Moon: 4, Mercury: 1, Venus: 4, Mars: 10, Jupiter: 1, Saturn: 7,
+};
+
+/**
  * The three category-specific planet sets, matching the legacy dignity loop's
  * dynamic category assignment (rule-engine.ts:687-689) exactly. Order within
  * each set is the classical order, so expansion is deterministic.
@@ -78,6 +89,8 @@ export type PlanetFacts = {
   dignity: PlanetDignity;
   is_retrograde: boolean;
   is_combust: boolean;
+  /** In its dig bala house (DIRECTIONAL_STRENGTH_HOUSE). Always false for the nodes. */
+  has_directional_strength: boolean;
   rules_houses: number[];
   /**
    * Whole-sign distance *to* this planet *from* each other planet, keyed by
@@ -215,6 +228,7 @@ export function buildRuleContext(
       dignity: planetDignity(p.name, p.sign),
       is_retrograde: p.is_retrograde ?? false,
       is_combust: p.is_combust ?? false,
+      has_directional_strength: DIRECTIONAL_STRENGTH_HOUSE[p.name] === p.house,
       rules_houses: rulesHouses[p.name] ?? [],
       sign_distance_from: distanceFrom,
       degree_in_sign: p.degree_in_sign,

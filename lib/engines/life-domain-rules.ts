@@ -15,7 +15,8 @@ import type {
   PlanetPosition,
 } from "./swiss-ephemeris-engine";
 
-export const LIFE_DOMAIN_RULES_VERSION = "2026-08-domain-v4";
+/* v5: kartari hemming, and the primary lord counted from its own house. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v5";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -331,6 +332,93 @@ function addOccupancyAndAspectRules(
       weight: Math.min(0.13, 0.055 + names.length * 0.025),
       summary: `${names.join(" and ")} make ${topic} more demanding; boundaries, preparation, and recovery time are part of the result.`,
       technical_note: `${names.join(", ")} occupy or cast a whole-sign aspect to primary house ${primaryHouse.house_number}.`,
+    });
+  }
+}
+
+/**
+ * Kartari ("scissors"): natural malefics in both the 12th and the 2nd from the
+ * primary house (papa kartari) squeeze it, natural benefics in both (shubha
+ * kartari) shield it -- whatever the house's own condition. Papa wins when both
+ * hold, because the constraint is the thing the reader has to plan around.
+ */
+function addKartariRules(rules: RuleDraft[], input: LifeDomainRuleInput): void {
+  const { label, primaryHouse, planets } = input;
+  const topic = domainName(label);
+  const house = primaryHouse.house_number;
+  const before = ((house + 10) % 12) + 1; // the 12th from it
+  const after = (house % 12) + 1; // the 2nd from it
+  const namesIn = (houseNumber: number, set: Set<string>) =>
+    planets
+      .filter((planet) => planet.house === houseNumber && set.has(planet.name))
+      .map((planet) => planet.name);
+
+  const maleficBefore = namesIn(before, NATURAL_MALEFICS);
+  const maleficAfter = namesIn(after, NATURAL_MALEFICS);
+  const beneficBefore = namesIn(before, NATURAL_BENEFICS);
+  const beneficAfter = namesIn(after, NATURAL_BENEFICS);
+
+  if (maleficBefore.length > 0 && maleficAfter.length > 0) {
+    addRule(rules, {
+      id: "primary_house_hemmed_malefic",
+      label: "This area is squeezed from both sides",
+      impact: "pressure",
+      weight: 0.08,
+      summary: `${topic[0].toUpperCase()}${topic.slice(1)} is boxed in by harder influences on either side, so it can feel constrained or rushed; it does best when the time and resources it needs are deliberately protected.`,
+      technical_note: `Papa kartari on house ${house}: ${maleficBefore.join(", ")} in house ${before}, ${maleficAfter.join(", ")} in house ${after}.`,
+    });
+  } else if (beneficBefore.length > 0 && beneficAfter.length > 0) {
+    addRule(rules, {
+      id: "primary_house_hemmed_benefic",
+      label: "This area is shielded on both sides",
+      impact: "support",
+      weight: 0.08,
+      summary: `${topic[0].toUpperCase()}${topic.slice(1)} is flanked by supportive influences, which tends to cushion setbacks here and make help easier to find when it is needed.`,
+      technical_note: `Shubha kartari on house ${house}: ${beneficBefore.join(", ")} in house ${before}, ${beneficAfter.join(", ")} in house ${after}.`,
+    });
+  }
+}
+
+const FROM_HOUSE_ORDINAL: Record<number, string> = { 6: "6th", 8: "8th", 12: "12th" };
+
+/**
+ * Where the primary lord sits counted from its own house, not from the
+ * ascendant -- the distinction delivery_pressure_house cannot make.
+ *
+ * A lord in the 6th, 8th or 12th from the house it rules is placed in strain
+ * relative to what it delivers. A lord in its own house, or aspecting it,
+ * guards it. Both can hold at once (Mars in the 6th from its house aspects it
+ * by its 8th): the classical reading is a strained ruler that still protects,
+ * so both are kept and the weights settle it.
+ */
+function addLordFromHouseRules(rules: RuleDraft[], input: LifeDomainRuleInput): void {
+  const { label, primaryHouse, primaryLord } = input;
+  const topic = domainName(label);
+  const house = primaryHouse.house_number;
+  const fromHouse = wholeSignDistance(house, primaryLord.house);
+
+  if (fromHouse in FROM_HOUSE_ORDINAL) {
+    addRule(rules, {
+      id: "lord_strained_from_house",
+      label: "Its ruler works from a distance",
+      impact: "pressure",
+      weight: 0.07,
+      summary: `The planet responsible for ${topic} sits in a position of strain relative to it, so results here tend to need more effort, patience or outside help than the area's promise suggests.`,
+      technical_note: `Primary lord ${primaryLord.name} in house ${primaryLord.house}, the ${FROM_HOUSE_ORDINAL[fromHouse]} from house ${house}.`,
+    });
+  }
+
+  if (primaryLord.house === house || aspectsHouse(primaryLord, house)) {
+    addRule(rules, {
+      id: "lord_guards_house",
+      label: "Its ruler watches over it",
+      impact: "support",
+      weight: 0.08,
+      summary: `The planet responsible for ${topic} looks after it directly, which classical astrology reads as protection: this area tends to recover well and to stay on your agenda.`,
+      technical_note:
+        primaryLord.house === house
+          ? `Primary lord ${primaryLord.name} occupies its own house ${house}.`
+          : `Primary lord ${primaryLord.name} in house ${primaryLord.house} aspects its own house ${house}.`,
     });
   }
 }
@@ -804,6 +892,8 @@ export function evaluateLifeDomainRules(input: LifeDomainRuleInput): {
   addDignityRule(rules, "anchor", input.anchorPlanet, input.label);
   addDeliveryRule(rules, input.primaryLord, input.label);
   addOccupancyAndAspectRules(rules, input);
+  addKartariRules(rules, input);
+  addLordFromHouseRules(rules, input);
   addConnectionRules(rules, input);
   addMatrixNatalRules(rules, input);
   addExtendedEvidenceRules(rules, input);

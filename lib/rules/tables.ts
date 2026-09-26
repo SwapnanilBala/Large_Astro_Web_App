@@ -120,6 +120,19 @@ export const PLANET_ROLE: Record<string, string> = {
   Saturn: "your discipline, patience and relationship with limits",
 };
 
+/**
+ * Each planet's Pancha Mahapurusha ("great person") yoga, by its classical
+ * name. Technical tier only: the Sanskrit is what a reader would search for to
+ * check the claim, and nothing a client needs in order to understand it.
+ */
+export const MAHAPURUSHA_NAME: Record<string, string> = {
+  Mars: "Ruchaka",
+  Mercury: "Bhadra",
+  Jupiter: "Hamsa",
+  Venus: "Malavya",
+  Saturn: "Sasa",
+};
+
 export const TABLES: Record<string, Record<string | number, string>> = {
   ascendant_insights: ASCENDANT_INSIGHTS,
   sun_sign_insights: SUN_SIGN_INSIGHTS,
@@ -129,4 +142,5 @@ export const TABLES: Record<string, Record<string | number, string>> = {
   love_insights: LOVE_INSIGHTS,
   element_style: ELEMENT_STYLE,
   planet_role: PLANET_ROLE,
+  mahapurusha_name: MAHAPURUSHA_NAME,
 };

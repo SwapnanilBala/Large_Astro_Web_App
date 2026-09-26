@@ -44,15 +44,21 @@ import { YOGA_RULES } from "./definitions/yoga";
 import { COMBINATION_RULES } from "./definitions/combination";
 
 /**
- * Bumped whenever the shape of a rule's *output* changes.
+ * Bumped whenever the shape of a rule's *output* changes -- or the rule set
+ * does, since a cached list without the new rules is as stale as one in the
+ * old shape.
  *
  * This string is embedded in every cache key that can hold rule output. Four
  * cache layers sit between the engine and the browser and none of them was
  * versioned before; without this, a payload-cache miss two hours after a deploy
  * rebuilds from day-old cached rules and republishes the old shape into a fresh
  * entry.
+ *
+ * v3: three rules added to each of the six definition files -- 23 records,
+ * because the planet-state and Mahapurusha rules split by category the way
+ * dignity does -- each one measured in rarity.json.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-08-v2";
+export const RULES_SCHEMA_VERSION = "rules-2026-09-v3";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop
