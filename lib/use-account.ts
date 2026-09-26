@@ -14,6 +14,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
+import { ACCOUNT_LABEL_KEY, accountLabel } from "@/lib/account-label";
 
 export type Account = {
   email: string;
@@ -25,6 +26,31 @@ export type AccountStatus = "loading" | "signed-in" | "signed-out" | "unavailabl
 type SessionResponse = { user: Account | null };
 
 type SessionResult = { status: Exclude<AccountStatus, "loading">; account: Account | null };
+
+/*
+ * The last signed-in account's label, kept on this device so the next page
+ * load can hold the navbar's account pill at its signed-in width before the
+ * session answers (read before first paint in app/(desktop)/layout.tsx; the
+ * pill in Navbar.tsx). Without it every page load for a signed-in reader
+ * opened on the signed-out pill and widened by ~250px when the answer came,
+ * pushing the theme and language toggles along the bar.
+ *
+ * It is only ever the label the navbar already puts on screen. It is written
+ * when a session check says signed in, and removed when one says signed out or
+ * the reader signs out, so a stale guess costs at most one shift. It is left
+ * alone when the check fails (503), since that answers neither way.
+ */
+function rememberAccountLabel(result: SessionResult) {
+  try {
+    if (result.status === "signed-in" && result.account) {
+      window.localStorage.setItem(ACCOUNT_LABEL_KEY, accountLabel(result.account));
+    } else if (result.status === "signed-out") {
+      window.localStorage.removeItem(ACCOUNT_LABEL_KEY);
+    }
+  } catch {
+    /* Storage blocked: the pill keeps opening at the signed-out width. */
+  }
+}
 
 /*
  * One /api/auth/session request per page load, however many components ask.
@@ -51,7 +77,9 @@ function requestSession(): Promise<SessionResult> {
          signed out. Keep the navbar quiet rather than claiming either. */
       if (!response.ok) return { status: "unavailable", account: null };
       const { user } = (await response.json()) as SessionResponse;
-      return { status: user ? "signed-in" : "signed-out", account: user };
+      const result: SessionResult = { status: user ? "signed-in" : "signed-out", account: user };
+      rememberAccountLabel(result);
+      return result;
     })
     .catch((): SessionResult => ({ status: "unavailable", account: null }))
     .finally(() => {
@@ -93,6 +121,7 @@ export function useAccount() {
          which is the honest answer either way. */
     }
 
+    rememberAccountLabel({ status: "signed-out", account: null });
     setAccount(null);
     setStatus("signed-out");
 

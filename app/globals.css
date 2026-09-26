@@ -3205,11 +3205,37 @@ html[data-chart-history] .navbar-chart-link--pending {
   transform: translateY(0) scale(0.97);
 }
 
-/* The stand-in Navbar.tsx renders until the session answers: the signed-out
-   pill's box, so the bar has its final height from the first paint, and none
-   of its text, so nobody already signed in sees "Sign in" flash. */
-.navbar-profile-link--pending {
+/* The stand-in Navbar.tsx renders until the session answers: the pill's box,
+   so the bar has its final height and width from the first paint, and none of
+   its text, so nobody sees "Sign in" or a name flash before the answer. */
+.navbar-profile-link--pending,
+.navbar-signout--pending {
   visibility: hidden;
+}
+
+/* Which of its two shapes the stand-in takes. The signed-out pill by default.
+   The signed-in pill, sized by this device's last account label, only where
+   app/(desktop)/layout.tsx set data-account-label before first paint. The
+   displays are the live elements' own: inline for the pill's text, and
+   inline-flex for Sign out, which is the global button rule's. */
+.navbar-pending-account {
+  display: none;
+}
+
+html[data-account-label] .navbar-pending-guest {
+  display: none;
+}
+
+html[data-account-label] .navbar-pending-account {
+  display: inline;
+}
+
+html[data-account-label] .navbar-signout.navbar-pending-account {
+  display: inline-flex;
+}
+
+.navbar-pending-label::before {
+  content: var(--account-label, "");
 }
 
 /* Sign out sits beside the profile pill rather than inside it: the pill is a

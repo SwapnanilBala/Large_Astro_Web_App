@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount } from "@/lib/use-account";
+import { accountLabel } from "@/lib/account-label";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -184,21 +185,40 @@ export default function Navbar() {
                   answer is still in flight flashes "Sign in" at someone who is
                   already signed in, on every page load.
 
-                  What stands in meanwhile is the signed-out pill, invisible.
-                  With nothing in its place the badge was an empty 18px ring:
-                  the bar grew by 30px when the answer landed, which moved the
-                  brand and both toggles down, and the pill's width pushed the
-                  toggles left. Held at the signed-out size, the bar has its
-                  final height from the first paint and only a signed-in
-                  answer changes the width. */}
+                  What stands in meanwhile is an invisible copy of the pill,
+                  sized for the likely answer. With nothing in its place the
+                  badge was an empty 18px ring: the bar grew by 30px when the
+                  answer landed, which moved the brand and both toggles down,
+                  and the pill's width pushed the toggles left. The copy carries
+                  both shapes: the signed-out pill, and the signed-in one (this
+                  device's last account label, an "Account" kicker and a Sign
+                  out button). CSS shows the second only where the inline script
+                  in app/(desktop)/layout.tsx found that label before first
+                  paint. Sign out is a real, disabled button so that it takes
+                  the global button rules' box, as the live one does. */}
               {status === "loading" ? (
-                <span className="navbar-profile-link navbar-profile-link--pending" aria-hidden="true">
-                  <strong>{t("navbar.signIn")}</strong>
-                </span>
+                <>
+                  <span className="navbar-profile-link navbar-profile-link--pending" aria-hidden="true">
+                    <strong className="navbar-pending-guest">{t("navbar.signIn")}</strong>
+                    <strong className="navbar-pending-account navbar-pending-label" />
+                    <span className="navbar-profile-switch navbar-pending-account">
+                      {t("navbar.account")}
+                    </span>
+                  </span>
+                  <button
+                    type="button"
+                    className="navbar-signout navbar-signout--pending navbar-pending-account"
+                    aria-hidden="true"
+                    tabIndex={-1}
+                    disabled
+                  >
+                    {t("navbar.signOut")}
+                  </button>
+                </>
               ) : (
                 <Link href="/login" className="navbar-profile-link">
                   <strong>
-                    {account ? account.displayName ?? account.email : t("navbar.signIn")}
+                    {account ? accountLabel(account) : t("navbar.signIn")}
                   </strong>
                   {account && (
                     <span className="navbar-profile-switch">{t("navbar.account")}</span>
@@ -286,7 +306,7 @@ export default function Navbar() {
         <div className="drawer-auth">
           <div className="drawer-user-info">
             <strong className="drawer-username">
-              {account ? account.displayName ?? account.email : t("navbar.signIn")}
+              {account ? accountLabel(account) : t("navbar.signIn")}
             </strong>
             {/* The email is worth repeating here even when it is also the name
                 above: on a handset this drawer is the only place the account is
