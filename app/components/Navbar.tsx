@@ -6,12 +6,14 @@ import { usePathname } from "next/navigation";
 import { useAccount } from "@/lib/use-account";
 import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@/lib/i18n-context";
 import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
+import { useHydrated } from "@/lib/use-hydrated";
 import ThemeToggle from "@/app/components/ThemeToggle";
 
 export default function Navbar() {
   const { account, status, signOut } = useAccount();
   const { language, setLanguage, t } = useTranslation();
   const pathname = usePathname();
+  const hydrated = useHydrated();
   const lastChartQuery = useLatestChartQuery();
   const lastChartUrl = lastChartQuery ? `/insights?${lastChartQuery}` : null;
   const [langOpen, setLangOpen] = useState(false);
@@ -161,16 +163,39 @@ export default function Navbar() {
           {/* Desktop profile section - hidden on mobile */}
           <div className="navbar-desktop-auth">
             <div className="user-badge">
-              {lastChartUrl && (
+              {/* The history is only readable after hydration, so until then
+                  an invisible copy holds the link's place -- but only where the
+                  inline script in app/(desktop)/layout.tsx found a saved chart
+                  before first paint; everywhere else CSS removes it. Gone once
+                  hydrated either way, so a stale mark cannot leave a gap. */}
+              {lastChartUrl ? (
                 <Link href={lastChartUrl} className="navbar-chart-link">
                   {t("navbar.myChart")}
                 </Link>
+              ) : (
+                !hydrated && (
+                  <span className="navbar-chart-link navbar-chart-link--pending" aria-hidden="true">
+                    {t("navbar.myChart")}
+                  </span>
+                )
               )}
-              {/* Rendered only once the session is known. "loading" and
-                  "signed out" look identical here, so showing the signed-out
-                  state while the answer is still in flight flashes "Sign in" at
-                  someone who is already signed in, on every page load. */}
-              {status !== "loading" && (
+              {/* The link waits for the session. "loading" and "signed out"
+                  look identical here, so showing the signed-out state while the
+                  answer is still in flight flashes "Sign in" at someone who is
+                  already signed in, on every page load.
+
+                  What stands in meanwhile is the signed-out pill, invisible.
+                  With nothing in its place the badge was an empty 18px ring:
+                  the bar grew by 30px when the answer landed, which moved the
+                  brand and both toggles down, and the pill's width pushed the
+                  toggles left. Held at the signed-out size, the bar has its
+                  final height from the first paint and only a signed-in
+                  answer changes the width. */}
+              {status === "loading" ? (
+                <span className="navbar-profile-link navbar-profile-link--pending" aria-hidden="true">
+                  <strong>{t("navbar.signIn")}</strong>
+                </span>
+              ) : (
                 <Link href="/login" className="navbar-profile-link">
                   <strong>
                     {account ? account.displayName ?? account.email : t("navbar.signIn")}

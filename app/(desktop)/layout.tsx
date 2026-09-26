@@ -8,6 +8,7 @@ import FreeUsagePrompt from "@/app/components/FreeUsagePrompt";
 import ViewportScaler from "@/app/components/ViewportScaler";
 import { ToastProvider } from "@/lib/toast-context";
 import DesktopLanguageProvider from "@/lib/i18n-desktop";
+import { chartHistoryKey } from "@/lib/chart-history-store";
 
 /*
  * Desktop shell.
@@ -42,6 +43,31 @@ const newsreader = Newsreader({
   variable: "--font-newsreader",
 });
 
+/*
+ * Marks <html> when this browser holds a saved chart, so the navbar can keep
+ * the "My Chart" link's place until the history is readable (Navbar.tsx,
+ * .navbar-chart-link--pending). The link comes from localStorage, so the server
+ * renders without it; it used to arrive after hydration and push the theme and
+ * language toggles 145px left on every page load, for anyone who had ever cast
+ * a chart.
+ *
+ * A plain inline script, run by the parser before the navbar's markup exists,
+ * rather than a next/script like the root layout's theme bootstrap: in the App
+ * Router beforeInteractive is queued on self.__next_s and run once the runtime's
+ * chunks load, which races the first paint (measured locally: a first paint at
+ * 32ms, the queued theme switch at 69ms). CSP permits it; 'unsafe-inline' is the
+ * concession next.config.ts already documents. The attribute it adds to <html>
+ * is covered by the suppressHydrationWarning the root layout already sets there.
+ */
+const CHART_HISTORY_MARK = `(() => {
+  try {
+    const saved = JSON.parse(window.localStorage.getItem(${JSON.stringify(chartHistoryKey())}) || "[]");
+    if (Array.isArray(saved) && saved.some((entry) => entry && typeof entry.name === "string" && typeof entry.queryString === "string" && entry.queryString.trim())) {
+      document.documentElement.dataset.chartHistory = "";
+    }
+  } catch {}
+})();`;
+
 export default function DesktopLayout({
   children,
 }: Readonly<{
@@ -49,6 +75,7 @@ export default function DesktopLayout({
 }>) {
   return (
     <div className={`${cinzel.variable} ${newsreader.variable}`}>
+      <script dangerouslySetInnerHTML={{ __html: CHART_HISTORY_MARK }} />
       <a href="#main-content" className="skip-nav">
         Skip to main content
       </a>

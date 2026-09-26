@@ -2905,6 +2905,18 @@ label:has(.autocomplete-wrapper.is-open) {
   transform: translateY(0) scale(0.97);
 }
 
+/* The copy Navbar.tsx renders in the link's place until the chart history can
+   be read. It takes room only where app/(desktop)/layout.tsx marked <html>
+   before first paint; for a first-time visitor it is not there at all. */
+.navbar-chart-link--pending {
+  display: none;
+  visibility: hidden;
+}
+
+html[data-chart-history] .navbar-chart-link--pending {
+  display: inline;
+}
+
 /* ── Site Navbar ────────────────────────────────── */
 
 /* The navbar is fixed and 108px tall at desktop sizes (1rem padding top and
@@ -3191,6 +3203,13 @@ label:has(.autocomplete-wrapper.is-open) {
 
 .navbar-profile-link:active {
   transform: translateY(0) scale(0.97);
+}
+
+/* The stand-in Navbar.tsx renders until the session answers: the signed-out
+   pill's box, so the bar has its final height from the first paint, and none
+   of its text, so nobody already signed in sees "Sign in" flash. */
+.navbar-profile-link--pending {
+  visibility: hidden;
 }
 
 /* Sign out sits beside the profile pill rather than inside it: the pill is a

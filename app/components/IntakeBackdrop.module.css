@@ -22,11 +22,22 @@
 /* ── Soft colour fields ──────────────────────────────────────────────────
    Four washes, placed off the corners so their centres — the only part that
    carries real saturation — sit outside the frame and only the falloff
-   reaches the page. */
+   reaches the page.
+
+   The top edge is a length, not the -10% the other three sides use. A
+   percentage top is a tenth of this layer's height, which is the page's, so
+   whenever the page settled to a new height the whole wash moved with it. A
+   returning visitor's saved draft does exactly that on load (the "add your
+   name" hint drops out and the form is 52px shorter), and a layer this size
+   moving by 5px is a layout shift over the entire viewport. The browser
+   scores a frame as the area that moved times the furthest anything moved,
+   so this wash supplied the whole screen and the navbar's toggles, settling
+   in the same frame, supplied the distance: up to 0.18 of CLS. 6rem is about
+   where -10% sat on a desktop-height page. */
 .backdrop::before {
   content: "";
   position: absolute;
-  inset: -10%;
+  inset: -6rem -10% -10%;
   background:
     radial-gradient(circle at 8% 2%, rgba(232, 200, 154, 0.13), transparent 42%),
     radial-gradient(circle at 94% 88%, rgba(74, 171, 158, 0.12), transparent 44%),
