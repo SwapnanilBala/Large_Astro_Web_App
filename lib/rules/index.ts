@@ -57,8 +57,15 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * v3: three rules added to each of the six definition files -- 23 records,
  * because the planet-state and Mahapurusha rules split by category the way
  * dignity does -- each one measured in rarity.json.
+ *
+ * v4: no rule changed. The yoga engine gained a hundred definitions, and
+ * detectYogas output rides inside both the chart and life-domain payloads,
+ * which key on this string -- so a chart cached before the deploy would serve
+ * the old list of yogas for the rest of its hour. rarity.json is untouched:
+ * yogas are scored by the engine's own occurrence_chance and have never had
+ * rarity keys.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-09-v3";
+export const RULES_SCHEMA_VERSION = "rules-2026-09-v4";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop
