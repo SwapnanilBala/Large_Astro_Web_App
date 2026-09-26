@@ -2393,15 +2393,34 @@
   flex-wrap: wrap;
 }
 
+/* The aqua-to-gold rim is a ::before masked to a 1px ring, the way the sign-in
+   panel draws its own. It used to be the padding-box/border-box background
+   trick, which only works over an opaque fill: --surface is 6% opaque, so the
+   gradient showed through the whole card. The aqua heading sat on aqua, about
+   1:1, and the body copy on a bright wash, in both themes, on every saved
+   reading, the fresh one on /insights and both sides of a comparison. */
 .palm-summary-card {
+  position: relative;
   border-radius: 14px;
   padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.04);
   border: 1px solid transparent;
-  background-image: linear-gradient(var(--surface), var(--surface)),
-    linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
-  background-origin: border-box;
-  background-clip: padding-box, border-box;
+  background-color: rgba(255, 255, 255, 0.04);
+  background-image: linear-gradient(var(--surface), var(--surface));
+}
+
+.palm-summary-card::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent-aqua), var(--accent-gold));
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
 }
 
 .palm-summary-card h3 {
