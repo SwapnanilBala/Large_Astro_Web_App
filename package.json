@@ -55,7 +55,8 @@
     "@tootallnate/once": ">=3.0.1",
     "@esbuild-kit/core-utils": {
       "esbuild": "^0.25.4"
-    }
+    },
+    "eslint-plugin-react-hooks": "7.0.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.6.3",

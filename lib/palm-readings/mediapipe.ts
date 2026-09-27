@@ -11,7 +11,7 @@
  * fails when the dependency moves and this does not, so a bump cannot quietly
  * leave the two halves on different releases.
  */
-export const MEDIAPIPE_WASM_VERSION = "0.10.32";
+export const MEDIAPIPE_WASM_VERSION = "0.10.35";
 
 export const MEDIAPIPE_WASM_BASE =
   `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${MEDIAPIPE_WASM_VERSION}/wasm`;
