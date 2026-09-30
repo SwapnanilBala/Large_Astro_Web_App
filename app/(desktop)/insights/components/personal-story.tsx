@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { Download, Loader2, Sparkles } from "lucide-react";
 import type { ChartApiResponse } from "@/lib/astro-types";
@@ -13,6 +13,7 @@ import {
   buildStoryProseFacts,
   parseStoryProse,
 } from "@/lib/story-prose";
+import { useHydrated } from "@/lib/use-hydrated";
 import styles from "./personal-story.module.css";
 
 export type PersonalStoryProps = {
@@ -87,8 +88,7 @@ export default function PersonalStory({
 }: PersonalStoryProps) {
   const [stage, setStage] = useState<GenerationStage>("idle");
   /* The dialog is portalled, so it cannot render until there is a document. */
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const mounted = useHydrated();
   const previewStory = useMemo(() => buildPersonalStory(payload), [payload]);
 
   const handleDownload = useCallback(async () => {

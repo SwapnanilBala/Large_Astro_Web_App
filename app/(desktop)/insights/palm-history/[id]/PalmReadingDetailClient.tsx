@@ -11,6 +11,7 @@ import type {
   PalmReadingRecord,
 } from "@/lib/palm-readings/types";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { useHydrated } from "@/lib/use-hydrated";
 import palmMessages from "@/messages/en.palm.json";
 
 /* ──────────────────────────────────────────────────────────
@@ -90,13 +91,28 @@ type Props = { id: string };
 
 export default function PalmReadingDetailClient({ id }: Props) {
   const tr = useRouteMessages(palmMessages);
+  const hydrated = useHydrated();
   const [record, setRecord] = useState<PalmReadingRecord | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  /* Which id `record` was read for. */
+  const [loadedId, setLoadedId] = useState<string | null>(null);
 
   // Editable title / notes state
   const [titleDraft, setTitleDraft] = useState("");
   const [notesDraft, setNotesDraft] = useState("");
+
+  // ── Load the reading from the local archive ──
+  /* Browser storage, so read once hydration is over, and once per id: during
+     render, where an effect used to do it a commit late -- and again on every
+     language switch, which also threw away a half-typed title or note. */
+  if (hydrated && loadedId !== id) {
+    const found = getPalmReading(id);
+    setLoadedId(id);
+    setRecord(found);
+    setTitleDraft(found?.title ?? "");
+    setNotesDraft(found?.notes ?? "");
+  }
+  const loading = loadedId !== id;
+  const error = !loading && !record ? tr("palm.detail.notFound") : null;
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleSaveState, setTitleSaveState] =
     useState<"idle" | "saving" | "saved" | "error">("idle");
@@ -117,21 +133,6 @@ export default function PalmReadingDetailClient({ id }: Props) {
     }),
     [tr],
   );
-
-  // ── Load the reading from the local archive ──
-  useEffect(() => {
-    setError(null);
-
-    const found = getPalmReading(id);
-    if (!found) {
-      setError(tr("palm.detail.notFound"));
-    } else {
-      setRecord(found);
-      setTitleDraft(found.title ?? "");
-      setNotesDraft(found.notes ?? "");
-    }
-    setLoading(false);
-  }, [id, tr]);
 
   useEffect(() => {
     if (editingTitle) {

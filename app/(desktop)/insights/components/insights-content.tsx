@@ -16,6 +16,7 @@ import PersonalStory from "@/app/(desktop)/insights/components/personal-story";
    where a lazy gate is exactly what made Major Life Shifts feel slow. */
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import styles from "../insights.module.css";
+import { useHydrated } from "@/lib/use-hydrated";
 import SectionGateway from "./section-gateway";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import TodaysSkyBand from "./todays-sky-band";
@@ -195,6 +196,30 @@ function GatewaySection({
   );
 }
 
+/* How a section should open once the browser is there to ask: open when the
+   URL's hash points at it, else as the reader last left it, else null for
+   "keep the default". */
+function readRestoredOpen(
+  id: string | undefined,
+  openForHash: string | undefined,
+  persistKey: string | undefined,
+): boolean | null {
+  const hashId = window.location.hash.replace("#", "");
+  if ((Boolean(id) && hashId === id) || (Boolean(openForHash) && hashId === openForHash)) {
+    return true;
+  }
+  if (!persistKey) return null;
+
+  try {
+    const storedState = window.localStorage.getItem(persistKey);
+    if (storedState === "open") return true;
+    if (storedState === "closed") return false;
+  } catch {
+    // Ignore storage failures so results still render in private contexts.
+  }
+  return null;
+}
+
 function CollapsibleSection({
   id,
   title,
@@ -225,7 +250,18 @@ function CollapsibleSection({
   summary?: React.ReactNode;
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const [hasRestored, setHasRestored] = useState(false);
+  const hydrated = useHydrated();
+  /* A deep link, or the reader's stored choice, applied once hydration is
+     over and again for each new key (the stored keys are per chart) --
+     during render, where an effect used to do it a commit late. */
+  const restoreKey = `${id ?? ""}|${openForHash ?? ""}|${persistKey ?? ""}`;
+  const [restoredFor, setRestoredFor] = useState<string | null>(null);
+  if (hydrated && restoredFor !== restoreKey) {
+    setRestoredFor(restoreKey);
+    const restored = readRestoredOpen(id, openForHash, persistKey);
+    if (restored !== null) setIsOpen(restored);
+  }
+  const hasRestored = restoredFor === restoreKey;
   const shouldReduceMotion = useReducedMotion();
   const contentIdBase =
     (id ?? persistKey ?? title)
@@ -233,37 +269,6 @@ function CollapsibleSection({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "") || "section";
   const contentId = `${contentIdBase}-content`;
-
-  useEffect(() => {
-    const hashId = window.location.hash.replace("#", "");
-    const isDeepLinked =
-      (Boolean(id) && hashId === id) ||
-      (Boolean(openForHash) && hashId === openForHash);
-
-    if (isDeepLinked) {
-      setIsOpen(true);
-      setHasRestored(true);
-      return;
-    }
-
-    if (!persistKey) {
-      setHasRestored(true);
-      return;
-    }
-
-    try {
-      const storedState = window.localStorage.getItem(persistKey);
-      if (storedState === "open") {
-        setIsOpen(true);
-      } else if (storedState === "closed") {
-        setIsOpen(false);
-      }
-    } catch {
-      // Ignore storage failures so results still render in private contexts.
-    } finally {
-      setHasRestored(true);
-    }
-  }, [defaultOpen, id, openForHash, persistKey]);
 
   useEffect(() => {
     if (!id && !openForHash) return;
@@ -830,6 +835,10 @@ function LifeDomainErrorState({
 
 type DomainLoadState = "idle" | "loading" | "ready" | "error";
 
+/* One empty set for every "no life areas" answer. The selection follows the
+   set's identity, so a fresh [] each render would reset it on every render. */
+const NO_DOMAIN_INSIGHTS: LifeDomainInsight[] = [];
+
 /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
    MAIN INSIGHTS DASHBOARD (BENTO GRID LAYOUT)
    â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
@@ -882,10 +891,36 @@ export default function InsightsContent({
   // details, so an unscoped key would leave one profile's charts listed in
   // storage for the next person on the device.
   const sectionStateScope = `${localScopedKey("astro_insights_section_state")}:${historyQs}`;
-  const initialDomainInsights = payload.chart.life_domain_insights ?? [];
-  const [domainInsights, setDomainInsights] = useState<LifeDomainInsight[]>(
-    initialDomainInsights
-  );
+  /*
+   * The life areas: the payload's own when it carries them, otherwise a set
+   * fetched once the section nears the viewport. Derived from which request a
+   * fetched set answers, rather than copied into state by an effect, so a new
+   * payload or a retry shows the right state in the same render.
+   */
+  const suppliedDomainInsights = payload.chart.life_domain_insights ?? NO_DOMAIN_INSIGHTS;
+  const hasSuppliedDomainInsights = suppliedDomainInsights.length > 0;
+  const [domainRetryToken, setDomainRetryToken] = useState(0);
+  const domainFetchKey = `${historyQs}#${domainRetryToken}`;
+  /* Written only by the observer and the fetch below. */
+  const [domainFetch, setDomainFetch] = useState<
+    | { key: string; status: "loading" }
+    | { key: string; status: "ready"; insights: LifeDomainInsight[] }
+    | { key: string; status: "error"; error: string }
+    | null
+  >(null);
+  const currentDomainFetch =
+    !hasSuppliedDomainInsights && !isLifeDomainLocked && domainFetch?.key === domainFetchKey
+      ? domainFetch
+      : null;
+  const domainInsights = hasSuppliedDomainInsights
+    ? suppliedDomainInsights
+    : currentDomainFetch?.status === "ready"
+      ? currentDomainFetch.insights
+      : NO_DOMAIN_INSIGHTS;
+  const domainLoadState: DomainLoadState = hasSuppliedDomainInsights
+    ? "ready"
+    : currentDomainFetch?.status ?? "idle";
+  const domainLoadError = currentDomainFetch?.status === "error" ? currentDomainFetch.error : "";
   const rankedDomainInsights = [...domainInsights].sort(
     (left, right) => right.confidence_score - left.confidence_score
   );
@@ -951,16 +986,7 @@ export default function InsightsContent({
   };
   const [selectedDomainKey, setSelectedDomainKey] = useState<
     LifeDomainInsight["key"]
-  >(
-    [...initialDomainInsights].sort(
-      (left, right) => right.confidence_score - left.confidence_score
-    )[0]?.key ?? "love_life"
-  );
-  const [domainLoadState, setDomainLoadState] = useState<DomainLoadState>(
-    initialDomainInsights.length > 0 ? "ready" : "idle"
-  );
-  const [domainLoadError, setDomainLoadError] = useState("");
-  const [domainRetryToken, setDomainRetryToken] = useState(0);
+  >(rankedDomainInsights[0]?.key ?? "love_life");
   const domainSectionRef = useRef<HTMLDivElement>(null);
   /* Written briefs, keyed by domain. The engine's display.body stays on screen
      until one arrives and stays for good if none does, so this is additive:
@@ -968,14 +994,39 @@ export default function InsightsContent({
   const [domainBriefs, setDomainBriefs] = useState<
     Partial<Record<LifeDomainInsight["key"], string>>
   >({});
-  const [domainBriefPending, setDomainBriefPending] = useState(false);
+  /* The domain whose brief request came back empty. Cleared by choosing a
+     domain, so going back to one asks again, as it always has. */
+  const [domainBriefFailedFor, setDomainBriefFailedFor] = useState<
+    LifeDomainInsight["key"] | null
+  >(null);
   /* Latched once the endpoint reports the feature is not configured. Without
      it a deployment with no ANTHROPIC_API_KEY fires one doomed request per tab
      click -- seven per reader, every reader, for a paragraph that was never
      going to arrive. The engine's body is the answer in that case, and asking
      again cannot change it. */
   const [domainBriefsOffline, setDomainBriefsOffline] = useState(false);
-  const domainBriefAbortRef = useRef<AbortController | null>(null);
+  /* A brief is out for the open domain while it has neither arrived nor
+     failed. Derived, where it used to be set as the request started. */
+  const domainBriefPending =
+    domainLoadState === "ready" &&
+    Boolean(selectedDomainKey) &&
+    !domainBriefsOffline &&
+    !domainBriefs[selectedDomainKey] &&
+    domainBriefFailedFor !== selectedDomainKey;
+
+  /* A new set of life areas opens on its strongest, as it always has. Adjusted
+     during render, where an effect used to do it a commit late. */
+  const [selectionMadeFor, setSelectionMadeFor] = useState(domainInsights);
+  if (selectionMadeFor !== domainInsights) {
+    setSelectionMadeFor(domainInsights);
+    if (rankedDomainInsights[0]) setSelectedDomainKey(rankedDomainInsights[0].key);
+    setDomainBriefFailedFor(null);
+  }
+  const selectDomain = (key: LifeDomainInsight["key"]) => {
+    if (key === selectedDomainKey) return;
+    setSelectedDomainKey(key);
+    setDomainBriefFailedFor(null);
+  };
 
   /*
    * Warm the Major Life Shifts chunk while the visitor is still at the top of
@@ -1004,30 +1055,15 @@ export default function InsightsContent({
   }, []);
 
   useEffect(() => {
-    const suppliedInsights = payload.chart.life_domain_insights ?? [];
-    if (suppliedInsights.length > 0) {
-      const topDomain = [...suppliedInsights].sort(
-        (left, right) => right.confidence_score - left.confidence_score
-      )[0];
-      setDomainInsights(suppliedInsights);
-      if (topDomain) setSelectedDomainKey(topDomain.key);
-      setDomainLoadError("");
-      setDomainLoadState("ready");
-      return;
-    }
+    if (hasSuppliedDomainInsights || isLifeDomainLocked) return;
 
-    setDomainInsights([]);
-    setDomainLoadError("");
-    setDomainLoadState("idle");
-    if (isLifeDomainLocked) return;
-
+    const key = domainFetchKey;
     const controller = new AbortController();
     let requested = false;
 
     const loadLifeDomains = async () => {
       if (requested) return;
       requested = true;
-      setDomainLoadState("loading");
 
       try {
         const response = await fetch(`/api/chart/life-domains?${historyQs}`, {
@@ -1044,25 +1080,24 @@ export default function InsightsContent({
         }
         if (controller.signal.aborted) return;
 
-        const topDomain = [...result.insights].sort(
-          (left, right) => right.confidence_score - left.confidence_score
-        )[0];
-        setDomainInsights(result.insights);
-        if (topDomain) setSelectedDomainKey(topDomain.key);
-        setDomainLoadState("ready");
+        setDomainFetch({ key, status: "ready", insights: result.insights });
       } catch (error) {
         if (controller.signal.aborted) return;
-        setDomainLoadError(
-          error instanceof Error
-            ? error.message
-            : "We could not complete the domain formulas."
-        );
-        setDomainLoadState("error");
+        setDomainFetch({
+          key,
+          status: "error",
+          error:
+            error instanceof Error
+              ? error.message
+              : "We could not complete the domain formulas.",
+        });
       }
     };
 
     const section = domainSectionRef.current;
     if (!section || typeof IntersectionObserver === "undefined") {
+      /* Nothing to wait on, so ask now. The panel keeps its queued copy until
+         the answer lands, rather than being marked loading from in here. */
       void loadLifeDomains();
       return () => controller.abort();
     }
@@ -1071,6 +1106,7 @@ export default function InsightsContent({
       ([entry]) => {
         if (!entry.isIntersecting) return;
         observer.disconnect();
+        setDomainFetch({ key, status: "loading" });
         void loadLifeDomains();
       },
       { rootMargin: "250px 0px" }
@@ -1081,7 +1117,7 @@ export default function InsightsContent({
       observer.disconnect();
       controller.abort();
     };
-  }, [domainRetryToken, historyQs, isLifeDomainLocked, payload.chart.life_domain_insights]);
+  }, [domainFetchKey, hasSuppliedDomainInsights, historyQs, isLifeDomainLocked]);
 
   /*
    * Ask for a written brief for whichever life area is open.
@@ -1099,17 +1135,12 @@ export default function InsightsContent({
    * response wins and lands its paragraph under a different area's heading.
    */
   useEffect(() => {
-    if (domainLoadState !== "ready") return;
-    if (!selectedDomainKey) return;
-    if (domainBriefsOffline) return;
-    if (domainBriefs[selectedDomainKey]) return;
+    if (!domainBriefPending) return;
 
     const controller = new AbortController();
-    domainBriefAbortRef.current?.abort();
-    domainBriefAbortRef.current = controller;
+    const domain = selectedDomainKey;
 
-    setDomainBriefPending(true);
-    fetch(`/api/chart/domain-brief?${historyQs}&domain=${selectedDomainKey}`, {
+    fetch(`/api/chart/domain-brief?${historyQs}&domain=${domain}`, {
       signal: controller.signal,
     })
       .then((response) => {
@@ -1128,24 +1159,24 @@ export default function InsightsContent({
         return null;
       })
       .then((data: { brief?: string } | null) => {
-        if (controller.signal.aborted || !data?.brief) return;
-        setDomainBriefs((previous) => ({
-          ...previous,
-          [selectedDomainKey]: data.brief,
-        }));
+        if (controller.signal.aborted) return;
+        const brief = data?.brief;
+        if (brief) {
+          setDomainBriefs((previous) => ({ ...previous, [domain]: brief }));
+        } else {
+          setDomainBriefFailedFor(domain);
+        }
       })
       .catch(() => {
         /* The engine's own body is still on screen; a failed request leaves
            the panel exactly as it was before this feature existed. */
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setDomainBriefPending(false);
+        if (!controller.signal.aborted) setDomainBriefFailedFor(domain);
       });
 
     return () => {
       controller.abort();
     };
-  }, [domainBriefs, domainBriefsOffline, domainLoadState, historyQs, selectedDomainKey]);
+  }, [domainBriefPending, historyQs, selectedDomainKey]);
 
   /* The two signs the hero's arch shows alongside the rising sign. Read from
      the natal placements, so they are the chart's own numbers rather than a
@@ -1514,7 +1545,7 @@ export default function InsightsContent({
                     role="tab"
                     aria-selected={domain.key === selectedDomainKey}
                     className={styles.zoneCard}
-                    onClick={() => setSelectedDomainKey(domain.key)}
+                    onClick={() => selectDomain(domain.key)}
                   >
                     {DOMAIN_ICONS[domain.key] && (
                       <span className={styles.zoneCardIcon} aria-hidden="true">

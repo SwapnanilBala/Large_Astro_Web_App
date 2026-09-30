@@ -6,7 +6,7 @@ import {
   useState,
   useEffect,
   useCallback,
-  useRef,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
 /* No message file is imported here on purpose.
@@ -49,8 +49,9 @@ export const LANGUAGE_CODES: Language[] = ["en", "es", "bn", "hi", "it", "fr"];
  * "11 Feb 2030", which React counts as a text mismatch and repairs by throwing
  * the server tree away. Deriving the tag from `language` instead makes the
  * output a function of app state, and safe to render on both sides: the
- * provider starts every visitor at "en" and only adopts the stored choice in
- * an effect, so the first client render always agrees with the server's.
+ * provider starts every visitor at "en" and only adopts the stored choice once
+ * hydration is over, so the first client render always agrees with the
+ * server's.
  */
 export const LOCALE_TAGS: Record<Language, string> = {
   en: "en-US",
@@ -92,6 +93,26 @@ type I18nContextValue = {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
+/* ── The stored choice ── */
+
+const LANGUAGE_STORAGE_KEY = "astro_language";
+
+/* Nothing but this provider writes the key, and it holds its own choice in
+   state, so there is nothing to subscribe to: the snapshot only has to be
+   read once hydration is over. */
+const subscribeToNothing = () => () => {};
+
+function readStoredLanguage(): Language {
+  /* Guarded: this runs during render, where a storage error would take the
+     whole tree down instead of one effect. */
+  try {
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language | null;
+    return stored && LANGUAGE_CODES.includes(stored) ? stored : "en";
+  } catch {
+    return "en";
+  }
+}
+
 /* ── Provider ── */
 
 export function LanguageProvider({
@@ -102,57 +123,52 @@ export function LanguageProvider({
   /** The English baseline for this tree. See the note at the top of the file. */
   baseMessages: MessageTree;
 }) {
-  const [language, setLanguageState] = useState<Language>("en");
+  /* The stored choice: "en" on the server and in the render that hydrates, the
+     stored language from the next render on, so the first client render still
+     agrees with the server's. A choice made on this page wins over it. */
+  const storedLanguage = useSyncExternalStore(
+    subscribeToNothing,
+    readStoredLanguage,
+    () => "en" as const,
+  );
+  const [chosenLanguage, setChosenLanguage] = useState<Language | null>(null);
+  const language = chosenLanguage ?? storedLanguage;
+
   /* Flattening walks the whole tree, so do it once per mount rather than on
      every render. baseMessages is a module-level JSON import in both wrappers,
      so its identity is stable. */
-  const englishRef = useRef<Record<string, string> | null>(null);
-  if (englishRef.current === null) {
-    englishRef.current = flattenMessages(baseMessages);
-  }
-  const ENGLISH_MESSAGES = englishRef.current;
-  const [messages, setMessages] =
-    useState<Record<string, string>>(ENGLISH_MESSAGES);
-  const loadRequestRef = useRef(0);
+  const [ENGLISH_MESSAGES] = useState(() => flattenMessages(baseMessages));
+  /* The last translation file to arrive, and which language it is. English
+     stands in until the file for the current language is here, and if it
+     never arrives. */
+  const [loaded, setLoaded] = useState<{
+    language: Language;
+    messages: Record<string, string>;
+  } | null>(null);
+  const messages =
+    language !== "en" && loaded?.language === language ? loaded.messages : ENGLISH_MESSAGES;
 
-  /* Load translation file for a given language */
-  const loadMessages = useCallback(async (lang: Language) => {
-    const requestId = ++loadRequestRef.current;
-
-    if (lang === "en") {
-      setMessages(ENGLISH_MESSAGES);
-      return;
-    }
-
-    // English remains the synchronous baseline while the selected language loads.
-    setMessages(ENGLISH_MESSAGES);
-
-    try {
-      const mod = await import(`@/messages/${lang}.json`);
-      const flat = flattenMessages(mod.default ?? mod);
-
-      if (requestId === loadRequestRef.current) {
-        setMessages({ ...ENGLISH_MESSAGES, ...flat });
-      }
-    } catch (err) {
-      console.error(`Failed to load translations for ${lang}:`, err);
-
-      if (requestId === loadRequestRef.current) {
-        setMessages(ENGLISH_MESSAGES);
-      }
-    }
-  }, [ENGLISH_MESSAGES]);
-
-  /* Hydrate from localStorage on mount */
+  /* Load the translation file for the current language */
   useEffect(() => {
-    const stored = localStorage.getItem("astro_language") as Language | null;
-    if (stored && LANGUAGE_CODES.includes(stored)) {
-      setLanguageState(stored);
-      loadMessages(stored);
-    } else {
-      loadMessages("en");
-    }
-  }, [loadMessages]);
+    if (language === "en") return;
+    /* Only the latest language's file lands; one still in flight from an
+       earlier choice is dropped. */
+    let current = true;
+
+    import(`@/messages/${language}.json`)
+      .then((mod) => {
+        if (current) {
+          setLoaded({ language, messages: { ...ENGLISH_MESSAGES, ...flattenMessages(mod.default ?? mod) } });
+        }
+      })
+      .catch((err) => {
+        console.error(`Failed to load translations for ${language}:`, err);
+      });
+
+    return () => {
+      current = false;
+    };
+  }, [language, ENGLISH_MESSAGES]);
 
   /*
    * Keep <html lang> in step with the selected language.
@@ -169,14 +185,10 @@ export function LanguageProvider({
   }, [language]);
 
   /* Change language */
-  const setLanguage = useCallback(
-    (lang: Language) => {
-      setLanguageState(lang);
-      localStorage.setItem("astro_language", lang);
-      loadMessages(lang);
-    },
-    [loadMessages]
-  );
+  const setLanguage = useCallback((lang: Language) => {
+    setChosenLanguage(lang);
+    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+  }, []);
 
   /* Translation function with placeholder interpolation */
   const t = useCallback(
@@ -234,11 +246,7 @@ export function useRouteMessages(
 
   /* Flattened once per mount, like the provider's own baseline — callers pass
      a module-level JSON import, so the identity is stable. */
-  const flatRef = useRef<Record<string, string> | null>(null);
-  if (flatRef.current === null) {
-    flatRef.current = flattenMessages(routeMessages);
-  }
-  const routeFallback = flatRef.current;
+  const [routeFallback] = useState(() => flattenMessages(routeMessages));
 
   return useCallback(
     (key: string, params?: Record<string, string>): string => {

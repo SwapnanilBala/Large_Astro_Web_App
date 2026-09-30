@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef, useId } from "react";
+import { useEffect, useState, useId } from "react";
 import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
@@ -710,10 +710,14 @@ function ProfectionWheel({
   const outerR = 42;
   const innerR = 18;
   const [selectedHouse, setSelectedHouse] = useState(activatedHouse);
-
-  useEffect(() => {
+  /* A different year activates a different house, and the selection follows
+     it. Adjusted during render rather than in an effect, which painted the old
+     house for a commit first. */
+  const [followedHouse, setFollowedHouse] = useState(activatedHouse);
+  if (followedHouse !== activatedHouse) {
+    setFollowedHouse(activatedHouse);
     setSelectedHouse(activatedHouse);
-  }, [activatedHouse]);
+  }
 
   const segments: React.ReactNode[] = [];
   const labels: React.ReactNode[] = [];
@@ -964,23 +968,36 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
   const maxYear = years[years.length - 1] ?? currentYear;
 
   const [targetYear, setTargetYear] = useState(currentYear);
-  const [data, setData] = useState<VarshaphalResult | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<VarshaphalError | null>(null);
-  const abortRef = useRef<AbortController | null>(null);
+  /* Bumped by "Read year", which asks again for the year already shown. */
+  const [reloadToken, setReloadToken] = useState(0);
+  const requestKey = `${queryString}|${targetYear}|${reloadToken}`;
+  /* The last request that finished, and which request it was. Loading means
+     the current request has not finished yet: derived, not set, so the fetch
+     below writes state only from its own callbacks. A year still loading keeps
+     the previous year on screen, as it always did, and an error shows only
+     while it belongs to the request on screen. */
+  const [settled, setSettled] = useState<{
+    key: string;
+    data: VarshaphalResult | null;
+    error: VarshaphalError | null;
+  } | null>(null);
+  const isLoading = settled?.key !== requestKey;
+  const data = settled?.data ?? null;
+  const error = settled && !isLoading ? settled.error : null;
 
-  const loadData = useCallback(
-    async (year: number) => {
-      abortRef.current?.abort();
-      setIsLoading(true);
-      setError(null);
+  useEffect(() => {
+    const controller = new AbortController();
+    /* Set by cleanup, so an abort from here (a newer request, or leaving the
+       page) is told apart from the timeout's. */
+    let superseded = false;
+    const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const settle = (data: VarshaphalResult | null, error: VarshaphalError | null) => {
+      if (!superseded) setSettled({ key: requestKey, data, error });
+    };
 
-      const controller = new AbortController();
-      abortRef.current = controller;
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
+    void (async () => {
       try {
-        const res = await fetch(buildVarshaphalUrl(queryString, year), {
+        const res = await fetch(buildVarshaphalUrl(queryString, targetYear), {
           signal: controller.signal,
         });
         clearTimeout(timeout);
@@ -988,47 +1005,39 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
         if (!res.ok) {
           const body = await res.json().catch(() => null);
           const message = body?.error?.message;
-          setData(null);
-          setError(
+          settle(
+            null,
             typeof message === "string" && message
               ? { kind: "apiMessage", text: message }
               : { kind: "api", status: String(res.status) }
           );
           return;
         }
-        const json = (await res.json()) as VarshaphalResult;
-        setData(json);
+        settle((await res.json()) as VarshaphalResult, null);
       } catch (err) {
         clearTimeout(timeout);
-        setData(null);
         if (err instanceof DOMException && err.name === "AbortError") {
-          setError({ kind: "timeout" });
+          settle(null, { kind: "timeout" });
         } else {
-          setError(
+          settle(
+            null,
             err instanceof Error
               ? { kind: "apiMessage", text: err.message }
               : { kind: "loadFailed" }
           );
         }
-      } finally {
-        setIsLoading(false);
       }
-    },
-    [queryString],
-  );
+    })();
 
-  useEffect(() => {
-    void loadData(targetYear);
     return () => {
-      abortRef.current?.abort();
+      superseded = true;
+      clearTimeout(timeout);
+      controller.abort();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queryString]);
+  }, [queryString, targetYear, requestKey]);
 
   const chooseYear = (year: number) => {
-    const nextYear = Math.min(maxYear, Math.max(minYear, year));
-    setTargetYear(nextYear);
-    void loadData(nextYear);
+    setTargetYear(Math.min(maxYear, Math.max(minYear, year)));
   };
 
   const quickYears = Array.from(
@@ -1058,7 +1067,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
         className={styles.yearForm}
         onSubmit={(e) => {
           e.preventDefault();
-          void loadData(targetYear);
+          setReloadToken((token) => token + 1);
         }}
       >
         <div className={styles.yearStepper} aria-label={tr("timing.varshaphal.yearControlsLabel")}>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState } from "react";
 import { CalendarPlus } from "lucide-react";
 import type { ForecastAspectInsight, ForecastReading } from "@/lib/astro-types";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
@@ -294,61 +294,70 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
   const tr = useRouteMessages(timingMessages);
   const locale = LOCALE_TAGS[language];
   const [selectedDate, setSelectedDate] = useState(() => localDateString());
-  const [forecast, setForecast] = useState<ForecastReading | null>(null);
   const [lifeArea, setLifeArea] = useState<LifeArea>("all");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<ForecastError | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
+  /* Bumped by Retry, which asks again for the date already chosen. */
+  const [reloadToken, setReloadToken] = useState(0);
+  const requestKey = `${queryString}|${selectedDate}|${reloadToken}`;
+  /* The last request that finished, and which one it was. Loading is "the
+     current request has not finished": derived, not set, so the fetch below
+     writes state only from its own callbacks -- and a request superseded by a
+     newer date can no longer clear the loading line out from under it. */
+  const [settled, setSettled] = useState<{
+    key: string;
+    forecast: ForecastReading | null;
+    error: ForecastError | null;
+  } | null>(null);
+  const isLoading = settled?.key !== requestKey;
+  const forecast = settled && !isLoading ? settled.forecast : null;
+  const error = settled && !isLoading ? settled.error : null;
   const dateOptions = Array.from(
     { length: DATE_STRIP_DAYS },
     (_, index) => addDays(localDateString(), index)
   );
 
-  const loadForecast = useCallback(async (targetDate: string) => {
-    abortControllerRef.current?.abort();
-    setIsLoading(true);
-    setError(null);
-
+  useEffect(() => {
     const controller = new AbortController();
-    abortControllerRef.current = controller;
+    /* Set by cleanup: a newer request, or leaving the page. */
+    let superseded = false;
     let didTimeout = false;
     const timeoutId = window.setTimeout(() => {
       didTimeout = true;
       controller.abort();
     }, FORECAST_TIMEOUT_MS);
+    const settle = (next: ForecastReading | null, nextError: ForecastError | null) => {
+      if (!superseded) setSettled({ key: requestKey, forecast: next, error: nextError });
+    };
 
-    try {
-      const response = await fetch(buildForecastUrl(queryString, targetDate), { signal: controller.signal });
-      if (!response.ok) {
-        setForecast(null);
-        setError({ kind: "api", status: String(response.status) });
-        return;
-      }
-      setForecast(await response.json() as ForecastReading);
-    } catch (fetchError) {
-      if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
-        if (didTimeout) {
-          setForecast(null);
-          setError({ kind: "timeout" });
+    void (async () => {
+      try {
+        const response = await fetch(buildForecastUrl(queryString, selectedDate), { signal: controller.signal });
+        if (!response.ok) {
+          settle(null, { kind: "api", status: String(response.status) });
+          return;
         }
-      } else {
-        setForecast(null);
-        setError(
-          fetchError instanceof Error
-            ? { kind: "message", text: fetchError.message }
-            : { kind: "loadFailed" }
-        );
+        settle(await response.json() as ForecastReading, null);
+      } catch (fetchError) {
+        if (fetchError instanceof DOMException && fetchError.name === "AbortError") {
+          if (didTimeout) settle(null, { kind: "timeout" });
+        } else {
+          settle(
+            null,
+            fetchError instanceof Error
+              ? { kind: "message", text: fetchError.message }
+              : { kind: "loadFailed" }
+          );
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
       }
-    } finally {
-      window.clearTimeout(timeoutId);
-      setIsLoading(false);
-    }
-  }, [queryString]);
+    })();
 
-  useEffect(() => {
-    void loadForecast(selectedDate);
-    return () => abortControllerRef.current?.abort();
-  }, [loadForecast, selectedDate]);
+    return () => {
+      superseded = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [queryString, selectedDate, requestKey]);
 
   return (
     <section className="rules-panel forecast-panel">
@@ -411,7 +420,7 @@ export default function FutureForecastPanel({ queryString }: FutureForecastPanel
           <button
             type="button"
             className="skel-retry-btn"
-            onClick={() => void loadForecast(selectedDate)}
+            onClick={() => setReloadToken((token) => token + 1)}
             disabled={isLoading}
           >
             {tr("timing.forecast.retry")}

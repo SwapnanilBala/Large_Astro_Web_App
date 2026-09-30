@@ -1,7 +1,7 @@
 "use client";
 
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { HiOutlineCalendarDays, HiOutlineClock } from "react-icons/hi2";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
@@ -679,8 +679,14 @@ export default function CompatibilityPageClient({
   );
   const [result, setResult] = useState<CompatibilityApiResponse | null>(null);
   const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const autoSubmittedRef = useRef(false);
+  /* The comparison being fetched, if one is: the two profiles as they stood
+     when it was asked for. Submitting is "a request is out". */
+  const [request, setRequest] = useState<{
+    primary: ProfileQueryInput;
+    partner: ProfileQueryInput;
+  } | null>(null);
+  const isSubmitting = request !== null;
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
 
   const canSubmit = useMemo(() => {
     return [primary, partner].every((profile) =>
@@ -688,43 +694,73 @@ export default function CompatibilityPageClient({
     );
   }, [partner, primary]);
 
-  const submitCompatibility = useCallback(async () => {
+  const submitCompatibility = () => {
     if (!canSubmit) {
       setError(t("compatibility.incompleteProfiles"));
       return;
     }
+    setError("");
+    setRequest({ primary, partner });
+  };
 
-    try {
-      setIsSubmitting(true);
-      setError("");
+  /* A link that arrives with both charts filled in reads itself, once, as soon
+     as the partner's details are all there. Done during render rather than in
+     an effect, so the page says "Comparing…" from its first paint: the profiles
+     come from the URL, so the server and the hydrating render agree on it. */
+  const hasPartnerSeed = Boolean(
+    partner.name.trim() &&
+      partner.birthDate.trim() &&
+      partner.birthTime.trim() &&
+      partner.city.trim()
+  );
+  if (!autoSubmitted && canSubmit && !result && hasPartnerSeed) {
+    setAutoSubmitted(true);
+    setError("");
+    setRequest({ primary, partner });
+  }
 
-      const response = await fetch(`${ASTRO_API}/api/compatibility`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          primary: buildBirthDetailsPayload(primary),
-          partner: buildBirthDetailsPayload(partner),
-          save_result: false,
-        }),
-      });
+  useEffect(() => {
+    if (!request) return;
+    const controller = new AbortController();
 
-      if (!response.ok) {
-        const payload = await response.json().catch(() => ({ detail: "Compatibility request failed." }));
-        throw new Error(payload.detail ?? "Compatibility request failed.");
+    void (async () => {
+      try {
+        const response = await fetch(`${ASTRO_API}/api/compatibility`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            primary: buildBirthDetailsPayload(request.primary),
+            partner: buildBirthDetailsPayload(request.partner),
+            save_result: false,
+          }),
+          signal: controller.signal,
+        });
+
+        if (!response.ok) {
+          const payload = await response.json().catch(() => ({ detail: "Compatibility request failed." }));
+          throw new Error(payload.detail ?? "Compatibility request failed.");
+        }
+
+        const payload = (await response.json()) as CompatibilityApiResponse;
+        if (controller.signal.aborted) return;
+        setResult(payload);
+        pushToast("Compatibility report ready.", "success");
+      } catch (requestError) {
+        if (controller.signal.aborted) return;
+        setError(requestError instanceof Error ? requestError.message : "Compatibility request failed.");
+        pushToast("Compatibility request failed.", "error");
+      } finally {
+        if (!controller.signal.aborted) {
+          setRequest((current) => (current === request ? null : current));
+        }
       }
+    })();
 
-      const payload = (await response.json()) as CompatibilityApiResponse;
-      setResult(payload);
-      pushToast("Compatibility report ready.", "success");
-    } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Compatibility request failed.");
-      pushToast("Compatibility request failed.", "error");
-    } finally {
-      setIsSubmitting(false);
-    }
-  }, [canSubmit, partner, primary, pushToast, t]);
+    /* Leaving the page, or StrictMode's rehearsal remount in development. */
+    return () => controller.abort();
+  }, [pushToast, request]);
 
   const shareCompatibility = async () => {
     const url = `${window.location.origin}/insights/compatibility?${buildCompatibilityQueryString(primary, partner)}`;
@@ -743,25 +779,6 @@ export default function CompatibilityPageClient({
       pushToast("Could not share the compatibility link.", "error");
     }
   };
-
-  useEffect(() => {
-    if (!canSubmit || result || autoSubmittedRef.current) {
-      return;
-    }
-
-    const hasPartnerSeed =
-      partner.name.trim() &&
-      partner.birthDate.trim() &&
-      partner.birthTime.trim() &&
-      partner.city.trim();
-
-    if (!hasPartnerSeed) {
-      return;
-    }
-
-    autoSubmittedRef.current = true;
-    void submitCompatibility();
-  }, [canSubmit, partner, result, submitCompatibility]);
 
   return (
     <div className="insights-shell below-navbar">
@@ -796,7 +813,7 @@ export default function CompatibilityPageClient({
           <button
             type="button"
             className="compat-primary-action"
-            onClick={() => void submitCompatibility()}
+            onClick={submitCompatibility}
             disabled={isSubmitting}
           >
             {isSubmitting ? "Comparing…" : "Compare charts"}

@@ -251,10 +251,28 @@ type DrillStep = {
   sequenceEndDate?: string;
 };
 
+/* The chain a drill path asks the API about: three lords and deeper, over a
+   dated window. Null where the built-in map is the answer. The key matches the
+   route's, so drilling back and forth costs one request per chain. */
+function chainRequestFor(drillPath: DrillStep[]) {
+  if (drillPath.length < 3) return null;
+  const deepest = drillPath[drillPath.length - 1];
+  if (!deepest.startDate || !deepest.endDate) return null;
+  const lords = drillPath.map((step) => step.planet);
+  return {
+    lords,
+    startDate: deepest.startDate,
+    endDate: deepest.endDate,
+    key: `${lords.join(">")}|${deepest.startDate}|${deepest.endDate}`,
+  };
+}
+
 type PopupData = {
   planet: string;
   isCurrent: boolean;
-  rect: DOMRect;
+  /* Where the popup sits in the timeline container, measured when the bar was
+     clicked: reading the container's rect during render is not allowed. */
+  position?: { left: string; top: string };
   level: number;
   startDate: string;
   endDate: string;
@@ -301,9 +319,14 @@ export default function NakshatraDashaPanel({
      and deeper. Keyed by the chain plus its window, which is what the route
      keys on too, so drilling back and forth costs one request per chain. */
   const [chainInsights, setChainInsights] = useState<Record<string, string>>({});
-  const [chainInsightLoading, setChainInsightLoading] = useState(false);
+  /* The drill path whose chain request came back empty. Held by path, not by
+     chain, so drilling back to the same chain asks again, as it always has. */
+  const [chainFailedPath, setChainFailedPath] = useState<DrillStep[] | null>(null);
+  /* One "now" for the whole panel, taken at mount: the progress ring, the
+     days-remaining counts and "is this period current" all agree with each
+     other, and render stays pure. The panel only mounts in the browser. */
+  const [now] = useState(() => Date.now());
   const popupRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<HTMLDivElement>(null);
 
   /* Close popup on outside click */
   useEffect(() => {
@@ -478,20 +501,15 @@ export default function NakshatraDashaPanel({
    * reviewed, and it costs nothing.
    */
   useEffect(() => {
-    if (drillPath.length < 3) return;
-    const deepest = drillPath[drillPath.length - 1];
-    if (!deepest.startDate || !deepest.endDate) return;
-
-    const lords = drillPath.map((step) => step.planet);
-    const key = `${lords.join(">")}|${deepest.startDate}|${deepest.endDate}`;
-    if (chainInsights[key]) return;
+    const request = chainRequestFor(drillPath);
+    if (!request || chainInsights[request.key]) return;
+    const { lords, startDate, endDate, key } = request;
 
     let cancelled = false;
-    setChainInsightLoading(true);
     fetch("/api/chart/dasha-interpretation", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lords, startDate: deepest.startDate, endDate: deepest.endDate }),
+      body: JSON.stringify({ lords, startDate, endDate }),
     })
       .then(async (res) => {
         if (res.ok) return res.json();
@@ -501,15 +519,17 @@ export default function NakshatraDashaPanel({
         return null;
       })
       .then((data) => {
-        if (cancelled || !data?.interpretation) return;
-        setChainInsights((prev) => ({ ...prev, [key]: data.interpretation }));
+        if (cancelled) return;
+        if (data?.interpretation) {
+          setChainInsights((prev) => ({ ...prev, [key]: data.interpretation }));
+        } else {
+          setChainFailedPath(drillPath);
+        }
       })
       .catch(() => {
         /* The deterministic sentence is still on screen; a failed request
            leaves the panel exactly as it was before this feature existed. */
-      })
-      .finally(() => {
-        if (!cancelled) setChainInsightLoading(false);
+        if (!cancelled) setChainFailedPath(drillPath);
       });
 
     return () => {
@@ -529,10 +549,24 @@ export default function NakshatraDashaPanel({
     e: React.MouseEvent<HTMLDivElement>
   ) => {
     const barRect = e.currentTarget.getBoundingClientRect();
+    /* The section the popup is positioned against, found from the bar rather
+       than through a ref: every bar sits inside it. */
+    const containerRect = e.currentTarget
+      .closest(".dasha-timeline-section")
+      ?.getBoundingClientRect();
+    let position: PopupData["position"];
+    if (containerRect) {
+      const barCenter = barRect.left + barRect.width / 2 - containerRect.left;
+      const clampedLeft = Math.max(0, Math.min(barCenter - 180, containerRect.width - 360));
+      position = {
+        left: `${clampedLeft}px`,
+        top: `${barRect.bottom - containerRect.top + 10}px`,
+      };
+    }
     setPopup({
       planet,
       isCurrent,
-      rect: barRect,
+      position,
       level,
       startDate,
       endDate,
@@ -553,19 +587,6 @@ export default function NakshatraDashaPanel({
     return { ...theme, placement, houseNote };
   };
 
-  /* Compute popup position relative to the timeline container */
-  const getPopupStyle = (): React.CSSProperties => {
-    if (!popup || !timelineRef.current) return {};
-    const containerRect = timelineRef.current.getBoundingClientRect();
-    const barCenter = popup.rect.left + popup.rect.width / 2 - containerRect.left;
-    const clampedLeft = Math.max(0, Math.min(barCenter - 180, containerRect.width - 360));
-
-    return {
-      left: `${clampedLeft}px`,
-      top: `${popup.rect.bottom - containerRect.top + 10}px`,
-    };
-  };
-
   /* Get sub-periods to show for current drill level */
   const getCurrentSubPeriods = (): SubPeriodInfo[] | null => {
     if (drillPath.length === 0) return null;
@@ -584,7 +605,7 @@ export default function NakshatraDashaPanel({
 
   /* Determine if a date range contains today */
   const isCurrentPeriod = (startDate: string, endDate: string) => {
-    const today = new Date().toISOString().split("T")[0];
+    const today = new Date(now).toISOString().split("T")[0];
     return startDate <= today && today <= endDate;
   };
 
@@ -697,7 +718,7 @@ export default function NakshatraDashaPanel({
 
   /* Calculate remaining days and progress percentage for the current antardasha */
   const getAntardashaProgress = () => {
-    const today = new Date();
+    const today = new Date(now);
     const start = new Date(dasha.current_antardasha_start + "T00:00:00");
     const end = new Date(dasha.current_antardasha_end + "T00:00:00");
     const totalDays = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
@@ -737,6 +758,11 @@ export default function NakshatraDashaPanel({
   const currentSubPeriods = getCurrentSubPeriods();
   const currentDrillLevel = drillPath.length > 0 ? drillPath[drillPath.length - 1].level + 1 : 1;
   const combinationInsight = getCombinationInsight();
+  /* Derived, not set before the fetch: a request is out for this chain while
+     it has neither an answer nor a failure on this visit. */
+  const chainRequest = chainRequestFor(drillPath);
+  const chainInsightLoading =
+    chainRequest !== null && !chainInsights[chainRequest.key] && chainFailedPath !== drillPath;
   const currentProgress = getAntardashaProgress();
   /*
    * The written reading for the stack the reader is standing in.
@@ -1012,7 +1038,7 @@ export default function NakshatraDashaPanel({
         </article>
       </div>
 
-      <div className="dasha-timeline-section" ref={timelineRef} style={{ position: "relative" }}>
+      <div className="dasha-timeline-section" style={{ position: "relative" }}>
         <h3>Vimshottari Dasha Timeline</h3>
         <p className="dasha-timeline-hint">
           Click a dasha to open Antardasha, then keep selecting branches for Pratyantar, Sookshma, and Prana timing.
@@ -1109,13 +1135,13 @@ export default function NakshatraDashaPanel({
           const spanEnd   = Math.max(...allEnds);
           const totalMs   = spanEnd - spanStart || 1;
 
-          const todayMs   = new Date().setHours(0, 0, 0, 0);
+          const todayMs   = new Date(now).setHours(0, 0, 0, 0);
           const todayPct  = Math.max(0, Math.min(100, ((todayMs - spanStart) / totalMs) * 100));
           const todayInSpan = todayMs >= spanStart && todayMs <= spanEnd;
 
           const activePeriod = dasha.periods.find((p) => p.planet === currentPlanet);
           const activeDaysRemaining = activePeriod
-            ? Math.max(0, Math.ceil((new Date(activePeriod.end_date + "T00:00:00").getTime() - Date.now()) / 86_400_000))
+            ? Math.max(0, Math.ceil((new Date(activePeriod.end_date + "T00:00:00").getTime() - now) / 86_400_000))
             : null;
 
           return (
@@ -1488,7 +1514,7 @@ export default function NakshatraDashaPanel({
           <div
             ref={popupRef}
             className="dasha-popup anim-fade-in"
-            style={getPopupStyle()}
+            style={popup.position}
           >
             <button
               className="dasha-popup-close"

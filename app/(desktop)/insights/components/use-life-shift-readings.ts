@@ -37,7 +37,8 @@ export type LifeShiftReadings = {
  *   be billed. In production the cleanup runs on a real navigation, where
  *   clearing the ref is meaningless anyway.
  *
- *   The empty dependency array covers re-renders. Depending on `shifts` looks
+ *   Taking the inputs once, as state, covers re-renders: the effect depends
+ *   on nothing that can change. Depending on `shifts` looks
  *   more correct and is worse: the array is rebuilt by a useMemo in the panel,
  *   and any parent re-render that changed its identity would re-fetch every
  *   reading. The chapters cannot change without a navigation, which unmounts
@@ -62,22 +63,16 @@ export function useLifeShiftReadings(
   const [state, setState] = useState<LifeShiftReadingsState>("pending");
   const [readings, setReadings] = useState<Map<string, string>>(() => new Map());
   const startedRef = useRef(false);
-  /* Read at fire time rather than depended on, so the once-per-mount contract
-     above holds without the effect closing over a stale first render. */
-  const shiftsRef = useRef(shifts);
-  shiftsRef.current = shifts;
-  const depthRef = useRef(depth);
-  depthRef.current = depth;
+  /* Taken once, from the render this hook mounted with. The request is once
+     per mounted lifetime, so these are the only inputs it will ever send;
+     holding them in state keeps the effect free of anything that changes,
+     where refs updated during render are something React's rules forbid. */
+  const [facts] = useState(() => buildLifeShiftFacts(shifts));
+  const [requestDepth] = useState(depth);
 
   useEffect(() => {
-    if (startedRef.current) return;
+    if (facts.length === 0 || startedRef.current) return;
     startedRef.current = true;
-
-    const facts = buildLifeShiftFacts(shiftsRef.current);
-    if (facts.length === 0) {
-      setState("failed");
-      return;
-    }
 
     /* Aborted on unmount so navigating away does not land a setState on a dead
        component. */
@@ -88,7 +83,7 @@ export function useLifeShiftReadings(
         const response = await fetch("/api/chart/life-shifts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ shifts: facts, depth: depthRef.current }),
+          body: JSON.stringify({ shifts: facts, depth: requestDepth }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -116,7 +111,8 @@ export function useLifeShiftReadings(
       /* So the StrictMode remount can ask again; see the note above. */
       startedRef.current = false;
     };
-  }, []);
+  }, [facts, requestDepth]);
 
-  return { state, readings };
+  /* No chapters means nothing to ask for, which reads the same as a failure. */
+  return { state: facts.length === 0 ? "failed" : state, readings };
 }

@@ -71,6 +71,10 @@ export default function AutocompleteInput({
   className,
 }: AutocompleteInputProps) {
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  /* The query `suggestions` answer. Focus only reopens them for that query, so
+     a value written in from outside -- a detected birthplace, a restored draft
+     -- never brings back a list that was fetched for something else. */
+  const [suggestionsQuery, setSuggestionsQuery] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -90,7 +94,9 @@ export default function AutocompleteInput({
   const generatedId = useId();
   const inputId = id ?? `autocomplete-${generatedId}`;
   const listboxId = `${inputId}-listbox`;
-  const isListboxVisible = isOpen && suggestions.length > 0;
+  /* Too short to ask about is too short to show a list for, whichever way the
+     value arrived. */
+  const isListboxVisible = isOpen && suggestions.length > 0 && value.trim().length >= 2;
 
   useEffect(() => {
     const query = value.trim();
@@ -98,10 +104,13 @@ export default function AutocompleteInput({
     if (timer.current) clearTimeout(timer.current);
     abortRef.current?.abort();
 
+    /* Every path below that does not look the value up bumps the sequence, so
+       an answer still in flight for an earlier value is dropped when it lands.
+       None of them touches the list: typing a short value closes it in
+       onChange, choosing an answer closes it in handleSelect, and a value
+       written from outside lands in a box whose list is not open. */
     if (!query || query.length < 2) {
       requestSeq.current += 1;
-      setSuggestions([]);
-      setIsOpen(false);
       return;
     }
 
@@ -120,20 +129,14 @@ export default function AutocompleteInput({
        rule it taught holds for any box written into from outside: only the one
        with the caret may open a list, and the others are spared a network
        round trip apiece for a value they never had to ask about. */
-    const closeQuietly = () => {
-      requestSeq.current += 1;
-      setSuggestions([]);
-      setIsOpen(false);
-    };
-
     if (justSelectedRef.current === query) {
       justSelectedRef.current = null;
-      closeQuietly();
+      requestSeq.current += 1;
       return;
     }
 
     if (!hasCaret()) {
-      closeQuietly();
+      requestSeq.current += 1;
       return;
     }
 
@@ -156,6 +159,7 @@ export default function AutocompleteInput({
         if (controller.signal.aborted || requestSeq.current !== currentRequest) return;
 
         setSuggestions(data);
+        setSuggestionsQuery(query);
         setIsOpen(data.length > 0);
         setActiveIndex(-1);
       } catch (error) {
@@ -231,10 +235,16 @@ export default function AutocompleteInput({
         onChange={(e) => {
           onChange(e.target.value);
           setActiveIndex(-1);
+          /* Typed down past a lookup: drop the list, so typing back up does
+             not flash the old one while the new lookup waits. */
+          if (e.target.value.trim().length < 2) {
+            setSuggestions([]);
+            setIsOpen(false);
+          }
         }}
         onKeyDown={handleKeyDown}
         onFocus={() => {
-          if (suggestions.length > 0) setIsOpen(true);
+          if (suggestions.length > 0 && suggestionsQuery === value.trim()) setIsOpen(true);
         }}
         onBlur={(event) => {
           if (!wrapperRef.current?.contains(event.relatedTarget as Node | null)) {

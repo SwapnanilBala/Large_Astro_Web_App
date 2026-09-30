@@ -9,6 +9,7 @@ import { savePalmReading } from "@/lib/palm-readings/local-store";
 import { MEDIAPIPE_HAND_MODEL_URL, MEDIAPIPE_WASM_BASE } from "@/lib/palm-readings/mediapipe";
 import { useRouteMessages } from "@/lib/i18n-context";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
+import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import palmMessages from "@/messages/en.palm.json";
 import PalmAnnotation from "./PalmAnnotation";
 import PalmQaPanel from "./palm-qa-panel";
@@ -260,6 +261,18 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const lastLandmarksRef = useRef<NormalizedLandmark[] | null>(null);
   const handConnectionsRef = useRef<typeof HandLandmarker.HAND_CONNECTIONS | null>(null);
   const DrawingUtilsClassRef = useRef<typeof DrawingUtils | null>(null);
+  const reduceMotion = usePrefersReducedMotion();
+
+  /* Declared ahead of the mount effect below, whose cleanup calls it. Refs
+     only, so the first render's copy that cleanup holds is as good as any. */
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+  };
 
   /* ── MediaPipe initialization ── */
   const initMediaPipe = useCallback(async () => {
@@ -395,15 +408,6 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     }
   };
 
-  const stopCamera = () => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-    if (rafRef.current) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-  };
-
   /* ── capture frame ── */
   const captureFrame = () => {
     const video = videoRef.current;
@@ -476,15 +480,12 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     reader.readAsDataURL(file);
   };
 
-  /* Advances the loading copy. Restarted from zero each time the phase
-     becomes "analyzing", so a second reading does not open on the copy the
-     first one finished with. One second is plenty of resolution for stages
-     tens of seconds apart, and the interval is cleared on the way out. */
+  /* Advances the loading copy. analyzePalm restarts it from zero on the way
+     in, so a second reading does not open on the copy the first one finished
+     with. One second is plenty of resolution for stages tens of seconds
+     apart, and the interval is cleared on the way out. */
   useEffect(() => {
-    if (phase !== "analyzing") {
-      setAnalyzingStage(0);
-      return;
-    }
+    if (phase !== "analyzing") return;
     const startedAt = Date.now();
     const id = setInterval(() => {
       const elapsed = Date.now() - startedAt;
@@ -501,6 +502,10 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const analyzePalm = async () => {
     if (!imageData) return;
 
+    /* Both belong to the run this click starts: the loading copy opens on its
+       first stage, and the results stagger in from nothing. */
+    setAnalyzingStage(0);
+    setRevealedSections(new Set());
     setPhase("analyzing");
     setError(null);
     try {
@@ -593,28 +598,13 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     return out;
   }, [reading]);
 
-  /* ── progressive reveal effect ── */
+  /* ── progressive reveal effect ──
+     Only the stagger lives here. The first section, and every section under
+     reduced motion, are shown by isRevealed below without waiting on it. */
   useEffect(() => {
-    if (phase !== "results" || !reading) return;
+    if (phase !== "results" || !reading || reduceMotion) return;
     clearRevealTimers();
 
-    // Detect prefers-reduced-motion at effect time (SSR-safe).
-    let reduced = false;
-    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
-      try {
-        reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      } catch {
-        reduced = false;
-      }
-    }
-
-    if (reduced) {
-      setRevealedSections(new Set(applicableSections));
-      return;
-    }
-
-    // Reveal first section immediately, then stagger the rest.
-    setRevealedSections(new Set(applicableSections.slice(0, 1)));
     for (let i = 1; i < applicableSections.length; i++) {
       const t = setTimeout(() => {
         setRevealedSections((prev) => {
@@ -627,7 +617,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
     }
 
     return () => clearRevealTimers();
-  }, [phase, reading, applicableSections, clearRevealTimers]);
+  }, [phase, reading, applicableSections, clearRevealTimers, reduceMotion]);
 
   const skipAnimations = useCallback(() => {
     clearRevealTimers();
@@ -892,8 +882,9 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
           hidden: { opacity: 0, y: 18 },
           show: { opacity: 1, y: 0, transition: { duration: 0.45, ease: "easeOut" as const } },
         };
-        const isRevealed = (id: RevealSection) => revealedSections.has(id);
-        const allRevealed = revealedSections.size >= applicableSections.length;
+        const isRevealed = (id: RevealSection) =>
+          reduceMotion || id === applicableSections[0] || revealedSections.has(id);
+        const allRevealed = applicableSections.every(isRevealed);
         const iq = reading.image_quality;
         const showHardWarning =
           !!iq && iq.reliable_for_reading === false && !imageQualityDismissed;

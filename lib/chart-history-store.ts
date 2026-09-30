@@ -48,6 +48,32 @@ export function readChartHistory(): ChartHistoryEntry[] {
   }
 }
 
+/*
+ * readChartHistory for useSyncExternalStore, which needs the same array back
+ * until something changes: a new one on every read re-renders forever. Cached
+ * on the scoped key and the raw stored string, as readChartSyncSnapshot is.
+ */
+let snapshotKey: string | undefined;
+let snapshotRaw: string | null | undefined;
+let snapshotEntries: ChartHistoryEntry[] = [];
+
+export function readChartHistorySnapshot(): ChartHistoryEntry[] {
+  ensureLocalScope();
+  const key = chartHistoryKey();
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(key);
+  } catch {
+    raw = null;
+  }
+  if (key !== snapshotKey || raw !== snapshotRaw) {
+    snapshotKey = key;
+    snapshotRaw = raw;
+    snapshotEntries = readChartHistory();
+  }
+  return snapshotEntries;
+}
+
 /** The most recently saved chart's query string, without its "?"; "" when there is none. */
 export function latestChartQuery(): string {
   const latest = [...readChartHistory()].sort(

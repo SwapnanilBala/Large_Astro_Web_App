@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   deletePalmReading,
-  listPalmReadings,
+  readPalmReadingsSnapshot,
   subscribeToPalmReadings,
 } from "@/lib/palm-readings/local-store";
 import type { PalmReadingSummary } from "@/lib/palm-readings/types";
@@ -47,29 +47,35 @@ export default function PalmHistoryClient() {
   const searchParams = useSearchParams();
   const compareWithId = searchParams?.get("compareWith") ?? null;
 
-  const [readings, setReadings] = useState<PalmReadingSummary[] | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  /* The saved readings, followed as they change -- in this tab or another.
+     Null on the server and in the render that hydrates: the archive is
+     browser storage. */
+  const readings = useSyncExternalStore<PalmReadingSummary[] | null>(
+    subscribeToPalmReadings,
+    readPalmReadingsSnapshot,
+    () => null,
+  );
+  const loading = readings === null;
+  /* A failed delete's message, held against the list it failed on, so any
+     change to the archive clears it, as reloading the list used to. */
+  const [deleteError, setDeleteError] = useState<{
+    message: string;
+    list: PalmReadingSummary[] | null;
+  } | null>(null);
+  const loadError = deleteError && deleteError.list === readings ? deleteError.message : null;
   const [compareMode, setCompareMode] = useState<boolean>(Boolean(compareWithId));
   const [selected, setSelected] = useState<string[]>(
     compareWithId ? [compareWithId] : [],
   );
+  /* Arriving with a different ?compareWith= restarts the selection from it.
+     Adjusted during render, where an effect used to do it a commit late. */
+  const [selectionFor, setSelectionFor] = useState(compareWithId);
+  if (selectionFor !== compareWithId) {
+    setSelectionFor(compareWithId);
+    setSelected(compareWithId ? [compareWithId] : []);
+  }
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  // ── Load the saved readings ──
-  useEffect(() => {
-    setSelected(compareWithId ? [compareWithId] : []);
-
-    const load = () => {
-      setReadings(listPalmReadings());
-      setLoadError(null);
-      setLoading(false);
-    };
-
-    load();
-    return subscribeToPalmReadings(load);
-  }, [compareWithId]);
 
   // ── Selection handling ──
   const toggleSelected = useCallback((id: string) => {
@@ -103,21 +109,23 @@ export default function PalmHistoryClient() {
     (id: string) => {
       setDeletingId(id);
       try {
+        /* The list follows on its own: the delete notifies the archive's
+           subscribers, and that re-reads it. */
         if (!deletePalmReading(id)) {
           throw new Error(tr("palm.history.deleteFailed"));
         }
-        setReadings((prev) => (prev ? prev.filter((r) => r.id !== id) : prev));
         setSelected((prev) => prev.filter((x) => x !== id));
       } catch (e) {
-        setLoadError(
-          e instanceof Error ? e.message : tr("palm.history.deleteFailed"),
-        );
+        setDeleteError({
+          message: e instanceof Error ? e.message : tr("palm.history.deleteFailed"),
+          list: readings,
+        });
       } finally {
         setDeletingId(null);
         setPendingDeleteId(null);
       }
     },
-    [tr],
+    [readings, tr],
   );
 
   const total = readings?.length ?? 0;

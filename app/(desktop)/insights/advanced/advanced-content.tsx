@@ -229,10 +229,13 @@ function CollapsibleSection({
 }) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const shouldReduceMotion = useReducedMotion();
-
-  useEffect(() => {
+  /* A new default (a different view) resets the section to it. Adjusted during
+     render rather than in an effect, which painted the old state first. */
+  const [appliedDefault, setAppliedDefault] = useState(defaultOpen);
+  if (appliedDefault !== defaultOpen) {
+    setAppliedDefault(defaultOpen);
     setIsOpen(defaultOpen);
-  }, [defaultOpen]);
+  }
 
   return (
     <motion.section

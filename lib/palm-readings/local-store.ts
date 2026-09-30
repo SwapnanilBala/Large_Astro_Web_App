@@ -169,6 +169,32 @@ export function listPalmReadings(): PalmReadingSummary[] {
   }));
 }
 
+/*
+ * listPalmReadings for useSyncExternalStore, which needs the same array back
+ * until something changes: a new one on every read re-renders forever. Cached
+ * on the scoped key and the raw stored string, as readChartSyncSnapshot is.
+ */
+let snapshotKey: string | undefined;
+let snapshotRaw: string | null | undefined;
+let snapshotList: PalmReadingSummary[] = [];
+
+export function readPalmReadingsSnapshot(): PalmReadingSummary[] {
+  ensureLocalScope();
+  const key = storageKey();
+  let raw: string | null = null;
+  try {
+    raw = window.localStorage.getItem(key);
+  } catch {
+    raw = null;
+  }
+  if (key !== snapshotKey || raw !== snapshotRaw) {
+    snapshotKey = key;
+    snapshotRaw = raw;
+    snapshotList = listPalmReadings();
+  }
+  return snapshotList;
+}
+
 export function getPalmReading(id: string): PalmReadingRecord | null {
   return readAll().find((record) => record.id === id) ?? null;
 }

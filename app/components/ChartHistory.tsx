@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef, useCallback } from "react";
+import { useEffect, useState, useRef, useCallback, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n-context";
 import { formatBirthDate } from "@/lib/format-birth-date";
 import {
-  readChartHistory,
+  readChartHistorySnapshot,
   recordChartVisit,
+  subscribeToChartHistory,
   type ChartHistoryEntry,
 } from "@/lib/chart-history-store";
 import { HiOutlineSparkles } from "react-icons/hi2";
@@ -142,20 +143,26 @@ function TiltCard({
 
 export default function ChartHistory({ userName, welcomeOnly = false }: ChartHistoryProps) {
   const { t } = useTranslation();
-  const [entries, setEntries] = useState<ChartHistoryEntry[]>([]);
+  /* This browser's charts, followed as they change. Null on the server and in
+     the render that hydrates: localStorage is not there to read. */
+  const localEntries = useSyncExternalStore<ChartHistoryEntry[] | null>(
+    subscribeToChartHistory,
+    readChartHistorySnapshot,
+    () => null,
+  );
+  const entries = localEntries ?? [];
+  /* Set once the account has been asked, for a browser with none of its own. */
+  const [accountChecked, setAccountChecked] = useState(false);
   /* Nothing is rendered until "does this person have a chart" has a final
      answer, because every branch below is that question and a provisional
-     answer shows the wrong one. localStorage is the first half and cannot be
-     read during render; the account is the second half and takes a round trip.
-     Setting this after the local read alone was enough to flash the welcome
-     panel at someone whose charts were about to arrive from the server. */
-  const [hydrated, setHydrated] = useState(false);
+     answer shows the wrong one. localStorage is the first half; the account is
+     the second half and takes a round trip. Answering after the local read
+     alone was enough to flash the welcome panel at someone whose charts were
+     about to arrive from the server. */
+  const hydrated = localEntries !== null && (localEntries.length > 0 || accountChecked);
   const router = useRouter();
 
   useEffect(() => {
-    const local = readChartHistory();
-    setEntries(local);
-
     /*
      * Hydration: the browser is empty, so ask the account whether it is.
      *
@@ -164,10 +171,7 @@ export default function ChartHistory({ userName, welcomeOnly = false }: ChartHis
      * device, so the two line up exactly. Filling a browser that already has
      * charts would interleave two histories under one list.
      */
-    if (local.length > 0) {
-      setHydrated(true);
-      return;
-    }
+    if (localEntries === null || localEntries.length > 0 || accountChecked) return;
 
     let cancelled = false;
 
@@ -192,7 +196,8 @@ export default function ChartHistory({ userName, welcomeOnly = false }: ChartHis
         if (cancelled || charts.length === 0) return;
 
         /* Oldest first, because recordChartVisit prepends — this leaves the
-           newest chart at the head, matching how local history reads. */
+           newest chart at the head, matching how local history reads. Each
+           write notifies the store, which is what puts them on screen. */
         for (const chart of [...charts].reverse()) {
           recordChartVisit({
             name: chart.name,
@@ -203,15 +208,13 @@ export default function ChartHistory({ userName, welcomeOnly = false }: ChartHis
             savedAt: chart.savedAt,
           });
         }
-
-        if (!cancelled) setEntries(readChartHistory());
       } catch {
         /* Offline, or the account store is down. The welcome panel is the
            honest thing to show; it is what a genuinely new visitor sees. */
       } finally {
         /* Every path above ends the question, including the early returns and
            the failure: none of them is going to produce charts later. */
-        if (!cancelled) setHydrated(true);
+        if (!cancelled) setAccountChecked(true);
       }
     };
 
@@ -220,7 +223,7 @@ export default function ChartHistory({ userName, welcomeOnly = false }: ChartHis
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [accountChecked, localEntries]);
 
   if (!hydrated) {
     return welcomeOnly ? <WelcomePanelStandIn /> : null;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import AdvancedContent from "./advanced-content";
@@ -45,77 +45,119 @@ function buildChartApiUrl(params: ChartParams): string {
   });
 }
 
+/* The payload this tab already holds for these params, while it is fresh --
+   /insights puts its server payload there. Null on the server, which has no
+   origin to build the key from and never fills the cache. */
+function readCachedChart(params: ChartParams): ChartApiResponse | null {
+  if (typeof window === "undefined") return null;
+  return chartCache.get(ChartCache.makeKey(buildChartApiUrl(params))) as ChartApiResponse | null;
+}
+
+/* A chart fetch the browser owes. A new object per request, so the effect that
+   serves it runs once per request rather than once per render. */
+type ChartRequest = { params: ChartParams };
+
 export default function AdvancedLoader({
   chartParams,
   focusView,
 }: AdvancedLoaderProps) {
   const t = useRouteMessages(sharedMessages);
-  const [payload, setPayload] = useState<ChartApiResponse | null>(null);
+  /* Read while rendering, so a chart this tab already has renders at once
+     instead of after a skeleton. Safe for hydration: on a hard load the
+     in-memory cache is empty, so this render still matches the server's
+     skeleton, and a client navigation has no server HTML to match. */
+  const [initialCached] = useState(() => readCachedChart(chartParams));
+  const [payload, setPayload] = useState<ChartApiResponse | null>(initialCached);
   const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(true);
+  /* Loading is "a request is owed". */
+  const [request, setRequest] = useState<ChartRequest | null>(() =>
+    initialCached ? null : { params: chartParams },
+  );
+  const isLoading = request !== null;
 
-  /* `t` is read when a request fails, not when the callback is built, so it is
+  /* Another chart while mounted -- back and forward between two charts'
+     advanced pages -- starts over, from the cache when it can. By value, not
+     identity: switching views re-renders the page with equal params, and that
+     must not refetch. */
+  const paramsKey = buildChartHistoryQuery(chartParams);
+  const [shownKey, setShownKey] = useState(paramsKey);
+  if (shownKey !== paramsKey) {
+    setShownKey(paramsKey);
+    const cached = readCachedChart(chartParams);
+    setPayload(cached);
+    setError("");
+    setRequest(cached ? null : { params: chartParams });
+  }
+
+  /* `t` is read when a request fails, not when the request starts, so it is
      held in a ref rather than listed as a dependency: its identity changes on
-     every language switch, and re-creating fetchChart re-runs the effect below,
-     which would re-request the chart each time the visitor changes language. */
+     every language switch, and the effect below would re-request the chart
+     each time the visitor changes language. */
   const tRef = useRef(t);
   useEffect(() => {
     tRef.current = t;
   }, [t]);
 
-  const fetchChart = useCallback(async () => {
-    setIsLoading(true);
+  useEffect(() => {
+    if (!request) return;
+    const controller = new AbortController();
+    /* Set by cleanup, so a superseded request is told apart from a timeout. */
+    let superseded = false;
+    const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    const chartUrl = buildChartApiUrl(request.params);
+
+    void (async () => {
+      try {
+        const response = await fetch(chartUrl, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+          throw new Error(`Chart API error (${response.status})`);
+        }
+
+        const data = (await response.json()) as ChartApiResponse;
+        chartCache.set(ChartCache.makeKey(chartUrl), data);
+        if (!superseded) setPayload(data);
+      } catch (err) {
+        if (superseded) return;
+        if (err instanceof DOMException && err.name === "AbortError") {
+          setError(
+            tRef.current("shared.chartRequestTimedOut", {
+              seconds: String(Math.round(REQUEST_TIMEOUT_MS / 1000)),
+            })
+          );
+        } else {
+          setError(
+            err instanceof Error ? err.message : tRef.current("shared.chartUnknownApiError")
+          );
+        }
+      } finally {
+        if (!superseded) setRequest((current) => (current === request ? null : current));
+      }
+    })();
+
+    return () => {
+      superseded = true;
+      clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [request]);
+
+  const retry = () => {
     setError("");
-    setPayload(null);
-
-    const chartUrl = buildChartApiUrl(chartParams);
-    const cacheKey = ChartCache.makeKey(chartUrl);
-
-    const cached = chartCache.get(cacheKey) as ChartApiResponse | null;
+    const cached = readCachedChart(chartParams);
     if (cached) {
       setPayload(cached);
-      setIsLoading(false);
+      setRequest(null);
       return;
     }
-
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
-
-      const response = await fetch(chartUrl, {
-        cache: "no-store",
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        throw new Error(`Chart API error (${response.status})`);
-      }
-
-      const data = (await response.json()) as ChartApiResponse;
-      chartCache.set(cacheKey, data);
-      setPayload(data);
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") {
-        setError(
-          tRef.current("shared.chartRequestTimedOut", {
-            seconds: String(Math.round(REQUEST_TIMEOUT_MS / 1000)),
-          })
-        );
-      } else {
-        setError(
-          err instanceof Error ? err.message : tRef.current("shared.chartUnknownApiError")
-        );
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [chartParams]);
-
-  useEffect(() => {
-    void fetchChart();
-  }, [fetchChart]);
+    setPayload(null);
+    setRequest({ params: chartParams });
+  };
 
   const historyQs = payload ? buildChartHistoryQuery(chartParams) : "";
 
@@ -170,7 +212,7 @@ export default function AdvancedLoader({
               <button
                 type="button"
                 className="skel-retry-btn"
-                onClick={() => void fetchChart()}
+                onClick={retry}
               >
                 <span className="skel-retry-icon">&#x21BB;</span>
                 {t("shared.chartErrorRetry")}

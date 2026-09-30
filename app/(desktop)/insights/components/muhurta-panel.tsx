@@ -112,6 +112,28 @@ interface StoredPrefs {
   daytimeOnly?: boolean;
 }
 
+/* The saved preferences, each one kept only if it is still a valid choice. */
+function readStoredPrefs(): StoredPrefs {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return {};
+    const p = JSON.parse(raw) as StoredPrefs;
+    return {
+      activity:
+        p.activity && ACTIVITIES.some((a) => a.value === p.activity) ? p.activity : undefined,
+      minScore:
+        typeof p.minScore === "number"
+          ? Math.min(MIN_SCORE_CEIL, Math.max(MIN_SCORE_FLOOR, p.minScore))
+          : undefined,
+      daytimeOnly: typeof p.daytimeOnly === "boolean" ? p.daytimeOnly : undefined,
+      preset: p.preset && PRESETS.some((pr) => pr.days === p.preset) ? p.preset : undefined,
+    };
+  } catch {
+    /* ignore unreadable prefs */
+    return {};
+  }
+}
+
 function isDaytime(isoStr: string): boolean {
   const h = new Date(isoStr).getHours();
   return h >= 6 && h < 18;
@@ -352,16 +374,20 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   const toId = useId();
   const { language } = useTranslation();
   const locale = LOCALE_TAGS[language];
-  const [activity, setActivity] = useState("general_auspicious");
+  /* The saved preferences seed the first render. The timing page loads this
+     panel with ssr: false, so there is no server HTML for storage to disagree
+     with -- and no effect applying them a commit after the defaults painted. */
+  const [storedPrefs] = useState(readStoredPrefs);
+  const [activity, setActivity] = useState(storedPrefs.activity ?? "general_auspicious");
   const [startDate, setStartDate] = useState(todayStr);
-  const [endDate, setEndDate] = useState(() => futureStr(7));
-  const [activePreset, setActivePreset] = useState<number>(7);
+  const [endDate, setEndDate] = useState(() => futureStr(storedPrefs.preset ?? 7));
+  const [activePreset, setActivePreset] = useState<number>(storedPrefs.preset ?? 7);
   const [result, setResult] = useState<MuhurtaResponse | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<MuhurtaError | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
-  const [minScore, setMinScore] = useState(MIN_SCORE_FLOOR);
-  const [daytimeOnly, setDaytimeOnly] = useState(false);
+  const [minScore, setMinScore] = useState(storedPrefs.minScore ?? MIN_SCORE_FLOOR);
+  const [daytimeOnly, setDaytimeOnly] = useState(storedPrefs.daytimeOnly ?? false);
   const [resultsOpen, setResultsOpen] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
 
@@ -476,30 +502,6 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
   }, [activity, startDate, endDate, queryString]);
 
   const hydrated = useRef(false);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const p = JSON.parse(raw) as StoredPrefs;
-      if (p.activity && ACTIVITIES.some((a) => a.value === p.activity)) {
-        setActivity(p.activity);
-      }
-      if (typeof p.minScore === "number") {
-        setMinScore(
-          Math.min(MIN_SCORE_CEIL, Math.max(MIN_SCORE_FLOOR, p.minScore)),
-        );
-      }
-      if (typeof p.daytimeOnly === "boolean") setDaytimeOnly(p.daytimeOnly);
-      if (p.preset && PRESETS.some((pr) => pr.days === p.preset)) {
-        setStartDate(todayStr());
-        setEndDate(futureStr(p.preset));
-        setActivePreset(p.preset);
-      }
-    } catch {
-      /* ignore unreadable prefs */
-    }
-  }, []);
 
   useEffect(() => {
     if (!hydrated.current) {

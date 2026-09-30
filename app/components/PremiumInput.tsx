@@ -50,17 +50,15 @@ export default function PremiumInput({
   normalize,
 }: PremiumInputProps) {
   const [isFocused, setIsFocused] = useState(false);
-  const [isFilled, setIsFilled] = useState(false);
+  /* Read off the value rather than mirrored into state: the mirror caught up a
+     commit late, so a field restored with a value first painted as empty. */
+  const isFilled = value.length > 0;
   const [assist, setAssist] = useState<IntakeFieldResult | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const generatedId = useId();
   const inputId = id ?? `premium-input-${generatedId}`;
   const errorId = `${inputId}-error`;
   const assistId = `${inputId}-assist`;
-
-  useEffect(() => {
-    setIsFilled(value.length > 0);
-  }, [value]);
 
   useEffect(() => {
     if (autoFocus && inputRef.current) {
@@ -85,7 +83,6 @@ export default function PremiumInput({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
-    setIsFilled(e.target.value.length > 0);
     /* A note about the previous value stops being true the moment the text
      * changes; the next blur will produce a fresh one. */
     if (assist) setAssist(null);

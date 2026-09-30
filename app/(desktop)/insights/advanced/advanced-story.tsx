@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -46,9 +46,17 @@ const MAX_ATTEMPTS = 2;
  *
  * Sharing the promise makes a second mount attach to the first call instead of
  * starting another, which is correct in production too for anything that
- * remounts this component.
+ * remounts this component. The start time and the attempt live on the entry
+ * for the same reason: a mount that joins reports the request's progress, not
+ * its own.
  */
-const inFlight = new Map<string, Promise<AdvancedStoryOutcome>>();
+type InFlightStory = {
+  promise: Promise<AdvancedStoryOutcome>;
+  startedAt: number;
+  attempt: number;
+};
+
+const inFlight = new Map<string, InFlightStory>();
 
 type AdvancedStoryOutcome =
   | { kind: "story"; story: AdvancedStory }
@@ -65,6 +73,9 @@ export type StoryState =
   | { status: "failed"; reason: "limit" | "unavailable" | "signedOut"; retry: () => void }
   | { status: "off" };
 
+const LOADING_FROM_ZERO: StoryState = { status: "loading", elapsedMs: 0, attempt: 1 };
+const STORY_OFF: StoryState = { status: "off" };
+
 /**
  * Fetches the whole page's prose in one request.
  *
@@ -76,24 +87,17 @@ export type StoryState =
  * not be the first answer to a provider that was merely slow.
  */
 export function useAdvancedStory(queryString: string): StoryState {
-  const [state, setState] = useState<StoryState>({
-    status: "loading",
-    elapsedMs: 0,
-    attempt: 1,
-  });
   const [retryToken, setRetryToken] = useState(0);
-  const startedAt = useRef<number>(Date.now());
-  /* Lives across the effect's own re-runs so a second mount joining a request
-     already in flight reports the attempt that request is really on. */
-  const attemptRef = useRef(1);
+  const requestKey = `${queryString}#${retryToken}`;
+  /* The latest state recorded for a request, and which request. One with
+     nothing recorded yet is loading from zero -- derived, where it used to be
+     set as the effect started. */
+  const [recorded, setRecorded] = useState<{ key: string; state: StoryState } | null>(null);
 
   const retry = useCallback(() => setRetryToken((token) => token + 1), []);
 
   useEffect(() => {
-    if (!queryString) {
-      setState({ status: "off" });
-      return;
-    }
+    if (!queryString) return;
 
     /* Cancelled rather than aborted: the request may be shared with another
        mount of this component, so this instance stops listening instead of
@@ -106,9 +110,16 @@ export function useAdvancedStory(queryString: string): StoryState {
       ticker = null;
     };
 
-    const key = `${queryString}#${retryToken}`;
+    const key = requestKey;
+    const record = (next: (previous: StoryState) => StoryState) => {
+      if (cancelled) return;
+      setRecorded((current) => ({
+        key,
+        state: next(current?.key === key ? current.state : LOADING_FROM_ZERO),
+      }));
+    };
 
-    const fetchOnce = async (): Promise<AdvancedStoryOutcome> => {
+    const fetchOnce = async (entry: InFlightStory): Promise<AdvancedStoryOutcome> => {
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
         try {
           const response = await fetch(`/api/chart/advanced-story?${queryString}`);
@@ -127,67 +138,54 @@ export function useAdvancedStory(queryString: string): StoryState {
         } catch (error) {
           if (attempt >= MAX_ATTEMPTS) throw error;
           /* Straight back in. The wait is already long; a backoff on top of it
-             would cost more than the retry saves. */
-          attemptRef.current = attempt + 1;
-          if (!cancelled) {
-            setState((previous) =>
-              previous.status === "loading"
-                ? { ...previous, attempt: attempt + 1 }
-                : previous,
-            );
-          }
+             would cost more than the retry saves. The next tick reports it. */
+          entry.attempt = attempt + 1;
         }
       }
       throw new Error("unreachable");
     };
 
-    let pending = inFlight.get(key);
-    if (!pending) {
-      startedAt.current = Date.now();
-      attemptRef.current = 1;
-      pending = fetchOnce().finally(() => {
+    let entry = inFlight.get(key);
+    if (!entry) {
+      const fresh = { startedAt: Date.now(), attempt: 1 } as InFlightStory;
+      fresh.promise = fetchOnce(fresh).finally(() => {
         inFlight.delete(key);
       });
-      inFlight.set(key, pending);
+      inFlight.set(key, fresh);
+      entry = fresh;
     }
+    const shared = entry;
 
-    setState({
-      status: "loading",
-      elapsedMs: Date.now() - startedAt.current,
-      attempt: attemptRef.current,
-    });
     ticker = setInterval(() => {
-      if (cancelled) return;
-      setState((previous) =>
+      record((previous) =>
         previous.status === "loading"
-          ? { ...previous, elapsedMs: Date.now() - startedAt.current }
+          ? { ...previous, elapsedMs: Date.now() - shared.startedAt, attempt: shared.attempt }
           : previous,
       );
     }, TICK_MS);
 
-    pending
+    shared.promise
       .then((outcome) => {
-        if (cancelled) return;
         stopTicking();
-        if (outcome.kind === "story") setState({ status: "ready", story: outcome.story });
-        else if (outcome.kind === "limit") setState({ status: "failed", reason: "limit", retry });
+        if (outcome.kind === "story") record(() => ({ status: "ready", story: outcome.story }));
+        else if (outcome.kind === "limit") record(() => ({ status: "failed", reason: "limit", retry }));
         else if (outcome.kind === "signedOut")
-          setState({ status: "failed", reason: "signedOut", retry });
-        else setState({ status: "off" });
+          record(() => ({ status: "failed", reason: "signedOut", retry }));
+        else record(() => ({ status: "off" }));
       })
       .catch(() => {
-        if (cancelled) return;
         stopTicking();
-        setState({ status: "failed", reason: "unavailable", retry });
+        record(() => ({ status: "failed", reason: "unavailable", retry }));
       });
 
     return () => {
       cancelled = true;
       stopTicking();
     };
-  }, [queryString, retry, retryToken]);
+  }, [queryString, requestKey, retry]);
 
-  return state;
+  if (!queryString) return STORY_OFF;
+  return recorded?.key === requestKey ? recorded.state : LOADING_FROM_ZERO;
 }
 
 /**

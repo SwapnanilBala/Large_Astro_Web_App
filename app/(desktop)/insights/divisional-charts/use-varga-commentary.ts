@@ -37,8 +37,9 @@ export type VargaCommentary = {
  *   never reaches the route, so clearing the ref cannot buy a second billed
  *   call.
  *
- *   The empty dependency array covers re-renders. The obvious alternative,
- *   depending on `charts`, looks more correct and is worse: the atlas re-renders
+ *   Taking the inputs once, as state, covers re-renders: the effect depends on
+ *   nothing that can change. The obvious alternative, depending on `charts`
+ *   as it arrives, looks more correct and is worse: the atlas re-renders
  *   on every tab click, and a new object identity on any of them would re-fetch
  *   all ten notes. The chart cannot change without a navigation, which unmounts
  *   this anyway.
@@ -55,16 +56,16 @@ export function useVargaCommentary(
   const [state, setState] = useState<VargaCommentaryState>("pending");
   const [notes, setNotes] = useState<Map<number, string>>(() => new Map());
   const startedRef = useRef(false);
+  /* Taken once, from the render this hook mounted with, so the effect below
+     depends on nothing that changes. That includes `language`: a locale switch
+     mid-page does not re-fetch, because that would spend a second call to
+     re-word a note the reader already has. It applies on the next visit. */
+  const [facts] = useState(() => buildVargaFacts(charts));
+  const [requestLanguage] = useState(language);
 
   useEffect(() => {
-    if (startedRef.current) return;
+    if (facts.length === 0 || startedRef.current) return;
     startedRef.current = true;
-
-    const facts = buildVargaFacts(charts);
-    if (facts.length === 0) {
-      setState("failed");
-      return;
-    }
 
     /* Aborted on unmount so a navigation away does not land a setState on a
        dead component. */
@@ -75,7 +76,7 @@ export function useVargaCommentary(
         const response = await fetch("/api/chart/varga-commentary", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ divisions: facts, language }),
+          body: JSON.stringify({ divisions: facts, language: requestLanguage }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -104,11 +105,8 @@ export function useVargaCommentary(
       /* So a remount can ask again; see the note above. */
       startedRef.current = false;
     };
-    /* eslint-disable-next-line react-hooks/exhaustive-deps -- once per mount; see above.
-       `language` is read at fire time on purpose: a locale switch mid-page does
-       not re-fetch, because that would spend a second call to re-word a note
-       the reader already has. It applies on the next visit. */
-  }, []);
+  }, [facts, requestLanguage]);
 
-  return { state, notes };
+  /* No divisions means nothing to ask for, which reads the same as a failure. */
+  return { state: facts.length === 0 ? "failed" : state, notes };
 }
