@@ -470,10 +470,15 @@
   box-shadow: inset 0 0 12px rgba(178, 130, 255, 0.2);
 }
 
+/* Quieter than the text around it by tier, not by opacity. An opacity takes a
+   share of whatever is painted behind the text, so the colour that lands is
+   one nobody chose: --ink-soft at 0.5 measured 2.85:1 on this card. The
+   dimmest dark tier that clears 4.5:1 here is --text-secondary, at 5.59:1;
+   --text-tertiary would be about 3.4:1. The light theme picks its own tier
+   near the end of this file. */
 .dasha-timeline-hint {
   font-size: 1.25rem;
-  color: var(--ink-soft);
-  opacity: 0.5;
+  color: var(--text-secondary);
   margin: -0.3rem 0 0.5rem;
   font-style: italic;
 }
@@ -1905,11 +1910,12 @@
   line-height: 1.55;
 }
 
+/* The same move as .dasha-timeline-hint: 0.7 of --ink-soft measured 3.84:1
+   over this card's violet tint, and --text-secondary measures 5.13:1. */
 .navamsa-click-hint {
   margin: 0.6rem 0 0;
   font-size: 1.25rem;
-  color: var(--ink-soft);
-  opacity: 0.7;
+  color: var(--text-secondary);
   font-style: italic;
 }
 
@@ -4847,12 +4853,11 @@ html[data-theme="light"] .palm-status--clear {
   color: var(--accent-teal-dim);
 }
 
-/* Two hints that dim themed ink with opacity. The multiplier is what makes
-   them fail: --ink-soft is fine on this card, and 0.5 of it is 2.18:1. The
-   de-emphasis moves to a lighter tier instead of a transparency. */
+/* The light theme's tier for the two hints set by tier above. They used to dim
+   --ink-soft with opacity, and 0.5 of it was 2.18:1 on the cream card; here
+   --text-tertiary is quiet enough and clears AA, at 5.18:1 and 4.92:1. */
 html[data-theme="light"] .dasha-timeline-hint,
 html[data-theme="light"] .navamsa-click-hint {
-  opacity: 1;
   color: var(--text-tertiary);
 }
 
