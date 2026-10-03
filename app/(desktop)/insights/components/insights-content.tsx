@@ -18,6 +18,8 @@ import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support
 import styles from "../insights.module.css";
 import { useHydrated } from "@/lib/use-hydrated";
 import SectionGateway from "./section-gateway";
+import TimingGatewayPreview from "./timing-gateway-preview";
+import { Clock3 } from "lucide-react";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import TodaysSkyBand from "./todays-sky-band";
 import {
@@ -1751,23 +1753,16 @@ export default function InsightsContent({
           <GatewaySection id="timing" className={styles.timingSection}>
             <SectionGateway
               href={`/insights/timing?${historyQs}`}
-              icon={<FiClock />}
-              heading="Forecast, electional windows, and the year ahead"
-              blurb={
-                "Three long views that were burying the rest of this report. They " +
-                "now have a page of their own, with room for the explanations each " +
-                "one needs."
-              }
-              chipsLabel="What the timing page covers"
-              chips={[
-                { label: "Forecast", note: "periods now and next" },
-                { label: "Muhurta", note: "when to begin" },
-                { label: "Varshaphal", note: "this year's chart" },
-              ]}
-              footnote="Electional windows are scored against this chart, not a generic calendar."
-              footnoteIcon={<FiClock aria-hidden="true" />}
-              ctaLabel="Open timing and electional"
-            />
+              icon={<Clock3 />}
+              eyebrow="01 / Timing and electional"
+              variant="timing"
+              heading="Your Timing"
+              blurb="Explore upcoming periods and windows for important beginnings."
+              footnote="Starting windows are scored against your own chart."
+              ctaLabel="Explore your timing"
+            >
+              <TimingGatewayPreview dasha={payload.chart.dasha} href={`/insights/timing?${historyQs}`} />
+            </SectionGateway>
           </GatewaySection>
 
           {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (

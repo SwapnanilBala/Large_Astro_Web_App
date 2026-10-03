@@ -1175,13 +1175,11 @@
     linear-gradient(135deg, rgba(206, 161, 66, 0.32), rgba(108, 225, 212, 0.18));
 }
 
-/* A gateway section is just its card -- no outer panel chrome, because the
-   card already has a border, a surface and a heading of its own, and nesting
-   one bordered box inside another was the reason these three read as heavier
-   than everything around them. */
+/* Unframed previews share their row height so the navigation stays aligned. */
 .gatewaySection {
   display: block;
   min-width: 0;
+  height: 100%;
 }
 
 /*
@@ -1210,11 +1208,8 @@
     auto-fit,
     minmax(min(100%, max(26rem, calc((100% - var(--gateway-gap)) / 2))), 1fr)
   );
-  /* Not stretch. The varga gateway carries ten chips against the other two's
-     three, so forcing a pair to equal height opens a void of a couple of
-     hundred pixels inside the shorter card. Ragged bottoms read as normal;
-     a card with a hole in the middle of it does not. */
-  align-items: start;
+  /* The compact previews occupy the middle track; footers align at the bottom. */
+  align-items: stretch;
   gap: var(--gateway-gap);
   min-width: 0;
 }

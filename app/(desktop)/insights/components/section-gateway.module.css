@@ -1,103 +1,93 @@
-/* Shared by every results-page section that links out to its own page.
-   Carried over from the varga-atlas gateway so the three read as one pattern. */
 .gateway {
+  --gateway-accent: var(--accent-gold);
   display: grid;
-  gap: 1.15rem;
-  margin-top: 0.8rem;
-  padding: clamp(1rem, 2vw, 1.45rem);
-  border: 1px solid rgba(200, 155, 60, 0.2);
-  border-radius: 16px;
-  background:
-    radial-gradient(circle at 92% 12%, rgba(108, 225, 212, 0.1), transparent 30%),
-    linear-gradient(135deg, rgba(200, 155, 60, 0.09), rgba(9, 14, 28, 0.7));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  grid-template-rows: auto 1fr auto;
+  gap: 1.5rem;
+  height: 100%;
+  min-width: 0;
+  padding: 1.6rem 0 1rem;
+  border-top: 1px solid var(--line-soft);
+  color: var(--ink-main);
+}
+
+.gateway[data-variant="atlas"] {
+  --gateway-accent: var(--accent-aqua);
+}
+
+.gateway[data-variant="reading"] {
+  --gateway-accent: var(--ink-main);
 }
 
 .copy {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.9rem;
-  align-items: start;
+  min-width: 0;
 }
 
-.icon {
-  display: inline-flex;
+.eyebrow {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 2.85rem;
-  height: 2.85rem;
-  border: 1px solid rgba(200, 155, 60, 0.32);
-  border-radius: 12px;
-  color: var(--accent-gold);
-  background: rgba(200, 155, 60, 0.1);
+  gap: 0.6rem;
+  margin: 0 0 0.85rem;
+  color: var(--gateway-accent);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
+.icon,
 .icon svg {
-  width: 1.35rem;
-  height: 1.35rem;
+  display: block;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex: 0 0 auto;
 }
 
-/* A gateway is a section in its own right now, not a card inside one, so its
-   heading takes the section treatment rather than flat cream. */
 .copy h3 {
-  margin: 0 0 0.35rem;
-  background: var(--heading-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  margin: 0 0 0.6rem;
+  color: var(--ink-main);
   font-family: var(--font-newsreader), Georgia, serif;
-  font-size: clamp(1.2rem, 2vw, 1.48rem);
-  line-height: 1.25;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1.16;
+  letter-spacing: 0;
+  text-wrap: balance;
 }
 
-.copy p,
-.footer p {
+.blurb {
+  max-width: 42rem;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 1.1rem;
-  line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.65;
 }
 
-/* Auto-fit rather than a fixed five: the varga atlas shows ten chips, timing
-   shows three. A fixed column count leaves one of them looking broken. */
+.preview {
+  min-width: 0;
+  align-self: start;
+}
+
 .chips {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 0.55rem;
-}
-
-/* 6.5rem (104px) was below the widest chip. "Chaturvimshamsa" under D24 is
-   the longest varga name: 116px with the padding, and it is one unbreakable
-   word, so wherever auto-fit resolved a track under that -- 109px at 1920,
-   106px at 1600, 105px at 1100 -- it rendered outside its own border. Only
-   1280 happened to land wide enough to hide it. 7.5rem floors the track at
-   120px, which resolves to 125px or more at every width. */
-.chips[data-count="many"] {
-  grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+  gap: 0.7rem;
 }
 
 .chips span {
   display: grid;
-  gap: 0.12rem;
+  gap: 0.25rem;
   min-width: 0;
-  /* min-width: 0 lets the track shrink below its content, which is what let a
-     long name escape the chip rather than push the column wider. The floor
-     above means nothing wraps today; this is so a longer name added later
-     wraps to a second line instead of spilling out again. */
-  overflow-wrap: break-word;
-  padding: 0.6rem 0.68rem;
-  border: 1px solid rgba(108, 225, 212, 0.13);
-  border-radius: 10px;
-  background: rgba(108, 225, 212, 0.045);
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line-soft);
   color: var(--ink-soft);
-  font-size: 0.84rem;
-  line-height: 1.25;
+  font-size: 0.85rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
 }
 
 .chips strong {
-  color: var(--accent-gold);
-  font-size: 1.02rem;
+  color: var(--gateway-accent);
+  font-size: 1.1rem;
 }
 
 .footer {
@@ -105,25 +95,76 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 0.85rem 1rem;
-  padding-top: 0.2rem;
+  gap: 0.85rem 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line-soft);
 }
 
 .footer p {
-  /* Row direction only. flex-basis follows the main axis, so when the
-     container query below turns this into a column the same declaration reads
-     as a 16rem *minimum height* and inflated the footer to 323px, which is
-     what opened the gap between the footnote and the button. */
-  flex: 1 1 16rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex: 1 1 14rem;
   min-width: 0;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+  line-height: 1.55;
 }
 
-/* Below this the sentence and the button each take their own line rather than
-   fighting over one. */
+.footer p svg {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+  flex: 0 0 auto;
+}
+
+.openLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-height: 2.9rem;
+  max-width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--gateway-accent) 48%, transparent);
+  border-radius: 6px;
+  background: var(--surface-strong);
+  color: var(--ink-main);
+  font-size: 0.92rem;
+  font-weight: 650;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-decoration: none;
+  text-align: center;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.openLink svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+  color: var(--gateway-accent);
+}
+
+.openLink:hover {
+  background: color-mix(in srgb, var(--gateway-accent) 12%, transparent);
+  border-color: var(--gateway-accent);
+}
+
+.openLink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+}
+
+.openLink:active {
+  background: color-mix(in srgb, var(--gateway-accent) 18%, transparent);
+}
+
 @container (max-width: 34rem) {
   .footer {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
   }
 
   .footer p {
@@ -131,168 +172,28 @@
   }
 }
 
-.footer p {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  font-size: 0.98rem;
-}
-
-/*
- * The gold plate. Was a flat 135deg wash with a lift on hover; it now reads as
- * a struck piece of metal -- a lit top edge and a shadowed bottom one give it
- * thickness, and a sheen crosses it once per hover.
- *
- * Mirrored by .sectionOpenLink in insights.module.css; keep the two in step.
- */
-.openLink {
-  position: relative;
-  /* Clips the sheen to the plate. Does not clip :focus-visible's outline,
-     which is drawn outside the border box. */
-  overflow: hidden;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
-  min-height: 3rem;
-  padding: 0.8rem 1.3rem;
-  border: 1px solid rgba(255, 234, 182, 0.5);
-  border-radius: 12px;
-  color: #17120a;
-  background:
-    linear-gradient(180deg, rgba(255, 252, 240, 0.2), rgba(255, 255, 255, 0) 38%),
-    linear-gradient(135deg, #edc87e 0%, #d3a54e 46%, #a8781f 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 250, 232, 0.62),
-    inset 0 -1px 0 rgba(84, 54, 10, 0.34),
-    0 1px 2px rgba(0, 0, 0, 0.32),
-    0 10px 24px -8px rgba(0, 0, 0, 0.5);
-  font-weight: 750;
-  letter-spacing: 0.01em;
-  text-decoration: none;
-  white-space: nowrap;
-  transition:
-    transform 200ms cubic-bezier(0.2, 0.7, 0.3, 1),
-    box-shadow 220ms ease,
-    border-color 220ms ease,
-    filter 200ms ease;
-}
-
-/* Passes over the text as well as the plate, which is what makes it read as
-   light crossing metal rather than a band sliding behind the label. */
-.openLink::after {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  background: linear-gradient(
-    104deg,
-    transparent 38%,
-    rgba(255, 253, 246, 0.52) 50%,
-    transparent 62%
-  );
-  transform: translateX(-115%);
-  transition: transform 680ms cubic-bezier(0.25, 0.6, 0.3, 1);
-  pointer-events: none;
-}
-
-.openLink svg {
-  transition: transform 220ms cubic-bezier(0.2, 0.7, 0.3, 1);
-}
-
-.openLink:hover,
-.openLink:focus-visible {
-  transform: translateY(-2px);
-  border-color: rgba(255, 240, 200, 0.8);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 250, 232, 0.75),
-    inset 0 -1px 0 rgba(84, 54, 10, 0.3),
-    0 2px 4px rgba(0, 0, 0, 0.3),
-    0 16px 32px -10px rgba(0, 0, 0, 0.55),
-    0 0 26px rgba(226, 188, 99, 0.3);
-}
-
-.openLink:hover::after,
-.openLink:focus-visible::after {
-  transform: translateX(115%);
-}
-
-.openLink:hover svg,
-.openLink:focus-visible svg {
-  transform: translate(3px, -3px);
-}
-
-/*
- * Its own ring. The old rule set outline: none here and left the 2px hover
- * lift as the only focus signal, which is not one -- a keyboard user could
- * not tell this button from its neighbour.
- */
-.openLink:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
-}
-
-/* There was no pressed state at all; the button stayed lifted through the
-   click. */
-.openLink:active {
-  transform: translateY(1px);
-  filter: brightness(0.96);
-  box-shadow:
-    inset 0 3px 7px rgba(70, 42, 4, 0.55),
-    inset 0 1px 0 rgba(255, 250, 232, 0.18),
-    0 1px 1px rgba(0, 0, 0, 0.28);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .openLink,
-  .openLink::after,
-  .openLink svg {
-    transition: none;
+@media (max-width: 600px) {
+  .gateway {
+    gap: 1.25rem;
+    padding-top: 1.25rem;
   }
 
-  /* Colour and the focus ring still respond; only the travel is dropped. */
-  .openLink:hover,
-  .openLink:focus-visible,
-  .openLink:active {
-    transform: none;
-  }
-
-  .openLink:hover::after,
-  .openLink:focus-visible::after {
-    transform: translateX(-115%);
-  }
-
-  .openLink:hover svg,
-  .openLink:focus-visible svg {
-    transform: none;
-  }
-}
-
-@media (max-width: 760px) {
-  .chips {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .copy h3 {
+    font-size: 1.7rem;
   }
 
   .footer {
-    align-items: stretch;
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .openLink {
-    width: 100%;
+  .footer p {
+    flex: 0 0 auto;
   }
 }
 
-/* ── Ethereal Dawn ──
- *
- * the gateway card was built for the dark tree: ink washes for surfaces, and
- * pale or bright-accent ink on top of them. Under Ethereal Dawn those
- * washes composite to mid greys, and the ink either matches them or goes
- * dark against them -- the copy measured between 1.0 and 2.5:1.
- *
- * Generated from this file's own declarations: every rule whose base
- * background layer is dark, and every colour too pale to survive a light
- * surface, mapped onto the themed tiers by the alpha each was reaching
- * for. Decorative layers are excluded. */
-:global(html[data-theme="light"]) .gateway {
-  background: var(--surface-frosted);
+@media (prefers-reduced-motion: reduce) {
+  .openLink {
+    transition: none;
+  }
 }
