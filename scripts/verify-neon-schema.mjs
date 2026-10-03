@@ -29,6 +29,10 @@ const expectedTables = [
      daily LLM ceiling degrades to the per-instance one it used to be — so this
      check is the only thing that would notice the migration had not run. */
   "llm_budget_counters",
+  /* Joins the list in 0009. Absent, the chart-style choice simply stays on the
+     device -- /api/account/preferences answers 503 and the page carries on --
+     so, as with the budget counters, only this check would notice. */
+  "user_preferences",
 ];
 
 /**

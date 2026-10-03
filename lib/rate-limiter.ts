@@ -82,6 +82,10 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      facts, so a second download of the same reading never reaches here. */
   "/api/chart/story-prose": { limit: 3, windowMs: 60_000 },
   "/api/suggest": { limit: 60, windowMs: 60_000 },
+  /* Read once per results page for a signed-in visitor, written once per click
+     on the chart-style switch. Thirty a minute is a person toggling to compare
+     the two drawings, not a loop. */
+  "/api/account/preferences": { limit: 30, windowMs: 60_000 },
 };
 
 /**

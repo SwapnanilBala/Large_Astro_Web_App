@@ -8,6 +8,7 @@
  */
 
 import { z } from "@/lib/zod";
+import { CHART_STYLES } from "@/lib/chart-style";
 import { ENGINE_PRESETS } from "@/lib/engines/engine-registry";
 import { isWeekStart } from "@/lib/format-week";
 
@@ -295,6 +296,11 @@ export type SuggestInput = z.infer<typeof SuggestInputSchema>;
  * server-side from `queryString` by lib/sync/facts.ts, so the client cannot
  * describe a chart differently from the way /insights rendered it.
  */
+/** PUT /api/account/preferences: the chart style to keep on the account. */
+export const AccountPreferencesSchema = z.object({
+  chartStyle: z.enum(CHART_STYLES, { error: "chartStyle must be constellation or north-indian" }),
+});
+
 export const ChartSyncRequestSchema = z.object({
   queryString: z.string().min(1, "queryString is required").max(4000),
   ascendantSign: z.string().max(20).nullish(),

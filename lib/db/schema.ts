@@ -118,6 +118,36 @@ export const authSessions = pgTable(
   ],
 );
 
+/**
+ * How a signed-in person likes the site drawn, so the choice follows them
+ * from device to device.
+ *
+ * One row per account, created on the first choice and deleted with the
+ * account. A column per preference rather than a JSON bag: each value is
+ * checked here, and an unknown style can never reach a client that would not
+ * know how to draw it. Every column is nullable -- null means "never chosen",
+ * which lets the device's own choice stand.
+ *
+ * The browser keeps its own copy (`astro_chart_style`); this row is what a
+ * second device adopts when the same person signs in there.
+ */
+export const userPreferences = pgTable(
+  "user_preferences",
+  {
+    userId: uuid("user_id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    chartStyle: varchar("chart_style", { length: 20 }),
+    ...timestamps(),
+  },
+  (table) => [
+    check(
+      "user_preferences_chart_style_check",
+      sql`${table.chartStyle} in ('constellation', 'north-indian')`,
+    ),
+  ],
+);
+
 /** A person whose contact information and astrology records are managed. */
 export const clients = pgTable(
   "clients",
