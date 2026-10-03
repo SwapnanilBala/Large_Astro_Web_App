@@ -19,7 +19,8 @@ import styles from "../insights.module.css";
 import { useHydrated } from "@/lib/use-hydrated";
 import SectionGateway from "./section-gateway";
 import TimingGatewayPreview from "./timing-gateway-preview";
-import { Clock3 } from "lucide-react";
+import AtlasGatewayPreview from "./atlas-gateway-preview";
+import { Clock3, Layers3 } from "lucide-react";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import TodaysSkyBand from "./todays-sky-band";
 import {
@@ -33,19 +34,7 @@ import {
 import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import LagnaChartCard from "./lagna-chart-card";
-import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
-import divisionalMessages from "@/messages/en.divisional.json";
-import { FiClock, FiBookOpen, FiLayers, FiArrowUpRight } from "react-icons/fi";
-
-/* Read as data rather than through useRouteMessages: the varga gateway that
-   renders these chips is still hard-coded English down to its heading, blurb,
-   footnote and CTA, so translating the ten chip labels alone would leave one
-   card speaking two languages. They move with the rest of this file when it
-   is routed through i18n. */
-const ENGLISH_DIVISIONAL_GUIDE = divisionalMessages.divisional.guide as Record<
-  string,
-  { name: string; focus: string }
->;
+import { FiBookOpen, FiArrowUpRight } from "react-icons/fi";
 
 // Lightweight skeleton for lazy-loaded panels
 function PanelSkeleton({ minHeight = 200 }: { minHeight?: number | string }) {
@@ -1770,22 +1759,16 @@ export default function InsightsContent({
               <PanelErrorBoundary panelName="Divisional Chart Atlas">
                 <SectionGateway
                   href={`/insights/divisional-charts?${historyQs}`}
-                  icon={<FiLayers />}
-                  heading="See the layers behind your main chart"
-                  blurb={
-                    `All ${Object.keys(payload.chart.divisional_charts).length} supported vargas from D1 through D60, ` +
-                    "with guidance for the ten that matter most in a client reading."
-                  }
-                  chipsLabel="Ten key divisional charts"
-                  chips={IMPORTANT_DIVISIONAL_CHARTS.map((chart) => ({
-                    label: chart.label,
-                    note: ENGLISH_DIVISIONAL_GUIDE[`d${chart.division}`].name,
-                    title: ENGLISH_DIVISIONAL_GUIDE[`d${chart.division}`].focus,
-                  }))}
-                  footnote="Higher divisions are shown with birth-time reliability guidance."
-                  footnoteIcon={<FiClock aria-hidden="true" />}
-                  ctaLabel="Open your varga atlas"
-                />
+                  icon={<Layers3 />}
+                  eyebrow="02 / Divisional charts"
+                  variant="atlas"
+                  heading="Your Chart Atlas"
+                  blurb="See how your birth chart unfolds across identity, relationships, and career."
+                  footnote="Higher divisions depend on the accuracy of your birth time."
+                  ctaLabel={`View all ${Object.keys(payload.chart.divisional_charts).length} charts`}
+                >
+                  <AtlasGatewayPreview charts={payload.chart.divisional_charts} historyQs={historyQs} />
+                </SectionGateway>
               </PanelErrorBoundary>
             </GatewaySection>
           )}

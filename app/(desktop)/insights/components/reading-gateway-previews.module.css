@@ -131,6 +131,131 @@
   border-radius: 4px;
 }
 
+.atlasGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.atlasLink {
+  min-width: 0;
+  color: var(--ink-main);
+  text-decoration: none;
+}
+
+.atlasFigure {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+  margin: 0;
+}
+
+.miniChart {
+  display: block;
+  width: 100%;
+  max-width: 11rem;
+  aspect-ratio: 1;
+  color: var(--accent-aqua);
+}
+
+.occupiedHouse {
+  fill: color-mix(in srgb, var(--accent-aqua) 9%, transparent);
+}
+
+.emptyHouse {
+  fill: none;
+}
+
+.miniSign {
+  fill: var(--ink-soft);
+  font-size: 23px;
+}
+
+.miniPlanet {
+  fill: var(--ink-main);
+  font-family: var(--font-body), sans-serif;
+  font-weight: 600;
+}
+
+.miniLines {
+  fill: none;
+  stroke: color-mix(in srgb, var(--accent-aqua) 50%, transparent);
+  stroke-width: 2;
+}
+
+.atlasCaption {
+  display: grid;
+  gap: 0.3rem;
+  min-width: 0;
+}
+
+.atlasCaption strong {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  color: var(--accent-aqua);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.atlasCaption strong svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}
+
+.atlasCaption > span {
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.atlasCaption small {
+  color: var(--ink-soft);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.atlasLink:hover .miniLines {
+  stroke: var(--accent-aqua);
+}
+
+.atlasLink:hover .atlasCaption > span {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.atlasLink:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.previewEmpty {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+@container (max-width: 28rem) {
+  .atlasGrid {
+    grid-template-columns: 1fr;
+    gap: 0.85rem;
+  }
+
+  .atlasFigure {
+    grid-template-columns: 5rem minmax(0, 1fr);
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .atlasLink:not(:last-child) {
+    padding-bottom: 0.85rem;
+    border-bottom: 1px solid var(--line-soft);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .stopArrow {
     transition: none;
