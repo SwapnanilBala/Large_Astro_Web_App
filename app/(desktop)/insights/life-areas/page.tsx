@@ -100,6 +100,7 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
           insights={insights}
           dasha={payload.chart.dasha}
           initialDomainKey={requestedKey ?? ""}
+          historyQs={historyQs}
           kalatra={kalatra}
         />
       </DetailPageShell>

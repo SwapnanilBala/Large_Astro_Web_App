@@ -96,10 +96,9 @@ type LlmBudgetConfig = {
  * Sized by what the call costs, not by what feels generous.
  *
  * The route totals are whole-deployment numbers rather than per-instance ones,
- * so they bite where they read. They are sized by what a call costs: the two
- * chart routes are Claude Opus 5 at low effort with max_tokens 1000 and a
- * cached system prefix, fractions of a cent each, while palm reading is Opus 5
- * vision over an image with nothing cached, and the reading it writes is about
+ * so they bite where they read. They are sized by what a call costs: dasha
+ * readings use Claude Opus 5 with a cached system prefix, while palm reading uses
+ * Opus 5 vision over an image with nothing cached, and its reading is about
  * five thousand output tokens -- $0.125 of output alone, so roughly $0.15 a
  * call. An order of magnitude dearer, hence 100 a day against 2500.
  *
@@ -140,7 +139,7 @@ type LlmBudgetConfig = {
  * away.
  *
  * The written PDF report is the dearest call in the app by a wide margin, and
- * the only one whose effort is set by who is asking. Opus 5 over the whole
+ * also varies its effort by who is asking. Opus 5 over the whole
  * nine-chapter document, streamed, max_tokens 32000, at HIGH for an account
  * and MEDIUM for a signed-out address. Measured on the sample chart:
  *
@@ -224,6 +223,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
   "/api/chart/domain-brief": {
+    // One paid call covers all seven areas: low for guests, medium for accounts.
     perDay: 2500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,

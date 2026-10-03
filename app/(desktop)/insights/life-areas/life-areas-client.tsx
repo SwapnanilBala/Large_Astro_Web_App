@@ -9,6 +9,7 @@ import {
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { useDomainBriefs } from "@/lib/use-domain-briefs";
 import lifeAreasMessages from "@/messages/en.life-areas.json";
 import KalatraPanel from "./kalatra-panel";
 import type { KalatraResult } from "@/lib/engines/kalatra-engine";
@@ -34,6 +35,7 @@ type LifeAreasClientProps = {
   insights: LifeDomainInsight[];
   dasha?: DashaInfo | null;
   initialDomainKey: string;
+  historyQs: string;
   /** Married-life detail. Only ever rendered under love_life. */
   kalatra?: KalatraResult | null;
 };
@@ -42,6 +44,7 @@ export default function LifeAreasClient({
   insights,
   dasha,
   initialDomainKey,
+  historyQs,
   kalatra,
 }: LifeAreasClientProps) {
   /* tr, not t: this page's copy is a namespace of its own that ships with the
@@ -63,6 +66,7 @@ export default function LifeAreasClient({
   const [viewMode, setViewMode] = useState<ViewMode>("detailed");
 
   const domain = ranked.find((entry) => entry.key === selectedKey) ?? ranked[0];
+  const { briefs, pending } = useDomainBriefs(historyQs, domain?.key ?? "love_life", Boolean(domain));
   if (!domain) return null;
 
   const copy = DOMAIN_READ_COPY[domain.key];
@@ -118,7 +122,9 @@ export default function LifeAreasClient({
             )}
           </div>
 
-          <p className={styles.domainOverview}>{domain.display.body}</p>
+          <p className={styles.domainOverview} aria-busy={pending}>
+            {briefs[domain.key] ?? domain.display.body}
+          </p>
 
           {domain.evidence_matrix && (
             <div className={styles.domainEvidenceVerdict}>

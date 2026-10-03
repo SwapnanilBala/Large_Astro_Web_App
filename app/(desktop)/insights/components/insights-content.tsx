@@ -135,7 +135,7 @@ import { localScopedKey } from "@/lib/local-scope";
 import { TRADITION_ORDER } from "@/lib/engines/engine-registry";
 import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
-import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
+import { useDomainBriefs } from "@/lib/use-domain-briefs";
 
 type InsightsContentProps = {
   payload: ChartApiResponse;
@@ -903,31 +903,9 @@ export default function InsightsContent({
     LifeDomainInsight["key"]
   >(rankedDomainInsights[0]?.key ?? "love_life");
   const domainSectionRef = useRef<HTMLDivElement>(null);
-  /* Written briefs, keyed by domain. The engine's display.body stays on screen
-     until one arrives and stays for good if none does, so this is additive:
-     nothing here can leave the panel emptier than it was. */
-  const [domainBriefs, setDomainBriefs] = useState<
-    Partial<Record<LifeDomainInsight["key"], string>>
-  >({});
-  /* The domain whose brief request came back empty. Cleared by choosing a
-     domain, so going back to one asks again, as it always has. */
-  const [domainBriefFailedFor, setDomainBriefFailedFor] = useState<
-    LifeDomainInsight["key"] | null
-  >(null);
-  /* Latched once the endpoint reports the feature is not configured. Without
-     it a deployment with no ANTHROPIC_API_KEY fires one doomed request per tab
-     click -- seven per reader, every reader, for a paragraph that was never
-     going to arrive. The engine's body is the answer in that case, and asking
-     again cannot change it. */
-  const [domainBriefsOffline, setDomainBriefsOffline] = useState(false);
-  /* A brief is out for the open domain while it has neither arrived nor
-     failed. Derived, where it used to be set as the request started. */
-  const domainBriefPending =
-    domainLoadState === "ready" &&
-    Boolean(selectedDomainKey) &&
-    !domainBriefsOffline &&
-    !domainBriefs[selectedDomainKey] &&
-    domainBriefFailedFor !== selectedDomainKey;
+  const { briefs: domainBriefs, pending: domainBriefPending } = useDomainBriefs(
+    historyQs, selectedDomainKey, domainLoadState === "ready",
+  );
 
   /* A new set of life areas opens on its strongest, as it always has. Adjusted
      during render, where an effect used to do it a commit late. */
@@ -935,12 +913,10 @@ export default function InsightsContent({
   if (selectionMadeFor !== domainInsights) {
     setSelectionMadeFor(domainInsights);
     if (rankedDomainInsights[0]) setSelectedDomainKey(rankedDomainInsights[0].key);
-    setDomainBriefFailedFor(null);
   }
   const selectDomain = (key: LifeDomainInsight["key"]) => {
     if (key === selectedDomainKey) return;
     setSelectedDomainKey(key);
-    setDomainBriefFailedFor(null);
   };
 
   /*
@@ -1033,65 +1009,6 @@ export default function InsightsContent({
       controller.abort();
     };
   }, [domainFetchKey, hasSuppliedDomainInsights, historyQs, isLifeDomainLocked]);
-
-  /*
-   * Ask for a written brief for whichever life area is open.
-   *
-   * The rule engine's display.body states what it found; this weighs those
-   * findings against each other, which is the part the engine cannot do because
-   * the combinations do not enumerate. It is a separate request rather than
-   * part of the life-domains payload on purpose: that payload is rendered
-   * server-side on /insights/life-areas and is on the critical path here, and
-   * seven model calls do not belong in front of either. One area is fetched,
-   * the one being read.
-   *
-   * Aborting on change is not optional. The zone is a tab strip, so clicking
-   * along the row issues a request per card, and without the abort the slowest
-   * response wins and lands its paragraph under a different area's heading.
-   */
-  useEffect(() => {
-    if (!domainBriefPending) return;
-
-    const controller = new AbortController();
-    const domain = selectedDomainKey;
-
-    fetch(`/api/chart/domain-brief?${historyQs}&domain=${domain}`, {
-      signal: controller.signal,
-    })
-      .then((response) => {
-        /* 503 is specifically "ANTHROPIC_API_KEY is not configured", and no
-           number of retries will change that. A 502 is a provider error --
-           a timeout, a refusal -- which says nothing about the next domain,
-           so it falls through and the next selection may still try. */
-        if (response.status === 503) {
-          setDomainBriefsOffline(true);
-          return null;
-        }
-        if (response.ok) return response.json();
-        /* A refused free allowance raises the sign-in prompt. It is not
-           `offline`: the feature works, this visitor has just had their two. */
-        void announceIfFreeUsageExhausted(response, "domainBrief");
-        return null;
-      })
-      .then((data: { brief?: string } | null) => {
-        if (controller.signal.aborted) return;
-        const brief = data?.brief;
-        if (brief) {
-          setDomainBriefs((previous) => ({ ...previous, [domain]: brief }));
-        } else {
-          setDomainBriefFailedFor(domain);
-        }
-      })
-      .catch(() => {
-        /* The engine's own body is still on screen; a failed request leaves
-           the panel exactly as it was before this feature existed. */
-        if (!controller.signal.aborted) setDomainBriefFailedFor(domain);
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [domainBriefPending, historyQs, selectedDomainKey]);
 
   /* The two signs the hero's arch shows alongside the rising sign. Read from
      the natal placements, so they are the chart's own numbers rather than a
