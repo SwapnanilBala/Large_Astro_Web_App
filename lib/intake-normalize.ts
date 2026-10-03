@@ -132,6 +132,20 @@ function clock(hours: number, minutes: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 }
 
+export interface BirthTimeOptions {
+  /**
+   * The text came off a 24-hour clock, so an hour with no AM or PM is that
+   * hour and never one of two.
+   *
+   * For the value of a working native time input, which is always "HH:mm"
+   * whatever its picker showed — the AM/PM wheel included. Not for anything a
+   * person typed: a browser without native time support turns the input into
+   * a text box (its `type` then reads "text"), and that text is as two-sided
+   * as any other.
+   */
+  clock24?: boolean;
+}
+
 /**
  * Read a typed birth time in whatever clock the visitor thinks in.
  *
@@ -147,9 +161,13 @@ function clock(hours: number, minutes: number): string {
  * Where the input is genuinely two-sided — a bare 1–12 hour with no AM/PM —
  * it commits the literal reading and returns the other one as a suggestion.
  * Guessing here is not a small error: a twelve-hour slip moves the ascendant
- * by half the zodiac.
+ * by half the zodiac. Which is also why `clock24` exists: offering "10:30 PM"
+ * beside a native input's "10:30" invites exactly that slip.
  */
-export function normalizeBirthTime(raw: string): IntakeFieldResult {
+export function normalizeBirthTime(
+  raw: string,
+  options: BirthTimeOptions = {},
+): IntakeFieldResult {
   const trimmed = raw.trim();
   if (!trimmed) return empty();
 
@@ -291,11 +309,14 @@ export function normalizeBirthTime(raw: string): IntakeFieldResult {
       return invalid("Hours only run from 0 to 23. Add AM or PM for a 12-hour time.");
     }
 
-    /* A bare 1–12 hour is the one case we cannot settle. A leading zero
-     * ("07:15") or a compact run ("0715", "1430") signals 24-hour intent, so
-     * only the plain forms are treated as two-sided. */
+    /* A bare 1–12 hour is the one case we cannot settle — unless it came off
+     * a 24-hour clock. A leading zero ("07:15") or a compact run ("0715",
+     * "1430") signals 24-hour intent too, so only the plain forms are treated
+     * as two-sided. */
     const writtenAsTwentyFourHour =
-      (hourToken.length === 2 && hourToken.startsWith("0")) || !separated;
+      options.clock24 ||
+      (hourToken.length === 2 && hourToken.startsWith("0")) ||
+      !separated;
 
     if (hours >= 1 && hours <= 12 && !writtenAsTwentyFourHour) {
       const alternate = hours === 12 ? clock(0, minutes) : clock(hours + 12, minutes);

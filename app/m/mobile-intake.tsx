@@ -10,7 +10,6 @@ import {
   formatBirthDateDisplay,
   formatClockDisplay,
   normalizeBirthDate,
-  normalizeBirthTime,
   normalizeCoordinate,
   normalizeCoordinatePair,
   normalizePersonName,
@@ -21,6 +20,7 @@ import {
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
+import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useHydrated } from "@/lib/use-hydrated";
 import styles from "./mobile.module.css";
 
@@ -48,6 +48,9 @@ const STEP_COUNT = 4;
  * "2:30 pm" would otherwise be submitted verbatim; and a 24-hour locale shows
  * the birth time back as "14:30", so the read-out under the field is the only
  * place the visitor sees which half of the day the chart will be built for.
+ * The time goes through normalizeTimeInputValue rather than the bare typed
+ * reading, because a working time input's value is already 24-hour: read as
+ * typed, a 10:30 picked from the wheel was offered back as 10:30 PM.
  */
 
 const STORAGE_PREFIX = "astro_intake_draft";
@@ -414,7 +417,7 @@ export default function MobileIntake() {
       ...source,
       name: keep(source.name, normalizePersonName(source.name)),
       birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate)),
-      birthTime: keep(source.birthTime, normalizeBirthTime(source.birthTime)),
+      birthTime: keep(source.birthTime, normalizeTimeInputValue(source.birthTime)),
       country: keep(source.country, normalizePlaceName(source.country)),
       state: keep(source.state, normalizePlaceName(source.state)),
       city: keep(source.city, normalizePlaceName(source.city)),
@@ -567,7 +570,7 @@ export default function MobileIntake() {
                 step={60}
                 value={draft.birthTime}
                 onChange={(e) => edit("birthTime", e.target.value)}
-                onBlur={commit("birthTime", normalizeBirthTime)}
+                onBlur={commit("birthTime", normalizeTimeInputValue)}
                 required
               />
               {fieldNotes.birthTime ? (

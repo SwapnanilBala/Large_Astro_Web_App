@@ -15,7 +15,6 @@ import {
   formatBirthDateDisplay,
   formatClockDisplay,
   normalizeBirthDate,
-  normalizeBirthTime,
   normalizeCoordinate,
   normalizeCoordinatePair,
   normalizePersonName,
@@ -25,6 +24,7 @@ import {
 } from "@/lib/intake-normalize";
 import { useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
+import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useToast } from "@/lib/toast-context";
 
 /** Derives the Western (Tropical) sun sign from a YYYY-MM-DD birth date string. */
@@ -493,11 +493,14 @@ function ProfileCard({
           <label className="input-glow-aqua">
             Birth time
             <div className="datetime-field">
+              {/* A native time input: its value is 24-hour whatever the
+                  picker showed, so it is read as one rather than as typed
+                  text that could be either half of the day. */}
               <input
                 type="time"
                 value={profile.birthTime}
                 onChange={updateField("birthTime")}
-                onBlur={commit("birthTime", normalizeBirthTime)}
+                onBlur={commit("birthTime", normalizeTimeInputValue)}
               />
               <HiOutlineClock className="datetime-icon datetime-icon-aqua" />
             </div>

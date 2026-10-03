@@ -118,6 +118,57 @@ describe("normalizeBirthTime", () => {
     ]);
   });
 
+  it("keeps a typed 10:30 two-sided", () => {
+    /* Typed into the desktop picker, or into the text box a browser without
+     * native time support falls back to, "10:30" really could be either. */
+    expect(normalizeBirthTime("10:30")).toMatchObject({
+      status: "ambiguous",
+      value: "10:30",
+      suggestions: [{ value: "22:30", label: "10:30 PM" }],
+    });
+  });
+
+  describe("with clock24, for a native time input's value", () => {
+    it("reads 10:00-12:59 as the 24-hour time it is", () => {
+      /* 10:30 AM picked from the OS wheel arrives as "10:30", and was offered
+       * back as possibly 10:30 PM — one tap from a chart twelve hours out. */
+      expect(normalizeBirthTime("10:30", { clock24: true })).toEqual({
+        status: "ok",
+        value: "10:30",
+        display: "10:30 AM",
+      });
+      expect(normalizeBirthTime("12:30", { clock24: true })).toEqual({
+        status: "ok",
+        value: "12:30",
+        display: "12:30 PM",
+      });
+    });
+
+    it("settles every minute of the day exactly as written", () => {
+      const unsettled: string[] = [];
+      for (let minute = 0; minute < 24 * 60; minute += 1) {
+        const value = `${String(Math.floor(minute / 60)).padStart(2, "0")}:${String(minute % 60).padStart(2, "0")}`;
+        const result = normalizeBirthTime(value, { clock24: true });
+        if (result.status !== "ok" || result.value !== value) unsettled.push(value);
+      }
+
+      expect(unsettled).toEqual([]);
+    });
+
+    it("changes what is said about a time, never the time itself", () => {
+      /* The mobile intake re-reads its whole draft on submit and keeps only
+       * the value, so the flag must not be able to move a time on its own. */
+      for (const text of ["10:30", "12:30", "7:15", "2:30 pm", "13:45 AM", "930", "24:00", "14:30:45"]) {
+        expect(normalizeBirthTime(text, { clock24: true }).value).toBe(normalizeBirthTime(text).value);
+      }
+    });
+
+    it("still honours an AM or PM that is actually there", () => {
+      expect(normalizeBirthTime("2:30 pm", { clock24: true }).value).toBe("14:30");
+      expect(normalizeBirthTime("13:45 AM", { clock24: true }).status).toBe("ambiguous");
+    });
+  });
+
   it("treats a leading zero or a compact run as settled 24-hour intent", () => {
     expect(normalizeBirthTime("07:15").status).toBe("ok");
     expect(normalizeBirthTime("0715")).toMatchObject({ status: "ok", value: "07:15" });
