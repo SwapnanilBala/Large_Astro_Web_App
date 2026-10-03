@@ -516,18 +516,16 @@
     "kicker": "Il Tuo Account",
     "heading": "Accedi",
     "headingSignedIn": "Hai effettuato l'accesso",
-    "lead": "Accedi con Google per conservare le carte salvate quando passi a un altro dispositivo. Tutto il resto resta in questo browser.",
+    "lead": "Accedi con Google per conservare le carte salvate quando passi a un altro dispositivo — tutto il resto resta in questo browser.",
     "leadSignedIn": "Le tue carte salvate seguono questo account su qualsiasi dispositivo da cui accedi.",
     "checking": "Verifica del tuo account…",
     "opening": "Apertura…",
     "continue": "Continua",
-    "unavailable": "Non riusciamo a raggiungere l'archivio degli account in questo momento. Nulla in questo browser è stato toccato — riprova tra poco.",
-    "storageNote": "Le tue carte, le letture e i dati di nascita recenti sono conservati in questo browser."
+    "unavailable": "Non riusciamo a raggiungere l'archivio degli account in questo momento. Nulla in questo browser è stato toccato — riprova tra poco."
   },
   "signIn": {
     "google": "Continua con Google",
     "googleBusy": "Apertura di Google…",
-    "note": "Accedendo conservi le tue carte quando cambi dispositivo. Tutto il resto resta in questo browser.",
     "errorHeading": "L'accesso non è stato completato",
     "error_not_configured": "L'accesso con Google non è ancora configurato su questo server.",
     "error_declined": "Quell'accesso è stato annullato. Se l'app è ancora in fase di test, l'account deve trovarsi anche nel suo elenco di utenti di prova.",

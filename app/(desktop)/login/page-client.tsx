@@ -89,6 +89,9 @@ export default function LoginPageClient({
             <h1 className={styles.heading}>
               {signedIn ? t("account.headingSignedIn") : t("account.heading")}
             </h1>
+            {/* The page's one sentence. A note under the Google button and a
+                storage note under the panel used to repeat it: three ways of
+                saying "everything else stays in this browser" on one screen. */}
             <p className={styles.lead}>
               {signedIn ? t("account.leadSignedIn") : t("account.lead")}
             </p>
@@ -149,11 +152,8 @@ export default function LoginPageClient({
             <p className={styles.error}>{t("account.unavailable")}</p>
           )}
 
-          <p className={styles.switchText}>{t("account.storageNote")}</p>
-
-          {/* Sits under the storage note on purpose: that paragraph explains
-              where data lives, and this is the control over the one part of it
-              that can leave the browser. */}
+          {/* Last on purpose: the lead says what leaves this browser and what
+              stays, and this is the control over the one part that can leave. */}
           <ChartSyncSettings />
         </section>
       </div>

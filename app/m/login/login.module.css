@@ -141,13 +141,6 @@
   white-space: nowrap;
 }
 
-.fine {
-  margin: 1rem 0 0;
-  color: var(--text-tertiary);
-  font-size: 0.8125rem;
-  line-height: 1.5;
-}
-
 .error {
   margin: 0.75rem 0 0;
   padding: 0.7rem 0.85rem;
@@ -156,13 +149,6 @@
   background: var(--danger-surface);
   color: var(--danger-text);
   font-size: 0.9375rem;
-  line-height: 1.45;
-}
-
-.footNote {
-  margin: 0.8rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
   line-height: 1.45;
 }
 

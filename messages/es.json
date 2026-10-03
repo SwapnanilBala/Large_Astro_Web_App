@@ -516,18 +516,16 @@
     "kicker": "Tu Cuenta",
     "heading": "Iniciar sesión",
     "headingSignedIn": "Has iniciado sesión",
-    "lead": "Inicia sesión con Google para conservar tus cartas guardadas cuando cambies de dispositivo. Todo lo demás permanece en este navegador.",
+    "lead": "Inicia sesión con Google para conservar tus cartas guardadas cuando cambies de dispositivo — todo lo demás permanece en este navegador.",
     "leadSignedIn": "Tus cartas guardadas siguen a esta cuenta en cualquier dispositivo en el que inicies sesión.",
     "checking": "Comprobando tu cuenta…",
     "opening": "Abriendo…",
     "continue": "Continuar",
-    "unavailable": "No podemos acceder al almacén de cuentas en este momento. Nada de este navegador se ve afectado — inténtalo de nuevo en un momento.",
-    "storageNote": "Tus cartas, lecturas y datos de nacimiento recientes se guardan en este navegador."
+    "unavailable": "No podemos acceder al almacén de cuentas en este momento. Nada de este navegador se ve afectado — inténtalo de nuevo en un momento."
   },
   "signIn": {
     "google": "Continuar con Google",
     "googleBusy": "Abriendo Google…",
-    "note": "Iniciar sesión conserva tus cartas cuando cambias de dispositivo. Todo lo demás permanece en este navegador.",
     "errorHeading": "El inicio de sesión no se completó",
     "error_not_configured": "El inicio de sesión con Google todavía no está configurado en este servidor.",
     "error_declined": "Ese inicio de sesión se canceló. Si la aplicación sigue en pruebas, la cuenta también debe estar en su lista de usuarios de prueba.",

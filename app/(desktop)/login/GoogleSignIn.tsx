@@ -78,19 +78,15 @@ export default function GoogleSignIn({ enabled, errorCode, returnTo }: GoogleSig
       )}
 
       {enabled && (
-        <>
-          <button
-            type="button"
-            className={styles.googleBtn}
-            onClick={() => void start()}
-            disabled={busy}
-          >
-            <GoogleMark />
-            <span>{busy ? t("signIn.googleBusy") : t("signIn.google")}</span>
-          </button>
-
-          <p className={styles.googleNote}>{t("signIn.note")}</p>
-        </>
+        <button
+          type="button"
+          className={styles.googleBtn}
+          onClick={() => void start()}
+          disabled={busy}
+        >
+          <GoogleMark />
+          <span>{busy ? t("signIn.googleBusy") : t("signIn.google")}</span>
+        </button>
       )}
     </>
   );

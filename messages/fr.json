@@ -516,18 +516,16 @@
     "kicker": "Votre Compte",
     "heading": "Se connecter",
     "headingSignedIn": "Vous êtes connecté",
-    "lead": "Connectez-vous avec Google pour conserver vos cartes enregistrées lorsque vous changez d'appareil. Tout le reste demeure dans ce navigateur.",
+    "lead": "Connectez-vous avec Google pour conserver vos cartes enregistrées lorsque vous changez d'appareil — tout le reste demeure dans ce navigateur.",
     "leadSignedIn": "Vos cartes enregistrées suivent ce compte sur tout appareil où vous vous connectez.",
     "checking": "Vérification de votre compte…",
     "opening": "Ouverture…",
     "continue": "Continuer",
-    "unavailable": "Nous ne parvenons pas à joindre le magasin de comptes pour le moment. Rien dans ce navigateur n'est affecté — réessayez dans un instant.",
-    "storageNote": "Vos cartes, vos lectures et vos données de naissance récentes sont conservées dans ce navigateur."
+    "unavailable": "Nous ne parvenons pas à joindre le magasin de comptes pour le moment. Rien dans ce navigateur n'est affecté — réessayez dans un instant."
   },
   "signIn": {
     "google": "Continuer avec Google",
     "googleBusy": "Ouverture de Google…",
-    "note": "La connexion conserve vos cartes lorsque vous changez d'appareil. Tout le reste demeure dans ce navigateur.",
     "errorHeading": "La connexion n'a pas abouti",
     "error_not_configured": "La connexion Google n'est pas encore configurée sur ce serveur.",
     "error_declined": "Cette connexion a été annulée. Si l'application est encore en phase de test, le compte doit aussi figurer sur sa liste d'utilisateurs de test.",

@@ -144,6 +144,9 @@ export default function MobileLogin({
             <h1 id="mobile-account-heading" className={styles.heading}>
               {signedIn ? t("account.headingSignedIn") : t("account.heading")}
             </h1>
+            {/* The page's one sentence. A note under the Google button and a
+                storage note under the panel used to repeat it: three ways of
+                saying "everything else stays in this browser" on one screen. */}
             <p className={styles.lead}>
               {signedIn ? t("account.leadSignedIn") : t("account.lead")}
             </p>
@@ -180,18 +183,15 @@ export default function MobileLogin({
                    invites a sign-in against a store that cannot answer. */
                 <p className={styles.error}>{t("account.unavailable")}</p>
               ) : googleEnabled ? (
-                <>
-                  <button
-                    type="button"
-                    className={`${styles.googleAction} ${styles.wideAction}`}
-                    onClick={() => void start()}
-                    disabled={busy}
-                  >
-                    <GoogleMark />
-                    <span>{busy ? t("signIn.googleBusy") : t("signIn.google")}</span>
-                  </button>
-                  <p className={styles.footNote}>{t("signIn.note")}</p>
-                </>
+                <button
+                  type="button"
+                  className={`${styles.googleAction} ${styles.wideAction}`}
+                  onClick={() => void start()}
+                  disabled={busy}
+                >
+                  <GoogleMark />
+                  <span>{busy ? t("signIn.googleBusy") : t("signIn.google")}</span>
+                </button>
               ) : (
                 /* Google is the only way in, so a deployment without
                    credentials has no sign-in at all. Say so rather than
@@ -199,8 +199,6 @@ export default function MobileLogin({
                 !message && <p className={styles.error}>{t("signIn.error_not_configured")}</p>
               )}
             </section>
-
-            <p className={styles.fine}>{t("account.storageNote")}</p>
           </div>
         </div>
       </div>
