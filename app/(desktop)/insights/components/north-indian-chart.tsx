@@ -11,9 +11,11 @@ import {
   SIGN_NUMBER_POINTS,
   formatWholeDegree,
   layoutHouseLabels,
+  rasiPlacements,
   signForHouse,
   signNumber,
   type ChartLabel,
+  type RasiPlacement,
 } from "@/lib/north-indian-chart";
 import { GRAHA_ORDER } from "@/lib/planet-colors";
 import styles from "./north-indian-chart.module.css";
@@ -33,6 +35,11 @@ const S = NORTH_INDIAN_SIZE;
  * The North Indian (diamond) chart: houses fixed, ascendant at the top, signs
  * rotating, each house carrying its sign number. All geometry comes from
  * lib/north-indian-chart.ts, which is tested; this file only draws it.
+ *
+ * Planets go where the constellation wheel puts them: rasiPlacements reads
+ * each one's sign off its longitude, with the wheel's own rule, so the two
+ * styles cannot disagree. The API's per-planet `house` is not used here; under
+ * a cusp-based house system it does not follow the signs.
  *
  * Each house is a focusable element with its own label, so a screen reader or
  * a keyboard user gets the chart house by house ("House 7, Capricorn: Saturn
@@ -54,24 +61,24 @@ export default function NorthIndianChart({
       : t(`planetNames.${name.toLowerCase()}`);
   const signName = (sign: string) => t(`zodiacSigns.${sign.toLowerCase()}`);
 
-  const ordered = [...planets].sort(
+  const ordered = rasiPlacements(planets, ascendantSign).sort(
     (a, b) =>
-      GRAHA_ORDER.indexOf(a.name as (typeof GRAHA_ORDER)[number]) -
-      GRAHA_ORDER.indexOf(b.name as (typeof GRAHA_ORDER)[number]),
+      GRAHA_ORDER.indexOf(a.planet.name as (typeof GRAHA_ORDER)[number]) -
+      GRAHA_ORDER.indexOf(b.planet.name as (typeof GRAHA_ORDER)[number]),
   );
 
   const houses = HOUSES.map((house) => {
     const sign = signForHouse(ascendantSign, house);
-    const inHouse = ordered.filter((planet) => planet.house === house);
+    const inHouse = ordered.filter((placement) => placement.house === house);
     /* Rahu and Ketu always move backwards, so marking them retrograde says
        nothing; only the true planets get the R. */
-    const isRetrograde = (planet: PlanetPosition) =>
+    const isRetrograde = ({ planet }: RasiPlacement) =>
       planet.is_retrograde === true && planet.name !== "Rahu" && planet.name !== "Ketu";
 
-    const labels: ChartLabel[] = inHouse.map((planet) => ({
-      abbrev: t(`lagnaChart.abbrev.${planet.name.toLowerCase()}`),
-      degree: formatWholeDegree(planet.degree_in_sign),
-      retrograde: isRetrograde(planet),
+    const labels: ChartLabel[] = inHouse.map((placement) => ({
+      abbrev: t(`lagnaChart.abbrev.${placement.planet.name.toLowerCase()}`),
+      degree: formatWholeDegree(placement.degreeInSign),
+      retrograde: isRetrograde(placement),
     }));
     if (house === 1) {
       labels.unshift({
@@ -84,9 +91,9 @@ export default function NorthIndianChart({
     const spoken = [
       ...(house === 1 ? [`${t("lagnaChart.ascendant")} ${formatWholeDegree(ascendantDegree)}`] : []),
       ...inHouse.map(
-        (planet) =>
-          `${planetName(planet.name)} ${formatWholeDegree(planet.degree_in_sign)}` +
-          (isRetrograde(planet) ? ` ${t("lagnaChart.retrograde")}` : ""),
+        (placement) =>
+          `${planetName(placement.planet.name)} ${formatWholeDegree(placement.degreeInSign)}` +
+          (isRetrograde(placement) ? ` ${t("lagnaChart.retrograde")}` : ""),
       ),
     ];
     const ariaLabel = spoken.length > 0

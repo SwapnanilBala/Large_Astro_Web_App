@@ -16,6 +16,9 @@
  * rotate, and each house shows the number of its sign (Aries = 1).
  */
 
+import type { PlanetPosition } from "./astro-types";
+import { wheelPlacement, type WheelPlacement } from "./constellation-geometry";
+
 export const NORTH_INDIAN_SIZE = 400;
 
 export type Point = readonly [number, number];
@@ -123,6 +126,28 @@ export function signForHouse(ascendantSign: string, house: number): string {
 /** Aries = 1 ... Pisces = 12, the number written in the house. */
 export function signNumber(sign: string): number {
   return ZODIAC_ORDER.indexOf(sign as (typeof ZODIAC_ORDER)[number]) + 1;
+}
+
+/** A planet and where the rasi chart puts it. */
+export type RasiPlacement = WheelPlacement & { planet: PlanetPosition };
+
+/**
+ * Where each planet sits on the rasi chart: in the sign the constellation
+ * wheel draws it in, and in that sign's house.
+ *
+ * Not in the API's `house`. That number follows the engine's house system,
+ * and the cusp-based ones (Equal, Placidus, Koch and the rest) draw a house's
+ * edge at a cusp rather than at a sign boundary, so it can name a house whose
+ * sign is not the planet's own. The diamond writes each house's sign number in
+ * it, and a planet placed by that `house` turned up in signs it was not in --
+ * under Placidus, eight planets in one house. A rasi chart is a chart of signs,
+ * so the house is the sign's, whatever system the rest of the reading uses.
+ */
+export function rasiPlacements(
+  planets: readonly PlanetPosition[],
+  ascendantSign: string,
+): RasiPlacement[] {
+  return planets.map((planet) => ({ planet, ...wheelPlacement(planet.longitude, ascendantSign) }));
 }
 
 /** Points-in-polygon by ray casting; edges count as inside. */

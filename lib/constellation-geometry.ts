@@ -116,6 +116,44 @@ export function lonToAngle(longitude: number): number {
   return longitude - 90;
 }
 
+export type ZodiacSign = (typeof SIGN_ORDER)[number];
+
+/** A planet as the wheel shows it. */
+export type WheelPlacement = {
+  sign: ZodiacSign;
+  /** 0 up to 30, measured from the start of the sign. */
+  degreeInSign: number;
+  /** Whole signs from the ascendant's, 1-12. */
+  house: number;
+};
+
+/**
+ * Where the wheel draws a longitude: its sign wedge, and that wedge's house.
+ *
+ * The wheel lays the sign wedge for SIGN_ORDER[i] over longitudes [30i, 30i +
+ * 30), puts each planet at lonToAngle(longitude), and numbers its houses round
+ * the rim by whole signs from the ascendant's. So a planet's sign and house
+ * follow from its longitude alone, and this is that rule written once.
+ *
+ * It is the reference every rasi drawing is held to. The North Indian diamond
+ * places planets with it (lib/north-indian-chart.ts rasiPlacements) rather than
+ * with the API's `house`, which follows the engine's house system and, under
+ * the cusp-based ones, need not match the planet's sign at all;
+ * lib/__tests__/rasi-chart-reference.test.ts checks the diamond against the
+ * wheel for every engine.
+ */
+export function wheelPlacement(longitude: number, ascendantSign: string): WheelPlacement {
+  const ascendantIndex = SIGN_ORDER.indexOf(ascendantSign as ZodiacSign);
+  if (ascendantIndex < 0) throw new Error(`Unknown ascendant sign: ${ascendantSign}`);
+  const wrapped = ((longitude % 360) + 360) % 360;
+  const index = Math.floor(wrapped / 30);
+  return {
+    sign: SIGN_ORDER[index],
+    degreeInSign: wrapped - index * 30,
+    house: ((index - ascendantIndex + 12) % 12) + 1,
+  };
+}
+
 export function degToRad(deg: number): number {
   return (deg * Math.PI) / 180;
 }

@@ -3,6 +3,7 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
+import { wheelPlacement } from "@/lib/constellation-geometry";
 import { useChartWorker } from "@/lib/hooks/useChartWorker";
 import type { ChartWorkerOutput } from "@/lib/hooks/useChartWorker";
 import { useRouteMessages } from "@/lib/i18n-context";
@@ -198,12 +199,26 @@ export default function ConstellationChart({
   // Get sign index for a given sign name
   const signIndex = useCallback((sign: string) => SIGN_ORDER.indexOf(sign), []);
 
+  /* Each planet's sign, degree and house as this wheel draws them: off its
+     longitude, the house counted in whole signs like the numbers round the
+     rim. The API's `house` follows the engine's house system and need not
+     match (see lib/constellation-geometry.ts wheelPlacement), and it used to
+     reach the tooltip and decide which planets the conjunction lines join. */
+  const wheelPlanets = useMemo(
+    () =>
+      (planets ?? []).map((p) => {
+        const placed = wheelPlacement(p.longitude, ascendantSign);
+        return { ...p, sign: placed.sign, degree_in_sign: placed.degreeInSign, house: placed.house };
+      }),
+    [planets, ascendantSign],
+  );
+
   // Planet positions on the wheel
   const planetPositionsFallback = useMemo(() => {
-    if (!planets || planets.length === 0) return [];
+    if (wheelPlanets.length === 0) return [];
 
     // Group planets by proximity to offset overlapping ones
-    const positions = planets.map((p) => {
+    const positions = wheelPlanets.map((p) => {
       const angle = lonToAngle(p.longitude);
       const pos = polarToCartesian(CX, CY, PLANET_R, angle);
       return {
@@ -236,7 +251,7 @@ export default function ConstellationChart({
     }
 
     return positions;
-  }, [planets]);
+  }, [wheelPlanets]);
 
   // Conjunction lines (planets in same house)
   const conjunctionLinesFallback = useMemo(() => {
@@ -266,8 +281,10 @@ export default function ConstellationChart({
   // ── Dispatch to Web Worker when inputs change ─────────────────────────
 
   useEffect(() => {
+    /* The worker groups conjunction lines by the `house` it is handed, so it
+       is handed the wheel's. */
     const promise = compute({
-      planets: planets ?? [],
+      planets: wheelPlanets,
       ascendantSign,
     });
 
@@ -282,7 +299,7 @@ export default function ConstellationChart({
     return () => {
       cancelled = true;
     };
-  }, [planets, ascendantSign, compute]);
+  }, [wheelPlanets, ascendantSign, compute]);
 
   // ── Resolved values: prefer worker result, fall back to synchronous ───
 
@@ -314,7 +331,7 @@ export default function ConstellationChart({
   }, [hoveredPlanet, planets, planetPositions]);
 
   const handlePlanetHover = (planetName: string, event: React.MouseEvent<SVGGElement>) => {
-    const p = planets?.find((pl) => pl.name === planetName);
+    const p = wheelPlanets.find((pl) => pl.name === planetName);
     if (!p || !svgRef.current) return;
     const rect = svgRef.current.getBoundingClientRect();
     const scaleX = 600 / rect.width;

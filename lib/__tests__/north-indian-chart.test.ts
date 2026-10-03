@@ -20,11 +20,13 @@ import {
   layoutHouseLabels,
   pointInPolygon,
   polygonArea,
+  rasiPlacements,
   signForHouse,
   signNumber,
   type ChartLabel,
   type Point,
 } from "../north-indian-chart";
+import type { PlanetPosition } from "../astro-types";
 
 const housesContaining = (point: Point) =>
   HOUSES.filter((house) => pointInPolygon(point, HOUSE_POLYGONS[house]));
@@ -117,6 +119,48 @@ describe("signs on the houses", () => {
 
   it("refuse an unknown ascendant rather than drawing a wrong chart", () => {
     expect(() => signForHouse("Ophiuchus", 1)).toThrow();
+  });
+});
+
+describe("rasi placements", () => {
+  const body = (name: string, longitude: number, house: number): PlanetPosition => ({
+    name,
+    longitude,
+    house,
+    sign: "Aries",
+    degree_in_sign: 0,
+  });
+
+  it("put a planet in its sign's house, counted from the ascendant's sign", () => {
+    const [saturn] = rasiPlacements([body("Saturn", 271.54, 7)], "Cancer");
+
+    expect(saturn).toMatchObject({ sign: "Capricorn", house: 7 });
+    expect(saturn.degreeInSign).toBeCloseTo(1.54, 6);
+    expect(signForHouse("Cancer", saturn.house)).toBe(saturn.sign);
+  });
+
+  it("ignore the house the API sent, which can come from a cusp-based system", () => {
+    /* Placidus put the Sun in house 3 for this chart; Taurus is the 11th sign
+       from Cancer, and that is where the rasi chart draws it. */
+    expect(rasiPlacements([body("Sun", 30.4, 3)], "Cancer")[0].house).toBe(11);
+  });
+
+  it("change sign exactly at each 30° boundary", () => {
+    const at = (longitude: number) => rasiPlacements([body("Moon", longitude, 1)], "Aries")[0];
+
+    expect(at(0)).toMatchObject({ sign: "Aries", house: 1, degreeInSign: 0 });
+    expect(at(29.9999)).toMatchObject({ sign: "Aries", house: 1 });
+    expect(at(30)).toMatchObject({ sign: "Taurus", house: 2, degreeInSign: 0 });
+    expect(at(359.9999)).toMatchObject({ sign: "Pisces", house: 12 });
+  });
+
+  it("wrap longitudes that arrive outside 0-360", () => {
+    expect(rasiPlacements([body("Rahu", 360, 1)], "Aries")[0]).toMatchObject({ sign: "Aries", house: 1 });
+    expect(rasiPlacements([body("Rahu", -15, 1)], "Aries")[0]).toMatchObject({ sign: "Pisces", house: 12 });
+  });
+
+  it("refuse an unknown ascendant", () => {
+    expect(() => rasiPlacements([body("Sun", 30.4, 11)], "Ophiuchus")).toThrow();
   });
 });
 

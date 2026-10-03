@@ -5,7 +5,13 @@ import { useState } from "react";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
-import { formatDegreeMinutes } from "@/lib/north-indian-chart";
+import {
+  HOUSES,
+  formatDegreeMinutes,
+  rasiPlacements,
+  signForHouse,
+  type RasiPlacement,
+} from "@/lib/north-indian-chart";
 import { GRAHA_ORDER, PLANET_COLORS } from "@/lib/planet-colors";
 import { useChartStyle, type ChartStyle } from "@/lib/use-chart-style";
 import styles from "./lagna-chart-card.module.css";
@@ -39,21 +45,30 @@ const SIGN_ELEMENTS: Record<string, string> = {
   Cancer: "Water", Scorpio: "Water", Pisces: "Water",
 };
 
-function readGlance(payload: ChartApiResponse) {
+function readGlance(payload: ChartApiResponse, placements: RasiPlacement[]) {
   const strongest = [...(payload.chart.shadbala ?? [])].sort(
     (left, right) => right.strengthRatio - left.strengthRatio,
   )[0];
-  const elementCounts = payload.chart.planets
-    .filter((planet) => GRAHA_ORDER.slice(0, 7).includes(planet.name as (typeof GRAHA_ORDER)[number]))
-    .reduce<Record<string, number>>((counts, planet) => {
-      const element = SIGN_ELEMENTS[planet.sign] ?? "Fire";
+  const elementCounts = placements
+    .filter(({ planet }) => GRAHA_ORDER.slice(0, 7).includes(planet.name as (typeof GRAHA_ORDER)[number]))
+    .reduce<Record<string, number>>((counts, { sign }) => {
+      const element = SIGN_ELEMENTS[sign] ?? "Fire";
       counts[element] = (counts[element] ?? 0) + 1;
       return counts;
     }, {});
   /* null when no classical planet was counted, which reads as "Mixed". */
   const dominantElement: string | null =
     Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? null;
-  const activeHouse = [...payload.chart.houses]
+  /* The busiest house of the chart on the card, counted from the same
+     placements it is drawn from. payload.chart.houses follows the engine's
+     house system instead, so under Placidus it named a house the chart did
+     not show crowded. Ties go to the lower house, as they did before. */
+  const ascendantSign = payload.chart.ascendant.sign;
+  const activeHouse = HOUSES.map((house) => ({
+    house,
+    sign: signForHouse(ascendantSign, house),
+    planets: placements.filter((placement) => placement.house === house).map(({ planet }) => planet.name),
+  }))
     .filter((house) => house.planets.length > 0)
     .sort((left, right) => right.planets.length - left.planets.length)[0];
   return { strongest, dominantElement, activeHouse };
@@ -67,7 +82,11 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
   const [activeHouse, setActiveHouse] = useState<number | null>(null);
 
   const { ascendant, planets, houses } = payload.chart;
-  const glance = readGlance(payload);
+  /* Where each planet sits on the chart this card draws, in either style: its
+     sign off its longitude, and that sign's house. The table and the glance
+     read these too, so they say what the drawing shows. */
+  const placements = rasiPlacements(planets, ascendant.sign);
+  const glance = readGlance(payload, placements);
 
   const planetName = (name: string) =>
     name === "Rahu" || name === "Ketu"
@@ -89,19 +108,19 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
       degree: ascendant.degree_in_sign,
       retrograde: false,
     },
-    ...[...planets]
+    ...[...placements]
       .sort(
         (a, b) =>
-          GRAHA_ORDER.indexOf(a.name as (typeof GRAHA_ORDER)[number]) -
-          GRAHA_ORDER.indexOf(b.name as (typeof GRAHA_ORDER)[number]),
+          GRAHA_ORDER.indexOf(a.planet.name as (typeof GRAHA_ORDER)[number]) -
+          GRAHA_ORDER.indexOf(b.planet.name as (typeof GRAHA_ORDER)[number]),
       )
-      .map((planet) => ({
+      .map(({ planet, sign, house, degreeInSign }) => ({
         key: planet.name,
         name: planetName(planet.name),
         color: PLANET_COLORS[planet.name],
-        sign: planet.sign,
-        house: planet.house,
-        degree: planet.degree_in_sign,
+        sign,
+        house,
+        degree: degreeInSign,
         /* The nodes are always retrograde; marking them says nothing. */
         retrograde: planet.is_retrograde === true && planet.name !== "Rahu" && planet.name !== "Ketu",
       })),
@@ -213,7 +232,7 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
               <dd>
                 {glance.activeHouse
                   ? t("lagnaChart.glance.houseAndSign", {
-                      house: String(glance.activeHouse.house_number),
+                      house: String(glance.activeHouse.house),
                       sign: signName(glance.activeHouse.sign),
                     })
                   : t("lagnaChart.glance.evenlyDistributed")}
