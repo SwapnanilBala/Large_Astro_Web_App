@@ -120,7 +120,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], tr, forma
           );
         })}
         <div className={styles.centre} aria-hidden="true">
-          <span className={styles.centreTitle}>Rasi</span>
+          <span className={styles.centreTitle}>{tr("mobileInsights.chartCentre")}</span>
           <span className={styles.centreMeta}>
             {tr("mobileInsights.ascendantLead", { sign: ascendantSign })}
           </span>

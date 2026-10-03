@@ -55,6 +55,7 @@
     "nowMarker": "Now",
     "factMoonSign": "Moon sign",
     "chartAria": "Rasi chart, {sign} ascendant",
+    "chartCentre": "Rasi",
     "chartHint": "Tap a graha for its placement",
     "chartPlacement": "{planet} in {sign} {degree}, house {house}"
   }

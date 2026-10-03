@@ -4,7 +4,8 @@
       "nowLabel": "Tu capítulo actual",
       "nowMarker": "Ahora",
       "factMoonSign": "Signo lunar",
-      "chartAria": "Carta rasi, ascendente {sign}",
+      "chartAria": "Carta Rashi, ascendente {sign}",
+      "chartCentre": "Rashi",
       "chartHint": "Toca un graha para ver su posición",
       "chartPlacement": "{planet} en {sign} {degree}, casa {house}"
     }
@@ -15,6 +16,7 @@
       "nowMarker": "এখন",
       "factMoonSign": "চন্দ্র রাশি",
       "chartAria": "রাশি চক্র, {sign} লগ্ন",
+      "chartCentre": "রাশি",
       "chartHint": "অবস্থান দেখতে একটি গ্রহে ট্যাপ করুন",
       "chartPlacement": "{planet} {sign} {degree}-এ, ভাব {house}"
     }
@@ -25,6 +27,7 @@
       "nowMarker": "अभी",
       "factMoonSign": "चंद्र राशि",
       "chartAria": "राशि कुंडली, {sign} लग्न",
+      "chartCentre": "राशि",
       "chartHint": "स्थिति देखने के लिए किसी ग्रह पर टैप करें",
       "chartPlacement": "{planet} {sign} {degree} में, भाव {house}"
     }
@@ -34,7 +37,8 @@
       "nowLabel": "Il tuo capitolo attuale",
       "nowMarker": "Ora",
       "factMoonSign": "Segno lunare",
-      "chartAria": "Carta rasi, ascendente {sign}",
+      "chartAria": "Carta Rashi, ascendente {sign}",
+      "chartCentre": "Rashi",
       "chartHint": "Tocca un graha per vederne la posizione",
       "chartPlacement": "{planet} in {sign} {degree}, casa {house}"
     }
@@ -44,7 +48,8 @@
       "nowLabel": "Votre chapitre en cours",
       "nowMarker": "Maintenant",
       "factMoonSign": "Signe lunaire",
-      "chartAria": "Carte rasi, ascendant {sign}",
+      "chartAria": "Carte Rashi, ascendant {sign}",
+      "chartCentre": "Rashi",
       "chartHint": "Touchez un graha pour voir sa position",
       "chartPlacement": "{planet} en {sign} {degree}, maison {house}"
     }
