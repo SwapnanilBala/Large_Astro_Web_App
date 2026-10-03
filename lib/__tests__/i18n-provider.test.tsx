@@ -71,6 +71,21 @@ describe("LanguageProvider", () => {
     expect(screen.getByTestId("language")).toHaveTextContent("en");
   });
 
+  it("puts a parameter in as written, dollar signs and all", () => {
+    /* A string replacement would read these as patterns: "$&" as the
+       placeholder itself, "$'" as the rest of the sentence, "$$" as "$". */
+    function Echo() {
+      const { t } = useTranslation();
+      return <span data-testid="echo">{t("probe.greeting", { name: "A$&B$'C$$D" })}</span>;
+    }
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Echo />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("echo")).toHaveTextContent("Hello, A$&B$'C$$D");
+  });
+
   it("switches on a choice and stores it for the next visit", async () => {
     render(
       <LanguageProvider baseMessages={baseMessages}>

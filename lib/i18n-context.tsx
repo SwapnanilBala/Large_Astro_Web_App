@@ -196,7 +196,11 @@ export function LanguageProvider({
       let text = messages[key] ?? ENGLISH_MESSAGES[key] ?? key;
       if (params) {
         for (const [placeholder, value] of Object.entries(params)) {
-          text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), value);
+          /* A function rather than the string, so the value goes in as it
+             is: a replacement string reads "$&" or "$'" inside it as
+             patterns, and a value can be text the visitor typed -- the name
+             the intake re-cased, quoted back to them. */
+          text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), () => value);
         }
       }
       return text;
@@ -258,7 +262,8 @@ export function useRouteMessages(
       if (text === undefined) return key;
       if (params) {
         for (const [placeholder, value] of Object.entries(params)) {
-          text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), value);
+          /* Literally, for the reason given in the provider's `t`. */
+          text = text.replace(new RegExp(`\\{${placeholder}\\}`, "g"), () => value);
         }
       }
       return text;
