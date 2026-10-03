@@ -1,47 +1,137 @@
-/* Mobile results view. Self-contained; inherits tokens only. */
+/*
+ * Mobile results view, in the almanac look. Self-contained; inherits tokens
+ * only. Sections are separated by rules rather than boxed as cards, headings
+ * are sentence-case serif, numbers are monospace, and vermilion marks the one
+ * thing that is "now".
+ */
 
-.keyFacts {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 0.625rem;
-}
+/* ── The top of the page ─────────────────────────────────────────── */
 
-.fact {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.75rem 0.875rem;
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
-  border-radius: 12px;
-  background: var(--surface-lit);
-  box-shadow: var(--edge-highlight);
-}
-
-.factLabel {
+.birthLine {
+  margin: 0;
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  color: var(--text-tertiary, #9a918a);
-}
-
-.factValue {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-primary, #f5f0e6);
-}
-
-.factMeta {
-  font-size: 0.8125rem;
-  color: var(--text-secondary, #a8a090);
+  line-height: 1.5;
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
-.section {
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
-  border-radius: 12px;
-  overflow: hidden;
+/* Where the reader is in their timeline: the first thing the page answers. */
+.now {
+  display: flex;
+  flex-direction: column;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-medium);
 }
 
-/* The whole header is the control — a 44px+ target rather than a small
-   chevron, since precise tapping is harder than clicking. */
+.nowLabel {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.nowTitle {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  line-height: 1.15;
+}
+
+.nowJoin {
+  color: var(--text-tertiary);
+}
+
+.nowMeta {
+  margin: 0.1rem 0 0;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+.nowTrack {
+  position: relative;
+  height: 3px;
+  margin: 0.9rem 0 0.4rem;
+  background: var(--border-medium);
+}
+
+.nowFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent);
+}
+
+.nowDot {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.nowRange {
+  display: flex;
+  justify-content: space-between;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Lagna, nakshatra and moon sign: three facts in a ruled row rather than
+   three cards, which left the third alone on a line of its own. */
+.identity {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+  border-top: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.identityItem {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  padding: 0.75rem 0.6rem 0.8rem 0;
+}
+
+.identityItem + .identityItem {
+  padding-left: 0.6rem;
+  border-left: 1px solid var(--border-subtle);
+}
+
+.identityLabel {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-tertiary);
+}
+
+.identityValue {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.identityMeta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: 1.35;
+  color: var(--text-secondary);
+}
+
+/* ── Sections ────────────────────────────────────────────────────── */
+
+.section {
+  border-top: 1px solid var(--border-medium);
+}
+
 /* The h2 around each section's toggle: a heading in the outline, and nothing
    on screen -- the button inside carries all of the styling. */
 .sectionHeading {
@@ -49,6 +139,8 @@
   font: inherit;
 }
 
+/* The whole header is the control — a 44px+ target rather than a small
+   chevron, since precise tapping is harder than clicking. */
 .sectionHeader {
   width: 100%;
   min-height: 3.25rem;
@@ -56,35 +148,38 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 0.875rem;
+  padding: 0.9rem 0;
   font-family: inherit;
   text-align: left;
-  color: var(--text-primary, #f5f0e6);
-  background: var(--surface-lit);
+  color: var(--text-primary);
+  background: none;
   border: none;
 }
 
 .sectionTitles {
   display: flex;
   flex-direction: column;
-  gap: 0.1rem;
+  gap: 0.15rem;
 }
 
 .sectionTitle {
   font-family: var(--font-display);
-  font-size: 1rem;
-  font-weight: 600;
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
+/* Sans, not the monospace: several of these are whole phrases ("All twelve,
+   and the support each holds"), and monospace is for figures. */
 .sectionSubtitle {
   font-size: 0.8125rem;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .chevron {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   line-height: 1;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-tertiary);
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -98,43 +193,38 @@
 }
 
 .sectionBody {
-  padding: 0.25rem 0.875rem 1rem;
+  padding: 0 0 1.5rem;
 }
+
+/* ── Tables ──────────────────────────────────────────────────────── */
 
 .table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.875rem;
+  /* Figures line up in columns, so they get tabular figures — otherwise the
+     degree and house columns jitter row to row. */
+  font-variant-numeric: tabular-nums;
 }
 
 .table th,
 .table td {
-  padding: 0.5rem 0.25rem;
+  padding: 0.55rem 0.25rem;
   text-align: left;
-  border-bottom: 1px solid var(--border-soft, rgba(212, 165, 116, 0.12));
-}
-
-/* Figures line up in columns, so they get tabular figures — otherwise the
-   degree and house columns jitter row to row. */
-.table {
-  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .signGlyph {
   margin-right: 0.375rem;
-  color: var(--accent-gold);
-  opacity: 0.85;
+  color: var(--text-tertiary);
 }
 
 .table thead th {
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  /* Not the display face. mobile-shell.css states the rule -- Cinzel is for
-     titles and section labels, "never for body copy, data, or anything a
-     person has to read at length" -- and a table header is data. */
-  color: var(--text-secondary, #a8a090);
+  font-weight: 400;
+  color: var(--text-tertiary);
+  border-bottom-color: var(--border-medium);
 }
 
 .table tbody tr:last-child th,
@@ -146,35 +236,101 @@
    them rather than re-reading each row. */
 .numeric {
   text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }
 
 .planetName {
   font-weight: 500;
-  color: var(--text-primary, #f5f0e6);
+  color: var(--text-primary);
 }
 
 .flag {
   margin-left: 0.3rem;
   padding: 0 0.25rem;
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  border-radius: 4px;
-  text-decoration: none;
-  color: var(--accent-gold, #d4a574);
-  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.24));
+  font-weight: 400;
+  border-radius: 3px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-medium);
 }
 
+/* The current period: a vermilion rule on its first cell, the almanac's
+   mark for "now". */
 .currentRow {
-  background: rgba(212, 165, 116, 0.09);
+  background: var(--surface-strong);
+}
+
+.currentRow > :first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+  padding-left: 0.5rem;
 }
 
 .currentDasha {
   margin: 0 0 0.75rem;
   font-size: 0.9375rem;
   line-height: 1.5;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
+
+/* The whole timeline at a glance, birth to the end of the cycle, each period
+   as wide as it is long. Decorative over the table that follows it, which
+   carries the same dates in words. */
+.lifeBar {
+  display: flex;
+  gap: 1px;
+  height: 1.375rem;
+  margin: 0.25rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.375rem;
+  text-align: center;
+  color: var(--text-tertiary);
+}
+
+.lifeSegment {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--surface-strong);
+}
+
+.lifeSegment:nth-child(even) {
+  background: var(--surface);
+}
+
+.lifeSegmentNow {
+  color: var(--on-accent);
+  background: var(--accent);
+}
+
+.lifeSegmentNow:nth-child(even) {
+  background: var(--accent);
+}
+
+.lifeScale {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  min-height: 1.4rem;
+  margin: 0.3rem 0 1rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.lifeNow {
+  position: absolute;
+  top: 0;
+  color: var(--accent-text);
+  white-space: nowrap;
+}
+
+/* ── Readings ────────────────────────────────────────────────────── */
 
 .rules {
   list-style: none;
@@ -182,49 +338,58 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
 }
 
 .rule {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
+  gap: 0.35rem;
+  padding: 1rem 0 0.25rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.rule:first-child {
+  border-top: 0;
+  padding-top: 0.25rem;
 }
 
 .ruleTitle {
   margin: 0;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.4;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.25;
 }
 
-/* Replaces the raw lowercase "high" badge with the measured rarity phrase. */
+/* The measured rarity phrase, set like a catalogue note. */
 .rarity {
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.02em;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .ruleInsight {
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
+/* A pull quote, ruled in vermilion. */
 .ruleTension {
-  margin: 0;
-  padding-left: 0.75rem;
-  border-left: 2px solid var(--border-medium, rgba(212, 165, 116, 0.24));
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: var(--text-secondary, #a8a090);
+  margin: 0.15rem 0 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid var(--accent);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--text-primary);
 }
 
 /* --------------------------------------------------------------------------
    Evidence disclosure
-   The technical basis is no longer printed under every reading; it sits behind
-   this trigger, which is sized for a thumb rather than a cursor.
+   The technical basis is not printed under every reading; it sits behind this
+   trigger, which is sized for a thumb rather than a cursor.
    -------------------------------------------------------------------------- */
 
 .evidenceToggle {
@@ -238,10 +403,9 @@
   padding: 0.5rem 0;
   background: none;
   border: 0;
-  border-top: 1px solid var(--border-subtle, rgba(212, 165, 116, 0.12));
   font: inherit;
-  font-size: 0.8125rem;
-  color: var(--text-tertiary, #9a918a);
+  font-size: 0.875rem;
+  color: var(--accent-text);
   text-align: left;
   cursor: pointer;
 }
@@ -250,14 +414,14 @@
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.5rem;
 }
 
 .ruleBasis {
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .claims {
@@ -275,7 +439,7 @@
 
 .claimLabel {
   margin: 0;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .claimLabel::after {
@@ -284,7 +448,7 @@
 
 .claimValue {
   margin: 0;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
 .claimDetail {
@@ -292,66 +456,65 @@
   width: 100%;
   font-size: var(--text-meta);
   line-height: 1.5;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .legend {
   margin: 0.6rem 0 0;
   font-size: var(--text-meta);
   line-height: 1.5;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 .summary {
   margin: 0;
-  font-size: 0.9375rem;
-  line-height: 1.65;
-  color: var(--text-secondary, #a8a090);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text-primary);
 }
 
 .legend b {
   font-weight: 600;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
 /* ── What each house is responsible for ── */
 
 .roles {
   display: grid;
-  gap: 0.5rem;
   margin: 0.75rem 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* One ruled row per house. The band shows on the number and a short rule at
+   the left: ink for strong support, a muted tone for middling, the error tone
+   for weak -- the three claims the desktop bars make, in this palette. */
 .role {
-  --role-accent: var(--border-soft, rgba(212, 165, 116, 0.4));
+  --role-accent: var(--text-tertiary);
   display: grid;
   gap: 0.3rem;
-  padding: 0.6rem 0.7rem 0.65rem;
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.14));
-  border-left: 2px solid var(--role-accent);
-  border-radius: 4px 12px 12px 4px;
-  background: var(--surface-lit);
+  padding: 0.7rem 0 0.75rem 0.75rem;
+  border-top: 1px solid var(--border-soft);
+  box-shadow: inset 2px 0 0 var(--role-accent);
 }
 
-/* The same three band colours the desktop bars and cards use, so a house
-   called strong here is the same claim as a strong one there. */
-.role[data-band="strong"] { --role-accent: #7fd8c4; }
-.role[data-band="neutral"] { --role-accent: #d4a574; }
-.role[data-band="weak"] { --role-accent: #b98a86; }
+.role[data-band="strong"] { --role-accent: var(--text-primary); }
+.role[data-band="neutral"] { --role-accent: var(--text-tertiary); }
+.role[data-band="weak"] { --role-accent: var(--danger-text); }
 
 .roleTop {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
 .roleNumber {
   flex: 0 0 auto;
   min-width: 1.25rem;
+  font-family: var(--font-mono);
   font-size: 0.9375rem;
-  font-weight: 700;
   line-height: 1;
   color: var(--role-accent);
   font-variant-numeric: tabular-nums;
@@ -359,15 +522,16 @@
 
 .roleName {
   flex: 1 1 auto;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-primary, #f5f0e6);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  color: var(--text-primary);
 }
 
 .roleReadout {
   flex: 0 0 auto;
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -376,7 +540,7 @@
   margin: 0;
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
 /* HOUSE_THEMES is written as mid-sentence fragments because the rule engine
@@ -394,12 +558,12 @@
 }
 
 .roleTag {
-  padding: 0.1rem 0.4rem;
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
+  padding: 0.05rem 0.4rem;
+  border: 1px solid var(--border-medium);
   border-radius: 999px;
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
-  letter-spacing: 0.04em;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
   white-space: nowrap;
 }
 
@@ -421,7 +585,8 @@
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.5rem 0 2rem;
+  padding: 1rem 0 2rem;
+  border-top: 1px solid var(--border-medium);
 }
 
 .textLink {
@@ -429,7 +594,8 @@
   display: inline-flex;
   align-items: center;
   font-size: 0.9375rem;
-  color: var(--accent-gold, #d4a574);
+  color: var(--accent-text);
+  text-underline-offset: 0.2em;
 }
 
 /* ── Married life in detail ───────────────────────────────────
@@ -441,17 +607,19 @@
  */
 .facets {
   display: grid;
-  gap: 0.7rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .facet {
-  padding: 0.75rem 0.8rem;
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  background: var(--surface);
+  padding: 0.9rem 0;
+  border-top: 1px solid var(--border-soft);
+}
+
+.facet:first-child {
+  border-top: 0;
+  padding-top: 0.25rem;
 }
 
 .facetTitle {
@@ -460,39 +628,21 @@
   justify-content: space-between;
   gap: 0.6rem;
   margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.125rem;
   color: var(--text-primary);
-  font-size: 0.95rem;
-  font-weight: 700;
 }
 
 .facetTitle span {
   flex: 0 0 auto;
-  font-size: 0.62rem;
-  font-weight: 800;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
   white-space: nowrap;
 }
 
-/*
- * Gold and danger, not the desktop panel's teal and coral.
- *
- * mobile-shell.css is explicit that it defines only the tokens this tree
- * actually reads, and --accent-teal and --accent-coral are not among them.
- * Writing them with literal fallbacks would have shipped two dark-theme hexes
- * that resolve the same way in Ethereal Dawn -- #6ce1d4 on a near-white card.
- * --danger-text is the tree's own negative tone and is themed in both, so the
- * three states read correctly here at the cost of one hue against the desktop
- * rendering. Adding two accent tokens to the shell for one panel is the change
- * that file is written to discourage.
- *
- * Gold then came out of the small text as well. This tree's light --accent-gold
- * is #ad7138, which measured 3.96:1 at 0.62rem on the card -- under the floor,
- * and the same trap app/m/engine-select hit at 0.68rem. The band label and the
- * "read from" label are distinguished by caps and weight instead, which costs
- * nothing at this size. Gold survives on the left rules, which are borders
- * rather than text.
- */
+/* Three states in the tree's own themed tones, so each reads correctly on ink
+   and on paper: ink for well supported, the second tone for mixed, the error
+   tone for needs care. */
 .facetTitle span[data-band="strong"] { color: var(--text-primary); }
 .facetTitle span[data-band="mixed"] { color: var(--text-secondary); }
 .facetTitle span[data-band="tender"] { color: var(--danger-text); }
@@ -500,7 +650,7 @@
 .facetSummary {
   margin: 0.4rem 0 0;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -517,16 +667,16 @@
    same three states in none of the width. */
 .facetFindings > li {
   padding-left: 0.6rem;
-  border-left: 2px solid var(--border-soft);
+  border-left: 2px solid var(--border-medium);
 }
 
-.facetFindings > li[data-polarity="support"] { border-left-color: var(--accent-gold); }
+.facetFindings > li[data-polarity="support"] { border-left-color: var(--text-primary); }
 .facetFindings > li[data-polarity="pressure"] { border-left-color: var(--danger-line); }
 
 .facetFindings p {
   margin: 0;
   color: var(--text-primary);
-  font-size: 0.85rem;
+  font-size: 0.875rem;
   line-height: 1.5;
 }
 
@@ -534,6 +684,7 @@
   display: block;
   margin-top: 0.2rem;
   color: var(--text-secondary);
+  font-family: var(--font-mono);
   font-size: var(--text-meta);
   font-style: normal;
 }
@@ -549,9 +700,7 @@
 
 .facetSourcing span {
   color: var(--text-primary);
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
+  font-weight: 600;
 }
 
 .facetMethod {

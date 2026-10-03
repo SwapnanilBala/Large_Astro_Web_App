@@ -50,6 +50,12 @@
       "strong": "Well supported",
       "mixed": "Mixed",
       "tender": "Needs care"
-    }
+    },
+    "nowLabel": "Your chapter now",
+    "nowMarker": "Now",
+    "factMoonSign": "Moon sign",
+    "chartAria": "Rasi chart, {sign} ascendant",
+    "chartHint": "Tap a graha for its placement",
+    "chartPlacement": "{planet} in {sign} {degree}, house {house}"
   }
 }

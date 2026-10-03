@@ -1,0 +1,119 @@
+/*
+ * The South Indian square, ruled in hairlines like a printed chart. Twelve
+ * sign cells around a 2×2 centre; every cell is square, so the chart is too.
+ */
+
+.wrap {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  aspect-ratio: 1;
+  border-top: 1px solid var(--border-medium);
+  border-left: 1px solid var(--border-medium);
+}
+
+.cell,
+.centre {
+  border-right: 1px solid var(--border-medium);
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.cell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0.3rem 0.35rem;
+}
+
+/* House number on the left, the sign on the right: what a reader needs to
+   find their way round without knowing the layout by heart. */
+.cellHead {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.2;
+  color: var(--text-tertiary);
+}
+
+.lagnaCell .cellHead span:first-child {
+  color: var(--accent-text);
+}
+
+.lagnaMark {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  line-height: 1.3;
+  color: var(--accent-text);
+}
+
+.planets {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 0.1rem 0.35rem;
+  margin-top: auto;
+}
+
+/* Below the tree's 44px floor on purpose: a cell is a quarter of the chart's
+   width and can hold several planets, and 28px still clears the 24px WCAG
+   2.5.8 asks of a target. The chart is also not the only way to the data --
+   the positions table follows it. */
+.planet {
+  min-height: 1.75rem;
+  min-width: 1.75rem;
+  padding: 0 0.15rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--text-primary);
+  background: none;
+  border: 0;
+  border-bottom: 1px solid transparent;
+}
+
+.planetOn {
+  color: var(--accent-text);
+  border-bottom-color: var(--accent);
+}
+
+.retro {
+  font-size: 0.625rem;
+  margin-left: 0.05rem;
+  color: var(--text-tertiary);
+}
+
+.centre {
+  grid-row: 2 / 4;
+  grid-column: 2 / 4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+.centreTitle {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.centreMeta {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+}
+
+.caption {
+  min-height: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}

@@ -8,6 +8,7 @@ import {
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { computeKalatraDetail } from "@/lib/engines/kalatra-engine";
+import { requestTime } from "@/lib/request-time";
 import MobileInsights from "./mobile-insights";
 import styles from "../mobile.module.css";
 
@@ -71,6 +72,8 @@ export default async function MobileInsightsPage({ searchParams }: PageProps) {
          on a phone and one cast on a laptop are one entry, not two. */
       historyQs={buildChartHistoryQuery(chartParams)}
       birthDate={chartParams.birthDate}
+      birthTime={chartParams.birthTime}
+      asOf={requestTime()}
     />
   );
 }

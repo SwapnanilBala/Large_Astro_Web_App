@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import type { ChartApiResponse, DeterministicRule } from "@/lib/astro-types";
+import type { ChartApiResponse, DashaInfo, DeterministicRule } from "@/lib/astro-types";
 import type { KalatraFacet, KalatraResult } from "@/lib/engines/kalatra-engine";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import insightsMessages from "@/messages/en.mobile-insights.json";
@@ -15,7 +15,7 @@ import {
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
-import MobileChart from "./mobile-chart";
+import MobileRasiChart, { abbreviate } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
 
@@ -39,9 +39,27 @@ type Props = {
   desktopHref: string;
   historyQs: string;
   birthDate: string;
+  /** As entered, HH:MM; the payload carries the zone but not the time. */
+  birthTime: string;
   /** Married-life detail, computed on the server. */
   kalatra: KalatraResult | null;
+  /**
+   * The request's time, in milliseconds. Taken on the server and passed down,
+   * so "how far through this period" is the same number in the server's HTML
+   * and in the render that hydrates it, and render reads no clock.
+   */
+  asOf: number;
 };
+
+/* How far through a period `asOf` is, 0 to 1, or null when the dates do not
+   describe one. The engine's dates are bare YYYY-MM-DD, read as UTC midnight,
+   the same way formatDate below reads them. */
+function periodProgress(start: string, end: string, asOf: number): number | null {
+  const from = Date.parse(start);
+  const to = Date.parse(end);
+  if (!Number.isFinite(from) || !Number.isFinite(to) || to <= from) return null;
+  return Math.min(1, Math.max(0, (asOf - from) / (to - from)));
+}
 
 /* The translator useRouteMessages hands back. Passed down rather than each
    subcomponent calling the hook again: RuleCard renders once per finding, and
@@ -143,6 +161,64 @@ function Section({
       </h2>
       {open && <div className={styles.sectionBody}>{children}</div>}
     </section>
+  );
+}
+
+/**
+ * The whole vimshottari cycle on one line: every period as wide as it is long,
+ * the current one in vermilion, and where today falls marked under it.
+ *
+ * Hidden from assistive technology on purpose. It is a picture of the table
+ * that follows it, which carries every date in words.
+ */
+function DashaLifeBar({
+  periods,
+  asOf,
+  tr,
+}: {
+  periods: DashaInfo["periods"];
+  asOf: number;
+  tr: Translate;
+}) {
+  const first = Date.parse(periods[0]?.start_date ?? "");
+  const last = Date.parse(periods[periods.length - 1]?.end_date ?? "");
+  if (!Number.isFinite(first) || !Number.isFinite(last) || last <= first) return null;
+  const span = last - first;
+  const nowAt = Math.min(1, Math.max(0, (asOf - first) / span));
+
+  return (
+    <div aria-hidden="true">
+      <div className={styles.lifeBar}>
+        {periods.map((period) => {
+          const start = Date.parse(period.start_date);
+          const end = Date.parse(period.end_date);
+          const length = Math.max(0, end - start);
+          const isNow = asOf >= start && asOf < end;
+          return (
+            <span
+              key={`${period.planet}-${period.start_date}`}
+              className={`${styles.lifeSegment} ${isNow ? styles.lifeSegmentNow : ""}`}
+              style={{ flexGrow: length, flexBasis: 0 }}
+            >
+              {/* Named only where a period is wide enough to hold the name. */}
+              {length / span >= 0.075 ? abbreviate(period.planet) : ""}
+            </span>
+          );
+        })}
+      </div>
+      <div className={styles.lifeScale}>
+        <span>{new Date(first).getUTCFullYear()}</span>
+        {/* Anchored in proportion to where it sits, so a marker near either
+            end leans inward instead of running off the page. */}
+        <span
+          className={styles.lifeNow}
+          style={{ left: `${(nowAt * 100).toFixed(1)}%`, transform: `translateX(-${(nowAt * 100).toFixed(1)}%)` }}
+        >
+          {tr("mobileInsights.nowMarker")}
+        </span>
+        <span>{new Date(last).getUTCFullYear()}</span>
+      </div>
+    </div>
   );
 }
 
@@ -323,7 +399,9 @@ export default function MobileInsights({
   desktopHref,
   historyQs,
   birthDate,
+  birthTime,
   kalatra,
+  asOf,
 }: Props) {
   /* tr, not t: this page's copy is a namespace of its own that ships with the
      route rather than riding in the layout's baseline, where every mobile page
@@ -354,7 +432,7 @@ export default function MobileInsights({
     return (
       <div className={shell.page}>
         <header className={shell.header}>
-          <h1 className={`${shell.title} mGold`}>{tr("mobileInsights.errorHeading")}</h1>
+          <h1 className={shell.title}>{tr("mobileInsights.errorHeading")}</h1>
           <p className={shell.lead}>{error || tr("mobileInsights.errorFallback")}</p>
         </header>
         <Link className={styles.textLink} href="/m">
@@ -373,56 +451,100 @@ export default function MobileInsights({
      block there are no bindus to show, and a titled collapsible that opens
      onto nothing reads as a failure rather than as an omission. */
   const houseSupport = computeHouseSupport(payload.ashtakavarga, houses);
+  const moon = planets.find((planet) => planet.name === "Moon");
+
+  /* The period the reader is in, narrowest first: the antardasha when the
+     engine gave one, the mahadasha otherwise. */
+  const nowStart = dasha ? dasha.current_antardasha_start || dasha.current_dasha_start : "";
+  const nowEnd = dasha ? dasha.current_antardasha_end || dasha.current_dasha_end : "";
+  const nowProgress = dasha ? periodProgress(nowStart, nowEnd, asOf) : null;
 
   return (
     <div className={shell.page}>
       <header className={shell.header}>
-        <span className={shell.step}>{[client.city, client.country].filter(Boolean).join(", ")}</span>
         <h1 className={shell.title}>{client.name}</h1>
-        <p className={shell.lead}>
-          {tr("mobileInsights.ascendantLead", { sign: ascendant.sign })}
-          {nakshatra
-            ? ` · ${tr("mobileInsights.nakshatraLead", { name: nakshatra.name })}`
-            : ""}
+        <p className={styles.birthLine}>
+          {[
+            [client.city, client.country].filter(Boolean).join(", "),
+            birthDate ? formatDate(birthDate, dateFormat) : "",
+            birthTime,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </p>
       </header>
 
-      <div className={styles.keyFacts}>
-        <div className={styles.fact}>
-          <span className={styles.factLabel}>{tr("mobileInsights.factLagna")}</span>
-          <span className={styles.factValue}>{ascendant.sign}</span>
-          <span className={styles.factMeta}>{formatDegree(ascendant.degree_in_sign)}</span>
+      {/* The answer before the reference: where the reader is in their
+          timeline, then who the chart says they are, then the chart. */}
+      {dasha && (
+        <section className={styles.now} aria-labelledby="m-now-heading">
+          <h2 id="m-now-heading" className={styles.nowLabel}>
+            {tr("mobileInsights.nowLabel")}
+          </h2>
+          <p className={styles.nowTitle}>
+            {dasha.current_dasha}
+            {dasha.current_antardasha && (
+              <>
+                <span className={styles.nowJoin} aria-hidden="true">
+                  {" · "}
+                </span>
+                {dasha.current_antardasha}
+              </>
+            )}
+          </p>
+          <p className={styles.nowMeta}>
+            {tr("mobileInsights.toDate", { date: formatDate(nowEnd, dateFormat) })}
+          </p>
+          {nowProgress !== null && (
+            <div className={styles.nowTrack} aria-hidden="true">
+              <span className={styles.nowFill} style={{ width: `${(nowProgress * 100).toFixed(1)}%` }} />
+              <span className={styles.nowDot} style={{ left: `${(nowProgress * 100).toFixed(1)}%` }} />
+            </div>
+          )}
+          {nowProgress !== null && (
+            <p className={styles.nowRange} aria-hidden="true">
+              <span>{formatDate(nowStart, dateFormat)}</span>
+              <span>{formatDate(nowEnd, dateFormat)}</span>
+            </p>
+          )}
+        </section>
+      )}
+
+      <dl className={styles.identity}>
+        <div className={styles.identityItem}>
+          <dt className={styles.identityLabel}>{tr("mobileInsights.factLagna")}</dt>
+          <dd className={styles.identityValue}>{ascendant.sign}</dd>
+          <dd className={styles.identityMeta}>{formatDegree(ascendant.degree_in_sign)}</dd>
         </div>
         {nakshatra && (
-          <div className={styles.fact}>
-            <span className={styles.factLabel}>{tr("mobileInsights.factNakshatra")}</span>
-            <span className={styles.factValue}>{nakshatra.name}</span>
-            <span className={styles.factMeta}>
+          <div className={styles.identityItem}>
+            <dt className={styles.identityLabel}>{tr("mobileInsights.factNakshatra")}</dt>
+            <dd className={styles.identityValue}>{nakshatra.name}</dd>
+            <dd className={styles.identityMeta}>
               {tr("mobileInsights.padaLord", {
                 pada: String(nakshatra.pada),
                 lord: nakshatra.lord,
               })}
-            </span>
+            </dd>
           </div>
         )}
-        {dasha && (
-          <div className={styles.fact}>
-            <span className={styles.factLabel}>{tr("mobileInsights.factMahadasha")}</span>
-            <span className={styles.factValue}>{dasha.current_dasha}</span>
-            <span className={styles.factMeta}>
-              {tr("mobileInsights.toDate", { date: formatDate(dasha.current_dasha_end, dateFormat) })}
-            </span>
+        {moon && (
+          <div className={styles.identityItem}>
+            <dt className={styles.identityLabel}>{tr("mobileInsights.factMoonSign")}</dt>
+            <dd className={styles.identityValue}>{moon.sign}</dd>
+            <dd className={styles.identityMeta}>{formatDegree(moon.degree_in_sign)}</dd>
           </div>
         )}
-      </div>
+      </dl>
 
-      {/* The wheel sits above the table on purpose: it answers "what does my
-          chart look like" at a glance, and the table answers "what exactly is
-          where" for anyone who wants the numbers. */}
-      <MobileChart
+      {/* The chart above the table on purpose: it answers "what does my chart
+          look like" at a glance, and the table answers "what exactly is where"
+          for anyone who wants the numbers. */}
+      <MobileRasiChart
         ascendantSign={ascendant.sign}
-        houses={houses}
         planets={planets}
+        tr={tr}
+        formatDegree={formatDegree}
       />
 
       <Section
@@ -535,6 +657,7 @@ export default function MobileInsights({
               })}
             />
           </p>
+          <DashaLifeBar periods={dasha.periods} asOf={asOf} tr={tr} />
           <table className={styles.table}>
             <thead>
               <tr>
@@ -547,7 +670,14 @@ export default function MobileInsights({
               {dasha.periods.map((period) => (
                 <tr
                   key={`${period.planet}-${period.start_date}`}
-                  className={period.planet === dasha.current_dasha ? styles.currentRow : undefined}
+                  /* By date, not by planet: the cycle can name a planet twice
+                     (Mercury opens and closes this one), and only one of the
+                     two rows is now. */
+                  className={
+                    asOf >= Date.parse(period.start_date) && asOf < Date.parse(period.end_date)
+                      ? styles.currentRow
+                      : undefined
+                  }
                 >
                   <th scope="row" className={styles.planetName}>{period.planet}</th>
                   <td className={styles.numeric}>{formatDate(period.start_date, dateFormat)}</td>
