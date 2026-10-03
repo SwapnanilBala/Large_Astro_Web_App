@@ -117,6 +117,7 @@
     "memberLoginAria": "Log in to a profile saved on this device",
     "actionHint": "Complete all fields to generate your chart",
     "actionHintMissing": "Add {fields} to continue.",
+    "actionHintCoordinates": "Waiting for coordinates…",
     "trustMicrocopy": "Encrypted · Never shared · ~60 seconds",
     "stickyComplete": "{count}/{total} complete",
     "stickyContinue": "Continue",

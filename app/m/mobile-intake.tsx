@@ -813,7 +813,7 @@ export default function MobileIntake() {
         )}
         {step === 4 && missing.length === 0 && !hasCoords && (
           <p id="m-action-hint" className={styles.actionHint} aria-live="polite">
-            Waiting for coordinates…
+            {t("home.actionHintCoordinates")}
           </p>
         )}
       </div>
