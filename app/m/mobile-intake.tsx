@@ -22,15 +22,20 @@ import AutocompleteInput from "@/app/components/AutocompleteInput";
 import { useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
 import { useHydrated } from "@/lib/use-hydrated";
-import MobileBackdrop from "./mobile-backdrop";
 import styles from "./mobile.module.css";
+
+/* The four questions, in order. */
+type Step = 1 | 2 | 3 | 4;
+const STEP_COUNT = 4;
 
 /*
  * Mobile intake.
  *
- * Same two-step shape as the desktop form and the same output — it builds its
- * query with buildChartQuery, so identical answers produce an identical chart
- * on either tree.
+ * One question per screen, the same four the desktop asks and in the same
+ * words (home.askName and its siblings, already translated): name, birth date,
+ * birth time, birthplace. The same output too — it builds its query with
+ * buildChartQuery, so identical answers produce an identical chart on either
+ * tree.
  *
  * What differs is the input layer. Desktop uses react-datepicker, which on a
  * phone means a cramped calendar grid and a 15-minute time dropdown. Here the
@@ -97,7 +102,7 @@ export default function MobileIntake() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<Step>(1);
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
   const [unknownTime, setUnknownTime] = useState(false);
   /* Whether the birthplace is being detected from one search rather than
@@ -113,6 +118,15 @@ export default function MobileIntake() {
   const [coordsExpanded, setCoordsExpanded] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const geoAbort = useRef<AbortController | null>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  /* The question last shown, so the heading takes focus when it changes but
+     not on arrival, where it would steal focus from nothing. */
+  const shownStep = useRef<Step>(1);
+  useEffect(() => {
+    if (shownStep.current === step) return;
+    shownStep.current = step;
+    headingRef.current?.focus();
+  }, [step]);
 
   /*
    * Share the desktop draft so switching trees mid-entry does not lose work.
@@ -308,6 +322,9 @@ export default function MobileIntake() {
   const exactBirthTime = unknownTime ? "" : draft.birthTime;
   const hasTime = unknownTime ? hasCoarseTimeFallback(coarseTime) : exactBirthTime.trim().length > 0;
   const canContinue = hasName && hasDate && hasTime;
+  /* Whether the question on screen is answered, which is all the button asks
+     on the first three. The last one asks for the whole form. */
+  const stepAnswered = step === 1 ? hasName : step === 2 ? hasDate : hasTime;
 
   /* Detected, the country and the state are never shown, so they cannot be
      required: a place with no administrative state would block the form with
@@ -324,7 +341,7 @@ export default function MobileIntake() {
   /* Resolve coordinates and the historical UTC offset for the birth moment.
    * Debounced because it fires on every keystroke across three fields. */
   useEffect(() => {
-    if (step !== 2 || !hasPlace) return;
+    if (step !== 4 || !hasPlace) return;
 
     const params = new URLSearchParams({
       city: draft.city.trim(),
@@ -369,13 +386,9 @@ export default function MobileIntake() {
   }, [step, hasPlace, draft.city, draft.state, draft.country, draft.birthDate, exactBirthTime]);
 
   const missing = useMemo(() => {
-    if (step === 1) {
-      const gaps: string[] = [];
-      if (!hasName) gaps.push(t("home.formName"));
-      if (!hasDate) gaps.push(t("home.formBirthDate"));
-      if (!hasTime) gaps.push(t("home.formBirthTime"));
-      return gaps;
-    }
+    if (step === 1) return hasName ? [] : [t("home.formName")];
+    if (step === 2) return hasDate ? [] : [t("home.formBirthDate")];
+    if (step === 3) return hasTime ? [] : [t("home.formBirthTime")];
     const gaps: string[] = [];
     /* Naming a box that is not on screen would be an instruction nobody can
        follow, so detected mode has one gap to close, not three. */
@@ -385,10 +398,10 @@ export default function MobileIntake() {
     return gaps;
   }, [step, hasName, hasDate, hasTime, autoPlace, draft.country, draft.state, draft.city, t]);
 
-  /* Step 1's fields unmount when step 2 opens, and an unmounted input never
-   * fires the blur its normaliser hangs off — so the whole draft goes through
-   * the normalisers here as well. Idempotent, so anything already canonical
-   * comes back untouched. */
+  /* Each question's field unmounts when the next one opens, and an unmounted
+   * input never fires the blur its normaliser hangs off — so the whole draft
+   * goes through the normalisers here as well. Idempotent, so anything already
+   * canonical comes back untouched. */
   const normalizedDraft = (source: ProfileQueryInput): ProfileQueryInput => {
     const keep = (raw: string, result: IntakeFieldResult) => result.value || raw;
 
@@ -411,8 +424,8 @@ export default function MobileIntake() {
     const tidied = normalizedDraft(draft);
     setDraft(tidied);
 
-    if (step === 1) {
-      if (canContinue) setStep(2);
+    if (step < STEP_COUNT) {
+      if (stepAnswered) setStep((step + 1) as Step);
       return;
     }
     if (!canSubmit || submitting) return;
@@ -425,25 +438,60 @@ export default function MobileIntake() {
     router.push(`/m/engine-select?${params.toString()}`);
   };
 
+  /* What each question asks, and what its button says, in the desktop's words.
+     The last button says Next rather than promising a chart, because the
+     method chooser comes before it. */
+  const question =
+    step === 1
+      ? { title: t("home.askName"), lead: t("home.askNameHelper"), cta: t("home.continueToBirthDate") }
+      : step === 2
+        ? { title: t("home.askBirthDate"), lead: t("home.askBirthDateHelper"), cta: t("home.continueToBirthTime") }
+        : step === 3
+          ? { title: t("home.askBirthTime"), lead: t("home.askBirthTimeHelper"), cta: t("home.continueToBirthplace") }
+          : { title: t("home.askPlace"), lead: t("home.askPlaceHelper"), cta: t("home.next") };
+
   return (
     <form className={styles.page} onSubmit={onSubmit} noValidate>
-      <MobileBackdrop />
+      <div className={styles.topBar}>
+        <span className={styles.wordmark}>Lagna Atelier</span>
+        {/* The way in for a member who already has charts on this device, on
+            every question rather than only the first.
+
+            An anchor, not a button: it cannot submit the form it sits in, and
+            the draft is written to localStorage on every edit, so leaving
+            mid-entry costs nothing.
+
+            A bare anchor rather than next/link, which is the convention
+            everywhere else. Link is not otherwise in /m's graph and pulls 3.3KB
+            gzipped into the one route with the least headroom, and its default
+            prefetch would fetch the login route for every visitor, including
+            the many here to build a first chart who will never tap this. */}
+        <a href="/m/login" className={styles.topLink} aria-label={t("home.memberLoginAria")}>
+          {t("account.heading")}
+        </a>
+      </div>
 
       <header className={styles.header}>
-        <span className={styles.step}>Step {step} of 2</span>
-        <h1 className={`${styles.title} mGold`}>
-          {step === 1 ? t("home.intakeHeadingDetails") : t("home.intakeHeadingLocation")}
-        </h1>
-        <p className={styles.lead}>
-          {step === 1 ? t("home.intakeLeadDetails") : t("home.intakeLeadLocation")}
-        </p>
+        <span className={styles.step}>
+          {t("home.questionCounter", { current: String(step), total: String(STEP_COUNT) })}
+        </span>
         <div className={styles.progress} aria-hidden="true">
-          <span className={`${styles.progressBar} ${styles.progressBarActive}`} />
-          <span className={`${styles.progressBar} ${step === 2 ? styles.progressBarActive : ""}`} />
+          {([1, 2, 3, 4] as const).map((n) => (
+            <span
+              key={n}
+              className={`${styles.progressBar} ${n <= step ? styles.progressBarActive : ""}`}
+            />
+          ))}
         </div>
+        {/* Focused when the question changes, so a screen reader announces
+            the new one rather than staying on a button that has moved on. */}
+        <h1 ref={headingRef} tabIndex={-1} className={styles.title}>
+          {question.title}
+        </h1>
+        <p className={styles.lead}>{question.lead}</p>
       </header>
 
-      {step === 1 ? (
+      {step === 1 && (
         <div className={styles.fields}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="m-name">
@@ -463,7 +511,11 @@ export default function MobileIntake() {
             />
             {renderNote("name")}
           </div>
+        </div>
+      )}
 
+      {step === 2 && (
+        <div className={styles.fields}>
           <div className={styles.field}>
             <label className={styles.label} htmlFor="m-birth-date">
               {t("home.formBirthDate")}
@@ -489,7 +541,11 @@ export default function MobileIntake() {
               <p className={styles.fieldNote}>{formatBirthDateDisplay(draft.birthDate)}</p>
             ) : null}
           </div>
+        </div>
+      )}
 
+      {step === 3 && (
+        <div className={styles.fields}>
           {!unknownTime && (
             <div className={styles.field}>
               <label className={styles.label} htmlFor="m-birth-time">
@@ -554,7 +610,9 @@ export default function MobileIntake() {
             </fieldset>
           )}
         </div>
-      ) : (
+      )}
+
+      {step === 4 && (
         <div className={styles.fields}>
           {/* Detected: one search answers the whole place. The country and
               the state are still filled behind it -- the geocoder is given
@@ -730,39 +788,11 @@ export default function MobileIntake() {
 
       <div className={styles.actions}>
         <div className={styles.actionRow}>
-          {/* Step 1 is the whole of this tree's front door, and until now it
-              offered no way to reach the profile portal — a member who already
-              has charts on this device was asked to fill the form again. The
-              left slot holds that door on step 1 and Back on step 2, so the
-              row never carries three controls at 375px.
-
-              An anchor, not a button: it cannot submit the form it sits in,
-              and the draft is written to localStorage on every edit, so
-              leaving mid-entry costs nothing either way.
-
-              A bare anchor rather than next/link, which is the convention
-              everywhere else. Two reasons, both about this page specifically:
-              Link is not otherwise in /m's graph and pulls 3.3KB gzipped into
-              the one route with the least headroom, and sitting in a fixed bar
-              it would never leave the viewport, so its default prefetch would
-              fetch the login route for every visitor — including the many who
-              are here to build a first chart and will never tap this. A hard
-              navigation is the right trade for a deliberate, once-a-visit
-              action. */}
-          {step === 1 && (
-            <a
-              href="/m/login"
-              className={styles.buttonLogin}
-              aria-label={t("home.memberLoginAria")}
-            >
-              {t("home.memberLogin")}
-            </a>
-          )}
-          {step === 2 && (
+          {step > 1 && (
             <button
               type="button"
               className={`${styles.button} ${styles.buttonGhost}`}
-              onClick={() => setStep(1)}
+              onClick={() => setStep((step - 1) as Step)}
             >
               {t("home.back")}
             </button>
@@ -770,18 +800,18 @@ export default function MobileIntake() {
           <button
             type="submit"
             className={styles.button}
-            disabled={step === 1 ? !canContinue : !canSubmit || submitting}
+            disabled={step < STEP_COUNT ? !stepAnswered : !canSubmit || submitting}
             aria-describedby={missing.length ? "m-action-hint" : undefined}
           >
-            {step === 1 ? t("home.continueToLocation") : t("home.cta")}
+            {question.cta}
           </button>
         </div>
         {missing.length > 0 && (
           <p id="m-action-hint" className={styles.actionHint} aria-live="polite">
-            Add {missing.join(", ")} to continue.
+            {t("home.actionHintMissing", { fields: missing.join(", ") })}
           </p>
         )}
-        {step === 2 && missing.length === 0 && !hasCoords && (
+        {step === 4 && missing.length === 0 && !hasCoords && (
           <p id="m-action-hint" className={styles.actionHint} aria-live="polite">
             Waiting for coordinates…
           </p>

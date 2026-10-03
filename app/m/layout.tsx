@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cinzel } from "next/font/google";
+import { Newsreader } from "next/font/google";
 import MobileLanguageProvider from "@/lib/i18n-mobile";
 import "./mobile-shell.css";
 import styles from "./mobile.module.css";
@@ -34,25 +34,26 @@ export const viewport: Viewport = {
   /* Deliberately not locking maximumScale — pinch-zoom is an accessibility
    * affordance and disabling it fails WCAG 1.4.4. */
   viewportFit: "cover",
-  themeColor: "#0F1117",
+  /* The almanac's ink, so the browser chrome around the page matches it. */
+  themeColor: "#15130f",
 };
 
 /*
- * One weight, one subset, headings only — 14.8KB against a font budget that
- * was sitting at zero.
+ * One weight, one subset, headings only.
  *
- * The whole /m tree ran on system-ui, which is why it read like a settings
- * panel rather than this product: Cinzel's serif capitals are the identity on
- * desktop, and dropping them was over-correction, not a cost the budget
- * required. Body copy and data stay on the system stack — this face is for
- * titles and section labels, where its character does the work and its
- * legibility at small sizes never has to.
+ * Newsreader, the serif the desktop reading already sets its prose in, in
+ * sentence case. It replaces Cinzel, whose inscription capitals are the stock
+ * astrology-app look and wrapped badly on a handset once a heading ran past a
+ * few words ("WHICH HOUSE IS RESPONSIBLE FOR WHAT"). Body copy stays on the
+ * system stack and numbers on the system monospace (--font-mono), so this is
+ * still the only face the tree downloads.
  *
  * display:swap so it can never block first paint.
  */
-const cinzel = Cinzel({
+const newsreader = Newsreader({
   subsets: ["latin"],
-  weight: ["600"],
+  weight: ["400"],
+  style: ["normal"],
   display: "swap",
   variable: "--font-display-m",
 });
@@ -63,7 +64,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
      no main region. */
   return (
     <MobileLanguageProvider>
-      <main id="main-content" className={`${cinzel.variable} ${styles.shell}`}>
+      <main id="main-content" className={`${newsreader.variable} ${styles.shell}`}>
         {children}
       </main>
     </MobileLanguageProvider>

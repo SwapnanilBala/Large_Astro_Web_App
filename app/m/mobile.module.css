@@ -1,18 +1,21 @@
 /*
- * Mobile shell styles.
+ * Mobile shell styles, in the almanac look.
  *
- * Self-contained on purpose. The desktop tree leans on a 12.8k-line
- * globals.css of which ~85% matches nothing on any given page; the mobile
- * tree should not inherit that. Everything here is written against the
- * tokens globals.css defines, but adds no dependency on its component rules.
+ * Self-contained on purpose: the desktop tree's globals.css never loads here.
+ * Every value reads the tokens in mobile-shell.css, so the two themes are the
+ * same rules on different ink.
+ *
+ * The look, briefly: sentence-case serif headings, fields drawn as ruled
+ * lines rather than boxes, hairlines instead of cards, numbers in monospace,
+ * and one vermilion for the action on the screen.
  */
 
 .shell {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-deep, #0a0a0f);
-  color: var(--text-primary, #f5f0e6);
+  background: var(--bg-deep);
+  color: var(--text-primary);
   /* Respect the notch and the home indicator. */
   padding:
     env(safe-area-inset-top) env(safe-area-inset-right)
@@ -23,163 +26,187 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
-  padding: 1.25rem 1rem 0;
+  gap: 1.5rem;
+  padding: 1rem 1.25rem 0;
   /* Room for the sticky action bar so the last field is never trapped behind it. */
   padding-bottom: 7.5rem;
-  /*
-   * Holds <MobileBackdrop />, which sits at z-index:-1. Without a stacking
-   * context here that resolves against the root and the layer disappears
-   * behind .shell's opaque background; with one it lands between this form's
-   * background and its content, which is the only place it can go -- a
-   * positioned layer at z-index:0 would paint over the fields, since they are
-   * not positioned themselves.
-   *
-   * Safe for .actions below: its z-index:20 and the --layer-overlay:10 the
-   * suggestion list sits on are both inside this form, so they are still
-   * ordered against each other and nothing outside competes.
-   */
+  /* A stacking context of its own, so the action bar's z-index:20 and the
+     --layer-overlay:10 the suggestion list sits on are ordered against each
+     other here and nothing outside the form competes with them. */
   isolation: isolate;
+}
+
+/* The intake's top line: the name of the house, and the way in for someone
+   who already has charts saved. */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 2.75rem;
+}
+
+.wordmark {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
+  color: var(--text-primary);
+}
+
+/* A text link rather than a filled control: on the first screen anyone sees,
+   the one filled control should be the way forward. */
+.topLink {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
+  padding: 0 0.25rem;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--border-medium);
+  text-underline-offset: 0.25em;
 }
 
 .header {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
 }
 
+/* Counters and small labels are set in the monospace, which is what lets a
+   third tier recede without dropping under AA (see --text-tertiary). */
 .step {
-  font-size: 0.8125rem;
-  color: var(--text-secondary, #a8a090);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  letter-spacing: 0.02em;
+  color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
 }
 
 .title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 600;
-  line-height: 1.25;
-  letter-spacing: 0.01em;
+  font-size: 2rem;
+  font-weight: 400;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
 }
 
 .lead {
   margin: 0;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
 .progress {
   display: flex;
-  gap: 0.375rem;
+  gap: 0.25rem;
 }
 
 .progressBar {
-  height: 3px;
+  height: 2px;
   flex: 1;
-  border-radius: 999px;
-  background: var(--border-soft, rgba(212, 165, 116, 0.16));
+  background: var(--border-medium);
 }
 
 .progressBarActive {
-  background: var(--accent-gold, #d4a574);
+  background: var(--accent);
+}
+
+/* The question needs air between it and the bar that counts it. */
+.progress + .title {
+  margin-top: 0.75rem;
 }
 
 .fields {
   display: flex;
   flex-direction: column;
-  gap: 1.125rem;
+  gap: 1.5rem;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.25rem;
 }
 
 .label {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
 }
 
 .required {
-  color: var(--accent-gold, #d4a574);
+  color: var(--accent-text);
   margin-left: 0.15rem;
 }
 
 /*
- * 16px is a hard floor, not a style choice: iOS Safari zooms the viewport in
- * when a focused input is smaller than that, and the page never zooms back
+ * A field is a ruled line with the answer written on it, in the serif.
+ *
+ * The 16px floor still holds, and with room to spare: iOS Safari zooms the
+ * viewport in when a focused input is smaller than that and never zooms back
  * out. Every control below inherits it.
  */
 .input {
   width: 100%;
   min-height: 3rem;
-  padding: 0.75rem 0.875rem;
-  font-size: 1rem;
-  font-family: inherit;
-  color: var(--text-primary, #f5f0e6);
-  background: var(--surface-strong, rgba(255, 243, 210, 0.06));
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
-  border-radius: 10px;
+  padding: 0.5rem 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.3;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--border-medium);
+  border-radius: 0;
   appearance: none;
   -webkit-appearance: none;
 }
 
+/* The line thickens to the ink's own colour: a focus state that is a change
+   of weight, not a glow. */
 .input:focus {
   outline: none;
-  border-color: var(--accent-gold, #d4a574);
-  box-shadow: 0 0 0 3px rgba(212, 165, 116, 0.22);
+  border-bottom-color: var(--text-primary);
+  box-shadow: 0 1px 0 var(--text-primary);
 }
 
 .input::placeholder {
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
-/* --danger-text rather than --danger-line: that one is the faint wash outline
-   the login panel uses, and a field's boundary has to clear 3:1 against both
-   the fill and the page. The literal here was #f07068, which measured 2.77:1
-   against the page on Ethereal Dawn. */
+/* --danger-text rather than --danger-line: a field's boundary has to clear
+   3:1 against the page in both themes. */
 .input[aria-invalid="true"] {
-  border-color: var(--danger-text);
+  border-bottom-color: var(--danger-text);
 }
 
-/* Native date/time controls render their own indicator; keep it visible on
- * a dark surface rather than letting it fall back to near-black. */
+/* Native date/time controls draw their own indicator; keep it visible on the
+   ink rather than letting it fall back to near-black. On paper it needs no
+   help. */
 .input::-webkit-calendar-picker-indicator {
-  filter: invert(0.75);
+  filter: invert(0.8);
   cursor: pointer;
 }
 
-.row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-.error {
-  font-size: 0.8125rem;
-  color: #f07068;
-}
-
-.hint {
-  font-size: 0.8125rem;
-  color: var(--text-tertiary, #9a918a);
+:global(html[data-theme="light"]) .input::-webkit-calendar-picker-indicator {
+  filter: none;
 }
 
 .toggleRow {
   display: flex;
   align-items: center;
-  gap: 0.625rem;
+  gap: 0.75rem;
   min-height: 3rem;
 }
 
 .checkbox {
-  width: 1.375rem;
-  height: 1.375rem;
-  accent-color: var(--accent-gold, #d4a574);
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--accent);
   flex-shrink: 0;
 }
 
@@ -199,27 +226,29 @@
   padding: 0.5rem 0.75rem;
   font-size: 0.9375rem;
   font-family: inherit;
-  color: var(--text-secondary, #a8a090);
+  color: var(--text-secondary);
   background: transparent;
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
-  border-radius: 10px;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
 }
 
+/* A chosen chip is inked in, not lit up: the vermilion is kept for the action
+   and for "now". */
 .chipActive {
-  color: var(--bg-deep, #0a0a0f);
-  background: var(--accent-gold, #d4a574);
-  border-color: var(--accent-gold, #d4a574);
+  color: var(--bg-deep);
+  background: var(--text-primary);
+  border-color: var(--text-primary);
   font-weight: 500;
-  /* Dark on gold, so it opts out of the body's antialiased setting for the
-     reason spelled out on .button below. This one has the least to spare of
-     the three: 15px at weight 500 is the lightest inverted text in the tree. */
+  /* Dark on light, so it opts out of the body's antialiased setting for the
+     reason spelled out on .button below. */
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
 }
 
 .status {
-  font-size: 0.8125rem;
-  color: var(--text-tertiary, #9a918a);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-tertiary);
   min-height: 1.2rem;
 }
 
@@ -241,9 +270,9 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  padding: 0.875rem 1rem calc(0.875rem + env(safe-area-inset-bottom));
-  background: var(--bg-surface, #12121a);
-  border-top: 1px solid var(--border-soft, rgba(212, 165, 116, 0.16));
+  padding: 0.875rem 1.25rem calc(0.875rem + env(safe-area-inset-bottom));
+  background: var(--bg-deep);
+  border-top: 1px solid var(--border-soft);
 }
 
 .actionRow {
@@ -257,121 +286,70 @@
   font-size: 1rem;
   font-family: inherit;
   font-weight: 600;
-  color: #1a1206;
-  background: linear-gradient(100deg, #c89b3c, #e8c89a);
+  color: var(--on-accent);
+  background: var(--accent);
   border: none;
-  border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
+  border-radius: 6px;
 
   /* mobile-shell.css sets -webkit-font-smoothing: antialiased on the body,
-     which is right for the cream-on-near-black this tree is otherwise made of
-     and wrong for the one element that inverts it. On iOS the thinned
-     rasterisation costs these dark glyphs the stroke density they need against
-     a bright gold fill, and the label goes soft at exactly the size where it
-     has the least to spare. Everything else here stays on the inherited
-     value. */
+     which is right for light text on the ink and wrong for a dark label on a
+     bright fill. On iOS the thinned rasterisation costs those glyphs the
+     stroke density they need, at exactly the size where they have the least
+     to spare. Everything else stays on the inherited value. */
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
 }
 
-/* A solid gold fill at 45% opacity over a near-black page renders as brown
-   sludge — and it was the primary action on the first screen anyone sees. A
-   disabled control should read as inert, not as a dimmed copy of the live one,
-   so it drops to a neutral surface with dimmed gold text.
-
-   The label alpha was 0.5, which is 2.89:1 on that surface. The neutral fill
-   is what says "inert" here — it is a different treatment from the live
-   button, not a fainter one — so the text alpha was carrying a signal the
-   fill already carries, at the cost of the only words on the control. 0.8
-   gives 5.29:1 and the state still reads at a glance. */
+/* Inert reads as a different treatment, not a fainter copy of the live one:
+   no fill, a hairline, and the label in the third tone (6.6:1 on the ink,
+   4.7:1 on the paper). */
 .button:disabled {
-  color: rgba(212, 165, 116, 0.8);
-  background: rgba(255, 243, 210, 0.05);
-  box-shadow: inset 0 0 0 1px rgba(212, 165, 116, 0.14);
+  color: var(--text-tertiary);
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--border-medium);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 .buttonGhost {
   flex: 0 0 auto;
   min-width: 5.5rem;
-  color: var(--text-primary, #f5f0e6);
+  color: var(--text-primary);
   background: transparent;
-  border: 1px solid var(--border-medium, rgba(212, 165, 116, 0.24));
-  /* Back to the body's setting. This variant carries .button as well, but it
-     is cream on the page rather than near-black on gold, so it wants the
-     thinner rasterisation the rest of the tree uses — the opt-out above is
-     specifically for the inverted fill. */
+  border: 1px solid var(--border-medium);
+  /* Light text on the page again, so back to the body's rasterisation. */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/*
- * Returning-member entrance.
- *
- * This tree carries no navigation chrome at all, so the profile portal at
- * /m/login had nothing pointing at it — a member with saved charts could only
- * reach it by typing the URL. It goes in the action bar because that is the
- * one part of this screen a thumb is already heading for.
- *
- * Red rather than gold on purpose. Gold is the primary path, and a second gold
- * control beside it would read as an equal choice; the red pill is sized to
- * its label so the primary keeps the width and the hierarchy stays obvious
- * even while the primary is disabled and dimmed.
- *
- * The gradient stops at #c62f2b rather than anything brighter so the cream
- * label clears 5:1 against the light end, not only the dark one.
- */
-.buttonLogin {
-  /* Sized to its label, but never past 45% of the row: a locale with a longer
-     word for this must not leave the primary action the smaller of the two.
-     Past that cap the label wraps inside the pill rather than being clipped,
-     and min-height keeps the 44px touch floor either way. */
-  flex: 0 0 auto;
-  max-width: 45%;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0.5rem 1.05rem;
-  min-height: 3.25rem;
-  font-size: 0.9375rem;
-  font-weight: 600;
-  line-height: 1.25;
-  text-align: center;
-  text-decoration: none;
-  color: #fff4ef;
-  background: linear-gradient(100deg, #a4141f, #c62f2b);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.22);
-}
-
-/* The shell clears the tap-highlight rectangle globally, so a control with no
-   :active state of its own feels dead under a thumb. */
-.buttonLogin:active {
-  filter: brightness(0.9);
+.buttonGhost:active,
+.button:active {
+  opacity: 0.86;
 }
 
 .actionHint {
   margin: 0;
   font-size: 0.8125rem;
   text-align: center;
-  color: var(--text-tertiary, #9a918a);
+  color: var(--text-tertiary);
 }
 
 /* The way back when a page cannot render — incomplete chart details reach
-   both the results route and the method chooser. Gold on a page with no other
-   control on it, because it is the only thing to do here. */
+   both the results route and the method chooser. The one filled control on
+   the page, because it is the only thing to do there. */
 .backToIntake {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  align-self: flex-start;
   min-height: 3.25rem;
   padding: 0 1.25rem;
   font-size: 1rem;
   font-weight: 600;
   text-decoration: none;
-  color: #1a1206;
-  background: linear-gradient(100deg, #c89b3c, #e8c89a);
-  border-radius: 12px;
-  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.28);
+  color: var(--on-accent);
+  background: var(--accent);
+  border-radius: 6px;
   /* Same fill and same inversion as .button, so the same opt-out. */
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
@@ -391,15 +369,13 @@
  * before the chart is built.
  */
 .fieldNote {
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
   font-size: 0.8125rem;
   line-height: 1.45;
-  color: var(--accent-gold, #d4a574);
+  color: var(--text-secondary);
 }
 
-/* The message that goes with the invalid border above, on the same token.
-   #e84545 cleared neither theme at this size -- 3.71:1 on light, 4.39:1 on
-   dark, where AA asks 4.5:1. */
+/* The message that goes with the invalid line above, on the same token. */
 .fieldNoteError {
   color: var(--danger-text);
 }
@@ -416,18 +392,17 @@
   padding: 0.4rem 0.9rem;
   font-size: 0.875rem;
   font-family: inherit;
-  color: var(--accent-gold, #d4a574);
+  color: var(--text-primary);
   background: transparent;
-  border: 1px solid var(--border-soft, rgba(212, 165, 116, 0.35));
+  border: 1px solid var(--border-medium);
   border-radius: 999px;
 }
 
 /*
  * The shared AutocompleteInput carries the fetching, debouncing and combobox
- * semantics, and globals.css already turns its dropdown into a bottom sheet
- * with 48px rows below 768px — the pattern the rest of the phone tree uses.
- * Only the input itself is skinned here, via the className prop, so it keeps
- * the 16px floor and the touch sizing the other fields have.
+ * semantics, and its list is styled in mobile-shell.css. Only the input itself
+ * is skinned here, via the className prop, so it is the same ruled line as
+ * every other field.
  */
 
 .disclosure {
@@ -436,7 +411,7 @@
   padding: 0.5rem 0;
   font-size: 0.9375rem;
   font-family: inherit;
-  color: var(--accent-gold, #d4a574);
+  color: var(--accent-text);
   background: none;
   border: none;
   text-decoration: underline;

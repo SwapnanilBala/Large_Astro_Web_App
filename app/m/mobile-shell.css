@@ -1,24 +1,30 @@
 /*
  * Mobile base sheet — the entire global stylesheet for the /m tree.
  *
- * globals.css is 174KB (22KB gzipped) and loads on the desktop tree only. The
- * mobile module sheets were already written to be self-contained, but they
- * read eleven custom properties that globals.css happened to define, so those
- * eleven are restated here. That is the whole dependency: audited by
- * extracting every var() in app/m/**.css and checking each against globals.css.
+ * globals.css is 174KB (22KB gzipped) and loads on the desktop tree only, so
+ * every custom property app/m/**.css reads is declared here. The token names
+ * still match the desktop's where the two meet; the values no longer do, since
+ * this tree has its own almanac palette (see :root below).
  *
  * Keep this file small. A rule belongs in a route's *.module.css unless every
  * mobile page needs it.
  */
 
 :root {
-  /* The eleven tokens app/m/**.module.css actually reads. Values copied from
-     globals.css so the two trees stay visually identical — with one deliberate
-     exception, noted on --text-tertiary below. */
-  --bg-deep: #0a0a0f;
-  --bg-surface: #12121a;
-  --surface: rgba(255, 243, 210, 0.03);
-  --surface-strong: rgba(255, 243, 210, 0.05);
+  /*
+   * The almanac palette: ink and paper, and one vermilion.
+   *
+   * The /m tree used to restate the desktop's gold-on-near-black, which is the
+   * default look of the astrology-app category and said nothing about this
+   * product. It now reads like a printed panchang: warm ink for the page,
+   * paper-white for the words, and a single red -- the rubric colour almanacs
+   * print important days in -- for the one action on a screen and for "now".
+   * Colour is flat; gold gradients, glows and gradient text are gone.
+   */
+  --bg-deep: #15130f;
+  --bg-surface: #1c1915;
+  --surface: rgba(236, 230, 218, 0.035);
+  --surface-strong: rgba(236, 230, 218, 0.06);
   /*
    * The type scale, same values as the desktop tree's. Declared again because
    * app/m loads mobile-shell.css and nothing else -- globals.css, where these
@@ -29,41 +35,40 @@
   --text-label: 0.8125rem; /* 13px  -- uppercase labels and badges */
   --text-ui: 0.95rem;      /* 15.2px -- buttons, links, tabs */
 
-  --text-primary: #f5f0e6;
-  --text-secondary: #a8a090;
+  --text-primary: #ece6da;
+  --text-secondary: #b3aa99;
   /*
-   * The one value that does not match globals.css, which has #6b6560.
-   *
-   * That measured 2.52:1 against the lightest surface in this sheet and 3.44:1
-   * against the page itself — under the 4.5:1 AA floor everywhere it was used,
-   * and it was used for twelve pieces of real 11-13px copy: field hints, the
-   * geocoding status line, the "add these to continue" prompt, input
-   * placeholders, and most of the labelling on the results page. None of that
-   * is decorative or disabled, so none of it is exempt.
-   *
-   * #9a918a clears 4.70:1 against the lightest surface here and 6.41:1 against
-   * the page. lib/__tests__/mobile-contrast.test.ts recomputes this from the
+   * The third tone has to clear the 4.5:1 AA floor on the lightest surface
+   * the tree paints, because it carries real 11-13px copy: field hints, the
+   * geocoding status line, placeholders, most of the labelling on the results
+   * page. #9b9385 measures 5.0:1 on --surface-lit-strong and 6.6:1 on the
+   * page. lib/__tests__/mobile-contrast.test.ts recomputes all of it from the
    * declarations below, so a surface lightened later fails the build rather
-   * than quietly dragging the text under the floor again.
+   * than quietly dragging the text under the floor.
    *
-   * What it costs: on a near-black page there is very little room left below
-   * --text-secondary once a tone has to clear AA, so these two now differ by
-   * about a fifth in luminance where they used to differ by nearly three
-   * times. Lightness alone no longer does much de-emphasis in this tree — for
-   * a third tier that genuinely recedes, reach for size, weight or caps as
-   * well, the way app/m/engine-select does.
-   *
-   * The desktop tree has the same #6b6560 against its own surfaces and has not
-   * been audited.
+   * On a dark page there is little room below --text-secondary once a tone
+   * has to clear AA, so for a tier that genuinely recedes reach for size and
+   * the monospace face as well, not lightness alone.
    */
-  --text-tertiary: #9a918a;
-  --accent-gold: #d4a574;
-  --border-soft: rgba(212, 165, 116, 0.12);
-  --border-medium: rgba(212, 165, 116, 0.2);
-  /* Referenced by the mobile sheets but never defined in globals.css either —
-     it was resolving to its inline fallback. Given a real value here so the
-     border scale is soft < subtle < medium rather than having a hole in it. */
-  --border-subtle: rgba(212, 165, 116, 0.16);
+  --text-tertiary: #9b9385;
+  /*
+   * Vermilion, in two strengths. --accent is the fill: the primary button,
+   * progress, the "now" marker. Small text in it would fall under AA on the
+   * raised surfaces, so text and links take --accent-text, a step lighter
+   * (6.2:1 on the page, 4.9:1 on the lightest surface). --on-accent is the
+   * label on an --accent fill, 5.0:1.
+   */
+  --accent: #e0563b;
+  --accent-text: #ec6f55;
+  --on-accent: #1a0d08;
+  /* Hairlines in the ink's own tone. The almanac separates with rules more
+     than with boxes, so these carry most of the structure. */
+  --border-soft: rgba(236, 230, 218, 0.1);
+  --border-subtle: rgba(236, 230, 218, 0.14);
+  --border-medium: rgba(236, 230, 218, 0.22);
+  /* Numbers, dates, degrees and small labels. The system's own monospace, so
+     the face costs nothing to load. */
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
 
   /*
    * Error states, as tokens rather than per-component literals.
@@ -78,13 +83,11 @@
   --danger-surface: rgba(229, 139, 139, 0.08);
   --danger-text: #f0a4a4;
 
-  /* Keyboard focus, for the whole tree. The value is the one /m/login already
-     used; it is a token now because the rest of the tree had no focus styling
-     at all and needed the same ring, not a second opinion. Teal rather than
-     the gold accent so the ring never sits on a fill close to its own colour:
-     it measures 3.94:1 on the page and 3.89:1 on the action bar, against the
-     3:1 WCAG 2.4.11 asks of a focus indicator. */
-  --focus-ring: rgba(88, 190, 175, 0.62);
+  /* Keyboard focus, for the whole tree. The paper tone rather than the
+     vermilion, so the ring never sits on a fill close to its own colour --
+     the primary button is vermilion. Well past the 3:1 WCAG 2.4.11 asks of a
+     focus indicator on the page and on the action bar. */
+  --focus-ring: #ece6da;
 
   /* One rank for anything a field opens over the page. The action bar sits
      above it at 20 so the primary control is never the thing that gets
@@ -92,58 +95,51 @@
   --layer-overlay: 10;
 
   /*
-   * Lit surfaces.
-   *
-   * Every card in this tree was a flat fill about 4% of luminance above the
-   * page, so nothing read as sitting on top of anything. A single top-down
-   * wash plus a hairline along the top edge is enough to suggest a light
-   * source, which is what the desktop tree gets from its gradients and
-   * translucency. Roughly 200 bytes for the whole tree.
+   * Raised surfaces: panels, the action bar, the suggestion list. A faint
+   * top-down wash over a base a shade above the page is enough to lift them;
+   * the almanac's structure comes from rules, so these stay quiet. The wash
+   * stop is what mobile-contrast.test.ts measures text against.
    */
   --surface-lit:
-    linear-gradient(180deg, rgba(255, 243, 210, 0.05), rgba(255, 243, 210, 0) 44%),
-    #12121a;
+    linear-gradient(180deg, rgba(236, 230, 218, 0.035), rgba(236, 230, 218, 0) 44%),
+    #1a1814;
   --surface-lit-strong:
-    linear-gradient(180deg, rgba(255, 243, 210, 0.08), rgba(255, 243, 210, 0) 48%),
-    #171722;
-  --edge-highlight: inset 0 1px 0 rgba(255, 243, 210, 0.07);
-
+    linear-gradient(180deg, rgba(236, 230, 218, 0.05), rgba(236, 230, 218, 0) 48%),
+    #1d1a16;
+  --edge-highlight: inset 0 1px 0 rgba(236, 230, 218, 0.05);
 }
 
-/* Ethereal Dawn follows the saved desktop preference on the dedicated mobile
-   tree as well. These are intentionally compact base tokens; route-level
-   mobile sheets continue to own their own layout and spacing. */
+/* The light theme is paper: the same almanac with the ink on the page rather
+   than under it. It follows the saved desktop preference, as before. */
 html[data-theme="light"] {
-  --bg-deep: #fff8f5;
-  --bg-surface: #fffdfb;
-  --surface: rgba(255, 253, 251, 0.86);
-  --surface-strong: rgba(255, 247, 245, 0.94);
-  --text-primary: #36263a;
-  --text-secondary: #6f5967;
-  --text-tertiary: #866f7c;
-  --accent-gold: #ad7138;
-  --border-soft: rgba(126, 78, 98, 0.14);
-  --border-medium: rgba(173, 113, 56, 0.24);
-  --border-subtle: rgba(126, 78, 98, 0.18);
+  --bg-deep: #f4efe4;
+  --bg-surface: #fbf8f1;
+  --surface: rgba(255, 253, 248, 0.6);
+  --surface-strong: rgba(255, 253, 248, 0.92);
+  --text-primary: #221d17;
+  --text-secondary: #5f5649;
+  /* 4.7:1 on the paper, 5.1:1 on the lightest surface. */
+  --text-tertiary: #73695c;
+  /* The fill and the text vermilion: 5.6:1 for the label on the fill, 5.8:1
+     for --accent-text on the paper. */
+  --accent: #b23a24;
+  --accent-text: #a8341f;
+  --on-accent: #fff8ef;
+  --border-soft: rgba(34, 29, 23, 0.1);
+  --border-subtle: rgba(34, 29, 23, 0.14);
+  --border-medium: rgba(34, 29, 23, 0.22);
   --danger-line: rgba(176, 58, 68, 0.32);
   --danger-surface: rgba(176, 58, 68, 0.07);
   --danger-text: #b03a44;
-  --focus-ring: rgba(91, 111, 181, 0.72);
+  --focus-ring: #221d17;
   --surface-lit:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 243, 240, 0.28) 48%),
-    #fffdfb;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0) 48%),
+    #fbf8f1;
   --surface-lit-strong:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(255, 237, 234, 0.34) 52%),
-    #fff7f5;
-  --edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 52%),
+    #fdfbf6;
+  --edge-highlight: inset 0 1px 0 rgba(255, 255, 255, 0.7);
   color-scheme: light;
-}
-
-html[data-theme="light"] body {
-  background:
-    radial-gradient(circle at 8% -4%, rgba(244, 185, 169, 0.25), transparent 22rem),
-    radial-gradient(circle at 95% 12%, rgba(188, 166, 229, 0.18), transparent 21rem),
-    var(--bg-deep);
 }
 
 /*
@@ -159,49 +155,6 @@ html[data-theme="light"] body {
  */
 main {
   --font-display: var(--font-display-m, Georgia), Georgia, "Times New Roman", serif;
-}
-
-/*
- * Display face, headings only.
- *
- * Cinzel is all-capitals by design, so it is used where that reads as
- * deliberate — page titles and section labels — and never for body copy,
- * data, or anything a person has to read at length.
- */
-.mDisplay {
-  font-family: var(--font-display);
-  letter-spacing: 0.01em;
-}
-
-/*
- * Gold-clipped headline: one bold use of the accent per screen.
- *
- * The colour is declared before the clip so a browser without
- * background-clip:text still renders readable cream text rather than nothing.
- */
- /* Doubled selector for specificity. .mGold and the module's own .heading are
-    both single classes, and the module sheet loads after this one, so an
-    undoubled .mGold loses the colour it is trying to set. */
-.mGold.mGold {
-  color: var(--text-primary);
-}
-
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  .mGold.mGold {
-    background: linear-gradient(100deg, #f5f0e6 0%, #ecd3a6 52%, #c89b3c 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-}
-
-@supports (background-clip: text) or (-webkit-background-clip: text) {
-  html[data-theme="light"] .mGold.mGold {
-    background: linear-gradient(100deg, #3d2a40 0%, #a7657b 52%, #ad7138 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
 }
 
 *,
@@ -244,7 +197,7 @@ textarea {
 }
 
 ::selection {
-  background: rgba(212, 165, 116, 0.25);
+  background: rgba(224, 86, 59, 0.3);
   color: var(--text-primary);
 }
 
@@ -306,8 +259,8 @@ button:focus-visible {
   list-style: none;
   background: var(--bg-surface);
   border: 1px solid var(--border-medium);
-  border-radius: 12px;
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.5);
+  border-radius: 6px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.32);
 }
 
 .autocomplete-item {
@@ -315,7 +268,7 @@ button:focus-visible {
   flex-direction: column;
   gap: 0.1rem;
   padding: 0.65rem 0.7rem;
-  border-radius: 8px;
+  border-radius: 4px;
   cursor: pointer;
   /* 44px floor, same as every other control in this tree. */
   min-height: 44px;
@@ -326,14 +279,16 @@ button:focus-visible {
   background: var(--surface-strong);
 }
 
+/* These read --font-mobile-body and --font-mobile-meta, which nothing ever
+   declared, so both sizes fell back to inherited. Stated outright instead. */
 .autocomplete-item-name {
   color: var(--text-primary);
-  font-size: var(--font-mobile-body);
+  font-size: 1rem;
 }
 
 .autocomplete-item-detail {
   color: var(--text-secondary);
-  font-size: var(--font-mobile-meta);
+  font-size: var(--text-meta);
 }
 
 /* OpenStreetMap's attribution; see the matching rule in app/globals.css.
@@ -346,7 +301,7 @@ button:focus-visible {
   bottom: -0.25rem;
   margin: 0.25rem -0.25rem -0.25rem;
   padding: 0.35rem 0.7rem;
-  font-size: var(--font-mobile-meta);
+  font-size: var(--text-meta);
   text-align: right;
   color: var(--text-secondary);
   background: var(--bg-surface);
