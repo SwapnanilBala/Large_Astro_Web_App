@@ -18,8 +18,9 @@ import { join } from "node:path";
  * lightening a surface later without thinking about what is written on it.
  *
  * Only the light-on-dark body tones are checked here. The accent and the
- * inverted text on gold fills are pairings this cannot infer from the token
- * list alone; they were measured by hand against the rendered page.
+ * label on its vermilion fill are pairings this cannot infer from the token
+ * list alone, and the light theme is a second set of declarations; those were
+ * measured against the rendered pages with scripts/contrast-audit.js.
  */
 
 const SHELL = join(process.cwd(), "app", "m", "mobile-shell.css");

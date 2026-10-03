@@ -169,8 +169,9 @@ body {
   min-height: 100%;
   background: var(--bg-deep);
   color: var(--text-primary);
-  /* System stack only. The desktop tree preloads Cinzel and Newsreader —
-     145KB of woff2 — and no mobile sheet references either family. */
+  /* System stack for the body. The desktop tree preloads Cinzel and
+     Newsreader — 145KB of woff2. This tree loads one 22KB weight of
+     Newsreader for its headings (layout.tsx) and nothing else. */
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   line-height: 1.6;
@@ -359,10 +360,10 @@ button:focus-visible {
  *
  * The mode discards background-image, box-shadow and filter and replaces
  * author colours with a system palette. Every control in this tree is drawn
- * with exactly those: the primary action is a gold gradient with no border,
+ * with exactly those: the primary action is a vermilion fill with no border,
  * the ghost and chip variants are a 1px rim in a colour that gets replaced,
- * and the disabled state is a tinted surface. Without this they all flatten
- * into unmarked text.
+ * and the disabled state is a rim drawn as a box-shadow, which the mode
+ * drops. Without this they all flatten into unmarked text.
  *
  * Inert unless the mode is on. Written to the system-colour contract rather
  * than to an observed rendering — the mode is an OS setting and could not be

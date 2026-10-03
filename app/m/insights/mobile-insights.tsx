@@ -582,8 +582,8 @@ export default function MobileInsights({
                   <span className={styles.signGlyph} aria-hidden="true">
                     {/* U+FE0E forces text presentation. Without it the system
                         emoji font claims the zodiac symbols and renders them as
-                        colour emoji, which ignores the gold and reads as a row
-                        of purple boxes. */}
+                        colour emoji, which ignores the text colour and reads
+                        as a row of purple boxes. */}
                     {SIGN_SYMBOLS[planet.sign] ? `${SIGN_SYMBOLS[planet.sign]}︎` : ""}
                   </span>
                   {planet.sign}
