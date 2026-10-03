@@ -1,8 +1,14 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useId } from "react";
-import type { IntakeFieldResult, IntakeSuggestion } from "@/lib/intake-normalize";
-import { useTranslation } from "@/lib/i18n-context";
+import {
+  formatIntakeMessages,
+  formatIntakeText,
+  suggestionTaken,
+  type IntakeFieldResult,
+  type IntakeSuggestion,
+} from "@/lib/intake-normalize";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "./PremiumInput.module.css";
 
 interface PremiumInputProps {
@@ -50,7 +56,8 @@ export default function PremiumInput({
   inputMode,
   normalize,
 }: PremiumInputProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const [isFocused, setIsFocused] = useState(false);
   /* Read off the value rather than mirrored into state: the mirror caught up a
      commit late, so a field restored with a value first painted as empty. */
@@ -94,19 +101,22 @@ export default function PremiumInput({
    * lands — otherwise the blur that reformats the field unmounts it first. */
   const applySuggestion = (suggestion: IntakeSuggestion) => {
     onChange(suggestion.value);
-    setAssist({
-      status: "corrected",
-      value: suggestion.value,
-      display: suggestion.label,
-      message: t("home.fieldNoteSetTo", { value: suggestion.label }),
-    });
+    setAssist(suggestionTaken(suggestion));
   };
 
-  const assistError = assist?.status === "invalid" ? assist.message : undefined;
+  /* The normaliser's notes are keys and canonical values; they are put into
+   * the visitor's language here, on every render, so a note already showing
+   * follows a change of language too. */
+  const assistError =
+    assist?.status === "invalid" && assist.messages?.length
+      ? formatIntakeMessages(assist.messages, t, locale)
+      : undefined;
   const visibleError = error ?? assistError;
   const assistNote =
     !visibleError && assist && assist.status !== "invalid"
-      ? assist.message ?? t("home.fieldNoteReadAs", { value: assist.display })
+      ? assist.messages?.length
+        ? formatIntakeMessages(assist.messages, t, locale)
+        : t("home.fieldNoteReadAs", { value: formatIntakeText(assist.display, locale) })
       : null;
   const suggestions = visibleError ? [] : assist?.suggestions ?? [];
 
@@ -157,7 +167,7 @@ export default function PremiumInput({
         <span
           className={styles.successBadge}
           aria-hidden={!isComplete}
-          aria-label={isComplete ? `${label} complete` : undefined}
+          aria-label={isComplete ? t("home.fieldComplete", { field: label }) : undefined}
           role={isComplete ? "status" : undefined}
         >
           <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
@@ -179,7 +189,7 @@ export default function PremiumInput({
       )}
       {suggestions.length > 0 && (
         <div className={styles.assistSuggestions}>
-          <span className={styles.assistSuggestionsLabel}>Did you mean</span>
+          <span className={styles.assistSuggestionsLabel}>{t("home.fieldNoteDidYouMean")}</span>
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.value}
@@ -188,7 +198,7 @@ export default function PremiumInput({
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => applySuggestion(suggestion)}
             >
-              {suggestion.label}
+              {formatIntakeText(suggestion.label, locale)}
             </button>
           ))}
         </div>

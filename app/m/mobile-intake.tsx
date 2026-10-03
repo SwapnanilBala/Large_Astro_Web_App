@@ -9,16 +9,20 @@ import {
   applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
+  formatIntakeMessages,
+  formatIntakeText,
   normalizeBirthDate,
   normalizeCoordinate,
   normalizeCoordinatePair,
   normalizePersonName,
   normalizePlaceName,
+  suggestionTaken,
   type IntakeFieldResult,
+  type IntakeSuggestion,
   type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
 import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -103,7 +107,11 @@ function initialDraft(): ProfileQueryInput {
 
 export default function MobileIntake() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  /* The normalisers hand back catalog keys and canonical dates and times;
+     both are written out here, at render time, in the visitor's language --
+     the same way the desktop intake and the compatibility form do it. */
+  const locale = LOCALE_TAGS[language];
 
   const [step, setStep] = useState<Step>(1);
   const [draft, setDraft] = useState<ProfileQueryInput>(initialDraft);
@@ -206,17 +214,9 @@ export default function MobileIntake() {
       if (result.value && result.value !== draft[key]) set(key, result.value);
     };
 
-  const applySuggestion = (key: keyof ProfileQueryInput, value: string, label: string) => {
-    set(key, value);
-    setFieldNotes((prev) => ({
-      ...prev,
-      [key]: {
-        status: "corrected",
-        value,
-        display: label,
-        message: t("home.fieldNoteSetTo", { value: label }),
-      },
-    }));
+  const applySuggestion = (key: keyof ProfileQueryInput, suggestion: IntakeSuggestion) => {
+    set(key, suggestion.value);
+    setFieldNotes((prev) => ({ ...prev, [key]: suggestionTaken(suggestion) }));
   };
 
   /* Same shape as `commit`, but driven by AutocompleteInput, which hands back
@@ -300,7 +300,9 @@ export default function MobileIntake() {
           role={note.status === "invalid" ? "alert" : undefined}
           aria-live={note.status === "invalid" ? undefined : "polite"}
         >
-          {note.message ?? t("home.fieldNoteReadAs", { value: note.display })}
+          {note.messages?.length
+            ? formatIntakeMessages(note.messages, t, locale)
+            : t("home.fieldNoteReadAs", { value: formatIntakeText(note.display, locale) })}
         </p>
         {note.suggestions?.length ? (
           <div className={styles.noteChips}>
@@ -309,9 +311,9 @@ export default function MobileIntake() {
                 key={suggestion.value}
                 type="button"
                 className={styles.noteChip}
-                onClick={() => applySuggestion(key, suggestion.value, suggestion.label)}
+                onClick={() => applySuggestion(key, suggestion)}
               >
-                {suggestion.label}
+                {formatIntakeText(suggestion.label, locale)}
               </button>
             ))}
           </div>
@@ -546,7 +548,7 @@ export default function MobileIntake() {
             {fieldNotes.birthDate ? (
               renderNote("birthDate")
             ) : hasDate ? (
-              <p className={styles.fieldNote}>{formatBirthDateDisplay(draft.birthDate)}</p>
+              <p className={styles.fieldNote}>{formatBirthDateDisplay(draft.birthDate, locale)}</p>
             ) : null}
           </div>
         </div>
@@ -576,7 +578,7 @@ export default function MobileIntake() {
               {fieldNotes.birthTime ? (
                 renderNote("birthTime")
               ) : draft.birthTime ? (
-                <p className={styles.fieldNote}>{formatClockDisplay(draft.birthTime)}</p>
+                <p className={styles.fieldNote}>{formatClockDisplay(draft.birthTime, locale)}</p>
               ) : null}
             </div>
           )}

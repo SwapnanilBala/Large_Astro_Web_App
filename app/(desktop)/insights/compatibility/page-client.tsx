@@ -14,15 +14,19 @@ import {
   applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
+  formatIntakeMessages,
+  formatIntakeText,
   normalizeBirthDate,
   normalizeCoordinate,
   normalizeCoordinatePair,
   normalizePersonName,
   normalizePlaceName,
   normalizeUtcOffsetMinutes,
+  suggestionTaken,
   type IntakeFieldResult,
+  type IntakeSuggestion,
 } from "@/lib/intake-normalize";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import { profileInitialState } from "@/lib/astro-types";
 import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useToast } from "@/lib/toast-context";
@@ -226,7 +230,10 @@ function ProfileCard({
   accentColor,
   variant = "form",
 }: ProfileCardProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  /* Notes and read-outs are written out at render time in the visitor's
+     language, exactly as the two intakes write theirs. */
+  const locale = LOCALE_TAGS[language];
   const signBorderColor = accentColor === "aqua"
     ? "rgba(100,200,255,0.5)"
     : "rgba(255,100,150,0.5)";
@@ -335,17 +342,9 @@ function ProfileCard({
       }
     };
 
-  const applySuggestion = (field: keyof ProfileQueryInput, value: string, label: string) => {
-    setProfile((previous) => ({ ...previous, [field]: value }));
-    setFieldNotes((previous) => ({
-      ...previous,
-      [field]: {
-        status: "corrected",
-        value,
-        display: label,
-        message: t("home.fieldNoteSetTo", { value: label }),
-      },
-    }));
+  const applySuggestion = (field: keyof ProfileQueryInput, suggestion: IntakeSuggestion) => {
+    setProfile((previous) => ({ ...previous, [field]: suggestion.value }));
+    setFieldNotes((previous) => ({ ...previous, [field]: suggestionTaken(suggestion) }));
   };
 
   /* A pasted "12.9716, 77.5946" fills both boxes rather than only the one it
@@ -377,7 +376,9 @@ function ProfileCard({
           role={note.status === "invalid" ? "alert" : undefined}
           aria-live={note.status === "invalid" ? undefined : "polite"}
         >
-          {note.message ?? t("home.fieldNoteReadAs", { value: note.display })}
+          {note.messages?.length
+            ? formatIntakeMessages(note.messages, t, locale)
+            : t("home.fieldNoteReadAs", { value: formatIntakeText(note.display, locale) })}
         </span>
         {note.suggestions?.length ? (
           <span className="field-note-chips">
@@ -387,9 +388,9 @@ function ProfileCard({
                 type="button"
                 className="field-note-chip"
                 onMouseDown={(event) => event.preventDefault()}
-                onClick={() => applySuggestion(field, suggestion.value, suggestion.label)}
+                onClick={() => applySuggestion(field, suggestion)}
               >
-                {suggestion.label}
+                {formatIntakeText(suggestion.label, locale)}
               </button>
             ))}
           </span>
@@ -428,8 +429,8 @@ function ProfileCard({
           <div className="compat-summary-text">
             <h2 className="compat-summary-name">{profile.name}</h2>
             <p className="compat-summary-meta">
-              {formatBirthDateDisplay(profile.birthDate)}
-              {profile.birthTime ? ` · ${formatClockDisplay(profile.birthTime)}` : ""}
+              {formatBirthDateDisplay(profile.birthDate, locale)}
+              {profile.birthTime ? ` · ${formatClockDisplay(profile.birthTime, locale)}` : ""}
             </p>
             {placeLine && <p className="compat-summary-meta">{placeLine}</p>}
           </div>
@@ -487,7 +488,7 @@ function ProfileCard({
             {fieldNotes.birthDate ? (
               renderNote("birthDate")
             ) : profile.birthDate ? (
-              <span className="field-note">{formatBirthDateDisplay(profile.birthDate)}</span>
+              <span className="field-note">{formatBirthDateDisplay(profile.birthDate, locale)}</span>
             ) : null}
           </label>
           <label className="input-glow-aqua">
@@ -507,7 +508,7 @@ function ProfileCard({
             {fieldNotes.birthTime ? (
               renderNote("birthTime")
             ) : profile.birthTime ? (
-              <span className="field-note">{formatClockDisplay(profile.birthTime)}</span>
+              <span className="field-note">{formatClockDisplay(profile.birthTime, locale)}</span>
             ) : null}
           </label>
         </div>

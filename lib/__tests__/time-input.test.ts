@@ -21,7 +21,7 @@ describe("normalizeTimeInputValue", () => {
     expect(normalizeTimeInputValue("10:30")).toMatchObject({
       status: "ambiguous",
       value: "10:30",
-      suggestions: [{ value: "22:30", label: "10:30 PM" }],
+      suggestions: [{ value: "22:30", label: { kind: "time", value: "22:30" } }],
     });
     expect(normalizeTimeInputValue("2:30 pm").value).toBe("14:30");
   });

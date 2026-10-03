@@ -5,12 +5,15 @@ import DatePicker from "react-datepicker";
 import { shift, size } from "@floating-ui/react";
 import "react-datepicker/dist/react-datepicker.css";
 import {
+  formatIntakeMessages,
+  formatIntakeText,
   normalizeBirthDate,
   normalizeBirthTime,
+  suggestionTaken,
   type IntakeFieldResult,
   type IntakeSuggestion,
 } from "@/lib/intake-normalize";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "./PremiumDatePicker.module.css";
 
 /*
@@ -196,7 +199,12 @@ interface PremiumDatePickerProps {
   yearDropdownItemNumber?: number;
   minDate?: Date;
   autoComplete?: string;
-  /** Message shown when typed text cannot be parsed. Defaults per field type. */
+  /**
+   * Message shown when typed text cannot be read at all. Defaults per field
+   * type. Text that was read and turned out impossible — 31 February, a date
+   * in the future — gets the normaliser's own note instead, which says what
+   * is wrong rather than repeating the format.
+   */
   formatHint?: string;
   /**
    * Keep the calendar shut when the field merely receives focus.
@@ -251,7 +259,8 @@ export default function PremiumDatePicker({
   formatHint,
   preventOpenOnFocus = false,
 }: PremiumDatePickerProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const [isFocused, setIsFocused] = useState(false);
   const [storedAssist, setAssist] = useState<AssistState | null>(null);
   const typedTextRef = useRef("");
@@ -273,8 +282,8 @@ export default function PremiumDatePicker({
       : null;
 
   const defaultHint = showTimeSelectOnly
-    ? "Enter a time like 14:30 or 2:30 PM."
-    : "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.";
+    ? t("home.birthTimeFormatHint")
+    : t("home.birthDateFormatHint");
 
   const minYear = minDate?.getFullYear();
   const maxTime = maxDate?.getTime();
@@ -328,11 +337,7 @@ export default function PremiumDatePicker({
       return;
     }
     if (result.status === "invalid") {
-      setAssist({
-        kind: "committed",
-        result: { ...result, message: result.message ?? formatHint ?? defaultHint },
-        forTime: valueTime,
-      });
+      setAssist({ kind: "committed", result, forTime: valueTime });
       return;
     }
 
@@ -340,14 +345,14 @@ export default function PremiumDatePicker({
     if (!parsed) {
       setAssist({
         kind: "committed",
-        result: { status: "invalid", value: "", display: "", message: formatHint ?? defaultHint },
+        result: { status: "invalid", value: "", display: "", unreadable: true },
         forTime: valueTime,
       });
       return;
     }
 
     applyValue(parsed, result.status === "ok" ? null : result);
-  }, [applyValue, defaultHint, formatHint, readTyped, toDate, valueTime]);
+  }, [applyValue, readTyped, toDate, valueTime]);
 
   const handleBlur = () => {
     setIsFocused(false);
@@ -503,24 +508,31 @@ export default function PremiumDatePicker({
     const parsed = toDate(suggestion.value);
     if (!parsed) return;
 
-    applyValue(parsed, {
-      status: "corrected",
-      value: suggestion.value,
-      display: suggestion.label,
-      message: t("home.fieldNoteSetTo", { value: suggestion.label }),
-    });
+    applyValue(parsed, suggestionTaken(suggestion));
     calendarRef.current?.querySelector("input")?.blur();
   };
 
+  /* Translated here, at render time, like every note below. Text with no date
+   * or time in it at all gets the field's format hint -- the caller's own,
+   * when it passes one, over the normaliser's generic example; text that was
+   * read and is impossible keeps the normaliser's note, which says what is
+   * wrong with it. */
   const assistError =
-    assist?.result.status === "invalid" ? assist.result.message ?? defaultHint : undefined;
+    assist?.result.status === "invalid"
+      ? assist.result.unreadable || !assist.result.messages?.length
+        ? formatHint ?? defaultHint
+        : formatIntakeMessages(assist.result.messages, t, locale)
+      : undefined;
   const visibleError = error ?? assistError;
 
   const assistNote = useMemo(() => {
     if (visibleError || !assist || assist.result.status === "invalid") return null;
-    if (assist.kind === "live") return t("home.fieldNoteReadsAs", { value: assist.result.display });
-    return assist.result.message ?? t("home.fieldNoteReadAs", { value: assist.result.display });
-  }, [assist, t, visibleError]);
+    const reading = formatIntakeText(assist.result.display, locale);
+    if (assist.kind === "live") return t("home.fieldNoteReadsAs", { value: reading });
+    return assist.result.messages?.length
+      ? formatIntakeMessages(assist.result.messages, t, locale)
+      : t("home.fieldNoteReadAs", { value: reading });
+  }, [assist, locale, t, visibleError]);
 
   const suggestions =
     !visibleError && assist?.kind === "committed" ? assist.result.suggestions ?? [] : [];
@@ -591,7 +603,7 @@ export default function PremiumDatePicker({
         <span
           className={styles.successBadge}
           aria-hidden={!isComplete}
-          aria-label={isComplete ? `${label} complete` : undefined}
+          aria-label={isComplete ? t("home.fieldComplete", { field: label }) : undefined}
           role={isComplete ? "status" : undefined}
         >
           <svg viewBox="0 0 16 16" focusable="false" aria-hidden="true">
@@ -617,7 +629,7 @@ export default function PremiumDatePicker({
       )}
       {suggestions.length > 0 && (
         <div className={styles.assistSuggestions}>
-          <span className={styles.assistSuggestionsLabel}>Did you mean</span>
+          <span className={styles.assistSuggestionsLabel}>{t("home.fieldNoteDidYouMean")}</span>
           {suggestions.map((suggestion) => (
             <button
               key={suggestion.value}
@@ -626,7 +638,7 @@ export default function PremiumDatePicker({
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => applySuggestion(suggestion)}
             >
-              {suggestion.label}
+              {formatIntakeText(suggestion.label, locale)}
             </button>
           ))}
         </div>

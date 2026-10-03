@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
+import enMessages from "@/messages/en.json";
 import {
   applyPlaceSuggestion,
   formatBirthDateDisplay,
   formatClockDisplay,
+  formatIntakeMessages,
+  formatIntakeText,
   normalizeBirthDate,
   normalizeBirthTime,
   normalizeCoordinate,
@@ -10,13 +13,41 @@ import {
   normalizePersonName,
   normalizePlaceName,
   normalizeUtcOffsetMinutes,
+  suggestionTaken,
   toAsciiDigits,
+  type IntakeFieldResult,
 } from "../intake-normalize";
 
 /* A fixed "today" so year expansion and the future-date guard are not tied to
  * the day the suite happens to run. */
 const TODAY = new Date(2026, 7, 17);
 const dateOptions = { today: TODAY };
+
+/* The English catalog, filled in the way the provider's `t` fills it, so the
+ * assertions below read the sentence a visitor reads. A key the catalog lacks
+ * comes back as the raw key and fails them. */
+const HOME = enMessages.home as Record<string, string>;
+
+function t(key: string, params: Record<string, string> = {}): string {
+  const text = key.startsWith("home.") ? HOME[key.slice("home.".length)] ?? key : key;
+  return Object.entries(params).reduce(
+    (filled, [name, value]) => filled.split(`{${name}}`).join(value),
+    text,
+  );
+}
+
+/** The note a form shows under the field, in English. */
+function english(result: IntakeFieldResult): string {
+  return formatIntakeMessages(result.messages ?? [], t, "en-US");
+}
+
+/** The chips a form offers, as [value committed, label shown]. */
+function chips(result: IntakeFieldResult): Array<[string, string]> | undefined {
+  return result.suggestions?.map((suggestion) => [
+    suggestion.value,
+    formatIntakeText(suggestion.label, "en-US"),
+  ]);
+}
 
 describe("toAsciiDigits", () => {
   it("folds other numeral systems down to ASCII", () => {
@@ -67,6 +98,8 @@ describe("normalizeBirthTime", () => {
     expect(normalizeBirthTime("12:00 PM").value).toBe("12:00");
     expect(normalizeBirthTime("noon").value).toBe("12:00");
     expect(normalizeBirthTime("midnight").value).toBe("00:00");
+    expect(english(normalizeBirthTime("noon"))).toBe("Noon is 12:00 PM.");
+    expect(english(normalizeBirthTime("midnight"))).toBe("Midnight is 00:00.");
   });
 
   it("repairs a redundant PM instead of rejecting the whole entry", () => {
@@ -74,7 +107,7 @@ describe("normalizeBirthTime", () => {
 
     expect(result.status).toBe("corrected");
     expect(result.value).toBe("13:00");
-    expect(result.message).toMatch(/redundant/i);
+    expect(english(result)).toBe("PM was redundant — 13:00 is already afternoon.");
   });
 
   it("keeps the explicit hour when AM contradicts it, and offers the morning reading", () => {
@@ -82,7 +115,8 @@ describe("normalizeBirthTime", () => {
 
     expect(result.status).toBe("ambiguous");
     expect(result.value).toBe("13:45");
-    expect(result.suggestions).toEqual([{ value: "01:45", label: "1:45 AM" }]);
+    expect(english(result)).toBe("13:45 already reads as afternoon, so the AM was ignored.");
+    expect(chips(result)).toEqual([["01:45", "1:45 AM"]]);
   });
 
   it("reads 24:00 as midnight", () => {
@@ -95,13 +129,15 @@ describe("normalizeBirthTime", () => {
   it("pads a single minute digit and fills in missing minutes", () => {
     expect(normalizeBirthTime("2:5 pm")).toMatchObject({ status: "corrected", value: "14:05" });
     expect(normalizeBirthTime("9 pm")).toMatchObject({ status: "corrected", value: "21:00" });
+    expect(english(normalizeBirthTime("2:5 pm"))).toBe("Minutes read as :05.");
+    expect(english(normalizeBirthTime("9 pm"))).toBe("No minutes were given, so :00 was used.");
   });
 
   it("drops seconds", () => {
     const result = normalizeBirthTime("14:30:45");
 
     expect(result.value).toBe("14:30");
-    expect(result.message).toMatch(/seconds/i);
+    expect(english(result)).toMatch(/seconds/i);
   });
 
   it("offers both readings when a bare 1-12 hour could be either half of the day", () => {
@@ -109,39 +145,35 @@ describe("normalizeBirthTime", () => {
 
     expect(result.status).toBe("ambiguous");
     expect(result.value).toBe("07:15");
-    expect(result.suggestions).toEqual([{ value: "19:15", label: "7:15 PM" }]);
+    /* Quoted as typed, against the reading it was given. */
+    expect(english(result)).toBe("7:15 could be morning or evening — read as 7:15 AM.");
+    expect(chips(result)).toEqual([["19:15", "7:15 PM"]]);
   });
 
   it("offers midnight as the other reading of a bare 12", () => {
-    expect(normalizeBirthTime("12:30").suggestions).toEqual([
-      { value: "00:30", label: "12:30 AM" },
-    ]);
+    expect(chips(normalizeBirthTime("12:30"))).toEqual([["00:30", "12:30 AM"]]);
   });
 
   it("keeps a typed 10:30 two-sided", () => {
     /* Typed into the desktop picker, or into the text box a browser without
      * native time support falls back to, "10:30" really could be either. */
-    expect(normalizeBirthTime("10:30")).toMatchObject({
-      status: "ambiguous",
-      value: "10:30",
-      suggestions: [{ value: "22:30", label: "10:30 PM" }],
-    });
+    const result = normalizeBirthTime("10:30");
+
+    expect(result).toMatchObject({ status: "ambiguous", value: "10:30" });
+    expect(chips(result)).toEqual([["22:30", "10:30 PM"]]);
   });
 
   describe("with clock24, for a native time input's value", () => {
     it("reads 10:00-12:59 as the 24-hour time it is", () => {
       /* 10:30 AM picked from the OS wheel arrives as "10:30", and was offered
        * back as possibly 10:30 PM — one tap from a chart twelve hours out. */
-      expect(normalizeBirthTime("10:30", { clock24: true })).toEqual({
-        status: "ok",
-        value: "10:30",
-        display: "10:30 AM",
-      });
-      expect(normalizeBirthTime("12:30", { clock24: true })).toEqual({
-        status: "ok",
-        value: "12:30",
-        display: "12:30 PM",
-      });
+      const morning = normalizeBirthTime("10:30", { clock24: true });
+      const lunchtime = normalizeBirthTime("12:30", { clock24: true });
+
+      expect(morning).toEqual({ status: "ok", value: "10:30", display: { kind: "time", value: "10:30" } });
+      expect(lunchtime).toEqual({ status: "ok", value: "12:30", display: { kind: "time", value: "12:30" } });
+      expect(formatIntakeText(morning.display, "en-US")).toBe("10:30 AM");
+      expect(formatIntakeText(lunchtime.display, "en-US")).toBe("12:30 PM");
     });
 
     it("settles every minute of the day exactly as written", () => {
@@ -181,6 +213,7 @@ describe("normalizeBirthTime", () => {
     expect(normalizeBirthTime("14:75").status).toBe("invalid");
     expect(normalizeBirthTime("hello").status).toBe("invalid");
     expect(normalizeBirthTime("25:00").value).toBe("");
+    expect(english(normalizeBirthTime("14:75"))).toBe("Minutes only run from 00 to 59.");
   });
 
   it("reports nothing for an empty field", () => {
@@ -190,14 +223,6 @@ describe("normalizeBirthTime", () => {
 
   it("reads times typed on a non-Latin keyboard", () => {
     expect(normalizeBirthTime("१४:३०").value).toBe("14:30");
-  });
-});
-
-describe("formatClockDisplay", () => {
-  it("writes a 24-hour value the way a person reads it", () => {
-    expect(formatClockDisplay("14:30")).toBe("2:30 PM");
-    expect(formatClockDisplay("00:05")).toBe("12:05 AM");
-    expect(formatClockDisplay("12:00")).toBe("12:00 PM");
   });
 });
 
@@ -217,12 +242,15 @@ describe("normalizeBirthDate", () => {
   it("reads compact digit runs from whichever end carries the year", () => {
     expect(normalizeBirthDate("15051990", dateOptions).value).toBe("1990-05-15");
     expect(normalizeBirthDate("19900515", dateOptions).value).toBe("1990-05-15");
+    expect(english(normalizeBirthDate("19900515", dateOptions))).toBe(
+      'Read "19900515" as year, month, day.',
+    );
   });
 
   it("expands a two-digit year to the reading that has already happened", () => {
     const ninety = normalizeBirthDate("15/05/90", dateOptions);
     expect(ninety.value).toBe("1990-05-15");
-    expect(ninety.message).toMatch(/1990/);
+    expect(english(ninety)).toBe('The year "90" was read as 1990.');
 
     expect(normalizeBirthDate("15/05/05", dateOptions).value).toBe("2005-05-15");
     expect(normalizeBirthDate("15/05/27", dateOptions).value).toBe("1927-05-15");
@@ -233,7 +261,8 @@ describe("normalizeBirthDate", () => {
 
     expect(result.status).toBe("ambiguous");
     expect(result.value).toBe("1990-06-05");
-    expect(result.suggestions).toEqual([{ value: "1990-05-06", label: "6 May 1990" }]);
+    expect(english(result)).toBe("That could also read as 6 May 1990.");
+    expect(chips(result)).toEqual([["1990-05-06", "6 May 1990"]]);
   });
 
   it("falls back to month-first only when day-first is impossible", () => {
@@ -242,6 +271,15 @@ describe("normalizeBirthDate", () => {
     expect(result.value).toBe("1990-05-22");
     expect(result.status).toBe("corrected");
     expect(result.suggestions).toBeUndefined();
+    expect(english(result)).toBe("Read month-first, because 22 cannot be a month.");
+  });
+
+  it("says so when month-first won because the day-first date is still to come", () => {
+    /* 8 September 2026 has not happened by 17 August, but 9 August has. */
+    const result = normalizeBirthDate("08/09/2026", dateOptions);
+
+    expect(result).toMatchObject({ status: "corrected", value: "2026-08-09" });
+    expect(english(result)).toBe("Read month-first, because 8 Sep 2026 is in the future.");
   });
 
   it("tolerates surrounding whitespace and mixed case month names", () => {
@@ -252,13 +290,18 @@ describe("normalizeBirthDate", () => {
     const result = normalizeBirthDate("31/02/1990", dateOptions);
 
     expect(result.status).toBe("invalid");
-    expect(result.message).toMatch(/28 days/);
+    expect(english(result)).toBe("February 1990 only has 28 days.");
     expect(normalizeBirthDate("1990-02-30", dateOptions).status).toBe("invalid");
+    expect(english(normalizeBirthDate("1990-13-45", dateOptions))).toBe(
+      "That is not a real calendar date.",
+    );
   });
 
   it("rejects dates outside the supported range", () => {
-    expect(normalizeBirthDate("15/05/2030", dateOptions).message).toMatch(/future/i);
-    expect(normalizeBirthDate("15/05/1850", dateOptions).message).toMatch(/1900/);
+    expect(english(normalizeBirthDate("15/05/2030", dateOptions))).toMatch(/future/i);
+    expect(english(normalizeBirthDate("15/05/1850", dateOptions))).toBe(
+      "Dates before 1900 are not supported.",
+    );
   });
 
   it("rejects text that is not a date", () => {
@@ -268,16 +311,12 @@ describe("normalizeBirthDate", () => {
   });
 });
 
-describe("formatBirthDateDisplay", () => {
-  it("writes an ISO date the way the picker shows it", () => {
-    expect(formatBirthDateDisplay("1990-05-15")).toBe("15 May 1990");
-    expect(formatBirthDateDisplay("1990-09-05")).toBe("5 Sep 1990");
-  });
-});
-
 describe("normalizePersonName", () => {
   it("tidies spacing without commenting on it twice", () => {
-    expect(normalizePersonName("  Ada   Lovelace ").value).toBe("Ada Lovelace");
+    const result = normalizePersonName("  Ada   Lovelace ");
+
+    expect(result.value).toBe("Ada Lovelace");
+    expect(english(result)).toBe("Extra spacing was tidied up.");
   });
 
   it("re-cases input that arrived entirely in one case", () => {
@@ -286,6 +325,13 @@ describe("normalizePersonName", () => {
     expect(normalizePersonName("jean-luc picard").value).toBe("Jean-Luc Picard");
     expect(normalizePersonName("mary o'brien").value).toBe("Mary O'Brien");
     expect(normalizePersonName("vincent van gogh").value).toBe("Vincent van Gogh");
+    expect(english(normalizePersonName("ada lovelace"))).toBe('Capitalised as "Ada Lovelace".');
+  });
+
+  it("says everything it repaired, one sentence after another", () => {
+    expect(english(normalizePersonName("  ada   lovelace "))).toBe(
+      'Extra spacing was tidied up. Capitalised as "Ada Lovelace".',
+    );
   });
 
   it("leaves deliberate mixed casing exactly as typed", () => {
@@ -298,6 +344,7 @@ describe("normalizePersonName", () => {
   it("rejects a name with fewer than two letters, matching the API", () => {
     expect(normalizePersonName("A").status).toBe("invalid");
     expect(normalizePersonName("42").status).toBe("invalid");
+    expect(english(normalizePersonName("A"))).toBe("A name needs at least two letters.");
   });
 });
 
@@ -330,6 +377,9 @@ describe("normalizeCoordinate", () => {
     expect(normalizeCoordinate("W 74.006", "longitude").value).toBe("-74.006");
     expect(normalizeCoordinate("40.7128 N", "latitude").value).toBe("40.7128");
     expect(normalizeCoordinate("22.5726 south", "latitude").value).toBe("-22.5726");
+    expect(english(normalizeCoordinate("74.006 W", "longitude"))).toBe(
+      "W was read as a negative value.",
+    );
   });
 
   it("converts degrees, minutes and seconds", () => {
@@ -342,13 +392,16 @@ describe("normalizeCoordinate", () => {
     const result = normalizeCoordinate("120.5", "latitude");
 
     expect(result.status).toBe("invalid");
-    expect(result.message).toMatch(/longitude/i);
+    expect(english(result)).toMatch(/longitude/i);
   });
 
   it("rejects values no axis could hold", () => {
     expect(normalizeCoordinate("200", "longitude").status).toBe("invalid");
     expect(normalizeCoordinate("40 75 N", "latitude").status).toBe("invalid");
     expect(normalizeCoordinate("somewhere", "latitude").status).toBe("invalid");
+    expect(english(normalizeCoordinate("200", "longitude"))).toBe(
+      "Longitude only runs from -180 to 180.",
+    );
   });
 });
 
@@ -384,19 +437,158 @@ describe("normalizeUtcOffsetMinutes", () => {
     expect(normalizeUtcOffsetMinutes("+05:30").value).toBe("330");
     expect(normalizeUtcOffsetMinutes("UTC+05:30").value).toBe("330");
     expect(normalizeUtcOffsetMinutes("-08:00").value).toBe("-480");
+    expect(english(normalizeUtcOffsetMinutes("+05:30"))).toBe("05:30 was read as 330 minutes.");
   });
 
   it("reads a small bare number as hours", () => {
     expect(normalizeUtcOffsetMinutes("5.5").value).toBe("330");
     expect(normalizeUtcOffsetMinutes("-8").value).toBe("-480");
+    expect(english(normalizeUtcOffsetMinutes("5.5"))).toBe(
+      "5.5 was read as hours, which is 330 minutes.",
+    );
   });
 
   it("rejects an offset no time zone uses", () => {
     expect(normalizeUtcOffsetMinutes("900").status).toBe("invalid");
     expect(normalizeUtcOffsetMinutes("nonsense").status).toBe("invalid");
+    expect(english(normalizeUtcOffsetMinutes("900"))).toBe(
+      "A UTC offset runs from -720 to 840 minutes.",
+    );
   });
 });
 
+describe("unreadable input", () => {
+  /* The forms show their own format hint in place of a generic example, so
+   * the flag has to tell "no date in this at all" from "a date that cannot
+   * be". */
+  it("is flagged when nothing in the text could be read", () => {
+    const unreadable = [
+      normalizeBirthTime("hello"),
+      normalizeBirthTime("1:2:3:4"),
+      normalizeBirthDate("hello", dateOptions),
+      normalizeBirthDate("15 Smarch 1990", dateOptions),
+      normalizeCoordinate("somewhere", "latitude"),
+      normalizeUtcOffsetMinutes("nonsense"),
+    ];
+    for (const result of unreadable) {
+      expect(result).toMatchObject({ status: "invalid", unreadable: true });
+    }
+  });
+
+  it("gives the field's format example as the note", () => {
+    expect(english(normalizeBirthTime("hello"))).toBe("Enter a time like 14:30 or 2:30 PM.");
+    expect(english(normalizeBirthDate("hello", dateOptions))).toBe(
+      "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
+    );
+    expect(english(normalizeCoordinate("somewhere", "latitude"))).toBe(
+      "Try a coordinate like 40.7128, or 40° 42' 46\" N.",
+    );
+    expect(english(normalizeUtcOffsetMinutes("nonsense"))).toBe(
+      "Try an offset like 330, +05:30, or 5.5.",
+    );
+  });
+
+  it("is not flagged when the value was read and is impossible", () => {
+    const impossible = [
+      normalizeBirthTime("25:00"),
+      normalizeBirthTime("14:75"),
+      normalizeBirthDate("31/02/1990", dateOptions),
+      normalizeBirthDate("15/05/2030", dateOptions),
+      normalizeCoordinate("120.5", "latitude"),
+      normalizeUtcOffsetMinutes("900"),
+      normalizePersonName("A"),
+    ];
+    for (const result of impossible) {
+      expect(result.status).toBe("invalid");
+      expect(result.unreadable).toBeUndefined();
+    }
+  });
+});
+
+describe("suggestionTaken", () => {
+  it("commits the reading and says what the field was set to", () => {
+    const [evening] = normalizeBirthTime("7:15").suggestions ?? [];
+    const result = suggestionTaken(evening);
+
+    expect(result).toMatchObject({ status: "corrected", value: "19:15" });
+    expect(english(result)).toBe("Set to 7:15 PM.");
+  });
+});
+
+describe("formatBirthDateDisplay", () => {
+  it("writes an ISO date the way the picker shows it", () => {
+    expect(formatBirthDateDisplay("1990-05-15", "en-US")).toBe("15 May 1990");
+    expect(formatBirthDateDisplay("1990-09-05", "en-US")).toBe("5 Sep 1990");
+  });
+
+  it("writes it in the visitor's language, day first and in Latin digits", () => {
+    expect(formatBirthDateDisplay("1990-05-15", "es-ES")).toMatch(/^15 may\.? 1990$/);
+    expect(formatBirthDateDisplay("1990-05-15", "fr-FR")).toMatch(/^15 mai 1990$/);
+    expect(formatBirthDateDisplay("1990-05-15", "it-IT")).toMatch(/^15 mag\.? 1990$/);
+    expect(formatBirthDateDisplay("1990-05-15", "hi-IN")).toMatch(/^15 मई 1990$/);
+    /* Bengali would default to Bengali digits; the fields and every number a
+     * note quotes are Latin, so the date is too. */
+    expect(formatBirthDateDisplay("1990-05-15", "bn-IN")).toMatch(/^15 মে,? 1990$/);
+  });
+
+  it("returns anything that is not a real ISO date untouched", () => {
+    expect(formatBirthDateDisplay("15/05/1990", "fr-FR")).toBe("15/05/1990");
+    expect(formatBirthDateDisplay("1990-02-30", "en-US")).toBe("1990-02-30");
+    expect(formatBirthDateDisplay("1990-13-01", "es-ES")).toBe("1990-13-01");
+  });
+});
+
+describe("formatClockDisplay", () => {
+  it("writes a 24-hour value the way a person reads it", () => {
+    expect(formatClockDisplay("14:30", "en-US")).toBe("2:30 PM");
+    expect(formatClockDisplay("00:05", "en-US")).toBe("12:05 AM");
+    expect(formatClockDisplay("12:00", "en-US")).toBe("12:00 PM");
+  });
+
+  it("uses a 24-hour clock with a two-digit hour where the language does", () => {
+    for (const locale of ["es-ES", "it-IT", "fr-FR"]) {
+      expect(formatClockDisplay("14:30", locale)).toBe("14:30");
+      expect(formatClockDisplay("02:30", locale)).toBe("02:30");
+      expect(formatClockDisplay("00:05", locale)).toBe("00:05");
+    }
+  });
+
+  it("keeps the twelve-hour clock, in the language's own words, where it is the norm", () => {
+    expect(formatClockDisplay("14:30", "hi-IN")).toMatch(/^2:30\s?pm$/i);
+    expect(formatClockDisplay("14:30", "bn-IN")).toMatch(/^2:30\s?pm$/i);
+    expect(formatClockDisplay("02:30", "hi-IN")).toMatch(/^2:30\s?am$/i);
+  });
+
+  it("returns anything that is not a clock time untouched", () => {
+    expect(formatClockDisplay("2:30 pm", "es-ES")).toBe("2:30 pm");
+    expect(formatClockDisplay("25:00", "en-US")).toBe("25:00");
+  });
+});
+
+describe("formatIntakeText", () => {
+  it("shows plain text as it is and writes tagged values out", () => {
+    expect(formatIntakeText("Ada Lovelace", "fr-FR")).toBe("Ada Lovelace");
+    expect(formatIntakeText({ kind: "date", value: "1990-05-06" }, "en-US")).toBe("6 May 1990");
+    expect(formatIntakeText({ kind: "time", value: "19:15" }, "fr-FR")).toBe("19:15");
+    expect(formatIntakeText({ kind: "month", value: "1990-02" }, "en-US")).toBe("February 1990");
+    expect(formatIntakeText({ kind: "month", value: "1990-02" }, "es-ES")).toMatch(/febrero/);
+  });
+});
+
+describe("formatIntakeMessages", () => {
+  it("fills each key's blanks with the values written out for the locale", () => {
+    const result = normalizeBirthDate("05/06/1990", dateOptions);
+    const seen: Array<[string, Record<string, string> | undefined]> = [];
+    const spy = (key: string, params?: Record<string, string>) => {
+      seen.push([key, params]);
+      return key;
+    };
+
+    formatIntakeMessages(result.messages ?? [], spy, "fr-FR");
+
+    expect(seen).toEqual([["home.fieldNoteDateAmbiguous", { date: "6 mai 1990" }]]);
+  });
+});
 
 describe("applyPlaceSuggestion", () => {
   const blank = { city: "", state: "", country: "" };

@@ -16,6 +16,13 @@
  * intake and the compatibility form share one set of rules — and so the rules
  * can be tested directly rather than through a form.
  *
+ * None of it is written in any one language. What was repaired comes back as
+ * catalog keys with parameters, and dates and times come back canonical and
+ * tagged with what they are (IntakeText); each form writes both out at render
+ * time, through its `t` and the visitor's locale (formatIntakeMessages,
+ * formatIntakeText). A note therefore reads in the interface language, and
+ * follows it if the visitor switches.
+ *
  * Callers always write back `result.value`; `status` only decides what, if
  * anything, to say about it.
  */
@@ -29,27 +36,121 @@ export type IntakeFieldStatus =
   | "corrected"
   /** Understood, but another reading is equally plausible — offer it. */
   | "ambiguous"
-  /** Not usable; `value` is empty and `message` explains why. */
+  /** Not usable; `value` is empty and `messages` explains why. */
   | "invalid";
+
+/**
+ * Something the intake shows the visitor, in a form that can still be written
+ * out in their language.
+ *
+ * A plain string is shown as it is: a name, a place, a fragment of what was
+ * typed. The tagged forms carry a canonical value — an ISO date, a 24-hour
+ * clock, a year and month — which formatIntakeText writes out for a locale.
+ */
+export type IntakeText =
+  | string
+  | { kind: "date"; value: string }
+  | { kind: "time"; value: string }
+  | { kind: "month"; value: string };
 
 export interface IntakeSuggestion {
   /** Canonical value committed when the visitor picks this reading. */
   value: string;
-  /** Chip label, written the way a person reads it. */
-  label: string;
+  /** Chip label: the same reading, written out the way a person reads it. */
+  label: IntakeText;
+}
+
+/**
+ * Every catalog key this module can hand back, all of them in `home`.
+ *
+ * Listed because nothing else would notice one going missing: the forms pass
+ * these to `t` as variables, which the scan of `t("...")` literals in
+ * lib/__tests__/i18n-mobile-coverage.test.ts cannot see, and a miss renders the
+ * raw key on screen. The normaliser tests hold each one against both English
+ * catalogs instead.
+ */
+export const INTAKE_MESSAGE_KEYS = [
+  /* Birth time. The format example is the hint the desktop intake already
+     shows under the field, so all three forms say the same thing. */
+  "home.birthTimeFormatHint",
+  "home.fieldNoteNoon",
+  "home.fieldNoteMidnight",
+  "home.fieldNoteMinutesRange",
+  "home.fieldNoteSecondsDropped",
+  "home.fieldNoteMinutesAssumed",
+  "home.fieldNoteMinutesPadded",
+  "home.fieldNoteZeroPm",
+  "home.fieldNotePmRedundant",
+  "home.fieldNoteHoursRange12",
+  "home.fieldNoteTwelveAm",
+  "home.fieldNoteAmIgnored",
+  "home.fieldNoteTwentyFour",
+  "home.fieldNoteHoursRange24",
+  "home.fieldNoteTimeAmbiguous",
+  /* Birth date, likewise. */
+  "home.birthDateFormatHint",
+  "home.fieldNoteYearExpanded",
+  "home.fieldNoteMonthFirst",
+  "home.fieldNoteMonthFirstFuture",
+  "home.fieldNoteDigitsDayFirst",
+  "home.fieldNoteDigitsYearFirst",
+  "home.fieldNoteMonthLength",
+  "home.fieldNoteNotADate",
+  "home.fieldNoteFutureDate",
+  "home.fieldNoteDateTooEarly",
+  "home.fieldNoteDateAmbiguous",
+  /* Names and places. */
+  "home.fieldNoteNameTooShort",
+  "home.fieldNoteSpacing",
+  "home.fieldNoteCapitalised",
+  /* Coordinates. */
+  "home.fieldNoteCoordinateHint",
+  "home.fieldNoteDecimalComma",
+  "home.fieldNoteDmsRange",
+  "home.fieldNoteDmsConverted",
+  "home.fieldNoteLatitudeSwapped",
+  "home.fieldNoteLatitudeRange",
+  "home.fieldNoteLongitudeRange",
+  "home.fieldNoteHemisphereNegative",
+  /* UTC offset. */
+  "home.fieldNoteOffsetHint",
+  "home.fieldNoteOffsetClock",
+  "home.fieldNoteOffsetHours",
+  "home.fieldNoteOffsetRange",
+  /* A reading the visitor picked from the chips. */
+  "home.fieldNoteSetTo",
+] as const;
+
+export type IntakeMessageKey = (typeof INTAKE_MESSAGE_KEYS)[number];
+
+/** One thing to say about a field: a catalog key and what fills its blanks. */
+export interface IntakeMessage {
+  key: IntakeMessageKey;
+  params?: Record<string, IntakeText>;
 }
 
 export interface IntakeFieldResult {
   status: IntakeFieldStatus;
   /** Canonical value for the app, or "" when nothing usable came out. */
   value: string;
-  /** The canonical value written the way a person reads it. */
-  display: string;
+  /** The canonical value, ready to be written the way a person reads it. */
+  display: IntakeText;
   /** What was repaired, what is still ambiguous, or why it was rejected. */
-  message?: string;
+  messages?: IntakeMessage[];
+  /**
+   * Only on an invalid result: nothing in the text could be read at all, so
+   * `messages` is no more than an example of the format, and a form with its
+   * own hint for the field may show that instead. A value that was read and
+   * turned out impossible — 31 February, a date still to come — is not
+   * unreadable; its message says exactly what is wrong.
+   */
+  unreadable?: boolean;
   /** Other readings, offered as one-tap corrections. */
   suggestions?: IntakeSuggestion[];
 }
+
+/** The shape of `t` from lib/i18n-context, which this module must not import. */
+export type IntakeTranslate = (key: string, params?: Record<string, string>) => string;
 
 /* ── Result builders ─────────────────────────────────────────────────────── */
 
@@ -59,27 +160,60 @@ function empty(): IntakeFieldResult {
   return { ...EMPTY_RESULT };
 }
 
+function message(key: IntakeMessageKey, params?: Record<string, IntakeText>): IntakeMessage {
+  return params ? { key, params } : { key };
+}
+
+function asDate(value: string): IntakeText {
+  return { kind: "date", value };
+}
+
+function asTime(value: string): IntakeText {
+  return { kind: "time", value };
+}
+
 function settled(
   value: string,
-  display: string,
-  notes: string[],
+  display: IntakeText,
+  notes: IntakeMessage[],
 ): IntakeFieldResult {
   return notes.length
-    ? { status: "corrected", value, display, message: notes.join(" ") }
+    ? { status: "corrected", value, display, messages: notes }
     : { status: "ok", value, display };
 }
 
 function ambiguous(
   value: string,
-  display: string,
-  message: string,
+  display: IntakeText,
+  messages: IntakeMessage[],
   suggestions: IntakeSuggestion[],
 ): IntakeFieldResult {
-  return { status: "ambiguous", value, display, message, suggestions };
+  return { status: "ambiguous", value, display, messages, suggestions };
 }
 
-function invalid(message: string): IntakeFieldResult {
-  return { status: "invalid", value: "", display: "", message };
+function invalid(key: IntakeMessageKey, params?: Record<string, IntakeText>): IntakeFieldResult {
+  return { status: "invalid", value: "", display: "", messages: [message(key, params)] };
+}
+
+/* Invalid because nothing in it could be read, as against read and found
+ * impossible; the key is the field's format example. */
+function unreadable(key: IntakeMessageKey): IntakeFieldResult {
+  return { ...invalid(key), unreadable: true };
+}
+
+/**
+ * The note for a field once the visitor takes one of the readings offered.
+ *
+ * Built here rather than in each form so that all of them say it in the same
+ * words, from a key this module answers for.
+ */
+export function suggestionTaken(suggestion: IntakeSuggestion): IntakeFieldResult {
+  return {
+    status: "corrected",
+    value: suggestion.value,
+    display: suggestion.label,
+    messages: [message("home.fieldNoteSetTo", { value: suggestion.label })],
+  };
 }
 
 /* ── Digits ──────────────────────────────────────────────────────────────── */
@@ -116,17 +250,6 @@ export function toAsciiDigits(input: string): string {
 }
 
 /* ── Birth time ──────────────────────────────────────────────────────────── */
-
-/** Render "14:30" as "2:30 PM". */
-export function formatClockDisplay(value: string): string {
-  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
-  if (!match) return value;
-
-  const hours = Number(match[1]);
-  const meridiem = hours < 12 ? "AM" : "PM";
-  const twelve = hours % 12 === 0 ? 12 : hours % 12;
-  return `${twelve}:${match[2]} ${meridiem}`;
-}
 
 function clock(hours: number, minutes: number): string {
   return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
@@ -171,7 +294,7 @@ export function normalizeBirthTime(
   const trimmed = raw.trim();
   if (!trimmed) return empty();
 
-  const notes: string[] = [];
+  const notes: IntakeMessage[] = [];
   let text = toAsciiDigits(trimmed)
     .toLowerCase()
     .replace(/([ap])\s*\.\s*m\s*\.?/g, "$1m") // a.m. → am
@@ -180,10 +303,12 @@ export function normalizeBirthTime(
     .trim();
 
   if (/^(12\s*)?noon$|^mid[\s-]?day$/.test(text)) {
-    return settled("12:00", "12:00 PM", ["Noon is 12:00 PM."]);
+    return settled("12:00", asTime("12:00"), [
+      message("home.fieldNoteNoon", { time: asTime("12:00") }),
+    ]);
   }
   if (/^mid[\s-]?night$/.test(text)) {
-    return settled("00:00", "12:00 AM", ["Midnight is 00:00."]);
+    return settled("00:00", asTime("00:00"), [message("home.fieldNoteMidnight")]);
   }
 
   let meridiem: "am" | "pm" | null = null;
@@ -202,12 +327,12 @@ export function normalizeBirthTime(
   text = text.replace(/(\d)\s*h\s*(?=\d|$)/g, "$1:").replace(/:$/, "");
 
   if (/[a-z]/.test(text)) {
-    return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+    return unreadable("home.birthTimeFormatHint");
   }
 
   /* Any run of non-digits is a separator: ":" "." " " "-" all appear. */
   const body = text.replace(/\D+/g, ":").replace(/^:+|:+$/g, "");
-  if (!body) return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+  if (!body) return unreadable("home.birthTimeFormatHint");
 
   const separated = body.includes(":");
   let hourToken = "";
@@ -216,7 +341,7 @@ export function normalizeBirthTime(
 
   if (separated) {
     const parts = body.split(":");
-    if (parts.length > 3) return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+    if (parts.length > 3) return unreadable("home.birthTimeFormatHint");
     hourToken = parts[0];
     minuteToken = parts[1] ?? "";
     secondToken = parts[2] ?? "";
@@ -247,66 +372,64 @@ export function normalizeBirthTime(
         secondToken = body.slice(4);
         break;
       default:
-        return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+        return unreadable("home.birthTimeFormatHint");
     }
   }
 
   if (!/^\d{1,2}$/.test(hourToken)) {
-    return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+    return unreadable("home.birthTimeFormatHint");
   }
   if (minuteToken && !/^\d{1,2}$/.test(minuteToken)) {
-    return invalid("Minutes only run from 00 to 59.");
+    return invalid("home.fieldNoteMinutesRange");
   }
   if (secondToken && !/^\d{1,2}$/.test(secondToken)) {
-    return invalid("Try a time like 14:30, 2:30 PM, or 1430.");
+    return unreadable("home.birthTimeFormatHint");
   }
 
   let hours = Number(hourToken);
   const minutes = minuteToken ? Number(minuteToken) : 0;
 
-  if (minutes > 59) return invalid("Minutes only run from 00 to 59.");
-  if (secondToken) notes.push("Seconds are not used, so they were dropped.");
-  if (!minuteToken) notes.push("No minutes were given, so :00 was used.");
+  if (minutes > 59) return invalid("home.fieldNoteMinutesRange");
+  if (secondToken) notes.push(message("home.fieldNoteSecondsDropped"));
+  if (!minuteToken) notes.push(message("home.fieldNoteMinutesAssumed"));
   else if (minuteToken.length === 1) {
-    notes.push(`Minutes read as :${String(minutes).padStart(2, "0")}.`);
+    notes.push(message("home.fieldNoteMinutesPadded", { minutes: String(minutes).padStart(2, "0") }));
   }
 
   const suggestions: IntakeSuggestion[] = [];
-  let ambiguityMessage = "";
+  let ambiguity: IntakeMessage | null = null;
 
   if (meridiem === "pm") {
     if (hours === 0) {
       hours = 12;
-      notes.push("0 PM is not a clock time, so it was read as 12 noon.");
+      notes.push(message("home.fieldNoteZeroPm"));
     } else if (hours < 12) {
       hours += 12;
     } else if (hours > 12 && hours <= 23) {
-      notes.push(`PM was redundant — ${clock(hours, minutes)} is already afternoon.`);
+      notes.push(message("home.fieldNotePmRedundant", { time: clock(hours, minutes) }));
     } else if (hours > 23) {
-      return invalid("Hours only run from 1 to 12 with AM or PM.");
+      return invalid("home.fieldNoteHoursRange12");
     }
   } else if (meridiem === "am") {
     if (hours === 12) {
       hours = 0;
-      notes.push("12 AM is midnight, so it was read as 00:00.");
+      notes.push(message("home.fieldNoteTwelveAm"));
     } else if (hours > 12 && hours <= 23) {
       /* "13:45 AM" contradicts itself. The explicit hour is the more
        * deliberate half of the input, so it wins — but the visitor may equally
        * have meant 1:45 in the morning, so offer that. */
-      ambiguityMessage = `${clock(hours, minutes)} already reads as afternoon, so the AM was ignored.`;
-      suggestions.push({
-        value: clock(hours - 12, minutes),
-        label: formatClockDisplay(clock(hours - 12, minutes)),
-      });
+      const morning = clock(hours - 12, minutes);
+      ambiguity = message("home.fieldNoteAmIgnored", { time: clock(hours, minutes) });
+      suggestions.push({ value: morning, label: asTime(morning) });
     } else if (hours > 23) {
-      return invalid("Hours only run from 1 to 12 with AM or PM.");
+      return invalid("home.fieldNoteHoursRange12");
     }
   } else {
     if (hours === 24 && minutes === 0) {
       hours = 0;
-      notes.push("24:00 is midnight, so it was read as 00:00.");
+      notes.push(message("home.fieldNoteTwentyFour"));
     } else if (hours > 23) {
-      return invalid("Hours only run from 0 to 23. Add AM or PM for a 12-hour time.");
+      return invalid("home.fieldNoteHoursRange24");
     }
 
     /* A bare 1–12 hour is the one case we cannot settle — unless it came off
@@ -320,21 +443,23 @@ export function normalizeBirthTime(
 
     if (hours >= 1 && hours <= 12 && !writtenAsTwentyFourHour) {
       const alternate = hours === 12 ? clock(0, minutes) : clock(hours + 12, minutes);
-      ambiguityMessage = `${clock(hours, minutes)} could be morning or evening — read as ${formatClockDisplay(clock(hours, minutes))}.`;
-      suggestions.push({ value: alternate, label: formatClockDisplay(alternate) });
+      /* The time is quoted back as it was typed, give or take a padded
+       * minute — "7:15", not the canonical "07:15" — so that in a language
+       * whose clock runs to 24 hours it still reads differently from the
+       * reading it was given, which comes out as "07:15" there. */
+      ambiguity = message("home.fieldNoteTimeAmbiguous", {
+        time: `${hours}:${String(minutes).padStart(2, "0")}`,
+        reading: asTime(clock(hours, minutes)),
+      });
+      suggestions.push({ value: alternate, label: asTime(alternate) });
     }
   }
 
   const value = clock(hours, minutes);
-  const display = formatClockDisplay(value);
+  const display = asTime(value);
 
   if (suggestions.length) {
-    return ambiguous(
-      value,
-      display,
-      [...notes, ambiguityMessage].filter(Boolean).join(" "),
-      suggestions,
-    );
+    return ambiguous(value, display, ambiguity ? [...notes, ambiguity] : notes, suggestions);
   }
   return settled(value, display, notes);
 }
@@ -356,13 +481,6 @@ function monthFromName(token: string): number | null {
   if (needle.length < 3) return null;
   const index = MONTH_NAMES.findIndex((month) => month.startsWith(needle));
   return index >= 0 ? index + 1 : null;
-}
-
-/** Render "1990-05-15" as "15 May 1990". */
-export function formatBirthDateDisplay(value: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) return value;
-  return `${Number(match[3])} ${MONTH_SHORT[Number(match[2]) - 1]} ${match[1]}`;
 }
 
 /* Build a local date only if the components survive the round-trip, which
@@ -389,19 +507,24 @@ export interface BirthDateOptions {
 
 /* A two-digit year has no safe reading on its own, but a *birth* year does:
  * the 20xx reading is only possible if it has already happened. */
-function expandYear(token: string, today: Date): { year: number; note?: string } {
+function expandYear(token: string, today: Date): { year: number; notes: IntakeMessage[] } {
   const raw = Number(token);
-  if (token.length === 4) return { year: raw };
+  if (token.length === 4) return { year: raw, notes: [] };
   const thisCentury = 2000 + raw;
   const year = thisCentury <= today.getFullYear() ? thisCentury : 1900 + raw;
-  return { year, note: `The year "${token}" was read as ${year}.` };
+  return {
+    year,
+    notes: [message("home.fieldNoteYearExpanded", { typed: token, year: String(year) })],
+  };
 }
 
 interface DateReading {
   year: number;
   month: number;
   day: number;
-  note?: string;
+  notes: IntakeMessage[];
+  /** The fallback reading of a numeric date, which has to say why it won. */
+  monthFirst?: boolean;
 }
 
 /**
@@ -446,31 +569,24 @@ export function normalizeBirthDate(
   const digitsOnly = /^(\d{6}|\d{8})$/.exec(text);
 
   if (iso) {
-    readings.push({ year: Number(iso[1]), month: Number(iso[2]), day: Number(iso[3]) });
+    readings.push({ year: Number(iso[1]), month: Number(iso[2]), day: Number(iso[3]), notes: [] });
   } else if (numeric) {
-    const { year, note } = expandYear(numeric[3], today);
+    const { year, notes } = expandYear(numeric[3], today);
     const first = Number(numeric[1]);
     const second = Number(numeric[2]);
-    readings.push({ year, month: second, day: first, note });
-    readings.push({
-      year,
-      month: first,
-      day: second,
-      note: [note, `Read month-first, because ${second} cannot be a day of the month.`]
-        .filter(Boolean)
-        .join(" "),
-    });
+    readings.push({ year, month: second, day: first, notes });
+    readings.push({ year, month: first, day: second, notes, monthFirst: true });
   } else if (dayThenName) {
     const month = monthFromName(dayThenName[2]);
     if (month) {
-      const { year, note } = expandYear(dayThenName[3], today);
-      readings.push({ year, month, day: Number(dayThenName[1]), note });
+      const { year, notes } = expandYear(dayThenName[3], today);
+      readings.push({ year, month, day: Number(dayThenName[1]), notes });
     }
   } else if (nameThenDay) {
     const month = monthFromName(nameThenDay[1]);
     if (month) {
-      const { year, note } = expandYear(nameThenDay[3], today);
-      readings.push({ year, month, day: Number(nameThenDay[2]), note });
+      const { year, notes } = expandYear(nameThenDay[3], today);
+      readings.push({ year, month, day: Number(nameThenDay[2]), notes });
     }
   } else if (digitsOnly) {
     const digits = digitsOnly[1];
@@ -481,13 +597,13 @@ export function normalizeBirthDate(
         year: tail,
         month: Number(digits.slice(2, 4)),
         day: Number(digits.slice(0, 2)),
-        note: `Read "${digits}" as day, month, year.`,
+        notes: [message("home.fieldNoteDigitsDayFirst", { digits })],
       };
       const yearFirst: DateReading = {
         year: head,
         month: Number(digits.slice(4, 6)),
         day: Number(digits.slice(6)),
-        note: `Read "${digits}" as year, month, day.`,
+        notes: [message("home.fieldNoteDigitsYearFirst", { digits })],
       };
       /* Whichever end carries a plausible birth year is the year end. */
       if (tail >= minYear && tail <= today.getFullYear()) readings.push(dayFirst, yearFirst);
@@ -498,13 +614,13 @@ export function normalizeBirthDate(
         year,
         month: Number(digits.slice(2, 4)),
         day: Number(digits.slice(0, 2)),
-        note: `Read "${digits}" as day, month, year.`,
+        notes: [message("home.fieldNoteDigitsDayFirst", { digits })],
       });
     }
   }
 
   if (!readings.length) {
-    return invalid("Try a date like 15/05/1990, 1990-05-15, or 15 May 1990.");
+    return unreadable("home.birthDateFormatHint");
   }
 
   const real = readings
@@ -516,12 +632,16 @@ export function normalizeBirthDate(
     if (first.month >= 1 && first.month <= 12) {
       const daysInMonth = new Date(first.year, first.month, 0).getDate();
       if (first.day > daysInMonth) {
-        return invalid(
-          `${MONTH_NAMES[first.month - 1].replace(/^./, (c) => c.toUpperCase())} ${first.year} only has ${daysInMonth} days.`,
-        );
+        return invalid("home.fieldNoteMonthLength", {
+          month: {
+            kind: "month",
+            value: `${String(first.year).padStart(4, "0")}-${String(first.month).padStart(2, "0")}`,
+          },
+          days: String(daysInMonth),
+        });
       }
     }
-    return invalid("That is not a real calendar date.");
+    return invalid("home.fieldNoteNotADate");
   }
 
   const inRange = real.filter(
@@ -530,14 +650,29 @@ export function normalizeBirthDate(
 
   if (!inRange.length) {
     const entry = real[0];
-    if (entry.date > endOfToday) return invalid("A birth date cannot be in the future.");
-    return invalid(`Dates before ${minYear} are not supported.`);
+    if (entry.date > endOfToday) return invalid("home.fieldNoteFutureDate");
+    return invalid("home.fieldNoteDateTooEarly", { year: String(minYear) });
   }
 
   const chosen = inRange[0];
   const value = isoDate(chosen.reading.year, chosen.reading.month, chosen.reading.day);
-  const display = formatBirthDateDisplay(value);
-  const notes = chosen.reading.note ? [chosen.reading.note] : [];
+  const display = asDate(value);
+  const notes = [...chosen.reading.notes];
+
+  if (chosen.reading.monthFirst) {
+    /* Day-first is the rule, so say why it gave way. Either the day-first
+     * reading is a real date that has not happened yet — 08/09 typed in
+     * August — or it is no date at all, which only happens when the second
+     * number is past 12 and so cannot be its month. */
+    const dayFirst = real.find((entry) => !entry.reading.monthFirst);
+    notes.push(
+      dayFirst
+        ? message("home.fieldNoteMonthFirstFuture", {
+            date: asDate(isoDate(dayFirst.reading.year, dayFirst.reading.month, dayFirst.reading.day)),
+          })
+        : message("home.fieldNoteMonthFirst", { number: String(chosen.reading.day) }),
+    );
+  }
 
   const alternates = inRange
     .slice(1)
@@ -548,11 +683,8 @@ export function normalizeBirthDate(
     return ambiguous(
       value,
       display,
-      [...notes, `That could also read as ${formatBirthDateDisplay(alternates[0])}.`].join(" "),
-      alternates.map((candidate) => ({
-        value: candidate,
-        label: formatBirthDateDisplay(candidate),
-      })),
+      [...notes, message("home.fieldNoteDateAmbiguous", { date: asDate(alternates[0]) })],
+      alternates.map((candidate) => ({ value: candidate, label: asDate(candidate) })),
     );
   }
 
@@ -622,14 +754,14 @@ export function normalizePersonName(raw: string): IntakeFieldResult {
 
   const letters = tidied.replace(/[^\p{L}]/gu, "");
   if (letters.length < 2) {
-    return invalid("A name needs at least two letters.");
+    return invalid("home.fieldNoteNameTooShort");
   }
 
   const cased = wasTypedWithoutCasing(tidied) ? titleCase(tidied, NAME_PARTICLES) : tidied;
 
-  const notes: string[] = [];
-  if (tidied !== raw.trim()) notes.push("Extra spacing was tidied up.");
-  if (cased !== tidied) notes.push(`Capitalised as "${cased}".`);
+  const notes: IntakeMessage[] = [];
+  if (tidied !== raw.trim()) notes.push(message("home.fieldNoteSpacing"));
+  if (cased !== tidied) notes.push(message("home.fieldNoteCapitalised", { value: cased }));
 
   return settled(cased, cased, notes);
 }
@@ -641,9 +773,9 @@ export function normalizePlaceName(raw: string): IntakeFieldResult {
 
   const cased = wasTypedWithoutCasing(tidied) ? titleCase(tidied, PLACE_MINOR_WORDS) : tidied;
 
-  const notes: string[] = [];
-  if (tidied !== raw.trim()) notes.push("Extra spacing was tidied up.");
-  if (cased !== tidied) notes.push(`Capitalised as "${cased}".`);
+  const notes: IntakeMessage[] = [];
+  if (tidied !== raw.trim()) notes.push(message("home.fieldNoteSpacing"));
+  if (cased !== tidied) notes.push(message("home.fieldNoteCapitalised", { value: cased }));
 
   return settled(cased, cased, notes);
 }
@@ -726,7 +858,7 @@ export function normalizeCoordinate(raw: string, axis: CoordinateAxis): IntakeFi
   const trimmed = raw.trim();
   if (!trimmed) return empty();
 
-  const notes: string[] = [];
+  const notes: IntakeMessage[] = [];
   let text = toAsciiDigits(trimmed)
     .toLowerCase()
     .replace(/\bnorth\b/g, "n")
@@ -747,7 +879,7 @@ export function normalizeCoordinate(raw: string, axis: CoordinateAxis): IntakeFi
   }
 
   if (/[a-z]/.test(text)) {
-    return invalid("Try a coordinate like 40.7128, or 40° 42' 46\" N.");
+    return unreadable("home.fieldNoteCoordinateHint");
   }
 
   const negativeSign = /^[-−–]/.test(text);
@@ -757,12 +889,12 @@ export function normalizeCoordinate(raw: string, axis: CoordinateAxis): IntakeFi
    * with a space is a list separator and belongs to normalizeCoordinatePair. */
   if (/^\d+,\d+$/.test(text)) {
     text = text.replace(",", ".");
-    notes.push("The comma was read as a decimal point.");
+    notes.push(message("home.fieldNoteDecimalComma"));
   }
 
   const tokens = text.split(/[^\d.]+/).filter(Boolean);
   if (!tokens.length || tokens.some((token) => !/^\d+(\.\d+)?$/.test(token))) {
-    return invalid("Try a coordinate like 40.7128, or 40° 42' 46\" N.");
+    return unreadable("home.fieldNoteCoordinateHint");
   }
 
   let magnitude: number;
@@ -773,12 +905,12 @@ export function normalizeCoordinate(raw: string, axis: CoordinateAxis): IntakeFi
     const minutes = Number(tokens[1]);
     const seconds = tokens.length === 3 ? Number(tokens[2]) : 0;
     if (minutes >= 60 || seconds >= 60) {
-      return invalid("Minutes and seconds only run from 0 to 59.");
+      return invalid("home.fieldNoteDmsRange");
     }
     magnitude = degrees + minutes / 60 + seconds / 3600;
-    notes.push("Degrees, minutes and seconds were converted to decimal degrees.");
+    notes.push(message("home.fieldNoteDmsConverted"));
   } else {
-    return invalid("Try a coordinate like 40.7128, or 40° 42' 46\" N.");
+    return unreadable("home.fieldNoteCoordinateHint");
   }
 
   const isNegative =
@@ -788,13 +920,16 @@ export function normalizeCoordinate(raw: string, axis: CoordinateAxis): IntakeFi
 
   if (Math.abs(value) > limit) {
     if (axis === "latitude" && Math.abs(value) <= AXIS_LIMIT.longitude) {
-      return invalid("Latitude only runs from -90 to 90 — is this the longitude?");
+      return invalid("home.fieldNoteLatitudeSwapped");
     }
-    return invalid(`${axis === "latitude" ? "Latitude" : "Longitude"} only runs from -${limit} to ${limit}.`);
+    return invalid(
+      axis === "latitude" ? "home.fieldNoteLatitudeRange" : "home.fieldNoteLongitudeRange",
+      { limit: String(limit) },
+    );
   }
 
   if (hemisphere === "s" || hemisphere === "w") {
-    notes.push(`${hemisphere.toUpperCase()} was read as a negative value.`);
+    notes.push(message("home.fieldNoteHemisphereNegative", { letter: hemisphere.toUpperCase() }));
   }
 
   return settled(String(value), formatCoordinateDisplay(value, axis), notes);
@@ -861,7 +996,7 @@ export function normalizeUtcOffsetMinutes(raw: string): IntakeFieldResult {
   const trimmed = raw.trim();
   if (!trimmed) return empty();
 
-  const notes: string[] = [];
+  const notes: IntakeMessage[] = [];
   let text = toAsciiDigits(trimmed)
     .toLowerCase()
     .replace(/\b(utc|gmt)\b/g, "")
@@ -877,26 +1012,183 @@ export function normalizeUtcOffsetMinutes(raw: string): IntakeFieldResult {
   if (clockForm) {
     const hourPart = Number(clockForm[1]);
     const minutePart = Number(clockForm[2]);
-    if (minutePart > 59) return invalid("Minutes only run from 00 to 59.");
+    if (minutePart > 59) return invalid("home.fieldNoteMinutesRange");
     minutes = hourPart * 60 + minutePart;
-    notes.push(`${clockForm[0]} was read as ${minutes} minutes.`);
+    notes.push(message("home.fieldNoteOffsetClock", { typed: clockForm[0], minutes: String(minutes) }));
   } else if (/^\d+(\.\d+)?$/.test(text)) {
     const numeric = Number(text);
     if (text.includes(".") || numeric <= 14) {
       minutes = Math.round(numeric * 60);
-      notes.push(`${text} was read as hours, which is ${minutes} minutes.`);
+      notes.push(message("home.fieldNoteOffsetHours", { typed: text, minutes: String(minutes) }));
     } else {
       minutes = Math.round(numeric);
     }
   } else {
-    return invalid("Try an offset like 330, +05:30, or 5.5.");
+    return unreadable("home.fieldNoteOffsetHint");
   }
 
   if (negative) minutes = -minutes;
 
   if (minutes < OFFSET_MIN || minutes > OFFSET_MAX) {
-    return invalid(`A UTC offset runs from ${OFFSET_MIN} to ${OFFSET_MAX} minutes.`);
+    return invalid("home.fieldNoteOffsetRange", {
+      min: String(OFFSET_MIN),
+      max: String(OFFSET_MAX),
+    });
   }
 
   return settled(String(minutes), formatUtcOffsetDisplay(minutes), notes);
+}
+
+/* ── Writing it out ──────────────────────────────────────────────────────── */
+
+/*
+ * English is written out by hand, every other language by Intl.
+ *
+ * Not for want of Intl's English. The intake writes a date day-first — "15
+ * May 1990", the order the desktop picker shows and the order numeric input
+ * is read in — where the interface's English locale, en-US, puts the month
+ * first. And English is the one language these are ever rendered in on the
+ * server (the provider holds every visitor at "en" until hydration is over),
+ * so it is the one output that must come out identically in Node and in every
+ * browser; built by hand, it cannot drift with the ICU version underneath.
+ */
+function isEnglish(locale: string): boolean {
+  return /^en(-|$)/i.test(locale);
+}
+
+const formatters = new Map<string, Intl.DateTimeFormat>();
+
+/*
+ * One formatter per locale and shape, since constructing an
+ * Intl.DateTimeFormat is the expensive half of formatting with one.
+ *
+ * Latin digits in every language: the fields hold them, and so does every
+ * number a note quotes back — a typed year, a count of minutes — so a Bengali
+ * date in Bengali digits would switch numeral systems mid-sentence. UTC on
+ * both sides, so no reader's own zone can move a calendar date.
+ */
+function formatter(
+  locale: string,
+  shape: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
+  const id = `${locale}|${shape}`;
+  let cached = formatters.get(id);
+  if (!cached) {
+    cached = new Intl.DateTimeFormat(locale, {
+      ...options,
+      numberingSystem: "latn",
+      timeZone: "UTC",
+    });
+    formatters.set(id, cached);
+  }
+  return cached;
+}
+
+/* A UTC instant for a wall-clock moment, exact for any year (Date.UTC alone
+ * reads 0–99 as 1900–1999). Null when the parts do not survive the round
+ * trip — month 13, 31 February — rather than a date rolled forward. */
+function utcMoment(year: number, month: number, day: number, hours = 0, minutes = 0): Date | null {
+  const date = new Date(Date.UTC(2000, month - 1, day, hours, minutes));
+  date.setUTCFullYear(year);
+  return date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+    ? date
+    : null;
+}
+
+/** Render "1990-05-15" as "15 May 1990", or as the locale writes it: "15 mai 1990". */
+export function formatBirthDateDisplay(value: string, locale: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return value;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = utcMoment(year, month, day);
+  if (!date) return value;
+
+  if (isEnglish(locale)) return `${day} ${MONTH_SHORT[month - 1]} ${match[1]}`;
+  return formatter(locale, "date", { day: "numeric", month: "short", year: "numeric" }).format(date);
+}
+
+/**
+ * Render "14:30" as "2:30 PM", or as the locale writes the time.
+ *
+ * That is a 24-hour clock in Spanish, Italian and French, and those get a
+ * two-digit hour: "02:30" there is plainly the small hours, where "2:30"
+ * could be read either way — and saying which half of the day a time means is
+ * most of what this read-out is for.
+ */
+export function formatClockDisplay(value: string, locale: string): string {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(value);
+  if (!match) return value;
+
+  const hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  if (hours > 23 || minutes > 59) return value;
+
+  if (isEnglish(locale)) {
+    const meridiem = hours < 12 ? "AM" : "PM";
+    const twelve = hours % 12 === 0 ? 12 : hours % 12;
+    return `${twelve}:${match[2]} ${meridiem}`;
+  }
+
+  const moment = utcMoment(2000, 1, 1, hours, minutes);
+  if (!moment) return value;
+  const twelveHour = formatter(locale, "hour", { hour: "numeric" }).resolvedOptions().hour12;
+  const shape = twelveHour
+    ? formatter(locale, "time12", { hour: "numeric", minute: "2-digit" })
+    : formatter(locale, "time24", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+  return shape.format(moment);
+}
+
+/* Render "1990-02" as "February 1990", for a note about the month itself. */
+function formatMonthDisplay(value: string, locale: string): string {
+  const match = /^(\d{4})-(\d{2})$/.exec(value);
+  if (!match) return value;
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const date = utcMoment(year, month, 1);
+  if (!date) return value;
+
+  if (isEnglish(locale)) return `${capitalizeSegment(MONTH_NAMES[month - 1])} ${year}`;
+  return formatter(locale, "month", { month: "long", year: "numeric" }).format(date);
+}
+
+/** Write any IntakeText out for a BCP-47 locale — one of LOCALE_TAGS. */
+export function formatIntakeText(text: IntakeText, locale: string): string {
+  if (typeof text === "string") return text;
+  switch (text.kind) {
+    case "date":
+      return formatBirthDateDisplay(text.value, locale);
+    case "time":
+      return formatClockDisplay(text.value, locale);
+    case "month":
+      return formatMonthDisplay(text.value, locale);
+  }
+}
+
+/**
+ * A result's messages as the sentences a form shows: each key through `t`,
+ * each parameter written out for the locale, one sentence after another.
+ */
+export function formatIntakeMessages(
+  messages: readonly IntakeMessage[],
+  t: IntakeTranslate,
+  locale: string,
+): string {
+  return messages
+    .map(({ key, params }) =>
+      t(
+        key,
+        params &&
+          Object.fromEntries(
+            Object.entries(params).map(([name, text]) => [name, formatIntakeText(text, locale)]),
+          ),
+      ),
+    )
+    .join(" ");
 }
