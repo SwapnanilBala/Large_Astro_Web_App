@@ -100,23 +100,21 @@
 }
 
 /*
- * The chart row: the birth chart card and the week side by side, house support
- * across the full width underneath.
+ * The chart row: the birth chart card and the week, side by side.
  *
  * It was three columns of 30/42/28 until 2026-10. The chart then got ~380px at
  * a 1440 window -- too small for a North Indian chart's labels -- and the tall
  * house-support column left the other two with a band of empty card beneath
- * them. Under 1200px it already stacked the third panel like this; now every
- * desktop width does, and the chart card takes the wider track because it
- * holds the chart and its positions list.
+ * them. House support went full width underneath, and has since left this row
+ * altogether to sit beside the insight zone -- see .insightPair. What is left
+ * is two cards, the chart taking the wider track because it holds both the
+ * chart and its positions list.
  *
  * fr rather than % so the gap comes out of the tracks instead of overflowing
  * them, and minmax(0, ...) so one long unbroken word cannot push the row wider
  * than its column -- the same failure .grid > * guards against further down.
- * Without house support (no Ashtakavarga block) the row is just the first two.
  */
-.cardRow3,
-.cardRow3[data-columns="two"] {
+.cardRow3 {
   display: grid;
   min-width: 0;
   gap: clamp(1.15rem, 1.8vw, 1.65rem);
@@ -124,8 +122,30 @@
   align-items: start;
 }
 
-.cardRow3 > *:nth-child(3) {
-  grid-column: 1 / -1;
+/*
+ * The Ultimate Module beside house support.
+ *
+ * The two were full-width blocks one after the other, so the reader scrolled
+ * past the whole insight zone to reach a dial and twelve bars that are a
+ * glance's worth of information. They pair the way the chart row above does,
+ * and in the same 58/42 proportion: the zone carries seven cards and a
+ * paragraph, house support carries one figure.
+ *
+ * No breakpoint is needed inside house support at this width. That panel is a
+ * container query -- see house-support-panel.module.css -- so it is sized by
+ * the slot it is given rather than by the viewport, and it stacks its dial
+ * above the bar chart on its own once the track drops under 820px.
+ */
+.insightPair {
+  display: grid;
+  min-width: 0;
+  gap: clamp(1.15rem, 1.8vw, 1.65rem);
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
+  align-items: start;
+}
+
+.insightPair[data-columns="one"] {
+  grid-template-columns: minmax(0, 1fr);
 }
 
 /*
@@ -4980,7 +5000,7 @@
  */
 @media (max-width: 1200px) {
   .cardRow3,
-  .cardRow3[data-columns="two"] {
+  .insightPair {
     grid-template-columns: minmax(0, 1fr);
   }
 }
@@ -5022,7 +5042,7 @@
   }
 
   .cardRow3,
-  .cardRow3[data-columns="two"] {
+  .insightPair {
     grid-template-columns: minmax(0, 1fr);
   }
 

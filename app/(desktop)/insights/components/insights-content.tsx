@@ -1357,9 +1357,6 @@ export default function InsightsContent({
         <motion.div
           id="chart-map"
           className={`${styles.cardRow3} ${styles.anchorTarget}`}
-          /* Two tracks rather than three when the Ashtakavarga block is absent,
-             so the row closes up instead of leaving a third of itself empty. */
-          data-columns={hasHouseSupport ? "three" : "two"}
           variants={bentoContainer}
           initial="hidden"
           whileInView="visible"
@@ -1374,15 +1371,159 @@ export default function InsightsContent({
             <LagnaChartCard payload={payload} />
           </motion.div>
 
-          {/* Centre: the week. */}
+          {/* Right: the week. House support used to be a third panel here
+              and is now paired with the insight zone below instead. */}
           <motion.div className={styles.rowPanel} variants={bentoItemFromRight}>
             <WeeklyEnergyPanel queryString={historyQs} />
           </motion.div>
+        </motion.div>
 
-          {/* Right: house support, promoted out of its collapsible so it can
-              hold a column. It keeps its id, so /insights#house-support still
+        {/* â”€â”€â”€ Life Domain Deep Dives, beside house support â”€â”€â”€ */}
+        <motion.div
+          className={styles.insightPair}
+          /* One track when there is no Ashtakavarga block, so the zone does not
+             sit in 58% of the row with nothing beside it. */
+          data-columns={hasHouseSupport ? "two" : "one"}
+          variants={bentoContainer}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-80px" }}
+        >
+          <div
+            id="ultimate"
+            ref={domainSectionRef}
+            className={styles.anchorTarget}
+          >
+              {domainLoadState === "error" ? (
+                <LifeDomainErrorState
+                  message={domainLoadError}
+                  onRetry={() => setDomainRetryToken((value) => value + 1)}
+                />
+              ) : selectedDomainInsight ? (
+                <motion.section
+                className={styles.cardDomains}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-60px" }}
+                transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
+              >
+                {/* Centred, the way the reference heads this band. The intro
+                    used to list all eight evidence families; that sentence is
+                    now on the page that actually shows them. */}
+                <div className={styles.zoneHeader}>
+                  <p className={styles.kicker}>Ultimate Module</p>
+                  <h2 className={styles.zoneTitle}>
+                    <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
+                    Connected Insight Zone
+                    <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
+                  </h2>
+                  <p className={styles.zoneSubtitle}>
+                    Seven areas, each read against its own evidence. Most active
+                    first; the full workup opens on its own page.
+                  </p>
+                </div>
+
+                {/*
+                  Still a tablist, and still the same seven buttons -- only the
+                  shape changed, from a chip to a card with the domain's own
+                  generated headline under its name. aria-selected was already
+                  doing the work the reference draws as a highlighted card, so
+                  there was no new state to invent.
+                */}
+                <div className={styles.zoneCards} role="tablist" aria-label="Life areas">
+                  {rankedDomainInsights.map((domain) => (
+                    <button
+                      key={domain.key}
+                      type="button"
+                      role="tab"
+                      aria-selected={domain.key === selectedDomainKey}
+                      className={styles.zoneCard}
+                      onClick={() => selectDomain(domain.key)}
+                    >
+                      {DOMAIN_ICONS[domain.key] && (
+                        <span className={styles.zoneCardIcon} aria-hidden="true">
+                          {DOMAIN_ICONS[domain.key]}
+                        </span>
+                      )}
+                      <span className={styles.zoneCardText}>
+                        <span className={styles.zoneCardTitle}>{domain.label}</span>
+                        <span className={styles.zoneCardBody}>
+                          {domain.display.headline}
+                        </span>
+                      </span>
+                      <span className={styles.zoneCardChevron} aria-hidden="true">
+                        &rsaquo;
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* The brief, and only the brief.
+                    Detailed and Action Plan were tabs here, and the evidence
+                    verdict, the six ranked subthemes, the timing windows,
+                    guidance and long game rendered under all three. That is a
+                    full consultation for one area, seven areas deep, on the page
+                    a client sees first. It all lives at /insights/life-areas now;
+                    what is left is the headline and the paragraph under it. */}
+                <AnimatePresence mode="wait">
+                  <motion.article
+                    key={selectedDomainInsight.key}
+                    className={styles.domainCard}
+                    initial={shouldReduceMotion ? false : { opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
+                  >
+                    <div className={styles.domainHeader}>
+                      <div>
+                        <p className={styles.kicker}>
+                          {selectedDomainInsight.label}
+                        </p>
+                        <h3>{selectedDomainInsight.display.headline}</h3>
+                      </div>
+                      {selectedDomainInsight.signal_profile?.activity_band && (
+                        <span className={styles.domainSignalBadge}>
+                          {selectedDomainInsight.signal_profile.activity_band} activity
+                        </span>
+                      )}
+                    </div>
+
+                    {/* The written brief when one has arrived, the engine's own
+                        body until then and for good if none ever does. */}
+                    <p
+                      className={styles.domainOverview}
+                      data-refining={
+                        domainBriefPending && !domainBriefs[selectedDomainInsight.key]
+                          ? "true"
+                          : undefined
+                      }
+                      aria-busy={
+                        domainBriefPending && !domainBriefs[selectedDomainInsight.key]
+                      }
+                    >
+                      {domainBriefs[selectedDomainInsight.key] ??
+                        selectedDomainInsight.display.body}
+                    </p>
+
+                    <Link
+                      href={`${lifeAreasHref}&domain=${selectedDomainInsight.key}`}
+                      className={styles.domainOpenLink}
+                    >
+                      Full reading for {selectedDomainInsight.label.toLowerCase()}
+                      <span aria-hidden="true">&rarr;</span>
+                    </Link>
+                  </motion.article>
+                </AnimatePresence>
+                </motion.section>
+              ) : (
+                <LifeDomainLoadingState queued={domainLoadState === "idle"} />
+              )}
+          </div>
+
+          {/* House support, promoted out of its collapsible so it can hold a
+              column. It keeps its id, so /insights#house-support still
               resolves -- but it loses CollapsibleSection's force-open-on-hash,
-              so it now relies on .anchorTarget's scroll-margin-top alone. */}
+              so it relies on .anchorTarget's scroll-margin-top alone. */}
           {hasHouseSupport && (
             <motion.section
               id="house-support"
@@ -1408,138 +1549,6 @@ export default function InsightsContent({
             </motion.section>
           )}
         </motion.div>
-
-        {/* â”€â”€â”€ Life Domain Deep Dives â”€â”€â”€ */}
-        <div
-          id="ultimate"
-          ref={domainSectionRef}
-          className={styles.anchorTarget}
-        >
-            {domainLoadState === "error" ? (
-              <LifeDomainErrorState
-                message={domainLoadError}
-                onRetry={() => setDomainRetryToken((value) => value + 1)}
-              />
-            ) : selectedDomainInsight ? (
-              <motion.section
-              className={styles.cardDomains}
-              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
-            >
-              {/* Centred, the way the reference heads this band. The intro
-                  used to list all eight evidence families; that sentence is
-                  now on the page that actually shows them. */}
-              <div className={styles.zoneHeader}>
-                <p className={styles.kicker}>Ultimate Module</p>
-                <h2 className={styles.zoneTitle}>
-                  <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
-                  Connected Insight Zone
-                  <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
-                </h2>
-                <p className={styles.zoneSubtitle}>
-                  Seven areas, each read against its own evidence. Most active
-                  first; the full workup opens on its own page.
-                </p>
-              </div>
-
-              {/*
-                Still a tablist, and still the same seven buttons -- only the
-                shape changed, from a chip to a card with the domain's own
-                generated headline under its name. aria-selected was already
-                doing the work the reference draws as a highlighted card, so
-                there was no new state to invent.
-              */}
-              <div className={styles.zoneCards} role="tablist" aria-label="Life areas">
-                {rankedDomainInsights.map((domain) => (
-                  <button
-                    key={domain.key}
-                    type="button"
-                    role="tab"
-                    aria-selected={domain.key === selectedDomainKey}
-                    className={styles.zoneCard}
-                    onClick={() => selectDomain(domain.key)}
-                  >
-                    {DOMAIN_ICONS[domain.key] && (
-                      <span className={styles.zoneCardIcon} aria-hidden="true">
-                        {DOMAIN_ICONS[domain.key]}
-                      </span>
-                    )}
-                    <span className={styles.zoneCardText}>
-                      <span className={styles.zoneCardTitle}>{domain.label}</span>
-                      <span className={styles.zoneCardBody}>
-                        {domain.display.headline}
-                      </span>
-                    </span>
-                    <span className={styles.zoneCardChevron} aria-hidden="true">
-                      &rsaquo;
-                    </span>
-                  </button>
-                ))}
-              </div>
-
-              {/* The brief, and only the brief.
-                  Detailed and Action Plan were tabs here, and the evidence
-                  verdict, the six ranked subthemes, the timing windows,
-                  guidance and long game rendered under all three. That is a
-                  full consultation for one area, seven areas deep, on the page
-                  a client sees first. It all lives at /insights/life-areas now;
-                  what is left is the headline and the paragraph under it. */}
-              <AnimatePresence mode="wait">
-                <motion.article
-                  key={selectedDomainInsight.key}
-                  className={styles.domainCard}
-                  initial={shouldReduceMotion ? false : { opacity: 0, x: 10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, x: -10 }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
-                >
-                  <div className={styles.domainHeader}>
-                    <div>
-                      <p className={styles.kicker}>
-                        {selectedDomainInsight.label}
-                      </p>
-                      <h3>{selectedDomainInsight.display.headline}</h3>
-                    </div>
-                    {selectedDomainInsight.signal_profile?.activity_band && (
-                      <span className={styles.domainSignalBadge}>
-                        {selectedDomainInsight.signal_profile.activity_band} activity
-                      </span>
-                    )}
-                  </div>
-
-                  {/* The written brief when one has arrived, the engine's own
-                      body until then and for good if none ever does. */}
-                  <p
-                    className={styles.domainOverview}
-                    data-refining={
-                      domainBriefPending && !domainBriefs[selectedDomainInsight.key]
-                        ? "true"
-                        : undefined
-                    }
-                    aria-busy={
-                      domainBriefPending && !domainBriefs[selectedDomainInsight.key]
-                    }
-                  >
-                    {domainBriefs[selectedDomainInsight.key] ??
-                      selectedDomainInsight.display.body}
-                  </p>
-
-                  <Link
-                    href={`${lifeAreasHref}&domain=${selectedDomainInsight.key}`}
-                    className={styles.domainOpenLink}
-                  >
-                    Full reading for {selectedDomainInsight.label.toLowerCase()}
-                    <span aria-hidden="true">&rarr;</span>
-                  </Link>
-                </motion.article>
-              </AnimatePresence>
-              </motion.section>
-            ) : (
-              <LifeDomainLoadingState queued={domainLoadState === "idle"} />
-            )}
-        </div>
 
         <CollapsibleSection
           kicker="Chart details"
