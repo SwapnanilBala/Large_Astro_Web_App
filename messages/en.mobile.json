@@ -24,7 +24,7 @@
     "formTimezone": "UTC Offset (min)",
     "formLatitude": "Latitude",
     "formLongitude": "Longitude",
-    "geoLoading": "Detecting coordinates...",
+    "geoLoading": "Detecting coordinates…",
     "geoFound": "Coordinates detected ({lat}, {lon})",
     "geoNotFound": "Could not detect coordinates — enter manually below",
     "submit": "Generate Chart Intelligence",

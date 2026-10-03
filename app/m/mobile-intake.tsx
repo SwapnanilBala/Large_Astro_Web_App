@@ -726,11 +726,20 @@ export default function MobileIntake() {
             </label>
           </div>
 
+          {/* The desktop intake's old status line, in its own strings: home.geo*
+              were written for this lookup's three states and are translated
+              in every catalog. Not-found points at the coordinate boxes rather
+              than the spelling because a geocoder timeout or outage lands here
+              too -- /api/geocode answers both with found: false -- and those
+              boxes open just below whatever the cause. */}
           <p className={styles.status} role="status" aria-live="polite">
-            {geoStatus === "loading" && "Finding coordinates…"}
+            {geoStatus === "loading" && t("home.geoLoading")}
             {geoStatus === "found" &&
-              `Located — ${Number(draft.latitude).toFixed(3)}, ${Number(draft.longitude).toFixed(3)}`}
-            {geoStatus === "not-found" && "Could not find that place. Check the spelling."}
+              t("home.geoFound", {
+                lat: Number(draft.latitude).toFixed(3),
+                lon: Number(draft.longitude).toFixed(3),
+              })}
+            {geoStatus === "not-found" && t("home.geoNotFound")}
           </p>
 
           {/* Without this the mobile tree dead-ends: submitting needs
