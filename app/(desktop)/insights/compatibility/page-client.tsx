@@ -55,6 +55,7 @@ function sunSignFromDate(birthDate: string): string {
 }
 
 function CompatibilityRing({ score }: { score: number }) {
+  const { t } = useTranslation();
   const [animated, setAnimated] = useState(false);
 
   useEffect(() => {
@@ -71,9 +72,9 @@ function CompatibilityRing({ score }: { score: number }) {
   const color = score >= 70 ? '#4ade80' : score >= 45 ? '#fbbf24' : '#f87171';
 
   const label =
-    score >= 70 ? 'Harmonious' :
-    score >= 45 ? 'Compatible' :
-    'Challenging';
+    score >= 70 ? t("compatibility.harmonious") :
+    score >= 45 ? t("compatibility.compatible") :
+    t("compatibility.challenging");
 
   const labelColor =
     score >= 70 ? '#4ade80' :
@@ -120,7 +121,7 @@ function CompatibilityRing({ score }: { score: number }) {
             fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)',
             textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '0.2rem',
           }}>
-            Score
+            {t("compatibility.score")}
           </span>
         </div>
       </div>
@@ -440,7 +441,7 @@ function ProfileCard({
           className="compat-inline-link"
           onClick={() => setIsEditing(true)}
         >
-          Change
+          {t("compatibility.change")}
         </button>
       </section>
     );
@@ -462,20 +463,20 @@ function ProfileCard({
 
       <div className="compat-fields">
         <label className="input-glow-gold">
-          Name
+          {t("home.formName")}
           <input
             type="text"
             value={profile.name}
             onChange={updateField("name")}
             onBlur={commit("name", normalizePersonName)}
-            placeholder="Their name"
+            placeholder={t("compatibility.namePlaceholder")}
           />
           {renderNote("name")}
         </label>
 
         <div className="compat-row-2">
           <label className="input-glow-aqua">
-            Birth date
+            {t("home.formBirthDate")}
             <div className="datetime-field">
               <input
                 type="date"
@@ -492,7 +493,7 @@ function ProfileCard({
             ) : null}
           </label>
           <label className="input-glow-aqua">
-            Birth time
+            {t("home.formBirthTime")}
             <div className="datetime-field">
               {/* A native time input: its value is 24-hour whatever the
                   picker showed, so it is read as one rather than as typed
@@ -517,7 +518,7 @@ function ProfileCard({
             fills the state and the country from the same result, which is why
             /api/suggest now returns them. */}
         <label className="input-glow-aqua">
-          Birth place
+          {t("home.formBirthplace")}
           <AutocompleteInput
             value={profile.city}
             onChange={setField("city")}
@@ -526,7 +527,7 @@ function ProfileCard({
               setProfile((previous) => ({ ...previous, ...applyPlaceSuggestion(previous, suggestion) }))
             }
             normalize={normalizePlaceName}
-            placeholder="City of birth"
+            placeholder={t("compatibility.placePlaceholder")}
             suggestType="city"
             required
           />
@@ -560,7 +561,7 @@ function ProfileCard({
             aria-expanded={showDerived}
             onClick={() => setShowDerived((open) => !open)}
           >
-            {showDerived ? "Hide details" : "Adjust"}
+            {showDerived ? t("compatibility.hideDetails") : t("compatibility.adjust")}
           </button>
         </div>
 
@@ -568,31 +569,31 @@ function ProfileCard({
           <div className="compat-derived-fields">
             <div className="compat-row-2">
               <label className="input-glow-gold">
-                Country
+                {t("home.formCountry")}
                 <AutocompleteInput
                   value={profile.country}
                   onChange={setField("country")}
                   onSelect={setField("country")}
                   normalize={normalizePlaceName}
-                  placeholder="Country"
+                  placeholder={t("home.formCountry")}
                   suggestType="country"
                 />
               </label>
               <label className="input-glow-gold">
-                State
+                {t("home.formState")}
                 <AutocompleteInput
                   value={profile.state}
                   onChange={setField("state")}
                   onSelect={setField("state")}
                   normalize={normalizePlaceName}
-                  placeholder="State or province"
+                  placeholder={t("compatibility.statePlaceholder")}
                   suggestType="state"
                 />
               </label>
             </div>
             <div className="compat-row-2">
               <label className="input-glow-gold">
-                Latitude
+                {t("home.formLatitude")}
                 <input
                   type="text"
                   inputMode="text"
@@ -604,7 +605,7 @@ function ProfileCard({
                 {renderNote("latitude")}
               </label>
               <label className="input-glow-gold">
-                Longitude
+                {t("home.formLongitude")}
                 <input
                   type="text"
                   inputMode="text"
@@ -618,7 +619,7 @@ function ProfileCard({
             </div>
             <div className="compat-row-2">
               <label className="input-glow-gold">
-                UTC offset (minutes)
+                {t("home.formTimezone")}
                 {/* Text, not number: half the world writes this offset as
                     "+05:30", and a number field discards that keystroke by
                     keystroke. */}
@@ -628,12 +629,12 @@ function ProfileCard({
                   value={profile.timezoneOffsetMinutes}
                   onChange={updateField("timezoneOffsetMinutes")}
                   onBlur={commit("timezoneOffsetMinutes", normalizeUtcOffsetMinutes)}
-                  placeholder="330 or +05:30"
+                  placeholder={t("compatibility.offsetPlaceholder")}
                 />
                 {renderNote("timezoneOffsetMinutes")}
               </label>
               <label className="input-glow-gold">
-                Time zone ID
+                {t("compatibility.timeZoneId")}
                 <input
                   type="text"
                   value={profile.timeZoneId}
@@ -728,6 +729,15 @@ export default function CompatibilityPageClient({
     setRequest({ primary, partner });
   }
 
+  /* `t` is read when the comparison comes back, not when it is asked for, so
+     it is held in a ref rather than listed as a dependency: its identity
+     changes when the visitor's language loads, and the effect below would
+     send the comparison again each time. */
+  const tRef = useRef(t);
+  useEffect(() => {
+    tRef.current = t;
+  }, [t]);
+
   useEffect(() => {
     if (!request) return;
     const controller = new AbortController();
@@ -748,18 +758,20 @@ export default function CompatibilityPageClient({
         });
 
         if (!response.ok) {
-          const payload = await response.json().catch(() => ({ detail: "Compatibility request failed." }));
-          throw new Error(payload.detail ?? "Compatibility request failed.");
+          const failed = tRef.current("compatibility.requestFailed");
+          const payload = await response.json().catch(() => ({ detail: failed }));
+          throw new Error(payload.detail ?? failed);
         }
 
         const payload = (await response.json()) as CompatibilityApiResponse;
         if (controller.signal.aborted) return;
         setResult(payload);
-        pushToast("Compatibility report ready.", "success");
+        pushToast(tRef.current("compatibility.reportReady"), "success");
       } catch (requestError) {
         if (controller.signal.aborted) return;
-        setError(requestError instanceof Error ? requestError.message : "Compatibility request failed.");
-        pushToast("Compatibility request failed.", "error");
+        const failed = tRef.current("compatibility.requestFailed");
+        setError(requestError instanceof Error ? requestError.message : failed);
+        pushToast(failed, "error");
       } finally {
         if (!controller.signal.aborted) {
           setRequest((current) => (current === request ? null : current));
@@ -776,16 +788,16 @@ export default function CompatibilityPageClient({
     try {
       if (navigator.share) {
         await navigator.share({
-          title: `${primary.name} + ${partner.name} compatibility`,
+          title: t("compatibility.shareTitle", { primary: primary.name, partner: partner.name }),
           url,
         });
-        pushToast("Share sheet opened.", "info");
+        pushToast(t("compatibility.shareOpened"), "info");
         return;
       }
       await navigator.clipboard.writeText(url);
-      pushToast("Compatibility link copied.", "success");
+      pushToast(t("compatibility.linkCopied"), "success");
     } catch {
-      pushToast("Could not share the compatibility link.", "error");
+      pushToast(t("compatibility.shareFailed"), "error");
     }
   };
 
@@ -796,22 +808,20 @@ export default function CompatibilityPageClient({
       <BackToReadingButton />
 
       <section className="dashboard-shell">
-        <p className="kicker">Synastry Analysis</p>
-        <h1>Compatibility</h1>
-        <p className="lead">
-          Your chart is already here. Add theirs and see how the two read together.
-        </p>
+        <p className="kicker">{t("compatibility.kicker")}</p>
+        <h1>{t("compatibility.title")}</h1>
+        <p className="lead">{t("compatibility.intro")}</p>
 
         <div className="compatibility-grid">
           <ProfileCard
-            title="Your chart"
+            title={t("compatibility.yourChart")}
             profile={primary}
             setProfile={setPrimary}
             accentColor="aqua"
             variant="summary"
           />
           <ProfileCard
-            title="Their chart"
+            title={t("compatibility.theirChart")}
             profile={partner}
             setProfile={setPartner}
             accentColor="coral"
@@ -825,13 +835,13 @@ export default function CompatibilityPageClient({
             onClick={submitCompatibility}
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Comparing…" : "Compare charts"}
+            {isSubmitting ? t("compatibility.comparing") : t("compatibility.compare")}
           </button>
           {/* Only once there is something to share. Before that it was a
               second button of equal weight that could not do anything. */}
           {result && (
             <button type="button" onClick={() => void shareCompatibility()} disabled={isSubmitting}>
-              Share this reading
+              {t("compatibility.share")}
             </button>
           )}
         </div>
@@ -842,7 +852,7 @@ export default function CompatibilityPageClient({
           <>
             <section className="verdict-band">
               <div className="verdict-hero">
-                <h3 className="verdict-heading">Compatibility score</h3>
+                <h3 className="verdict-heading">{t("compatibility.scoreHeading")}</h3>
                 <div style={{
                   display: "flex",
                   alignItems: "center",
@@ -879,9 +889,7 @@ export default function CompatibilityPageClient({
                   </div>
                 </div>
                 <CompatibilityRing score={result.compatibility_score} />
-                <small className="verdict-caption">
-                  Composite synastry score from aspects and elemental fit.
-                </small>
+                <small className="verdict-caption">{t("compatibility.scoreCaption")}</small>
               </div>
 
               {/* What the score is made of, counted from the same arrays the
@@ -899,12 +907,12 @@ export default function CompatibilityPageClient({
               tabs={[
                 {
                   id: "themes",
-                  label: "Themes",
+                  label: t("compatibility.tabThemes"),
                   panel: (
                       <section className="rules-panel">
                         <div className="rules-header">
-                          <p className="kicker">Summary</p>
-                          <h2>Relationship themes</h2>
+                          <p className="kicker">{t("compatibility.summaryKicker")}</p>
+                          <h2>{t("compatibility.themesHeading")}</h2>
                         </div>
                         <p className="section-intro">{result.summary}</p>
                         <div className="rules-list">
@@ -952,18 +960,14 @@ export default function CompatibilityPageClient({
                   ? [
                       {
                         id: "married-life",
-                        label: "Married life",
+                        label: t("compatibility.marriedLife"),
                         panel: (
                       <section className="rules-panel">
                         <div className="rules-header">
-                          <p className="kicker">Synastry</p>
-                          <h2>Married life, across the two charts</h2>
+                          <p className="kicker">{t("compatibility.synastryKicker")}</p>
+                          <h2>{t("compatibility.marriedLifeHeading")}</h2>
                         </div>
-                        <p className="section-intro">
-                          The married-life read on each person&rsquo;s own page can only use one chart.
-                          These are the parts that need both — including the Mangal cancellation a
-                          single chart cannot evaluate.
-                        </p>
+                        <p className="section-intro">{t("compatibility.marriedLifeIntro")}</p>
                         <div className="kalatra-syn-grid">
                           {result.kalatra_synastry.facets.map((facet) => (
                             <article key={facet.key} className="kalatra-syn-card">
@@ -982,13 +986,13 @@ export default function CompatibilityPageClient({
                                 </ul>
                               )}
                               <p className="kalatra-syn-sourcing">
-                                <span>Read from</span> {facet.sourcing}
+                                <span>{t("compatibility.readFrom")}</span> {facet.sourcing}
                               </p>
                             </article>
                           ))}
                         </div>
                         <details className="kalatra-syn-method">
-                          <summary>How these were derived</summary>
+                          <summary>{t("compatibility.derivation")}</summary>
                           <p>{result.kalatra_synastry.method}</p>
                         </details>
                       </section>
@@ -998,18 +1002,14 @@ export default function CompatibilityPageClient({
                   : []),
                 {
                   id: "aspects",
-                  label: "Aspects",
+                  label: t("compatibility.tabAspects"),
                   panel: (
                       <section className="rules-panel">
                         <div className="rules-header">
-                          <p className="kicker">Synastry</p>
-                          <h2>Inter-chart aspects</h2>
+                          <p className="kicker">{t("compatibility.synastryKicker")}</p>
+                          <h2>{t("compatibility.aspectsHeading")}</h2>
                         </div>
-                        <p className="section-intro">
-                          Every contact between one chart and the other. The line is the aspect:
-                          heavier means a tighter orb, dashed means the contact pulls rather than
-                          helps.
-                        </p>
+                        <p className="section-intro">{t("compatibility.aspectsIntro")}</p>
                         <SynastryBridge
                           aspects={result.synastry_aspects}
                           primaryName={result.primary_client.name}

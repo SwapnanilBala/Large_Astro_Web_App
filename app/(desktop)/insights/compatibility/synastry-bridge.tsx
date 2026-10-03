@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import type { SynastryAspectInfo } from "@/lib/engines/compatibility-service";
+import { useTranslation } from "@/lib/i18n-context";
+import { aspectLabel, planetLabel } from "./aspect-labels";
 
 /*
  * The inter-chart aspects, drawn as the thing they actually are.
@@ -82,6 +84,7 @@ export default function SynastryBridge({
   primaryName,
   partnerName,
 }: SynastryBridgeProps) {
+  const { t } = useTranslation();
   const model = useMemo(() => {
     const leftRail = orderRail(new Set(aspects.map((a) => a.primary_planet)));
     const rightRail = orderRail(new Set(aspects.map((a) => a.partner_planet)));
@@ -109,9 +112,7 @@ export default function SynastryBridge({
 
   if (aspects.length === 0) {
     return (
-      <p className="section-intro">
-        No inter-chart aspects came back inside the orbs this engine uses.
-      </p>
+      <p className="section-intro">{t("compatibility.noAspects")}</p>
     );
   }
 
@@ -155,7 +156,11 @@ export default function SynastryBridge({
                   strokeWidth={strokeWidthForOrb(aspect.orb)}
                 />
                 <title>
-                  {`${aspect.primary_planet} ${aspect.aspect_type} ${aspect.partner_planet} — orb ${aspect.orb.toFixed(2)}°, ${aspect.harmonious ? "supportive" : "friction"}`}
+                  {t("compatibility.aspectTitle", {
+                    pair: aspectLabel(t, aspect),
+                    orb: aspect.orb.toFixed(2),
+                    polarity: t(aspect.harmonious ? "compatibility.supportive" : "compatibility.friction"),
+                  })}
                 </title>
               </g>
             );
@@ -166,7 +171,7 @@ export default function SynastryBridge({
           {leftRail.map((planet) => (
             <g key={`l-${planet}`}>
               <text className="bridge-label bridge-label--left" x={LEFT_RAIL - 14} y={leftY.get(planet)}>
-                {planet}
+                {planetLabel(t, planet)}
               </text>
               <circle className="bridge-node" cx={LEFT_RAIL} cy={leftY.get(planet)} r={4.5} />
             </g>
@@ -175,7 +180,7 @@ export default function SynastryBridge({
             <g key={`r-${planet}`}>
               <circle className="bridge-node" cx={RIGHT_RAIL} cy={rightY.get(planet)} r={4.5} />
               <text className="bridge-label bridge-label--right" x={RIGHT_RAIL + 14} y={rightY.get(planet)}>
-                {planet}
+                {planetLabel(t, planet)}
               </text>
             </g>
           ))}
@@ -184,14 +189,14 @@ export default function SynastryBridge({
 
       <p className="bridge-legend">
         <span className="bridge-key bridge-key--supportive" aria-hidden="true" />
-        {supportive} supportive
+        {supportive} {t("compatibility.supportive")}
         <span className="bridge-key bridge-key--friction" aria-hidden="true" />
-        {friction} friction
-        <span className="bridge-legend-note">thicker line, tighter orb</span>
+        {friction} {t("compatibility.friction")}
+        <span className="bridge-legend-note">{t("compatibility.legendNote")}</span>
       </p>
 
       <details className="bridge-table">
-        <summary>Every aspect, as a list</summary>
+        <summary>{t("compatibility.aspectList")}</summary>
         <ul>
           {[...aspects]
             .sort((a, b) => a.orb - b.orb)
@@ -200,9 +205,7 @@ export default function SynastryBridge({
                 key={`${aspect.primary_planet}-${aspect.partner_planet}-${aspect.aspect_type}`}
                 data-polarity={aspect.harmonious ? "supportive" : "friction"}
               >
-                <span className="bridge-table-pair">
-                  {aspect.primary_planet} {aspect.aspect_type} {aspect.partner_planet}
-                </span>
+                <span className="bridge-table-pair">{aspectLabel(t, aspect)}</span>
                 <span className="bridge-table-orb">{aspect.orb.toFixed(2)}°</span>
               </li>
             ))}

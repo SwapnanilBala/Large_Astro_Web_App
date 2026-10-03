@@ -2,6 +2,8 @@
 
 import { useCallback, useId, useRef, useState, type ReactNode } from "react";
 import type { CompatibilityResponse } from "@/lib/engines/compatibility-service";
+import { useTranslation } from "@/lib/i18n-context";
+import { aspectLabel } from "./aspect-labels";
 
 /*
  * The verdict band and the tabbed evidence below it.
@@ -37,6 +39,7 @@ type VerdictTilesProps = {
 };
 
 export function VerdictTiles({ aspects, kalatra }: VerdictTilesProps) {
+  const { t } = useTranslation();
   const supportive = aspects.filter((a) => a.harmonious).length;
   const friction = aspects.length - supportive;
 
@@ -55,21 +58,19 @@ export function VerdictTiles({ aspects, kalatra }: VerdictTilesProps) {
   return (
     <dl className="verdict-tiles">
       <div className="verdict-tile">
-        <dt>Balance</dt>
+        <dt>{t("compatibility.balance")}</dt>
         <dd>
-          <span className="verdict-tile-strong">{supportive}</span> supportive
+          <span className="verdict-tile-strong">{supportive}</span> {t("compatibility.supportive")}
           <span className="verdict-tile-sep">·</span>
-          <span className="verdict-tile-strong">{friction}</span> friction
+          <span className="verdict-tile-strong">{friction}</span> {t("compatibility.friction")}
         </dd>
       </div>
 
       {tightest && (
         <div className="verdict-tile">
-          <dt>Tightest contact</dt>
+          <dt>{t("compatibility.tightestContact")}</dt>
           <dd>
-            <span className="verdict-tile-strong">
-              {tightest.primary_planet} {tightest.aspect_type} {tightest.partner_planet}
-            </span>
+            <span className="verdict-tile-strong">{aspectLabel(t, tightest)}</span>
             <span className="verdict-tile-sep">·</span>
             {tightest.orb.toFixed(2)}&deg;
           </dd>
@@ -78,11 +79,11 @@ export function VerdictTiles({ aspects, kalatra }: VerdictTilesProps) {
 
       {findings.length > 0 && (
         <div className="verdict-tile">
-          <dt>Married life</dt>
+          <dt>{t("compatibility.marriedLife")}</dt>
           <dd>
-            <span className="verdict-tile-strong">{clear}</span> clear
+            <span className="verdict-tile-strong">{clear}</span> {t("compatibility.clear")}
             <span className="verdict-tile-sep">·</span>
-            <span className="verdict-tile-strong">{caution}</span> caution
+            <span className="verdict-tile-strong">{caution}</span> {t("compatibility.caution")}
           </dd>
         </div>
       )}
@@ -111,6 +112,7 @@ export type ResultTab = {
  * laying out and painting for readers who never open it.
  */
 export function ResultTabs({ tabs }: { tabs: ResultTab[] }) {
+  const { t } = useTranslation();
   const [active, setActive] = useState(0);
   const baseId = useId();
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -136,7 +138,7 @@ export function ResultTabs({ tabs }: { tabs: ResultTab[] }) {
 
   return (
     <div className="verdict-tabs">
-      <div className="verdict-tablist" role="tablist" aria-label="Compatibility evidence">
+      <div className="verdict-tablist" role="tablist" aria-label={t("compatibility.evidenceLabel")}>
         {tabs.map((tab, index) => (
           <button
             key={tab.id}
