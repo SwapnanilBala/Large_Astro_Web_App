@@ -1961,5 +1961,47 @@
     "later": "अभी नहीं",
     "note": "आपके पास जो पहले से है वह कहीं नहीं जाता। आपकी कुंडली और स्क्रीन पर मौजूद हर पठन जहाँ हैं वहीं रहेंगे।",
     "featurePalmQuestions": "आपकी रीडिंग पर प्रश्न"
+  },
+  "lagnaChart": {
+    "kicker": "जन्म कुंडली · राशि (D1)",
+    "styleGroup": "कुंडली शैली",
+    "constellation": "नक्षत्र मंडल",
+    "northIndian": "उत्तर भारतीय",
+    "northIndianTitle": "{ascendant} लग्न की उत्तर भारतीय कुंडली",
+    "northIndianDesc": "भाव स्थिर रहते हैं: लग्न ऊपर का हीरा है और भाव वहाँ से वामावर्त क्रम में चलते हैं। हर भाव में उसकी राशि की संख्या लिखी है, मेष 1 है।",
+    "houseAria": "भाव {house}, {sign}: {planets}",
+    "houseEmptyAria": "भाव {house}, {sign}: कोई ग्रह नहीं",
+    "positionsCaption": "ग्रह स्थिति",
+    "sign": "राशि",
+    "ascendant": "लग्न",
+    "retrograde": "वक्री",
+    "retrogradeShort": "व",
+    "rahu": "राहु",
+    "ketu": "केतु",
+    "abbrev": {
+      "ascendant": "ल",
+      "sun": "सू",
+      "moon": "चं",
+      "mars": "मं",
+      "mercury": "बु",
+      "jupiter": "गु",
+      "venus": "शु",
+      "saturn": "श",
+      "rahu": "रा",
+      "ketu": "के"
+    },
+    "rising": "{sign} लग्न",
+    "glance": {
+      "label": "कुंडली एक नज़र में",
+      "strongestSupport": "सबसे प्रबल सहारा",
+      "dominantTone": "प्रमुख तत्व",
+      "mostActiveArea": "सबसे सक्रिय क्षेत्र",
+      "balanced": "संतुलित",
+      "mixed": "मिश्रित",
+      "evenlyDistributed": "समान रूप से बँटा हुआ",
+      "houseAndSign": "भाव {house} · {sign}",
+      "noteOne": "{planet} कुंडली के इस भाग में है।",
+      "noteMany": "{planets} कुंडली के इस भाग में केंद्रित हैं।"
+    }
   }
 }

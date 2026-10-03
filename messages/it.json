@@ -1961,5 +1961,47 @@
     "later": "Non ora",
     "note": "Nulla di ciò che hai già va perduto. Il tuo tema, e ogni lettura già a schermo, restano esattamente dove sono.",
     "featurePalmQuestions": "Domande sulla tua lettura"
+  },
+  "lagnaChart": {
+    "kicker": "Tema natale · Rashi (D1)",
+    "styleGroup": "Stile della carta",
+    "constellation": "Costellazione",
+    "northIndian": "India del Nord",
+    "northIndianTitle": "Carta in stile India del Nord con ascendente in {ascendant}",
+    "northIndianDesc": "Le case sono fisse: l'ascendente è il rombo in alto e le case procedono da lì in senso antiorario. Ogni casa mostra il numero del proprio segno, con l'Ariete come 1.",
+    "houseAria": "Casa {house}, {sign}: {planets}",
+    "houseEmptyAria": "Casa {house}, {sign}: nessun pianeta",
+    "positionsCaption": "Posizioni dei pianeti",
+    "sign": "Segno",
+    "ascendant": "Ascendente",
+    "retrograde": "retrogrado",
+    "retrogradeShort": "R",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+    "abbrev": {
+      "ascendant": "Asc",
+      "sun": "So",
+      "moon": "Lu",
+      "mars": "Ma",
+      "mercury": "Me",
+      "jupiter": "Gi",
+      "venus": "Ve",
+      "saturn": "Sa",
+      "rahu": "Ra",
+      "ketu": "Ke"
+    },
+    "rising": "Ascendente {sign}",
+    "glance": {
+      "label": "Il tema in breve",
+      "strongestSupport": "Sostegno più forte",
+      "dominantTone": "Tono dominante",
+      "mostActiveArea": "Area più attiva",
+      "balanced": "Equilibrato",
+      "mixed": "Misto",
+      "evenlyDistributed": "Distribuzione uniforme",
+      "houseAndSign": "Casa {house} · {sign}",
+      "noteOne": "{planet} si trova in questa parte del tema.",
+      "noteMany": "{planets} si concentrano in questa parte del tema."
+    }
   }
 }

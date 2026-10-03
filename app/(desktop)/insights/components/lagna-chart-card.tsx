@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { useState } from "react";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import type { ChartApiResponse } from "@/lib/astro-types";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import { formatDegreeMinutes } from "@/lib/north-indian-chart";
 import { GRAHA_ORDER, PLANET_COLORS } from "@/lib/planet-colors";
 import { useChartStyle, type ChartStyle } from "@/lib/use-chart-style";
@@ -50,8 +50,9 @@ function readGlance(payload: ChartApiResponse) {
       counts[element] = (counts[element] ?? 0) + 1;
       return counts;
     }, {});
-  const dominantElement =
-    Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? "Mixed";
+  /* null when no classical planet was counted, which reads as "Mixed". */
+  const dominantElement: string | null =
+    Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? null;
   const activeHouse = [...payload.chart.houses]
     .filter((house) => house.planets.length > 0)
     .sort((left, right) => right.planets.length - left.planets.length)[0];
@@ -59,7 +60,7 @@ function readGlance(payload: ChartApiResponse) {
 }
 
 export default function LagnaChartCard({ payload }: { payload: ChartApiResponse }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [style, setStyle] = useChartStyle();
   /* The house under the pointer or keyboard focus, shared by the diamond and
      the positions list so each highlights the other. */
@@ -73,6 +74,11 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
       ? t(`lagnaChart.${name.toLowerCase()}`)
       : t(`planetNames.${name.toLowerCase()}`);
   const signName = (sign: string) => t(`zodiacSigns.${sign.toLowerCase()}`);
+  /* "Saturn and Rahu", "शनि और राहु": the list joined the way the reader's
+     language joins one, from app state so the server and client agree. */
+  const listOf = (names: string[]) =>
+    new Intl.ListFormat(LOCALE_TAGS[language], { style: "long", type: "conjunction" }).format(names);
+  const activeNames = glance.activeHouse?.planets.map(planetName) ?? [];
 
   const rows: { key: string; name: string; color?: string; sign: string; house: number; degree: number; retrograde: boolean }[] = [
     {
@@ -106,7 +112,7 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
       <header className={styles.head}>
         <div className={styles.headText}>
           <p className={styles.kicker}>{t("lagnaChart.kicker")}</p>
-          <h2 className={styles.title}>{ascendant.sign} rising</h2>
+          <h2 className={styles.title}>{t("lagnaChart.rising", { sign: signName(ascendant.sign) })}</h2>
         </div>
         <div className={styles.switch} role="group" aria-label={t("lagnaChart.styleGroup")}>
           {STYLE_OPTIONS.map((option) => (
@@ -183,29 +189,42 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
         </div>
 
         {/* The three signals the old "Chart at a glance" panel carried, moved
-            into the card with the chart they describe. Wording unchanged. */}
+            into the card with the chart they describe. */}
         <div className={styles.glanceBlock}>
-          <dl className={styles.glance} aria-label="Chart at a glance">
+          <dl className={styles.glance} aria-label={t("lagnaChart.glance.label")}>
             <div>
-              <dt>Strongest support</dt>
-              <dd>{glance.strongest?.planet ?? "Balanced"}</dd>
+              <dt>{t("lagnaChart.glance.strongestSupport")}</dt>
+              <dd>
+                {glance.strongest
+                  ? planetName(glance.strongest.planet)
+                  : t("lagnaChart.glance.balanced")}
+              </dd>
             </div>
             <div>
-              <dt>Dominant tone</dt>
-              <dd>{glance.dominantElement}</dd>
+              <dt>{t("lagnaChart.glance.dominantTone")}</dt>
+              <dd>
+                {glance.dominantElement
+                  ? t(`zodiacElements.${glance.dominantElement.toLowerCase()}`)
+                  : t("lagnaChart.glance.mixed")}
+              </dd>
             </div>
             <div>
-              <dt>Most active area</dt>
+              <dt>{t("lagnaChart.glance.mostActiveArea")}</dt>
               <dd>
                 {glance.activeHouse
-                  ? `House ${glance.activeHouse.house_number} · ${glance.activeHouse.sign}`
-                  : "Evenly distributed"}
+                  ? t("lagnaChart.glance.houseAndSign", {
+                      house: String(glance.activeHouse.house_number),
+                      sign: signName(glance.activeHouse.sign),
+                    })
+                  : t("lagnaChart.glance.evenlyDistributed")}
               </dd>
             </div>
           </dl>
-          {glance.activeHouse && (
+          {activeNames.length > 0 && (
             <p className={styles.glanceNote}>
-              {glance.activeHouse.planets.join(", ")} concentrate in this part of the chart.
+              {activeNames.length === 1
+                ? t("lagnaChart.glance.noteOne", { planet: activeNames[0] })
+                : t("lagnaChart.glance.noteMany", { planets: listOf(activeNames) })}
             </p>
           )}
         </div>

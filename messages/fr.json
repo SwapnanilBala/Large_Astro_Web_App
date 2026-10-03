@@ -1961,5 +1961,47 @@
     "later": "Pas maintenant",
     "note": "Rien de ce que vous avez déjà ne disparaît. Votre thème, et toutes les lectures déjà à l'écran, restent exactement où ils sont.",
     "featurePalmQuestions": "Questions sur votre lecture"
+  },
+  "lagnaChart": {
+    "kicker": "Thème natal · Rashi (D1)",
+    "styleGroup": "Style de carte",
+    "constellation": "Constellation",
+    "northIndian": "Inde du Nord",
+    "northIndianTitle": "Carte de l'Inde du Nord avec ascendant {ascendant}",
+    "northIndianDesc": "Les maisons sont fixes : l'ascendant est le losange du haut et les maisons se suivent à partir de lui dans le sens inverse des aiguilles d'une montre. Chaque maison porte le numéro de son signe, le Bélier valant 1.",
+    "houseAria": "Maison {house}, {sign} : {planets}",
+    "houseEmptyAria": "Maison {house}, {sign} : aucune planète",
+    "positionsCaption": "Positions des planètes",
+    "sign": "Signe",
+    "ascendant": "Ascendant",
+    "retrograde": "rétrograde",
+    "retrogradeShort": "R",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+    "abbrev": {
+      "ascendant": "Asc",
+      "sun": "So",
+      "moon": "Lu",
+      "mars": "Ma",
+      "mercury": "Me",
+      "jupiter": "Ju",
+      "venus": "Vé",
+      "saturn": "Sa",
+      "rahu": "Ra",
+      "ketu": "Ke"
+    },
+    "rising": "Ascendant {sign}",
+    "glance": {
+      "label": "Le thème en un coup d'œil",
+      "strongestSupport": "Soutien le plus fort",
+      "dominantTone": "Tonalité dominante",
+      "mostActiveArea": "Zone la plus active",
+      "balanced": "Équilibré",
+      "mixed": "Mixte",
+      "evenlyDistributed": "Répartition égale",
+      "houseAndSign": "Maison {house} · {sign}",
+      "noteOne": "{planet} se trouve dans cette partie du thème.",
+      "noteMany": "{planets} se concentrent dans cette partie du thème."
+    }
   }
 }

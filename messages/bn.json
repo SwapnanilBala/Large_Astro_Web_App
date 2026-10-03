@@ -1961,5 +1961,47 @@
     "later": "এখন নয়",
     "note": "আপনার কাছে যা আছে তার কিছুই হারাবে না। আপনার চার্ট এবং পর্দায় থাকা প্রতিটি পাঠ যেখানে আছে সেখানেই থাকবে।",
     "featurePalmQuestions": "আপনার রিডিং নিয়ে প্রশ্ন"
+  },
+  "lagnaChart": {
+    "kicker": "জন্মছক · রাশি (D1)",
+    "styleGroup": "ছকের ধরন",
+    "constellation": "নক্ষত্রমণ্ডল",
+    "northIndian": "উত্তর ভারতীয়",
+    "northIndianTitle": "{ascendant} লগ্নের উত্তর ভারতীয় ছক",
+    "northIndianDesc": "ভাবগুলি স্থির: লগ্ন উপরের রম্বস, আর ভাবগুলি সেখান থেকে ঘড়ির কাঁটার বিপরীত দিকে চলে। প্রতিটি ভাবে তার রাশির সংখ্যা লেখা থাকে, মেষ হল 1।",
+    "houseAria": "ভাব {house}, {sign}: {planets}",
+    "houseEmptyAria": "ভাব {house}, {sign}: কোনো গ্রহ নেই",
+    "positionsCaption": "গ্রহের অবস্থান",
+    "sign": "রাশি",
+    "ascendant": "লগ্ন",
+    "retrograde": "বক্রী",
+    "retrogradeShort": "ব",
+    "rahu": "রাহু",
+    "ketu": "কেতু",
+    "abbrev": {
+      "ascendant": "ল",
+      "sun": "র",
+      "moon": "চ",
+      "mars": "ম",
+      "mercury": "বু",
+      "jupiter": "বৃ",
+      "venus": "শু",
+      "saturn": "শ",
+      "rahu": "রা",
+      "ketu": "কে"
+    },
+    "rising": "{sign} লগ্ন",
+    "glance": {
+      "label": "এক নজরে ছক",
+      "strongestSupport": "সবচেয়ে বড় সহায়",
+      "dominantTone": "প্রধান তত্ত্ব",
+      "mostActiveArea": "সবচেয়ে সক্রিয় ক্ষেত্র",
+      "balanced": "ভারসাম্যপূর্ণ",
+      "mixed": "মিশ্র",
+      "evenlyDistributed": "সমানভাবে ছড়ানো",
+      "houseAndSign": "ভাব {house} · {sign}",
+      "noteOne": "{planet} ছকের এই অংশে আছে।",
+      "noteMany": "{planets} ছকের এই অংশে কেন্দ্রীভূত।"
+    }
   }
 }

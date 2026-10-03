@@ -1961,5 +1961,47 @@
     "later": "Ahora no",
     "note": "No pierdes nada de lo que ya tienes. Tu carta, y todas las lecturas que ya están en pantalla, se quedan donde están.",
     "featurePalmQuestions": "Preguntas sobre tu lectura"
+  },
+  "lagnaChart": {
+    "kicker": "Carta natal · Rashi (D1)",
+    "styleGroup": "Estilo de carta",
+    "constellation": "Constelación",
+    "northIndian": "India del Norte",
+    "northIndianTitle": "Carta del norte de la India con ascendente en {ascendant}",
+    "northIndianDesc": "Las casas son fijas: el ascendente es el rombo superior y las casas avanzan desde él en sentido antihorario. Cada casa muestra el número de su signo, con Aries como 1.",
+    "houseAria": "Casa {house}, {sign}: {planets}",
+    "houseEmptyAria": "Casa {house}, {sign}: sin planetas",
+    "positionsCaption": "Posiciones planetarias",
+    "sign": "Signo",
+    "ascendant": "Ascendente",
+    "retrograde": "retrógrado",
+    "retrogradeShort": "R",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+    "abbrev": {
+      "ascendant": "Asc",
+      "sun": "So",
+      "moon": "Lu",
+      "mars": "Ma",
+      "mercury": "Me",
+      "jupiter": "Jú",
+      "venus": "Ve",
+      "saturn": "Sa",
+      "rahu": "Ra",
+      "ketu": "Ke"
+    },
+    "rising": "Ascendente {sign}",
+    "glance": {
+      "label": "La carta de un vistazo",
+      "strongestSupport": "Mayor apoyo",
+      "dominantTone": "Tono dominante",
+      "mostActiveArea": "Área más activa",
+      "balanced": "Equilibrado",
+      "mixed": "Mixto",
+      "evenlyDistributed": "Distribución uniforme",
+      "houseAndSign": "Casa {house} · {sign}",
+      "noteOne": "{planet} está en esta parte de la carta.",
+      "noteMany": "{planets} se concentran en esta parte de la carta."
+    }
   }
 }

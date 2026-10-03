@@ -576,7 +576,7 @@
     "featurePalmQuestions": "Questions about your reading"
   },
   "lagnaChart": {
-    "kicker": "Birth chart · Rasi (D1)",
+    "kicker": "Birth chart · Rashi (D1)",
     "styleGroup": "Chart style",
     "constellation": "Constellation",
     "northIndian": "North Indian",
@@ -602,6 +602,19 @@
       "saturn": "Sa",
       "rahu": "Ra",
       "ketu": "Ke"
+    },
+    "rising": "{sign} rising",
+    "glance": {
+      "label": "Chart at a glance",
+      "strongestSupport": "Strongest support",
+      "dominantTone": "Dominant tone",
+      "mostActiveArea": "Most active area",
+      "balanced": "Balanced",
+      "mixed": "Mixed",
+      "evenlyDistributed": "Evenly distributed",
+      "houseAndSign": "House {house} · {sign}",
+      "noteOne": "{planet} sits in this part of the chart.",
+      "noteMany": "{planets} concentrate in this part of the chart."
     }
   }
 }
