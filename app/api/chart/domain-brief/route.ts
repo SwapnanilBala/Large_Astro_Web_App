@@ -3,6 +3,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
+import { sessionFromRequest } from "@/lib/identity/require-session";
+import { DOMAIN_BRIEF_KEYS, type DomainBriefs, type DomainBriefEffort } from "@/lib/domain-briefs";
 import {
   chartParamsToBirthInput,
   getLifeDomainPayload,
@@ -13,7 +15,8 @@ import { makeCacheKey } from "@/lib/server-cache";
 import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
 
 /*
- * The Ultimate Module's brief, written against that chart's own evidence.
+ * The Ultimate Module's seven briefs, written against each area's own evidence.
+ * One budget unit buys all areas; switching tabs never needs seven paid calls.
  *
  * Why this route exists: the Connected Insight Zone renders display.body, which
  * the rule engine composes from whichever rules fired. That is accurate and it
@@ -45,22 +48,22 @@ import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
  * would have turned the route into an open text relay on our key.
  */
 
-export const maxDuration = 30;
+export const maxDuration = 60;
 
-const REQUEST_TIMEOUT_MS = 20_000;
-const CACHE_HEADER = "private, max-age=3600, stale-while-revalidate=1800";
+const REQUEST_TIMEOUT_MS = 50_000;
+const CACHE_HEADER = "private, no-store";
 
 /* Bump when the prompt or the fact selection changes, so a copy revision is not
    hidden behind warm cache entries written by the previous wording. */
-const DOMAIN_BRIEF_PROMPT_VERSION = "1";
+const DOMAIN_BRIEF_PROMPT_VERSION = "2";
 
-/* One chart has seven domains and the panel is a tab strip, so a single reader
-   clicking along the row fills seven entries. Bounded so a long-lived server
-   cannot grow it without limit. */
+/* One entry contains all seven areas at one effort. Browser caching is disabled
+   so signing in always rechecks the session before selecting this cache. */
 const MAX_CACHE_ENTRIES = 500;
-const cache = new Map<string, string>();
+const cache = new Map<string, DomainBriefs>();
+const inFlight = new Map<string, Promise<DomainBriefs>>();
 
-function remember(key: string, value: string) {
+function remember(key: string, value: DomainBriefs) {
   if (cache.size >= MAX_CACHE_ENTRIES) {
     const oldest = cache.keys().next().value;
     if (oldest !== undefined) cache.delete(oldest);
@@ -68,28 +71,21 @@ function remember(key: string, value: string) {
   cache.set(key, value);
 }
 
-const DOMAIN_KEYS = new Set<string>([
-  "love_life",
-  "career",
-  "family",
-  "inheritance",
-  "influence",
-  "life_cycle",
-  "travel_destinations",
-]);
+const DOMAIN_KEYS = new Set<string>(DOMAIN_BRIEF_KEYS);
 
 /*
  * Frozen, so it is the cacheable prefix. Everything that varies per request --
  * the domain, its evidence -- goes in the user turn, after the breakpoint.
  */
-const SYSTEM_PROMPT = `You write one short brief for a single life area in a Vedic astrology report.
+const SYSTEM_PROMPT = `You write one short brief for each requested life area in a Vedic astrology report.
 
 You are given a structured summary of what the chart engine found for that area: how active it is relative to the reader's other areas, how strong the conclusion is, which families of evidence support it, which press on it, and the leading sub-themes.
 
 Your job is to weigh those findings against each other and say what the combination means. The findings themselves are already established; do not re-list them.
 
 Rules:
-- 2 to 3 sentences. No heading, no preamble, no list, no markdown.
+- Each brief is 2 to 3 sentences. No heading, no preamble, no list, no markdown.
+- Return every requested area under its exact key. Keep each area's facts separate; do not borrow evidence from a different area.
 - Address the reader as "you".
 - Lead with the synthesis, not the evidence. Name a tension explicitly when support and pressure disagree.
 - State nothing you were not given. No planets, houses, signs, degrees, nakshatras, dashas or dates unless they appear in the input.
@@ -145,6 +141,93 @@ function buildFacts(insight: LifeDomainInsight, rank: number, total: number): st
   return lines.join("\n");
 }
 
+async function writeBriefs(
+  request: NextRequest,
+  insights: LifeDomainInsight[],
+  facts: string,
+  effort: DomainBriefEffort,
+): Promise<DomainBriefs> {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new ApiError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      "Life-area briefs are unavailable: ANTHROPIC_API_KEY is not configured.",
+      { statusCode: 503 },
+    );
+  }
+
+  const budget = await consumeLlmBudget("/api/chart/domain-brief", request);
+  if (!budget.allowed) {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/domain-brief",
+      event: "llm_budget_exhausted",
+      scope: budget.scope,
+    }));
+    throw new ApiError(
+      ErrorCode.RATE_LIMITED,
+      budget.scope === "anonymous"
+        ? "Sign in to read more life-area briefs today."
+        : "Life-area briefs are rate limited for today.",
+      { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
+    );
+  }
+
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: REQUEST_TIMEOUT_MS,
+    maxRetries: 0,
+  });
+  const startedAt = Date.now();
+  const response = await client.messages.parse({
+    model: "claude-opus-5",
+    max_tokens: 6000,
+    output_config: {
+      effort,
+      format: {
+        type: "json_schema",
+        schema: {
+          type: "object",
+          properties: Object.fromEntries(insights.map(({ key }) => [key, { type: "string" }])),
+          required: insights.map(({ key }) => key),
+          additionalProperties: false,
+        },
+      },
+    },
+    system: [
+      { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+    ],
+    messages: [{ role: "user", content: facts }],
+  });
+
+  console.info(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route: "/api/chart/domain-brief",
+    event: "llm_usage",
+    effort,
+    domains: insights.length,
+    elapsedMs: Date.now() - startedAt,
+    stopReason: response.stop_reason,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+  }));
+
+  if (response.stop_reason !== "end_turn") {
+    throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The life-area briefs were not completed.");
+  }
+
+  const parsed = response.parsed_output as Record<string, unknown> | null;
+  const briefs: DomainBriefs = {};
+  for (const insight of insights) {
+    const value = parsed?.[insight.key];
+    const brief = typeof value === "string" ? stripInlineMarkdown(value).trim() : "";
+    if (!brief) {
+      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "A life-area brief was missing from the response.");
+    }
+    briefs[insight.key] = brief;
+  }
+  return briefs;
+}
+
 export async function GET(request: NextRequest) {
   try {
     const rawParams = Object.fromEntries(request.nextUrl.searchParams.entries());
@@ -189,19 +272,22 @@ export async function GET(request: NextRequest) {
 
     /* Ranked the same way the panel ranks them, so "ranked 2 of 7" in the
        prompt matches the order the reader is looking at. */
-    const ranked = [...payload.insights].sort(
+    const ranked = payload.insights.filter((entry) => DOMAIN_KEYS.has(entry.key)).sort(
       (a, b) => b.signal_profile.activity_score - a.signal_profile.activity_score,
     );
-    const rank = ranked.findIndex((entry) => entry.key === insight.key) + 1;
+    const facts = ranked.map((entry, index) =>
+      `Area key: ${entry.key}\n${buildFacts(entry, index + 1, ranked.length)}`,
+    ).join("\n\n---\n\n");
+    // Google OAuth is the app's only sign-in provider. Never trust query claims.
+    const session = await sessionFromRequest(request);
+    const effort: DomainBriefEffort = session ? "medium" : "low";
 
-    const facts = buildFacts(insight, rank, ranked.length);
-
-    /* Keyed on the facts themselves rather than on the birth parameters. Same
-       evidence means the same brief, and any change in what the engine found --
+    /* Keyed on facts and effort rather than on the birth parameters. Same
+       evidence and effort mean the same briefs, and any engine change --
        or in what this route decides to send -- misses the cache on its own
        without a version to remember to bump. */
     const key = makeCacheKey("domain_brief", {
-      domain,
+      effort,
       prompt_version: DOMAIN_BRIEF_PROMPT_VERSION,
       facts,
     });
@@ -209,84 +295,25 @@ export async function GET(request: NextRequest) {
     const cached = cache.get(key);
     if (cached) {
       return NextResponse.json(
-        { brief: cached, cached: true },
+        { brief: cached[insight.key], briefs: cached, effort, cached: true },
         { headers: { "Cache-Control": CACHE_HEADER } },
       );
     }
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      /* The panel falls back to the engine's own body on any non-OK response,
-         so this is a degraded feature rather than a broken page. */
-      /* 503 rather than 502, matching /api/palm-reading's missing-key branch.
-         The distinction is load-bearing on the client: a provider error is
-         worth another attempt on the next domain, a key that is not configured
-         never is, and the panel can only tell them apart by status. */
-      throw new ApiError(
-        ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "Life-area briefs are unavailable: ANTHROPIC_API_KEY is not configured.",
-        { statusCode: 503 },
-      );
+    // Rapid tab changes share one paid call for this chart and effort.
+    let writing = inFlight.get(key);
+    if (!writing) {
+      writing = writeBriefs(request, ranked, facts, effort)
+        .then((briefs) => {
+          remember(key, briefs);
+          return briefs;
+        })
+        .finally(() => { inFlight.delete(key); });
+      inFlight.set(key, writing);
     }
-
-    /* Past the cache, so this request is about to cost money. */
-    const budget = await consumeLlmBudget("/api/chart/domain-brief", request);
-    if (!budget.allowed) {
-      console.warn(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: "/api/chart/domain-brief",
-        event: "llm_budget_exhausted",
-        scope: budget.scope,
-      }));
-      throw new ApiError(
-        ErrorCode.RATE_LIMITED,
-        budget.scope === "anonymous"
-          ? "Sign in to read the rest of the life-area briefs today."
-          : "Life-area briefs are rate limited for today.",
-        { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
-      );
-    }
-
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY,
-      timeout: REQUEST_TIMEOUT_MS,
-    });
-
-    const response = await client.messages.create({
-      model: "claude-opus-5",
-      /* Deliberately short output: 2-3 sentences. */
-      max_tokens: 1000,
-      /* Low effort suits a short phrasing job and keeps the tab strip
-         responsive; thinking is omitted, which on this model runs adaptive. */
-      output_config: { effort: "low" },
-      system: [
-        { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
-      ],
-      messages: [{ role: "user", content: facts }],
-    });
-
-    if (response.stop_reason === "refusal") {
-      throw new ApiError(
-        ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "The brief was declined.",
-        { details: { category: response.stop_details?.category ?? null } },
-      );
-    }
-
-    const brief = stripInlineMarkdown(
-      response.content
-        .filter((block): block is Anthropic.TextBlock => block.type === "text")
-        .map((block) => block.text)
-        .join(""),
-    ).trim();
-
-
-    if (!brief) {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No brief was returned.");
-    }
-
-    remember(key, brief);
+    const briefs = await writing;
     return NextResponse.json(
-      { brief, cached: false },
+      { brief: briefs[insight.key], briefs, effort, cached: false },
       { headers: { "Cache-Control": CACHE_HEADER } },
     );
   } catch (error) {
