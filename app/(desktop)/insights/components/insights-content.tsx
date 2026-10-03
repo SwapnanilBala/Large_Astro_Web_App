@@ -30,6 +30,7 @@ import {
 } from "./decor/insights-decor";
 import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
+import LagnaChartCard from "./lagna-chart-card";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
 import divisionalMessages from "@/messages/en.divisional.json";
 import { FiClock, FiBookOpen, FiLayers, FiArrowUpRight } from "react-icons/fi";
@@ -118,12 +119,9 @@ function LazyPanel({
   );
 }
 
-/* The diamond (North Indian) chart was removed: its house geometry placed
- * houses 2 and 12 outside the chart box and the placements did not line up.
- * The constellation view is the only chart here now, so it is imported
- * directly rather than through the old toggle wrapper. Recover the diamond
- * from git history if it is ever fixed. */
-const ConstellationChart = dynamic(() => import("./constellation-chart"), { ssr: false, loading: () => <PanelSkeleton /> });
+/* The birth chart card owns both drawings -- the constellation wheel and the
+ * North Indian diamond, rebuilt in 2026-10 on tested geometry after the first
+ * diamond was dropped in 342a086 -- and lazy-loads whichever is chosen. */
 const NakshatraDashaPanel = dynamic(() => import("./nakshatra-dasha-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const LuckyElementsPanel = dynamic(() => import("./lucky-elements-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 /*
@@ -517,81 +515,6 @@ function SectionAnchorNav() {
         );
       })}
     </nav>
-  );
-}
-
-function getElementCounts(planets: ChartApiResponse["chart"]["planets"]) {
-  const signElements: Record<string, string> = {
-    Aries: "Fire",
-    Leo: "Fire",
-    Sagittarius: "Fire",
-    Taurus: "Earth",
-    Virgo: "Earth",
-    Capricorn: "Earth",
-    Gemini: "Air",
-    Libra: "Air",
-    Aquarius: "Air",
-    Cancer: "Water",
-    Scorpio: "Water",
-    Pisces: "Water",
-  };
-
-  return planets
-    .filter((planet) => ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"].includes(planet.name))
-    .reduce<Record<string, number>>((counts, planet) => {
-      const element = signElements[planet.sign] ?? "Fire";
-      counts[element] = (counts[element] ?? 0) + 1;
-      return counts;
-    }, {});
-}
-
-function ChartAtAGlance({ payload }: { payload: ChartApiResponse }) {
-  const shadbala = payload.chart.shadbala ?? [];
-  const strongest = [...shadbala].sort(
-    (left, right) => right.strengthRatio - left.strengthRatio,
-  )[0];
-  const elementCounts = getElementCounts(payload.chart.planets);
-  const dominantElement =
-    Object.entries(elementCounts).sort((left, right) => right[1] - left[1])[0]?.[0] ?? "Mixed";
-  const activeHouse = [...payload.chart.houses]
-    .filter((house) => house.planets.length > 0)
-    .sort((left, right) => right.planets.length - left.planets.length)[0];
-
-  return (
-    <aside className={styles.chartGlance} aria-label="Chart at a glance">
-      <div>
-        <p className={styles.kicker}>Chart at a glance</p>
-        <h2>{payload.chart.ascendant.sign} rising</h2>
-        <p className={styles.chartGlanceIntro}>
-          The three chart signals worth carrying into the interpretation.
-        </p>
-      </div>
-      <div className={styles.chartGlanceRight}>
-        <dl className={styles.chartGlanceFacts}>
-          <div>
-            <dt>Strongest support</dt>
-            <dd>{strongest?.planet ?? "Balanced"}</dd>
-          </div>
-          <div>
-            <dt>Dominant tone</dt>
-            <dd>{dominantElement}</dd>
-          </div>
-          <div>
-            <dt>Most active area</dt>
-            <dd>
-              {activeHouse
-                ? `House ${activeHouse.house_number} · ${activeHouse.sign}`
-                : "Evenly distributed"}
-            </dd>
-          </div>
-        </dl>
-        {activeHouse && (
-          <p className={styles.chartGlanceNote}>
-            {activeHouse.planets.join(", ")} concentrate in this part of the chart.
-          </p>
-        )}
-      </div>
-    </aside>
   );
 }
 
@@ -1442,22 +1365,13 @@ export default function InsightsContent({
           whileInView="visible"
           viewport={{ once: true, margin: "-80px" }}
         >
-          {/* Left: the wheel and the three signals read off it, one card.
-              These were two siblings in a one-column grid; the glance panel
-              held three short facts in a column half of which was empty, and
-              it belongs against the chart it describes. */}
+          {/* Left: the birth chart in the reader's chosen style, its planet
+              positions, and the three signals read off it, in one card. */}
           <motion.div
             className={`${styles.cardChart} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
           >
-            <PanelErrorBoundary panelName="Lagna Chart">
-              <ConstellationChart
-                ascendantSign={payload.chart.ascendant.sign}
-                houses={payload.chart.houses}
-                planets={payload.chart.planets}
-              />
-            </PanelErrorBoundary>
-            <ChartAtAGlance payload={payload} />
+            <LagnaChartCard payload={payload} />
           </motion.div>
 
           {/* Centre: the week. */}

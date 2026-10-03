@@ -1,0 +1,157 @@
+{
+  "es": {
+    "lagnaChart": {
+      "kicker": "Carta natal · Rasi (D1)",
+      "styleGroup": "Estilo de carta",
+      "constellation": "Constelación",
+      "northIndian": "India del Norte",
+      "northIndianTitle": "Carta del norte de la India con ascendente en {ascendant}",
+      "northIndianDesc": "Las casas son fijas: el ascendente es el rombo superior y las casas avanzan desde él en sentido antihorario. Cada casa muestra el número de su signo, con Aries como 1.",
+      "houseAria": "Casa {house}, {sign}: {planets}",
+      "houseEmptyAria": "Casa {house}, {sign}: sin planetas",
+      "positionsCaption": "Posiciones planetarias",
+      "sign": "Signo",
+      "ascendant": "Ascendente",
+      "retrograde": "retrógrado",
+      "retrogradeShort": "R",
+      "rahu": "Rahu",
+      "ketu": "Ketu",
+      "abbrev": {
+        "ascendant": "Asc",
+        "sun": "So",
+        "moon": "Lu",
+        "mars": "Ma",
+        "mercury": "Me",
+        "jupiter": "Jú",
+        "venus": "Ve",
+        "saturn": "Sa",
+        "rahu": "Ra",
+        "ketu": "Ke"
+      }
+    }
+  },
+  "bn": {
+    "lagnaChart": {
+      "kicker": "জন্মছক · রাশি (D1)",
+      "styleGroup": "ছকের ধরন",
+      "constellation": "নক্ষত্রমণ্ডল",
+      "northIndian": "উত্তর ভারতীয়",
+      "northIndianTitle": "{ascendant} লগ্নের উত্তর ভারতীয় ছক",
+      "northIndianDesc": "ভাবগুলি স্থির: লগ্ন উপরের রম্বস, আর ভাবগুলি সেখান থেকে ঘড়ির কাঁটার বিপরীত দিকে চলে। প্রতিটি ভাবে তার রাশির সংখ্যা লেখা থাকে, মেষ হল 1।",
+      "houseAria": "ভাব {house}, {sign}: {planets}",
+      "houseEmptyAria": "ভাব {house}, {sign}: কোনো গ্রহ নেই",
+      "positionsCaption": "গ্রহের অবস্থান",
+      "sign": "রাশি",
+      "ascendant": "লগ্ন",
+      "retrograde": "বক্রী",
+      "retrogradeShort": "ব",
+      "rahu": "রাহু",
+      "ketu": "কেতু",
+      "abbrev": {
+        "ascendant": "ল",
+        "sun": "র",
+        "moon": "চ",
+        "mars": "ম",
+        "mercury": "বু",
+        "jupiter": "বৃ",
+        "venus": "শু",
+        "saturn": "শ",
+        "rahu": "রা",
+        "ketu": "কে"
+      }
+    }
+  },
+  "hi": {
+    "lagnaChart": {
+      "kicker": "जन्म कुंडली · राशि (D1)",
+      "styleGroup": "कुंडली शैली",
+      "constellation": "नक्षत्र मंडल",
+      "northIndian": "उत्तर भारतीय",
+      "northIndianTitle": "{ascendant} लग्न की उत्तर भारतीय कुंडली",
+      "northIndianDesc": "भाव स्थिर रहते हैं: लग्न ऊपर का हीरा है और भाव वहाँ से वामावर्त क्रम में चलते हैं। हर भाव में उसकी राशि की संख्या लिखी है, मेष 1 है।",
+      "houseAria": "भाव {house}, {sign}: {planets}",
+      "houseEmptyAria": "भाव {house}, {sign}: कोई ग्रह नहीं",
+      "positionsCaption": "ग्रह स्थिति",
+      "sign": "राशि",
+      "ascendant": "लग्न",
+      "retrograde": "वक्री",
+      "retrogradeShort": "व",
+      "rahu": "राहु",
+      "ketu": "केतु",
+      "abbrev": {
+        "ascendant": "ल",
+        "sun": "सू",
+        "moon": "चं",
+        "mars": "मं",
+        "mercury": "बु",
+        "jupiter": "गु",
+        "venus": "शु",
+        "saturn": "श",
+        "rahu": "रा",
+        "ketu": "के"
+      }
+    }
+  },
+  "it": {
+    "lagnaChart": {
+      "kicker": "Tema natale · Rasi (D1)",
+      "styleGroup": "Stile della carta",
+      "constellation": "Costellazione",
+      "northIndian": "India del Nord",
+      "northIndianTitle": "Carta in stile India del Nord con ascendente in {ascendant}",
+      "northIndianDesc": "Le case sono fisse: l'ascendente è il rombo in alto e le case procedono da lì in senso antiorario. Ogni casa mostra il numero del proprio segno, con l'Ariete come 1.",
+      "houseAria": "Casa {house}, {sign}: {planets}",
+      "houseEmptyAria": "Casa {house}, {sign}: nessun pianeta",
+      "positionsCaption": "Posizioni dei pianeti",
+      "sign": "Segno",
+      "ascendant": "Ascendente",
+      "retrograde": "retrogrado",
+      "retrogradeShort": "R",
+      "rahu": "Rahu",
+      "ketu": "Ketu",
+      "abbrev": {
+        "ascendant": "Asc",
+        "sun": "So",
+        "moon": "Lu",
+        "mars": "Ma",
+        "mercury": "Me",
+        "jupiter": "Gi",
+        "venus": "Ve",
+        "saturn": "Sa",
+        "rahu": "Ra",
+        "ketu": "Ke"
+      }
+    }
+  },
+  "fr": {
+    "lagnaChart": {
+      "kicker": "Thème natal · Rasi (D1)",
+      "styleGroup": "Style de carte",
+      "constellation": "Constellation",
+      "northIndian": "Inde du Nord",
+      "northIndianTitle": "Carte de l'Inde du Nord avec ascendant {ascendant}",
+      "northIndianDesc": "Les maisons sont fixes : l'ascendant est le losange du haut et les maisons se suivent à partir de lui dans le sens inverse des aiguilles d'une montre. Chaque maison porte le numéro de son signe, le Bélier valant 1.",
+      "houseAria": "Maison {house}, {sign} : {planets}",
+      "houseEmptyAria": "Maison {house}, {sign} : aucune planète",
+      "positionsCaption": "Positions des planètes",
+      "sign": "Signe",
+      "ascendant": "Ascendant",
+      "retrograde": "rétrograde",
+      "retrogradeShort": "R",
+      "rahu": "Rahu",
+      "ketu": "Ketu",
+      "abbrev": {
+        "ascendant": "Asc",
+        "sun": "So",
+        "moon": "Lu",
+        "mars": "Ma",
+        "mercury": "Me",
+        "jupiter": "Ju",
+        "venus": "Vé",
+        "saturn": "Sa",
+        "rahu": "Ra",
+        "ketu": "Ke"
+      }
+    }
+  }
+}

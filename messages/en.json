@@ -573,5 +573,34 @@
     "later": "Not now",
     "note": "Nothing you already have goes away. Your chart, and every reading already on screen, stay exactly where they are.",
     "featurePalmQuestions": "Questions about your reading"
+  },
+  "lagnaChart": {
+    "kicker": "Birth chart · Rasi (D1)",
+    "styleGroup": "Chart style",
+    "constellation": "Constellation",
+    "northIndian": "North Indian",
+    "northIndianTitle": "North Indian chart with {ascendant} ascendant",
+    "northIndianDesc": "The houses are fixed: the ascendant is the top diamond and the houses run anticlockwise from it. Each house shows the number of its sign, with Aries as 1.",
+    "houseAria": "House {house}, {sign}: {planets}",
+    "houseEmptyAria": "House {house}, {sign}: no planets",
+    "positionsCaption": "Planet positions",
+    "sign": "Sign",
+    "ascendant": "Ascendant",
+    "retrograde": "retrograde",
+    "retrogradeShort": "R",
+    "rahu": "Rahu",
+    "ketu": "Ketu",
+    "abbrev": {
+      "ascendant": "Asc",
+      "sun": "Su",
+      "moon": "Mo",
+      "mars": "Ma",
+      "mercury": "Me",
+      "jupiter": "Ju",
+      "venus": "Ve",
+      "saturn": "Sa",
+      "rahu": "Ra",
+      "ketu": "Ke"
+    }
   }
 }

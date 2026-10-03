@@ -6,6 +6,7 @@ import type { HousePlacement, PlanetPosition } from "@/lib/astro-types";
 import { useChartWorker } from "@/lib/hooks/useChartWorker";
 import type { ChartWorkerOutput } from "@/lib/hooks/useChartWorker";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { PLANET_COLORS } from "@/lib/planet-colors";
 import sharedMessages from "@/messages/en.shared.json";
 
 type ConstellationChartProps = {
@@ -26,17 +27,6 @@ const PLANET_SYMBOLS: Record<string, string> = {
   Ketu: "\u260B",
 };
 
-const PLANET_COLORS: Record<string, string> = {
-  Sun: "#f2c26c",
-  Moon: "#c8d8e8",
-  Mars: "#ff6b5b",
-  Mercury: "#6ce1a0",
-  Jupiter: "#ffd966",
-  Venus: "#f0a0c8",
-  Saturn: "#7eaadf",
-  Rahu: "#a0a8b0",
-  Ketu: "#c49a6c",
-};
 
 const SIGN_SYMBOLS: Record<string, string> = {
   Aries: "\u2648",

@@ -1,0 +1,119 @@
+/*
+ * The North Indian chart's face. Dark by default, matching the constellation
+ * wheel it alternates with; the light theme gets a parchment face below.
+ * Themed from inside the module, since a globals.css override cannot reach
+ * these hashed class names.
+ */
+
+.chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(210, 172, 98, 0.07), transparent 62%),
+    #08111f;
+  font-family: var(--font-body), "Inter", sans-serif;
+  /* No text selection on a click-to-highlight chart: a drag across houses
+     would otherwise paint half the labels blue. */
+  user-select: none;
+}
+
+.lines {
+  fill: none;
+  stroke: rgba(210, 172, 98, 0.62);
+  stroke-width: 1.3;
+  pointer-events: none;
+}
+
+.region {
+  fill: transparent;
+  stroke: transparent;
+  stroke-width: 3;
+  transition: fill 0.15s ease;
+}
+
+.house {
+  cursor: default;
+  outline: none;
+}
+
+/* The ascendant's house, faintly lit so the eye finds the start of the count. */
+.house[data-ascendant="true"] .region {
+  fill: rgba(210, 172, 98, 0.07);
+}
+
+.house[data-active="true"] .region {
+  fill: rgba(210, 172, 98, 0.17);
+}
+
+.house:focus-visible .region {
+  stroke: var(--accent-gold-light, #f2d89d);
+}
+
+.signNumber {
+  fill: rgba(242, 216, 157, 0.62);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  fill: var(--ink-main, #f8f2e7);
+}
+
+.abbrev {
+  font-weight: 600;
+}
+
+.degree {
+  fill: var(--ink-soft, #bbb4aa);
+  font-variant-numeric: tabular-nums;
+}
+
+.retro {
+  fill: var(--accent-gold-light, #f2d89d);
+  font-weight: 700;
+}
+
+.ascendantLabel .abbrev {
+  fill: var(--accent-gold-light, #f2d89d);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .region {
+    transition: none;
+  }
+}
+
+/* ── Light theme ── */
+
+:global(html[data-theme="light"]) .chart {
+  background:
+    radial-gradient(circle at 50% 45%, rgba(181, 116, 61, 0.08), transparent 62%),
+    #fbf5ea;
+}
+
+:global(html[data-theme="light"]) .lines {
+  stroke: rgba(131, 83, 42, 0.55);
+}
+
+:global(html[data-theme="light"]) .house[data-ascendant="true"] .region {
+  fill: rgba(181, 116, 61, 0.08);
+}
+
+:global(html[data-theme="light"]) .house[data-active="true"] .region {
+  fill: rgba(181, 116, 61, 0.18);
+}
+
+:global(html[data-theme="light"]) .house:focus-visible .region {
+  stroke: var(--accent-gold, #83532a);
+}
+
+:global(html[data-theme="light"]) .signNumber {
+  fill: rgba(131, 83, 42, 0.78);
+}
+
+:global(html[data-theme="light"]) .retro,
+:global(html[data-theme="light"]) .ascendantLabel .abbrev {
+  fill: var(--accent-gold, #83532a);
+}

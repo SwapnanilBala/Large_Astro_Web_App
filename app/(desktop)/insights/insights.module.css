@@ -100,24 +100,32 @@
 }
 
 /*
- * The three-column row: chart / weekly energy / vibe.
+ * The chart row: the birth chart card and the week side by side, house support
+ * across the full width underneath.
+ *
+ * It was three columns of 30/42/28 until 2026-10. The chart then got ~380px at
+ * a 1440 window -- too small for a North Indian chart's labels -- and the tall
+ * house-support column left the other two with a band of empty card beneath
+ * them. Under 1200px it already stacked the third panel like this; now every
+ * desktop width does, and the chart card takes the wider track because it
+ * holds the chart and its positions list.
  *
  * fr rather than % so the gap comes out of the tracks instead of overflowing
  * them, and minmax(0, ...) so one long unbroken word cannot push the row wider
  * than its column -- the same failure .grid > * guards against further down.
+ * Without house support (no Ashtakavarga block) the row is just the first two.
  */
-.cardRow3 {
+.cardRow3,
+.cardRow3[data-columns="two"] {
   display: grid;
   min-width: 0;
   gap: clamp(1.15rem, 1.8vw, 1.65rem);
-  grid-template-columns: minmax(0, 30fr) minmax(0, 42fr) minmax(0, 28fr);
+  grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
   align-items: start;
 }
 
-/* The third column is gated on the Ashtakavarga block, so the row has to be
-   able to close up rather than leave a third of itself blank. */
-.cardRow3[data-columns="two"] {
-  grid-template-columns: minmax(0, 38fr) minmax(0, 62fr);
+.cardRow3 > *:nth-child(3) {
+  grid-column: 1 / -1;
 }
 
 /*
@@ -272,12 +280,6 @@
   justify-items: start;
   min-width: 0;
   width: 100%;
-}
-
-/* On the lifted glance card the base gold measured 3.75:1; the light end of the
-   ramp clears 4.5:1. Dark theme only -- light's --accent-gold is already deep. */
-:global(html:not([data-theme="light"])) .chartGlance .kicker {
-  color: var(--accent-gold-light);
 }
 
 .kicker {
@@ -1829,22 +1831,13 @@
 
 /* ── Chart Card (Large) ── */
 
-/* The constellation is square, so at the full content width it also becomes
-   taller than the viewport and you cannot see the whole chart at once. The cap
-   goes on the card rather than the chart inside it, so the card hugs the chart
-   instead of framing it with empty panel either side. Still far larger than the
-   ~595px it had when it shared the row with the glance panel.
-
-   padding: 0 is deliberate here, unlike on the collapsible cards: this card
-   holds nothing but the square SVG, which is meant to bleed to the border. The
-   breathing room around the wheel comes from empty sky inside the artwork. */
+/* The surface for lagna-chart-card.tsx, which brings its own padding and
+   layout; this only supplies the card itself and its slot in the row. */
 .cardChart {
   composes: card;
   grid-column: 1;
   padding: 0;
   overflow: hidden;
-  max-width: min(100%, 840px);
-  margin-inline: auto;
   width: 100%;
 }
 
@@ -1857,7 +1850,7 @@
  * old .heroArch: declared above .card, its four corner radius longhands lost
  * to .card's `border-radius` shorthand and the arch rendered as an ordinary
  * 16px rectangle. That class is gone now -- the hero uses a medallion, which
- * composes nothing -- but .cardChart and .chartGlance below still depend on
+ * composes nothing -- but .cardChart below still depends on
  * this ordering. Same trap the .cardRow3 comment warns about, one property
  * along.
  */
@@ -1970,114 +1963,6 @@
   font-weight: 650;
   line-height: 1.2;
   color: var(--ink-main);
-}
-
-/* ── Planets Card ── */
-.chartGlance {
-  composes: card;
-  /*
-   * One column, under the wheel it describes.
-   *
-   * It has been three things: a tall column beside the chart, then a
-   * full-width strip below it with `minmax(14rem, 1fr) 1.6fr`. It now sits
-   * inside the three-column row's left track, about 370px wide, where those
-   * two tracks needed 224px + 176px + gap and overflowed the card by 98px --
-   * clipped, because .card carries `overflow: hidden`.
-   *
-   * minmax(0, 1fr) rather than 1fr: a single track still has to be allowed to
-   * be narrower than its content, or the facts grid below pushes it wide again.
-   */
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: stretch;
-  gap: 0.9rem;
-  padding: clamp(1.1rem, 2vw, 1.5rem);
-  /*
-   * No teal 2px top rule any more. It existed to separate this from the chart
-   * when it was a full-width strip directly underneath it. In the three-column
-   * row it is one of three peer cards, and it was the only one of the three
-   * with an accent edge -- 1.6px teal against its neighbours' 0.8px gold
-   * hairline, which read as an unexplained emphasis rather than a divider.
-   */
-}
-
-@media (max-width: 720px) {
-  .chartGlance {
-    grid-template-columns: 1fr;
-  }
-}
-
-.chartGlance h2 {
-  margin: 0;
-  background: var(--heading-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-family: var(--font-display), sans-serif;
-  font-size: clamp(1.45rem, 2vw, 1.9rem);
-  line-height: 1.2;
-}
-
-/* The right column: three facts, then the sentence about them directly
-   underneath. The note used to span the full width as a third grid child,
-   which is what left the space below the facts empty. */
-.chartGlanceRight {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  min-width: 0;
-}
-
-.chartGlanceIntro,
-/* 0.95rem, down from 1.08rem. Sized for a full-width strip, it was the
-   largest body text in the three-column row -- 17.28px against the
-   house-support intro's 15.2px in the column beside it. */
-.chartGlanceNote {
-  margin: 0.55rem 0 0;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
-  line-height: 1.55;
-}
-
-.chartGlanceNote {
-  padding-top: 0.15rem;
-}
-
-.chartGlanceFacts {
-  display: grid;
-  /*
-   * min(100%, 8rem) rather than a bare 11rem. auto-fit picks its track count
-   * from the minimum, so an 11rem floor in a 340px column still asked for a
-   * 176px track and overflowed by 122px. The min() lets the track shrink below
-   * its preferred size instead of overflowing -- the same guard, and the same
-   * reason, as the note on .gatewayGrid.
-   */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
-  gap: 0.65rem clamp(0.75rem, 2vw, 1.5rem);
-  margin: 0;
-}
-
-.chartGlanceFacts > div {
-  display: grid;
-  gap: 0.25rem;
-  padding: 0.9rem 0;
-  border-top: 1px solid var(--line-soft);
-}
-
-.chartGlanceFacts dt {
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-  font-weight: 750;
-  letter-spacing: 0.09em;
-  text-transform: uppercase;
-}
-
-.chartGlanceFacts dd {
-  margin: 0;
-  color: var(--ink-main);
-  font-family: var(--font-display), sans-serif;
-  font-size: 1.15rem;
-  font-weight: 700;
 }
 
 .chartDetails {
@@ -5088,19 +4973,15 @@
  * sitting after the 900 and 600 ones would also match at those widths and win
  * on source order alone -- silently undoing both.
  *
- * Three columns of 30/42/28 stop working before they stop fitting: the wheel
- * and the seven-day chart both need width more than the house-support rings
- * do. So the rings drop to a full-width row underneath and the other two share
- * the top.
+ * Below 1200 the chart row is one column. In a 58% track the chart card gets
+ * ~570px here and has to stack its positions list under the chart, which makes
+ * it far taller than the week beside it; at full width it keeps chart and list
+ * side by side, and the week and house support follow underneath.
  */
 @media (max-width: 1200px) {
   .cardRow3,
   .cardRow3[data-columns="two"] {
-    grid-template-columns: minmax(0, 44fr) minmax(0, 56fr);
-  }
-
-  .cardRow3 > *:nth-child(3) {
-    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
