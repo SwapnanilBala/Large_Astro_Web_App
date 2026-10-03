@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import enMessages from "@/messages/en.json";
+import { LOCALE_TAGS } from "@/lib/i18n-context";
 import {
   applyPlaceSuggestion,
   formatBirthDateDisplay,
@@ -22,6 +23,9 @@ import {
  * the day the suite happens to run. */
 const TODAY = new Date(2026, 7, 17);
 const dateOptions = { today: TODAY };
+
+/* Every language the interface speaks that is not written out by hand. */
+const OTHER_LOCALES = Object.values(LOCALE_TAGS).filter((locale) => locale !== "en-US");
 
 /* The English catalog, filled in the way the provider's `t` fills it, so the
  * assertions below read the sentence a visitor reads. A key the catalog lacks
@@ -224,6 +228,30 @@ describe("normalizeBirthTime", () => {
   it("reads times typed on a non-Latin keyboard", () => {
     expect(normalizeBirthTime("१४:३०").value).toBe("14:30");
   });
+
+  it("reads the interface language's own AM and PM, wherever it puts them", () => {
+    /* Every language the interface speaks writes these in Latin letters in
+       today's data, so two that do not stand in: Nepali, in the Devanagari
+       date-fns uses for Hindi, and Chinese, which puts them first. */
+    expect(normalizeBirthTime("7:15 अपराह्न", { locale: "ne-NP" })).toMatchObject({
+      status: "ok",
+      value: "19:15",
+    });
+    expect(normalizeBirthTime("下午7:15", { locale: "zh-CN" }).value).toBe("19:15");
+    /* Without the locale the word is passed over, and 7:15 stays two-sided. */
+    expect(normalizeBirthTime("7:15 अपराह्न").status).toBe("ambiguous");
+  });
+
+  it("reads back every time the read-out writes", () => {
+    for (const locale of OTHER_LOCALES) {
+      for (let hours = 0; hours < 24; hours++) {
+        for (const minutes of [0, 7, 30, 59]) {
+          const value = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+          expect(normalizeBirthTime(formatClockDisplay(value, locale), { locale }).value).toBe(value);
+        }
+      }
+    }
+  });
 });
 
 describe("normalizeBirthDate", () => {
@@ -308,6 +336,50 @@ describe("normalizeBirthDate", () => {
     expect(normalizeBirthDate("hello", dateOptions).status).toBe("invalid");
     expect(normalizeBirthDate("15 Smarch 1990", dateOptions).status).toBe("invalid");
     expect(normalizeBirthDate("", dateOptions).status).toBe("empty");
+  });
+
+  describe("in the interface language", () => {
+    const inLocale = (locale: string) => ({ ...dateOptions, locale });
+
+    it("reads its month names in every form it writes them", () => {
+      expect(normalizeBirthDate("15 juin 1990", inLocale("fr-FR")).value).toBe("1990-06-15");
+      expect(normalizeBirthDate("15 févr. 1990", inLocale("fr-FR")).value).toBe("1990-02-15");
+      expect(normalizeBirthDate("15 sept 1990", inLocale("es-ES")).value).toBe("1990-09-15");
+      expect(normalizeBirthDate("mag 15 1990", inLocale("it-IT")).value).toBe("1990-05-15");
+      expect(normalizeBirthDate("15 जन॰ 1990", inLocale("hi-IN")).value).toBe("1990-01-15");
+      expect(normalizeBirthDate("15 फ़रवरी 1990", inLocale("hi-IN")).value).toBe("1990-02-15");
+      /* Bengali abbreviates April inside a date and spells it out alone. */
+      expect(normalizeBirthDate("15 এপ্রি, 1990", inLocale("bn-IN")).value).toBe("1990-04-15");
+      expect(normalizeBirthDate("15 এপ্রিল 1990", inLocale("bn-IN")).value).toBe("1990-04-15");
+    });
+
+    it("forgives a missing accent or abbreviation mark", () => {
+      expect(normalizeBirthDate("15 fevrier 1990", inLocale("fr-FR")).value).toBe("1990-02-15");
+      expect(normalizeBirthDate("15 जन 1990", inLocale("hi-IN")).value).toBe("1990-01-15");
+      expect(normalizeBirthDate("15 সেপ্টে 1990", inLocale("bn-IN")).value).toBe("1990-09-15");
+    });
+
+    it("reads a typed beginning only when one month begins that way", () => {
+      expect(normalizeBirthDate("15 juil 1990", inLocale("fr-FR")).value).toBe("1990-07-15");
+      /* Juin or juillet. */
+      expect(normalizeBirthDate("15 jui 1990", inLocale("fr-FR")).status).toBe("invalid");
+    });
+
+    it("keeps reading English's, and reads only English's without a locale", () => {
+      expect(normalizeBirthDate("15 May 1990", inLocale("fr-FR")).value).toBe("1990-05-15");
+      expect(normalizeBirthDate("15 juin 1990", dateOptions).status).toBe("invalid");
+    });
+
+    it("reads back every date the read-out writes", () => {
+      for (const locale of OTHER_LOCALES) {
+        for (let month = 1; month <= 12; month++) {
+          const value = `1990-${String(month).padStart(2, "0")}-05`;
+          expect(
+            normalizeBirthDate(formatBirthDateDisplay(value, locale), inLocale(locale)),
+          ).toMatchObject({ status: "ok", value });
+        }
+      }
+    });
   });
 });
 

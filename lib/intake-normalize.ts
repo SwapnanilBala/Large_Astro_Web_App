@@ -267,6 +267,13 @@ export interface BirthTimeOptions {
    * as any other.
    */
   clock24?: boolean;
+  /**
+   * The interface language, as one of LOCALE_TAGS. Its own words for AM and
+   * PM are read as well as English's, wherever it puts them, for the same
+   * reason as the month names in BirthDateOptions: the desktop picker writes
+   * a time in them.
+   */
+  locale?: string;
 }
 
 /**
@@ -295,8 +302,11 @@ export function normalizeBirthTime(
   if (!trimmed) return empty();
 
   const notes: IntakeMessage[] = [];
-  let text = toAsciiDigits(trimmed)
-    .toLowerCase()
+  let text = toAsciiDigits(trimmed).normalize("NFC").toLowerCase();
+  if (options.locale && !isEnglish(options.locale)) {
+    text = withEnglishMeridiems(text, options.locale);
+  }
+  text = text
     .replace(/([ap])\s*\.\s*m\s*\.?/g, "$1m") // a.m. → am
     .replace(/\b(at|around|about|approx\.?|hrs?|hours?|o'?\s*clock)\b/g, " ")
     .replace(/\s+/g, " ")
@@ -476,11 +486,16 @@ const MONTH_SHORT = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-function monthFromName(token: string): number | null {
-  const needle = token.toLowerCase();
-  if (needle.length < 3) return null;
-  const index = MONTH_NAMES.findIndex((month) => month.startsWith(needle));
-  return index >= 0 ? index + 1 : null;
+/* English's month names by any beginning of three letters or more, then the
+ * locale's own, which is how a date the desktop picker writes in French or
+ * Hindi still reads back once the visitor edits it. */
+function monthFromName(token: string, locale?: string): number | null {
+  const needle = foldWord(token);
+  if (needle.length >= 3) {
+    const index = MONTH_NAMES.findIndex((month) => month.startsWith(needle));
+    if (index >= 0) return index + 1;
+  }
+  return locale && !isEnglish(locale) ? localMonthFromName(needle, locale) : null;
 }
 
 /* Build a local date only if the components survive the round-trip, which
@@ -503,6 +518,12 @@ export interface BirthDateOptions {
   today?: Date;
   /** Lower bound year; defaults to 1900, matching the picker. */
   minYear?: number;
+  /**
+   * The interface language, as one of LOCALE_TAGS. Its month names are read
+   * as well as English's, in every form it writes them: the desktop picker
+   * shows a date in them, and the visitor may edit what it shows.
+   */
+  locale?: string;
 }
 
 /* A two-digit year has no safe reading on its own, but a *birth* year does:
@@ -562,10 +583,13 @@ export function normalizeBirthDate(
 
   const readings: DateReading[] = [];
 
+  /* A month name is letters in any script, with the marks that write its
+   * vowels, and may end in what abbreviates it: a full stop, or Devanagari's
+   * "॰" in "जन॰". */
   const iso = /^(\d{4})[-/. ](\d{1,2})[-/. ](\d{1,2})$/.exec(text);
   const numeric = /^(\d{1,2})[-/. ](\d{1,2})[-/. ](\d{4}|\d{2})$/.exec(text);
-  const dayThenName = /^(\d{1,2})[-/. ]*([a-z]+)[-/. ]*(\d{4}|\d{2})$/.exec(text);
-  const nameThenDay = /^([a-z]+)[-/. ]*(\d{1,2})[-/. ]*(\d{4}|\d{2})$/.exec(text);
+  const dayThenName = /^(\d{1,2})[-/. ]*([\p{L}\p{M}]+)[-/.\u0970 ]*(\d{4}|\d{2})$/u.exec(text);
+  const nameThenDay = /^([\p{L}\p{M}]+)[-/.\u0970 ]*(\d{1,2})[-/. ]*(\d{4}|\d{2})$/u.exec(text);
   const digitsOnly = /^(\d{6}|\d{8})$/.exec(text);
 
   if (iso) {
@@ -577,13 +601,13 @@ export function normalizeBirthDate(
     readings.push({ year, month: second, day: first, notes });
     readings.push({ year, month: first, day: second, notes, monthFirst: true });
   } else if (dayThenName) {
-    const month = monthFromName(dayThenName[2]);
+    const month = monthFromName(dayThenName[2], options.locale);
     if (month) {
       const { year, notes } = expandYear(dayThenName[3], today);
       readings.push({ year, month, day: Number(dayThenName[1]), notes });
     }
   } else if (nameThenDay) {
-    const month = monthFromName(nameThenDay[1]);
+    const month = monthFromName(nameThenDay[1], options.locale);
     if (month) {
       const { year, notes } = expandYear(nameThenDay[3], today);
       readings.push({ year, month, day: Number(nameThenDay[2]), notes });
@@ -1098,6 +1122,33 @@ function utcMoment(year: number, month: number, day: number, hours = 0, minutes 
     : null;
 }
 
+/**
+ * What writes a birth date in any language but English, in UTC.
+ *
+ * Exported for the desktop picker, which has to write the date in its field
+ * exactly as the read-out under the field does; sharing the formatter is what
+ * keeps the two from drifting.
+ */
+export function birthDateFormatter(locale: string): Intl.DateTimeFormat {
+  return formatter(locale, "date", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/**
+ * What writes a birth time in any language but English, in UTC: the
+ * language's own clock, twelve-hour or 24-hour.
+ *
+ * The 24-hour ones — Spanish, Italian and French — get a two-digit hour:
+ * "02:30" there is plainly the small hours, where "2:30" could be read either
+ * way, and saying which half of the day a time means is most of what the
+ * read-out is for. Exported for the picker, as above.
+ */
+export function clockFormatter(locale: string): Intl.DateTimeFormat {
+  const twelveHour = formatter(locale, "hour", { hour: "numeric" }).resolvedOptions().hour12;
+  return twelveHour
+    ? formatter(locale, "time12", { hour: "numeric", minute: "2-digit" })
+    : formatter(locale, "time24", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+}
+
 /** Render "1990-05-15" as "15 May 1990", or as the locale writes it: "15 mai 1990". */
 export function formatBirthDateDisplay(value: string, locale: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
@@ -1110,17 +1161,10 @@ export function formatBirthDateDisplay(value: string, locale: string): string {
   if (!date) return value;
 
   if (isEnglish(locale)) return `${day} ${MONTH_SHORT[month - 1]} ${match[1]}`;
-  return formatter(locale, "date", { day: "numeric", month: "short", year: "numeric" }).format(date);
+  return birthDateFormatter(locale).format(date);
 }
 
-/**
- * Render "14:30" as "2:30 PM", or as the locale writes the time.
- *
- * That is a 24-hour clock in Spanish, Italian and French, and those get a
- * two-digit hour: "02:30" there is plainly the small hours, where "2:30"
- * could be read either way — and saying which half of the day a time means is
- * most of what this read-out is for.
- */
+/** Render "14:30" as "2:30 PM", or as the locale writes the time (see clockFormatter). */
 export function formatClockDisplay(value: string, locale: string): string {
   const match = /^(\d{1,2}):(\d{2})$/.exec(value);
   if (!match) return value;
@@ -1137,11 +1181,7 @@ export function formatClockDisplay(value: string, locale: string): string {
 
   const moment = utcMoment(2000, 1, 1, hours, minutes);
   if (!moment) return value;
-  const twelveHour = formatter(locale, "hour", { hour: "numeric" }).resolvedOptions().hour12;
-  const shape = twelveHour
-    ? formatter(locale, "time12", { hour: "numeric", minute: "2-digit" })
-    : formatter(locale, "time24", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
-  return shape.format(moment);
+  return clockFormatter(locale).format(moment);
 }
 
 /* Render "1990-02" as "February 1990", for a note about the month itself. */
@@ -1191,4 +1231,112 @@ export function formatIntakeMessages(
       ),
     )
     .join(" ");
+}
+
+/* ── Reading the interface language back ─────────────────────────────────── */
+
+/*
+ * A word as it is compared: in lower case, without Latin's accents, and
+ * without the mark that abbreviates it — so "Févr.", "févr" and "fevr" are one
+ * word, as are "जन॰" and "जन", and "সেপ্টেঃ" and "সেপ্টে".
+ *
+ * Only the Latin combining accents go. Devanagari and Bengali vowel signs are
+ * combining marks too, and there they are the word. Normalising first also
+ * makes a nukta typed as one code point compare equal to the two Intl writes.
+ */
+function foldWord(word: string): string {
+  return word
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[.\u0970\u0983]+$/, "");
+}
+
+interface LocaleWords {
+  /** Every form the locale writes each month in, folded, and its number. */
+  months: Map<string, number>;
+  /** The full names alone, which a typed beginning is matched against. */
+  fullNames: Array<[string, number]>;
+  /** The locale's AM and PM, where English's rules would not see them. */
+  meridiems: Array<[string, "am" | "pm"]>;
+}
+
+const localeWords = new Map<string, LocaleWords>();
+
+/*
+ * The words a language writes dates and times in, so that whatever a field
+ * shows in that language can be typed back into it.
+ *
+ * Taken from Intl rather than listed by hand, and from the formatters that
+ * write them: the desktop picker shows a date in exactly these words and the
+ * read-out under it says them back, so the one list certain to match both is
+ * the one the runtime itself produces. Every form is collected, short and
+ * full, inside a date and standing alone, because they differ: Bengali writes
+ * April "এপ্রি" in a date and "এপ্রিল" on its own.
+ */
+function wordsFor(locale: string): LocaleWords {
+  let words = localeWords.get(locale);
+  if (words) return words;
+
+  const shortForms = [birthDateFormatter(locale), formatter(locale, "monthShort", { month: "short" })];
+  const fullForms = [
+    formatter(locale, "dateLong", { day: "numeric", month: "long", year: "numeric" }),
+    formatter(locale, "monthLong", { month: "long" }),
+  ];
+  const months = new Map<string, number>();
+  const fullNames: Array<[string, number]> = [];
+  for (let month = 1; month <= 12; month++) {
+    const moment = new Date(Date.UTC(2000, month - 1, 15));
+    const nameIn = (shape: Intl.DateTimeFormat) =>
+      foldWord(shape.formatToParts(moment).find((part) => part.type === "month")?.value ?? "");
+    for (const shape of shortForms) months.set(nameIn(shape), month);
+    for (const shape of fullForms) {
+      months.set(nameIn(shape), month);
+      fullNames.push([nameIn(shape), month]);
+    }
+  }
+  months.delete("");
+
+  /* Only the words English's rules would skip. Hindi and Bengali write "am"
+     and "pm" in today's data, and Spanish "p. m.", all of which those rules
+     read already. Data that writes them in the language's own script — as
+     date-fns writes Hindi's, "पूर्वाह्न" and "अपराह्न" — would otherwise have
+     the word passed over, and the time read as one of two. */
+  const twelveHour = formatter(locale, "meridiem", { hour: "numeric", hour12: true });
+  const meridiems: Array<[string, "am" | "pm"]> = [];
+  for (const [hours, meridiem] of [[7, "am"], [19, "pm"]] as const) {
+    const word = twelveHour
+      .formatToParts(new Date(Date.UTC(2000, 0, 1, hours)))
+      .find((part) => part.type === "dayPeriod")
+      ?.value.normalize("NFC")
+      .toLowerCase();
+    if (word && !/[a-z]/.test(word)) meridiems.push([word, meridiem]);
+  }
+
+  words = { months, fullNames, meridiems };
+  localeWords.set(locale, words);
+  return words;
+}
+
+/* A month from a name in the locale's own words, or null. A beginning of a
+ * full name counts only when one month begins that way: "jui" starts both
+ * juin and juillet. */
+function localMonthFromName(needle: string, locale: string): number | null {
+  const words = wordsFor(locale);
+  const exact = words.months.get(needle);
+  if (exact) return exact;
+  if (needle.length < 3) return null;
+  const begun = new Set(
+    words.fullNames.filter(([name]) => name.startsWith(needle)).map(([, month]) => month),
+  );
+  return begun.size === 1 ? [...begun][0] : null;
+}
+
+/* The locale's own AM and PM swapped for English's, wherever it puts them. */
+function withEnglishMeridiems(text: string, locale: string): string {
+  return wordsFor(locale).meridiems.reduce(
+    (swapped, [word, meridiem]) => swapped.split(word).join(` ${meridiem} `),
+    text,
+  );
 }
