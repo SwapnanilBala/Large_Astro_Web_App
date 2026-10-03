@@ -48,10 +48,11 @@
    * make the page less readable rather than more consistent.
    */
   --section-rhythm: 1.25rem;
+  --dashboard-gap: clamp(1.05rem, 1.5vw, 1.5rem);
 
   display: flex;
   flex-direction: column;
-  gap: clamp(1.05rem, 1.5vw, 1.5rem);
+  gap: var(--dashboard-gap);
 }
 
 /* ═══ Band and row primitives ═══ */
@@ -5001,6 +5002,15 @@
 /* ═══════════════════════════════════════════════
    Responsive Breakpoints
    ═══════════════════════════════════════════════ */
+
+/* Center the tabs vertically in their band when the wide page is at the top.
+   The card supplies the top inset; the row gap plus this margin match it below. */
+@media (min-width: 1201px) {
+  .anchorNav {
+    margin-top: 0;
+    margin-bottom: max(0px, calc(var(--shell-pad-inline) - var(--dashboard-gap)));
+  }
+}
 
 /*
  * ── 1200px ──
