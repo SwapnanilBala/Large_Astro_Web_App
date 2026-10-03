@@ -1,17 +1,15 @@
 "use client";
 
-import { useMemo, useState, useTransition, type CSSProperties, type KeyboardEvent } from "react";
+import { useMemo, useState, useTransition, type KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
   DEFAULT_ENGINE_ID,
   TRADITION_ORDER,
   listEnginePresets,
   type EnginePreset,
-  type TraditionKey,
 } from "@/lib/engines/engine-registry";
 import { useRouteMessages } from "@/lib/i18n-context";
 import engineSelectMessages from "@/messages/en.engine-select.json";
-import TraditionGlyph from "@/app/components/TraditionGlyph";
 import shell from "../mobile.module.css";
 import styles from "./engine-select.module.css";
 
@@ -26,8 +24,9 @@ import styles from "./engine-select.module.css";
  * each with its own Go button, because there is room to compare them side by
  * side. Six expanded cards stacked on a 375px screen is several thousand
  * pixels of prose with six competing calls to action, so here the list reads
- * as a table of contents — a glyph, a name and one line each — and only the
- * chosen tradition opens to show its method and its house styles. Selecting
+ * as a table of contents — a name and a line each, ruled like an almanac's
+ * index — and only the chosen tradition opens to show its method and its
+ * house styles. Selecting
  * and expanding are the same gesture because they are the same decision, and
  * the single CTA lives in the pinned bar the rest of this tree uses.
  */
@@ -39,18 +38,6 @@ type Props = {
 };
 
 const engines = listEnginePresets();
-
-/* Decorative only — the glyph tint, so six entries in a list are separable at
-   a glance. Nothing reads text against these, so they carry no contrast
-   requirement; the labels stay on the tree's cream. */
-const TRADITION_ACCENT: Record<TraditionKey, string> = {
-  lahiri: "#c89b3c",
-  raman: "#b8698a",
-  krishnamurti: "#2a8b7e",
-  fagan_bradley: "#5c84a8",
-  pushyapaksha: "#7a9b5c",
-  yukteshwar: "#7b6ba8",
-};
 
 function CheckMark() {
   return (
@@ -156,7 +143,7 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
     <div className={`${shell.page} ${styles.page}`}>
       <header className={shell.header}>
         <span className={shell.step}>{tr("engineSelect.kicker")}</span>
-        <h1 className={`${shell.title} mGold`}>{tr("engineSelect.heading")}</h1>
+        <h1 className={shell.title}>{tr("engineSelect.heading")}</h1>
         <p className={shell.lead}>{tr("engineSelect.lead")}</p>
       </header>
 
@@ -185,7 +172,6 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
             <article
               key={group.key}
               className={`${styles.card}${isOpen ? ` ${styles.cardOpen}` : ""}`}
-              style={{ "--tradition-accent": TRADITION_ACCENT[group.key] } as CSSProperties}
             >
               <button
                 type="button"
@@ -196,10 +182,6 @@ export default function MobileEngineSelect({ query, defaultEngineId }: Props) {
                 aria-expanded={isOpen}
                 aria-controls={bodyId}
               >
-                <span className={styles.glyph} aria-hidden="true">
-                  <TraditionGlyph tradition={group.key} />
-                </span>
-
                 <span className={styles.headText}>
                   <span className={styles.titleRow}>
                     <span className={styles.cardTitle}>

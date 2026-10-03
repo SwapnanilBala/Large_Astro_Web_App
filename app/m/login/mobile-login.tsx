@@ -80,46 +80,6 @@ function Glyph({ d, size = 20 }: { d: string; size?: number }) {
   );
 }
 
-function Ornament() {
-  return (
-    <svg className={styles.ornament} viewBox="0 0 100 100" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="mobile-orbit-gold" x1="18" y1="16" x2="82" y2="86" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#E8C89A" />
-          <stop offset="1" stopColor="#C89B3C" />
-        </linearGradient>
-        <linearGradient id="mobile-orbit-teal" x1="26" y1="22" x2="74" y2="78" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#46B6A7" />
-          <stop offset="1" stopColor="#1A7B6E" />
-        </linearGradient>
-      </defs>
-      <circle cx="50" cy="50" r="45" fill="#11111A" stroke="url(#mobile-orbit-gold)" strokeWidth="1" opacity="0.96" />
-      <circle cx="50" cy="50" r="32" fill="none" stroke="url(#mobile-orbit-teal)" strokeWidth="0.9" opacity="0.5" />
-      <path
-        d="M50 12 L54 42 L84 50 L54 58 L50 88 L46 58 L16 50 L46 42 Z"
-        fill="url(#mobile-orbit-gold)"
-        opacity="0.96"
-      />
-      <circle cx="50" cy="50" r="4" fill="url(#mobile-orbit-teal)" />
-      <circle cx="50" cy="5" r="1.8" fill="#D4A574" />
-      <circle cx="95" cy="50" r="1.6" fill="#2DA89A" />
-      <circle cx="50" cy="95" r="1.8" fill="#D4A574" />
-      <circle cx="5" cy="50" r="1.6" fill="#2DA89A" />
-    </svg>
-  );
-}
-
-function AmbientWheel() {
-  return (
-    <svg className={styles.ambientWheel} viewBox="0 0 600 600" aria-hidden="true" focusable="false">
-      <circle cx="300" cy="300" r="284" />
-      <circle cx="300" cy="300" r="224" />
-      <circle cx="300" cy="300" r="108" />
-      <path d="M300 16V584 M16 300H584 M99 99L501 501 M501 99L99 501 M54 158L546 442 M158 54L442 546 M442 54L158 546 M546 158L54 442" />
-    </svg>
-  );
-}
-
 const ICON = {
   chevron: "m15 18-6-6 6-6",
 };
@@ -155,9 +115,7 @@ export default function MobileLogin({
   if (status === "loading" || leaving) {
     return (
       <div className={styles.page}>
-        <AmbientWheel />
         <div className={styles.loadingCard} role="status">
-          <Ornament />
           <p className={styles.loading}>
             {leaving ? t("account.opening") : t("account.checking")}
           </p>
@@ -170,7 +128,6 @@ export default function MobileLogin({
 
   return (
     <div className={styles.page}>
-      <AmbientWheel />
       <div className={styles.rail}>
         <header className={styles.topBar}>
           <Link href="/" className={styles.back}>
@@ -178,17 +135,13 @@ export default function MobileLogin({
             {t("home.back")}
           </Link>
           <span className={styles.wordmark}>Lagna Atelier</span>
-          <span className={styles.topBarSpacer} aria-hidden="true" />
         </header>
 
         <div className={styles.mainLayout}>
           <section className={styles.hero} aria-labelledby="mobile-account-heading">
             {skyLine && <span className={styles.sky}>{skyLine}</span>}
-            <div className={styles.markHalo}>
-              <Ornament />
-            </div>
             <p className={styles.eyebrow}>{t("account.kicker")}</p>
-            <h1 id="mobile-account-heading" className={`${styles.heading} mGold`}>
+            <h1 id="mobile-account-heading" className={styles.heading}>
               {signedIn ? t("account.headingSignedIn") : t("account.heading")}
             </h1>
             <p className={styles.lead}>
@@ -230,7 +183,7 @@ export default function MobileLogin({
                 <>
                   <button
                     type="button"
-                    className={`${styles.primaryAction} ${styles.wideAction}`}
+                    className={`${styles.googleAction} ${styles.wideAction}`}
                     onClick={() => void start()}
                     disabled={busy}
                   >

@@ -1,44 +1,20 @@
+/*
+ * The account page, in the almanac look: the question, the one way in, and
+ * what signing in does and does not keep -- on the plain page, left-aligned
+ * like every other screen in this tree. The orbit emblem, its halo, the
+ * gradient-rimmed panel and the slowly turning wheel behind the page went
+ * with the rest of the stock decoration.
+ */
+
 .page {
-  --auth-panel: linear-gradient(180deg, #1a1a26 0%, #12121a 100%);
-  --auth-rim: linear-gradient(
-    135deg,
-    rgba(232, 200, 154, 0.58),
-    rgba(42, 139, 126, 0.36) 52%,
-    rgba(123, 107, 168, 0.3)
-  );
-  position: relative;
-  isolation: isolate;
   flex: 1;
   min-height: 100%;
   padding: 0.625rem clamp(1rem, 5vw, 1.5rem) 2rem;
   overflow-x: clip;
-  background:
-    radial-gradient(circle at 50% 24%, rgba(123, 107, 168, 0.16), transparent 36%),
-    radial-gradient(circle at 12% 78%, rgba(42, 139, 126, 0.1), transparent 32%),
-    radial-gradient(circle at 88% 65%, rgba(200, 155, 60, 0.08), transparent 30%),
-    var(--bg-deep);
-}
-
-.ambientWheel {
-  position: fixed;
-  z-index: -1;
-  top: 12%;
-  left: 50%;
-  width: min(128vw, 580px);
-  height: min(128vw, 580px);
-  color: var(--accent-gold);
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1;
-  opacity: 0.065;
-  pointer-events: none;
-  transform: translateX(-50%);
-  transform-origin: 50% 50%;
+  background: var(--bg-deep);
 }
 
 .rail {
-  position: relative;
-  z-index: 1;
   width: 100%;
   max-width: 440px;
   margin: 0 auto;
@@ -46,23 +22,21 @@
 
 .topBar {
   min-height: 44px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.75rem;
 }
 
 .back {
-  justify-self: start;
   min-width: 44px;
   min-height: 44px;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  margin-left: -0.5rem;
-  padding: 0 0.5rem;
-  border-radius: 12px;
+  margin-left: -0.35rem;
+  padding: 0 0.35rem;
   color: var(--text-secondary);
   font-size: 0.9375rem;
   line-height: 1;
@@ -70,99 +44,67 @@
 }
 
 .wordmark {
-  justify-self: center;
   font-family: var(--font-display);
-  font-size: var(--text-meta);
-  font-weight: 600;
-  line-height: 1;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  font-size: 1.0625rem;
+  letter-spacing: 0.01em;
   white-space: nowrap;
-  color: rgba(245, 240, 230, 0.82);
-}
-
-.topBarSpacer {
-  justify-self: end;
-  width: 44px;
-  height: 44px;
+  color: var(--text-primary);
 }
 
 .mainLayout {
   display: grid;
-  gap: 1.15rem;
+  gap: 1.75rem;
 }
 
 .hero {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
+  align-items: flex-start;
 }
 
+/* Today's sky, from the server: a real reading, so it stays, set as a line
+   of the almanac rather than a badge. */
 .sky {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 30px;
   max-width: 100%;
-  margin-bottom: 0.7rem;
-  padding: 0.35rem 0.75rem;
-  border: 1px solid rgba(212, 165, 116, 0.2);
-  border-radius: 999px;
-  background: rgba(18, 18, 26, 0.82);
-  color: #e4bd78;
-  font-size: 0.875rem;
-  line-height: 1.25;
-  letter-spacing: 0.01em;
-  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.05);
+  margin-bottom: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  line-height: 1.4;
+  color: var(--text-tertiary);
 }
 
-.markHalo {
-  width: 112px;
-  height: 112px;
-  display: grid;
-  place-items: center;
-  margin-bottom: 0.55rem;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle, rgba(42, 139, 126, 0.16) 0%, rgba(123, 107, 168, 0.13) 42%, transparent 72%);
-  filter: drop-shadow(0 16px 24px rgba(0, 0, 0, 0.28));
-}
-
-.ornament {
-  display: block;
-  width: 88px;
-  height: 88px;
-}
-
+/* account.kicker is written in title case ("Your Account"); this tree sets
+   labels in sentence case, so it is lowered and its first letter restored. */
 .eyebrow {
-  margin: 0 0 0.3rem;
-  font-family: var(--font-display);
+  margin: 0 0 0.35rem;
   font-size: 0.8125rem;
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.2;
-  letter-spacing: 0.14em;
+  color: var(--text-secondary);
+  text-transform: lowercase;
+}
+
+.eyebrow::first-letter {
   text-transform: uppercase;
-  color: #d6ad67;
 }
 
 .heading {
   max-width: 100%;
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.875rem, 8vw, 2.125rem);
-  font-weight: 600;
-  line-height: 1.12;
-  letter-spacing: -0.018em;
+  font-size: clamp(2rem, 9vw, 2.375rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
   text-wrap: balance;
 }
 
 .lead {
   max-width: 390px;
-  margin: 0.65rem 0 0;
+  margin: 0.75rem 0 0;
   color: var(--text-secondary);
   font-size: 1rem;
-  line-height: 1.52;
+  line-height: 1.55;
   text-wrap: pretty;
 }
 
@@ -171,42 +113,28 @@
 }
 
 .profilePanel {
-  position: relative;
-  padding: 0.75rem;
-  border: 1px solid transparent;
-  border-radius: 24px;
-  background: var(--auth-panel) padding-box, var(--auth-rim) border-box;
-  box-shadow:
-    0 22px 56px rgba(0, 0, 0, 0.36),
-    inset 0 1px 0 rgba(255, 243, 210, 0.07);
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-medium);
 }
 
 .avatar {
   flex: none;
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: grid;
   place-items: center;
-  /* Spent through --accent-gold rather than three gold literals: the wash
-     follows the page, so a fixed gold left the initial at 1.67:1 on
-     Ethereal Dawn. Same color-mix pattern as engine-select .glyph. The
-     letter is aria-hidden decoration -- .name carries the real text -- so
-     this only has to stay visible, not clear 4.5:1. */
-  border: 1px solid color-mix(in srgb, var(--accent-gold) 35%, transparent);
+  border: 1px solid var(--border-medium);
   border-radius: 50%;
-  background: color-mix(in srgb, var(--accent-gold) 12%, transparent);
-  color: var(--accent-gold);
+  color: var(--text-primary);
   font-family: var(--font-display);
-  font-size: 1.125rem;
-  font-weight: 600;
-  box-shadow: inset 0 1px 0 rgba(255, 243, 210, 0.08);
+  font-size: 1.25rem;
 }
 
 .name {
   min-width: 0;
   overflow: hidden;
   color: var(--text-primary);
-  font-size: 1.0875rem;
+  font-size: 1.0625rem;
   font-weight: 600;
   line-height: 1.25;
   text-overflow: ellipsis;
@@ -214,18 +142,17 @@
 }
 
 .fine {
-  margin: 0.7rem 0 0;
-  color: var(--text-secondary);
-  font-size: 0.875rem;
+  margin: 1rem 0 0;
+  color: var(--text-tertiary);
+  font-size: 0.8125rem;
   line-height: 1.5;
-  text-align: center;
 }
 
 .error {
   margin: 0.75rem 0 0;
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--danger-line);
-  border-radius: 14px;
+  border-radius: 6px;
   background: var(--danger-surface);
   color: var(--danger-text);
   font-size: 0.9375rem;
@@ -233,270 +160,105 @@
 }
 
 .footNote {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 0.55rem;
-  margin: 0.8rem auto 0;
-  padding: 0 0.4rem;
+  margin: 0.8rem 0 0;
   color: var(--text-secondary);
   font-size: 0.875rem;
   line-height: 1.45;
-  text-align: left;
 }
 
+/* While the session is checked: one quiet line, where the emblem used to
+   sit in a card of its own. */
 .loadingCard {
-  position: relative;
-  z-index: 1;
-  width: min(100%, 360px);
-  min-height: 240px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.85rem;
   margin: clamp(4rem, 18vh, 9rem) auto 0;
-  border: 1px solid transparent;
-  border-radius: 24px;
-  background: var(--auth-panel) padding-box, var(--auth-rim) border-box;
-  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.36);
-}
-
-.loadingCard .ornament {
-  width: 76px;
-  height: 76px;
+  text-align: center;
 }
 
 .loading {
   margin: 0;
-  color: #e5bd73;
-  font-family: var(--font-display);
-  font-size: 0.875rem;
-  font-weight: 600;
-  letter-spacing: 0.13em;
-  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
 }
 
+/* This tree's own action: "Continue", once signed in. */
 .primaryAction {
-  min-height: 54px;
+  min-height: 52px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.6rem;
   padding: 0.65rem 1rem;
-  border-radius: 15px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--accent);
+  color: var(--on-accent);
   font-family: inherit;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
+  cursor: pointer;
+  /* Dark label on a bright fill; see .button in ../mobile.module.css. */
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+/* Google's button, in Google's own neutral styles -- their sign-in branding
+   asks for these rather than a product colour, and they sit quietly on both
+   the ink and the paper. */
+.googleAction {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border: 1px solid #8e918f;
+  border-radius: 6px;
+  background: #131314;
+  color: #e3e3e3;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
 }
 
-.primaryAction {
-  flex: 1;
-  border: 1px solid rgba(232, 200, 154, 0.34);
-  background: linear-gradient(105deg, #d2a549, #ebcf91);
-  color: #1a1206;
-  box-shadow: 0 9px 24px rgba(200, 155, 60, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.24);
+:global(html[data-theme="light"]) .googleAction {
+  border-color: #747775;
+  background: #ffffff;
+  color: #1f1f1f;
 }
 
-:where(.primaryAction):disabled {
+:where(.primaryAction, .googleAction):disabled {
   cursor: wait;
-  opacity: 0.56;
+  opacity: 0.6;
 }
 
-:where(.back, .primaryAction):active {
+:where(.back, .primaryAction, .googleAction):active {
   transform: scale(0.985);
 }
 
 @media (hover: hover) {
-.back:hover {
-    background: rgba(255, 243, 210, 0.06);
+  .back:hover {
     color: var(--text-primary);
   }
 }
 
-@media (max-width: 350px) {
-.page {
-    padding-inline: 0.875rem;
-  }
-
-.wordmark {
-    font-size: var(--text-meta);
-    letter-spacing: 0.1em;
-  }
-
-.profilePanel {
-    padding: 0.625rem;
-    border-radius: 21px;
-  }
-
-.avatar {
-    width: 44px;
-    height: 44px;
-  }
-
-.name {
-    font-size: 1.025rem;
-  }
-}
-
-@media (orientation: portrait) and (max-height: 700px) {
-.page {
-    padding-top: 0.35rem;
-    padding-bottom: 1.25rem;
-  }
-
-.topBar {
-    margin-bottom: 0.25rem;
-  }
-
-.mainLayout {
-    gap: 0.85rem;
-  }
-
-.sky {
-    margin-bottom: 0.35rem;
-  }
-
-.markHalo {
-    width: 88px;
-    height: 88px;
-    margin-bottom: 0.3rem;
-  }
-
-.ornament {
-    width: 72px;
-    height: 72px;
-  }
-
-.heading {
-    font-size: 1.8rem;
-  }
-
-.lead {
-    margin-top: 0.45rem;
-    line-height: 1.45;
-  }
-
-.footNote {
-    margin-top: 0.65rem;
+@media (prefers-reduced-motion: no-preference) {
+  .back,
+  .primaryAction,
+  .googleAction {
+    transition: color 140ms ease, transform 100ms ease;
   }
 }
 
 @media (orientation: landscape) and (min-width: 600px) and (max-height: 520px) {
-.page {
-    padding: 0.35rem clamp(1.25rem, 4vw, 2rem) 1rem;
-    background:
-      radial-gradient(circle at 25% 46%, rgba(123, 107, 168, 0.16), transparent 36%),
-      radial-gradient(circle at 84% 70%, rgba(42, 139, 126, 0.11), transparent 34%),
-      var(--bg-deep);
-  }
-
-.ambientWheel {
-    top: 50%;
-    left: 24%;
-    width: min(68vw, 450px);
-    height: min(68vw, 450px);
-    transform: translate(-50%, -50%);
-  }
-
-.rail {
+  .rail {
     max-width: 780px;
   }
 
-.topBar {
-    margin-bottom: 0.15rem;
-  }
-
-.mainLayout {
+  .mainLayout {
     grid-template-columns: minmax(210px, 0.82fr) minmax(0, 1.18fr);
     align-items: center;
     gap: clamp(1rem, 3vw, 2.5rem);
-  }
-
-.hero {
-    align-items: flex-start;
-    text-align: left;
-  }
-
-.sky {
-    justify-content: flex-start;
-    margin-bottom: 0.35rem;
-  }
-
-.markHalo {
-    width: 78px;
-    height: 78px;
-    margin-bottom: 0.25rem;
-  }
-
-.ornament {
-    width: 66px;
-    height: 66px;
-  }
-
-.eyebrow {
-    font-size: var(--text-meta);
-  }
-
-.heading {
-    font-size: clamp(1.7rem, 3.7vw, 2rem);
-  }
-
-.lead {
-    max-width: 310px;
-    margin-top: 0.4rem;
-    font-size: 1rem;
-    line-height: 1.42;
-  }
-
-.profilePanel {
-    padding: 0.65rem;
-  }
-
-.avatar {
-    width: 44px;
-    height: 44px;
-  }
-
-.footNote {
-    max-width: 410px;
-    margin-top: 0.55rem;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-.ambientWheel {
-    animation: wheelDrift 180s linear infinite;
-  }
-
-.back,
-.primaryAction {
-    transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 100ms ease;
-  }
-}
-
-@keyframes wheelDrift {
-  from {
-    rotate: 0deg;
-  }
-  to {
-    rotate: 360deg;
-  }
-}
-
-@keyframes overlayIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes sheetIn {
-  from {
-    opacity: 0;
-    transform: translateY(26px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -507,15 +269,13 @@
 .identity {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   min-width: 0;
   margin: 0 0 1rem;
 }
 
-/* Sign-in is the only action on this page now, so the button spans the panel
+/* Sign-in is the only action on this page, so the button spans the panel
    instead of sharing a row with a second one. */
 .wideAction {
   width: 100%;
-  gap: 0.6rem;
 }

@@ -28,7 +28,7 @@ export default async function MobileEngineSelectPage({ searchParams }: PageProps
     return (
       <div className={shell.page}>
         <header className={shell.header}>
-          <h1 className={`${shell.title} mGold`}>Chart details are incomplete</h1>
+          <h1 className={shell.title}>Chart details are incomplete</h1>
           <p className={shell.lead}>
             Head back to intake and fill in the birth details to choose a method.
           </p>
