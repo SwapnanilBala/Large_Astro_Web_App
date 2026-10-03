@@ -1,9 +1,9 @@
 "use client";
 
 /**
- * "That was your last free reading."
+ * An invitation to continue after the guest allowance is used.
  *
- * Raised when one of the three paid panels is refused for want of an account,
+ * Raised when a paid reading is refused for want of an account,
  * and only then: the daily route ceiling and the per-account ceiling are both
  * refusals that signing in would not lift, so offering an account as the remedy
  * for those would be a lie. lib/free-usage-store.ts makes that distinction and
@@ -21,9 +21,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Check, Orbit, X } from "lucide-react";
 
 import { useTranslation } from "@/lib/i18n-context";
-import { subscribeToFreeUsage, type PaidFeature } from "@/lib/free-usage-store";
+import {
+  claimFreeUsagePrompt,
+  setFreeUsagePromptMutedForToday,
+  subscribeToFreeUsage,
+  type PaidFeature,
+} from "@/lib/free-usage-store";
 import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
 import styles from "./FreeUsagePrompt.module.css";
 
@@ -38,14 +44,20 @@ const FEATURE_KEY: Record<PaidFeature, string> = {
 export default function FreeUsagePrompt() {
   const { t } = useTranslation();
   const [feature, setFeature] = useState<PaidFeature | null>(null);
+  const [dontShowToday, setDontShowToday] = useState(false);
+  const [signInHref, setSignInHref] = useState("/login");
   const closeRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   /* Where focus was when the dialog took it, so it can be handed back. */
   const returnFocusRef = useRef<Element | null>(null);
 
   useEffect(
     () =>
       subscribeToFreeUsage((next) => {
+        if (!claimFreeUsagePrompt()) return;
         returnFocusRef.current = document.activeElement;
+        setDontShowToday(false);
+        setSignInHref(`/login?returnTo=${encodeURIComponent(window.location.pathname + window.location.search + window.location.hash)}`);
         setFeature(next);
       }),
     [],
@@ -54,17 +66,40 @@ export default function FreeUsagePrompt() {
   const dismiss = useCallback(() => {
     setFeature(null);
     const previous = returnFocusRef.current;
-    if (previous instanceof HTMLElement) previous.focus();
+    if (previous instanceof HTMLElement && previous.isConnected) previous.focus();
   }, []);
 
   useEffect(() => {
     if (!feature) return;
     closeRef.current?.focus();
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [feature]);
+
+  useEffect(() => {
+    if (!feature) return;
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") dismiss();
+      if (event.key !== "Tab") return;
+      const controls = panelRef.current?.querySelectorAll<HTMLElement>("a[href], button, input");
+      const first = controls?.[0];
+      const last = controls?.[controls.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
-    return () => document.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("popstate", dismiss);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("popstate", dismiss);
+    };
   }, [feature, dismiss]);
 
   if (!feature) return null;
@@ -77,6 +112,7 @@ export default function FreeUsagePrompt() {
       onClick={dismiss}
     >
       <div
+        ref={panelRef}
         className={styles.panel}
         role="dialog"
         aria-modal="true"
@@ -84,26 +120,60 @@ export default function FreeUsagePrompt() {
         aria-describedby="free-usage-detail"
         onClick={(event) => event.stopPropagation()}
       >
+        <button
+          ref={closeRef}
+          type="button"
+          className={styles.close}
+          aria-label={t("freeUsage.close")}
+          onClick={dismiss}
+        >
+          <X aria-hidden="true" />
+        </button>
+        <div className={styles.emblem} aria-hidden="true"><Orbit /></div>
         <p className={styles.kicker}>{t(FEATURE_KEY[feature])}</p>
         <h2 id="free-usage-title" className={styles.title}>
           {t("freeUsage.title")}
         </h2>
         <p id="free-usage-detail" className={styles.detail}>
-          {/* Interpolated rather than spelled out in the catalogs: the numbers
-              are a config value, and six translations of the word "two" do not
-              change when that value does. */}
-          {t("freeUsage.detail", {
-            free: String(LLM_FREE_PER_DAY),
-            account: String(LLM_ACCOUNT_PER_DAY),
-          })}
+          {t("freeUsage.detail")}
         </p>
 
+        <div className={styles.allowance}>
+          <div>
+            <p className={styles.allowanceValue}>
+              <strong>{LLM_FREE_PER_DAY}</strong>
+              <span>{t("freeUsage.perDay")}</span>
+            </p>
+            <p className={styles.allowanceLabel}>{t("freeUsage.guestAllowance")}</p>
+          </div>
+          <ArrowRight className={styles.allowanceArrow} aria-hidden="true" />
+          <div className={styles.accountAllowance}>
+            <p className={styles.allowanceValue}>
+              <strong>{LLM_ACCOUNT_PER_DAY}</strong>
+              <span>{t("freeUsage.perDay")}</span>
+            </p>
+            <p className={styles.allowanceLabel}>{t("freeUsage.accountAllowance")}</p>
+          </div>
+        </div>
+
+        <label className={styles.muteOption}>
+          <input
+            type="checkbox"
+            checked={dontShowToday}
+            onChange={(event) => {
+              setDontShowToday(event.target.checked);
+              setFreeUsagePromptMutedForToday(event.target.checked);
+            }}
+          />
+          <span>{t("freeUsage.hideToday")}</span>
+        </label>
+
         <div className={styles.actions}>
-          <Link href="/login" className={`${styles.button} ${styles.primary}`} onClick={dismiss}>
+          <Link href={signInHref} className={`${styles.button} ${styles.primary}`} onClick={dismiss}>
             {t("freeUsage.register")}
+            <ArrowRight aria-hidden="true" />
           </Link>
           <button
-            ref={closeRef}
             type="button"
             className={`${styles.button} ${styles.secondary}`}
             onClick={dismiss}
@@ -112,7 +182,7 @@ export default function FreeUsagePrompt() {
           </button>
         </div>
 
-        <p className={styles.note}>{t("freeUsage.note")}</p>
+        <p className={styles.note}><Check aria-hidden="true" />{t("freeUsage.note")}</p>
       </div>
     </div>
   );

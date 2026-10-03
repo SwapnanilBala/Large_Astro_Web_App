@@ -22,6 +22,50 @@ export type PaidFeature =
   | "palmQuestions";
 
 const FREE_USAGE_EXHAUSTED_EVENT = "astro:free-usage-exhausted";
+const PROMPT_SEEN_KEY = "astro_free_usage_prompt_seen";
+const PROMPT_MUTED_KEY = "astro_free_usage_prompt_muted";
+
+/* Memory keeps dismissal working if this browser blocks storage. */
+let seenDay = "";
+let mutedDay = "";
+
+function localDay(): string {
+  const now = new Date();
+  return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+}
+
+/** Claim the one prompt for this browser session and local calendar day.
+ * Session storage survives page navigation and reloads; an explicit daily mute
+ * lives in local storage so it also applies to new tabs and browser sessions. */
+export function claimFreeUsagePrompt(): boolean {
+  if (typeof window === "undefined") return false;
+  const today = localDay();
+  if (seenDay === today || mutedDay === today) return false;
+  try {
+    if (window.localStorage.getItem(PROMPT_MUTED_KEY) === today) return false;
+  } catch { /* The in-memory mute still applies. */ }
+  try {
+    if (window.sessionStorage.getItem(PROMPT_SEEN_KEY) === today) return false;
+  } catch { /* The in-memory claim still applies. */ }
+
+  seenDay = today;
+  try {
+    window.sessionStorage.setItem(PROMPT_SEEN_KEY, today);
+  } catch { /* Already claimed in memory. */ }
+  return true;
+}
+
+export function setFreeUsagePromptMutedForToday(muted: boolean): void {
+  if (typeof window === "undefined") return;
+  const today = localDay();
+  mutedDay = muted ? today : "";
+  try {
+    if (muted) window.localStorage.setItem(PROMPT_MUTED_KEY, today);
+    else if (window.localStorage.getItem(PROMPT_MUTED_KEY) === today) {
+      window.localStorage.removeItem(PROMPT_MUTED_KEY);
+    }
+  } catch { /* Keep this page's in-memory mute. */ }
+}
 
 /**
  * The budget scope out of a refusal, or null if this was not one.
