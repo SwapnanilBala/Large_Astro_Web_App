@@ -448,6 +448,25 @@
   visibility: hidden;
 }
 
+/* Which of its two shapes the panel takes while the session is checked
+   (`shaped` in page-client.tsx; both classes exist only then): the signed-out
+   one by default, the signed-in one where this device was signed in last
+   time. Same switch as the navbar's stand-ins in globals.css, from the same
+   pre-paint attribute; a stale guess costs one shift, only when a session
+   was revoked early. `revert` gives each element back its own display:
+   inline for the heading's and lead's spans, block for the stand-in. */
+.pendingAccount {
+  display: none;
+}
+
+:global(html[data-account-label]) .pendingAccount {
+  display: revert;
+}
+
+:global(html[data-account-label]) .pendingGuest {
+  display: none;
+}
+
 .signInPending > .checking {
   visibility: visible;
   position: absolute;
