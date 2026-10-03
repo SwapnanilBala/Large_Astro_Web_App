@@ -19,6 +19,7 @@
 }
 
 .copy {
+  grid-row: 1;
   min-width: 0;
 }
 
@@ -63,34 +64,13 @@
 }
 
 .preview {
+  grid-row: 2;
   min-width: 0;
   align-self: start;
 }
 
-.chips {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
-  gap: 0.7rem;
-}
-
-.chips span {
-  display: grid;
-  gap: 0.25rem;
-  min-width: 0;
-  padding: 0.65rem 0;
-  border-bottom: 1px solid var(--line-soft);
-  color: var(--ink-soft);
-  font-size: 0.85rem;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-
-.chips strong {
-  color: var(--gateway-accent);
-  font-size: 1.1rem;
-}
-
 .footer {
+  grid-row: 3;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -176,6 +156,7 @@
   .gateway {
     gap: 1.25rem;
     padding-top: 1.25rem;
+    grid-template-rows: auto auto auto;
   }
 
   .copy h3 {
@@ -183,8 +164,13 @@
   }
 
   .footer {
+    grid-row: 2;
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .preview {
+    grid-row: 3;
   }
 
   .footer p {

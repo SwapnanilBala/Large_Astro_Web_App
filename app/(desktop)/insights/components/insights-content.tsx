@@ -20,7 +20,8 @@ import { useHydrated } from "@/lib/use-hydrated";
 import SectionGateway from "./section-gateway";
 import TimingGatewayPreview from "./timing-gateway-preview";
 import AtlasGatewayPreview from "./atlas-gateway-preview";
-import { Clock3, Layers3 } from "lucide-react";
+import ReadingEvidencePreview from "./reading-evidence-preview";
+import { BookOpen, Clock3, Layers3 } from "lucide-react";
 import ZodiacSignImage from "@/app/components/ZodiacSignImage";
 import TodaysSkyBand from "./todays-sky-band";
 import {
@@ -34,7 +35,7 @@ import {
 import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import LagnaChartCard from "./lagna-chart-card";
-import { FiBookOpen, FiArrowUpRight } from "react-icons/fi";
+import { FiArrowUpRight } from "react-icons/fi";
 
 // Lightweight skeleton for lazy-loaded panels
 function PanelSkeleton({ minHeight = 200 }: { minHeight?: number | string }) {
@@ -1739,7 +1740,7 @@ export default function InsightsContent({
             no equivalent for. Adding the shared class here changed nothing. */}
         <div className={styles.gatewayGrid}>
           {/* ─── Timing & electional (gateway to its own page) ─── */}
-          <GatewaySection id="timing" className={styles.timingSection}>
+          <GatewaySection id="timing">
             <SectionGateway
               href={`/insights/timing?${historyQs}`}
               icon={<Clock3 />}
@@ -1777,28 +1778,16 @@ export default function InsightsContent({
           <GatewaySection id="core">
             <SectionGateway
               href={`/insights/full-reading?${historyQs}`}
-              icon={<FiBookOpen />}
-              heading="Every finding, with the placement behind it"
-              blurb={
-                `All ${payload.chart.deterministic_rules.length} matched patterns, the ` +
-                "long-term combinations, and the karmic reading — laid out in a grid " +
-                "with the type set to be read rather than skimmed."
-              }
-              chipsLabel="What the full reading covers"
-              chips={[
-                {
-                  label: String(payload.chart.deterministic_rules.length),
-                  note: "chart findings",
-                },
-                {
-                  label: String(payload.chart.yogas?.length ?? 0),
-                  note: "lifetime combinations",
-                },
-                { label: "Karma", note: "inherited patterns" },
-              ]}
-              footnote="The three priorities at the top of this report are drawn from this set."
-              ctaLabel="Open the full reading"
-            />
+              icon={<BookOpen />}
+              eyebrow="03 / Findings and evidence"
+              variant="reading"
+              heading="Your Reading, Explained"
+              blurb="Connect the patterns in your life with the placements in your chart."
+              footnote="Your complete reading includes every matched finding and its evidence."
+              ctaLabel="Read every finding"
+            >
+              <ReadingEvidencePreview rules={payload.chart.deterministic_rules} yogaCount={payload.chart.yogas?.length ?? 0} />
+            </SectionGateway>
           </GatewaySection>
         </div>
 
