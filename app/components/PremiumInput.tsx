@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect, useId } from "react";
 import type { IntakeFieldResult, IntakeSuggestion } from "@/lib/intake-normalize";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./PremiumInput.module.css";
 
 interface PremiumInputProps {
@@ -49,6 +50,7 @@ export default function PremiumInput({
   inputMode,
   normalize,
 }: PremiumInputProps) {
+  const { t } = useTranslation();
   const [isFocused, setIsFocused] = useState(false);
   /* Read off the value rather than mirrored into state: the mirror caught up a
      commit late, so a field restored with a value first painted as empty. */
@@ -96,7 +98,7 @@ export default function PremiumInput({
       status: "corrected",
       value: suggestion.value,
       display: suggestion.label,
-      message: `Set to ${suggestion.label}.`,
+      message: t("home.fieldNoteSetTo", { value: suggestion.label }),
     });
   };
 
@@ -104,7 +106,7 @@ export default function PremiumInput({
   const visibleError = error ?? assistError;
   const assistNote =
     !visibleError && assist && assist.status !== "invalid"
-      ? assist.message ?? `Read as ${assist.display}`
+      ? assist.message ?? t("home.fieldNoteReadAs", { value: assist.display })
       : null;
   const suggestions = visibleError ? [] : assist?.suggestions ?? [];
 

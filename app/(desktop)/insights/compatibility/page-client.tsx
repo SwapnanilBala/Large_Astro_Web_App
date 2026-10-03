@@ -339,7 +339,12 @@ function ProfileCard({
     setProfile((previous) => ({ ...previous, [field]: value }));
     setFieldNotes((previous) => ({
       ...previous,
-      [field]: { status: "corrected", value, display: label, message: `Set to ${label}.` },
+      [field]: {
+        status: "corrected",
+        value,
+        display: label,
+        message: t("home.fieldNoteSetTo", { value: label }),
+      },
     }));
   };
 
@@ -372,7 +377,7 @@ function ProfileCard({
           role={note.status === "invalid" ? "alert" : undefined}
           aria-live={note.status === "invalid" ? undefined : "polite"}
         >
-          {note.message ?? `Read as ${note.display}`}
+          {note.message ?? t("home.fieldNoteReadAs", { value: note.display })}
         </span>
         {note.suggestions?.length ? (
           <span className="field-note-chips">

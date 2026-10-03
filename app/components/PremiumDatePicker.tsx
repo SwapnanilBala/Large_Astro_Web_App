@@ -10,6 +10,7 @@ import {
   type IntakeFieldResult,
   type IntakeSuggestion,
 } from "@/lib/intake-normalize";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./PremiumDatePicker.module.css";
 
 /*
@@ -250,6 +251,7 @@ export default function PremiumDatePicker({
   formatHint,
   preventOpenOnFocus = false,
 }: PremiumDatePickerProps) {
+  const { t } = useTranslation();
   const [isFocused, setIsFocused] = useState(false);
   const [storedAssist, setAssist] = useState<AssistState | null>(null);
   const typedTextRef = useRef("");
@@ -505,7 +507,7 @@ export default function PremiumDatePicker({
       status: "corrected",
       value: suggestion.value,
       display: suggestion.label,
-      message: `Set to ${suggestion.label}.`,
+      message: t("home.fieldNoteSetTo", { value: suggestion.label }),
     });
     calendarRef.current?.querySelector("input")?.blur();
   };
@@ -516,9 +518,9 @@ export default function PremiumDatePicker({
 
   const assistNote = useMemo(() => {
     if (visibleError || !assist || assist.result.status === "invalid") return null;
-    if (assist.kind === "live") return `Reads as ${assist.result.display}`;
-    return assist.result.message ?? `Read as ${assist.result.display}`;
-  }, [assist, visibleError]);
+    if (assist.kind === "live") return t("home.fieldNoteReadsAs", { value: assist.result.display });
+    return assist.result.message ?? t("home.fieldNoteReadAs", { value: assist.result.display });
+  }, [assist, t, visibleError]);
 
   const suggestions =
     !visibleError && assist?.kind === "committed" ? assist.result.suggestions ?? [] : [];
