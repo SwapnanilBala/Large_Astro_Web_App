@@ -132,15 +132,29 @@ function AscendantRing({ support }: { support: HouseSupport }) {
   );
 }
 
-function HouseBars({ houses }: { houses: HouseSupport[] }) {
+function HouseBars({
+  houses,
+  variant,
+}: {
+  houses: HouseSupport[];
+  variant: "brief" | "full";
+}) {
   const tr = useRouteMessages(strengthMessages);
+  const isFull = variant === "full";
   const width = 560;
-  const height = 200;
-  const padTop = 18;
-  const padBottom = 34;
+  /* The full page deliberately uses larger chart labels. Reserve headroom for
+     the value above a max-height bar and a second, readable label beneath the
+     axis; the compact results-page chart keeps its original proportions. */
+  const height = isFull ? 220 : 200;
+  const padTop = isFull ? 26 : 18;
+  const padBottom = isFull ? 46 : 34;
   const plotHeight = height - padTop - padBottom;
   const slot = width / houses.length;
   const barWidth = slot * 0.56;
+  const houseNumberY = height - padBottom + (isFull ? 18 : 15);
+  const houseSignY = height - padBottom + (isFull ? 34 : 27);
+  const baselineEndX = width - (isFull ? 38 : 34);
+  const baselineLabelX = width - (isFull ? 34 : 30);
 
   const baselineY = padTop + plotHeight * (1 - AVERAGE_BINDUS_PER_HOUSE / BAR_MAX_BINDUS);
 
@@ -179,14 +193,14 @@ function HouseBars({ houses }: { houses: HouseSupport[] }) {
             <text
               className={styles.barHouseLabel}
               x={x + barWidth / 2}
-              y={height - padBottom + 15}
+              y={houseNumberY}
             >
               {house.house}
             </text>
             <text
               className={styles.barHouseLabel}
               x={x + barWidth / 2}
-              y={height - padBottom + 27}
+              y={houseSignY}
             >
               {tr(`strength.signAbbr.${house.sign.toLowerCase()}`)}
             </text>
@@ -198,10 +212,10 @@ function HouseBars({ houses }: { houses: HouseSupport[] }) {
         className={styles.barBaseline}
         x1="0"
         y1={baselineY}
-        x2={width - 34}
+        x2={baselineEndX}
         y2={baselineY}
       />
-      <text className={styles.barBaselineLabel} x={width - 30} y={baselineY + 3}>
+      <text className={styles.barBaselineLabel} x={baselineLabelX} y={baselineY + 3}>
         28.1
       </text>
     </svg>
@@ -341,7 +355,7 @@ export default function HouseSupportPanel({
   const CardHeading = isBrief ? "h3" : "h2";
 
   return (
-    <div className={styles.panel}>
+    <div className={styles.panel} data-variant={variant}>
       {isBrief ? (
         <p className={styles.intro}>
           {tr("strength.houseSupport.introBriefA")}{" "}
@@ -430,7 +444,7 @@ export default function HouseSupportPanel({
             </p>
           </div>
 
-          <HouseBars houses={support.houses} />
+          <HouseBars houses={support.houses} variant={variant} />
 
           <ul className={styles.legend}>
             {(["strong", "neutral", "weak"] as const).map((band) => (

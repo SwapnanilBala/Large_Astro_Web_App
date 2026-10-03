@@ -470,6 +470,148 @@
   color: var(--text-secondary, #a8a090);
 }
 
+/* ── Standalone House Support: reading-distance typography ──
+ *
+ * The results-page variant is deliberately compact because it sits beside
+ * other insight cards. The full page is a reference reading, so each label
+ * gets enough scale and contrast to scan comfortably at desktop distance.
+ * Keeping these overrides behind the variant hook preserves the compact card.
+ */
+
+.panel[data-variant="full"] {
+  gap: 1.65rem;
+}
+
+.panel[data-variant="full"] .intro {
+  font-size: 1.06rem;
+  line-height: 1.7;
+}
+
+.panel[data-variant="full"] .card {
+  gap: 1rem;
+  padding: 1.5rem;
+}
+
+.panel[data-variant="full"] .cardKicker {
+  font-size: 0.84rem;
+}
+
+.panel[data-variant="full"] .cardTitle {
+  font-size: 1.25rem;
+  line-height: 1.35;
+}
+
+.panel[data-variant="full"] .formula {
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: var(--text-secondary, #a8a090);
+}
+
+.panel[data-variant="full"] .facts {
+  gap: 0.55rem;
+}
+
+.panel[data-variant="full"] .fact {
+  padding: 0.52rem 0.7rem;
+  font-size: 0.94rem;
+}
+
+.panel[data-variant="full"] .ringPercent {
+  font-size: 32px;
+}
+
+.panel[data-variant="full"] .ringCaption {
+  font-size: 11px;
+}
+
+.panel[data-variant="full"] .ringBaselineLabel {
+  fill: var(--text-secondary, #a8a090);
+  font-size: 9.5px;
+}
+
+.panel[data-variant="full"] .barValueLabel,
+.panel[data-variant="full"] .barHouseLabel {
+  font-size: 12px;
+}
+
+.panel[data-variant="full"] .barBaselineLabel {
+  fill: var(--text-secondary, #a8a090);
+  font-size: 10px;
+}
+
+.panel[data-variant="full"] .legend {
+  gap: 0.45rem 1.1rem;
+  font-size: 0.9rem;
+}
+
+.panel[data-variant="full"] .legendSwatch {
+  width: 0.7rem;
+  height: 0.7rem;
+}
+
+.panel[data-variant="full"] .caveat {
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.panel[data-variant="full"] .roles {
+  gap: 1.05rem;
+  padding-top: 1.5rem;
+}
+
+.panel[data-variant="full"] .rolesTitle {
+  font-size: 1.22rem;
+  line-height: 1.35;
+}
+
+.panel[data-variant="full"] .rolesIntro {
+  font-size: 0.94rem;
+  line-height: 1.65;
+}
+
+.panel[data-variant="full"] .roleGrid {
+  gap: 0.7rem;
+}
+
+.panel[data-variant="full"] .role {
+  gap: 0.48rem;
+  padding: 0.75rem 0.9rem 0.8rem;
+}
+
+.panel[data-variant="full"] .roleNumber {
+  min-width: 1.5rem;
+  font-size: 1.08rem;
+}
+
+.panel[data-variant="full"] .roleName {
+  font-size: 0.96rem;
+}
+
+.panel[data-variant="full"] .roleReadout {
+  font-size: 0.8125rem;
+  color: var(--text-secondary, #a8a090);
+}
+
+.panel[data-variant="full"] .roleTheme {
+  font-size: 0.94rem;
+  line-height: 1.55;
+}
+
+.panel[data-variant="full"] .roleTag,
+.panel[data-variant="full"] .rolePeak {
+  font-size: 0.8125rem;
+}
+
+.panel[data-variant="full"] .roleTag {
+  color: var(--text-secondary, #a8a090);
+}
+
+.panel[data-variant="full"] .rolesLegend {
+  font-size: 0.9rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #a8a090);
+}
+
 /* Screen-reader-only table: the SVGs carry the picture, this carries the
    numbers for anyone not looking at it. */
 .srOnly {
