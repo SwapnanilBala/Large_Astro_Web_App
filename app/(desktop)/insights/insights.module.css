@@ -141,7 +141,12 @@
   min-width: 0;
   gap: clamp(1.15rem, 1.8vw, 1.65rem);
   grid-template-columns: minmax(0, 58fr) minmax(0, 42fr);
-  align-items: start;
+  align-items: stretch;
+}
+
+.insightColumn {
+  display: grid;
+  min-width: 0;
 }
 
 .insightPair[data-columns="one"] {
@@ -3458,8 +3463,20 @@
  */
 .cardDomains {
   display: grid;
+  /* Keep the header and tabs compact; the reading fills the paired height. */
+  grid-template-rows: auto auto minmax(0, 1fr);
   gap: var(--section-rhythm);
   padding: 1.5rem;
+}
+
+.cardDomains .domainCard {
+  display: flex;
+  flex-direction: column;
+}
+
+.cardDomains .domainOpenLink {
+  align-self: flex-start;
+  margin-top: auto;
 }
 
 .domainLoading,

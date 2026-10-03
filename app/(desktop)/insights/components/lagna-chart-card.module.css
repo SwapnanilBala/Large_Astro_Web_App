@@ -51,6 +51,7 @@
 
 .switch {
   display: inline-flex;
+  align-items: center;
   gap: 2px;
   padding: 3px;
   border: 1px solid var(--line-soft);
@@ -59,6 +60,10 @@
 }
 
 .switchOption {
+  /* Segments share the pill's inset instead of the global button spacing. */
+  flex: 1;
+  min-height: 0;
+  margin: 0;
   padding: 0.42rem 0.95rem;
   border: 0;
   border-radius: 999px;
@@ -67,12 +72,27 @@
   font: inherit;
   font-size: 0.86rem;
   line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: none;
+  text-shadow: none;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .switchOption:hover {
   color: var(--ink-main);
+  box-shadow: none;
+}
+
+.switchOption:hover,
+.switchOption:active {
+  transform: none;
+  filter: none;
+}
+
+.switchOption::before,
+.switchOption::after {
+  content: none;
 }
 
 .switchOption[aria-pressed="true"] {

@@ -1392,7 +1392,7 @@ export default function InsightsContent({
           <div
             id="ultimate"
             ref={domainSectionRef}
-            className={styles.anchorTarget}
+            className={`${styles.anchorTarget} ${styles.insightColumn}`}
           >
               {domainLoadState === "error" ? (
                 <LifeDomainErrorState
