@@ -214,9 +214,10 @@ export function LanguageProvider({
    * app/layout.tsx hard-codes lang="en" and nothing ever moved it, so a Hindi
    * or Bengali page was still announced with English pronunciation rules --
    * and lang also drives hyphenation and the font fallback a browser reaches
-   * for on Devanagari and Bengali text. Done here rather than in the switcher
-   * so it follows the localStorage hydration above as well as an explicit
-   * change; the switcher is desktop-only, but /m inherits the stored choice.
+   * for on Devanagari and Bengali text. Done here rather than in a switcher
+   * so it follows the language adopted after hydration -- a stored choice or
+   * the location's suggestion -- as well as a change made in the desktop
+   * navbar or the mobile intake's select.
    */
   useEffect(() => {
     document.documentElement.lang = language;

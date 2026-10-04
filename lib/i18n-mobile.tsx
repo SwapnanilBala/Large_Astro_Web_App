@@ -20,9 +20,10 @@ import { LanguageProvider } from "@/lib/i18n-context";
  * gzipped of chart-method copy stays off the intake, which is the route with
  * the least headroom in the tree. Add here only what more than one page reads.
  *
- * Non-English still loads its full message file on demand. There is no language
- * switcher under /m, so that only happens for a visitor who chose a language on
- * desktop, and the full file is a superset of this baseline.
+ * Non-English still loads its full message file on demand -- for a visitor
+ * whose location suggests another language, or who picked one in the intake's
+ * language select or on desktop -- and the full file is a superset of this
+ * baseline.
  */
 export default function MobileLanguageProvider({ children }: { children: ReactNode }) {
   return <LanguageProvider baseMessages={mobileMessages}>{children}</LanguageProvider>;
