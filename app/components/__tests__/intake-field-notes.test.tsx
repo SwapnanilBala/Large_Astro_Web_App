@@ -1,9 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useState } from "react";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import en from "@/messages/en.json";
 import { LanguageProvider } from "@/lib/i18n-context";
-import { normalizePersonName } from "@/lib/intake-normalize";
+import {
+  formatBirthDateDisplay,
+  formatClockDisplay,
+  normalizePersonName,
+} from "@/lib/intake-normalize";
 import PremiumDatePicker from "../PremiumDatePicker";
 import PremiumInput from "../PremiumInput";
 
@@ -52,7 +56,23 @@ function TimeField({ formatHint }: { formatHint?: string }) {
       formatHint={formatHint}
       showTimeSelect
       showTimeSelectOnly
-      dateFormat="h:mm aa"
+      preventOpenOnFocus
+    />
+  );
+}
+
+function DateField({ initial = null }: { initial?: Date | null }) {
+  const [value, setValue] = useState<Date | null>(initial);
+  return (
+    <PremiumDatePicker
+      id="date"
+      label="Birth Date"
+      value={value}
+      onChange={setValue}
+      maxDate={new Date(2026, 7, 17)}
+      minDate={new Date(1900, 0, 1)}
+      showMonthDropdown
+      showYearDropdown
       preventOpenOnFocus
     />
   );
@@ -60,6 +80,22 @@ function TimeField({ formatHint }: { formatHint?: string }) {
 
 function renderInEnglish(ui: React.ReactElement) {
   return render(<LanguageProvider baseMessages={en}>{ui}</LanguageProvider>);
+}
+
+/* The provider adopts the stored language on its first client render. Its
+   translation file cannot load here, so the catalog stays English; the
+   picker's language does not depend on the catalog. */
+function renderIn(language: string, ui: React.ReactElement) {
+  window.localStorage.setItem("astro_language", language);
+  return renderInEnglish(ui);
+}
+
+/* The weekday names over the calendar, as they are seen. */
+function weekdayNames(): string[] {
+  return Array.from(
+    document.querySelectorAll('.react-datepicker__day-name [aria-hidden="true"]'),
+    (name) => name.textContent ?? "",
+  );
 }
 
 function type(input: HTMLElement, text: string) {
@@ -141,5 +177,107 @@ describe("PremiumDatePicker", () => {
 
     /* French keeps a 24-hour clock. */
     expect(screen.getByText(/14:30$/)).toBeInTheDocument();
+  });
+});
+
+describe("PremiumDatePicker in the interface language", () => {
+  beforeEach(() => {
+    /* Opening the calendar scrolls to make room for it; jsdom cannot scroll. */
+    vi.spyOn(window, "scrollBy").mockImplementation(() => {});
+  });
+
+  it("keeps English as it always was", () => {
+    renderInEnglish(
+      <>
+        <DateField />
+        <TimeField />
+      </>,
+    );
+
+    type(screen.getByLabelText("Birth Date"), "5 June 1990");
+    type(screen.getByLabelText("Birth Time"), "7:15");
+
+    expect(screen.getByLabelText("Birth Date")).toHaveValue("05 Jun 1990");
+    expect(screen.getByLabelText("Birth Time")).toHaveValue("7:15 AM");
+  });
+
+  it("writes the field as the read-out under it does", () => {
+    renderIn(
+      "fr",
+      <>
+        <DateField />
+        <TimeField />
+      </>,
+    );
+
+    type(screen.getByLabelText("Birth Date"), "15/05/1990");
+    type(screen.getByLabelText("Birth Time"), "7:15 pm");
+
+    expect(screen.getByLabelText("Birth Date")).toHaveValue(
+      formatBirthDateDisplay("1990-05-15", "fr-FR"),
+    );
+    /* French keeps a 24-hour clock. */
+    expect(screen.getByLabelText("Birth Time")).toHaveValue("19:15");
+  });
+
+  it("reads back what it wrote once the visitor edits it", () => {
+    renderIn(
+      "hi",
+      <>
+        <DateField />
+        <TimeField />
+      </>,
+    );
+
+    type(screen.getByLabelText("Birth Date"), "15 जन॰ 1990");
+    type(screen.getByLabelText("Birth Time"), "7:15 pm");
+
+    expect(screen.getByLabelText("Birth Date")).toHaveValue(
+      formatBirthDateDisplay("1990-01-15", "hi-IN"),
+    );
+    expect(screen.getByLabelText("Birth Time")).toHaveValue(formatClockDisplay("19:15", "hi-IN"));
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
+  it("opens a calendar in the language", async () => {
+    renderIn("fr", <DateField initial={new Date(1990, 4, 15)} />);
+
+    fireEvent.click(screen.getByLabelText("Birth Date"));
+
+    /* The language's calendar arrives in a chunk of its own, and a French week
+       starts on Monday. */
+    await waitFor(() =>
+      expect(weekdayNames()).toEqual(["lu", "ma", "me", "je", "ve", "sa", "di"]),
+    );
+    expect(document.querySelector(".react-datepicker__current-month")).toHaveTextContent(
+      "mai 1990",
+    );
+  });
+
+  it("lists the times on the language's clock", () => {
+    renderIn("fr", <TimeField />);
+
+    fireEvent.click(screen.getByLabelText("Birth Time"));
+
+    const times = Array.from(
+      document.querySelectorAll(".react-datepicker__time-list-item"),
+      (item) => item.textContent,
+    );
+    expect(times).toContain("07:15");
+    expect(times).toContain("19:15");
+    expect(times.join(" ")).not.toMatch(/AM|PM/);
+  });
+
+  it("heads the list of times with the catalog's caption", () => {
+    const messages = { ...en, home: { ...en.home, timeCaption: "Heure" } };
+    render(
+      <LanguageProvider baseMessages={messages}>
+        <TimeField />
+      </LanguageProvider>,
+    );
+
+    fireEvent.click(screen.getByLabelText("Birth Time"));
+
+    expect(document.querySelector(".react-datepicker-time__header")).toHaveTextContent("Heure");
   });
 });

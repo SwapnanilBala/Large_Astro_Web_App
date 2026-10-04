@@ -1152,7 +1152,6 @@ export default function Home() {
                           "home.birthDateFormatHint",
                           "Enter a date like 15/05/1990, 1990-05-15, or 15 May 1990.",
                         )}
-                        dateFormat="dd MMM yyyy"
                         icon={<HiOutlineCalendarDays />}
                         completed={hasBirthDate}
                         required
@@ -1200,8 +1199,6 @@ export default function Home() {
                             showTimeSelect
                             showTimeSelectOnly
                             timeIntervals={5}
-                            timeCaption={t("home.timeCaption")}
-                            dateFormat="h:mm aa"
                             icon={<HiOutlineClock />}
                             completed={hasBirthTimeSignal}
                             required={!unknownTime}

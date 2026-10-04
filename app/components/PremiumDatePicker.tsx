@@ -2,8 +2,15 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState, useId } from "react";
 import DatePicker from "react-datepicker";
+import type { Locale } from "date-fns";
 import { shift, size } from "@floating-ui/react";
 import "react-datepicker/dist/react-datepicker.css";
+import {
+  ENGLISH_DATE_FORMAT,
+  ENGLISH_TIME_FORMAT,
+  loadCalendarLocale,
+  pickerFormats,
+} from "@/lib/date-picker-locale";
 import {
   formatIntakeMessages,
   formatIntakeText,
@@ -13,7 +20,7 @@ import {
   type IntakeFieldResult,
   type IntakeSuggestion,
 } from "@/lib/intake-normalize";
-import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation, type Language } from "@/lib/i18n-context";
 import styles from "./PremiumDatePicker.module.css";
 
 /*
@@ -125,6 +132,14 @@ const POPPER_MODIFIERS = [
   }),
 ];
 
+/*
+ * The calendar's own words, by language, once fetched (see
+ * lib/date-picker-locale). The date and the time are separate questions, so
+ * the time field is a fresh mount of this component; kept out here, its
+ * calendar is in the visitor's language from its first frame.
+ */
+const calendarLocales = new Map<Language, Locale>();
+
 export function parseLocalIsoDate(value: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
   if (!match) return null;
@@ -189,10 +204,10 @@ interface PremiumDatePickerProps {
   disabled?: boolean;
   showTimeSelect?: boolean;
   showTimeSelectOnly?: boolean;
-  dateFormat?: string;
   required?: boolean;
   maxDate?: Date;
   timeIntervals?: number;
+  /** The heading over the list of times; the catalog's "home.timeCaption" by default. */
   timeCaption?: string;
   showYearDropdown?: boolean;
   showMonthDropdown?: boolean;
@@ -246,11 +261,10 @@ export default function PremiumDatePicker({
   disabled = false,
   showTimeSelect = false,
   showTimeSelectOnly = false,
-  dateFormat = "MMMM d, yyyy",
   required = false,
   maxDate,
   timeIntervals = 15,
-  timeCaption = "Time",
+  timeCaption,
   showYearDropdown = false,
   showMonthDropdown = false,
   yearDropdownItemNumber = 100,
@@ -285,18 +299,53 @@ export default function PremiumDatePicker({
     ? t("home.birthTimeFormatHint")
     : t("home.birthDateFormatHint");
 
+  /* The calendar's words in a language other than English: from this mount's
+   * own fetch, or from the cache an earlier mount filled. */
+  const [fetched, setFetched] = useState<{ language: Language; locale: Locale } | null>(null);
+  const calendarLocale =
+    fetched?.language === language ? fetched.locale : calendarLocales.get(language);
+
+  useEffect(() => {
+    if (language === "en" || calendarLocales.has(language)) return;
+    let current = true;
+    loadCalendarLocale(language).then(
+      (loaded) => {
+        calendarLocales.set(language, loaded);
+        if (current) setFetched({ language, locale: loaded });
+      },
+      () => {
+        /* Offline, say. The calendar keeps en-US's month and weekday names;
+           the field reads in the language regardless. */
+      },
+    );
+    return () => {
+      current = false;
+    };
+  }, [language]);
+
+  /* English keeps react-datepicker's own en-US and the formats it always had. */
+  const picker = useMemo(
+    () => (language === "en" ? null : pickerFormats(locale, calendarLocale)),
+    [calendarLocale, language, locale],
+  );
+  const fieldFormat = showTimeSelectOnly
+    ? picker?.timeFormat ?? ENGLISH_TIME_FORMAT
+    : picker?.dateFormat ?? ENGLISH_DATE_FORMAT;
+
   const minYear = minDate?.getFullYear();
   const maxTime = maxDate?.getTime();
 
+  /* With the locale, so the words the field is written in read back. */
   const readTyped = useCallback(
     (text: string): IntakeFieldResult =>
       showTimeSelectOnly
-        ? normalizeBirthTime(text)
+        ? normalizeBirthTime(text, { locale })
         : normalizeBirthDate(text, {
             today: maxTime === undefined ? undefined : new Date(maxTime),
             minYear,
+            locale,
           }),
-    [maxTime, minYear, showTimeSelectOnly],
+    [locale, maxTime, minYear, showTimeSelectOnly],
   );
 
   const toDate = useCallback(
@@ -580,7 +629,9 @@ export default function PremiumDatePicker({
           preventOpenOnFocus={preventOpenOnFocus}
           showTimeSelect={showTimeSelect}
           showTimeSelectOnly={showTimeSelectOnly}
-          dateFormat={dateFormat}
+          locale={picker?.locale}
+          dateFormat={fieldFormat}
+          timeFormat={picker?.timeFormat}
           required={required}
           ariaRequired={required ? "true" : undefined}
           ariaInvalid={visibleError ? "true" : undefined}
@@ -588,7 +639,7 @@ export default function PremiumDatePicker({
           maxDate={maxDate}
           minDate={minDate}
           timeIntervals={timeIntervals}
-          timeCaption={timeCaption}
+          timeCaption={timeCaption ?? t("home.timeCaption")}
           showYearDropdown={showYearDropdown}
           showMonthDropdown={showMonthDropdown}
           yearDropdownItemNumber={yearDropdownItemNumber}
