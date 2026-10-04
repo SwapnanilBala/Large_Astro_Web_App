@@ -878,11 +878,15 @@ export const llmBudgetCounters = pgTable(
 export const knowledgePassages = pgTable(
   "knowledge_passages",
   {
-    /** `<source>:<chapter>.<verse>`, e.g. `brihat-jataka-1885:12.3`. */
+    /** `<source>:<chapter>.<verse>.<part>`, e.g. `brihat-jataka-1885:14.2.3`. */
     id: varchar("id", { length: 120 }).primaryKey(),
     source: varchar("source", { length: 60 }).notNull(),
     chapter: smallint("chapter").notNull(),
     verse: smallint("verse").notNull(),
+    /** One part per combination when a verse lists several; 1 otherwise. */
+    part: smallint("part").notNull(),
+    /** `verse` for the translated text, `note` for the translator's own note. */
+    kind: varchar("kind", { length: 10 }).notNull(),
     chapterTitle: text("chapter_title").notNull(),
     /** The translator's words, OCR damage repaired and nothing else changed. */
     text: text("text").notNull(),
@@ -901,10 +905,11 @@ export const knowledgePassages = pgTable(
     ...timestamps(),
   },
   (table) => [
-    unique("knowledge_passages_source_chapter_verse_unique").on(
+    unique("knowledge_passages_source_chapter_verse_part_unique").on(
       table.source,
       table.chapter,
       table.verse,
+      table.part,
     ),
     index("knowledge_passages_yoga_ids_idx").using("gin", table.yogaIds),
     index("knowledge_passages_life_areas_idx").using("gin", table.lifeAreas),
@@ -912,6 +917,7 @@ export const knowledgePassages = pgTable(
       "hnsw",
       table.embedding.op("vector_cosine_ops"),
     ),
+    check("knowledge_passages_kind_check", sql`${table.kind} in ('verse', 'note')`),
     check(
       "knowledge_passages_withheld_reason_check",
       sql`${table.withheld} = (${table.withheldReason} is not null)`,

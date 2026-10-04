@@ -5,6 +5,11 @@
 -- files in lib/knowledge/corpus, so the table can be emptied and rebuilt from
 -- them at any time.
 --
+-- One row per combination, not per printed verse: a verse listing seven planet
+-- pairs is seven parts, so each pair is found for the chart that has it and
+-- withheld (or not) on its own words. kind tells the translated verse from the
+-- translator's notes.
+--
 -- Lookups go two ways. yoga_ids carries the yoga engine's own ids, and its GIN
 -- index serves `yoga_ids && $ids`, which is how a reading finds the passages for
 -- the yogas a chart has. The HNSW index serves cosine search on embedding for
@@ -22,6 +27,8 @@ CREATE TABLE "knowledge_passages" (
 	"source" varchar(60) NOT NULL,
 	"chapter" smallint NOT NULL,
 	"verse" smallint NOT NULL,
+	"part" smallint NOT NULL,
+	"kind" varchar(10) NOT NULL,
 	"chapter_title" text NOT NULL,
 	"text" text NOT NULL,
 	"notes" text,
@@ -36,7 +43,8 @@ CREATE TABLE "knowledge_passages" (
 	"embedding_model" varchar(80),
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "knowledge_passages_source_chapter_verse_unique" UNIQUE("source","chapter","verse"),
+	CONSTRAINT "knowledge_passages_source_chapter_verse_part_unique" UNIQUE("source","chapter","verse","part"),
+	CONSTRAINT "knowledge_passages_kind_check" CHECK ("knowledge_passages"."kind" in ('verse', 'note')),
 	CONSTRAINT "knowledge_passages_withheld_reason_check" CHECK ("knowledge_passages"."withheld" = ("knowledge_passages"."withheld_reason" is not null))
 );
 --> statement-breakpoint

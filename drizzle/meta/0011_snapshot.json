@@ -1,5 +1,5 @@
 {
-  "id": "d950498c-f359-46c5-aa0b-f74f9933c46a",
+  "id": "5e47cd24-8f19-4e35-9955-08269a007341",
   "prevId": "26f7e0da-83be-4d31-bb23-ac1525c3b726",
   "version": "7",
   "dialect": "postgresql",
@@ -2997,6 +2997,18 @@
           "primaryKey": false,
           "notNull": true
         },
+        "part": {
+          "name": "part",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "varchar(10)",
+          "primaryKey": false,
+          "notNull": true
+        },
         "chapter_title": {
           "name": "chapter_title",
           "type": "text",
@@ -3135,18 +3147,23 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "knowledge_passages_source_chapter_verse_unique": {
-          "name": "knowledge_passages_source_chapter_verse_unique",
+        "knowledge_passages_source_chapter_verse_part_unique": {
+          "name": "knowledge_passages_source_chapter_verse_part_unique",
           "nullsNotDistinct": false,
           "columns": [
             "source",
             "chapter",
-            "verse"
+            "verse",
+            "part"
           ]
         }
       },
       "policies": {},
       "checkConstraints": {
+        "knowledge_passages_kind_check": {
+          "name": "knowledge_passages_kind_check",
+          "value": "\"knowledge_passages\".\"kind\" in ('verse', 'note')"
+        },
         "knowledge_passages_withheld_reason_check": {
           "name": "knowledge_passages_withheld_reason_check",
           "value": "\"knowledge_passages\".\"withheld\" = (\"knowledge_passages\".\"withheld_reason\" is not null)"
