@@ -1,6 +1,6 @@
-import Link from "next/link";
 import InsightsLoader from "@/app/(desktop)/insights/components/insights-loader";
 import BackButton from "@/app/components/BackButton";
+import MissingChartNotice from "@/app/components/MissingChartNotice";
 import PageTransition from "@/app/components/PageTransition";
 import {
   getChartPayload,
@@ -28,16 +28,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
       <PageTransition>
       <div className="insights-shell below-navbar">
         <BackButton href="/" />
-        <section className="dashboard-shell">
-          <p className="kicker">Missing Input</p>
-          <h1>Chart details are incomplete.</h1>
-          <p className="lead">
-            Please return to intake and provide complete birth metadata.
-          </p>
-          <Link href="/" className="ghost-link">
-            Back to Intake
-          </Link>
-        </section>
+        <MissingChartNotice />
       </div>
       </PageTransition>
     );

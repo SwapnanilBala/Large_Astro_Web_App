@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import BackButton from "@/app/components/BackButton";
+import MissingChartNotice from "@/app/components/MissingChartNotice";
 import EngineSelectClient from "@/app/(desktop)/engine-select/engine-select-client";
 import styles from "./engine-select.module.css";
 
@@ -64,16 +64,7 @@ export default async function EngineSelectPage({
     return (
       <div className={styles.shell}>
         <BackButton href="/" />
-        <section className="dashboard-shell">
-          <p className="kicker">Missing Input</p>
-          <h1>Chart details are incomplete.</h1>
-          <p className="lead">
-            Please return to intake and provide complete birth metadata.
-          </p>
-          <Link href="/" className="ghost-link">
-            Back to Intake
-          </Link>
-        </section>
+        <MissingChartNotice />
       </div>
     );
   }

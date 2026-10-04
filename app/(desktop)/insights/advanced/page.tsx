@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { sessionFromCookieStore } from "@/lib/identity/require-session";
 import BackButton from "@/app/components/BackButton";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
+import MissingChartNotice from "@/app/components/MissingChartNotice";
 import { buildChartHistoryQuery } from "@/lib/chart-params";
 import PageTransition from "@/app/components/PageTransition";
 import { getAdvancedFocusView } from "./advanced-views";
@@ -68,16 +69,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
       <PageTransition>
       <div className="insights-shell below-navbar">
         <BackButton href="/" />
-        <section className="dashboard-shell">
-          <p className="kicker">Missing Input</p>
-          <h1>Chart details are incomplete.</h1>
-          <p className="lead">
-            Please return to intake and provide complete birth metadata.
-          </p>
-          <Link href="/" className="ghost-link">
-            Back to Intake
-          </Link>
-        </section>
+        <MissingChartNotice />
       </div>
       </PageTransition>
     );
