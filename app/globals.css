@@ -3488,6 +3488,27 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+/* The birth date and time. A native date input will not shrink below its own
+   dd/mm/yyyy, and in the narrower card half a row was less than that: the date
+   box ran under the time box, by 31px at 1280px wide and 87px at 990px. So
+   this row wraps instead, side by side only while each half can hold 15rem.
+   That is about what the date control needs at this type size, and room for
+   every translation of the two labels on one line, so the pair stays level.
+   A control that needs more still wraps in time: a flex item does not shrink
+   below its content. */
+.compat-row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  /* Each box at the top of its own label. Stretched to match the other, a
+     label with no read-out under its box spread its rows apart and dropped
+     the box about 30px. */
+  align-items: flex-start;
+}
+
+.compat-row-wrap > * {
+  flex: 1 1 15rem;
+}
+
 /* What the geocoder worked out, as a sentence. */
 .compat-derived {
   display: flex;
@@ -3820,6 +3841,10 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
 @media (max-width: 860px) {
   .compat-row-2 {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compat-row-wrap > * {
+    flex-basis: 100%;
   }
 }
 

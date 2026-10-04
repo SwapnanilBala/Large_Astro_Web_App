@@ -474,7 +474,7 @@ function ProfileCard({
           {renderNote("name")}
         </label>
 
-        <div className="compat-row-2">
+        <div className="compat-row-2 compat-row-wrap">
           <label className="input-glow-aqua">
             {t("home.formBirthDate")}
             <div className="datetime-field">
