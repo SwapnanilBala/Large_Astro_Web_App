@@ -213,6 +213,9 @@ const EXPLAINERS: Record<string, Explainer> = {
   vajra: (f, ours) =>
     !ours ? "PyJHora needs one benefic in each of the 1st and 7th and one malefic in each of the 4th and 10th; ours needs every one of them placed" : null,
 
+  yava: (f, ours) =>
+    !ours ? "PyJHora needs one malefic in each of the 1st and 7th and one benefic in each of the 4th and 10th; ours needs every one of them placed" : null,
+
   rajju: (f, ours) =>
     ours && ![0, 3, 6, 9].includes(f.sign("Rahu"))
       ? "Rahu and Ketu are not in movable signs; PyJHora includes the nodes, ours uses the seven planets"

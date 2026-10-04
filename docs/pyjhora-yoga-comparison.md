@@ -20,8 +20,8 @@ Each pair is marked in `scripts/pyjhora/yoga-map.ts` before the comparison runs:
 
 ## Summary
 
-- 29 of 52 same-definition pairs agree on every chart.
-- 23 same-definition pairs disagree somewhere, on 3867 chart-yoga pairs in all. Every one of those disagreements is explained by a known difference in how PyJHora's code reads the rule (listed below).
+- 29 of 53 same-definition pairs agree on every chart.
+- 24 same-definition pairs disagree somewhere, on 3869 chart-yoga pairs in all. Every one of those disagreements is explained by a known difference in how PyJHora's code reads the rule (listed below).
 - The two engines' own charts: the ascendant and the seven planets never differ by more than 0.018°. One placement lands in a different sign, from a planet sitting right on a sign boundary.
 - Rahu and Ketu: ours matches the **mean** node (never more than 0.010° away), although the code calls it the true node. PyJHora uses the true node, up to 1.88° away, which puts Rahu in a different sign in 2.9% of charts.
 - A PyJHora bug the comparison works around: `adhi_yoga`, `maalaa_yoga`, `srik_yoga` change PyJHora's shared `const.natural_benefics` list in place. In a long-running process, every yoga checked afterwards then sees the changed list. `run_pyjhora.py` restores it after every call.
@@ -121,6 +121,9 @@ Each pair is marked in `scripts/pyjhora/yoga-map.ts` before the comparison runs:
 - **Rajju Yoga** vs `rajju_yoga`: agree on 99.9% of charts.
   - Only ours, 3 charts:
     - 3: Rahu and Ketu are not in movable signs; PyJHora includes the nodes, ours uses the seven planets.
+- **Yava Yoga** vs `yava_yoga`: agree on 99.9% of charts.
+  - Only PyJHora, 2 charts:
+    - 2: PyJHora needs one malefic in each of the 1st and 7th and one benefic in each of the 4th and 10th; ours needs every one of them placed.
 - **Kamala Yoga** vs `kamala_yoga`: agree on 99.9% of charts.
   - Only PyJHora, 2 charts:
     - 2: not every house in the set is occupied; ours requires that, PyJHora does not.
@@ -155,6 +158,7 @@ Each pair is marked in `scripts/pyjhora/yoga-map.ts` before the comparison runs:
 | Vajra Yoga | `vajra_yoga` | 99.8% | 0 | 4 | 0 |
 | Shakti Yoga | `sakti_yoga` | 99.8% | 0 | 4 | 4 |
 | Rajju Yoga | `rajju_yoga` | 99.9% | 3 | 0 | 0 |
+| Yava Yoga | `yava_yoga` | 99.9% | 0 | 2 | 0 |
 | Kamala Yoga | `kamala_yoga` | 99.9% | 0 | 2 | 0 |
 | Vapi Yoga | `vaapi_yoga` | 99.9% | 0 | 2 | 0 |
 | Khadga Yoga | `khadga_yoga` | 100.0% | 1 | 0 | 3 |
@@ -254,10 +258,6 @@ Each pair is marked in `scripts/pyjhora/yoga-map.ts` before the comparison runs:
 - **Lakshmi Yoga** vs `lakshmi_yoga`: agree on 93.2% of charts.
   - Only ours, 98 charts: #7 (1958-07-12 10:08 UTC, Delhi); #66 (1941-10-04 08:29 UTC, Singapore); #93 (1995-10-28 00:48 UTC, Chennai)
   - Only PyJHora, 39 charts: #40 (1979-05-27 09:34 UTC, London); #77 (2015-01-02 17:43 UTC, New York); #95 (1995-10-27 13:56 UTC, Chennai)
-- **Yava Yoga** vs `yava_yoga`: agree on 93.6% of charts.
-  - Expected difference: PyJHora's is the classical Yava; ours counts paired signs.
-  - Only ours, 126 charts: #20 (1949-03-14 15:43 UTC, Singapore); #49 (1951-10-28 03:39 UTC, Buenos Aires); #53 (2015-09-18 22:26 UTC, Stockholm)
-  - Only PyJHora, 2 charts: #1028 (1996-08-20 21:47 UTC, Sydney); #1107 (1941-10-13 02:56 UTC, London)
 - **Amala Yoga** vs `amala_yoga`: agree on 93.7% of charts.
   - Expected difference: PyJHora needs only benefics in the 10th; ours needs one benefic there.
   - Only ours, 126 charts: #11 (1960-08-30 01:55 UTC, Stockholm); #14 (1992-11-24 07:54 UTC, Delhi); #28 (1975-10-04 13:10 UTC, London)
@@ -303,7 +303,6 @@ Each pair is marked in `scripts/pyjhora/yoga-map.ts` before the comparison runs:
 | Guru-Mangal Yoga | `guru_mangala_yoga` | 89.5% | 0 | 211 | 187 |
 | Kalanidhi Yoga | `kalaanidhi_yoga` | 90.0% | 200 | 0 | 43 |
 | Lakshmi Yoga | `lakshmi_yoga` | 93.2% | 98 | 39 | 23 |
-| Yava Yoga | `yava_yoga` | 93.6% | 126 | 2 | 0 |
 | Amala Yoga | `amala_yoga` | 93.7% | 126 | 0 | 632 |
 | Kalpadruma Yoga | `kalpadruma_yoga` | 94.2% | 13 | 103 | 36 |
 | Mala Yoga | `maalaa_yoga` | 97.0% | 59 | 0 | 0 |

@@ -90,7 +90,7 @@ export const YOGA_PAIRS: YogaPair[] = [
   { ours: "mala", theirs: "maalaa_yoga", expect: "different", note: "PyJHora's Maalaa counts three angles held by benefics." },
   { ours: "sarpa_nabhasa", theirs: "sarpa_yoga", expect: "different", note: "PyJHora counts three angles held by malefics." },
   { ours: "vajra", theirs: "vajra_yoga", expect: "same" },
-  { ours: "yava", theirs: "yava_yoga", expect: "different", note: "PyJHora's is the classical Yava; ours counts paired signs." },
+  { ours: "yava", theirs: "yava_yoga", expect: "same" },
 
   // ── Nabhasa: the shape the houses make ──
   { ours: "gada", theirs: "gadaa_yoga", expect: "same" },

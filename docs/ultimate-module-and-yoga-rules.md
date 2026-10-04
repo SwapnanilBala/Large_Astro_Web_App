@@ -7,15 +7,15 @@ This is a plain-English description of two rule sets: the Ultimate Module (the "
 
 | file | yogas | this document |
 | --- | --- | --- |
-| `definitions/core.ts` | 22 | sections 1 and 2 |
+| `definitions/core.ts` | 20 | sections 1 and 2 |
 | `definitions/generated.ts` | 50 | sections 4 to 10 |
 | `definitions/additional.ts` | 28 | section 3 |
-| `definitions/nabhasa.ts` | 30 | section 11 |
+| `definitions/nabhasa.ts` | 32 | section 11 |
 | `definitions/classical.ts` | 64 | sections 4 to 10 |
 | `definitions/named.ts` | 6 | section 12 |
 | `definitions/navamsa.ts` | 5 | section 13 |
 
-Two of those rows need a footnote. Section 11 describes all 32 whole-chart patterns, but only 30 are in `definitions/nabhasa.ts` — Kedara and Yava were in the engine before the rest of the family arrived, and they stayed in `core.ts` rather than being moved. And sections 4 to 10 each draw on both `generated.ts` and `classical.ts`, because those two files are the same six recipe shapes filled in at different times.
+Sections 4 to 10 each draw on both `generated.ts` and `classical.ts`, because those two files are the same six recipe shapes filled in at different times. Two of the 32 whole-chart patterns, Kedara and Yava, were in the engine before the rest of their family arrived and sat in `core.ts` until 2026-10-04, when they moved into `nabhasa.ts`.
 
 The supporting code sits beside them: `types.ts` (the shapes), `tables.ts` (signs, rulers and dignities), `helpers.ts` (the shared tests), `factories.ts` (the builders the recipe-based yogas run through) and `navamsa.ts` (the only place the engine reads a second chart).
 
@@ -415,8 +415,6 @@ A planet must be in an angle and in a strong sign. Strength is **strong** if the
 - **Daridra** (challenging): the 11th lord is in house 6, 8 or 12. Weak if that lord is in a strong sign, otherwise moderate.
 - **Grahan** (challenging): the Sun or the Moon is in the same sign as Rahu or Ketu. Strong if both the Sun and Moon are affected, otherwise moderate.
 - **Viparita Raja** (reversal): the lord of house 6, 8 or 12 is in a different one of those houses. Strong if two or more such lords do this, otherwise moderate.
-- **Kedara** (pattern): the seven classical planets are spread across exactly four signs. Always moderate.
-- **Yava** (pattern): at least three signs hold exactly two classical planets each. Always moderate.
 
 ## 3. More named yogas
 
@@ -646,13 +644,14 @@ These look at the shape of the whole chart. They use only the seven classical pl
 **Good and hard planets split:**
 
 - **Vajra**: Jupiter, Venus and Mercury are all in house 1 or 7, and the Sun, Mars and Saturn are all in house 4 or 10. The Moon can be anywhere.
+- **Yava**: the reverse. The Sun, Mars and Saturn are all in house 1 or 7, and Jupiter, Venus and Mercury are all in house 4 or 10. The Moon can be anywhere.
 
 **How many signs the seven planets use:**
 
 - **Gola**: one sign.
 - **Yuga**: two signs.
 - **Shula**: three signs.
-- **Kedara**: four signs (section 2).
+- **Kedara**: four signs.
 - **Pasa**: five signs.
 - **Damini**: six signs.
 - **Veena**: seven signs.
@@ -684,16 +683,16 @@ The "two different planets" conditions on Gauri and Bharathi are not decoration.
 
 These are notes on how the code behaves today. None of them is fixed yet.
 
-One earlier quirk is fixed. Career, Inheritance and Life Cycle used to name the Saturn yoga `sasa` instead of `shasha`, so Shasha Yoga never counted for them. Rules version v7 fixes this, and a test now fails if any area names a yoga that does not exist.
+Two earlier quirks are fixed. Career, Inheritance and Life Cycle used to name the Saturn yoga `sasa` instead of `shasha`, so Shasha Yoga never counted for them. Rules version v7 fixes this, and a test now fails if any area names a yoga that does not exist. And Yava used to mean "at least three signs with exactly two planets each", which is not the classical rule. It showed on about 6% of charts, every one of which also had Kedara. Since 2026-10-04 it is the classical Yava (section 11), which falls under quirk 2.
 
 1. **Every chart gets exactly one "how many signs" pattern.** Seven planets always fill between one and seven signs, so one of Gola, Yuga, Shula, Kedara, Pasa, Damini or Veena is always present. The code comment notes that the old texts use these only when no other pattern applies. The code does not apply that rule.
-2. **Three yogas can never happen.** Mercury counts as a good planet here, and Mercury is never more than one sign away from the Sun. That makes these impossible:
+2. **Four yogas can never happen.** Mercury counts as a good planet here, and Mercury is never more than one sign away from the Sun. That makes these impossible:
    - Vajra (Mercury in 1st or 7th with the Sun in 4th or 10th).
+   - Yava (Mercury in 4th or 10th with the Sun in 1st or 7th).
    - Dhwaja (Mercury in the 1st with the Sun in the 8th).
    - Kurma (Mercury in 5th, 6th or 7th with the Sun in 1st, 3rd or 11th).
 
-   In 20,000 random charts these three never appeared. Shakata (pattern), Vihaga, Kamala, Nauka, Chhatra and Gola also never appeared, but they are possible, just very rare.
+   In 20,000 random charts the other three never appeared, and Yava did not appear in 50,000. Shakata (pattern), Vihaga, Kamala, Nauka, Chhatra and Gola also never appeared, but they are possible, just very rare. The old texts already knew about Vajra and Yava: Varahamihira asks in Brihat Jataka 12.6 how Mercury and Venus could ever be four signs from the Sun. With one of the unequal house systems, at high latitudes, the two become possible, and that is how the 1885 translator defends them. Even so, neither appeared in 50,000 charts on any of the six house systems.
 3. **Some cancellations are never shown.** A weak yoga that is also cancelled scores below 30 and is hidden. So a cancelled Kemadruma, a combust Budhaditya, a Jupiter-softened Vish and a reduced Shakata never reach the page. The yoga simply disappears.
-4. **Yava is not the classical Yava.** Here it means "at least three signs with exactly two planets each". Any chart like that also has Kedara.
-5. **Very common yogas.** In 20,000 random charts, Dhanakaraka appeared about 96% of the time, Raja about 94%, and Chandra Malefic Upachaya about 90%. On their own they do not say much about one chart.
-6. **The two modules use different good and hard planet lists** (see the table at the top). A planet can count as hard in a yoga and not count at all in the Ultimate Module. The Sun is the main example.
+4. **Very common yogas.** In 20,000 random charts, Dhanakaraka appeared about 96% of the time, Raja about 94%, and Chandra Malefic Upachaya about 90%. On their own they do not say much about one chart.
+5. **The two modules use different good and hard planet lists** (see the table at the top). A planet can count as hard in a yoga and not count at all in the Ultimate Module. The Sun is the main example.
