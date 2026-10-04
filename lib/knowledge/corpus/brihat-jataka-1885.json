@@ -7437,7 +7437,9 @@
       "text": "but if the 7th house be aspected by the Moon and Venus, the person will have several wives.",
       "notes": null,
       "summary": "The translator's note says that if the Moon and Venus aspect the 7th house, the person will have several wives.",
-      "yogaIds": [],
+      "yogaIds": [
+        "kalatra_chandra_shukra"
+      ],
       "planets": [
         "Moon",
         "Venus"
@@ -7445,8 +7447,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -7707,8 +7709,7 @@
       "notes": null,
       "summary": "The text says that if male and female planets share a sign while Saturn and Mars are in the 7th house aspected by benefics, the wife will be older and the man will marry late.",
       "yogaIds": [
-        "shani_digbala",
-        "mangala_shani_yoga"
+        "kalatra_mangala_shani"
       ],
       "planets": [
         "Mars",
@@ -7717,8 +7718,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.951
     },
     {

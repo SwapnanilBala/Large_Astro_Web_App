@@ -110,6 +110,12 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      Chandra-Shani) would have shown it for a Moon-Saturn pair in any house,
      or for Saturn alone in the 7th. */
   "23.1.4": { tags: ["kalatra_chandra_shani"], showDespiteChapter: true },
+  /* The two neighbouring marriage passages, added by the owner the same day:
+     more than one marriage ("but if the 7th house be aspected by the Moon and
+     Venus, the person will have several wives") and marrying late to an older
+     spouse (v. 5). Each is tagged only with the yoga built from it. */
+  "23.1.7": { tags: ["kalatra_chandra_shukra"], showDespiteChapter: true },
+  "23.5.4": { tags: ["kalatra_mangala_shani"], showDespiteChapter: true },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);

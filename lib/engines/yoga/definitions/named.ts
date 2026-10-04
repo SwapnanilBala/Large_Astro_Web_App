@@ -10,20 +10,25 @@ import {
   overallStrength,
   planetStrength,
   richYogaDetail,
+  signDistance,
   uniquePlanetNames,
 } from "../helpers";
 import { ordinal } from "../factories";
 import { dignifiedInRasiOrNavamsa } from "../navamsa";
-import { KALATRA_CHANDRA_SHANI_SOURCE } from "./sources";
+import {
+  KALATRA_CHANDRA_SHANI_SOURCE,
+  KALATRA_CHANDRA_SHUKRA_SOURCE,
+  KALATRA_MANGALA_SHANI_SOURCE,
+} from "./sources";
 
 // --------------------------------------------------------------------------
 // Named yogas written out in full
 // --------------------------------------------------------------------------
 /*
- * Seven combinations that none of the recipe templates can express, because each
- * makes a claim about several planets or houses at once. The seventh, last
- * below, is the one combination taken from the Brihat Jataka's chapter on
- * malefic yogas.
+ * Combinations that none of the recipe templates can express, because each
+ * makes a claim about several planets or houses at once: six from Jataka
+ * Parijata and Phaladeepika, then, last below, the three Kalatra yogas about
+ * marriage from the Brihat Jataka's chapter on malefic yogas.
  *
  * The list is short on purpose. The literature names hundreds more, and the
  * famous ones that read the navamsa -- Kalpadruma, Parijata, Gauri, Bharathi
@@ -44,10 +49,189 @@ function maleficsIn(chart: YogaChartInput, house: number): PlanetPosition[] {
   return planetsInHouse(chart, house).filter((planet) => NATURAL_MALEFICS.includes(planet.name));
 }
 
-/* Gender-neutral where the 1885 note speaks only of a wife, and stated as a
-   tendency, the way this catalogue states every challenging yoga. */
-const KALATRA_CHANDRA_SHANI_EFFECTS =
-  "The classical notes link this pairing in the house of marriage with a spouse who leaves and marries again. Read as a tendency rather than a verdict, it asks for patience, plain speaking and steady attention in a long partnership.";
+// --------------------------------------------------------------------------
+// The Kalatra yogas: marriage, from the chapter on malefic yogas
+// --------------------------------------------------------------------------
+/*
+ * Brihat Jataka ch. 23 (Chidambaram Iyer's numbering) is the chapter on
+ * malefic yogas. The owner's line, 2026-10-04: a husband or wife leaving can be
+ * shown, and so can the two neighbouring marriage verses, marrying late and
+ * more than one marriage; a spouse's death, barrenness, blindness and other
+ * disability, disease and imprisonment cannot. So these three are the only
+ * combinations taken from that chapter, and the rest of its passages stay
+ * withheld in the knowledge corpus.
+ *
+ * Each states its 1885 text for either partner where the text speaks only of a
+ * wife, and as a tendency, the way this catalogue states every challenging
+ * yoga. "In the 7th house" is the bhava the planet is in, as Shani Digbala
+ * reads it. "Aspects" is the classical rule -- Jupiter on the 5th, 7th and 9th
+ * signs from itself, every other planet on the 7th only -- narrower than
+ * hasFullAspect, so each record stays a subset of its verse.
+ */
+const MALE_PLANETS = ["Sun", "Mars", "Jupiter"];
+const FEMALE_PLANETS = ["Moon", "Venus"];
+
+function aspectsSign(from: PlanetPosition, sign: string): boolean {
+  const distance = signDistance(from.sign, sign);
+  return from.name === "Jupiter" ? [5, 7, 9].includes(distance) : distance === 7;
+}
+
+function seventhHouseSign(chart: YogaChartInput): string | undefined {
+  return chart.houses.find((house) => house.house_number === 7)?.sign;
+}
+
+/** "the Sun", "the Moon", but "Mars": how the descriptions here name a planet mid-sentence. */
+function inProse(planet: string): string {
+  return planet === "Sun" || planet === "Moon" ? `the ${planet}` : planet;
+}
+
+function inProseList(planets: PlanetPosition[]): string {
+  return uniquePlanetNames(planets).map(inProse).join(" and ");
+}
+
+type KalatraSpec = {
+  id: string;
+  name: string;
+  sanskrit: string;
+  source: string;
+  description: string;
+  effects: string;
+  activation: string;
+  traits: string[];
+  /** The planets that form it in this chart and what to say about them, or null. */
+  find: (chart: YogaChartInput) => { planets: PlanetPosition[]; description: string } | null;
+};
+
+function kalatraYoga(spec: KalatraSpec): YogaDefinition {
+  return {
+    id: spec.id,
+    name: spec.name,
+    sanskrit: spec.sanskrit,
+    category: "challenging",
+    source: spec.source,
+    description: spec.description,
+    effects: spec.effects,
+    detect: (chart) => {
+      const found = spec.find(chart);
+      if (!found) return null;
+      const involved = uniquePlanetNames(found.planets);
+      return {
+        yoga_id: spec.id,
+        name: spec.name,
+        sanskrit: spec.sanskrit,
+        category: "challenging",
+        present: true,
+        strength: overallStrength(found.planets.map((planet) => planetStrength(planet.name, planet.sign))),
+        involved_planets: involved,
+        description: found.description,
+        effects: spec.effects,
+        activation_timing: spec.activation,
+        key_traits: spec.traits,
+        source: spec.source,
+        detailed_description: richYogaDetail(spec.name, spec.effects, involved, spec.activation, spec.traits),
+      };
+    },
+  };
+}
+
+const KALATRA_YOGAS: YogaDefinition[] = [
+  /* A spouse leaving. Translator's note to v. 1: "If the Moon and Saturn
+     occupy the 7th house a person's wife will quit him and marry another." */
+  kalatraYoga({
+    id: "kalatra_chandra_shani",
+    name: "Kalatra Chandra-Shani Yoga",
+    sanskrit: "कलत्र चन्द्र-शनि योग",
+    source: KALATRA_CHANDRA_SHANI_SOURCE,
+    description: "The Moon and Saturn together in the 7th house, the house of marriage.",
+    effects:
+      "The classical notes link this pairing in the house of marriage with a spouse who leaves and marries again. Read as a tendency rather than a verdict, it asks for patience, plain speaking and steady attention in a long partnership.",
+    activation: "Moon and Saturn periods, and the years a partnership is tested",
+    traits: ["distance", "patience", "commitment"],
+    find: (chart) => {
+      const moon = findPlanet(chart.planets, "Moon");
+      const saturn = findPlanet(chart.planets, "Saturn");
+      if (!moon || !saturn || moon.house !== 7 || saturn.house !== 7) return null;
+      return {
+        planets: [moon, saturn],
+        description:
+          moon.sign === saturn.sign
+            ? `The Moon and Saturn share ${moon.sign} in the 7th house.`
+            : `The Moon (in ${moon.sign}) and Saturn (in ${saturn.sign}) both fall in the 7th house.`,
+      };
+    },
+  }),
+  /* More than one marriage. Translator's note to v. 1, after a single wife
+     for Jupiter, or the Moon and Venus, in the 7th: "but if the 7th house be
+     aspected by the Moon and Venus, the person will have several wives." Both
+     cast only the 7th-sign aspect, so both stand opposite the 7th. */
+  kalatraYoga({
+    id: "kalatra_chandra_shukra",
+    name: "Kalatra Chandra-Shukra Yoga",
+    sanskrit: "कलत्र चन्द्र-शुक्र योग",
+    source: KALATRA_CHANDRA_SHUKRA_SOURCE,
+    description: "The Moon and Venus both aspecting the 7th house, the house of marriage, from opposite it.",
+    effects:
+      "The classical notes link this with more than one marriage in a lifetime. Read as a tendency rather than a verdict, it asks for care in choosing a partner, and in keeping a first commitment alive.",
+    activation: "Moon and Venus periods, and the years a relationship is begun or renewed",
+    traits: ["warmth", "restlessness", "renewal"],
+    find: (chart) => {
+      const moon = findPlanet(chart.planets, "Moon");
+      const venus = findPlanet(chart.planets, "Venus");
+      const seventh = seventhHouseSign(chart);
+      if (!moon || !venus || !seventh || !aspectsSign(moon, seventh) || !aspectsSign(venus, seventh)) return null;
+      return {
+        planets: [moon, venus],
+        description:
+          moon.sign === venus.sign
+            ? `The Moon and Venus in ${moon.sign} both aspect the 7th house, ${seventh}.`
+            : `The Moon (in ${moon.sign}) and Venus (in ${venus.sign}) both aspect the 7th house, ${seventh}.`,
+      };
+    },
+  }),
+  /* Marrying late, to an older spouse. Verse 5: "if, when male and female
+     planets occupy a sign, Saturn and Mars occupy the 7th house from the
+     ascendant and be aspected by benefic planets, the person's wife will be of
+     advanced age and the man will marry late in life." All three conditions
+     are kept: a male planet (Sun, Mars, Jupiter) sharing a sign with a female
+     one (Moon, Venus), Mars and Saturn in the 7th, and a benefic aspecting
+     them both. Without the benefic, or with Venus and the Moon as the pair, the
+     chapter's verdicts are a spouse's absence or worse, which stay out. */
+  kalatraYoga({
+    id: "kalatra_mangala_shani",
+    name: "Kalatra Mangala-Shani Yoga",
+    sanskrit: "कलत्र मङ्गल-शनि योग",
+    source: KALATRA_MANGALA_SHANI_SOURCE,
+    description:
+      "Mars and Saturn in the 7th house under a benefic's aspect, while a male and a female planet share a sign.",
+    effects:
+      "The Brihat Jataka links this with marrying later in life, to a partner older than you. Read as a tendency rather than a verdict, it favours letting a commitment ripen instead of hurrying it.",
+    activation: "Mars and Saturn periods, and the years after the usual age for settling down",
+    traits: ["patience", "maturity", "late bloom"],
+    find: (chart) => {
+      const mars = findPlanet(chart.planets, "Mars");
+      const saturn = findPlanet(chart.planets, "Saturn");
+      if (!mars || !saturn || mars.house !== 7 || saturn.house !== 7) return null;
+      const benefics = chart.planets.filter(
+        (planet) =>
+          NATURAL_BENEFICS.includes(planet.name) && aspectsSign(planet, mars.sign) && aspectsSign(planet, saturn.sign),
+      );
+      if (benefics.length === 0) return null;
+      const male = chart.planets.find(
+        (planet) =>
+          MALE_PLANETS.includes(planet.name) &&
+          chart.planets.some((other) => FEMALE_PLANETS.includes(other.name) && other.sign === planet.sign),
+      );
+      if (!male) return null;
+      const females = chart.planets.filter((planet) => FEMALE_PLANETS.includes(planet.name) && planet.sign === male.sign);
+      return {
+        planets: [mars, saturn],
+        description:
+          `Mars and Saturn hold the 7th house under the aspect of ${inProseList(benefics)}, ` +
+          `and ${inProse(male.name)} shares ${male.sign} with ${inProseList(females)}.`,
+      };
+    },
+  }),
+];
 
 export const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
   {
@@ -299,60 +483,6 @@ export const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
     },
   },
 
-  // ------------------------------------------------------------------------
-  // From the chapter on malefic yogas
-  // ------------------------------------------------------------------------
-  /*
-   * The only combination from Brihat Jataka ch. 23 the product shows, chosen by
-   * the owner on 2026-10-04: a spouse leaving. A spouse leaving is something a
-   * reader can hear; the rest of that chapter -- a spouse's death, barrenness,
-   * blindness and other disability, disease, imprisonment -- is deliberately
-   * not implemented, and its passages stay withheld in the knowledge corpus.
-   *
-   * The source is the 1885 translator's note to verse 1: "If the Moon and
-   * Saturn occupy the 7th house a person's wife will quit him and marry
-   * another." Stated here for either partner, and in this engine's terms for
-   * "in the 7th house": the bhava each planet is in, as Shani Digbala reads it.
-   */
-  {
-    id: "kalatra_chandra_shani",
-    name: "Kalatra Chandra-Shani Yoga",
-    sanskrit: "कलत्र चन्द्र-शनि योग",
-    category: "challenging",
-    source: KALATRA_CHANDRA_SHANI_SOURCE,
-    description: "The Moon and Saturn together in the 7th house, the house of marriage.",
-    effects: KALATRA_CHANDRA_SHANI_EFFECTS,
-    detect: (chart) => {
-      const moon = findPlanet(chart.planets, "Moon");
-      const saturn = findPlanet(chart.planets, "Saturn");
-      if (!moon || !saturn || moon.house !== 7 || saturn.house !== 7) return null;
-      const involved = ["Moon", "Saturn"];
-      const activation = "Moon and Saturn periods, and the years a partnership is tested";
-      const traits = ["distance", "patience", "commitment"];
-      return {
-        yoga_id: "kalatra_chandra_shani",
-        name: "Kalatra Chandra-Shani Yoga",
-        sanskrit: "कलत्र चन्द्र-शनि योग",
-        category: "challenging",
-        present: true,
-        strength: overallStrength([planetStrength("Moon", moon.sign), planetStrength("Saturn", saturn.sign)]),
-        involved_planets: involved,
-        description:
-          moon.sign === saturn.sign
-            ? `The Moon and Saturn share ${moon.sign} in the 7th house.`
-            : `The Moon (in ${moon.sign}) and Saturn (in ${saturn.sign}) both fall in the 7th house.`,
-        effects: KALATRA_CHANDRA_SHANI_EFFECTS,
-        activation_timing: activation,
-        key_traits: traits,
-        source: KALATRA_CHANDRA_SHANI_SOURCE,
-        detailed_description: richYogaDetail(
-          "Kalatra Chandra-Shani Yoga",
-          KALATRA_CHANDRA_SHANI_EFFECTS,
-          involved,
-          activation,
-          traits
-        ),
-      };
-    },
-  },
+  // The Kalatra yogas, defined above: marriage, from the chapter on malefic yogas.
+  ...KALATRA_YOGAS,
 ];

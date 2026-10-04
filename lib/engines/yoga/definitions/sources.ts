@@ -41,11 +41,16 @@ export const KARAKA_RELATIVE_SOURCE =
   "BPHS and Saravali (benefic and malefic placements reckoned from the Sun and the Moon)";
 
 /*
- * Cited by the 1885 translation's own numbering, edition named, because it is
- * the translator's note rather than Varahamihira's verse and the chapter is
+ * The Kalatra yogas: the three marriage combinations from the Brihat Jataka's
+ * chapter on malefic yogas that the product shows (see named.ts). Cited by the
+ * 1885 translation's own numbering, edition named, because two of them are the
+ * translator's notes rather than Varahamihira's verse and the chapter is
  * numbered differently in Sastri: in Chidambaram Iyer, chapter 23 is "On
- * Malefic Yogas" and the note follows its first verse. The same passage is
- * brihat-jataka-1885:23.1.4 in lib/knowledge/corpus.
+ * Malefic Yogas". The passages are brihat-jataka-1885:23.1.4, 23.1.7 and
+ * 23.5.4 in lib/knowledge/corpus.
  */
-export const KALATRA_CHANDRA_SHANI_SOURCE =
-  "Brihat Jataka, tr. N. Chidambaram Iyer (1885), ch. 23 (malefic yogas), translator's note to v. 1";
+const MALEFIC_CHAPTER_1885 = "Brihat Jataka, tr. N. Chidambaram Iyer (1885), ch. 23 (malefic yogas)";
+
+export const KALATRA_CHANDRA_SHANI_SOURCE = `${MALEFIC_CHAPTER_1885}, translator's note to v. 1`;
+export const KALATRA_CHANDRA_SHUKRA_SOURCE = `${MALEFIC_CHAPTER_1885}, translator's note to v. 1`;
+export const KALATRA_MANGALA_SHANI_SOURCE = `${MALEFIC_CHAPTER_1885}, v. 5`;

@@ -84,8 +84,12 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * Moon and Saturn both in the 7th house). New detections reach the cached
  * chart and life-domain payloads, as v6's did. No rule names the yoga, so
  * rarity.json is not regenerated.
+ *
+ * v8 (2026-10-04): the two other Kalatra yogas joined it, Chandra-Shukra
+ * (more than one marriage) and Mangala-Shani (marrying late), from the same
+ * chapter. Same reasons, same decision on rarity.json.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-10-v7";
+export const RULES_SCHEMA_VERSION = "rules-2026-10-v8";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop

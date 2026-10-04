@@ -32,10 +32,10 @@ function buildChart(): YogaChartInput {
 }
 
 describe("yoga-engine", () => {
-  it("defines exactly 206 unique yogas", () => {
+  it("defines exactly 208 unique yogas", () => {
     const ids = YOGA_DEFINITIONS.map((definition) => definition.id);
-    expect(YOGA_DEFINITIONS).toHaveLength(206);
-    expect(new Set(ids)).toHaveLength(206);
+    expect(YOGA_DEFINITIONS).toHaveLength(208);
+    expect(new Set(ids)).toHaveLength(208);
   });
 
   /* Two yogas sharing a display name would be indistinguishable in the panel,
@@ -120,6 +120,8 @@ describe("yoga-engine: rare whole-chart figures are reachable", () => {
       },
     )],
     ["kalatra_chandra_shani", chartOf({ Moon: 7, Saturn: 7, Sun: 1, Mars: 2, Mercury: 3, Jupiter: 4, Venus: 5 })],
+    ["kalatra_chandra_shukra", chartOf({ Moon: 1, Venus: 1, Sun: 2, Mercury: 2, Mars: 3, Jupiter: 4, Saturn: 5 })],
+    ["kalatra_mangala_shani", chartOf({ Mars: 7, Saturn: 7, Jupiter: 3, Sun: 2, Moon: 2, Mercury: 2, Venus: 4 })],
   ];
 
   it.each(cases)("detects %s on a chart built to satisfy it", (id, chart) => {
@@ -150,6 +152,38 @@ describe("yoga-engine: rare whole-chart figures are reachable", () => {
     expect(found?.description).toBe("The Moon and Saturn share Libra in the 7th house.");
   });
 
+  /* More than one marriage: the Moon and Venus both cast their (7th-sign)
+     aspect on the 7th, which means both stand opposite it. */
+  it("finds Kalatra Chandra-Shukra only when both the Moon and Venus aspect the 7th", () => {
+    const others = { Sun: 2, Mercury: 2, Mars: 3, Jupiter: 4, Saturn: 5 };
+    const detect = (placements: Record<string, number>) =>
+      detectYogas(chartOf({ ...others, ...placements })).find((yoga) => yoga.yoga_id === "kalatra_chandra_shukra");
+
+    expect(detect({ Moon: 1, Venus: 1 })?.description).toBe("The Moon and Venus in Aries both aspect the 7th house, Libra.");
+    expect(detect({ Moon: 1, Venus: 2 })).toBeUndefined();
+    // In the 7th is occupying it, not aspecting it.
+    expect(detect({ Moon: 7, Venus: 7 })).toBeUndefined();
+  });
+
+  /* Marrying late: Mars and Saturn in the 7th, a benefic aspecting them, and a
+     male planet sharing a sign with a female one. Every condition is needed. */
+  it("finds Kalatra Mangala-Shani only with all three of its verse's conditions", () => {
+    const detect = (placements: Record<string, number>) =>
+      detectYogas(chartOf(placements)).find((yoga) => yoga.yoga_id === "kalatra_mangala_shani");
+    const full = { Mars: 7, Saturn: 7, Jupiter: 3, Sun: 2, Moon: 2, Mercury: 2, Venus: 4 };
+
+    expect(detect(full)?.description).toBe(
+      "Mars and Saturn hold the 7th house under the aspect of Jupiter, and the Sun shares Taurus with the Moon.",
+    );
+    expect(detect(full)?.involved_planets).toEqual(["Mars", "Saturn"]);
+    // Jupiter in the 4th casts no aspect on the 7th, and no other benefic does.
+    expect(detect({ ...full, Jupiter: 4 })).toBeUndefined();
+    // No male planet shares a sign with a female one.
+    expect(detect({ ...full, Jupiter: 1, Moon: 5, Venus: 6 })).toBeUndefined();
+    // Saturn outside the 7th.
+    expect(detect({ ...full, Saturn: 8 })).toBeUndefined();
+  });
+
   /* Yava used to be "three signs holding two planets each", a rule of its own
      under the classical name. That is only Kedara with the planets split
      2-2-2-1, and it put Yava on about 6% of charts, every one of which also
@@ -167,11 +201,11 @@ describe("yoga-engine: citations", () => {
   /* The hundred added in 2026-09 each name the text they come from. The
      original hundred deliberately do not -- see the note on YogaDefinition --
      except Kedara and Yava, two of the 32 Nabhasa figures, which took the
-     family's citation when they moved in beside it. Kalatra Chandra-Shani,
-     added 2026-10-04 from the malefic-yogas chapter, carries its own. */
+     family's citation when they moved in beside it. The three Kalatra
+     yogas, added 2026-10-04 from the malefic-yogas chapter, carry their own. */
   it("cites a classical source on exactly the definitions that have one", () => {
     const cited = YOGA_DEFINITIONS.filter((definition) => definition.source);
-    expect(cited).toHaveLength(108);
+    expect(cited).toHaveLength(110);
     for (const definition of cited) {
       expect(definition.source!.length).toBeGreaterThan(10);
     }

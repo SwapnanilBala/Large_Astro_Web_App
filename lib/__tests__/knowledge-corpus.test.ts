@@ -124,14 +124,23 @@ describe("the Brihat Jataka corpus", () => {
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
   });
 
-  it("shows one passage of the malefic-yogas chapter, the spouse leaving, tied only to its own yoga", () => {
-    // The owner's line, 2026-10-04: a spouse leaving can be shown; a spouse's
-    // death, disability and disease cannot. Tagged only with the yoga built
-    // from it, so a Moon-Saturn pair elsewhere never pulls it in.
+  it("shows three passages of the malefic-yogas chapter, the marriage ones, each tied only to its own yoga", () => {
+    // The owner's line, 2026-10-04: a spouse leaving, more than one marriage and
+    // marrying late can be shown; a spouse's death, disability and disease
+    // cannot. Each passage is tagged only with the yoga built from it, so the
+    // same planets elsewhere never pull it in.
     const shown = corpus?.passages.filter((passage) => passage.chapter === 23 && !passage.withheld) ?? [];
-    expect(shown.map((passage) => passage.id)).toEqual(["brihat-jataka-1885:23.1.4"]);
-    expect(shown[0].yogaIds).toEqual(["kalatra_chandra_shani"]);
+    expect(shown.map((passage) => [passage.id, passage.yogaIds])).toEqual([
+      ["brihat-jataka-1885:23.1.4", ["kalatra_chandra_shani"]],
+      ["brihat-jataka-1885:23.1.7", ["kalatra_chandra_shukra"]],
+      ["brihat-jataka-1885:23.5.4", ["kalatra_mangala_shani"]],
+    ]);
     expect(shown[0].text).toMatch(/wife will quit him and marry another/);
-    expect(YOGA_DEFINITIONS.find((definition) => definition.id === "kalatra_chandra_shani")?.source).toContain("ch. 23");
+    expect(shown[1].text).toMatch(/several wives/);
+    expect(shown[2].text).toMatch(/marry late in life/);
+    for (const passage of shown) {
+      const yoga = YOGA_DEFINITIONS.find((definition) => definition.id === passage.yogaIds[0]);
+      expect(yoga?.source, passage.id).toContain("ch. 23");
+    }
   });
 });

@@ -3,7 +3,7 @@
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
 - Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v7`.
-- Yogas: `lib/engines/yoga-engine.ts` (206 yogas). That file is only a re-export; the code is in `lib/engines/yoga/`. `index.ts` holds the detector and the assembled list, and `definitions/` holds the 206 records in seven files, grouped by how each one is built rather than by what it means:
+- Yogas: `lib/engines/yoga-engine.ts` (208 yogas). That file is only a re-export; the code is in `lib/engines/yoga/`. `index.ts` holds the detector and the assembled list, and `definitions/` holds the 208 records in seven files, grouped by how each one is built rather than by what it means:
 
 | file | yogas | this document |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ This is a plain-English description of two rule sets: the Ultimate Module (the "
 | `definitions/additional.ts` | 28 | section 3 |
 | `definitions/nabhasa.ts` | 32 | section 11 |
 | `definitions/classical.ts` | 64 | sections 4 to 10 |
-| `definitions/named.ts` | 7 | section 12 |
+| `definitions/named.ts` | 9 | section 12 |
 | `definitions/navamsa.ts` | 5 | section 13 |
 
 Sections 4 to 10 each draw on both `generated.ts` and `classical.ts`, because those two files are the same six recipe shapes filled in at different times. Two of the 32 whole-chart patterns, Kedara and Yava, were in the engine before the rest of their family arrived and sat in `core.ts` until 2026-10-04, when they moved into `nabhasa.ts`.
@@ -351,7 +351,7 @@ Sub-themes are listed highest score first.
 
 ## General rules
 
-- There are **206** yogas. Each one has a fixed test.
+- There are **208** yogas. Each one has a fixed test.
 - Most yogas are checked on the birth chart only (D1). Five also read the navamsa (D9); they are in section 13. Kurma, in section 12, accepts a strong sign in either chart.
 - Houses are whole signs counted from the Ascendant.
 - "Looks at" in this part has a simpler meaning than in Part 1. Planet A fully aspects planet B if B is in the same sign as A, or in the 5th, 7th or 9th sign from A. This is the same for every planet.
@@ -656,7 +656,7 @@ These look at the shape of the whole chart. They use only the seven classical pl
 - **Damini**: six signs.
 - **Veena**: seven signs.
 
-## 12. Seven named yogas written in full
+## 12. Nine named yogas written in full
 
 - **Chatussagara** (wealth): all four angles (1, 4, 7, 10) have at least one planet each.
 - **Khadga** (wealth): the 2nd and 9th lords swap houses, and the 1st lord is in an angle or a trine.
@@ -664,7 +664,12 @@ These look at the shape of the whole chart. They use only the seven classical pl
 - **Matsya** (benefic): hard planets are in the 1st and the 9th, the 5th has both a good and a hard planet, and there is no good planet in the 4th or the 8th. An empty 4th or 8th is fine.
 - **Dhwaja** (wealth): every good planet is in the 1st house, and every classical hard planet (Sun, Mars, Saturn) is in the 8th. Strength comes from the good planets only.
 - **Kurma** (benefic): every good planet is in house 5, 6 or 7, every classical hard planet is in house 1, 3 or 11, and every one of them is in a strong sign — in the birth chart or in the navamsa, which is how the old text states it. Always strong.
-- **Kalatra Chandra-Shani** (challenging): the Moon and Saturn are both in the 7th house. Strength combines the two planets' signs. This is the only yoga taken from the Brihat Jataka's chapter on malefic yogas: chapter 23 in N. Chidambaram Iyer's 1885 translation, where the translator's note to verse 1 says the spouse will leave and marry again. The rest of that chapter (a spouse's death, barrenness, disability, disease, imprisonment) is left out on purpose. It shows on about 0.7% of charts, which is what a one-in-twelve chance for each planet predicts.
+
+The last three are the Kalatra yogas, about marriage. They are the only yogas taken from the Brihat Jataka's chapter on malefic yogas (chapter 23 in N. Chidambaram Iyer's 1885 translation). The rest of that chapter (a spouse's death, barrenness, disability, disease, imprisonment) is left out on purpose. "Aspects" in these three uses the classical rule rather than the one in the general rules above: Jupiter looks at the 5th, 7th and 9th signs from itself, every other planet at the 7th only.
+
+- **Kalatra Chandra-Shani** (challenging): the Moon and Saturn are both in the 7th house. The translator's note to verse 1 says the spouse will leave and marry again. Strength combines the two planets' signs. About 0.7% of charts, which is what a one-in-twelve chance for each planet predicts.
+- **Kalatra Chandra-Shukra** (challenging): the Moon and Venus both look at the 7th house, which means both stand opposite it. The same note says there will be more than one marriage. About 0.7% of charts.
+- **Kalatra Mangala-Shani** (challenging): Mars and Saturn are both in the 7th house, a good planet (Jupiter, Venus or Mercury) looks at them, and a male planet (Sun, Mars or Jupiter) shares a sign with a female one (the Moon or Venus). Verse 5 says the person will marry late, to an older partner. All three conditions are required, so it is rarer: about 0.16% of charts.
 
 ## 13. The five yogas that read the navamsa
 
