@@ -182,23 +182,23 @@
       },
       "fagan_bradley": {
         "label": "Fagan-Bradley",
-        "origin": "??????? ???????? ????",
+        "origin": "पश्चिमी निरयण मानक",
         "description": "पश्चिमी निरयण मानक, आमने-सामने तुलना के लिए।",
-        "method": "Fagan-Bradley Swiss Ephemeris ?? 24.042044444 ?????? at JD 2433282.42346 reference ?? ????? ???",
+        "method": "Fagan-Bradley, Swiss Ephemeris के संदर्भ मान का अनुसरण करता है: JD 2433282.42346 पर 24.042044444 अंश।",
         "summary": "पश्चिमी निरयण संदर्भ, तुलनात्मक कार्य के लिए।"
       },
       "pushyapaksha": {
         "label": "Pushyapaksha",
-        "origin": "Pushya ???? anchor",
+        "origin": "पुष्य नक्षत्र आधार",
         "description": "किसी गणना के बजाय पुष्य नक्षत्र पर आधारित।",
-        "method": "Pushyapaksha True Pushya rule ????? ??: Asellus Australis / delta Cancri ?? Cancer ?? 16 degrees ?? ??? ???? ???",
+        "method": "Pushyapaksha, True Pushya नियम का अनुसरण करता है: Asellus Australis / delta Cancri को कर्क के 16 अंश पर स्थिर रखा जाता है।",
         "summary": "नक्षत्र-आधारित संदर्भ, पुष्य पर स्थिर।"
       },
       "yukteshwar": {
         "label": "Yukteshwar",
-        "origin": "Sri Yukteshwar ??????",
+        "origin": "श्री युक्तेश्वर परंपरा",
         "description": "श्री युक्तेश्वर की परंपरा का अनुसरण करता है।",
-        "method": "Yukteshwar Swiss Ephemeris ?? 360 - 338.917778 degrees at J1900.0 reference ?? ????? ???",
+        "method": "Yukteshwar, Swiss Ephemeris के संदर्भ मान का अनुसरण करता है: J1900.0 पर 360 - 338.917778 अंश।",
         "summary": "श्री युक्तेश्वर की परंपरा में एक वैकल्पिक निरयण गणना।"
       }
     },
