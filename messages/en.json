@@ -115,6 +115,7 @@
     "cta": "Unravel My Future",
     "memberLogin": "Log In",
     "memberLoginAria": "Log in to a profile saved on this device",
+    "languageLabel": "Language",
     "actionHint": "Complete all fields to generate your chart",
     "actionHintMissing": "Add {fields} to continue.",
     "actionHintCoordinates": "Waiting for coordinates…",

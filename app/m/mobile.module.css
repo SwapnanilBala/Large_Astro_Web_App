@@ -67,6 +67,54 @@
   text-underline-offset: 0.25em;
 }
 
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* The language select, set as text beside the sign-in link for the same
+   reason that is a link: the first screen's one filled control is the way
+   forward. A native select keeps the system picker; appearance: none only
+   drops the box it draws closed, and the chevron stands in for its arrow. */
+.languagePicker {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.languageSelect {
+  min-height: 2.75rem;
+  padding: 0 1.1rem 0 0.25rem;
+  font: inherit;
+  font-size: 0.9375rem;
+  color: var(--text-primary);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  /* As wide as the chosen name rather than the longest one, so the chevron
+     sits beside "বাংলা" instead of a gap away. Where unsupported the select
+     keeps its native width, which is only looser. */
+  field-sizing: content;
+}
+
+/* mobile-shell.css rings only links and buttons. */
+.languageSelect:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.languageChevron {
+  position: absolute;
+  right: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+}
+
 .header {
   display: flex;
   flex-direction: column;

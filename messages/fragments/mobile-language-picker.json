@@ -1,0 +1,27 @@
+{
+  "es": {
+    "home": {
+      "languageLabel": "Idioma"
+    }
+  },
+  "bn": {
+    "home": {
+      "languageLabel": "ভাষা"
+    }
+  },
+  "hi": {
+    "home": {
+      "languageLabel": "भाषा"
+    }
+  },
+  "it": {
+    "home": {
+      "languageLabel": "Lingua"
+    }
+  },
+  "fr": {
+    "home": {
+      "languageLabel": "Langue"
+    }
+  }
+}

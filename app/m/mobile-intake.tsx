@@ -22,7 +22,13 @@ import {
   type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
-import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
+import {
+  LANGUAGE_CODES,
+  LANGUAGE_NAMES,
+  LOCALE_TAGS,
+  useTranslation,
+  type Language,
+} from "@/lib/i18n-context";
 import { localScopedKey } from "@/lib/local-scope";
 import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useHydrated } from "@/lib/use-hydrated";
@@ -109,7 +115,7 @@ function initialDraft(): ProfileQueryInput {
 
 export default function MobileIntake() {
   const router = useRouter();
-  const { t, language } = useTranslation();
+  const { t, language, setLanguage } = useTranslation();
   /* The normalisers hand back catalog keys and canonical dates and times;
      both are written out here, at render time, in the visitor's language --
      the same way the desktop intake and the compatibility form do it. */
@@ -466,21 +472,47 @@ export default function MobileIntake() {
     <form className={styles.page} onSubmit={onSubmit} noValidate>
       <div className={styles.topBar}>
         <span className={styles.wordmark}>Lagna Atelier</span>
-        {/* The way in for a member who already has charts on this device, on
-            every question rather than only the first.
+        <div className={styles.topActions}>
+          {/* The interface language. The tree starts each visitor in the
+              language of where they are (lib/location-language.ts), so it
+              needs a way back out for anyone the location guessed wrong for
+              -- and the desktop's switcher is in a navbar this tree does not
+              have. A native select, so the choice opens in the phone's own
+              picker; each name is written in its own language and tagged as
+              such, so a screen reader says "বাংলা" in Bengali. */}
+          <span className={styles.languagePicker}>
+            <select
+              className={styles.languageSelect}
+              value={language}
+              onChange={(event) => setLanguage(event.target.value as Language)}
+              aria-label={t("home.languageLabel")}
+            >
+              {LANGUAGE_CODES.map((code) => (
+                <option key={code} value={code} lang={code}>
+                  {LANGUAGE_NAMES[code]}
+                </option>
+              ))}
+            </select>
+            <span className={styles.languageChevron} aria-hidden="true">
+              ▾
+            </span>
+          </span>
+          {/* The way in for a member who already has charts on this device, on
+              every question rather than only the first.
 
-            An anchor, not a button: it cannot submit the form it sits in, and
-            the draft is written to localStorage on every edit, so leaving
-            mid-entry costs nothing.
+              An anchor, not a button: it cannot submit the form it sits in, and
+              the draft is written to localStorage on every edit, so leaving
+              mid-entry costs nothing.
 
-            A bare anchor rather than next/link, which is the convention
-            everywhere else. Link is not otherwise in /m's graph and pulls 3.3KB
-            gzipped into the one route with the least headroom, and its default
-            prefetch would fetch the login route for every visitor, including
-            the many here to build a first chart who will never tap this. */}
-        <a href="/m/login" className={styles.topLink} aria-label={t("home.memberLoginAria")}>
-          {t("account.heading")}
-        </a>
+              A bare anchor rather than next/link, which is the convention
+              everywhere else. Link is not otherwise in /m's graph and pulls 3.3KB
+              gzipped into the one route with the least headroom, and its default
+              prefetch would fetch the login route for every visitor, including
+              the many here to build a first chart who will never tap this. */}
+          <a href="/m/login" className={styles.topLink} aria-label={t("home.memberLoginAria")}>
+            {t("account.heading")}
+          </a>
+        </div>
       </div>
 
       <header className={styles.header}>
