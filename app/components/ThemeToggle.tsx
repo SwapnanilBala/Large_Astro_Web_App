@@ -1,65 +1,31 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useTranslation } from "@/lib/i18n-context";
+import { useTheme } from "@/lib/use-theme";
+import { MoonIcon, SunIcon } from "@/app/components/locale-icons";
 
-const THEME_STORAGE_KEY = "lagna-theme";
-type Theme = "dark" | "light";
-
-function readTheme(): Theme {
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
-}
-
-function applyTheme(theme: Theme) {
-  const root = document.documentElement;
-  root.dataset.theme = theme;
-  root.style.colorScheme = theme;
-  document.body.style.background = theme === "light" ? "#fff8f5" : "#07111b";
-}
-
-function subscribe(onStoreChange: () => void) {
-  const observer = new MutationObserver(onStoreChange);
-  observer.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["data-theme"],
-  });
-  window.addEventListener("storage", onStoreChange);
-
-  return () => {
-    observer.disconnect();
-    window.removeEventListener("storage", onStoreChange);
-  };
-}
-
-function getServerSnapshot(): Theme {
-  return "dark";
-}
-
+/*
+ * Light and dark as a switch with both ends in view: the sun and the moon sit
+ * at either end of a track, and a gold knob rests under the one in force. The
+ * old control was a 44px circle showing only the theme you were not in, which
+ * read as a glyph rather than a control.
+ *
+ * The knob's place comes from html[data-theme] in globals.css, not from React
+ * state, so it is right from the first paint: every page is rendered dark and
+ * the bootstrap in app/layout.tsx may flip the attribute before this hydrates.
+ * The label is the one thing that waits for hydration, and it says what a
+ * press will do.
+ */
 export default function ThemeToggle() {
-  const theme = useSyncExternalStore(subscribe, readTheme, getServerSnapshot);
-
-  const toggleTheme = () => {
-    const nextTheme: Theme = theme === "dark" ? "light" : "dark";
-    applyTheme(nextTheme);
-
-    try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    } catch {
-      // The visual preference should still work when storage is unavailable.
-    }
-  };
-
-  const isDark = theme === "dark";
+  const { theme, toggleTheme } = useTheme();
+  const { t } = useTranslation();
+  const label = theme === "dark" ? t("home.switchToLightMode") : t("home.switchToDarkMode");
 
   return (
-    <button
-      type="button"
-      className="theme-toggle-btn"
-      onClick={toggleTheme}
-      aria-label={isDark ? "Switch to the Ethereal Dawn light theme" : "Switch to the Celestial Luxe dark theme"}
-      aria-pressed={!isDark}
-      title={isDark ? "Use Ethereal Dawn" : "Use Celestial Luxe"}
-    >
-      <span aria-hidden="true">{isDark ? "☼" : "☾"}</span>
+    <button type="button" className="theme-toggle-btn" onClick={toggleTheme} aria-label={label} title={label}>
+      <span className="theme-toggle-knob" aria-hidden="true" />
+      <SunIcon className="theme-toggle-icon theme-toggle-icon--sun" />
+      <MoonIcon className="theme-toggle-icon theme-toggle-icon--moon" />
     </button>
   );
 }

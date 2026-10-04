@@ -22,6 +22,7 @@ import {
   type PlaceSuggestion,
 } from "@/lib/intake-normalize";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
+import { ChevronDownIcon, GlobeIcon, MoonIcon, SunIcon } from "@/app/components/locale-icons";
 import {
   LANGUAGE_CODES,
   LANGUAGE_NAMES,
@@ -32,6 +33,7 @@ import {
 import { localScopedKey } from "@/lib/local-scope";
 import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useHydrated } from "@/lib/use-hydrated";
+import { useTheme } from "@/lib/use-theme";
 import styles from "./mobile.module.css";
 
 /* The four questions, in order. */
@@ -116,6 +118,7 @@ function initialDraft(): ProfileQueryInput {
 export default function MobileIntake() {
   const router = useRouter();
   const { t, language, setLanguage } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
   /* The normalisers hand back catalog keys and canonical dates and times;
      both are written out here, at render time, in the visitor's language --
      the same way the desktop intake and the compatibility form do it. */
@@ -477,10 +480,21 @@ export default function MobileIntake() {
               language of where they are (lib/location-language.ts), so it
               needs a way back out for anyone the location guessed wrong for
               -- and the desktop's switcher is in a navbar this tree does not
-              have. A native select, so the choice opens in the phone's own
-              picker; each name is written in its own language and tagged as
-              such, so a screen reader says "বাংলা" in Bengali. */}
-          <span className={styles.languagePicker}>
+              have.
+
+              What shows is an outlined pill: a globe and the language's code.
+              The full name would not fit beside the wordmark, the theme
+              button and "Sign in" at 375px ("Français" alone overflows). What
+              is pressed is a native select laid invisibly over the pill, so
+              the choice opens in the phone's own picker, where each language
+              is named in itself and tagged as such -- a screen reader says
+              "বাংলা" in Bengali. The select is the control in every other
+              sense too: it takes focus, carries the name "Language", and its
+              value is what is announced. */}
+          <span className={styles.languagePill}>
+            <GlobeIcon className={styles.pillIcon} />
+            <span aria-hidden="true">{language.toUpperCase()}</span>
+            <ChevronDownIcon className={styles.pillChevron} />
             <select
               className={styles.languageSelect}
               value={language}
@@ -493,10 +507,21 @@ export default function MobileIntake() {
                 </option>
               ))}
             </select>
-            <span className={styles.languageChevron} aria-hidden="true">
-              ▾
-            </span>
           </span>
+          {/* Light or dark, which the tree has always rendered but never
+              offered: the theme came only from a choice made on desktop. It
+              shows the theme a press leads to, a sun in the dark and a moon
+              on paper; which one comes from html[data-theme] in the
+              stylesheet, so it is right from first paint. */}
+          <button
+            type="button"
+            className={styles.themeButton}
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? t("home.switchToLightMode") : t("home.switchToDarkMode")}
+          >
+            <SunIcon className={`${styles.themeIcon} ${styles.themeSun}`} />
+            <MoonIcon className={`${styles.themeIcon} ${styles.themeMoon}`} />
+          </button>
           {/* The way in for a member who already has charts on this device, on
               every question rather than only the first.
 

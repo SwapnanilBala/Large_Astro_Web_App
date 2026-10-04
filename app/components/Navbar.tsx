@@ -9,6 +9,7 @@ import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@
 import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 import { useHydrated } from "@/lib/use-hydrated";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import { ChevronDownIcon, GlobeIcon } from "@/app/components/locale-icons";
 
 export default function Navbar() {
   const { account, status, signOut } = useAccount();
@@ -132,17 +133,27 @@ export default function Navbar() {
         <div className="navbar-right">
           <ThemeToggle />
 
-          {/* Language Selector - always visible */}
+          {/* Language Selector - always visible.
+
+              A globe and the language's own name, so someone who does not
+              read the current language still recognises their own on the
+              button: "हिन्दी" says more to a Hindi reader than "HI" did. The
+              name gives way to the code where the bar is narrow. Its
+              accessible name is "Language: <name>", the visible words plus
+              what the globe stands for. */}
           <div className="lang-selector" ref={langRef}>
             <button
               className="lang-toggle"
               onClick={() => setLangOpen((prev) => !prev)}
               type="button"
-              aria-label="Select language"
               aria-expanded={langOpen}
               aria-controls="navbar-language-menu"
             >
-              {language.toUpperCase()}
+              <GlobeIcon className="lang-toggle-icon" />
+              <span className="lang-toggle-prefix">{t("home.languageLabel")}: </span>
+              <span className="lang-toggle-name">{LANGUAGE_NAMES[language]}</span>
+              <span className="lang-toggle-code">{language.toUpperCase()}</span>
+              <ChevronDownIcon className="lang-toggle-chevron" />
             </button>
             {langOpen && (
               <div id="navbar-language-menu" className="lang-dropdown anim-fade-in">

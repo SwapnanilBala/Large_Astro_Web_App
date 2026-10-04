@@ -45,10 +45,11 @@ describe("mobile intake: language", () => {
     }
   });
 
-  it("shows the language the location suggested", () => {
-    document.cookie = "astro_location_locale=bn-IN; path=/";
+  it("shows the language the location suggested, by code on the pill", () => {
+    document.cookie = "astro_location_locale=bn-IN.2; path=/";
     renderIntake();
     expect(screen.getByRole("combobox", { name: "Language" })).toHaveValue("bn");
+    expect(screen.getByText("BN")).toBeInTheDocument();
   });
 
   it("keeps a choice for the next visit, over the location", async () => {

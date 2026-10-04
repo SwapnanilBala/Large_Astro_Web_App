@@ -3009,41 +3009,100 @@ html[data-chart-history] .navbar-chart-link--pending {
   gap: 0.75rem;
 }
 
-.theme-toggle-btn {
-  background: var(--surface-soft) !important;
-  border: 1px solid var(--line-soft) !important;
-  color: var(--accent-gold) !important;
-  font-size: 1.7rem;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem !important;
-  min-width: 2.75rem;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 !important;
+/* ── Light/dark switch and language button ─────
+ *
+ * A pair, sized and edged alike so they read as the bar's controls: 48px tall
+ * pills with a gold edge strong enough to find at a glance, where the old
+ * 44px circles had a hairline that all but vanished against the glass.
+ *
+ * Both opt out of the global button dressing -- the gradient fill, the ripple
+ * and halo pseudo-elements, the lift on hover -- with !important, which is the
+ * weight those global rules carry. Hover changes colour only: no scaling, so
+ * nothing beside them moves. */
+
+.theme-toggle-btn,
+.lang-toggle {
+  position: relative;
+  height: 3rem;
+  min-height: 3rem !important;
   margin: 0 !important;
-  backdrop-filter: blur(16px);
-  transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
+  border: 1px solid rgba(240, 183, 84, 0.55) !important;
+  border-radius: 999px;
+  background: var(--surface) !important;
   box-shadow: none !important;
-  line-height: 1;
+  text-shadow: none !important;
+  cursor: pointer;
+  backdrop-filter: blur(16px);
+  transition: border-color 200ms ease, background-color 200ms ease;
 }
 
-.theme-toggle-btn:hover {
-  border-color: #F0B754 !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 4px 20px rgba(240, 183, 84, 0.2) !important;
-  background: rgba(240, 183, 84, 0.1) !important;
-}
-
-.theme-toggle-btn:active {
-  transform: scale(0.95) !important;
-}
-
-.theme-toggle-btn::after {
+.theme-toggle-btn::before,
+.theme-toggle-btn::after,
+.lang-toggle::before,
+.lang-toggle::after {
   display: none !important;
+}
+
+.theme-toggle-btn:hover,
+.lang-toggle:hover {
+  border-color: #F0B754 !important;
+  background: rgba(240, 183, 84, 0.1) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* The switch: sun at one end, moon at the other, the knob under the theme in
+   force. Measured off the padding box (the 1px border sits outside it): 86px
+   wide, so with 12px of padding each 20px icon centres 22px from its end, and
+   the 36px knob at 4px in is centred under the sun -- or, moved 42px, under
+   the moon. */
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 5.5rem;
+  min-width: 5.5rem;
+  padding: 0 0.75rem !important;
+  color: var(--ink-soft) !important;
+}
+
+.theme-toggle-knob {
+  position: absolute;
+  top: calc(50% - 1.125rem);
+  left: 0.25rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: var(--accent-gold);
+  box-shadow: 0 2px 10px rgba(240, 183, 84, 0.35);
+  transform: translateX(2.625rem);
+  transition: transform 260ms cubic-bezier(.2, .9, .3, 1.1);
+}
+
+html[data-theme="light"] .theme-toggle-knob {
+  transform: none;
+}
+
+.theme-toggle-icon {
+  position: relative;
+  z-index: 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  transition: color 200ms ease;
+}
+
+/* The icon riding on the knob is inked so it reads on the gold. */
+html:not([data-theme="light"]) .theme-toggle-icon--moon {
+  color: #1a1206;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-toggle-knob,
+  .theme-toggle-icon {
+    transition: none;
+  }
 }
 
 /* ── Navbar Right Container ──────────────────── */
@@ -3060,43 +3119,113 @@ html[data-chart-history] .navbar-chart-link--pending {
   position: relative;
 }
 
+/* The language button: globe, the language's own name, chevron. The shared
+   rules above give it its box. */
 .lang-toggle {
-  background: var(--surface) !important;
-  border: 1px solid var(--line-soft) !important;
-  color: var(--ink-soft) !important;
-  font-size: 1.32rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  width: 2.75rem;
-  height: 2.75rem;
-  min-height: 2.75rem !important;
-  min-width: 2.75rem;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 0 !important;
-  margin: 0 !important;
-  backdrop-filter: blur(16px);
-  transition: border-color 250ms ease, transform 250ms ease, box-shadow 250ms ease, background 250ms ease;
-  box-shadow: none !important;
+  gap: 0.5rem;
+  padding: 0 0.95rem 0 0.85rem !important;
+  color: var(--ink-main) !important;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
   line-height: 1;
+  white-space: nowrap;
 }
 
-.lang-toggle:hover {
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  transform: scale(1.15) !important;
-  box-shadow: 0 4px 20px rgba(240, 183, 84, 0.2) !important;
-  background: rgba(240, 183, 84, 0.1) !important;
+.lang-toggle-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: var(--accent-gold);
 }
 
-.lang-toggle:active {
-  transform: scale(0.95) !important;
+.lang-toggle-chevron {
+  width: 0.9rem;
+  height: 0.9rem;
+  flex-shrink: 0;
+  color: var(--ink-soft);
+  transition: transform 200ms ease;
 }
 
-.lang-toggle::after {
-  display: none !important;
+.lang-toggle[aria-expanded="true"] .lang-toggle-chevron {
+  transform: rotate(180deg);
+}
+
+/* "Language: " for assistive technology, which the globe says to the eye. */
+.lang-toggle-prefix {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.lang-toggle-code {
+  display: none;
+  letter-spacing: 0.06em;
+}
+
+/* Narrow bars keep the code: the drawer and the brand need the room. */
+@media (max-width: 640px) {
+  .lang-toggle-name {
+    display: none;
+  }
+
+  .lang-toggle-code {
+    display: inline;
+  }
+}
+
+/* Narrower still, both controls shrink so the brand keeps one line. At 375px
+   the full pair (88px switch, 103px pill) took 267px with the menu button and
+   folded "Lagna Atelier" onto two lines, lifting the bar over the page; this
+   is 176px, which leaves the brand the ~166px it needs. The switch becomes a
+   44px button carrying just the knob and the theme in force, and the pill
+   drops its chevron. */
+@media (max-width: 480px) {
+  .navbar-right {
+    gap: 0.5rem;
+  }
+
+  .theme-toggle-btn,
+  .lang-toggle {
+    height: 2.75rem;
+    min-height: 2.75rem !important;
+  }
+
+  .theme-toggle-btn {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    justify-content: center;
+    padding: 0 !important;
+  }
+
+  .theme-toggle-knob,
+  html[data-theme="light"] .theme-toggle-knob {
+    top: calc(50% - 1rem);
+    left: calc(50% - 1rem);
+    width: 2rem;
+    height: 2rem;
+    transform: none;
+  }
+
+  html:not([data-theme="light"]) .theme-toggle-icon--sun,
+  html[data-theme="light"] .theme-toggle-icon--moon {
+    display: none;
+  }
+
+  .lang-toggle {
+    gap: 0.4rem;
+    padding: 0 0.75rem !important;
+  }
+
+  .lang-toggle-chevron {
+    display: none;
+  }
 }
 
 .lang-dropdown {
@@ -3119,6 +3248,9 @@ html[data-chart-history] .navbar-chart-link--pending {
 .lang-option {
   display: flex;
   align-items: center;
+  /* Against the global button rule's centring, which set each row's code and
+     name at a different indent, since the names are not one width. */
+  justify-content: flex-start;
   gap: 0.5rem;
   width: 100%;
   padding: 0.5rem 0.7rem;
@@ -7887,15 +8019,23 @@ html[data-theme="light"] .site-navbar.navbar-scrolled {
 
 html[data-theme="light"] .theme-toggle-btn,
 html[data-theme="light"] .lang-toggle {
-  background: rgba(255, 255, 255, 0.68) !important;
-  border-color: rgba(126, 78, 98, 0.16) !important;
+  background: rgba(255, 255, 255, 0.78) !important;
+  border-color: rgba(131, 83, 42, 0.5) !important;
 }
 
 html[data-theme="light"] .theme-toggle-btn:hover,
 html[data-theme="light"] .lang-toggle:hover {
-  background: rgba(255, 236, 225, 0.82) !important;
-  border-color: rgba(173, 113, 56, 0.38) !important;
-  box-shadow: 0 6px 18px rgba(173, 113, 56, 0.13) !important;
+  background: rgba(255, 236, 225, 0.9) !important;
+  border-color: var(--accent-gold) !important;
+}
+
+html[data-theme="light"] .theme-toggle-knob {
+  box-shadow: 0 2px 10px rgba(131, 83, 42, 0.3);
+}
+
+/* On paper the knob is the darker gold, so the sun riding it goes light. */
+html[data-theme="light"] .theme-toggle-icon--sun {
+  color: #fff8f5;
 }
 
 html[data-theme="light"] .lang-dropdown {
