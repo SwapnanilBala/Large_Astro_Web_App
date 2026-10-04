@@ -71,6 +71,20 @@
       "when": 1791008208746,
       "tag": "0009_user_preferences",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791141253059,
+      "tag": "0010_vector_extension",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1791141263005,
+      "tag": "0011_knowledge_passages",
+      "breakpoints": true
     }
   ]
 }

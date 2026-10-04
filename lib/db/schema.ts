@@ -19,8 +19,10 @@ import {
   uniqueIndex,
   uuid,
   varchar,
+  vector,
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
+import { KNOWLEDGE_EMBEDDING_DIMENSIONS } from "../knowledge/embedding";
 
 type JsonObject = Record<string, unknown>;
 
@@ -851,6 +853,69 @@ export const llmBudgetCounters = pgTable(
        weekly prune is a range scan on the same index. */
     primaryKey({ columns: [table.utcDay, table.route, table.caller] }),
     check("llm_budget_counters_count_check", sql`${table.count} >= 0`),
+  ],
+);
+
+/**
+ * Passages from classical texts, for readings to quote.
+ *
+ * Reference data, not anyone's records: no `user_id`, and every row comes from
+ * a checked-in corpus file (`lib/knowledge/corpus/*.json`) by way of
+ * `npm run knowledge:load`. The file is the source of truth and this table is
+ * an index over it: a verse whose wording changes is re-embedded, and one that
+ * leaves the corpus is deleted.
+ *
+ * Two ways in. `yoga_ids` holds the yoga engine's own ids, so a reading fetches
+ * the passages for the yogas a chart actually has with an exact array match
+ * and no embedding call. `embedding` serves the looser case, a question in the
+ * reader's own words, by cosine distance.
+ *
+ * `withheld` rows are kept for completeness but never retrieved: the verse's
+ * main claim is about death, illness, caste, crime, harm to family or sexual
+ * morality, and no reading here prints those. The check keeps a reason on
+ * every withheld row and on no other.
+ */
+export const knowledgePassages = pgTable(
+  "knowledge_passages",
+  {
+    /** `<source>:<chapter>.<verse>`, e.g. `brihat-jataka-1885:12.3`. */
+    id: varchar("id", { length: 120 }).primaryKey(),
+    source: varchar("source", { length: 60 }).notNull(),
+    chapter: smallint("chapter").notNull(),
+    verse: smallint("verse").notNull(),
+    chapterTitle: text("chapter_title").notNull(),
+    /** The translator's words, OCR damage repaired and nothing else changed. */
+    text: text("text").notNull(),
+    notes: text("notes"),
+    /** Plain modern English: what the verse says, attributed to the text. */
+    summary: text("summary").notNull(),
+    yogaIds: text("yoga_ids").array().notNull(),
+    planets: text("planets").array().notNull(),
+    lifeAreas: text("life_areas").array().notNull(),
+    withheld: boolean("withheld").notNull(),
+    withheldReason: text("withheld_reason"),
+    /** sha256 of the embedding input; when it changes, the vector is stale. */
+    contentHash: varchar("content_hash", { length: 64 }).notNull(),
+    embedding: vector("embedding", { dimensions: KNOWLEDGE_EMBEDDING_DIMENSIONS }),
+    embeddingModel: varchar("embedding_model", { length: 80 }),
+    ...timestamps(),
+  },
+  (table) => [
+    unique("knowledge_passages_source_chapter_verse_unique").on(
+      table.source,
+      table.chapter,
+      table.verse,
+    ),
+    index("knowledge_passages_yoga_ids_idx").using("gin", table.yogaIds),
+    index("knowledge_passages_life_areas_idx").using("gin", table.lifeAreas),
+    index("knowledge_passages_embedding_idx").using(
+      "hnsw",
+      table.embedding.op("vector_cosine_ops"),
+    ),
+    check(
+      "knowledge_passages_withheld_reason_check",
+      sql`${table.withheld} = (${table.withheldReason} is not null)`,
+    ),
   ],
 );
 

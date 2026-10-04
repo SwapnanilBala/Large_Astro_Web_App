@@ -25,6 +25,9 @@ const expectedTables = [
   "consent_records",
   "dasha_periods",
   "generated_artifacts",
+  /* Joins the list in 0011. Nothing reads it yet, so its absence would
+     otherwise go unnoticed until the first reading asked it for a passage. */
+  "knowledge_passages",
   /* Joins the list in 0007. Its absence is silent at runtime by design — the
      daily LLM ceiling degrades to the per-instance one it used to be — so this
      check is the only thing that would notice the migration had not run. */
