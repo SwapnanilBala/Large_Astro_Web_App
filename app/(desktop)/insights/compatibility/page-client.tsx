@@ -808,9 +808,11 @@ export default function CompatibilityPageClient({
       <BackToReadingButton />
 
       <section className="dashboard-shell">
-        <p className="kicker">{t("compatibility.kicker")}</p>
-        <h1>{t("compatibility.title")}</h1>
-        <p className="lead">{t("compatibility.intro")}</p>
+        <header className="compat-heading">
+          <p className="kicker">{t("compatibility.kicker")}</p>
+          <h1>{t("compatibility.title")}</h1>
+          <p className="lead">{t("compatibility.intro")}</p>
+        </header>
 
         <div className="compatibility-grid">
           <ProfileCard

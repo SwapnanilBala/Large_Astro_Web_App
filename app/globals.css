@@ -3530,6 +3530,55 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
   gap: 1.25rem;
 }
 
+/* The page's own heading. "Compatibility" sits halfway between the kicker
+   and the intro box, measured from the letters themselves: from the foot of
+   SYNASTRY ANALYSIS to the top of the tallest letter, and from the tails of
+   the p and y to the box's edge, 0.9rem each.
+
+   Line boxes are no guide to where letters are. The title's line-height
+   (1.04) is tighter than its letters, so its p and y hung out of the bottom
+   of its box, where the gradient -- painted only inside the box -- cut them
+   off, and the space read 23px above the word against 13px under what was
+   left of it. So the title gets room to paint its letters whole, and its
+   margins take the line boxes out of the sum. The numbers are the system UI
+   font as Windows draws it, Segoe UI, measured from the letters as painted
+   rather than from the bounds the browser reports, which overstate them: the
+   title's tallest letters stand 0.194em (less half a pixel of rounding)
+   inside the top of its box, its tails reach 0.129em past the bottom, and
+   the kicker's box ends 0.3rem below its capitals. */
+.compat-heading {
+  --heading-gap: 0.9rem;
+}
+
+.compat-heading h1 {
+  /* A block, not the flex box every h1 gets for an icon beside its text:
+     only a block's line box can be trimmed, below. */
+  display: block;
+  padding-bottom: 0.2em;
+  margin: calc(var(--heading-gap) - 0.3rem - 0.194em + 0.5px) 0
+    calc(var(--heading-gap) - 0.2em + 0.129em - 0.5px);
+}
+
+/* Where the browser can trim a line box to the letters itself, it does the
+   measuring, for whichever font the system supplies -- San Francisco on a
+   Mac, Roboto on Android -- not only the one above. Trimmed, the title's box
+   runs from the top of its capitals to its baseline, so it is padded to give
+   the gradient room for the letters that pass those edges: the tallest rise
+   0.04em above the capitals, the p and y fall 0.235em below the baseline.
+   The kicker's round letters dip 0.2px below its own. */
+@supports (text-box: trim-both cap alphabetic) {
+  .compat-heading .kicker {
+    text-box: trim-end text alphabetic;
+  }
+
+  .compat-heading h1 {
+    text-box: trim-both cap alphabetic;
+    padding: 0.35em 0;
+    margin: calc(var(--heading-gap) - 0.35em + 0.04em + 0.2px) 0
+      calc(var(--heading-gap) - 0.35em + 0.235em);
+  }
+}
+
 .compatibility-grid {
   display: grid;
   gap: 1rem;
@@ -3537,6 +3586,15 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
      already known, the right one is the only thing anybody has to fill in. */
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   align-items: start;
+}
+
+/* Without your own chart in the link there is no summary to show: "Your
+   chart" is a form like the other one, and squeezed into the narrow column
+   it had to stack its birth date and time on most laptops, below about
+   1,510px wide. Two forms split the row evenly, and keep the pair side by
+   side from about 1,215px. */
+.compatibility-grid:not(:has(.compat-summary)) {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .compatibility-profile-card {
@@ -3624,9 +3682,10 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
 }
 
 /* The birth date and time. A native date input will not shrink below its own
-   dd/mm/yyyy, and in the narrower card half a row was less than that: the date
-   box ran under the time box, by 31px at 1280px wide and 87px at 990px. So
-   this row wraps instead, side by side only while each half can hold 15rem.
+   dd/mm/yyyy, and half a row can be less than that: in the narrow column the
+   date box ran under the time box, by 31px at 1280px wide and 87px at 990px,
+   and even split evenly a card is that narrow below about 1,215px. So this
+   row wraps instead, side by side only while each half can hold 15rem.
    That is about what the date control needs at this type size, and room for
    every translation of the two labels on one line, so the pair stays level.
    A control that needs more still wraps in time: a flex item does not shrink
@@ -4154,7 +4213,8 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
 
 
 @media (max-width: 980px) {
-  .compatibility-grid {
+  .compatibility-grid,
+  .compatibility-grid:not(:has(.compat-summary)) {
     grid-template-columns: 1fr;
   }
 
