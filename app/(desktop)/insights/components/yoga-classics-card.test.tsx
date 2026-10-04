@@ -101,7 +101,8 @@ describe("the classical yoga card", () => {
     expect(items[0]).toHaveTextContent("Brihat Jataka 13.8");
     expect(items[2]).toHaveTextContent("Brihat Jataka 12.17 · translator's note");
     expect(items[1].querySelector("q")).toHaveAttribute("lang", "en");
-    expect(screen.getByText(/Chidambaram Iyer's English translation of 1885/)).toBeInTheDocument();
+    expect(screen.getByText(/The numbers point to the verses they come from/)).toBeInTheDocument();
+    expect(screen.queryByText(/\bAI\b/)).toBeNull();
   });
 
   it.each([

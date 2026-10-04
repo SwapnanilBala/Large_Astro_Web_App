@@ -265,7 +265,7 @@
         "sourcesLabel": "The verses ({count})",
         "sourceRef": "Brihat Jataka {ref}",
         "noteLabel": "translator's note",
-        "credit": "Varahamihira's Brihat Jataka, quoted as printed in N. Chidambaram Iyer's English translation of 1885. The note above is written from these verses by an AI model."
+        "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka."
       }
     }
   }

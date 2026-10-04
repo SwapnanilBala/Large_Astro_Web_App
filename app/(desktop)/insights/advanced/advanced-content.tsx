@@ -457,7 +457,7 @@ export default function AdvancedContent({
                 <>
               Nakshatra cycles, Dasha timing, Navamsa refinements, divisional charts,
               planetary yogas, transit overlays, Ashtakavarga scores, Shadbala strength,
-              and AI-powered palm reading — all in one dedicated space.
+              and palm reading — all in one dedicated space.
                 </>
               )}
             </p>

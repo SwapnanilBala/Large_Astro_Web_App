@@ -9,7 +9,7 @@
           "sourcesLabel": "Los versos ({count})",
           "sourceRef": "Brihat Jataka {ref}",
           "noteLabel": "nota del traductor",
-          "credit": "El Brihat Jataka de Varahamihira, citado tal como se imprimió en la traducción inglesa de N. Chidambaram Iyer de 1885. La nota de arriba la escribe un modelo de IA a partir de estos versos."
+          "credit": "Los números remiten a los versos de los que proceden, citados tal como se imprimieron en la traducción inglesa del Brihat Jataka de Varahamihira hecha por N. Chidambaram Iyer en 1885."
         }
       }
     }
@@ -24,7 +24,7 @@
           "sourcesLabel": "শ্লোক ({count})",
           "sourceRef": "বৃহৎ জাতক {ref}",
           "noteLabel": "অনুবাদকের টীকা",
-          "credit": "বরাহমিহিরের বৃহৎ জাতক, এন. চিদম্বরম আইয়ারের 1885 সালের ইংরেজি অনুবাদ থেকে হুবহু উদ্ধৃত। উপরের টীকাটি এই শ্লোকগুলি থেকে একটি AI মডেল লিখেছে।"
+          "credit": "সংখ্যাগুলি সেই শ্লোকগুলির দিকে নির্দেশ করে, যেখান থেকে কথাগুলি নেওয়া। শ্লোকগুলি বরাহমিহিরের বৃহৎ জাতকের, এন. চিদম্বরম আইয়ারের 1885 সালের ইংরেজি অনুবাদ থেকে হুবহু উদ্ধৃত।"
         }
       }
     }
@@ -39,7 +39,7 @@
           "sourcesLabel": "श्लोक ({count})",
           "sourceRef": "बृहत् जातक {ref}",
           "noteLabel": "अनुवादक की टिप्पणी",
-          "credit": "वराहमिहिर का बृहत् जातक, एन. चिदंबरम अय्यर के 1885 के अंग्रेज़ी अनुवाद से ज्यों का त्यों उद्धृत। ऊपर की टिप्पणी इन्हीं श्लोकों के आधार पर एक AI मॉडल ने लिखी है।"
+          "credit": "अंक उन श्लोकों की ओर संकेत करते हैं जिनसे बात ली गई है। श्लोक वराहमिहिर के बृहत् जातक के, एन. चिदंबरम अय्यर द्वारा 1885 में किए गए अंग्रेज़ी अनुवाद से ज्यों के त्यों उद्धृत हैं।"
         }
       }
     }
@@ -54,7 +54,7 @@
           "sourcesLabel": "I versi ({count})",
           "sourceRef": "Brihat Jataka {ref}",
           "noteLabel": "nota del traduttore",
-          "credit": "Il Brihat Jataka di Varahamihira, citato com'è stampato nella traduzione inglese di N. Chidambaram Iyer del 1885. La nota qui sopra è scritta da un modello di IA a partire da questi versi."
+          "credit": "I numeri rimandano ai versi da cui sono tratti, citati come sono stampati nella traduzione inglese del Brihat Jataka di Varahamihira curata da N. Chidambaram Iyer nel 1885."
         }
       }
     }
@@ -69,7 +69,7 @@
           "sourcesLabel": "Les versets ({count})",
           "sourceRef": "Brihat Jataka {ref}",
           "noteLabel": "note du traducteur",
-          "credit": "Le Brihat Jataka de Varahamihira, cité tel qu'il est imprimé dans la traduction anglaise de N. Chidambaram Iyer (1885). La note ci-dessus est rédigée à partir de ces versets par un modèle d'IA."
+          "credit": "Les numéros renvoient aux versets dont ils sont tirés, cités tels qu'ils sont imprimés dans la traduction anglaise du Brihat Jataka de Varahamihira par N. Chidambaram Iyer (1885)."
         }
       }
     }
