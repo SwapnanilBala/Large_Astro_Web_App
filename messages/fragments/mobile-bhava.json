@@ -1,0 +1,67 @@
+{
+  "es": {
+    "mobileInsights": {
+      "colBhava": "Bhava",
+      "bhavaLegend": "Casa cuenta las casas por signo, como la carta. Bhava es la casa según {system}, el sistema que usan las lecturas.",
+      "chartPlacementBhava": "{planet} en {sign} {degree}, casa {house} · bhava {bhava} ({system})",
+      "systemEqual": "Casas iguales",
+      "systemPlacidus": "Placidus",
+      "systemKoch": "Koch",
+      "systemCampanus": "Campanus",
+      "systemRegiomontanus": "Regiomontanus",
+      "systemPorphyry": "Porfirio"
+    }
+  },
+  "bn": {
+    "mobileInsights": {
+      "colBhava": "চলিত",
+      "bhavaLegend": "ভাব: রাশি থেকে গোনা, চক্রের মতোই। চলিত: {system} পদ্ধতিতে ভাব, যার ভিত্তিতে রিডিং লেখা হয়েছে।",
+      "chartPlacementBhava": "{planet} {sign} {degree}-এ, ভাব {house} · চলিত {bhava} ({system})",
+      "systemEqual": "Equal Houses",
+      "systemPlacidus": "Placidus",
+      "systemKoch": "Koch",
+      "systemCampanus": "Campanus",
+      "systemRegiomontanus": "Regiomontanus",
+      "systemPorphyry": "Porphyry"
+    }
+  },
+  "hi": {
+    "mobileInsights": {
+      "colBhava": "चलित",
+      "bhavaLegend": "भाव: राशि से गिना गया, जैसा कुंडली में है। चलित: {system} पद्धति में भाव, जिस पर रीडिंग आधारित है।",
+      "chartPlacementBhava": "{planet} {sign} {degree} में, भाव {house} · चलित {bhava} ({system})",
+      "systemEqual": "Equal Houses",
+      "systemPlacidus": "Placidus",
+      "systemKoch": "Koch",
+      "systemCampanus": "Campanus",
+      "systemRegiomontanus": "Regiomontanus",
+      "systemPorphyry": "Porphyry"
+    }
+  },
+  "it": {
+    "mobileInsights": {
+      "colBhava": "Bhava",
+      "bhavaLegend": "Casa conta le case per segno, come la carta. Bhava è la casa secondo {system}, il sistema usato dalle letture.",
+      "chartPlacementBhava": "{planet} in {sign} {degree}, casa {house} · bhava {bhava} ({system})",
+      "systemEqual": "Case uguali",
+      "systemPlacidus": "Placidus",
+      "systemKoch": "Koch",
+      "systemCampanus": "Campanus",
+      "systemRegiomontanus": "Regiomontanus",
+      "systemPorphyry": "Porfirio"
+    }
+  },
+  "fr": {
+    "mobileInsights": {
+      "colBhava": "Bhava",
+      "bhavaLegend": "Mais. compte les maisons par signe, comme la carte. Bhava est la maison selon {system}, le système qu'utilisent les lectures.",
+      "chartPlacementBhava": "{planet} en {sign} {degree}, maison {house} · bhava {bhava} ({system})",
+      "systemEqual": "Maisons égales",
+      "systemPlacidus": "Placidus",
+      "systemKoch": "Koch",
+      "systemCampanus": "Campanus",
+      "systemRegiomontanus": "Regiomontanus",
+      "systemPorphyry": "Porphyre"
+    }
+  }
+}

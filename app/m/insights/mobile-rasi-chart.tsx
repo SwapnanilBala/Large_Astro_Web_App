@@ -24,9 +24,47 @@ type Translate = (key: string, params?: Record<string, string>) => string;
 type Props = {
   ascendantSign: string;
   planets?: PlanetPosition[];
+  /** chart.house_system: the system `planet.house` was counted in. */
+  houseSystem?: string;
   tr: Translate;
   formatDegree: (value: number) => string;
 };
+
+/**
+ * The house a sign is, counted from the lagna's sign: the number this chart
+ * writes in that sign's cell. Null when either sign is not one of the twelve.
+ */
+export function signHouse(sign: string, ascendantSign: string): number | null {
+  const index = SIGN_ORDER.indexOf(sign as (typeof SIGN_ORDER)[number]);
+  const ascIndex = SIGN_ORDER.indexOf(ascendantSign as (typeof SIGN_ORDER)[number]);
+  return index < 0 || ascIndex < 0 ? null : ((index - ascIndex + 12) % 12) + 1;
+}
+
+/**
+ * The name of the house system `planet.house` was counted in, or null under
+ * Whole Sign. There the bhava is the sign house, which the chart already
+ * shows; under any other system the two can differ, so the page gives both.
+ * Every key is spelled out because the mobile coverage test reads only
+ * plain-string arguments.
+ */
+export function bhavaSystemName(houseSystem: string | undefined, tr: Translate): string | null {
+  switch (houseSystem) {
+    case "equal":
+      return tr("mobileInsights.systemEqual");
+    case "placidus":
+      return tr("mobileInsights.systemPlacidus");
+    case "koch":
+      return tr("mobileInsights.systemKoch");
+    case "campanus":
+      return tr("mobileInsights.systemCampanus");
+    case "regiomontanus":
+      return tr("mobileInsights.systemRegiomontanus");
+    case "porphyry":
+      return tr("mobileInsights.systemPorphyry");
+    default:
+      return null;
+  }
+}
 
 /* Grid row and column (1-based) of each sign in the South Indian layout, in
    SIGN_ORDER order: Aries across the top, down the right, back along the
@@ -61,18 +99,25 @@ const ABBREVIATION: Record<string, string> = {
 /** A planet as astrologers write it by hand: Su, Mo, Ma and so on. */
 export const abbreviate = (name: string) => ABBREVIATION[name] ?? name.slice(0, 2);
 
-export default function MobileRasiChart({ ascendantSign, planets = [], tr, formatDegree }: Props) {
+export default function MobileRasiChart({ ascendantSign, planets = [], houseSystem, tr, formatDegree }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
-  const ascIndex = SIGN_ORDER.indexOf(ascendantSign as (typeof SIGN_ORDER)[number]);
   const active = planets.find((planet) => planet.name === selected) ?? null;
+  const system = bhavaSystemName(houseSystem, tr);
 
-  const placement = (planet: PlanetPosition) =>
-    tr("mobileInsights.chartPlacement", {
+  /* The house the cell says comes first, since the line sits right under it.
+     Under any system but Whole Sign the bhava follows, named, because that is
+     the house the readings count from. */
+  const placement = (planet: PlanetPosition) => {
+    const params = {
       planet: planet.name,
       sign: planet.sign,
       degree: formatDegree(planet.degree_in_sign),
-      house: String(planet.house),
-    });
+      house: String(signHouse(planet.sign, ascendantSign) ?? planet.house),
+    };
+    return system
+      ? tr("mobileInsights.chartPlacementBhava", { ...params, bhava: String(planet.house), system })
+      : tr("mobileInsights.chartPlacement", params);
+  };
 
   return (
     <figure className={styles.wrap}>
@@ -82,9 +127,9 @@ export default function MobileRasiChart({ ascendantSign, planets = [], tr, forma
         role="group"
         aria-label={tr("mobileInsights.chartAria", { sign: ascendantSign })}
       >
-        {SIGN_ORDER.map((sign, index) => {
+        {SIGN_ORDER.map((sign) => {
           const [row, column] = CELL[sign];
-          const house = ascIndex < 0 ? null : ((index - ascIndex + 12) % 12) + 1;
+          const house = signHouse(sign, ascendantSign);
           const isLagna = house === 1;
           const here = planets.filter((planet) => planet.sign === sign);
           return (

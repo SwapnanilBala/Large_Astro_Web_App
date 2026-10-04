@@ -16,9 +16,11 @@
     "colSign": "Sign",
     "colDeg": "Deg",
     "colHouse": "Hse",
+    "colBhava": "Bhava",
     "flagRetrograde": "Rx",
     "flagCombust": "Cmb",
     "flagLegend": "Rx = moving backwards from here · Cmb = too close to the Sun to act freely",
+    "bhavaLegend": "Hse counts houses by sign, as the chart does. Bhava is the house under {system}, the system the readings use.",
     "houseRolesTitle": "Which house is responsible for what",
     "houseRolesSubtitle": "All twelve, and the support each holds",
     "bindusLegend": "Bindus are Ashtakavarga’s support score for the sign sitting on that house, out of a fixed pool of 337. Dead average is 28.1, so a house is read against that rather than against a maximum.",
@@ -57,6 +59,13 @@
     "chartAria": "Rasi chart, {sign} ascendant",
     "chartCentre": "Rasi",
     "chartHint": "Tap a graha for its placement",
-    "chartPlacement": "{planet} in {sign} {degree}, house {house}"
+    "chartPlacement": "{planet} in {sign} {degree}, house {house}",
+    "chartPlacementBhava": "{planet} in {sign} {degree}, house {house} · bhava {bhava} ({system})",
+    "systemEqual": "Equal Houses",
+    "systemPlacidus": "Placidus",
+    "systemKoch": "Koch",
+    "systemCampanus": "Campanus",
+    "systemRegiomontanus": "Regiomontanus",
+    "systemPorphyry": "Porphyry"
   }
 }

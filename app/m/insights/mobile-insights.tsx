@@ -15,7 +15,7 @@ import {
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
-import MobileRasiChart, { abbreviate } from "./mobile-rasi-chart";
+import MobileRasiChart, { abbreviate, bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
 
@@ -443,7 +443,18 @@ export default function MobileInsights({
   }
 
   const { client, chart } = payload;
-  const { ascendant, planets, houses, nakshatra, dasha, deterministic_rules: rules } = chart;
+  const {
+    ascendant,
+    planets,
+    houses,
+    house_system: houseSystem,
+    nakshatra,
+    dasha,
+    deterministic_rules: rules,
+  } = chart;
+  /* Null under Whole Sign, where a planet's bhava is its sign house and the
+     table needs only the one column. */
+  const bhavaSystem = bhavaSystemName(houseSystem, tr);
 
   const highPriority = (rules ?? []).filter((rule) => rule.priority === "high");
 
@@ -543,6 +554,7 @@ export default function MobileInsights({
       <MobileRasiChart
         ascendantSign={ascendant.sign}
         planets={planets}
+        houseSystem={houseSystem}
         tr={tr}
         formatDegree={formatDegree}
       />
@@ -559,6 +571,9 @@ export default function MobileInsights({
               <th scope="col">{tr("mobileInsights.colSign")}</th>
               <th scope="col" className={styles.numeric}>{tr("mobileInsights.colDeg")}</th>
               <th scope="col" className={styles.numeric}>{tr("mobileInsights.colHouse")}</th>
+              {bhavaSystem && (
+                <th scope="col" className={styles.numeric}>{tr("mobileInsights.colBhava")}</th>
+              )}
             </tr>
           </thead>
           <tbody>
@@ -589,13 +604,20 @@ export default function MobileInsights({
                   {planet.sign}
                 </td>
                 <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
-                <td className={styles.numeric}>{planet.house}</td>
+                {/* Counted by sign, so it matches the number in the chart's
+                    cell above; the bhava, where it can differ, has its own
+                    column. */}
+                <td className={styles.numeric}>{signHouse(planet.sign, ascendant.sign) ?? planet.house}</td>
+                {bhavaSystem && <td className={styles.numeric}>{planet.house}</td>}
               </tr>
             ))}
           </tbody>
         </table>
         {planets.some((p) => p.is_retrograde || p.is_combust) && (
           <p className={styles.legend}>{tr("mobileInsights.flagLegend")}</p>
+        )}
+        {bhavaSystem && (
+          <p className={styles.legend}>{tr("mobileInsights.bhavaLegend", { system: bhavaSystem })}</p>
         )}
       </Section>
 
