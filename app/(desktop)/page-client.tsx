@@ -35,7 +35,8 @@ import {
 import { useAccount } from "@/lib/use-account";
 import { useHydrated } from "@/lib/use-hydrated";
 import { localScopedKey } from "@/lib/local-scope";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
+import { parseSmartFill } from "@/lib/smart-fill";
 import AutocompleteInput from "@/app/components/AutocompleteInput";
 import ChartHistory, { WelcomePanelStandIn } from "@/app/components/ChartHistory";
 import FormCelebration from "@/app/components/FormCelebration";
@@ -258,7 +259,9 @@ export default function Home() {
   const [unknownTime, setUnknownTime] = useState(false);
   const [coarseTime, setCoarseTime] = useState("");
   const { account, status: accountStatus } = useAccount();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  /* For reading typed and pasted dates and times in the visitor's language. */
+  const locale = LOCALE_TAGS[language];
   const [draft, setDraft] = useState<ProfileQueryInput>(withClientTimezoneDefault);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [latLonExpanded, setLatLonExpanded] = useState(false);
@@ -741,65 +744,10 @@ export default function Home() {
     draftSavedDisplayTimer.current = setTimeout(() => setDraftSaved(false), 1500);
   }, []);
 
-  /* Smart fill: one comma-separated line into the whole form.
-   *
-   * Each part is handed to the same normalisers the individual fields use, so
-   * a date or time pasted here is read — and repaired — exactly as it would be
-   * if it had been typed into its own box. The parts are matched by what they
-   * parse as rather than by position, because people write the birth moment in
-   * either order and sometimes leave the time out entirely. */
-  const parseSmartFill = (text: string) => {
-    const parts = text.split(",").map((part) => part.trim()).filter(Boolean);
-    if (parts.length < 3) return null;
-
-    const parsed: Partial<ProfileQueryInput> = {};
-    const leftovers: string[] = [];
-
-    parts.forEach((part, index) => {
-      if (index === 0) {
-        const name = normalizePersonName(part);
-        if (name.value) {
-          parsed.name = name.value;
-          return;
-        }
-      }
-
-      if (!parsed.birthDate) {
-        const date = normalizeBirthDate(part);
-        if (date.value) {
-          parsed.birthDate = date.value;
-          return;
-        }
-      }
-
-      if (!parsed.birthTime) {
-        const time = normalizeBirthTime(part);
-        if (time.value) {
-          parsed.birthTime = time.value;
-          return;
-        }
-      }
-
-      leftovers.push(part);
-    });
-
-    /* Whatever is left is the place, written outward: "City, State, Country". */
-    const place = leftovers.map((part) => normalizePlaceName(part).value || part);
-    if (place.length >= 3) {
-      [parsed.city, parsed.state, parsed.country] = place;
-    } else if (place.length === 2) {
-      parsed.city = place[0];
-      parsed.state = "";
-      parsed.country = place[1];
-    } else if (place.length === 1) {
-      parsed.city = place[0];
-    }
-
-    return parsed;
-  };
-
+  /* Smart fill: one comma-separated line into the whole form, read in the
+   * interface language (see lib/smart-fill). */
   const handleSmartFill = () => {
-    const parsed = parseSmartFill(smartFillText);
+    const parsed = parseSmartFill(smartFillText, locale);
     if (parsed) {
       setDraft(prev => ({ ...prev, ...parsed }));
       setSmartFillText("");
@@ -896,8 +844,8 @@ export default function Home() {
     return {
       ...source,
       name: keep(source.name, normalizePersonName(source.name)),
-      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate)),
-      birthTime: keep(source.birthTime, normalizeBirthTime(source.birthTime)),
+      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate, { locale })),
+      birthTime: keep(source.birthTime, normalizeBirthTime(source.birthTime, { locale })),
       country: keep(source.country, normalizePlaceName(source.country)),
       state: keep(source.state, normalizePlaceName(source.state)),
       city: keep(source.city, normalizePlaceName(source.city)),
