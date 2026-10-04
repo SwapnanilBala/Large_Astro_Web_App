@@ -110,6 +110,16 @@ describe("LanguageProvider", () => {
     expect(window.localStorage.getItem("astro_language")).toBeNull();
   });
 
+  it("reads the cookie in its current shape, with the table's edition", () => {
+    setLocationLocale("hi-IN.2");
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("hi");
+  });
+
   it("puts a stored choice ahead of the location, English included", () => {
     setLocationLocale("hi-IN");
     window.localStorage.setItem("astro_language", "en");

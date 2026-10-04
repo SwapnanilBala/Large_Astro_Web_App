@@ -17,8 +17,9 @@
  * A forged header changes nothing but the language of the forger's own page,
  * so unlike the client IP (lib/rate-limiter.ts) this is not a trust boundary.
  *
- * Read by proxy.ts only. Kept free of runtime imports so the proxy bundles it
- * without pulling the client i18n module along.
+ * Read by proxy.ts only. Its one runtime import is the cookie format; the
+ * client i18n module is imported for its types alone, so the proxy does not
+ * bundle it.
  */
 
 import type { Language } from "@/lib/i18n-context";
@@ -27,18 +28,35 @@ import {
   parseLocationLocale,
 } from "@/lib/location-locale-cookie";
 
-/*
- * Countries with one clear answer among the six languages. Anything missing
- * from this table and the next gets English, which is also what a visitor gets
- * when the location is unknown.
+/**
+ * Which edition of the tables below decided a cookie. Within a country the
+ * first answer otherwise stands (see nextLocationLocale), so an edit here
+ * reaches only new visitors and travellers unless this goes up with it; a
+ * cookie from an older edition is decided once more, then stands again.
  *
- * Deliberately conservative: a wrong guess puts a page in a language the
- * visitor may not read, which is worse than English, so a country is listed
- * only where the language is what people there read day to day. That leaves
- * out places where it is one official language among several in practice
- * (Andorra) or a second language beside Arabic (the Maghreb).
+ *   1  India by state: Hindi in the Hindi-speaking states, English elsewhere.
+ *   2  Hindi for all of India but West Bengal and Tripura.
+ */
+export const LOCATION_TABLE_VERSION = 2;
+
+/*
+ * Countries with one answer among the six languages. Anything missing gets
+ * English, which is also what a visitor gets when the location is unknown.
+ *
+ * A wrong guess puts a page in a language the visitor may not read, which is
+ * worse than English, so outside India a country is listed only where the
+ * language is what people there read day to day. That leaves out places where
+ * it is one official language among several in practice (Andorra) or a second
+ * language beside Arabic (the Maghreb).
+ *
+ * India is the exception by choice: Hindi for the whole country, the south,
+ * the west and the north-east included, with West Bengal and Tripura in
+ * Bengali (the overrides below). Anyone it does not suit has the switcher,
+ * and their pick outranks this from then on.
  */
 const COUNTRY_LANGUAGE: Readonly<Record<string, Language>> = {
+  IN: "hi",
+
   /* Spain, Spanish-speaking America, Puerto Rico and Equatorial Guinea. */
   ES: "es", MX: "es", GT: "es", HN: "es", SV: "es", NI: "es", CR: "es", PA: "es",
   CU: "es", DO: "es", PR: "es", CO: "es", VE: "es", EC: "es", PE: "es", BO: "es",
@@ -59,27 +77,15 @@ const COUNTRY_LANGUAGE: Readonly<Record<string, Language>> = {
 };
 
 /*
- * Countries where the answer depends on the region. These get English unless
- * the region is listed, so an unknown region falls back to English rather
- * than to a guess.
+ * Regions whose language differs from their country's answer above. A region
+ * not listed, or not known, takes the country's answer.
  *
- * India is the one that matters most. Hindi is the language of the states
- * listed, not of the country: a Hindi default in Chennai or Bengaluru would be
- * presumptuous, so the south, the west and the north-east get English.
- * Bengali is the language of West Bengal and Tripura, as of Bangladesh above.
- * Two of these codes changed in ISO 3166-2 -- Uttarakhand UT to UK,
- * Chhattisgarh CT to CG -- and IP databases do not all move at once, so both
- * spellings are here.
- *
- * Region codes are the second half of ISO 3166-2 (the "UP" of "IN-UP"), which
+ * Region codes are the second half of ISO 3166-2 (the "WB" of "IN-WB"), which
  * is what x-vercel-ip-country-region carries.
  */
-const REGION_LANGUAGE: Readonly<Record<string, Readonly<Record<string, Language>>>> = {
-  IN: {
-    UP: "hi", BR: "hi", MP: "hi", RJ: "hi", HR: "hi", DL: "hi", HP: "hi", JH: "hi",
-    CH: "hi", UK: "hi", UT: "hi", CG: "hi", CT: "hi",
-    WB: "bn", TR: "bn",
-  },
+const REGION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Language>>>> = {
+  /* West Bengal and Tripura read Bengali, as Bangladesh does. */
+  IN: { WB: "bn", TR: "bn" },
   /* Quebec. */
   CA: { QC: "fr" },
   /* Wallonia and Brussels; Flanders reads Dutch, which is not offered. */
@@ -89,21 +95,21 @@ const REGION_LANGUAGE: Readonly<Record<string, Readonly<Record<string, Language>
   CH: { GE: "fr", VD: "fr", NE: "fr", JU: "fr", FR: "fr", VS: "fr", TI: "it" },
 };
 
-/*
- * Codes are checked against these before any table is consulted, which is
- * also what keeps a lookup off the object prototype: no inherited key is two
- * or three upper-case characters.
- */
 const COUNTRY_CODE = /^[A-Z]{2}$/;
 const REGION_CODE = /^[A-Z0-9]{1,3}$/;
 
 export type VisitorLocation = { country: string; region: string | null };
 
+/* Own keys only, so no lookup can land on the object prototype. */
+function own<T>(table: Readonly<Record<string, T>>, key: string): T | undefined {
+  return Object.prototype.hasOwnProperty.call(table, key) ? table[key] : undefined;
+}
+
 /** The language this location suggests; English when nothing more specific is known. */
 export function languageForLocation(location: VisitorLocation): Language {
-  const regions = REGION_LANGUAGE[location.country];
-  if (regions) return (location.region && regions[location.region]) || "en";
-  return COUNTRY_LANGUAGE[location.country] ?? "en";
+  const regions = own(REGION_OVERRIDES, location.country);
+  const regional = regions && location.region ? own(regions, location.region) : undefined;
+  return regional ?? own(COUNTRY_LANGUAGE, location.country) ?? "en";
 }
 
 /**
@@ -124,9 +130,10 @@ export function locationFromHeaders(headers: Headers): VisitorLocation | null {
  *
  * Within one country the first answer stands. IP addresses are placed in a
  * region far less reliably than in a country -- a phone's carrier address can
- * read as Delhi one day and West Bengal the next -- and re-deciding on every
- * visit would turn that noise into a page that changes language between
- * visits. A different country is travel, and gets a fresh answer.
+ * read as Jharkhand one day and West Bengal the next -- and re-deciding on
+ * every visit would turn that noise into a page that changes language between
+ * visits. A different country is travel, and gets a fresh answer; so does a
+ * cookie from an older edition of the tables.
  */
 export function nextLocationLocale(
   location: VisitorLocation | null,
@@ -134,9 +141,16 @@ export function nextLocationLocale(
 ): string | null {
   if (!location) return null;
   const remembered = parseLocationLocale(current);
-  if (remembered && remembered.country === location.country) return null;
+  if (
+    remembered &&
+    remembered.country === location.country &&
+    remembered.version === LOCATION_TABLE_VERSION
+  ) {
+    return null;
+  }
   return formatLocationLocale({
     language: languageForLocation(location),
     country: location.country,
+    version: LOCATION_TABLE_VERSION,
   });
 }
