@@ -67,6 +67,36 @@ const PROMPT_VERSION = 2;
  */
 const MIN_LENGTH_SHARE = 0.9;
 
+/**
+ * Chapters withheld whole, whatever the model said verse by verse.
+ *
+ * Chapter 23 is "On Malefic Yogas": every verse in it is a misfortune (a wife
+ * who leaves, no wife or son, deformity, servitude), so there is nothing in it
+ * a reading here would print. Verse-by-verse judgement let 16 of its 53
+ * passages through, among them "a person's wife will quit him and marry
+ * another", and because the chapter talks about Saturn in the 7th or the Sun
+ * in the 10th, those passages were tagged with benign yogas like Shani
+ * Digbala and would have coloured them. A rule is cheaper and surer than
+ * another prompt.
+ */
+const WITHHELD_CHAPTERS: Record<number, string> = {
+  23: "The chapter on malefic yogas, which predicts only misfortune.",
+};
+
+/**
+ * Yoga tags added by hand, by passage (`chapter.verse.part`), on top of the
+ * model's. Kept here rather than edited into the corpus file, because a
+ * rebuild regenerates that file from the cached answers and would drop them.
+ *
+ * Yava's two passages were tagged on 2026-10-04, when the catalogue's Yava was
+ * corrected to the classical rule (Vajra reversed) after the answers had been
+ * cached against the old one, which the model rightly declined to match.
+ */
+const ADDED_TAGS: Record<string, string[]> = {
+  "12.5.2": ["yava"],
+  "12.14.2": ["yava"],
+};
+
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
 const OUT_FILE = resolve("lib/knowledge/corpus", `${SOURCE.slug}.json`);
 
@@ -428,11 +458,21 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       text: answered.text.trim(),
       notes,
       summary: answered.summary.trim(),
-      yogaIds: inOrder([...new Set(answered.yoga_ids)], YOGA_IDS),
+      yogaIds: inOrder(
+        [
+          ...new Set([
+            ...answered.yoga_ids,
+            ...(ADDED_TAGS[`${chapter.chapter}.${answered.verse}.${answered.part}`] ?? []),
+          ]),
+        ],
+        YOGA_IDS,
+      ),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: answered.withheld,
-      withheldReason: answered.withheld ? answered.withheld_reason.trim() : null,
+      withheld: answered.withheld || chapter.chapter in WITHHELD_CHAPTERS,
+      withheldReason: answered.withheld
+        ? answered.withheld_reason.trim()
+        : (WITHHELD_CHAPTERS[chapter.chapter] ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });
@@ -476,6 +516,14 @@ async function main() {
     passagesOf(chapter, ocrByChapter.get(chapter.chapter)!, answers.get(chapter.chapter)!),
   );
 
+  /* A hand-added tag whose passage no longer exists (a fresh build split the
+     verse differently) must fail loudly, not vanish. */
+  const refs = new Set(passages.map((p) => `${p.chapter}.${p.verse}.${p.part}`));
+  const orphaned = Object.keys(ADDED_TAGS).filter((ref) => !refs.has(ref));
+  if (orphaned.length > 0) {
+    throw new Error(`ADDED_TAGS names passages this build does not have: ${orphaned.join(", ")}. Re-point them.`);
+  }
+
   const short: number[] = [];
   const drifting: number[] = [];
   for (const chapter of CHAPTERS) {
@@ -498,10 +546,8 @@ async function main() {
 
   /* The catalogue entries that cite this chapter for their definition: all 32
      Nabhasa figures. Kedara and Yava joined them on 2026-10-04, when Yava's
-     rule was corrected to the classical one, and its two passages (12.5.2 and
-     12.14.2) were tagged by hand. Chapter-12 answers cached before then do not
-     tag Yava, so rebuilding from them trips this warning; rebuild that chapter
-     with --fresh=12 instead. */
+     rule was corrected to the classical one; Yava's two passages carry the
+     tag through ADDED_TAGS above, since the cached answers predate the fix. */
   const citedHere = YOGA_DEFINITIONS.filter((d) => d.source?.startsWith("Brihat Jataka ch. 12")).map((d) => d.id);
   const tagged = new Set(passages.filter((p) => p.chapter === 12).flatMap((p) => p.yogaIds));
   const untagged = citedHere.filter((id) => !tagged.has(id));

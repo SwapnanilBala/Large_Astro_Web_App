@@ -7300,8 +7300,8 @@
         "relationships",
         "children"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.902
     },
     {
@@ -7375,8 +7375,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7398,8 +7398,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7424,8 +7424,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7447,8 +7447,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7538,8 +7538,8 @@
         "Venus"
       ],
       "lifeAreas": [],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.667
     },
     {
@@ -7585,8 +7585,8 @@
         "relationships",
         "children"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7606,8 +7606,8 @@
         "relationships",
         "children"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.923
     },
     {
@@ -7693,8 +7693,8 @@
         "relationships",
         "children"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -7719,8 +7719,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.951
     },
     {
@@ -7766,8 +7766,8 @@
         "career",
         "learning"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.897
     },
     {
@@ -7817,8 +7817,8 @@
         "character",
         "status"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -8308,8 +8308,8 @@
         "career",
         "status"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.941
     },
     {
@@ -8333,8 +8333,8 @@
         "career",
         "status"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.943
     },
     {
@@ -8399,8 +8399,8 @@
       "lifeAreas": [
         "character"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.957
     },
     {
@@ -8564,8 +8564,8 @@
         "career",
         "status"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.924
     }
   ]
