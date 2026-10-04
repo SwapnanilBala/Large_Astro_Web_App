@@ -57,7 +57,8 @@
 }
 
 .title {
-  margin: 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0;
   font-family: var(--font-display), serif;
   /* Larger than the results page's h1 — this page has one subject. */
   font-size: clamp(2.4rem, 5.5vw, 3.6rem);

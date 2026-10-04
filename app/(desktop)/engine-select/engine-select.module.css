@@ -62,7 +62,8 @@
      anonymous flex item so the heading sits under the kicker. */
   justify-content: center;
   color: var(--text-primary);
-  margin: 0 0 0.6rem;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0 calc(0.6rem - var(--title-ink-room, 0px));
   line-height: 1.18;
 }
 

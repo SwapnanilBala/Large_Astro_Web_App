@@ -346,7 +346,8 @@
   font-size: clamp(2.35rem, 6vw, 4.75rem);
   font-weight: 750;
   color: var(--ink-main);
-  margin: 0 0 1.15rem;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0 calc(1.15rem - var(--title-ink-room, 0px));
   line-height: 1.02;
   text-align: start;
   text-wrap: balance;
@@ -355,6 +356,12 @@
 .titleName {
   display: block;
   max-width: 100%;
+  /* A gradient of its own, so a box of its own to paint inside: padded like
+     every h1 (see h1 in globals.css) so the tails of g, y and Q are not cut
+     off, with the room given back. A grid item, so the margins cannot
+     collapse into anything. */
+  padding-block: var(--title-ink-room, 0px);
+  margin-block: calc(0px - var(--title-ink-room, 0px));
   background: linear-gradient(115deg, #fff7e3 12%, #f0b754 52%, #e8edf7 88%);
   -webkit-background-clip: text;
   background-clip: text;

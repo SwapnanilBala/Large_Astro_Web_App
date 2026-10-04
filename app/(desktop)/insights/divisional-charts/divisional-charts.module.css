@@ -630,7 +630,8 @@
 }
 
 .topTitle h1 {
-  margin: 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0;
   font-family: var(--font-display), serif;
   font-size: clamp(1.05rem, 1.7vw, 1.45rem);
   line-height: 1.2;

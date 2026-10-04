@@ -537,7 +537,17 @@ h3 {
 }
 
 h1 {
-  margin: 0.55rem 0 0.8rem;
+  /* Room for the letters that reach past the line box. The gradient below
+     is painted only inside the box, so anything outside it is cut off: at
+     these tight line-heights the tails of g, j, p, q and y hung up to 0.13em
+     below it, and Hindi and Bengali vowel marks stood up to 0.28em above it,
+     which cut "अपनी वैदिक जन्म कुंडली बनाएं" on the home page down to
+     "अपना वादक जन्म कुडला बनाए". The padding gives the gradient room to
+     paint them whole, and every margin set on an h1 -- here and in each
+     page's own rule -- gives the same room back, so nothing moves. */
+  --title-ink-room: 0.3em;
+  padding-block: var(--title-ink-room);
+  margin: calc(0.55rem - var(--title-ink-room)) 0 calc(0.8rem - var(--title-ink-room));
   font-size: clamp(1.9rem, 3.5vw, 3.1rem);
   line-height: 1.04;
   background: linear-gradient(135deg, var(--ink-main) 0%, var(--accent-gold) 55%, #7B5DC0 100%);
@@ -3554,7 +3564,9 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
   /* A block, not the flex box every h1 gets for an icon beside its text:
      only a block's line box can be trimmed, below. */
   display: block;
-  padding-bottom: 0.2em;
+  /* Its own, not the room every h1 gets: the margins below are measured
+     against exactly this padding. */
+  padding: 0 0 0.2em;
   margin: calc(var(--heading-gap) - 0.3rem - 0.194em + 0.5px) 0
     calc(var(--heading-gap) - 0.2em + 0.129em - 0.5px);
 }
@@ -4756,7 +4768,8 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
   font-size: clamp(1.6rem, 3vw, 2rem);
   font-weight: 600;
   color: var(--accent-gold);
-  margin: 0 0 0.75rem;
+  /* Less the room every h1 is padded with (see h1), so it stays put. */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0 calc(0.75rem - var(--title-ink-room, 0px));
   line-height: 1.3;
 }
 
@@ -5022,7 +5035,8 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
   font-size: clamp(1.65rem, 3.5vw, 2.2rem);
   font-weight: 600;
   color: var(--accent-gold);
-  margin: 0.5rem 0 1rem;
+  /* Less the room every h1 is padded with (see h1), so it stays put. */
+  margin: calc(0.5rem - var(--title-ink-room, 0px)) 0 calc(1rem - var(--title-ink-room, 0px));
   line-height: 1.25;
 }
 
@@ -6491,7 +6505,7 @@ html[data-account-label]:not([data-chart-history]) .chart-history-panel--pending
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--accent-gold, #f5c842);
-  margin-bottom: 0.75rem;
+  margin-bottom: calc(0.75rem - var(--title-ink-room, 0px));
 }
 .error-description {
   font-size: 1.45rem;

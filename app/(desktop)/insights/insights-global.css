@@ -4131,7 +4131,8 @@
 }
 
 .palm-history-header h1 {
-  margin: 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0;
   color: var(--ink-main);
   font-family: var(--font-display, "Cormorant Garamond", serif);
   font-size: clamp(1.85rem, 3.5vw, 2.4rem);
@@ -4437,7 +4438,8 @@
 }
 
 .palm-detail-title-button h1 {
-  margin: 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0px - var(--title-ink-room, 0px)) 0;
   color: var(--ink-main);
   font-family: var(--font-display, "Cormorant Garamond", serif);
   font-size: clamp(1.85rem, 3.5vw, 2.4rem);

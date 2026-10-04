@@ -144,7 +144,8 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--ink-main);
-  margin: 0.6rem auto 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0.6rem - var(--title-ink-room, 0px)) auto calc(0px - var(--title-ink-room, 0px));
   line-height: 1.2;
   text-align: center;
   width: fit-content;

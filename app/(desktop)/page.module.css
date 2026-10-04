@@ -1474,7 +1474,8 @@
 }
 
 .streamlinedHeader h1 {
-  margin: 0.55rem 0 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0.55rem - var(--title-ink-room, 0px)) 0 calc(0px - var(--title-ink-room, 0px));
   color: var(--text-primary, #fff);
   font-family: var(--font-display), serif;
   font-size: clamp(2rem, 5vw, 3.2rem);
@@ -2027,7 +2028,8 @@
 
 .streamlinedHeader h1 {
   max-width: 48rem;
-  margin: 0.55rem 0 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0.55rem - var(--title-ink-room, 0px)) 0 calc(0px - var(--title-ink-room, 0px));
   font-size: clamp(2.2rem, 4.4vw, 4.15rem);
   font-weight: 500;
   letter-spacing: -0.045em;

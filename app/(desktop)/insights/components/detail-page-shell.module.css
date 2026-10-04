@@ -103,7 +103,8 @@
 }
 
 .hero h1 {
-  margin: 0.2rem 0 0;
+  /* Less the room every h1 is padded with (see h1 in globals.css). */
+  margin: calc(0.2rem - var(--title-ink-room, 0px)) 0 calc(0px - var(--title-ink-room, 0px));
   font-family: var(--font-display), sans-serif;
   font-size: clamp(1.7rem, 3.4vw, 2.5rem);
   line-height: 1.15;
