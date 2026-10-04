@@ -63,7 +63,7 @@ describe("yoga-engine", () => {
 });
 
 /*
- * The eight whole-chart figures below did not fire once in 50,000 sampled
+ * The nine whole-chart figures below did not fire once in 50,000 sampled
  * charts, which is the expected result -- Dhwaja wants every benefic in the
  * ascendant and every malefic in the 8th -- but it is also exactly what a
  * definition that can never fire looks like. A Monte Carlo run cannot tell
@@ -106,6 +106,7 @@ describe("yoga-engine: rare whole-chart figures are reachable", () => {
   const cases: Array<[string, YogaChartInput]> = [
     ["shakata_nabhasa", chartOf({ Sun: 1, Moon: 1, Mars: 1, Mercury: 1, Venus: 7, Jupiter: 7, Saturn: 7 })],
     ["vajra", chartOf({ Jupiter: 1, Venus: 1, Mercury: 7, Sun: 4, Mars: 4, Saturn: 10, Moon: 1 })],
+    ["yava", chartOf({ Sun: 1, Mars: 1, Saturn: 7, Jupiter: 4, Mercury: 4, Venus: 10, Moon: 7 })],
     ["kamala", chartOf({ Sun: 1, Moon: 4, Mars: 7, Mercury: 10, Venus: 1, Jupiter: 4, Saturn: 7 })],
     ["vapi", chartOf({ Sun: 2, Moon: 5, Mars: 8, Mercury: 11, Venus: 2, Jupiter: 5, Saturn: 8 })],
     ["chakra", chartOf({ Sun: 1, Moon: 3, Mars: 5, Mercury: 7, Venus: 9, Jupiter: 11, Saturn: 1 })],
@@ -123,14 +124,28 @@ describe("yoga-engine: rare whole-chart figures are reachable", () => {
   it.each(cases)("detects %s on a chart built to satisfy it", (id, chart) => {
     expect(detectYogas(chart).map((yoga) => yoga.yoga_id)).toContain(id);
   });
+
+  /* Yava used to be "three signs holding two planets each", a rule of its own
+     under the classical name. That is only Kedara with the planets split
+     2-2-2-1, and it put Yava on about 6% of charts, every one of which also
+     had Kedara. */
+  it("calls a 2-2-2-1 split Kedara, not Yava", () => {
+    const ids = detectYogas(
+      chartOf({ Sun: 1, Mercury: 1, Moon: 2, Venus: 2, Mars: 3, Jupiter: 3, Saturn: 5 }),
+    ).map((yoga) => yoga.yoga_id);
+    expect(ids).toContain("kedara");
+    expect(ids).not.toContain("yava");
+  });
 });
 
 describe("yoga-engine: citations", () => {
   /* The hundred added in 2026-09 each name the text they come from. The
-     original hundred deliberately do not -- see the note on YogaDefinition. */
+     original hundred deliberately do not -- see the note on YogaDefinition --
+     except Kedara and Yava, two of the 32 Nabhasa figures, which took the
+     family's citation when they moved in beside it. */
   it("cites a classical source on exactly the definitions that have one", () => {
     const cited = YOGA_DEFINITIONS.filter((definition) => definition.source);
-    expect(cited).toHaveLength(105);
+    expect(cited).toHaveLength(107);
     for (const definition of cited) {
       expect(definition.source!.length).toBeGreaterThan(10);
     }

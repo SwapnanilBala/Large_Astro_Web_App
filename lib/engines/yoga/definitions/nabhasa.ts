@@ -251,6 +251,18 @@ const NABHASA_YOGA_RECIPES: NabhasaRecipe[] = [
     activation_timing: "long working stretches, land and production work, and Saturn periods",
     key_traits: ["labour", "productivity", "patience"],
   },
+  /*
+   * Vajra and Yava almost never occur, and the texts know it. Both put Mercury
+   * and Venus a quarter of the way round from the Sun -- the fourth sign from
+   * it or the tenth, at least 60 degrees away -- and Mercury never strays more
+   * than about 28 degrees from the Sun, Venus about 47. Varahamihira raises
+   * exactly this in the next verse (Brihat Jataka 12.6) and keeps the pair only
+   * because earlier writers gave it. By whole-sign houses they cannot happen
+   * at all. With unequal house cusps at high latitudes they can, which is how
+   * the 1885 translator defends them, and `house` here comes from whichever
+   * system the chart uses. Neither fired once in 50,000 sampled charts on any
+   * of the six systems, so the reachability test builds a chart for each.
+   */
   {
     id: "vajra", name: "Vajra Yoga", sanskrit: "वज्र योग", category: "nabhasa",
     source: NABHASA_SOURCE,
@@ -259,6 +271,15 @@ const NABHASA_YOGA_RECIPES: NabhasaRecipe[] = [
     effects: "Pleasant at the beginning and end of life and harder through the middle. Physical vigour is good and the temperament is direct.",
     activation_timing: "mid-life pressure periods, and the periods of the angular malefics",
     key_traits: ["vigour", "directness", "mid-life strain"],
+  },
+  {
+    id: "yava", name: "Yava Yoga", sanskrit: "यव योग", category: "nabhasa",
+    source: NABHASA_SOURCE,
+    pattern: { kind: "beneficMaleficSplit", beneficHouses: [4, 10], maleficHouses: [1, 7] },
+    description: "The malefics hold the 1st and 7th houses while the natural benefics hold the 4th and 10th -- Vajra reversed, hard at the ends and full through the middle, like the barley grain it is named for.",
+    effects: "Harder at the beginning and end of life and best through the middle. Strength and capacity are marked, and the working years are where comfort and standing gather.",
+    activation_timing: "the middle decades of life, and the periods of the benefics in the 4th and 10th",
+    key_traits: ["strength", "capacity", "mid-life peak"],
   },
   {
     id: "kamala", name: "Kamala Yoga", sanskrit: "कमल योग", category: "nabhasa",
@@ -412,6 +433,15 @@ const NABHASA_YOGA_RECIPES: NabhasaRecipe[] = [
     effects: "Gives a sharp, pointed nature: quick to engage, hard to deflect, effective in any work that rewards a direct approach.",
     activation_timing: "contested stretches, and the periods of planets in the most crowded of the three signs",
     key_traits: ["sharpness", "force", "directness"],
+  },
+  {
+    id: "kedara", name: "Kedara Yoga", sanskrit: "केदार योग", category: "nabhasa",
+    source: NABHASA_SOURCE,
+    pattern: { kind: "signCount", count: 4 },
+    description: "The seven classical planets are spread across four signs.",
+    effects: "Gives a cultivator's temperament -- the field in the old reading, any patiently tended enterprise in the modern one. Means come from steady work, and being useful to others is a settled habit.",
+    activation_timing: "long stretches of steady productive work, land and property matters, and the periods of the 4th lord",
+    key_traits: ["cultivation", "usefulness", "steadiness"],
   },
   {
     id: "pasa", name: "Pasa Yoga", sanskrit: "पाश योग", category: "nabhasa",

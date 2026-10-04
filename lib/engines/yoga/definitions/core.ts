@@ -54,7 +54,12 @@ function detectMahapurusha(
 
 /**
  * The definitions the engine started with: the five Mahapurusha yogas and the
- * seventeen other classical combinations written out by hand.
+ * fifteen other classical combinations written out by hand.
+ *
+ * It started with two more, Kedara and Yava, which are Nabhasa figures and now
+ * sit with the rest of that family in nabhasa.ts. Yava had been given a rule of
+ * its own (three signs holding two planets each) under the classical name; it
+ * was corrected to the classical rule when it moved.
  */
 export const CORE_YOGA_DEFINITIONS: YogaDefinition[] = [
 // ── Pancha Mahapurusha Yogas ──
@@ -729,74 +734,6 @@ export const CORE_YOGA_DEFINITIONS: YogaDefinition[] = [
             .map((f) => `Lord of the ${ordinal(f.fromHouse)} house (${f.lord}) is placed in the ${ordinal(f.inHouse)} house`)
             .join(". ") + ".",
           effects: "Unexpected gains through adversity, resilience that converts hardship into advantage and hidden strength.",
-        };
-      }
-      return null;
-    },
-  },
-
-  // ── Nabhasa Yogas ──
-  {
-    id: "kedara",
-    name: "Kedara Yoga",
-    sanskrit: "केदार योग",
-    category: "nabhasa",
-    description: "All seven classical planets occupy exactly four signs.",
-    effects: "Indicates agricultural or land-based wealth, practical success, and grounded prosperity.",
-    detect: (chart) => {
-      const classical = chart.planets.filter((p) =>
-        ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"].includes(p.name)
-      );
-      const uniqueSigns = new Set(classical.map((p) => p.sign));
-
-      if (uniqueSigns.size === 4) {
-        return {
-          yoga_id: "kedara",
-          name: "Kedara Yoga",
-          sanskrit: "केदार योग",
-          category: "nabhasa",
-          present: true,
-          strength: "moderate",
-          involved_planets: classical.map((p) => p.name),
-          description: `All seven classical planets are distributed across exactly 4 signs: ${[...uniqueSigns].join(", ")}.`,
-          effects: "Indicates agricultural or land-based wealth, practical success, and grounded prosperity.",
-        };
-      }
-      return null;
-    },
-  },
-  {
-    id: "yava",
-    name: "Yava Yoga",
-    sanskrit: "यव योग",
-    category: "nabhasa",
-    description: "All planets arranged in pairs of signs (every occupied sign has exactly two planets).",
-    effects: "Moderate wealth, charitable disposition, and balanced approach to material life.",
-    detect: (chart) => {
-      const classical = chart.planets.filter((p) =>
-        ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"].includes(p.name)
-      );
-      const signCounts: Record<string, number> = {};
-      for (const p of classical) {
-        signCounts[p.sign] = (signCounts[p.sign] || 0) + 1;
-      }
-
-      // Check: with 7 planets, perfect pairing is impossible (odd number).
-      // Classical interpretation: planets arranged such that most signs have pairs.
-      // Check if at least 3 signs have exactly 2 planets (6 of 7 paired).
-      const pairCount = Object.values(signCounts).filter((c) => c === 2).length;
-
-      if (pairCount >= 3) {
-        return {
-          yoga_id: "yava",
-          name: "Yava Yoga",
-          sanskrit: "यव योग",
-          category: "nabhasa",
-          present: true,
-          strength: pairCount >= 3 ? "moderate" : "weak",
-          involved_planets: classical.map((p) => p.name),
-          description: `Classical planets form ${pairCount} pairs across signs, creating a barley-grain pattern.`,
-          effects: "Moderate wealth, charitable disposition, and balanced approach to material life.",
         };
       }
       return null;

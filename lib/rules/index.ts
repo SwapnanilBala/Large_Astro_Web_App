@@ -70,8 +70,16 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * and Kalpadruma, Gauri and Bharathi all became rarer once they stopped
  * being satisfiable by a planet joining itself. Same reasoning as v4: that
  * output rides inside the cached chart and life-domain payloads.
+ *
+ * v6: no rule changed. Yava was corrected to the classical figure (malefics
+ * in the 1st and 7th, benefics in the 4th and 10th), which takes it off the
+ * ~6% of charts its old two-planets-a-sign rule fired on, and Kedara moved to
+ * the Nabhasa recipe, so its strength now follows the planets' dignity like
+ * the other six sign-count figures. Both changes reach cached payloads the
+ * same way as v4's. rarity.json is untouched: no rule names either yoga, and
+ * regenerating it gave the same count for every one of its 290 keys.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-09-v5";
+export const RULES_SCHEMA_VERSION = "rules-2026-10-v6";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop

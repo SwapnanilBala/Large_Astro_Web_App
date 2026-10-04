@@ -496,9 +496,12 @@ async function main() {
     );
   }
 
-  /* The catalogue entries that cite this chapter for their definition. Two
-     more carry the category without the citation (kedara, yava), and yava's
-     rule is not the classical one, so the verse rightly does not match it. */
+  /* The catalogue entries that cite this chapter for their definition: all 32
+     Nabhasa figures. Kedara and Yava joined them on 2026-10-04, when Yava's
+     rule was corrected to the classical one, and its two passages (12.5.2 and
+     12.14.2) were tagged by hand. Chapter-12 answers cached before then do not
+     tag Yava, so rebuilding from them trips this warning; rebuild that chapter
+     with --fresh=12 instead. */
   const citedHere = YOGA_DEFINITIONS.filter((d) => d.source?.startsWith("Brihat Jataka ch. 12")).map((d) => d.id);
   const tagged = new Set(passages.filter((p) => p.chapter === 12).flatMap((p) => p.yogaIds));
   const untagged = citedHere.filter((id) => !tagged.has(id));

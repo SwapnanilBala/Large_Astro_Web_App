@@ -112,14 +112,15 @@ describe("the Brihat Jataka corpus", () => {
   });
 
   it("tags every yoga the catalogue cites to chapter 12 somewhere in that chapter", () => {
-    // kedara and yava carry the nabhasa category without the citation, and
-    // yava's rule (planets paired two to a sign) is not the classical one, so
-    // only the cited entries are held to the chapter.
+    // All 32 Nabhasa entries cite the chapter. Kedara and Yava did not until
+    // 2026-10-04: Yava's rule then (planets paired two to a sign) was not the
+    // one the chapter gives, so its verses were left untagged. Both moved in
+    // with the family when Yava was corrected, and are held to it like the rest.
     const tagged = new Set(
       corpus?.passages.filter((passage) => passage.chapter === 12).flatMap((passage) => passage.yogaIds),
     );
     const cited = YOGA_DEFINITIONS.filter((definition) => definition.source?.startsWith("Brihat Jataka ch. 12"));
-    expect(cited.length).toBeGreaterThanOrEqual(30);
+    expect(cited.length).toBeGreaterThanOrEqual(32);
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
   });
 });

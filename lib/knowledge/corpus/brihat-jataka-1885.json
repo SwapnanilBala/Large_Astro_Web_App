@@ -1300,7 +1300,9 @@
       "text": "and if the reverse be the case (a) the yoga is known as Yava.",
       "notes": "(a). That is if the malefic planets occupy the ascendant and the 7th house while the benefic planets occupy the 4th and 10th houses.",
       "summary": "The text says the yoga is called Yava in the reverse case, with malefics in the ascendant and 7th house and benefics in the 4th and 10th houses.",
-      "yogaIds": [],
+      "yogaIds": [
+        "yava"
+      ],
       "planets": [],
       "lifeAreas": [],
       "withheld": false,
@@ -2052,7 +2054,9 @@
       "text": "A person born in a Yava yoga will be powerful, and will be happy at the middle of life.",
       "notes": null,
       "summary": "The text says a person born under Yava yoga will be powerful and happy in the middle of life.",
-      "yogaIds": [],
+      "yogaIds": [
+        "yava"
+      ],
       "planets": [],
       "lifeAreas": [
         "status"

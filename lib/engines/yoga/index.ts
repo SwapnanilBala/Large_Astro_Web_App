@@ -16,20 +16,27 @@ import { NAVAMSA_YOGA_DEFINITIONS } from "./definitions/navamsa";
  * `detectYogas` sorts by strength and then by occurrence chance, and
  * Array.prototype.sort is stable, so every tie falls back to the order below.
  * It is therefore the order the panel lists equally-rated yogas in, and it is
- * the order the single file declared them in before it was split. Reordering
- * these lines reorders the page.
+ * the order the single file declared them in before it was split, apart from
+ * Kedara and Yava (below). Reordering these lines reorders the page.
  *
  * How the groups came to be, since the split is otherwise the only thing
  * explaining the shape of this list:
  *
- *   core         22   the definitions the engine opened with
+ *   core         20   the definitions the engine opened with
  *   generated    50   the first recipe batch
  *   additional   28   one-off definitions written out by hand
- *   nabhasa      30 ┐ the hundred added on 2026-09-25: 30 Nabhasa figures
+ *   nabhasa      32 ┐ the hundred added on 2026-09-25: 30 Nabhasa figures
  *   classical    64 │ (completing the classical 32), 22 parivartana, 15
  *   named         6 ┘ house-lord placements, 11 single-planet placements,
  *                     11 conjunctions, 5 reckoned from a karaka, 6 named
  *   navamsa       5   the combinations that read the D9, added 2026-09-26
+ *
+ * The other two of the 32 Nabhasa figures, Kedara and Yava, opened the engine
+ * in core and moved into nabhasa on 2026-10-04, which is why the bracket holds
+ * 102. Yava's rule was not the classical one until then. They now sit where
+ * Brihat Jataka ch. 12 puts them, Yava after Vajra and Kedara between Shula
+ * and Pasa, so they tie-break after every core, generated and additional
+ * yoga rather than before.
  */
 const YOGA_DEFINITIONS: YogaDefinition[] = [
   ...CORE_YOGA_DEFINITIONS,
