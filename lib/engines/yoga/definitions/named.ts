@@ -14,13 +14,16 @@ import {
 } from "../helpers";
 import { ordinal } from "../factories";
 import { dignifiedInRasiOrNavamsa } from "../navamsa";
+import { KALATRA_CHANDRA_SHANI_SOURCE } from "./sources";
 
 // --------------------------------------------------------------------------
 // Named yogas written out in full
 // --------------------------------------------------------------------------
 /*
- * Six combinations that none of the recipe templates can express, because each
- * makes a claim about several houses at once with different conditions on each.
+ * Seven combinations that none of the recipe templates can express, because each
+ * makes a claim about several planets or houses at once. The seventh, last
+ * below, is the one combination taken from the Brihat Jataka's chapter on
+ * malefic yogas.
  *
  * The list is short on purpose. The literature names hundreds more, and the
  * famous ones that read the navamsa -- Kalpadruma, Parijata, Gauri, Bharathi
@@ -40,6 +43,11 @@ function beneficsIn(chart: YogaChartInput, house: number): PlanetPosition[] {
 function maleficsIn(chart: YogaChartInput, house: number): PlanetPosition[] {
   return planetsInHouse(chart, house).filter((planet) => NATURAL_MALEFICS.includes(planet.name));
 }
+
+/* Gender-neutral where the 1885 note speaks only of a wife, and stated as a
+   tendency, the way this catalogue states every challenging yoga. */
+const KALATRA_CHANDRA_SHANI_EFFECTS =
+  "The classical notes link this pairing in the house of marriage with a spouse who leaves and marries again. Read as a tendency rather than a verdict, it asks for patience, plain speaking and steady attention in a long partnership.";
 
 export const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
   {
@@ -286,6 +294,63 @@ export const NAMED_CLASSICAL_YOGA_DEFINITIONS: YogaDefinition[] = [
           uniquePlanetNames(involved),
           "stretches of public responsibility",
           ["steadiness", "integrity", "renown"]
+        ),
+      };
+    },
+  },
+
+  // ------------------------------------------------------------------------
+  // From the chapter on malefic yogas
+  // ------------------------------------------------------------------------
+  /*
+   * The only combination from Brihat Jataka ch. 23 the product shows, chosen by
+   * the owner on 2026-10-04: a spouse leaving. A spouse leaving is something a
+   * reader can hear; the rest of that chapter -- a spouse's death, barrenness,
+   * blindness and other disability, disease, imprisonment -- is deliberately
+   * not implemented, and its passages stay withheld in the knowledge corpus.
+   *
+   * The source is the 1885 translator's note to verse 1: "If the Moon and
+   * Saturn occupy the 7th house a person's wife will quit him and marry
+   * another." Stated here for either partner, and in this engine's terms for
+   * "in the 7th house": the bhava each planet is in, as Shani Digbala reads it.
+   */
+  {
+    id: "kalatra_chandra_shani",
+    name: "Kalatra Chandra-Shani Yoga",
+    sanskrit: "कलत्र चन्द्र-शनि योग",
+    category: "challenging",
+    source: KALATRA_CHANDRA_SHANI_SOURCE,
+    description: "The Moon and Saturn together in the 7th house, the house of marriage.",
+    effects: KALATRA_CHANDRA_SHANI_EFFECTS,
+    detect: (chart) => {
+      const moon = findPlanet(chart.planets, "Moon");
+      const saturn = findPlanet(chart.planets, "Saturn");
+      if (!moon || !saturn || moon.house !== 7 || saturn.house !== 7) return null;
+      const involved = ["Moon", "Saturn"];
+      const activation = "Moon and Saturn periods, and the years a partnership is tested";
+      const traits = ["distance", "patience", "commitment"];
+      return {
+        yoga_id: "kalatra_chandra_shani",
+        name: "Kalatra Chandra-Shani Yoga",
+        sanskrit: "कलत्र चन्द्र-शनि योग",
+        category: "challenging",
+        present: true,
+        strength: overallStrength([planetStrength("Moon", moon.sign), planetStrength("Saturn", saturn.sign)]),
+        involved_planets: involved,
+        description:
+          moon.sign === saturn.sign
+            ? `The Moon and Saturn share ${moon.sign} in the 7th house.`
+            : `The Moon (in ${moon.sign}) and Saturn (in ${saturn.sign}) both fall in the 7th house.`,
+        effects: KALATRA_CHANDRA_SHANI_EFFECTS,
+        activation_timing: activation,
+        key_traits: traits,
+        source: KALATRA_CHANDRA_SHANI_SOURCE,
+        detailed_description: richYogaDetail(
+          "Kalatra Chandra-Shani Yoga",
+          KALATRA_CHANDRA_SHANI_EFFECTS,
+          involved,
+          activation,
+          traits
         ),
       };
     },

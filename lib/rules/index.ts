@@ -78,8 +78,14 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * the other six sign-count figures. Both changes reach cached payloads the
  * same way as v4's. rarity.json is untouched: no rule names either yoga, and
  * regenerating it gave the same count for every one of its 290 keys.
+ *
+ * v7 (2026-10-04): Kalatra Chandra-Shani joined the yoga catalogue, the one
+ * combination taken from the Brihat Jataka's chapter on malefic yogas (the
+ * Moon and Saturn both in the 7th house). New detections reach the cached
+ * chart and life-domain payloads, as v6's did. No rule names the yoga, so
+ * rarity.json is not regenerated.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-10-v6";
+export const RULES_SCHEMA_VERSION = "rules-2026-10-v7";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop

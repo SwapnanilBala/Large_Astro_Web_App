@@ -7,12 +7,14 @@
  *
  *   npx tsx scripts/knowledge/sample-yoga-classics.ts 1985-11-02 06:15
  *   npx tsx scripts/knowledge/sample-yoga-classics.ts 1990-05-15 10:30 Hindi medium 7001
+ *   npx tsx scripts/knowledge/sample-yoga-classics.ts 1990-05-16 11:09 English low 7001 --lat=35.69 --lng=139.69 --tz=540
  *
- * Arguments: birth date, birth time (Bengaluru, +5:30), the language as the
- * prompt names it, the effort, and the port of a running dev server, which is
- * where the chart and its yogas come from. Passages are read from the corpus
- * file rather than the table, withheld ones dropped, so it needs no database.
- * Each run is one paid call, about $0.02 at low effort.
+ * Arguments: birth date, birth time, the language as the prompt names it, the
+ * effort, and the port of a running dev server, which is where the chart and
+ * its yogas come from. The place defaults to Bengaluru (+5:30); --lat, --lng
+ * and --tz (minutes east of UTC) choose another. Passages are read from the
+ * corpus file rather than the table, withheld ones dropped, so it needs no
+ * database. Each run is one paid call, about $0.02 at low effort.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -35,18 +37,20 @@ import type { YogaDetectionResult } from "../../lib/astro-types";
 config({ path: ".env.local", quiet: true });
 
 async function main() {
-  const [date = "1985-11-02", time = "06:15", language = "English", effort = "low", port = "7001"] =
-    process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const [date = "1985-11-02", time = "06:15", language = "English", effort = "low", port = "7001"] = args.filter(
+    (arg) => !arg.startsWith("--"),
+  );
+  const flag = (name: string, fallback: string) =>
+    args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
 
   const query = new URLSearchParams({
     name: `Sample ${date} ${time}`,
     birth_date: date,
     birth_time: time,
-    timezone_offset_minutes: "330",
-    latitude: "12.9716",
-    longitude: "77.5946",
-    country: "India",
-    city: "Bengaluru",
+    timezone_offset_minutes: flag("tz", "330"),
+    latitude: flag("lat", "12.9716"),
+    longitude: flag("lng", "77.5946"),
   });
   const chart = (await (await fetch(`http://localhost:${port}/api/chart?${query}`)).json()) as {
     chart: { yogas: YogaDetectionResult[] };

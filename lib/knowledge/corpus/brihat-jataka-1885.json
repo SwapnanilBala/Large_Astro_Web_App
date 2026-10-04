@@ -7364,9 +7364,7 @@
       "notes": null,
       "summary": "The translator's note says that if the Moon and Saturn are in the 7th house, the person's wife will leave him and marry another.",
       "yogaIds": [
-        "vish",
-        "shani_digbala",
-        "chandra_shani_yoga"
+        "kalatra_chandra_shani"
       ],
       "planets": [
         "Moon",
@@ -7375,8 +7373,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

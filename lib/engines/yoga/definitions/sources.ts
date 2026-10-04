@@ -39,3 +39,13 @@ export const CONJUNCTION_SOURCE = "Saravali (results of two planets in conjuncti
 
 export const KARAKA_RELATIVE_SOURCE =
   "BPHS and Saravali (benefic and malefic placements reckoned from the Sun and the Moon)";
+
+/*
+ * Cited by the 1885 translation's own numbering, edition named, because it is
+ * the translator's note rather than Varahamihira's verse and the chapter is
+ * numbered differently in Sastri: in Chidambaram Iyer, chapter 23 is "On
+ * Malefic Yogas" and the note follows its first verse. The same passage is
+ * brihat-jataka-1885:23.1.4 in lib/knowledge/corpus.
+ */
+export const KALATRA_CHANDRA_SHANI_SOURCE =
+  "Brihat Jataka, tr. N. Chidambaram Iyer (1885), ch. 23 (malefic yogas), translator's note to v. 1";

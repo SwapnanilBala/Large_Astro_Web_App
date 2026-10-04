@@ -77,24 +77,39 @@ const MIN_LENGTH_SHARE = 0.9;
  * another", and because the chapter talks about Saturn in the 7th or the Sun
  * in the 10th, those passages were tagged with benign yogas like Shani
  * Digbala and would have coloured them. A rule is cheaper and surer than
- * another prompt.
+ * another prompt. The one exception, a spouse leaving, is in
+ * PASSAGE_OVERRIDES below.
  */
 const WITHHELD_CHAPTERS: Record<number, string> = {
   23: "The chapter on malefic yogas, which predicts only misfortune.",
 };
 
 /**
- * Yoga tags added by hand, by passage (`chapter.verse.part`), on top of the
- * model's. Kept here rather than edited into the corpus file, because a
- * rebuild regenerates that file from the cached answers and would drop them.
+ * Decisions about single passages (`chapter.verse.part`), made by hand and
+ * applied on top of the model's answers. They live here rather than as edits
+ * to the corpus file, because a rebuild regenerates that file from the cached
+ * answers and would drop them. A ref that a build no longer has fails it.
  *
- * Yava's two passages were tagged on 2026-10-04, when the catalogue's Yava was
- * corrected to the classical rule (Vajra reversed) after the answers had been
- * cached against the old one, which the model rightly declined to match.
+ *   addTags            tags the model could not have given
+ *   tags               replaces the model's tags, where they are looser than the passage
+ *   showDespiteChapter shows a passage that WITHHELD_CHAPTERS would withhold
  */
-const ADDED_TAGS: Record<string, string[]> = {
-  "12.5.2": ["yava"],
-  "12.14.2": ["yava"],
+type PassageOverride = { addTags?: string[]; tags?: string[]; showDespiteChapter?: true };
+
+const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
+  /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
+     classical rule (Vajra reversed) after these answers had been cached
+     against the old one, which the model rightly declined to match. */
+  "12.5.2": { addTags: ["yava"] },
+  "12.14.2": { addTags: ["yava"] },
+  /* The one malefic-yoga passage the product shows, by the owner's choice on
+     2026-10-04: "If the Moon and Saturn occupy the 7th house a person's wife
+     will quit him and marry another." A spouse leaving is something a reader
+     can hear; a spouse's death, disability and disease are not. Its tags are
+     replaced with the yoga built from it: the model's (Vish, Shani Digbala,
+     Chandra-Shani) would have shown it for a Moon-Saturn pair in any house,
+     or for Saturn alone in the 7th. */
+  "23.1.4": { tags: ["kalatra_chandra_shani"], showDespiteChapter: true },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
@@ -447,6 +462,8 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       throw new Error(`Chapter ${chapter.chapter} ${answered.verse}.${answered.part}: withheld without a reason.`);
     }
     const agreement = ocrAgreement(scoredText({ text: answered.text, notes }), rawWords, positionsOf);
+    const override = PASSAGE_OVERRIDES[`${chapter.chapter}.${answered.verse}.${answered.part}`] ?? {};
+    const chapterWithheld = chapter.chapter in WITHHELD_CHAPTERS && !override.showDespiteChapter;
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
       source: SOURCE.slug,
@@ -459,20 +476,17 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       notes,
       summary: answered.summary.trim(),
       yogaIds: inOrder(
-        [
-          ...new Set([
-            ...answered.yoga_ids,
-            ...(ADDED_TAGS[`${chapter.chapter}.${answered.verse}.${answered.part}`] ?? []),
-          ]),
-        ],
+        [...new Set(override.tags ?? [...answered.yoga_ids, ...(override.addTags ?? [])])],
         YOGA_IDS,
       ),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: answered.withheld || chapter.chapter in WITHHELD_CHAPTERS,
+      withheld: answered.withheld || chapterWithheld,
       withheldReason: answered.withheld
         ? answered.withheld_reason.trim()
-        : (WITHHELD_CHAPTERS[chapter.chapter] ?? null),
+        : chapterWithheld
+          ? WITHHELD_CHAPTERS[chapter.chapter]
+          : null,
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });
@@ -519,9 +533,9 @@ async function main() {
   /* A hand-added tag whose passage no longer exists (a fresh build split the
      verse differently) must fail loudly, not vanish. */
   const refs = new Set(passages.map((p) => `${p.chapter}.${p.verse}.${p.part}`));
-  const orphaned = Object.keys(ADDED_TAGS).filter((ref) => !refs.has(ref));
+  const orphaned = Object.keys(PASSAGE_OVERRIDES).filter((ref) => !refs.has(ref));
   if (orphaned.length > 0) {
-    throw new Error(`ADDED_TAGS names passages this build does not have: ${orphaned.join(", ")}. Re-point them.`);
+    throw new Error(`PASSAGE_OVERRIDES names passages this build does not have: ${orphaned.join(", ")}. Re-point them.`);
   }
 
   const short: number[] = [];
@@ -547,7 +561,7 @@ async function main() {
   /* The catalogue entries that cite this chapter for their definition: all 32
      Nabhasa figures. Kedara and Yava joined them on 2026-10-04, when Yava's
      rule was corrected to the classical one; Yava's two passages carry the
-     tag through ADDED_TAGS above, since the cached answers predate the fix. */
+     tag through PASSAGE_OVERRIDES above, since the cached answers predate the fix. */
   const citedHere = YOGA_DEFINITIONS.filter((d) => d.source?.startsWith("Brihat Jataka ch. 12")).map((d) => d.id);
   const tagged = new Set(passages.filter((p) => p.chapter === 12).flatMap((p) => p.yogaIds));
   const untagged = citedHere.filter((id) => !tagged.has(id));

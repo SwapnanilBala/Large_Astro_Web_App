@@ -60,7 +60,7 @@ Tell the reader what the Brihat Jataka says about their yogas.
 - A passage that begins "${NOTE_PREFIX.trim()}" is the 1885 translator's own note, often quoting other authorities. Attribute it that way ("the translator's notes add ...", "other authorities quoted in the notes hold ..."), never to Varahamihira.
 - Plain modern language for a reader who knows no astrology. The book's "king" means someone with standing and authority; say that rather than "king".
 - Where a passage's verdict is harsh, name what the book warned of in one neutral phrase. Never describe the reader with its insults.
-- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does.
+- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving or a marriage ending may be said plainly, for either partner, without blame.
 - No advice, no disclaimers, no headings, no lists, no markdown.
 - Address the reader as "you". Use the yoga names exactly as given.`;
 

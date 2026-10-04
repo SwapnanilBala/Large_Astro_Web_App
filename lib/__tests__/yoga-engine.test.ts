@@ -32,10 +32,10 @@ function buildChart(): YogaChartInput {
 }
 
 describe("yoga-engine", () => {
-  it("defines exactly 205 unique yogas", () => {
+  it("defines exactly 206 unique yogas", () => {
     const ids = YOGA_DEFINITIONS.map((definition) => definition.id);
-    expect(YOGA_DEFINITIONS).toHaveLength(205);
-    expect(new Set(ids)).toHaveLength(205);
+    expect(YOGA_DEFINITIONS).toHaveLength(206);
+    expect(new Set(ids)).toHaveLength(206);
   });
 
   /* Two yogas sharing a display name would be indistinguishable in the panel,
@@ -119,10 +119,35 @@ describe("yoga-engine: rare whole-chart figures are reachable", () => {
         Sun: "Aries", Mars: "Capricorn", Saturn: "Libra",
       },
     )],
+    ["kalatra_chandra_shani", chartOf({ Moon: 7, Saturn: 7, Sun: 1, Mars: 2, Mercury: 3, Jupiter: 4, Venus: 5 })],
   ];
 
   it.each(cases)("detects %s on a chart built to satisfy it", (id, chart) => {
     expect(detectYogas(chart).map((yoga) => yoga.yoga_id)).toContain(id);
+  });
+
+  /* The one yoga from the Brihat Jataka's chapter on malefic yogas: a spouse
+     leaving, when the Moon and Saturn are both in the 7th. Being together is
+     not enough (that is Vish), and neither is one of them there. */
+  it("finds Kalatra Chandra-Shani only with both the Moon and Saturn in the 7th", () => {
+    const others = { Sun: 1, Mars: 2, Mercury: 3, Jupiter: 4, Venus: 5 };
+    const ids = (placements: Record<string, number>) =>
+      detectYogas(chartOf({ ...others, ...placements })).map((yoga) => yoga.yoga_id);
+
+    expect(ids({ Moon: 7, Saturn: 7 })).toContain("kalatra_chandra_shani");
+    expect(ids({ Moon: 7, Saturn: 8 })).not.toContain("kalatra_chandra_shani");
+    expect(ids({ Moon: 6, Saturn: 7 })).not.toContain("kalatra_chandra_shani");
+    // In the 9th, clear of Jupiter's aspect from the 4th, which would cancel Vish.
+    const together = ids({ Moon: 9, Saturn: 9 });
+    expect(together).toContain("vish");
+    expect(together).not.toContain("kalatra_chandra_shani");
+
+    const found = detectYogas(chartOf({ ...others, Moon: 7, Saturn: 7 })).find(
+      (yoga) => yoga.yoga_id === "kalatra_chandra_shani",
+    );
+    expect(found).toMatchObject({ category: "challenging", involved_planets: ["Moon", "Saturn"] });
+    expect(found?.source).toContain("ch. 23");
+    expect(found?.description).toBe("The Moon and Saturn share Libra in the 7th house.");
   });
 
   /* Yava used to be "three signs holding two planets each", a rule of its own
@@ -142,10 +167,11 @@ describe("yoga-engine: citations", () => {
   /* The hundred added in 2026-09 each name the text they come from. The
      original hundred deliberately do not -- see the note on YogaDefinition --
      except Kedara and Yava, two of the 32 Nabhasa figures, which took the
-     family's citation when they moved in beside it. */
+     family's citation when they moved in beside it. Kalatra Chandra-Shani,
+     added 2026-10-04 from the malefic-yogas chapter, carries its own. */
   it("cites a classical source on exactly the definitions that have one", () => {
     const cited = YOGA_DEFINITIONS.filter((definition) => definition.source);
-    expect(cited).toHaveLength(107);
+    expect(cited).toHaveLength(108);
     for (const definition of cited) {
       expect(definition.source!.length).toBeGreaterThan(10);
     }

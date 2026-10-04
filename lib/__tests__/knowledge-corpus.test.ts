@@ -123,4 +123,15 @@ describe("the Brihat Jataka corpus", () => {
     expect(cited.length).toBeGreaterThanOrEqual(32);
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
   });
+
+  it("shows one passage of the malefic-yogas chapter, the spouse leaving, tied only to its own yoga", () => {
+    // The owner's line, 2026-10-04: a spouse leaving can be shown; a spouse's
+    // death, disability and disease cannot. Tagged only with the yoga built
+    // from it, so a Moon-Saturn pair elsewhere never pulls it in.
+    const shown = corpus?.passages.filter((passage) => passage.chapter === 23 && !passage.withheld) ?? [];
+    expect(shown.map((passage) => passage.id)).toEqual(["brihat-jataka-1885:23.1.4"]);
+    expect(shown[0].yogaIds).toEqual(["kalatra_chandra_shani"]);
+    expect(shown[0].text).toMatch(/wife will quit him and marry another/);
+    expect(YOGA_DEFINITIONS.find((definition) => definition.id === "kalatra_chandra_shani")?.source).toContain("ch. 23");
+  });
 });
