@@ -52,6 +52,8 @@ const STEP_COUNT = 4;
  * "2:30 pm" would otherwise be submitted verbatim; and a 24-hour locale shows
  * the birth time back as "14:30", so the read-out under the field is the only
  * place the visitor sees which half of the day the chart will be built for.
+ * They are given the interface language, so that plain text reads in its
+ * words too: "15 juin 1990" as well as "15 June 1990".
  * The time goes through normalizeTimeInputValue rather than the bare typed
  * reading, because a working time input's value is already 24-hour: read as
  * typed, a 10:30 picked from the wheel was offered back as 10:30 PM.
@@ -418,8 +420,8 @@ export default function MobileIntake() {
     return {
       ...source,
       name: keep(source.name, normalizePersonName(source.name)),
-      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate)),
-      birthTime: keep(source.birthTime, normalizeTimeInputValue(source.birthTime)),
+      birthDate: keep(source.birthDate, normalizeBirthDate(source.birthDate, { locale })),
+      birthTime: keep(source.birthTime, normalizeTimeInputValue(source.birthTime, locale)),
       country: keep(source.country, normalizePlaceName(source.country)),
       state: keep(source.state, normalizePlaceName(source.state)),
       city: keep(source.city, normalizePlaceName(source.city)),
@@ -539,7 +541,7 @@ export default function MobileIntake() {
               type="date"
               value={draft.birthDate}
               onChange={(e) => edit("birthDate", e.target.value)}
-              onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
+              onBlur={commit("birthDate", (value) => normalizeBirthDate(value, { locale }))}
               max={new Date().toISOString().slice(0, 10)}
               min="1900-01-01"
               autoComplete="bday"
@@ -572,7 +574,7 @@ export default function MobileIntake() {
                 step={60}
                 value={draft.birthTime}
                 onChange={(e) => edit("birthTime", e.target.value)}
-                onBlur={commit("birthTime", normalizeTimeInputValue)}
+                onBlur={commit("birthTime", (value) => normalizeTimeInputValue(value, locale))}
                 required
               />
               {fieldNotes.birthTime ? (

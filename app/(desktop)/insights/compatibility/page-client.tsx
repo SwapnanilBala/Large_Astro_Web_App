@@ -482,7 +482,7 @@ function ProfileCard({
                 type="date"
                 value={profile.birthDate}
                 onChange={updateField("birthDate")}
-                onBlur={commit("birthDate", (value) => normalizeBirthDate(value))}
+                onBlur={commit("birthDate", (value) => normalizeBirthDate(value, { locale }))}
               />
               <HiOutlineCalendarDays className="datetime-icon datetime-icon-aqua" />
             </div>
@@ -502,7 +502,7 @@ function ProfileCard({
                 type="time"
                 value={profile.birthTime}
                 onChange={updateField("birthTime")}
-                onBlur={commit("birthTime", normalizeTimeInputValue)}
+                onBlur={commit("birthTime", (value) => normalizeTimeInputValue(value, locale))}
               />
               <HiOutlineClock className="datetime-icon datetime-icon-aqua" />
             </div>

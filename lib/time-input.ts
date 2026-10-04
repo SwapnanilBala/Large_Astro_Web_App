@@ -24,8 +24,10 @@ export function hasNativeTimeInput(): boolean {
  * picked from the morning side of the wheel came back as "could be morning or
  * evening" with a 10:30 PM chip beside it, one tap from moving the birth time
  * twelve hours. Where the control does not work, the field is a text box, and
- * what was typed there gets the lenient reading every typed time gets.
+ * what was typed there gets the lenient reading every typed time gets: in the
+ * interface language as well, given its `locale` (one of LOCALE_TAGS), whose
+ * own words for AM and PM are then read along with English's.
  */
-export function normalizeTimeInputValue(value: string): IntakeFieldResult {
-  return normalizeBirthTime(value, { clock24: hasNativeTimeInput() });
+export function normalizeTimeInputValue(value: string, locale?: string): IntakeFieldResult {
+  return normalizeBirthTime(value, { clock24: hasNativeTimeInput(), locale });
 }

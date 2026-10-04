@@ -25,4 +25,21 @@ describe("normalizeTimeInputValue", () => {
     });
     expect(normalizeTimeInputValue("2:30 pm").value).toBe("14:30");
   });
+
+  it("reads the fallback text box in the interface language", () => {
+    vi.spyOn(HTMLInputElement.prototype, "type", "get").mockReturnValue("text");
+
+    /* Every language the interface speaks writes AM and PM in Latin letters
+       in today's data; Nepali still writes them in Devanagari, as date-fns
+       writes Hindi's, so it shows the locale reaching the reader. */
+    expect(normalizeTimeInputValue("7:15 अपराह्न", "ne-NP")).toMatchObject({
+      status: "ok",
+      value: "19:15",
+    });
+    expect(normalizeTimeInputValue("7:15 अपराह्न").status).toBe("ambiguous");
+  });
+
+  it("has no use for the locale while the time input works", () => {
+    expect(normalizeTimeInputValue("10:30", "fr-FR")).toMatchObject({ status: "ok", value: "10:30" });
+  });
 });
