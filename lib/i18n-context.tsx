@@ -9,6 +9,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
+import { LOCATION_LOCALE_COOKIE, parseLocationLocale } from "@/lib/location-locale-cookie";
 /* No message file is imported here on purpose.
  *
  * This module is pulled into every tree, so a top-level import of en.json
@@ -49,9 +50,9 @@ export const LANGUAGE_CODES: Language[] = ["en", "es", "bn", "hi", "it", "fr"];
  * "11 Feb 2030", which React counts as a text mismatch and repairs by throwing
  * the server tree away. Deriving the tag from `language` instead makes the
  * output a function of app state, and safe to render on both sides: the
- * provider starts every visitor at "en" and only adopts the stored choice once
- * hydration is over, so the first client render always agrees with the
- * server's.
+ * provider starts every visitor at "en" and only adopts a stored choice, or
+ * the one their location suggests, once hydration is over, so the first
+ * client render always agrees with the server's.
  */
 export const LOCALE_TAGS: Record<Language, string> = {
   en: "en-US",
@@ -102,15 +103,49 @@ const LANGUAGE_STORAGE_KEY = "astro_language";
    read once hydration is over. */
 const subscribeToNothing = () => () => {};
 
-function readStoredLanguage(): Language {
+function isLanguage(value: string | null | undefined): value is Language {
+  return !!value && (LANGUAGE_CODES as string[]).includes(value);
+}
+
+/** The visitor's own choice, or null when they have never made one. */
+function readStoredLanguage(): Language | null {
   /* Guarded: this runs during render, where a storage error would take the
      whole tree down instead of one effect. */
   try {
-    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY) as Language | null;
-    return stored && LANGUAGE_CODES.includes(stored) ? stored : "en";
+    const stored = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    return isLanguage(stored) ? stored : null;
   } catch {
-    return "en";
+    return null;
   }
+}
+
+/* ── The location's suggestion ── */
+
+/** What the visitor's location suggests, as proxy.ts left it (lib/location-language.ts). */
+function readLocationLanguage(): Language | null {
+  try {
+    const prefix = `${LOCATION_LOCALE_COOKIE}=`;
+    const entry = document.cookie.split(/;\s*/).find((pair) => pair.startsWith(prefix));
+    const language = parseLocationLocale(entry?.slice(prefix.length))?.language;
+    return isLanguage(language) ? language : null;
+  } catch {
+    return null;
+  }
+}
+
+/* The first read, kept: the proxy may rewrite the cookie on any later request
+   -- a client navigation included -- and a page should not change language
+   under someone halfway through a form because their address moved. */
+function readOnce<T>(read: () => T): () => T {
+  let done = false;
+  let value: T;
+  return () => {
+    if (!done) {
+      value = read();
+      done = true;
+    }
+    return value;
+  };
 }
 
 /* ── Provider ── */
@@ -123,16 +158,19 @@ export function LanguageProvider({
   /** The English baseline for this tree. See the note at the top of the file. */
   baseMessages: MessageTree;
 }) {
-  /* The stored choice: "en" on the server and in the render that hydrates, the
-     stored language from the next render on, so the first client render still
-     agrees with the server's. A choice made on this page wins over it. */
-  const storedLanguage = useSyncExternalStore(
-    subscribeToNothing,
-    readStoredLanguage,
-    () => "en" as const,
-  );
+  /* Which language, most deliberate first: a choice made on this page, a
+     choice made on an earlier visit, then what the visitor's location
+     suggests, then English.
+
+     Both reads are null on the server and in the render that hydrates, and
+     only answer from the next render on, so the first client render still
+     agrees with the server's. The location is read once per mount; see
+     readOnce. */
+  const storedLanguage = useSyncExternalStore(subscribeToNothing, readStoredLanguage, () => null);
+  const [readLocationOnce] = useState(() => readOnce(readLocationLanguage));
+  const locationLanguage = useSyncExternalStore(subscribeToNothing, readLocationOnce, () => null);
   const [chosenLanguage, setChosenLanguage] = useState<Language | null>(null);
-  const language = chosenLanguage ?? storedLanguage;
+  const language = chosenLanguage ?? storedLanguage ?? locationLanguage ?? "en";
 
   /* Flattening walks the whole tree, so do it once per mount rather than on
      every render. baseMessages is a module-level JSON import in both wrappers,

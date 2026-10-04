@@ -6,8 +6,10 @@ import { LanguageProvider, useTranslation } from "@/lib/i18n-context";
  * The provider reads the stored language through useSyncExternalStore rather
  * than an effect. These pin what that must keep: English with nothing (or
  * nonsense) stored, the stored choice once the browser is there, <html lang>
- * following it, and a new choice written back. The translation files are not
- * what is under test, so the English baseline is all that is asserted on.
+ * following it, and a new choice written back -- and, beneath any choice, the
+ * language the visitor's location suggests (the cookie proxy.ts leaves). The
+ * translation files are not what is under test, so the English baseline is
+ * all that is asserted on.
  */
 
 function Probe() {
@@ -25,8 +27,17 @@ function Probe() {
 
 const baseMessages = { probe: { greeting: "Hello, {name}" } };
 
+/* What proxy.ts leaves when the platform says where the visitor is. */
+function setLocationLocale(value: string | null) {
+  document.cookie =
+    value === null
+      ? "astro_location_locale=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/"
+      : `astro_location_locale=${value}; path=/`;
+}
+
 beforeEach(() => {
   window.localStorage.clear();
+  setLocationLocale(null);
   document.documentElement.lang = "en";
   /* A translation file that cannot be imported here is reported, not thrown. */
   vi.spyOn(console, "error").mockImplementation(() => {});
@@ -84,6 +95,73 @@ describe("LanguageProvider", () => {
       </LanguageProvider>
     );
     expect(screen.getByTestId("echo")).toHaveTextContent("Hello, A$&B$'C$$D");
+  });
+
+  it("adopts the language the visitor's location suggests when nothing is stored", async () => {
+    setLocationLocale("bn-IN");
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("bn");
+    await waitFor(() => expect(document.documentElement.lang).toBe("bn"));
+    /* A suggestion is not a choice, so nothing is stored for it. */
+    expect(window.localStorage.getItem("astro_language")).toBeNull();
+  });
+
+  it("puts a stored choice ahead of the location, English included", () => {
+    setLocationLocale("hi-IN");
+    window.localStorage.setItem("astro_language", "en");
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("en");
+  });
+
+  it("puts a choice made on the page ahead of the location", () => {
+    setLocationLocale("hi-IN");
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("hi");
+    fireEvent.click(screen.getByRole("button", { name: "Spanish" }));
+    expect(screen.getByTestId("language")).toHaveTextContent("es");
+    expect(window.localStorage.getItem("astro_language")).toBe("es");
+  });
+
+  it("ignores a location that suggests a language it does not offer", () => {
+    setLocationLocale("de-DE");
+    render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("en");
+  });
+
+  it("keeps the location it first read, so the page never changes language mid-visit", () => {
+    setLocationLocale("hi-IN");
+    const { rerender } = render(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("hi");
+
+    /* A later response rewrites the cookie -- a client navigation from a
+       different address -- and the provider renders again. */
+    setLocationLocale("fr-FR");
+    rerender(
+      <LanguageProvider baseMessages={baseMessages}>
+        <Probe />
+      </LanguageProvider>
+    );
+    expect(screen.getByTestId("language")).toHaveTextContent("hi");
   });
 
   it("switches on a choice and stores it for the next visit", async () => {

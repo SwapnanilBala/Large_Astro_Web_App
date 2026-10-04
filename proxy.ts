@@ -8,6 +8,8 @@ import {
   resolveRoute,
 } from "@/lib/device";
 import { IMPORTANT_DIVISIONAL_CHARTS } from "@/lib/divisional-chart-guide";
+import { locationFromHeaders, nextLocationLocale } from "@/lib/location-language";
+import { LOCATION_LOCALE_COOKIE } from "@/lib/location-locale-cookie";
 
 /**
  * Route a page request to the mobile or desktop tree.
@@ -129,14 +131,42 @@ function rateLimitApi(request: NextRequest): NextResponse {
   return response;
 }
 
+/**
+ * Leave the language the visitor's location suggests where the page can read it.
+ *
+ * A cookie rather than anything rendered: the intake pages are prerendered,
+ * one copy for everyone, and LanguageProvider already adopts a stored language
+ * after hydration, so it reads this one at the same moment. The response that
+ * delivers the page sets it, so even a first visit has it before any script
+ * runs. Not httpOnly, for that reason.
+ *
+ * Written by the page routes in the matcher, which are the ways into the app
+ * (both intakes, the chart, sign-in); a deep link elsewhere picks it up on
+ * the next of those. API calls leave it alone.
+ */
+function rememberLocationLocale(request: NextRequest, response: NextResponse): NextResponse {
+  const locale = nextLocationLocale(
+    locationFromHeaders(request.headers),
+    request.cookies.get(LOCATION_LOCALE_COOKIE)?.value,
+  );
+  if (locale) {
+    response.cookies.set(LOCATION_LOCALE_COOKIE, locale, {
+      path: "/",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+  return response;
+}
+
 export function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return rateLimitApi(request);
   }
-  if (request.nextUrl.pathname.startsWith("/insights/divisional-charts/")) {
-    return refuseUnknownDivision(request);
-  }
-  return routeByDevice(request);
+  const response = request.nextUrl.pathname.startsWith("/insights/divisional-charts/")
+    ? refuseUnknownDivision(request)
+    : routeByDevice(request);
+  return rememberLocationLocale(request, response);
 }
 
 export const config = {
