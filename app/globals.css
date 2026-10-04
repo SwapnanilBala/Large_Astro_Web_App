@@ -27,11 +27,14 @@
    * ── Type scale ──
    *
    * The floor exists because the results page had 36 elements at 10px and 22
-   * at 11px. Nothing that carries meaning goes below --text-meta.
+   * at 11px. Nothing that carries meaning goes below --text-meta, and a
+   * sentence -- a note, a legend, a footer -- goes no lower than --text-ui.
+   * Both floors were raised in 2026-10 from 12.5px and 13px, which still read
+   * as squinting text on the dark ground, especially in uppercase.
    */
-  --text-meta: 0.78rem;    /* 12.5px -- table numbers, fine print */
-  --text-label: 0.8125rem; /* 13px  -- uppercase kickers and badges */
-  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, nav pills */
+  --text-meta: 0.875rem;   /* 14px  -- table numbers, fine print */
+  --text-label: 0.875rem;  /* 14px  -- uppercase kickers and badges */
+  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, nav pills, sentences */
   --text-body: 1.0625rem;  /* 17px  -- prose */
   --text-lead: 1.1875rem;  /* 19px  -- the lead under a title */
 
@@ -226,7 +229,7 @@
   --field-glow-warm: 0 0 0 3px rgba(212, 165, 116, 0.24);
   --font-mobile-body: 1rem;
   --font-mobile-label: 0.875rem;
-  --font-mobile-meta: 0.75rem;
+  --font-mobile-meta: 0.875rem; /* the --text-meta floor, at narrow widths too */
 }
 
 
@@ -2175,7 +2178,7 @@ label:has(.autocomplete-wrapper.is-open) {
   background: transparent;
   color: var(--ink-soft);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   padding: 0.35rem 0.65rem;
 }
@@ -2262,7 +2265,7 @@ label:has(.autocomplete-wrapper.is-open) {
   border: 1px solid rgba(108, 225, 212, 0.3);
   background: var(--chip-teal-surface);
   color: var(--accent-teal);
-  font-size: 0.8rem;
+  font-size: var(--text-label);
   font-weight: 800;
   letter-spacing: 0.08em;
   line-height: 1;
@@ -2437,7 +2440,7 @@ label:has(.autocomplete-wrapper.is-open) {
   background: rgba(200, 155, 60, 0.1);
   color: var(--accent-gold);
   cursor: pointer;
-  font-size: 0.84rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   padding: 0.4rem 0.7rem;
 }
@@ -3858,7 +3861,9 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
 .bridge-label {
   fill: var(--ink-soft);
   font-family: inherit;
-  font-size: 12px;
+  /* SVG units of a 640-unit drawing that usually renders narrower than that,
+     so 14 lands at 12px and up. Planet names still clear both rails. */
+  font-size: 14px;
   dominant-baseline: middle;
 }
 
@@ -5440,7 +5445,7 @@ a:focus-visible {
 
 .drawer-account-email {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--text-meta);
   /* A long address must not widen the drawer past the viewport. */
   max-width: 100%;
   overflow: hidden;
@@ -5712,7 +5717,7 @@ a:focus-visible {
   position: sticky;
   bottom: 0;
   padding: 0.3rem 0.75rem;
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   text-align: right;
   color: var(--ink-soft);
   background: #17161f;
@@ -7039,7 +7044,7 @@ textarea:focus-visible {
   }
 
   .metric-card h3 {
-    font-size: 0.8rem;
+    font-size: var(--text-meta);
   }
 
   .metric-card p,
@@ -7048,7 +7053,7 @@ textarea:focus-visible {
   }
 
   .metric-card small {
-    font-size: 0.8rem;
+    font-size: var(--text-meta);
   }
 
   .metric-card--hero {

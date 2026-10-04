@@ -77,7 +77,7 @@ export default function RootError({
         </a>
       </div>
       {error.digest && (
-        <p style={{ margin: 0, fontSize: "0.75rem", color: "#6B6560" }}>
+        <p style={{ margin: 0, fontSize: "0.875rem", color: "#6B6560" }}>
           Reference: {error.digest}
         </p>
       )}

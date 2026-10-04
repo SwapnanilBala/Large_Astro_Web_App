@@ -176,7 +176,7 @@
 
   .breadcrumb {
     gap: 0.35rem;
-    font-size: 0.82rem;
+    font-size: var(--text-meta);
     line-height: 1.35;
   }
 
@@ -191,7 +191,7 @@
   }
 
   .heroKicker {
-    font-size: 0.82rem;
+    font-size: var(--text-meta);
     letter-spacing: 0.14em;
   }
 
@@ -333,7 +333,7 @@
 
 .storyProgressNote {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   color: var(--accent-gold);
 }
 
@@ -355,7 +355,7 @@
 
 .storyProgressHint {
   margin: 0;
-  font-size: 0.84rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: var(--ink-soft);
 }

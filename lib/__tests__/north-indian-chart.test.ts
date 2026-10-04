@@ -205,6 +205,29 @@ describe("label layout", () => {
     expect(crowded.labels.some((label) => !label.showDegree)).toBe(true);
     expect(crowded.scale).toBe(1);
   });
+
+  it("spaces larger labels for a chart that prints them larger", () => {
+    // The atlas thumbnails print labels at 25 units, nearly twice LABEL_FONT,
+    // and used to stack them at the main chart's 15-unit spacing: "Asc" and
+    // "Ke" in one house printed on top of each other.
+    const font = 25;
+    const short: ChartLabel = { abbrev: "Asc", degree: "", retrograde: false };
+    for (const house of HOUSES) {
+      const box = LABEL_BOXES[house];
+      for (let count = 2; count <= 4; count++) {
+        const { labels, scale } = layoutHouseLabels(Array(count).fill(short), box, font / 13);
+        const size = font * scale;
+        for (let i = 0; i < labels.length; i++) {
+          for (let j = i + 1; j < labels.length; j++) {
+            const apart =
+              Math.abs(labels[i].x - labels[j].x) >= estimate(short, false, scale) * (font / 13) ||
+              Math.abs(labels[i].y - labels[j].y) >= size;
+            expect(apart, `house ${house}, ${count} labels, ${i} and ${j}`).toBe(true);
+          }
+        }
+      }
+    }
+  });
 });
 
 describe("degree formatting", () => {

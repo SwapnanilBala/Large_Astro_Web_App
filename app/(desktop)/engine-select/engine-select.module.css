@@ -246,7 +246,7 @@
 }
 
 .detailOrigin {
-  font-size: 0.82rem;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -335,7 +335,7 @@
 
 .styleLabel {
   display: block;
-  font-size: 0.82rem;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -419,7 +419,7 @@
 
 .impactLabel {
   display: block;
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -448,7 +448,7 @@
 }
 
 .selection span {
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.1em;

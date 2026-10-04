@@ -45,7 +45,7 @@
 .detail {
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -94,7 +94,7 @@
 .note {
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.78rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
   color: var(--ink-soft);
   opacity: 0.75;

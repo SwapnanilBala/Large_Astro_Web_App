@@ -25,8 +25,11 @@ import styles from "./weekly-energy-panel.module.css";
 
 const W = 640;
 const H = 300;
-/* right is wide because the band labels (High / Balanced / Low) live there. */
-const PAD = { top: 24, right: 58, bottom: 42, left: 44 };
+/* right is wide because the band labels (High / Balanced / Low) live there,
+   and has to hold the longest translation of them -- "Equilibrada", or the
+   Bengali -- at the 16-unit size in weekly-energy-panel.module.css. The panel
+   draws this chart at 0.75-0.85 of its units, so 16 is about 12-14px. */
+const PAD = { top: 24, right: 124, bottom: 54, left: 44 };
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
 
@@ -112,8 +115,8 @@ export default function WeeklyEnergyChart({
    */
   const calloutAnchor: "start" | "middle" | "end" =
     peakIndex <= 1 ? "start" : peakIndex >= DAY_COUNT - 2 ? "end" : "middle";
-  const calloutAbove = peakPoint.y > PAD.top + 54;
-  const calloutY = svgCoord(calloutAbove ? peakPoint.y - 16 : peakPoint.y + 16);
+  const calloutAbove = peakPoint.y > PAD.top + 60;
+  const calloutY = svgCoord(calloutAbove ? peakPoint.y - 18 : peakPoint.y + 20);
   const calloutDx = calloutAnchor === "start" ? 10 : calloutAnchor === "end" ? -10 : 0;
 
   const lineTransition = animate
@@ -223,7 +226,7 @@ export default function WeeklyEnergyChart({
           <text
             textAnchor={calloutAnchor}
             dx={calloutDx}
-            dy={calloutAbove ? -14 : 14}
+            dy={calloutAbove ? -22 : 22}
             className={styles.calloutLabel}
           >
             {peak.is_significant ? peak.label : t("shared.weeklyEnergyNoStandoutDay")}
@@ -236,7 +239,7 @@ export default function WeeklyEnergyChart({
             return (
               <text key={`axis-${p.day.date}`} x={p.x} y={svgCoord(H - PAD.bottom + 20)} textAnchor="middle">
                 <tspan x={p.x}>{weekday}</tspan>
-                <tspan x={p.x} dy="15" className={styles.axisDay}>{day}</tspan>
+                <tspan x={p.x} dy="19" className={styles.axisDay}>{day}</tspan>
               </text>
             );
           })}

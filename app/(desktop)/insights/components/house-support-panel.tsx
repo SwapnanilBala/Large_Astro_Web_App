@@ -142,19 +142,24 @@ function HouseBars({
   const tr = useRouteMessages(strengthMessages);
   const isFull = variant === "full";
   const width = 560;
-  /* The full page deliberately uses larger chart labels. Reserve headroom for
-     the value above a max-height bar and a second, readable label beneath the
-     axis; the compact results-page chart keeps its original proportions. */
-  const height = isFull ? 220 : 200;
-  const padTop = isFull ? 26 : 18;
-  const padBottom = isFull ? 46 : 34;
+  /* Both variants reserve headroom for the value above a tall bar and two
+     label rows beneath the axis. The compact results-page card draws this at
+     about 0.7-0.8 of its unit size, so its labels are set larger in units
+     (see .barHouseLabel) to land at 12px and up on screen, which needs the
+     taller rows. */
+  const height = isFull ? 220 : 232;
+  const padTop = 26;
+  const padBottom = isFull ? 46 : 52;
   const plotHeight = height - padTop - padBottom;
-  const slot = width / houses.length;
+  /* A gutter at the right holds the 28.1 baseline label, so it no longer
+     prints over the twelfth bar. */
+  const gutter = isFull ? 36 : 44;
+  const slot = (width - gutter) / houses.length;
   const barWidth = slot * 0.56;
-  const houseNumberY = height - padBottom + (isFull ? 18 : 15);
-  const houseSignY = height - padBottom + (isFull ? 34 : 27);
-  const baselineEndX = width - (isFull ? 38 : 34);
-  const baselineLabelX = width - (isFull ? 34 : 30);
+  const houseNumberY = height - padBottom + (isFull ? 18 : 20);
+  const houseSignY = height - padBottom + (isFull ? 34 : 40);
+  const baselineEndX = width - gutter + 4;
+  const baselineLabelX = width - gutter + 8;
 
   const baselineY = padTop + plotHeight * (1 - AVERAGE_BINDUS_PER_HOUSE / BAR_MAX_BINDUS);
 

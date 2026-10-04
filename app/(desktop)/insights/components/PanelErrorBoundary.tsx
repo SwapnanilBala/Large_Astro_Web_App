@@ -89,7 +89,7 @@ export default class PanelErrorBoundary extends Component<
                 border: "1px solid rgba(169, 164, 184, 0.3)",
                 background: "transparent",
                 color: "#a9a4b8",
-                fontSize: "0.75rem",
+                fontSize: "0.875rem",
                 cursor: "pointer",
               }}
             >
@@ -104,7 +104,7 @@ export default class PanelErrorBoundary extends Component<
                 border: "1px solid rgba(212, 175, 55, 0.4)",
                 background: "transparent",
                 color: "#d4af37",
-                fontSize: "0.75rem",
+                fontSize: "0.875rem",
                 cursor: "pointer",
               }}
             >
@@ -117,7 +117,7 @@ export default class PanelErrorBoundary extends Component<
           <p
             style={{
               marginTop: "0.75rem",
-              fontSize: "0.75rem",
+              fontSize: "0.875rem",
               color: "#6b6580",
               wordBreak: "break-word",
             }}

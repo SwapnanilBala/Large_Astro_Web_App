@@ -30,7 +30,7 @@
 .kicker {
   margin: 0 0 0.3rem;
   color: var(--accent-gold-light);
-  font-size: 0.74rem;
+  font-size: var(--text-label);
   font-weight: 750;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -171,7 +171,7 @@
   padding: 0 0.45rem 0.45rem;
   border-bottom: 1px solid var(--line-soft);
   color: var(--text-secondary);
-  font-size: 0.76rem;
+  font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-align: left;
@@ -228,7 +228,7 @@
 .retro {
   margin-left: 0.3rem;
   color: var(--accent-gold-light);
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 700;
   text-decoration: none;
   cursor: help;
@@ -254,7 +254,7 @@
 .glance dt {
   color: var(--text-secondary);
   font-family: var(--font-body), sans-serif;
-  font-size: 0.74rem;
+  font-size: var(--text-label);
   font-weight: 750;
   letter-spacing: 0.08em;
   text-transform: uppercase;

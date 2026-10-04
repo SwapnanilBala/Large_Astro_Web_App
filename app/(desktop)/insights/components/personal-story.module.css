@@ -22,7 +22,7 @@
 .kicker {
   margin: 0 0 0.3rem;
   color: var(--accent-gold);
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -123,7 +123,7 @@
 .error {
   margin: 0;
   color: var(--accent-coral, #C96B2A);
-  font-size: 0.85rem;
+  font-size: var(--text-ui);
 }
 
 @media (max-width: 640px) {
@@ -294,7 +294,7 @@
 .dialogNote {
   margin: 0;
   color: var(--text-tertiary, #9a918a);
-  font-size: 0.8rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
 }
 

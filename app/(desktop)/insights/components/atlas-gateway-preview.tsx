@@ -5,6 +5,7 @@ import {
   HOUSES,
   HOUSE_POLYGONS,
   LABEL_BOXES,
+  LABEL_FONT,
   NORTH_INDIAN_SIZE,
   SIGN_NUMBER_POINTS,
   layoutHouseLabels,
@@ -12,6 +13,11 @@ import {
   signNumber,
 } from "@/lib/north-indian-chart";
 import styles from "./reading-gateway-previews.module.css";
+
+/* Planet labels in chart units. The thumbnail draws the 400-unit chart at
+   about 180-215px, so this lands near 11-12px; the layout is told the size so
+   stacked labels in a crowded house shrink to fit instead of overprinting. */
+const MINI_LABEL_FONT = 25;
 
 const FEATURED_CHARTS = [
   { division: 1, focus: "Life and identity" },
@@ -37,7 +43,7 @@ function ChartMiniature({ chart, ascendantSign }: { chart: DivisionalChartInfo; 
           abbrev: position.name === "Ascendant" ? "Asc" : position.name.slice(0, 2),
           degree: "",
           retrograde: false,
-        })), LABEL_BOXES[house]);
+        })), LABEL_BOXES[house], MINI_LABEL_FONT / LABEL_FONT.abbrev);
         const [x, y] = SIGN_NUMBER_POINTS[house];
         return (
           <g key={house}>
@@ -53,7 +59,7 @@ function ChartMiniature({ chart, ascendantSign }: { chart: DivisionalChartInfo; 
                 key={positions[index].name}
                 x={label.x}
                 y={label.y}
-                fontSize={25 * layout.scale}
+                fontSize={MINI_LABEL_FONT * layout.scale}
                 className={styles.miniPlanet}
                 textAnchor="middle"
                 dominantBaseline="central"

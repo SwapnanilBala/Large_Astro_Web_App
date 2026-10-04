@@ -89,7 +89,7 @@
 
 .summary {
   margin-top: 0.15rem;
-  font-size: 0.875rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: var(--text-secondary);
 }
@@ -189,7 +189,7 @@
 
 .styleHint {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
   color: var(--text-secondary);
 }
@@ -210,7 +210,7 @@
 
 .noteText {
   margin: 0;
-  font-size: 0.875rem;
+  font-size: var(--text-ui);
   line-height: 1.55;
   color: var(--text-secondary);
 }
@@ -226,7 +226,7 @@
   align-items: baseline;
   gap: 0.4rem;
   min-width: 0;
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   color: var(--text-secondary);
 }
 

@@ -160,8 +160,9 @@
   opacity: 0.35;
 }
 
+/* Chart sizes are SVG units; see PAD in weekly-energy-chart.tsx for the scale. */
 .bandLabels text {
-  font-size: 12px;
+  font-size: 16px;
   fill: var(--text-secondary);
   text-anchor: start;
   dominant-baseline: middle;
@@ -204,23 +205,23 @@
 }
 
 .calloutDay {
-  font-size: 13px;
+  font-size: 17px;
   font-weight: 650;
 }
 
 .calloutLabel {
-  font-size: 12px;
+  font-size: 16px;
   fill: var(--accent-gold);
   letter-spacing: 0.05em;
 }
 
 .axis text {
-  font-size: 12px;
+  font-size: 16px;
   fill: var(--text-secondary);
 }
 
 .axisDay {
-  font-size: 13px;
+  font-size: 17px;
   fill: var(--ink-main);
   font-weight: 600;
 }
@@ -351,7 +352,7 @@
 .loadingBar:nth-child(3) { width: 64%; }
 
 .loadingNote {
-  font-size: 0.85rem;
+  font-size: var(--text-ui);
   color: var(--ink-soft);
   margin: 0.2rem 0 0;
 }
@@ -376,7 +377,7 @@
 }
 
 .errorBody {
-  font-size: 0.85rem;
+  font-size: var(--text-ui);
   color: var(--ink-soft);
   margin: 0;
 }
@@ -391,7 +392,7 @@
   border: 1px solid var(--line-soft);
   background: var(--surface-soft);
   color: var(--ink-main);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   cursor: pointer;
 }
 

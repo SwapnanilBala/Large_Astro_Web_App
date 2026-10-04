@@ -216,22 +216,28 @@ function labelWidth(label: ChartLabel, showDegree: boolean, scale: number): numb
  * Fit a house's labels into its box: one column if it fits, then two or three,
  * dropping the degrees before shrinking the type, and shrinking only as a last
  * resort. Returns the labels with centre points, row by row.
+ *
+ * `fontScale` is for a chart that prints its labels larger than LABEL_FONT,
+ * relative to it: the atlas thumbnails draw this geometry at under half size,
+ * so they print at 25 units, nearly twice the 13 here. Line height, widths and
+ * gaps grow with it, so stacked labels never overprint one another.
  */
-export function layoutHouseLabels(labels: ChartLabel[], box: Box): LabelLayout {
+export function layoutHouseLabels(labels: ChartLabel[], box: Box, fontScale = 1): LabelLayout {
   if (labels.length === 0) return { labels: [], scale: 1 };
+  const gap = COLUMN_GAP * fontScale;
 
   for (const scale of [1, 0.88, 0.76, 0.66]) {
     for (const showDegree of [true, false]) {
       for (const columns of [1, 2, 3]) {
         const rows = Math.ceil(labels.length / columns);
-        const lineHeight = LINE_HEIGHT * scale;
+        const lineHeight = LINE_HEIGHT * scale * fontScale;
         if (rows * lineHeight > box.h) continue;
-        const columnWidth = Math.max(...labels.map((label) => labelWidth(label, showDegree, scale)));
-        if (columns * columnWidth + (columns - 1) * COLUMN_GAP > box.w) continue;
+        const columnWidth = Math.max(...labels.map((label) => labelWidth(label, showDegree, scale))) * fontScale;
+        if (columns * columnWidth + (columns - 1) * gap > box.w) continue;
 
         const blockHeight = rows * lineHeight;
         const top = box.y + (box.h - blockHeight) / 2;
-        const blockWidth = columns * columnWidth + (columns - 1) * COLUMN_GAP;
+        const blockWidth = columns * columnWidth + (columns - 1) * gap;
         const left = box.x + (box.w - blockWidth) / 2;
         return {
           scale,
@@ -240,12 +246,12 @@ export function layoutHouseLabels(labels: ChartLabel[], box: Box): LabelLayout {
             const column = index % columns;
             /* A last row with fewer labels is centred rather than left-aligned. */
             const inRow = Math.min(columns, labels.length - row * columns);
-            const rowWidth = inRow * columnWidth + (inRow - 1) * COLUMN_GAP;
+            const rowWidth = inRow * columnWidth + (inRow - 1) * gap;
             const rowLeft = columns === 1 ? left : box.x + (box.w - rowWidth) / 2;
             return {
               ...label,
               showDegree,
-              x: rowLeft + column * (columnWidth + COLUMN_GAP) + columnWidth / 2,
+              x: rowLeft + column * (columnWidth + gap) + columnWidth / 2,
               y: top + row * lineHeight + lineHeight / 2,
             };
           }),
@@ -262,7 +268,7 @@ export function layoutHouseLabels(labels: ChartLabel[], box: Box): LabelLayout {
       ...label,
       showDegree: false,
       x: box.x + box.w / 2,
-      y: box.y + (index + 0.5) * Math.min(LINE_HEIGHT * scale, box.h / labels.length),
+      y: box.y + (index + 0.5) * Math.min(LINE_HEIGHT * scale * fontScale, box.h / labels.length),
     })),
   };
 }

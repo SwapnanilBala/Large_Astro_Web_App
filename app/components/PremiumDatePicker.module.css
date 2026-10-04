@@ -4,7 +4,7 @@
 
 .fieldLabel {
   display: block;
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
@@ -410,7 +410,7 @@
 
 .errorMessage {
   margin-top: var(--space-sm);
-  font-size: 0.875rem;
+  font-size: var(--text-ui);
   color: #E84545;
   font-weight: 500;
   animation: slideDown 0.2s ease-out;
@@ -630,7 +630,7 @@
  * we made to their answer and has to be noticeable enough to argue with. */
 .assistMessage {
   margin-top: var(--space-sm);
-  font-size: 0.8125rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: rgba(242, 194, 108, 0.92);
   animation: slideDown 0.2s ease-out;
@@ -651,14 +651,14 @@
 }
 
 .assistSuggestionsLabel {
-  font-size: 0.78125rem;
+  font-size: var(--text-meta);
   color: var(--text-secondary);
 }
 
 .assistChip {
   padding: 0.28rem 0.7rem;
   font: inherit;
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   font-weight: 500;
   color: rgba(242, 194, 108, 0.95);
   background: rgba(242, 194, 108, 0.1);

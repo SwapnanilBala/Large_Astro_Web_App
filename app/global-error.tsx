@@ -63,7 +63,7 @@ export default function GlobalError({
           {error.digest && (
             <p
               style={{
-                fontSize: "0.75rem",
+                fontSize: "0.875rem",
                 color: "rgba(185, 208, 225, 0.5)",
                 marginBottom: "1.5rem",
               }}

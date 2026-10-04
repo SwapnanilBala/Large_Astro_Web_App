@@ -36,7 +36,7 @@
 .detail {
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: var(--text-ui);
   line-height: 1.55;
   color: var(--ink-soft);
 }
@@ -55,7 +55,7 @@
   background: transparent;
   color: var(--ink-soft);
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease;
 }
@@ -87,7 +87,7 @@
 .result {
   margin: 0;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   line-height: 1.5;
   color: var(--ink-soft);
 }

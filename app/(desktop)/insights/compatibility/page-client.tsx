@@ -869,7 +869,7 @@ export default function CompatibilityPageClient({
                         boxShadow: "0 0 20px rgba(100,200,255,0.25)",
                       }}
                     />
-                    <p style={{ margin: "0.4rem 0 0", fontSize: "0.75rem", opacity: 0.7 }}>
+                    <p style={{ margin: "0.4rem 0 0", fontSize: "var(--text-meta)", opacity: 0.7 }}>
                       {result.primary_client.name}
                     </p>
                   </div>
@@ -883,7 +883,7 @@ export default function CompatibilityPageClient({
                         boxShadow: "0 0 20px rgba(255,100,150,0.25)",
                       }}
                     />
-                    <p style={{ margin: "0.4rem 0 0", fontSize: "0.75rem", opacity: 0.7 }}>
+                    <p style={{ margin: "0.4rem 0 0", fontSize: "var(--text-meta)", opacity: 0.7 }}>
                       {result.partner_client.name}
                     </p>
                   </div>

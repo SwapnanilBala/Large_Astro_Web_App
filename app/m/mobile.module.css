@@ -232,7 +232,7 @@
 }
 
 .label {
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -428,7 +428,7 @@
 
 .actionHint {
   margin: 0;
-  font-size: 0.8125rem;
+  font-size: var(--text-ui);
   text-align: center;
   color: var(--text-tertiary);
 }
@@ -469,7 +469,7 @@
  */
 .fieldNote {
   margin-top: 0.35rem;
-  font-size: 0.8125rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: var(--text-secondary);
 }

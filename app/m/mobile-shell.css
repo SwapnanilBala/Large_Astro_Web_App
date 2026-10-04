@@ -31,9 +31,9 @@
    * live for the desktop tree, never reaches this one. Same numbers on purpose:
    * two scales would drift.
    */
-  --text-meta: 0.78rem;    /* 12.5px -- table numbers, fine print */
-  --text-label: 0.8125rem; /* 13px  -- uppercase labels and badges */
-  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, tabs */
+  --text-meta: 0.875rem;   /* 14px  -- table numbers, fine print */
+  --text-label: 0.875rem;  /* 14px  -- uppercase labels and badges */
+  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, tabs, sentences */
 
   --text-primary: #ece6da;
   --text-secondary: #b3aa99;

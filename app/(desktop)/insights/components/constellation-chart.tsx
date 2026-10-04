@@ -481,7 +481,7 @@ export default function ConstellationChart({
                   x={labelPos.x}
                   y={labelPos.y}
                   fill={isAsc ? "#ffe0a3" : "rgba(231,240,250,0.72)"}
-                  fontSize="16"
+                  fontSize="22"
                   textAnchor="middle"
                   dominantBaseline="central"
                   style={{ fontFamily: "var(--font-display), serif" }}
@@ -525,7 +525,7 @@ export default function ConstellationChart({
                   x={numPos.x}
                   y={numPos.y}
                   fill="rgba(255,222,160,0.72)"
-                  fontSize="11"
+                  fontSize="18"
                   textAnchor="middle"
                   dominantBaseline="central"
                   style={{
@@ -618,7 +618,7 @@ export default function ConstellationChart({
                 x={p.cx}
                 y={p.cy - 12}
                 fill={color}
-                fontSize={isHovered ? "15" : "13"}
+                fontSize={isHovered ? "20" : "18"}
                 textAnchor="middle"
                 dominantBaseline="central"
                 style={{
@@ -651,9 +651,9 @@ export default function ConstellationChart({
             strokeWidth="1"
           />
           <text
-            x={CX} y={CY - 14}
+            x={CX} y={CY - 22}
             fill="rgba(255,225,170,0.92)"
-            fontSize="9"
+            fontSize="18"
             textAnchor="middle"
             dominantBaseline="central"
             style={{
@@ -665,9 +665,9 @@ export default function ConstellationChart({
             {t("shared.constellationRasi")}
           </text>
           <text
-            x={CX} y={CY + 6}
+            x={CX} y={CY + 4}
             fill="#f8fbff"
-            fontSize="16"
+            fontSize="21"
             fontWeight="bold"
             textAnchor="middle"
             dominantBaseline="central"
@@ -676,9 +676,9 @@ export default function ConstellationChart({
             {SIGN_SYMBOLS[ascendantSign] ?? ""} {ascendantSign}
           </text>
           <text
-            x={CX} y={CY + 24}
+            x={CX} y={CY + 30}
             fill="rgba(205,224,240,0.76)"
-            fontSize="8"
+            fontSize="18"
             textAnchor="middle"
             dominantBaseline="central"
             style={{
@@ -701,23 +701,25 @@ export default function ConstellationChart({
               transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.15 }}
             >
               {(() => {
-                const tx = Math.min(Math.max(tooltip.x - 80, 5), 440);
-                const ty = Math.max(tooltip.y - 85, 5);
+                /* Sized for the wheel's smallest rendering, about 0.68 of its
+                   600 units at 1440px wide, so each line lands at 11px and up. */
+                const tx = Math.min(Math.max(tooltip.x - 118, 5), 359);
+                const ty = Math.max(tooltip.y - 118, 5);
                 const planetColor = PLANET_COLORS[tooltip.planet] ?? "#f2c26c";
                 return (
                   <>
                     <rect
                       x={tx} y={ty}
-                      width="160" height="72"
-                      rx="8"
+                      width="236" height="104"
+                      rx="10"
                       fill="rgba(4, 16, 28, 0.95)"
                       stroke="rgba(108, 225, 212, 0.3)"
                       strokeWidth="1"
                     />
                     <text
-                      x={tx + 80} y={ty + 16}
+                      x={tx + 118} y={ty + 24}
                       fill={planetColor}
-                      fontSize="13"
+                      fontSize="19"
                       fontWeight="bold"
                       textAnchor="middle"
                       dominantBaseline="central"
@@ -727,9 +729,9 @@ export default function ConstellationChart({
                       {tooltip.isRetrograde ? " (R)" : ""}
                     </text>
                     <text
-                      x={tx + 80} y={ty + 34}
+                      x={tx + 118} y={ty + 52}
                       fill="#b9d0e1"
-                      fontSize="11"
+                      fontSize="17"
                       textAnchor="middle"
                       dominantBaseline="central"
                       style={{ fontFamily: "var(--font-body), sans-serif" }}
@@ -737,9 +739,9 @@ export default function ConstellationChart({
                       {SIGN_SYMBOLS[tooltip.sign] ?? ""} {tooltip.sign} {tooltip.degree.toFixed(2)}&deg;
                     </text>
                     <text
-                      x={tx + 80} y={ty + 50}
+                      x={tx + 118} y={ty + 78}
                       fill="rgba(108,225,212,0.8)"
-                      fontSize="10"
+                      fontSize="16"
                       textAnchor="middle"
                       dominantBaseline="central"
                       style={{ fontFamily: "var(--font-body), sans-serif" }}

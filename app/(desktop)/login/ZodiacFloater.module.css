@@ -85,7 +85,7 @@
 
 .signName {
   font-family: var(--font-cinzel, "Cinzel", serif);
-  font-size: 0.82rem;
+  font-size: var(--text-label);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--accent-gold, #C89B3C);

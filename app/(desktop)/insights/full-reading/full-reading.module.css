@@ -94,7 +94,7 @@
 .sectionKicker {
   margin: 0 0 0.4rem;
   color: rgba(108, 225, 212, 0.85);
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;

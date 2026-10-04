@@ -256,7 +256,7 @@
   border: 1px solid var(--line-soft);
   border-radius: 999px;
   background: rgba(255, 243, 210, 0.04);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--ink-soft);
@@ -328,7 +328,7 @@
 }
 
 .detailLabel {
-  font-size: 0.8rem;
+  font-size: var(--text-label);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;

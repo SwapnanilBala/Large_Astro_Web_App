@@ -727,7 +727,7 @@
     0.64rem/800/0.15em, which made these read as a third label style. */
 .fortuneLabel {
   font-family: var(--font-body), sans-serif;
-  font-size: 0.84rem;
+  font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -2086,7 +2086,7 @@
 
 .methodTierKicker {
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -3775,7 +3775,7 @@
   grid-area: label;
   min-width: 0;
   color: var(--ink-main);
-  font-size: 0.78rem;
+  font-size: var(--text-meta);
   font-weight: 750;
   line-height: 1.15;
   overflow-wrap: anywhere;
@@ -4248,7 +4248,7 @@
 .domainSubthemes { display: grid; gap: 0.75rem; margin: 0 0 1.25rem; }
 .domainSubthemeHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
 .domainSubthemeHeader h4 { color: var(--accent-gold); font-family: var(--font-display), sans-serif; margin: 0; }
-.domainSubthemeHeader span { color: var(--ink-muted); font-size: 0.82rem; }
+.domainSubthemeHeader span { color: var(--ink-muted); font-size: var(--text-meta); }
 .domainSubthemeGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; }
 .domainSubthemeCard { min-width: 0; border: 1px solid rgba(200, 155, 60, 0.12); border-radius: 10px; background: rgba(255, 243, 210, 0.025); padding: 0.8rem; }
 .domainSubthemeCard > div { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }

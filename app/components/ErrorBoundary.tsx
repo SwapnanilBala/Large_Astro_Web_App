@@ -97,7 +97,7 @@ function DefaultErrorFallback({ error, copied, onReset, onCopy }: DefaultErrorFa
       </p>
       <p
         style={{
-          fontSize: "0.75rem",
+          fontSize: "0.875rem",
           color: "#6b6580",
           marginBottom: "1.5rem",
           wordBreak: "break-word",

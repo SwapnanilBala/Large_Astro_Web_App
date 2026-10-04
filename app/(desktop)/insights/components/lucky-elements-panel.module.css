@@ -184,7 +184,7 @@
 
 .guidanceCard dt {
   color: var(--text-secondary);
-  font-size: 0.8rem;
+  font-size: var(--text-label);
   font-weight: 800;
   letter-spacing: 0.07em;
   line-height: 1.2;
@@ -203,7 +203,7 @@
   border-left: 2px solid var(--accent-coral);
   color: var(--text-secondary);
   font-family: var(--font-newsreader), Georgia, serif;
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   line-height: 1.55;
   margin: 0.85rem 0 0;
   padding-left: 0.7rem;
@@ -512,7 +512,7 @@
 .cautionTitle {
   margin: 0 0 0.45rem;
   color: #F07068;
-  font-size: 0.84rem;
+  font-size: var(--text-label);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;

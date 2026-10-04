@@ -231,7 +231,7 @@
 .eyebrow {
   display: block;
   color: var(--accent-gold);
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 800;
   letter-spacing: 0.14em;
   line-height: 1;
@@ -251,7 +251,7 @@
   border-radius: 999px;
   background: rgba(108, 225, 212, 0.08);
   color: var(--ink-main);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   line-height: 1;
   padding: 0.55rem 0.7rem;
@@ -288,7 +288,7 @@
 .timelineMonthLabel {
   display: block;
   color: var(--ink-soft);
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 800;
   letter-spacing: 0.12em;
   line-height: 1;
@@ -305,7 +305,7 @@
 
 .timelineMonth p {
   color: var(--ink-soft);
-  font-size: 0.86rem;
+  font-size: var(--text-ui);
   line-height: 1.42;
   margin: 0.45rem 0 0;
 }
@@ -429,7 +429,7 @@
 .themeStat small {
   display: block;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   line-height: 1.25;
   margin-top: 0.45rem;
 }
@@ -465,7 +465,7 @@
 .overviewHeader > p {
   max-width: 48ch;
   color: var(--ink-soft);
-  font-size: 0.88rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
   margin: 0;
 }
@@ -513,7 +513,7 @@
 .priorityCard p,
 .forceCard p {
   color: var(--ink-soft);
-  font-size: 0.86rem;
+  font-size: var(--text-ui);
   line-height: 1.48;
   margin: 0.5rem 0 0;
 }
@@ -538,7 +538,7 @@
   display: block;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--ink-main);
-  font-size: 0.78rem;
+  font-size: var(--text-ui);
   font-style: italic;
   line-height: 1.42;
   margin-top: 0.8rem;
@@ -552,7 +552,7 @@
 .forceCard strong {
   display: block;
   color: var(--accent-gold);
-  font-size: 0.8rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   line-height: 1.35;
   margin-top: 0.45rem;
@@ -588,7 +588,7 @@
 
 .seasonTopline span {
   color: var(--accent-gold);
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -611,7 +611,7 @@
 .seasonCard small {
   display: block;
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   margin-top: 0.75rem;
 }
@@ -705,7 +705,7 @@
 
 .windowCard p {
   color: var(--ink-soft);
-  font-size: 0.86rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   margin: 0.35rem 0 0;
 }
@@ -820,7 +820,7 @@
 
 .weatherMeter p {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--text-ui);
   line-height: 1.42;
   margin: 0;
 }
@@ -920,7 +920,7 @@
 
 .sectionIntro {
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
   margin: 0 0 0.9rem;
 }
@@ -1067,7 +1067,7 @@
 .returnReason {
   border-top: 1px solid rgba(200, 155, 60, 0.1);
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   margin-top: 0.55rem;
   padding-top: 0.65rem;
@@ -1101,7 +1101,7 @@
 .placementCard strong {
   display: block;
   color: var(--accent-gold);
-  font-size: 0.8rem;
+  font-size: var(--text-meta);
   line-height: 1.35;
   margin-top: 0.3rem;
 }
@@ -1120,7 +1120,7 @@
 .allPlacements summary {
   color: var(--accent-teal);
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   font-weight: 800;
   list-style-position: inside;
 }
@@ -1254,7 +1254,7 @@
 .wheelHint {
   max-width: 35ch;
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   margin: 0.2rem 0 0;
   text-align: center;

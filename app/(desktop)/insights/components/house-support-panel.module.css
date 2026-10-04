@@ -116,7 +116,7 @@
 
 .formula {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
   color: var(--text-secondary, #a8a090);
   font-variant-numeric: tabular-nums;
@@ -237,22 +237,24 @@
   stroke-dasharray: 5 4;
 }
 
+/* Sizes are SVG units. The compact card draws the 560-unit chart at roughly
+   400-470px, so 16-17 units land at about 12-14px on screen. */
 .barBaselineLabel {
   fill: rgba(245, 240, 230, 0.72);
-  font-size: 9px;
+  font-size: 17px;
   font-variant-numeric: tabular-nums;
 }
 
 .barHouseLabel {
   fill: var(--text-secondary, #a8a090);
-  font-size: 10px;
+  font-size: 17px;
   text-anchor: middle;
   font-variant-numeric: tabular-nums;
 }
 
 .barValueLabel {
   fill: var(--text-primary, #f5f0e6);
-  font-size: 10px;
+  font-size: 17px;
   font-weight: 600;
   text-anchor: middle;
   font-variant-numeric: tabular-nums;
@@ -265,7 +267,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 0.86rem;
+  font-size: var(--text-ui);
   color: var(--text-secondary, #a8a090);
 }
 
@@ -408,7 +410,7 @@
 
 .roleReadout {
   flex: 0 0 auto;
-  font-size: 0.8rem;
+  font-size: var(--text-meta);
   color: var(--text-tertiary, #9a918a);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -460,7 +462,7 @@
 .rolesLegend {
   margin: 0.1rem 0 0;
   max-width: 88ch;
-  font-size: 0.85rem;
+  font-size: var(--text-ui);
   line-height: 1.6;
   color: var(--text-tertiary, #9a918a);
 }
@@ -493,7 +495,7 @@
 }
 
 .panel[data-variant="full"] .cardKicker {
-  font-size: 0.84rem;
+  font-size: var(--text-meta);
 }
 
 .panel[data-variant="full"] .cardTitle {
@@ -536,12 +538,12 @@
 
 .panel[data-variant="full"] .barBaselineLabel {
   fill: var(--text-secondary, #a8a090);
-  font-size: 10px;
+  font-size: 11px;
 }
 
 .panel[data-variant="full"] .legend {
   gap: 0.45rem 1.1rem;
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
 }
 
 .panel[data-variant="full"] .legendSwatch {
@@ -588,7 +590,7 @@
 }
 
 .panel[data-variant="full"] .roleReadout {
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   color: var(--text-secondary, #a8a090);
 }
 
@@ -599,7 +601,7 @@
 
 .panel[data-variant="full"] .roleTag,
 .panel[data-variant="full"] .rolePeak {
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
 }
 
 .panel[data-variant="full"] .roleTag {
@@ -607,7 +609,7 @@
 }
 
 .panel[data-variant="full"] .rolesLegend {
-  font-size: 0.9rem;
+  font-size: var(--text-ui);
   line-height: 1.65;
   color: var(--text-secondary, #a8a090);
 }

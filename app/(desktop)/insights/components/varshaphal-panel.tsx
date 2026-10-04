@@ -797,19 +797,20 @@ function ProfectionWheel({
       <text
         key={`lbl-${houseNum}`}
         x={lx}
-        y={ly - 1.5}
+        y={ly - 2.2}
         className={isActive || isSelected ? styles.wheelLabelActive : styles.wheelLabel}
       >
         {houseNum}
       </text>
     );
+    /* Units of a 100-unit wheel drawn at 320px, so 3.8 is about 12px. */
     labels.push(
       <text
         key={`sign-${houseNum}`}
         x={lx}
-        y={ly + 2}
+        y={ly + 2.9}
         className={isActive || isSelected ? styles.wheelLabelActive : styles.wheelLabel}
-        style={{ fontSize: isActive || isSelected ? "2.8px" : "2.5px" }}
+        style={{ fontSize: isActive || isSelected ? "4.1px" : "3.8px" }}
       >
         {abbrev}
       </text>

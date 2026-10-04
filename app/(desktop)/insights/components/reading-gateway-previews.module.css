@@ -2,7 +2,7 @@
   display: block;
   margin-bottom: 0.4rem;
   color: var(--ink-soft);
-  font-size: 0.76rem;
+  font-size: var(--text-label);
   font-weight: 650;
   line-height: 1.4;
   letter-spacing: 0;
@@ -40,7 +40,7 @@
 
 .currentPeriod time {
   color: var(--ink-soft);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
 }
 
 .timingStrip {
@@ -104,7 +104,7 @@
 
 .stopNote {
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: var(--text-meta);
   line-height: 1.45;
 }
 
@@ -154,7 +154,9 @@
 .miniChart {
   display: block;
   width: 100%;
-  max-width: 11rem;
+  /* The diamond is 400 units drawn at this width: at 11rem its sign numbers
+     printed at 10px. 13.5rem puts them, and the planets, at 12px and up. */
+  max-width: 13.5rem;
   aspect-ratio: 1;
   color: var(--accent-aqua);
 }
@@ -169,7 +171,7 @@
 
 .miniSign {
   fill: var(--ink-soft);
-  font-size: 23px;
+  font-size: 26px;
 }
 
 .miniPlanet {
@@ -213,7 +215,7 @@
 
 .atlasCaption small {
   color: var(--ink-soft);
-  font-size: 0.76rem;
+  font-size: var(--text-meta);
   line-height: 1.45;
 }
 
@@ -355,7 +357,7 @@
   gap: 0.6rem;
   margin: 0;
   color: var(--ink-soft);
-  font-size: 0.86rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
 }
 

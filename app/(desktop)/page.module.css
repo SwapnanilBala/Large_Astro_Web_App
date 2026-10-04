@@ -357,7 +357,7 @@
 .birthHistoryMeta {
   grid-column: 1 / -1;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
   line-height: 1.45;
   overflow-wrap: anywhere;
 }
@@ -374,7 +374,7 @@
 .birthHistoryEmpty {
   margin: 0;
   color: var(--text-secondary);
-  font-size: 0.84rem;
+  font-size: var(--text-ui);
   line-height: 1.5;
 }
 
@@ -408,7 +408,7 @@
 
 .autocompleteWrapper label {
   display: block;
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   font-weight: 500;
   color: var(--text-secondary);
   margin-bottom: 0.5rem;
@@ -523,7 +523,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.8125rem;
+  font-size: var(--text-meta);
   color: var(--accent-gold);
   opacity: 0.8;
   transition: opacity 0.2s ease;
@@ -597,7 +597,7 @@
 
 .actionHint {
   margin-top: 0.75rem;
-  font-size: 0.875rem;
+  font-size: var(--text-ui);
   color: var(--text-secondary);
   opacity: 0.75;
 }
@@ -1342,7 +1342,7 @@
   margin: 0;
   padding-left: 0.15rem;
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: var(--text-tertiary);
 }
@@ -1569,7 +1569,7 @@
   min-height: 2.35rem;
   padding: 0.5rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: var(--text-meta);
 }
 
 .smartFillContent,
@@ -1713,7 +1713,7 @@
 
 .smartFillExampleChip {
   padding: 0.48rem 0.72rem;
-  font-size: 0.78rem;
+  font-size: var(--text-meta);
   font-weight: 700;
   text-align: left;
 }
@@ -2613,7 +2613,7 @@
      buys headroom above that line instead of sitting exactly on it. Measured
      after the change, not assumed — see the commit. */
   color: rgba(231, 230, 236, 0.66);
-  font-size: 0.82rem;
+  font-size: var(--text-meta);
 }
 
 /* Whole-form shortcuts sit after the task and read as quiet disclosures. */

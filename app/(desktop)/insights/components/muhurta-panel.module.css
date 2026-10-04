@@ -18,7 +18,7 @@
 
 .kicker {
   font-family: var(--font-body), sans-serif;
-  font-size: 0.82rem;
+  font-size: var(--text-label);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.12em;
@@ -153,7 +153,7 @@
 }
 
 .fieldLabel {
-  font-size: 0.78rem;
+  font-size: var(--text-label);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;

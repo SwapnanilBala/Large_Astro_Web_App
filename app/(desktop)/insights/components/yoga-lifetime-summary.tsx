@@ -80,7 +80,7 @@ function StrengthBadge({ strength }: { strength: StrengthGroup }) {
     <span
       style={{
         display: "inline-block",
-        fontSize: "0.8rem",
+        fontSize: "var(--text-label)",
         fontWeight: 600,
         textTransform: "uppercase",
         letterSpacing: "0.5px",
@@ -188,7 +188,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
         }}
       >
         <div>
-          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "var(--accent-gold)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "var(--text-label)", color: "var(--accent-gold)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
             Manifestation Chance
           </p>
           <p style={{ margin: 0, fontSize: "1.35rem", fontWeight: 700, color: "var(--accent-gold)" }}>
@@ -196,7 +196,7 @@ function YogaLifetimeCard({ yoga }: YogaLifetimeCardProps) {
           </p>
         </div>
         <div>
-          <p style={{ margin: "0 0 0.25rem 0", fontSize: "0.8rem", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
+          <p style={{ margin: "0 0 0.25rem 0", fontSize: "var(--text-label)", color: "var(--text-tertiary)", textTransform: "uppercase", letterSpacing: "0.5px", fontWeight: 600 }}>
             Activation Window
           </p>
           <p style={{ margin: 0, fontSize: "0.95rem", fontWeight: 600, color: "var(--text-secondary)" }}>
@@ -426,7 +426,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
             <p
               style={{
                 margin: "0 0 1rem 0",
-                fontSize: "0.9rem",
+                fontSize: "var(--text-ui)",
                 color: "var(--text-tertiary)",
               }}
             >
@@ -484,7 +484,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
             <p
               style={{
                 margin: "0 0 1rem 0",
-                fontSize: "0.9rem",
+                fontSize: "var(--text-ui)",
                 color: "var(--text-tertiary)",
               }}
             >
@@ -542,7 +542,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
             <p
               style={{
                 margin: "0 0 1rem 0",
-                fontSize: "0.9rem",
+                fontSize: "var(--text-ui)",
                 color: "var(--text-tertiary)",
               }}
             >
@@ -577,7 +577,7 @@ function YogaLifetimeSummary({ yogas }: YogaLifetimeSummaryProps) {
         <p
           style={{
             margin: 0,
-            fontSize: "0.9rem",
+            fontSize: "var(--text-ui)",
             color: "var(--text-secondary)",
             lineHeight: 1.6,
           }}

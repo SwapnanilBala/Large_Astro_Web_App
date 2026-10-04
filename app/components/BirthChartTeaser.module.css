@@ -72,7 +72,7 @@
 .teaserKicker,
 .rowLabel {
   display: block;
-  font-size: 0.62rem;
+  font-size: var(--text-label);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: 0.12em;
@@ -330,7 +330,7 @@
   -webkit-line-clamp: 2;
   max-width: 92%;
   overflow: hidden;
-  font-size: 0.66rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1.12;
   color: var(--ink-soft, #EAEDF3);
@@ -340,9 +340,9 @@
 
 .centerMeta {
   margin-top: 0.2rem;
-  font-size: 0.55rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  /* 8.8px is below the large-text threshold however bold it is, so this is
+  /* 11.2px is below the large-text threshold however bold it is, so this is
      held to 4.5:1. 0.48 measured 4.42:1 on the preview's own backdrop. */
   color: rgba(234, 237, 243, 0.6);
   text-transform: uppercase;
@@ -537,7 +537,7 @@
 }
 
 .isEmbedded .teaserBody {
-  grid-template-columns: minmax(112px, 0.72fr) minmax(0, 1.28fr);
+  grid-template-columns: minmax(150px, 0.9fr) minmax(0, 1.1fr);
   gap: 0.75rem;
 }
 
@@ -546,8 +546,8 @@
 }
 
 .isEmbedded .astrolabe {
-  width: min(100%, 148px);
-  max-width: 148px;
+  width: min(100%, 172px);
+  max-width: 172px;
 }
 
 .isEmbedded .houseRing {
@@ -567,10 +567,12 @@
   display: none;
 }
 
+/* Big enough to hold MOON at 12px: the astrolabe is only 172px across, and
+   these labels printed at 7px when the discs were 1.9rem. */
 .isEmbedded .planetMarker {
-  width: 1.9rem;
-  height: 1.9rem;
-  font-size: 0.43rem;
+  width: 2.55rem;
+  height: 2.55rem;
+  font-size: 0.75rem;
 }
 
 .isEmbedded .teaserRows {
@@ -607,13 +609,13 @@
 }
 
 .isEmbedded .rowValue {
-  font-size: 0.82rem;
+  font-size: var(--text-ui);
 }
 
 .embeddedEmptyState {
   margin: 0;
   max-width: 20rem;
-  font-size: 0.78rem;
+  font-size: var(--text-ui);
   line-height: 1.45;
   color: rgba(234, 237, 243, 0.58);
   text-wrap: balance;
@@ -644,7 +646,7 @@
   }
 
   .isEmbedded .astrolabe {
-    width: min(60vw, 148px);
+    width: min(60vw, 172px);
   }
 
   .isEmbedded .teaserRows {
