@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Newsreader } from "next/font/google";
+import localFont from "next/font/local";
 import MobileLanguageProvider from "@/lib/i18n-mobile";
 import "./mobile-shell.css";
 import styles from "./mobile.module.css";
@@ -49,13 +49,17 @@ export const viewport: Viewport = {
  * still the only face the tree downloads.
  *
  * display:swap so it can never block first paint.
+ *
+ * The file is in app/fonts, the static 400 instance Google served for this
+ * request, so the build never fetches it; see the README there.
  */
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400"],
-  style: ["normal"],
+const newsreader = localFont({
+  src: "../fonts/newsreader-latin-400-normal.woff2",
+  weight: "400",
+  style: "normal",
   display: "swap",
   variable: "--font-display-m",
+  adjustFontFallback: "Times New Roman",
 });
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {

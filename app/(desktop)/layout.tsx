@@ -1,4 +1,4 @@
-import { Cinzel, Newsreader } from "next/font/google";
+import localFont from "next/font/local";
 import "../globals.css";
 
 import GradientBlobs from "@/app/components/GradientBlobs";
@@ -29,19 +29,44 @@ import { ACCOUNT_LABEL_KEY, ACCOUNT_LABEL_MAX_AGE_MS } from "@/lib/account-label
  * var(--font-display) below this point resolves exactly as before.
  */
 
-const cinzel = Cinzel({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+/*
+ * Both faces come from app/fonts rather than from Google at build time; see
+ * the README there. Turbopack's Google loader broke on Google's own font URLs
+ * and failed every route with it, and a build that needs the network to
+ * finish can fail for reasons that have nothing to do with the code.
+ *
+ * The files are the variable fonts Google served for these exact requests, so
+ * the text renders as it did. Each one is declared at 400, 500, 600 and 700,
+ * as Google declared it, rather than as a weight range: rules asking for 650
+ * or 750 then still resolve to the 700 face instead of rendering a weight
+ * nothing here was designed with.
+ */
+const cinzel = localFont({
+  src: [
+    { path: "../fonts/cinzel-latin-wght-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/cinzel-latin-wght-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/cinzel-latin-wght-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/cinzel-latin-wght-normal.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-display",
+  adjustFontFallback: "Times New Roman",
 });
 
-const newsreader = Newsreader({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+const newsreader = localFont({
+  src: [
+    { path: "../fonts/newsreader-latin-wght-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/newsreader-latin-wght-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/newsreader-latin-wght-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/newsreader-latin-wght-normal.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/newsreader-latin-wght-italic.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/newsreader-latin-wght-italic.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/newsreader-latin-wght-italic.woff2", weight: "600", style: "italic" },
+    { path: "../fonts/newsreader-latin-wght-italic.woff2", weight: "700", style: "italic" },
+  ],
   display: "swap",
   variable: "--font-newsreader",
+  adjustFontFallback: "Times New Roman",
 });
 
 /*
