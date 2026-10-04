@@ -6,6 +6,7 @@ import {
   type PlanetPosition,
   type HousePlacement,
   type AscendantData,
+  type HouseSystemUsed,
 } from "./swiss-ephemeris-engine";
 import {
   generateRules,
@@ -39,9 +40,11 @@ import type { YogaDetectionResult } from "./yoga-engine";
 import { computeAshtakavarga } from "./ashtakavarga-engine";
 import type { AshtakavargaResult } from "./ashtakavarga-engine";
 import {
+  HOUSE_SYSTEMS,
   getEnginePreset,
   listEnginePresets,
   presetToMetadata,
+  type EnginePreset,
 } from "./engine-registry";
 import type { BirthDetailsInput } from "./compatibility-service";
 import { computeLuckyElements } from "./lucky-elements-engine";
@@ -74,6 +77,8 @@ export interface ChartResponse {
     planets: PlanetPosition[];
     houses: HousePlacement[];
     house_cusps?: number[];
+    /** The system `house_cusps` and `planet.house` follow: the engine's, or its stand-in inside the polar circles. */
+    house_system?: HouseSystemUsed;
     deterministic_rules: DeterministicRule[];
     /** Rank-ordered instance_keys of the selected rules. Length <= topN. */
     selected_rule_ids: string[];
@@ -340,6 +345,7 @@ interface CorePositionsResult {
   planets: PlanetPosition[];
   houses: HousePlacement[];
   house_cusps?: number[];
+  house_system: HouseSystemUsed;
   fallback_mode: boolean;
   rules: DeterministicRule[];
   summary: string;
@@ -546,6 +552,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
     planets: computed.planets,
     houses: computed.houses,
     house_cusps: computed.house_cusps,
+    house_system: computed.house_system,
     fallback_mode: computed.fallback_mode,
     rules,
     summary,
@@ -558,6 +565,18 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
 // --------------------------------------------------------------------------
 // Stage B: Dasha timeline (nakshatra + dasha periods + calculation audit)
 // --------------------------------------------------------------------------
+
+/**
+ * The house system the audit names: the one the cusps were computed with.
+ * Inside the polar circles that can be a stand-in for the preset's (see
+ * "House systems" in swiss-ephemeris-engine.ts), and an audit naming the
+ * preset's system would then be wrong about the chart beside it.
+ */
+function auditedHouseSystem(preset: EnginePreset, used: HouseSystemUsed): string {
+  if (used === preset.house_system_code) return preset.house_system;
+  const label = HOUSE_SYSTEMS.find((system) => system.code === used)?.label ?? "Porphyry";
+  return `${label} (${preset.house_system} is undefined at this latitude)`;
+}
 
 /**
  * The current period is looked up at the moment of the request.
@@ -577,6 +596,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
 function computeDashaTimeline(
   birth: BirthDetailsInput,
   planets: PlanetPosition[],
+  houseSystem: HouseSystemUsed,
 ): DashaStageResult {
   const moon = planets.find((p) => p.name === "Moon")!;
   const birthMoment = resolveBirthMoment(birth);
@@ -647,7 +667,7 @@ function computeDashaTimeline(
     engine_id: preset.engine_id,
     engine_label: preset.label,
     ayanamsha: preset.ayanamsha,
-    house_system: preset.house_system,
+    house_system: auditedHouseSystem(preset, houseSystem),
     time_zone_id: birthMoment.timeZoneId,
     timezone_offset_minutes: birthMoment.timezoneOffsetMinutes,
     timezone_source: birthMoment.source,
@@ -787,7 +807,7 @@ export function buildLifeDomainInsights(
     ],
     ALL_DIVISIONAL_CHARTS
   );
-  const dashaStage = computeDashaTimeline(birth, core.planets);
+  const dashaStage = computeDashaTimeline(birth, core.planets, core.house_system);
   const transits = computeTransitPositions(new Date(), birth.engine_id);
   const extendedEvidence: LifeDomainExtendedEvidence = {
     divisionalCharts,
@@ -860,7 +880,7 @@ export function buildChart(
 
   if (includePremium) {
     // Stage B: dasha timeline
-    const dashaStage = computeDashaTimeline(birth, core.planets);
+    const dashaStage = computeDashaTimeline(birth, core.planets, core.house_system);
     nakshatraInfo = dashaStage.nakshatraInfo;
     dashaInfo = dashaStage.dashaInfo;
     calculationAudit = dashaStage.calculationAudit;
@@ -985,6 +1005,7 @@ export function buildChart(
       planets: core.planets,
       houses: core.houses,
       house_cusps: core.house_cusps,
+      house_system: core.house_system,
       deterministic_rules: core.rules,
       selected_rule_ids: selectedRuleIds(core.rules),
       rules_dataset_version: rulesDatasetVersion(),

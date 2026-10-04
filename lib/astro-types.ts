@@ -750,6 +750,13 @@ export type ChartApiResponse = {
     planets: PlanetPosition[];
     houses: HousePlacement[];
     house_cusps?: number[];
+    /**
+     * The house system `house_cusps`, `houses` and `planet.house` follow, as a
+     * code ("whole_sign", "placidus", ...). Usually the engine's own; inside
+     * the polar circles Placidus and Koch come back as "porphyry", and any
+     * quadrant system as "equal" while the MC is below the horizon.
+     */
+    house_system?: string;
     deterministic_rules: DeterministicRule[];
     /** Rank-ordered instance_keys of the selected rules. Length <= topN. */
     selected_rule_ids?: string[];

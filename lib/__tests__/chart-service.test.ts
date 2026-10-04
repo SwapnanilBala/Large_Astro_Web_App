@@ -361,6 +361,35 @@ describe("chart-service", () => {
         const chart = buildChart({ ...BIRTH, engine_id: "raman_classic" });
         expect(chart.engine.engine_id).toBe("raman_classic");
       });
+
+      it("names the house system the cusps follow, and the stand-in inside the polar circles", () => {
+        const delhi = buildChart({ ...BIRTH, engine_id: "krishnamurti_placidus" }, { includePremium: true });
+        expect(delhi.chart.house_system).toBe("placidus");
+        expect(delhi.chart.calculation_audit?.house_system).toBe("Placidus");
+
+        // Tromso, 69.65 N, is inside the Arctic Circle, where Placidus is
+        // undefined. The engine metadata still names the preset the reader
+        // chose; the chart and its audit say what was computed.
+        const tromso = buildChart(
+          {
+            ...BIRTH,
+            engine_id: "krishnamurti_placidus",
+            latitude: 69.6492,
+            longitude: 18.9553,
+            timezone_offset_minutes: 120,
+            country: "Norway",
+            state: "",
+            city: "Tromso",
+            time_zone_id: "Europe/Oslo",
+          },
+          { includePremium: true }
+        );
+        expect(tromso.engine.house_system).toBe("Placidus");
+        expect(tromso.chart.house_system).toBe("porphyry");
+        expect(tromso.chart.calculation_audit?.house_system).toBe(
+          "Porphyry (Placidus is undefined at this latitude)"
+        );
+      });
     });
   });
 
