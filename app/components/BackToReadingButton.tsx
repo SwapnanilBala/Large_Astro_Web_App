@@ -1,6 +1,7 @@
 "use client";
 
 import BackButton from "@/app/components/BackButton";
+import { useTranslation } from "@/lib/i18n-context";
 import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 
 /*
@@ -20,24 +21,42 @@ import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
  * up on intake, and for them that is the right place to be.
  */
 
+/*
+ * The labels a page can ask for, by catalog key. Most callers are server
+ * pages, which have no translator of their own: they name the key, and the
+ * button reads it in the visitor's language. A label passed as text from a
+ * server page would stay English whatever language the visitor chose.
+ */
+export const BACK_TO_READING_LABELS = [
+  "insights.backToReading",
+  "insights.backToAdvanced",
+  "home.back",
+] as const;
+
 type BackToReadingButtonProps = {
   /** The chart query for this page, when the route already carries one. */
   queryString?: string;
   /** Where to return to. Defaults to the reading itself. */
   path?: string;
+  /** The label, as a catalog key. Defaults to "Back to your reading". */
+  labelKey?: (typeof BACK_TO_READING_LABELS)[number];
+  /** The label as text already in the visitor's language, from a client
+      component's own `t`. Wins over `labelKey`. */
   label?: string;
 };
 
 export default function BackToReadingButton({
   queryString,
   path = "/insights",
-  label = "Back to your reading",
+  labelKey = "insights.backToReading",
+  label,
 }: BackToReadingButtonProps) {
+  const { t } = useTranslation();
   const own = queryString?.trim().replace(/^\?/, "") ?? "";
   const remembered = useLatestChartQuery();
 
   const query = own || remembered;
   const href = query ? `${path}?${query}` : "/";
 
-  return <BackButton href={href} label={label} />;
+  return <BackButton href={href} label={label ?? t(labelKey)} />;
 }

@@ -288,6 +288,8 @@
     "missingHeading": "Chart details are incomplete.",
     "missingLead": "Please return to intake and provide complete birth metadata.",
     "backToIntake": "Back to Intake",
+    "backToReading": "Back to your reading",
+    "backToAdvanced": "Back to advanced",
     "errorKicker": "Service Unreachable",
     "errorHeading": "Chart service is not available.",
     "editIntake": "Edit Intake Data",

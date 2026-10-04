@@ -117,7 +117,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
         <div className="insights-shell below-navbar">
           <BackToReadingButton
             queryString={buildChartHistoryQuery(chartParams)}
-            label="Back"
+            labelKey="home.back"
           />
           <section className="dashboard-shell advanced-gate">
             <p className="kicker">Members only</p>
@@ -151,7 +151,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   return (
     <PageTransition>
     <div className="insights-shell below-navbar">
-      <BackToReadingButton queryString={buildChartHistoryQuery(chartParams)} label="Back" />
+      <BackToReadingButton queryString={buildChartHistoryQuery(chartParams)} labelKey="home.back" />
       <AdvancedLoader chartParams={chartParams} focusView={focusView} />
     </div>
     </PageTransition>

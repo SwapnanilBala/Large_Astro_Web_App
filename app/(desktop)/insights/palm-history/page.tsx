@@ -18,7 +18,7 @@ export const metadata = {
 export default function PalmHistoryPage() {
   return (
     <div className="home-shell palm-page">
-      <BackToReadingButton path="/insights/advanced" label="Back to advanced" />
+      <BackToReadingButton path="/insights/advanced" labelKey="insights.backToAdvanced" />
       <Suspense fallback={null}>
         <PalmHistoryClient />
       </Suspense>

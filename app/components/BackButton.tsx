@@ -2,16 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useTranslation } from "@/lib/i18n-context";
 
 interface BackButtonProps {
   /** Explicit href to navigate to. If omitted, uses router.back() */
   href?: string;
-  /** Button label. Defaults to "Back" */
+  /** Button label, already in the visitor's language. Defaults to "Back" in it. */
   label?: string;
 }
 
-export default function BackButton({ href, label = "Back" }: BackButtonProps) {
+export default function BackButton({ href, label: givenLabel }: BackButtonProps) {
   const router = useRouter();
+  const { t } = useTranslation();
+  /* Looked up here rather than defaulted in the signature: most callers are
+     server pages, which have no translator to pass one in with. */
+  const label = givenLabel ?? t("home.back");
 
   if (href) {
     return (
