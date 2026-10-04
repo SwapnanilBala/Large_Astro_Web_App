@@ -63,6 +63,9 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      stopped at the minute rather than at the day, which is the one place the
      other two LLM routes cannot be: they are driven by clicking. */
   "/api/chart/varga-commentary": { limit: 6, windowMs: 60_000 },
+  /* Asked once per chart when the yoga section mounts, then answered from
+     cache, so the atlas's number fits for the same reason. */
+  "/api/chart/yoga-classics": { limit: 6, windowMs: 60_000 },
   /* Same shape as the atlas: asked once per chart on mount and then served
      from cache. Slightly higher because the panel mounts on two pages, so a
      visitor who opens the results page and then /insights/life-shifts

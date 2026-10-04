@@ -1,0 +1,77 @@
+{
+  "es": {
+    "strength": {
+      "yogas": {
+        "classics": {
+          "kicker": "De los clásicos",
+          "heading": "Lo que dice el Brihat Jataka sobre tus yogas",
+          "pending": "Leyendo el Brihat Jataka para tus yogas…",
+          "sourcesLabel": "Los versos ({count})",
+          "sourceRef": "Brihat Jataka {ref}",
+          "noteLabel": "nota del traductor",
+          "credit": "El Brihat Jataka de Varahamihira, citado tal como se imprimió en la traducción inglesa de N. Chidambaram Iyer de 1885. La nota de arriba la escribe un modelo de IA a partir de estos versos."
+        }
+      }
+    }
+  },
+  "bn": {
+    "strength": {
+      "yogas": {
+        "classics": {
+          "kicker": "শাস্ত্র থেকে",
+          "heading": "আপনার যোগগুলি নিয়ে বৃহৎ জাতক কী বলে",
+          "pending": "আপনার যোগগুলির জন্য বৃহৎ জাতক পড়া হচ্ছে…",
+          "sourcesLabel": "শ্লোক ({count})",
+          "sourceRef": "বৃহৎ জাতক {ref}",
+          "noteLabel": "অনুবাদকের টীকা",
+          "credit": "বরাহমিহিরের বৃহৎ জাতক, এন. চিদম্বরম আইয়ারের 1885 সালের ইংরেজি অনুবাদ থেকে হুবহু উদ্ধৃত। উপরের টীকাটি এই শ্লোকগুলি থেকে একটি AI মডেল লিখেছে।"
+        }
+      }
+    }
+  },
+  "hi": {
+    "strength": {
+      "yogas": {
+        "classics": {
+          "kicker": "शास्त्रों से",
+          "heading": "आपके योगों के बारे में बृहत् जातक क्या कहता है",
+          "pending": "आपके योगों के लिए बृहत् जातक पढ़ा जा रहा है…",
+          "sourcesLabel": "श्लोक ({count})",
+          "sourceRef": "बृहत् जातक {ref}",
+          "noteLabel": "अनुवादक की टिप्पणी",
+          "credit": "वराहमिहिर का बृहत् जातक, एन. चिदंबरम अय्यर के 1885 के अंग्रेज़ी अनुवाद से ज्यों का त्यों उद्धृत। ऊपर की टिप्पणी इन्हीं श्लोकों के आधार पर एक AI मॉडल ने लिखी है।"
+        }
+      }
+    }
+  },
+  "it": {
+    "strength": {
+      "yogas": {
+        "classics": {
+          "kicker": "Dai classici",
+          "heading": "Che cosa dice il Brihat Jataka dei tuoi yoga",
+          "pending": "Lettura del Brihat Jataka per i tuoi yoga…",
+          "sourcesLabel": "I versi ({count})",
+          "sourceRef": "Brihat Jataka {ref}",
+          "noteLabel": "nota del traduttore",
+          "credit": "Il Brihat Jataka di Varahamihira, citato com'è stampato nella traduzione inglese di N. Chidambaram Iyer del 1885. La nota qui sopra è scritta da un modello di IA a partire da questi versi."
+        }
+      }
+    }
+  },
+  "fr": {
+    "strength": {
+      "yogas": {
+        "classics": {
+          "kicker": "Selon les classiques",
+          "heading": "Ce que dit le Brihat Jataka de vos yogas",
+          "pending": "Lecture du Brihat Jataka pour vos yogas…",
+          "sourcesLabel": "Les versets ({count})",
+          "sourceRef": "Brihat Jataka {ref}",
+          "noteLabel": "note du traducteur",
+          "credit": "Le Brihat Jataka de Varahamihira, cité tel qu'il est imprimé dans la traduction anglaise de N. Chidambaram Iyer (1885). La note ci-dessus est rédigée à partir de ces versets par un modèle d'IA."
+        }
+      }
+    }
+  }
+}

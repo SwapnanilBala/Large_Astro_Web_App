@@ -22,6 +22,10 @@ const BROWSER_MODULES = [
   "lib/life-shift-reading.ts",
   "lib/current-period-reading.ts",
   "lib/varga-commentary.ts",
+  /* The yoga panel's classical note: types, ranking and the request. The
+     prompt, the database and the citation mapping stay in
+     yoga-classics-reading.ts and retrieve.ts, which no client file imports. */
+  "lib/knowledge/yoga-classics.ts",
 ];
 
 const NODE_BUILTIN =

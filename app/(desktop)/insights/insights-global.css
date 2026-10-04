@@ -3786,6 +3786,137 @@
   max-width: 720px;
 }
 
+/* ── From the classics (yoga-classics-card.tsx) ── */
+.yoga-classics {
+  margin: 0 0 1.5rem;
+  padding: 1.1rem 1.25rem 1rem;
+  border: 1px solid rgba(242, 194, 108, 0.2);
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 14px;
+  background: rgba(242, 194, 108, 0.055);
+  max-width: 920px;
+}
+
+.yoga-classics .kicker {
+  margin: 0 0 0.25rem;
+}
+
+.yoga-classics-heading {
+  margin: 0 0 0.75rem;
+}
+
+.yoga-classics-reading p {
+  color: var(--ink-main);
+  font-size: 1.3rem;
+  line-height: 1.6;
+  margin: 0 0 0.7rem;
+  max-width: 780px;
+}
+
+/* A reference mark, so the label floor applies rather than the superscript
+   exception: it is the reader's only route to the verse. */
+.yoga-classics-mark {
+  color: var(--accent-gold);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  line-height: 0;
+  margin-left: 0.12em;
+}
+
+.yoga-classics-verses {
+  margin: 0.4rem 0 0;
+}
+
+.yoga-classics-verses summary {
+  color: var(--accent-aqua);
+  cursor: pointer;
+  font-size: var(--text-label);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.yoga-classics-sources {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0.6rem 0 0;
+  padding-left: 1.6rem;
+}
+
+.yoga-classics-sources li {
+  color: var(--ink-soft);
+  font-size: var(--text-ui);
+  line-height: 1.5;
+}
+
+.yoga-classics-source-ref {
+  color: var(--ink-main);
+  display: block;
+  font-size: var(--text-label);
+  font-weight: 700;
+}
+
+.yoga-classics-source-text {
+  font-style: italic;
+}
+
+.yoga-classics-credit {
+  color: var(--ink-soft);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  margin: 0.85rem 0 0;
+  max-width: 780px;
+}
+
+/* Holds roughly the note's height while it is written, so the list below
+   does not jump when it lands. */
+.yoga-classics-pending {
+  align-content: start;
+  display: grid;
+  gap: 0.6rem;
+  min-height: 16rem;
+}
+
+.yoga-classics-pending p {
+  color: var(--ink-soft);
+  font-size: var(--text-ui);
+  margin: 0 0 0.35rem;
+}
+
+.yoga-classics-bar {
+  animation: yoga-classics-pulse 1.6s ease-in-out infinite;
+  background: rgba(242, 194, 108, 0.14);
+  border-radius: 999px;
+  display: block;
+  height: 0.9rem;
+}
+
+.yoga-classics-bar--short {
+  width: 60%;
+}
+
+@keyframes yoga-classics-pulse {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .yoga-classics-bar {
+    animation: none;
+  }
+}
+
+html[data-theme="light"] .yoga-classics {
+  background: var(--surface-frosted);
+  border-color: rgba(176, 124, 32, 0.3);
+}
+
 /* ── Category Tabs ── */
 .yogas-tabs {
   display: flex;

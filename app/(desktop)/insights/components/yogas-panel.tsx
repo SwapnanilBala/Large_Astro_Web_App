@@ -3,7 +3,9 @@
 import { useState, memo } from "react";
 import type { YogaDetectionResult } from "@/lib/astro-types";
 import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import { rankYogas } from "@/lib/knowledge/yoga-classics";
 import strengthMessages from "@/messages/en.strength.json";
+import { YogaClassicsCard } from "./yoga-classics-card";
 
 type Translator = (key: string, params?: Record<string, string>) => string;
 
@@ -192,17 +194,9 @@ type YogasPanelProps = {
 function YogasPanel({ yogas }: YogasPanelProps) {
   const tr = useRouteMessages(strengthMessages);
   const [activeCategory, setActiveCategory] = useState<CategoryKey>("all");
-  const rankedYogas = [...yogas].sort((a, b) => {
-    if (b.occurrence_chance !== a.occurrence_chance) {
-      return b.occurrence_chance - a.occurrence_chance;
-    }
-    const strengthOrder: Record<YogaDetectionResult["strength"], number> = {
-      strong: 0,
-      moderate: 1,
-      weak: 2,
-    };
-    return strengthOrder[a.strength] - strengthOrder[b.strength];
-  });
+  /* Shared with the classical note, so it speaks first about the yogas this
+     list puts first. */
+  const rankedYogas = rankYogas(yogas);
   const rankByYogaId = new Map(
     rankedYogas.map((yoga, index) => [yoga.yoga_id, index + 1])
   );
@@ -234,6 +228,8 @@ function YogasPanel({ yogas }: YogasPanelProps) {
       </div>
 
       <p className="yogas-intro">{tr("strength.yogas.intro")}</p>
+
+      <YogaClassicsCard yogas={yogas} />
 
       {/* Category filter tabs */}
       <div

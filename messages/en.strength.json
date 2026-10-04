@@ -257,6 +257,15 @@
           "2": "temperament",
           "3": "life structure"
         }
+      },
+      "classics": {
+        "kicker": "From the classics",
+        "heading": "What the Brihat Jataka says about your yogas",
+        "pending": "Reading the Brihat Jataka for your yogas…",
+        "sourcesLabel": "The verses ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "noteLabel": "translator's note",
+        "credit": "Varahamihira's Brihat Jataka, quoted as printed in N. Chidambaram Iyer's English translation of 1885. The note above is written from these verses by an AI model."
       }
     }
   }

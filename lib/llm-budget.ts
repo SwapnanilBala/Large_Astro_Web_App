@@ -78,6 +78,7 @@ export type LlmRouteKey =
   | "/api/chart/domain-brief"
   | "/api/chart/advanced-story"
   | "/api/chart/varga-commentary"
+  | "/api/chart/yoga-classics"
   | "/api/chart/life-shifts"
   | "/api/chart/story-prose"
   | "/api/palm-reading"
@@ -239,6 +240,25 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   },
   "/api/chart/varga-commentary": {
     perDay: 400,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* The classical note in the yoga section: Opus 5.5 at low effort over at most
+     five yogas' passages, cited, against a cached system prefix. Measured on
+     two sample charts on 2026-10-04: 1,142-1,530 input tokens plus a
+     1,248-token prefix, and 544-855 output tokens, which is $0.016-$0.029 a
+     call, about half a varga atlas. Output is two thirds of it, so the
+     word ceiling in the prompt is the lever, as on current-period.
+
+     A chart costs one call and then nothing: the cache is keyed by the yogas
+     and verses chosen, not the chart, so charts sharing their leading yogas
+     share a note, and a chart none of whose yogas the book names never calls
+     at all. The section is on the members-only advanced page, mounted only
+     when scrolled to, so this is bought by signed-in readers who look at
+     their yogas. 600 a day is about $17 on a day that exhausts the route,
+     inside the $22 every dear route here is held to. */
+  "/api/chart/yoga-classics": {
+    perDay: 600,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
