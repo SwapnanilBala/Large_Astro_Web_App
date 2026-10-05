@@ -28,6 +28,8 @@ const BROWSER_MODULES = [
   "lib/knowledge/yoga-classics.ts",
   /* The reading's shape and paragraphs, shared by both classical-note cards. */
   "lib/knowledge/classical-reading.ts",
+  /* Whose hand a palm reading is for; the panel asks, the route tells the model. */
+  "lib/palm-readings/reader.ts",
 ];
 
 const NODE_BUILTIN =

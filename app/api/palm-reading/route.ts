@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
 import { safeLabel, safeNumber } from "@/lib/prompt-input";
 
 // ---------------------------------------------------------------------------
@@ -139,7 +140,7 @@ const BASE_SCHEMA_BLOCK = `Return ONLY valid JSON — no markdown fencing, no ex
 
 {
   "overall_summary": "A 2-3 sentence overview of the palm reading.",
-  "dominant_hand_note": "A brief note about which hand appears to be shown and what that signifies in palmistry.",
+  "dominant_hand_note": "A brief note about which hand appears to be shown and what that signifies in palmistry. When a [READER] line is given, also say whether this is the hand the tradition reads for them.",
   "lines": {
     "heart_line": {
       "description": "Describe what you physically observe about this line — length, depth, curvature, starting/ending points. If the line is not detected, say so explicitly here.",
@@ -265,6 +266,15 @@ Conditional sections — include ONLY when the corresponding input was provided.
 
 CRITICAL: omit conditional sections entirely when their inputs are absent. Never emit empty stubs. Return ONLY valid JSON — no markdown, no code fences, no commentary.`;
 
+/*
+ * Both modes: the reader may say whose hand this is (lib/palm-readings/
+ * reader.ts), and the tradition reads a woman's left hand and a man's right.
+ * The panel already told them which hand to photograph; the model checks the
+ * photo, says which hand it shows, and reads it either way -- a reading of the
+ * "wrong" hand, kindly flagged, beats a refusal after a two-minute wait.
+ */
+const HAND_RULE_GUIDELINE = `- When a [READER] line is given, the tradition reads a woman's left hand and a man's right. In dominant_hand_note, say which hand the photo shows and whether it is that hand. If it is the other hand, still give the full reading, and say so plainly and kindly in that note.`;
+
 const STANDARD_GUIDELINES = `Important guidelines:
 - Be specific about what you actually see in the image.
 - Frame all readings positively — palm lines show tendencies, not fixed destiny.
@@ -275,6 +285,7 @@ const STANDARD_GUIDELINES = `Important guidelines:
 - For relationships_and_emotional, be empathetic and constructive.
 - For health_and_vitality, focus on wellness and self-care rather than medical diagnoses.
 - ALWAYS assess image_quality first. Be honest: if the image is blurry, poorly lit, partial, or fingers are cropped, list the issues and set reliable_for_reading=false when rating is "poor". Still produce the full reading, but temper the interpretive depth for poor images.
+${HAND_RULE_GUIDELINE}
 - ALWAYS provide line_confidence for all four lines. Lines that are "not_detected" must still appear in the "lines" section, with description and interpretation noting the absence.
 - ALWAYS provide line_coordinates as normalized [0,1] points (origin top-left). Minimum 3 points per detected line (start, middle, end); up to 6 for clearly curved lines. OMIT a line's coordinate key entirely when its visibility is "not_detected".
 - If the image is unclear or not a palm, still return the JSON structure but note the limitation in the relevant fields and in image_quality.`;
@@ -286,6 +297,7 @@ const CLASSICAL_GUIDELINES = `Important guidelines (Hasta Samudrika Shastra mode
 - Frame interpretations through the classical lens of dharma, karma, ayu, artha, and moksha rather than modern psychology.
 - The life line (Ayu Rekha) traditionally indicates pranic vitality — explicitly note it does NOT fix lifespan.
 - ALWAYS assess image_quality first. Be honest about blur, lighting, partial palms, or cropped fingers; set reliable_for_reading=false when rating is "poor".
+${HAND_RULE_GUIDELINE}
 - ALWAYS provide line_confidence for all four lines. "not_detected" lines must still appear in "lines" with the absence noted.
 - ALWAYS provide line_coordinates as normalized [0,1] points (origin top-left). 3-6 points per detected line. OMIT a line's coordinate key entirely when its visibility is "not_detected".
 - classical_framework_notes MUST be included in this mode.`;
@@ -436,12 +448,17 @@ function sanitizeJyotishContext(raw: unknown): JyotishContext | undefined {
 function buildUserMessage(
   classicalMode: boolean,
   jyotish: JyotishContext | undefined,
+  reader: PalmReader,
 ): string {
   const parts: string[] = [];
 
   if (classicalMode) {
     parts.push("[FRAMEWORK: Hasta Samudrika Shastra — classical Vedic palmistry only]");
   }
+
+  /* A closed set, parsed by parsePalmReader: no browser string reaches the prompt. */
+  const handRule = readerLine(reader);
+  if (handRule) parts.push(handRule);
 
   parts.push("Analyze this palm image and provide a detailed palmistry reading.");
 
@@ -598,11 +615,13 @@ export async function POST(request: NextRequest) {
       mediaType,
       classicalMode,
       jyotishContext,
+      reader,
     } = body as {
       image: unknown;
       mediaType: unknown;
       classicalMode?: unknown;
       jyotishContext?: unknown;
+      reader?: unknown;
     };
 
     // -- Validate input --
@@ -635,6 +654,7 @@ export async function POST(request: NextRequest) {
     // -- Optional fields: graceful handling --
     const isClassicalMode = classicalMode === true;
     const sanitizedJyotish = sanitizeJyotishContext(jyotishContext);
+    const palmReader = parsePalmReader(reader);
 
     // -- Check API keys --
     /* Either provider can serve this, so the route is only down when neither
@@ -676,7 +696,7 @@ export async function POST(request: NextRequest) {
       image,
       mediaType: mediaType as VisionRequest["mediaType"],
       systemPrompt: isClassicalMode ? CLASSICAL_SYSTEM_PROMPT : STANDARD_SYSTEM_PROMPT,
-      userText: buildUserMessage(isClassicalMode, sanitizedJyotish),
+      userText: buildUserMessage(isClassicalMode, sanitizedJyotish, palmReader),
     };
 
     let rawText = "";

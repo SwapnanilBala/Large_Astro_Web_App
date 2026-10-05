@@ -89,12 +89,13 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function analyzeAPalm() {
+async function analyzeAPalm(beforePhoto?: () => void) {
   const { container } = render(
     <LanguageProvider baseMessages={{}}>
       <PalmReadingPanel />
     </LanguageProvider>,
   );
+  beforePhoto?.();
   const input = container.querySelector('input[type="file"]') as HTMLInputElement;
   const photo = new File([new Uint8Array([137, 80, 78, 71])], "palm.png", { type: "image/png" });
   fireEvent.change(input, { target: { files: [photo] } });
@@ -120,7 +121,31 @@ async function landTheReading(reading: object = READING) {
   await screen.findByText(READING.overall_summary);
 }
 
+const sentBody = () =>
+  JSON.parse(String((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body)) as Record<string, unknown>;
+
 describe("PalmReadingPanel", () => {
+  it("asks whose hand it is, and sends no hand rule until the reader says", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm(() => {
+      expect(screen.getByRole("group", { name: "Whose hand is this?" })).toBeInTheDocument();
+      expect(screen.getByRole("radio", { name: "Prefer not to say" })).toBeChecked();
+      expect(screen.getByText("Photograph the hand you write with.")).toBeInTheDocument();
+    });
+    expect(sentBody()).not.toHaveProperty("reader");
+  });
+
+  it("tells a woman to photograph her left hand, and sends the choice with the photo", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm(() => {
+      fireEvent.click(screen.getByRole("radio", { name: "A woman's" }));
+      expect(
+        screen.getByText("Photograph the left hand: classical palmistry reads a woman's left hand."),
+      ).toBeInTheDocument();
+    });
+    expect(sentBody()).toMatchObject({ reader: "woman" });
+  });
+
   it("opens the loading copy on its first stage", async () => {
     setReducedMotion(false);
     await analyzeAPalm();

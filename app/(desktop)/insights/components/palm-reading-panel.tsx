@@ -11,6 +11,7 @@ import { useRouteMessages } from "@/lib/i18n-context";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import palmMessages from "@/messages/en.palm.json";
+import { PALM_READERS, type PalmReader } from "@/lib/palm-readings/reader";
 import PalmAnnotation from "./PalmAnnotation";
 import PalmQaPanel from "./palm-qa-panel";
 
@@ -220,6 +221,19 @@ const REINFORCEMENT_COLORS: Record<JyotishCorrelationItem["reinforcement"], stri
   neutral: "#888",
 };
 
+/* Literal keys, so the catalog test can read them out of this file. */
+const READER_LABEL_KEYS: Record<PalmReader, string> = {
+  woman: "palm.panel.readerWoman",
+  man: "palm.panel.readerMan",
+  unspecified: "palm.panel.readerUnspecified",
+};
+
+const READER_HINT_KEYS: Record<PalmReader, string> = {
+  woman: "palm.panel.readerHintWoman",
+  man: "palm.panel.readerHintMan",
+  unspecified: "palm.panel.readerHintUnspecified",
+};
+
 /* ────────────────────────────────────────────────
    Component
    ──────────────────────────────────────────────── */
@@ -241,6 +255,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const [handDetected, setHandDetected] = useState(false);
   const [handScore, setHandScore] = useState(0);
   const [classicalMode, setClassicalMode] = useState(false);
+  const [reader, setReader] = useState<PalmReader>("unspecified");
   const [analyzingStage, setAnalyzingStage] = useState(0);
   const [imageQualityDismissed, setImageQualityDismissed] = useState(false);
   const [revealedSections, setRevealedSections] = useState<Set<RevealSection>>(new Set());
@@ -513,6 +528,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
       };
       const body: Record<string, unknown> = { image: imageData, mediaType };
       if (classicalMode) body.classicalMode = true;
+      if (reader !== "unspecified") body.reader = reader;
       if (jyotishContext) body.jyotishContext = jyotishContext;
       const res = await fetch("/api/palm-reading", {
         method: "POST",
@@ -716,6 +732,32 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
             </h2>
           </div>
           <p className="palm-intro">{tr("palm.panel.intro")}</p>
+
+          {/* Whose hand: the tradition reads a woman's left hand and a man's
+              right (lib/palm-readings/reader.ts). Asked before the photo, so
+              the reader knows which hand to hold up. */}
+          <fieldset className="palm-reader">
+            <legend className="palm-reader-legend">{tr("palm.panel.readerLegend")}</legend>
+            <div className="palm-reader-options">
+              {PALM_READERS.map((option) => (
+                <label
+                  key={option}
+                  className={`palm-reader-option ${reader === option ? "is-selected" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="palm-reader"
+                    value={option}
+                    checked={reader === option}
+                    onChange={() => setReader(option)}
+                    className="palm-reader-input"
+                  />
+                  {tr(READER_LABEL_KEYS[option])}
+                </label>
+              ))}
+            </div>
+            <p className="palm-reader-hint">{tr(READER_HINT_KEYS[reader])}</p>
+          </fieldset>
 
           {/* Classical mode toggle */}
           <label className="palm-toggle">

@@ -1,0 +1,67 @@
+{
+  "es": {
+    "palm": {
+      "panel": {
+        "readerLegend": "¿De quién es esta mano?",
+        "readerWoman": "De una mujer",
+        "readerMan": "De un hombre",
+        "readerUnspecified": "Prefiero no decirlo",
+        "readerHintWoman": "Fotografía la mano izquierda: la quiromancia clásica lee la mano izquierda de la mujer.",
+        "readerHintMan": "Fotografía la mano derecha: la quiromancia clásica lee la mano derecha del hombre.",
+        "readerHintUnspecified": "Fotografía la mano con la que escribes."
+      }
+    }
+  },
+  "bn": {
+    "palm": {
+      "panel": {
+        "readerLegend": "এটি কার হাত?",
+        "readerWoman": "একজন নারীর",
+        "readerMan": "একজন পুরুষের",
+        "readerUnspecified": "বলতে চাই না",
+        "readerHintWoman": "বাঁ হাতের ছবি তুলুন: শাস্ত্রীয় হস্তরেখাবিদ্যায় নারীর বাঁ হাত দেখা হয়।",
+        "readerHintMan": "ডান হাতের ছবি তুলুন: শাস্ত্রীয় হস্তরেখাবিদ্যায় পুরুষের ডান হাত দেখা হয়।",
+        "readerHintUnspecified": "যে হাতে আপনি লেখেন, সেই হাতের ছবি তুলুন।"
+      }
+    }
+  },
+  "hi": {
+    "palm": {
+      "panel": {
+        "readerLegend": "यह किसका हाथ है?",
+        "readerWoman": "स्त्री का",
+        "readerMan": "पुरुष का",
+        "readerUnspecified": "बताना नहीं चाहते",
+        "readerHintWoman": "बाएँ हाथ की तस्वीर लें: शास्त्रीय हस्तरेखा विद्या में स्त्री का बायाँ हाथ देखा जाता है।",
+        "readerHintMan": "दाएँ हाथ की तस्वीर लें: शास्त्रीय हस्तरेखा विद्या में पुरुष का दायाँ हाथ देखा जाता है।",
+        "readerHintUnspecified": "जिस हाथ से आप लिखते हैं, उसकी तस्वीर लें।"
+      }
+    }
+  },
+  "it": {
+    "palm": {
+      "panel": {
+        "readerLegend": "Di chi è questa mano?",
+        "readerWoman": "Di una donna",
+        "readerMan": "Di un uomo",
+        "readerUnspecified": "Preferisco non dirlo",
+        "readerHintWoman": "Fotografa la mano sinistra: la chiromanzia classica legge la mano sinistra della donna.",
+        "readerHintMan": "Fotografa la mano destra: la chiromanzia classica legge la mano destra dell'uomo.",
+        "readerHintUnspecified": "Fotografa la mano con cui scrivi."
+      }
+    }
+  },
+  "fr": {
+    "palm": {
+      "panel": {
+        "readerLegend": "À qui appartient cette main ?",
+        "readerWoman": "À une femme",
+        "readerMan": "À un homme",
+        "readerUnspecified": "Je préfère ne pas le dire",
+        "readerHintWoman": "Photographiez la main gauche : la chiromancie classique lit la main gauche des femmes.",
+        "readerHintMan": "Photographiez la main droite : la chiromancie classique lit la main droite des hommes.",
+        "readerHintUnspecified": "Photographiez la main avec laquelle vous écrivez."
+      }
+    }
+  }
+}
