@@ -20,16 +20,17 @@ import {
   type AreaChart,
   type AreaSelection,
 } from "../knowledge/area-classics-reading";
-import { chartPlacementKeys, heldPlacements, placementsHold } from "../knowledge/placements";
+import { PLACEMENT_KEYS, chartPlacementKeys, heldPlacements, housesOf, placementsHold } from "../knowledge/placements";
 import { CLASSICAL_NOTE_RULES, NOTE_PREFIX, type PassageRow } from "../knowledge/yoga-classics-reading";
 
 const row = (
   ref: string,
-  fields: Partial<Pick<PassageRow, "lifeAreas" | "placements" | "placementsAny" | "yogaIds" | "planets" | "kind">>,
+  fields: Partial<Pick<PassageRow, "lifeAreas" | "placements" | "placementsAny" | "yogaIds" | "planets" | "kind" | "source">>,
 ): PassageRow => {
   const [chapter, verse, part] = ref.split(".").map(Number);
   return {
     id: `bj:${ref}`,
+    source: fields.source ?? "brihat-jataka-1885",
     chapter,
     verse,
     part,
@@ -245,8 +246,9 @@ describe("what the model is sent", () => {
 
   it("tells the model a woman's verses about a wife describe her partner, and nothing when the reader did not say", () => {
     expect(areaClassicsInstruction(selection, "English", "female")).toContain(
-      "where a passage speaks of a wife or of women, it describes the reader's partner",
+      "where its passages speak of a wife or of women, they describe the reader's partner",
     );
+    expect(areaClassicsInstruction(selection, "English", "female")).toContain("its husband is the reader's partner");
     expect(areaClassicsInstruction(selection, "English", "male")).toContain('Call the partner "your partner"');
     expect(areaClassicsInstruction(selection, "English")).not.toMatch(/reader is/);
   });
@@ -267,6 +269,122 @@ describe("what the model is sent", () => {
     expect(describePlacement("Jupiter.aspects.Moon")).toBe("Jupiter aspecting the Moon");
     expect(describePlacement("ascendant.sign.Leo")).toBe("Leo rising");
     expect(describePlacement("reader.sex.female")).toBe("the reader is a woman");
+    expect(describePlacement("Venus.fromMoon.7")).toBe("Venus in the 7th house from the Moon");
+    expect(describePlacement("lord7.house.1")).toBe("the lord of the 7th house in the 1st house");
+    expect(describePlacement("lord11.dignity.exalted")).toBe("the lord of the 11th house exalted");
+    expect(describePlacement("Saturn.aspects.lord7")).toBe("Saturn aspecting the lord of the 7th house");
+    expect(describePlacement("ascendant.signtype.odd")).toBe("an odd sign rising");
+    expect(describePlacement("Moon.signtype.even")).toBe("the Moon in an even sign");
+    expect(describePlacement("Moon.nakshatra.PurvaPhalguni")).toBe("the Moon in the nakshatra Purva Phalguni");
+  });
+
+  it("sends each book its own document, the Brihat Jataka first, and reads citations back to the right book", () => {
+    const both: AreaSelection[] = [
+      {
+        area: "family",
+        passages: [
+          row("12.1.1", { source: "strijataka-1931", lifeAreas: ["family"], placements: ["lord7.house.1", "reader.sex.female"] }),
+          row("20.4.1", { lifeAreas: ["family"], placements: ["Moon.house.4"] }),
+        ],
+        conditions: ["lord7.house.1", "reader.sex.female", "Moon.house.4"],
+        yogaNames: ["Gajakesari Yoga"],
+      },
+    ];
+    const documents = areaDocuments(both);
+    expect(documents.map((document) => document.title)).toEqual([
+      "[family] The Brihat Jataka of Varaha Mihira, on family and home",
+      "[family] Strijataka, or Female Horoscopy, on family and home",
+    ]);
+    expect(documents[0].context).toContain("the Moon in the 4th house");
+    expect(documents[0].context).not.toContain("lord of the 7th");
+    expect(documents[0].context).toContain("Gajakesari Yoga");
+    expect(documents[1].context).toContain("the lord of the 7th house in the 1st house; the reader is a woman");
+    expect(documents[1].context).toContain("B. Suryanarain Rao's 1931 English book on reading women's birth charts");
+    expect(documents[1].context).not.toContain("Gajakesari");
+
+    const cite = (document: number) => ({
+      type: "content_block_location",
+      cited_text: "",
+      document_index: document,
+      document_title: null,
+      start_block_index: 0,
+      end_block_index: 1,
+    });
+    const content = [
+      { type: "text", text: "[family] The Strijataka holds", citations: [cite(1)] },
+      { type: "text", text: " and the Brihat Jataka agrees.", citations: [cite(0)] },
+    ] as unknown as Anthropic.ContentBlock[];
+    expect(areaReadingsFrom(content, both).family!.sources).toEqual([
+      { number: 1, book: "strijataka-1931", ref: "12", kind: "verse", text: "text of 12.1.1" },
+      { number: 2, book: "brihat-jataka-1885", ref: "20.4", kind: "verse", text: "text of 20.4.1" },
+    ]);
+  });
+
+  it("tells the model what square brackets mean, and names both books", () => {
+    expect(AREA_CLASSICS_SYSTEM_PROMPT).toMatch(/Words in square brackets inside a passage are the app's/);
+    expect(AREA_CLASSICS_SYSTEM_PROMPT).toContain("Strijataka, or Female Horoscopy");
+    expect(AREA_CLASSICS_SYSTEM_PROMPT).toContain("the Brihat Jataka, Varahamihira's classical text on birth charts");
+  });
+});
+
+describe("the conditions the books on women's charts need", () => {
+  /* PLANETS: Aries rising, the Moon and Venus in Libra, Mars exalted in Capricorn,
+     Jupiter exalted in Cancer, Saturn in Aquarius, the Sun in Leo. */
+  const hers = chartPlacementKeys({ planets: PLANETS, ascendantSign: "Aries", moonNakshatra: "Purva Phalguni" });
+
+  it("count houses from the Moon too", () => {
+    expect(hers.has("Venus.fromMoon.1")).toBe(true);
+    expect(hers.has("Sun.fromMoon.11")).toBe(true);
+    expect(hers.has("Mars.fromMoon.4")).toBe(true);
+    expect([...hers].some((key) => key.startsWith("Moon.fromMoon."))).toBe(false);
+  });
+
+  it("place each house's lord, with its dignity and the planets that aspect it", () => {
+    expect(hers.has("lord1.house.10")).toBe(true); // Mars rules Aries and sits in Capricorn
+    expect(hers.has("lord1.dignity.exalted")).toBe(true);
+    expect(hers.has("lord7.house.7")).toBe(true); // Venus rules Libra and sits in it
+    expect(hers.has("lord7.dignity.own")).toBe(true);
+    expect(hers.has("lord4.house.7")).toBe(true); // the Moon rules Cancer
+    expect(hers.has("Jupiter.aspects.lord1")).toBe(true); // Capricorn is 7th from Cancer
+    expect(hers.has("Mars.aspects.lord1")).toBe(false); // a lord does not aspect itself
+    expect(hers.has("Sun.aspects.lord10")).toBe(true); // Saturn in Aquarius, 7th from Leo
+  });
+
+  it("say whether the rising sign and the planets are in odd or even signs", () => {
+    expect(hers.has("ascendant.signtype.odd")).toBe(true);
+    expect(hers.has("Moon.signtype.odd")).toBe(true);
+    expect(hers.has("Mars.signtype.even")).toBe(true);
+    expect([...hers].some((key) => key.startsWith("Rahu.signtype."))).toBe(false);
+  });
+
+  it("name the birth star only when the chart gives a real one", () => {
+    expect(hers.has("Moon.nakshatra.PurvaPhalguni")).toBe(true);
+    expect([...KEYS].some((key) => key.includes(".nakshatra."))).toBe(false);
+    const unknown = chartPlacementKeys({ planets: PLANETS, ascendantSign: "Aries", moonNakshatra: "Abhijit" });
+    expect([...unknown].some((key) => key.includes(".nakshatra."))).toBe(false);
+  });
+
+  it("are all in the vocabulary", () => {
+    const vocabulary = new Set(PLACEMENT_KEYS);
+    expect([...hers].filter((key) => !vocabulary.has(key))).toEqual([]);
+  });
+
+  it("tell which houses a key is about, for ranking", () => {
+    expect(housesOf("Venus.house.7")).toEqual([7]);
+    expect(housesOf("Venus.fromMoon.7")).toEqual([7]);
+    expect(housesOf("lord7.house.1")).toEqual([7, 1]);
+    expect(housesOf("lord10.dignity.own")).toEqual([10]);
+    expect(housesOf("Saturn.aspects.lord7")).toEqual([7]);
+    expect(housesOf("Jupiter.aspects.Moon")).toEqual([]);
+  });
+
+  it("rank a passage written for the reader's sex above the same condition written for anyone", () => {
+    const chart: AreaChart = { keys: new Set(["Venus.house.7", "reader.sex.female"]), yogas: [] };
+    const rows = [
+      row("20.8.2", { lifeAreas: ["relationships"], placements: ["Venus.house.7"] }),
+      row("10.19.2", { source: "strijataka-1931", lifeAreas: ["relationships"], placements: ["Venus.house.7", "reader.sex.female"] }),
+    ];
+    expect(selectAreaPassages(rows, "love_life", chart, 1).map((passage) => passage.id)).toEqual(["bj:10.19.2"]);
   });
 });
 
@@ -344,7 +462,7 @@ describe("cutting the answer back into one reading per area", () => {
       [1, "20.8"],
       [2, "17.7"],
     ]);
-    expect(readings.career!.sources).toEqual([{ number: 1, ref: "20.6", kind: "note", text: "text of 20.6.9" }]);
+    expect(readings.career!.sources).toEqual([{ number: 1, book: "brihat-jataka-1885", ref: "20.6", kind: "note", text: "text of 20.6.9" }]);
   });
 
   it("keeps a citation on a block that opens with its marker", () => {

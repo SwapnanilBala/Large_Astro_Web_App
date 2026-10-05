@@ -21,14 +21,26 @@ export const CLASSICAL_NOTE_KEYS = [
   "credit",
 ] as const;
 
-/** A verse the reading cites, numbered in the order the reading first cites it. */
+/**
+ * The book on women's charts (lib/knowledge/sources.ts, STRIJATAKA_1931),
+ * whose passages reach only the life areas' note, and only for a reader who
+ * said she is a woman.
+ */
+export const WOMENS_BOOK_SLUG = "strijataka-1931";
+
+/** The strings a card needs only when it can quote the women's book: the life areas' card. */
+export const WOMENS_BOOK_NOTE_KEYS = ["sourceRefStrijataka", "creditStrijataka"] as const;
+
+/** A passage the reading cites, numbered in the order the reading first cites it. */
 export type ClassicalSource = {
   number: number;
-  /** Chapter and verse as printed, e.g. "13.5". */
+  /** The book it is quoted from, by slug: the card names the book from it. */
+  book: string;
+  /** What a reader can look up: chapter and verse, e.g. "13.5", or a chapter alone for a prose book. */
   ref: string;
-  /** "verse" for Varahamihira's text, "note" for the translator's note on it. */
+  /** "verse" for the book's own text, "note" for a translator's note on it. */
   kind: "verse" | "note";
-  /** The 1885 translation's own words. */
+  /** The book's words as printed, but for any rewording in square brackets. */
   text: string;
 };
 

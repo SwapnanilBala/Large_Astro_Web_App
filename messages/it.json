@@ -1728,12 +1728,14 @@
     },
     "classics": {
       "kicker": "Dai classici",
-      "heading": "Che cosa dice il Brihat Jataka di quest'area della tua vita",
-      "pending": "Lettura del Brihat Jataka per il tuo tema natale…",
-      "sourcesLabel": "I versi ({count})",
+      "heading": "Che cosa dicono i classici di quest'area della tua vita",
+      "pending": "Lettura dei classici per il tuo tema natale…",
+      "sourcesLabel": "I passi ({count})",
       "sourceRef": "Brihat Jataka {ref}",
+      "sourceRefStrijataka": "Strijataka, cap. {ref}",
       "noteLabel": "nota del traduttore",
-      "credit": "I numeri rimandano ai versi da cui sono tratti, citati come sono stampati nella traduzione inglese del Brihat Jataka di Varahamihira curata da N. Chidambaram Iyer nel 1885."
+      "credit": "I numeri rimandano ai versi da cui sono tratti, citati come sono stampati nella traduzione inglese del Brihat Jataka di Varahamihira curata da N. Chidambaram Iyer nel 1885.",
+      "creditStrijataka": "I passi segnati Strijataka sono citati come sono stampati in Strijataka, or Female Horoscopy (1931), il libro di B. Suryanarain Rao sui temi natali delle donne. Le parole tra parentesi quadre sono nostre, non del libro."
     }
   },
   "fullReading": {

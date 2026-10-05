@@ -1728,12 +1728,14 @@
     },
     "classics": {
       "kicker": "Selon les classiques",
-      "heading": "Ce que dit le Brihat Jataka de ce domaine de votre vie",
-      "pending": "Lecture du Brihat Jataka pour votre thème…",
-      "sourcesLabel": "Les versets ({count})",
+      "heading": "Ce que disent les classiques de ce domaine de votre vie",
+      "pending": "Lecture des classiques pour votre thème…",
+      "sourcesLabel": "Les passages ({count})",
       "sourceRef": "Brihat Jataka {ref}",
+      "sourceRefStrijataka": "Strijataka, ch. {ref}",
       "noteLabel": "note du traducteur",
-      "credit": "Les numéros renvoient aux versets dont ils sont tirés, cités tels qu'ils sont imprimés dans la traduction anglaise du Brihat Jataka de Varahamihira par N. Chidambaram Iyer (1885)."
+      "credit": "Les numéros renvoient aux versets dont ils sont tirés, cités tels qu'ils sont imprimés dans la traduction anglaise du Brihat Jataka de Varahamihira par N. Chidambaram Iyer (1885).",
+      "creditStrijataka": "Les passages marqués Strijataka sont cités tels qu'ils sont imprimés dans Strijataka, or Female Horoscopy (1931), le livre de B. Suryanarain Rao sur les thèmes natals des femmes. Les mots entre crochets sont de nous, non du livre."
     }
   },
   "fullReading": {

@@ -27,7 +27,9 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 
 /*
  * "From the classics" for the life areas: what the Brihat Jataka says about
- * each area of the reader's life, written for them and cited verse by verse.
+ * each area of the reader's life, written for them and cited verse by verse,
+ * and for a reader who said she is a woman, what the Strijataka (1931), a book
+ * on women's charts, says too.
  *
  * ── RETRIEVAL BY THE CHART, NOT BY SIMILARITY ──────────────────────────────
  *
@@ -215,6 +217,7 @@ export async function GET(request: NextRequest) {
         planets: payload.chart.planets,
         ascendantSign: payload.chart.ascendant.sign,
         navamsa: payload.chart.navamsa,
+        moonNakshatra: payload.chart.nakshatra?.name,
         sex,
       }),
       yogas: (payload.chart.yogas ?? [])

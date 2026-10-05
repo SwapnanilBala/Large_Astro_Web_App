@@ -31,6 +31,7 @@ const row = (
   const [chapter, verse, part] = ref.split(".").map(Number);
   return {
     id: `bj:${ref}`,
+    source: "brihat-jataka-1885",
     chapter,
     verse,
     part,

@@ -26,12 +26,22 @@ const RESPONSE: AreaClassicsResponse = {
         { text: "the Brihat Jataka holds that you will be drawn to romance.", sources: [1] },
       ],
       sources: [
-        { number: 1, ref: "20.8", kind: "verse", text: "if Venus occupy the 7th house, the person will be fond of quarrels" },
+        { number: 1, book: "brihat-jataka-1885", ref: "20.8", kind: "verse", text: "if Venus occupy the 7th house, the person will be fond of quarrels" },
+      ],
+    },
+    family: {
+      segments: [
+        { text: "With the lord of your 7th house in your 1st, the Strijataka promises a happy home", sources: [1] },
+        { text: ", and the Brihat Jataka agrees.", sources: [2] },
+      ],
+      sources: [
+        { number: 1, book: "strijataka-1931", ref: "12", kind: "verse", text: "If the lord of 7th joins Lagna" },
+        { number: 2, book: "brihat-jataka-1885", ref: "20.4", kind: "verse", text: "if the Moon occupy the 4th house" },
       ],
     },
     career: {
       segments: [{ text: "With Mars in the 10th, the translator's notes add that you will lead.", sources: [1] }],
-      sources: [{ number: 1, ref: "20.6", kind: "note", text: "Mars in the 10th makes a leader of men." }],
+      sources: [{ number: 1, book: "brihat-jataka-1885", ref: "20.6", kind: "note", text: "Mars in the 10th makes a leader of men." }],
     },
   },
 };
@@ -96,6 +106,22 @@ describe("the life areas' classical note", () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 
+  it("names each passage's book, and credits each book it quotes", async () => {
+    respond(RESPONSE);
+    const { container, showArea } = renderNote("love_life");
+    await screen.findByText(/drawn to romance/);
+    const credits = () => [...container.querySelectorAll(".classical-note-credit")].map((node) => node.textContent);
+    expect(credits()).toEqual([lifeAreasMessages.lifeAreas.classics.credit]);
+
+    showArea("family");
+    const refs = [...container.querySelectorAll(".classical-note-source-ref")].map((node) => node.textContent);
+    expect(refs).toEqual(["Strijataka, ch. 12", "Brihat Jataka 20.4"]);
+    expect(credits()).toEqual([
+      lifeAreasMessages.lifeAreas.classics.credit,
+      lifeAreasMessages.lifeAreas.classics.creditStrijataka,
+    ]);
+  });
+
   it("shows nothing for an area the book has nothing on, while others have notes", async () => {
     respond(RESPONSE);
     const { container, showArea } = renderNote("love_life");
@@ -107,9 +133,9 @@ describe("the life areas' classical note", () => {
   it("holds its place with a status line while the notes are written", () => {
     vi.spyOn(globalThis, "fetch").mockReturnValue(new Promise(() => {}));
     renderNote("love_life");
-    expect(screen.getByRole("status")).toHaveTextContent("Reading the Brihat Jataka for your chart");
+    expect(screen.getByRole("status")).toHaveTextContent("Reading the classics for your chart");
     expect(
-      screen.getByRole("region", { name: "What the Brihat Jataka says about this area of your life" }),
+      screen.getByRole("region", { name: "What the classics say about this area of your life" }),
     ).toHaveAttribute("aria-busy", "true");
   });
 

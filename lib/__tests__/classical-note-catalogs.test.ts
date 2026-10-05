@@ -12,7 +12,7 @@ import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { CLASSICAL_NOTE_KEYS } from "@/lib/knowledge/classical-reading";
+import { CLASSICAL_NOTE_KEYS, WOMENS_BOOK_NOTE_KEYS } from "@/lib/knowledge/classical-reading";
 import enStrength from "@/messages/en.strength.json";
 import enLifeAreas from "@/messages/en.life-areas.json";
 import es from "@/messages/es.json";
@@ -49,25 +49,28 @@ const CARDS = [
     page: ["app", "(desktop)", "insights", "components", "yoga-classics-card.tsx"],
     prefix: "strength.yogas.classics",
     english: enStrength as Tree,
+    /* Its passages are the yoga chapters' only: the book on women's charts carries no yoga ids. */
+    keys: [...CLASSICAL_NOTE_KEYS],
   },
   {
     name: "the life areas' note",
     page: ["app", "(desktop)", "insights", "life-areas", "life-areas-client.tsx"],
     prefix: "lifeAreas.classics",
     english: enLifeAreas as Tree,
+    keys: [...CLASSICAL_NOTE_KEYS, ...WOMENS_BOOK_NOTE_KEYS],
   },
 ];
 
 describe("the classical note card", () => {
-  it("reads exactly the keys CLASSICAL_NOTE_KEYS lists", () => {
+  it("reads exactly the keys CLASSICAL_NOTE_KEYS and WOMENS_BOOK_NOTE_KEYS list", () => {
     const card = source("app", "(desktop)", "insights", "components", "classical-note.tsx");
     const read = new Set([...card.matchAll(/`\$\{prefix\}\.(\w+)`/g)].map((match) => match[1]));
-    expect([...read].sort()).toEqual([...CLASSICAL_NOTE_KEYS].sort());
+    expect([...read].sort()).toEqual([...CLASSICAL_NOTE_KEYS, ...WOMENS_BOOK_NOTE_KEYS].sort());
   });
 });
 
-describe.each(CARDS)("$name", ({ page, prefix, english }) => {
-  const keys = CLASSICAL_NOTE_KEYS.map((key) => `${prefix}.${key}`);
+describe.each(CARDS)("$name", ({ page, prefix, english, keys: own }) => {
+  const keys = own.map((key) => `${prefix}.${key}`);
 
   it("passes its prefix to the card", () => {
     expect(source(...page)).toContain(`prefix="${prefix}"`);

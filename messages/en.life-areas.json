@@ -52,12 +52,14 @@
     },
     "classics": {
       "kicker": "From the classics",
-      "heading": "What the Brihat Jataka says about this area of your life",
-      "pending": "Reading the Brihat Jataka for your chart…",
-      "sourcesLabel": "The verses ({count})",
+      "heading": "What the classics say about this area of your life",
+      "pending": "Reading the classics for your chart…",
+      "sourcesLabel": "The passages ({count})",
       "sourceRef": "Brihat Jataka {ref}",
+      "sourceRefStrijataka": "Strijataka, ch. {ref}",
       "noteLabel": "translator's note",
-      "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka."
+      "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka.",
+      "creditStrijataka": "Passages marked Strijataka are quoted as printed in B. Suryanarain Rao's Strijataka, or Female Horoscopy (1931), a book on women's birth charts. Words in square brackets are ours, not the book's."
     }
   }
 }

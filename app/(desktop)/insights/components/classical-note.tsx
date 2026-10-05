@@ -1,15 +1,16 @@
 "use client";
 
 import { Fragment } from "react";
-import { readingParagraphs, type ClassicalReading } from "@/lib/knowledge/classical-reading";
+import { WOMENS_BOOK_SLUG, readingParagraphs, type ClassicalReading } from "@/lib/knowledge/classical-reading";
 
 /**
- * "From the classics": what the Brihat Jataka says, with every statement
- * numbered against the verse it rests on and the verses printed underneath as
- * the 1885 translation has them. The yoga section's note and each life area's
- * are this card; they differ in what they ask for and in their strings, which
- * each keeps in its own route catalog under `prefix`, with the keys in
- * CLASSICAL_NOTE_KEYS beneath it.
+ * "From the classics": what the books say, with every statement numbered
+ * against the passage it rests on and the passages printed underneath as the
+ * books have them. The yoga section's note and each life area's are this card;
+ * they differ in what they ask for and in their strings, which each keeps in
+ * its own route catalog under `prefix`, with the keys in CLASSICAL_NOTE_KEYS
+ * beneath it, and for the life areas, which can quote the book on women's
+ * charts, WOMENS_BOOK_NOTE_KEYS too.
  *
  * The card holds its place while the note is written (several seconds on a
  * cold chart) so the content below does not jump when it lands, and it
@@ -32,6 +33,11 @@ type ClassicalNoteProps = {
 export function ClassicalNote({ state, reading, tr, prefix, headingId, className }: ClassicalNoteProps) {
   if (state === "empty" || state === "failed") return null;
   if (state === "ready" && !reading) return null;
+
+  /* Each book gets its own credit, shown when the reading quotes it. */
+  const fromWomensBook = (book: string) => book === WOMENS_BOOK_SLUG;
+  const quotesWomensBook = reading?.sources.some((source) => fromWomensBook(source.book)) ?? false;
+  const quotesOtherBooks = reading?.sources.some((source) => !fromWomensBook(source.book)) ?? false;
 
   return (
     <section
@@ -66,10 +72,12 @@ export function ClassicalNote({ state, reading, tr, prefix, headingId, className
               {reading.sources.map((source) => (
                 <li key={source.number}>
                   <span className="classical-note-source-ref">
-                    {tr(`${prefix}.sourceRef`, { ref: source.ref })}
+                    {fromWomensBook(source.book)
+                      ? tr(`${prefix}.sourceRefStrijataka`, { ref: source.ref })
+                      : tr(`${prefix}.sourceRef`, { ref: source.ref })}
                     {source.kind === "note" && ` · ${tr(`${prefix}.noteLabel`)}`}
                   </span>
-                  {/* Quoted in the 1885 English whatever the page language. */}
+                  {/* Quoted in the books' English whatever the page language. */}
                   <q className="classical-note-source-text" lang="en">
                     {source.text}
                   </q>
@@ -78,7 +86,8 @@ export function ClassicalNote({ state, reading, tr, prefix, headingId, className
             </ol>
           </details>
 
-          <p className="classical-note-credit">{tr(`${prefix}.credit`)}</p>
+          {quotesOtherBooks && <p className="classical-note-credit">{tr(`${prefix}.credit`)}</p>}
+          {quotesWomensBook && <p className="classical-note-credit">{tr(`${prefix}.creditStrijataka`)}</p>}
         </>
       ) : (
         <div className="classical-note-pending" role="status">

@@ -19,6 +19,8 @@ import type {
 /** A knowledge_passages row as the route reads it. Withheld rows never get this far. */
 export type PassageRow = {
   id: string;
+  /** The book's slug in lib/knowledge/sources.ts. */
+  source: string;
   chapter: number;
   verse: number;
   part: number;
@@ -51,12 +53,13 @@ export const NOTE_PREFIX = "Translator's note: ";
  * section's and each life area's. One constant, so the two prompts cannot
  * drift apart on attribution, tone or what is never said.
  */
-export const CLASSICAL_NOTE_RULES = `- Attribute the claims to the book ("The Brihat Jataka holds that ...", "Varahamihira counts this among ..."). This is the classical view, not a prediction about the reader.
+export const CLASSICAL_NOTE_RULES = `- Attribute each claim to the book it comes from, as its document's title names it ("The Brihat Jataka holds that ...", "Varahamihira counts this among ..."). This is the classical view, not a prediction about the reader.
 - A passage that begins "${NOTE_PREFIX.trim()}" is the 1885 translator's own note, often quoting other authorities. Attribute it that way ("the translator's notes add ...", "other authorities quoted in the notes hold ..."), never to Varahamihira.
 - Plain modern language for a reader who knows no astrology. The book's "king" means someone with standing and authority; say that rather than "king".
 - Where a passage's verdict is harsh, name what the book warned of in one neutral phrase. Never describe the reader with its insults.
 - Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving, a marriage ending, marrying late or more than once, and having few children or none may be said plainly, for either partner, without blame.
-- The book writes for a man ("his wife", "fond of women"). Write for a reader of any gender: "your partner", "marriage", "romance".
+- The books write for one sex ("his wife", "fond of women", "her husband"). Write for a reader of any gender: "your partner", "marriage", "romance".
+- Put every claim in your own plain words; the passages are printed under the note, word for word, for anyone who wants them. Above all, never write a book's word for a spouse, even in a quotation: not "fond of husband[2]" but "devoted to your partner[2]"; not "will possess several wives[1]" but "more than one marriage[1]".
 - Speak of sexual matters only as romance, warmth or attraction, never explicitly.
 - No advice, no disclaimers, no headings, no lists, no markdown.
 - Address the reader as "you".`;
@@ -144,9 +147,16 @@ export function selectYogaPassages(
   return chosen;
 }
 
-/** The chapter and verse a reader can look up, e.g. "13.5". */
-export function passageRef(passage: Pick<PassageRow, "chapter" | "verse">): string {
-  return `${passage.chapter}.${passage.verse}`;
+/**
+ * Books with no numbered verses, cited by chapter alone: the Strijataka is
+ * prose, and its passages' "verse" is the build's paragraph count, which no
+ * reader could find in the printed book.
+ */
+const CITED_BY_CHAPTER = new Set(["strijataka-1931"]);
+
+/** What a reader can look up: chapter and verse, e.g. "13.5", or the chapter, e.g. "9". */
+export function passageRef(passage: Pick<PassageRow, "chapter" | "verse" | "source">): string {
+  return CITED_BY_CHAPTER.has(passage.source) ? String(passage.chapter) : `${passage.chapter}.${passage.verse}`;
 }
 
 /**
@@ -212,7 +222,7 @@ export function readingFrom(
         if (number === undefined) {
           number = sources.length + 1;
           numbers.set(passage.id, number);
-          sources.push({ number, ref: passageRef(passage), kind: passage.kind, text: passage.text });
+          sources.push({ number, book: passage.source, ref: passageRef(passage), kind: passage.kind, text: passage.text });
         }
         if (!cited.includes(number)) cited.push(number);
       }

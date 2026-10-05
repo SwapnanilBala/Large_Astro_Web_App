@@ -25,9 +25,9 @@ const READING: YogaClassicsResponse = {
       { text: ", and the notes add more.", sources: [] },
     ],
     sources: [
-      { number: 1, ref: "13.8", kind: "verse", text: "If the yoga planet be Saturn, a person will be the chief of parties of men." },
-      { number: 2, ref: "12.10", kind: "verse", text: "If all the planets occupy any seven signs the yoga is known as Vallaki ;" },
-      { number: 3, ref: "12.17", kind: "note", text: "A person born in a Vallaki yoga will delight in music and dance." },
+      { number: 1, book: "brihat-jataka-1885", ref: "13.8", kind: "verse", text: "If the yoga planet be Saturn, a person will be the chief of parties of men." },
+      { number: 2, book: "brihat-jataka-1885", ref: "12.10", kind: "verse", text: "If all the planets occupy any seven signs the yoga is known as Vallaki ;" },
+      { number: 3, book: "brihat-jataka-1885", ref: "12.17", kind: "note", text: "A person born in a Vallaki yoga will delight in music and dance." },
     ],
   },
 };

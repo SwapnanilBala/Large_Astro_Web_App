@@ -15,6 +15,7 @@ import type { PassageRow } from "./yoga-classics-reading";
 
 const COLUMNS = {
   id: knowledgePassages.id,
+  source: knowledgePassages.source,
   chapter: knowledgePassages.chapter,
   verse: knowledgePassages.verse,
   part: knowledgePassages.part,
