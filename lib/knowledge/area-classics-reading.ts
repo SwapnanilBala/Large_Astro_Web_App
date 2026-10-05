@@ -84,14 +84,26 @@ function bookOrder(a: PassageRow, b: PassageRow): number {
   return a.chapter - b.chapter || a.verse - b.verse || a.part - b.part;
 }
 
-/** The chart's yogas that a passage is tagged with, in the form it speaks of. */
-function yogasFor(passage: PassageRow, chart: AreaChart): ChartYoga[] {
-  return chart.yogas.filter((yoga) => passage.yogaIds.includes(yoga.id) && speaksToChart(passage, yoga));
+const countsFor = (area: LifeDomainKey, id: string): boolean =>
+  LIFE_DOMAIN_EVIDENCE_CONFIG[area].yogaIdPrefixes.some((prefix) => id === prefix || id.startsWith(prefix));
+
+/**
+ * The chart's yogas that a passage is tagged with, in the form it speaks of,
+ * and that the area counts as its own evidence. The last test is what keeps
+ * the yoga section's material in the yoga section: Kemadruma's verse names
+ * wealth and standing, but no area counts Kemadruma, so it is quoted once,
+ * there, and not again under every area it touches. The marriage yogas are on
+ * Love Life's list, so their verses reach it.
+ */
+function yogasFor(passage: PassageRow, chart: AreaChart, area: LifeDomainKey): ChartYoga[] {
+  return chart.yogas.filter(
+    (yoga) => passage.yogaIds.includes(yoga.id) && speaksToChart(passage, yoga) && countsFor(area, yoga.id),
+  );
 }
 
-/** Whether a passage applies to the chart: by its placements, or by a yoga the chart has in the form it speaks of. */
-export function appliesToChart(passage: PassageRow, chart: AreaChart): boolean {
-  return placementsHold(passage, chart.keys) || yogasFor(passage, chart).length > 0;
+/** Whether a passage applies to the chart for an area: by its placements, or by a yoga the area counts. */
+export function appliesToChart(passage: PassageRow, chart: AreaChart, area: LifeDomainKey): boolean {
+  return placementsHold(passage, chart.keys) || yogasFor(passage, chart, area).length > 0;
 }
 
 /**
@@ -100,8 +112,8 @@ export function appliesToChart(passage: PassageRow, chart: AreaChart): boolean {
  * Rows arrive from the database already narrowed; this keeps only those that
  * truly apply and carry one of the area's topics, then ranks: a condition in
  * one of the area's own houses first (Venus in the 7th for love), then one
- * about the area's planets, then a yoga the area counts, then the rest; the
- * verse before the translator's note; then the book's order.
+ * about the area's planets, then one reached through a yoga, then the rest;
+ * the verse before the translator's note; then the book's order.
  */
 export function selectAreaPassages(
   rows: readonly PassageRow[],
@@ -120,13 +132,11 @@ export function selectAreaPassages(
       return kind === "house" && houses.has(value);
     });
     const ofAreaPlanet = held.some((key) => planets.has(key.split(".")[0]));
-    const areaYoga = yogasFor(passage, chart).some(({ id }) =>
-      config.yogaIdPrefixes.some((prefix) => id === prefix || id.startsWith(prefix)),
-    );
+    const areaYoga = yogasFor(passage, chart, area).length > 0;
     return (inAreaHouse ? 8 : 0) + (ofAreaPlanet ? 4 : 0) + (areaYoga ? 2 : 0) + (passage.kind === "verse" ? 1 : 0);
   };
   return rows
-    .filter((passage) => passage.lifeAreas.some((topic) => topics.has(topic)) && appliesToChart(passage, chart))
+    .filter((passage) => passage.lifeAreas.some((topic) => topics.has(topic)) && appliesToChart(passage, chart, area))
     .sort((a, b) => score(b) - score(a) || bookOrder(a, b))
     .slice(0, limit)
     .sort(bookOrder);
@@ -146,7 +156,7 @@ export function selectAreas(
     const passages = selectAreaPassages(rows, area, chart, limit);
     if (passages.length === 0) return [];
     const conditions = [...new Set(passages.flatMap((passage) => heldPlacements(passage, chart.keys)))];
-    const ids = new Set(passages.flatMap((passage) => yogasFor(passage, chart).map((yoga) => yoga.id)));
+    const ids = new Set(passages.flatMap((passage) => yogasFor(passage, chart, area).map((yoga) => yoga.id)));
     const yogaNames = [...ids].map((id) => DEFINITIONS.get(id)?.name ?? id);
     return [{ area, passages, conditions, yogaNames }];
   });

@@ -165,6 +165,14 @@ describe("which passages an area gets", () => {
     ]);
   });
 
+  it("reaches a yoga's verse only for an area that counts the yoga", () => {
+    const kemadruma = row("13.6.2", { lifeAreas: ["wealth", "status"], yogaIds: ["kemadruma"], planets: ["Moon"] });
+    const chart: AreaChart = { keys: KEYS, yogas: [...CHART.yogas, { id: "kemadruma", planets: ["Moon"] }] };
+    expect(selectAreaPassages([kemadruma], "inheritance", chart)).toEqual([]);
+    expect(selectAreaPassages([kemadruma], "influence", chart)).toEqual([]);
+    expect(selectAreas([kemadruma], chart)).toEqual([]);
+  });
+
   it("reaches a passage through one alternative of its either/or", () => {
     expect(selectAreaPassages(ROWS, "career", CHART, 10).map((passage) => passage.id)).toEqual([
       "bj:18.5.4",
