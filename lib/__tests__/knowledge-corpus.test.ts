@@ -134,7 +134,22 @@ describe("the Brihat Jataka corpus", () => {
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
   });
 
-  const LIFE_CHAPTERS = [10, 17, 18, 19, 20, 21];
+  /* Chapter 24, on women's charts, is configured but waits for the build
+     (the account's monthly limit); it is a life chapter all the same. */
+  const BUILT_LIFE_CHAPTERS = [10, 17, 18, 19, 20, 21];
+  const LIFE_CHAPTERS = [...BUILT_LIFE_CHAPTERS, 24];
+
+  it("keeps the chapter on women's charts to women's charts", () => {
+    // Every chapter-24 verse with a condition of its own also needs the
+    // reader to have said she is a woman; one with none stays unmatched.
+    const unguarded = (corpus?.passages ?? []).filter(
+      (passage) =>
+        passage.chapter === 24 &&
+        passage.placements.length + passage.placementsAny.length > 0 &&
+        !passage.placements.includes("reader.sex.female"),
+    );
+    expect(unguarded.map((passage) => passage.id)).toEqual([]);
+  });
 
   it("covers the life chapters, with most of the Moon, sign and house verses tagged by placement", () => {
     // Measured on the 2026-10-04 build: of the passages shown, 63 of 65 in
@@ -143,7 +158,7 @@ describe("the Brihat Jataka corpus", () => {
     // an either/or the build did not yet ask for. Chapters 10 and 21 rest on
     // divisional lords and are reached by none.
     const chapters = new Set(corpus?.passages.map((passage) => passage.chapter));
-    for (const chapter of LIFE_CHAPTERS) expect(chapters.has(chapter), `chapter ${chapter}`).toBe(true);
+    for (const chapter of BUILT_LIFE_CHAPTERS) expect(chapters.has(chapter), `chapter ${chapter}`).toBe(true);
     const share = (chapter: number) => {
       const shown = corpus?.passages.filter((passage) => passage.chapter === chapter && !passage.withheld) ?? [];
       return shown.filter((passage) => passage.placements.length + passage.placementsAny.length > 0).length / shown.length;
@@ -169,7 +184,7 @@ describe("the Brihat Jataka corpus", () => {
       "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|impoten\w*)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*)\b/i;
     const found = (corpus?.passages ?? [])
       .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
       .flatMap((passage) => {

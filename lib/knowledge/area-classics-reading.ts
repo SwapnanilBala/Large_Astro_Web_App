@@ -173,6 +173,7 @@ export function describePlacement(key: string): string {
   if (kind === "house") return `${inProse(subject)} in the ${value}${ORDINAL_SUFFIX(Number(value))} house`;
   if (kind === "dignity") return `${inProse(subject)} ${value === "own" ? "in its own sign" : value}`;
   if (kind === "aspects") return `${inProse(subject)} aspecting ${inProse(value)}`;
+  if (kind === "sex") return `the reader is ${value === "female" ? "a woman" : "a man"}`;
   return key;
 }
 

@@ -1,3 +1,4 @@
+import { partnerSignificator, type BirthSex } from "@/lib/birth-sex";
 import type { HousePlacement, PlanetPosition } from "@/lib/engines/swiss-ephemeris-engine";
 import { SIGN_RULERS, planetDignity } from "@/lib/rules/context";
 
@@ -613,7 +614,7 @@ function inLaws(chart: Chart): KalatraFacet {
  * itself. A chart can be warm in the first reading of the 8th and brittle in
  * the second, and separating them is the point of having two facets.
  */
-function bondDurability(chart: Chart, mangal: MangalDosha): KalatraFacet {
+function bondDurability(chart: Chart, mangal: MangalDosha, sex?: BirthSex): KalatraFacet {
   const findings: KalatraFinding[] = [];
   const lord7 = chart.lordOf(7);
   const lord7House = chart.houseOf(lord7);
@@ -659,6 +660,44 @@ function bondDurability(chart: Chart, mangal: MangalDosha): KalatraFacet {
     }
   }
 
+  /* The partner's significator, when the reader gave their sex: Venus in a
+     man's chart, Jupiter in a woman's (lib/birth-sex.ts). Read like the 7th
+     lord above -- by dignity, and by whether it sits in a hard house. A reader
+     who did not say gets neither finding, exactly as before. */
+  const significator = partnerSignificator(sex);
+  const significatorPlanet = significator ? chart.planet(significator) : undefined;
+  if (significator && significatorPlanet) {
+    const whose = `${significator} (your partner's significator in ${sex === "female" ? "a woman's" : "a man's"} chart)`;
+    const dignity = planetDignity(significator, significatorPlanet.sign);
+    if (dignity === "exalted" || dignity === "own_sign") {
+      findings.push({
+        text:
+          "The planet that stands for your partner is strong in its sign. Classically this describes a " +
+          "partner who brings real substance to the bond.",
+        basis: `${whose} ${dignity === "exalted" ? "exalted" : "in its own sign"} in ${significatorPlanet.sign}`,
+        polarity: "support",
+      });
+    } else if (dignity === "debilitated") {
+      findings.push({
+        text:
+          "The planet that stands for your partner is weak in its sign, which tends to show up as a " +
+          "standard for a partner that is hard for anyone to meet.",
+        basis: `${whose} debilitated in ${significatorPlanet.sign}`,
+        polarity: "pressure",
+      });
+    }
+    const significatorHouse = chart.houseOf(significator);
+    if (significatorHouse && [6, 8, 12].includes(significatorHouse)) {
+      findings.push({
+        text:
+          "The planet that stands for your partner sits in a difficult house, so the right partner tends " +
+          "to arrive later, or after some searching.",
+        basis: `${whose} in the ${ordinal(significatorHouse)} house`,
+        polarity: "pressure",
+      });
+    }
+  }
+
   if (chart.aspectsHouse("Jupiter", 7)) {
     findings.push({
       text:
@@ -697,7 +736,9 @@ function bondDurability(chart: Chart, mangal: MangalDosha): KalatraFacet {
   return {
     key: "bond_durability",
     label: "Whether the bond holds",
-    sourcing: "7th lord and its dignity, 8th bhava as mangalya sthana, Jupiter's drishti, Mangal dosha",
+    sourcing:
+      "7th lord and its dignity, 8th bhava as mangalya sthana, Jupiter's drishti, Mangal dosha" +
+      (significator ? `, ${significator} as the partner's significator` : ""),
     score,
     band: bandOf(score),
     summary:
@@ -855,7 +896,9 @@ export function computeMangalDosha(planets: PlanetPosition[], houses: HousePlace
 
 export function computeKalatraDetail(
   planets: PlanetPosition[],
-  houses: HousePlacement[]
+  houses: HousePlacement[],
+  /** Sex at birth, when given: it adds the partner's significator to "whether the bond holds". */
+  sex?: BirthSex
 ): KalatraResult | null {
   if (planets.length === 0 || houses.length === 0) return null;
 
@@ -867,7 +910,7 @@ export function computeKalatraDetail(
       physicalIntimacy(chart),
       privacyAndRest(chart),
       inLaws(chart),
-      bondDurability(chart, mangal),
+      bondDurability(chart, mangal, sex),
       desirePattern(chart),
     ],
     mangal,

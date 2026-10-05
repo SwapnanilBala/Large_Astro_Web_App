@@ -190,6 +190,12 @@ const OUT_FILE = resolve("lib/knowledge/corpus", `${SOURCE.slug}.json`);
  * life chapters -- professions, the Moon and the planets in the signs, aspects,
  * the planets in the houses, the divisions -- are reached through placement
  * keys, and serve the life areas.
+ *
+ * `requires` adds keys to every passage of a chapter that has a condition of
+ * its own: chapter 24 is about women's charts, so its verses reach a chart only
+ * when the reader said she is a woman. A verse with no stateable condition
+ * stays unmatched, as everywhere -- given the key alone it would reach every
+ * woman's chart.
  */
 const CHAPTERS = [
   { chapter: 10, title: "On Avocations", from: 8538, to: 8665, heading: /^On\s+Avo/i, group: "life" },
@@ -212,7 +218,24 @@ const CHAPTERS = [
   { chapter: 21, title: "On the Planets in the Several Vargas", from: 11999, to: 12231, heading: /Several\s+Vargas/i, group: "life" },
   { chapter: 22, title: "On Miscellaneous Yogas", from: 12234, to: 12345, heading: /Miscellaneous/i, group: "yoga" },
   { chapter: 23, title: "On Malefic Yogas", from: 12347, to: 12671, heading: /Malefic/i, group: "yoga" },
-] as const satisfies readonly { chapter: number; title: string; from: number; to: number; heading: RegExp; group: Group }[];
+  {
+    chapter: 24,
+    title: "On the Horoscopy of Women",
+    from: 12674,
+    to: 12961,
+    heading: /Ho[rb]oscopy\s+of\s+Women/i,
+    group: "life",
+    requires: ["reader.sex.female"],
+  },
+] as const satisfies readonly {
+  chapter: number;
+  title: string;
+  from: number;
+  to: number;
+  heading: RegExp;
+  group: Group;
+  requires?: readonly string[];
+}[];
 
 type Chapter = (typeof CHAPTERS)[number];
 
@@ -581,6 +604,20 @@ function conditionsOf(answered: AnsweredRecord): { placements: string[]; placeme
   return { placements: inOrder([...all], PLACEMENT_KEYS), placementsAny: inOrder(any, PLACEMENT_KEYS) };
 }
 
+/** A chapter's required keys, added only to passages that have a condition of their own. */
+function withRequired(
+  conditions: { placements: string[]; placementsAny: string[] },
+  required: readonly string[],
+): { placements: string[]; placementsAny: string[] } {
+  if (required.length === 0 || conditions.placements.length + conditions.placementsAny.length === 0) {
+    return conditions;
+  }
+  return {
+    ...conditions,
+    placements: inOrder([...new Set([...conditions.placements, ...required])], PLACEMENT_KEYS),
+  };
+}
+
 function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): KnowledgePassage[] {
   const records = [...answer.records].sort((a, b) => a.verse - b.verse || a.part - b.part);
   const verses = [...new Set(records.map((record) => record.verse))];
@@ -628,7 +665,7 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
         [...new Set(override.tags ?? [...answered.yoga_ids, ...(override.addTags ?? [])])],
         YOGA_IDS,
       ),
-      ...conditionsOf(answered),
+      ...withRequired(conditionsOf(answered), "requires" in chapter ? chapter.requires : []),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
       withheld: modelWithheld || chapterWithheld || Boolean(override.withhold),

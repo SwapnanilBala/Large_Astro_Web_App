@@ -351,6 +351,27 @@ describe("the result as a whole", () => {
     }
   });
 
+  it("reads the partner's significator only when the reader gave their sex", () => {
+    // Taurus rising: Jupiter in the 3rd is exalted in Cancer; Venus in the 12th
+    // (Aries) is in no dignity but sits in a hard house.
+    const { planets, houses } = chartOf("Taurus", {
+      Sun: 1, Moon: 2, Mars: 5, Mercury: 1, Jupiter: 3, Venus: 12, Saturn: 10,
+    });
+    const woman = computeKalatraDetail(planets, houses, "female");
+    const man = computeKalatraDetail(planets, houses, "male");
+    const unsaid = computeKalatraDetail(planets, houses);
+
+    expect(bases(woman, "bond_durability")).toContain(
+      "Jupiter (your partner's significator in a woman's chart) exalted in Cancer",
+    );
+    expect(bases(man, "bond_durability")).toContain(
+      "Venus (your partner's significator in a man's chart) in the 12th house",
+    );
+    expect(bases(unsaid, "bond_durability").some((basis) => basis.includes("significator"))).toBe(false);
+    expect(facet(woman, "bond_durability").sourcing).toContain("Jupiter as the partner's significator");
+    expect(facet(unsaid, "bond_durability").sourcing).not.toContain("significator");
+  });
+
   it("returns null rather than an empty shell when there is no chart", () => {
     expect(computeKalatraDetail([], [])).toBeNull();
   });

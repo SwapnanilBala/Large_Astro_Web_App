@@ -90,6 +90,13 @@ describe("a chart's placement keys", () => {
     expect([...KEYS].some((key) => key.startsWith("Ascendant."))).toBe(false);
   });
 
+  it("name the reader's sex only when they gave it", () => {
+    expect([...KEYS].some((key) => key.startsWith("reader."))).toBe(false);
+    const hers = chartPlacementKeys({ planets: PLANETS, ascendantSign: "Aries", sex: "female" });
+    expect(hers.has("reader.sex.female")).toBe(true);
+    expect(hers.has("reader.sex.male")).toBe(false);
+  });
+
   it("give full aspects by Varahamihira's rule: the 7th for all, Mars, Jupiter and Saturn their extra signs", () => {
     expect(KEYS.has("Saturn.aspects.Sun")).toBe(true); // Leo is 7th from Aquarius
     expect(KEYS.has("Jupiter.aspects.Mars")).toBe(true); // Capricorn is 7th from Cancer
@@ -251,6 +258,7 @@ describe("what the model is sent", () => {
     expect(describePlacement("Venus.dignity.own")).toBe("Venus in its own sign");
     expect(describePlacement("Jupiter.aspects.Moon")).toBe("Jupiter aspecting the Moon");
     expect(describePlacement("ascendant.sign.Leo")).toBe("Leo rising");
+    expect(describePlacement("reader.sex.female")).toBe("the reader is a woman");
   });
 });
 

@@ -12,6 +12,7 @@ import {
   PLANET_EXALTATIONS,
   SIGN_RULERS,
 } from "@/lib/rules/context";
+import type { BirthSex } from "@/lib/birth-sex";
 import { calculateNavamsa } from "./navamsa-engine";
 import type {
   HousePlacement,
@@ -24,8 +25,11 @@ import type {
        named it "sasa", which no yoga id matches.
    v8: the three marriage yogas from the Brihat Jataka (kalatra_*) reach love
        life, as pressure: a spouse leaving, more than one marriage, marrying
-       late. */
-export const LIFE_DOMAIN_RULES_VERSION = "2026-10-domain-v8";
+       late.
+   v9: sex at birth, when given, picks love life's instinct planet: the
+       partner's significator, Jupiter for a woman and Venus for a man. Not
+       given stays Venus, as before. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-10-domain-v9";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -49,6 +53,8 @@ export type LifeDomainExtendedEvidence = {
   transits?: Array<{ name: string; sign: string }>;
   birthTimeAccuracy?: "exact" | "morning" | "afternoon" | "evening" | "unknown";
   birthTimeFallback?: boolean;
+  /** Sex at birth, when the reader gave it: it picks love life's partner significator. */
+  birthSex?: BirthSex;
 };
 
 type DomainDivisionScope = {

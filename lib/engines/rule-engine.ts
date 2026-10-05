@@ -48,6 +48,7 @@ export { LIFE_DOMAIN_RULES_VERSION };
 // The rule interpreter. generateRules() is a thin adapter over this: build the
 // context, fire the rules, attach measured rarity and per-chart strength, rank,
 // and map onto the payload shape.
+import { partnerSignificator } from "@/lib/birth-sex";
 import { buildRuleContext, CLASSICAL_PLANETS, SIGN_ELEMENTS, SIGN_RULERS } from "@/lib/rules/context";
 import { planetDignity as dignityOf } from "@/lib/rules/context";
 import { evaluateRules } from "@/lib/rules";
@@ -979,7 +980,14 @@ function buildLifeDomainInsight(
   const primaryLord = planetByName(planets, primaryLordName);
   const secondaryLordName = SIGN_RULERS[secondaryHouse.sign];
   const secondaryLord = planetByName(planets, secondaryLordName);
-  const anchorPlanet = planetByName(planets, config.anchor_planet);
+  /* Love life's instinct planet is the partner's significator: Jupiter in a
+     woman's chart, Venus in a man's, and Venus as before when the reader did
+     not say. Every other area's is the same for everyone. */
+  const anchorName =
+    key === "love_life"
+      ? (partnerSignificator(extendedEvidence?.birthSex) ?? config.anchor_planet)
+      : config.anchor_planet;
+  const anchorPlanet = planetByName(planets, anchorName);
   const { rules: domainRules, profile: signalProfile } = evaluateLifeDomainRules({
     key,
     label: config.label,

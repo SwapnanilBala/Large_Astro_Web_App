@@ -476,6 +476,27 @@ describe("rule-engine", () => {
       expect(insights).toHaveLength(7);
     });
 
+    it("reads love life's anchor as the partner's significator when the reader gave their sex", () => {
+      const planets = buildTestPlanets();
+      const houses = buildTestHouses(ASC_SIGN);
+      const anchors = (sex?: "female" | "male") =>
+        Object.fromEntries(
+          generateLifeDomainInsights(ASC_SIGN, planets, houses, sex ? { birthSex: sex } : undefined).map(
+            (insight) => [insight.key, insight.evidence.claims.find((claim) => claim.label === "Anchor planet")?.value],
+          ),
+        );
+      const unsaid = anchors();
+      expect(anchors("female").love_life).toBe("Jupiter");
+      expect(anchors("male").love_life).toBe("Venus");
+      expect(unsaid.love_life).toBe("Venus");
+      // Every other area reads the same planet whatever the reader's sex.
+      for (const sex of ["female", "male"] as const) {
+        const { love_life: _love, ...rest } = anchors(sex);
+        const { love_life: _unsaidLove, ...unsaidRest } = unsaid;
+        expect(rest).toEqual(unsaidRest);
+      }
+    });
+
     it("covers all 7 domain keys", () => {
       const planets = buildTestPlanets();
       const houses = buildTestHouses(ASC_SIGN);

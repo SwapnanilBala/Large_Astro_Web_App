@@ -1,3 +1,4 @@
+import { BIRTH_SEXES, type BirthSex } from "../birth-sex";
 import type { PlanetPosition } from "../engines/swiss-ephemeris-engine";
 import { isDebilitated, isExalted, isOwnSign, signDistance } from "../engines/yoga/helpers";
 import { ZODIAC_SIGNS } from "../engines/yoga/tables";
@@ -22,6 +23,7 @@ import { ZODIAC_SIGNS } from "../engines/yoga/tables";
  *   Jupiter.dignity.own   Jupiter in its own sign (also exalted, debilitated)
  *   Jupiter.aspects.Moon  Jupiter casts a full aspect on the Moon
  *   ascendant.sign.Leo    Leo rising
+ *   reader.sex.female     the reader said she is a woman (for the chapter on women's charts)
  *
  * Houses are whole signs counted from the rising sign, as Varahamihira counts
  * them and as the yoga engine does, never `planet.house`: that follows the
@@ -66,6 +68,7 @@ export const PLACEMENT_KEYS: readonly string[] = [
     PLACEMENT_PLANETS.filter((other) => other !== planet).map((other) => `${planet}.aspects.${other}`),
   ),
   ...ZODIAC_SIGNS.map((sign) => `ascendant.sign.${sign}`),
+  ...BIRTH_SEXES.map((sex) => `reader.sex.${sex}`),
 ];
 
 /** A chart as the vocabulary reads it. */
@@ -74,6 +77,8 @@ export type PlacementChart = {
   ascendantSign: string;
   /** Each planet's navamsa sign. Without them, no navamsa key holds. */
   navamsa?: readonly { name: string; navamsa_sign: string }[] | null;
+  /** Sex at birth, when the reader gave it: the Brihat Jataka's chapter on women's charts needs it. */
+  sex?: BirthSex;
 };
 
 /** Every key that holds for a chart. */
@@ -95,6 +100,7 @@ export function chartPlacementKeys(chart: PlacementChart): Set<string> {
   for (const position of chart.navamsa ?? []) {
     if (isPlacementPlanet(position.name)) keys.add(`${position.name}.navamsa.${position.navamsa_sign}`);
   }
+  if (chart.sex) keys.add(`reader.sex.${chart.sex}`);
   return keys;
 }
 
