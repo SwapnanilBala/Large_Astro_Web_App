@@ -46,9 +46,20 @@ import {
   type KnowledgeCorpus,
   type KnowledgePassage,
 } from "../../lib/knowledge/corpus";
-import { PLACEMENT_KEYS } from "../../lib/knowledge/placements";
 import { BRIHAT_JATAKA_1885 as SOURCE } from "../../lib/knowledge/sources";
-import { conditionsOf, inOrder, median, ocrAgreement, withRequired } from "./build-shared";
+import {
+  LABELS_PROMPT,
+  REWORDED,
+  awaitingWording,
+  checkedConditions,
+  conditionsOf,
+  inOrder,
+  median,
+  ocrAgreement,
+  pendingLabels,
+  shownText,
+  withRequired,
+} from "./build-shared";
 
 config({ path: ".env.local", quiet: true });
 
@@ -67,6 +78,11 @@ const EFFORT = "high";
  *   life 4  a combination's list of results split into runs of one kind, and
  *           having no children withheld. v3 withheld 10 of the 12 Moon-sign
  *           verses whole, each for one clause about illness or the body.
+ *   life 5  either/or conditions and navamsas, and chapter 24 on women's
+ *           charts (2026-10-05): houses from the Moon, house lords and odd or
+ *           even signs as keys; the owner's lines that few or no children,
+ *           desire and adultery may be shown; their wording for words about
+ *           people (<labels>, build-shared.ts).
  */
 const PROMPT_VERSIONS = { yoga: 2, life: 5 } as const;
 type Group = keyof typeof PROMPT_VERSIONS;
@@ -118,6 +134,8 @@ type PassageOverride = {
   textIncludes?: string;
 };
 
+const ADULTERY_ALLOWED = "desire or adultery, which the owner allows";
+
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
      classical rule (Vajra reversed) after these answers had been cached
@@ -138,11 +156,25 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      spouse (v. 5). Each is tagged only with the yoga built from it. */
   "23.1.7": { tags: ["kalatra_chandra_shukra"], showDespiteChapter: true },
   "23.5.4": { tags: ["kalatra_mangala_shani"], showDespiteChapter: true },
-  /* Mercury in Pisces: two harmless traits and "learned in the handicraft of
-     men of low castes" in one part. A reading quotes its sources word for
-     word, so the caste clause would be printed; the traits are lost with it
-     until a rebuild splits the clause off on its own. */
-  "18.11.3": { withhold: "mentions caste", textIncludes: "men of low castes" },
+  /* The owner's call, 2026-10-05: "Adultery is fine, not too bad, same do it
+     for men as well". The yoga answers (v2) withheld these for sexual morality
+     alone; the life prompt (v5) now says so itself. Their neighbours that also
+     speak of disease, theft, duels or prostitutes stay withheld. */
+  /* Under v5's line on desire, the Moon in Gemini's "sexual union with
+     hermaphrodites" came through; the content line has never shown eunuchs or
+     hermaphrodites, whatever the context. */
+  "17.3.6": { withhold: "speaks of hermaphrodites", textIncludes: "hermaphrodites" },
+  /* The same in chapter 24, where Mercury in the 7th makes the husband one, a
+     passage with conditions that would have reached a woman's chart; and the
+     chapter's framing verse, which names the husband's death. */
+  "24.4.7": { withhold: "speaks of hermaphrodites", textIncludes: "hermaphrodite" },
+  "24.8.2": { withhold: "speaks of hermaphrodites", textIncludes: "husband will be a hermaphrodite" },
+  "24.1.1": { withhold: "speaks of the husband's death", textIncludes: "The death of the husband" },
+  "13.7.4": { show: ADULTERY_ALLOWED, textIncludes: "afflicted with sexual passion" },
+  "14.4.27": { show: ADULTERY_ALLOWED, textIncludes: "he will commit adultery" },
+  "14.4.87": { show: ADULTERY_ALLOWED, textIncludes: "fond of the wives of other men" },
+  "14.4.99": { show: ADULTERY_ALLOWED, textIncludes: "covet the wives of other men" },
+  "14.4.104": { show: ADULTERY_ALLOWED, textIncludes: "covet the wives of other men" },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
@@ -194,6 +226,9 @@ const CHAPTERS = [
     heading: /Ho[rb]oscopy\s+of\s+Women/i,
     group: "life",
     requires: ["reader.sex.female"],
+    /* Its scan is the most damaged after chapter 10's ("Sach effeotn ... husbarifi ... coiuiecfed"):
+       repaired, the text is shorter than the garble, and came to 89.7% with every note present. */
+    minLengthShare: 0.88,
   },
 ] as const satisfies readonly {
   chapter: number;
@@ -203,6 +238,7 @@ const CHAPTERS = [
   heading: RegExp;
   group: Group;
   requires?: readonly string[];
+  minLengthShare?: number;
 }[];
 
 type Chapter = (typeof CHAPTERS)[number];
@@ -335,34 +371,50 @@ function insertOnce(text: string, anchor: string, replacement: string): string {
 }
 
 /*
- * The life chapters' prompt: the yoga prompt with the owner's marriage line
- * added to <withheld> and a <placements> section before the catalogue. Built
- * from the yoga prompt rather than copied, so the rules they share cannot
- * drift apart.
+ * The life chapters' prompt: the yoga prompt with the owner's lines on what may
+ * be shown added to <withheld>, the owner's wording for words about people
+ * (<labels>, shared with every book) and a <placements> section before the
+ * catalogue. Built from the yoga prompt rather than copied, so the rules they
+ * share cannot drift apart.
  */
 const WITHHELD_END = "is an empty string when `withheld` is false.\n</withheld>";
 const LIFE_SYSTEM_PROMPT = insertOnce(
   insertOnce(
     insertOnce(
-      SYSTEM_PROMPT,
+      insertOnce(
+        SYSTEM_PROMPT,
+        /* Adultery and desire may be shown, by the owner's line; branding words go to <labels>. */
+        "harm to or the death of a parent, spouse or child; immorality in sexual matters.",
+        "harm to or the death of a parent, spouse or child.",
+      ),
       WITHHELD_END,
-      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having few children or none does not count either, and may be shown; losing a child does count, as a death. Any mention of caste does count, even in passing (\"the handicraft of men of low castes\"): split such a clause into a part of its own, so only it is withheld.\n</withheld>",
+      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having few children or none does not count either, and may be shown; losing a child does count, as a death. Desire, sexual traits and adultery do not count either, and may be shown; the words for a prostitute, and words that brand a person, are handled under <labels>, not here. Any mention of caste does count, even in passing (\"the handicraft of men of low castes\", \"women of low caste\"): split such a clause into a part of its own, so only it is withheld.\n</withheld>",
     ),
     "\n</records>",
     "\n- These chapters give a long list of results for one combination (\"the person will have red eyes, will be fond of vegetable food, will be wealthy, will have a wound on the head\"). Split such a record further, at its clause breaks, into parts that each hold neighbouring results of one kind: body and appearance; temperament and conduct; wealth and work; family, marriage and children; learning and skill; health. Keep each part a contiguous, verbatim run of the text, and open every part after the first with the condition's words in square brackets, so it reads alone. A withheld result then withholds only its own part.\n</records>",
   ),
   "<catalogue>",
-  `<placements>
-Every condition the record's claim requires of a birth chart, as keys from the schema's list, in two lists. \`placements\` holds the conditions that must all hold. \`placements_any\` holds the claim's one set of alternatives, when it has one, of which at least one must hold. The claim applies to a chart only when both lists are met, so list each condition the record states, and nothing it does not.
+  `${LABELS_PROMPT}
+
+<placements>
+Every condition the record's claim requires of a birth chart, as keys in the forms below, in two lists. \`placements\` holds the conditions that must all hold. \`placements_any\` holds the claim's one set of alternatives, when it has one, of which at least one must hold. The claim applies to a chart only when both lists are met, so list each condition the record states, and nothing it does not.
   <Planet>.house.<n>          the planet in the nth house from the ascendant ("the Sun in the 10th house" is Sun.house.10)
+  <Planet>.fromMoon.<n>       the planet in the nth house counted from the Moon ("Venus in the 7th from the Moon" is Venus.fromMoon.7)
   <Planet>.sign.<Sign>        the planet in that sign ("the Moon in Taurus" is Moon.sign.Taurus)
   <Planet>.navamsa.<Sign>     the planet in the navamsa of that sign ("the Moon in the Navamsa of Leo" is Moon.navamsa.Leo)
   <Planet>.dignity.exalted, .debilitated or .own    the planet in its exaltation, debilitation or own sign
   <Planet>.aspects.<Planet>   the first planet casts its full aspect on the second ("the Moon aspected by Jupiter" is Jupiter.aspects.Moon)
   ascendant.sign.<Sign>       that sign rising
-- Alternatives the text gives -- "Mars in sign Taurus or Libra", "aspected by Saturn, the Sun or Mars", "the 4th or the 5th house" -- go in \`placements_any\`, one key per alternative: Mars.sign.Taurus and Mars.sign.Libra. A navamsa named for its lord means either of that planet's signs: "the Navamsa of Mars" is Moon.navamsa.Aries or Moon.navamsa.Scorpio, so two keys in \`placements_any\`; "the Navamsa of Cancer" names one sign, so one key in \`placements\`.
-- A claim with two separate sets of alternatives ("in the Navamsa of Venus and aspected by Mercury or Jupiter") cannot be stated: both lists empty. A single alternative left over is a plain condition, in \`placements\`.
-- If any condition the claim needs cannot be stated exactly in these keys -- a drekkana, trimsamsa or other division besides the navamsa, a waxing or waning Moon, the lord of a house or of a navamsa, "a benefic" without naming the planet, strength or weakness, a day or night birth, a house counted from the Moon or the Sun -- both lists are empty, not filled with the part that can be stated: listing only some conditions shows the passage to charts it does not describe.
+  ascendant.signtype.odd or .even, <Planet>.signtype.odd or .even    the ascendant or a planet (not Rahu or Ketu) in an odd sign (Aries, Gemini, Leo, Libra, Sagittarius, Aquarius) or an even one
+  lord<n>.house.<m>           the lord of the nth house in the mth house ("the lord of the 7th in the ascendant" is lord7.house.1; the lord of the ascendant is lord1)
+  lord<n>.dignity.exalted, .debilitated or .own    the lord of the nth house in its exaltation, debilitation or own sign
+  <Planet>.aspects.lord<n>    the planet casts its full aspect on the lord of the nth house
+Planets: Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Ketu. Signs: Aries to Pisces. Houses 1 to 12. A house's lord is the ruler of its sign.
+- Two planets together in a house are each in that house.
+- Alternatives the text gives -- "Mars in sign Taurus or Libra", "aspected by Saturn, the Sun or Mars", "the 4th or the 5th house", "the 7th house from the ascendant or the Moon" -- go in \`placements_any\`, one key per alternative: Mars.sign.Taurus and Mars.sign.Libra; Venus.house.7 and Venus.fromMoon.7. A navamsa named for its lord means either of that planet's signs: "the Navamsa of Mars" is Moon.navamsa.Aries or Moon.navamsa.Scorpio, so two keys in \`placements_any\`; "the Navamsa of Cancer" names one sign, so one key in \`placements\`. "The ascendant and the Moon in even signs" is ascendant.signtype.even and Moon.signtype.even, both in \`placements\`.
+- A condition on a house's sign may be restated as the rising signs that make it so, when that is exact: "the 7th house is a sign of Saturn" means Cancer or Leo rising, two keys in \`placements_any\`.
+- A claim with two separate sets of alternatives ("in the Navamsa of Venus and aspected by Mercury or Jupiter"), or alternatives that each need more than one key, cannot be stated: both lists empty. A single alternative left over is a plain condition, in \`placements\`.
+- If any condition the claim needs cannot be stated exactly in these keys -- a drekkana, trimsamsa or other division besides the navamsa, the lord of a navamsa, a waxing or waning Moon, "a benefic" or "a malefic" without naming the planet, strength or weakness, a day or night birth, a house counted from the Sun or from a house's lord -- both lists are empty, not filled with the part that can be stated: listing only some conditions shows the passage to charts it does not describe.
 - Bracketed opening words are part of the condition.
 </placements>
 
@@ -387,8 +439,11 @@ function outputSchema(group: Group) {
     withheld_reason: { type: "string" },
   };
   if (group === "life") {
-    properties.placements = { type: "array", items: { type: "string", enum: [...PLACEMENT_KEYS] } };
-    properties.placements_any = { type: "array", items: { type: "string", enum: [...PLACEMENT_KEYS] } };
+    /* Over 800 keys: checked against the vocabulary after the answer (checkedConditions), not by enum. */
+    properties.placements = { type: "array", items: { type: "string" } };
+    properties.placements_any = { type: "array", items: { type: "string" } };
+    properties.reworded_text = { type: "string" };
+    properties.harsh_labels = { type: "array", items: { type: "string" } };
   }
   return {
     type: "object",
@@ -423,6 +478,9 @@ interface AnsweredRecord {
   /** Life chapters only. */
   placements?: string[];
   placements_any?: string[];
+  /** Life chapters only, from prompt v5: the owner's wording (build-shared.ts). */
+  reworded_text?: string;
+  harsh_labels?: string[];
 }
 
 interface ChapterAnswer {
@@ -489,7 +547,9 @@ async function chapterAnswer(chapter: Chapter, ocr: string, fresh: boolean): Pro
 
 /* ---------------------------------------------------------- the passages */
 
-function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): KnowledgePassage[] {
+type Tallies = { unknownKeys: string[]; labels: Map<string, string[]>; reworded: string[] };
+
+function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallies: Tallies): KnowledgePassage[] {
   const records = [...answer.records].sort((a, b) => a.verse - b.verse || a.part - b.part);
   const verses = [...new Set(records.map((record) => record.verse))];
   if (verses.some((verse, index) => verse !== index + 1)) {
@@ -513,14 +573,32 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
     if (answered.withheld && !answered.withheld_reason.trim()) {
       throw new Error(`Chapter ${chapter.chapter} ${answered.verse}.${answered.part}: withheld without a reason.`);
     }
-    const agreement = ocrAgreement(scoredText({ text: answered.text, notes }), rawWords, positionsOf);
     const ref = `${chapter.chapter}.${answered.verse}.${answered.part}`;
     const override = PASSAGE_OVERRIDES[ref] ?? {};
     if (override.textIncludes && !answered.text.includes(override.textIncludes)) {
       throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
     }
+    const required = "requires" in chapter ? chapter.requires : [];
+    /* The life prompt (v5) asks for the owner's wording; the yoga answers predate it. */
+    const life = chapter.group === "life";
+    const { text, printedText } = life
+      ? shownText(ref, answered.text, answered.reworded_text ?? "")
+      : { text: answered.text.trim(), printedText: null };
+    if (printedText) tallies.reworded.push(ref);
+    /* Summaries are embedded, never shown; the yoga answers' (v2) predate the rule, so only v5's are held to it. */
+    if (life && REWORDED.test(answered.summary)) {
+      throw new Error(`${ref}: the summary says "${answered.summary.match(REWORDED)?.[0]}".`);
+    }
+    const labels = pendingLabels(answered.harsh_labels ?? []);
+    for (const label of labels) tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+
+    const agreement = ocrAgreement(scoredText({ text, printedText, notes }), rawWords, positionsOf);
     const chapterWithheld = chapter.chapter in WITHHELD_CHAPTERS && !override.showDespiteChapter;
     const modelWithheld = answered.withheld && !override.show;
+    const waiting = labels.length > 0 && !override.show;
+    const withheld = modelWithheld || chapterWithheld || waiting || Boolean(override.withhold);
+    /* A yoga answer has no rewording, so a word for a prostitute in it must stay withheld. */
+    if (!withheld && REWORDED.test(text)) throw new Error(`${ref}: shows "${text.match(REWORDED)?.[0]}" without the owner's rewording.`);
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
       source: SOURCE.slug,
@@ -529,22 +607,27 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       part: answered.part,
       kind: answered.kind,
       chapterTitle: chapter.title,
-      text: answered.text.trim(),
+      text,
+      ...(printedText ? { printedText } : {}),
       notes,
       summary: answered.summary.trim(),
       yogaIds: inOrder(
         [...new Set(override.tags ?? [...answered.yoga_ids, ...(override.addTags ?? [])])],
         YOGA_IDS,
       ),
-      ...withRequired(conditionsOf(answered), "requires" in chapter ? chapter.requires : []),
+      ...(life
+        ? checkedConditions(ref, answered, required, tallies.unknownKeys)
+        : withRequired(conditionsOf(answered), required)),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: modelWithheld || chapterWithheld || Boolean(override.withhold),
+      withheld,
       withheldReason: modelWithheld
         ? answered.withheld_reason.trim()
         : chapterWithheld
           ? WITHHELD_CHAPTERS[chapter.chapter]
-          : (override.withhold ?? null),
+          : waiting
+            ? awaitingWording(labels)
+            : (override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });
@@ -592,9 +675,20 @@ async function main() {
   );
   rest.forEach((chapter, index) => answers.set(chapter.chapter, others[index]));
 
+  const tallies: Tallies = { unknownKeys: [], labels: new Map(), reworded: [] };
   const passages = CHAPTERS.flatMap((chapter) =>
-    passagesOf(chapter, ocrByChapter.get(chapter.chapter)!, answers.get(chapter.chapter)!),
+    passagesOf(chapter, ocrByChapter.get(chapter.chapter)!, answers.get(chapter.chapter)!, tallies),
   );
+  if (tallies.reworded.length > 0) console.log(`reworded as the owner asked: ${tallies.reworded.join(", ")}`);
+  if (tallies.labels.size > 0) {
+    console.log("withheld until the owner picks wording:");
+    for (const [label, where] of [...tallies.labels].sort((a, b) => b[1].length - a[1].length)) {
+      console.log(`  "${label}" x${where.length}: ${where.join(", ")}`);
+    }
+  }
+  if (tallies.unknownKeys.length > 0) {
+    console.warn(`keys outside the vocabulary, conditions dropped:\n  ${tallies.unknownKeys.join("\n  ")}`);
+  }
 
   /* A hand-added tag whose passage no longer exists (a fresh build split the
      verse differently) must fail loudly, not vanish. */
@@ -614,7 +708,7 @@ async function main() {
       0,
     );
     const share = cleanLength / ocrByChapter.get(chapter.chapter)!.length;
-    if (share < MIN_LENGTH_SHARE) short.push(chapter.chapter);
+    if (share < ("minLengthShare" in chapter ? chapter.minLengthShare : MIN_LENGTH_SHARE)) short.push(chapter.chapter);
     const typical = median(own.map((p) => p.ocrAgreement));
     if (typical < MIN_CHAPTER_SCAN_AGREEMENT) drifting.push(chapter.chapter);
     console.log(
@@ -643,7 +737,7 @@ async function main() {
         drifted.length > 0 && `${drifted.length} passages no longer read like the scan`,
         drifting.length > 0 &&
           `chapters ${drifting.join(", ")} read like paraphrase overall (median below ${MIN_CHAPTER_SCAN_AGREEMENT})`,
-        short.length > 0 && `chapters ${short.join(", ")} came back shorter than ${MIN_LENGTH_SHARE * 100}% of the scan`,
+        short.length > 0 && `chapters ${short.join(", ")} came back shorter than their share of the scan`,
       ]
         .filter(Boolean)
         .join("; ") + ". Nothing written.",

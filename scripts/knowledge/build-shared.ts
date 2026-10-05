@@ -130,3 +130,127 @@ export function withRequired(conditions: Conditions, required: readonly string[]
     placements: inOrder([...new Set([...conditions.placements, ...required])], PLACEMENT_KEYS),
   };
 }
+
+const VOCABULARY = new Set(PLACEMENT_KEYS);
+
+/**
+ * A record's conditions, checked against the vocabulary. The answer schemas no
+ * longer enumerate the keys (there are over 800), so a key the model made up
+ * is caught here, and it empties the whole condition: half a condition shows a
+ * passage to charts it does not describe. `unknown` collects them for the log.
+ */
+export function checkedConditions(
+  ref: string,
+  answered: { placements?: string[]; placements_any?: string[] },
+  required: readonly string[],
+  unknown: string[],
+): Conditions {
+  const strange = [...(answered.placements ?? []), ...(answered.placements_any ?? [])].filter((key) => !VOCABULARY.has(key));
+  if (strange.length > 0) {
+    unknown.push(`${ref}: ${strange.join(", ")}`);
+    return { placements: [], placementsAny: [] };
+  }
+  return withRequired(conditionsOf(answered), required);
+}
+
+/* ------------------------------------------------------ the owner's wording */
+
+/*
+ * The owner's line on words about people, set on 2026-10-05 while the
+ * Strijataka was built, and held to in every book since:
+ *
+ *   - The words for a prostitute are printed as "multiple illicit
+ *     relationships", in square brackets ("calling prostitute is a bit too bold
+ *     and some people might get hurt"). The model transcribes faithfully into
+ *     `text` and rewords into `reworded_text`; shownText checks the rewording.
+ *   - Adultery may be said plainly ("Adultery is fine, not too bad, same do it
+ *     for men as well"), and so may "free with other men".
+ *   - Any other word that brands a person for their sexual conduct or for
+ *     having no children waits, withheld, until the owner picks its wording
+ *     ("if you find similar stuff let me know I will recommend").
+ */
+export const REWORDED = /\b(prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public\s+wom[ae]n)\b/i;
+export const OWNERS_WORDING = "multiple illicit relationships";
+/** Words a rewording may drop with the label: its article and its verb. */
+const DROPPABLE =
+  /^(a|an|the|of|is|are|be|been|being|become|becomes|became|turn|turns|prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public|women|woman)$/;
+
+/**
+ * Labels the owner has cleared since a book was read (2026-10-05). The
+ * Strijataka's cached answers still list them in `harsh_labels`; they are
+ * dropped wherever labels are read, so no rebuild is needed to show them.
+ */
+const CLEARED_LABELS = /^(adulter\w*|free with other men)$/i;
+
+/** A record's labels still waiting for the owner's wording, trimmed, once each. */
+export function pendingLabels(labels: readonly string[]): string[] {
+  return [...new Set(labels.map((label) => label.trim()).filter((label) => label && !CLEARED_LABELS.test(label)))];
+}
+
+export const awaitingWording = (labels: readonly string[]) =>
+  `awaiting the owner's wording for ${labels.map((label) => `"${label}"`).join(", ")}`;
+
+const brackets = (text: string) => [...text.matchAll(/\[([^\]]*)\]/g)].map((match) => match[1]);
+const wordsOutsideBrackets = (text: string) => scanWords(text.replace(/\[[^\]]*\]/g, " "));
+
+/**
+ * A record's text as shown: the owner's rewording when it has one, checked to
+ * have changed only the words it may. Throws on anything else, since a
+ * rewording that strays is a misquotation with the book's name on it. A
+ * rewording written by hand (`byHand`, from a build's PASSAGE_OVERRIDES) was
+ * read before it went in, so only its brackets are checked.
+ */
+export function shownText(
+  ref: string,
+  printedText: string,
+  rewordedText: string,
+  byHand?: string,
+): { text: string; printedText: string | null } {
+  const printed = printedText.trim();
+  const reworded = (byHand ?? rewordedText).trim();
+  if (!reworded) {
+    if (REWORDED.test(printed)) throw new Error(`${ref}: "${printed.match(REWORDED)?.[0]}" left unreworded.`);
+    return { text: printed, printedText: null };
+  }
+  if (!REWORDED.test(printed)) throw new Error(`${ref}: reworded, but has none of the words the owner asked to reword.`);
+  if (REWORDED.test(reworded)) throw new Error(`${ref}: the rewording still has "${reworded.match(REWORDED)?.[0]}".`);
+  const kept = new Set(brackets(printed));
+  const added = brackets(reworded).filter((inside) => !kept.has(inside));
+  if (added.length === 0 || added.some((inside) => !inside.toLowerCase().includes(OWNERS_WORDING))) {
+    throw new Error(`${ref}: a bracket in the rewording lacks the owner's wording: ${JSON.stringify(added)}.`);
+  }
+  if (byHand) return { text: reworded, printedText: printed };
+  /* Outside the brackets, the rewording may only drop words, and only the label and its article or verb. */
+  const original = wordsOutsideBrackets(printed);
+  const rewritten = wordsOutsideBrackets(reworded);
+  const dropped: string[] = [];
+  let at = 0;
+  for (const word of original) {
+    if (at < rewritten.length && rewritten[at] === word) at++;
+    else dropped.push(word);
+  }
+  if (at < rewritten.length) throw new Error(`${ref}: the rewording adds or reorders words outside its brackets.`);
+  const stray = dropped.filter((word) => !DROPPABLE.test(word));
+  if (stray.length > 0) throw new Error(`${ref}: the rewording drops ${JSON.stringify(stray)}, not only the label.`);
+  return { text: reworded, printedText: printed };
+}
+
+/**
+ * The prompt section that asks for the two fields the owner's wording needs,
+ * `reworded_text` and `harsh_labels`. (The Strijataka's prompt has its own
+ * copy, frozen with its cached answers, which predates the adultery line.)
+ */
+export const LABELS_PROMPT = `<labels>
+The app's owner has decided how some words about people are handled. \`text\` stays faithful either way.
+
+1. The book's words for a prostitute -- prostitute, harlot, courtesan, whore, public woman -- are too harsh to print. For a record that has any of them, \`reworded_text\` is the record's text with only those words replaced, in square brackets, by wording built on the owner's phrase "${OWNERS_WORDING}", fitted to the grammar:
+   "will be fond of harlots" -> "will be fond of [${OWNERS_WORDING}]"
+   "she will become a prostitute" -> "she will become [prone to ${OWNERS_WORDING}]"
+   Drop at most the label's article ("a", "the") and its verb ("be", "become") with it; change nothing else. \`reworded_text\` is an empty string for every other record.
+
+2. Adultery, desire for or relations with another's spouse, and being "free with other men" may be said plainly: they are not labels, and they do not withhold a record.
+
+3. Other words that brand a person for their sexual conduct or for having no children -- "unchaste", "immoral", "wanton", "bad women", "a woman of low deeds", "of bad character" when it means morals, "barren", and the like -- wait for the owner to choose their wording. List each such word or phrase in \`harsh_labels\`, exactly as \`text\` has it. Do not reword them. Where a record lists several results, split the clause that holds such a word into a part of its own, so only that part waits. \`harsh_labels\` is empty when there are none.
+
+\`summary\` must never use any of these words: use the owner's phrase for the first kind and a plain, neutral description for the third.
+</labels>`;

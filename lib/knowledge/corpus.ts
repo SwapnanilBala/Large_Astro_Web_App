@@ -101,6 +101,13 @@ export const knowledgePassageSchema = z
     planets: z.array(z.enum(KNOWLEDGE_PLANETS)),
     lifeAreas: z.array(z.enum(KNOWLEDGE_LIFE_AREAS)),
     /**
+     * The passage is about the hand: the palm, its lines, the fingers, the
+     * nails, the wrist. Set only in the Brihat Samhita's chapters on the
+     * features of men and women, whose hand passages the palm reading takes
+     * whole (lib/palm-readings/classical-hand.ts). Not loaded into the table.
+     */
+    hand: z.literal(true).optional(),
+    /**
      * Kept for completeness, never retrieved: the verse's main claim is about
      * death, illness, caste, crime, harm to family or sexual morality.
      */
@@ -180,7 +187,17 @@ export const LETTER_CHECKED = {
 
 /** A passage's letters as the letter-level check compares them: bracketed words out, letters only, lower case. */
 export function scanLetters(text: string): string {
-  return text.replace(/\[[^\]]*\]/g, " ").toLowerCase().replace(/[^a-z]/g, "");
+  return rawLetters(text.replace(/\[[^\]]*\]/g, " "));
+}
+
+/**
+ * The scan's letters, which the passages are compared against. No bracket is
+ * removed here: the OCR has stray ones ("if the [soles be of the color"), and
+ * one paired with a running head's "CH. 21.]" a page later would cut a page
+ * out of the scan.
+ */
+export function rawLetters(text: string): string {
+  return text.toLowerCase().replace(/[^a-z]/g, "");
 }
 
 /** The normalisation both sides of the comparison get: letters only, lower case, hyphens closed up. */
@@ -199,12 +216,26 @@ export function scoredText(passage: { text: string; printedText?: string | null;
   return `${passage.printedText ?? passage.text}\n${passage.notes ?? ""}`;
 }
 
+/**
+ * Passages read against the scan by hand, where the scan defeats both checks.
+ * The build and the tests skip the floor for these ids and no others, so the
+ * list is the whole of what was let through, each with what was seen.
+ */
+export const CHECKED_BY_HAND: Record<string, string> = {
+  "brihat-samhita-1884:68.88.1":
+    "the OCR runs the words together ('Themouth, the eyes^the arras, the nose andthepavt'); the transcription is the scan's, word for word",
+  "brihat-samhita-1884:68.83.2":
+    "four words of the verse ('and if otherwise, happy') after a bracketed opening, whose join no scan run can match; both are the scan's",
+};
+
 export function scanAgreementFloor(passage: {
+  id?: string;
   source?: string;
   text: string;
   printedText?: string | null;
   notes: string | null;
 }): number {
+  if (passage.id && passage.id in CHECKED_BY_HAND) return 0;
   const letterChecked = passage.source ? LETTER_CHECKED[passage.source as keyof typeof LETTER_CHECKED] : undefined;
   if (letterChecked) {
     return scanLetters(scoredText(passage)).length >= letterChecked.shortLetters ? letterChecked.long : letterChecked.short;

@@ -45,6 +45,7 @@ import {
   passageId,
   chapterScanAgreementFloor,
   scanAgreementFloor,
+  rawLetters,
   scanLetters,
   scanWords,
   scoredText,
@@ -53,7 +54,17 @@ import {
 } from "../../lib/knowledge/corpus";
 import { PLACEMENT_KEYS } from "../../lib/knowledge/placements";
 import { STRIJATAKA_1931 as SOURCE } from "../../lib/knowledge/sources";
-import { conditionsOf, inOrder, letterAgreement, median, withRequired } from "./build-shared";
+import {
+  OWNERS_WORDING,
+  REWORDED,
+  awaitingWording,
+  checkedConditions,
+  inOrder,
+  letterAgreement,
+  median,
+  pendingLabels,
+  shownText,
+} from "./build-shared";
 
 config({ path: ".env.local", quiet: true });
 
@@ -75,18 +86,6 @@ const MIN_LENGTH_SHARE = 0.85;
 
 /** Every passage here is about a woman's chart. */
 const REQUIRED = ["reader.sex.female"] as const;
-
-/*
- * The owner's wording, 2026-10-05: "calling prostitute is a bit too bold and
- * some people might get hurt ... multiple illicit relationships would be
- * better". Claude transcribes the book's words faithfully into `text` and puts
- * the reworded passage in `reworded_text`; the build checks that the rewording
- * touched only these words and put the owner's phrase in their place.
- */
-const REWORDED = /\b(prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public\s+wom[ae]n)\b/i;
-const OWNERS_WORDING = "multiple illicit relationships";
-/** Words a rewording may drop with the label: its article and its verb. */
-const DROPPABLE = /^(a|an|the|of|is|are|be|been|being|become|becomes|became|turn|turns|prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public|women|woman)$/;
 
 /**
  * Decisions about single passages (`chapter.paragraph.part`), as in the
@@ -135,6 +134,9 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      weakest degrees, and the mortals of a cosmology. */
   "7.30.1": { withhold: "speaks of death", textIncludes: "loses his power" },
   "11.9.4": { withhold: "speaks of death", textIncludes: "to die or death" },
+  /* Cleared with adultery on 2026-10-05, but it also calls her husband "born of
+     adultery": a slur on his birth, which the content line withholds. */
+  "6.6.1": { withhold: "speaks of birth status (born of adultery)", textIncludes: "born of adultery" },
   "12.1.1": { opening: SAUBHAGYA, textIncludes: "aspected by Sukra" },
   "12.2.1": { opening: SAUBHAGYA, textIncludes: "aspected by Guru and Chandra" },
   "12.3.1": { opening: SAUBHAGYA, textIncludes: "the lord of Lagna occupies Lagna" },
@@ -441,58 +443,6 @@ async function chapterAnswer(chapter: Chapter, ocr: string, fresh: boolean): Pro
 
 /* ---------------------------------------------------------- the passages */
 
-const VOCABULARY = new Set(PLACEMENT_KEYS);
-
-/** Words, square-bracketed runs removed: what a rewording must leave untouched. */
-const wordsOutsideBrackets = (text: string) => scanWords(text.replace(/\[[^\]]*\]/g, " "));
-const brackets = (text: string) => [...text.matchAll(/\[([^\]]*)\]/g)].map((match) => match[1]);
-
-/**
- * The record's text as shown: the owner's rewording when it has one, checked
- * to have changed only the words it may. Throws on anything else, since a
- * rewording that strays is a misquotation with the book's name on it.
- */
-function shownText(ref: string, answered: AnsweredRecord, byHand?: string): { text: string; printedText: string | null } {
-  const printed = answered.text.trim();
-  const reworded = (byHand ?? answered.reworded_text).trim();
-  if (!reworded) {
-    if (REWORDED.test(printed)) throw new Error(`${ref}: "${printed.match(REWORDED)?.[0]}" left unreworded.`);
-    return { text: printed, printedText: null };
-  }
-  if (!REWORDED.test(printed)) throw new Error(`${ref}: reworded, but has none of the words the owner asked to reword.`);
-  if (REWORDED.test(reworded)) throw new Error(`${ref}: the rewording still has "${reworded.match(REWORDED)?.[0]}".`);
-  const kept = new Set(brackets(printed));
-  const added = brackets(reworded).filter((inside) => !kept.has(inside));
-  if (added.length === 0 || added.some((inside) => !inside.toLowerCase().includes(OWNERS_WORDING))) {
-    throw new Error(`${ref}: a bracket in the rewording lacks the owner's wording: ${JSON.stringify(added)}.`);
-  }
-  /* A rewording written by hand in PASSAGE_OVERRIDES was read before it went in. */
-  if (byHand) return { text: reworded, printedText: printed };
-  /* Outside the brackets, the rewording may only drop words, and only the label and its article or verb. */
-  const original = wordsOutsideBrackets(printed);
-  const rewritten = wordsOutsideBrackets(reworded);
-  const dropped: string[] = [];
-  let at = 0;
-  for (const word of original) {
-    if (at < rewritten.length && rewritten[at] === word) at++;
-    else dropped.push(word);
-  }
-  if (at < rewritten.length) throw new Error(`${ref}: the rewording adds or reorders words outside its brackets.`);
-  const stray = dropped.filter((word) => !DROPPABLE.test(word));
-  if (stray.length > 0) throw new Error(`${ref}: the rewording drops ${JSON.stringify(stray)}, not only the label.`);
-  return { text: reworded, printedText: printed };
-}
-
-/** Keys outside the vocabulary make the whole condition unstateable: half a condition shows a passage to the wrong charts. */
-function checkedConditions(ref: string, answered: AnsweredRecord, unknown: string[]) {
-  const strange = [...answered.placements, ...answered.placements_any].filter((key) => !VOCABULARY.has(key));
-  if (strange.length > 0) {
-    unknown.push(`${ref}: ${strange.join(", ")}`);
-    return { placements: [], placementsAny: [] };
-  }
-  return withRequired(conditionsOf(answered), REQUIRED);
-}
-
 type Tallies = { unknownKeys: string[]; labels: Map<string, string[]>; reworded: string[] };
 
 function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallies: Tallies): KnowledgePassage[] {
@@ -509,7 +459,7 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       );
     }
   }
-  const rawLetters = scanLetters(ocr);
+  const scan = rawLetters(ocr);
 
   return records.map((answered) => {
     const ref = `${chapter.chapter}.${answered.paragraph}.${answered.part}`;
@@ -519,25 +469,26 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     if (override.textIncludes && !answered.text.includes(override.textIncludes)) {
       throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
     }
-    const shown = shownText(ref, answered, override.reworded);
+    const shown = shownText(ref, answered.text, answered.reworded_text, override.reworded);
     const { printedText } = shown;
     const text = override.opening ? `${override.opening} ${shown.text}` : shown.text;
     if (printedText) tallies.reworded.push(ref);
     if (REWORDED.test(answered.summary)) throw new Error(`${ref}: the summary says "${answered.summary.match(REWORDED)?.[0]}".`);
 
-    const labels = [...new Set(answered.harsh_labels.map((label) => label.trim()).filter(Boolean))];
+    /* Adultery and "free with other men", flagged by this prompt, have since been cleared (build-shared.ts). */
+    const labels = pendingLabels(answered.harsh_labels);
     for (const label of labels) tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
 
     const modelWithheld = answered.withheld && !override.show;
-    const awaitingWording = labels.length > 0 && !override.show;
+    const waiting = labels.length > 0 && !override.show;
     const reason = modelWithheld
       ? answered.withheld_reason.trim()
-      : awaitingWording
-        ? `awaiting the owner's wording for ${labels.map((label) => `"${label}"`).join(", ")}`
+      : waiting
+        ? awaitingWording(labels)
         : (override.withhold ?? null);
 
     /* The letter-level check: this scan defeats the word runs (lib/knowledge/corpus.ts, LETTER_CHECKED). */
-    const agreement = letterAgreement(scanLetters(scoredText({ text, printedText, notes })), rawLetters);
+    const agreement = letterAgreement(scanLetters(scoredText({ text, printedText, notes })), scan);
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.paragraph, answered.part),
       source: SOURCE.slug,
@@ -551,10 +502,10 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       notes,
       summary: answered.summary.trim(),
       yogaIds: [],
-      ...checkedConditions(ref, answered, tallies.unknownKeys),
+      ...checkedConditions(ref, answered, REQUIRED, tallies.unknownKeys),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: modelWithheld || awaitingWording || Boolean(override.withhold),
+      withheld: modelWithheld || waiting || Boolean(override.withhold),
       withheldReason: reason,
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };

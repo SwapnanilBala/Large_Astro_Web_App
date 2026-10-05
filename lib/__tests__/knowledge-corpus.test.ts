@@ -135,10 +135,8 @@ describe("the Brihat Jataka corpus", () => {
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
   });
 
-  /* Chapter 24, on women's charts, is configured but waits for the build
-     (the account's monthly limit); it is a life chapter all the same. */
-  const BUILT_LIFE_CHAPTERS = [10, 17, 18, 19, 20, 21];
-  const LIFE_CHAPTERS = [...BUILT_LIFE_CHAPTERS, 24];
+  /* Chapter 24, on women's charts, joined the life chapters in prompt v5 (2026-10-05). */
+  const LIFE_CHAPTERS = [10, 17, 18, 19, 20, 21, 24];
 
   it("keeps the chapter on women's charts to women's charts", () => {
     // Every chapter-24 verse with a condition of its own also needs the
@@ -159,7 +157,7 @@ describe("the Brihat Jataka corpus", () => {
     // an either/or the build did not yet ask for. Chapters 10 and 21 rest on
     // divisional lords and are reached by none.
     const chapters = new Set(corpus?.passages.map((passage) => passage.chapter));
-    for (const chapter of BUILT_LIFE_CHAPTERS) expect(chapters.has(chapter), `chapter ${chapter}`).toBe(true);
+    for (const chapter of LIFE_CHAPTERS) expect(chapters.has(chapter), `chapter ${chapter}`).toBe(true);
     const share = (chapter: number) => {
       const shown = corpus?.passages.filter((passage) => passage.chapter === chapter && !passage.withheld) ?? [];
       return shown.filter((passage) => passage.placements.length + passage.placementsAny.length > 0).length / shown.length;
@@ -185,7 +183,7 @@ describe("the Brihat Jataka corpus", () => {
       "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|unchaste|barren)\b/i;
     const found = (corpus?.passages ?? [])
       .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
       .flatMap((passage) => {
@@ -197,12 +195,20 @@ describe("the Brihat Jataka corpus", () => {
 
   it("shows few or no children, as the owner decided, but not a child's death", () => {
     // 2026-10-04: having few children or none is "inherently not a problem";
-    // a child's death still falls under the rule against death.
-    const withheld = (ref: string) =>
-      corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref)?.withheld;
-    for (const ref of ["17.5.2", "18.4.4", "18.7.4", "19.8.1", "20.2.3"]) expect(withheld(ref), ref).toBe(false);
-    expect(withheld("18.20.25")).toBe(true); // "will lose his children"
-    expect(withheld("20.3.2")).toBe(true); // few sons, but also blindness
+    // a child's death still falls under the rule against death. By the words,
+    // not the refs: prompt v5 re-split the chapters and renumbered the parts.
+    const shown = (corpus?.passages ?? []).filter((passage) => !passage.withheld);
+    expect(shown.filter((passage) => /\b(very few|no) (sons|children)\b/i.test(passage.text)).length).toBeGreaterThan(5);
+    expect(shown.filter((passage) => /lose his (sons|children)|loss of (his )?(sons|children)/i.test(passage.text))).toEqual([]);
+  });
+
+  it("shows adultery, for men as for women, as the owner decided", () => {
+    // 2026-10-05: "Adultery is fine, not too bad, same do it for men as well".
+    const shown = (corpus?.passages ?? []).filter((passage) => !passage.withheld);
+    const said = shown.filter((passage) => /wives of other men|commit adultery/i.test(passage.text));
+    expect(said.length).toBeGreaterThan(3);
+    expect(said.some((passage) => passage.chapter === 14)).toBe(true); // a yoga chapter, shown by hand
+    expect(said.some((passage) => passage.chapter === 18)).toBe(true); // a life chapter, shown by prompt v5
   });
 
   it("shows three passages of the malefic-yogas chapter, the marriage ones, each tied only to its own yoga", () => {
@@ -270,11 +276,20 @@ describe("the Strijataka corpus", () => {
 
   it("holds back, until the owner words them, the passages that brand a woman", () => {
     // The owner asked to see these before any is shown ("if you find similar
-    // stuff let me know I will recommend"): adulteress, immoral, barren and
-    // the like are withheld with that reason, not reworded on the owner's behalf.
+    // stuff let me know I will recommend"): immoral, barren and the like are
+    // withheld with that reason, not reworded on the owner's behalf.
     const waiting = passages.filter((passage) => passage.withheldReason?.startsWith("awaiting the owner's wording"));
     expect(waiting.length).toBeGreaterThan(0);
     expect(waiting.every((passage) => passage.withheld)).toBe(true);
+    expect(waiting.some((passage) => /adulter|free with other men/.test(passage.withheldReason ?? ""))).toBe(false);
+  });
+
+  it("shows adultery, as the owner decided, but not a slur on someone's birth", () => {
+    // 2026-10-05: "Adultery is fine, not too bad". "Born of adultery" is about
+    // the husband's birth, which the content line withholds as low birth.
+    const said = shown.filter((passage) => /adulter|free with other men/i.test(passage.text));
+    expect(said.map((passage) => passage.id)).toContain("strijataka-1931:5.2.5");
+    expect(shown.some((passage) => /born of adultery/i.test(passage.text))).toBe(false);
   });
 
   it("shows no passage that speaks of death, crime, caste, or brands a woman", () => {
@@ -282,13 +297,44 @@ describe("the Strijataka corpus", () => {
       "strijataka-1931:11.1.4": "'love is blind', a proverb, in the author's discussion of beauty",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|poison\w*|blind\w*|lepro\w*|leper|thie(f|ves|vish)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|brahmin\w*|sudras?|prostitut\w*|whores?|harlots?|courtesans?|adulter\w*|immoral\w*|unchaste|wanton|barren|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|poison\w*|blind\w*|lepro\w*|leper|thie(f|ves|vish)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|brahmin\w*|sudras?|prostitut\w*|whores?|harlots?|courtesans?|immoral\w*|unchaste|wanton|barren|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*)\b/i;
     const found = shown
       .filter((passage) => !(passage.id in ALLOWED))
       .flatMap((passage) => {
         const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
         return match ? [`${passage.id}: ${match[0]}`] : [];
       });
+    expect(found).toEqual([]);
+  });
+});
+
+describe("the Brihat Samhita corpus", () => {
+  const corpus = corpora.find(({ corpus }) => corpus.source === "brihat-samhita-1884")?.corpus;
+  const passages = corpus?.passages ?? [];
+  const shown = passages.filter((passage) => !passage.withheld);
+
+  it("holds the chapters on the features of men and of women, with their hand passages marked", () => {
+    expect(new Set(passages.map((passage) => passage.chapter))).toEqual(new Set([68, 70]));
+    for (const chapter of [68, 70]) {
+      expect(shown.some((passage) => passage.chapter === chapter && passage.hand), `chapter ${chapter}`).toBe(true);
+    }
+  });
+
+  it("never reaches a chart-driven note: no chart conditions, no yoga ids", () => {
+    const reachable = passages.filter(
+      (passage) => passage.placements.length + passage.placementsAny.length + passage.yogaIds.length > 0,
+    );
+    expect(reachable.map((passage) => passage.id)).toEqual([]);
+  });
+
+  it("shows no lifespan, death, disease, caste or the rest", () => {
+    // A long life counts here too: the palm reading says no line fixes a lifespan.
+    const FORBIDDEN =
+      /\b(die|dies|died|dying|death|dead|kill\w*|hundred years|years of age|blind\w*|lepro\w*|leper|thie(f|ves)|theft|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*|unchaste|barren)\b/i;
+    const found = shown.flatMap((passage) => {
+      const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
+      return match ? [`${passage.id}: ${match[0]}`] : [];
+    });
     expect(found).toEqual([]);
   });
 });
