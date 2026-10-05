@@ -2180,5 +2180,34 @@
       "noteOne": "{planet} कुंडली के इस भाग में है।",
       "noteMany": "{planets} कुंडली के इस भाग में केंद्रित हैं।"
     }
+  },
+  "nakshatraNames": {
+    "ashwini": "अश्विनी",
+    "bharani": "भरणी",
+    "krittika": "कृत्तिका",
+    "rohini": "रोहिणी",
+    "mrigashira": "मृगशिरा",
+    "ardra": "आर्द्रा",
+    "punarvasu": "पुनर्वसु",
+    "pushya": "पुष्य",
+    "ashlesha": "आश्लेषा",
+    "magha": "मघा",
+    "purvaPhalguni": "पूर्वा फाल्गुनी",
+    "uttaraPhalguni": "उत्तरा फाल्गुनी",
+    "hasta": "हस्त",
+    "chitra": "चित्रा",
+    "swati": "स्वाति",
+    "vishakha": "विशाखा",
+    "anuradha": "अनुराधा",
+    "jyeshtha": "ज्येष्ठा",
+    "moola": "मूल",
+    "purvaAshadha": "पूर्वाषाढ़ा",
+    "uttaraAshadha": "उत्तराषाढ़ा",
+    "shravana": "श्रवण",
+    "dhanishta": "धनिष्ठा",
+    "shatabhisha": "शतभिषा",
+    "purvaBhadrapada": "पूर्वा भाद्रपद",
+    "uttaraBhadrapada": "उत्तरा भाद्रपद",
+    "revati": "रेवती"
   }
 }

@@ -2180,5 +2180,34 @@
       "noteOne": "{planet} está en esta parte de la carta.",
       "noteMany": "{planets} se concentran en esta parte de la carta."
     }
+  },
+  "nakshatraNames": {
+    "ashwini": "Ashwini",
+    "bharani": "Bharani",
+    "krittika": "Krittika",
+    "rohini": "Rohini",
+    "mrigashira": "Mrigashira",
+    "ardra": "Ardra",
+    "punarvasu": "Punarvasu",
+    "pushya": "Pushya",
+    "ashlesha": "Ashlesha",
+    "magha": "Magha",
+    "purvaPhalguni": "Purva Phalguni",
+    "uttaraPhalguni": "Uttara Phalguni",
+    "hasta": "Hasta",
+    "chitra": "Chitra",
+    "swati": "Swati",
+    "vishakha": "Vishakha",
+    "anuradha": "Anuradha",
+    "jyeshtha": "Jyeshtha",
+    "moola": "Moola",
+    "purvaAshadha": "Purva Ashadha",
+    "uttaraAshadha": "Uttara Ashadha",
+    "shravana": "Shravana",
+    "dhanishta": "Dhanishta",
+    "shatabhisha": "Shatabhisha",
+    "purvaBhadrapada": "Purva Bhadrapada",
+    "uttaraBhadrapada": "Uttara Bhadrapada",
+    "revati": "Revati"
   }
 }

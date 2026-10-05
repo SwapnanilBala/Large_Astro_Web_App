@@ -2180,5 +2180,34 @@
       "noteOne": "{planet} ছকের এই অংশে আছে।",
       "noteMany": "{planets} ছকের এই অংশে কেন্দ্রীভূত।"
     }
+  },
+  "nakshatraNames": {
+    "ashwini": "অশ্বিনী",
+    "bharani": "ভরণী",
+    "krittika": "কৃত্তিকা",
+    "rohini": "রোহিণী",
+    "mrigashira": "মৃগশিরা",
+    "ardra": "আর্দ্রা",
+    "punarvasu": "পুনর্বসু",
+    "pushya": "পুষ্যা",
+    "ashlesha": "অশ্লেষা",
+    "magha": "মঘা",
+    "purvaPhalguni": "পূর্বফাল্গুনী",
+    "uttaraPhalguni": "উত্তরফাল্গুনী",
+    "hasta": "হস্তা",
+    "chitra": "চিত্রা",
+    "swati": "স্বাতী",
+    "vishakha": "বিশাখা",
+    "anuradha": "অনুরাধা",
+    "jyeshtha": "জ্যেষ্ঠা",
+    "moola": "মূলা",
+    "purvaAshadha": "পূর্বাষাঢ়া",
+    "uttaraAshadha": "উত্তরাষাঢ়া",
+    "shravana": "শ্রবণা",
+    "dhanishta": "ধনিষ্ঠা",
+    "shatabhisha": "শতভিষা",
+    "purvaBhadrapada": "পূর্বভাদ্রপদ",
+    "uttaraBhadrapada": "উত্তরভাদ্রপদ",
+    "revati": "রেবতী"
   }
 }
