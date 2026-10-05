@@ -81,6 +81,13 @@ const birthTimeSourceField = z
   )
   .default("exact");
 
+/* Sex at birth, when the reader gave it (lib/birth-sex.ts); anything else is
+   "not given" rather than an error, as on every optional intake field. */
+const birthSexField = z.preprocess(
+  (value) => (value === "female" || value === "male" ? value : undefined),
+  z.enum(["female", "male"]).optional(),
+);
+
 const booleanStringField = z
   .preprocess(
     (value) => {
@@ -209,6 +216,7 @@ export const BirthInputSchema = z.object({
   birth_time_accuracy: birthTimeAccuracyField,
   birth_time_source: birthTimeSourceField,
   birth_time_fallback: booleanStringField,
+  birth_sex: birthSexField,
 });
 
 export type BirthInput = z.infer<typeof BirthInputSchema>;

@@ -52,6 +52,7 @@ const paramsFor = (name: string) => ({
   birthTimeAccuracy: "",
   birthTimeSource: "",
   birthTimeFallback: "",
+  birthSex: "",
 });
 
 const payload = (marker: string) => ({ marker }) as unknown as ChartApiResponse;

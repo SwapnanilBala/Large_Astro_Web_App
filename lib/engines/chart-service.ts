@@ -763,7 +763,7 @@ function computeInsights(
     hHash = ((hHash << 5) + hHash + houseSig.charCodeAt(i)) | 0;
   }
   const evidenceSignature = extendedEvidence
-    ? `${extendedEvidence.birthTimeAccuracy ?? "exact"}_${extendedEvidence.birthTimeFallback ? "fallback" : "recorded"}_${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
+    ? `${extendedEvidence.birthTimeAccuracy ?? "exact"}_${extendedEvidence.birthTimeFallback ? "fallback" : "recorded"}_${extendedEvidence.birthSex ?? "unsaid"}_${extendedEvidence.timingLords?.join("-") ?? "none"}_${extendedEvidence.transits?.map((item) => `${item.name}:${item.sign}`).join("-") ?? "none"}`
     : "natal";
   const cacheKey = `ins_v5_${longHash}_${(hHash >>> 0).toString(36)}_${evidenceSignature}`;
 
@@ -829,6 +829,7 @@ export function buildLifeDomainInsights(
     transits: transits.map((transit) => ({ name: transit.name, sign: transit.sign })),
     birthTimeAccuracy: birth.birth_time_accuracy,
     birthTimeFallback: birth.birth_time_fallback,
+    birthSex: birth.birth_sex,
   };
   return computeInsights(
     core.ascendant.sign,
@@ -938,6 +939,7 @@ export function buildChart(
           ].filter((lord): lord is string => Boolean(lord)),
           birthTimeAccuracy: birth.birth_time_accuracy,
           birthTimeFallback: birth.birth_time_fallback,
+          birthSex: birth.birth_sex,
         }
       : undefined;
     const insightsStage = computeInsights(

@@ -12,6 +12,17 @@
 export const BIRTH_SEXES = ["female", "male"] as const;
 export type BirthSex = (typeof BIRTH_SEXES)[number];
 
+/**
+ * The intake's choices, in the order both trees show them. "Prefer not to
+ * say" is the empty value, which is also where the choice starts, so an
+ * untouched form reads exactly as before.
+ */
+export const BIRTH_SEX_CHOICES = [
+  { value: "female", labelKey: "home.birthSexFemale" },
+  { value: "male", labelKey: "home.birthSexMale" },
+  { value: "", labelKey: "home.birthSexUnspecified" },
+] as const;
+
 /** Anything that is not one of the two values is "not given". */
 export function parseBirthSex(value: unknown): BirthSex | undefined {
   return value === "female" || value === "male" ? value : undefined;

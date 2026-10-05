@@ -14,6 +14,8 @@ export type ProfileQueryInput = {
   birthTimeAccuracy: string;
   birthTimeSource: string;
   birthTimeFallback: string;
+  /** "female", "male", or "" when the reader did not say (lib/birth-sex.ts). */
+  birthSex: string;
 };
 
 // ---------------------------------------------------------------------------
@@ -903,5 +905,6 @@ export const profileInitialState: ProfileQueryInput = {
   timeZoneId: "",
   birthTimeAccuracy: "",
   birthTimeSource: "",
-  birthTimeFallback: ""
+  birthTimeFallback: "",
+  birthSex: ""
 };

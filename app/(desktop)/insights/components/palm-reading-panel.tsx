@@ -240,9 +240,11 @@ const READER_HINT_KEYS: Record<PalmReader, string> = {
 
 type PalmReadingPanelProps = {
   jyotishContext?: JyotishContext;
+  /** Where the "whose hand?" choice starts: from the chart's sex at birth, when given. */
+  initialReader?: PalmReader;
 };
 
-export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelProps = {}) {
+export default function PalmReadingPanel({ jyotishContext, initialReader = "unspecified" }: PalmReadingPanelProps = {}) {
   const tr = useRouteMessages(palmMessages);
 
   /* ── state ── */
@@ -255,7 +257,7 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
   const [handDetected, setHandDetected] = useState(false);
   const [handScore, setHandScore] = useState(0);
   const [classicalMode, setClassicalMode] = useState(false);
-  const [reader, setReader] = useState<PalmReader>("unspecified");
+  const [reader, setReader] = useState<PalmReader>(initialReader);
   const [analyzingStage, setAnalyzingStage] = useState(0);
   const [imageQualityDismissed, setImageQualityDismissed] = useState(false);
   const [revealedSections, setRevealedSections] = useState<Set<RevealSection>>(new Set());

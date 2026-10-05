@@ -2,7 +2,7 @@
 
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
-- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-10-domain-v8`.
+- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-10-domain-v9`.
 - Yogas: `lib/engines/yoga-engine.ts` (208 yogas). That file is only a re-export; the code is in `lib/engines/yoga/`. `index.ts` holds the detector and the assembled list, and `definitions/` holds the 208 records in seven files, grouped by how each one is built rather than by what it means:
 
 | file | yogas | this document |
@@ -57,7 +57,7 @@ The module reads seven life areas. Each area gets a list of rules that fired, th
 
 Each area has a main house, a supporting house and an instinct planet.
 
-- **Love Life**: main house 7, supporting house 5, instinct planet Venus.
+- **Love Life**: main house 7, supporting house 5, instinct planet Venus — or, when the reader gives their sex at birth, the partner's significator: Jupiter for a woman, Venus for a man. That split is a later convention than the Brihat Jataka, which reads a woman's partner from her 7th house without naming a planet.
 - **Career**: main house 10, supporting house 6, instinct planet Saturn.
 - **Family**: main house 4, supporting house 2, instinct planet Moon.
 - **Inheritance**: main house 8, supporting house 2, instinct planet Jupiter.
@@ -69,7 +69,7 @@ From these the engine finds three planets:
 
 - The **main ruler**: the lord of the main house.
 - The **supporting ruler**: the lord of the supporting house.
-- The **instinct planet**: fixed for each area, as listed above.
+- The **instinct planet**: fixed for each area, as listed above (Love Life's follows the reader's sex at birth when given).
 
 Each area also has a wider list of houses and planets. Some rules use these lists.
 

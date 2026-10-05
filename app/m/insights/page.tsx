@@ -7,6 +7,7 @@ import {
   readChartParams,
 } from "@/lib/chart-params";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { parseBirthSex } from "@/lib/birth-sex";
 import { computeKalatraDetail } from "@/lib/engines/kalatra-engine";
 import { requestTime } from "@/lib/request-time";
 import MobileInsights from "./mobile-insights";
@@ -59,7 +60,7 @@ export default async function MobileInsightsPage({ searchParams }: PageProps) {
   /* Server-side so the engine and its rule prose stay out of the handset
      bundle -- this tree pays for every kilobyte it ships. */
   const kalatra = payload
-    ? computeKalatraDetail(payload.chart.planets, payload.chart.houses)
+    ? computeKalatraDetail(payload.chart.planets, payload.chart.houses, parseBirthSex(chartParams.birthSex))
     : null;
 
   return (

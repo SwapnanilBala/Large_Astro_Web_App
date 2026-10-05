@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import BackButton from "@/app/components/BackButton";
 import MissingChartNotice from "@/app/components/MissingChartNotice";
+import { readChartParams } from "@/lib/chart-params-url";
 import EngineSelectClient from "@/app/(desktop)/engine-select/engine-select-client";
 import styles from "./engine-select.module.css";
 
@@ -76,6 +77,9 @@ export default async function EngineSelectPage({
   if (birthTimeAccuracy) forwardParams.birthTimeAccuracy = birthTimeAccuracy;
   if (birthTimeSource) forwardParams.birthTimeSource = birthTimeSource;
   if (birthTimeFallback) forwardParams.birthTimeFallback = birthTimeFallback;
+  /* Read through the shared reader so only "female" or "male" is forwarded. */
+  const { birthSex } = readChartParams(rawParams);
+  if (birthSex) forwardParams.birthSex = birthSex;
 
   return (
     <div className={styles.shell}>

@@ -30,6 +30,8 @@ export type ChartParams = Record<(typeof REQUIRED_CHART_PARAMS)[number], string>
   birthTimeAccuracy: string;
   birthTimeSource: string;
   birthTimeFallback: string;
+  /** "female", "male", or "" when the reader did not say (lib/birth-sex.ts). */
+  birthSex: string;
 };
 
 type RawParams = Record<string, string | string[] | undefined>;
@@ -54,8 +56,13 @@ export function readChartParams(raw: RawParams): ChartParams {
     birthTimeAccuracy: getSingle(raw.birthTimeAccuracy),
     birthTimeSource: getSingle(raw.birthTimeSource),
     birthTimeFallback: getSingle(raw.birthTimeFallback),
+    birthSex: readBirthSex(getSingle(raw.birthSex)),
   };
 }
+
+/* Inline rather than lib/birth-sex.ts's parseBirthSex: this file imports
+   nothing (see the header). Anything else is "not given". */
+const readBirthSex = (value: string): string => (value === "female" || value === "male" ? value : "");
 
 export function hasAllChartParams(params: ChartParams): boolean {
   return REQUIRED_CHART_PARAMS.every((key) => params[key].trim().length > 0);
@@ -93,6 +100,7 @@ export function buildChartHistoryQuery(params: ChartParams): string {
   if (params.birthTimeAccuracy) qs.birthTimeAccuracy = params.birthTimeAccuracy;
   if (params.birthTimeSource) qs.birthTimeSource = params.birthTimeSource;
   if (params.birthTimeFallback) qs.birthTimeFallback = params.birthTimeFallback;
+  if (params.birthSex) qs.birthSex = params.birthSex;
 
   return new URLSearchParams(qs).toString();
 }

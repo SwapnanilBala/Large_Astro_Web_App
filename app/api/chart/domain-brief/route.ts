@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
+import { parseBirthSex } from "@/lib/birth-sex";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import { DOMAIN_BRIEF_KEYS, type DomainBriefs, type DomainBriefEffort } from "@/lib/domain-briefs";
@@ -54,7 +55,7 @@ const CACHE_HEADER = "private, no-store";
 
 /* Bump when the prompt or the fact selection changes, so a copy revision is not
    hidden behind warm cache entries written by the previous wording. */
-const DOMAIN_BRIEF_PROMPT_VERSION = "2";
+const DOMAIN_BRIEF_PROMPT_VERSION = "3";
 
 /* One entry contains all seven areas. Browser caching stays disabled, so a
    brief is always served from this cache or freshly written, never from a
@@ -91,6 +92,7 @@ Rules:
 - State nothing you were not given. No planets, houses, signs, degrees, nakshatras, dashas or dates unless they appear in the input.
 - Do not name the evidence families, the activity band, or any score. Those are how the finding was reached, not what it means.
 - No predictions of specific events, no health, legal or financial advice, and nothing fatalistic. A chart describes conditions, not outcomes.
+- When the facts give the reader's sex at birth, the love life findings already read the partner's significator from it (Jupiter in a woman's chart, Venus in a man's); keep that reading. Whatever the reader's sex, call a spouse or partner "your partner".
 - Plain prose, warm but not effusive. No astrology jargon the reader has not already been shown.`;
 
 /** Everything the model is told, built only from engine output. */
@@ -275,7 +277,11 @@ export async function GET(request: NextRequest) {
     const ranked = payload.insights.filter((entry) => DOMAIN_KEYS.has(entry.key)).sort(
       (a, b) => b.signal_profile.activity_score - a.signal_profile.activity_score,
     );
-    const facts = ranked.map((entry, index) =>
+    /* The reader's sex, when given, heads the facts: the love life findings
+       were read with its partner significator, and the prompt says how. */
+    const sex = parseBirthSex(chartParams.birthSex);
+    const readerLine = sex ? `Reader's sex at birth: ${sex === "female" ? "a woman" : "a man"}\n\n---\n\n` : "";
+    const facts = readerLine + ranked.map((entry, index) =>
       `Area key: ${entry.key}\n${buildFacts(entry, index + 1, ranked.length)}`,
     ).join("\n\n---\n\n");
     /* Low for everyone since 2026-10-04, the owner's call to hold costs down

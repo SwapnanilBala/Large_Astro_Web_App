@@ -73,6 +73,8 @@ export interface BirthDetailsInput {
   birth_time_accuracy?: "exact" | "morning" | "afternoon" | "evening" | "unknown";
   birth_time_source?: "exact" | "fallback";
   birth_time_fallback?: boolean;
+  /** Sex at birth, when the reader gave it. */
+  birth_sex?: "female" | "male";
 }
 
 // --------------------------------------------------------------------------

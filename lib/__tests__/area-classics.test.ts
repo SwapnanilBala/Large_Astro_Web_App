@@ -243,6 +243,14 @@ describe("what the model is sent", () => {
     );
   });
 
+  it("tells the model a woman's verses about a wife describe her partner, and nothing when the reader did not say", () => {
+    expect(areaClassicsInstruction(selection, "English", "female")).toContain(
+      "where a passage speaks of a wife or of women, it describes the reader's partner",
+    );
+    expect(areaClassicsInstruction(selection, "English", "male")).toContain('Call the partner "your partner"');
+    expect(areaClassicsInstruction(selection, "English")).not.toMatch(/reader is/);
+  });
+
   it("carries the shared rules, and never the word AI", () => {
     expect(AREA_CLASSICS_SYSTEM_PROMPT).toContain(CLASSICAL_NOTE_RULES);
     expect(CLASSICAL_NOTE_RULES).toMatch(/reader of any gender/);

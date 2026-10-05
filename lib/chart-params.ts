@@ -53,6 +53,7 @@ export function chartParamsToBirthInput(chartParams: ChartParams): BirthDetailsI
     birth_time_accuracy: chartParams.birthTimeAccuracy,
     birth_time_source: chartParams.birthTimeSource,
     birth_time_fallback: chartParams.birthTimeFallback,
+    birth_sex: chartParams.birthSex,
   });
 
   if (!parsed.success) {
@@ -129,6 +130,8 @@ export function getLifeDomainPayload(
     lng: birth.longitude,
     birth_time_accuracy: birth.birth_time_accuracy,
     birth_time_fallback: birth.birth_time_fallback,
+    /* Love life's partner significator follows it. */
+    birth_sex: birth.birth_sex ?? "",
     rules_schema: RULES_SCHEMA_VERSION,
     life_domain_rules: LIFE_DOMAIN_RULES_VERSION,
   });

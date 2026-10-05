@@ -240,12 +240,22 @@ export async function saveChart(
   );
 
   const existing = await db
-    .select({ id: chartCalculations.id })
+    .select({ id: chartCalculations.id, snapshot: chartCalculations.inputSnapshotJson })
     .from(chartCalculations)
     .where(reproducible)
     .limit(1);
 
   if (existing[0]) {
+    /* The fingerprint covers the birth facts and the engine. A detail outside
+       them -- sex at birth, added after the chart was first saved -- changes
+       the query string without changing the chart, so keep the newest string:
+       it is what another device rebuilds /insights from. */
+    if (existing[0].snapshot?.query_string !== input.queryString) {
+      await db
+        .update(chartCalculations)
+        .set({ inputSnapshotJson: { query_string: input.queryString } })
+        .where(eq(chartCalculations.id, existing[0].id));
+    }
     return { chartId: existing[0].id, clientId, birthProfileId, created: false };
   }
 

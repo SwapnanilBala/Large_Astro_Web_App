@@ -18,6 +18,7 @@ import {
   type AreaChart,
   type AreaSelection,
 } from "@/lib/knowledge/area-classics-reading";
+import { parseBirthSex, type BirthSex } from "@/lib/birth-sex";
 import type { AreaClassicsResponse } from "@/lib/knowledge/classical-reading";
 import { chartPlacementKeys } from "@/lib/knowledge/placements";
 import { passagesForChart } from "@/lib/knowledge/retrieve";
@@ -82,8 +83,8 @@ function remember(key: string, value: Readings) {
   cache.set(key, value);
 }
 
-/** What the model is sent, canonically: the areas, their passages, conditions and yogas. */
-function cacheKey(languageCode: string, selection: AreaSelection[]): string {
+/** What the model is sent, canonically: the areas, their passages, conditions and yogas, and the reader's sex. */
+function cacheKey(languageCode: string, selection: AreaSelection[], sex: BirthSex | undefined): string {
   const canonical = selection
     .map(({ area, passages, conditions, yogaNames }) =>
       [area, passages.map((p) => p.id).join(","), [...conditions].sort().join(","), [...yogaNames].sort().join(",")].join(
@@ -91,13 +92,14 @@ function cacheKey(languageCode: string, selection: AreaSelection[]): string {
       ),
     )
     .join(";");
-  return `${languageCode}:${createHash("sha1").update(canonical).digest("hex")}`;
+  return `${languageCode}:${sex ?? "unsaid"}:${createHash("sha1").update(canonical).digest("hex")}`;
 }
 
 async function writeReadings(
   request: NextRequest,
   selection: AreaSelection[],
   languageCode: string,
+  sex: BirthSex | undefined,
 ): Promise<Readings> {
   if (!process.env.ANTHROPIC_API_KEY) {
     /* The page renders either way; this is a missing layer, not a broken page. */
@@ -139,7 +141,7 @@ async function writeReadings(
         role: "user",
         content: [
           ...areaDocuments(selection),
-          { type: "text", text: areaClassicsInstruction(selection, COMMENTARY_LANGUAGES[languageCode]) },
+          { type: "text", text: areaClassicsInstruction(selection, COMMENTARY_LANGUAGES[languageCode], sex) },
         ],
       },
     ],
@@ -207,11 +209,13 @@ export async function GET(request: NextRequest) {
 
     /* The same cached chart the page was rendered from. */
     const payload = getChartPayload(chartParams);
+    const sex = parseBirthSex(chartParams.birthSex);
     const chart: AreaChart = {
       keys: chartPlacementKeys({
         planets: payload.chart.planets,
         ascendantSign: payload.chart.ascendant.sign,
         navamsa: payload.chart.navamsa,
+        sex,
       }),
       yogas: (payload.chart.yogas ?? [])
         .filter((yoga) => yoga.present)
@@ -231,7 +235,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(empty, { headers: { "Cache-Control": CACHE_HEADER } });
     }
 
-    const key = cacheKey(languageCode, selection);
+    const key = cacheKey(languageCode, selection, sex);
     const cached = cache.get(key);
     if (cached) {
       const hit: AreaClassicsResponse = { readings: cached, cached: true };
@@ -240,7 +244,7 @@ export async function GET(request: NextRequest) {
 
     let writing = inFlight.get(key);
     if (!writing) {
-      writing = writeReadings(request, selection, languageCode)
+      writing = writeReadings(request, selection, languageCode, sex)
         .then((readings) => {
           remember(key, readings);
           return readings;

@@ -16,6 +16,7 @@ type ProfileApiQuery = {
   birth_time_accuracy: string;
   birth_time_source: string;
   birth_time_fallback: string;
+  birth_sex: string;
 };
 
 type ProfileApiQuerySource = ProfileQueryInput | URLSearchParams | string;
@@ -37,6 +38,7 @@ export const profileQueryKeys = [
   "birthTimeAccuracy",
   "birthTimeSource",
   "birthTimeFallback",
+  "birthSex",
 ] as const satisfies ReadonlyArray<keyof ProfileQueryInput>;
 
 const profileApiQueryFields = [
@@ -55,6 +57,7 @@ const profileApiQueryFields = [
   ["birthTimeAccuracy", "birth_time_accuracy", ""],
   ["birthTimeSource", "birth_time_source", ""],
   ["birthTimeFallback", "birth_time_fallback", ""],
+  ["birthSex", "birth_sex", ""],
 ] as const satisfies ReadonlyArray<
   readonly [keyof ProfileQueryInput, keyof ProfileApiQuery, string]
 >;

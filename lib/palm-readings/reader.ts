@@ -11,6 +11,8 @@
  * server import.
  */
 
+import type { BirthSex } from "../birth-sex";
+
 export const PALM_READERS = ["woman", "man", "unspecified"] as const;
 export type PalmReader = (typeof PALM_READERS)[number];
 
@@ -24,6 +26,13 @@ export function traditionalHand(reader: PalmReader): "left" | "right" | null {
   if (reader === "woman") return "left";
   if (reader === "man") return "right";
   return null;
+}
+
+/** The palm choice a chart's sex at birth implies, so the panel can start from it. */
+export function readerFromBirthSex(sex: BirthSex | undefined): PalmReader {
+  if (sex === "female") return "woman";
+  if (sex === "male") return "man";
+  return "unspecified";
 }
 
 /** The line the model is given, or null when the reader did not say. */

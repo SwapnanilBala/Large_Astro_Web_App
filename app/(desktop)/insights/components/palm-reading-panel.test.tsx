@@ -135,6 +135,18 @@ describe("PalmReadingPanel", () => {
     expect(sentBody()).not.toHaveProperty("reader");
   });
 
+  it("starts from the chart's sex at birth when the page passes it", () => {
+    render(
+      <LanguageProvider baseMessages={{}}>
+        <PalmReadingPanel initialReader="man" />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("radio", { name: "A man's" })).toBeChecked();
+    expect(
+      screen.getByText("Photograph the right hand: classical palmistry reads a man's right hand."),
+    ).toBeInTheDocument();
+  });
+
   it("tells a woman to photograph her left hand, and sends the choice with the photo", async () => {
     setReducedMotion(true);
     await analyzeAPalm(() => {

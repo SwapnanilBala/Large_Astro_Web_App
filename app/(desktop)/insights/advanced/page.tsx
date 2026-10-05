@@ -5,7 +5,7 @@ import { sessionFromCookieStore } from "@/lib/identity/require-session";
 import BackButton from "@/app/components/BackButton";
 import BackToReadingButton from "@/app/components/BackToReadingButton";
 import MissingChartNotice from "@/app/components/MissingChartNotice";
-import { buildChartHistoryQuery } from "@/lib/chart-params";
+import { buildChartHistoryQuery, readChartParams } from "@/lib/chart-params";
 import PageTransition from "@/app/components/PageTransition";
 import { getAdvancedFocusView } from "./advanced-views";
 import { chartPageMetadata } from "@/lib/page-metadata";
@@ -60,6 +60,8 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
   const birthTimeAccuracy = getSingle(rawParams.birthTimeAccuracy);
   const birthTimeSource = getSingle(rawParams.birthTimeSource);
   const birthTimeFallback = getSingle(rawParams.birthTimeFallback);
+  /* Through the shared reader, which knows the two values it accepts. */
+  const { birthSex } = readChartParams(rawParams);
   const focusView = getAdvancedFocusView(getSingle(rawParams.view));
 
   const hasAllInputs = requiredParams.every((param) => params[param].trim().length > 0);
@@ -83,6 +85,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
     birthTimeAccuracy,
     birthTimeSource,
     birthTimeFallback,
+    birthSex,
   };
 
   /*

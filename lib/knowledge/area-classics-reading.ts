@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { LifeDomainKey } from "../astro-types";
+import type { BirthSex } from "../birth-sex";
 import { LIFE_DOMAIN_EVIDENCE_CONFIG } from "../engines/life-domain-rules";
 import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import type { ClassicalReading } from "./classical-reading";
@@ -223,11 +224,29 @@ For each area, tell the reader what the Brihat Jataka says about that part of th
 ${CLASSICAL_NOTE_RULES}`;
 
 /** The user turn's closing instruction: which language, which areas, in what order, under which markers. */
-export function areaClassicsInstruction(selection: readonly AreaSelection[], languageName: string): string {
+/*
+ * The Brihat Jataka writes for men, and says how to read it for a woman: the
+ * same rules hold, and what concerns a wife concerns her husband (ch. 24,
+ * v. 1). So for a woman the verses about a wife describe her partner. The
+ * note still says "your partner" either way, by the owner's choice.
+ */
+const READER_LINES: Record<BirthSex, string> = {
+  female:
+    " The reader is a woman. The book writes for men: where a passage speaks of a wife or of women, " +
+    'it describes the reader\'s partner. Call the partner "your partner".',
+  male: ' The reader is a man. Call the partner "your partner".',
+};
+
+export function areaClassicsInstruction(
+  selection: readonly AreaSelection[],
+  languageName: string,
+  sex?: BirthSex,
+): string {
   const areas = selection.map(({ area }) => `${areaMarker(area)} ${AREA_NAMES[area]}`);
   return (
     `Write the notes in ${languageName}, one paragraph for each of these ${areas.length} areas, ` +
-    `in this order, each opening with its marker: ${areas.join("; ")}.`
+    `in this order, each opening with its marker: ${areas.join("; ")}.` +
+    (sex ? READER_LINES[sex] : "")
   );
 }
 

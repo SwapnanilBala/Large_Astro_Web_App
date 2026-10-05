@@ -12,7 +12,9 @@ import CosmicOrbs from "@/app/components/CosmicOrbs";
 import styles from "../insights.module.css";
 import advStyles from "./advanced.module.css";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { parseBirthSex } from "@/lib/birth-sex";
 import { useTranslation } from "@/lib/i18n-context";
+import { readerFromBirthSex, type PalmReader } from "@/lib/palm-readings/reader";
 import type { AdvancedFocusView } from "./advanced-views";
 import {
   StoryOpening,
@@ -327,15 +329,17 @@ function LiveTransitsModule({
 
 function PalmReadingModule({
   jyotishContext,
+  palmReader,
   rootMargin,
 }: {
   jyotishContext: JyotishContext | undefined;
+  palmReader: PalmReader;
   rootMargin?: string;
 }) {
   return (
     <LazyPanel rootMargin={rootMargin}>
       <PanelErrorBoundary panelName="Palm Reading">
-          <PalmReadingPanel jyotishContext={jyotishContext} />
+          <PalmReadingPanel jyotishContext={jyotishContext} initialReader={palmReader} />
       </PanelErrorBoundary>
     </LazyPanel>
   );
@@ -345,10 +349,12 @@ function FocusWorkspace({
   focusView,
   payload,
   jyotishContext,
+  palmReader,
 }: {
   focusView: AdvancedFocusView;
   payload: ChartApiResponse;
   jyotishContext: JyotishContext | undefined;
+  palmReader: PalmReader;
 }) {
   const copy = FOCUS_WORKSPACE_COPY[focusView];
 
@@ -371,6 +377,7 @@ function FocusWorkspace({
         ) : (
           <PalmReadingModule
             jyotishContext={jyotishContext}
+            palmReader={palmReader}
             rootMargin="900px"
           />
         )}
@@ -400,6 +407,9 @@ export default function AdvancedContent({
      cannot be one per module. */
   const storyState = useAdvancedStory(historyQs);
   const jyotishContext = buildJyotishContext(payload);
+  /* The chart's sex at birth, when given, is where the palm panel's "whose
+     hand?" choice starts; the reader can still change it there. */
+  const palmReader = readerFromBirthSex(parseBirthSex(new URLSearchParams(historyQs).get("birthSex")));
   const insightsHref = historyQs ? `/insights?${historyQs}` : "/insights";
   const returnToReadingHref = focusView
     ? `${insightsHref}#continue-reading`
@@ -468,6 +478,7 @@ export default function AdvancedContent({
               focusView={focusView}
               payload={payload}
               jyotishContext={jyotishContext}
+              palmReader={palmReader}
             />
           )}
 
@@ -690,7 +701,7 @@ export default function AdvancedContent({
           >
             <LazyPanel>
               <PanelErrorBoundary panelName="Palm Reading">
-                  <PalmReadingPanel jyotishContext={jyotishContext} />
+                  <PalmReadingPanel jyotishContext={jyotishContext} initialReader={palmReader} />
               </PanelErrorBoundary>
             </LazyPanel>
           </CollapsibleSection>

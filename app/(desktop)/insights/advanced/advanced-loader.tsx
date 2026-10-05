@@ -1,5 +1,6 @@
 "use client";
 
+import type { ChartParams as SharedChartParams } from "@/lib/chart-params-url";
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,23 +17,8 @@ import type { AdvancedFocusView } from "./advanced-views";
 
 const REQUEST_TIMEOUT_MS = 55_000;
 
-type ChartParams = {
-  name: string;
-  birthDate: string;
-  birthTime: string;
-  timezoneOffsetMinutes: string;
-  latitude: string;
-  longitude: string;
-  country: string;
-  state: string;
-  city: string;
-  town: string;
-  timeZoneId: string;
-  engineId: string;
-  birthTimeAccuracy: string;
-  birthTimeSource: string;
-  birthTimeFallback: string;
-};
+/* The shared shape, so a new chart field cannot be dropped here. */
+type ChartParams = SharedChartParams;
 
 type AdvancedLoaderProps = {
   chartParams: ChartParams;
