@@ -67,8 +67,12 @@
   --border-subtle: rgba(236, 230, 218, 0.14);
   --border-medium: rgba(236, 230, 218, 0.22);
   /* Numbers, dates, degrees and small labels. The system's own monospace, so
-     the face costs nothing to load. */
+     the face costs nothing to load. Hindi and Bengali set them in --font-text
+     instead; see the :lang() rule below. */
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
+  /* Running text: the system's own sans, for the same reason. */
+  --font-text: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+    sans-serif;
 
   /*
    * Error states, as tokens rather than per-component literals.
@@ -157,6 +161,25 @@ main {
   --font-display: var(--font-display-m, Georgia), Georgia, "Times New Roman", serif;
 }
 
+/*
+ * Hindi and Bengali set the labels in the text face.
+ *
+ * No system monospace carries Devanagari or Bengali, so a mono label in either
+ * language already draws its letters from the system's Indic face. Its spaces
+ * still came from the monospace, though: 0.59em, against 0.27em in running
+ * text, which left every gap between words more than twice as wide as in the
+ * sentence beside it. In the text face the Indic letters are drawn as before
+ * and the gaps close. Columns of figures stay aligned, since the table,
+ * timeline and date rules already ask for tabular-nums.
+ *
+ * :lang() rather than :root:lang(), so a passage marked lang="hi" inside
+ * another language's page is covered too.
+ */
+:lang(hi),
+:lang(bn) {
+  --font-mono: var(--font-text);
+}
+
 *,
 *::before,
 *::after {
@@ -172,8 +195,7 @@ body {
   /* System stack for the body. The desktop tree preloads Cinzel and
      Newsreader — 145KB of woff2. This tree loads one 22KB weight of
      Newsreader for its headings (layout.tsx) and nothing else. */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
