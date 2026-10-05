@@ -118,17 +118,6 @@ type PassageOverride = {
   textIncludes?: string;
 };
 
-/*
- * The owner's call on 2026-10-04, when asked: having few children or none is
- * "inherently not a problem" and is shown. The life prompt that wrote the
- * cached answers counted it as harm to a child, so each such passage is shown
- * here by hand -- only those whose every clause is otherwise allowed. A
- * child's death still counts, as death: 18.20.25 ("will lose his children")
- * stays withheld, as do 18.18.5 (a bodily defect), 18.20.11 (ill-treating his
- * parents) and 20.3.2 (blindness), which share a part with a children clause.
- */
-const FEW_OR_NO_CHILDREN = "few or no children, which the owner allows";
-
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
      classical rule (Vajra reversed) after these answers had been cached
@@ -154,27 +143,6 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      word, so the caste clause would be printed; the traits are lost with it
      until a rebuild splits the clause off on its own. */
   "18.11.3": { withhold: "mentions caste", textIncludes: "men of low castes" },
-  /* Tagged "loss of sons", but the words are a separation, which the owner
-     allows as they do a spouse leaving. */
-  "17.2.7": {
-    show: "a separation from family, not a loss",
-    textIncludes: "separated from his kinsmen, wealth and sons",
-  },
-  "17.5.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
-  "17.6.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "daughters and very few sons" },
-  "18.4.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "will have no sons" },
-  "18.7.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "few wives and children" },
-  "18.7.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few children" },
-  "18.10.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "neither comfort nor sons" },
-  "18.16.3": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
-  "18.17.5": { show: FEW_OR_NO_CHILDREN, textIncludes: "will have no sons" },
-  "18.18.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "no sons and will carry burdens" },
-  /* Its other clause, "separated from his parents" when young, is a separation too. */
-  "18.20.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
-  "19.7.5": { show: FEW_OR_NO_CHILDREN, textIncludes: "he will have no sons" },
-  "19.8.1": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few children" },
-  "20.2.3": { show: FEW_OR_NO_CHILDREN, textIncludes: "he will have no sons" },
-  "20.3.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "neither sons nor wealth" },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
@@ -378,7 +346,7 @@ const LIFE_SYSTEM_PROMPT = insertOnce(
     insertOnce(
       SYSTEM_PROMPT,
       WITHHELD_END,
-      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having no children, or few, or losing them, does count, as harm to a child. So does any mention of caste, even in passing (\"the handicraft of men of low castes\"): split such a clause into a part of its own, so only it is withheld.\n</withheld>",
+      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having few children or none does not count either, and may be shown; losing a child does count, as a death. Any mention of caste does count, even in passing (\"the handicraft of men of low castes\"): split such a clause into a part of its own, so only it is withheld.\n</withheld>",
     ),
     "\n</records>",
     "\n- These chapters give a long list of results for one combination (\"the person will have red eyes, will be fond of vegetable food, will be wealthy, will have a wound on the head\"). Split such a record further, at its clause breaks, into parts that each hold neighbouring results of one kind: body and appearance; temperament and conduct; wealth and work; family, marriage and children; learning and skill; health. Keep each part a contiguous, verbatim run of the text, and open every part after the first with the condition's words in square brackets, so it reads alone. A withheld result then withholds only its own part.\n</records>",
