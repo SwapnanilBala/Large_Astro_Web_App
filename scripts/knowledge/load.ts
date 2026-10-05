@@ -34,7 +34,10 @@ import {
   KNOWLEDGE_EMBEDDING_MODEL,
   embeddingInput,
 } from "../../lib/knowledge/embedding";
+import { PLACEMENT_KEYS } from "../../lib/knowledge/placements";
 import { KNOWLEDGE_SOURCES } from "../../lib/knowledge/sources";
+
+const PLACEMENTS = new Set(PLACEMENT_KEYS);
 
 config({ path: ".env.local", quiet: true });
 
@@ -53,6 +56,8 @@ function corpora(): KnowledgeCorpus[] {
       for (const passage of corpus.passages) {
         const unknown = passage.yogaIds.filter((id) => !known.has(id));
         if (unknown.length > 0) throw new Error(`${passage.id}: unknown yoga ids ${unknown.join(", ")}.`);
+        const strange = [...passage.placements, ...passage.placementsAny].filter((key) => !PLACEMENTS.has(key));
+        if (strange.length > 0) throw new Error(`${passage.id}: unknown placement keys ${strange.join(", ")}.`);
       }
       return corpus;
     });
@@ -152,6 +157,8 @@ async function main() {
         notes: passage.notes,
         summary: passage.summary,
         yogaIds: passage.yogaIds,
+        placements: passage.placements,
+        placementsAny: passage.placementsAny,
         planets: passage.planets,
         lifeAreas: passage.lifeAreas,
         withheld: passage.withheld,
@@ -177,6 +184,8 @@ async function main() {
             notes: inserted("notes"),
             summary: inserted("summary"),
             yogaIds: inserted("yoga_ids"),
+            placements: inserted("placements"),
+            placementsAny: inserted("placements_any"),
             planets: inserted("planets"),
             lifeAreas: inserted("life_areas"),
             withheld: inserted("withheld"),

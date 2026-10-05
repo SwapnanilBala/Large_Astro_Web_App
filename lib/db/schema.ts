@@ -894,6 +894,14 @@ export const knowledgePassages = pgTable(
     /** Plain modern English: what the verse says, attributed to the text. */
     summary: text("summary").notNull(),
     yogaIds: text("yoga_ids").array().notNull(),
+    /**
+     * Every chart condition the passage's claim requires, as keys from
+     * lib/knowledge/placements.ts. A chart gets the passage when all of them
+     * hold, `placements <@ $chartKeys`, and, if `placements_any` is not empty,
+     * at least one of its alternatives does too: `placements_any && $chartKeys`.
+     */
+    placements: text("placements").array().notNull().default(sql`'{}'::text[]`),
+    placementsAny: text("placements_any").array().notNull().default(sql`'{}'::text[]`),
     planets: text("planets").array().notNull(),
     lifeAreas: text("life_areas").array().notNull(),
     withheld: boolean("withheld").notNull(),
@@ -912,6 +920,8 @@ export const knowledgePassages = pgTable(
       table.part,
     ),
     index("knowledge_passages_yoga_ids_idx").using("gin", table.yogaIds),
+    index("knowledge_passages_placements_idx").using("gin", table.placements),
+    index("knowledge_passages_placements_any_idx").using("gin", table.placementsAny),
     index("knowledge_passages_life_areas_idx").using("gin", table.lifeAreas),
     index("knowledge_passages_embedding_idx").using(
       "hnsw",

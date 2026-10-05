@@ -85,6 +85,13 @@
       "when": 1791141959624,
       "tag": "0011_knowledge_passages",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791159085771,
+      "tag": "0012_knowledge_placements",
+      "breakpoints": true
     }
   ]
 }
