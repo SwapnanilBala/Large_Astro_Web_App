@@ -47,6 +47,7 @@ import {
   type KnowledgeCorpus,
   type KnowledgePassage,
 } from "../../lib/knowledge/corpus";
+import { PLACEMENT_KEYS } from "../../lib/knowledge/placements";
 import { BRIHAT_JATAKA_1885 as SOURCE } from "../../lib/knowledge/sources";
 
 config({ path: ".env.local", quiet: true });
@@ -54,12 +55,21 @@ config({ path: ".env.local", quiet: true });
 const MODEL = "claude-opus-5-5";
 const EFFORT = "high";
 /**
- * Bump whenever the prompt or the answer schema changes, so stale cached
- * answers are not reused. 2 split list-like verses into one part per
- * combination: whole verses withheld a chapter-14 verse for one clause about
- * birth and let through a chapter-12 one that calls Bana yoga's native a jailor.
+ * Per chapter group. Bump a group's version whenever its prompt or answer
+ * schema changes, so stale cached answers are not reused.
+ *
+ *   yoga 2  split list-like verses into one part per combination: whole verses
+ *           withheld a chapter-14 verse for one clause about birth and let
+ *           through a chapter-12 one that calls Bana yoga's native a jailor.
+ *   life 3  the house and sign chapters (2026-10-04): the yoga prompt plus
+ *           placement keys, and the owner's line that a spouse leaving,
+ *           marrying late or marrying more than once may be shown.
+ *   life 4  a combination's list of results split into runs of one kind, and
+ *           having no children withheld. v3 withheld 10 of the 12 Moon-sign
+ *           verses whole, each for one clause about illness or the body.
  */
-const PROMPT_VERSION = 2;
+const PROMPT_VERSIONS = { yoga: 2, life: 4 } as const;
+type Group = keyof typeof PROMPT_VERSIONS;
 /**
  * The cleaned chapter's share of the raw chapter's length. Repair only removes
  * debris (96-99% in the first build); a passage dropped on the way would show
@@ -93,8 +103,18 @@ const WITHHELD_CHAPTERS: Record<number, string> = {
  *   addTags            tags the model could not have given
  *   tags               replaces the model's tags, where they are looser than the passage
  *   showDespiteChapter shows a passage that WITHHELD_CHAPTERS would withhold
+ *   withhold           withholds a passage the model let through, with the reason
+ *   textIncludes       words the passage must contain, or the build fails: parts
+ *                      renumber when a chapter is re-split, and an override must
+ *                      not quietly land on a neighbour
  */
-type PassageOverride = { addTags?: string[]; tags?: string[]; showDespiteChapter?: true };
+type PassageOverride = {
+  addTags?: string[];
+  tags?: string[];
+  showDespiteChapter?: true;
+  withhold?: string;
+  textIncludes?: string;
+};
 
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
@@ -116,25 +136,49 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      spouse (v. 5). Each is tagged only with the yoga built from it. */
   "23.1.7": { tags: ["kalatra_chandra_shukra"], showDespiteChapter: true },
   "23.5.4": { tags: ["kalatra_mangala_shani"], showDespiteChapter: true },
+  /* Mercury in Pisces: two harmless traits and "learned in the handicraft of
+     men of low castes" in one part. A reading quotes its sources word for
+     word, so the caste clause would be printed; the traits are lost with it
+     until a rebuild splits the clause off on its own. */
+  "18.11.3": { withhold: "mentions caste", textIncludes: "men of low castes" },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
 const OUT_FILE = resolve("lib/knowledge/corpus", `${SOURCE.slug}.json`);
 
 /**
- * The yoga chapters, by line range in the pinned OCR file (1-based, inclusive).
- * `heading` must match the range's first line, so a wrong range fails loudly
- * instead of shipping one chapter's verses under another's number.
+ * The chapters, by line range in the pinned OCR file (1-based, inclusive), in
+ * the book's order. `heading` must match the range's first line, so a wrong
+ * range fails loudly instead of shipping one chapter's verses under another's
+ * number.
+ *
+ * Two groups. The yoga chapters are reached through the yoga engine's ids. The
+ * life chapters -- professions, the Moon and the planets in the signs, aspects,
+ * the planets in the houses, the divisions -- are reached through placement
+ * keys, and serve the life areas.
  */
 const CHAPTERS = [
-  { chapter: 11, title: "On Raja Yoga, or the Birth of Kings", from: 8668, to: 9085, heading: /Raja\s+yo/i },
-  { chapter: 12, title: "On Nabhasa Yogas", from: 9088, to: 9711, heading: /Nabhasa/i },
-  { chapter: 13, title: "On Chandra (Lunar) Yogas", from: 9713, to: 10001, heading: /Chandra/i },
-  { chapter: 14, title: "On Double Planetary Yogas", from: 10004, to: 10580, heading: /Double\s+Planet/i },
-  { chapter: 15, title: "On Ascetic Yogas", from: 10583, to: 10697, heading: /Ascetic/i },
-  { chapter: 22, title: "On Miscellaneous Yogas", from: 12234, to: 12345, heading: /Miscellaneous/i },
-  { chapter: 23, title: "On Malefic Yogas", from: 12347, to: 12671, heading: /Malefic/i },
-] as const;
+  { chapter: 10, title: "On Avocations", from: 8538, to: 8665, heading: /^On\s+Avo/i, group: "life" },
+  { chapter: 11, title: "On Raja Yoga, or the Birth of Kings", from: 8668, to: 9085, heading: /Raja\s+yo/i, group: "yoga" },
+  { chapter: 12, title: "On Nabhasa Yogas", from: 9088, to: 9711, heading: /Nabhasa/i, group: "yoga" },
+  { chapter: 13, title: "On Chandra (Lunar) Yogas", from: 9713, to: 10001, heading: /Chandra/i, group: "yoga" },
+  { chapter: 14, title: "On Double Planetary Yogas", from: 10004, to: 10580, heading: /Double\s+Planet/i, group: "yoga" },
+  { chapter: 15, title: "On Ascetic Yogas", from: 10583, to: 10697, heading: /Ascetic/i, group: "yoga" },
+  { chapter: 17, title: "On the Moon in the Several Signs", from: 10891, to: 11049, heading: /Moon\s+In\s+T/i, group: "life" },
+  {
+    chapter: 18,
+    title: "On the Sun, Mars and Other Planets in the Several Signs",
+    from: 11052,
+    to: 11535,
+    heading: /Sun,\s+Mars/i,
+    group: "life",
+  },
+  { chapter: 19, title: "On Planetary Aspects", from: 11538, to: 11768, heading: /Planetary\s+Aspects/i, group: "life" },
+  { chapter: 20, title: "On the Planets in the Bhavas", from: 11771, to: 11996, heading: /Planets\s+in\s+the\s+Bh/i, group: "life" },
+  { chapter: 21, title: "On the Planets in the Several Vargas", from: 11999, to: 12231, heading: /Several\s+Vargas/i, group: "life" },
+  { chapter: 22, title: "On Miscellaneous Yogas", from: 12234, to: 12345, heading: /Miscellaneous/i, group: "yoga" },
+  { chapter: 23, title: "On Malefic Yogas", from: 12347, to: 12671, heading: /Malefic/i, group: "yoga" },
+] as const satisfies readonly { chapter: number; title: string; from: number; to: number; heading: RegExp; group: Group }[];
 
 type Chapter = (typeof CHAPTERS)[number];
 
@@ -326,46 +370,81 @@ id | name | category | what the app detects
 ${YOGA_DEFINITIONS.map((d) => `${d.id} | ${d.name} | ${d.category} | ${d.description}`).join("\n")}
 </catalogue>`;
 
-const OUTPUT_SCHEMA = {
-  type: "object",
-  properties: {
-    records: {
-      type: "array",
-      items: {
-        type: "object",
-        properties: {
-          verse: { type: "integer" },
-          part: { type: "integer" },
-          kind: { type: "string", enum: [...KNOWLEDGE_PASSAGE_KINDS] },
-          text: { type: "string" },
-          notes: { type: "string" },
-          summary: { type: "string" },
-          yoga_ids: { type: "array", items: { type: "string", enum: YOGA_IDS } },
-          planets: { type: "array", items: { type: "string", enum: [...KNOWLEDGE_PLANETS] } },
-          life_areas: { type: "array", items: { type: "string", enum: [...KNOWLEDGE_LIFE_AREAS] } },
-          withheld: { type: "boolean" },
-          withheld_reason: { type: "string" },
+function insertOnce(text: string, anchor: string, replacement: string): string {
+  if (text.split(anchor).length !== 2) throw new Error(`Prompt anchor not found exactly once: ${anchor}`);
+  return text.replace(anchor, replacement);
+}
+
+/*
+ * The life chapters' prompt: the yoga prompt with the owner's marriage line
+ * added to <withheld> and a <placements> section before the catalogue. Built
+ * from the yoga prompt rather than copied, so the rules they share cannot
+ * drift apart.
+ */
+const WITHHELD_END = "is an empty string when `withheld` is false.\n</withheld>";
+const LIFE_SYSTEM_PROMPT = insertOnce(
+  insertOnce(
+    insertOnce(
+      SYSTEM_PROMPT,
+      WITHHELD_END,
+      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having no children, or few, or losing them, does count, as harm to a child.\n</withheld>",
+    ),
+    "\n</records>",
+    "\n- These chapters give a long list of results for one combination (\"the person will have red eyes, will be fond of vegetable food, will be wealthy, will have a wound on the head\"). Split such a record further, at its clause breaks, into parts that each hold neighbouring results of one kind: body and appearance; temperament and conduct; wealth and work; family, marriage and children; learning and skill; health. Keep each part a contiguous, verbatim run of the text, and open every part after the first with the condition's words in square brackets, so it reads alone. A withheld result then withholds only its own part.\n</records>",
+  ),
+  "<catalogue>",
+  `<placements>
+Every condition the record's claim requires of a birth chart, as keys from the schema's list. The claim applies to a chart only when all of them hold, so list each condition the record states, and nothing it does not.
+  <Planet>.house.<n>          the planet in the nth house from the ascendant ("the Sun in the 10th house" is Sun.house.10)
+  <Planet>.sign.<Sign>        the planet in that sign ("the Moon in Taurus" is Moon.sign.Taurus)
+  <Planet>.dignity.exalted, .debilitated or .own    the planet in its exaltation, debilitation or own sign
+  <Planet>.aspects.<Planet>   the first planet casts its full aspect on the second ("the Moon aspected by Jupiter" is Jupiter.aspects.Moon)
+  ascendant.sign.<Sign>       that sign rising
+- If any condition the claim needs cannot be stated exactly in these keys -- a navamsa, drekkana or other division, a waxing or waning Moon, the lord of a house, "a benefic" without naming the planet, strength or weakness, a day or night birth -- the record gets an empty list, not the part that can be stated: listing only some conditions shows the passage to charts it does not describe.
+- Alternatives ("the Sun or Mars in the 10th") should already be separate records; if one remains, give it an empty list.
+- Bracketed opening words are part of the condition.
+</placements>
+
+<catalogue>`,
+);
+
+const PROMPTS: Record<Group, string> = { yoga: SYSTEM_PROMPT, life: LIFE_SYSTEM_PROMPT };
+
+/** The answer schema; the life chapters' records also carry placement keys. */
+function outputSchema(group: Group) {
+  const properties: Record<string, unknown> = {
+    verse: { type: "integer" },
+    part: { type: "integer" },
+    kind: { type: "string", enum: [...KNOWLEDGE_PASSAGE_KINDS] },
+    text: { type: "string" },
+    notes: { type: "string" },
+    summary: { type: "string" },
+    yoga_ids: { type: "array", items: { type: "string", enum: YOGA_IDS } },
+    planets: { type: "array", items: { type: "string", enum: [...KNOWLEDGE_PLANETS] } },
+    life_areas: { type: "array", items: { type: "string", enum: [...KNOWLEDGE_LIFE_AREAS] } },
+    withheld: { type: "boolean" },
+    withheld_reason: { type: "string" },
+  };
+  if (group === "life") {
+    properties.placements = { type: "array", items: { type: "string", enum: [...PLACEMENT_KEYS] } };
+  }
+  return {
+    type: "object",
+    properties: {
+      records: {
+        type: "array",
+        items: {
+          type: "object",
+          properties,
+          required: Object.keys(properties),
+          additionalProperties: false,
         },
-        required: [
-          "verse",
-          "part",
-          "kind",
-          "text",
-          "notes",
-          "summary",
-          "yoga_ids",
-          "planets",
-          "life_areas",
-          "withheld",
-          "withheld_reason",
-        ],
-        additionalProperties: false,
       },
     },
-  },
-  required: ["records"],
-  additionalProperties: false,
-};
+    required: ["records"],
+    additionalProperties: false,
+  };
+}
 
 interface AnsweredRecord {
   verse: number;
@@ -379,6 +458,9 @@ interface AnsweredRecord {
   life_areas: (typeof KNOWLEDGE_LIFE_AREAS)[number][];
   withheld: boolean;
   withheld_reason: string;
+  /** Life chapters only. */
+  placements?: string[];
+  placements_any?: string[];
 }
 
 interface ChapterAnswer {
@@ -399,9 +481,9 @@ async function askClaude(chapter: Chapter, ocr: string): Promise<ChapterAnswer> 
     max_tokens: 64000,
     output_config: {
       effort: EFFORT,
-      format: { type: "json_schema", schema: OUTPUT_SCHEMA },
+      format: { type: "json_schema", schema: outputSchema(chapter.group) },
     },
-    system: [{ type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+    system: [{ type: "text", text: PROMPTS[chapter.group], cache_control: { type: "ephemeral" } }],
     messages: [
       {
         role: "user",
@@ -416,17 +498,23 @@ async function askClaude(chapter: Chapter, ocr: string): Promise<ChapterAnswer> 
   const block = message.content.find((part) => part.type === "text");
   if (!block || block.type !== "text") throw new Error(`Chapter ${chapter.chapter}: no text in the answer.`);
   const { records } = JSON.parse(block.text) as { records: AnsweredRecord[] };
-  return { promptVersion: PROMPT_VERSION, model: MODEL, effort: EFFORT, usage: message.usage, records };
+  return { promptVersion: PROMPT_VERSIONS[chapter.group], model: MODEL, effort: EFFORT, usage: message.usage, records };
+}
+
+/** A chapter's cached answer, if one was written under its group's current prompt. */
+function cachedAnswer(chapter: Chapter): ChapterAnswer | null {
+  const file = resolve(CACHE_DIR, `chapter-${chapter.chapter}.json`);
+  if (!existsSync(file)) return null;
+  const cached = JSON.parse(readFileSync(file, "utf8")) as ChapterAnswer;
+  const current =
+    cached.promptVersion === PROMPT_VERSIONS[chapter.group] && cached.model === MODEL && cached.effort === EFFORT;
+  return current ? cached : null;
 }
 
 async function chapterAnswer(chapter: Chapter, ocr: string, fresh: boolean): Promise<ChapterAnswer> {
   const file = resolve(CACHE_DIR, `chapter-${chapter.chapter}.json`);
-  if (!fresh && existsSync(file)) {
-    const cached = JSON.parse(readFileSync(file, "utf8")) as ChapterAnswer;
-    if (cached.promptVersion === PROMPT_VERSION && cached.model === MODEL && cached.effort === EFFORT) {
-      return cached;
-    }
-  }
+  const cached = fresh ? null : cachedAnswer(chapter);
+  if (cached) return cached;
   const startedAt = Date.now();
   const answer = await askClaude(chapter, ocr);
   writeFileSync(file, `${JSON.stringify(answer, null, 2)}\n`);
@@ -441,6 +529,22 @@ async function chapterAnswer(chapter: Chapter, ocr: string, fresh: boolean): Pro
 
 function inOrder<T extends string>(values: T[], order: readonly T[]): T[] {
   return order.filter((value) => values.includes(value));
+}
+
+/**
+ * A record's two placement lists, normalised. A lone alternative is a plain
+ * condition. An alternative that is also required makes the either/or always
+ * met, so the alternatives say nothing and are dropped.
+ */
+function conditionsOf(answered: AnsweredRecord): { placements: string[]; placementsAny: string[] } {
+  const all = new Set(answered.placements ?? []);
+  let any = [...new Set(answered.placements_any ?? [])];
+  if (any.some((key) => all.has(key))) any = [];
+  if (any.length === 1) {
+    all.add(any[0]);
+    any = [];
+  }
+  return { placements: inOrder([...all], PLACEMENT_KEYS), placementsAny: inOrder(any, PLACEMENT_KEYS) };
 }
 
 function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): KnowledgePassage[] {
@@ -468,7 +572,11 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       throw new Error(`Chapter ${chapter.chapter} ${answered.verse}.${answered.part}: withheld without a reason.`);
     }
     const agreement = ocrAgreement(scoredText({ text: answered.text, notes }), rawWords, positionsOf);
-    const override = PASSAGE_OVERRIDES[`${chapter.chapter}.${answered.verse}.${answered.part}`] ?? {};
+    const ref = `${chapter.chapter}.${answered.verse}.${answered.part}`;
+    const override = PASSAGE_OVERRIDES[ref] ?? {};
+    if (override.textIncludes && !answered.text.includes(override.textIncludes)) {
+      throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
+    }
     const chapterWithheld = chapter.chapter in WITHHELD_CHAPTERS && !override.showDespiteChapter;
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
@@ -485,14 +593,15 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
         [...new Set(override.tags ?? [...answered.yoga_ids, ...(override.addTags ?? [])])],
         YOGA_IDS,
       ),
+      ...conditionsOf(answered),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: answered.withheld || chapterWithheld,
+      withheld: answered.withheld || chapterWithheld || Boolean(override.withhold),
       withheldReason: answered.withheld
         ? answered.withheld_reason.trim()
         : chapterWithheld
           ? WITHHELD_CHAPTERS[chapter.chapter]
-          : null,
+          : (override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });
@@ -523,10 +632,18 @@ async function main() {
     return;
   }
 
-  /* The first call writes the prompt cache that the other six then read. */
-  const [first, ...rest] = CHAPTERS;
+  /* In each group, the first chapter that has to ask runs alone and writes the
+     prompt cache its group's other chapters then read. Cached chapters ask
+     nothing. */
   const answers = new Map<number, ChapterAnswer>();
-  answers.set(first.chapter, await chapterAnswer(first, ocrByChapter.get(first.chapter)!, isFresh(first)));
+  const asking = CHAPTERS.filter((chapter) => isFresh(chapter) || !cachedAnswer(chapter));
+  const leads = (Object.keys(PROMPT_VERSIONS) as Group[])
+    .map((group) => asking.find((chapter) => chapter.group === group))
+    .filter((chapter): chapter is Chapter => chapter !== undefined);
+  for (const lead of leads) {
+    answers.set(lead.chapter, await chapterAnswer(lead, ocrByChapter.get(lead.chapter)!, isFresh(lead)));
+  }
+  const rest = CHAPTERS.filter((chapter) => !answers.has(chapter.chapter));
   const others = await Promise.all(
     rest.map((chapter) => chapterAnswer(chapter, ocrByChapter.get(chapter.chapter)!, isFresh(chapter))),
   );
@@ -592,7 +709,7 @@ async function main() {
 
   const corpus: KnowledgeCorpus = knowledgeCorpusSchema.parse({
     source: SOURCE.slug,
-    build: { model: MODEL, effort: EFFORT, promptVersion: PROMPT_VERSION },
+    build: { model: MODEL, effort: EFFORT, promptVersions: { ...PROMPT_VERSIONS } },
     passages,
   });
   mkdirSync(dirname(OUT_FILE), { recursive: true });

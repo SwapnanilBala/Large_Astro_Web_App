@@ -18,6 +18,7 @@ import {
   passageId,
   scanAgreementFloor,
 } from "../knowledge/corpus";
+import { PLACEMENT_KEYS } from "../knowledge/placements";
 import { KNOWLEDGE_SOURCES } from "../knowledge/sources";
 
 const CORPUS_DIR = join(process.cwd(), "lib", "knowledge", "corpus");
@@ -30,6 +31,7 @@ const corpora = readdirSync(CORPUS_DIR)
   }));
 
 const yogaIds = new Set(YOGA_DEFINITIONS.map((definition) => definition.id));
+const placementKeys = new Set(PLACEMENT_KEYS);
 
 describe("knowledge corpora", () => {
   it("exist", () => {
@@ -80,6 +82,14 @@ describe("knowledge corpora", () => {
         }
       });
 
+      it("tag only placement keys in the vocabulary, and never offer a single alternative", () => {
+        for (const passage of corpus.passages) {
+          const keys = [...passage.placements, ...passage.placementsAny];
+          expect(keys.filter((key) => !placementKeys.has(key)), passage.id).toEqual([]);
+          expect(passage.placementsAny.length, passage.id).not.toBe(1);
+        }
+      });
+
       it("give a reason for every withheld passage and for no other", () => {
         for (const passage of corpus.passages) {
           expect(passage.withheldReason !== null, passage.id).toBe(passage.withheld);
@@ -122,6 +132,51 @@ describe("the Brihat Jataka corpus", () => {
     const cited = YOGA_DEFINITIONS.filter((definition) => definition.source?.startsWith("Brihat Jataka ch. 12"));
     expect(cited.length).toBeGreaterThanOrEqual(32);
     expect(cited.map((definition) => definition.id).filter((id) => !tagged.has(id))).toEqual([]);
+  });
+
+  const LIFE_CHAPTERS = [10, 17, 18, 19, 20, 21];
+
+  it("covers the life chapters, with most of the Moon, sign and house verses tagged by placement", () => {
+    // Measured on the 2026-10-04 build: of the passages shown, 63 of 65 in
+    // chapter 17, 93 of 115 in chapter 18 and 54 of 70 in chapter 20 carry
+    // placement keys. The rest are general rules, or need a navamsa lord or
+    // an either/or the build did not yet ask for. Chapters 10 and 21 rest on
+    // divisional lords and are reached by none.
+    const chapters = new Set(corpus?.passages.map((passage) => passage.chapter));
+    for (const chapter of LIFE_CHAPTERS) expect(chapters.has(chapter), `chapter ${chapter}`).toBe(true);
+    const share = (chapter: number) => {
+      const shown = corpus?.passages.filter((passage) => passage.chapter === chapter && !passage.withheld) ?? [];
+      return shown.filter((passage) => passage.placements.length + passage.placementsAny.length > 0).length / shown.length;
+    };
+    expect(share(17)).toBeGreaterThan(0.9);
+    expect(share(18)).toBeGreaterThan(0.75);
+    expect(share(20)).toBeGreaterThan(0.7);
+  });
+
+  it("keeps placement keys off the yoga chapters, which are reached by their yoga ids", () => {
+    const tagged = corpus?.passages.filter(
+      (passage) =>
+        !LIFE_CHAPTERS.includes(passage.chapter) && passage.placements.length + passage.placementsAny.length > 0,
+    );
+    expect(tagged?.map((passage) => passage.id)).toEqual([]);
+  });
+
+  it("shows no passage that speaks of death, crime, caste and the rest", () => {
+    // A reading quotes its sources word for word, so a withheld topic in a
+    // shown passage is printed even when the note itself steers clear. Words
+    // a passage may use harmlessly are listed with the reason.
+    const ALLOWED: Record<string, string> = {
+      "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
+    };
+    const FORBIDDEN =
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|impoten\w*|childless|barren)\b/i;
+    const found = (corpus?.passages ?? [])
+      .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
+      .flatMap((passage) => {
+        const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
+        return match ? [`${passage.id}: ${match[0]}`] : [];
+      });
+    expect(found).toEqual([]);
   });
 
   it("shows three passages of the malefic-yogas chapter, the marriage ones, each tied only to its own yoga", () => {
