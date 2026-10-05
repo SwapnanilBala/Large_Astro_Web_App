@@ -646,6 +646,21 @@
   }
 }
 
+/* Devanagari and Bengali letters hang from one continuous headline stroke;
+   letter-spacing cuts it into pieces ("यह पाठ क्यों" became six islands), and
+   upper-casing does nothing for them anyway. The spaced small labels set
+   tight in those two scripts. */
+.label:lang(hi),
+.label:lang(bn),
+.meta:lang(hi),
+.meta:lang(bn),
+.groupLabel:lang(hi),
+.groupLabel:lang(bn),
+.pill:lang(hi),
+.pill:lang(bn) {
+  letter-spacing: 0;
+}
+
 /* ── Ethereal Dawn ──
  *
  * The bright accent tiers that read on navy are too pale on cream (teal-light

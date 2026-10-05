@@ -184,6 +184,15 @@
   }
 }
 
+/* The kickers' tracking splits the headline stroke Devanagari and Bengali
+   letters hang from; see the same rule in reading-room.module.css. */
+.kicker:lang(hi),
+.kicker:lang(bn),
+.sectionKicker:lang(hi),
+.sectionKicker:lang(bn) {
+  letter-spacing: 0;
+}
+
 /* ── Ethereal Dawn ──
  *
  * the full reading was built for the dark tree: ink washes for surfaces, and
