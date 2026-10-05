@@ -185,7 +185,12 @@
     "actionHintCoordinates": "Esperando las coordenadas…",
     "languageLabel": "Idioma",
     "switchToLightMode": "Cambiar a modo claro",
-    "switchToDarkMode": "Cambiar a modo oscuro"
+    "switchToDarkMode": "Cambiar a modo oscuro",
+    "birthSexLabel": "Sexo al nacer",
+    "birthSexHint": "Opcional. Algunas lecturas, como el planeta de tu pareja, se leen de forma distinta para mujeres y hombres.",
+    "birthSexFemale": "Mujer",
+    "birthSexMale": "Hombre",
+    "birthSexUnspecified": "Prefiero no decirlo"
   },
   "engineSelect": {
     "kicker": "Ajustes de la carta",

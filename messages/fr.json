@@ -185,7 +185,12 @@
     "actionHintCoordinates": "En attente des coordonnées…",
     "languageLabel": "Langue",
     "switchToLightMode": "Passer en mode clair",
-    "switchToDarkMode": "Passer en mode sombre"
+    "switchToDarkMode": "Passer en mode sombre",
+    "birthSexLabel": "Sexe à la naissance",
+    "birthSexHint": "Facultatif. Certaines lectures, comme la planète de votre partenaire, se lisent différemment pour les femmes et pour les hommes.",
+    "birthSexFemale": "Femme",
+    "birthSexMale": "Homme",
+    "birthSexUnspecified": "Je préfère ne pas le dire"
   },
   "engineSelect": {
     "kicker": "Réglages du thème",

@@ -185,7 +185,12 @@
     "actionHintCoordinates": "निर्देशांक की प्रतीक्षा…",
     "languageLabel": "भाषा",
     "switchToLightMode": "लाइट मोड पर जाएं",
-    "switchToDarkMode": "डार्क मोड पर जाएं"
+    "switchToDarkMode": "डार्क मोड पर जाएं",
+    "birthSexLabel": "जन्म के समय लिंग",
+    "birthSexHint": "वैकल्पिक। कुछ पाठ, जैसे आपके साथी का ग्रह, स्त्रियों और पुरुषों के लिए अलग ढंग से पढ़े जाते हैं।",
+    "birthSexFemale": "स्त्री",
+    "birthSexMale": "पुरुष",
+    "birthSexUnspecified": "बताना नहीं चाहते"
   },
   "engineSelect": {
     "kicker": "कुंडली सेटिंग्स",

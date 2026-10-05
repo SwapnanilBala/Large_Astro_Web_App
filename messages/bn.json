@@ -185,7 +185,12 @@
     "actionHintCoordinates": "স্থানাঙ্কের অপেক্ষা…",
     "languageLabel": "ভাষা",
     "switchToLightMode": "লাইট মোডে যান",
-    "switchToDarkMode": "ডার্ক মোডে যান"
+    "switchToDarkMode": "ডার্ক মোডে যান",
+    "birthSexLabel": "জন্মের সময় লিঙ্গ",
+    "birthSexHint": "ঐচ্ছিক। কিছু পাঠ, যেমন আপনার সঙ্গীর গ্রহ, নারী ও পুরুষের জন্য আলাদাভাবে পড়া হয়।",
+    "birthSexFemale": "নারী",
+    "birthSexMale": "পুরুষ",
+    "birthSexUnspecified": "বলতে চাই না"
   },
   "engineSelect": {
     "kicker": "কুণ্ডলী সেটিংস",
