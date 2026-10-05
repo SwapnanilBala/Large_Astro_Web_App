@@ -2,7 +2,8 @@
  * Every label the full reading can show is in English and in the other five
  * languages, with the same blanks.
  *
- * The page reads three catalogs: its own route catalog (fullReading.*), the
+ * The page reads three catalogs, mostly through the room builders in
+ * app/components/reading-room that /m shares: its own route catalog (fullReading.*), the
  * yoga panel's (strength.*, for family, strength and trait labels) and the
  * desktop baseline (planetNames.*). The literal keys are read straight out of
  * the page's files. The yoga room also builds three families at runtime from
@@ -22,8 +23,8 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
-import { FINDING_THEMES, FINDING_THEME_KEYS } from "@/app/(desktop)/insights/full-reading/findings-room";
-import { YOGA_FAMILIES, YOGA_STRENGTHS } from "@/app/(desktop)/insights/full-reading/yogas-room";
+import { FINDING_THEMES, FINDING_THEME_KEYS } from "@/app/components/reading-room/findings";
+import { YOGA_FAMILIES, YOGA_STRENGTHS } from "@/app/components/reading-room/yogas";
 
 type Tree = Record<string, unknown>;
 
@@ -37,13 +38,21 @@ const placeholders = (text: string) => [...new Set(text.match(/\{\w+\}/g) ?? [])
    hands to useRouteMessages. */
 const ENGLISH: Tree = { ...(en as Tree), ...(enFullReading as Tree), ...(enStrength as Tree) };
 
-const PAGE_DIR = join(process.cwd(), "app", "(desktop)", "insights", "full-reading");
+/* The page, and the room builders it shares with /m, which hold most of the
+   keys. */
+const SOURCE_DIRS = [
+  join(process.cwd(), "app", "(desktop)", "insights", "full-reading"),
+  join(process.cwd(), "app", "components", "reading-room"),
+];
 const NAMESPACES = new Set(["fullReading", "strength", "planetNames"]);
 const LITERAL_KEYS = [
   ...new Set(
-    readdirSync(PAGE_DIR)
-      .filter((file) => /\.tsx?$/.test(file))
-      .flatMap((file) => [...readFileSync(join(PAGE_DIR, file), "utf8").matchAll(/["'](\w+(?:\.\w+)+)["']/g)])
+    SOURCE_DIRS.flatMap((dir) =>
+      readdirSync(dir)
+        .filter((file) => /\.tsx?$/.test(file))
+        .map((file) => readFileSync(join(dir, file), "utf8")),
+    )
+      .flatMap((source) => [...source.matchAll(/["'](\w+(?:\.\w+)+)["']/g)])
       .map((match) => match[1])
       .filter((key) => NAMESPACES.has(key.split(".")[0])),
   ),

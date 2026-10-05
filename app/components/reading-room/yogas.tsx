@@ -1,18 +1,10 @@
-"use client";
-
 import type { YogaDetectionResult } from "@/lib/astro-types";
-import { useRouteMessages } from "@/lib/i18n-context";
-import fullReadingMessages from "@/messages/en.full-reading.json";
-import strengthMessages from "@/messages/en.strength.json";
-import ReadingRoom, {
-  type ReadingRoomFilter,
-  type ReadingRoomGroup,
-  type ReadingRoomItem,
-} from "./reading-room";
-import room from "./reading-room.module.css";
+import type { ReadingRoomContent, ReadingRoomFilter, ReadingRoomGroup, ReadingRoomItem } from "./ReadingRoom";
+import type { ReadingRoomClasses, Translate } from "./classes";
+import { roomNavigation } from "./navigation";
 
 /*
- * The chart's yogas, in the reading room.
+ * The chart's yogas, as reading-room content.
  *
  * Grouped by family rather than by strength, which is what the old three-up
  * grid did: 34 cards in three strength bands said little that a strength mark
@@ -21,8 +13,10 @@ import room from "./reading-room.module.css";
  * Strength stays a filter. Within a family the engine's own order holds
  * (strength, then its score), because Array.prototype.sort is stable.
  *
- * The family and strength names, the trait label and the planet names are the
- * yoga panel's own keys, already translated, rather than new copies of them.
+ * `tr` must resolve fullReading (messages/en.full-reading.json) and `ts` the
+ * yoga panel's strength namespace (messages/en.strength.json): the family and
+ * strength names, the trait label and the planet names are that panel's own
+ * keys, already translated, rather than new copies of them.
  */
 
 type Category = YogaDetectionResult["category"];
@@ -66,10 +60,12 @@ function sanskritLine(yoga: YogaDetectionResult): string | null {
   return sanskrit && sanskrit !== yoga.name ? sanskrit : null;
 }
 
-export default function YogasRoom({ yogas }: { yogas: YogaDetectionResult[] }) {
-  const tr = useRouteMessages(fullReadingMessages);
-  const ts = useRouteMessages(strengthMessages);
-
+export function buildYogaRoom(
+  yogas: YogaDetectionResult[],
+  tr: Translate,
+  ts: Translate,
+  c: ReadingRoomClasses,
+): ReadingRoomContent {
   /* Same lookup as the yoga panel: the shared planet names first, then the
      strength catalog's own keys for the two nodes, then the name as sent. */
   const planetLabel = (planet: string) => {
@@ -113,15 +109,15 @@ export default function YogasRoom({ yogas }: { yogas: YogaDetectionResult[] }) {
       tags: [yoga.strength],
       row: (
         <>
-          <span className={room.mark}>
-            <span className={room.strengthMark} data-strength={yoga.strength} />
+          <span className={c.mark}>
+            <span className={c.strengthMark} data-strength={yoga.strength} />
           </span>
-          <span className={room.rowText}>
-            <span className={room.rowTitle}>{yoga.name}</span>
-            <span className={room.rowMeta}>{strengthLabel(yoga.strength)}</span>
+          <span className={c.rowText}>
+            <span className={c.rowTitle}>{yoga.name}</span>
+            <span className={c.rowMeta}>{strengthLabel(yoga.strength)}</span>
           </span>
           {glyphs.trim() && (
-            <span className={room.glyphs} aria-hidden="true">
+            <span className={c.glyphs} aria-hidden="true">
               {glyphs}
               {yoga.involved_planets.length > 3 && " +"}
             </span>
@@ -130,39 +126,36 @@ export default function YogasRoom({ yogas }: { yogas: YogaDetectionResult[] }) {
       ),
       detail: (headingId) => (
         <article>
-          <p className={room.meta}>
-            <span className={room.tone} data-tone="quiet">
+          <p className={c.meta}>
+            <span className={c.tone} data-tone="quiet">
               {familyLabel(yoga.category)}
             </span>
-            <span className={room.pill} data-strength={yoga.strength}>
+            <span className={c.pill} data-strength={yoga.strength}>
               {strengthLabel(yoga.strength)}
             </span>
           </p>
-          <h3 id={headingId} className={room.title}>
+          <h3 id={headingId} className={c.title}>
             {yoga.name}
           </h3>
           {sanskrit && (
-            <p className={room.subtitle} lang="sa">
+            <p className={c.subtitle} lang="sa">
               {sanskrit}
             </p>
           )}
           {yoga.involved_planets.length > 0 && (
-            <p className={room.planets}>
+            <p className={c.planets}>
               {yoga.involved_planets
                 .map((planet) => `${PLANET_GLYPHS[planet] ?? ""} ${planetLabel(planet)}`.trim())
                 .join("  ·  ")}
             </p>
           )}
-          <div className={room.detailBody}>
+          <div className={c.detailBody}>
             <div>
-              <div className={room.block}>
-                <p className={room.label}>{tr("fullReading.yogaDoes")}</p>
-                <p className={room.text}>{yoga.effects}</p>
+              <div className={c.block}>
+                <p className={c.label}>{tr("fullReading.yogaDoes")}</p>
+                <p className={c.text}>{yoga.effects}</p>
                 {traits.length > 0 && (
-                  <ul
-                    className={room.traits}
-                    aria-label={ts("strength.yogas.traitsAriaLabel", { name: yoga.name })}
-                  >
+                  <ul className={c.traits} aria-label={ts("strength.yogas.traitsAriaLabel", { name: yoga.name })}>
                     {traits.map((trait) => (
                       <li key={trait}>{trait}</li>
                     ))}
@@ -170,25 +163,25 @@ export default function YogasRoom({ yogas }: { yogas: YogaDetectionResult[] }) {
                 )}
               </div>
               {yoga.activation_timing && (
-                <div className={room.block}>
-                  <p className={room.label}>{tr("fullReading.yogaShows")}</p>
-                  <p className={room.text}>{yoga.activation_timing}</p>
+                <div className={c.block}>
+                  <p className={c.label}>{tr("fullReading.yogaShows")}</p>
+                  <p className={c.text}>{yoga.activation_timing}</p>
                 </div>
               )}
               {yoga.cancellation && (
-                <div className={room.block}>
-                  <p className={room.label}>{tr("fullReading.yogaSoftened")}</p>
-                  <p className={room.text}>{yoga.cancellation}</p>
+                <div className={c.block}>
+                  <p className={c.label}>{tr("fullReading.yogaSoftened")}</p>
+                  <p className={c.text}>{yoga.cancellation}</p>
                 </div>
               )}
             </div>
-            <aside className={room.evidence} aria-labelledby={`${headingId}-why`}>
-              <p id={`${headingId}-why`} className={room.label}>
+            <aside className={c.evidence} aria-labelledby={`${headingId}-why`}>
+              <p id={`${headingId}-why`} className={c.label}>
                 {tr("fullReading.yogaForms")}
               </p>
-              <p className={room.asideText}>{yoga.description}</p>
+              <p className={c.asideText}>{yoga.description}</p>
               {yoga.source && (
-                <p className={room.basis}>
+                <p className={c.basis}>
                   {tr("fullReading.yogaSource")}: {yoga.source}
                 </p>
               )}
@@ -199,18 +192,12 @@ export default function YogasRoom({ yogas }: { yogas: YogaDetectionResult[] }) {
     };
   });
 
-  return (
-    <ReadingRoom
-      items={items}
-      groups={groups}
-      listLabel={tr("fullReading.yogasList")}
-      filters={filters}
-      filterLabel={tr("fullReading.yogasFilter")}
-      previousLabel={tr("fullReading.previous")}
-      nextLabel={tr("fullReading.next")}
-      positionLabel={(position, total) =>
-        tr("fullReading.position", { position: String(position), total: String(total) })
-      }
-    />
-  );
+  return {
+    items,
+    groups,
+    filters,
+    listLabel: tr("fullReading.yogasList"),
+    filterLabel: tr("fullReading.yogasFilter"),
+    ...roomNavigation(tr),
+  };
 }

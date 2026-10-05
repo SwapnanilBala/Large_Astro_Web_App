@@ -4,8 +4,9 @@ import type { ChartApiResponse, HousePlacement, PlanetPosition } from "@/lib/ast
  * The karma reading: four short readings built from the chart already on the
  * page -- the nodal axis, the Moon's nakshatra, the 10th house, the strongest
  * planet and yoga -- with no model call. It was the body of
- * past-life-insights-panel.tsx; the full reading now lays the four out in its
- * reading room (karma-room.tsx) and this module only builds them.
+ * past-life-insights-panel.tsx. Both trees lay the four out in a reading room
+ * (app/components/reading-room/karma.tsx); this module only builds them, so
+ * the desktop full reading and /m read the same words.
  */
 
 export type InsightTone = "gold" | "teal" | "coral";
@@ -317,3 +318,7 @@ export function karmaSignals(payload: ChartApiResponse): string[] {
     dasha ? `${dasha.current_dasha} / ${dasha.current_antardasha}` : "",
   ].filter(Boolean);
 }
+
+/** Said under the karma reading wherever it is shown. English, like the reading. */
+export const KARMA_NOTE =
+  "These insights are framed as reflective astrology, not fixed destiny. The useful part is the pattern your chart actually carries: what to mature, what to release, and what kind of work makes the old story serve the present one.";

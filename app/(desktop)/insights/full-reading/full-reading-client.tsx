@@ -6,9 +6,7 @@ import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBo
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { useRouteMessages } from "@/lib/i18n-context";
 import fullReadingMessages from "@/messages/en.full-reading.json";
-import FindingsRoom from "./findings-room";
-import YogasRoom from "./yogas-room";
-import KarmaRoom from "./karma-room";
+import { FindingsRoom, KarmaRoom, YogasRoom } from "./rooms";
 import styles from "./full-reading.module.css";
 
 /*
@@ -19,10 +17,11 @@ import styles from "./full-reading.module.css";
  * abreast for the findings, three for the yogas -- which on a desktop ran to
  * some twenty screens of boxes that all looked alike.
  *
- * Now each block is a reading room (reading-room.tsx): a pinned list on the
- * left, one item read in full on the right with its evidence beside it. The
- * findings, the yogas and the karma reading each get one, so the whole page is
- * about three screens and every item is one click from any other.
+ * Now each block is a reading room (app/components/reading-room): a pinned
+ * list on the left, one item read in full on the right with its evidence beside
+ * it. The findings, the yogas and the karma reading each get one, so the whole
+ * page is about three screens and every item is one click from any other. /m
+ * shows the same three rooms, stacked.
  *
  * All three render with the page rather than as lazily imported panels: their
  * data is already in the payload, and the "Preparing…" placeholders they used

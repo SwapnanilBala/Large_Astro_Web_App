@@ -2,24 +2,32 @@
 
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi";
-import styles from "./reading-room.module.css";
+import type { ReadingRoomClasses } from "./classes";
 
 /*
- * The reading room: a list on the left, the chosen item in full on the right.
+ * The reading room: a list, and the chosen item read in full with its
+ * evidence.
  *
  * The full reading used to be a grid of cards -- two abreast for the findings,
  * three for the yogas -- which on a desktop meant some twenty screens of boxes
- * that all looked alike. Here the list carries one line per item, so the whole
- * set can be scanned at once, and only one item is read at a time, with its
- * evidence already open beside it.
+ * that all looked alike, and on a phone one long column of them. Here the list
+ * carries one line per item, so the whole set can be scanned at once, and only
+ * one item is read at a time, with its evidence already open.
  *
- * On wide screens the list is pinned and scrolls on its own while the reading
- * flows with the page, so a long reading scrolls like any text and the next
- * item is always one click away. Below 1024px there is no room for two
- * columns: the list is the page, and the chosen item opens in place under its
- * own row. Both renderings are always in the markup and CSS picks one, rather
- * than a media-query hook choosing after hydration -- that would paint one
- * layout on the server and swap it on the client.
+ * Both trees render it; each passes its own stylesheet as `classes` (the
+ * desktop's gold on navy, /m's ink and paper), and the class names every
+ * stylesheet must define are listed in classes.ts.
+ *
+ * Two layouts:
+ *
+ *   split    (desktop) a pinned list on the left, scrolling on its own, and
+ *            the reading on the right flowing with the page. Below 1024px the
+ *            stylesheet hides the pane and shows the copy of the reading that
+ *            sits under its own row, so both renderings are in the markup and
+ *            CSS picks one, rather than a media-query hook choosing after
+ *            hydration and repainting.
+ *   stacked  (/m) the list is the page and the reading opens under its row;
+ *            no pane is rendered at all.
  *
  * One item is always open. Selection is held by key and derived against the
  * filter during render: an item the filter hides falls back to the first one
@@ -34,14 +42,15 @@ export type ReadingRoomItem = {
   group?: string;
   /** One line in the list. */
   row: ReactNode;
-  /** The reading itself. `headingId` belongs on its title, which labels the pane. */
+  /** The reading itself. `headingId` belongs on its title, which labels the region. */
   detail: (headingId: string) => ReactNode;
 };
 
 export type ReadingRoomFilter = { value: string; label: string; count: number };
 export type ReadingRoomGroup = { key: string; label: string };
 
-type ReadingRoomProps = {
+/** Everything a room shows apart from how it is styled and laid out. */
+export type ReadingRoomContent = {
   items: ReadingRoomItem[];
   /** Accessible name of the list. */
   listLabel: string;
@@ -52,6 +61,11 @@ type ReadingRoomProps = {
   nextLabel: string;
   /** "3 of 24", in the reader's language. */
   positionLabel: (position: number, total: number) => string;
+};
+
+type ReadingRoomProps = ReadingRoomContent & {
+  classes: ReadingRoomClasses;
+  layout?: "split" | "stacked";
 };
 
 const ALL = "all";
@@ -65,6 +79,8 @@ export default function ReadingRoom({
   previousLabel,
   nextLabel,
   positionLabel,
+  classes: c,
+  layout = "split",
 }: ReadingRoomProps) {
   const baseId = useId();
   const [filter, setFilter] = useState(ALL);
@@ -76,6 +92,7 @@ export default function ReadingRoom({
 
   const paneId = `${baseId}-pane`;
   const inlineId = `${baseId}-inline`;
+  const controls = layout === "split" ? `${paneId} ${inlineId}` : inlineId;
 
   /* After the new reading renders, make sure its top is in view: a reader who
      had scrolled down a long reading would otherwise land in the middle of the
@@ -141,20 +158,20 @@ export default function ReadingRoom({
   }
 
   const nav = (
-    <div className={styles.nav}>
+    <div className={c.nav}>
       <button
         type="button"
-        className={styles.navButton}
+        className={c.navButton}
         onClick={(event) => step(-1, event.currentTarget)}
         disabled={index <= 0}
       >
         <FiArrowLeft aria-hidden="true" />
         {previousLabel}
       </button>
-      <span className={styles.navPosition}>{positionLabel(index + 1, visible.length)}</span>
+      <span className={c.navPosition}>{positionLabel(index + 1, visible.length)}</span>
       <button
         type="button"
-        className={styles.navButton}
+        className={c.navButton}
         onClick={(event) => step(1, event.currentTarget)}
         disabled={index >= visible.length - 1}
       >
@@ -167,14 +184,14 @@ export default function ReadingRoom({
   function renderRow(item: ReadingRoomItem) {
     const open = item.key === selected?.key;
     return (
-      <li key={item.key} className={styles.rowItem}>
+      <li key={item.key} className={c.rowItem}>
         <button
           type="button"
-          className={styles.row}
+          className={c.row}
           data-room-key={item.key}
           tabIndex={open ? 0 : -1}
           aria-current={open ? "true" : undefined}
-          aria-controls={`${paneId} ${inlineId}`}
+          aria-controls={controls}
           onClick={(event) => select(item.key, event.currentTarget)}
         >
           {item.row}
@@ -182,7 +199,7 @@ export default function ReadingRoom({
         {open && (
           <div
             id={inlineId}
-            className={styles.inline}
+            className={c.inline}
             role="region"
             aria-labelledby={`${inlineId}-title`}
             data-room-reading=""
@@ -202,27 +219,27 @@ export default function ReadingRoom({
     : null;
 
   return (
-    <div className={styles.room} data-reading-room="">
+    <div className={c.room} data-reading-room="" data-layout={layout}>
       {filters && filters.length > 1 && (
-        <div className={styles.filters} role="group" aria-label={filterLabel}>
+        <div className={c.filters} role="group" aria-label={filterLabel}>
           {filters.map((option) => (
             <button
               key={option.value}
               type="button"
-              className={styles.filter}
+              className={c.filter}
               aria-pressed={filter === option.value}
               onClick={() => setFilter(option.value)}
             >
               {option.label}
-              <span className={styles.filterCount}>{option.count}</span>
+              <span className={c.filterCount}>{option.count}</span>
             </button>
           ))}
         </div>
       )}
 
-      <div className={styles.split}>
+      <div className={c.split}>
         <div
-          className={styles.listColumn}
+          className={c.listColumn}
           role="group"
           aria-label={listLabel}
           onKeyDown={onListKeyDown}
@@ -230,25 +247,25 @@ export default function ReadingRoom({
           {grouped ? (
             grouped.map(({ group, members }) => (
               <section key={group.key} aria-labelledby={`${baseId}-${group.key}`}>
-                <h3 id={`${baseId}-${group.key}`} className={styles.groupLabel}>
+                <h3 id={`${baseId}-${group.key}`} className={c.groupLabel}>
                   {group.label}
                   {/* The gap separates the count on screen; this separates it
                       for a screen reader, which would say "Benefic15". */}
-                  <span className={styles.srOnly}>, </span>
-                  <span className={styles.groupCount}>{members.length}</span>
+                  <span className={c.srOnly}>, </span>
+                  <span className={c.groupCount}>{members.length}</span>
                 </h3>
-                <ul className={styles.rows}>{members.map(renderRow)}</ul>
+                <ul className={c.rows}>{members.map(renderRow)}</ul>
               </section>
             ))
           ) : (
-            <ul className={styles.rows}>{visible.map(renderRow)}</ul>
+            <ul className={c.rows}>{visible.map(renderRow)}</ul>
           )}
         </div>
 
-        {selected && (
+        {layout === "split" && selected && (
           <section
             id={paneId}
-            className={styles.pane}
+            className={c.pane}
             aria-labelledby={`${paneId}-title`}
             data-room-reading=""
           >

@@ -1,6 +1,6 @@
 import { BookOpen } from "lucide-react";
 import type { DeterministicRule } from "@/lib/astro-types";
-import { bySelectionRank } from "./rule-order";
+import { bySelectionRank } from "@/lib/rule-order";
 import styles from "./reading-gateway-previews.module.css";
 
 export default function ReadingEvidencePreview({

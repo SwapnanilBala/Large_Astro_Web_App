@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { fireEvent, render, screen } from "@testing-library/react";
-import ReadingRoom, { type ReadingRoomItem } from "../reading-room";
+import ReadingRoom, { type ReadingRoomItem } from "../ReadingRoom";
 
 /*
  * The reading room's behaviour, independent of what it lists: one item open
@@ -8,9 +8,9 @@ import ReadingRoom, { type ReadingRoomItem } from "../reading-room";
  * following, a filter that falls back to the first row it shows, and
  * Previous/Next stopping at the ends.
  *
- * jsdom applies no CSS, so both renderings of the open item are in the tree
- * at once -- the pane and the copy under its own row that narrow screens use.
- * Hence "two headings" wherever a reading is asserted.
+ * jsdom applies no CSS, so in the split layout both renderings of the open
+ * item are in the tree at once -- the pane and the copy under its own row that
+ * narrow screens use. Hence "two headings" wherever a reading is asserted.
  */
 
 const NAMES = ["Alpha", "Beta", "Gamma", "Delta"];
@@ -26,6 +26,8 @@ function items(): ReadingRoomItem[] {
 }
 
 const copy = {
+  /* jsdom applies no stylesheet, so the class names do not matter here. */
+  classes: {},
   listLabel: "Things",
   previousLabel: "Previous",
   nextLabel: "Next",
@@ -124,6 +126,15 @@ describe("ReadingRoom", () => {
     expect(screen.getByRole("heading", { name: /^First\s*,\s*2$/ })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: /^Second\s*,\s*2$/ })).toBeInTheDocument();
     expect(screen.getByRole("group", { name: "Things" })).toBeInTheDocument();
+  });
+
+  it("renders no pane when stacked, only the reading under its row", () => {
+    /* The /m layout: the list is the page. */
+    render(<ReadingRoom items={items()} layout="stacked" {...copy} />);
+    expect(openReadings()).toEqual(["Alpha reading"]);
+    fireEvent.click(row("Beta"));
+    expect(openReadings()).toEqual(["Beta reading"]);
+    expect(row("Beta").getAttribute("aria-controls")).not.toContain(" ");
   });
 
   it("hides the filter bar when there is nothing to choose between", () => {
