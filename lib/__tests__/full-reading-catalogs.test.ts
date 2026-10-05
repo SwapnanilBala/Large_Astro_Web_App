@@ -25,6 +25,7 @@ import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
 import { FINDING_THEMES, FINDING_THEME_KEYS } from "@/app/components/reading-room/findings";
 import { YOGA_FAMILIES, YOGA_STRENGTHS } from "@/app/components/reading-room/yogas";
+import { PLANET_IDS, planetNameKey } from "@/lib/planet-labels";
 
 type Tree = Record<string, unknown>;
 
@@ -58,17 +59,13 @@ const LITERAL_KEYS = [
   ),
 ];
 
-/* Built by the yoga room from the engine's closed sets. Planets go through
-   planetNames first and fall back to strength.planets, which carries the two
-   nodes the baseline does not. */
-const PLANETS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn", "rahu", "ketu"];
-const planetKey = (planet: string) =>
-  lookup(ENGLISH, `planetNames.${planet}`) !== undefined ? `planetNames.${planet}` : `strength.planets.${planet}`;
-
+/* Built by the yoga room from the engine's closed sets. Planet names are
+   lib/planet-labels' keys: planetNames for the seven, strength.planets for the
+   two nodes the baseline does not carry. */
 const RUNTIME_KEYS = [
   ...YOGA_STRENGTHS.map((strength) => `strength.yogas.strengthLabels.${strength}`),
   ...YOGA_FAMILIES.map((family) => `strength.yogas.categories.${family}`),
-  ...PLANETS.map(planetKey),
+  ...PLANET_IDS.map((planet) => planetNameKey(planet)!),
 ];
 
 const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };

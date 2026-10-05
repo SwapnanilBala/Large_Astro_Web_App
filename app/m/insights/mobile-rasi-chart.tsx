@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { SIGN_ORDER } from "@/lib/constellation-geometry";
+import { planetAbbreviation, planetName, retrogradeMark } from "@/lib/planet-labels";
 import styles from "./mobile-rasi-chart.module.css";
 
 /*
@@ -14,9 +15,11 @@ import styles from "./mobile-rasi-chart.module.css";
  * in fixed places -- Pisces top left, then clockwise -- and the houses are
  * counted from the rising sign, which is marked.
  *
- * Planets are written the way astrologers write them by hand, two letters
- * each. Tapping one puts its placement in a line under the chart, as the wheel
- * did; there is no hover on a phone to hang a tooltip on.
+ * Planets are written the way astrologers write them by hand, a letter or two
+ * each in the reader's language (Su, Mo; सू, चं), with the abbreviations the
+ * desktop's North Indian chart uses. Tapping one puts its placement in a line
+ * under the chart, as the wheel did; there is no hover on a phone to hang a
+ * tooltip on.
  */
 
 type Translate = (key: string, params?: Record<string, string>) => string;
@@ -84,21 +87,6 @@ const CELL: Record<(typeof SIGN_ORDER)[number], [number, number]> = {
   Pisces: [1, 1],
 };
 
-const ABBREVIATION: Record<string, string> = {
-  Sun: "Su",
-  Moon: "Mo",
-  Mars: "Ma",
-  Mercury: "Me",
-  Jupiter: "Ju",
-  Venus: "Ve",
-  Saturn: "Sa",
-  Rahu: "Ra",
-  Ketu: "Ke",
-};
-
-/** A planet as astrologers write it by hand: Su, Mo, Ma and so on. */
-export const abbreviate = (name: string) => ABBREVIATION[name] ?? name.slice(0, 2);
-
 export default function MobileRasiChart({ ascendantSign, planets = [], houseSystem, tr, formatDegree }: Props) {
   const [selected, setSelected] = useState<string | null>(null);
   const active = planets.find((planet) => planet.name === selected) ?? null;
@@ -109,7 +97,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
      the house the readings count from. */
   const placement = (planet: PlanetPosition) => {
     const params = {
-      planet: planet.name,
+      planet: planetName(planet.name, tr),
       sign: planet.sign,
       degree: formatDegree(planet.degree_in_sign),
       house: String(signHouse(planet.sign, ascendantSign) ?? planet.house),
@@ -155,8 +143,8 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
                       aria-label={placement(planet)}
                       onClick={() => setSelected(isOn ? null : planet.name)}
                     >
-                      {abbreviate(planet.name)}
-                      {planet.is_retrograde && <sup className={styles.retro}>R</sup>}
+                      {planetAbbreviation(planet.name, tr)}
+                      {planet.is_retrograde && <sup className={styles.retro}>{retrogradeMark(tr)}</sup>}
                     </button>
                   );
                 })}

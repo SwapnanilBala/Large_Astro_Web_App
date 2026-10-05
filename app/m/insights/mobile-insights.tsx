@@ -16,7 +16,8 @@ import {
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
-import MobileRasiChart, { abbreviate, bhavaSystemName, signHouse } from "./mobile-rasi-chart";
+import { planetAbbreviation, planetName } from "@/lib/planet-labels";
+import MobileRasiChart, { bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
 
@@ -215,7 +216,7 @@ function DashaLifeBar({
               style={{ flexGrow: length, flexBasis: 0 }}
             >
               {/* Named only where a period is wide enough to hold the name. */}
-              {length / span >= 0.075 ? abbreviate(period.planet) : ""}
+              {length / span >= 0.075 ? planetAbbreviation(period.planet, tr) : ""}
             </span>
           );
         })}
@@ -507,13 +508,13 @@ export default function MobileInsights({
             {tr("mobileInsights.nowLabel")}
           </h2>
           <p className={styles.nowTitle}>
-            {dasha.current_dasha}
+            {planetName(dasha.current_dasha, tr)}
             {dasha.current_antardasha && (
               <>
                 <span className={styles.nowJoin} aria-hidden="true">
                   {" · "}
                 </span>
-                {dasha.current_antardasha}
+                {planetName(dasha.current_antardasha, tr)}
               </>
             )}
           </p>
@@ -548,7 +549,7 @@ export default function MobileInsights({
             <dd className={styles.identityMeta}>
               {tr("mobileInsights.padaLord", {
                 pada: String(nakshatra.pada),
-                lord: nakshatra.lord,
+                lord: planetName(nakshatra.lord, tr),
               })}
             </dd>
           </div>
@@ -596,7 +597,7 @@ export default function MobileInsights({
                 {/* Plain spans, not <abbr title>: a tooltip is unreachable on
                     a touch screen, so the meaning goes in the legend below. */}
                 <th scope="row" className={styles.planetName}>
-                  {planet.name}
+                  {planetName(planet.name, tr)}
                   {planet.is_retrograde && (
                     <span className={styles.flag}>{tr("mobileInsights.flagRetrograde")}</span>
                   )}
@@ -687,8 +688,8 @@ export default function MobileInsights({
           <p className={styles.currentDasha}>
             <Emphasise
               text={tr("mobileInsights.dashaCurrent", {
-                dasha: dasha.current_dasha,
-                antardasha: dasha.current_antardasha ? ` / ${dasha.current_antardasha}` : "",
+                dasha: planetName(dasha.current_dasha, tr),
+                antardasha: dasha.current_antardasha ? ` / ${planetName(dasha.current_antardasha, tr)}` : "",
                 date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end, dateFormat),
               })}
             />
@@ -715,7 +716,7 @@ export default function MobileInsights({
                       : undefined
                   }
                 >
-                  <th scope="row" className={styles.planetName}>{period.planet}</th>
+                  <th scope="row" className={styles.planetName}>{planetName(period.planet, tr)}</th>
                   <td className={styles.numeric}>{formatDate(period.start_date, dateFormat)}</td>
                   <td className={styles.numeric}>{formatDate(period.end_date, dateFormat)}</td>
                 </tr>

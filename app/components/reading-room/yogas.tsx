@@ -1,4 +1,5 @@
 import type { YogaDetectionResult } from "@/lib/astro-types";
+import { planetName } from "@/lib/planet-labels";
 import type { ReadingRoomContent, ReadingRoomFilter, ReadingRoomGroup, ReadingRoomItem } from "./ReadingRoom";
 import type { ReadingRoomClasses, Translate } from "./classes";
 import { roomNavigation } from "./navigation";
@@ -15,8 +16,9 @@ import { roomNavigation } from "./navigation";
  *
  * `tr` must resolve fullReading (messages/en.full-reading.json) and `ts` the
  * yoga panel's strength namespace (messages/en.strength.json): the family and
- * strength names, the trait label and the planet names are that panel's own
- * keys, already translated, rather than new copies of them.
+ * strength names and the trait label are that panel's own keys, already
+ * translated, rather than new copies of them. Planet names come from
+ * lib/planet-labels, the lookup the mobile chart and tables use too.
  */
 
 type Category = YogaDetectionResult["category"];
@@ -66,16 +68,6 @@ export function buildYogaRoom(
   ts: Translate,
   c: ReadingRoomClasses,
 ): ReadingRoomContent {
-  /* Same lookup as the yoga panel: the shared planet names first, then the
-     strength catalog's own keys for the two nodes, then the name as sent. */
-  const planetLabel = (planet: string) => {
-    const baseKey = `planetNames.${planet.toLowerCase()}`;
-    const base = tr(baseKey);
-    if (base !== baseKey) return base;
-    const extraKey = `strength.planets.${planet.toLowerCase()}`;
-    const extra = ts(extraKey);
-    return extra === extraKey ? planet : extra;
-  };
   const strengthLabel = (strength: Strength) => leading(ts(`strength.yogas.strengthLabels.${strength}`));
   const familyLabel = (category: Category) => ts(`strength.yogas.categories.${category}`);
 
@@ -145,7 +137,7 @@ export function buildYogaRoom(
           {yoga.involved_planets.length > 0 && (
             <p className={c.planets}>
               {yoga.involved_planets
-                .map((planet) => `${PLANET_GLYPHS[planet] ?? ""} ${planetLabel(planet)}`.trim())
+                .map((planet) => `${PLANET_GLYPHS[planet] ?? ""} ${planetName(planet, tr)}`.trim())
                 .join("  ·  ")}
             </p>
           )}
