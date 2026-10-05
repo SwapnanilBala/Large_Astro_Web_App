@@ -16,7 +16,7 @@ import {
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
-import { planetAbbreviation, planetName } from "@/lib/planet-labels";
+import { nakshatraName, planetAbbreviation, planetName, signName } from "@/lib/chart-labels";
 import MobileRasiChart, { bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
@@ -375,13 +375,13 @@ function HouseRoleList({ houses, tr }: { houses: HouseSupport[]; tr: Translate }
               <span className={styles.roleReadout}>
                 <span className={styles.srOnly}>
                   {tr("mobileInsights.srSupport", {
-                    sign: house.sign,
+                    sign: signName(house.sign, tr),
                     bindus: String(house.bindus),
                   })}
                 </span>
                 <span aria-hidden="true">
                   {tr("mobileInsights.supportReadout", {
-                    sign: house.sign,
+                    sign: signName(house.sign, tr),
                     bindus: String(house.bindus),
                   })}
                 </span>
@@ -539,13 +539,13 @@ export default function MobileInsights({
       <dl className={styles.identity}>
         <div className={styles.identityItem}>
           <dt className={styles.identityLabel}>{tr("mobileInsights.factLagna")}</dt>
-          <dd className={styles.identityValue}>{ascendant.sign}</dd>
+          <dd className={styles.identityValue}>{signName(ascendant.sign, tr)}</dd>
           <dd className={styles.identityMeta}>{formatDegree(ascendant.degree_in_sign)}</dd>
         </div>
         {nakshatra && (
           <div className={styles.identityItem}>
             <dt className={styles.identityLabel}>{tr("mobileInsights.factNakshatra")}</dt>
-            <dd className={styles.identityValue}>{nakshatra.name}</dd>
+            <dd className={styles.identityValue}>{nakshatraName(nakshatra.name, tr)}</dd>
             <dd className={styles.identityMeta}>
               {tr("mobileInsights.padaLord", {
                 pada: String(nakshatra.pada),
@@ -557,7 +557,7 @@ export default function MobileInsights({
         {moon && (
           <div className={styles.identityItem}>
             <dt className={styles.identityLabel}>{tr("mobileInsights.factMoonSign")}</dt>
-            <dd className={styles.identityValue}>{moon.sign}</dd>
+            <dd className={styles.identityValue}>{signName(moon.sign, tr)}</dd>
             <dd className={styles.identityMeta}>{formatDegree(moon.degree_in_sign)}</dd>
           </div>
         )}
@@ -616,7 +616,7 @@ export default function MobileInsights({
                         as a row of purple boxes. */}
                     {SIGN_SYMBOLS[planet.sign] ? `${SIGN_SYMBOLS[planet.sign]}︎` : ""}
                   </span>
-                  {planet.sign}
+                  {signName(planet.sign, tr)}
                 </td>
                 <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
                 {/* Counted by sign, so it matches the number in the chart's

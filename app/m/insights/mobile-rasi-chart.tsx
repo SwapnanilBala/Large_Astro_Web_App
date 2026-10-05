@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { SIGN_ORDER } from "@/lib/constellation-geometry";
-import { planetAbbreviation, planetName, retrogradeMark } from "@/lib/planet-labels";
+import { planetAbbreviation, planetName, retrogradeMark, signAbbreviation, signName } from "@/lib/chart-labels";
 import styles from "./mobile-rasi-chart.module.css";
 
 /*
@@ -13,7 +13,9 @@ import styles from "./mobile-rasi-chart.module.css";
  * reading and was the most stock image on the page; the square is the chart a
  * Vedic reader already knows, and it carries the same information. Signs sit
  * in fixed places -- Pisces top left, then clockwise -- and the houses are
- * counted from the rising sign, which is marked.
+ * counted from the rising sign, which is marked. Each cell names its sign in
+ * the reader's language: three letters in the Latin alphabet (Pis, Gém), the
+ * whole name in Devanagari or Bengali (मीन), which is short enough to fit.
  *
  * Planets are written the way astrologers write them by hand, a letter or two
  * each in the reader's language (Su, Mo; सू, चं), with the abbreviations the
@@ -98,7 +100,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
   const placement = (planet: PlanetPosition) => {
     const params = {
       planet: planetName(planet.name, tr),
-      sign: planet.sign,
+      sign: signName(planet.sign, tr),
       degree: formatDegree(planet.degree_in_sign),
       house: String(signHouse(planet.sign, ascendantSign) ?? planet.house),
     };
@@ -113,7 +115,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
         className={styles.grid}
         /* group, not img: the planets inside are buttons. */
         role="group"
-        aria-label={tr("mobileInsights.chartAria", { sign: ascendantSign })}
+        aria-label={tr("mobileInsights.chartAria", { sign: signName(ascendantSign, tr) })}
       >
         {SIGN_ORDER.map((sign) => {
           const [row, column] = CELL[sign];
@@ -128,7 +130,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
             >
               <span className={styles.cellHead} aria-hidden="true">
                 <span>{house ?? ""}</span>
-                <span>{sign.slice(0, 3)}</span>
+                <span>{signAbbreviation(sign, tr)}</span>
               </span>
               {isLagna && <span className={styles.lagnaMark}>{tr("mobileInsights.factLagna")}</span>}
               <span className={styles.planets}>
@@ -155,7 +157,7 @@ export default function MobileRasiChart({ ascendantSign, planets = [], houseSyst
         <div className={styles.centre} aria-hidden="true">
           <span className={styles.centreTitle}>{tr("mobileInsights.chartCentre")}</span>
           <span className={styles.centreMeta}>
-            {tr("mobileInsights.ascendantLead", { sign: ascendantSign })}
+            {tr("mobileInsights.ascendantLead", { sign: signName(ascendantSign, tr) })}
           </span>
         </div>
       </div>

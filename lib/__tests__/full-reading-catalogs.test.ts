@@ -25,7 +25,7 @@ import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
 import { FINDING_THEMES, FINDING_THEME_KEYS } from "@/app/components/reading-room/findings";
 import { YOGA_FAMILIES, YOGA_STRENGTHS } from "@/app/components/reading-room/yogas";
-import { PLANET_IDS, planetNameKey } from "@/lib/planet-labels";
+import { PLANET_IDS, planetNameKey } from "@/lib/chart-labels";
 
 type Tree = Record<string, unknown>;
 
@@ -60,7 +60,7 @@ const LITERAL_KEYS = [
 ];
 
 /* Built by the yoga room from the engine's closed sets. Planet names are
-   lib/planet-labels' keys: planetNames for the seven, strength.planets for the
+   lib/chart-labels' keys: planetNames for the seven, strength.planets for the
    two nodes the baseline does not carry. */
 const RUNTIME_KEYS = [
   ...YOGA_STRENGTHS.map((strength) => `strength.yogas.strengthLabels.${strength}`),

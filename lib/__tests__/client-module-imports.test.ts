@@ -30,6 +30,9 @@ const BROWSER_MODULES = [
   "lib/knowledge/classical-reading.ts",
   /* Whose hand a palm reading is for; the panel asks, the route tells the model. */
   "lib/palm-readings/reader.ts",
+  /* Planet, sign and nakshatra names in the reader's language: the mobile chart,
+     its tables and the reading room's yoga list. */
+  "lib/chart-labels.ts",
 ];
 
 const NODE_BUILTIN =

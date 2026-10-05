@@ -1,5 +1,5 @@
 import type { YogaDetectionResult } from "@/lib/astro-types";
-import { planetName } from "@/lib/planet-labels";
+import { planetName } from "@/lib/chart-labels";
 import type { ReadingRoomContent, ReadingRoomFilter, ReadingRoomGroup, ReadingRoomItem } from "./ReadingRoom";
 import type { ReadingRoomClasses, Translate } from "./classes";
 import { roomNavigation } from "./navigation";
@@ -18,7 +18,7 @@ import { roomNavigation } from "./navigation";
  * yoga panel's strength namespace (messages/en.strength.json): the family and
  * strength names and the trait label are that panel's own keys, already
  * translated, rather than new copies of them. Planet names come from
- * lib/planet-labels, the lookup the mobile chart and tables use too.
+ * lib/chart-labels, the lookup the mobile chart and tables use too.
  */
 
 type Category = YogaDetectionResult["category"];
