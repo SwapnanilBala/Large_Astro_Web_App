@@ -5227,3 +5227,230 @@ html[data-theme="light"] .dasha-command-meter-ring {
     order: -1;
   }
 }
+
+/* ── Phone and tablet overrides, moved here from globals.css ──
+ *
+ * These stayed behind in globals.css when the insights rules were split out
+ * into this file (4a4bee8). This file loads after globals.css, so the base
+ * rules they override came later and won, and from July 2026 none of them
+ * applied. The dasha panel's "Current life chapter" card is what that looked
+ * like on a phone: its text in a 0px column, "Rahu to Moon" one letter per
+ * line. The nakshatra cards, the audit grid and the palm, shadbala, yoga,
+ * ashtakavarga, navamsa and divisional layouts kept their desktop shape too.
+ * Here, after the rules they override, they win again. A phone override for
+ * a class in this file belongs in this file, after the rule it overrides;
+ * lib/__tests__/stylesheet-cascade.test.ts fails on one left in globals.css.
+ */
+@media (max-width: 680px) {
+  .dasha-popup {
+    width: 300px;
+    padding: 1rem;
+    font-size: 1.3rem;
+  }
+
+  .dasha-popup-planet {
+    font-size: 1.65rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .ashtakavarga-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .ashtakavarga-tabs {
+    gap: 0.3rem;
+  }
+
+  .ashtakavarga-tab {
+    font-size: 1.22rem;
+    padding: 0.3rem 0.55rem;
+  }
+}
+
+@media (max-width: 880px) {
+  .dasha-audit-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .nakshatra-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dasha-command-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .dasha-command-meter {
+    justify-content: flex-start;
+  }
+
+  /* No smaller ring here, though there was one (96px): "complete" is 70px at
+     the 0.95rem the label is now, and below its centre a 96px ring's disc is
+     66px across, so the word ran onto the band. 112px holds it. */
+
+  .dasha-audit-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 680px) {
+  .dasha-breadcrumb-item {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .palm-lines-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .palm-skel-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .palm-trajectory-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .shadbala-panel {
+    padding: 1rem;
+  }
+
+  .shadbala-comp-label {
+    min-width: 90px;
+  }
+
+  .shadbala-planet-name {
+    min-width: 70px;
+  }
+
+  .shadbala-sign-context-header {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .shadbala-sign-context-source {
+    font-size: 1rem;
+  }
+
+  .shadbala-sign-summary,
+  .shadbala-sign-planet-context-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .shadbala-sign-card,
+  .shadbala-sign-unavailable {
+    padding: 0.75rem;
+  }
+
+  .shadbala-sign-chip {
+    min-height: 2.25rem;
+    font-size: 1.12rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .yogas-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .yogas-tabs {
+    gap: 0.35rem;
+  }
+
+  .yogas-tab {
+    font-size: 1.2rem;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .navamsa-panel,
+  .divisional-panel {
+    padding: 1rem;
+    border-radius: 14px;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.24);
+  }
+
+  .divisional-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scroll-snap-type: inline proximity;
+    scrollbar-width: thin;
+    padding: 0.15rem 0 0.55rem;
+  }
+
+  .divisional-tab {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0.45rem 0.7rem;
+    scroll-snap-align: start;
+  }
+
+  .divisional-tab-label,
+  .divisional-theme-badge {
+    font-size: 0.95rem;
+  }
+
+  .divisional-tab-name,
+  .divisional-theme-text,
+  .divisional-hint {
+    font-size: var(--font-mobile-label);
+  }
+
+  .navamsa-table,
+  .divisional-table {
+    display: block;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .navamsa-row--header,
+  .divisional-row--header {
+    font-size: var(--font-mobile-meta);
+  }
+
+  .navamsa-planet,
+  .navamsa-sign,
+  .navamsa-arrow,
+  .divisional-planet,
+  .divisional-planet-name,
+  .divisional-sign,
+  .divisional-arrow {
+    font-size: 0.95rem;
+  }
+
+  .navamsa-vargottama-label,
+  .divisional-same-label {
+    font-size: var(--text-meta);
+  }
+}
+
+@media (max-width: 900px) {
+  .palm-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .palm-compare-delta-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .palm-compare-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

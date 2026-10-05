@@ -1043,6 +1043,11 @@
 
 .detailRow {
   display: flex;
+  /* A value too long to sit beside its label drops under it, rather than
+     squeezing the label one word to a line: on a phone in Hindi, "वापसी का
+     क्षण" stood three lines tall in 54px beside the return date. */
+  flex-wrap: wrap;
+  column-gap: 1rem;
   justify-content: space-between;
   align-items: baseline;
   padding: 0.35rem 0;
@@ -1060,6 +1065,9 @@
 }
 
 .detailValue {
+  /* Right-aligned on its own line too, as it is beside the label. */
+  margin-left: auto;
+  text-align: right;
   color: var(--ink-main);
   font-weight: 600;
 }

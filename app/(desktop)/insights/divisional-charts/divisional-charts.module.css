@@ -440,74 +440,6 @@
   font-size: var(--text-ui);
 }
 
-
-
-
-
-
-
-/*
- * The stacked shape, below the board's 1100px.
- *
- * 820 used to be where the two-up grids folded to one column. There are no
- * two-up grids left -- the board is one column here and three above 1100 -- so
- * the only thing that still needs saying at a narrow width is what the top bar
- * does when three chips and a title cannot share a row.
- */
-@media (max-width: 1099px) {
-  .topBar {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.7rem;
-  }
-
-  .topFacts {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 560px) {
-  .page {
-    /* Narrow viewports get a shorter navbar, but 4.7rem (75px) was still
-       under it. Same floor the sibling pages drop to. */
-    padding-top: calc(max(7rem, 120px) + env(safe-area-inset-top));
-  }
-
-  .topFacts {
-    align-items: stretch;
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .topFacts span {
-    justify-content: center;
-  }
-
-  .snapshotGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .positionRow {
-    grid-template-columns: minmax(98px, 1.15fr) minmax(68px, 0.85fr) minmax(82px, 1fr);
-    font-size: var(--text-meta);
-  }
-
-  .positionRow > span {
-    padding-inline: 0.48rem;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .backButton,
-  .detailPageLink,
-  .railItem {
-    transition: none;
-  }
-
-  .detailPageLink svg {
-    transition: none;
-  }
-}
-
 /* Marks the four vargas outside Parashara's sixteen (D5, D6, D8, D11), which
    otherwise render identically to the classical ones. */
 .traditionNote {
@@ -854,6 +786,68 @@
   font-size: var(--text-ui);
   font-style: italic;
   line-height: 1.4;
+}
+
+/*
+ * The stacked shape, below the board's 1100px.
+ *
+ * 820 used to be where the two-up grids folded to one column. There are no
+ * two-up grids left -- the board is one column here and three above 1100 -- so
+ * the only thing that still needs saying at a narrow width is what the top bar
+ * does when three chips and a title cannot share a row.
+ */
+@media (max-width: 1099px) {
+  .topBar {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.7rem;
+  }
+
+  .topFacts {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 560px) {
+  .page {
+    /* Narrow viewports get a shorter navbar, but 4.7rem (75px) was still
+       under it. Same floor the sibling pages drop to. */
+    padding-top: calc(max(7rem, 120px) + env(safe-area-inset-top));
+  }
+
+  .topFacts {
+    align-items: stretch;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .topFacts span {
+    justify-content: center;
+  }
+
+  .snapshotGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .positionRow {
+    grid-template-columns: minmax(98px, 1.15fr) minmax(68px, 0.85fr) minmax(82px, 1fr);
+    font-size: var(--text-meta);
+  }
+
+  .positionRow > span {
+    padding-inline: 0.48rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .backButton,
+  .detailPageLink,
+  .railItem {
+    transition: none;
+  }
+
+  .detailPageLink svg {
+    transition: none;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════

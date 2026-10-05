@@ -1698,17 +1698,6 @@ label:has(.autocomplete-wrapper.is-open) {
 @keyframes spin {
   to { transform: rotate(360deg); }}
 
-@media (max-width: 680px) {
-  .dasha-popup {
-    width: 300px;
-    padding: 1rem;
-    font-size: 1.3rem;
-  }
-
-  .dasha-popup-planet {
-    font-size: 1.65rem;
-  }}
-
 .aspect-grid {
   display: grid;
   gap: 0.78rem;
@@ -1892,18 +1881,6 @@ label:has(.autocomplete-wrapper.is-open) {
   color: var(--ink-soft);
   font-style: italic;
 }
-
-@media (max-width: 640px) {
-  .ashtakavarga-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .ashtakavarga-tabs {
-    gap: 0.3rem;
-  }
-  .ashtakavarga-tab {
-    font-size: 1.22rem;
-    padding: 0.3rem 0.55rem;
-  }}
 
 .planet-interpretation {
   margin-top: 0.7rem;
@@ -2753,14 +2730,6 @@ label:has(.autocomplete-wrapper.is-open) {
     grid-template-columns: 1fr;
   }
 
-  .dasha-audit-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .nakshatra-grid {
-    grid-template-columns: 1fr;
-  }
-
   .transits-columns {
     grid-template-columns: 1fr;
   }
@@ -2770,18 +2739,6 @@ label:has(.autocomplete-wrapper.is-open) {
   }}
 
 @media (max-width: 680px) {
-  .dasha-command-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .dasha-command-meter {
-    justify-content: flex-start;
-  }
-
-  .dasha-command-meter-ring {
-    width: 96px;
-    height: 96px;
-  }
 
   .dasha-lens-header,
   .dasha-table-header {
@@ -2803,10 +2760,6 @@ label:has(.autocomplete-wrapper.is-open) {
 
   .dasha-audit-toggle {
     width: 100%;
-  }
-
-  .dasha-audit-grid {
-    grid-template-columns: 1fr;
   }
 
   .home-shell,
@@ -5207,7 +5160,8 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
    ═══════════════════════════════════════════════ */
 
 @media (max-width: 640px) {
-  .error-card,
+  /* .error-card's phone padding is with its second definition below, which
+     comes later and so beat this one at every width. */
   .not-found-content {
     padding: 2rem 1.5rem;
     border-radius: 1rem;
@@ -5241,10 +5195,6 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
    ACCESSIBILITY — Touch Target Sizing (WCAG 2.5.8)
    ═══════════════════════════════════════════════ */
 @media (max-width: 680px) {
-  .dasha-breadcrumb-item {
-    min-height: 44px;
-    padding: 10px 12px;
-  }
 
   .navamsa-row {
     min-height: 44px;
@@ -6500,6 +6450,14 @@ html[data-account-label]:not([data-chart-history]) .chart-history-panel--pending
   box-shadow: 0 8px 40px rgba(0,0,0,0.4);
   text-align: center;
 }
+@media (max-width: 640px) {
+  /* After the rule above, so the phone padding wins: written in the
+     error-and-not-found block further up, it never applied. */
+  .error-card {
+    padding: 2rem 1.5rem;
+    border-radius: 1rem;
+  }
+}
 .error-icon { font-size: 3rem; margin-bottom: 1rem; }
 .error-title {
   font-size: 1.75rem;
@@ -6714,14 +6672,6 @@ html[data-account-label]:not([data-chart-history]) .chart-history-panel--pending
   0%, 100% { opacity: 0.4; }
   50% { opacity: 0.15; }}
 
-@media (max-width: 600px) {
-  .palm-lines-grid {
-    grid-template-columns: 1fr;
-  }
-  .palm-skel-grid {
-    grid-template-columns: 1fr;
-  }}
-
 /* ── Section cards (mounts, fingers, markings) ── */
 
 .palm-section-card {
@@ -6730,11 +6680,6 @@ html[data-account-label]:not([data-chart-history]) .chart-history-panel--pending
   background: rgba(6, 26, 41, 0.78);
   border: 1px solid var(--line-soft);
 }
-
-@media (max-width: 600px) {
-  .palm-trajectory-grid {
-    grid-template-columns: 1fr;
-  }}
 
 /* ═══════════════════════════════════════════════
    PALM READING — extended UI (toggles, save, warnings,
@@ -7008,63 +6953,13 @@ textarea:focus-visible {
 
 /* Responsive */
 @media (max-width: 600px) {
-  .shadbala-panel {
-    padding: 1rem;
-  }
-
-  .shadbala-comp-label {
-    min-width: 90px;
-  }
 
   .shadbala-comp-desc {
     display: none;
   }
 
-  .shadbala-planet-name {
-    min-width: 70px;
-  }
-
   .shadbala-summary {
     flex-direction: column;
-  }
-
-  .shadbala-sign-context-header {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-
-  .shadbala-sign-context-source {
-    font-size: 1rem;
-  }
-
-  .shadbala-sign-summary,
-  .shadbala-sign-planet-context-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .shadbala-sign-card,
-  .shadbala-sign-unavailable {
-    padding: 0.75rem;
-  }
-
-  .shadbala-sign-chip {
-    min-height: 2.25rem;
-    font-size: 1.12rem;
-  }}
-
-/* ── Responsive ── */
-@media (max-width: 640px) {
-  .yogas-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .yogas-tabs {
-    gap: 0.35rem;
-  }
-
-  .yogas-tab {
-    font-size: 1.2rem;
-    padding: 0.3rem 0.6rem;
   }}
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -7266,6 +7161,17 @@ textarea:focus-visible {
     font-size: 16px !important;
   }}
 
+/* ── Narrow phone (≤374px) ──
+   At 360px, the most common narrow Android width, the wordmark was 9px
+   short of its line beside the theme, language and menu controls, so it
+   broke into "LAGNA / ATELIER" and the bar grew from 61px to 84px. 20px
+   holds it on one line there; anything narrower still wraps as before. */
+@media (max-width: 374px) {
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+}
+
 /* ── Landscape phone ── */
 /*
  * No `overflow-y: auto` on the cards here, on purpose -- see the note on
@@ -7332,72 +7238,10 @@ textarea:focus-visible {
 
 /* Dense chart surfaces keep their columns readable and advertise horizontal use. */
 @media (max-width: 768px) {
-  .navamsa-panel,
-  .divisional-panel {
-    padding: 1rem;
-    border-radius: 14px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.24);
-  }
-
-  .divisional-tabs {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scroll-snap-type: inline proximity;
-    scrollbar-width: thin;
-    padding: 0.15rem 0 0.55rem;
-  }
-
-  .divisional-tab {
-    flex: 0 0 auto;
-    min-height: 44px;
-    padding: 0.45rem 0.7rem;
-    scroll-snap-align: start;
-  }
-
-  .divisional-tab-label,
-  .divisional-theme-badge {
-    font-size: 0.95rem;
-  }
-
-  .divisional-tab-name,
-  .divisional-theme-text,
-  .divisional-hint {
-    font-size: var(--font-mobile-label);
-  }
-
-  .navamsa-table,
-  .divisional-table {
-    display: block;
-    overflow-x: auto;
-    overscroll-behavior-inline: contain;
-    scrollbar-width: thin;
-    -webkit-overflow-scrolling: touch;
-  }
 
   .navamsa-row,
   .divisional-row {
     min-width: 34rem;
-  }
-
-  .navamsa-row--header,
-  .divisional-row--header {
-    font-size: var(--font-mobile-meta);
-  }
-
-  .navamsa-planet,
-  .navamsa-sign,
-  .navamsa-arrow,
-  .divisional-planet,
-  .divisional-planet-name,
-  .divisional-sign,
-  .divisional-arrow {
-    font-size: 0.95rem;
-  }
-
-  .navamsa-vargottama-label,
-  .divisional-same-label {
-    font-size: var(--text-meta);
   }}
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -7894,21 +7738,6 @@ textarea:focus-visible {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
-
-@media (max-width: 900px) {
-  .palm-compare-grid {
-    grid-template-columns: 1fr;
-  }}
-
-@media (max-width: 700px) {
-  .palm-compare-delta-grid {
-    grid-template-columns: 1fr;
-  }}
-
-@media (max-width: 700px) {
-  .palm-compare-summary-grid {
-    grid-template-columns: 1fr;
-  }}
 
 @media (max-width: 768px), (pointer: coarse) {
   .site-navbar {
