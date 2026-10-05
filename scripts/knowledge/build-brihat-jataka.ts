@@ -68,7 +68,7 @@ const EFFORT = "high";
  *           having no children withheld. v3 withheld 10 of the 12 Moon-sign
  *           verses whole, each for one clause about illness or the body.
  */
-const PROMPT_VERSIONS = { yoga: 2, life: 4 } as const;
+const PROMPT_VERSIONS = { yoga: 2, life: 5 } as const;
 type Group = keyof typeof PROMPT_VERSIONS;
 /**
  * The cleaned chapter's share of the raw chapter's length. Repair only removes
@@ -378,21 +378,23 @@ const LIFE_SYSTEM_PROMPT = insertOnce(
     insertOnce(
       SYSTEM_PROMPT,
       WITHHELD_END,
-      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having no children, or few, or losing them, does count, as harm to a child.\n</withheld>",
+      "is an empty string when `withheld` is false.\n\nA spouse leaving, a separation, remarriage, marrying late or marrying more than once do not count, and may be shown: say them plainly, for either partner. Having no children, or few, or losing them, does count, as harm to a child. So does any mention of caste, even in passing (\"the handicraft of men of low castes\"): split such a clause into a part of its own, so only it is withheld.\n</withheld>",
     ),
     "\n</records>",
     "\n- These chapters give a long list of results for one combination (\"the person will have red eyes, will be fond of vegetable food, will be wealthy, will have a wound on the head\"). Split such a record further, at its clause breaks, into parts that each hold neighbouring results of one kind: body and appearance; temperament and conduct; wealth and work; family, marriage and children; learning and skill; health. Keep each part a contiguous, verbatim run of the text, and open every part after the first with the condition's words in square brackets, so it reads alone. A withheld result then withholds only its own part.\n</records>",
   ),
   "<catalogue>",
   `<placements>
-Every condition the record's claim requires of a birth chart, as keys from the schema's list. The claim applies to a chart only when all of them hold, so list each condition the record states, and nothing it does not.
+Every condition the record's claim requires of a birth chart, as keys from the schema's list, in two lists. \`placements\` holds the conditions that must all hold. \`placements_any\` holds the claim's one set of alternatives, when it has one, of which at least one must hold. The claim applies to a chart only when both lists are met, so list each condition the record states, and nothing it does not.
   <Planet>.house.<n>          the planet in the nth house from the ascendant ("the Sun in the 10th house" is Sun.house.10)
   <Planet>.sign.<Sign>        the planet in that sign ("the Moon in Taurus" is Moon.sign.Taurus)
+  <Planet>.navamsa.<Sign>     the planet in the navamsa of that sign ("the Moon in the Navamsa of Leo" is Moon.navamsa.Leo)
   <Planet>.dignity.exalted, .debilitated or .own    the planet in its exaltation, debilitation or own sign
   <Planet>.aspects.<Planet>   the first planet casts its full aspect on the second ("the Moon aspected by Jupiter" is Jupiter.aspects.Moon)
   ascendant.sign.<Sign>       that sign rising
-- If any condition the claim needs cannot be stated exactly in these keys -- a navamsa, drekkana or other division, a waxing or waning Moon, the lord of a house, "a benefic" without naming the planet, strength or weakness, a day or night birth -- the record gets an empty list, not the part that can be stated: listing only some conditions shows the passage to charts it does not describe.
-- Alternatives ("the Sun or Mars in the 10th") should already be separate records; if one remains, give it an empty list.
+- Alternatives the text gives -- "Mars in sign Taurus or Libra", "aspected by Saturn, the Sun or Mars", "the 4th or the 5th house" -- go in \`placements_any\`, one key per alternative: Mars.sign.Taurus and Mars.sign.Libra. A navamsa named for its lord means either of that planet's signs: "the Navamsa of Mars" is Moon.navamsa.Aries or Moon.navamsa.Scorpio, so two keys in \`placements_any\`; "the Navamsa of Cancer" names one sign, so one key in \`placements\`.
+- A claim with two separate sets of alternatives ("in the Navamsa of Venus and aspected by Mercury or Jupiter") cannot be stated: both lists empty. A single alternative left over is a plain condition, in \`placements\`.
+- If any condition the claim needs cannot be stated exactly in these keys -- a drekkana, trimsamsa or other division besides the navamsa, a waxing or waning Moon, the lord of a house or of a navamsa, "a benefic" without naming the planet, strength or weakness, a day or night birth, a house counted from the Moon or the Sun -- both lists are empty, not filled with the part that can be stated: listing only some conditions shows the passage to charts it does not describe.
 - Bracketed opening words are part of the condition.
 </placements>
 
@@ -418,6 +420,7 @@ function outputSchema(group: Group) {
   };
   if (group === "life") {
     properties.placements = { type: "array", items: { type: "string", enum: [...PLACEMENT_KEYS] } };
+    properties.placements_any = { type: "array", items: { type: "string", enum: [...PLACEMENT_KEYS] } };
   }
   return {
     type: "object",
