@@ -2280,7 +2280,8 @@
       "part": 4,
       "kind": "verse",
       "chapterTitle": "Beneficial Aspects and Conjunctions",
-      "text": "If Lagna is joined by Sani and Kuja, or by Chandra and Sukra, and the 5th is aspected or occupied by malefics she becomes barren.",
+      "text": "If Lagna is joined by Sani and Kuja, or by Chandra and Sukra, and the 5th is aspected or occupied by malefics she [may have no children].",
+      "printedText": "If Lagna is joined by Sani and Kuja, or by Chandra and Sukra, and the 5th is aspected or occupied by malefics she becomes barren.",
       "notes": null,
       "summary": "The book says that if Saturn and Mars, or the Moon and Venus, are in the ascendant and malefics occupy or aspect the 5th house, she will have no children.",
       "yogaIds": [],
@@ -2295,8 +2296,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"barren\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.96
     },
     {

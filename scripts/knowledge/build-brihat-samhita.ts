@@ -49,11 +49,12 @@ import { BRIHAT_SAMHITA_1884 as SOURCE } from "../../lib/knowledge/sources";
 import {
   LABELS_PROMPT,
   REWORDED,
-  awaitingWording,
+  UNPRINTED,
   inOrder,
+  labelDecision,
+  labelReason,
   median,
   ocrAgreement,
-  pendingLabels,
   shownText,
 } from "./build-shared";
 
@@ -343,11 +344,15 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     const { text, printedText } = shownText(ref, answered.text, answered.reworded_text);
     if (printedText) tallies.reworded.push(ref);
     if (REWORDED.test(answered.summary)) throw new Error(`${ref}: the summary says "${answered.summary.match(REWORDED)?.[0]}".`);
-    const labels = pendingLabels(answered.harsh_labels);
-    for (const label of labels) tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    const decision = labelDecision(answered.harsh_labels);
+    for (const label of decision.waiting) {
+      tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    }
 
     const modelWithheld = answered.withheld && !override.show;
-    const waiting = labels.length > 0 && !override.show;
+    const labelled = override.show ? null : labelReason(decision);
+    const withheld = modelWithheld || Boolean(labelled) || Boolean(override.withhold);
+    if (!withheld && UNPRINTED.test(text)) throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
     const agreement = ocrAgreement(scoredText({ text, printedText, notes }), rawWords, positionsOf);
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
@@ -367,12 +372,8 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
       ...(answered.hand ? { hand: true as const } : {}),
-      withheld: modelWithheld || waiting || Boolean(override.withhold),
-      withheldReason: modelWithheld
-        ? answered.withheld_reason.trim()
-        : waiting
-          ? awaitingWording(labels)
-          : (override.withhold ?? null),
+      withheld,
+      withheldReason: modelWithheld ? answered.withheld_reason.trim() : (labelled ?? override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });

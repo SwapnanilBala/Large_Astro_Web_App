@@ -48,15 +48,18 @@ import {
 } from "../../lib/knowledge/corpus";
 import { BRIHAT_JATAKA_1885 as SOURCE } from "../../lib/knowledge/sources";
 import {
+  BARREN_WORDING,
   LABELS_PROMPT,
   REWORDED,
-  awaitingWording,
+  UNPRINTED,
   checkedConditions,
   conditionsOf,
   inOrder,
+  labelDecision,
+  labelReason,
   median,
   ocrAgreement,
-  pendingLabels,
+  rewordByHand,
   shownText,
   withRequired,
 } from "./build-shared";
@@ -121,6 +124,8 @@ const WITHHELD_CHAPTERS: Record<number, string> = {
  *   showDespiteChapter shows a passage that WITHHELD_CHAPTERS would withhold
  *   withhold           withholds a passage the model let through, with the reason
  *   show               shows a passage the model withheld, with the reason it may be
+ *   rewordPhrase       the owner's rewording by hand: one phrase of the printed text
+ *                      and what replaces it (build-shared.ts)
  *   textIncludes       words the passage must contain, or the build fails: parts
  *                      renumber when a chapter is re-split, and an override must
  *                      not quietly land on a neighbour
@@ -131,6 +136,7 @@ type PassageOverride = {
   showDespiteChapter?: true;
   withhold?: string;
   show?: string;
+  rewordPhrase?: readonly [string, string];
   textIncludes?: string;
 };
 
@@ -170,6 +176,8 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   "24.4.7": { withhold: "speaks of hermaphrodites", textIncludes: "hermaphrodite" },
   "24.8.2": { withhold: "speaks of hermaphrodites", textIncludes: "husband will be a hermaphrodite" },
   "24.1.1": { withhold: "speaks of the husband's death", textIncludes: "The death of the husband" },
+  /* "Barren", in the owner's wording (2026-10-05): "may have no children". */
+  "24.5.20": { rewordPhrase: ["will be barren", `[${BARREN_WORDING}]`], textIncludes: "she will be barren" },
   "13.7.4": { show: ADULTERY_ALLOWED, textIncludes: "afflicted with sexual passion" },
   "14.4.27": { show: ADULTERY_ALLOWED, textIncludes: "he will commit adultery" },
   "14.4.87": { show: ADULTERY_ALLOWED, textIncludes: "fond of the wives of other men" },
@@ -581,24 +589,28 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     const required = "requires" in chapter ? chapter.requires : [];
     /* The life prompt (v5) asks for the owner's wording; the yoga answers predate it. */
     const life = chapter.group === "life";
-    const { text, printedText } = life
-      ? shownText(ref, answered.text, answered.reworded_text ?? "")
-      : { text: answered.text.trim(), printedText: null };
+    const byHand = override.rewordPhrase && rewordByHand(answered.text, override.rewordPhrase);
+    const { text, printedText } =
+      life || byHand
+        ? shownText(ref, answered.text, answered.reworded_text ?? "", byHand)
+        : { text: answered.text.trim(), printedText: null };
     if (printedText) tallies.reworded.push(ref);
     /* Summaries are embedded, never shown; the yoga answers' (v2) predate the rule, so only v5's are held to it. */
     if (life && REWORDED.test(answered.summary)) {
       throw new Error(`${ref}: the summary says "${answered.summary.match(REWORDED)?.[0]}".`);
     }
-    const labels = pendingLabels(answered.harsh_labels ?? []);
-    for (const label of labels) tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    const decision = labelDecision(answered.harsh_labels ?? []);
+    for (const label of decision.waiting) {
+      tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    }
 
     const agreement = ocrAgreement(scoredText({ text, printedText, notes }), rawWords, positionsOf);
     const chapterWithheld = chapter.chapter in WITHHELD_CHAPTERS && !override.showDespiteChapter;
     const modelWithheld = answered.withheld && !override.show;
-    const waiting = labels.length > 0 && !override.show;
-    const withheld = modelWithheld || chapterWithheld || waiting || Boolean(override.withhold);
-    /* A yoga answer has no rewording, so a word for a prostitute in it must stay withheld. */
-    if (!withheld && REWORDED.test(text)) throw new Error(`${ref}: shows "${text.match(REWORDED)?.[0]}" without the owner's rewording.`);
+    const labelled = override.show ? null : labelReason(decision);
+    const withheld = modelWithheld || chapterWithheld || Boolean(labelled) || Boolean(override.withhold);
+    /* A yoga answer has no rewording, so a word the owner rewords must stay withheld there unless reworded by hand. */
+    if (!withheld && UNPRINTED.test(text)) throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
       source: SOURCE.slug,
@@ -625,9 +637,7 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
         ? answered.withheld_reason.trim()
         : chapterWithheld
           ? WITHHELD_CHAPTERS[chapter.chapter]
-          : waiting
-            ? awaitingWording(labels)
-            : (override.withhold ?? null),
+          : (labelled ?? override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });

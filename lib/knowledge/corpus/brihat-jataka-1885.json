@@ -14133,7 +14133,7 @@
         "relationships"
       ],
       "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"a woman of low deeds\"",
+      "withheldReason": "the owner keeps \"a woman of low deeds\" hidden",
       "ocrAgreement": 0.929
     },
     {
@@ -23856,7 +23856,8 @@
       "part": 20,
       "kind": "verse",
       "chapterTitle": "On the Horoscopy of Women",
-      "text": "[When the rising sign or the sign occupied by the Moon at the time of birth of a woman is either Capricorn or Aquarius, if the rising Trimsamsa or the Trimsamsa occupied by the Moon be that of] Venus she will be barren.",
+      "text": "[When the rising sign or the sign occupied by the Moon at the time of birth of a woman is either Capricorn or Aquarius, if the rising Trimsamsa or the Trimsamsa occupied by the Moon be that of] Venus she [may have no children].",
+      "printedText": "[When the rising sign or the sign occupied by the Moon at the time of birth of a woman is either Capricorn or Aquarius, if the rising Trimsamsa or the Trimsamsa occupied by the Moon be that of] Venus she will be barren.",
       "notes": null,
       "summary": "The text says that with the ascendant or Moon in Capricorn or Aquarius and the Trimsamsa of Venus, she will have no children.",
       "yogaIds": [],
@@ -23869,8 +23870,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"barren\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

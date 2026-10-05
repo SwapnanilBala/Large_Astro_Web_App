@@ -47,22 +47,23 @@ import {
   scanAgreementFloor,
   rawLetters,
   scanLetters,
-  scanWords,
   scoredText,
   type KnowledgeCorpus,
   type KnowledgePassage,
 } from "../../lib/knowledge/corpus";
-import { PLACEMENT_KEYS } from "../../lib/knowledge/placements";
 import { STRIJATAKA_1931 as SOURCE } from "../../lib/knowledge/sources";
 import {
+  BARREN_WORDING,
   OWNERS_WORDING,
   REWORDED,
-  awaitingWording,
+  UNPRINTED,
   checkedConditions,
   inOrder,
+  labelDecision,
+  labelReason,
   letterAgreement,
   median,
-  pendingLabels,
+  rewordByHand,
   shownText,
 } from "./build-shared";
 
@@ -95,7 +96,8 @@ const REQUIRED = ["reader.sex.female"] as const;
  *   withhold      withholds a passage the model let through, with the reason
  *   show          shows a passage the model withheld, with the reason it may be
  *   reworded      the owner's rewording written by hand, where the model's reads badly;
- *                 it must still drop every word REWORDED names and carry OWNERS_WORDING
+ *                 it must still drop every word the owner rewords and carry their wording
+ *   rewordPhrase  the same, as one phrase of the printed text and what replaces it
  *   opening       bracketed words put before the passage, for a list item whose result
  *                 is only in the heading over the list
  *   textIncludes  words the passage must contain, or the build fails
@@ -104,6 +106,7 @@ type PassageOverride = {
   withhold?: string;
   show?: string;
   reworded?: string;
+  rewordPhrase?: readonly [string, string];
   opening?: `[${string}]`;
   textIncludes?: string;
 };
@@ -137,6 +140,8 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Cleared with adultery on 2026-10-05, but it also calls her husband "born of
      adultery": a slur on his birth, which the content line withholds. */
   "6.6.1": { withhold: "speaks of birth status (born of adultery)", textIncludes: "born of adultery" },
+  /* "Barren", in the owner's wording (2026-10-05): "may have no children". */
+  "6.9.4": { rewordPhrase: ["becomes barren", `[${BARREN_WORDING}]`], textIncludes: "she becomes barren" },
   "12.1.1": { opening: SAUBHAGYA, textIncludes: "aspected by Sukra" },
   "12.2.1": { opening: SAUBHAGYA, textIncludes: "aspected by Guru and Chandra" },
   "12.3.1": { opening: SAUBHAGYA, textIncludes: "the lord of Lagna occupies Lagna" },
@@ -469,23 +474,24 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     if (override.textIncludes && !answered.text.includes(override.textIncludes)) {
       throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
     }
-    const shown = shownText(ref, answered.text, answered.reworded_text, override.reworded);
+    const byHand = override.reworded ?? (override.rewordPhrase && rewordByHand(answered.text, override.rewordPhrase));
+    const shown = shownText(ref, answered.text, answered.reworded_text, byHand);
     const { printedText } = shown;
     const text = override.opening ? `${override.opening} ${shown.text}` : shown.text;
     if (printedText) tallies.reworded.push(ref);
     if (REWORDED.test(answered.summary)) throw new Error(`${ref}: the summary says "${answered.summary.match(REWORDED)?.[0]}".`);
 
-    /* Adultery and "free with other men", flagged by this prompt, have since been cleared (build-shared.ts). */
-    const labels = pendingLabels(answered.harsh_labels);
-    for (const label of labels) tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    /* The labels this prompt flagged, as the owner has since settled them (build-shared.ts). */
+    const decision = labelDecision(answered.harsh_labels);
+    for (const label of decision.waiting) {
+      tallies.labels.set(label.toLowerCase(), [...(tallies.labels.get(label.toLowerCase()) ?? []), ref]);
+    }
 
     const modelWithheld = answered.withheld && !override.show;
-    const waiting = labels.length > 0 && !override.show;
-    const reason = modelWithheld
-      ? answered.withheld_reason.trim()
-      : waiting
-        ? awaitingWording(labels)
-        : (override.withhold ?? null);
+    const labelled = override.show ? null : labelReason(decision);
+    const reason = modelWithheld ? answered.withheld_reason.trim() : (labelled ?? override.withhold ?? null);
+    const withheld = modelWithheld || Boolean(labelled) || Boolean(override.withhold);
+    if (!withheld && UNPRINTED.test(text)) throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
 
     /* The letter-level check: this scan defeats the word runs (lib/knowledge/corpus.ts, LETTER_CHECKED). */
     const agreement = letterAgreement(scanLetters(scoredText({ text, printedText, notes })), scan);
@@ -505,7 +511,7 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       ...checkedConditions(ref, answered, REQUIRED, tallies.unknownKeys),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: modelWithheld || waiting || Boolean(override.withhold),
+      withheld,
       withheldReason: reason,
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };

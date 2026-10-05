@@ -202,6 +202,16 @@ describe("the Brihat Jataka corpus", () => {
     expect(shown.filter((passage) => /lose his (sons|children)|loss of (his )?(sons|children)/i.test(passage.text))).toEqual([]);
   });
 
+  it("prints 'may have no children' for barren, and keeps 'a woman of low deeds' hidden, as the owner decided", () => {
+    // 2026-10-05: "show barren as 'may have no children' ... keep the 'a woman
+    // of low deeds' and 'dirty women' hidden".
+    const find = (ref: string) => corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref);
+    expect(find("24.5.20")?.withheld).toBe(false);
+    expect(find("24.5.20")?.text).toMatch(/she \[may have no children\]\.$/);
+    expect(find("18.20.75")?.withheld).toBe(true);
+    expect(find("18.20.75")?.withheldReason).toBe('the owner keeps "a woman of low deeds" hidden');
+  });
+
   it("shows adultery, for men as for women, as the owner decided", () => {
     // 2026-10-05: "Adultery is fine, not too bad, same do it for men as well".
     const shown = (corpus?.passages ?? []).filter((passage) => !passage.withheld);
@@ -265,12 +275,21 @@ describe("the Strijataka corpus", () => {
   it("prints the owner's wording for the book's words for a prostitute, and keeps the book's own words aside", () => {
     // 2026-10-05: "calling prostitute is a bit too bold and some people might
     // get hurt ... multiple illicit relationships would be better".
-    const reworded = passages.filter((passage) => passage.printedText);
+    const reworded = passages.filter((passage) => /prostitut|whore|harlot|courtesan/i.test(passage.printedText ?? ""));
     expect(reworded.length).toBeGreaterThan(0);
     for (const passage of reworded) {
       expect(passage.text, passage.id).toMatch(/\[[^\]]*multiple illicit relationships[^\]]*\]/i);
       expect(passage.text, passage.id).not.toMatch(/prostitut|whore|harlot|courtesan/i);
-      expect(passage.printedText, passage.id).toMatch(/prostitut|whore|harlot|courtesan/i);
+    }
+  });
+
+  it("prints 'may have no children' for barren, as the owner worded it", () => {
+    // 2026-10-05: "show barren as 'may have no children'".
+    const reworded = passages.filter((passage) => /\bbarren\b/i.test(passage.printedText ?? ""));
+    expect(reworded.map((passage) => passage.id)).toContain("strijataka-1931:6.9.4");
+    for (const passage of reworded) {
+      expect(passage.text, passage.id).toContain("[may have no children]");
+      expect(passage.withheld, passage.id).toBe(false);
     }
   });
 

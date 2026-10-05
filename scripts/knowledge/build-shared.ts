@@ -167,31 +167,68 @@ export function checkedConditions(
  *     for men as well"), and so may "free with other men", and the book's
  *     other words for it, "going wrong" and "free in her sexual intercourse"
  *     ("these sound alright", the same day).
- *   - Any other word that brands a person for their sexual conduct or for
- *     having no children waits, withheld, until the owner picks its wording
- *     ("if you find similar stuff let me know I will recommend").
+ *   - "Barren" is printed as "may have no children", in square brackets
+ *     ("show barren as 'may have no children'"). The answers flag it rather
+ *     than reword it, so each such passage is reworded by hand in its build's
+ *     PASSAGE_OVERRIDES (rewordPhrase), and a shown passage that still prints
+ *     it fails the build (UNPRINTED).
+ *   - "A woman of low deeds" and "dirty women" stay hidden for good ("keep ...
+ *     hidden").
+ *   - Any other word that brands a person for their sexual conduct waits,
+ *     withheld, until the owner picks its wording ("if you find similar stuff
+ *     let me know I will recommend").
  */
 export const REWORDED = /\b(prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public\s+wom[ae]n)\b/i;
 export const OWNERS_WORDING = "multiple illicit relationships";
+export const BARREN = /\bbarren\b/i;
+export const BARREN_WORDING = "may have no children";
+/** What a shown passage may never print: every word the owner has reworded. */
+export const UNPRINTED = new RegExp(`${REWORDED.source}|${BARREN.source}`, "i");
 /** Words a rewording may drop with the label: its article and its verb. */
 const DROPPABLE =
   /^(a|an|the|of|is|are|be|been|being|become|becomes|became|turn|turns|prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public|women|woman)$/;
 
 /**
- * Labels the owner has cleared since a book was read (2026-10-05). The
- * cached answers still list them in `harsh_labels`; they are dropped wherever
- * labels are read, so no rebuild is needed to show them. A passage with any
- * other label as well still waits for that one.
+ * Labels the owner has settled since a book was read (2026-10-05). The cached
+ * answers still list them in `harsh_labels`, so they are sorted here, wherever
+ * labels are read, and no rebuild is needed: cleared ones no longer withhold a
+ * passage ("barren" because it is reworded by hand, which UNPRINTED enforces),
+ * hidden ones withhold it for good. A passage with any other label as well
+ * still waits for that one.
  */
-const CLEARED_LABELS = /^(adulter\w*|free with other men|going wrong|free in her sexual intercourse)$/i;
+const CLEARED_LABELS = /^(adulter\w*|free with other men|going wrong|free in her sexual intercourse|barren)$/i;
+const HIDDEN_LABELS = /^(a woman of low deeds|dirty women)$/i;
 
-/** A record's labels still waiting for the owner's wording, trimmed, once each. */
-export function pendingLabels(labels: readonly string[]): string[] {
-  return [...new Set(labels.map((label) => label.trim()).filter((label) => label && !CLEARED_LABELS.test(label)))];
+/** A record's labels, trimmed and once each: those hidden for good, and those still waiting for wording. */
+export function labelDecision(labels: readonly string[]): { hidden: string[]; waiting: string[] } {
+  const open = [...new Set(labels.map((label) => label.trim()).filter((label) => label && !CLEARED_LABELS.test(label)))];
+  return {
+    hidden: open.filter((label) => HIDDEN_LABELS.test(label)),
+    waiting: open.filter((label) => !HIDDEN_LABELS.test(label)),
+  };
 }
 
-export const awaitingWording = (labels: readonly string[]) =>
-  `awaiting the owner's wording for ${labels.map((label) => `"${label}"`).join(", ")}`;
+const quoted = (labels: readonly string[]) => labels.map((label) => `"${label}"`).join(", ");
+export const awaitingWording = (labels: readonly string[]) => `awaiting the owner's wording for ${quoted(labels)}`;
+export const hiddenByOwner = (labels: readonly string[]) => `the owner keeps ${quoted(labels)} hidden`;
+
+/** The withheld reason a record's labels give, if they give one: a decision to hide outranks a wait. */
+export function labelReason(decision: { hidden: string[]; waiting: string[] }): string | null {
+  if (decision.hidden.length > 0) return hiddenByOwner(decision.hidden);
+  if (decision.waiting.length > 0) return awaitingWording(decision.waiting);
+  return null;
+}
+
+/**
+ * A rewording by hand from one phrase of the printed text to the owner's
+ * bracketed wording ("she will be barren" to "she [may have no children]"),
+ * which must occur exactly once.
+ */
+export function rewordByHand(printed: string, [from, to]: readonly [string, string]): string {
+  const at = printed.indexOf(from);
+  if (at < 0 || printed.indexOf(from, at + 1) >= 0) throw new Error(`"${from}" must occur exactly once in "${printed}".`);
+  return printed.slice(0, at) + to + printed.slice(at + from.length);
+}
 
 const brackets = (text: string) => [...text.matchAll(/\[([^\]]*)\]/g)].map((match) => match[1]);
 const wordsOutsideBrackets = (text: string) => scanWords(text.replace(/\[[^\]]*\]/g, " "));
@@ -215,11 +252,13 @@ export function shownText(
     if (REWORDED.test(printed)) throw new Error(`${ref}: "${printed.match(REWORDED)?.[0]}" left unreworded.`);
     return { text: printed, printedText: null };
   }
-  if (!REWORDED.test(printed)) throw new Error(`${ref}: reworded, but has none of the words the owner asked to reword.`);
-  if (REWORDED.test(reworded)) throw new Error(`${ref}: the rewording still has "${reworded.match(REWORDED)?.[0]}".`);
+  if (!UNPRINTED.test(printed)) throw new Error(`${ref}: reworded, but has none of the words the owner asked to reword.`);
+  if (UNPRINTED.test(reworded)) throw new Error(`${ref}: the rewording still has "${reworded.match(UNPRINTED)?.[0]}".`);
   const kept = new Set(brackets(printed));
   const added = brackets(reworded).filter((inside) => !kept.has(inside));
-  if (added.length === 0 || added.some((inside) => !inside.toLowerCase().includes(OWNERS_WORDING))) {
+  const ownersWording = (inside: string) =>
+    [OWNERS_WORDING, BARREN_WORDING].some((wording) => inside.toLowerCase().includes(wording));
+  if (added.length === 0 || !added.every(ownersWording)) {
     throw new Error(`${ref}: a bracket in the rewording lacks the owner's wording: ${JSON.stringify(added)}.`);
   }
   if (byHand) return { text: reworded, printedText: printed };
