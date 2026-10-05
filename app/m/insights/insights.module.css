@@ -115,6 +115,11 @@
   font-family: var(--font-display);
   font-size: 1.25rem;
   line-height: 1.2;
+  /* A third of a phone is narrow for "Shatabhisha" or German "Wassermann":
+     break at a syllable, with a hyphen, where the browser knows the language,
+     and anywhere only where it does not. */
+  -webkit-hyphens: auto;
+  hyphens: auto;
   overflow-wrap: anywhere;
 }
 
