@@ -40,6 +40,34 @@ export const BRIHAT_JATAKA_1885: KnowledgeSource = {
   textMd5: "c4cd7f67be08cbfb4002e33fee48ea0b",
 };
 
+/*
+ * For the palm reading. Chapter 68, "On the Features of Man", gives the marks
+ * of the palm, fingers and nails (verses 39-50 in this translation), and
+ * chapter 70, "On the Features of Women", gives a woman's (verses 10-14 and
+ * 22). The palm reading named "Brihat Samhita Ch. 68" from memory until
+ * 2026-10-04; this is the text itself.
+ *
+ * Two public-domain scans were compared on those chapters: this one, Harvard's
+ * copy scanned by Google, and the Wellcome Library's (b29353130). Their OCR is
+ * about equally damaged there, in different words; this one is pinned because
+ * its chapter headings survive OCR intact and it is the same provenance as the
+ * Brihat Jataka above.
+ */
+export const BRIHAT_SAMHITA_1884: KnowledgeSource = {
+  slug: "brihat-samhita-1884",
+  title: "The Brihat Samhita of Varaha Mihira",
+  author: "Varahamihira",
+  translator: "N. Chidambaram Iyer",
+  publisher: "South Indian Press, Madura",
+  year: 1884,
+  rights:
+    "Public domain: published in 1884, so out of copyright in the United States (before 1930) and in India (life plus 60 years, long past for a translator publishing in 1884). Scanned by Google from the Harvard University copy; archive.org marks it NOT_IN_COPYRIGHT.",
+  url: "https://archive.org/details/bihatsahitvarah00iyergoog",
+  textUrl: "https://archive.org/download/bihatsahitvarah00iyergoog/bihatsahitvarah00iyergoog_djvu.txt",
+  textMd5: "6d7ef7e079c6aae131a4a0e91b6a3405",
+};
+
 export const KNOWLEDGE_SOURCES: Record<string, KnowledgeSource> = {
   [BRIHAT_JATAKA_1885.slug]: BRIHAT_JATAKA_1885,
+  [BRIHAT_SAMHITA_1884.slug]: BRIHAT_SAMHITA_1884,
 };
