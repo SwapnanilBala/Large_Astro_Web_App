@@ -164,7 +164,9 @@ export function checkedConditions(
  *     and some people might get hurt"). The model transcribes faithfully into
  *     `text` and rewords into `reworded_text`; shownText checks the rewording.
  *   - Adultery may be said plainly ("Adultery is fine, not too bad, same do it
- *     for men as well"), and so may "free with other men".
+ *     for men as well"), and so may "free with other men", and the book's
+ *     other words for it, "going wrong" and "free in her sexual intercourse"
+ *     ("these sound alright", the same day).
  *   - Any other word that brands a person for their sexual conduct or for
  *     having no children waits, withheld, until the owner picks its wording
  *     ("if you find similar stuff let me know I will recommend").
@@ -177,10 +179,11 @@ const DROPPABLE =
 
 /**
  * Labels the owner has cleared since a book was read (2026-10-05). The
- * Strijataka's cached answers still list them in `harsh_labels`; they are
- * dropped wherever labels are read, so no rebuild is needed to show them.
+ * cached answers still list them in `harsh_labels`; they are dropped wherever
+ * labels are read, so no rebuild is needed to show them. A passage with any
+ * other label as well still waits for that one.
  */
-const CLEARED_LABELS = /^(adulter\w*|free with other men)$/i;
+const CLEARED_LABELS = /^(adulter\w*|free with other men|going wrong|free in her sexual intercourse)$/i;
 
 /** A record's labels still waiting for the owner's wording, trimmed, once each. */
 export function pendingLabels(labels: readonly string[]): string[] {

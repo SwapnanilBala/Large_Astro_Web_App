@@ -281,7 +281,9 @@ describe("the Strijataka corpus", () => {
     const waiting = passages.filter((passage) => passage.withheldReason?.startsWith("awaiting the owner's wording"));
     expect(waiting.length).toBeGreaterThan(0);
     expect(waiting.every((passage) => passage.withheld)).toBe(true);
-    expect(waiting.some((passage) => /adulter|free with other men/.test(passage.withheldReason ?? ""))).toBe(false);
+    // Cleared by the owner on 2026-10-05, so no longer a reason to wait.
+    const cleared = /adulter|free with other men|going wrong|free in her sexual intercourse/;
+    expect(waiting.some((passage) => cleared.test(passage.withheldReason ?? ""))).toBe(false);
   });
 
   it("shows adultery, as the owner decided, but not a slur on someone's birth", () => {
