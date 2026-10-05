@@ -33,8 +33,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"bad character\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.979
     },
     {
@@ -109,8 +109,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"of bad character\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.963
     },
     {
@@ -129,8 +129,8 @@
       "placementsAny": [],
       "planets": [],
       "lifeAreas": [],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"bad in morality\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.906
     },
     {
@@ -525,8 +525,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"a bad one\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -629,7 +629,8 @@
       "part": 2,
       "kind": "verse",
       "chapterTitle": "Precautions in Predictions",
-      "text": "But the Astrologer must make some difference even in such cases of adultery. A woman sleeps with a rich and agreeable sort of man, she yields her embraces to an ordinary man under passion before marriage, she will commit adultery with a street beggar out of violent passion. In all these cases the girl is guilty of immoral actions. But even then there is some difference. A woman going wrong after marriage and before marriage, after puberty and before puberty, and with a rich man and a poor beggar cannot and will not have the same sins or same happiness. The impulses will not be the same and the measure of pleasure and profit will considerably differ.",
+      "text": "But the Astrologer must make some difference even in such cases of adultery. A woman sleeps with a rich and agreeable sort of man, she yields her embraces to an ordinary man under passion before marriage, she will commit adultery with a street beggar out of violent passion. In all these cases the girl is guilty of [multiple illicit relationships]. But even then there is some difference. A woman going wrong after marriage and before marriage, after puberty and before puberty, and with a rich man and a poor beggar cannot and will not have the same sins or same happiness. The impulses will not be the same and the measure of pleasure and profit will considerably differ.",
+      "printedText": "But the Astrologer must make some difference even in such cases of adultery. A woman sleeps with a rich and agreeable sort of man, she yields her embraces to an ordinary man under passion before marriage, she will commit adultery with a street beggar out of violent passion. In all these cases the girl is guilty of immoral actions. But even then there is some difference. A woman going wrong after marriage and before marriage, after puberty and before puberty, and with a rich man and a poor beggar cannot and will not have the same sins or same happiness. The impulses will not be the same and the measure of pleasure and profit will considerably differ.",
       "notes": null,
       "summary": "The book says the astrologer must still distinguish between such cases: a relationship with a rich, agreeable man, with an ordinary man before marriage, or with a beggar out of strong passion differ in motive, in pleasure and in profit, depending also on whether it happens before or after marriage or puberty.",
       "yogaIds": [],
@@ -639,8 +640,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"immoral\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.981
     },
     {
@@ -706,7 +707,8 @@
       "part": 2,
       "kind": "verse",
       "chapterTitle": "Precautions in Predictions",
-      "text": "If Kataka or that Navamsa rises at birth the husband will be immoral and sympathetic.",
+      "text": "If Kataka or that Navamsa rises at birth the husband will be [given to multiple illicit relationships] and sympathetic.",
+      "printedText": "If Kataka or that Navamsa rises at birth the husband will be immoral and sympathetic.",
       "notes": null,
       "summary": "The book says that if Cancer, or the Cancer navamsa, rises at birth, the husband will be immoral and sympathetic.",
       "yogaIds": [],
@@ -716,8 +718,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"immoral\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -750,7 +752,8 @@
       "part": 4,
       "kind": "verse",
       "chapterTitle": "Precautions in Predictions",
-      "text": "If the 7th Navamsa rises in Simha or Simha becomes 7th house, the husband will become engaged in various commercial concerns and will be immoral.",
+      "text": "If the 7th Navamsa rises in Simha or Simha becomes 7th house, the husband will become engaged in various commercial concerns and will be [given to multiple illicit relationships].",
+      "printedText": "If the 7th Navamsa rises in Simha or Simha becomes 7th house, the husband will become engaged in various commercial concerns and will be immoral.",
       "notes": null,
       "summary": "The book says that if the 7th navamsa falls in Leo or Leo is the 7th house, the husband will engage in various business concerns and will be immoral.",
       "yogaIds": [],
@@ -760,8 +763,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"immoral\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.966
     },
     {
@@ -1716,7 +1719,7 @@
         "family"
       ],
       "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"immoral\"",
+      "withheldReason": "speaks of birth status (illegitimacy)",
       "ocrAgreement": 1
     },
     {
@@ -2737,8 +2740,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"bad character\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.973
     },
     {
@@ -16404,7 +16407,7 @@
       "part": 4,
       "kind": "verse",
       "chapterTitle": "Jupiter, Venus and Saturn in the Twelve Houses",
-      "text": "[Sani in 4 —] questionable morais",
+      "text": "[Sani in 4 —] questionable morals",
       "notes": null,
       "summary": "The book says that with Saturn in the 4th house her personal conduct will be open to question.",
       "yogaIds": [],
@@ -16420,9 +16423,9 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"questionable morais\"",
-      "ocrAgreement": 1
+      "withheld": false,
+      "withheldReason": null,
+      "ocrAgreement": 0.944
     },
     {
       "id": "strijataka-1931:10.29.1",
@@ -17363,7 +17366,8 @@
       "part": 3,
       "kind": "verse",
       "chapterTitle": "Rajayogas, or Combinations for Power and Prosperity",
-      "text": "Morality has been specially mentioned when they have any. Royal females have greater temptations to fall into immoral channels.",
+      "text": "Morality has been specially mentioned when they have any. Royal females have greater temptations to fall into [multiple illicit relationships].",
+      "printedText": "Morality has been specially mentioned when they have any. Royal females have greater temptations to fall into immoral channels.",
       "notes": null,
       "summary": "The book comments that morality is specially mentioned where it applies, since royal women face greater temptations to stray from moral conduct.",
       "yogaIds": [],
@@ -17374,8 +17378,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"immoral\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.981
     },
     {

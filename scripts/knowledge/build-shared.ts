@@ -174,16 +174,24 @@ export function checkedConditions(
  *     it fails the build (UNPRINTED).
  *   - "A woman of low deeds" and "dirty women" stay hidden for good ("keep ...
  *     hidden").
- *   - Any other word that brands a person for their sexual conduct waits,
- *     withheld, until the owner picks its wording ("if you find similar stuff
- *     let me know I will recommend").
+ *   - "Unchaste", "bad character" (with "of bad conduct", "a bad one", "bad in
+ *     morality") and "questionable morals" may be said plainly; "immoral" and
+ *     "bad women" are printed as "multiple illicit relationships", reworded by
+ *     hand like "barren" ("Unchaste sounds fine, keep multiple illicit
+ *     relationships, bad character is fine and then keep the questionable
+ *     morals").
+ *   - Any word that brands a person and that the owner has not yet seen waits,
+ *     withheld, until they pick its wording ("if you find similar stuff let me
+ *     know I will recommend").
  */
 export const REWORDED = /\b(prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public\s+wom[ae]n)\b/i;
 export const OWNERS_WORDING = "multiple illicit relationships";
 export const BARREN = /\bbarren\b/i;
 export const BARREN_WORDING = "may have no children";
+/** Reworded by hand to OWNERS_WORDING, passage by passage. */
+const IMMORAL = /\b(immoral\w*|bad\s+wom[ae]n)\b/i;
 /** What a shown passage may never print: every word the owner has reworded. */
-export const UNPRINTED = new RegExp(`${REWORDED.source}|${BARREN.source}`, "i");
+export const UNPRINTED = new RegExp(`${REWORDED.source}|${BARREN.source}|${IMMORAL.source}`, "i");
 /** Words a rewording may drop with the label: its article and its verb. */
 const DROPPABLE =
   /^(a|an|the|of|is|are|be|been|being|become|becomes|became|turn|turns|prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public|women|woman)$/;
@@ -196,7 +204,29 @@ const DROPPABLE =
  * hidden ones withhold it for good. A passage with any other label as well
  * still waits for that one.
  */
-const CLEARED_LABELS = /^(adulter\w*|free with other men|going wrong|free in her sexual intercourse|barren)$/i;
+const CLEARED_LABELS = new RegExp(
+  [
+    /* said plainly */
+    "adulter\\w*",
+    "free with other men",
+    "going wrong",
+    "free in her sexual intercourse",
+    "unchaste",
+    "not be chaste",
+    "(of )?bad character",
+    "of bad conduct",
+    "a bad one",
+    "bad in morality",
+    "questionable mora[il]s",
+    /* reworded by hand, which UNPRINTED enforces */
+    "barren",
+    "immoral",
+    "bad women",
+  ]
+    .map((label) => `^${label}$`)
+    .join("|"),
+  "i",
+);
 const HIDDEN_LABELS = /^(a woman of low deeds|dirty women)$/i;
 
 /** A record's labels, trimmed and once each: those hidden for good, and those still waiting for wording. */

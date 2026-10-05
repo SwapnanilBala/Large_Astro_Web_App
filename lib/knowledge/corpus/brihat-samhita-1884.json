@@ -7785,8 +7785,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"unchaste\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.882
     },
     {
@@ -7919,8 +7919,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"unchaste\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

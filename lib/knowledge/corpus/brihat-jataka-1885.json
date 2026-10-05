@@ -11667,7 +11667,8 @@
       "part": 4,
       "kind": "verse",
       "chapterTitle": "On the Sun, Mars and Other Planets in the Several Signs",
-      "text": "[A person born with Venus in sign Capricorn or Aquarius] and will be fond of bad women.",
+      "text": "[A person born with Venus in sign Capricorn or Aquarius] and will be fond of [multiple illicit relationships].",
+      "printedText": "[A person born with Venus in sign Capricorn or Aquarius] and will be fond of bad women.",
       "notes": null,
       "summary": "The text says a person born with Venus in Capricorn or Aquarius will be attracted to women whose conduct the text disapproves of.",
       "yogaIds": [],
@@ -11682,8 +11683,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"bad women\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.867
     },
     {
@@ -17254,7 +17255,8 @@
       "part": 5,
       "kind": "verse",
       "chapterTitle": "On Planetary Aspects",
-      "text": "[If at the time of birth, the Moon occupy the Navamsa of Saturn] if by Venus, he will be fond of bad women",
+      "text": "[If at the time of birth, the Moon occupy the Navamsa of Saturn] if by Venus, he will be fond of [multiple illicit relationships]",
+      "printedText": "[If at the time of birth, the Moon occupy the Navamsa of Saturn] if by Venus, he will be fond of bad women",
       "notes": null,
       "summary": "The text says that if the Moon is in a Navamsa of Saturn and aspected by Venus, the person will be fond of women of loose sexual conduct.",
       "yogaIds": [],
@@ -17273,8 +17275,8 @@
       "lifeAreas": [
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"bad women\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.857
     },
     {
@@ -23007,8 +23009,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"unchaste\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.977
     },
     {
@@ -23110,8 +23112,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"of bad conduct\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.977
     },
     {
@@ -23136,8 +23138,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"of bad conduct\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.977
     },
     {
@@ -23489,8 +23491,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"of bad conduct\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -23741,8 +23743,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"not be chaste\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.929
     },
     {
@@ -23844,8 +23846,8 @@
         "character",
         "relationships"
       ],
-      "withheld": true,
-      "withheldReason": "awaiting the owner's wording for \"of bad conduct\"",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

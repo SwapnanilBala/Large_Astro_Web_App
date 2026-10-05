@@ -98,6 +98,7 @@ const REQUIRED = ["reader.sex.female"] as const;
  *   reworded      the owner's rewording written by hand, where the model's reads badly;
  *                 it must still drop every word the owner rewords and carry their wording
  *   rewordPhrase  the same, as one phrase of the printed text and what replaces it
+ *   repair        an OCR misreading the model left in, as the scan's word and the right one
  *   opening       bracketed words put before the passage, for a list item whose result
  *                 is only in the heading over the list
  *   textIncludes  words the passage must contain, or the build fails
@@ -107,6 +108,7 @@ type PassageOverride = {
   show?: string;
   reworded?: string;
   rewordPhrase?: readonly [string, string];
+  repair?: readonly [string, string];
   opening?: `[${string}]`;
   textIncludes?: string;
 };
@@ -114,7 +116,8 @@ type PassageOverride = {
 /* The Saubhagya yogas are a bare list of conditions under a heading; what they
    give is in the heading and in the contents page's gloss of it. */
 const SAUBHAGYA: `[${string}]` = "[Saubhagya Yogas, long marital states:]";
-const IMMORAL = `awaiting the owner's wording for "immoral"`;
+/* "Immoral", in the owner's wording (2026-10-05): "multiple illicit relationships". */
+const IMMORAL_WORDING = `[given to ${OWNERS_WORDING}]`;
 
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Saturn in the 5th, in a list of results: "prostitute behaviour". The
@@ -129,10 +132,17 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      model read the two as one sentence, which would pin page 11's result on
      page 9's condition. */
   "4.5.1": { withhold: "joins two pages across the missing page 10", textIncludes: "husband will be learned" },
-  /* "The husband will be immoral": the label the model flags for a woman,
-     said of her partner. Held with the others until the owner words it. */
-  "4.5.2": { withhold: IMMORAL, textIncludes: "husband will be immoral" },
-  "4.5.4": { withhold: IMMORAL, textIncludes: "will be immoral" },
+  /* "Immoral", for a woman and for her husband alike: in this chapter on
+     "moral and virtuous behaviour" it is the opposite of chaste. */
+  "4.3.2": { rewordPhrase: ["immoral actions", `[${OWNERS_WORDING}]`], textIncludes: "guilty of immoral actions" },
+  "4.5.2": { rewordPhrase: ["immoral", IMMORAL_WORDING], textIncludes: "husband will be immoral" },
+  "4.5.4": { rewordPhrase: ["immoral", IMMORAL_WORDING], textIncludes: "will be immoral" },
+  "11.2.3": { rewordPhrase: ["immoral channels", `[${OWNERS_WORDING}]`], textIncludes: "fall into immoral channels" },
+  /* Not cleared with "immoral": the mother's conduct is how it says the son
+     is not his father's, a slur on his birth like "born of adultery". */
+  "6.6.2": { withhold: "speaks of birth status (illegitimacy)", textIncludes: "not the son of his reputed" },
+  /* Saturn in the 4th: "questionable morais", the scan's misreading of "morals". */
+  "10.28.4": { repair: ["morais", "morals"], textIncludes: "questionable morais" },
   /* Discussion, matched to no chart, but it speaks of death: a planet's
      weakest degrees, and the mortals of a cosmology. */
   "7.30.1": { withhold: "speaks of death", textIncludes: "loses his power" },
@@ -474,8 +484,10 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     if (override.textIncludes && !answered.text.includes(override.textIncludes)) {
       throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
     }
-    const byHand = override.reworded ?? (override.rewordPhrase && rewordByHand(answered.text, override.rewordPhrase));
-    const shown = shownText(ref, answered.text, answered.reworded_text, byHand);
+    /* A repair is still the book's own word, so it comes before any rewording and stays in printedText. */
+    const transcribed = override.repair ? rewordByHand(answered.text, override.repair) : answered.text;
+    const byHand = override.reworded ?? (override.rewordPhrase && rewordByHand(transcribed, override.rewordPhrase));
+    const shown = shownText(ref, transcribed, answered.reworded_text, byHand);
     const { printedText } = shown;
     const text = override.opening ? `${override.opening} ${shown.text}` : shown.text;
     if (printedText) tallies.reworded.push(ref);

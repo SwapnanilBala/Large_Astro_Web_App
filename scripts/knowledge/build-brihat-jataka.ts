@@ -49,6 +49,7 @@ import {
 import { BRIHAT_JATAKA_1885 as SOURCE } from "../../lib/knowledge/sources";
 import {
   BARREN_WORDING,
+  OWNERS_WORDING,
   LABELS_PROMPT,
   REWORDED,
   UNPRINTED,
@@ -178,6 +179,9 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   "24.1.1": { withhold: "speaks of the husband's death", textIncludes: "The death of the husband" },
   /* "Barren", in the owner's wording (2026-10-05): "may have no children". */
   "24.5.20": { rewordPhrase: ["will be barren", `[${BARREN_WORDING}]`], textIncludes: "she will be barren" },
+  /* "Bad women", in the owner's wording (2026-10-05): "multiple illicit relationships". */
+  "18.15.4": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },
+  "19.8.5": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },
   "13.7.4": { show: ADULTERY_ALLOWED, textIncludes: "afflicted with sexual passion" },
   "14.4.27": { show: ADULTERY_ALLOWED, textIncludes: "he will commit adultery" },
   "14.4.87": { show: ADULTERY_ALLOWED, textIncludes: "fond of the wives of other men" },

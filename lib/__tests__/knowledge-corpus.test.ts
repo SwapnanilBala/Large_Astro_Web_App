@@ -183,7 +183,7 @@ describe("the Brihat Jataka corpus", () => {
       "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|unchaste|barren)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n)\b/i;
     const found = (corpus?.passages ?? [])
       .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
       .flatMap((passage) => {
@@ -210,6 +210,14 @@ describe("the Brihat Jataka corpus", () => {
     expect(find("24.5.20")?.text).toMatch(/she \[may have no children\]\.$/);
     expect(find("18.20.75")?.withheld).toBe(true);
     expect(find("18.20.75")?.withheldReason).toBe('the owner keeps "a woman of low deeds" hidden');
+  });
+
+  it("prints 'multiple illicit relationships' for 'bad women', and shows 'unchaste' as printed, as the owner decided", () => {
+    const find = (ref: string) => corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref);
+    expect(find("18.15.4")?.text).toMatch(/fond of \[multiple illicit relationships\]\.$/);
+    expect(find("18.15.4")?.withheld).toBe(false);
+    expect(find("24.3.1")?.withheld).toBe(false);
+    expect(find("24.3.1")?.text).toContain("unchaste before marriage");
   });
 
   it("shows adultery, for men as for women, as the owner decided", () => {
@@ -293,16 +301,28 @@ describe("the Strijataka corpus", () => {
     }
   });
 
-  it("holds back, until the owner words them, the passages that brand a woman", () => {
+  it("holds back, until the owner words them, only labels the owner has not yet seen", () => {
     // The owner asked to see these before any is shown ("if you find similar
-    // stuff let me know I will recommend"): immoral, barren and the like are
-    // withheld with that reason, not reworded on the owner's behalf.
+    // stuff let me know I will recommend"). Every one they have seen is
+    // settled (build-shared.ts): said plainly, reworded, or hidden for good.
     const waiting = passages.filter((passage) => passage.withheldReason?.startsWith("awaiting the owner's wording"));
-    expect(waiting.length).toBeGreaterThan(0);
     expect(waiting.every((passage) => passage.withheld)).toBe(true);
-    // Cleared by the owner on 2026-10-05, so no longer a reason to wait.
-    const cleared = /adulter|free with other men|going wrong|free in her sexual intercourse/;
-    expect(waiting.some((passage) => cleared.test(passage.withheldReason ?? ""))).toBe(false);
+    const settled =
+      /adulter|free with other men|going wrong|free in her sexual intercourse|unchaste|chaste|bad character|bad conduct|a bad one|bad in morality|questionable|barren|immoral|bad women|low deeds|dirty women/;
+    expect(waiting.filter((passage) => settled.test(passage.withheldReason ?? "")).map((passage) => passage.id)).toEqual([]);
+  });
+
+  it("prints the owner's words for 'immoral', and says 'bad character', 'unchaste' and 'questionable morals' plainly", () => {
+    // 2026-10-05: "Unchaste sounds fine, keep multiple illicit relationships,
+    // bad character is fine and then keep the questionable morals".
+    const find = (ref: string) => passages.find((passage) => passage.id === "strijataka-1931:" + ref);
+    expect(find("4.5.2")?.text).toContain("the husband will be [given to multiple illicit relationships]");
+    expect(find("11.2.3")?.text).toContain("fall into [multiple illicit relationships]");
+    expect(find("7.4.1")?.withheld).toBe(false);
+    expect(find("7.4.1")?.text).toContain("bad character");
+    expect(find("10.28.4")?.text).toBe("[Sani in 4 —] questionable morals"); // the scan reads "morais"
+    // Not cleared with "immoral": it is how the passage says a son is not his father's.
+    expect(find("6.6.2")?.withheld).toBe(true);
   });
 
   it("shows adultery, as the owner decided, but not a slur on someone's birth", () => {
@@ -318,7 +338,7 @@ describe("the Strijataka corpus", () => {
       "strijataka-1931:11.1.4": "'love is blind', a proverb, in the author's discussion of beauty",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|poison\w*|blind\w*|lepro\w*|leper|thie(f|ves|vish)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|brahmin\w*|sudras?|prostitut\w*|whores?|harlots?|courtesans?|immoral\w*|unchaste|wanton|barren|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|poison\w*|blind\w*|lepro\w*|leper|thie(f|ves|vish)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|brahmin\w*|sudras?|prostitut\w*|whores?|harlots?|courtesans?|immoral\w*|bad\s+wom[ae]n|wanton|barren|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*)\b/i;
     const found = shown
       .filter((passage) => !(passage.id in ALLOWED))
       .flatMap((passage) => {
@@ -351,7 +371,7 @@ describe("the Brihat Samhita corpus", () => {
   it("shows no lifespan, death, disease, caste or the rest", () => {
     // A long life counts here too: the palm reading says no line fixes a lifespan.
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|hundred years|years of age|blind\w*|lepro\w*|leper|thie(f|ves)|theft|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*|unchaste|barren)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|hundred years|years of age|blind\w*|lepro\w*|leper|thie(f|ves)|theft|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n)\b/i;
     const found = shown.flatMap((passage) => {
       const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
       return match ? [`${passage.id}: ${match[0]}`] : [];
