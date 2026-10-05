@@ -49,6 +49,15 @@
       "strong": "Well supported",
       "mixed": "Mixed",
       "tender": "Needs care"
+    },
+    "classics": {
+      "kicker": "From the classics",
+      "heading": "What the Brihat Jataka says about this area of your life",
+      "pending": "Reading the Brihat Jataka for your chart…",
+      "sourcesLabel": "The verses ({count})",
+      "sourceRef": "Brihat Jataka {ref}",
+      "noteLabel": "translator's note",
+      "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka."
     }
   }
 }

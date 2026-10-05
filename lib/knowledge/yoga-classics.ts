@@ -1,4 +1,12 @@
 import type { YogaDetectionResult } from "../astro-types";
+import type {
+  ClassicalReading,
+  ClassicalReadingResponse,
+  ClassicalSegment,
+  ClassicalSource,
+} from "./classical-reading";
+
+export { readingParagraphs } from "./classical-reading";
 
 /*
  * "From the classics" in the yoga section: what the Brihat Jataka says about
@@ -6,7 +14,8 @@ import type { YogaDetectionResult } from "../astro-types";
  *
  * This module is the part both sides need -- the order yogas are ranked in, what
  * the browser sends, what comes back -- and nothing else, so the client bundle
- * does not carry the prompt or the database code.
+ * does not carry the prompt or the database code. The reading's own shape is
+ * shared with the life areas' note, in classical-reading.ts.
  */
 
 /** Yogas sent per request: every yoga a chart is likely to have, in rank order. */
@@ -19,37 +28,11 @@ export type YogaClassicsYoga = {
   strength: YogaDetectionResult["strength"];
 };
 
-/** A verse the reading cites, numbered in the order the reading first cites it. */
-export type YogaClassicsSource = {
-  number: number;
-  /** Chapter and verse as printed, e.g. "13.5". */
-  ref: string;
-  /** "verse" for Varahamihira's text, "note" for the translator's note on it. */
-  kind: "verse" | "note";
-  /** The 1885 translation's own words. */
-  text: string;
-};
-
-/** A run of the reading and the sources it rests on (often none, for joining text). */
-export type YogaClassicsSegment = {
-  text: string;
-  sources: number[];
-};
-
-export type YogaClassicsReading = {
-  segments: YogaClassicsSegment[];
-  sources: YogaClassicsSource[];
-};
-
-/**
- * `reading` is null when none of the chart's yogas has a passage in the
- * library. That is an answer, not a failure: the section simply has no
- * classical note for this chart, and nothing was paid for.
- */
-export type YogaClassicsResponse = {
-  reading: YogaClassicsReading | null;
-  cached: boolean;
-};
+export type YogaClassicsSource = ClassicalSource;
+export type YogaClassicsSegment = ClassicalSegment;
+export type YogaClassicsReading = ClassicalReading;
+/** `reading` is null when none of the chart's yogas has a passage in the library. */
+export type YogaClassicsResponse = ClassicalReadingResponse;
 
 const STRENGTH_ORDER: Record<YogaDetectionResult["strength"], number> = {
   strong: 0,
@@ -68,36 +51,6 @@ export function rankYogas(yogas: YogaDetectionResult[]): YogaDetectionResult[] {
     }
     return STRENGTH_ORDER[a.strength] - STRENGTH_ORDER[b.strength];
   });
-}
-
-/**
- * The reading as paragraphs of cited pieces, for rendering.
- *
- * Citations arrive per text block, and a block can end mid-paragraph or carry
- * a paragraph break inside it. So paragraphs are cut at blank lines wherever
- * they fall, and a block's source numbers stay on the last piece of it, where
- * the marker belongs: after the words it supports.
- */
-export function readingParagraphs(reading: YogaClassicsReading): YogaClassicsSegment[][] {
-  const paragraphs: YogaClassicsSegment[][] = [[]];
-  for (const segment of reading.segments) {
-    const parts = segment.text.split(/\n\s*\n/);
-    parts.forEach((part, index) => {
-      if (index > 0) paragraphs.push([]);
-      const last = index === parts.length - 1;
-      paragraphs[paragraphs.length - 1].push({ text: part, sources: last ? segment.sources : [] });
-    });
-  }
-  return paragraphs
-    .map((pieces) => {
-      const trimmed = pieces.map((piece) => ({ ...piece }));
-      if (trimmed.length > 0) {
-        trimmed[0].text = trimmed[0].text.trimStart();
-        trimmed[trimmed.length - 1].text = trimmed[trimmed.length - 1].text.trimEnd();
-      }
-      return trimmed.filter((piece) => piece.text.length > 0 || piece.sources.length > 0);
-    })
-    .filter((pieces) => pieces.some((piece) => piece.text.trim().length > 0));
 }
 
 /**

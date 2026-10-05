@@ -2,7 +2,7 @@
 
 This is a plain-English description of two rule sets: the Ultimate Module (the "Life areas" cards) and the yoga detector. It describes what the code does today. The code is the source of truth:
 
-- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-09-domain-v7`.
+- Ultimate Module: `lib/engines/life-domain-rules.ts` (the rules) and `lib/engines/rule-engine.ts` (the seven areas, evidence families and sub-themes). Rules version `2026-10-domain-v8`.
 - Yogas: `lib/engines/yoga-engine.ts` (208 yogas). That file is only a re-export; the code is in `lib/engines/yoga/`. `index.ts` holds the detector and the assembled list, and `definitions/` holds the 208 records in seven files, grouped by how each one is built rather than by what it means:
 
 | file | yogas | this document |
@@ -224,7 +224,7 @@ A divisional chart confirms or qualifies the birth chart. It never overrides it.
 
 The yoga lists are:
 
-- **Love Life**: 7th-lord yogas (Yuvati Kendra, Yuvati-Karma Parivartana, Yuvati Swagruhi), Sukha-Yuvati Parivartana, Venus yogas (Shukra Kendra Saundarya, Shukra Digbala, Shukra Vyaya Sthana, Shukra-Shani), Malavya, Hamsa.
+- **Love Life**: 7th-lord yogas (Yuvati Kendra, Yuvati-Karma Parivartana, Yuvati Swagruhi), Sukha-Yuvati Parivartana, Venus yogas (Shukra Kendra Saundarya, Shukra Digbala, Shukra Vyaya Sthana, Shukra-Shani), the three Kalatra yogas (Chandra-Shani, Chandra-Shukra, Mangala-Shani, all challenging, so they count as pressure), Malavya, Hamsa.
 - **Career**: 10th-lord yogas (Karma Kendra, Karma Trikona, Karma-Labha Parivartana, Karma Swagruhi, Karma-Sukha Sthana), Artha Support, Dharma-Karmadhipati, Parakrama-Karma Parivartana, Saturn yogas (Shani Upachaya, Shani-Budha, Shani Digbala), Mercury yogas (Budha Upachaya, Budha-Shukra, Budha Digbala), all nine Sun yogas whose names start with Surya, Kahala, Bheri, Akhanda Samrajya, Bhadra, Hamsa, Shasha.
 - **Family**: all 4th-lord yogas (names starting with Sukha), all thirteen Moon yogas whose names start with Chandra, Moksha Support, all 5th-lord yogas (names starting with Vidya), Hamsa.
 - **Inheritance**: Randhra Transformation, all 2nd-lord yogas (names starting with Dhana), Dhanakaraka, Shatru Vijaya, Shatru-Vyaya Parivartana, Bhrigu-Mangal, Hamsa, Shasha.

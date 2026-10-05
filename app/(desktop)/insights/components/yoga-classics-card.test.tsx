@@ -88,15 +88,15 @@ describe("the classical yoga card", () => {
     const { container } = renderCard();
     await screen.findByText(/leadership of groups/);
 
-    const paragraphs = container.querySelectorAll(".yoga-classics-reading p");
+    const paragraphs = container.querySelectorAll(".classical-note-reading p");
     expect(paragraphs).toHaveLength(2);
-    expect([...container.querySelectorAll(".yoga-classics-mark")].map((mark) => mark.textContent)).toEqual([
+    expect([...container.querySelectorAll(".classical-note-mark")].map((mark) => mark.textContent)).toEqual([
       "1",
       "2,3",
     ]);
 
     expect(screen.getByText("The verses (3)")).toBeInTheDocument();
-    const items = container.querySelectorAll(".yoga-classics-sources li");
+    const items = container.querySelectorAll(".classical-note-sources li");
     expect(items).toHaveLength(3);
     expect(items[0]).toHaveTextContent("Brihat Jataka 13.8");
     expect(items[2]).toHaveTextContent("Brihat Jataka 12.17 · translator's note");
@@ -112,6 +112,6 @@ describe("the classical yoga card", () => {
   ])("leaves nothing behind when %s", async (_, body, ok) => {
     respond(body, ok);
     const { container } = renderCard();
-    await waitFor(() => expect(container.querySelector(".yoga-classics")).toBeNull());
+    await waitFor(() => expect(container.querySelector(".classical-note")).toBeNull());
   });
 });

@@ -79,6 +79,7 @@ export type LlmRouteKey =
   | "/api/chart/advanced-story"
   | "/api/chart/varga-commentary"
   | "/api/chart/yoga-classics"
+  | "/api/chart/area-classics"
   | "/api/chart/life-shifts"
   | "/api/chart/story-prose"
   | "/api/palm-reading"
@@ -259,6 +260,25 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      inside the $22 every dear route here is held to. */
   "/api/chart/yoga-classics": {
     perDay: 600,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* The classical notes on the life-areas page: the same model and effort as
+     the yoga note, but one call writes every area -- up to seven documents of
+     six short passages, about 3,000 input tokens, and seven notes of at most
+     70 words, about 1,000-1,300 output tokens with thinking. At the yoga
+     note's measured rates that is roughly $0.04 a call. That figure is an
+     ESTIMATE from token counts, made on 2026-10-04 when the account's monthly
+     limit stopped a live measurement; replace it from the llm_usage lines.
+
+     A chart costs one call however many areas the reader opens, and the cache
+     is keyed by the passages chosen, so charts that meet the same conditions
+     share notes. The page is public and one link from the results page, so
+     this is bought by visitors rather than only by members. 500 a day is
+     about $20 on a day that exhausts the route, inside the $22 every dear
+     route here is held to. */
+  "/api/chart/area-classics": {
+    perDay: 500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },

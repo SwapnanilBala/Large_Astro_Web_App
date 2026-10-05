@@ -3786,8 +3786,8 @@
   max-width: 720px;
 }
 
-/* ── From the classics (yoga-classics-card.tsx) ── */
-.yoga-classics {
+/* ── From the classics (classical-note.tsx): the yoga section's note and each life area's ── */
+.classical-note {
   margin: 0 0 1.5rem;
   padding: 1.1rem 1.25rem 1rem;
   border: 1px solid rgba(242, 194, 108, 0.2);
@@ -3797,15 +3797,15 @@
   max-width: 920px;
 }
 
-.yoga-classics .kicker {
+.classical-note .kicker {
   margin: 0 0 0.25rem;
 }
 
-.yoga-classics-heading {
+.classical-note-heading {
   margin: 0 0 0.75rem;
 }
 
-.yoga-classics-reading p {
+.classical-note-reading p {
   color: var(--ink-main);
   font-size: 1.3rem;
   line-height: 1.6;
@@ -3815,7 +3815,7 @@
 
 /* A reference mark, so the label floor applies rather than the superscript
    exception: it is the reader's only route to the verse. */
-.yoga-classics-mark {
+.classical-note-mark {
   color: var(--accent-gold);
   font-size: var(--text-meta);
   font-weight: 700;
@@ -3823,11 +3823,11 @@
   margin-left: 0.12em;
 }
 
-.yoga-classics-verses {
+.classical-note-verses {
   margin: 0.4rem 0 0;
 }
 
-.yoga-classics-verses summary {
+.classical-note-verses summary {
   color: var(--accent-aqua);
   cursor: pointer;
   font-size: var(--text-label);
@@ -3837,31 +3837,31 @@
   width: fit-content;
 }
 
-.yoga-classics-sources {
+.classical-note-sources {
   display: grid;
   gap: 0.55rem;
   margin: 0.6rem 0 0;
   padding-left: 1.6rem;
 }
 
-.yoga-classics-sources li {
+.classical-note-sources li {
   color: var(--ink-soft);
   font-size: var(--text-ui);
   line-height: 1.5;
 }
 
-.yoga-classics-source-ref {
+.classical-note-source-ref {
   color: var(--ink-main);
   display: block;
   font-size: var(--text-label);
   font-weight: 700;
 }
 
-.yoga-classics-source-text {
+.classical-note-source-text {
   font-style: italic;
 }
 
-.yoga-classics-credit {
+.classical-note-credit {
   color: var(--ink-soft);
   font-size: var(--text-meta);
   line-height: 1.5;
@@ -3871,32 +3871,32 @@
 
 /* Holds roughly the note's height while it is written, so the list below
    does not jump when it lands. */
-.yoga-classics-pending {
+.classical-note-pending {
   align-content: start;
   display: grid;
   gap: 0.6rem;
   min-height: 16rem;
 }
 
-.yoga-classics-pending p {
+.classical-note-pending p {
   color: var(--ink-soft);
   font-size: var(--text-ui);
   margin: 0 0 0.35rem;
 }
 
-.yoga-classics-bar {
-  animation: yoga-classics-pulse 1.6s ease-in-out infinite;
+.classical-note-bar {
+  animation: classical-note-pulse 1.6s ease-in-out infinite;
   background: rgba(242, 194, 108, 0.14);
   border-radius: 999px;
   display: block;
   height: 0.9rem;
 }
 
-.yoga-classics-bar--short {
+.classical-note-bar--short {
   width: 60%;
 }
 
-@keyframes yoga-classics-pulse {
+@keyframes classical-note-pulse {
   0%,
   100% {
     opacity: 0.55;
@@ -3907,14 +3907,19 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .yoga-classics-bar {
+  .classical-note-bar {
     animation: none;
   }
 }
 
-html[data-theme="light"] .yoga-classics {
+html[data-theme="light"] .classical-note {
   background: var(--surface-frosted);
   border-color: rgba(176, 124, 32, 0.3);
+}
+
+/* A life area's note is one short paragraph rather than one per yoga. */
+.classical-note--single .classical-note-pending {
+  min-height: 9rem;
 }
 
 /* ── Category Tabs ── */

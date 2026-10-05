@@ -8,10 +8,12 @@ import {
 } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
 import { useDomainBriefs } from "@/lib/use-domain-briefs";
 import lifeAreasMessages from "@/messages/en.life-areas.json";
+import { ClassicalNote } from "@/app/(desktop)/insights/components/classical-note";
 import KalatraPanel from "./kalatra-panel";
+import { useAreaClassics } from "./use-area-classics";
 import type { KalatraResult } from "@/lib/engines/kalatra-engine";
 import styles from "./life-areas.module.css";
 
@@ -67,6 +69,9 @@ export default function LifeAreasClient({
 
   const domain = ranked.find((entry) => entry.key === selectedKey) ?? ranked[0];
   const { briefs, pending } = useDomainBriefs(historyQs, domain?.key ?? "love_life", Boolean(domain));
+  /* Above the early return, like the briefs: one request for every area. */
+  const { language } = useTranslation();
+  const classics = useAreaClassics(historyQs, language);
   if (!domain) return null;
 
   const copy = DOMAIN_READ_COPY[domain.key];
@@ -198,6 +203,18 @@ export default function LifeAreasClient({
           {domain.key === "love_life" && kalatra && (
             <KalatraPanel detail={kalatra} tr={tr} />
           )}
+
+          {/* What the Brihat Jataka says about this area, from the passages
+              whose conditions hold in this chart. Every area came back in the
+              one request, so switching areas only switches the note. */}
+          <ClassicalNote
+            state={classics.state}
+            reading={classics.readings[domain.key] ?? null}
+            tr={tr}
+            prefix="lifeAreas.classics"
+            headingId="area-classics-heading"
+            className="classical-note--single"
+          />
 
           <div className={styles.domainTimingWindows}>
             {timingWindows.map((window) => (

@@ -27,6 +27,10 @@ export type PassageRow = {
   yogaIds: string[];
   planets: string[];
   lifeAreas: string[];
+  /** Chart conditions the passage needs; see lib/knowledge/placements.ts. */
+  placements: string[];
+  /** Its one either/or, when it has one: at least one of these must hold too. */
+  placementsAny: string[];
 };
 
 export type YogaWithPassages = { yoga: YogaClassicsYoga; passages: PassageRow[] };
@@ -42,6 +46,21 @@ const DEFINITIONS = new Map(YOGA_DEFINITIONS.map((definition) => [definition.id,
 /** How a translator's note is marked in the text the model reads; the prompt names it. */
 export const NOTE_PREFIX = "Translator's note: ";
 
+/**
+ * The rules every classical note follows, whatever it is about: the yoga
+ * section's and each life area's. One constant, so the two prompts cannot
+ * drift apart on attribution, tone or what is never said.
+ */
+export const CLASSICAL_NOTE_RULES = `- Attribute the claims to the book ("The Brihat Jataka holds that ...", "Varahamihira counts this among ..."). This is the classical view, not a prediction about the reader.
+- A passage that begins "${NOTE_PREFIX.trim()}" is the 1885 translator's own note, often quoting other authorities. Attribute it that way ("the translator's notes add ...", "other authorities quoted in the notes hold ..."), never to Varahamihira.
+- Plain modern language for a reader who knows no astrology. The book's "king" means someone with standing and authority; say that rather than "king".
+- Where a passage's verdict is harsh, name what the book warned of in one neutral phrase. Never describe the reader with its insults.
+- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving, a marriage ending, marrying late or marrying more than once may be said plainly, for either partner, without blame.
+- The book writes for a man ("his wife", "fond of women"). Write for a reader of any gender: "your partner", "marriage", "romance".
+- Speak of sexual matters only as romance, warmth or attraction, never explicitly.
+- No advice, no disclaimers, no headings, no lists, no markdown.
+- Address the reader as "you".`;
+
 /*
  * Frozen, so it is the cacheable prefix; the documents and the language vary
  * per request and follow it in the user turn. Kept here rather than in the
@@ -56,13 +75,8 @@ Tell the reader what the Brihat Jataka says about their yogas.
 
 - One short paragraph per yoga, in the order given, one or two sentences each, and no more than 170 words in all. The note sits in a card above the yoga list; a long note is a note that gets cut.
 - Ground every statement in the passages and cite the passage it comes from. Say nothing about a yoga that its passages do not say. Where a verse gives results planet by planet, use the one for the planet named in the document's context.
-- Attribute the claims to the book ("The Brihat Jataka holds that ...", "Varahamihira counts this among ..."). This is the classical view, not a prediction about the reader.
-- A passage that begins "${NOTE_PREFIX.trim()}" is the 1885 translator's own note, often quoting other authorities. Attribute it that way ("the translator's notes add ...", "other authorities quoted in the notes hold ..."), never to Varahamihira.
-- Plain modern language for a reader who knows no astrology. The book's "king" means someone with standing and authority; say that rather than "king".
-- Where a passage's verdict is harsh, name what the book warned of in one neutral phrase. Never describe the reader with its insults.
-- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving or a marriage ending may be said plainly, for either partner, without blame.
-- No advice, no disclaimers, no headings, no lists, no markdown.
-- Address the reader as "you". Use the yoga names exactly as given.`;
+${CLASSICAL_NOTE_RULES}
+- Use the yoga names exactly as given.`;
 
 /** The user turn's closing instruction, after the documents: which language, which yogas, in what order. */
 export function yogaClassicsInstruction(names: string[], languageName: string): string {
@@ -98,7 +112,7 @@ function bookOrder(a: PassageRow, b: PassageRow): number {
  * Moon's sign or the lord of the ascendant") rather than a requirement that
  * all of them take part. A yoga that reports no planets is not filtered at all.
  */
-function speaksToChart(passage: PassageRow, yoga: YogaClassicsYoga): boolean {
+export function speaksToChart(passage: PassageRow, yoga: Pick<YogaClassicsYoga, "planets">): boolean {
   if (yoga.planets.length === 0 || passage.planets.length !== 1) return true;
   return yoga.planets.includes(passage.planets[0]);
 }
@@ -177,7 +191,8 @@ export function yogaDocuments(selection: YogaWithPassages[]): Anthropic.Document
  */
 export function readingFrom(
   content: Anthropic.ContentBlock[],
-  selection: YogaWithPassages[],
+  /** The documents in the order they were sent, each with its passages in block order. */
+  selection: readonly { passages: PassageRow[] }[],
 ): YogaClassicsReading {
   const numbers = new Map<string, number>();
   const sources: YogaClassicsSource[] = [];

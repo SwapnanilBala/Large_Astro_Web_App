@@ -21,8 +21,11 @@ import type {
 /* v5: kartari hemming, and the primary lord counted from its own house.
    v6: the primary lord's company, vargottama, and cancelled debilitation.
    v7: Shasha Yoga reaches career, inheritance and life cycle -- their lists
-       named it "sasa", which no yoga id matches. */
-export const LIFE_DOMAIN_RULES_VERSION = "2026-09-domain-v7";
+       named it "sasa", which no yoga id matches.
+   v8: the three marriage yogas from the Brihat Jataka (kalatra_*) reach love
+       life, as pressure: a spouse leaving, more than one marriage, marrying
+       late. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-10-domain-v8";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;
@@ -67,7 +70,7 @@ export const LIFE_DOMAIN_EVIDENCE_CONFIG: Record<LifeDomainKey, DomainEvidenceCo
     houses: [5, 7, 8, 12],
     planets: ["Venus", "Jupiter", "Moon"],
     divisionScopes: [{ division: 9, subthemes: ["commitment", "availability", "intimacy", "repair"], domainWide: true, method: "classical" }],
-    yogaIdPrefixes: ["yuvati_", "sukha_yuvati_", "shukra_", "malavya", "hamsa"],
+    yogaIdPrefixes: ["yuvati_", "sukha_yuvati_", "shukra_", "kalatra_", "malavya", "hamsa"],
   },
   career: {
     houses: [2, 6, 10, 11],

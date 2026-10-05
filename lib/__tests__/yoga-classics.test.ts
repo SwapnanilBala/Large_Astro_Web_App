@@ -29,7 +29,19 @@ const row = (
   kind: "verse" | "note" = "verse",
 ): PassageRow => {
   const [chapter, verse, part] = ref.split(".").map(Number);
-  return { id: `bj:${ref}`, chapter, verse, part, kind, text: `text of ${ref}`, yogaIds, planets, lifeAreas };
+  return {
+    id: `bj:${ref}`,
+    chapter,
+    verse,
+    part,
+    kind,
+    text: `text of ${ref}`,
+    yogaIds,
+    planets,
+    lifeAreas,
+    placements: [],
+    placementsAny: [],
+  };
 };
 
 /* Shaped like the corpus: Sunapha's definition names the Sun (as the planet

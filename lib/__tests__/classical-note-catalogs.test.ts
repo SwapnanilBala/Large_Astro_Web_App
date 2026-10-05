@@ -1,16 +1,20 @@
 /**
- * Every string the "From the classics" card can show is in the strength
- * catalog's English and in the other five languages, folded or staged.
+ * Every string a "From the classics" card can show is in its route catalog's
+ * English and in the other five languages, folded or staged.
  *
- * The card's keys are literals, read straight out of its source here, so a key
- * added to the card without its strings fails this rather than rendering on
+ * Both cards are ClassicalNote, which reads `${prefix}.${key}` for the keys in
+ * CLASSICAL_NOTE_KEYS. So the test reads the card's own source for the keys it
+ * builds and each page's source for the prefix it passes, and a key added to
+ * the card, or a card given a new prefix, fails here rather than rendering on
  * screen as itself.
  */
 import { describe, expect, it } from "vitest";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import en from "@/messages/en.strength.json";
+import { CLASSICAL_NOTE_KEYS } from "@/lib/knowledge/classical-reading";
+import enStrength from "@/messages/en.strength.json";
+import enLifeAreas from "@/messages/en.life-areas.json";
 import es from "@/messages/es.json";
 import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
@@ -24,13 +28,7 @@ function lookup(tree: Tree, key: string): unknown {
 }
 
 const placeholders = (text: string) => [...new Set(text.match(/\{\w+\}/g) ?? [])].sort();
-
-const CARD = join(process.cwd(), "app", "(desktop)", "insights", "components", "yoga-classics-card.tsx");
-const KEYS = [
-  ...new Set(
-    [...readFileSync(CARD, "utf8").matchAll(/["'](strength\.yogas\.classics\.\w+)["']/g)].map((match) => match[1]),
-  ),
-];
+const source = (...path: string[]) => readFileSync(join(process.cwd(), ...path), "utf8");
 
 const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
 
@@ -45,42 +43,67 @@ function staged(lang: string, key: string): unknown[] {
   return FRAGMENTS.map((fragment) => lookup(fragment, `${lang}.${key}`)).filter((value) => value !== undefined);
 }
 
-describe("the classical yoga card's catalog keys", () => {
-  it("finds the literals it reads", () => {
-    expect(KEYS).toEqual(
-      expect.arrayContaining([
-        "strength.yogas.classics.heading",
-        "strength.yogas.classics.sourceRef",
-        "strength.yogas.classics.credit",
-      ]),
-    );
+const CARDS = [
+  {
+    name: "the yoga section's note",
+    page: ["app", "(desktop)", "insights", "components", "yoga-classics-card.tsx"],
+    prefix: "strength.yogas.classics",
+    english: enStrength as Tree,
+  },
+  {
+    name: "the life areas' note",
+    page: ["app", "(desktop)", "insights", "life-areas", "life-areas-client.tsx"],
+    prefix: "lifeAreas.classics",
+    english: enLifeAreas as Tree,
+  },
+];
+
+describe("the classical note card", () => {
+  it("reads exactly the keys CLASSICAL_NOTE_KEYS lists", () => {
+    const card = source("app", "(desktop)", "insights", "components", "classical-note.tsx");
+    const read = new Set([...card.matchAll(/`\$\{prefix\}\.(\w+)`/g)].map((match) => match[1]));
+    expect([...read].sort()).toEqual([...CLASSICAL_NOTE_KEYS].sort());
+  });
+});
+
+describe.each(CARDS)("$name", ({ page, prefix, english }) => {
+  const keys = CLASSICAL_NOTE_KEYS.map((key) => `${prefix}.${key}`);
+
+  it("passes its prefix to the card", () => {
+    expect(source(...page)).toContain(`prefix="${prefix}"`);
   });
 
-  it("are all in the strength catalog's English", () => {
-    for (const key of KEYS) {
-      expect(typeof lookup(en as Tree, key), key).toBe("string");
+  it("has every string in its catalog's English", () => {
+    for (const key of keys) {
+      expect(typeof lookup(english, key), key).toBe("string");
     }
   });
 
-  it.each(Object.keys(TRANSLATIONS))("are translated into %s, once, with the same blanks", (lang) => {
-    for (const key of KEYS) {
+  it.each(Object.keys(TRANSLATIONS))("is translated into %s, once, with the same blanks", (lang) => {
+    for (const key of keys) {
       const folded = lookup(TRANSLATIONS[lang], key);
       const pending = staged(lang, key);
       expect(Number(folded !== undefined) + pending.length, `${lang}: ${key}`).toBe(1);
       const translated = folded ?? pending[0];
       expect(typeof translated, `${lang}: ${key}`).toBe("string");
       expect(placeholders(translated as string), `${lang}: ${key}`).toEqual(
-        placeholders(lookup(en as Tree, key) as string),
+        placeholders(lookup(english, key) as string),
       );
     }
   });
 
   it("stores Bengali and Hindi in NFC, the form the catalogs use", () => {
     for (const lang of ["bn", "hi"]) {
-      for (const key of KEYS) {
+      for (const key of keys) {
         const value = (lookup(TRANSLATIONS[lang], key) ?? staged(lang, key)[0]) as string;
         expect(value, `${lang}: ${key}`).toBe(value.normalize("NFC"));
       }
+    }
+  });
+
+  it("never says AI", () => {
+    for (const key of keys) {
+      expect(lookup(english, key) as string, key).not.toMatch(/\bAI\b/);
     }
   });
 });

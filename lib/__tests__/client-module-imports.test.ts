@@ -26,6 +26,8 @@ const BROWSER_MODULES = [
      prompt, the database and the citation mapping stay in
      yoga-classics-reading.ts and retrieve.ts, which no client file imports. */
   "lib/knowledge/yoga-classics.ts",
+  /* The reading's shape and paragraphs, shared by both classical-note cards. */
+  "lib/knowledge/classical-reading.ts",
 ];
 
 const NODE_BUILTIN =
