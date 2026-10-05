@@ -1609,8 +1609,6 @@
     }
   },
   "fullReading": {
-    "loadingCombinations": "Préparation des combinaisons…",
-    "loadingKarma": "Préparation de la lecture karmique…",
     "backToNamedReading": "Retour à la lecture de {name}",
     "kicker": "Lecture complète",
     "title": "Chaque résultat de la carte",
@@ -1619,7 +1617,7 @@
     "longTermCombinations": "combinaisons à long terme",
     "patternsKicker": "Motifs",
     "patternsHeading": "Ce que disent les positions",
-    "patternsLead": "Chaque carte énonce la lecture, puis la position qui la sous-tend. Ouvrez « Pourquoi cette lecture » pour voir la base technique et la fréquence du motif.",
+    "patternsLead": "Choisissez un résultat dans la liste pour le lire en entier. La position qui le sous-tend, et la fréquence du motif, figurent à côté de la lecture.",
     "combinationsKicker": "Combinaisons",
     "combinationsHeading": "Des motifs qui durent toute une vie",
     "combinationsLead": "Les yogas sont des combinaisons et non des positions isolées, et ils décrivent des conditions permanentes de la carte plutôt qu'une période passagère.",

@@ -1609,8 +1609,6 @@
     }
   },
   "fullReading": {
-    "loadingCombinations": "Preparando combinaciones…",
-    "loadingKarma": "Preparando la lectura kármica…",
     "backToNamedReading": "Volver a la lectura de {name}",
     "kicker": "Lectura completa",
     "title": "Todos los hallazgos de la carta",
@@ -1619,7 +1617,7 @@
     "longTermCombinations": "combinaciones a largo plazo",
     "patternsKicker": "Patrones",
     "patternsHeading": "Lo que dicen las posiciones",
-    "patternsLead": "Cada tarjeta expone la lectura y después la posición que la respalda. Abre “Por qué esta lectura” para ver la base técnica y con qué frecuencia aparece el patrón.",
+    "patternsLead": "Elige un hallazgo de la lista para leerlo completo. La posición en la que se apoya, y con qué frecuencia aparece el patrón, están junto a la lectura.",
     "combinationsKicker": "Combinaciones",
     "combinationsHeading": "Patrones que duran toda la vida",
     "combinationsLead": "Los yogas son combinaciones y no posiciones aisladas, y describen condiciones permanentes de la carta más que un período pasajero.",

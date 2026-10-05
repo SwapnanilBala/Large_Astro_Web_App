@@ -1,0 +1,147 @@
+{
+  "es": {
+    "fullReading": {
+      "filterAll": "Todos",
+      "filterTop": "Prioridades principales",
+      "themes": {
+        "core": "Quién eres",
+        "career": "Trabajo",
+        "love": "Amor"
+      },
+      "rare": "Raro",
+      "topPriority": "Prioridad n.º {rank}",
+      "otherSide": "La otra cara",
+      "whyThisReading": "Por qué esta lectura",
+      "previous": "Anterior",
+      "next": "Siguiente",
+      "position": "{position} de {total}",
+      "findingsList": "Hallazgos",
+      "findingsFilter": "Mostrar hallazgos",
+      "yogasList": "Yogas",
+      "yogasFilter": "Mostrar yogas por fuerza",
+      "karmaList": "Lecturas kármicas",
+      "karmaSignals": "Leído a partir de",
+      "yogaDoes": "Qué produce",
+      "yogaShows": "Cuándo se manifiesta",
+      "yogaSoftened": "Qué lo atenúa",
+      "yogaForms": "Qué lo forma",
+      "yogaSource": "Fuente"
+    }
+  },
+  "fr": {
+    "fullReading": {
+      "filterAll": "Tous",
+      "filterTop": "Priorités principales",
+      "themes": {
+        "core": "Qui vous êtes",
+        "career": "Travail",
+        "love": "Amour"
+      },
+      "rare": "Rare",
+      "topPriority": "Priorité n° {rank}",
+      "otherSide": "Le revers",
+      "whyThisReading": "Pourquoi cette lecture",
+      "previous": "Précédent",
+      "next": "Suivant",
+      "position": "{position} sur {total}",
+      "findingsList": "Résultats",
+      "findingsFilter": "Afficher les résultats",
+      "yogasList": "Yogas",
+      "yogasFilter": "Afficher les yogas selon leur force",
+      "karmaList": "Lectures karmiques",
+      "karmaSignals": "Lu à partir de",
+      "yogaDoes": "Ce qu'il produit",
+      "yogaShows": "Quand il se manifeste",
+      "yogaSoftened": "Ce qui l'atténue",
+      "yogaForms": "Ce qui le forme",
+      "yogaSource": "Source"
+    }
+  },
+  "it": {
+    "fullReading": {
+      "filterAll": "Tutti",
+      "filterTop": "Priorità principali",
+      "themes": {
+        "core": "Chi sei",
+        "career": "Lavoro",
+        "love": "Amore"
+      },
+      "rare": "Raro",
+      "topPriority": "Priorità n. {rank}",
+      "otherSide": "L'altra faccia",
+      "whyThisReading": "Perché questa lettura",
+      "previous": "Precedente",
+      "next": "Successivo",
+      "position": "{position} di {total}",
+      "findingsList": "Riscontri",
+      "findingsFilter": "Mostra i riscontri",
+      "yogasList": "Yoga",
+      "yogasFilter": "Mostra gli yoga per forza",
+      "karmaList": "Letture karmiche",
+      "karmaSignals": "Letto a partire da",
+      "yogaDoes": "Che cosa produce",
+      "yogaShows": "Quando si manifesta",
+      "yogaSoftened": "Che cosa lo attenua",
+      "yogaForms": "Che cosa lo forma",
+      "yogaSource": "Fonte"
+    }
+  },
+  "hi": {
+    "fullReading": {
+      "filterAll": "सभी",
+      "filterTop": "शीर्ष प्राथमिकताएँ",
+      "themes": {
+        "core": "आप कौन हैं",
+        "career": "कार्य",
+        "love": "प्रेम"
+      },
+      "rare": "दुर्लभ",
+      "topPriority": "शीर्ष प्राथमिकता {rank}",
+      "otherSide": "दूसरा पहलू",
+      "whyThisReading": "यह पाठ क्यों",
+      "previous": "पिछला",
+      "next": "अगला",
+      "position": "{total} में से {position}",
+      "findingsList": "निष्कर्ष",
+      "findingsFilter": "निष्कर्ष दिखाएँ",
+      "yogasList": "योग",
+      "yogasFilter": "बल के अनुसार योग दिखाएँ",
+      "karmaList": "कर्म पाठ",
+      "karmaSignals": "इनसे पढ़ा गया",
+      "yogaDoes": "यह क्या करता है",
+      "yogaShows": "यह कब प्रकट होता है",
+      "yogaSoftened": "इसे क्या नरम करता है",
+      "yogaForms": "यह कैसे बनता है",
+      "yogaSource": "स्रोत"
+    }
+  },
+  "bn": {
+    "fullReading": {
+      "filterAll": "সব",
+      "filterTop": "শীর্ষ অগ্রাধিকার",
+      "themes": {
+        "core": "আপনি কে",
+        "career": "কাজ",
+        "love": "প্রেম"
+      },
+      "rare": "বিরল",
+      "topPriority": "শীর্ষ অগ্রাধিকার {rank}",
+      "otherSide": "অন্য দিক",
+      "whyThisReading": "কেন এই পাঠ",
+      "previous": "আগেরটি",
+      "next": "পরেরটি",
+      "position": "{total}-এর মধ্যে {position}",
+      "findingsList": "ফলাফল",
+      "findingsFilter": "ফলাফল দেখান",
+      "yogasList": "যোগ",
+      "yogasFilter": "শক্তি অনুযায়ী যোগ দেখান",
+      "karmaList": "কর্ম পাঠ",
+      "karmaSignals": "যা থেকে পড়া হয়েছে",
+      "yogaDoes": "এটি কী করে",
+      "yogaShows": "এটি কখন প্রকাশ পায়",
+      "yogaSoftened": "কী এটিকে নরম করে",
+      "yogaForms": "এটি কীভাবে গঠিত হয়",
+      "yogaSource": "উৎস"
+    }
+  }
+}
