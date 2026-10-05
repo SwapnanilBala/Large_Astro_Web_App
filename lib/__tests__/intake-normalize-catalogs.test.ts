@@ -21,6 +21,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 import {
   INTAKE_MESSAGE_KEYS,
   normalizeBirthDate,
@@ -79,7 +80,7 @@ const FORM_KEYS = [
   "home.fieldComplete",
 ];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 /* Translations staged for the fold, each shaped { lang: { namespace: ... } }.
    The fold deletes them and the catalogs carry the keys from then on, so

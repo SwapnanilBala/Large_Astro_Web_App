@@ -30,7 +30,7 @@ export type VargaCommentaryResponse = {
 /**
  * The language a note is written in, and its name as the prompt says it.
  *
- * The curated guidance on this page ships in six languages; a note bolted
+ * The curated guidance on this page ships in seven languages; a note bolted
  * underneath it in English would be the one paragraph a Hindi reader cannot
  * read. The model is told which language to write in rather than the page
  * translating afterwards, because there is nothing to translate at build time
@@ -47,6 +47,11 @@ export const COMMENTARY_LANGUAGES: Record<string, string> = {
   hi: "Hindi",
   it: "Italian",
   fr: "French",
+  /* The interface calls the reader "du", and a note that switched to "Sie"
+     would read as another voice; told only "German", the model tends to the
+     formal. Each prompt says "Write ... in {this}", so the register rides
+     along. */
+  de: 'German, addressing the reader informally as "du"',
 };
 
 /** The points worth sending. The engine returns these in a stable order. */

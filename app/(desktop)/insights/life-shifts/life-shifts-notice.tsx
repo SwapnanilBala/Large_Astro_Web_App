@@ -20,7 +20,7 @@ import lifeAreasMessages from "@/messages/en.life-areas.json";
  *
  * The three `insights` keys are the results page's own missing-input notice,
  * word for word. That namespace is in the desktop baseline and already
- * translated in all five languages, so it is read rather than copied.
+ * translated in all six languages, so it is read rather than copied.
  */
 
 type LifeShiftsNoticeProps =

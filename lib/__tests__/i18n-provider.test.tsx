@@ -145,7 +145,7 @@ describe("LanguageProvider", () => {
   });
 
   it("ignores a location that suggests a language it does not offer", () => {
-    setLocationLocale("de-DE");
+    setLocationLocale("nl-NL");
     render(
       <LanguageProvider baseMessages={baseMessages}>
         <Probe />

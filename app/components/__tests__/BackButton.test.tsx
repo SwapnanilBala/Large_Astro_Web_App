@@ -9,6 +9,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 import { LanguageProvider, type MessageTree } from "@/lib/i18n-context";
 import BackButton from "../BackButton";
 import BackToReadingButton, { BACK_TO_READING_LABELS } from "../BackToReadingButton";
@@ -45,7 +46,7 @@ function merge(base: Tree, extra: Tree): Tree {
   return out;
 }
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 /* Translations staged for the fold, each shaped { lang: { namespace: ... } }.
    The fold deletes them and the catalogs carry the keys from then on, so

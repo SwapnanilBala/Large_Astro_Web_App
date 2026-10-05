@@ -23,11 +23,16 @@ describe("languageForLocation", () => {
     ["IT", "it"],
     ["SM", "it"],
     ["BD", "bn"],
+    ["DE", "de"],
+    ["AT", "de"],
+    ["LI", "de"],
+    ["CH", "de"],
+    ["LU", "fr"],
   ])("gives a whole-country answer for %s: %s", (country, language) => {
     expect(languageForLocation(at(country))).toBe(language);
   });
 
-  it.each(["US", "GB", "AU", "DE", "JP", "NP", "PK", "MA", "AD"])(
+  it.each(["US", "GB", "AU", "NL", "JP", "NP", "PK", "MA", "AD"])(
     "leaves %s in English",
     (country) => {
       expect(languageForLocation(at(country))).toBe("en");
@@ -64,8 +69,13 @@ describe("languageForLocation", () => {
     expect(languageForLocation(at("BE", "BRU"))).toBe("fr");
     expect(languageForLocation(at("BE", "VLG"))).toBe("en");
     expect(languageForLocation(at("CH", "GE"))).toBe("fr");
+    expect(languageForLocation(at("CH", "VS"))).toBe("fr");
     expect(languageForLocation(at("CH", "TI"))).toBe("it");
-    expect(languageForLocation(at("CH", "ZH"))).toBe("en");
+    expect(languageForLocation(at("CH", "ZH"))).toBe("de");
+    expect(languageForLocation(at("CH", "BE"))).toBe("de");
+    /* East Belgium and South Tyrol keep their region's language. */
+    expect(languageForLocation(at("BE", "WAL"))).toBe("fr");
+    expect(languageForLocation(at("IT", "32"))).toBe("it");
   });
 
   it("only ever answers with a language the app offers", () => {

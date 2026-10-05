@@ -15,6 +15,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 
 type Tree = Record<string, unknown>;
 
@@ -23,7 +24,7 @@ const lookup = (tree: Tree, key: string): unknown =>
 
 const KEYS = ["home.birthSexLabel", "home.birthSexHint", ...BIRTH_SEX_CHOICES.map((choice) => choice.labelKey)];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 const FRAGMENT_DIR = join(process.cwd(), "messages", "fragments");
 const FRAGMENTS: Tree[] = existsSync(FRAGMENT_DIR)
   ? readdirSync(FRAGMENT_DIR)

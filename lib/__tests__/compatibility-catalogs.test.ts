@@ -19,6 +19,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 import type { SynastryAspectInfo } from "@/lib/engines/compatibility-service";
 import { aspectLabel, planetLabel } from "@/app/(desktop)/insights/compatibility/aspect-labels";
 
@@ -65,7 +66,7 @@ const RUNTIME_KEYS = [
   ...ASPECT_TYPES.map((type) => `compatibility.aspectTypes.${type.toLowerCase()}`),
 ];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 /* Translations staged for the fold, each shaped { lang: { namespace: ... } }.
    The fold deletes them and the catalogs carry the keys from then on, so

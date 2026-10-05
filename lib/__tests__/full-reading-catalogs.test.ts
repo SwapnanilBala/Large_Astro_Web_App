@@ -23,6 +23,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 import { FINDING_THEMES, FINDING_THEME_KEYS } from "@/app/components/reading-room/findings";
 import { YOGA_FAMILIES, YOGA_STRENGTHS } from "@/app/components/reading-room/yogas";
 import { PLANET_IDS, planetNameKey } from "@/lib/chart-labels";
@@ -68,7 +69,7 @@ const RUNTIME_KEYS = [
   ...PLANET_IDS.map((planet) => planetNameKey(planet)!),
 ];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 /* Translations staged for the fold, each shaped { lang: { namespace: ... } }.
    The fold deletes them and the catalogs carry the keys from then on, so

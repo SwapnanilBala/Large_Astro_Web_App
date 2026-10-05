@@ -17,7 +17,7 @@ import {
  * Chart-specific commentary for the varga atlas.
  *
  * What the page already had: a curated paragraph per key varga, written once
- * and translated into six languages, saying what D9 *is*. What it did not have
+ * and translated into seven languages, saying what D9 *is*. What it did not have
  * is anything about what D9 says on *this* chart -- the atlas showed a table of
  * signs and left the reader to draw the line between them. That line is what
  * this route asks for.

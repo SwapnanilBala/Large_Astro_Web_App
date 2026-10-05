@@ -21,6 +21,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 import { SIGN_ORDER } from "@/lib/constellation-geometry";
 import { NAKSHATRA_SPAN, calculateNakshatra } from "@/lib/engines/nakshatra-engine";
 import {
@@ -52,7 +53,7 @@ const FRAGMENTS: Tree[] = existsSync(FRAGMENT_DIR)
       .map((file) => JSON.parse(readFileSync(join(FRAGMENT_DIR, file), "utf8")) as Tree)
   : [];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 function translated(lang: string, key: string): unknown {
   const folded = lookup(TRANSLATIONS[lang], key);

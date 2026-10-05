@@ -14,6 +14,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 
 type Tree = Record<string, unknown>;
 
@@ -23,7 +24,7 @@ const lookup = (tree: Tree, key: string): unknown =>
 const PANEL = join(process.cwd(), "app", "(desktop)", "insights", "components", "palm-reading-panel.tsx");
 const KEYS = [...new Set([...readFileSync(PANEL, "utf8").matchAll(/["'](palm\.panel\.reader\w+)["']/g)].map((m) => m[1]))];
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 const FRAGMENT_DIR = join(process.cwd(), "messages", "fragments");
 const FRAGMENTS: Tree[] = existsSync(FRAGMENT_DIR)
   ? readdirSync(FRAGMENT_DIR)

@@ -20,6 +20,7 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 
 type Tree = Record<string, unknown>;
 
@@ -30,7 +31,7 @@ function lookup(tree: Tree, key: string): unknown {
 const placeholders = (text: string) => [...new Set(text.match(/\{\w+\}/g) ?? [])].sort();
 const source = (...path: string[]) => readFileSync(join(process.cwd(), ...path), "utf8");
 
-const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr };
+const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 
 const FRAGMENT_DIR = join(process.cwd(), "messages", "fragments");
 const FRAGMENTS: Tree[] = existsSync(FRAGMENT_DIR)

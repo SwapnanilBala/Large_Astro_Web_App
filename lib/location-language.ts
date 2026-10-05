@@ -36,11 +36,13 @@ import {
  *
  *   1  India by state: Hindi in the Hindi-speaking states, English elsewhere.
  *   2  Hindi for all of India but West Bengal and Tripura.
+ *   3  German for Germany, Austria, Liechtenstein and German-speaking
+ *      Switzerland.
  */
-export const LOCATION_TABLE_VERSION = 2;
+export const LOCATION_TABLE_VERSION = 3;
 
 /*
- * Countries with one answer among the six languages. Anything missing gets
+ * Countries with one answer among the seven languages. Anything missing gets
  * English, which is also what a visitor gets when the location is unknown.
  *
  * A wrong guess puts a page in a language the visitor may not read, which is
@@ -72,6 +74,12 @@ const COUNTRY_LANGUAGE: Readonly<Record<string, Language>> = {
   KM: "fr", BI: "fr",
 
   IT: "it", SM: "it", VA: "it",
+  /* Germany, Austria and Liechtenstein, and Switzerland, whose French- and
+     Italian-speaking cantons are overridden below. South Tyrol and East
+     Belgium read German too, but their region codes also cover Trentino and
+     the rest of Wallonia, so they keep Italian and French. Luxembourg stays
+     French, as above. */
+  DE: "de", AT: "de", LI: "de", CH: "de",
 
   BD: "bn",
 };
@@ -91,7 +99,8 @@ const REGION_OVERRIDES: Readonly<Record<string, Readonly<Record<string, Language
   /* Wallonia and Brussels; Flanders reads Dutch, which is not offered. */
   BE: { WAL: "fr", BRU: "fr" },
   /* The French-speaking cantons, counting bilingual Fribourg and Valais by
-     their majority, and Italian-speaking Ticino. */
+     their majority, and Italian-speaking Ticino. The rest, bilingual Bern
+     included, read German, the country's answer. */
   CH: { GE: "fr", VD: "fr", NE: "fr", JU: "fr", FR: "fr", VS: "fr", TI: "it" },
 };
 

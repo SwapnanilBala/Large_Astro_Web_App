@@ -15,9 +15,10 @@ import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
 import it_ from "@/messages/it.json";
 import fr from "@/messages/fr.json";
+import de from "@/messages/de.json";
 
 type Tree = Record<string, unknown>;
-const CATALOGS: Record<string, Tree> = { en, es, bn, hi, it: it_, fr };
+const CATALOGS: Record<string, Tree> = { en, es, bn, hi, it: it_, fr, de };
 
 function lookup(tree: Tree, key: string): unknown {
   return key.split(".").reduce<unknown>((node, part) => (node as Tree | undefined)?.[part], tree);

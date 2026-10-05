@@ -36,10 +36,10 @@ export type CalendarLanguage = Exclude<Language, "en">;
 
 /*
  * One chunk per language, of 2.0–2.4KB gzipped, fetched only by a visitor
- * reading in it. Bundled with the picker instead, all five would put 7.6KB on
- * every visitor, English included. Listed rather than built from a template
- * string, which would have the bundler split out a chunk for every one of
- * date-fns's locales.
+ * reading in it. Bundled with the picker instead, every one would ride on
+ * every visitor, English included -- 7.6KB for the first five. Listed rather
+ * than built from a template string, which would have the bundler split out a
+ * chunk for every one of date-fns's locales.
  */
 const CALENDAR_LOCALES: Record<CalendarLanguage, () => Promise<Locale>> = {
   es: () => import("date-fns/locale/es").then((module) => module.es),
@@ -47,6 +47,7 @@ const CALENDAR_LOCALES: Record<CalendarLanguage, () => Promise<Locale>> = {
   it: () => import("date-fns/locale/it").then((module) => module.it),
   hi: () => import("date-fns/locale/hi").then((module) => module.hi),
   bn: () => import("date-fns/locale/bn").then((module) => module.bn),
+  de: () => import("date-fns/locale/de").then((module) => module.de),
 };
 
 /** Fetch the date-fns locale a language's calendar is written in. */

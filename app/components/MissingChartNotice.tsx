@@ -13,7 +13,7 @@ import { useTranslation } from "@/lib/i18n-context";
  * shell and the back button around it.
  *
  * The four strings are the `insights` ones the desktop baseline already
- * carries in all five languages. The subpages whose lead says something more
+ * carries in all six languages. The subpages whose lead says something more
  * specific (the full reading, life areas, timing) keep their own notice beside
  * them, reading the same kicker, heading and link.
  */

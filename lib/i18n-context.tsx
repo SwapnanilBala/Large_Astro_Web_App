@@ -24,7 +24,7 @@ import { LOCATION_LOCALE_COOKIE, parseLocationLocale } from "@/lib/location-loca
 
 /* ── Supported languages ── */
 
-export type Language = "en" | "es" | "bn" | "hi" | "it" | "fr";
+export type Language = "en" | "es" | "bn" | "hi" | "it" | "fr" | "de";
 
 export const LANGUAGE_NAMES: Record<Language, string> = {
   en: "English",
@@ -33,9 +33,10 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   hi: "हिन्दी",
   it: "Italiano",
   fr: "Français",
+  de: "Deutsch",
 };
 
-export const LANGUAGE_CODES: Language[] = ["en", "es", "bn", "hi", "it", "fr"];
+export const LANGUAGE_CODES: Language[] = ["en", "es", "bn", "hi", "it", "fr", "de"];
 
 /*
  * The interface language as a BCP-47 tag, for Intl formatters.
@@ -61,6 +62,7 @@ export const LOCALE_TAGS: Record<Language, string> = {
   hi: "hi-IN",
   it: "it-IT",
   fr: "fr-FR",
+  de: "de-DE",
 };
 
 /* ── Flatten nested JSON into dot-notation keys ── */
