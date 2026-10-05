@@ -1,8 +1,5 @@
 {
   "fullReading": {
-    "loadingCombinations": "Preparing combinations…",
-    "loadingKarma": "Preparing the karmic reading…",
-
     "backToNamedReading": "Back to {name}’s reading",
     "kicker": "Full reading",
     "title": "Every finding in the chart",
@@ -12,7 +9,7 @@
 
     "patternsKicker": "Patterns",
     "patternsHeading": "What the placements say",
-    "patternsLead": "Each card states the reading, then the placement behind it. Open “Why this reading” to see the technical basis and how common the pattern is.",
+    "patternsLead": "Choose a finding from the list to read it in full. The placement it rests on, and how common the pattern is, sit beside the reading.",
 
     "combinationsKicker": "Combinations",
     "combinationsHeading": "Patterns that run for a lifetime",
@@ -21,6 +18,32 @@
     "karmaKicker": "Karma",
     "karmaHeading": "Inherited patterns and vocation",
     "karmaLead": "A secondary reading of what the chart suggests was carried in, where it asks to be released, and the kind of work it points toward.",
+
+    "filterAll": "All",
+    "filterTop": "Top priorities",
+    "themes": {
+      "core": "Who you are",
+      "career": "Work",
+      "love": "Love"
+    },
+    "rare": "Rare",
+    "topPriority": "Top priority {rank}",
+    "otherSide": "The other side",
+    "whyThisReading": "Why this reading",
+    "previous": "Previous",
+    "next": "Next",
+    "position": "{position} of {total}",
+    "findingsList": "Findings",
+    "findingsFilter": "Show findings",
+    "yogasList": "Yogas",
+    "yogasFilter": "Show yogas by strength",
+    "karmaList": "Karma readings",
+    "karmaSignals": "Read from",
+    "yogaDoes": "What it does",
+    "yogaShows": "When it shows",
+    "yogaSoftened": "What softens it",
+    "yogaForms": "What forms it",
+    "yogaSource": "Source",
 
     "backToReading": "Back to the reading",
 

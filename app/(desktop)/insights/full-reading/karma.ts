@@ -1,15 +1,21 @@
-"use client";
-
 import type { ChartApiResponse, HousePlacement, PlanetPosition } from "@/lib/astro-types";
-import styles from "../insights.module.css";
 
-type InsightTone = "gold" | "teal" | "coral";
+/*
+ * The karma reading: four short readings built from the chart already on the
+ * page -- the nodal axis, the Moon's nakshatra, the 10th house, the strongest
+ * planet and yoga -- with no model call. It was the body of
+ * past-life-insights-panel.tsx; the full reading now lays the four out in its
+ * reading room (karma-room.tsx) and this module only builds them.
+ */
 
-type PastLifeInsightCard = {
+export type InsightTone = "gold" | "teal" | "coral";
+
+export type PastLifeInsightCard = {
   title: string;
   label: string;
   body: string;
-  evidence: string;
+  /** The placements the reading rests on, at most four. */
+  evidence: string[];
   tone: InsightTone;
 };
 
@@ -164,8 +170,8 @@ function formatHouse(houseNumber?: number) {
   return houseNumber ? `house ${houseNumber}` : "an unplaced house";
 }
 
-function joinSignals(signals: string[]) {
-  return signals.filter(Boolean).slice(0, 4).join(" | ");
+function pickSignals(signals: string[]) {
+  return signals.filter(Boolean).slice(0, 4);
 }
 
 function strongestPlanet(payload: ChartApiResponse) {
@@ -186,7 +192,7 @@ function nakshatraKey(name: string | undefined): string | undefined {
   return name.replace(/\s+/g, "");
 }
 
-function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[] {
+export function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[] {
   const planets = payload.chart.planets;
   const houses = payload.chart.houses;
   const ascendantSign = payload.chart.ascendant?.sign;
@@ -250,7 +256,7 @@ function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[]
       title: "Past-life residue and unfinished mastery",
       tone: "gold",
       body: karmaBody,
-      evidence: joinSignals([
+      evidence: pickSignals([
         ascendantSign ? `Lagna: ${ascendantSign}` : "",
         ketu ? `Ketu: ${ketu.sign}, ${formatHouse(ketu.house)}` : "",
         nakshatra ? `Moon nakshatra: ${nakshatra.name} (lord ${nakshatra.lord})` : "",
@@ -262,7 +268,7 @@ function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[]
       title: "The direction fate keeps pulling forward",
       tone: "teal",
       body: fateBody,
-      evidence: joinSignals([
+      evidence: pickSignals([
         rahu ? `Rahu: ${rahu.sign}, ${formatHouse(rahu.house)}` : "",
         rahuLord ? `Rahu lord: ${rahuLord}` : "",
         currentDasha ? `Mahadasha: ${currentDasha}` : "",
@@ -274,7 +280,7 @@ function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[]
       title: "Work that completes the karmic arc",
       tone: "coral",
       body: vocationBody,
-      evidence: joinSignals([
+      evidence: pickSignals([
         tenthHouse ? `10th: ${tenthHouse.sign}${tenthPlanets.length > 0 ? ` with ${tenthPlanets.join(", ")}` : ""}` : "",
         vocationLord ? `10th lord: ${vocationLord}` : "",
         strongest ? `Strongest: ${strongest.planet} (${Math.round(strongest.strengthRatio)}%)` : "",
@@ -286,7 +292,7 @@ function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[]
       title: "How to work with the pattern now",
       tone: "gold",
       body: integrationBody,
-      evidence: joinSignals([
+      evidence: pickSignals([
         yoga ? `${yoga.name}: ${yoga.strength}` : "",
         strongest ? `Strongest planet: ${strongest.planet}` : "",
         jupiter ? `Jupiter: ${jupiter.sign}, ${formatHouse(jupiter.house)}` : "",
@@ -296,67 +302,18 @@ function buildPastLifeInsights(payload: ChartApiResponse): PastLifeInsightCard[]
   ];
 }
 
-export default function PastLifeInsightsPanel({
-  payload,
-}: {
-  payload: ChartApiResponse;
-}) {
-  const insights = buildPastLifeInsights(payload);
-  const nakshatra = payload.chart.nakshatra;
-  const dasha = payload.chart.dasha;
+/** The placements the whole karma reading is drawn from, shown above it. */
+export function karmaSignals(payload: ChartApiResponse): string[] {
   const ascendantSign = payload.chart.ascendant?.sign;
   const ketu = getPlanet(payload.chart.planets, "Ketu");
   const rahu = getPlanet(payload.chart.planets, "Rahu");
-
-  return (
-    <div className={styles.pastLifePanel}>
-      <p className={styles.sectionIntro}>
-        A symbolic past-life layer drawn from your specific lagna, nodal axis,
-        Moon&apos;s nakshatra, dasha timing, yogas, and vocation houses — read for
-        you, not as a generic template. This is separate from palm reading and
-        uses only the birth chart results already on the page.
-      </p>
-
-      <div className={styles.pastLifeSignalBar} aria-label="Past-life reading signals">
-        {ascendantSign && (
-          <span>{ascendantSign} lagna</span>
-        )}
-        {ketu && (
-          <span>Ketu in {ketu.sign} / H{ketu.house}</span>
-        )}
-        {rahu && (
-          <span>Rahu in {rahu.sign} / H{rahu.house}</span>
-        )}
-        {nakshatra && (
-          <span>{nakshatra.name} pada {nakshatra.pada}</span>
-        )}
-        {dasha && (
-          <span>{dasha.current_dasha} / {dasha.current_antardasha}</span>
-        )}
-      </div>
-
-      <div className={styles.pastLifeGrid}>
-        {insights.map((insight) => (
-          <article
-            key={insight.title}
-            className={`${styles.pastLifeCard} ${styles[`pastLifeCard${insight.tone[0].toUpperCase()}${insight.tone.slice(1)}`]}`}
-          >
-            <p className={styles.pastLifeLabel}>{insight.label}</p>
-            <h3>{insight.title}</h3>
-            <p>{insight.body}</p>
-            {insight.evidence && (
-              <small>{insight.evidence}</small>
-            )}
-          </article>
-        ))}
-      </div>
-
-      <p className={styles.pastLifeNote}>
-        These insights are framed as reflective astrology, not fixed destiny.
-        The useful part is the pattern your chart actually carries: what to
-        mature, what to release, and what kind of work makes the old story
-        serve the present one.
-      </p>
-    </div>
-  );
+  const nakshatra = payload.chart.nakshatra;
+  const dasha = payload.chart.dasha;
+  return [
+    ascendantSign ? `${ascendantSign} lagna` : "",
+    ketu ? `Ketu in ${ketu.sign} / H${ketu.house}` : "",
+    rahu ? `Rahu in ${rahu.sign} / H${rahu.house}` : "",
+    nakshatra ? `${nakshatra.name} pada ${nakshatra.pada}` : "",
+    dasha ? `${dasha.current_dasha} / ${dasha.current_antardasha}` : "",
+  ].filter(Boolean);
 }

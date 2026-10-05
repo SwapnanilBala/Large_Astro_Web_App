@@ -1,45 +1,33 @@
 "use client";
 
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { FiArrowLeft, FiBookOpen } from "react-icons/fi";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
-import RuleCard, { bySelectionRank } from "../components/rule-card";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { useRouteMessages } from "@/lib/i18n-context";
 import fullReadingMessages from "@/messages/en.full-reading.json";
+import FindingsRoom from "./findings-room";
+import YogasRoom from "./yogas-room";
+import KarmaRoom from "./karma-room";
 import styles from "./full-reading.module.css";
 
 /*
  * The full reading, on its own page.
  *
  * On the results page this was a collapsed section holding every finding the
- * engine produced — dozens of rule cards, the yoga summary and the past-life
- * panel — stacked in a narrow column. Collapsed it was invisible; open it was
- * the longest thing on the page by a wide margin.
+ * engine produced. Given a page of its own it first became a card grid -- two
+ * abreast for the findings, three for the yogas -- which on a desktop ran to
+ * some twenty screens of boxes that all looked alike.
  *
- * Here the cards sit in a two-column grid on wide screens so the eye has
- * somewhere to go, the type is a step larger throughout, and each block gets a
- * standfirst rather than a single line of grey text.
+ * Now each block is a reading room (reading-room.tsx): a pinned list on the
+ * left, one item read in full on the right with its evidence beside it. The
+ * findings, the yogas and the karma reading each get one, so the whole page is
+ * about three screens and every item is one click from any other.
+ *
+ * All three render with the page rather than as lazily imported panels: their
+ * data is already in the payload, and the "Preparing…" placeholders they used
+ * to show were only ever waiting on JavaScript.
  */
-
-/* A component rather than the <p> inline, so the placeholder can read the
-   catalog: dynamic()'s `loading` is evaluated at module scope, where a hook
-   cannot run, but what it returns is rendered inside the tree like anything
-   else. */
-function LoadingLine({ messageKey }: { messageKey: string }) {
-  const tr = useRouteMessages(fullReadingMessages);
-  return <p className={styles.loading}>{tr(messageKey)}</p>;
-}
-
-const YogaLifetimeSummary = dynamic(() => import("../components/yoga-lifetime-summary"), {
-  ssr: false,
-  loading: () => <LoadingLine messageKey="fullReading.loadingCombinations" />,
-});
-const PastLifeInsightsPanel = dynamic(() => import("../components/past-life-insights-panel"), {
-  ssr: false,
-  loading: () => <LoadingLine messageKey="fullReading.loadingKarma" />,
-});
 
 type Props = {
   payload: ChartApiResponse;
@@ -50,9 +38,7 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
   /* tr, not t: this page's copy is a namespace of its own that ships with the
      route rather than riding in the desktop baseline. */
   const tr = useRouteMessages(fullReadingMessages);
-  /* Most significant first. This page inherited the list from the results page
-     but not its ordering, so the findings were arriving in raw engine order. */
-  const rules = [...payload.chart.deterministic_rules].sort(bySelectionRank);
+  const rules = payload.chart.deterministic_rules;
   const yogas = payload.chart.yogas ?? [];
 
   return (
@@ -88,12 +74,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
             <h2>{tr("fullReading.patternsHeading")}</h2>
             <p className={styles.sectionLead}>{tr("fullReading.patternsLead")}</p>
           </div>
-
-          <div className={styles.ruleGrid}>
-            {rules.map((rule, i) => (
-              <RuleCard key={rule.instance_key} rule={rule} index={i} />
-            ))}
-          </div>
+          <PanelErrorBoundary panelName="Findings">
+            <FindingsRoom rules={rules} />
+          </PanelErrorBoundary>
         </section>
       )}
 
@@ -106,11 +89,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
             <h2>{tr("fullReading.combinationsHeading")}</h2>
             <p className={styles.sectionLead}>{tr("fullReading.combinationsLead")}</p>
           </div>
-          <div className={styles.panel}>
-            <PanelErrorBoundary panelName="Yoga Lifetime Summary">
-              <YogaLifetimeSummary yogas={yogas} />
-            </PanelErrorBoundary>
-          </div>
+          <PanelErrorBoundary panelName="Yogas">
+            <YogasRoom yogas={yogas} />
+          </PanelErrorBoundary>
         </section>
       )}
 
@@ -120,11 +101,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
           <h2>{tr("fullReading.karmaHeading")}</h2>
           <p className={styles.sectionLead}>{tr("fullReading.karmaLead")}</p>
         </div>
-        <div className={styles.panel}>
-          <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
-            <PastLifeInsightsPanel payload={payload} />
-          </PanelErrorBoundary>
-        </div>
+        <PanelErrorBoundary panelName="Karma, Fate, and Vocation">
+          <KarmaRoom payload={payload} />
+        </PanelErrorBoundary>
       </section>
 
       <footer className={styles.footer}>

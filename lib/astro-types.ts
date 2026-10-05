@@ -289,6 +289,9 @@ export type YogaDetectionResult = {
   key_traits?: string[];
   detailed_description?: string;
   cancellation?: string;
+  /** The classical text the combination is cited to. The engine sends it on
+      every record added from 2026-09 on; the first hundred carry none. */
+  source?: string;
 };
 
 export type AshtakavargaData = {

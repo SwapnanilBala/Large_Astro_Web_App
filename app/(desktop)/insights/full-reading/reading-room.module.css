@@ -1,0 +1,686 @@
+/*
+ * The reading room (reading-room.tsx), and the pieces the three rooms on the
+ * full reading build their rows and readings from.
+ *
+ * Wide screens: a pinned list on the left that scrolls on its own, the reading
+ * on the right flowing with the page. The pane is a size container, so a
+ * reading lays its evidence beside the text when it has the width for it and
+ * under it when it does not -- the pane is roughly 70% of a box that is itself
+ * 78% of the window, which is anywhere from 520px to 1,400px.
+ *
+ * Under 1024px: one column, the open item's reading under its own row.
+ */
+
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ── buttons ──
+ *
+ * The global button (globals.css) is a call to action: a top margin, a gold
+ * rim, a lift and a shimmer layer on hover. None of the room's buttons are
+ * calls to action -- dressed that way, 34 list rows read as 34 boxes again --
+ * so each opts out the way lagna-chart-card's view switch does. The rules
+ * below set what they want on top of this. */
+
+.filter,
+.row,
+.navButton {
+  min-height: 0;
+  margin: 0;
+  justify-content: flex-start;
+  box-shadow: none;
+  text-shadow: none;
+  letter-spacing: normal;
+}
+
+.filter:hover,
+.filter:active,
+.row:hover,
+.row:active,
+.navButton:hover,
+.navButton:active {
+  transform: none;
+  filter: none;
+  box-shadow: none;
+}
+
+.filter::before,
+.filter::after,
+.row::before,
+.row::after,
+.navButton::before,
+.navButton::after {
+  content: none;
+}
+
+/* ── filters ── */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.95rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-ui);
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.18s ease, color 0.18s ease, background-color 0.18s ease;
+}
+
+.filter:hover {
+  border-color: var(--accent-gold-dim);
+  color: var(--ink-main);
+}
+
+.filter[aria-pressed="true"] {
+  border-color: var(--accent-gold);
+  background: var(--accent-gold-glow);
+  color: var(--ink-main);
+}
+
+.filter:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+.filterCount {
+  color: var(--accent-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── the split ──
+ *
+ * No overflow: hidden here, whatever the rounded corners suggest: it would
+ * make this box the scroll container the pinned list sticks to, and a box
+ * that never scrolls pins nothing. The list column repeats the radius instead.
+ */
+
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  border: 1px solid rgba(200, 155, 60, 0.16);
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 243, 210, 0.035), rgba(255, 243, 210, 0) 40%),
+    rgba(9, 14, 28, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.listColumn {
+  padding: 0.5rem 0;
+  border-radius: 18px 0 0 18px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-gold-dim) transparent;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rowItem {
+  margin: 0;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 1.15rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink-main);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  /* Keyboard focus scrolls rows into view; keep them out from under the
+     fixed navbar when the list is not pinned (under 1024px). */
+  scroll-margin: calc(var(--navbar-h, 108px) + 1rem) 0 1rem;
+  transition: background-color 0.15s ease;
+}
+
+.row:hover {
+  background: var(--surface-hover);
+}
+
+.row[aria-current="true"] {
+  background: var(--surface-strong);
+  box-shadow: inset 3px 0 0 var(--accent-gold);
+}
+
+.row:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: -2px;
+}
+
+/* An h3 by level, so the tag rules in globals.css would restyle it: pin them. */
+.groupLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1rem 1.15rem 0.4rem;
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-label);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.groupCount {
+  color: var(--accent-gold);
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── the reading ── */
+
+.pane,
+.inline {
+  container-type: inline-size;
+  scroll-margin-top: calc(var(--navbar-h, 108px) + 1rem);
+}
+
+.pane {
+  min-width: 0;
+  padding: clamp(1.5rem, 2.4vw, 2.5rem);
+}
+
+.inline {
+  margin: 0 0 0.5rem;
+  padding: 1.1rem 1.15rem 1.25rem 1.6rem;
+  border-left: 3px solid var(--accent-gold);
+  border-radius: 0;
+  background: var(--surface-soft);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.5rem;
+  padding: 0.35rem 0.25rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-ui);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.navButton:hover:not(:disabled) {
+  color: var(--accent-gold);
+}
+
+.navButton:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+}
+
+/* The global rule fades a disabled button and greys it through a filter;
+   the end of the list only needs to read as the end. */
+.navButton:disabled {
+  opacity: 1;
+  filter: none;
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
+.navPosition {
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 1024px) {
+  .split {
+    grid-template-columns: minmax(17rem, 30%) minmax(0, 1fr);
+  }
+
+  /* Pinned, and scrolling on its own: the whole list stays in reach however
+     far down a long reading goes. */
+  .listColumn {
+    position: sticky;
+    top: calc(var(--navbar-h, 108px) + 1rem);
+    max-height: calc(100vh - var(--navbar-h, 108px) - 2rem);
+    overflow-y: auto;
+    border-right: 1px solid var(--border-soft);
+  }
+
+  .inline {
+    display: none;
+  }
+}
+
+@media (max-width: 1023.98px) {
+  .pane {
+    display: none;
+  }
+}
+
+/* ══ Row parts, shared by the three rooms ══ */
+
+.mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  margin-top: 0.05rem;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  background: var(--accent-gold-glow);
+  color: var(--accent-gold-light);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.strengthMark {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  border: 2px solid var(--accent-purple);
+}
+
+.strengthMark[data-strength="strong"] {
+  border-color: var(--accent-gold);
+  background: var(--accent-gold);
+}
+
+.strengthMark[data-strength="weak"] {
+  border-color: var(--accent-coral);
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  color: var(--ink-main);
+}
+
+.rowMeta {
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.4;
+}
+
+.glyphs {
+  flex: none;
+  margin-top: 0.1rem;
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  /* Text presentation for the planet symbols: some platforms default ♀ and ♂
+     to colour emoji otherwise. */
+  font-variant-emoji: text;
+}
+
+/* ══ Reading parts ══ */
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.tone {
+  color: var(--accent-gold);
+}
+
+.tone[data-tone="career"] {
+  color: var(--accent-teal-light);
+}
+
+.tone[data-tone="love"] {
+  color: var(--accent-purple-light);
+}
+
+.tone[data-tone="coral"] {
+  color: var(--accent-coral);
+}
+
+.tone[data-tone="quiet"] {
+  color: var(--text-secondary);
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--accent-gold-dim);
+  border-radius: 999px;
+  color: var(--accent-gold-light);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: none;
+}
+
+.pill[data-strength="moderate"] {
+  border-color: var(--accent-purple-dim);
+  color: var(--accent-purple-light);
+}
+
+.pill[data-strength="weak"] {
+  border-color: var(--accent-coral);
+  color: var(--accent-coral);
+}
+
+/* An h3: pin what the tag rules would otherwise set. */
+.title {
+  margin: 0.6rem 0 0;
+  color: var(--ink-main);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: clamp(1.55rem, 1.15rem + 0.9vw, 2.1rem);
+  font-weight: 600;
+  line-height: 1.22;
+  letter-spacing: -0.005em;
+}
+
+.subtitle {
+  margin: 0.3rem 0 0;
+  color: var(--accent-gold);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.15rem;
+  font-style: italic;
+}
+
+.planets {
+  margin: 0.75rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-ui);
+}
+
+.detailBody {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+}
+
+.text {
+  max-width: 66ch;
+  margin: 0;
+  color: var(--ink-main);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.22rem;
+  line-height: 1.75;
+}
+
+.text + .text {
+  margin-top: 1rem;
+}
+
+.otherSide {
+  max-width: 66ch;
+  margin: 1.4rem 0 0;
+  padding-left: 1rem;
+  border-left: 2px solid var(--accent-gold-dim);
+  border-radius: 0;
+}
+
+.otherSide p:last-child {
+  margin: 0.35rem 0 0;
+  color: var(--ink-soft);
+  font-family: var(--font-newsreader), Georgia, serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.label {
+  margin: 0;
+  color: var(--accent-gold);
+  font-family: var(--font-body);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.block + .block {
+  margin-top: 1.25rem;
+}
+
+.block .text {
+  margin-top: 0.35rem;
+}
+
+.evidence {
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.45rem 1.1rem;
+  margin: 0.75rem 0 0;
+}
+
+.facts div {
+  display: contents;
+}
+
+.facts dt {
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--ink-main);
+  font-size: var(--text-ui);
+  line-height: 1.5;
+}
+
+.factDetail {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+}
+
+.signals {
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signals li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--ink-main);
+  font-size: var(--text-ui);
+  line-height: 1.45;
+}
+
+.signals li:last-child {
+  border-bottom: 0;
+}
+
+.asideText {
+  margin: 0.6rem 0 0;
+  color: var(--ink-main);
+  font-size: var(--text-ui);
+  line-height: 1.6;
+}
+
+.basis {
+  margin: 0.9rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.55;
+}
+
+.rarity {
+  margin: 0.75rem 0 0;
+  color: var(--ink-soft);
+  font-size: var(--text-ui);
+  line-height: 1.5;
+}
+
+.rarity[data-band="rare"],
+.rarity[data-band="very_rare"] {
+  color: var(--accent-gold);
+}
+
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traits li {
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--ink-soft);
+  font-size: var(--text-meta);
+}
+
+/* Enough width for two columns: the evidence moves beside the text, where the
+   eye can check a claim against its placement without scrolling. */
+@container (min-width: 46rem) {
+  .detailBody {
+    grid-template-columns: minmax(0, 1fr) minmax(15rem, 19rem);
+    gap: 2.5rem;
+    align-items: start;
+  }
+
+  .evidence {
+    padding-top: 0;
+    padding-left: 1.75rem;
+    border-top: 0;
+    border-left: 1px solid var(--border-soft);
+  }
+
+  /* Stacked in the narrow aside, label over value. */
+  .facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+  }
+
+  .facts div + div dt {
+    margin-top: 0.6rem;
+  }
+}
+
+/* ── Ethereal Dawn ──
+ *
+ * The bright accent tiers that read on navy are too pale on cream (teal-light
+ * and purple-light measure under 3:1 there), so the light theme steps each one
+ * down a tier. Surfaces follow the full reading's own panel recipe. */
+:global(html[data-theme="light"]) .split {
+  background: var(--surface-frosted);
+  border-color: var(--border-soft);
+  box-shadow: none;
+}
+
+:global(html[data-theme="light"]) .tone[data-tone="career"] {
+  color: var(--accent-teal);
+}
+
+:global(html[data-theme="light"]) .tone[data-tone="love"] {
+  color: var(--accent-purple-dim);
+}
+
+:global(html[data-theme="light"]) .rank,
+:global(html[data-theme="light"]) .pill {
+  color: var(--accent-gold);
+}
+
+:global(html[data-theme="light"]) .pill[data-strength="moderate"] {
+  color: var(--accent-purple-dim);
+}
+
+:global(html[data-theme="light"]) .pill[data-strength="weak"] {
+  color: var(--accent-coral);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filter,
+  .row {
+    transition: none;
+  }
+}
