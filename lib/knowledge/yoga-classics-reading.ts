@@ -55,7 +55,7 @@ export const CLASSICAL_NOTE_RULES = `- Attribute the claims to the book ("The Br
 - A passage that begins "${NOTE_PREFIX.trim()}" is the 1885 translator's own note, often quoting other authorities. Attribute it that way ("the translator's notes add ...", "other authorities quoted in the notes hold ..."), never to Varahamihira.
 - Plain modern language for a reader who knows no astrology. The book's "king" means someone with standing and authority; say that rather than "king".
 - Where a passage's verdict is harsh, name what the book warned of in one neutral phrase. Never describe the reader with its insults.
-- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving, a marriage ending, marrying late or marrying more than once may be said plainly, for either partner, without blame.
+- Never mention death, lifespan, illness, caste or birth status, crime, or harm to a parent, spouse or child, even if a passage does. A spouse leaving, a marriage ending, marrying late or more than once, and having few children or none may be said plainly, for either partner, without blame.
 - The book writes for a man ("his wife", "fond of women"). Write for a reader of any gender: "your partner", "marriage", "romance".
 - Speak of sexual matters only as romance, warmth or attraction, never explicitly.
 - No advice, no disclaimers, no headings, no lists, no markdown.

@@ -104,6 +104,7 @@ const WITHHELD_CHAPTERS: Record<number, string> = {
  *   tags               replaces the model's tags, where they are looser than the passage
  *   showDespiteChapter shows a passage that WITHHELD_CHAPTERS would withhold
  *   withhold           withholds a passage the model let through, with the reason
+ *   show               shows a passage the model withheld, with the reason it may be
  *   textIncludes       words the passage must contain, or the build fails: parts
  *                      renumber when a chapter is re-split, and an override must
  *                      not quietly land on a neighbour
@@ -113,8 +114,20 @@ type PassageOverride = {
   tags?: string[];
   showDespiteChapter?: true;
   withhold?: string;
+  show?: string;
   textIncludes?: string;
 };
+
+/*
+ * The owner's call on 2026-10-04, when asked: having few children or none is
+ * "inherently not a problem" and is shown. The life prompt that wrote the
+ * cached answers counted it as harm to a child, so each such passage is shown
+ * here by hand -- only those whose every clause is otherwise allowed. A
+ * child's death still counts, as death: 18.20.25 ("will lose his children")
+ * stays withheld, as do 18.18.5 (a bodily defect), 18.20.11 (ill-treating his
+ * parents) and 20.3.2 (blindness), which share a part with a children clause.
+ */
+const FEW_OR_NO_CHILDREN = "few or no children, which the owner allows";
 
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
@@ -141,6 +154,27 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
      word, so the caste clause would be printed; the traits are lost with it
      until a rebuild splits the clause off on its own. */
   "18.11.3": { withhold: "mentions caste", textIncludes: "men of low castes" },
+  /* Tagged "loss of sons", but the words are a separation, which the owner
+     allows as they do a spouse leaving. */
+  "17.2.7": {
+    show: "a separation from family, not a loss",
+    textIncludes: "separated from his kinsmen, wealth and sons",
+  },
+  "17.5.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
+  "17.6.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "daughters and very few sons" },
+  "18.4.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "will have no sons" },
+  "18.7.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "few wives and children" },
+  "18.7.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few children" },
+  "18.10.2": { show: FEW_OR_NO_CHILDREN, textIncludes: "neither comfort nor sons" },
+  "18.16.3": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
+  "18.17.5": { show: FEW_OR_NO_CHILDREN, textIncludes: "will have no sons" },
+  "18.18.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "no sons and will carry burdens" },
+  /* Its other clause, "separated from his parents" when young, is a separation too. */
+  "18.20.4": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few sons" },
+  "19.7.5": { show: FEW_OR_NO_CHILDREN, textIncludes: "he will have no sons" },
+  "19.8.1": { show: FEW_OR_NO_CHILDREN, textIncludes: "very few children" },
+  "20.2.3": { show: FEW_OR_NO_CHILDREN, textIncludes: "he will have no sons" },
+  "20.3.7": { show: FEW_OR_NO_CHILDREN, textIncludes: "neither sons nor wealth" },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
@@ -578,6 +612,7 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       throw new Error(`PASSAGE_OVERRIDES["${ref}"] expects "${override.textIncludes}", which ${ref} no longer has. Re-point it.`);
     }
     const chapterWithheld = chapter.chapter in WITHHELD_CHAPTERS && !override.showDespiteChapter;
+    const modelWithheld = answered.withheld && !override.show;
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
       source: SOURCE.slug,
@@ -596,8 +631,8 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer): Knowl
       ...conditionsOf(answered),
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
-      withheld: answered.withheld || chapterWithheld || Boolean(override.withhold),
-      withheldReason: answered.withheld
+      withheld: modelWithheld || chapterWithheld || Boolean(override.withhold),
+      withheldReason: modelWithheld
         ? answered.withheld_reason.trim()
         : chapterWithheld
           ? WITHHELD_CHAPTERS[chapter.chapter]

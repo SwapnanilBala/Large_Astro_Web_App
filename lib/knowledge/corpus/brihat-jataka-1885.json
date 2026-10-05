@@ -8350,8 +8350,8 @@
         "family",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "loss of sons",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -8797,8 +8797,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -9061,8 +9061,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.867
     },
     {
@@ -10527,8 +10527,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "no children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.923
     },
     {
@@ -10870,8 +10870,8 @@
         "relationships",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.846
     },
     {
@@ -10920,8 +10920,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.857
     },
     {
@@ -11212,8 +11212,8 @@
         "wealth",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "no children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -11856,8 +11856,8 @@
         "relationships",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.933
     },
     {
@@ -12041,8 +12041,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "no children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -12255,8 +12255,8 @@
         "career",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "no children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.929
     },
     {
@@ -12509,8 +12509,8 @@
         "family",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.958
     },
     {
@@ -16905,8 +16905,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "no children (no sons)",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.909
     },
     {
@@ -17112,8 +17112,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "few children",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.917
     },
     {
@@ -17707,8 +17707,8 @@
       "lifeAreas": [
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "Having no sons (harm to children).",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.882
     },
     {
@@ -17975,8 +17975,8 @@
         "wealth",
         "children"
       ],
-      "withheld": true,
-      "withheldReason": "Having no sons (harm to children).",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

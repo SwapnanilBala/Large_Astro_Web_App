@@ -169,7 +169,7 @@ describe("the Brihat Jataka corpus", () => {
       "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|impoten\w*|childless|barren)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|adulter\w*|harlot\w*|widow\w*|eunuch\w*|impoten\w*)\b/i;
     const found = (corpus?.passages ?? [])
       .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
       .flatMap((passage) => {
@@ -177,6 +177,16 @@ describe("the Brihat Jataka corpus", () => {
         return match ? [`${passage.id}: ${match[0]}`] : [];
       });
     expect(found).toEqual([]);
+  });
+
+  it("shows few or no children, as the owner decided, but not a child's death", () => {
+    // 2026-10-04: having few children or none is "inherently not a problem";
+    // a child's death still falls under the rule against death.
+    const withheld = (ref: string) =>
+      corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref)?.withheld;
+    for (const ref of ["17.5.2", "18.4.4", "18.7.4", "19.8.1", "20.2.3"]) expect(withheld(ref), ref).toBe(false);
+    expect(withheld("18.20.25")).toBe(true); // "will lose his children"
+    expect(withheld("20.3.2")).toBe(true); // few sons, but also blindness
   });
 
   it("shows three passages of the malefic-yogas chapter, the marriage ones, each tied only to its own yoga", () => {
