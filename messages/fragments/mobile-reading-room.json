@@ -1,0 +1,37 @@
+{
+  "es": {
+    "mobileInsights": {
+      "yogasTitle": "Yogas",
+      "karmaTitle": "Karma y vocación",
+      "karmaSubtitle": "Lo que la carta trajo consigo y el trabajo al que apunta"
+    }
+  },
+  "fr": {
+    "mobileInsights": {
+      "yogasTitle": "Yogas",
+      "karmaTitle": "Karma et vocation",
+      "karmaSubtitle": "Ce que la carte a apporté, et le travail vers lequel elle oriente"
+    }
+  },
+  "it": {
+    "mobileInsights": {
+      "yogasTitle": "Yoga",
+      "karmaTitle": "Karma e vocazione",
+      "karmaSubtitle": "Ciò che la carta ha portato con sé e il lavoro a cui indica"
+    }
+  },
+  "hi": {
+    "mobileInsights": {
+      "yogasTitle": "योग",
+      "karmaTitle": "कर्म और वृत्ति",
+      "karmaSubtitle": "कुंडली क्या साथ लेकर आई, और किस काम की ओर संकेत करती है"
+    }
+  },
+  "bn": {
+    "mobileInsights": {
+      "yogasTitle": "যোগ",
+      "karmaTitle": "কর্ম ও বৃত্তি",
+      "karmaSubtitle": "কুণ্ডলী কী সঙ্গে নিয়ে এসেছে, আর কোন কাজের দিকে ইঙ্গিত করে"
+    }
+  }
+}

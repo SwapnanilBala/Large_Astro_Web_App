@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { ChartApiResponse, DashaInfo, DeterministicRule } from "@/lib/astro-types";
 import type { KalatraFacet, KalatraResult } from "@/lib/engines/kalatra-engine";
@@ -18,6 +19,19 @@ import { HOUSE_THEMES } from "@/lib/rules/tables";
 import MobileRasiChart, { abbreviate, bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
+
+/* The full reading's three rooms, fetched when their section is opened. All
+   three start closed, and they bring two route catalogs and the karma tables
+   with them, so the reading's first load does not pay for them. */
+const MobileFindingsRoom = dynamic(() =>
+  import("./mobile-reading-rooms").then((module) => module.MobileFindingsRoom),
+);
+const MobileYogasRoom = dynamic(() =>
+  import("./mobile-reading-rooms").then((module) => module.MobileYogasRoom),
+);
+const MobileKarmaRoom = dynamic(() =>
+  import("./mobile-reading-rooms").then((module) => module.MobileKarmaRoom),
+);
 
 /*
  * Mobile results view.
@@ -422,8 +436,8 @@ export default function MobileInsights({
       }),
     [language]
   );
-  // Keyed by "section:instance_key" so the same rule appearing in both the
-  // above-the-fold list and the full list opens independently.
+  // Keyed by "section:instance_key". Only the attention list uses it now; the
+  // full list below is a reading room, which keeps its own open item.
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
   const toggleEvidence = (key: string) =>
     setOpenEvidence((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -740,6 +754,8 @@ export default function MobileInsights({
         </Section>
       )}
 
+      {/* The full reading, as the desktop page lays it out: one line per item,
+          and the item tapped opens underneath its row with its evidence. */}
       {(rules ?? []).length > highPriority.length && (
         <Section
           title={tr("mobileInsights.allReadingsTitle")}
@@ -747,19 +763,24 @@ export default function MobileInsights({
             count: String((rules ?? []).length),
           })}
         >
-          <ul className={styles.rules}>
-            {(rules ?? []).map((rule) => (
-              <RuleCard
-                key={rule.instance_key}
-                rule={rule}
-                open={Boolean(openEvidence[`all:${rule.instance_key}`])}
-                onToggle={() => toggleEvidence(`all:${rule.instance_key}`)}
-                tr={tr}
-              />
-            ))}
-          </ul>
+          <MobileFindingsRoom rules={rules ?? []} />
         </Section>
       )}
+
+      {(chart.yogas ?? []).length > 0 && (
+        <Section
+          title={tr("mobileInsights.yogasTitle")}
+          subtitle={tr("mobileInsights.allReadingsSubtitle", {
+            count: String((chart.yogas ?? []).length),
+          })}
+        >
+          <MobileYogasRoom yogas={chart.yogas ?? []} />
+        </Section>
+      )}
+
+      <Section title={tr("mobileInsights.karmaTitle")} subtitle={tr("mobileInsights.karmaSubtitle")}>
+        <MobileKarmaRoom payload={payload} />
+      </Section>
 
       {/* Below the reading, above the footer: the question is worth asking
           where somebody has finished, not in front of what they came for. */}

@@ -1,0 +1,501 @@
+/*
+ * The reading room in the /m dress (app/components/reading-room, stacked).
+ *
+ * The same rooms the desktop full reading shows, set the almanac way: ink and
+ * paper, hairline rules instead of boxes, Newsreader for what reads as a
+ * heading, the monospace for labels and figures. Vermilion marks one thing,
+ * the open item -- the "open choice" it is kept for -- and the pull quote
+ * that the mobile reading cards already rule in it. Chosen filters are inked,
+ * like every chosen chip in this tree.
+ *
+ * Every class here is part of a contract listed in
+ * app/components/reading-room/classes.ts; the desktop stylesheet defines the
+ * same names.
+ */
+
+.room {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* ── filters ── */
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.875rem;
+  padding: 0.5rem 0.8rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.filter[aria-pressed="true"] {
+  border-color: var(--text-primary);
+  background: var(--text-primary);
+  color: var(--bg-deep);
+}
+
+.filterCount {
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+/* ── the list ── */
+
+.split {
+  border-top: 1px solid var(--border-soft);
+}
+
+.listColumn {
+  min-width: 0;
+}
+
+.rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rowItem {
+  margin: 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0;
+  padding: 0.8rem 0;
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  scroll-margin: 1rem 0;
+}
+
+.row:active {
+  background: var(--surface);
+}
+
+/* An h3 in the outline; this tree styles no heading tags, so set it all. */
+.groupLabel {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 1.1rem 0 0.4rem;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  font-weight: 400;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.groupCount {
+  color: var(--text-secondary);
+  letter-spacing: 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Never rendered in the stacked layout; defined because the contract asks. */
+.pane {
+  display: none;
+}
+
+/* The open item, under its own row: the one place vermilion marks a choice. */
+.inline {
+  margin: 0 0 0.9rem;
+  padding: 0.15rem 0 0.25rem 0.9rem;
+  border-left: 2px solid var(--accent);
+  scroll-margin-top: 1rem;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1.1rem;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.navButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0;
+  border: 0;
+  background: none;
+  color: var(--accent-text);
+  font-size: var(--text-ui);
+  cursor: pointer;
+}
+
+.navButton:disabled {
+  color: var(--text-tertiary);
+  cursor: default;
+}
+
+.navPosition {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+/* ══ Row parts ══ */
+
+.mark {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+}
+
+.rank {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 50%;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+.dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+
+/* Strength in ink: filled, ringed, dotted -- not in colour, which this tree
+   keeps for one thing. */
+.strengthMark {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 1.5px solid var(--text-secondary);
+  border-radius: 50%;
+}
+
+.strengthMark[data-strength="strong"] {
+  border-color: var(--text-primary);
+  background: var(--text-primary);
+}
+
+.strengthMark[data-strength="weak"] {
+  border-style: dotted;
+}
+
+.rowText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.rowTitle {
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+.rowMeta {
+  color: var(--text-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.4;
+}
+
+.glyphs {
+  flex: none;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  font-variant-emoji: text;
+}
+
+/* ══ Reading parts ══ */
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+  margin: 0.4rem 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tone {
+  color: var(--text-secondary);
+}
+
+.pill {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  color: var(--text-primary);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+/* An h3; nothing in this tree styles heading tags, so set it all. */
+.title {
+  margin: 0.45rem 0 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: normal;
+}
+
+.subtitle {
+  margin: 0.2rem 0 0;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: 1.0625rem;
+  font-style: italic;
+}
+
+.planets {
+  margin: 0.5rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+.detailBody {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.8rem;
+}
+
+.text {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* The pull quote, ruled in vermilion like the reading cards above it. */
+.otherSide {
+  margin: 0.9rem 0 0;
+  padding-left: 0.85rem;
+  border-left: 2px solid var(--accent);
+}
+
+.otherSide p:last-child {
+  margin: 0.3rem 0 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.label {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-label);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.block + .block {
+  margin-top: 0.9rem;
+}
+
+.block .text {
+  margin-top: 0.3rem;
+}
+
+.evidence {
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border-soft);
+}
+
+.facts {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+}
+
+.facts div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+  font-size: var(--text-meta);
+}
+
+.facts dt {
+  color: var(--text-tertiary);
+}
+
+.facts dt::after {
+  content: ":";
+}
+
+.facts dd {
+  margin: 0;
+  color: var(--text-secondary);
+}
+
+.factDetail {
+  display: block;
+  width: 100%;
+  color: var(--text-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+.asideText {
+  margin: 0.4rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-ui);
+  line-height: 1.55;
+}
+
+.signals {
+  margin: 0.4rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signals li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid var(--border-soft);
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.45;
+}
+
+.signals li:last-child {
+  border-bottom: 0;
+}
+
+.basis {
+  margin: 0.6rem 0 0;
+  color: var(--text-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+/* The measured rarity phrase, set like a catalogue note, as on the cards. */
+.rarity {
+  margin: 0.5rem 0 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+.rarity[data-band="rare"],
+.rarity[data-band="very_rare"] {
+  color: var(--text-primary);
+}
+
+.traits {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.traits li {
+  padding: 0.1rem 0.55rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+}
+
+/* ══ Around the karma room (not part of the shared contract) ══ */
+
+.karma {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+/* What the karma reading was read from, before it is read: inked text in
+   hairline pills, the same as the trait chips. */
+.signalBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.signalBar li {
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+}
+
+.karmaNote {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--text-meta);
+  line-height: 1.55;
+}
+
+/* Tracking cuts the headline stroke Devanagari and Bengali letters hang from,
+   and upper-casing does nothing for them. */
+.label:lang(hi),
+.label:lang(bn),
+.meta:lang(hi),
+.meta:lang(bn),
+.groupLabel:lang(hi),
+.groupLabel:lang(bn),
+.pill:lang(hi),
+.pill:lang(bn) {
+  letter-spacing: 0;
+}
