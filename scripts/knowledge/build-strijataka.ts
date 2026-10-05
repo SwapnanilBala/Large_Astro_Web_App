@@ -62,6 +62,7 @@ import {
   labelDecision,
   labelReason,
   letterAgreement,
+  modelReason,
   median,
   rewordByHand,
   shownText,
@@ -501,7 +502,9 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
 
     const modelWithheld = answered.withheld && !override.show;
     const labelled = override.show ? null : labelReason(decision);
-    const reason = modelWithheld ? answered.withheld_reason.trim() : (labelled ?? override.withhold ?? null);
+    const reason = modelWithheld
+      ? modelReason(answered.withheld_reason.trim(), decision)
+      : (labelled ?? override.withhold ?? null);
     const withheld = modelWithheld || Boolean(labelled) || Boolean(override.withhold);
     if (!withheld && UNPRINTED.test(text)) throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
 

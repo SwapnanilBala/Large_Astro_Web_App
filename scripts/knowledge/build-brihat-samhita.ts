@@ -53,6 +53,7 @@ import {
   inOrder,
   labelDecision,
   labelReason,
+  modelReason,
   median,
   ocrAgreement,
   shownText,
@@ -373,7 +374,9 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
       ...(answered.hand ? { hand: true as const } : {}),
       withheld,
-      withheldReason: modelWithheld ? answered.withheld_reason.trim() : (labelled ?? override.withhold ?? null),
+      withheldReason: modelWithheld
+        ? modelReason(answered.withheld_reason.trim(), decision)
+        : (labelled ?? override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };
   });

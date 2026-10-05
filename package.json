@@ -17,6 +17,7 @@
     "knowledge:build": "tsx scripts/knowledge/build-brihat-jataka.ts",
     "knowledge:build:samhita": "tsx scripts/knowledge/build-brihat-samhita.ts",
     "knowledge:build:strijataka": "tsx scripts/knowledge/build-strijataka.ts",
+    "knowledge:hidden-report": "tsx scripts/knowledge/hidden-report.ts",
     "knowledge:load": "tsx scripts/knowledge/load.ts",
     "lint": "eslint app lib proxy.ts eslint.config.mjs vitest.config.ts vitest.setup.ts next.config.ts",
     "test": "vitest run",

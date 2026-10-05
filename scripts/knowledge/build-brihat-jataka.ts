@@ -58,6 +58,7 @@ import {
   inOrder,
   labelDecision,
   labelReason,
+  modelReason,
   median,
   ocrAgreement,
   rewordByHand,
@@ -138,6 +139,8 @@ type PassageOverride = {
   withhold?: string;
   show?: string;
   rewordPhrase?: readonly [string, string];
+  /** The reason recorded for a passage the model withheld, where the model's own no longer holds. */
+  reason?: string;
   textIncludes?: string;
 };
 
@@ -187,6 +190,16 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   "14.4.87": { show: ADULTERY_ALLOWED, textIncludes: "fond of the wives of other men" },
   "14.4.99": { show: ADULTERY_ALLOWED, textIncludes: "covet the wives of other men" },
   "14.4.104": { show: ADULTERY_ALLOWED, textIncludes: "covet the wives of other men" },
+  /* Withheld by the yoga answers for "sexual immorality", which no longer
+     withholds anything. Mars and Venus together also "engage in duels", which
+     counts as violence; "attached to prostitutes" is shown in the owner's
+     wording, as such words are everywhere else. */
+  "14.3.3": { reason: "speaks of duels (violence)", textIncludes: "engage in duels" },
+  "14.4.67": {
+    show: "the owner's wording for a prostitute",
+    rewordPhrase: ["prostitutes", `[${OWNERS_WORDING}]`],
+    textIncludes: "attached to prostitutes",
+  },
 };
 
 const CACHE_DIR = resolve("tmp/knowledge", SOURCE.slug);
@@ -637,10 +650,11 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
       planets: inOrder(answered.planets, KNOWLEDGE_PLANETS),
       lifeAreas: inOrder(answered.life_areas, KNOWLEDGE_LIFE_AREAS),
       withheld,
-      withheldReason: modelWithheld
-        ? answered.withheld_reason.trim()
-        : chapterWithheld
-          ? WITHHELD_CHAPTERS[chapter.chapter]
+      /* A chapter withheld whole is withheld for that decision, whatever else the model saw in a verse. */
+      withheldReason: chapterWithheld
+        ? WITHHELD_CHAPTERS[chapter.chapter]
+        : modelWithheld
+          ? modelReason(override.reason ?? answered.withheld_reason.trim(), decision)
           : (labelled ?? override.withhold ?? null),
       ocrAgreement: Math.round(agreement * 1000) / 1000,
     };

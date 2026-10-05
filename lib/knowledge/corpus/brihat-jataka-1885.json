@@ -4512,7 +4512,7 @@
         "relationships"
       ],
       "withheld": true,
-      "withheldReason": "Sexual immorality.",
+      "withheldReason": "speaks of duels (violence)",
       "ocrAgreement": 1
     },
     {
@@ -6386,7 +6386,8 @@
       "part": 67,
       "kind": "note",
       "chapterTitle": "On Double Planetary Yogas",
-      "text": "[Again, if the yoga planets occupying together a sign of Zodiac at the time of birth be] (9). The Sun, Moon, Jupiter and Saturn—will be fond of travels, will be rich, intelligent and attached to prostitutes.",
+      "text": "[Again, if the yoga planets occupying together a sign of Zodiac at the time of birth be] (9). The Sun, Moon, Jupiter and Saturn—will be fond of travels, will be rich, intelligent and attached to [multiple illicit relationships].",
+      "printedText": "[Again, if the yoga planets occupying together a sign of Zodiac at the time of birth be] (9). The Sun, Moon, Jupiter and Saturn—will be fond of travels, will be rich, intelligent and attached to prostitutes.",
       "notes": null,
       "summary": "The translator's note says that with the Sun, Moon, Jupiter and Saturn in one sign the person will be fond of travel, rich, intelligent, and attached to prostitutes.",
       "yogaIds": [],
@@ -6404,8 +6405,8 @@
         "relationships",
         "travel"
       ],
-      "withheld": true,
-      "withheldReason": "Sexual immorality.",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.882
     },
     {
@@ -21472,7 +21473,7 @@
         "relationships"
       ],
       "withheld": true,
-      "withheldReason": "loss of the wife",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.84
     },
     {
@@ -21497,7 +21498,7 @@
         "children"
       ],
       "withheld": true,
-      "withheldReason": "loss of sons",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.96
     },
     {
@@ -21629,7 +21630,7 @@
         "longevity"
       ],
       "withheld": true,
-      "withheldReason": "death of the wife",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.897
     },
     {
@@ -21655,7 +21656,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disability (loss of an eye)",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -21680,7 +21681,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deformity",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.857
     },
     {
@@ -21729,7 +21730,7 @@
         "children"
       ],
       "withheld": true,
-      "withheldReason": "barrenness of the wife",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.818
     },
     {
@@ -21804,7 +21805,7 @@
         "relationships"
       ],
       "withheld": true,
-      "withheldReason": "sexual immorality",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -21838,7 +21839,7 @@
         "relationships"
       ],
       "withheld": true,
-      "withheldReason": "sexual immorality",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -21922,7 +21923,7 @@
         "family"
       ],
       "withheld": true,
-      "withheldReason": "destruction of the family",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.825
     },
     {
@@ -21976,7 +21977,7 @@
         "family"
       ],
       "withheld": true,
-      "withheldReason": "low social birth",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.852
     },
     {
@@ -22030,7 +22031,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.872
     },
     {
@@ -22054,7 +22055,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.97
     },
     {
@@ -22081,7 +22082,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.871
     },
     {
@@ -22110,7 +22111,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deformity",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.914
     },
     {
@@ -22137,7 +22138,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.806
     },
     {
@@ -22162,7 +22163,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.826
     },
     {
@@ -22187,7 +22188,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "wasting disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22213,7 +22214,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.774
     },
     {
@@ -22238,7 +22239,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.941
     },
     {
@@ -22262,7 +22263,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disfigurement",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.84
     },
     {
@@ -22289,7 +22290,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "blindness",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.863
     },
     {
@@ -22316,7 +22317,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deafness",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.872
     },
     {
@@ -22343,7 +22344,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deformity",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.769
     },
     {
@@ -22371,7 +22372,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "affliction by spirits",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22399,7 +22400,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "blindness",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.969
     },
     {
@@ -22427,7 +22428,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22454,7 +22455,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "insanity",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22479,7 +22480,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "mental disability",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22507,7 +22508,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "mental disability",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.952
     },
     {
@@ -22588,7 +22589,7 @@
         "family"
       ],
       "withheld": true,
-      "withheldReason": "low social birth",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.902
     },
     {
@@ -22611,7 +22612,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deformity of the teeth",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.852
     },
     {
@@ -22657,7 +22658,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "impaired sight",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.962
     },
     {
@@ -22681,7 +22682,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22705,7 +22706,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "deformity",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 1
     },
     {
@@ -22727,7 +22728,7 @@
         "status"
       ],
       "withheld": true,
-      "withheldReason": "imprisonment",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.907
     },
     {
@@ -22749,7 +22750,7 @@
         "status"
       ],
       "withheld": true,
-      "withheldReason": "imprisonment",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.814
     },
     {
@@ -22779,7 +22780,7 @@
         "health"
       ],
       "withheld": true,
-      "withheldReason": "disease",
+      "withheldReason": "The chapter on malefic yogas, which predicts only misfortune.",
       "ocrAgreement": 0.89
     },
     {

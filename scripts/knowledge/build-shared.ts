@@ -250,6 +250,15 @@ export function labelReason(decision: { hidden: string[]; waiting: string[] }): 
 }
 
 /**
+ * The reason for a record the model withheld, with the owner's own decision
+ * named first when it also holds a word they chose to hide: the record of what
+ * is hidden (docs/what-the-readings-keep-hidden.md) lists it under that decision.
+ */
+export function modelReason(reason: string, decision: { hidden: string[] }): string {
+  return decision.hidden.length > 0 ? `${hiddenByOwner(decision.hidden)}; also ${reason}` : reason;
+}
+
+/**
  * A rewording by hand from one phrase of the printed text to the owner's
  * bracketed wording ("she will be barren" to "she [may have no children]"),
  * which must occur exactly once.
