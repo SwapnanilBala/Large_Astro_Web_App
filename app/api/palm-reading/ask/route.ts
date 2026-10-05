@@ -18,8 +18,8 @@ import {
  * this route is the conversation about it, which is the part people actually
  * came for and the part a fixed JSON schema structurally cannot provide.
  *
- * Provider: Anthropic, Claude Opus 5, reading ANTHROPIC_API_KEY -- shared with
- * /api/chart/domain-brief and /api/chart/dasha-interpretation.
+ * Provider: Anthropic, Claude Opus 5.5 (Opus 5 until 2026-10-04), reading
+ * ANTHROPIC_API_KEY -- shared with every chart route.
  *
  * THE SHAPE OF THE ABUSE PROBLEM, because it differs from every other LLM route
  * here and the difference is the whole design. The chart routes rebuild their
@@ -102,7 +102,7 @@ ${OFF_TOPIC_REPLY}`;
  * A long user turn between the rules and the answer is the ordinary shape of a
  * successful injection: the instructions are far away and the attacker's text
  * is adjacent. A mid-conversation system message is the operator channel --
- * available on Claude Opus 5 with no beta header, carrying system authority
+ * available on Claude Opus 5 and 5.5 with no beta header, carrying system authority
  * that no `user` turn can claim, and appended after the cached prefix so it
  * costs nothing in cache terms. It has to follow a user turn and be last in the
  * array, which is exactly where it needs to sit anyway.
@@ -224,13 +224,15 @@ export async function POST(request: NextRequest) {
     ];
 
     const response = await client.messages.create({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       max_tokens: MAX_ANSWER_TOKENS,
-      /* Medium rather than the low the chart routes use: this is a judgement
-         about which of several palm features bears on a question, not the
-         phrasing job those routes do. Thinking is omitted, which on this model
-         runs adaptive. */
-      output_config: { effort: "medium" },
+      /* Low, like every route since 2026-10-04 (the owner's call, to hold
+         costs down). This was medium on Opus 5, because choosing which palm
+         feature bears on a question is a judgement rather than the phrasing
+         job the chart routes do; Opus 5.5's low is documented to land close
+         to Opus 5's higher settings. Re-measure once the account's monthly
+         limit allows. Thinking is omitted, which on this model runs adaptive. */
+      output_config: { effort: "low" },
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],

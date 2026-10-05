@@ -39,7 +39,14 @@ import {
  */
 
 /*
- * ── EFFORT -- medium, measured, and the same at both lengths ──────────────
+ * ── EFFORT -- low on Opus 5.5, the same at both lengths ──────────────────
+ *
+ * Low since 2026-10-04, when every chart route moved to Claude Opus 5.5 at
+ * low effort by the owner's call, to hold costs down. The sweep below, on
+ * Opus 5, had already found low within noise of medium on cost, time and
+ * every fact it was handed; it stayed at medium only to match its siblings,
+ * and they have all come down too. Re-measure once the account's monthly
+ * limit allows. The history:
  *
  * This started as two dials -- high for the single headline reading, medium
  * for the row of five -- on the reasoning that one chapter is cheap enough to
@@ -82,7 +89,7 @@ import {
  * rather than on evidence from this sweep; low is a defensible saving if the
  * route total ever comes under pressure.
  */
-const EFFORT = "medium" as const;
+const EFFORT = "low" as const;
 
 export const maxDuration = 60;
 
@@ -288,7 +295,7 @@ export async function POST(request: NextRequest) {
      * problem to the API, which is where it is actually solved.
      */
     const response = await client.messages.parse({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       /* Headroom for thinking plus five short paragraphs, not a target. */
       max_tokens: 12000,
       /* thinking is omitted, which on this model runs adaptive by default. */

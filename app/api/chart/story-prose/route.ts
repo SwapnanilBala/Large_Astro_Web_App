@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
-import { sessionFromRequest } from "@/lib/identity/require-session";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
@@ -22,7 +21,20 @@ import {
  * lib/story-prose.ts carries what this may and may not rewrite, and why. This
  * file is the call.
  *
- * ── EFFORT -- high for an account, medium for an address ──────────────────
+ * ── EFFORT -- low on Opus 5.5, for everyone ───────────────────────────────
+ *
+ * Since 2026-10-04, when the owner moved every route to Claude Opus 5.5 at
+ * low effort to hold costs down across the sections. This was the dearest
+ * call in the app at high, and Opus 5.5 is 20% cheaper per token besides;
+ * its low is documented to land close to Opus 5's higher settings.
+ *
+ * It is also the route where low is the closest call, for the reason the
+ * history below gives: what the extra thinking bought was the nine chapters
+ * agreeing with each other. If the report starts repeating itself between
+ * chapters, this constant is the dial, and a fresh measurement is the way to
+ * decide. One effort also means one report per chart, cached for every
+ * caller, where there used to be one per tier. Re-measure once the account's
+ * monthly limit allows. The history that set the two tiers:
  *
  * This is the route where effort buys the most and costs the most, so it is
  * the one where the two are worth splitting by who is asking.
@@ -81,18 +93,7 @@ import {
  * page is.
  */
 
-/*
- * Keyed by whether the caller has an account. `sessionFromRequest` is the same
- * helper lib/llm-budget.ts resolves its caller with, so the tier here and the
- * allowance there cannot disagree within one request -- and asking twice costs
- * one session lookup on a route that is about to spend three minutes.
- */
-const EFFORT_BY_TIER = {
-  account: "high",
-  address: "medium",
-} as const;
-
-type ProseTier = keyof typeof EFFORT_BY_TIER;
+const EFFORT = "low" as const;
 
 export const maxDuration = 300;
 
@@ -230,15 +231,10 @@ function parseFacts(value: unknown): StoryProseFacts {
 }
 
 /**
- * Canonical, so the same report hits the same entry however it arrives.
- *
- * The tier is part of the key. Without it the first reader of a chart decides
- * which effort every later reader of that chart gets -- an account arriving
- * second would be served the medium report it did not ask for, and an address
- * arriving second would be handed the expensive one for free. Two entries per
- * chart is the cost of the answer matching the asker.
+ * Canonical, so the same report hits the same entry however it arrives. With
+ * one effort for every caller there is one entry per chart, shared by all.
  */
-function cacheKey(facts: StoryProseFacts, tier: ProseTier): string {
+function cacheKey(facts: StoryProseFacts): string {
   const canonical = [
     facts.headline,
     facts.subtitle,
@@ -255,7 +251,7 @@ function cacheKey(facts: StoryProseFacts, tier: ProseTier): string {
         ].join("|"),
       ),
   ].join(";");
-  return `${tier}:${createHash("sha1").update(canonical).digest("hex")}`;
+  return createHash("sha1").update(canonical).digest("hex");
 }
 
 /* Markdown is forbidden by the prompt; this is what makes that true rather
@@ -274,10 +270,8 @@ export async function POST(request: NextRequest) {
     }
 
     const facts = parseFacts(body.facts);
-    const session = await sessionFromRequest(request);
-    const tier: ProseTier = session ? "account" : "address";
-    const effort = EFFORT_BY_TIER[tier];
-    const key = cacheKey(facts, tier);
+    const effort = EFFORT;
+    const key = cacheKey(facts);
 
     const cached = cache.get(key);
     if (cached) {
@@ -321,7 +315,7 @@ export async function POST(request: NextRequest) {
     const startedAt = Date.now();
     const response = await client.messages
       .stream({
-        model: "claude-opus-5",
+        model: "claude-opus-5-5",
         max_tokens: 32000,
         /* thinking is omitted, which on this model runs adaptive by default. */
         output_config: {
@@ -341,8 +335,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       route: "/api/chart/story-prose",
       event: "llm_usage",
+      model: "claude-opus-5-5",
       effort,
-      tier,
       chapters: facts.chapters.length,
       elapsedMs,
       stopReason: response.stop_reason,

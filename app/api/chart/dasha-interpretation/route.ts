@@ -27,9 +27,19 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  */
 
 /*
- * EFFORT -- medium, measured rather than assumed.
+ * EFFORT -- low on Opus 5.5, by the owner's call on 2026-10-04.
  *
- * Raised from low after running the shipped prompt at three levels over the
+ * Every chart route moved to Claude Opus 5.5 at low effort that day, to hold
+ * the bill down across the sections. Opus 5.5 is 20% cheaper per token than
+ * Opus 5, and its low effort is documented to land close to Opus 5's higher
+ * settings; the job here is phrasing facts the engine already decided.
+ *
+ * The one thing low was measured to lose on Opus 5 (below) was the date
+ * window, so the prompt now asks for it outright: that buys the gain without
+ * paying for the effort. Re-measure with scripts/effort-compare.mjs once the
+ * account's monthly limit allows; the history that set medium follows.
+ *
+ * Medium was chosen after running the shipped prompt at three levels over the
  * three chain shapes this route accepts (scripts/effort-compare.mjs). What the
  * numbers said, per call, on Opus 5:
  *
@@ -57,7 +67,7 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  * 6-second call, and a longer one only makes a genuinely stuck request take
  * longer to fall back to the deterministic sentence.
  */
-const EFFORT = "medium" as const;
+const EFFORT = "low" as const;
 
 export const maxDuration = 30;
 
@@ -102,6 +112,7 @@ Rules:
 - 2 to 3 sentences. No heading, no preamble, no list, no markdown.
 - Every lord in the chain must do some work in the sentence. If you cannot say something specific about the middle lords, say how they qualify the innermost one rather than dropping them.
 - Write about the texture of the period -- what it asks for, what it makes easier or harder. Address the reader as "you".
+- Place the reading in the window you were given, once, in plain words ("through mid-2029").
 - State nothing you were not given. No degrees, no houses, no signs, no aspects, no other planets, no dates beyond the window supplied.
 - No predictions of specific events, no health, legal, or financial advice, and nothing fatalistic. A dasha describes conditions, not outcomes.
 - Plain prose. Do not use the Sanskrit level names unless the chain is only two lords deep.`;
@@ -203,7 +214,7 @@ export async function POST(request: NextRequest) {
       .join("\n");
 
     const response = await client.messages.create({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       /* Headroom for thinking, not a target. The visible answer is still 2-3
          sentences; see the note on EFFORT above for why this is not 1000. */
       max_tokens: 8000,

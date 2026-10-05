@@ -50,12 +50,12 @@ const routePath = path.join(root, "app", "api", "chart", "story-prose", "route.t
 const wantProse = process.argv.includes("--prose");
 const wantFresh = process.argv.includes("--fresh");
 /*
- * Which tier to render. The route picks this from the session -- high for an
- * account, medium for an address -- and a script has no session, so it is a
- * flag. Both cache separately, the way the route keys them separately.
+ * Which effort to render. The route writes every report at low since
+ * 2026-10-04, so that is the default; the flag stays for comparing levels,
+ * and each level caches separately.
  */
 const effort = (process.argv.find((a) => a.startsWith("--effort="))?.slice(9)
-  ?? "high") as "low" | "medium" | "high" | "xhigh" | "max";
+  ?? "low") as "low" | "medium" | "high" | "xhigh" | "max";
 
 Font.register({
   family: "Cinzel",
@@ -144,11 +144,11 @@ async function writtenProse(story: PersonalStory) {
   const client = new Anthropic({ apiKey, timeout: 250_000 });
   const facts = buildStoryProseFacts(story, birth.name);
 
-  console.log(`prose: calling claude-opus-5 at ${effort} effort, one call, please wait...`);
+  console.log(`prose: calling claude-opus-5-5 at ${effort} effort, one call, please wait...`);
   const startedAt = Date.now();
   const response = await client.messages
     .stream({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       max_tokens: 32000,
       output_config: {
         effort,

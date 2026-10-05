@@ -20,7 +20,15 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
 }
 
 /*
- * Claude Opus 5 reads the palm; GPT-4o is the fallback.
+ * Claude Opus 5.5 reads the palm; GPT-4o is the fallback.
+ *
+ * (Opus 5 until 2026-10-04, when every route moved to Opus 5.5 at low effort
+ * to hold costs down: 20% cheaper per token, and documented to read images
+ * more accurately at every effort. The timings below were measured on Opus 5.
+ * Opus 5.5 tends to think somewhat more per turn at the same effort, which is
+ * exactly the truncation risk this header describes, so MAX_READING_TOKENS
+ * went from 16000 to 24000 -- headroom is free, since billing is per token
+ * generated. Re-measure once the account's monthly limit allows.)
  *
  * It was GPT-4o alone, and the reading it produced was accurate about the hand
  * and generic about the person -- the failure mode being that palmistry prose
@@ -77,7 +85,7 @@ export const maxDuration = 300;
 const ANTHROPIC_TIMEOUT_MS = 200_000;
 const OPENAI_TIMEOUT_MS = 30_000;
 
-const MAX_READING_TOKENS = 16000;
+const MAX_READING_TOKENS = 24000;
 
 const MAX_JSON_BODY_BYTES = 7 * 1024 * 1024;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -495,7 +503,7 @@ async function readWithClaude({ image, mediaType, systemPrompt, userText }: Visi
      assembled message, since nothing here renders token by token. */
   const response = await client.messages
     .stream({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       max_tokens: MAX_READING_TOKENS,
       /* `low` on purpose, and measured -- see the header. Higher effort
          spends the token budget on thinking and truncates the document. */

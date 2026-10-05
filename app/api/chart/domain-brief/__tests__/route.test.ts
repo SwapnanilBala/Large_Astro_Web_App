@@ -95,51 +95,35 @@ describe("Ultimate Module Opus briefs", () => {
     expect(mocks.budget).toHaveBeenCalledTimes(1);
     expect(mocks.resolveSession).not.toHaveBeenCalled();
     const call = mocks.parse.mock.calls[0][0];
-    expect(call.model).toBe("claude-opus-5");
+    expect(call.model).toBe("claude-opus-5-5");
     expect(call.output_config.effort).toBe("low");
     expect(call.output_config.format.schema.required).toEqual([...DOMAIN_BRIEF_KEYS]);
     for (const key of DOMAIN_BRIEF_KEYS) expect(call.messages[0].content).toContain(`${key} strength`);
   });
 
-  it("uses medium only for a resolved Google sign-in, not query-supplied effort", async () => {
+  it("writes at low effort for a signed-in reader too, and takes no effort from the URL", async () => {
     mocks.resolveSession.mockResolvedValue({ userId: "google-user", email: "reader@gmail.com" });
-    const response = await GET(request("career", "astro_session=valid-token", "&effort=low"));
+    const response = await GET(request("career", "astro_session=valid-token", "&effort=high&signedIn=true"));
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ effort: "medium" });
-    expect(mocks.resolveSession).toHaveBeenCalledWith("valid-token");
-    expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("medium");
-  });
-
-  it("cannot upgrade a guest by claiming an email or effort in the URL", async () => {
-    await GET(request("family", undefined, "&effort=medium&email=reader@gmail.com&signedIn=true"));
+    expect(await response.json()).toMatchObject({ effort: "low" });
     expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("low");
+    // One effort for everyone, so there is no caller to resolve.
+    expect(mocks.resolveSession).not.toHaveBeenCalled();
   });
 
-  it.each(["expired-token", "%E0%A4%A"])("keeps invalid session %s at low effort", async (token) => {
-    const response = await GET(request("influence", `astro_session=${token}`));
-    expect(response.status).toBe(200);
-    expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("low");
-  });
-
-  it("fails safely to low effort when the session store is unavailable", async () => {
+  it("is untouched by a broken session store", async () => {
     mocks.resolveSession.mockRejectedValue(new Error("database offline"));
     const response = await GET(request("inheritance", "astro_session=valid-token"));
     expect(response.status).toBe(200);
     expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("low");
   });
 
-  it("isolates guest and account caches, including after signing back out", async () => {
+  it("shares one cache between guests and accounts", async () => {
     await GET(request());
-    mocks.resolveSession.mockResolvedValue({ userId: "google-user" });
-    mocks.parse.mockResolvedValue(providerResponse("Account"));
     const account = await GET(request("career", "astro_session=valid-token"));
-    expect(await account.json()).toMatchObject({ brief: "Account career brief.", effort: "medium", cached: false });
-    const guest = await GET(request("career"));
-    expect(await guest.json()).toMatchObject({ brief: "Guest career brief.", effort: "low", cached: true });
-    const cachedAccount = await GET(request("family", "astro_session=valid-token"));
-    expect(await cachedAccount.json()).toMatchObject({ brief: "Account family brief.", effort: "medium", cached: true });
-    expect(mocks.parse).toHaveBeenCalledTimes(2);
-    expect(mocks.budget).toHaveBeenCalledTimes(2);
+    expect(await account.json()).toMatchObject({ brief: "Guest career brief.", effort: "low", cached: true });
+    expect(mocks.parse).toHaveBeenCalledTimes(1);
+    expect(mocks.budget).toHaveBeenCalledTimes(1);
   });
 
   it("coalesces overlapping tab requests into one Opus call", async () => {

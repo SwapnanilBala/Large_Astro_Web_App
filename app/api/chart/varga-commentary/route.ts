@@ -41,7 +41,16 @@ import {
  *   deliberately not meant to present as independent verdicts, and paying a
  *   model to comment on them would undo that. A request naming one is refused.
  *
- * ── EFFORT -- medium ───────────────────────────────────────────────────────
+ * ── EFFORT -- low on Opus 5.5 ─────────────────────────────────────────────
+ *
+ * Low since 2026-10-04, when every chart route moved to Claude Opus 5.5 at
+ * low effort by the owner's call, to hold costs down. This is the route where
+ * that is the closest call: on Opus 5, what medium bought over low was the
+ * cross-varga observation (below), and the prompt already asks for it in so
+ * many words. Opus 5.5's low is documented to land close to Opus 5's higher
+ * settings, so it may hold; if the notes start reading as ten separate
+ * paragraphs, this is the dial, and the sweep is the way to decide. The
+ * history that set medium:
  *
  * Asked for, and measured rather than taken on trust. Sweeping this route's own
  * shipped prompt over the ten-varga payload
@@ -76,7 +85,7 @@ import {
  * model owns how it reads.
  */
 
-const EFFORT = "medium" as const;
+const EFFORT = "low" as const;
 
 export const maxDuration = 60;
 
@@ -314,7 +323,7 @@ export async function POST(request: NextRequest) {
      * that problem to the API, which is where it is actually solved.
      */
     const response = await client.messages.parse({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       /* Headroom for thinking plus ten paragraphs, not a target. */
       max_tokens: 16000,
       /* thinking is omitted, which on this model runs adaptive by default. */

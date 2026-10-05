@@ -211,7 +211,7 @@ export async function GET(request: NextRequest) {
       .join("\n");
 
     const response = await client.messages.parse({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       max_tokens: 4000,
       /* Seven short passages, not an essay. Low effort keeps the page from
          waiting on reasoning it does not need. */

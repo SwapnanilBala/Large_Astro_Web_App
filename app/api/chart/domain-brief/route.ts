@@ -3,7 +3,6 @@ import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
-import { sessionFromRequest } from "@/lib/identity/require-session";
 import { DOMAIN_BRIEF_KEYS, type DomainBriefs, type DomainBriefEffort } from "@/lib/domain-briefs";
 import {
   chartParamsToBirthInput,
@@ -57,8 +56,9 @@ const CACHE_HEADER = "private, no-store";
    hidden behind warm cache entries written by the previous wording. */
 const DOMAIN_BRIEF_PROMPT_VERSION = "2";
 
-/* One entry contains all seven areas at one effort. Browser caching is disabled
-   so signing in always rechecks the session before selecting this cache. */
+/* One entry contains all seven areas. Browser caching stays disabled, so a
+   brief is always served from this cache or freshly written, never from a
+   copy the browser kept across a rules change. */
 const MAX_CACHE_ENTRIES = 500;
 const cache = new Map<string, DomainBriefs>();
 const inFlight = new Map<string, Promise<DomainBriefs>>();
@@ -179,7 +179,7 @@ async function writeBriefs(
   });
   const startedAt = Date.now();
   const response = await client.messages.parse({
-    model: "claude-opus-5",
+    model: "claude-opus-5-5",
     max_tokens: 6000,
     output_config: {
       effort,
@@ -278,9 +278,11 @@ export async function GET(request: NextRequest) {
     const facts = ranked.map((entry, index) =>
       `Area key: ${entry.key}\n${buildFacts(entry, index + 1, ranked.length)}`,
     ).join("\n\n---\n\n");
-    // Google OAuth is the app's only sign-in provider. Never trust query claims.
-    const session = await sessionFromRequest(request);
-    const effort: DomainBriefEffort = session ? "medium" : "low";
+    /* Low for everyone since 2026-10-04, the owner's call to hold costs down
+       across the sections; a Google sign-in used to buy medium. With one
+       effort there is nothing to decide per caller, so no session lookup, and
+       an account and a guest share the same cached briefs. */
+    const effort: DomainBriefEffort = "low";
 
     /* Keyed on facts and effort rather than on the birth parameters. Same
        evidence and effort mean the same briefs, and any engine change --

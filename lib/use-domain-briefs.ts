@@ -17,7 +17,7 @@ const EMPTY_STATE: BriefState = { key: null, briefs: {}, failedFor: null, offlin
 
 export function useDomainBriefs(historyQs: string, domain: LifeDomainKey, enabled = true) {
   const { account, status } = useAccount();
-  // This scopes browser state only. The endpoint independently verifies effort.
+  // This scopes browser state only; the endpoint writes every brief at one effort.
   const key = status === "loading" ? null : JSON.stringify([
     historyQs, status === "signed-in" ? account?.email : "guest",
   ]);

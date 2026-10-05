@@ -97,6 +97,15 @@ type LlmBudgetConfig = {
 /*
  * Sized by what the call costs, not by what feels generous.
  *
+ * 2026-10-04: every route moved to Claude Opus 5.5 at low effort, the owner's
+ * call to hold costs down across the sections. Opus 5.5 is 20% cheaper per
+ * token than Opus 5 ($4/$20 against $5/$25), and low spends less on
+ * thinking, which is most of the output bill. The per-call figures below were
+ * measured on Opus 5 at the efforts they name, so read them as ceilings now
+ * rather than measurements, and re-measure from the llm_usage lines. The
+ * daily totals are left as they were: they bound a bad day, and a cheaper
+ * call only widens the margin.
+ *
  * The route totals are whole-deployment numbers rather than per-instance ones,
  * so they bite where they read. They are sized by what a call costs: dasha
  * readings use Claude Opus 5 with a cached system prefix, while palm reading uses
@@ -225,7 +234,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
   "/api/chart/domain-brief": {
-    // One paid call covers all seven areas: low for guests, medium for accounts.
+    // One paid call covers all seven areas, at low effort for every caller.
     perDay: 2500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,

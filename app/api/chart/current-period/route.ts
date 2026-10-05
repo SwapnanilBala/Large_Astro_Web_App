@@ -42,7 +42,15 @@ import {
  */
 
 /*
- * EFFORT -- medium, measured rather than assumed.
+ * EFFORT -- low on Opus 5.5, by the owner's call on 2026-10-04.
+ *
+ * Every chart route moved to Claude Opus 5.5 at low effort that day, to hold
+ * the bill down across the sections: Opus 5.5 is 20% cheaper per token than
+ * Opus 5, and its low effort is documented to land close to Opus 5's higher
+ * settings. The sweep below, on Opus 5, already found low using every natal
+ * placement it was handed, which was the check that mattered; what medium
+ * added was the birth nakshatra more often and a more even close. Re-measure
+ * once the account's monthly limit allows. The history that set medium:
  *
  * Swept with `scripts/effort-compare.mjs --route current-period` over the three
  * shapes the card produces: two lords with placements, three lords with
@@ -81,7 +89,7 @@ import {
  * it, nothing measured comes near it, and headroom is free because billing is
  * per token generated.
  */
-const EFFORT = "medium" as const;
+const EFFORT = "low" as const;
 
 export const maxDuration = 30;
 
@@ -274,7 +282,7 @@ export async function POST(request: NextRequest) {
     });
 
     const response = await client.messages.create({
-      model: "claude-opus-5",
+      model: "claude-opus-5-5",
       /* Headroom for thinking, not a target; see the note on EFFORT above. */
       max_tokens: 8000,
       /* thinking is omitted, which on this model runs adaptive by default. */

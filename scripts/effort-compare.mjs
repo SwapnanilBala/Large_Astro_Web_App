@@ -32,7 +32,7 @@ const routeFile = (...parts) => join(HERE, "..", "app", "api", ...parts, "route.
 
 /* Claude Opus 5, $ per token. */
 const PRICE = { input: 5 / 1e6, output: 25 / 1e6, cacheRead: 0.5 / 1e6, cacheWrite: 6.25 / 1e6 };
-const MODEL = "claude-opus-5";
+const MODEL = "claude-opus-5-5";
 
 const LEVEL_LABELS = {
   1: "Maha Dasha",
