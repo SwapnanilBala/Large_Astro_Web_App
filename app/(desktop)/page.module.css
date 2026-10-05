@@ -1389,6 +1389,29 @@
   gap: 0.75rem;
 }
 
+/* The sex-at-birth choice reuses this panel under the name field. Its hint is
+   a sentence rather than a two-word cue, so it stacks under the label and
+   wraps; the three choices share one row; and the panel takes its own height
+   instead of filling the question. */
+.birthSexPanel {
+  min-height: auto;
+  margin-top: 1rem;
+}
+
+.birthSexPanel .approxTimeHeader {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.3rem;
+}
+
+.birthSexPanel .approxTimeHint {
+  white-space: normal;
+}
+
+.birthSexPanel .approxTimeOptions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .approxTimeOption {
   min-height: 3.35rem;
   padding: 0.85rem 1rem;
@@ -1459,7 +1482,8 @@
   }}
 
 @media (max-width: 420px) {
-  .approxTimeOptions {
+  .approxTimeOptions,
+  .birthSexPanel .approxTimeOptions {
     grid-template-columns: 1fr;
   }}
 
@@ -2918,12 +2942,29 @@
   border-color: rgba(132, 86, 105, 0.16);
 }
 
+/* The approximate-time panel -- and the sex-at-birth choice that reuses it on
+   the intake's first screen -- kept its dark glass on the light theme and
+   read as a grey box. It takes the light card surface the panels around it
+   use, and its unselected chips the field fill; the selected chip keeps its
+   gold. */
 :global(html[data-theme="light"]) .smartFillContent,
 :global(html[data-theme="light"]) .birthHistoryPanel,
+:global(html[data-theme="light"]) .approxTimePanel,
 :global(html[data-theme="light"]) .previewCard {
   background: rgba(255, 250, 248, 0.84);
   border-color: rgba(132, 86, 105, 0.15);
   box-shadow: 0 12px 30px rgba(91, 55, 71, 0.09);
+}
+
+:global(html[data-theme="light"]) .approxTimeOption:not(.approxTimeOptionSelected) {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(132, 86, 105, 0.16);
+  box-shadow: 0 6px 16px rgba(91, 55, 71, 0.06);
+}
+
+:global(html[data-theme="light"]) .approxTimeOption:not(.approxTimeOptionSelected):hover {
+  background: rgba(212, 165, 116, 0.14);
+  border-color: rgba(176, 124, 32, 0.4);
 }
 
 :global(html[data-theme="light"]) .smartFillTextarea::placeholder,

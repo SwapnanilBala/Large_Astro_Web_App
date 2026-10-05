@@ -1,0 +1,47 @@
+{
+  "es": {
+    "home": {
+      "birthSexLabel": "Sexo al nacer",
+      "birthSexHint": "Opcional. Algunas lecturas, como el planeta de tu pareja, se leen de forma distinta para mujeres y hombres.",
+      "birthSexFemale": "Mujer",
+      "birthSexMale": "Hombre",
+      "birthSexUnspecified": "Prefiero no decirlo"
+    }
+  },
+  "bn": {
+    "home": {
+      "birthSexLabel": "জন্মের সময় লিঙ্গ",
+      "birthSexHint": "ঐচ্ছিক। কিছু পাঠ, যেমন আপনার সঙ্গীর গ্রহ, নারী ও পুরুষের জন্য আলাদাভাবে পড়া হয়।",
+      "birthSexFemale": "নারী",
+      "birthSexMale": "পুরুষ",
+      "birthSexUnspecified": "বলতে চাই না"
+    }
+  },
+  "hi": {
+    "home": {
+      "birthSexLabel": "जन्म के समय लिंग",
+      "birthSexHint": "वैकल्पिक। कुछ पाठ, जैसे आपके साथी का ग्रह, स्त्रियों और पुरुषों के लिए अलग ढंग से पढ़े जाते हैं।",
+      "birthSexFemale": "स्त्री",
+      "birthSexMale": "पुरुष",
+      "birthSexUnspecified": "बताना नहीं चाहते"
+    }
+  },
+  "it": {
+    "home": {
+      "birthSexLabel": "Sesso alla nascita",
+      "birthSexHint": "Facoltativo. Alcune letture, come il pianeta del tuo partner, si leggono in modo diverso per donne e uomini.",
+      "birthSexFemale": "Donna",
+      "birthSexMale": "Uomo",
+      "birthSexUnspecified": "Preferisco non dirlo"
+    }
+  },
+  "fr": {
+    "home": {
+      "birthSexLabel": "Sexe à la naissance",
+      "birthSexHint": "Facultatif. Certaines lectures, comme la planète de votre partenaire, se lisent différemment pour les femmes et pour les hommes.",
+      "birthSexFemale": "Femme",
+      "birthSexMale": "Homme",
+      "birthSexUnspecified": "Je préfère ne pas le dire"
+    }
+  }
+}

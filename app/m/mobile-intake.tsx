@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
+import { BIRTH_SEX_CHOICES } from "@/lib/birth-sex";
 import { COARSE_TIME_OPTIONS, hasCoarseTimeFallback } from "@/lib/birth-time";
 import { buildChartQuery } from "@/lib/intake-query";
 import {
@@ -580,6 +581,27 @@ export default function MobileIntake() {
             />
             {renderNote("name")}
           </div>
+
+          {/* Optional, and read only where the tradition reads the sexes
+              differently (lib/birth-sex.ts); the same chips as the
+              approximate time on step 3. */}
+          <fieldset className={styles.field}>
+            <legend className={styles.label}>{t("home.birthSexLabel")}</legend>
+            <div className={styles.chips}>
+              {BIRTH_SEX_CHOICES.map((choice) => (
+                <button
+                  key={choice.labelKey}
+                  type="button"
+                  className={`${styles.chip} ${draft.birthSex === choice.value ? styles.chipActive : ""}`}
+                  aria-pressed={draft.birthSex === choice.value}
+                  onClick={() => edit("birthSex", choice.value)}
+                >
+                  {t(choice.labelKey)}
+                </button>
+              ))}
+            </div>
+            <p className={styles.fieldNote}>{t("home.birthSexHint")}</p>
+          </fieldset>
         </div>
       )}
 

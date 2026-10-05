@@ -39,6 +39,13 @@ describe("buildChartQuery", () => {
     expect(params.toString()).not.toContain("14%3A35");
   });
 
+  it("carries sex at birth when the visitor gave it, and nothing when they did not", () => {
+    const given = buildChartQuery({ ...draftWithParkedTime, birthSex: "female" }, { unknownTime: false, coarseTime: "" });
+    expect(given.get("birthSex")).toBe("female");
+    const unsaid = buildChartQuery(draftWithParkedTime, { unknownTime: false, coarseTime: "" });
+    expect(unsaid.get("birthSex") ?? "").toBe("");
+  });
+
   it("falls back to noon when no window was chosen either", () => {
     const params = buildChartQuery(draftWithParkedTime, { unknownTime: true, coarseTime: "" });
 

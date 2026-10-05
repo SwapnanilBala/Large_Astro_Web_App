@@ -16,6 +16,7 @@ import {
   HiOutlineUser,
 } from "react-icons/hi2";
 import { profileInitialState, type ProfileQueryInput } from "@/lib/astro-types";
+import { BIRTH_SEX_CHOICES } from "@/lib/birth-sex";
 import {
   COARSE_TIME_OPTIONS,
   getBirthTimeFallback,
@@ -1063,21 +1064,60 @@ export default function Home() {
 
                 <div className={styles.questionBody} ref={questionBodyRef}>
                   {activeQuestion.id === "name" && (
-                    <div className={styles.premiumField}>
-                      <PremiumInput
-                        id="birth-name"
-                        name="name"
-                        label={tWithFallback("home.formNameShort", "Name")}
-                        value={draft.name}
-                        onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
-                        normalize={normalizePersonName}
-                        placeholder={t("home.formNamePlaceholder")}
-                        icon={<HiOutlineUser />}
-                        completed={hasName}
-                        required
-                        autoComplete="name"
-                      />
-                    </div>
+                    <>
+                      <div className={styles.premiumField}>
+                        <PremiumInput
+                          id="birth-name"
+                          name="name"
+                          label={tWithFallback("home.formNameShort", "Name")}
+                          value={draft.name}
+                          onChange={(value) => setDraft((prev) => ({ ...prev, name: value }))}
+                          normalize={normalizePersonName}
+                          placeholder={t("home.formNamePlaceholder")}
+                          icon={<HiOutlineUser />}
+                          completed={hasName}
+                          required
+                          autoComplete="name"
+                        />
+                      </div>
+
+                      {/* Optional, and read only where the tradition reads the
+                          sexes differently -- the partner's planet, the hand a
+                          palm reading reads (lib/birth-sex.ts). Styled as the
+                          approximate-time chips, so it reads as the same form. */}
+                      <div
+                        className={`${styles.approxTimePanel} ${styles.birthSexPanel}`}
+                        role="group"
+                        aria-labelledby="birth-sex-label"
+                      >
+                        <div className={styles.approxTimeHeader}>
+                          <span id="birth-sex-label" className={styles.approxTimeLabel}>
+                            {tWithFallback("home.birthSexLabel", "Sex at birth")}
+                          </span>
+                          <span className={styles.approxTimeHint}>
+                            {tWithFallback(
+                              "home.birthSexHint",
+                              "Optional. Some readings, like your partner's planet, are read differently for women and men.",
+                            )}
+                          </span>
+                        </div>
+                        <div className={styles.approxTimeOptions}>
+                          {BIRTH_SEX_CHOICES.map((choice) => (
+                            <button
+                              key={choice.labelKey}
+                              type="button"
+                              className={`${styles.approxTimeOption} ${
+                                draft.birthSex === choice.value ? styles.approxTimeOptionSelected : ""
+                              }`}
+                              onClick={() => setDraft((prev) => ({ ...prev, birthSex: choice.value }))}
+                              aria-pressed={draft.birthSex === choice.value}
+                            >
+                              {t(choice.labelKey)}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </>
                   )}
 
                   {activeQuestion.id === "birthDate" && (

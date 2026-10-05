@@ -38,6 +38,26 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe("the mobile intake's sex at birth", () => {
+  it("starts on prefer not to say, and keeps a choice in the shared draft", () => {
+    const { container } = render(
+      <LanguageProvider baseMessages={enMobile}>
+        <MobileIntake />
+      </LanguageProvider>,
+    );
+    expect(screen.getByRole("button", { name: "Prefer not to say" })).toHaveAttribute("aria-pressed", "true");
+
+    const name = container.querySelector<HTMLInputElement>("#m-name");
+    if (!name) throw new Error("The name question is not on screen.");
+    fireEvent.change(name, { target: { value: "Ada" } });
+    fireEvent.click(screen.getByRole("button", { name: "Woman" }));
+
+    expect(screen.getByRole("button", { name: "Woman" })).toHaveAttribute("aria-pressed", "true");
+    const stored = JSON.parse(window.localStorage.getItem("astro_intake_draft:local") ?? "{}");
+    expect(stored.draft?.birthSex).toBe("female");
+  });
+});
+
 /* Answer the name question and return the date field that replaces it. */
 function openDateQuestion(): HTMLInputElement {
   const { container } = render(
