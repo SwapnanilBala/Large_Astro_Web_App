@@ -58,7 +58,6 @@ type AnyClassicalNotes =
         meaning?: string;
         observation?: string;
       }>;
-      classical_text_references?: string[];
     };
 
 type ExtendedReading = PalmReadingJSON & {
@@ -684,10 +683,9 @@ export default function PalmReadingDetailClient({ id }: Props) {
         const sanskritTerms = Array.isArray(cfn.sanskrit_terms)
           ? cfn.sanskrit_terms
           : [];
-        const classicalRefs = Array.isArray(cfn.classical_text_references)
-          ? cfn.classical_text_references
-          : [];
-        if (sanskritTerms.length === 0 && classicalRefs.length === 0) {
+        /* Older readings also carry `classical_text_references`, written from
+           memory with nothing checking them, so they are not shown. */
+        if (sanskritTerms.length === 0) {
           return null;
         }
         return (
@@ -716,18 +714,6 @@ export default function PalmReadingDetailClient({ id }: Props) {
                   </li>
                 ))}
               </ul>
-            )}
-            {classicalRefs.length > 0 && (
-              <div className="palm-classical-refs">
-                {classicalRefs.map((ref, i) => (
-                  <span
-                    key={`${ref}-${i}`}
-                    className="palm-chip palm-chip--ref"
-                  >
-                    {ref}
-                  </span>
-                ))}
-              </div>
             )}
           </div>
         );

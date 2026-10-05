@@ -3297,19 +3297,6 @@
   color: var(--ink-main);
   line-height: 1.55;
 }
-.palm-classical-refs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-top: 0.85rem;
-}
-.palm-chip--ref {
-  background: rgba(200, 155, 60, 0.10);
-  border: 1px solid rgba(200, 155, 60, 0.28);
-  color: var(--accent-gold);
-  font-size: var(--text-meta);
-}
-
 /* ── Captured/preview variants ── */
 .palm-preview--dimmed { opacity: 0.55; }
 .palm-preview--small { max-width: 220px; margin: 0 auto 0.6rem; }

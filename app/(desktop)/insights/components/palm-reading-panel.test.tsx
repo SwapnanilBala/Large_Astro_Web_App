@@ -108,10 +108,10 @@ async function analyzeAPalm() {
   return container;
 }
 
-async function landTheReading() {
+async function landTheReading(reading: object = READING) {
   await act(async () => {
     answer(
-      new Response(JSON.stringify(READING), {
+      new Response(JSON.stringify(reading), {
         status: 200,
         headers: { "Content-Type": "application/json" },
       }),
@@ -147,6 +147,24 @@ describe("PalmReadingPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: "Skip animations" }));
     expect(screen.getByText(READING.guidance)).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Skip animations" })).not.toBeInTheDocument();
+  });
+
+  it("shows a classical reading's Sanskrit terms but none of its text references", async () => {
+    // The references were written from memory, with nothing checking a text
+    // says them. Older readings and a model ignoring the prompt still send them.
+    setReducedMotion(true);
+    await analyzeAPalm();
+    await landTheReading({
+      ...READING,
+      classical_framework_notes: {
+        framework: "Hasta Samudrika Shastra",
+        sanskrit_terms: [{ term: "Hridaya Rekha", meaning: "heart line", observation: "Long and unbroken." }],
+        classical_text_references: ["Brihat Samhita Ch. 68"],
+      },
+    });
+
+    expect(screen.getByText("Hridaya Rekha")).toBeInTheDocument();
+    expect(screen.queryByText("Brihat Samhita Ch. 68")).not.toBeInTheDocument();
   });
 
   it("shows everything at once under reduced motion", async () => {

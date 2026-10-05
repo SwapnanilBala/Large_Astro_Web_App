@@ -260,8 +260,7 @@ Conditional sections — include ONLY when the corresponding input was provided.
         "observation": "what was observed regarding this term in the image"
       }
       // 3 to 6 entries
-    ],
-    "classical_text_references": ["e.g. 'Brihat Samhita Ch. 68'", "Samudrika Lakshana"]
+    ]
   }
 
 CRITICAL: omit conditional sections entirely when their inputs are absent. Never emit empty stubs. Return ONLY valid JSON — no markdown, no code fences, no commentary.`;
@@ -283,7 +282,7 @@ const STANDARD_GUIDELINES = `Important guidelines:
 const CLASSICAL_GUIDELINES = `Important guidelines (Hasta Samudrika Shastra mode):
 - Use ONLY the classical Vedic framework. Do not introduce Western palmistry terminology or interpretive frames.
 - Use Sanskrit terms (e.g. Hridaya Rekha, Mastaka Rekha, Ayu Rekha, Bhagya Rekha, Manibandha, Surya Rekha) and provide concise English meanings inline.
-- Cite classical texts where appropriate (Brihat Samhita Ch. 68, Samudrika Lakshana, Hasta Sanjeevani) in classical_text_references.
+- Do not name, cite or quote any classical text, chapter or verse. Nothing in this reading is checked against a source, so a citation would be a guess presented as a reference.
 - Frame interpretations through the classical lens of dharma, karma, ayu, artha, and moksha rather than modern psychology.
 - The life line (Ayu Rekha) traditionally indicates pranic vitality — explicitly note it does NOT fix lifespan.
 - ALWAYS assess image_quality first. Be honest about blur, lighting, partial palms, or cropped fingers; set reliable_for_reading=false when rating is "poor".
@@ -322,7 +321,15 @@ ${STANDARD_GUIDELINES}
 
 ${SPECIFICITY_GUIDELINES}`;
 
-const CLASSICAL_SYSTEM_PROMPT = `You are a traditional Vedic palmist (Samudrika-shastri) reading strictly within the Hasta Samudrika Shastra framework. You do NOT use Western palmistry concepts, vocabulary, or interpretive models. All observations and readings are grounded in classical Indian palmistry as preserved in texts such as Brihat Samhita (Ch. 68), Samudrika Lakshana, and Hasta Sanjeevani.
+/*
+ * No text names, on purpose (2026-10-04). Classical mode used to ask for
+ * `classical_text_references` and the page showed them as chips ("Brihat
+ * Samhita Ch. 68"), but they were written from memory: nothing checked that a
+ * text says what the reading claims. Until the reading can quote retrieved,
+ * cited passages, as the yoga and life-area notes do, it names no source at
+ * all.
+ */
+const CLASSICAL_SYSTEM_PROMPT = `You are a traditional Vedic palmist (Samudrika-shastri) reading strictly within the Hasta Samudrika Shastra framework. You do NOT use Western palmistry concepts, vocabulary, or interpretive models. You read in the tradition of classical Indian palmistry.
 
 ${BASE_SCHEMA_BLOCK}
 

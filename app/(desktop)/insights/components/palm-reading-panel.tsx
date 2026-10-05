@@ -72,7 +72,6 @@ type SanskritTerm = {
 type ClassicalFrameworkNotes = {
   framework: string;
   sanskrit_terms: SanskritTerm[];
-  classical_text_references: string[];
 };
 
 export type JyotishContext = {
@@ -1368,20 +1367,8 @@ export default function PalmReadingPanel({ jyotishContext }: PalmReadingPanelPro
                       ))}
                     </ul>
                   )}
-                {Array.isArray(
-                  reading.classical_framework_notes.classical_text_references,
-                ) &&
-                  reading.classical_framework_notes.classical_text_references.length > 0 && (
-                    <div className="palm-classical-refs">
-                      {reading.classical_framework_notes.classical_text_references.map(
-                        (ref, i) => (
-                          <span key={`${ref}-${i}`} className="palm-chip palm-chip--ref">
-                            {ref}
-                          </span>
-                        ),
-                      )}
-                    </div>
-                  )}
+                {/* No text references: older readings carry some, written from
+                    memory with nothing checking them, so they are not shown. */}
               </motion.div>
             )}
 

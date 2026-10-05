@@ -109,7 +109,12 @@ export type PalmDashaRelevance = {
 export type PalmClassicalFrameworkNotes = {
   framework: string;
   sanskrit_terms: Array<{ term: string; meaning: string; observation: string }>;
-  classical_text_references: string[];
+  /**
+   * Written from memory, with nothing checking a text says it; no longer asked
+   * for or shown since 2026-10-04. Older readings stored on the device still
+   * carry it.
+   */
+  classical_text_references?: string[];
 };
 
 export type PalmReadingJSON = {
