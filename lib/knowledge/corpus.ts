@@ -72,6 +72,13 @@ export const knowledgePassageSchema = z
      * words in square brackets, copied from the verse, so that it reads alone.
      */
     text: z.string().min(1),
+    /**
+     * The words as the book prints them, when `text` carries a rewording the
+     * owner chose, in square brackets, for a word too harsh to print (the
+     * Strijataka's words for a prostitute, 2026-10-05). Kept for review and
+     * for the scan check; never loaded into the table or shown.
+     */
+    printedText: z.string().min(1).nullable().optional(),
     /** The translator's footnotes to these words, when there are any. */
     notes: z.string().min(1).nullable(),
     /** Plain modern English: what the verse says, attributed to the text. */
@@ -151,6 +158,31 @@ export const LONG_PASSAGE_WORDS = 15;
 export const MIN_SCAN_AGREEMENT = { long: 0.5, short: 0.7 } as const;
 export const MIN_CHAPTER_SCAN_AGREEMENT = 0.75;
 
+/*
+ * Books whose scan the word-run check cannot see past, held to a letter-level
+ * measure instead: one minus the fewest letter edits that turn the passage
+ * (square-bracketed words left out, letters only) into some run of its
+ * chapter's scan, over the passage's length. Spaces and punctuation do not
+ * count, so a word the OCR split or ran together costs nothing.
+ *
+ * The Strijataka (1931): its OCR reads "in" as "m" and "Sani" as "Sam", which
+ * short list items ("Sani in 7 — widowhood") cannot survive word by word, so
+ * 238 of 728 faithful passages failed the word floors. Measured on 2026-10-05
+ * with each passage's summary, clipped to the passage's length, as the
+ * rewording to tell apart: faithful passages scored at least 0.64 (0.71 at
+ * 25 letters and up), summaries a median of 0.46, and 1-2% of them reach 0.7
+ * at 25 letters and up. Under 25 letters any check is weak, as a short run of
+ * letters turns up somewhere by chance.
+ */
+export const LETTER_CHECKED = {
+  "strijataka-1931": { short: 0.6, long: 0.7, shortLetters: 25, chapter: 0.85 },
+} as const satisfies Record<string, { short: number; long: number; shortLetters: number; chapter: number }>;
+
+/** A passage's letters as the letter-level check compares them: bracketed words out, letters only, lower case. */
+export function scanLetters(text: string): string {
+  return text.replace(/\[[^\]]*\]/g, " ").toLowerCase().replace(/[^a-z]/g, "");
+}
+
 /** The normalisation both sides of the comparison get: letters only, lower case, hyphens closed up. */
 export function scanWords(text: string): string[] {
   return text
@@ -162,15 +194,29 @@ export function scanWords(text: string): string[] {
     .filter(Boolean);
 }
 
-/** The words a passage is scored on: its text and its footnotes. */
-export function scoredText(passage: { text: string; notes: string | null }): string {
-  return `${passage.text}\n${passage.notes ?? ""}`;
+/** The words a passage is scored on: its text as printed and its footnotes. */
+export function scoredText(passage: { text: string; printedText?: string | null; notes: string | null }): string {
+  return `${passage.printedText ?? passage.text}\n${passage.notes ?? ""}`;
 }
 
-export function scanAgreementFloor(passage: { text: string; notes: string | null }): number {
+export function scanAgreementFloor(passage: {
+  source?: string;
+  text: string;
+  printedText?: string | null;
+  notes: string | null;
+}): number {
+  const letterChecked = passage.source ? LETTER_CHECKED[passage.source as keyof typeof LETTER_CHECKED] : undefined;
+  if (letterChecked) {
+    return scanLetters(scoredText(passage)).length >= letterChecked.shortLetters ? letterChecked.long : letterChecked.short;
+  }
   return scanWords(scoredText(passage)).length >= LONG_PASSAGE_WORDS
     ? MIN_SCAN_AGREEMENT.long
     : MIN_SCAN_AGREEMENT.short;
+}
+
+/** The median a whole chapter's passages must reach, by book. */
+export function chapterScanAgreementFloor(source: string): number {
+  return LETTER_CHECKED[source as keyof typeof LETTER_CHECKED]?.chapter ?? MIN_CHAPTER_SCAN_AGREEMENT;
 }
 
 export function passageId(source: string, chapter: number, verse: number, part: number): string {

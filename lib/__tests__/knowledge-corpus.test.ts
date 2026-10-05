@@ -12,13 +12,14 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
+import { NAKSHATRAS } from "../engines/panchanga";
 import {
-  MIN_CHAPTER_SCAN_AGREEMENT,
+  chapterScanAgreementFloor,
   knowledgeCorpusSchema,
   passageId,
   scanAgreementFloor,
 } from "../knowledge/corpus";
-import { PLACEMENT_KEYS } from "../knowledge/placements";
+import { PLACEMENT_KEYS, nakshatraKey } from "../knowledge/placements";
 import { KNOWLEDGE_SOURCES } from "../knowledge/sources";
 
 const CORPUS_DIR = join(process.cwd(), "lib", "knowledge", "corpus");
@@ -107,7 +108,7 @@ describe("knowledge corpora", () => {
             .sort((a, b) => a - b);
           const middle = Math.floor(scores.length / 2);
           const median = scores.length % 2 === 1 ? scores[middle] : (scores[middle - 1] + scores[middle]) / 2;
-          expect(median, `chapter ${chapter}`).toBeGreaterThanOrEqual(MIN_CHAPTER_SCAN_AGREEMENT);
+          expect(median, `chapter ${chapter}`).toBeGreaterThanOrEqual(chapterScanAgreementFloor(corpus.source));
         }
       });
     });
@@ -222,5 +223,72 @@ describe("the Brihat Jataka corpus", () => {
       const yoga = YOGA_DEFINITIONS.find((definition) => definition.id === passage.yogaIds[0]);
       expect(yoga?.source, passage.id).toContain("ch. 23");
     }
+  });
+});
+
+describe("the Strijataka corpus", () => {
+  const corpus = corpora.find(({ corpus }) => corpus.source === "strijataka-1931")?.corpus;
+  const passages = corpus?.passages ?? [];
+  const shown = passages.filter((passage) => !passage.withheld);
+
+  it("is present, with most of the house, sign and star passages matched to a chart", () => {
+    // Measured on the 2026-10-05 build: 516 of 625 shown passages carry
+    // conditions; the rest are the author's discussion, or need a navamsa
+    // lord, a trimsamsa or "a benefic" the keys cannot state.
+    expect(corpus).toBeDefined();
+    const keyed = shown.filter((passage) => passage.placements.length + passage.placementsAny.length > 0);
+    expect(keyed.length).toBeGreaterThan(450);
+  });
+
+  it("keeps every passage to women's charts, and away from the yoga notes every reader gets", () => {
+    const unguarded = passages.filter(
+      (passage) =>
+        passage.placements.length + passage.placementsAny.length > 0 && !passage.placements.includes("reader.sex.female"),
+    );
+    expect(unguarded.map((passage) => passage.id)).toEqual([]);
+    expect(passages.filter((passage) => passage.yogaIds.length > 0).map((passage) => passage.id)).toEqual([]);
+  });
+
+  it("reaches a woman through her birth star, for all twenty-seven", () => {
+    const stars = new Set(
+      shown.flatMap((passage) => passage.placements).filter((key) => key.startsWith("Moon.nakshatra.")),
+    );
+    expect([...stars].sort()).toEqual(NAKSHATRAS.map((name) => `Moon.nakshatra.${nakshatraKey(name)}`).sort());
+  });
+
+  it("prints the owner's wording for the book's words for a prostitute, and keeps the book's own words aside", () => {
+    // 2026-10-05: "calling prostitute is a bit too bold and some people might
+    // get hurt ... multiple illicit relationships would be better".
+    const reworded = passages.filter((passage) => passage.printedText);
+    expect(reworded.length).toBeGreaterThan(0);
+    for (const passage of reworded) {
+      expect(passage.text, passage.id).toMatch(/\[[^\]]*multiple illicit relationships[^\]]*\]/i);
+      expect(passage.text, passage.id).not.toMatch(/prostitut|whore|harlot|courtesan/i);
+      expect(passage.printedText, passage.id).toMatch(/prostitut|whore|harlot|courtesan/i);
+    }
+  });
+
+  it("holds back, until the owner words them, the passages that brand a woman", () => {
+    // The owner asked to see these before any is shown ("if you find similar
+    // stuff let me know I will recommend"): adulteress, immoral, barren and
+    // the like are withheld with that reason, not reworded on the owner's behalf.
+    const waiting = passages.filter((passage) => passage.withheldReason?.startsWith("awaiting the owner's wording"));
+    expect(waiting.length).toBeGreaterThan(0);
+    expect(waiting.every((passage) => passage.withheld)).toBe(true);
+  });
+
+  it("shows no passage that speaks of death, crime, caste, or brands a woman", () => {
+    const ALLOWED: Record<string, string> = {
+      "strijataka-1931:11.1.4": "'love is blind', a proverb, in the author's discussion of beauty",
+    };
+    const FORBIDDEN =
+      /\b(die|dies|died|dying|death|dead|kill\w*|poison\w*|blind\w*|lepro\w*|leper|thie(f|ves|vish)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|brahmin\w*|sudras?|prostitut\w*|whores?|harlots?|courtesans?|adulter\w*|immoral\w*|unchaste|wanton|barren|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*)\b/i;
+    const found = shown
+      .filter((passage) => !(passage.id in ALLOWED))
+      .flatMap((passage) => {
+        const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
+        return match ? [`${passage.id}: ${match[0]}`] : [];
+      });
+    expect(found).toEqual([]);
   });
 });
