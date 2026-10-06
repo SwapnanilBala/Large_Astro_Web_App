@@ -3,6 +3,7 @@ import type { DeterministicRule } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
 import { bySelectionRank } from "@/lib/rule-order";
 import styles from "./reading-gateway-previews.module.css";
+import { chartValue } from "@/lib/chart-labels";
 
 export default function ReadingEvidencePreview({
   rules,
@@ -38,7 +39,7 @@ export default function ReadingEvidencePreview({
                 {claims.map((claim, index) => (
                   <div key={`${claim.label}-${index}`}>
                     <dt>{claim.label}</dt>
-                    <dd>{claim.value}</dd>
+                    <dd>{chartValue(claim.value, t)}</dd>
                   </div>
                 ))}
               </dl>

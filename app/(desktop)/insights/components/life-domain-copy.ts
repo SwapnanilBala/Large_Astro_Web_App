@@ -1,5 +1,5 @@
 import type { DomainRuleImpact, LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
-import { planetName, signName } from "@/lib/chart-labels";
+import { chartValue } from "@/lib/chart-labels";
 
 /*
  * Presentation copy and helpers for the seven life domains.
@@ -103,15 +103,7 @@ export function claimLabel(label: string, t: Translate): string {
 
 /** A claim's value -- "10th house", a sign or a planet -- in the reader's language. */
 export function claimValue(value: string, t: Translate): string {
-  const house = /^(\d{1,2})(?:st|nd|rd|th) house$/.exec(value);
-  if (house) {
-    const key = `lifeAreas.claims.houses.h${house[1]}`;
-    const text = t(key);
-    return text === key ? value : text;
-  }
-  /* Both fall back to what they were given, so a value that is neither a sign
-     nor a planet passes through unchanged. */
-  return signName(planetName(value, t), t);
+  return chartValue(value, t);
 }
 
 /** A word from one of the engine's closed sets, or the engine's own word if a

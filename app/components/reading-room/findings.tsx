@@ -1,5 +1,6 @@
 import type { DeterministicRule, RuleCategory } from "@/lib/astro-types";
 import { bySelectionRank } from "@/lib/rule-order";
+import { chartValue } from "@/lib/chart-labels";
 import type { ReadingRoomFilter, ReadingRoomContent, ReadingRoomItem } from "./ReadingRoom";
 import type { ReadingRoomClasses, Translate } from "./classes";
 import { roomNavigation } from "./navigation";
@@ -105,7 +106,7 @@ export function buildFindingRoom(
                     <div key={`${claim.label}-${index}`}>
                       <dt>{claim.label}</dt>
                       <dd>
-                        {claim.value}
+                        {chartValue(claim.value, tr)}
                         {claim.detail && <span className={c.factDetail}>{claim.detail}</span>}
                       </dd>
                     </div>

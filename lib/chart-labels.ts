@@ -85,6 +85,21 @@ export function pointName(point: string, tr: Translate): string {
   return point === "Ascendant" ? resolve(tr, ASCENDANT_NAME_KEY, point) : planetName(point, tr);
 }
 
+/*
+ * A value from an engine's evidence list (lib/rules/paths.ts formatClaimValue,
+ * the life-domain claims): a sign, a planet or the ascendant, an "Nth house",
+ * or a comma list of those. Anything else -- degrees, counts, a dignity word, a
+ * phrase -- passes through as the engine wrote it. The house names are the
+ * life-areas catalog's (lifeAreas.claims.houses.h1 to h12); English falls
+ * back to the engine's own "7th house".
+ */
+export function chartValue(value: string, tr: Translate): string {
+  if (value.includes(", ")) return value.split(", ").map((part) => chartValue(part, tr)).join(", ");
+  const house = /^(\d{1,2})(?:st|nd|rd|th) house$/.exec(value);
+  if (house) return resolve(tr, `lifeAreas.claims.houses.h${house[1]}`, value);
+  return signName(pointName(value, tr), tr);
+}
+
 /** A planet as it is written in a chart cell: Su, Mo, Ma; सू, चं, मं in Hindi. */
 export function planetAbbreviation(planet: string, tr: Translate): string {
   const id = planetId(planet);
