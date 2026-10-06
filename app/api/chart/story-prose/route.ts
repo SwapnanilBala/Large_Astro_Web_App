@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
-import { consumeLlmBudget } from "@/lib/llm-budget";
+import { consumeLlmBudget, resolveLlmCaller } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   PARAGRAPHS_PER_CHAPTER,
@@ -46,9 +46,10 @@ import {
  * history below gives: what the extra thinking bought was the nine chapters
  * agreeing with each other. If the report starts repeating itself between
  * chapters, this constant is the dial, and a fresh measurement is the way to
- * decide. One effort also means one report per chart, cached for every
- * caller, where there used to be one per tier. Re-measure once the account's
- * monthly limit allows. The history that set the two tiers:
+ * decide. One effort also meant one report per chart, cached for every
+ * caller, where there used to be one per tier; the cache has since been split
+ * by caller (see cacheKey). Re-measure once the account's monthly limit
+ * allows. The history that set the two tiers:
  *
  * This is the route where effort buys the most and costs the most, so it is
  * the one where the two are worth splitting by who is asking.
@@ -117,7 +118,8 @@ export const maxDuration = 300;
 const REQUEST_TIMEOUT_MS = 250_000;
 
 /*
- * Bounded, process-lifetime, keyed by the request it would send.
+ * Bounded, process-lifetime, keyed by who is asking and the request it would
+ * send.
  *
  * A reader who downloads the same report twice -- which people do, having lost
  * the first file -- should not pay for it twice, and neither should the key.
@@ -249,27 +251,40 @@ function parseFacts(value: unknown): StoryProseFacts {
 }
 
 /**
- * A hash of the whole request -- model, system prompt, schema and user turn --
- * so two callers share an answer only when the model would have been sent the
- * same bytes. Every caller is written for the same way, so a chart still gets
- * one entry, shared by all.
+ * A hash of who is asking and of the whole request -- model, system prompt,
+ * schema and user turn. A reader's second download is answered from the first
+ * one's entry only when the model would have been sent the same bytes, and
+ * two callers never share an entry at all.
  *
- * It used to be a list of chosen fields, and the list had fallen behind the
- * prompt: it left out the reader's name, each glance row's context, and each
- * chapter's title and section, all four of which the user turn then printed.
- * (It no longer prints the name; see StoryProseFacts.) The facts come from
- * the browser and the cache is shared, so anyone holding someone else's birth
- * details -- a share link carries them, and /api/chart/story-report returns
- * the story these facts are built from -- could write instructions into those
- * four, leave the rest alone, and be the first to fill the entry; the other
- * reader's PDF would then come out of the cache with prose a stranger had
- * steered. A key built from what is sent cannot fall behind what is sent.
+ * The request half used to be a list of chosen fields, and the list had
+ * fallen behind the prompt: it left out the reader's name, each glance row's
+ * context, and each chapter's title and section, all four of which the user
+ * turn then printed. (It no longer prints the name; see StoryProseFacts.) The
+ * facts come from the browser and the cache was shared, so anyone holding
+ * someone else's birth details -- a share link carries them, and
+ * /api/chart/story-report returns the story these facts are built from --
+ * could write instructions into those four, leave the rest alone, and be the
+ * first to fill the entry; the other reader's PDF would then come out of the
+ * cache with prose a stranger had steered. A key built from what is sent
+ * cannot fall behind what is sent.
+ *
+ * The caller half is there because each report is written for the reader who
+ * asked for it. With the name gone, two people with the same birth details
+ * send byte-identical requests, and one cached report would have served them
+ * both. Nothing of the first reader was in it, but how fast a download came
+ * back told anyone holding someone's birth details whether that chart's
+ * report had been written recently on this instance. The caller is the one
+ * the daily allowance counts (resolveLlmCaller in lib/llm-budget.ts): the
+ * account, on any device, or else the address -- so a signed-out reader whose
+ * address changes, on a phone network say, pays again for a repeat download.
+ * It does not make the request half optional: everyone behind one address is
+ * one caller.
  *
  * SHA-256 rather than the SHA-1 the other routes use: theirs hash what the
  * engine chose, this hashes text anyone can type.
  */
-function cacheKey(params: Anthropic.MessageStreamParams): string {
-  return createHash("sha256").update(JSON.stringify(params)).digest("hex");
+function cacheKey(callerKey: string, params: Anthropic.MessageStreamParams): string {
+  return createHash("sha256").update(JSON.stringify([callerKey, params])).digest("hex");
 }
 
 /* Markdown is forbidden by the prompt; this is what makes that true rather
@@ -300,7 +315,11 @@ export async function POST(request: NextRequest) {
       ],
       messages: [{ role: "user", content: renderStoryProseFacts(facts) }],
     };
-    const key = cacheKey(params);
+    /* Before the cache, which is per caller (see cacheKey). For a signed-in
+       reader that is a session read on a cache hit too; the budget below is
+       handed the same caller, so a miss does not read it twice. */
+    const caller = await resolveLlmCaller(request);
+    const key = cacheKey(caller.key, params);
 
     const cached = cache.get(key);
     if (cached) {
@@ -319,7 +338,7 @@ export async function POST(request: NextRequest) {
 
     /* Past the cache, so this request is about to cost money -- and more of it
        than any other route here. */
-    const budget = await consumeLlmBudget("/api/chart/story-prose", request);
+    const budget = await consumeLlmBudget("/api/chart/story-prose", caller);
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),

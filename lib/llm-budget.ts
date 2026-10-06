@@ -179,9 +179,10 @@ type LlmBudgetConfig = {
  * report -- which is about $22, deliberately the same daily exposure as palm
  * reading's 100 and the varga atlas's 400. Three routes, one ceiling on what a
  * bad day costs. A realistic mix lands well under it. It is also a count of
- * distinct reports per tier: the cache is keyed by the facts *and* the tier,
- * so a second download of the same reading is free, and an account is never
- * served the medium report a passing visitor paid for.
+ * distinct reports per reader: since 2026-10-06 the cache is keyed by the
+ * request *and* the caller (see that route's cacheKey), so a reader's second
+ * download of the same reading is free, and no caller is served a report that
+ * another caller's download paid for.
  *
  * THE TWO TIERS are 4 free, then 8 once registered, on every route in the
  * table. An address is a weak name for a person in both directions at once --
@@ -432,7 +433,7 @@ function refuse(scope: LlmBudgetScope, now: number): LlmBudgetResult {
  * the same bucket, and so a row in `llm_budget_counters` says which kind of
  * caller it counted without anyone having to infer it from the shape.
  */
-type LlmCaller = {
+export type LlmCaller = {
   key: string;
   signedIn: boolean;
 };
@@ -450,8 +451,12 @@ type LlmCaller = {
  * routes have never required an account and must not start 500ing because the
  * session store is unreachable; the cost of guessing wrong is the smaller
  * allowance, which is the safe direction to be wrong in.
+ *
+ * Exported for a route that has to know who is asking before its cache
+ * lookup -- the PDF report keeps an entry per caller -- and that then hands
+ * the caller to consumeLlmBudget, so the session is read once, not twice.
  */
-async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
+export async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
   const session = await sessionFromRequest(request);
   if (session) {
     return { key: `user:${session.userId}`, signedIn: true };
@@ -485,16 +490,21 @@ function schedulePrune(day: number) {
  * if the provider then fails: counting an attempt that reached the provider is
  * the safe direction, because a provider erroring after it has already billed
  * us is exactly the case a budget is for.
+ *
+ * `from` is the request, or the caller resolveLlmCaller has already read from
+ * it; either way the same allowance is spent.
  */
 export async function consumeLlmBudget(
   route: LlmRouteKey,
-  request: Request,
+  from: Request | LlmCaller,
   now: number = Date.now(),
 ): Promise<LlmBudgetResult> {
   rollOver(now);
 
   const config = LLM_BUDGETS[route];
-  const caller = await resolveLlmCaller(request);
+  /* Told apart by shape, not `instanceof Request`, which a request built from
+     another copy of the class would fail -- and be counted as a caller. */
+  const caller = "signedIn" in from ? from : await resolveLlmCaller(from);
   /* One number or the other, chosen once, so every check below and the
      `remaining` reported back all speak about the same allowance. */
   const callerLimit = caller.signedIn ? config.perCallerPerDay : config.perAnonPerDay;

@@ -43,6 +43,7 @@ const {
   __resetLlmBudgetForTests,
   consumeLlmBudget,
   readLlmBudgetUsage,
+  resolveLlmCaller,
 } = await import("@/lib/llm-budget");
 
 /* 2026-09-12T12:00:00Z -- midday, so "same day" cases cannot straddle midnight
@@ -307,5 +308,25 @@ describe("caller identity", () => {
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
     expect(refused.scope).toBe("anonymous");
+  });
+
+  it("names an account by its user and anyone else by their address", async () => {
+    expect(await resolveLlmCaller(signedInAs("user-a"))).toEqual({ key: "user:user-a", signedIn: true });
+    expect(await resolveLlmCaller(requestFrom("203.0.113.5"))).toEqual({ key: "ip:203.0.113.5", signedIn: false });
+  });
+
+  it("spends one allowance whether it is handed the request or the caller read from it", async () => {
+    /* The PDF report reads its caller before its cache and hands that over,
+       so the session is looked up once. Both ways must reach one bucket. */
+    const account = signedInAs("user-a", "/api/chart/story-prose");
+    const caller = await resolveLlmCaller(account);
+    for (let i = 0; i < PER_ACCOUNT - 1; i += 1) {
+      expect((await consumeLlmBudget("/api/chart/story-prose", account, NOON)).allowed).toBe(true);
+    }
+    expect((await consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
+    const refused = await consumeLlmBudget("/api/chart/story-prose", account, NOON);
+    expect(refused.allowed).toBe(false);
+    if (refused.allowed) throw new Error("unreachable");
+    expect(refused.scope).toBe("caller");
   });
 });
