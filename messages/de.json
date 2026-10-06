@@ -5,7 +5,10 @@
     "menu": "Menü",
     "signOut": "Abmelden",
     "signIn": "Anmelden",
-    "account": "Konto"
+    "account": "Konto",
+    "closeMenu": "Navigationsmenü schließen",
+    "openMenu": "Navigationsmenü öffnen",
+    "skipToContent": "Zum Hauptinhalt springen"
   },
   "home": {
     "kicker": "Studio für vedische Astrologie",
@@ -390,7 +393,424 @@
     "yogaLifetime": "Lebenslange Bedeutung",
     "yogaNoYogas": "In diesem Horoskop wurden derzeit keine planetaren Yogas gefunden.",
     "backToReading": "Zurück zu deiner Deutung",
-    "backToAdvanced": "Zurück zur erweiterten Analyse"
+    "backToAdvanced": "Zurück zur erweiterten Analyse",
+    "atlasPreview": {
+      "aria": "Ausgewählte Teilhoroskope",
+      "ascendant": "Aszendent {sign}",
+      "chartAria": "{chart}-Horoskop mit Ganzzeichen-Häusern: {placements}",
+      "empty": "Erkunde die {count} verfügbaren Teilhoroskope in deinem Atlas.",
+      "focus": {
+        "d1": "Leben und Identität",
+        "d10": "Beruf und Wirken",
+        "d9": "Beziehungen und Bestimmung"
+      },
+      "noAscendant": "Aszendent nicht verfügbar",
+      "placement": "{planet} in {sign}"
+    },
+    "evidence": {
+      "aria": "Belege im Horoskop für diese Erkenntnis",
+      "combinations": "Lebenslange Kombinationen",
+      "finding": "Eine Erkenntnis aus deinem Horoskop",
+      "findings": "Erkenntnisse aus dem Horoskop",
+      "none": "Für dieses Horoskop liegen keine passenden Erkenntnisse vor.",
+      "placement": "Die Stellung dahinter",
+      "scope": "Karmische Muster und ererbte Themen"
+    },
+    "fortunePanel": {
+      "anchorDetail": "Beginne eine bewusste Aufgabe mit Blick nach {direction}; lass die Zahl {number} eine kleine sichtbare Erinnerung an deine Prioritäten sein.",
+      "anyDay": "Jeden Tag",
+      "badOmens": "Schlechte Vorzeichen",
+      "cautionTitle": "Ungünstige Farben, Gegenstände & schlechte Vorzeichen",
+      "colorsToAvoid": "Zu meidende Farben",
+      "dailyAnchor": "Täglicher Anker",
+      "directionFocus": "Blick nach {direction}",
+      "domainsEyebrow": "Wo das Glück wächst",
+      "domainsLead": "In diesen Lebensbereichen können sich Vorbereitung, Weitblick und die richtigen Kontakte gegenseitig verstärken.",
+      "domainsTitle": "Glücksbereiche",
+      "fallbackColor": "deine Hauptfarbe",
+      "fallbackDirection": "deiner bevorzugten Himmelsrichtung",
+      "gemEyebrow": "Traditionelle Praxis",
+      "gemLead": "Nutze sie als Bezugspunkte für deine Absichten, verankert in den Planeten, die dein Horoskop stützen.",
+      "gemTitle": "Hinweise zu Edelsteinen",
+      "house": "Haus {house}",
+      "items": "Gegenstände",
+      "pairWith": "Kombinieren mit",
+      "planet": "Planet",
+      "primaryDetail": "Nutze {color} für den wichtigsten Termin der Woche – ein Treffen, eine Kontaktaufnahme oder einen ersten Schritt.",
+      "primaryOpening": "Beste Gelegenheit",
+      "primaryRecommendation": "Erste Empfehlung",
+      "secondaryRecommendation": "Zweite Empfehlung",
+      "supportDetail": "Nutze diesen Tag zum Feinschliff, zum Dranbleiben und für Gespräche, die von Geduld profitieren.",
+      "supportWindow": "Förderliches Zeitfenster",
+      "wearDay": "Tag zum Tragen",
+      "weekEyebrow": "Glück im Alltag",
+      "weekLead": "Kleine, auf dein Horoskop abgestimmte Momente, damit sich die nächsten sieben Tage bewusster anfühlen.",
+      "weekTitle": "Die kommende Woche"
+    },
+    "lucky": {
+      "colors": {
+        "ash_grey": "Aschgrau",
+        "blue": "Blau",
+        "clouded_grey": "Getrübtes Grau",
+        "cold_blue": "Kaltes Blau",
+        "cream": "Cremeweiß",
+        "dark": "Dunkeltöne",
+        "deep_red": "Tiefrot",
+        "dull_black": "Mattschwarz",
+        "dust_grey": "Staubgrau",
+        "dusty_green": "Staubgrün",
+        "earthy": "Erdtöne",
+        "electric_purple": "Leuchtviolett",
+        "emerald": "Smaragdgrün",
+        "flat_black": "Stumpfes Schwarz",
+        "golden": "Goldgelb",
+        "green": "Grün",
+        "grey": "Grau",
+        "harsh_neon": "Grelles Neon",
+        "mixed_mud": "Schlammgemisch",
+        "muddy_gold": "Schlammiges Gold",
+        "murky_brown": "Trübes Braun",
+        "orange": "Orange",
+        "pale_brown": "Blassbraun",
+        "pink": "Rosa",
+        "red": "Rot",
+        "rust_red": "Rostrot",
+        "sallow_yellow": "Fahlgelb",
+        "scarlet": "Scharlachrot",
+        "smoky": "Rauchgrau",
+        "smoky_black": "Rauchschwarz",
+        "stained_white": "Fleckiges Weiß",
+        "ultraviolet": "Ultraviolett",
+        "washed_pink": "Verwaschenes Rosa",
+        "white": "Weiß",
+        "yellow": "Gelb"
+      },
+      "directions": {
+        "east": "Osten",
+        "north": "Norden",
+        "northeast": "Nordosten",
+        "northwest": "Nordwesten",
+        "south": "Süden",
+        "southeast": "Südosten",
+        "southwest": "Südwesten",
+        "west": "Westen"
+      },
+      "domainBasis": {
+        "9th_house_lord": "Herrscher des 9. Hauses",
+        "ascendant_lord_influence": "Einfluss des Aszendentenherrschers",
+        "jupiter_s_natal_placement": "Jupiters Stellung im Geburtshoroskop",
+        "yogakaraka_influence": "Einfluss des Yogakaraka"
+      },
+      "domainFocus": {
+        "growth_opportunity": "Großzügigkeit, die Weitergabe von Wissen und der Blick aufs große Ganze, wenn eine Chance Zuversicht und Vorbereitung verlangt.",
+        "learning_mentors": "Vertieftes Studium, verlässliche Wegbegleiter, weite Reisen und Entscheidungen, die deinen Horizont erweitern.",
+        "personal_momentum": "Die praktischen Entscheidungen, durch die du Chancen leichter erkennst und beständig nutzt."
+      },
+      "domainTitles": {
+        "growth_opportunity": "Wachstum & Chancen",
+        "learning_mentors": "Lernen & Mentoren",
+        "personal_momentum": "Persönlicher Schwung"
+      },
+      "gems": {
+        "blue_sapphire": "Blauer Saphir",
+        "cat_s_eye": "Katzenauge",
+        "diamond": "Diamant",
+        "emerald": "Smaragd",
+        "hessonite_garnet": "Hessonit-Granat",
+        "pearl": "Perle",
+        "red_coral": "Rote Koralle",
+        "ruby": "Rubin",
+        "yellow_sapphire": "Gelber Saphir"
+      },
+      "intentions": {
+        "jupiter": "Fördert Weisheit, Lernen und weitreichende Chancen.",
+        "ketu": "Fördert Besinnung, Unterscheidungskraft und spirituellen Fokus.",
+        "mars": "Fördert Mut, Schwung und entschlossenes Handeln.",
+        "mercury": "Fördert klare Kommunikation, Lernen und Urteilsvermögen.",
+        "moon": "Fördert emotionale Ausgeglichenheit, Ruhe und Empfänglichkeit.",
+        "rahu": "Fördert bodenständigen Ehrgeiz und hilft, Abkürzungen zu widerstehen.",
+        "saturn": "Fördert Geduld, Verantwortung und dauerhaften Fortschritt.",
+        "sun": "Fördert Selbstvertrauen, Klarheit und eine konstruktive Sichtbarkeit.",
+        "venus": "Fördert Harmonie, Kreativität und Anmut in Beziehungen."
+      },
+      "items": {
+        "broken_beads": "Zerbrochene Perlen",
+        "broken_blades": "Zerbrochene Klingen",
+        "burnt_tools": "Verbrannte Werkzeuge",
+        "chipped_silver": "Angeschlagenes Silber",
+        "cracked_mirrors": "Gesprungene Spiegel",
+        "damaged_books": "Beschädigte Bücher",
+        "empty_wallets": "Leere Geldbörsen",
+        "faded_gold": "Verblasstes Gold",
+        "faulty_pens": "Defekte Stifte",
+        "frayed_cloth": "Ausgefranster Stoff",
+        "frayed_cords": "Ausgefranste Schnüre",
+        "rusty_iron": "Rostiges Eisen",
+        "scratched_perfume_bottles": "Zerkratzte Parfümflaschen",
+        "stagnant_water": "Stehendes Wasser",
+        "synthetic_stones": "Synthetische Steine",
+        "torn_papers": "Zerrissene Papiere",
+        "wilted_flowers": "Verwelkte Blumen",
+        "worn_shoes": "Abgetragene Schuhe"
+      },
+      "metals": {
+        "bronze": "Bronze",
+        "copper": "Kupfer",
+        "gold": "Gold",
+        "iron": "Eisen",
+        "lead": "Blei",
+        "platinum": "Platin",
+        "silver": "Silber"
+      },
+      "omens": {
+        "arguments_cuts_or_sparks_before_departure": "Streit, Schnittwunden oder Funken vor dem Aufbruch",
+        "blocked_paths_delays_or_broken_machinery": "Versperrte Wege, Verzögerungen oder defekte Maschinen",
+        "broken_promises_from_advisers_or_teachers": "Gebrochene Versprechen von Beratern oder Lehrern",
+        "confusing_shortcuts_or_sudden_misinformation": "Verwirrende Abkürzungen oder plötzliche Falschinformationen",
+        "misplaced_documents_or_repeated_message_errors": "Verlegte Dokumente oder wiederholte Fehler in Nachrichten",
+        "repeated_authority_clashes_before_starting": "Wiederholte Konflikte mit Autoritäten vor dem Beginn",
+        "spoiled_sweets_or_repeated_social_awkwardness": "Verdorbene Süßigkeiten oder wiederholte peinliche Begegnungen",
+        "sudden_detachment_lost_keys_or_repeated_silence": "Plötzliche Loslösung, verlorene Schlüssel oder wiederholtes Schweigen",
+        "unsettled_sleep_or_repeated_water_spills": "Unruhiger Schlaf oder immer wieder verschüttetes Wasser"
+      },
+      "safetyNote": "Edelsteine als Abhilfe sind eine traditionelle spirituelle Praxis, keine Garantie. Lass dich von einer qualifizierten Fachperson für vedische Astrologie beraten, bevor du einen solchen Edelstein kaufst oder trägst."
+    },
+    "page": {
+      "dasha": {
+        "antar": "Antardasha <strong>{planet}</strong>",
+        "kicker": "Timing im Detail",
+        "maha": "Mahadasha <strong>{planet}</strong>",
+        "title": "Dasha-Perioden und Unterperioden",
+        "until": "bis {date}"
+      },
+      "details": {
+        "ayanamsha": "Ayanamsha",
+        "fallback": "Ersatzberechnung",
+        "houses": "<strong>{count}</strong> Häuser",
+        "houseSystem": "Häusersystem",
+        "kicker": "Details zum Horoskop",
+        "mainMethod": "Hauptmethode",
+        "method": "Berechnungsmethode",
+        "placements": "<strong>{count}</strong> Stellungen",
+        "subMethod": "Untermethode",
+        "title": "Stellungen und Berechnungseinstellungen"
+      },
+      "domains": {
+        "errorEmpty": "Die Analyse der Lebensbereiche hat keine Ergebnisse geliefert.",
+        "errorFailed": "Wir konnten die Formeln für die Lebensbereiche nicht abschließen.",
+        "errorHeading": "Die ausführliche Deutung wurde nicht abgeschlossen",
+        "kicker": "Analyse der Lebensbereiche",
+        "loadingHeading": "Sieben Lebensbereiche werden einzeln berechnet",
+        "loadingLead": "Wir vergleichen für jeden Bereich die Anlage, den unterstützenden Herrscher, die Druckpunkte und den zeitlichen Verlauf – statt eine allgemeine Deutung wiederzuverwerten.",
+        "queuedHeading": "Deine vertiefte Deutung kann beginnen",
+        "queuedLead": "Die ausführlichen Formeln starten, sobald du dich diesem Abschnitt näherst – so bleibt der erste Teil deines Berichts schnell.",
+        "stepHouses": "Beziehungen zwischen Häusern und Herrschern",
+        "stepStrength": "Signale für Stärke und Druck",
+        "stepTiming": "Timing und maßgeschneiderte Synthese"
+      },
+      "fortune": {
+        "color": "Glücksfarbe",
+        "colorCaption": "Trag sie, wenn es darauf ankommt.",
+        "day": "Glückstag",
+        "dayCaption": "Beginne an diesem Tag Neues.",
+        "heading": "Dein Glück im Alltag",
+        "keyedTo": "abgestimmt auf Lagna <strong>{sign}</strong>",
+        "kicker": "Weitere Details",
+        "number": "Glückszahl",
+        "numberCaption": "Das Glück fällt oft auf sie.",
+        "stone": "Glücksstein",
+        "stoneCaption": "Verstärkt deine Absicht.",
+        "subtitle": "Alltagsmagie, ganz einfach.",
+        "summaryKinds": "Farben, Zahlen, Tage",
+        "title": "Glücksbringer und Glück im Alltag"
+      },
+      "gateways": {
+        "atlas": {
+          "blurb": "Sieh, wie sich dein Geburtshoroskop in Identität, Beziehungen und Beruf entfaltet.",
+          "cta": "Alle {count} Horoskope ansehen",
+          "eyebrow": "02 / Teilhoroskope",
+          "footnote": "Höhere Teilhoroskope hängen von der Genauigkeit deiner Geburtszeit ab.",
+          "heading": "Dein Horoskop-Atlas"
+        },
+        "reading": {
+          "blurb": "Verbinde die Muster in deinem Leben mit den Stellungen in deinem Horoskop.",
+          "cta": "Alle Erkenntnisse lesen",
+          "eyebrow": "03 / Erkenntnisse und Belege",
+          "footnote": "Deine vollständige Deutung enthält jede ermittelte Erkenntnis samt ihren Belegen.",
+          "heading": "Deine Deutung, erklärt"
+        },
+        "timing": {
+          "blurb": "Erkunde kommende Perioden und Zeitfenster für wichtige Anfänge.",
+          "cta": "Dein Timing erkunden",
+          "eyebrow": "01 / Timing und Zeitwahl",
+          "footnote": "Die Zeitfenster für Anfänge werden an deinem eigenen Horoskop gemessen.",
+          "heading": "Dein Timing"
+        }
+      },
+      "hero": {
+        "actionsAria": "Aktionen für den Bericht",
+        "copied": "Link zum aktuellen Horoskop kopiert.",
+        "copyFailed": "Der Link zum aktuellen Horoskop konnte nicht kopiert werden.",
+        "copyLink": "Link kopieren",
+        "identityAria": "Eckdaten des Horoskops",
+        "period": "Periode",
+        "rising": "Aszendent {sign}",
+        "scriptLead": "Lies es als Landkarte,",
+        "scriptTail": "nicht als Urteil."
+      },
+      "houseSupport": {
+        "heading": "Wie viel Unterstützung dein Horoskop aus den Häusern erhält",
+        "kicker": "Unterstützung der Häuser",
+        "link": "Wofür jedes Haus zuständig ist"
+      },
+      "lifeShifts": {
+        "kicker": "Große Lebenswenden",
+        "link": "Alle Kapitel, vergangene und kommende",
+        "title": "Aktive und kommende Lebenswenden"
+      },
+      "nav": {
+        "aria": "Abschnitte der Ergebnisseite",
+        "chart": "Horoskop",
+        "lifeAreas": "Lebensbereiche",
+        "more": "Mehr",
+        "overview": "Überblick",
+        "timing": "Timing"
+      },
+      "next": {
+        "advancedBody": "Wähle eine weitere Spezialdeutung.",
+        "advancedTitle": "Alle erweiterten Werkzeuge",
+        "browseTools": "Werkzeuge ansehen",
+        "heading": "Mach mit einem gezielten Werkzeug weiter",
+        "kicker": "Als Nächstes entdecken",
+        "lead": "Drei klare nächste Schritte, ohne die Deutung zu wiederholen, die du gerade gelesen hast.",
+        "openTool": "Werkzeug öffnen",
+        "partnerBody": "Vergleiche zwei vollständige Geburtsprofile.",
+        "partnerTitle": "Partnerschaftsvergleich",
+        "transitsBody": "Vergleiche den heutigen Himmel mit deinem Geburtshoroskop.",
+        "transitsTitle": "Aktuelle Transite"
+      },
+      "takeaways": {
+        "antardashaBody": "{planet} als Antardasha-Herrscher spitzt die Periode auf unmittelbarere Entscheidungen und Reaktionen zu.",
+        "chartSignal": "Signal im Horoskop",
+        "currentTiming": "Aktuelles Timing",
+        "dashaActive": "Aktive Dasha: {planet}",
+        "dashaBody": "Betrachte anstehende Entscheidungen vor allem im Licht der aktuellen Dasha.",
+        "heading": "Was zuerst Aufmerksamkeit verdient",
+        "highestSignal": "Stärkstes Signal",
+        "kicker": "Die 3 wichtigsten Punkte",
+        "orientation": "Ausrichtung des Horoskops",
+        "orientationTitle": "Aszendent {sign} gibt die Herangehensweise vor",
+        "runsThrough": "Läuft bis {date}",
+        "strongestBody": "Dieser Planet gehört zu den klareren Quellen der Unterstützung, auf die du bauen kannst, wenn das Horoskop unübersichtlich wirkt.",
+        "strongestPlanet": "Stärkster Planet",
+        "strongestTitle": "{planet} führt die Stärkeübersicht an"
+      },
+      "zone": {
+        "fullReadingFor": "Vollständige Deutung zum Bereich {area}",
+        "kicker": "Hauptmodul",
+        "subtitle": "Sieben Bereiche, jeder anhand seiner eigenen Belege gedeutet. Die aktivsten zuerst; die vollständige Auswertung öffnet sich auf einer eigenen Seite.",
+        "title": "Vernetzte Einblicke"
+      }
+    },
+    "shifts": {
+      "active": "Jetzt aktiv",
+      "age": "Alter {age}",
+      "empty": "Dieses Horoskop enthält nicht genug Geburtsdaten, um die Zeitfenster großer Lebenswenden abzuschätzen. Berechne es mit einer bestätigten Geburtszeit neu, um diesen Abschnitt freizuschalten.",
+      "introBrief": "Das Kapitel, in dem du gerade bist. Die Daten sind Planungsfenster, keine Fristen.",
+      "introFull": "Konzentriere dich auf das Kapitel, das jetzt aktiv ist, und auf den nächsten großen Übergang. Die Daten sind Planungsfenster, keine Fristen.",
+      "labels": {
+        "jupiterReturn": "{ordinal} Jupiterrückkehr",
+        "mahadasha": "Beginn der Mahadasha {planet}",
+        "nodalReturn": "{ordinal} Rückkehr der Mondknoten",
+        "saturnReturn": "{ordinal} Saturnrückkehr"
+      },
+      "ordinals": {
+        "first": "Erste",
+        "fourth": "Vierte",
+        "second": "Zweite",
+        "third": "Dritte"
+      },
+      "past": "Vergangenes Kapitel",
+      "pivot": "Wendepunkt:",
+      "themes": {
+        "jupiter": "Erweiterung, Glaube, Lehre und ethisches Wachstum",
+        "jupiterReturn": "Erweiterung, Sinn und ein größeres Spielfeld",
+        "ketu": "Loslassen, Rückzug und innere Meisterschaft",
+        "mars": "Mut, Konflikt und entschlossenes Handeln",
+        "mercury": "Kommunikation, Studium und anpassungsfähiges Denken",
+        "moon": "Emotionale Grundlagen, Familie und innere Sicherheit",
+        "nodalReturn": "Schicksalsachse – wonach du greifst und was du loslässt",
+        "rahu": "Ehrgeiz, Hunger und unbekanntes Terrain",
+        "saturn": "Disziplin, Verantwortung und karmische Abrechnung",
+        "saturnReturn": "Struktur, Verantwortung und der Preis von Entscheidungen",
+        "sun": "Autorität, Identität und Sichtbarkeit",
+        "venus": "Liebe, Partnerschaft, Geld und Genuss"
+      },
+      "upcoming": "Bevorstehend",
+      "viewPastOne": "1 vergangenes Kapitel ansehen",
+      "viewPastOther": "{count} vergangene Kapitel ansehen",
+      "window": "Zeitfenster:"
+    },
+    "sky": {
+      "inSign": "in {sign}",
+      "kicker": "Der Himmel heute",
+      "noteLead": "Wo die Planeten heute stehen,",
+      "noteTail": "nicht, wo sie bei deiner Geburt standen.",
+      "now": "Gerade jetzt",
+      "planetIn": "{planet} in {sign}"
+    },
+    "snapshots": {
+      "combust": "Verbrannt",
+      "dignities": {
+        "detriment": "Im Exil",
+        "domicile": "Im Domizil",
+        "exalted": "Erhöht",
+        "fall": "Im Fall",
+        "neutral": "Neutral"
+      },
+      "dignity": "Würde",
+      "direct": "Direktläufig",
+      "intro": "Zeichen, Grad, Haus und Würde für jeden Graha. Öffne eine Karte, um die genaue Länge und die Bewegung zu sehen.",
+      "longitude": "Länge",
+      "motion": "Bewegung",
+      "retrograde": "Rückläufig",
+      "speed": "{speed}°/Tag"
+    },
+    "story": {
+      "chapters": "{count} geprüfte Kapitel zu Identität, Beziehungen, Familie, Berufung, Ressourcen, Timing und konkretem Handeln.",
+      "dialogLead": "Jedes Kapitel wird punktgenau auf deine eigenen Stellungen hin verfasst. Das dauert ein paar Minuten, und das Warten lohnt sich.",
+      "dialogNote": "Lass diesen Tab geöffnet. Der Download startet von selbst, sobald der Bericht fertig ist.",
+      "dialogTitle": "Dein PDF wird geschrieben",
+      "downloadPdf": "PDF herunterladen",
+      "downloadReading": "Deutung herunterladen",
+      "error": "Der Bericht konnte nicht erstellt werden. Bitte versuche es erneut.",
+      "inProgress": "{stage}…",
+      "kicker": "Persönliche Deutung",
+      "stages": {
+        "calculating": "Die Berechnung wird abgeschlossen",
+        "typesetting": "Das PDF wird gesetzt",
+        "verifying": "Das Horoskop wird gegengeprüft",
+        "writing": "Deine Deutung wird geschrieben"
+      }
+    },
+    "timingPreview": {
+      "chapter": "Aktuelles Kapitel",
+      "stops": {
+        "forecast": {
+          "label": "Prognose",
+          "note": "Perioden jetzt und danach"
+        },
+        "muhurta": {
+          "label": "Muhurta",
+          "note": "Den Anfang wählen"
+        },
+        "yearAhead": {
+          "label": "Jahresausblick",
+          "note": "Dein Jahreshoroskop"
+        }
+      },
+      "until": "Bis {date}"
+    }
   },
   "dasha": {
     "kicker": "VEDISCHES ZEITSYSTEM",
@@ -417,7 +837,82 @@
     "periodProgress": "Periodenfortschritt",
     "currentReadingPending": "Deine aktuelle Periode wird gedeutet…",
     "stepBack": "Zurück",
-    "stepBackTo": "Zurück zur Ebene {level}"
+    "stepBackTo": "Zurück zur Ebene {level}",
+    "panel": {
+      "activeMaha": "Aktive Mahadasha",
+      "auditBirthTime": "Verwendete Geburtszeit",
+      "auditCompleteAtBirth": "Bei der Geburt zu {percent}% durchlaufen",
+      "auditCoordinates": "Koordinaten",
+      "auditCoordinatesNote": "Breiten- und Längengrad, die für dieses Horoskop verwendet wurden",
+      "auditElapsed": "Bei der Geburt verstrichen: {elapsed} / {total} Jahre",
+      "auditEngine": "Berechnungsmethode",
+      "auditHeading": "Sieh dir die genauen Eingaben hinter diesem Timing-Ergebnis an",
+      "auditIntoNakshatra": "{degree} Grad im Nakshatra",
+      "auditKicker": "Prüfung der Berechnung",
+      "auditMoon": "Mondposition",
+      "auditMoonValue": "{sign} {degree} Grad",
+      "auditNakshatra": "Ausgangs-Nakshatra",
+      "auditNote": "Wenn ein Dasha-Ergebnis seltsam wirkt, vergleiche diesen Kasten mit der Horoskopquelle, die du erwartet hast, bevor du die Deutung änderst.",
+      "auditPada": "Pada {pada}",
+      "auditRemaining": "Bei der Geburt verbleibend: {remaining} Jahre",
+      "auditSeed": "Ausgangs-Dasha bei der Geburt",
+      "auditSeedLord": "Mahadasha {planet}",
+      "auditSidereal": "Siderische Länge {degree} Grad",
+      "auditTimingCheck": "Timing-Prüfung",
+      "auditTimingNote": "Wann die aktuelle Periode abgefragt wurde, nach deiner Uhrzeit",
+      "auditWindow": "Zeitraum: {start} bis {end} Ortszeit",
+      "barTitle": "{planet}: {years} Jahre ({start} – {end})",
+      "chainJoin": "–",
+      "chapterKicker": "Aktuelles Lebenskapitel",
+      "close": "Schließen",
+      "colDuration": "Dauer",
+      "colEnd": "Ende",
+      "colStart": "Beginn",
+      "colStatus": "Status",
+      "colTheme": "Thema",
+      "combined": "Gemeinsamer Einfluss",
+      "complete": "verstrichen",
+      "dashaLabel": "Dasha",
+      "deeperSubPeriods": "der tieferen Unterperioden",
+      "detailsLoading": "Timing-Details werden geladen",
+      "durationDays": "{count} Tage",
+      "durationMonths": "{count} Monate",
+      "durationYears": "{count} Jahre",
+      "hideAudit": "Prüfung ausblenden",
+      "lensMaha": "Mahadasha-Kapitel unter der Lupe",
+      "lensSub": "{planet}: Unterperioden unter der Lupe",
+      "level": "Ebene {level}",
+      "meterAria": "Fortschritt der aktuellen Antardasha",
+      "openBranch": "Nächsten Zweig öffnen",
+      "placement": "{planet} in {sign} (Haus {house})",
+      "readingChain": "Diese Abfolge wird gedeutet…",
+      "showAudit": "Prüfung anzeigen",
+      "stackAria": "Aktive Dasha-Ebenen",
+      "subPeriods": "Unterperioden",
+      "tableMaha": "Vollständige Abfolge der Mahadashas",
+      "tableSub": "Unterperioden in der Periode {planet}",
+      "themeActive": "Aktiver zeitlicher Einfluss",
+      "themes": {
+        "jupiter": "Weisheit & Wachstum",
+        "ketu": "Spiritualität & Loslösung",
+        "mars": "Energie & Mut",
+        "mercury": "Intellekt & Kommunikation",
+        "moon": "Gefühle & Öffentlichkeit",
+        "rahu": "Ehrgeiz & Wandlung",
+        "saturn": "Disziplin & Karma",
+        "sun": "Autorität & Selbstausdruck",
+        "venus": "Liebe & Luxus"
+      },
+      "themeSubPeriod": "Einfluss der Unterperiode",
+      "timelineHint": "Klicke auf eine Dasha, um ihre Antardashas zu öffnen, und wähle dann weitere Zweige für das Timing von Pratyantar, Sookshma und Prana.",
+      "timelineTitle": "Vimshottari-Dasha-Zeitleiste",
+      "today": "Heute",
+      "upcomingOrPast": "Kommend / vergangen",
+      "viewLens": "Lupe",
+      "viewsAria": "Ansichten der Dasha-Zeitleiste",
+      "viewTable": "Tabelle",
+      "viewTimeline": "Zeitleiste"
+    }
   },
   "transits": {
     "kicker": "AKTUELLER HIMMEL",
@@ -425,7 +920,9 @@
     "computedAt": "Berechnet am",
     "positions": "Aktuelle Positionen",
     "aspects": "Aktive Transitaspekte",
-    "noAspects": "Keine aktiven Transitaspekte."
+    "noAspects": "Keine aktiven Transitaspekte.",
+    "aspectLine": "<strong>{transit}</strong> {aspect} <strong>{natal}</strong> im Geburtshoroskop",
+    "aspectsAria": "Transitaspekte zu den Planeten im Geburtshoroskop"
   },
   "navamsa": {
     "kicker": "TEILHOROSKOP",
@@ -440,14 +937,28 @@
     "vargottamaCount": "{count} Vargottama-Planet(en)",
     "vargottamaCountZero": "Keine Vargottama-Planeten in deinem Horoskop",
     "vargottamaExplanation": "Vargottama-Planeten bringen ihre Bedeutungen klar und beständig zum Ausdruck, in materieller wie in spiritueller Hinsicht.",
-    "clickHint": "Klicke auf eine Planetenzeile, um die ausführliche Navamsa-Deutung zu sehen"
+    "clickHint": "Klicke auf eine Planetenzeile, um die ausführliche Navamsa-Deutung zu sehen",
+    "dignities": {
+      "debilitated": "Im Fall",
+      "enemy": "Feindliches Zeichen",
+      "exalted": "Erhöht",
+      "friend": "Befreundetes Zeichen",
+      "moolatrikona": "Moolatrikona",
+      "neutral": "Neutral",
+      "own": "Eigenes Zeichen"
+    },
+    "legendAria": "Farblegende der Würden",
+    "signLabel": "Navamsa-Zeichen {sign}",
+    "tableAria": "Planetenpositionen im Navamsa",
+    "vargottamaLabel": "Vargottama"
   },
   "aspects": {
     "kicker": "PLANETARE BEZIEHUNGEN",
     "heading": "Aspektanalyse",
     "vedicDrishti": "Vedische Drishti",
     "applying": "Zunehmend",
-    "separating": "Abnehmend"
+    "separating": "Abnehmend",
+    "listAria": "Planetare Aspekte"
   },
   "compatibility": {
     "kicker": "Synastrie-Analyse",
@@ -552,7 +1063,14 @@
     "fields": "{filled}/{total} Felder",
     "nearlyFormed": "Die Atmosphäre des Horoskops hat fast Gestalt angenommen",
     "addDetails": "Ergänze Angaben, um das Horoskop zu wecken",
-    "readyPercent": "{percent}% bereit"
+    "readyPercent": "{percent}% bereit",
+    "markers": {
+      "ascendant": "AC",
+      "houses": "HÄUSER",
+      "midheaven": "MC",
+      "moon": "MOND",
+      "sun": "SONNE"
+    }
   },
   "zodiacSigns": {
     "aries": "Widder",
@@ -584,7 +1102,8 @@
   },
   "bottomNav": {
     "home": "Start",
-    "insights": "Einblicke"
+    "insights": "Einblicke",
+    "aria": "Mobile Navigation"
   },
   "errorBoundary": {
     "heading": "Etwas ist schiefgelaufen",
@@ -646,7 +1165,40 @@
     "error_exchange_failed": "Google konnte die Anmeldung nicht abschließen. Versuche es erneut.",
     "error_email_unverified": "Google hat die E-Mail-Adresse dieses Kontos nicht bestätigt, daher kann es nicht zur Anmeldung verwendet werden.",
     "error_signin_failed": "Beim Abschließen der Anmeldung ist etwas schiefgelaufen. Versuche es erneut.",
-    "error_unknown": "Die Anmeldung wurde nicht abgeschlossen. Versuche es erneut."
+    "error_unknown": "Die Anmeldung wurde nicht abgeschlossen. Versuche es erneut.",
+    "facts": {
+      "aquarius1": "Der Meteorstrom der Aquariiden im Mai besteht aus Trümmern des Halleyschen Kometen · zuletzt 1986 zu sehen und erst 2061 wieder zu erwarten.",
+      "aquarius2": "Im Wassermann liegt der Helixnebel, 650 Lichtjahre entfernt · oft das Auge Gottes genannt, das aus der Dunkelheit zurückblickt.",
+      "aries1": "Das erste Zeichen · von Mars beherrscht, trägt es den Funken des Neubeginns und den Mut, ins Unbekannte zu gehen.",
+      "aries2": "In der vedischen Überlieferung ist die Sonne in Mesha erhöht · einst verankerte die Tagundnachtgleiche im Frühling hier den wahren Beginn des Jahres.",
+      "cancer1": "Das eigene Haus des Mondes · die vedische Tradition nennt es Karka, den Hüter der Erinnerung, der Abstammung und der inneren Gezeiten.",
+      "cancer2": "In seinem Herzen liegt der Bienenkorb-Sternhaufen, M44 · ein Schwarm aus fast tausend Sternen, den Galilei 1609 als Erster in einzelne Sterne auflöste.",
+      "capricorn1": "Der Ziegenfisch gehört zu den ältesten mythischen Gestalten · schon die Sumerer zeichneten ihn vor mehr als viertausend Jahren.",
+      "capricorn2": "Hier herrscht Saturn · Makara ist der langsame Aufstieg aus den Tiefen des Ozeans zum disziplinierten Gipfel der Welt.",
+      "gemini1": "Castor ist nicht ein Stern, sondern sechs · ein durch die Schwerkraft gebundenes Sechsfachsystem, das sich als einzelner Lichtpunkt ausgibt.",
+      "gemini2": "Merkurs luftige Zwillinge · das Botenzeichen der Neugier, der Sprache und der Schwelle zwischen den Welten.",
+      "leo1": "Regulus, der kleine König, steht fast genau auf der Ekliptik · jeden August zieht die Sonne direkt über ihn hinweg.",
+      "leo2": "In der vedischen Tradition ist Simha das eigene Haus der Sonne · Königtum, Gold und die Wirbelsäule unterstehen alle seiner Herrschaft.",
+      "libra1": "Das einzige Tierkreiszeichen, das durch einen Gegenstand dargestellt wird · einst waren diese Waagschalen die Scheren des benachbarten Skorpions.",
+      "libra2": "Saturn ist in Tula erhöht · das kosmische Maß, das jede Handlung gegen ihr stilles Gegengewicht abwägt.",
+      "pisces1": "Zwei Fische, die in entgegengesetzte Richtungen schwimmen · die letzte Auflösung der Seele vor der Wiedergeburt in eine neue Runde des Tierkreises.",
+      "pisces2": "Die vedische Astrologie nennt die Fische Meena · Jupiters eigenes Zeichen und das Erhöhungszeichen der Venus, der Ozean, in dem die Weisheit endlich ruht.",
+      "sagittarius1": "Der Schütze zeigt direkt auf das galaktische Zentrum · das supermassereiche Schwarze Loch Sgr A* liegt innerhalb seiner Grenzen.",
+      "sagittarius2": "Jupiters feuriges Reich · in der vedischen Überlieferung ist Dhanu der Bogenschütze des Dharma, der die Seele auf einen höheren Sinn ausrichtet.",
+      "scorpio1": "Antares, das Herz des Skorpions, ist so riesig, dass er die Umlaufbahn des Mars verschlucken würde, stünde er an der Stelle unserer Sonne.",
+      "scorpio2": "Die vedische Astrologie nennt dieses Zeichen Vrishchika · verbunden mit Ketu, dem südlichen Mondknoten und Hüter vergrabener karmischer Fäden.",
+      "taurus1": "Das erdige Reich der Venus · geduldig, sinnlich und standhaft wie der Stier, der das Feld bewacht.",
+      "taurus2": "Die Plejaden sitzen auf der Schulter des Stiers · vedische Seher nennen diese sieben Schwestern Krittika, die Flammennymphen.",
+      "virgo1": "Das zweitgrößte Sternbild am Himmel · die Jungfrau erstreckt sich über 1.294 Quadratgrad himmlischen Grund und Bodens.",
+      "virgo2": "Merkur ist hier erhöht · in der vedischen Überlieferung trägt Kanya die Urteilskraft, die rohe Erfahrung in Weisheit verwandelt."
+    },
+    "sky": {
+      "aligned": "Himmel im Einklang · Neue Anfänge",
+      "mercuryDirect": "Merkur direktläufig",
+      "mercuryRetrograde": "Merkur rückläufig",
+      "moonIn": "Mond in {sign}",
+      "sunClear": "Sonne in {sign} · Klarer Himmel"
+    }
   },
   "chartSync": {
     "kicker": "Dein Horoskop speichern",
@@ -1159,7 +1711,15 @@
         "vargaHouseDisplayValue": "Ganzzeichen-Häuser, abgeleitet vom {label}-Aszendenten",
         "birthTimeStatus": "Status der Geburtszeit",
         "cautionTitle": "Grenzen der Deutung",
-        "cautionBody": "Diese Seite zeigt berechnete Zeichen, Ganzzeichen-Häuser, Herrscher, klassische Würde und die Stellung der Dasha-Herrscher. Sie leitet keine exakten Aspekte im Teilhoroskop ab, wertet wiederkehrende Zeichen nicht automatisch als positiv und lässt das D1 nicht von {label} überstimmen."
+        "cautionBody": "Diese Seite zeigt berechnete Zeichen, Ganzzeichen-Häuser, Herrscher, klassische Würde und die Stellung der Dasha-Herrscher. Sie leitet keine exakten Aspekte im Teilhoroskop ab, wertet wiederkehrende Zeichen nicht automatisch als positiv und lässt das D1 nicht von {label} überstimmen.",
+        "houseSystems": {
+          "campanus": "Campanus",
+          "equal": "Äquale Häuser",
+          "koch": "Koch",
+          "placidus": "Placidus",
+          "regiomontanus": "Regiomontanus",
+          "whole_sign": "Ganzzeichen-Häuser"
+        }
       },
       "pager": {
         "label": "Benachbarte Kernhoroskope",
@@ -1169,7 +1729,14 @@
       "footer": {
         "note": "Teilhoroskope verfeinern eine Anlage im Geburtshoroskop; sie ersetzen sie nicht. Festere Schlüsse brauchen zuverlässige Geburtsdaten und die Übereinstimmung mit unabhängigen Belegen.",
         "returnLink": "Zurück zu deiner vollständigen Deutung"
-      }
+      },
+      "dignities": {
+        "debilitated": "Im Fall",
+        "exalted": "Erhöht",
+        "neutral": "Neutral",
+        "own_sign": "Eigenes Zeichen"
+      },
+      "houseShort": "H{house}"
     },
     "guide": {
       "d1": {
@@ -1456,6 +2023,43 @@
       "calendar": {
         "summary": "Günstiges Zeitfenster — {activity} ({score}/100 {quality})",
         "factor": "{name}: {value} — {quality}"
+      },
+      "factorQualities": {
+        "auspicious": "günstig",
+        "bhadra_auspicious": "Bhadra (günstig)",
+        "favorable": "förderlich",
+        "fixed_dhruva": "Fest (Dhruva)",
+        "inauspicious": "ungünstig",
+        "jaya_victorious": "Jaya (siegreich)",
+        "mixed_sadharana": "Gemischt (Sadharana)",
+        "movable_chara": "Beweglich (Chara)",
+        "nanda_joyful": "Nanda (freudvoll)",
+        "neutral": "neutral",
+        "purna_full_complete": "Purna (voll/vollständig)",
+        "rikta_empty": "Rikta (leer)",
+        "sharp_fierce_tikshna": "Scharf/Heftig (Tikshna)",
+        "soft_tender_mridu": "Sanft/Zart (Mridu)"
+      },
+      "factors": {
+        "hora": "Hora",
+        "karana": "Karana",
+        "nakshatra": "Nakshatra",
+        "rahukaala": "Rahukaala",
+        "tithi": "Tithi",
+        "weekday": "Wochentag",
+        "yamaghantaka": "Yamaghantaka",
+        "yoga": "Yoga"
+      },
+      "horaValue": "Hora {planet}",
+      "periodStates": {
+        "active": "Aktiv",
+        "clear": "Nicht aktiv"
+      },
+      "windowQualities": {
+        "excellent": "ausgezeichnet",
+        "fair": "mäßig",
+        "good": "gut",
+        "poor": "schwach"
       }
     },
     "varshaphal": {
@@ -1672,6 +2276,50 @@
       },
       "interpretation": {
         "asYearLord": "{planet} als Jahresherrscher:"
+      },
+      "profectionThemes": {
+        "aspirations": "Ziele",
+        "authority": "Autorität",
+        "career": "Karriere",
+        "children": "Kinder",
+        "communication": "Kommunikation",
+        "community": "Gemeinschaft",
+        "contracts": "Verträge",
+        "creativity": "Kreativität",
+        "daily_routines": "Alltagsroutinen",
+        "emotional_roots": "emotionale Wurzeln",
+        "endings": "Abschlüsse",
+        "family": "Familie",
+        "finances": "Finanzen",
+        "friends": "Freundschaften",
+        "health": "Gesundheit",
+        "higher_learning": "Studium",
+        "home": "Zuhause",
+        "identity": "Identität",
+        "long_travel": "Fernreisen",
+        "marriage": "Ehe",
+        "material_security": "materielle Sicherheit",
+        "occult": "Okkultes",
+        "partnerships": "Partnerschaften",
+        "personal_direction": "Lebensrichtung",
+        "philosophy": "Philosophie",
+        "public_life": "Öffentlichkeit",
+        "romance": "Romantik",
+        "self": "Selbst",
+        "service": "Dienst",
+        "shared_resources": "gemeinsame Ressourcen",
+        "short_travel": "Kurzreisen",
+        "siblings": "Geschwister",
+        "solitude": "Alleinsein",
+        "spirituality": "Spiritualität",
+        "transformation": "Wandlung",
+        "values": "Werte"
+      },
+      "yearLordReasons": {
+        "default": "Standardmäßig der Herrscher des Solar-Aszendenten",
+        "munthaSign": "Herrscher des Muntha-Zeichens ({sign})",
+        "natalAscendant": "Herrscher des Aszendenten im Geburtshoroskop ({sign})",
+        "returnAscendant": "Herrscher des Solar-Aszendenten ({sign})"
       }
     }
   },
@@ -1710,7 +2358,10 @@
       "errorKicker": "Lebenskapitel",
       "errorHeading": "Die Lebenskapitel konnten nicht erstellt werden.",
       "errorFallback": "Es wurden keine Horoskopdaten zurückgegeben.",
-      "backToReading": "Zurück zu deiner Deutung"
+      "backToReading": "Zurück zu deiner Deutung",
+      "heroKicker": "Große Lebenswenden",
+      "heroLead": "Jedes Kapitel, das dieses Horoskop absteckt – das laufende, das darauf folgende und die, die schon hinter dir liegen. Die Daten sind Planungsfenster, keine Fristen.",
+      "heroTitle": "Die Lebenskapitel von {name}"
     },
     "kalatraHeading": "Das Eheleben im Detail",
     "kalatraNote": "Fünf Facetten, jede aus ihrem eigenen Haus gelesen",
@@ -1734,6 +2385,135 @@
       "noteLabel": "Anmerkung des Übersetzers",
       "credit": "Die Zahlen verweisen auf die Verse, aus denen die Aussagen stammen, zitiert im gedruckten Wortlaut der englischen Übersetzung des Brihat Jataka von Varahamihira, die N. Chidambaram Iyer 1885 vorlegte.",
       "creditStrijataka": "Die mit Strijataka gekennzeichneten Textstellen stammen aus „Strijataka, or Female Horoscopy“ (1931) von B. Suryanarain Rao, einem Buch über die Geburtshoroskope von Frauen, und sind im gedruckten Wortlaut zitiert. Wörter in eckigen Klammern sind unsere Ergänzungen, nicht Teil des Buchs."
+    },
+    "claims": {
+      "anchorPlanet": "Ankerplanet",
+      "houseLord": "Hausherrscher",
+      "houses": {
+        "h1": "1. Haus",
+        "h10": "10. Haus",
+        "h11": "11. Haus",
+        "h12": "12. Haus",
+        "h2": "2. Haus",
+        "h3": "3. Haus",
+        "h4": "4. Haus",
+        "h5": "5. Haus",
+        "h6": "6. Haus",
+        "h7": "7. Haus",
+        "h8": "8. Haus",
+        "h9": "9. Haus"
+      },
+      "houseSign": "Zeichen in diesem Haus",
+      "lordPlacement": "Stellung des Herrschers",
+      "primaryHouse": "Haupthaus",
+      "supportingHouse": "Unterstützendes Haus",
+      "supportingLord": "Unterstützender Herrscher"
+    },
+    "conclusion": {
+      "cautious": "vorsichtiges Fazit",
+      "moderate": "gemäßigtes Fazit",
+      "strong": "deutliches Fazit"
+    },
+    "confirmation": {
+      "confirmed": "bestätigt",
+      "contradictory": "widersprüchlich",
+      "improved": "aufgewertet",
+      "insufficient": "unzureichend",
+      "qualified": "bedingt bestätigt"
+    },
+    "copy": {
+      "career": {
+        "boundaryRule": "Sind Häuser des Drucks beteiligt, braucht der Aufstieg womöglich Systeme, Mentoren und wiederholbare Nachweise, bevor Sichtbarkeit entsteht.",
+        "clarity": "Lies den Beruf nicht allein aus dem 10. Haus. Wäge das Zeichen des 10. Hauses, seinen Herrscher, das Arbeitsmuster des 6. Hauses und Saturn als Filter der Disziplin gemeinsam ab.",
+        "decisionRule": "Berufliche Schritte gelingen klarer, wenn der zeitliche Auslöser sowohl die Anlage des 10. Hauses als auch die Stellung seines Herrschers verstärkt.",
+        "description": "Unterscheidet zwischen Berufung, Arbeitslast, Autorität, öffentlichem Ansehen, dem Druck des Dienens und dem Weg, auf dem berufliche Anerkennung entsteht."
+      },
+      "family": {
+        "boundaryRule": "Greift der Warnhinweis, schütze zuerst die Beständigkeit; eine Lösung gelingt besser, wenn das emotionale Gleichgewicht wiederhergestellt ist.",
+        "clarity": "Lies das 4. Haus für den emotionalen Boden, das 2. für Abstammung und Sprache, den Mond für gefühlte Sicherheit und den Hausherrscher dafür, wo Heilung geschieht.",
+        "decisionRule": "Empfehlungen zur Familie sind am stärksten, wenn das Unterstützungsmuster dasselbe Bedürfnis benennt wie der Ausblick auf lange Sicht.",
+        "description": "Klärt das häusliche Leben, ererbte emotionale Muster, den Rückhalt in der Familie, private Stabilität und die Gewohnheiten, durch die sich Zugehörigkeit verlässlich anfühlt."
+      },
+      "influence": {
+        "boundaryRule": "Nennt der Warnhinweis Verzettelung oder Verzögerung, grenze das Publikum ein und mach die Botschaft leichter wiederholbar.",
+        "clarity": "Lies das 11. Haus für Netzwerke, das 10. für das öffentliche Ansehen, die Sonne für Sichtbarkeit und den Herrscher dafür, wo Einfluss verdient wird.",
+        "decisionRule": "Einfluss wächst am schnellsten, wenn zeitliche Auslöser ein bestehendes Unterstützungsmuster verstärken, statt Sichtbarkeit zu früh zu erzwingen.",
+        "description": "Betrachtet öffentliche Wirkung, Verbündete, soziale Reichweite, Autorität, Ansehen und die Bedingungen, unter denen deine Stimme Menschen bewegt."
+      },
+      "inheritance": {
+        "boundaryRule": "Nennt der Warnhinweis verborgene Kosten oder Verzögerungen, setze auf Dokumentation, Transparenz und eine geduldige Reihenfolge.",
+        "clarity": "Lies das 8. Haus für übertragene Ressourcen, das 2. für angesammelte Werte, Jupiter für sorgsames Haushalten und die Stellung des Herrschers für den Weg der Verantwortung.",
+        "decisionRule": "Nimm Signale zum Erbe als praktische Anstöße für die Planung, wenn sie sich in den Abschnitten zu Unterstützung, Vorsicht und Timing wiederholen.",
+        "description": "Betrachtet gemeinsame Ressourcen, Vermächtnis, Schulden, verborgene Verpflichtungen, Familienvermögen und die Reife, die Übergänge bei Ressourcen verlangen."
+      },
+      "life_cycle": {
+        "boundaryRule": "Greift der Warnhinweis, verlangsame das Tempo und mach den nächsten Schritt kleiner, klarer und leichter durchzuhalten.",
+        "clarity": "Lies das 1. Haus für die Identität, das 8. für die Wandlung, den Mond für die Anpassung und die Stellung des Herrschers für das Terrain des Wandels.",
+        "decisionRule": "Ein Signal zum Lebenszyklus verdient Vorrang, wenn die Hinweise zum Timing und die Empfehlungen auf lange Sicht beide auf dieselbe Art von Reife hinweisen.",
+        "description": "Verbindet Identität, Neuerfindung, Erholungszyklen, Widerstandskraft und die Phasen, in denen das Leben eine klarere Form der Selbstbestimmung verlangt."
+      },
+      "love_life": {
+        "boundaryRule": "Widerspricht der Warnhinweis der Unterstützung, behandle ihn als die Bedingung, die du in den Griff bekommen musst, bevor sich die Unterstützung auszahlt.",
+        "clarity": "Beurteile die Liebe nicht allein nach Venus. Lies das 7. Haus für die Partnerschaft, das 5. für die Romantik, den Hausherrscher für die Umsetzung und die zeitlichen Auslöser dafür, wann das Muster sichtbar wird.",
+        "decisionRule": "Ein Beziehungssignal ist stärker, wenn die Hinweise zu Unterstützung, Vorsicht und Timing dasselbe Thema wiederholen.",
+        "description": "Unterscheidet zwischen Anziehung, der Beständigkeit einer Partnerschaft, emotionaler Verfügbarkeit und dem Timing, das es leichter macht, eine Verbindung aufrechtzuerhalten."
+      },
+      "travel_destinations": {
+        "boundaryRule": "Nennen die Warnhinweise Reibung, betrachte Planung, Dokumente, Gesundheit und zeitliche Puffer als Teil der Deutung, nicht als Nebensache.",
+        "clarity": "Lies das 9. Haus für Ferne und Sinn, das 3. für Bewegung und Logistik, Jupiter für Erweiterung und die Stellung des Herrschers für den Zweck des Reisens.",
+        "decisionRule": "Reisesignale werden praktisch, wenn zeitliche Auslöser sowohl die Gelegenheit als auch die Vorbereitung unterstützen.",
+        "description": "Klärt Fernreisen, kurze Reisen, den Drang zum Ortswechsel, Verbindungen ins Ausland, Themen der Pilgerschaft und das, was einen Ort bedeutsam macht."
+      }
+    },
+    "evidenceStatus": {
+      "context": "Kontext",
+      "mixed": "gemischt",
+      "pressure": "Druck",
+      "support": "Unterstützung"
+    },
+    "families": {
+      "contradiction": "Prüfung auf Widersprüche",
+      "divisional": "Bestätigung durch Teilhoroskope",
+      "house_support": "Unterstützung der Häuser",
+      "primary": "Anlage im Geburtshoroskop",
+      "strength": "Umsetzungskraft",
+      "supporting": "Unterstützende Faktoren",
+      "timing": "Timing und Aktivierung",
+      "yoga": "Unterstützung durch Kombinationen"
+    },
+    "hero": {
+      "kicker": "Hauptmodul · Lebensbereiche",
+      "lead": "Jeder Bereich durchläuft eine eigene Matrix von Belegen: Anlage im Geburtshoroskop, unterstützende Faktoren, Bestätigung durch die Teilhoroskope, gemessene Stärke, Unterstützung der Häuser, Kombinationen, Timing und Widersprüche.",
+      "title": "Die Lebensbereiche von {name} im Detail"
+    },
+    "kalatraFacets": {
+      "bond_durability": "Ob die Bindung hält",
+      "desire_pattern": "Die Gestalt des Begehrens",
+      "in_laws": "Die Familie, in die du einheiratest",
+      "physical_intimacy": "Die körperliche Seite",
+      "privacy_and_rest": "Privatsphäre, Ruhe und das Bett"
+    },
+    "ruleImpact": {
+      "activation": "Aktivierung",
+      "context": "Kontext",
+      "pressure": "Druck",
+      "support": "Unterstützung"
+    },
+    "ruleLabels": {
+      "action": "Handlungsregel",
+      "evidence": "Belegregel",
+      "house": "Hausregel",
+      "timing": "Timing-Regel"
+    },
+    "subthemeBands": {
+      "developing": "in Entwicklung",
+      "leading": "führend",
+      "supporting": "unterstützend"
+    },
+    "timingWindows": {
+      "caution": "Wann Vorsicht geboten ist",
+      "current": "Aktuelle Aktivierung",
+      "next": "Nächster stärkerer Zyklus"
     }
   },
   "fullReading": {
@@ -1871,7 +2651,8 @@
       "calculationFailed": "Berechnung des Horoskops fehlgeschlagen",
       "backToReading": "Zurück zu deiner Deutung",
       "heroTitle": "Die Unterstützung der Häuser von {name} im Detail",
-      "heroLead": "Wie viel Unterstützung jedes der zwölf Häuser hat, wofür jedes einzelne zuständig ist und welche Rechnung hinter beidem steckt."
+      "heroLead": "Wie viel Unterstützung jedes der zwölf Häuser hat, wofür jedes einzelne zuständig ist und welche Rechnung hinter beidem steckt.",
+      "heroKicker": "Ashtakavarga · Unterstützung der Häuser"
     },
     "bhavaNames": {
       "1": "Tanu",
@@ -2214,5 +2995,120 @@
     "purvaBhadrapada": "Purva Bhadrapada",
     "uttaraBhadrapada": "Uttara Bhadrapada",
     "revati": "Revati"
+  },
+  "advanced": {
+    "focus": {
+      "palm": {
+        "breadcrumb": "Synthese Horoskop + Handfläche",
+        "description": "Lade ein deutliches Foto deiner Handfläche hoch, um ihre Muster mit dem Kontext aus deinem Geburtshoroskop zusammenzuführen.",
+        "status": "Ein Foto der Handfläche wird benötigt"
+      },
+      "transits": {
+        "breadcrumb": "Aktuelle Transite",
+        "description": "Der aktuelle Himmel wird deinem Geburtshoroskop gegenübergestellt, damit die aktiven Themen im Mittelpunkt bleiben.",
+        "status": "Live-Überlagerung des Horoskops"
+      }
+    },
+    "gate": {
+      "heading": "Für die erweiterte Deutung brauchst du ein Konto",
+      "kicker": "Nur für Mitglieder",
+      "lead": "Hier entsteht eine vollständige Deutung deines Horoskops – Timing, Aspekte, Teilhoroskope und Stärken – samt allen Tabellen, auf denen sie beruht. Nichts in der App ist aufwendiger, deshalb ist dieser Bereich allen vorbehalten, die angemeldet sind.",
+      "signIn": "Zum Fortfahren anmelden"
+    },
+    "header": {
+      "advanced": "Erweitert",
+      "backToInsights": "Zurück zu den Einblicken",
+      "breadcrumbAria": "Position in der Deutung",
+      "focusKicker": "Fokussierter Arbeitsbereich",
+      "kicker": "Werkzeuge zur Vertiefung",
+      "lead": "Nakshatra-Zyklen, Dasha-Timing, Verfeinerungen durch das Navamsa, Teilhoroskope, planetare Yogas, Transit-Überlagerungen, Ashtakavarga-Werte, Shadbala-Stärke und Handdeutung – alles an einem eigenen Ort.",
+      "moreKicker": "Mehr entdecken",
+      "moreTitle": "Weitere erweiterte Werkzeuge",
+      "title": "Erweiterte Analyse & Handdeutung",
+      "workspaceAria": "Arbeitsbereich: {name}",
+      "yourReading": "Deine Deutung"
+    },
+    "locked": {
+      "ashtakavarga": {
+        "description": "Schalte das klassische vedische System der Transitstärke frei, das die Verteilung der Bindus auf alle 12 Zeichen zeigt.",
+        "title": "Ashtakavarga-Bewertung"
+      },
+      "aspects": {
+        "description": "Sieh die stärksten harmonischen und spannungsreichen Kontakte im Geburtshoroskop, geordnet nach Orbis.",
+        "title": "Aspektmatrix der Planeten"
+      },
+      "dasha": {
+        "description": "Schalte die Analyse der Mondstationen, die Abfolge der aktuellen Dashas und zeitgenaue Detailansichten frei.",
+        "title": "Nakshatra und Dasha-Timing"
+      },
+      "divisional": {
+        "description": "Schalte den vollständigen Atlas der verfügbaren Teilhoroskope frei – für Grundanlage, Wohlstand, Beziehungen, Beruf, Abstammung, Widerstandskraft und mehr.",
+        "title": "Teilhoroskope (Vargas)"
+      },
+      "navamsa": {
+        "description": "Öffne die Ebene des D9, um Reifemuster, tiefere Beziehungssignaturen und die innere Anlage zu beurteilen.",
+        "title": "Verfeinerung durch das Navamsa (D9)"
+      },
+      "transits": {
+        "description": "Verfolge den aktuellen Himmel vor dem Hintergrund des Geburtshoroskops, um aktive Auslöser und nahe Zeitfenster zu verstehen.",
+        "title": "Live-Transite"
+      }
+    },
+    "story": {
+      "almost": "Fast fertig…",
+      "hide": {
+        "ashtakavarga": "Punktetabellen ausblenden",
+        "aspects": "Aspekttabelle ausblenden",
+        "divisional": "Teilhoroskope ausblenden",
+        "navamsa": "Navamsa-Horoskop ausblenden",
+        "strength": "Stärketabelle ausblenden",
+        "timing": "Timing-Details ausblenden",
+        "transits": "Transit-Details ausblenden",
+        "yogas": "Yoga-Liste ausblenden"
+      },
+      "limit": "Du hast deine Deutungen für heute aufgebraucht. Alle Tabellen findest du weiterhin hier unten.",
+      "readingChart": "Dein Horoskop wird gedeutet…",
+      "secondRun": "Ein zweiter Anlauf…",
+      "secondsLeftOne": "Noch etwa {count} Sekunde",
+      "secondsLeftOther": "Noch etwa {count} Sekunden",
+      "sessionEnded": "Deine Sitzung ist abgelaufen.",
+      "sessionEndedTail": "und lass diese Deutung neu schreiben. Alle Tabellen findest du weiterhin hier unten.",
+      "show": {
+        "ashtakavarga": "Punktetabellen anzeigen",
+        "aspects": "Aspekttabelle anzeigen",
+        "divisional": "Teilhoroskope anzeigen",
+        "navamsa": "Navamsa-Horoskop anzeigen",
+        "strength": "Stärketabelle anzeigen",
+        "timing": "Timing-Details anzeigen",
+        "transits": "Transit-Details anzeigen",
+        "yogas": "Yoga-Liste anzeigen"
+      },
+      "signInAgain": "Melde dich erneut an",
+      "tablesMeanwhile": "Bis dahin ist jede Tabelle unten nur einen Klick entfernt.",
+      "unavailable": "Die Deutung konnte gerade nicht geschrieben werden.",
+      "writing": "Deine Deutung wird geschrieben",
+      "writingSection": "Dieser Abschnitt wird geschrieben…"
+    }
+  },
+  "lifeDomains": {
+    "activity": {
+      "active": "Spürbare Aktivität",
+      "developing": "Wachsende Aktivität",
+      "prominent": "Ausgeprägte Aktivität"
+    },
+    "names": {
+      "career": "Beruf",
+      "family": "Familie",
+      "influence": "Einfluss",
+      "inheritance": "Erbe",
+      "life_cycle": "Lebenszyklus",
+      "love_life": "Liebesleben",
+      "travel_destinations": "Reisen & Orte"
+    }
+  },
+  "planetOrb": {
+    "activeDasha": "Planet der aktiven Dasha",
+    "orb": "Planetensymbol {planet}",
+    "strength": "{percent}% Stärke"
   }
 }

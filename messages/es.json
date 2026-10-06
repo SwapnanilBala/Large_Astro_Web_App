@@ -5,7 +5,10 @@
     "menu": "Menú",
     "signOut": "Cerrar sesión",
     "signIn": "Iniciar sesión",
-    "account": "Cuenta"
+    "account": "Cuenta",
+    "closeMenu": "Cerrar el menú de navegación",
+    "openMenu": "Abrir el menú de navegación",
+    "skipToContent": "Saltar al contenido principal"
   },
   "home": {
     "kicker": "Motor de Inteligencia Védica",
@@ -390,7 +393,424 @@
     "yogaLifetime": "Implicación de por vida",
     "yogaNoYogas": "No se han detectado yogas planetarios en esta carta por ahora.",
     "backToReading": "Volver a tu lectura",
-    "backToAdvanced": "Volver al análisis avanzado"
+    "backToAdvanced": "Volver al análisis avanzado",
+    "atlasPreview": {
+      "aria": "Cartas divisionales destacadas",
+      "ascendant": "Ascendente {sign}",
+      "chartAria": "Carta {chart} de signo completo: {placements}",
+      "empty": "Explora las {count} cartas divisionales disponibles en tu atlas.",
+      "focus": {
+        "d1": "Vida e identidad",
+        "d10": "Carrera y contribución",
+        "d9": "Relaciones y propósito"
+      },
+      "noAscendant": "Ascendente no disponible",
+      "placement": "{planet} en {sign}"
+    },
+    "evidence": {
+      "aria": "Evidencia de la carta para este hallazgo",
+      "combinations": "Combinaciones de por vida",
+      "finding": "Un hallazgo de tu carta",
+      "findings": "Hallazgos de la carta",
+      "none": "No hay hallazgos detectados para esta carta.",
+      "placement": "La posición en la que se apoya",
+      "scope": "Patrones kármicos y temas heredados"
+    },
+    "fortunePanel": {
+      "anchorDetail": "Empieza una tarea con intención de cara al {direction}; deja que el número {number} sea un pequeño recordatorio visual de tus prioridades.",
+      "anyDay": "Cualquier día",
+      "badOmens": "Malos presagios",
+      "cautionTitle": "Colores y objetos de mala suerte, y malos presagios",
+      "colorsToAvoid": "Colores que evitar",
+      "dailyAnchor": "Ancla diaria",
+      "directionFocus": "Mirando al {direction}",
+      "domainsEyebrow": "Donde crece la fortuna",
+      "domainsLead": "Son las áreas de la vida donde la preparación, la perspectiva y los contactos adecuados pueden potenciarse entre sí.",
+      "domainsTitle": "Ámbitos de la fortuna",
+      "fallbackColor": "tu color principal",
+      "fallbackDirection": "tu dirección preferida",
+      "gemEyebrow": "Práctica tradicional",
+      "gemLead": "Úsalas como referencias para fijar intenciones, basadas en los planetas que apoyan tu carta.",
+      "gemTitle": "Guía de gemas",
+      "house": "casa {house}",
+      "items": "Objetos",
+      "pairWith": "Combinar con",
+      "planet": "Planeta",
+      "primaryDetail": "Usa {color} para la reunión, el contacto o el primer paso más importante de la semana.",
+      "primaryOpening": "Apertura principal",
+      "primaryRecommendation": "Recomendación principal",
+      "secondaryRecommendation": "Recomendación secundaria",
+      "supportDetail": "Usa este día para pulir detalles, rematar lo empezado y mantener conversaciones que piden paciencia.",
+      "supportWindow": "Ventana de apoyo",
+      "wearDay": "Día para llevarla",
+      "weekEyebrow": "Fortuna práctica",
+      "weekLead": "Pequeños momentos en sintonía con tu carta para vivir los próximos siete días con más intención.",
+      "weekTitle": "La semana que viene"
+    },
+    "lucky": {
+      "colors": {
+        "ash_grey": "Gris ceniza",
+        "blue": "Azul",
+        "clouded_grey": "Gris nublado",
+        "cold_blue": "Azul frío",
+        "cream": "Crema",
+        "dark": "Tonos oscuros",
+        "deep_red": "Rojo intenso",
+        "dull_black": "Negro apagado",
+        "dust_grey": "Gris polvo",
+        "dusty_green": "Verde polvoriento",
+        "earthy": "Tonos tierra",
+        "electric_purple": "Morado eléctrico",
+        "emerald": "Verde esmeralda",
+        "flat_black": "Negro mate",
+        "golden": "Dorado",
+        "green": "Verde",
+        "grey": "Gris",
+        "harsh_neon": "Neón chillón",
+        "mixed_mud": "Barro revuelto",
+        "muddy_gold": "Dorado turbio",
+        "murky_brown": "Marrón turbio",
+        "orange": "Naranja",
+        "pale_brown": "Marrón pálido",
+        "pink": "Rosa",
+        "red": "Rojo",
+        "rust_red": "Rojo óxido",
+        "sallow_yellow": "Amarillo cetrino",
+        "scarlet": "Escarlata",
+        "smoky": "Gris humo",
+        "smoky_black": "Negro ahumado",
+        "stained_white": "Blanco manchado",
+        "ultraviolet": "Ultravioleta",
+        "washed_pink": "Rosa desvaído",
+        "white": "Blanco",
+        "yellow": "Amarillo"
+      },
+      "directions": {
+        "east": "Este",
+        "north": "Norte",
+        "northeast": "Noreste",
+        "northwest": "Noroeste",
+        "south": "Sur",
+        "southeast": "Sureste",
+        "southwest": "Suroeste",
+        "west": "Oeste"
+      },
+      "domainBasis": {
+        "9th_house_lord": "Señor de la casa 9",
+        "ascendant_lord_influence": "Influencia del señor del ascendente",
+        "jupiter_s_natal_placement": "Posición natal de Júpiter",
+        "yogakaraka_influence": "Influencia del yogakaraka"
+      },
+      "domainFocus": {
+        "growth_opportunity": "Generosidad, enseñanza y una mirada amplia cuando una oportunidad pide fe y preparación.",
+        "learning_mentors": "Estudio profundo, guías de confianza, viajes lejanos y decisiones que amplían tu perspectiva.",
+        "personal_momentum": "Las decisiones prácticas que hacen más fácil reconocer las oportunidades y aprovecharlas con constancia."
+      },
+      "domainTitles": {
+        "growth_opportunity": "Crecimiento y oportunidades",
+        "learning_mentors": "Aprendizaje y mentores",
+        "personal_momentum": "Impulso personal"
+      },
+      "gems": {
+        "blue_sapphire": "Zafiro azul",
+        "cat_s_eye": "Ojo de gato",
+        "diamond": "Diamante",
+        "emerald": "Esmeralda",
+        "hessonite_garnet": "Granate hessonita",
+        "pearl": "Perla",
+        "red_coral": "Coral rojo",
+        "ruby": "Rubí",
+        "yellow_sapphire": "Zafiro amarillo"
+      },
+      "intentions": {
+        "jupiter": "Favorece la sabiduría, el aprendizaje y las oportunidades de expansión.",
+        "ketu": "Favorece la reflexión, el discernimiento y el enfoque espiritual.",
+        "mars": "Favorece el valor, el impulso y la acción decidida.",
+        "mercury": "Favorece la comunicación clara, el aprendizaje y el discernimiento.",
+        "moon": "Favorece la estabilidad emocional, el descanso y la receptividad.",
+        "rahu": "Favorece una ambición con los pies en la tierra, sin caer en atajos.",
+        "saturn": "Favorece la paciencia, la responsabilidad y el progreso duradero.",
+        "sun": "Favorece la confianza, la claridad y una visibilidad constructiva.",
+        "venus": "Favorece la armonía, la creatividad y la gracia en las relaciones."
+      },
+      "items": {
+        "broken_beads": "Cuentas rotas",
+        "broken_blades": "Cuchillas rotas",
+        "burnt_tools": "Herramientas quemadas",
+        "chipped_silver": "Plata mellada",
+        "cracked_mirrors": "Espejos agrietados",
+        "damaged_books": "Libros dañados",
+        "empty_wallets": "Carteras vacías",
+        "faded_gold": "Oro deslucido",
+        "faulty_pens": "Bolígrafos que fallan",
+        "frayed_cloth": "Tela deshilachada",
+        "frayed_cords": "Cuerdas deshilachadas",
+        "rusty_iron": "Hierro oxidado",
+        "scratched_perfume_bottles": "Frascos de perfume rayados",
+        "stagnant_water": "Agua estancada",
+        "synthetic_stones": "Piedras sintéticas",
+        "torn_papers": "Papeles rasgados",
+        "wilted_flowers": "Flores marchitas",
+        "worn_shoes": "Zapatos gastados"
+      },
+      "metals": {
+        "bronze": "Bronce",
+        "copper": "Cobre",
+        "gold": "Oro",
+        "iron": "Hierro",
+        "lead": "Plomo",
+        "platinum": "Platino",
+        "silver": "Plata"
+      },
+      "omens": {
+        "arguments_cuts_or_sparks_before_departure": "Discusiones, cortes o chispas antes de partir",
+        "blocked_paths_delays_or_broken_machinery": "Caminos bloqueados, retrasos o máquinas averiadas",
+        "broken_promises_from_advisers_or_teachers": "Promesas incumplidas de consejeros o maestros",
+        "confusing_shortcuts_or_sudden_misinformation": "Atajos confusos o desinformación repentina",
+        "misplaced_documents_or_repeated_message_errors": "Documentos extraviados o errores repetidos en los mensajes",
+        "repeated_authority_clashes_before_starting": "Choques repetidos con la autoridad antes de empezar",
+        "spoiled_sweets_or_repeated_social_awkwardness": "Dulces estropeados o incomodidad social repetida",
+        "sudden_detachment_lost_keys_or_repeated_silence": "Desapego repentino, llaves perdidas o silencios repetidos",
+        "unsettled_sleep_or_repeated_water_spills": "Sueño inquieto o agua derramada una y otra vez"
+      },
+      "safetyNote": "Los remedios con gemas son prácticas espirituales tradicionales, no garantías. Consulta a un astrólogo védico cualificado antes de comprar o llevar una gema como remedio."
+    },
+    "page": {
+      "dasha": {
+        "antar": "Antardasha de <strong>{planet}</strong>",
+        "kicker": "Detalle de tiempos",
+        "maha": "Maha dasha de <strong>{planet}</strong>",
+        "title": "Períodos y sub-períodos de dasha",
+        "until": "hasta {date}"
+      },
+      "details": {
+        "ayanamsha": "Ayanamsha",
+        "fallback": "Cálculo de respaldo",
+        "houses": "<strong>{count}</strong> casas",
+        "houseSystem": "Sistema de casas",
+        "kicker": "Detalles de la carta",
+        "mainMethod": "Método principal",
+        "method": "Método de cálculo",
+        "placements": "<strong>{count}</strong> posiciones",
+        "subMethod": "Submétodo",
+        "title": "Posiciones y ajustes de cálculo"
+      },
+      "domains": {
+        "errorEmpty": "El análisis por áreas no devolvió resultados.",
+        "errorFailed": "No pudimos completar las fórmulas de las áreas.",
+        "errorHeading": "La lectura detallada no terminó",
+        "kicker": "Análisis por áreas de la vida",
+        "loadingHeading": "Calculando siete áreas de la vida por separado",
+        "loadingLead": "Estamos comparando la promesa, el regente de apoyo, los puntos de presión y la trayectoria temporal de cada área —sin reciclar una lectura general.",
+        "queuedHeading": "Tu lectura en profundidad está lista para empezar",
+        "queuedLead": "Las fórmulas detalladas empezarán cuando te acerques a esta sección, para que la primera parte de tu informe cargue rápido.",
+        "stepHouses": "Relaciones entre casas y regentes",
+        "stepStrength": "Señales de fuerza y de presión",
+        "stepTiming": "Tiempos y síntesis a medida"
+      },
+      "fortune": {
+        "color": "Color de la suerte",
+        "colorCaption": "Llévalo cuando importe.",
+        "day": "Día de la suerte",
+        "dayCaption": "Empieza las cosas ese día.",
+        "heading": "Tu fortuna práctica",
+        "keyedTo": "según tu Lagna en <strong>{sign}</strong>",
+        "kicker": "Detalles secundarios",
+        "number": "Número de la suerte",
+        "numberCaption": "La suerte suele caer en él.",
+        "stone": "Piedra de la suerte",
+        "stoneCaption": "Amplifica tu intención.",
+        "subtitle": "La magia de cada día, sin complicaciones.",
+        "summaryKinds": "Colores, números, días",
+        "title": "Elementos de la suerte y fortuna práctica"
+      },
+      "gateways": {
+        "atlas": {
+          "blurb": "Mira cómo se despliega tu carta natal en la identidad, las relaciones y la carrera.",
+          "cta": "Ver las {count} cartas",
+          "eyebrow": "02 / Cartas divisionales",
+          "footnote": "Las divisiones superiores dependen de la precisión de tu hora de nacimiento.",
+          "heading": "Tu atlas de cartas"
+        },
+        "reading": {
+          "blurb": "Conecta los patrones de tu vida con las posiciones de tu carta.",
+          "cta": "Lee todos los hallazgos",
+          "eyebrow": "03 / Hallazgos y evidencia",
+          "footnote": "Tu lectura completa incluye todos los hallazgos detectados y su evidencia.",
+          "heading": "Tu lectura, explicada"
+        },
+        "timing": {
+          "blurb": "Explora los próximos períodos y las ventanas para comienzos importantes.",
+          "cta": "Explora tus tiempos",
+          "eyebrow": "01 / Tiempos y elección de momentos",
+          "footnote": "Las ventanas de inicio se puntúan frente a tu propia carta.",
+          "heading": "Tus tiempos"
+        }
+      },
+      "hero": {
+        "actionsAria": "Acciones del informe",
+        "copied": "Enlace de la carta actual copiado.",
+        "copyFailed": "No se pudo copiar el enlace de la carta actual.",
+        "copyLink": "Copiar enlace",
+        "identityAria": "Identidad de la carta",
+        "period": "Período",
+        "rising": "Ascendente {sign}",
+        "scriptLead": "Léela como un mapa,",
+        "scriptTail": "no como un veredicto."
+      },
+      "houseSupport": {
+        "heading": "Cuánto apoyo recibe tu carta de las casas",
+        "kicker": "Apoyo de las casas",
+        "link": "De qué responde cada casa"
+      },
+      "lifeShifts": {
+        "kicker": "Grandes cambios de vida",
+        "link": "Todos los capítulos, pasados y futuros",
+        "title": "Cambios de vida activos y próximos"
+      },
+      "nav": {
+        "aria": "Secciones de la página de resultados",
+        "chart": "Carta",
+        "lifeAreas": "Áreas de la vida",
+        "more": "Más",
+        "overview": "Resumen",
+        "timing": "Tiempos"
+      },
+      "next": {
+        "advancedBody": "Elige otra lectura especializada.",
+        "advancedTitle": "Todas las herramientas avanzadas",
+        "browseTools": "Ver herramientas",
+        "heading": "Sigue con una herramienta concreta",
+        "kicker": "Explora a continuación",
+        "lead": "Tres próximos pasos claros, sin repetir la lectura que acabas de terminar.",
+        "openTool": "Abrir herramienta",
+        "partnerBody": "Compara dos perfiles de nacimiento completos.",
+        "partnerTitle": "Comparación de pareja",
+        "transitsBody": "Compara el cielo de hoy con tu carta natal.",
+        "transitsTitle": "Tránsitos actuales"
+      },
+      "takeaways": {
+        "antardashaBody": "La antardasha de {planet} acota el período a decisiones y respuestas más inmediatas.",
+        "chartSignal": "Señal de la carta",
+        "currentTiming": "Momento actual",
+        "dashaActive": "La dasha de {planet} está activa",
+        "dashaBody": "Toma la dasha actual como la referencia principal de tiempos para las decisiones a corto plazo.",
+        "heading": "Lo que merece atención primero",
+        "highestSignal": "Señal prioritaria",
+        "kicker": "Las 3 claves",
+        "orientation": "Orientación de la carta",
+        "orientationTitle": "El ascendente en {sign} define el enfoque",
+        "runsThrough": "Dura hasta {date}",
+        "strongestBody": "Este planeta es una de las fuentes de apoyo más claras a las que recurrir cuando la carta resulta confusa.",
+        "strongestPlanet": "Planeta más fuerte",
+        "strongestTitle": "{planet} encabeza el mapa de fuerza"
+      },
+      "zone": {
+        "fullReadingFor": "Lectura completa: {area}",
+        "kicker": "Módulo definitivo",
+        "subtitle": "Siete áreas, cada una leída frente a su propia evidencia. Primero las más activas; el estudio completo se abre en su propia página.",
+        "title": "Zona de análisis conectado"
+      }
+    },
+    "shifts": {
+      "active": "Activo ahora",
+      "age": "edad {age}",
+      "empty": "Esta carta no tiene suficientes datos de nacimiento para estimar las ventanas de los grandes cambios de vida. Vuelve a calcularla con una hora de nacimiento confirmada para desbloquear esta sección.",
+      "introBrief": "El capítulo en el que estás ahora. Las fechas son ventanas para planificar, no plazos.",
+      "introFull": "Céntrate en el capítulo activo ahora y en la próxima gran transición. Las fechas son ventanas para planificar, no plazos.",
+      "labels": {
+        "jupiterReturn": "{ordinal} retorno de Júpiter",
+        "mahadasha": "Comienza la mahadasha de {planet}",
+        "nodalReturn": "{ordinal} retorno nodal",
+        "saturnReturn": "{ordinal} retorno de Saturno"
+      },
+      "ordinals": {
+        "first": "Primer",
+        "fourth": "Cuarto",
+        "second": "Segundo",
+        "third": "Tercer"
+      },
+      "past": "Capítulo pasado",
+      "pivot": "Punto de giro:",
+      "themes": {
+        "jupiter": "Expansión, fe, enseñanza y crecimiento ético",
+        "jupiterReturn": "Expansión, sentido y un campo de juego más amplio",
+        "ketu": "Desprendimiento, retiro y dominio interior",
+        "mars": "Valor, conflicto y acción decidida",
+        "mercury": "Comunicación, estudio y pensamiento flexible",
+        "moon": "Bases emocionales, familia y seguridad interior",
+        "nodalReturn": "Eje del destino — lo que buscas y lo que sueltas",
+        "rahu": "Ambición, hambre y terreno desconocido",
+        "saturn": "Disciplina, responsabilidad y rendición de cuentas kármica",
+        "saturnReturn": "Estructura, responsabilidad y el precio de las decisiones",
+        "sun": "Autoridad, identidad y visibilidad",
+        "venus": "Amor, pareja, dinero y placer"
+      },
+      "upcoming": "Próximo",
+      "viewPastOne": "Ver 1 capítulo pasado",
+      "viewPastOther": "Ver {count} capítulos pasados",
+      "window": "Ventana:"
+    },
+    "sky": {
+      "inSign": "en {sign}",
+      "kicker": "El cielo de hoy",
+      "noteLead": "Dónde están hoy los planetas,",
+      "noteTail": "no dónde estaban cuando naciste.",
+      "now": "Ahora mismo",
+      "planetIn": "{planet} en {sign}"
+    },
+    "snapshots": {
+      "combust": "Combusto",
+      "dignities": {
+        "detriment": "Exilio",
+        "domicile": "Domicilio",
+        "exalted": "Exaltado",
+        "fall": "Caída",
+        "neutral": "Neutral"
+      },
+      "dignity": "Dignidad",
+      "direct": "Directo",
+      "intro": "Signo, grado, casa y dignidad de cada graha. Abre una tarjeta para ver la longitud exacta y el movimiento.",
+      "longitude": "Longitud",
+      "motion": "Movimiento",
+      "retrograde": "Retrógrado",
+      "speed": "{speed}°/día"
+    },
+    "story": {
+      "chapters": "{count} capítulos verificados sobre identidad, relaciones, familia, vocación, recursos, tiempos y acción práctica.",
+      "dialogLead": "Cada capítulo se está redactando a partir de tus propias posiciones, con precisión milimétrica. Tarda un par de minutos, y la espera merece la pena.",
+      "dialogNote": "Mantén esta pestaña abierta. La descarga empieza sola cuando el informe esté listo.",
+      "dialogTitle": "Estamos escribiendo tu PDF",
+      "downloadPdf": "Descargar PDF",
+      "downloadReading": "Descargar lectura",
+      "error": "No se pudo generar el informe. Inténtalo de nuevo.",
+      "inProgress": "{stage}...",
+      "kicker": "Lectura personal",
+      "stages": {
+        "calculating": "Completando el cálculo",
+        "typesetting": "Maquetando el PDF",
+        "verifying": "Verificando la carta",
+        "writing": "Escribiendo tu lectura"
+      }
+    },
+    "timingPreview": {
+      "chapter": "Capítulo actual",
+      "stops": {
+        "forecast": {
+          "label": "Pronóstico",
+          "note": "Períodos actuales y próximos"
+        },
+        "muhurta": {
+          "label": "Muhurta",
+          "note": "Cuándo empezar"
+        },
+        "yearAhead": {
+          "label": "El año que viene",
+          "note": "Tu carta anual"
+        }
+      },
+      "until": "Hasta {date}"
+    }
   },
   "dasha": {
     "kicker": "SISTEMA DE TIEMPO VÉDICO",
@@ -417,7 +837,82 @@
     "periodProgress": "Progreso del Período",
     "currentReadingPending": "Interpretando tu período actual…",
     "stepBack": "Atrás",
-    "stepBackTo": "Volver a {level}"
+    "stepBackTo": "Volver a {level}",
+    "panel": {
+      "activeMaha": "Maha Dasha activa",
+      "auditBirthTime": "Hora de nacimiento usada",
+      "auditCompleteAtBirth": "{percent}% completado al nacer",
+      "auditCoordinates": "Coordenadas",
+      "auditCoordinatesNote": "Latitud y longitud usadas para esta carta",
+      "auditElapsed": "Transcurrido al nacer: {elapsed} / {total} años",
+      "auditEngine": "Motor",
+      "auditHeading": "Consulta los datos exactos que hay detrás de este resultado de tiempos",
+      "auditIntoNakshatra": "{degree}° dentro del nakshatra",
+      "auditKicker": "Auditoría del cálculo",
+      "auditMoon": "Posición de la Luna",
+      "auditMoonValue": "{sign} {degree}°",
+      "auditNakshatra": "Nakshatra de partida",
+      "auditNote": "Si un resultado de dasha no cuadra, compara este recuadro con la fuente de la carta que esperabas antes de cambiar la interpretación.",
+      "auditPada": "Pada {pada}",
+      "auditRemaining": "Restante al nacer: {remaining} años",
+      "auditSeed": "Dasha de partida al nacer",
+      "auditSeedLord": "Mahadasha de {planet}",
+      "auditSidereal": "Longitud sideral {degree}°",
+      "auditTimingCheck": "Hora de la consulta",
+      "auditTimingNote": "Cuándo se consultó el período actual, según tu reloj",
+      "auditWindow": "Ventana: {start} a {end}, hora local",
+      "barTitle": "{planet}: {years} años ({start} – {end})",
+      "chainJoin": "/",
+      "chapterKicker": "Capítulo de vida actual",
+      "close": "Cerrar",
+      "colDuration": "Duración",
+      "colEnd": "Fin",
+      "colStart": "Inicio",
+      "colStatus": "Estado",
+      "colTheme": "Tema",
+      "combined": "Influencia combinada",
+      "complete": "completado",
+      "dashaLabel": "Dasha",
+      "deeperSubPeriods": "sub-períodos más profundos",
+      "detailsLoading": "Cargando detalles de tiempos",
+      "durationDays": "{count} días",
+      "durationMonths": "{count} meses",
+      "durationYears": "{count} años",
+      "hideAudit": "Ocultar auditoría",
+      "lensMaha": "Lente de capítulos de la Maha Dasha",
+      "lensSub": "Lente de sub-períodos de {planet}",
+      "level": "Nivel {level}",
+      "meterAria": "Progreso de la antardasha actual",
+      "openBranch": "Abrir la siguiente rama",
+      "placement": "{planet} en {sign} (Casa {house})",
+      "readingChain": "Leyendo esta cadena…",
+      "showAudit": "Mostrar auditoría",
+      "stackAria": "Dashas activas por nivel",
+      "subPeriods": "sub-períodos",
+      "tableMaha": "Secuencia completa de Maha Dashas",
+      "tableSub": "Sub-períodos dentro de {planet}",
+      "themeActive": "Influencia temporal activa",
+      "themes": {
+        "jupiter": "Sabiduría y expansión",
+        "ketu": "Espiritualidad y desapego",
+        "mars": "Energía y valor",
+        "mercury": "Intelecto y comunicación",
+        "moon": "Emociones y vida pública",
+        "rahu": "Ambición y transformación",
+        "saturn": "Disciplina y karma",
+        "sun": "Autoridad y expresión personal",
+        "venus": "Amor y lujo"
+      },
+      "themeSubPeriod": "Influencia del sub-período",
+      "timelineHint": "Haz clic en una dasha para abrir su Antardasha y sigue eligiendo ramas para ver los tiempos de Pratyantar, Sookshma y Prana.",
+      "timelineTitle": "Línea de tiempo Vimshottari Dasha",
+      "today": "Hoy",
+      "upcomingOrPast": "Próximo / pasado",
+      "viewLens": "Lente",
+      "viewsAria": "Vistas de la línea de tiempo dasha",
+      "viewTable": "Tabla",
+      "viewTimeline": "Línea de tiempo"
+    }
   },
   "transits": {
     "kicker": "CIELO ACTUAL",
@@ -425,7 +920,9 @@
     "computedAt": "Calculado a las",
     "positions": "Posiciones Actuales",
     "aspects": "Aspectos de Tránsito Activos",
-    "noAspects": "No hay aspectos de tránsito activos."
+    "noAspects": "No hay aspectos de tránsito activos.",
+    "aspectLine": "<strong>{transit}</strong> {aspect} <strong>{natal}</strong> natal",
+    "aspectsAria": "Aspectos de tránsito a los planetas natales"
   },
   "navamsa": {
     "kicker": "CARTA DIVISIONAL",
@@ -440,14 +937,28 @@
     "vargottamaCount": "{count} planeta(s) Vargottama",
     "vargottamaCountZero": "No hay planetas Vargottama en tu carta",
     "vargottamaExplanation": "Los planetas Vargottama llevan sus significados con claridad y consistencia a través de las dimensiones material y espiritual.",
-    "clickHint": "Haz clic en cualquier fila de planeta para ver la interpretación detallada del Navamsa"
+    "clickHint": "Haz clic en cualquier fila de planeta para ver la interpretación detallada del Navamsa",
+    "dignities": {
+      "debilitated": "Debilitado",
+      "enemy": "Signo enemigo",
+      "exalted": "Exaltado",
+      "friend": "Signo amigo",
+      "moolatrikona": "Moolatrikona",
+      "neutral": "Neutral",
+      "own": "Signo propio"
+    },
+    "legendAria": "Leyenda de colores de las dignidades",
+    "signLabel": "Navamsa {sign}",
+    "tableAria": "Posiciones planetarias en el Navamsa",
+    "vargottamaLabel": "Vargottama"
   },
   "aspects": {
     "kicker": "RELACIONES PLANETARIAS",
     "heading": "Análisis de Aspectos",
     "vedicDrishti": "Drishti Védico",
     "applying": "Aplicando",
-    "separating": "Separando"
+    "separating": "Separando",
+    "listAria": "Aspectos planetarios"
   },
   "compatibility": {
     "kicker": "Análisis de Sinastría",
@@ -552,7 +1063,14 @@
     "fields": "{filled}/{total} campos",
     "nearlyFormed": "La atmósfera de la carta casi está formada",
     "addDetails": "Agrega datos para despertar la carta",
-    "readyPercent": "{percent}% listo"
+    "readyPercent": "{percent}% listo",
+    "markers": {
+      "ascendant": "ASC",
+      "houses": "CASAS",
+      "midheaven": "MC",
+      "moon": "LUNA",
+      "sun": "SOL"
+    }
   },
   "zodiacSigns": {
     "aries": "Aries",
@@ -584,7 +1102,8 @@
   },
   "bottomNav": {
     "home": "Inicio",
-    "insights": "Análisis"
+    "insights": "Análisis",
+    "aria": "Navegación móvil"
   },
   "errorBoundary": {
     "heading": "Algo salió mal",
@@ -646,7 +1165,40 @@
     "error_exchange_failed": "Google no pudo completar el inicio de sesión. Inténtalo de nuevo.",
     "error_email_unverified": "Google no ha verificado el correo de esa cuenta, así que no puede usarse para iniciar sesión.",
     "error_signin_failed": "Algo salió mal al finalizar el inicio de sesión. Inténtalo de nuevo.",
-    "error_unknown": "El inicio de sesión no se completó. Inténtalo de nuevo."
+    "error_unknown": "El inicio de sesión no se completó. Inténtalo de nuevo.",
+    "facts": {
+      "aquarius1": "La lluvia de estrellas de las Acuáridas, cada mayo, procede de los restos del cometa Halley · se vio por última vez en 1986 y no volverá hasta 2061.",
+      "aquarius2": "Acuario alberga la nebulosa de la Hélice, a 650 años luz · a menudo llamada el Ojo de Dios, nos devuelve la mirada desde la oscuridad.",
+      "aries1": "El primer signo · regido por Marte, lleva la chispa de los nuevos comienzos y el valor para adentrarse en lo desconocido.",
+      "aries2": "En la tradición védica, el Sol está exaltado en Mesha · el equinoccio de primavera marcó aquí, en otro tiempo, el verdadero comienzo del año.",
+      "cancer1": "La casa propia de la Luna · la tradición védica la llama Karka, guardiana de la memoria, el linaje y la marea interior.",
+      "cancer2": "En su corazón está el cúmulo de la Colmena, M44 · un enjambre de casi mil estrellas que Galileo distinguió por primera vez en 1609.",
+      "capricorn1": "La cabra marina es una de las figuras míticas más antiguas · ya la dibujaban los sumerios hace más de cuatro mil años.",
+      "capricorn2": "Aquí rige Saturno · Makara es el lento ascenso desde las profundidades del océano hasta la cima disciplinada del mundo.",
+      "gemini1": "Cástor no es una estrella sino seis · un sistema séxtuple unido por la gravedad que se hace pasar por un único punto de luz.",
+      "gemini2": "Los gemelos de aire de Mercurio · el signo mensajero de la curiosidad, el lenguaje y el umbral entre mundos.",
+      "leo1": "Régulo, el Pequeño Rey, está casi exactamente sobre la eclíptica · el Sol lo cruza de lleno cada agosto.",
+      "leo2": "En la tradición védica, Simha es la casa propia del Sol · la realeza, el oro y la columna vertebral responden a su regencia.",
+      "libra1": "El único signo del zodiaco representado por un objeto · sus platillos fueron antaño las pinzas del escorpión vecino.",
+      "libra2": "Saturno está exaltado en Tula · la medida cósmica que pesa cada acción frente a su callado contrapeso.",
+      "pisces1": "Dos peces que nadan en direcciones opuestas · la disolución final del alma antes de renacer en una nueva vuelta del zodiaco.",
+      "pisces2": "La astrología védica llama Meena a Piscis · signo propio de Júpiter y exaltación de Venus, el océano donde la sabiduría por fin descansa.",
+      "sagittarius1": "Sagitario apunta directamente al núcleo galáctico · el agujero negro supermasivo Sgr A* se encuentra dentro de sus límites.",
+      "sagittarius2": "El dominio de fuego de Júpiter · en la tradición védica, Dhanu es el arquero del dharma, que dirige el alma hacia un sentido más alto.",
+      "scorpio1": "Antares, el corazón del escorpión, es tan enorme que engulliría la órbita de Marte si ocupara el lugar de nuestro Sol.",
+      "scorpio2": "La astrología védica llama Vrishchika a este signo · ligado a Ketu, el nodo lunar sur y guardián de los hilos kármicos enterrados.",
+      "taurus1": "El dominio de tierra de Venus · paciente, sensual y firme como el toro que guarda el campo.",
+      "taurus2": "Las Pléyades se posan en el hombro de Tauro · los videntes védicos llaman Krittika a estas siete hermanas, las ninfas de la llama.",
+      "virgo1": "La segunda constelación más grande del cielo · Virgo se extiende por 1294 grados cuadrados de terreno celeste.",
+      "virgo2": "Aquí Mercurio está exaltado · en la tradición védica, Kanya guarda el discernimiento que convierte la experiencia en bruto en sabiduría."
+    },
+    "sky": {
+      "aligned": "Cielos alineados · Nuevos comienzos",
+      "mercuryDirect": "Mercurio directo",
+      "mercuryRetrograde": "Mercurio retrógrado",
+      "moonIn": "Luna en {sign}",
+      "sunClear": "Sol en {sign} · Cielos despejados"
+    }
   },
   "chartSync": {
     "kicker": "Guardando tu carta",
@@ -1159,7 +1711,15 @@
         "vargaHouseDisplayValue": "Casas de signo completo derivadas del Ascendente {label}",
         "birthTimeStatus": "Estado de la hora de nacimiento",
         "cautionTitle": "Límite interpretativo",
-        "cautionBody": "Esta página informa de signos calculados, casas de signo completo, regentes, dignidad clásica y la ubicación de los señores del tiempo. No infiere aspectos divisionales exactos, no trata la repetición de signo como automáticamente positiva, ni permite que {label} prevalezca sobre la D1."
+        "cautionBody": "Esta página informa de signos calculados, casas de signo completo, regentes, dignidad clásica y la ubicación de los señores del tiempo. No infiere aspectos divisionales exactos, no trata la repetición de signo como automáticamente positiva, ni permite que {label} prevalezca sobre la D1.",
+        "houseSystems": {
+          "campanus": "Campanus",
+          "equal": "Casas iguales",
+          "koch": "Koch",
+          "placidus": "Placidus",
+          "regiomontanus": "Regiomontanus",
+          "whole_sign": "Signo completo"
+        }
       },
       "pager": {
         "label": "Cartas divisionales clave adyacentes",
@@ -1169,7 +1729,14 @@
       "footer": {
         "note": "Las cartas divisionales refinan una promesa natal; no la sustituyen. Las conclusiones más firmes requieren datos de nacimiento fiables y concordancia con evidencia independiente.",
         "returnLink": "Regresar a tu lectura completa"
-      }
+      },
+      "dignities": {
+        "debilitated": "Debilitado",
+        "exalted": "Exaltado",
+        "neutral": "Neutral",
+        "own_sign": "Signo propio"
+      },
+      "houseShort": "C{house}"
     },
     "guide": {
       "d1": {
@@ -1456,6 +2023,43 @@
       "calendar": {
         "summary": "Ventana auspiciosa — {activity} ({score}/100 {quality})",
         "factor": "{name}: {value} — {quality}"
+      },
+      "factorQualities": {
+        "auspicious": "auspicioso",
+        "bhadra_auspicious": "Bhadra (auspicioso)",
+        "favorable": "favorable",
+        "fixed_dhruva": "Fijo (Dhruva)",
+        "inauspicious": "inauspicioso",
+        "jaya_victorious": "Jaya (victorioso)",
+        "mixed_sadharana": "Mixto (Sadharana)",
+        "movable_chara": "Móvil (Chara)",
+        "nanda_joyful": "Nanda (alegre)",
+        "neutral": "neutral",
+        "purna_full_complete": "Purna (lleno/completo)",
+        "rikta_empty": "Rikta (vacío)",
+        "sharp_fierce_tikshna": "Agudo/Feroz (Tikshna)",
+        "soft_tender_mridu": "Suave/Tierno (Mridu)"
+      },
+      "factors": {
+        "hora": "Hora",
+        "karana": "Karana",
+        "nakshatra": "Nakshatra",
+        "rahukaala": "Rahukaala",
+        "tithi": "Tithi",
+        "weekday": "Día",
+        "yamaghantaka": "Yamaghantaka",
+        "yoga": "Yoga"
+      },
+      "horaValue": "Hora de {planet}",
+      "periodStates": {
+        "active": "Activo",
+        "clear": "Libre"
+      },
+      "windowQualities": {
+        "excellent": "excelente",
+        "fair": "regular",
+        "good": "buena",
+        "poor": "baja"
       }
     },
     "varshaphal": {
@@ -1672,6 +2276,50 @@
       },
       "interpretation": {
         "asYearLord": "{planet} como Señor del Año:"
+      },
+      "profectionThemes": {
+        "aspirations": "aspiraciones",
+        "authority": "autoridad",
+        "career": "Carrera",
+        "children": "hijos",
+        "communication": "Comunicación",
+        "community": "comunidad",
+        "contracts": "contratos",
+        "creativity": "Creatividad",
+        "daily_routines": "rutinas diarias",
+        "emotional_roots": "raíces emocionales",
+        "endings": "cierres",
+        "family": "familia",
+        "finances": "Finanzas",
+        "friends": "Amistades",
+        "health": "Salud",
+        "higher_learning": "Estudios superiores",
+        "home": "Hogar",
+        "identity": "identidad",
+        "long_travel": "viajes largos",
+        "marriage": "matrimonio",
+        "material_security": "seguridad material",
+        "occult": "lo oculto",
+        "partnerships": "Asociaciones",
+        "personal_direction": "rumbo personal",
+        "philosophy": "filosofía",
+        "public_life": "vida pública",
+        "romance": "romance",
+        "self": "Personalidad",
+        "service": "servicio",
+        "shared_resources": "recursos compartidos",
+        "short_travel": "viajes cortos",
+        "siblings": "hermanos",
+        "solitude": "soledad",
+        "spirituality": "Espiritualidad",
+        "transformation": "Transformación",
+        "values": "valores"
+      },
+      "yearLordReasons": {
+        "default": "Por defecto, el señor del ascendente del retorno",
+        "munthaSign": "Señor del signo de la Muntha ({sign})",
+        "natalAscendant": "Señor del ascendente natal ({sign})",
+        "returnAscendant": "Señor del ascendente del retorno solar ({sign})"
       }
     }
   },
@@ -1710,7 +2358,10 @@
       "errorKicker": "Capítulos de la vida",
       "errorHeading": "No se pudieron preparar los capítulos de la vida.",
       "errorFallback": "No se devolvieron datos de la carta.",
-      "backToReading": "Volver a tu lectura"
+      "backToReading": "Volver a tu lectura",
+      "heroKicker": "Grandes cambios de vida",
+      "heroLead": "Todos los capítulos que marca esta carta —el que vives ahora, el que le sigue y los que ya dejaste atrás—. Las fechas son ventanas para planificar, no plazos.",
+      "heroTitle": "Los capítulos de la vida de {name}"
     },
     "kalatraHeading": "La vida conyugal en detalle",
     "kalatraNote": "Cinco facetas, cada una leída desde su propia casa",
@@ -1734,6 +2385,135 @@
       "noteLabel": "nota del traductor",
       "credit": "Los números remiten a los versos de los que proceden, citados tal como se imprimieron en la traducción inglesa del Brihat Jataka de Varahamihira hecha por N. Chidambaram Iyer en 1885.",
       "creditStrijataka": "Los pasajes marcados Strijataka se citan tal como se imprimieron en Strijataka, or Female Horoscopy (1931), el libro de B. Suryanarain Rao sobre las cartas natales de mujeres. Las palabras entre corchetes son nuestras, no del libro."
+    },
+    "claims": {
+      "anchorPlanet": "Planeta ancla",
+      "houseLord": "Señor de la casa",
+      "houses": {
+        "h1": "Casa 1",
+        "h10": "Casa 10",
+        "h11": "Casa 11",
+        "h12": "Casa 12",
+        "h2": "Casa 2",
+        "h3": "Casa 3",
+        "h4": "Casa 4",
+        "h5": "Casa 5",
+        "h6": "Casa 6",
+        "h7": "Casa 7",
+        "h8": "Casa 8",
+        "h9": "Casa 9"
+      },
+      "houseSign": "Signo en esa casa",
+      "lordPlacement": "Posición del señor",
+      "primaryHouse": "Casa principal",
+      "supportingHouse": "Casa de apoyo",
+      "supportingLord": "Señor de apoyo"
+    },
+    "conclusion": {
+      "cautious": "conclusión prudente",
+      "moderate": "conclusión moderada",
+      "strong": "conclusión firme"
+    },
+    "confirmation": {
+      "confirmed": "confirmada",
+      "contradictory": "contradictoria",
+      "improved": "mejorada",
+      "insufficient": "insuficiente",
+      "qualified": "con condiciones"
+    },
+    "copy": {
+      "career": {
+        "boundaryRule": "Si intervienen casas de presión, avanzar puede requerir sistemas, mentores y pruebas repetibles antes de que llegue la visibilidad.",
+        "clarity": "No leas la carrera solo desde la décima casa. Sopesa juntos el signo de la décima, su señor, el patrón de trabajo de la sexta casa y el filtro de disciplina de Saturno.",
+        "decisionRule": "Los movimientos profesionales son más limpios cuando el disparador temporal refuerza a la vez la promesa de la décima casa y la posición de su señor.",
+        "description": "Distingue la vocación, la carga de trabajo, la autoridad, la reputación pública, la presión del servicio y la vía por la que se construye el reconocimiento profesional."
+      },
+      "family": {
+        "boundaryRule": "Cuando el punto a vigilar está activo, protege primero la estabilidad; la resolución funciona mejor una vez restablecida la base emocional.",
+        "clarity": "Lee la cuarta casa para el terreno emocional, la segunda para el linaje y la palabra, la Luna para la seguridad que se siente y el señor de la casa para ver dónde se produce la reparación.",
+        "decisionRule": "La orientación familiar es más sólida cuando el patrón de apoyo nombra la misma necesidad que la nota a largo plazo.",
+        "description": "Aclara la vida en el hogar, los patrones emocionales heredados, el apoyo familiar, la estabilidad privada y los hábitos que hacen que la pertenencia resulte fiable."
+      },
+      "influence": {
+        "boundaryRule": "Si el punto a vigilar habla de dispersión o de retraso, acota el público y haz que el mensaje sea más fácil de repetir.",
+        "clarity": "Lee la undécima casa para las redes, la décima para la posición pública, el Sol para la visibilidad y el señor para ver dónde se gana la influencia.",
+        "decisionRule": "La influencia crece más rápido cuando los disparadores temporales amplifican un patrón de apoyo que ya existe, en lugar de forzar la visibilidad antes de tiempo.",
+        "description": "Examina el impacto público, los aliados, el alcance social, la autoridad, la reputación y las condiciones que ayudan a que tu voz mueva a la gente."
+      },
+      "inheritance": {
+        "boundaryRule": "Si el punto a vigilar habla de costes ocultos o de retrasos, prioriza la documentación, la transparencia y avanzar paso a paso con paciencia.",
+        "clarity": "Lee la octava casa para los recursos transferidos, la segunda para el valor acumulado, Júpiter para la buena administración y la posición del señor para el camino de la responsabilidad.",
+        "decisionRule": "Trata las señales de herencia como avisos prácticos para planificar cuando se repiten en el apoyo, en los puntos a vigilar y en los tiempos.",
+        "description": "Enmarca los recursos compartidos, el legado, las deudas, las obligaciones ocultas, los bienes familiares y la madurez que exigen los traspasos de recursos."
+      },
+      "life_cycle": {
+        "boundaryRule": "Si el punto a vigilar está activo, baja el ritmo y haz que el siguiente paso sea más pequeño, más claro y más fácil de sostener.",
+        "clarity": "Lee la primera casa para la identidad, la octava para la transformación, la Luna para la adaptación y la posición del señor para el terreno del cambio.",
+        "decisionRule": "Una señal del ciclo vital merece prioridad cuando las notas de tiempos y la orientación a largo plazo apuntan al mismo tipo de madurez.",
+        "description": "Conecta la identidad, la reinvención, los ciclos de recuperación, la resiliencia y los períodos en los que la vida pide llevar tu propio rumbo con más claridad."
+      },
+      "love_life": {
+        "boundaryRule": "Si el punto a vigilar contradice el apoyo, trátalo como la condición que hay que gestionar antes de que el apoyo dé fruto.",
+        "clarity": "No juzgues el amor solo por Venus. Lee la séptima casa para la pareja, la quinta para el romance, el señor de la casa para ver cómo se concreta y los disparadores temporales para saber cuándo se hace visible el patrón.",
+        "decisionRule": "Una señal de relación es más fuerte cuando el apoyo, los puntos a vigilar y las notas de tiempos repiten el mismo tema.",
+        "description": "Distingue la atracción, la solidez de la pareja, la disponibilidad emocional y los momentos que hacen más fácil sostener un vínculo."
+      },
+      "travel_destinations": {
+        "boundaryRule": "Si los puntos a vigilar hablan de fricción, trata la planificación, los documentos, la salud y los márgenes de tiempo como parte de la lectura y no como un añadido de última hora.",
+        "clarity": "Lee la novena casa para la distancia y el sentido, la tercera para el movimiento y la logística, Júpiter para la expansión y la posición del señor para el propósito del viaje.",
+        "decisionRule": "Las señales de viaje se vuelven prácticas cuando los disparadores temporales respaldan a la vez la oportunidad y la preparación.",
+        "description": "Aclara los viajes largos, los trayectos cortos, el impulso de mudarse, los vínculos con el extranjero, los temas de peregrinación y lo que hace que un lugar tenga sentido."
+      }
+    },
+    "evidenceStatus": {
+      "context": "contexto",
+      "mixed": "mixto",
+      "pressure": "presión",
+      "support": "apoyo"
+    },
+    "families": {
+      "contradiction": "Revisión de contradicciones",
+      "divisional": "Confirmación divisional",
+      "house_support": "Apoyo de las casas",
+      "primary": "Promesa natal",
+      "strength": "Capacidad de realización",
+      "supporting": "Factores de apoyo",
+      "timing": "Tiempos y activación",
+      "yoga": "Apoyo de las combinaciones"
+    },
+    "hero": {
+      "kicker": "Módulo definitivo · Áreas de la vida",
+      "lead": "Cada área tiene su propia matriz de evidencia: promesa natal, factores de apoyo, confirmación divisional, fuerza medida, apoyo de las casas, combinaciones, tiempos y contradicciones.",
+      "title": "Las áreas de la vida de {name}, al completo"
+    },
+    "kalatraFacets": {
+      "bond_durability": "Si el vínculo perdura",
+      "desire_pattern": "La forma del deseo",
+      "in_laws": "La familia política",
+      "physical_intimacy": "El lado físico",
+      "privacy_and_rest": "La privacidad, el descanso y la cama"
+    },
+    "ruleImpact": {
+      "activation": "Activación",
+      "context": "Contexto",
+      "pressure": "Presión",
+      "support": "Apoyo"
+    },
+    "ruleLabels": {
+      "action": "Regla de acción",
+      "evidence": "Regla de evidencia",
+      "house": "Regla de casa",
+      "timing": "Regla de tiempos"
+    },
+    "subthemeBands": {
+      "developing": "en desarrollo",
+      "leading": "principal",
+      "supporting": "de apoyo"
+    },
+    "timingWindows": {
+      "caution": "Condición de cautela",
+      "current": "Activación actual",
+      "next": "Próximo ciclo más fuerte"
     }
   },
   "fullReading": {
@@ -1871,7 +2651,8 @@
       "calculationFailed": "El cálculo de la carta falló",
       "backToReading": "Volver a tu lectura",
       "heroTitle": "El apoyo de las casas de {name} en detalle",
-      "heroLead": "Cuánto apoyo tiene cada una de las doce casas, de qué responde cada una y la aritmética que hay detrás de ambas cosas."
+      "heroLead": "Cuánto apoyo tiene cada una de las doce casas, de qué responde cada una y la aritmética que hay detrás de ambas cosas.",
+      "heroKicker": "Ashtakavarga · Apoyo de las casas"
     },
     "bhavaNames": {
       "1": "Tanu",
@@ -2214,5 +2995,120 @@
     "purvaBhadrapada": "Purva Bhadrapada",
     "uttaraBhadrapada": "Uttara Bhadrapada",
     "revati": "Revati"
+  },
+  "advanced": {
+    "focus": {
+      "palm": {
+        "breadcrumb": "Síntesis carta + palma",
+        "description": "Sube una foto nítida de tu palma para unir sus patrones con el contexto de tu carta natal.",
+        "status": "Se necesita una foto de la palma"
+      },
+      "transits": {
+        "breadcrumb": "Tránsitos actuales",
+        "description": "El cielo actual se muestra sobre tu carta natal, para que los temas activos queden en primer plano.",
+        "status": "Superposición en vivo sobre la carta"
+      }
+    },
+    "gate": {
+      "heading": "La lectura avanzada necesita una cuenta",
+      "kicker": "Solo para miembros",
+      "lead": "Esta sección escribe una lectura completa de tu carta —los tiempos, los aspectos, los armónicos y las fuerzas— y conserva todas las tablas en las que se basa. Es lo más costoso que hace la aplicación, así que está reservada a quienes han iniciado sesión.",
+      "signIn": "Inicia sesión para continuar"
+    },
+    "header": {
+      "advanced": "Avanzado",
+      "backToInsights": "Volver al análisis",
+      "breadcrumbAria": "Ubicación en la lectura",
+      "focusKicker": "Espacio enfocado",
+      "kicker": "Herramientas a fondo",
+      "lead": "Ciclos de nakshatra, tiempos de dasha, matices del Navamsa, cartas divisionales, yogas planetarios, tránsitos superpuestos, puntuaciones del Ashtakavarga, fuerza Shadbala y lectura de la palma —todo en un espacio propio.",
+      "moreKicker": "Más por explorar",
+      "moreTitle": "Otras herramientas avanzadas",
+      "title": "Análisis avanzado y de la palma",
+      "workspaceAria": "Espacio de trabajo: {name}",
+      "yourReading": "Tu lectura"
+    },
+    "locked": {
+      "ashtakavarga": {
+        "description": "Desbloquea el sistema védico clásico de fuerza de tránsitos, que muestra el reparto de bindus en los 12 signos.",
+        "title": "Puntuación del Ashtakavarga"
+      },
+      "aspects": {
+        "description": "Consulta los contactos más fuertes de la carta natal, tanto armónicos como de fricción, ordenados por orbe.",
+        "title": "Matriz de aspectos planetarios"
+      },
+      "dasha": {
+        "description": "Desbloquea el análisis de las mansiones lunares, la secuencia de dashas actual y los desgloses detallados de tiempos.",
+        "title": "Nakshatra y tiempos de dasha"
+      },
+      "divisional": {
+        "description": "Desbloquea todo el atlas divisional admitido: fundamentos natales, riqueza, relaciones, carrera, ascendencia, resiliencia y más.",
+        "title": "Cartas divisionales (vargas)"
+      },
+      "navamsa": {
+        "description": "Abre la capa D9 para evaluar los patrones de madurez, las firmas más profundas de las relaciones y la promesa interior.",
+        "title": "Refinamiento del Navamsa D9"
+      },
+      "transits": {
+        "description": "Sigue el cielo actual frente a la carta natal para entender los disparadores activos y las ventanas próximas.",
+        "title": "Tránsitos en vivo"
+      }
+    },
+    "story": {
+      "almost": "Ya casi está…",
+      "hide": {
+        "ashtakavarga": "Ocultar las tablas de puntos",
+        "aspects": "Ocultar la tabla de aspectos",
+        "divisional": "Ocultar las cartas divisionales",
+        "navamsa": "Ocultar la carta navamsa",
+        "strength": "Ocultar la tabla de fuerza",
+        "timing": "Ocultar el detalle de tiempos",
+        "transits": "Ocultar el detalle de tránsitos",
+        "yogas": "Ocultar la lista de yogas"
+      },
+      "limit": "Ya has usado las lecturas de hoy. Todas las tablas siguen aquí, abajo.",
+      "readingChart": "Leyendo tu carta…",
+      "secondRun": "Intentándolo de nuevo…",
+      "secondsLeftOne": "Queda aproximadamente {count} segundo",
+      "secondsLeftOther": "Quedan unos {count} segundos",
+      "sessionEnded": "Tu sesión ha terminado.",
+      "sessionEndedTail": "para reescribir esta lectura. Todas las tablas siguen aquí, abajo.",
+      "show": {
+        "ashtakavarga": "Mostrar las tablas de puntos",
+        "aspects": "Mostrar la tabla de aspectos",
+        "divisional": "Mostrar las cartas divisionales",
+        "navamsa": "Mostrar la carta navamsa",
+        "strength": "Mostrar la tabla de fuerza",
+        "timing": "Mostrar el detalle de tiempos",
+        "transits": "Mostrar el detalle de tránsitos",
+        "yogas": "Mostrar la lista de yogas"
+      },
+      "signInAgain": "Inicia sesión de nuevo",
+      "tablesMeanwhile": "Mientras tanto, todas las tablas están abajo, a un clic.",
+      "unavailable": "No se pudo escribir la lectura en este momento.",
+      "writing": "Escribiendo tu lectura",
+      "writingSection": "Escribiendo esta sección…"
+    }
+  },
+  "lifeDomains": {
+    "activity": {
+      "active": "Área activa",
+      "developing": "Área en desarrollo",
+      "prominent": "Área destacada"
+    },
+    "names": {
+      "career": "Carrera",
+      "family": "Familia",
+      "influence": "Influencia",
+      "inheritance": "Herencia",
+      "life_cycle": "Ciclo vital",
+      "love_life": "Vida amorosa",
+      "travel_destinations": "Viajes y destinos"
+    }
+  },
+  "planetOrb": {
+    "activeDasha": "planeta de la dasha activa",
+    "orb": "Esfera de {planet}",
+    "strength": "{percent}% de fuerza"
   }
 }
