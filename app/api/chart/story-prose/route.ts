@@ -117,7 +117,7 @@ export const maxDuration = 300;
 const REQUEST_TIMEOUT_MS = 250_000;
 
 /*
- * Bounded, process-lifetime, keyed by the facts.
+ * Bounded, process-lifetime, keyed by the request it would send.
  *
  * A reader who downloads the same report twice -- which people do, having lost
  * the first file -- should not pay for it twice, and neither should the key.
@@ -248,28 +248,27 @@ function parseFacts(value: unknown): StoryProseFacts {
 }
 
 /**
- * Canonical, so the same report hits the same entry however it arrives. Every
- * caller is written for the same way, so there is one entry per chart, shared
- * by all.
+ * A hash of the whole request -- model, system prompt, schema and user turn --
+ * so two callers share an answer only when the model would have been sent the
+ * same bytes. Every caller is written for the same way, so a chart still gets
+ * one entry, shared by all.
+ *
+ * It used to be a list of chosen fields, and the list had fallen behind the
+ * prompt: it left out the reader's name, each glance row's context, and each
+ * chapter's title and section, all four of which the user turn prints. The
+ * facts come from the browser and the cache is shared, so anyone holding
+ * someone else's birth details -- a share link carries them, and
+ * /api/chart/story-report returns the story these facts are built from --
+ * could write instructions into those four, leave the rest alone, and be the
+ * first to fill the entry; the other reader's PDF would then come out of the
+ * cache with prose a stranger had steered. A key built from what is sent
+ * cannot fall behind what is sent.
+ *
+ * SHA-256 rather than the SHA-1 the other routes use: theirs hash what the
+ * engine chose, this hashes text anyone can type.
  */
-function cacheKey(facts: StoryProseFacts): string {
-  const canonical = [
-    facts.headline,
-    facts.subtitle,
-    ...facts.centralThemes,
-    ...facts.atAGlance.map((item) => `${item.label}=${item.value}`),
-    ...[...facts.chapters]
-      .sort((left, right) => left.id.localeCompare(right.id))
-      .map((chapter) =>
-        [
-          chapter.id,
-          chapter.support,
-          chapter.signals.map((signal) => `${signal.label}=${signal.value}`).join(","),
-          chapter.draft,
-        ].join("|"),
-      ),
-  ].join(";");
-  return createHash("sha1").update(canonical).digest("hex");
+function cacheKey(params: Anthropic.MessageStreamParams): string {
+  return createHash("sha256").update(JSON.stringify(params)).digest("hex");
 }
 
 /* Markdown is forbidden by the prompt; this is what makes that true rather
@@ -288,7 +287,19 @@ export async function POST(request: NextRequest) {
     }
 
     const facts = parseFacts(body.facts);
-    const key = cacheKey(facts);
+    const params: Anthropic.MessageStreamParams = {
+      model: MODEL,
+      max_tokens: 32000,
+      /* No `thinking` and no effort; see MODEL in the header. */
+      output_config: {
+        format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
+      },
+      system: [
+        { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
+      ],
+      messages: [{ role: "user", content: renderStoryProseFacts(facts) }],
+    };
+    const key = cacheKey(params);
 
     const cached = cache.get(key);
     if (cached) {
@@ -330,20 +341,8 @@ export async function POST(request: NextRequest) {
     });
 
     const startedAt = Date.now();
-    const response = await client.messages
-      .stream({
-        model: MODEL,
-        max_tokens: 32000,
-        /* No `thinking` and no effort; see MODEL in the header. */
-        output_config: {
-          format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
-        },
-        system: [
-          { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
-        ],
-        messages: [{ role: "user", content: renderStoryProseFacts(facts) }],
-      })
-      .finalMessage();
+    /* The same object the key was built from, so the two cannot disagree. */
+    const response = await client.messages.stream(params).finalMessage();
 
     const elapsedMs = Date.now() - startedAt;
 
