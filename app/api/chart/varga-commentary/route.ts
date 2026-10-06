@@ -283,9 +283,11 @@ export async function POST(request: NextRequest) {
     const facts = parseDivisions(body.divisions);
     /* An unknown language is English, not an error: the page still works, and
        refusing a chart because the browser asked for a locale this table has
-       not caught up with would be the wrong failure. */
+       not caught up with would be the wrong failure. An own key only: `in`
+       would take "constructor" and ask for notes in "function Object() {
+       [native code] }". */
     const languageCode =
-      typeof body.language === "string" && body.language in COMMENTARY_LANGUAGES
+      typeof body.language === "string" && Object.hasOwn(COMMENTARY_LANGUAGES, body.language)
         ? body.language
         : "en";
     const languageName = COMMENTARY_LANGUAGES[languageCode];

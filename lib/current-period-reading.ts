@@ -204,15 +204,18 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts): string {
 }
 
 /**
- * What makes two requests the same reading.
+ * What makes two requests the same reading: everything the prompt is given.
  *
- * The phase band rather than the percentage, for the reason given above; the
- * placements are implied by the lords and the chart, so they are left out and
- * the key stays short.
+ * The phase band rather than the percentage, for the reason given above. The
+ * placements are in it too. They used to be left out as implied by the lords
+ * and the chart, but the route takes them from the browser, so a request
+ * could pair a real stack with signs and houses of its own choosing and file
+ * a reading written about them under the real chart's entry, for every
+ * visitor with that stack to be served.
  */
 export function currentPeriodCacheKey(facts: CurrentPeriodFacts): string {
   const stack = facts.stack
-    .map((step) => `${step.lord}@${step.startDate}..${step.endDate}`)
+    .map((step) => `${step.lord}@${step.startDate}..${step.endDate}@${step.sign ?? "-"}/${step.house ?? "-"}`)
     .join(">");
   const { name, lord, pada } = facts.nakshatra;
   return `${stack}|${name}/${lord}/${pada}|${currentPeriodPhase(facts.progressPercent)}`;
