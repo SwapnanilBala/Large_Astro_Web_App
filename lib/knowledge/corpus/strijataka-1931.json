@@ -6298,7 +6298,8 @@
       "part": 3,
       "kind": "verse",
       "chapterTitle": "Results of the Twenty-Seven Constellations",
-      "text": "[Makha—] respect for Gods and Brahmins",
+      "text": "[Makha—] respect for Gods and [people of very high status and influence]",
+      "printedText": "[Makha—] respect for Gods and Brahmins",
       "notes": null,
       "summary": "The book says a girl born in Makha respects the Gods and a named priestly group.",
       "yogaIds": [],
@@ -6311,8 +6312,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": true,
-      "withheldReason": "mentions a caste by name",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -9055,7 +9056,8 @@
       "part": 5,
       "kind": "verse",
       "chapterTitle": "The Sun, Moon, Mars and Mercury in the Twelve Houses",
-      "text": "[Ravi in 5 —] and faith in Brahmins and priestly classes are indicated.",
+      "text": "[Ravi in 5 —] and faith in [people of very high status and influence] are indicated.",
+      "printedText": "[Ravi in 5 —] and faith in Brahmins and priestly classes are indicated.",
       "notes": null,
       "summary": "The book says the Sun in the fifth house indicates faith in a named priestly group.",
       "yogaIds": [],
@@ -9070,8 +9072,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": true,
-      "withheldReason": "mentions caste",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -10080,7 +10082,8 @@
       "part": 5,
       "kind": "verse",
       "chapterTitle": "The Sun, Moon, Mars and Mercury in the Twelve Houses",
-      "text": "[Chandra in 2 —] and respect to good Brahmins.",
+      "text": "[Chandra in 2 —] and respect to good [people of very high status and influence].",
+      "printedText": "[Chandra in 2 —] and respect to good Brahmins.",
       "notes": null,
       "summary": "The book says the Moon in the second house gives respect for a named priestly group.",
       "yogaIds": [],
@@ -10095,8 +10098,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": true,
-      "withheldReason": "mentions caste",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {
@@ -12339,7 +12342,8 @@
       "part": 3,
       "kind": "verse",
       "chapterTitle": "The Sun, Moon, Mars and Mercury in the Twelve Houses",
-      "text": "[Budha in 2 —] fond of Gods and Brahmins,",
+      "text": "[Budha in 2 —] fond of Gods and [people of very high status and influence],",
+      "printedText": "[Budha in 2 —] fond of Gods and Brahmins,",
       "notes": null,
       "summary": "The book says Mercury in the second house makes her fond of the Gods and of a named priestly group.",
       "yogaIds": [],
@@ -12354,8 +12358,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": true,
-      "withheldReason": "mentions caste",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.81
     },
     {
@@ -15431,7 +15435,8 @@
       "part": 4,
       "kind": "verse",
       "chapterTitle": "Jupiter, Venus and Saturn in the Twelve Houses",
-      "text": "[Sukra in 7 —] fond of Brahmins,",
+      "text": "[Sukra in 7 —] fond of [people of very high status and influence],",
+      "printedText": "[Sukra in 7 —] fond of Brahmins,",
       "notes": null,
       "summary": "The book says that with Venus in the 7th house she will be fond of members of a particular caste.",
       "yogaIds": [],
@@ -15446,8 +15451,8 @@
       "lifeAreas": [
         "character"
       ],
-      "withheld": true,
-      "withheldReason": "mention of caste",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 1
     },
     {

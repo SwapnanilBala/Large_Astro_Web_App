@@ -49,8 +49,9 @@ import {
 import { BRIHAT_JATAKA_1885 as SOURCE } from "../../lib/knowledge/sources";
 import {
   BARREN_WORDING,
-  OWNERS_WORDING,
+  BRAHMIN_WORDING,
   LABELS_PROMPT,
+  OWNERS_WORDING,
   REWORDED,
   UNPRINTED,
   checkedConditions,
@@ -58,8 +59,8 @@ import {
   inOrder,
   labelDecision,
   labelReason,
-  modelReason,
   median,
+  modelReason,
   ocrAgreement,
   rewordByHand,
   shownText,
@@ -145,6 +146,8 @@ type PassageOverride = {
 };
 
 const ADULTERY_ALLOWED = "desire or adultery, which the owner allows";
+/* Brahmins, in the owner's wording (2026-10-05): "people of very high status and influence". */
+const BRAHMINS: readonly [string, string] = ["Brahmins", `[people of ${BRAHMIN_WORDING}]`];
 
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Tagged on 2026-10-04, when the catalogue's Yava was corrected to the
@@ -182,6 +185,19 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   "24.1.1": { withhold: "speaks of the husband's death", textIncludes: "The death of the husband" },
   /* "Barren", in the owner's wording (2026-10-05): "may have no children". */
   "24.5.20": { rewordPhrase: ["will be barren", `[${BARREN_WORDING}]`], textIncludes: "she will be barren" },
+  "10.3.1": { show: "the owner's wording for Brahmins", rewordPhrase: BRAHMINS, textIncludes: "wealth through Brahmins" },
+  "17.7.1": { rewordPhrase: BRAHMINS, textIncludes: "respect the Devas, Brahmins" },
+  /* Mars and Jupiter together: "will acquire money or will be a Brahmin", the
+     same rank in the owner's terms. */
+  "14.3.2": {
+    rewordPhrase: ["a Brahmin", `[a person of ${BRAHMIN_WORDING}]`],
+    textIncludes: "will be a Brahmin",
+  },
+  /* A translator's note defining the ascetic orders: a Bhikshu is "a Brahman
+     ascetic who ... subsists entirely on alms". In the owner's wording the
+     mendicant would become a person of high status, so the caste rule holds;
+     no reading quotes the note. */
+  "15.1.2": { withhold: "mentions caste (a Brahman ascetic), in a note no reading quotes", textIncludes: "A Brahman ascetic" },
   /* "Bad women", in the owner's wording (2026-10-05): "multiple illicit relationships". */
   "18.15.4": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },
   "19.8.5": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },

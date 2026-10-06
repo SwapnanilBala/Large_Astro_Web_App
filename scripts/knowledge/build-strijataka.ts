@@ -54,6 +54,7 @@ import {
 import { STRIJATAKA_1931 as SOURCE } from "../../lib/knowledge/sources";
 import {
   BARREN_WORDING,
+  BRAHMIN_WORDING,
   OWNERS_WORDING,
   REWORDED,
   UNPRINTED,
@@ -119,6 +120,9 @@ type PassageOverride = {
 const SAUBHAGYA: `[${string}]` = "[Saubhagya Yogas, long marital states:]";
 /* "Immoral", in the owner's wording (2026-10-05): "multiple illicit relationships". */
 const IMMORAL_WORDING = `[given to ${OWNERS_WORDING}]`;
+/* Brahmins, spoken of with respect, in the owner's wording (2026-10-05). */
+const BRAHMINS: readonly [string, string] = ["Brahmins", `[people of ${BRAHMIN_WORDING}]`];
+const BRAHMINS_WORDED = "the owner's wording for Brahmins";
 
 const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   /* Saturn in the 5th, in a list of results: "prostitute behaviour". The
@@ -153,6 +157,15 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
   "6.6.1": { withhold: "speaks of birth status (born of adultery)", textIncludes: "born of adultery" },
   /* "Barren", in the owner's wording (2026-10-05): "may have no children". */
   "6.9.4": { rewordPhrase: ["becomes barren", `[${BARREN_WORDING}]`], textIncludes: "she becomes barren" },
+  "8.11.3": { show: BRAHMINS_WORDED, rewordPhrase: BRAHMINS, textIncludes: "respect for Gods and Brahmins" },
+  "9.7.5": {
+    show: BRAHMINS_WORDED,
+    rewordPhrase: ["Brahmins and priestly classes", `[people of ${BRAHMIN_WORDING}]`],
+    textIncludes: "faith in Brahmins and priestly classes",
+  },
+  "9.16.5": { show: BRAHMINS_WORDED, rewordPhrase: BRAHMINS, textIncludes: "respect to good Brahmins" },
+  "9.36.3": { show: BRAHMINS_WORDED, rewordPhrase: BRAHMINS, textIncludes: "fond of Gods and Brahmins" },
+  "10.19.4": { show: BRAHMINS_WORDED, rewordPhrase: BRAHMINS, textIncludes: "fond of Brahmins" },
   "12.1.1": { opening: SAUBHAGYA, textIncludes: "aspected by Sukra" },
   "12.2.1": { opening: SAUBHAGYA, textIncludes: "aspected by Guru and Chandra" },
   "12.3.1": { opening: SAUBHAGYA, textIncludes: "the lord of Lagna occupies Lagna" },

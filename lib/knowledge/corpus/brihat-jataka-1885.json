@@ -386,7 +386,8 @@
       "part": 1,
       "kind": "verse",
       "chapterTitle": "On Avocations",
-      "text": "If the lord of the Navamsa be Jupiter, a person will get wealth through Brahmins, the Devas or learned men,",
+      "text": "If the lord of the Navamsa be Jupiter, a person will get wealth through [people of very high status and influence], the Devas or learned men,",
+      "printedText": "If the lord of the Navamsa be Jupiter, a person will get wealth through Brahmins, the Devas or learned men,",
       "notes": null,
       "summary": "The text says that if Jupiter is the deciding Navamsa lord, the person will get wealth through Brahmins, the gods or learned men.",
       "yogaIds": [],
@@ -399,8 +400,8 @@
         "wealth",
         "career"
       ],
-      "withheld": true,
-      "withheldReason": "mentions caste (Brahmins)",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.833
     },
     {
@@ -4466,7 +4467,8 @@
       "part": 2,
       "kind": "verse",
       "chapterTitle": "On Double Planetary Yogas",
-      "text": "[If the double planets occupying together a sign of the Zodiac at the time of birth be] Mars and Jupiter, the person will be the chief of a town or a king, will acquire money or will be a Brahmin;",
+      "text": "[If the double planets occupying together a sign of the Zodiac at the time of birth be] Mars and Jupiter, the person will be the chief of a town or a king, will acquire money or will be [a person of very high status and influence];",
+      "printedText": "[If the double planets occupying together a sign of the Zodiac at the time of birth be] Mars and Jupiter, the person will be the chief of a town or a king, will acquire money or will be a Brahmin;",
       "notes": null,
       "summary": "The text says that a person born with Mars and Jupiter together in one sign will be the head of a town or a king, will gain money, or will be a Brahmin.",
       "yogaIds": [
@@ -8060,8 +8062,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": false,
-      "withheldReason": null,
+      "withheld": true,
+      "withheldReason": "mentions caste (a Brahman ascetic), in a note no reading quotes",
       "ocrAgreement": 0.91
     },
     {
@@ -9238,7 +9240,8 @@
       "part": 1,
       "kind": "verse",
       "chapterTitle": "On the Moon in the Several Signs",
-      "text": "A person born with the Moon in sign Libra will respect the Devas, Brahmins, and holy men; will be intelligent, will never covet the property of other men; will lead a religious life;",
+      "text": "A person born with the Moon in sign Libra will respect the Devas, [people of very high status and influence], and holy men; will be intelligent, will never covet the property of other men; will lead a religious life;",
+      "printedText": "A person born with the Moon in sign Libra will respect the Devas, Brahmins, and holy men; will be intelligent, will never covet the property of other men; will lead a religious life;",
       "notes": null,
       "summary": "The text says a person born with the Moon in Libra will respect gods, Brahmins and holy men, be intelligent, never covet others' property, and lead a religious life.",
       "yogaIds": [],

@@ -180,6 +180,11 @@ export function checkedConditions(
  *     hand like "barren" ("Unchaste sounds fine, keep multiple illicit
  *     relationships, bad character is fine and then keep the questionable
  *     morals").
+ *   - Brahmins, where a passage speaks of them with respect or liking, are
+ *     printed as "people of very high status and influence" ("Fond of
+ *     Bhramins change it to liking of people with very high status and
+ *     influential people"), reworded by hand. Every other mention of caste is
+ *     still withheld.
  *   - Any word that brands a person and that the owner has not yet seen waits,
  *     withheld, until they pick its wording ("if you find similar stuff let me
  *     know I will recommend").
@@ -190,8 +195,14 @@ export const BARREN = /\bbarren\b/i;
 export const BARREN_WORDING = "may have no children";
 /** Reworded by hand to OWNERS_WORDING, passage by passage. */
 const IMMORAL = /\b(immoral\w*|bad\s+wom[ae]n)\b/i;
+/** Reworded by hand, passage by passage; the Brahminy kite, a bird, is not one. */
+export const BRAHMIN = /\bbrahm[ai]ns?\b/i;
+export const BRAHMIN_WORDING = "very high status and influence";
 /** What a shown passage may never print: every word the owner has reworded. */
-export const UNPRINTED = new RegExp(`${REWORDED.source}|${BARREN.source}|${IMMORAL.source}`, "i");
+export const UNPRINTED = new RegExp(
+  `${REWORDED.source}|${BARREN.source}|${IMMORAL.source}|${BRAHMIN.source}`,
+  "i",
+);
 /** Words a rewording may drop with the label: its article and its verb. */
 const DROPPABLE =
   /^(a|an|the|of|is|are|be|been|being|become|becomes|became|turn|turns|prostitut\w*|whores?|harlots?|courtesans?|strumpets?|public|women|woman)$/;
@@ -296,7 +307,7 @@ export function shownText(
   const kept = new Set(brackets(printed));
   const added = brackets(reworded).filter((inside) => !kept.has(inside));
   const ownersWording = (inside: string) =>
-    [OWNERS_WORDING, BARREN_WORDING].some((wording) => inside.toLowerCase().includes(wording));
+    [OWNERS_WORDING, BARREN_WORDING, BRAHMIN_WORDING].some((wording) => inside.toLowerCase().includes(wording));
   if (added.length === 0 || !added.every(ownersWording)) {
     throw new Error(`${ref}: a bracket in the rewording lacks the owner's wording: ${JSON.stringify(added)}.`);
   }

@@ -180,10 +180,9 @@ describe("the Brihat Jataka corpus", () => {
     // shown passage is printed even when the note itself steers clear. Words
     // a passage may use harmlessly are listed with the reason.
     const ALLOWED: Record<string, string> = {
-      "brihat-jataka-1885:15.1.2": "an ascetic life kept 'till death' means for life",
     };
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n|brahm[ai]ns?)\b/i;
     const found = (corpus?.passages ?? [])
       .filter((passage) => !passage.withheld && !(passage.id in ALLOWED))
       .flatMap((passage) => {
@@ -210,6 +209,16 @@ describe("the Brihat Jataka corpus", () => {
     expect(find("24.5.20")?.text).toMatch(/she \[may have no children\]\.$/);
     expect(find("18.20.75")?.withheld).toBe(true);
     expect(find("18.20.75")?.withheldReason).toBe('the owner keeps "a woman of low deeds" hidden');
+  });
+
+  it("prints Brahmins as people of very high status and influence, as the owner worded it", () => {
+    // 2026-10-05: "Fond of Bhramins change it to liking of people with very
+    // high status and influential people".
+    const find = (ref: string) => corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref);
+    expect(find("17.7.1")?.text).toContain("respect the Devas, [people of very high status and influence], and holy men");
+    expect(find("14.3.2")?.text).toContain("will be [a person of very high status and influence]");
+    // Defining a mendicant order, the wording would make no sense; the caste rule holds.
+    expect(find("15.1.2")?.withheld).toBe(true);
   });
 
   it("prints 'multiple illicit relationships' for 'bad women', and shows 'unchaste' as printed, as the owner decided", () => {
@@ -312,6 +321,13 @@ describe("the Strijataka corpus", () => {
     expect(waiting.filter((passage) => settled.test(passage.withheldReason ?? "")).map((passage) => passage.id)).toEqual([]);
   });
 
+  it("shows a respect for Brahmins in the owner's wording, and keeps every other mention of caste hidden", () => {
+    const find = (ref: string) => passages.find((passage) => passage.id === "strijataka-1931:" + ref);
+    expect(find("10.19.4")?.withheld).toBe(false);
+    expect(find("10.19.4")?.text).toBe("[Sukra in 7 —] fond of [people of very high status and influence],");
+    expect(find("11.1.3")?.withheld).toBe(true); // "a lower caste than that of the ruler"
+  });
+
   it("prints the owner's words for 'immoral', and says 'bad character', 'unchaste' and 'questionable morals' plainly", () => {
     // 2026-10-05: "Unchaste sounds fine, keep multiple illicit relationships,
     // bad character is fine and then keep the questionable morals".
@@ -371,7 +387,7 @@ describe("the Brihat Samhita corpus", () => {
   it("shows no lifespan, death, disease, caste or the rest", () => {
     // A long life counts here too: the palm reading says no line fixes a lifespan.
     const FORBIDDEN =
-      /\b(die|dies|died|dying|death|dead|kill\w*|hundred years|years of age|blind\w*|lepro\w*|leper|thie(f|ves)|theft|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n)\b/i;
+      /\b(die|dies|died|dying|death|dead|kill\w*|hundred years|years of age|blind\w*|lepro\w*|leper|thie(f|ves)|theft|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuchs?|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n|brahm[ai]ns?)\b/i;
     const found = shown.flatMap((passage) => {
       const match = `${passage.text} ${passage.notes ?? ""}`.match(FORBIDDEN);
       return match ? [`${passage.id}: ${match[0]}`] : [];

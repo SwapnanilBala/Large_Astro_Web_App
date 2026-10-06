@@ -39,12 +39,7 @@ Some things are still shown. Words the books use for a temperament or body type,
 
 Caste was ruled out in the first rules the corpus was built on, and the owner's later decisions kept that rule. Slurs on birth fall under the same rule.
 
-**Open question:** the two books don't yet treat a respectful mention of caste the same way.
-
-- The Brihat Jataka shows a few passages that name a caste respectfully ("will respect the Devas, Brahmins, and holy men").
-- The Strijataka hides the same kind of mention ("fond of Brahmins").
-
-The two books should follow one rule.
+The one exception is a respectful mention of Brahmins ("fond of Brahmins", "will respect the Devas, Brahmins, and holy men"). These are reworded rather than hidden; see below. A note that only defines an ascetic order as "a Brahman ascetic" stays hidden, because the rewording would make a beggar-monk into a person of high status.
 
 ### Crime, violence and imprisonment
 
@@ -81,6 +76,7 @@ Some words are too harsh to print but say something the owner wants readers to h
 - **Words for a prostitute** (prostitute, whore, harlot, courtesan) become "[multiple illicit relationships]". The owner: "calling prostitute is a bit too bold and some people might get hurt we have to reframe that wording like multiple illicit relationships would be a better".
 - **"Immoral" and "bad women"** become "[multiple illicit relationships]" too ("keep multiple illicit relationships").
 - **"Barren"** becomes "[may have no children]" ("show barren as 'may have no children'").
+- **Brahmins, spoken of with respect or liking,** become "[people of very high status and influence]": "fond of [people of very high status and influence]" ("Fond of Bhramins change it to liking of people with very high status and influential people"). Mars and Jupiter's "will be a Brahmin" becomes "will be [a person of very high status and influence]". Every other mention of caste stays hidden.
 
 A build fails if a passage it would show still prints one of these words.
 
@@ -118,11 +114,11 @@ The palm reading names no text at all: "no need to mention the citation on the p
 | A sentence broken by a missing page | 0 | 0 | 1 |
 | Eunuchs and hermaphrodites | 3 | 1 | 0 |
 | Death, widowhood and lifespan | 24 | 46 | 29 |
-| Caste and birth status | 13 | 7 | 10 |
+| Caste and birth status | 13 | 7 | 5 |
 | Harm to a parent, partner or child | 3 | 0 | 2 |
 | Crime, violence and imprisonment | 28 | 4 | 1 |
 | Illness, injury, disability and deformity | 61 | 7 | 40 |
-| **Hidden in all** | **183** of 949 | **65** of 366 | **84** of 728 |
+| **Hidden in all** | **183** of 949 | **65** of 366 | **79** of 728 |
 
 A passage is counted under the first kind its recorded reason names, in the order above.
 
@@ -301,12 +297,12 @@ Grouped by kind, then by book and place in the book. Each line gives the passage
 - `strijataka-1931:12.15.1`: listed as a combination for widowhood -- "If Rahu combines with Sani and Kuja and joins 7th or 8th"
 - `strijataka-1931:12.16.1`: husband's death and killing of husband, violence -- "romantic, interesting and instructive A poor girl, marries a poor man and he dies and she lives to a long t..."
 
-### Caste and birth status (30)
+### Caste and birth status (25)
 
-- `brihat-jataka-1885:10.3.1`: mentions caste (Brahmins) -- "If the lord of the Navamsa be Jupiter, a person will get wealth through Brahmins, the Devas or learned men,"
 - `brihat-jataka-1885:14.2.5`: Low social birth; sexual immorality of mother. -- "[If the double planets occupying together a sign of the Zodiac at the time of birth be] the Moon and Saturn..."
 - `brihat-jataka-1885:14.4.50`: Deformity; low birth. -- "[Again, if the Yoga planets occupying a single sign be] (27). Mars, Mercury and Venus—will be of defective..."
 - `brihat-jataka-1885:14.4.117`: Low birth; disease. -- "[Lastly, if the yoga planets occupying a single sign of Zodiac at the time of birth be the several planets]..."
+- `brihat-jataka-1885:15.1.2`: mentions caste (a Brahman ascetic), in a note no reading quotes -- "(c). The ascetic life of the most powerful planet will be embraced by the person first, then that of the pl..."
 - `brihat-jataka-1885:17.10.7`: Mention of caste -- "[A person born with the Moon in sign Capricorn] and will be attached to old women of low caste;"
 - `brihat-jataka-1885:18.11.4`: mentions caste -- "[A person born with Mercury in sign Pisces] and will be learned in the handicraft of men of low castes."
 - `brihat-jataka-1885:18.18.1`: mentions caste -- "A person born with Saturn in sign Taurus will be fond of women of low caste,"
@@ -326,11 +322,6 @@ Grouped by kind, then by book and place in the book. Each line gives the passage
 - `strijataka-1931:6.6.1`: speaks of birth status (born of adultery) -- "If Sani and Chandra occupy a movable sign aspected by Sukra, her husband will be fond of other women, fickl..."
 - `strijataka-1931:6.6.2`: speaks of birth status (illegitimacy) -- "This means that his mother is immoral and he is not the son of his reputed or registered father."
 - `strijataka-1931:7.20.1`: mention of caste (her class) -- "5. Chandra in Simha, leader among her class"
-- `strijataka-1931:8.11.3`: mentions a caste by name -- "[Makha—] respect for Gods and Brahmins"
-- `strijataka-1931:9.7.5`: mentions caste -- "[Ravi in 5 —] and faith in Brahmins and priestly classes are indicated."
-- `strijataka-1931:9.16.5`: mentions caste -- "[Chandra in 2 —] and respect to good Brahmins."
-- `strijataka-1931:9.36.3`: mentions caste -- "[Budha in 2 —] fond of Gods and Brahmins,"
-- `strijataka-1931:10.19.4`: mention of caste -- "[Sukra in 7 —] fond of Brahmins,"
 - `strijataka-1931:11.1.2`: mentions caste -- "[If Guru is in Lagna, if Chandra is in 7th or in his own vergas, and Sukra is in 10th, the woman will becom..."
 - `strijataka-1931:11.1.3`: mentions caste -- "Here it means that although a girl may be born in humble circumstances and belong to a lower caste than tha..."
 
