@@ -47,9 +47,20 @@ export type StoryProseChapterFacts = {
   draft: string;
 };
 
+/**
+ * Everything the model is told about the report.
+ *
+ * Not the reader's name, and not the report title, which the engine writes as
+ * "<name> story". The prompt tells the model never to name the reader, so the
+ * name did nothing there -- and it was the one piece of text a link could
+ * carry into this prompt. A chart link holds the name exactly as typed, and
+ * the report is built from whatever link the reader opened, so a link someone
+ * else wrote could put instructions into the reader's own download. What is
+ * left is text the engine wrote from the chart: a link can change the chart,
+ * but not the words. The PDF still prints the name, from the chart rather
+ * than from anything the model returns.
+ */
 export type StoryProseFacts = {
-  clientName?: string;
-  headline: string;
   subtitle: string;
   atAGlance: Array<{ label: string; value: string; context: string }>;
   centralThemes: string[];
@@ -83,13 +94,8 @@ export const WORDS_PER_PARAGRAPH = "110 to 140";
  * filters out at render time, and sending the same sentence twice invites the
  * model to treat the duplication as emphasis.
  */
-export function buildStoryProseFacts(
-  story: PersonalStory,
-  clientName?: string,
-): StoryProseFacts {
+export function buildStoryProseFacts(story: PersonalStory): StoryProseFacts {
   return {
-    clientName,
-    headline: story.title,
     subtitle: story.subtitle,
     atAGlance: story.atAGlance,
     centralThemes: story.centralThemes,
@@ -111,7 +117,7 @@ export function buildStoryProseFacts(
   };
 }
 
-/** The user turn. Also used by scripts/effort-compare.mjs's mirror of it. */
+/** The user turn. Also what scripts/render-story-pdf-sample.tsx sends. */
 export function renderStoryProseFacts(facts: StoryProseFacts): string {
   const glance = facts.atAGlance
     .map((item) => `  ${item.label}: ${item.value} -- ${item.context}`)
@@ -134,8 +140,6 @@ export function renderStoryProseFacts(facts: StoryProseFacts): string {
     .join("\n\n");
 
   return [
-    facts.clientName ? `Reader: ${facts.clientName}` : "Reader: unnamed",
-    `Report title: ${facts.headline}`,
     `Report subtitle: ${facts.subtitle}`,
     "",
     `At a glance (printed on its own page; do not restate these as a list):\n${glance}`,

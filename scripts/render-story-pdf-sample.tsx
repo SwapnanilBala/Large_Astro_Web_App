@@ -142,7 +142,7 @@ async function writtenProse(story: PersonalStory) {
 
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic({ apiKey, timeout: 250_000 });
-  const facts = buildStoryProseFacts(story, birth.name);
+  const facts = buildStoryProseFacts(story);
 
   console.log(`prose: calling ${MODEL}, one call, please wait...`);
   const startedAt = Date.now();

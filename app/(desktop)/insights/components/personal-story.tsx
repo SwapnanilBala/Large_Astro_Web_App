@@ -133,7 +133,7 @@ export default function PersonalStory({
        */
       setStage("writing");
       try {
-        const facts = buildStoryProseFacts(story, payload.client.name);
+        const facts = buildStoryProseFacts(story);
         const response = await fetch("/api/chart/story-prose", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

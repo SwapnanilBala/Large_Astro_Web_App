@@ -230,9 +230,10 @@ function parseFacts(value: unknown): StoryProseFacts {
   const glance = Array.isArray(raw.atAGlance) ? raw.atAGlance.slice(0, 8) : [];
   const themes = Array.isArray(raw.centralThemes) ? raw.centralThemes.slice(0, 5) : [];
 
+  /* No name and no title; see StoryProseFacts. A page loaded before they were
+     dropped still sends `clientName` and `headline`, and reading only these
+     fields is what leaves them out. */
   return {
-    clientName: text(raw.clientName, 120) || undefined,
-    headline: text(raw.headline, 200),
     subtitle: text(raw.subtitle, 300),
     atAGlance: glance.map((item) => {
       const row = (item ?? {}) as Record<string, unknown>;
@@ -255,14 +256,14 @@ function parseFacts(value: unknown): StoryProseFacts {
  *
  * It used to be a list of chosen fields, and the list had fallen behind the
  * prompt: it left out the reader's name, each glance row's context, and each
- * chapter's title and section, all four of which the user turn prints. The
- * facts come from the browser and the cache is shared, so anyone holding
- * someone else's birth details -- a share link carries them, and
- * /api/chart/story-report returns the story these facts are built from --
- * could write instructions into those four, leave the rest alone, and be the
- * first to fill the entry; the other reader's PDF would then come out of the
- * cache with prose a stranger had steered. A key built from what is sent
- * cannot fall behind what is sent.
+ * chapter's title and section, all four of which the user turn then printed.
+ * (It no longer prints the name; see StoryProseFacts.) The facts come from
+ * the browser and the cache is shared, so anyone holding someone else's birth
+ * details -- a share link carries them, and /api/chart/story-report returns
+ * the story these facts are built from -- could write instructions into those
+ * four, leave the rest alone, and be the first to fill the entry; the other
+ * reader's PDF would then come out of the cache with prose a stranger had
+ * steered. A key built from what is sent cannot fall behind what is sent.
  *
  * SHA-256 rather than the SHA-1 the other routes use: theirs hash what the
  * engine chose, this hashes text anyone can type.
