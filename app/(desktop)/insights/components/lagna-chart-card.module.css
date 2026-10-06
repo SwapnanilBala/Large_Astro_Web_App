@@ -50,7 +50,13 @@
 /* ── Style switch ── */
 
 .switch {
-  display: inline-flex;
+  /* Two equal segments, each as wide as the longer label. A grid's 1fr
+     columns size to their widest item; flex: 1 halved the pill instead, which
+     clipped the longer label whenever the two differed (Hindi "उत्तर भारतीय"
+     lost 3px at every width). */
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   align-items: center;
   gap: 2px;
   padding: 3px;
@@ -61,7 +67,6 @@
 
 .switchOption {
   /* Segments share the pill's inset instead of the global button spacing. */
-  flex: 1;
   min-height: 0;
   margin: 0;
   padding: 0.42rem 0.95rem;

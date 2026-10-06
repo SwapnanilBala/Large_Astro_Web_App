@@ -581,6 +581,7 @@ function buildTopTakeaways(
      moves. */
   const topDomain = loadedTopDomain
     ? {
+        key: loadedTopDomain.key,
         label: loadedTopDomain.label,
         headline: loadedTopDomain.display.headline,
         guidance: loadedTopDomain.display.guidance,
@@ -623,7 +624,7 @@ function buildTopTakeaways(
 
   if (topDomain) {
     takeaways.push({
-      label: topDomain.label,
+      label: domainName(topDomain, t),
       title: topDomain.headline,
       body: topDomain.guidance,
       /* No meta: this used to repeat topDomain.label, which is already the
