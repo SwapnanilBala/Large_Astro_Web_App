@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { YOGA_DEFINITIONS } from "@/lib/engines/yoga-engine";
+import { checkNote, type NoteFailure } from "@/lib/knowledge/classical-note-check";
 import { KNOWLEDGE_PLANETS } from "@/lib/knowledge/corpus";
 import { passagesTaggedWith } from "@/lib/knowledge/retrieve";
 import {
@@ -54,6 +55,15 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * the corpus and filtered in SQL), and the prompt forbids those topics anyway,
  * because a shown passage can still be harsh (Kemadruma's "will be dirty ...
  * and will be wicked").
+ *
+ * ── CHECKED, THEN RETRIED ONCE ─────────────────────────────────────────────
+ *
+ * Haiku writes the note, and what it writes is checked before it ships
+ * (lib/knowledge/classical-note-check.ts): cited, and for a Hindi or Bengali
+ * reader written in their script and free of the words the content line
+ * forbids. Measured, about half its Hindi and Bengali notes failed. A note
+ * that fails is asked for once more, on Opus 5.5, from the same request and
+ * within the same budget unit, and is not shipped if that fails too.
  */
 
 /* Claude Haiku 4.5 since 2026-10-06, the owner's call to hold costs down
@@ -61,9 +71,29 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
    `thinking` omitted it does not reason before it writes. */
 const MODEL = "claude-haiku-4-5";
 
+/* The one retry: what the note ran on before, which wrote the Hindi notes
+   correctly when Haiku did not. Slower (7-21 s against 2-15 s) and about six
+   times the price of a Haiku note, so it is only ever the retry. */
+type Ask = Pick<Anthropic.MessageCreateParamsNonStreaming, "model" | "output_config">;
+const FIRST: Ask = { model: MODEL };
+const RETRY: Ask = { model: "claude-opus-5-5", output_config: { effort: "low" } };
+
 export const maxDuration = 60;
 
 const REQUEST_TIMEOUT_MS = 45_000;
+/* The retry gets what is left of maxDuration, less a margin to answer in, and
+   is not started with less time than Opus needs to finish a note. */
+const DEADLINE_MS = 55_000;
+const RETRY_MIN_MS = 15_000;
+
+const FAILED: Record<NoteFailure, string> = {
+  refusal: "The classical note was declined.",
+  /* Truncation is a failure, not a short answer: a note cut off
+     mid-sentence is worse than none. */
+  max_tokens: "The classical note ran past its token ceiling.",
+  uncited: "The classical note came back without its sources.",
+  check: "The classical note came back in the wrong language or with words it may not use.",
+};
 
 /*
  * Bounded, process-lifetime, keyed by the yogas and passages actually used.
@@ -135,7 +165,91 @@ function cacheKey(selection: YogaWithPassages[]): string {
   return createHash("sha1").update(canonical).digest("hex");
 }
 
+type Written = { reading: YogaClassicsReading; failure?: undefined } | { reading?: undefined; failure: NoteFailure };
+
+/** One paid call: the note, or why it cannot be shipped. */
+async function writeNote(
+  client: Anthropic,
+  ask: Ask,
+  attempt: number,
+  selection: YogaWithPassages[],
+  languageCode: string,
+  options?: { timeout: number; maxRetries: number },
+): Promise<Written> {
+  const names = selection.map(({ yoga }) => DEFINITIONS.get(yoga.id)?.name ?? yoga.id);
+  const startedAt = Date.now();
+  const response = await client.messages.create(
+    {
+      ...ask,
+      /* Headroom for a short note, and Opus's thinking on the retry, not a target. */
+      max_tokens: 4000,
+      system: [{ type: "text", text: YOGA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
+      messages: [
+        {
+          role: "user",
+          content: [
+            ...yogaDocuments(selection),
+            { type: "text", text: yogaClassicsInstruction(names, COMMENTARY_LANGUAGES[languageCode]) },
+          ],
+        },
+      ],
+    },
+    options,
+  );
+
+  /* One line per uncached call, as on every paid route here, so the model
+     and budget questions are settled from logs rather than from arithmetic. */
+  console.info(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route: "/api/chart/yoga-classics",
+    event: "llm_usage",
+    model: ask.model,
+    attempt,
+    yogas: selection.length,
+    passages: selection.reduce((sum, { passages }) => sum + passages.length, 0),
+    language: languageCode,
+    elapsedMs: Date.now() - startedAt,
+    stopReason: response.stop_reason,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+    cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+  }));
+
+  if (response.stop_reason === "refusal") return { failure: "refusal" };
+  if (response.stop_reason === "max_tokens") return { failure: "max_tokens" };
+
+  const reading = readingFrom(response.content, selection);
+  if (reading.sources.length === 0) {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/yoga-classics",
+      event: "llm_reading_uncited",
+      model: ask.model,
+      attempt,
+      segments: reading.segments.length,
+    }));
+    return { failure: "uncited" };
+  }
+
+  const check = checkNote(reading, languageCode);
+  if (check.problems.length > 0) {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/yoga-classics",
+      event: "llm_note_check",
+      model: ask.model,
+      attempt,
+      language: languageCode,
+      problems: check.problems,
+      blocks: check.blocks,
+    }));
+  }
+  return check.blocks ? { failure: "check" } : { reading };
+}
+
 export async function POST(request: NextRequest) {
+  const receivedAt = Date.now();
   try {
     let body: { yogas?: unknown; language?: unknown };
     try {
@@ -145,10 +259,11 @@ export async function POST(request: NextRequest) {
     }
 
     const yogas = parseYogas(body.yogas);
-    /* An unknown language is English, as on the other commentary routes. */
+    /* An unknown language is English, as on the other commentary routes. An
+       own key only: `in` would take "constructor" and ask for a note in
+       "function Object() { [native code] }". */
     const languageCode =
-      typeof body.language === "string" && body.language in COMMENTARY_LANGUAGES ? body.language : "en";
-    const languageName = COMMENTARY_LANGUAGES[languageCode];
+      typeof body.language === "string" && Object.hasOwn(COMMENTARY_LANGUAGES, body.language) ? body.language : "en";
 
     const selection = selectYogaPassages(
       await passagesTaggedWith(yogas.map((yoga) => yoga.id)),
@@ -195,59 +310,31 @@ export async function POST(request: NextRequest) {
     }
 
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY, timeout: REQUEST_TIMEOUT_MS });
-    const names = selection.map(({ yoga }) => DEFINITIONS.get(yoga.id)?.name ?? yoga.id);
-    const response = await client.messages.create({
-      model: MODEL,
-      /* Headroom for a short note, not a target. */
-      max_tokens: 4000,
-      system: [{ type: "text", text: YOGA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-      messages: [
-        {
-          role: "user",
-          content: [...yogaDocuments(selection), { type: "text", text: yogaClassicsInstruction(names, languageName) }],
-        },
-      ],
-    });
-
-    /* One line per uncached call, as on every paid route here, so the model
-       and budget questions are settled from logs rather than from arithmetic. */
-    console.info(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      route: "/api/chart/yoga-classics",
-      event: "llm_usage",
-      model: MODEL,
-      yogas: selection.length,
-      passages: selection.reduce((sum, { passages }) => sum + passages.length, 0),
-      language: languageCode,
-      stopReason: response.stop_reason,
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
-      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
-      cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
-    }));
-
-    if (response.stop_reason === "refusal") {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The classical note was declined.");
-    }
-    /* Truncation is a failure, not a short answer: a note cut off
-       mid-sentence is worse than none. */
-    if (response.stop_reason === "max_tokens") {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The classical note ran past its token ceiling.");
-    }
-
-    const reading = readingFrom(response.content, selection);
-    if (reading.sources.length === 0) {
+    let written = await writeNote(client, FIRST, 1, selection, languageCode);
+    if (written.failure) {
+      const leftMs = DEADLINE_MS - (Date.now() - receivedAt);
+      const retrying = leftMs >= RETRY_MIN_MS;
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/yoga-classics",
-        event: "llm_reading_uncited",
-        segments: reading.segments.length,
+        event: "llm_note_retry",
+        failure: written.failure,
+        language: languageCode,
+        model: RETRY.model,
+        leftMs,
+        retrying,
       }));
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The classical note came back without its sources.");
+      if (retrying) {
+        written = await writeNote(client, RETRY, 2, selection, languageCode, {
+          timeout: Math.min(REQUEST_TIMEOUT_MS, leftMs),
+          maxRetries: 0,
+        });
+      }
     }
+    if (!written.reading) throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, FAILED[written.failure]);
 
-    remember(key, reading);
-    const fresh: YogaClassicsResponse = { reading, cached: false };
+    remember(key, written.reading);
+    const fresh: YogaClassicsResponse = { reading: written.reading, cached: false };
     return NextResponse.json(fresh);
   } catch (error) {
     if (!(error instanceof ApiError)) {

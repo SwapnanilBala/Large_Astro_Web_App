@@ -279,7 +279,13 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      at all. The section is on the members-only advanced page, mounted only
      when scrolled to, so this is bought by signed-in readers who look at
      their yogas. 600 a day is about $17 on a day that exhausts the route,
-     inside the $22 every dear route here is held to. */
+     inside the $22 every dear route here is held to.
+
+     Measured again on 2026-10-06: Haiku costs $0.003-$0.006 a note, and a
+     note that fails its checks (most often a Hindi or Bengali one) is
+     retried once on Opus 5.5 at low effort inside the same unit, so a unit
+     costs $0.006 without the retry and about $0.036 with it. That puts an
+     exhausted day at $4 if nothing retries and about $22 if everything does. */
   "/api/chart/yoga-classics": {
     perDay: 600,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
@@ -298,7 +304,16 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      share notes. The page is public and one link from the results page, so
      this is bought by visitors rather than only by members. 500 a day is
      about $20 on a day that exhausts the route, inside the $22 every dear
-     route here is held to. */
+     route here is held to.
+
+     Measured again on 2026-10-06: Haiku costs $0.005-$0.015 a call and Opus
+     5.5 at low effort about $0.06 for every area. Areas that fail their
+     checks are retried once on Opus inside the same unit, and only those,
+     so a unit costs up to $0.015 without the retry and up to about $0.075
+     with all seven. An exhausted day is $8 if nothing retries and about $37
+     if every call retries every area, which only all-Hindi or all-Bengali
+     traffic could approach: over the $22 line, so watch the llm_note_retry
+     lines before raising the ceiling. */
   "/api/chart/area-classics": {
     perDay: 500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
