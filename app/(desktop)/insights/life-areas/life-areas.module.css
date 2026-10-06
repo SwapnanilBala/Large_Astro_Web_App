@@ -13,7 +13,8 @@
 /* The frame sets --detail-*; these alias them so the rules below read the
    same as when this file owned the page. */
 .domainNav,
-.domainCard {
+.domainCard,
+.askCard {
   --area-gold: var(--detail-gold, #e0b85c);
   --area-teal: var(--detail-teal, #6ce1d4);
   --area-ink: var(--detail-ink, #f4f1ec);
@@ -104,6 +105,41 @@
   border: 1px solid rgba(200, 155, 60, 0.14);
   border-radius: 18px;
   background: rgba(13, 10, 22, 0.9);
+}
+
+/* ── Ask the classics ──
+ * The questions a reader can put to the books, under the area card and
+ * dressed like it. The chips are the area picker's, and the answer is the
+ * shared classical-note card. */
+
+.askCard {
+  display: grid;
+  gap: 1rem;
+  padding: clamp(1.15rem, 2.4vw, 1.9rem);
+  border: 1px solid rgba(200, 155, 60, 0.14);
+  border-radius: 18px;
+  background: rgba(13, 10, 22, 0.9);
+}
+
+.askHeader {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.askHeader h2 {
+  margin: 0;
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(1.25rem, 2.2vw, 1.55rem);
+  line-height: 1.25;
+}
+
+.askLead,
+.askMessage {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--area-soft);
+  font-size: var(--text-ui);
+  line-height: 1.6;
 }
 
 .domainHeader {
@@ -564,7 +600,8 @@
 /* ── Ethereal Dawn ──
  * Same fault as the dashboard's copy of this card: a 90%-opaque ink panel
  * holding themed ink, which the light theme reads as dark on dark. */
-:global(html[data-theme="light"]) .domainCard {
+:global(html[data-theme="light"]) .domainCard,
+:global(html[data-theme="light"]) .askCard {
   border-color: var(--border-soft);
   background: var(--surface-frosted);
 }

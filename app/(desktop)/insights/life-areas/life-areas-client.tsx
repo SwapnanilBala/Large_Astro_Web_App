@@ -18,6 +18,7 @@ import { useDomainBriefs } from "@/lib/use-domain-briefs";
 import lifeAreasMessages from "@/messages/en.life-areas.json";
 import { ClassicalNote } from "@/app/(desktop)/insights/components/classical-note";
 import KalatraPanel from "./kalatra-panel";
+import { AskClassicsPanel } from "./ask-classics-panel";
 import { useAreaClassics } from "./use-area-classics";
 import type { KalatraResult } from "@/lib/engines/kalatra-engine";
 import styles from "./life-areas.module.css";
@@ -379,6 +380,11 @@ export default function LifeAreasClient({
             </>
           )}
         </article>
+
+        {/* Questions for the books, answered from the passages that apply to
+            this chart. Below the card, so its late arrival moves nothing the
+            reader is already reading. */}
+        <AskClassicsPanel historyQs={historyQs} tr={tr} />
     </>
   );
 }

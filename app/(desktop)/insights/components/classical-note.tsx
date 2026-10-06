@@ -26,11 +26,13 @@ type ClassicalNoteProps = {
   /** A route-catalog translator and the prefix this card's strings sit under. */
   tr: (key: string, params?: Record<string, string>) => string;
   prefix: string;
+  /** A heading of the card's own, in place of the prefix's: the question an answer is to. */
+  heading?: string;
   headingId: string;
   className?: string;
 };
 
-export function ClassicalNote({ state, reading, tr, prefix, headingId, className }: ClassicalNoteProps) {
+export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, className }: ClassicalNoteProps) {
   if (state === "empty" || state === "failed") return null;
   if (state === "ready" && !reading) return null;
 
@@ -47,7 +49,7 @@ export function ClassicalNote({ state, reading, tr, prefix, headingId, className
     >
       <p className="kicker">{tr(`${prefix}.kicker`)}</p>
       <h3 id={headingId} className="classical-note-heading">
-        {tr(`${prefix}.heading`)}
+        {heading ?? tr(`${prefix}.heading`)}
       </h3>
 
       {state === "ready" && reading ? (
