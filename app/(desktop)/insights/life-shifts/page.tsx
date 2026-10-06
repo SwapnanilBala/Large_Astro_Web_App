@@ -74,7 +74,7 @@ export default async function LifeShiftsPage({ searchParams }: LifeShiftsPagePro
         icon={<FiTrendingUp />}
       >
         <PanelErrorBoundary panelName="Major Life Shifts">
-          <MajorShiftsPanel payload={payload} variant="full" />
+          <MajorShiftsPanel payload={payload} historyQs={historyQs} variant="full" />
         </PanelErrorBoundary>
       </DetailPageShell>
     </PageTransition>

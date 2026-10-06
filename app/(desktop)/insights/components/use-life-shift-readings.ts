@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { MajorLifeShift } from "@/lib/engines/major-shifts-engine";
 import {
-  buildLifeShiftFacts,
+  MAX_LIFE_SHIFTS,
+  lifeShiftId,
   type LifeShiftDepth,
   type LifeShiftReading,
 } from "@/lib/life-shift-reading";
@@ -44,6 +45,11 @@ export type LifeShiftReadings = {
  *   reading. The chapters cannot change without a navigation, which unmounts
  *   this anyway.
  *
+ * What is sent is the chart's query string and the ids of the chapters, not
+ * the chapters themselves: the route rebuilds the chart and writes the facts
+ * the model reads from it, so nothing typed into a request reaches the
+ * prompt. The readings come back on the same ids the panel files them under.
+ *
  * Deliberately off the critical path. The panel renders the engine's own
  * narrative for every chapter immediately and swaps in the written reading
  * when it arrives; a failure -- no key, budget spent, rate limited, the model
@@ -59,6 +65,8 @@ export type LifeShiftReadings = {
 export function useLifeShiftReadings(
   shifts: MajorLifeShift[],
   depth: LifeShiftDepth,
+  /** The chart's query string, which the route rebuilds the chapters from. */
+  historyQs: string,
 ): LifeShiftReadings {
   const [state, setState] = useState<LifeShiftReadingsState>("pending");
   const [readings, setReadings] = useState<Map<string, string>>(() => new Map());
@@ -67,11 +75,12 @@ export function useLifeShiftReadings(
      per mounted lifetime, so these are the only inputs it will ever send;
      holding them in state keeps the effect free of anything that changes,
      where refs updated during render are something React's rules forbid. */
-  const [facts] = useState(() => buildLifeShiftFacts(shifts));
+  const [ids] = useState(() => shifts.slice(0, MAX_LIFE_SHIFTS).map(lifeShiftId));
   const [requestDepth] = useState(depth);
+  const [query] = useState(historyQs);
 
   useEffect(() => {
-    if (facts.length === 0 || startedRef.current) return;
+    if (ids.length === 0 || startedRef.current) return;
     startedRef.current = true;
 
     /* Aborted on unmount so navigating away does not land a setState on a dead
@@ -80,10 +89,10 @@ export function useLifeShiftReadings(
 
     (async () => {
       try {
-        const response = await fetch("/api/chart/life-shifts", {
+        const response = await fetch(`/api/chart/life-shifts?${query}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ shifts: facts, depth: requestDepth }),
+          body: JSON.stringify({ ids, depth: requestDepth }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -111,8 +120,8 @@ export function useLifeShiftReadings(
       /* So the StrictMode remount can ask again; see the note above. */
       startedRef.current = false;
     };
-  }, [facts, requestDepth]);
+  }, [ids, requestDepth, query]);
 
   /* No chapters means nothing to ask for, which reads the same as a failure. */
-  return { state: facts.length === 0 ? "failed" : state, readings };
+  return { state: ids.length === 0 ? "failed" : state, readings };
 }

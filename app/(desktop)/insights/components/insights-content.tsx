@@ -1767,7 +1767,7 @@ export default function InsightsContent({
               enough lead time to render before the section is actually read. */}
           <LazyPanel minHeight={560} rootMargin="800px">
             <PanelErrorBoundary panelName="Major Life Shifts">
-              <MajorShiftsPanel payload={payload} variant="brief" />
+              <MajorShiftsPanel payload={payload} historyQs={historyQs} variant="brief" />
             </PanelErrorBoundary>
           </LazyPanel>
           <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>

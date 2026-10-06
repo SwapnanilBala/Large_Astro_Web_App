@@ -3,11 +3,21 @@ import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
+import {
+  chartParamsToBirthInput,
+  getChartPayload,
+  hasAllChartParams,
+  readChartParams,
+  type ChartParams,
+} from "@/lib/chart-params";
+import { computeMajorLifeShifts } from "@/lib/engines/major-shifts-engine";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import { lifeShiftCacheKey } from "@/lib/life-shift-reading-server";
 import {
   MAX_LIFE_SHIFTS,
+  buildLifeShiftFacts,
+  lifeShiftId,
   renderLifeShiftFacts,
   type LifeShiftDepth,
   type LifeShiftFacts,
@@ -31,6 +41,16 @@ import {
  * the model is only allowed to phrase it. Everything in the user turn is a
  * fact the engine computed; nothing in the system prompt invites the model to
  * add a placement, an aspect or a date of its own.
+ *
+ * ── REBUILT HERE, NOT TAKEN FROM THE BROWSER ───────────────────────────────
+ *
+ * The route takes the birth details in the query, as the life-areas notes
+ * do, and the ids of the chapters the panel draws in the body -- nothing
+ * else. It rebuilds the chart and the chapters itself and writes the facts
+ * from them. Until 2026-10-06 the browser sent the facts, seven free-text
+ * fields a chapter, and anything typed into them went to the model: a free
+ * general-purpose model for whoever asked. An id is now only a key to look
+ * a chapter up by, and one this chart does not have is dropped.
  *
  * Failure is quiet by design. The panel keeps the engine's own narrative for
  * any chapter this route does not return, so no key, a spent budget, a refusal
@@ -166,22 +186,9 @@ const ReadingsSchema = z.object({
   ),
 });
 
-const STATUSES = new Set(["past", "active", "upcoming"]);
-const MAX_FIELD_LENGTH = 400;
-
-function text(row: Record<string, unknown>, field: string, required = true): string {
-  const value = typeof row[field] === "string" ? (row[field] as string).trim() : "";
-  if (!value && required) {
-    throw new ApiError(ErrorCode.VALIDATION_FAILED, `Each shift needs a \`${field}\`.`);
-  }
-  if (value.length > MAX_FIELD_LENGTH) {
-    throw new ApiError(
-      ErrorCode.VALIDATION_FAILED,
-      `\`${field}\` may be at most ${MAX_FIELD_LENGTH} characters.`,
-    );
-  }
-  return value;
-}
+/* Longer than any id the engine writes ("jupiter-return-" and an ISO instant
+   is 39), and only ever used to look a chapter up. */
+const MAX_ID_LENGTH = 64;
 
 function parseDepth(value: unknown): LifeShiftDepth {
   /* Defaulted rather than required, so a caller written before this split
@@ -196,64 +203,62 @@ function parseDepth(value: unknown): LifeShiftDepth {
   return value;
 }
 
-function parseShifts(value: unknown): LifeShiftFacts[] {
+function parseIds(value: unknown): string[] {
   if (!Array.isArray(value) || value.length === 0) {
-    throw new ApiError(ErrorCode.VALIDATION_FAILED, "`shifts` must be a non-empty array.");
+    throw new ApiError(ErrorCode.VALIDATION_FAILED, "`ids` must be a non-empty array.");
   }
   if (value.length > MAX_LIFE_SHIFTS) {
     throw new ApiError(
       ErrorCode.VALIDATION_FAILED,
-      `\`shifts\` may hold at most ${MAX_LIFE_SHIFTS} entries.`,
+      `\`ids\` may hold at most ${MAX_LIFE_SHIFTS} entries.`,
     );
   }
+  const ids = value.map((id) => (typeof id === "string" ? id : ""));
+  if (ids.some((id) => id.length === 0 || id.length > MAX_ID_LENGTH)) {
+    throw new ApiError(ErrorCode.VALIDATION_FAILED, "Each of `ids` must be a chapter id.");
+  }
+  return [...new Set(ids)];
+}
 
-  const seen = new Set<string>();
-  return value.map((entry) => {
-    const row = (entry ?? {}) as Record<string, unknown>;
-    const id = text(row, "id");
-    if (seen.has(id)) {
-      throw new ApiError(ErrorCode.VALIDATION_FAILED, `Duplicate shift id: ${id}.`);
-    }
-    seen.add(id);
-
-    const status = String(row.status ?? "");
-    if (!STATUSES.has(status)) {
-      throw new ApiError(
-        ErrorCode.VALIDATION_FAILED,
-        "`status` must be one of past, active, upcoming.",
-      );
-    }
-
-    const ageAtPivot = Number(row.ageAtPivot);
-    if (!Number.isFinite(ageAtPivot) || ageAtPivot < 0 || ageAtPivot > 150) {
-      throw new ApiError(ErrorCode.VALIDATION_FAILED, "`ageAtPivot` must be an age in years.");
-    }
-
-    return {
-      id,
-      label: text(row, "label"),
-      planet: text(row, "planet"),
-      theme: text(row, "theme"),
-      status: status as LifeShiftFacts["status"],
-      ageAtPivot: Math.round(ageAtPivot),
-      pivot: text(row, "pivot"),
-      window: text(row, "window"),
-      evidence: text(row, "evidence", false),
-    };
+/**
+ * The facts for the chapters asked for, in the order asked, from the chart
+ * this route built: an id the chart has no chapter for is dropped.
+ */
+function chapterFacts(chartParams: ChartParams, ids: string[]): LifeShiftFacts[] {
+  const byId = new Map(
+    computeMajorLifeShifts(getChartPayload(chartParams)).map((shift) => [lifeShiftId(shift), shift]),
+  );
+  const shifts = ids.flatMap((id) => {
+    const shift = byId.get(id);
+    return shift ? [shift] : [];
   });
+  return buildLifeShiftFacts(shifts);
 }
 
 export async function POST(request: NextRequest) {
   try {
-    let body: { shifts?: unknown; depth?: unknown };
+    const chartParams = readChartParams(Object.fromEntries(request.nextUrl.searchParams.entries()));
+    if (!hasAllChartParams(chartParams)) {
+      throw new ApiError(ErrorCode.VALIDATION_FAILED, "Complete birth details are required for the life shift readings.");
+    }
     try {
-      body = (await request.json()) as { shifts?: unknown; depth?: unknown };
+      chartParamsToBirthInput(chartParams);
+    } catch (error) {
+      throw new ApiError(ErrorCode.VALIDATION_FAILED, error instanceof Error ? error.message : "Invalid birth details.");
+    }
+
+    let body: { ids?: unknown; depth?: unknown };
+    try {
+      body = (await request.json()) as { ids?: unknown; depth?: unknown };
     } catch {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, "Request body must be JSON.");
     }
 
-    const facts = parseShifts(body.shifts);
     const depth = parseDepth(body.depth);
+    const facts = chapterFacts(chartParams, parseIds(body.ids));
+    if (facts.length === 0) {
+      throw new ApiError(ErrorCode.VALIDATION_FAILED, "None of those chapters is in this chart.");
+    }
 
     /* Depth included; see lifeShiftCacheKey for why that matters. */
     const key = lifeShiftCacheKey(depth, facts);

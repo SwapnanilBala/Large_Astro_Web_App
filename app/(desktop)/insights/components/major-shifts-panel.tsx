@@ -129,9 +129,12 @@ function ShiftCard({
  */
 export default function MajorShiftsPanel({
   payload,
+  historyQs,
   variant = "full",
 }: {
   payload: ChartApiResponse;
+  /** The chart's query string, which the readings' route rebuilds the chapters from. */
+  historyQs: string;
   variant?: "brief" | "full";
 }) {
   const { t } = useTranslation();
@@ -163,6 +166,7 @@ export default function MajorShiftsPanel({
   const { readings } = useLifeShiftReadings(
     renderedShifts,
     isBrief ? "headline" : "compact",
+    historyQs,
   );
 
   if (shifts.length === 0) {
