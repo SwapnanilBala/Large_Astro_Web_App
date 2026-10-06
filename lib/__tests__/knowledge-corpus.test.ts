@@ -180,6 +180,8 @@ describe("the Brihat Jataka corpus", () => {
     // shown passage is printed even when the note itself steers clear. Words
     // a passage may use harmlessly are listed with the reason.
     const ALLOWED: Record<string, string> = {
+      "brihat-jataka-1885:15.1.2":
+        "the note defining the ascetic orders, printed as it is by the owner's call: 'till death' means for life, and 'a Brahman ascetic' names an order",
     };
     const FORBIDDEN =
       /\b(die|dies|died|dying|death|dead|kill\w*|blind\w*|lepro\w*|leper|thie(f|ves)|theft|robber\w*|murder\w*|castes?|outcastes?|chandala|prostitut\w*|harlot\w*|courtesans?|widow\w*|eunuch\w*|hermaphrodit\w*|impoten\w*|barren|immoral\w*|bad\s+wom[ae]n|brahm[ai]ns?)\b/i;
@@ -217,8 +219,10 @@ describe("the Brihat Jataka corpus", () => {
     const find = (ref: string) => corpus?.passages.find((passage) => passage.id === "brihat-jataka-1885:" + ref);
     expect(find("17.7.1")?.text).toContain("respect the Devas, [people of very high status and influence], and holy men");
     expect(find("14.3.2")?.text).toContain("will be [a person of very high status and influence]");
-    // Defining a mendicant order, the wording would make no sense; the caste rule holds.
-    expect(find("15.1.2")?.withheld).toBe(true);
+    // Defining a mendicant order, the wording would bend its meaning, so it is
+    // printed as it is (2026-10-06: "let's not bend the actual meaning, put it as it is").
+    expect(find("15.1.2")?.withheld).toBe(false);
+    expect(find("15.1.2")?.text).toContain("A Brahman ascetic who abandons his house and family");
   });
 
   it("prints 'multiple illicit relationships' for 'bad women', and shows 'unchaste' as printed, as the owner decided", () => {

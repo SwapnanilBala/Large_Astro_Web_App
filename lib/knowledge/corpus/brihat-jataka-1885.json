@@ -8062,8 +8062,8 @@
       "lifeAreas": [
         "spirituality"
       ],
-      "withheld": true,
-      "withheldReason": "mentions caste (a Brahman ascetic), in a note no reading quotes",
+      "withheld": false,
+      "withheldReason": null,
       "ocrAgreement": 0.91
     },
     {

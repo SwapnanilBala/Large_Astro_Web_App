@@ -140,6 +140,12 @@ type PassageOverride = {
   withhold?: string;
   show?: string;
   rewordPhrase?: readonly [string, string];
+  /**
+   * The owner chose to print this passage's words as they are, though it holds
+   * a word they reword elsewhere, because the rewording would bend its meaning
+   * (the reason why). Exempts it from UNPRINTED, and nothing else.
+   */
+  asPrinted?: string;
   /** The reason recorded for a passage the model withheld, where the model's own no longer holds. */
   reason?: string;
   textIncludes?: string;
@@ -194,10 +200,13 @@ const PASSAGE_OVERRIDES: Record<string, PassageOverride> = {
     textIncludes: "will be a Brahmin",
   },
   /* A translator's note defining the ascetic orders: a Bhikshu is "a Brahman
-     ascetic who ... subsists entirely on alms". In the owner's wording the
-     mendicant would become a person of high status, so the caste rule holds;
-     no reading quotes the note. */
-  "15.1.2": { withhold: "mentions caste (a Brahman ascetic), in a note no reading quotes", textIncludes: "A Brahman ascetic" },
+     ascetic who ... subsists entirely on alms". The owner's wording for
+     Brahmins would make the mendicant a person of high status, so, by their
+     call (2026-10-06): "let's not bend the actual meaning, put it as it is". */
+  "15.1.2": {
+    asPrinted: "a definition of an ascetic order, which the owner's wording for Brahmins would bend",
+    textIncludes: "A Brahman ascetic",
+  },
   /* "Bad women", in the owner's wording (2026-10-05): "multiple illicit relationships". */
   "18.15.4": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },
   "19.8.5": { rewordPhrase: ["bad women", `[${OWNERS_WORDING}]`], textIncludes: "fond of bad women" },
@@ -643,7 +652,9 @@ function passagesOf(chapter: Chapter, ocr: string, answer: ChapterAnswer, tallie
     const labelled = override.show ? null : labelReason(decision);
     const withheld = modelWithheld || chapterWithheld || Boolean(labelled) || Boolean(override.withhold);
     /* A yoga answer has no rewording, so a word the owner rewords must stay withheld there unless reworded by hand. */
-    if (!withheld && UNPRINTED.test(text)) throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
+    if (!withheld && !override.asPrinted && UNPRINTED.test(text)) {
+      throw new Error(`${ref}: shows "${text.match(UNPRINTED)?.[0]}" without the owner's rewording.`);
+    }
     return {
       id: passageId(SOURCE.slug, chapter.chapter, answered.verse, answered.part),
       source: SOURCE.slug,
