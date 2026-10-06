@@ -80,6 +80,7 @@ export type LlmRouteKey =
   | "/api/chart/varga-commentary"
   | "/api/chart/yoga-classics"
   | "/api/chart/area-classics"
+  | "/api/chart/ask-classics"
   | "/api/chart/life-shifts"
   | "/api/chart/story-prose"
   | "/api/palm-reading"
@@ -317,6 +318,28 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      lines before raising the ceiling. */
   "/api/chart/area-classics": {
     perDay: 500,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
+  },
+  /* "Ask the classics" on the life-areas page: one answer to one of a fixed
+     set of questions, Haiku 4.5 over at most eight passages, cited. An
+     ESTIMATE from token counts until the llm_usage lines say otherwise: about
+     1,800 input tokens (the system prompt and eight short passages) and
+     150-250 output, which is roughly $0.003 a call. The question's embedding
+     is a separate OpenAI call of about a millionth of a dollar, made once per
+     question per process, and not counted here.
+
+     A unit is a question the reader clicks, so this is bought by clicking,
+     unlike the notes that ask on mount; the per-caller tiers are what hold a
+     visitor to a few questions a day. The cache is keyed by the question and
+     the passages chosen, so charts that meet the same conditions share
+     answers, and asking a question twice is free. An answer that fails its
+     checks is retried once on Opus 5.5 at low effort inside the same unit,
+     about $0.03, as on the other classical notes. 600 a day is about $2 if
+     nothing retries and about $20 if everything does, inside the $22 every
+     dear route here is held to. */
+  "/api/chart/ask-classics": {
+    perDay: 600,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },

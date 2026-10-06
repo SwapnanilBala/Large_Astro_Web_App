@@ -190,6 +190,38 @@
       "in_laws": "The family you marry into",
       "bond_durability": "Whether the bond holds",
       "desire_pattern": "The shape of desire"
+    },
+    "ask": {
+      "kicker": "Ask the classics",
+      "heading": "Put a question to the books",
+      "lead": "Pick a question. The answer is drawn only from the passages whose conditions hold in your chart, and every statement points to the passage it comes from.",
+      "chooseLabel": "Questions you can ask",
+      "loading": "Finding the questions your chart can answer…",
+      "empty": "The books have nothing on this question for your chart.",
+      "limited": "That is all the questions for today. Come back tomorrow to ask more.",
+      "limitedSignIn": "That is all the questions for today. Sign in to ask more.",
+      "failed": "This question could not be answered just now. Pick it again to try once more.",
+      "questions": {
+        "career_year": "My career in the year ahead",
+        "love_year": "My love life in the year ahead",
+        "money_year": "Money in the year ahead",
+        "health": "Health and vitality",
+        "marriage": "Marriage and my partner",
+        "strengths": "My natural strengths",
+        "children": "Children",
+        "standing": "Reputation and standing"
+      },
+      "note": {
+        "kicker": "From the classics",
+        "heading": "What the classics say",
+        "pending": "Reading the classics for your question…",
+        "sourcesLabel": "The passages ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, ch. {ref}",
+        "noteLabel": "translator's note",
+        "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka.",
+        "creditStrijataka": "Passages marked Strijataka are quoted as printed in B. Suryanarain Rao's Strijataka, or Female Horoscopy (1931), a book on women's birth charts. Words in square brackets are ours, not the book's."
+      }
     }
   }
 }

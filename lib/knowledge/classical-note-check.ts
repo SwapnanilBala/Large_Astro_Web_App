@@ -86,7 +86,7 @@ const BANNED_TERMS: Record<string, readonly string[]> = {
   en: [
     "husband", "husbands", "wife", "wives", "widow*",
     "death*", "die", "dies", "died", "dying", "dead", "deceased",
-    "lifespan*", "life span*", "longevity", "long-lived", "short-lived",
+    "lifespan*", "life span*", "longevity", "long-lived", "short-lived", "long life",
     "ill health", "illness*", "disease*", "sick", "sickly", "sickness*", "ailment*", "malady", "maladies",
     "blind", "blindness", "disabled", "disability", "disabilities", "deaf", "deafness", "crippled", "lame",
     "caste*", "outcaste*", "low-born", "lowborn",

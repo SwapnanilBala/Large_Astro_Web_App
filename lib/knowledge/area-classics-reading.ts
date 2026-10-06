@@ -89,6 +89,13 @@ const countsFor = (area: LifeDomainKey, id: string): boolean =>
   LIFE_DOMAIN_EVIDENCE_CONFIG[area].yogaIdPrefixes.some((prefix) => id === prefix || id.startsWith(prefix));
 
 /**
+ * Whether any life area counts a yoga as its own evidence. One that none does,
+ * such as Kemadruma, is the yoga section's to quote, and the notes about a
+ * part of life leave it there; see yogasFor.
+ */
+export const countedByAnyArea = (id: string): boolean => AREA_KEYS.some((area) => countsFor(area, id));
+
+/**
  * The chart's yogas that a passage is tagged with, in the form it speaks of,
  * and that the area counts as its own evidence. The last test is what keeps
  * the yoga section's material in the yoga section: Kemadruma's verse names
@@ -277,7 +284,7 @@ ${CLASSICAL_NOTE_RULES}`;
  * still says "your partner" either way, by the owner's choice.
  */
 const NO_SPOUSE_WORDS = ' Call the partner "your partner", and never write "husband", "wife" or "wives".';
-const READER_LINES: Record<BirthSex, string> = {
+export const READER_LINES: Record<BirthSex, string> = {
   female:
     " The reader is a woman. The Brihat Jataka writes for men: where its passages speak of a wife or of women, " +
     "they describe the reader's partner. The Strijataka writes about women, and its husband is the reader's partner." +

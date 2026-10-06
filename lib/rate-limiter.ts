@@ -69,6 +69,11 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   /* Asked once per life-areas visit for every area at once, then served from
      cache; moving between areas never asks again. The yoga note's number. */
   "/api/chart/area-classics": { limit: 6, windowMs: 60_000 },
+  /* One unpaid request per visit to learn which questions can be answered,
+     then one per question the reader clicks, each answered from cache after
+     the first time. Ten a minute is a reader going through the questions,
+     not a loop. */
+  "/api/chart/ask-classics": { limit: 10, windowMs: 60_000 },
   /* Same shape as the atlas: asked once per chart on mount and then served
      from cache. Slightly higher because the panel mounts on two pages, so a
      visitor who opens the results page and then /insights/life-shifts

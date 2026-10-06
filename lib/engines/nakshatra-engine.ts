@@ -11,7 +11,7 @@ const NAKSHATRAS: string[] = [
   "Dhanishta", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati",
 ];
 
-const NAKSHATRA_LORDS: string[] = [
+export const NAKSHATRA_LORDS: string[] = [
   "Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury",
 ];
 

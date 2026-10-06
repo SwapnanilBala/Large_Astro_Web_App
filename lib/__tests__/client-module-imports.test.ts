@@ -28,6 +28,10 @@ const BROWSER_MODULES = [
   "lib/knowledge/yoga-classics.ts",
   /* The reading's shape and paragraphs, shared by both classical-note cards. */
   "lib/knowledge/classical-reading.ts",
+  /* The questions the life-areas page can put to the classics, and the
+     route's answer shapes. The search, the prompt and the database stay in
+     ask-classics-reading.ts, question-embedding.ts and retrieve.ts. */
+  "lib/knowledge/ask-questions.ts",
   /* Whose hand a palm reading is for; the panel asks, the route tells the model. */
   "lib/palm-readings/reader.ts",
   /* Planet, sign and nakshatra names in the reader's language: the mobile chart,
