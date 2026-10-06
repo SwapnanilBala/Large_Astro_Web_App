@@ -70,7 +70,7 @@ import {
 } from "@/lib/db/llm-budget-counters";
 import { sessionFromRequest } from "@/lib/identity/require-session";
 import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
-import { getClientIp } from "@/lib/rate-limiter";
+import { clientKey } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
   | "/api/chart/dasha-interpretation"
@@ -456,7 +456,8 @@ async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
   if (session) {
     return { key: `user:${session.userId}`, signedIn: true };
   }
-  return { key: `ip:${getClientIp(request)}`, signedIn: false };
+  /* An IPv6 caller counts as its /64; see clientKey. */
+  return { key: `ip:${clientKey(request)}`, signedIn: false };
 }
 
 /**

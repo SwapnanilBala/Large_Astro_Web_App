@@ -102,7 +102,7 @@ const ORDERED_ROUTE_KEYS = Object.keys(ROUTE_LIMITS).sort(
   (a, b) => b.length - a.length
 );
 
-/** Map<compositeKey, timestamps[]> where compositeKey = `${ip}::${routeKey}` */
+/** Map<compositeKey, timestamps[]> where compositeKey = `${clientKey}::${routeKey}` */
 const store = new Map<string, number[]>();
 
 let cleanupTimer: ReturnType<typeof setInterval> | null = null;
@@ -142,9 +142,10 @@ function normalizeIpHeader(value: string | null) {
 /**
  * Caller identity from the headers the platform sets, and only those.
  *
- * Exported because lib/llm-budget.ts keys its per-caller ceilings on the same
- * value: two different notions of "who is calling" would let a caller sit under
- * one limit while blowing through the other.
+ * The limits count clientKey, built from this, and lib/llm-budget.ts keys its
+ * per-caller ceilings on that same value: two different notions of "who is
+ * calling" would let a caller sit under one limit while blowing through the
+ * other. Exported whole for the sign-in audit trail.
  *
  * THE RULE, because getting this wrong is silent: a forwarding header is only
  * evidence of anything if something we trust wrote it. Every header below is
@@ -189,6 +190,75 @@ export function getClientIp(request: Request): string {
   return "unknown";
 }
 
+/**
+ * The caller as the limits count them: getClientIp's answer, except that an
+ * IPv6 address counts as its /64.
+ *
+ * An IPv6 home or mobile connection is handed a whole /64 -- 2^64 addresses
+ * -- and may send from any of them, so counting whole addresses gave one
+ * signed-out caller a fresh per-minute window and a fresh slice of the daily
+ * LLM allowance for every address they cared to use. The /64 is the smallest
+ * block a subscriber is given, so it is one caller. (A provider that hands
+ * out /56s still leaves 256 per subscriber; narrow this to /56 if the logs
+ * ever show that.) IPv4 counts per address as before, and an IPv4 address in
+ * IPv6 dress (::ffff:203.0.113.9) counts as that IPv4 address.
+ *
+ * Both the per-minute window below and lib/llm-budget.ts key on this.
+ * getClientIp itself still returns the whole address, for the sign-in audit
+ * trail, which records where a session came from rather than counting it.
+ */
+export function clientKey(request: Request): string {
+  return limitKeyFor(getClientIp(request));
+}
+
+/** An address as the limits count it; see clientKey. Exported for the tests. */
+export function limitKeyFor(ip: string): string {
+  if (!ip.includes(":")) return ip;
+  const groups = ipv6Groups(ip);
+  /* Not parseable as IPv6: count it as written, which is still bounded and
+     still not the caller's to choose (see getClientIp). */
+  if (!groups) return ip;
+  if (groups.slice(0, 5).every((group) => group === 0) && groups[5] === 0xffff) {
+    return [groups[6] >> 8, groups[6] & 0xff, groups[7] >> 8, groups[7] & 0xff].join(".");
+  }
+  return `${groups
+    .slice(0, 4)
+    .map((group) => group.toString(16))
+    .join(":")}::/64`;
+}
+
+const HEX_GROUP = /^[0-9a-f]{1,4}$/;
+
+/** The eight 16-bit groups of an IPv6 address, or null when it is not one. */
+function ipv6Groups(ip: string): number[] | null {
+  /* A zone id ("fe80::1%eth0") names an interface, not part of the address. */
+  let address = ip.split("%")[0].toLowerCase();
+
+  /* The last 32 bits may be written as a dotted IPv4 address. */
+  let tail: number[] = [];
+  const dotted = /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/.exec(address);
+  if (dotted) {
+    const octets = dotted.slice(1).map(Number);
+    if (octets.some((octet) => octet > 255)) return null;
+    tail = [(octets[0] << 8) | octets[1], (octets[2] << 8) | octets[3]];
+    address = address.slice(0, dotted.index);
+    if (!address.endsWith(":")) return null;
+    if (!address.endsWith("::")) address = address.slice(0, -1);
+  }
+
+  const halves = address.split("::");
+  if (halves.length > 2) return null;
+  const left = halves[0] === "" ? [] : halves[0].split(":");
+  const right = halves.length === 2 && halves[1] !== "" ? halves[1].split(":") : [];
+  if (![...left, ...right].every((group) => HEX_GROUP.test(group))) return null;
+
+  const written = left.length + right.length + tail.length;
+  /* Without "::" every group is written; with it, at least one is not. */
+  if (halves.length === 1 ? written !== 8 : written > 7) return null;
+  const elided = halves.length === 2 ? Array<string>(8 - written).fill("0") : [];
+  return [...left, ...elided, ...right].map((group) => parseInt(group, 16)).concat(tail);
+}
+
 function matchRoute(pathname: string): string | null {
   for (const key of ORDERED_ROUTE_KEYS) {
     if (pathname === key || pathname.startsWith(key + "/") || pathname.startsWith(key + "?")) {
@@ -224,8 +294,7 @@ export function checkRateLimit(
   }
 
   const config = ROUTE_LIMITS[matched];
-  const ip = getClientIp(request);
-  const storeKey = `${ip}::${matched}`;
+  const storeKey = `${clientKey(request)}::${matched}`;
   const now = Date.now();
   const windowStart = now - config.windowMs;
 

@@ -19,9 +19,10 @@ import { llmBudgetCounters } from "@/lib/db/schema";
  *
  * `*` and not the empty string: the two rows the increment writes must be
  * distinct, or Postgres rejects the statement with "ON CONFLICT DO UPDATE
- * command cannot affect row a second time". `getClientIp` normalises away
- * everything outside `[0-9a-fA-F:.%]` and falls back to `unknown`, so no caller
- * can ever be spelled `*` and collide with the total.
+ * command cannot affect row a second time". Every caller key starts `ip:` or
+ * `user:` (lib/llm-budget.ts), and the address after `ip:` is `clientKey`'s --
+ * address characters only, or an IPv6 /64 such as `2001:db8:1:2::/64`, or
+ * `unknown` -- so no caller can ever be spelled `*` and collide with the total.
  */
 export const ROUTE_TOTAL_CALLER = "*";
 

@@ -279,6 +279,22 @@ describe("caller identity", () => {
     expect((await consumeLlmBudget("/api/chart/domain-brief", anonymous(), NOON)).allowed).toBe(false);
   });
 
+  it("gives a whole IPv6 /64 one signed-out allowance, however many addresses it sends from", async () => {
+    /* A subscriber is handed the /64 and may use any of its 2^64 addresses;
+       counted per address, every new one was a fresh taste. */
+    for (let i = 1; i <= PER_ADDRESS; i += 1) {
+      const rotating = requestFrom(`2001:db8:5:6::${i.toString(16)}`);
+      expect((await consumeLlmBudget("/api/chart/domain-brief", rotating, NOON)).allowed).toBe(true);
+    }
+    const refused = await consumeLlmBudget("/api/chart/domain-brief", requestFrom("2001:db8:5:6:dead:beef:0:1"), NOON);
+    expect(refused.allowed).toBe(false);
+    if (refused.allowed) throw new Error("unreachable");
+    expect(refused.scope).toBe("anonymous");
+
+    /* The next /64 over is somebody else. */
+    expect((await consumeLlmBudget("/api/chart/domain-brief", requestFrom("2001:db8:5:7::1"), NOON)).allowed).toBe(true);
+  });
+
   it("treats a cookie that resolves to nobody as signed out", async () => {
     /* An expired or forged token must not buy the larger allowance. */
     const forged = new Request("https://example.test/api/palm-reading", {

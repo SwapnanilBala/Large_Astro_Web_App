@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getClientIp } from "@/lib/rate-limiter";
+import { checkRateLimit, clientKey, getClientIp, limitKeyFor } from "@/lib/rate-limiter";
 
 /**
  * Who the rate limiter and the daily LLM budget think is calling.
@@ -110,5 +110,64 @@ describe("no forwarding header at all", () => {
        would be the same as having no per-caller limit, so they share. */
     expect(getClientIp(requestWith({}))).toBe("unknown");
     expect(getClientIp(requestWith({ "user-agent": "curl/8.0" }))).toBe("unknown");
+  });
+});
+
+describe("the caller as the limits count them", () => {
+  /* An IPv6 subscriber is handed a whole /64 and may send from any address in
+     it. Counted per address, each one was a fresh per-minute window and a
+     fresh slice of the daily allowance; counted per /64 it is one caller. */
+  it("counts every address in one IPv6 /64 as one caller", () => {
+    const keys = new Set(
+      [
+        "2001:db8:1:2::1",
+        "2001:db8:1:2:aaaa:bbbb:cccc:dddd",
+        "2001:0DB8:0001:0002:0000:0000:0000:ffff",
+        "2001:db8:1:2::1%eth0",
+      ].map(limitKeyFor),
+    );
+    expect([...keys]).toEqual(["2001:db8:1:2::/64"]);
+  });
+
+  it("keeps different /64s apart", () => {
+    expect(limitKeyFor("2001:db8:1:2::1")).not.toBe(limitKeyFor("2001:db8:1:3::1"));
+    expect(limitKeyFor("::1")).toBe("0:0:0:0::/64");
+  });
+
+  it("counts IPv4 per address, in either notation", () => {
+    expect(limitKeyFor("203.0.113.9")).toBe("203.0.113.9");
+    expect(limitKeyFor("::ffff:203.0.113.9")).toBe("203.0.113.9");
+    expect(limitKeyFor("::FFFF:cb00:7109")).toBe("203.0.113.9");
+    /* NAT64 keeps its IPv6 prefix: the caller is whoever holds that /64. */
+    expect(limitKeyFor("64:ff9b::203.0.113.9")).toBe("64:ff9b:0:0::/64");
+  });
+
+  it("leaves the shared bucket and anything unparseable as they were", () => {
+    expect(limitKeyFor("unknown")).toBe("unknown");
+    for (const odd of ["1:2:3", "abc:::def", "1:2:3:4:5:6:7:8:9", "12345::1", "::1.2.3.999", "1::2::3"]) {
+      expect(limitKeyFor(odd)).toBe(odd);
+    }
+  });
+
+  it("is what clientKey answers for a request, while getClientIp keeps the whole address", () => {
+    const request = requestWith({ "x-vercel-forwarded-for": "2001:db8:aa:bb::7" });
+    expect(clientKey(request)).toBe("2001:db8:aa:bb::/64");
+    expect(getClientIp(request)).toBe("2001:db8:aa:bb::7");
+  });
+
+  it("shares one per-minute window across a /64", () => {
+    /* Palm reading allows five a minute. A sixth from yet another address in
+       the same /64 is the same caller and is refused. */
+    const from = (suffix: number) =>
+      new Request("https://example.test/api/palm-reading", {
+        headers: { "x-vercel-forwarded-for": `2001:db8:77:88::${suffix.toString(16)}` },
+      });
+    for (let suffix = 1; suffix <= 5; suffix++) expect(checkRateLimit(from(suffix))?.allowed).toBe(true);
+    expect(checkRateLimit(from(6))?.allowed).toBe(false);
+    /* A neighbouring /64 is someone else. */
+    const neighbour = new Request("https://example.test/api/palm-reading", {
+      headers: { "x-vercel-forwarded-for": "2001:db8:77:89::1" },
+    });
+    expect(checkRateLimit(neighbour)?.allowed).toBe(true);
   });
 });
