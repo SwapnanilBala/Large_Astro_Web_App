@@ -10,6 +10,7 @@ import type {
   SubPeriodInfo,
 } from "@/lib/astro-types";
 import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
+import { nakshatraName, planetName, signName } from "@/lib/chart-labels";
 import { PLANET_COLORS, PLANET_INK } from "@/lib/constellation-geometry";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import { useCurrentPeriodReading } from "./use-current-period-reading";
@@ -77,6 +78,18 @@ const DASHA_LORD_THEMES: Record<string, { theme: string; keywords: string[]; gen
       "The Ketu dasha activates spiritual seeking, detachment, and inner transformation. Material losses or separations may occur to redirect focus inward. Psychic sensitivity, past-life themes, and healing abilities are heightened. This is a deeply introspective period — worldly ambitions may feel hollow. Trust the process of letting go; liberation is the ultimate gift.",
   },
 };
+
+/* A lord's theme as a label, in the reader's language: dasha.panel.themes.<planet>.
+   The theme also runs inside the English prose below, which keeps the English. */
+export const DASHA_THEME_PLANETS = Object.keys(DASHA_LORD_THEMES);
+
+function themeLabelFor(planet: string, t: (key: string) => string, fallbackKey: string): string {
+  const theme = DASHA_LORD_THEMES[planet]?.theme;
+  if (!theme) return t(fallbackKey);
+  const key = `dasha.panel.themes.${planet.toLowerCase()}`;
+  const text = t(key);
+  return text === key ? theme : text;
+}
 
 /* House-based modifiers: where the dasha lord sits alters the expression */
 const HOUSE_MODIFIER: Record<number, string> = {
@@ -224,12 +237,22 @@ const dashaColor = (planet: string) =>
 const dashaInk = (planet: string) =>
   PLANET_INK[planet] ?? DASHA_FALLBACK_COLOR;
 
-const LEVEL_LABELS: Record<number, string> = {
+/* English, for the English sentence getCombinationInsight builds; everything
+   the interface prints reads LEVEL_LABEL_KEYS. */
+const LEVEL_NAMES_EN: Record<number, string> = {
   1: "Maha Dasha",
   2: "Antardasha",
   3: "Pratyantardasha",
   4: "Sookshma Dasha",
   5: "Prana Dasha",
+};
+
+const LEVEL_LABEL_KEYS: Record<number, string> = {
+  1: "dasha.mahaDasha",
+  2: "dasha.antardasha",
+  3: "dasha.pratyantardasha",
+  4: "dasha.sookshmaDasha",
+  5: "dasha.pranaDasha",
 };
 
 const LEVEL_COLORS: Record<number, string> = {
@@ -239,8 +262,6 @@ const LEVEL_COLORS: Record<number, string> = {
   4: "#c490e4",
   5: "#8bb8f0",
 };
-
-const AUDIT_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 type DrillStep = {
   level: number;
@@ -628,15 +649,27 @@ export default function NakshatraDashaPanel({
     });
   };
 
+  /* Numbers in the reader's notation: 2.5 in English, 2,5 in German. */
+  const formatYears = (years: number, digits: number) =>
+    new Intl.NumberFormat(LOCALE_TAGS[language], {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(years);
+
+  const levelLabel = (level: number) =>
+    LEVEL_LABEL_KEYS[level]
+      ? t(LEVEL_LABEL_KEYS[level])
+      : t("dasha.panel.level", { level: String(level) });
+
   const formatPeriodDuration = (startDate: string, endDate: string) => {
     const days = Math.max(1, Math.round(daysBetween(startDate, endDate)));
     if (days >= 730) {
-      return `${(days / 365.25).toFixed(1)} years`;
+      return t("dasha.panel.durationYears", { count: formatYears(days / 365.25, 1) });
     }
     if (days >= 60) {
-      return `${Math.round(days / 30.44)} months`;
+      return t("dasha.panel.durationMonths", { count: String(Math.round(days / 30.44)) });
     }
-    return `${days} days`;
+    return t("dasha.panel.durationDays", { count: String(days) });
   };
 
   const getPeriodLords = (period: DashaDisplayPeriod) => {
@@ -671,11 +704,19 @@ export default function NakshatraDashaPanel({
     if (!match) return value.replace("T", " ");
 
     const [, year, month, day, hour, minute] = match;
-    const numericHour = Number(hour);
-    const suffix = numericHour >= 12 ? "PM" : "AM";
-    const twelveHour = numericHour % 12 || 12;
-
-    return `${AUDIT_MONTHS[Number(month) - 1]} ${Number(day)}, ${year}, ${twelveHour}:${minute} ${suffix}`;
+    /* The wall-clock digits as written, in the reader's language: built in UTC
+       and formatted in UTC, so no time zone moves them. */
+    const instant = new Date(
+      Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute)),
+    );
+    return instant.toLocaleString(LOCALE_TAGS[language], {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
   };
 
   /*
@@ -689,7 +730,7 @@ export default function NakshatraDashaPanel({
   const formatReaderTime = (utcIso: string) => {
     const instant = new Date(`${utcIso}:00Z`);
     if (Number.isNaN(instant.getTime())) return `${formatAuditTimestamp(utcIso)} UTC`;
-    return new Intl.DateTimeFormat("en-US", {
+    return new Intl.DateTimeFormat(LOCALE_TAGS[language], {
       month: "short",
       day: "numeric",
       year: "numeric",
@@ -742,7 +783,7 @@ export default function NakshatraDashaPanel({
     const deepestLord = lords[lords.length - 1];
     const comboKey = `${mahaLord}-${deepestLord}`;
     const fallback = DASHA_COMBO_EFFECTS[comboKey]
-      ?? `${DASHA_LORD_THEMES[mahaLord]?.theme ?? mahaLord} energy is filtered through ${DASHA_LORD_THEMES[deepestLord]?.theme ?? deepestLord} at the ${LEVEL_LABELS[drillPath.length + 1] ?? "sub-period"} level.`;
+      ?? `${DASHA_LORD_THEMES[mahaLord]?.theme ?? mahaLord} energy is filtered through ${DASHA_LORD_THEMES[deepestLord]?.theme ?? deepestLord} at the ${LEVEL_NAMES_EN[drillPath.length + 1] ?? "sub-period"} level.`;
 
     /* Three lords and deeper, prefer the generated reading -- it is the only
        one that has seen the middle of the chain. Until it arrives, and if it
@@ -790,7 +831,7 @@ export default function NakshatraDashaPanel({
   const selectedParent = drillPath.length > 0 ? drillPath[drillPath.length - 1] : null;
   /* One level shallower than what is on screen; at the first step that is the
      Maha Dasha timeline itself. */
-  const stepBackTarget = LEVEL_LABELS[currentDrillLevel - 1] ?? LEVEL_LABELS[1];
+  const stepBackTarget = levelLabel(LEVEL_LABEL_KEYS[currentDrillLevel - 1] ? currentDrillLevel - 1 : 1);
   const displayLevel = currentSubPeriods ? currentDrillLevel : 1;
   const displayPeriods: DashaDisplayPeriod[] = currentSubPeriods
     ? currentSubPeriods
@@ -798,20 +839,20 @@ export default function NakshatraDashaPanel({
   const visiblePeriods = displayPeriods.slice(0, viewMode === "lens" ? 9 : displayPeriods.length);
   const activeStack = [
     {
-      label: LEVEL_LABELS[1],
+      label: levelLabel(1),
       planet: dasha.current_dasha,
       startDate: dasha.current_dasha_start,
       endDate: dasha.current_dasha_end,
     },
     {
-      label: LEVEL_LABELS[2],
+      label: levelLabel(2),
       planet: dasha.current_antardasha,
       startDate: dasha.current_antardasha_start,
       endDate: dasha.current_antardasha_end,
     },
     dasha.current_pratyantar
       ? {
-          label: LEVEL_LABELS[3],
+          label: levelLabel(3),
           planet: dasha.current_pratyantar,
           startDate: dasha.current_pratyantar_start ?? "",
           endDate: dasha.current_pratyantar_end ?? "",
@@ -833,10 +874,16 @@ export default function NakshatraDashaPanel({
 
       <section className="dasha-command-hero">
         <div className="dasha-command-copy">
-          <p className="dasha-command-kicker">Current life chapter</p>
+          <p className="dasha-command-kicker">{t("dasha.panel.chapterKicker")}</p>
           <h3>
-            {dasha.current_dasha} <span>to</span> {dasha.current_antardasha}
-            {dasha.current_pratyantar ? <span> to {dasha.current_pratyantar}</span> : null}
+            {planetName(dasha.current_dasha, t)} <span>{t("dasha.panel.chainJoin")}</span>{" "}
+            {planetName(dasha.current_antardasha, t)}
+            {dasha.current_pratyantar ? (
+              <span>
+                {" "}
+                {t("dasha.panel.chainJoin")} {planetName(dasha.current_pratyantar, t)}
+              </span>
+            ) : null}
           </h3>
           {/* The orienting line, not the reading. The written paragraph goes in
               the Current Period card below, where it has room; the two used to
@@ -846,31 +893,35 @@ export default function NakshatraDashaPanel({
           )}
         </div>
 
-        <div className="dasha-command-meter" aria-label="Current antardasha progress">
+        <div className="dasha-command-meter" aria-label={t("dasha.panel.meterAria")}>
           <div className="dasha-command-meter-ring">
             <span>{Math.round(currentProgress.progressPercent)}%</span>
-            <small>complete</small>
+            <small>{t("dasha.panel.complete")}</small>
           </div>
           <div className="dasha-command-meter-copy">
-            <strong>{currentProgress.remainingDays.toLocaleString()} days remaining</strong>
+            <strong>
+              {t("dasha.daysRemaining", {
+                days: currentProgress.remainingDays.toLocaleString(LOCALE_TAGS[language]),
+              })}
+            </strong>
             <span>{formatDate(dasha.current_antardasha_start)} - {formatDate(dasha.current_antardasha_end)}</span>
           </div>
         </div>
       </section>
 
-      <div className="dasha-active-stack" aria-label="Active dasha stack">
+      <div className="dasha-active-stack" aria-label={t("dasha.panel.stackAria")}>
         {activeStack.map((step) => {
           const color = dashaInk(step.planet);
           return (
             <article key={`${step.label}-${step.planet}`} className="dasha-active-stack-card">
               <span className="dasha-active-stack-level">{step.label}</span>
-              <strong style={{ color }}>{step.planet}</strong>
+              <strong style={{ color }}>{planetName(step.planet, t)}</strong>
               <small>
                 {step.startDate && step.endDate
                   ? `${formatDate(step.startDate)} - ${formatDate(step.endDate)}`
-                  : "Timing details loading"}
+                  : t("dasha.panel.detailsLoading")}
               </small>
-              <p>{DASHA_LORD_THEMES[step.planet]?.theme ?? "Active timing influence"}</p>
+              <p>{themeLabelFor(step.planet, t, "dasha.panel.themeActive")}</p>
             </article>
           );
         })}
@@ -880,33 +931,30 @@ export default function NakshatraDashaPanel({
         <section className="dasha-audit">
           <div className="dasha-audit-header">
             <div>
-              <p className="dasha-audit-kicker">Calculation audit</p>
-              <h3>See the exact inputs behind this timing result</h3>
+              <p className="dasha-audit-kicker">{t("dasha.panel.auditKicker")}</p>
+              <h3>{t("dasha.panel.auditHeading")}</h3>
             </div>
             <button
               className="dasha-audit-toggle"
               type="button"
               onClick={() => setShowAudit((previous) => !previous)}
             >
-              {showAudit ? "Hide audit" : "Show audit"}
+              {showAudit ? t("dasha.panel.hideAudit") : t("dasha.panel.showAudit")}
             </button>
           </div>
 
           {showAudit && (
             <>
-              <p className="dasha-audit-note">
-                If a dasha result looks off, compare this box with the chart source you expected before
-                changing the interpretation.
-              </p>
+              <p className="dasha-audit-note">{t("dasha.panel.auditNote")}</p>
               <div className="dasha-audit-grid">
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Engine</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditEngine")}</span>
                   <strong>{audit.engine_label}</strong>
                   <small>{audit.ayanamsha} / {audit.house_system}</small>
                 </article>
 
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Birth Time Used</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditBirthTime")}</span>
                   <strong>{formatAuditTimestamp(audit.birth_local_iso)}</strong>
                   <small>
                     {audit.time_zone_id ? `${audit.time_zone_id} / ` : ""}
@@ -916,50 +964,68 @@ export default function NakshatraDashaPanel({
                 </article>
 
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Coordinates</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditCoordinates")}</span>
                   <strong>
                     {audit.latitude.toFixed(4)}, {audit.longitude.toFixed(4)}
                   </strong>
-                  <small>Latitude and longitude used for this chart</small>
+                  <small>{t("dasha.panel.auditCoordinatesNote")}</small>
                 </article>
 
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Moon Position</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditMoon")}</span>
                   <strong>
-                    {audit.moon_sign} {audit.moon_degree_in_sign.toFixed(4)} deg
+                    {t("dasha.panel.auditMoonValue", {
+                      sign: signName(audit.moon_sign, t),
+                      degree: audit.moon_degree_in_sign.toFixed(4),
+                    })}
                   </strong>
-                  <small>Sidereal longitude {audit.moon_sidereal_longitude.toFixed(4)} deg</small>
+                  <small>
+                    {t("dasha.panel.auditSidereal", { degree: audit.moon_sidereal_longitude.toFixed(4) })}
+                  </small>
                 </article>
 
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Nakshatra Seed</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditNakshatra")}</span>
                   <strong>
-                    {audit.nakshatra_name} / {audit.nakshatra_lord} / Pada {audit.nakshatra_pada}
+                    {nakshatraName(audit.nakshatra_name, t)} / {planetName(audit.nakshatra_lord, t)} /{" "}
+                    {t("dasha.panel.auditPada", { pada: String(audit.nakshatra_pada) })}
                   </strong>
-                  <small>{audit.degree_in_nakshatra.toFixed(4)} deg into the nakshatra</small>
-                  <small>{audit.nakshatra_progress_percent.toFixed(2)}% complete at birth</small>
-                </article>
-
-                <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Birth Dasha Seed</span>
-                  <strong>{audit.dasha_seed_lord} Mahadasha</strong>
                   <small>
-                    Elapsed at birth: {audit.dasha_seed_elapsed_years.toFixed(2)} /{" "}
-                    {audit.dasha_seed_total_years.toFixed(2)} years
+                    {t("dasha.panel.auditIntoNakshatra", { degree: audit.degree_in_nakshatra.toFixed(4) })}
                   </small>
                   <small>
-                    Remaining at birth: {audit.dasha_seed_remaining_years.toFixed(2)} years
-                  </small>
-                  <small>
-                    Window: {formatAuditTimestamp(audit.dasha_seed_start_local_iso)} to{" "}
-                    {formatAuditTimestamp(audit.dasha_seed_end_local_iso)} local
+                    {t("dasha.panel.auditCompleteAtBirth", {
+                      percent: audit.nakshatra_progress_percent.toFixed(2),
+                    })}
                   </small>
                 </article>
 
                 <article className="dasha-audit-card">
-                  <span className="dasha-audit-label">Timing Check</span>
+                  <span className="dasha-audit-label">{t("dasha.panel.auditSeed")}</span>
+                  <strong>
+                    {t("dasha.panel.auditSeedLord", { planet: planetName(audit.dasha_seed_lord, t) })}
+                  </strong>
+                  <small>
+                    {t("dasha.panel.auditElapsed", {
+                      elapsed: formatYears(audit.dasha_seed_elapsed_years, 2),
+                      total: formatYears(audit.dasha_seed_total_years, 2),
+                    })}
+                  </small>
+                  <small>
+                    {t("dasha.panel.auditRemaining", { remaining: formatYears(audit.dasha_seed_remaining_years, 2) })}
+                  </small>
+                  <small>
+                    {t("dasha.panel.auditWindow", {
+                      start: formatAuditTimestamp(audit.dasha_seed_start_local_iso),
+                      end: formatAuditTimestamp(audit.dasha_seed_end_local_iso),
+                    })}
+                  </small>
+                </article>
+
+                <article className="dasha-audit-card">
+                  <span className="dasha-audit-label">{t("dasha.panel.auditTimingCheck")}</span>
                   <strong>{formatReaderTime(audit.reference_utc_iso)}</strong>
-                  <small>When the current period was looked up, on your clock</small>
+                  <small>{t("dasha.panel.auditTimingNote")}</small>
                   <small>UTC: {formatAuditTimestamp(audit.reference_utc_iso)} UTC</small>
                 </article>
               </div>
@@ -971,10 +1037,10 @@ export default function NakshatraDashaPanel({
       <div className="nakshatra-grid">
         <article className="nakshatra-card">
           <h3>{t("dasha.nakshatra")}</h3>
-          <p className="nakshatra-name">{nakshatra.name}</p>
+          <p className="nakshatra-name">{nakshatraName(nakshatra.name, t)}</p>
           <div className="nakshatra-details">
             <span>
-              <strong>{t("dasha.lord")}:</strong> {nakshatra.lord}
+              <strong>{t("dasha.lord")}:</strong> {planetName(nakshatra.lord, t)}
             </span>
             <span>
               <strong>{t("dasha.pada")}:</strong> {nakshatra.pada}
@@ -988,16 +1054,16 @@ export default function NakshatraDashaPanel({
         <article className="nakshatra-card">
           <h3>{t("dasha.currentPeriod")}</h3>
           <p className="nakshatra-period-label">
-            {t("dasha.youAreIn")} <strong>{dasha.current_dasha}</strong> {t("dasha.mahaDasha")}{" "}
-            &rarr; <strong>{dasha.current_antardasha}</strong> {t("dasha.antardasha")}
+            {t("dasha.youAreIn")} <strong>{planetName(dasha.current_dasha, t)}</strong> {t("dasha.mahaDasha")}{" "}
+            &rarr; <strong>{planetName(dasha.current_antardasha, t)}</strong> {t("dasha.antardasha")}
           </p>
           <div className="nakshatra-details">
             <span>
-              <strong>Dasha:</strong> {dasha.current_dasha_start} &ndash;{" "}
+              <strong>{t("dasha.panel.dashaLabel")}:</strong> {dasha.current_dasha_start} &ndash;{" "}
               {dasha.current_dasha_end}
             </span>
             <span>
-              <strong>Antardasha:</strong> {dasha.current_antardasha_start}{" "}
+              <strong>{t("dasha.antardasha")}:</strong> {dasha.current_antardasha_start}{" "}
               &ndash; {dasha.current_antardasha_end}
             </span>
           </div>
@@ -1039,12 +1105,10 @@ export default function NakshatraDashaPanel({
       </div>
 
       <div className="dasha-timeline-section" style={{ position: "relative" }}>
-        <h3>Vimshottari Dasha Timeline</h3>
-        <p className="dasha-timeline-hint">
-          Click a dasha to open Antardasha, then keep selecting branches for Pratyantar, Sookshma, and Prana timing.
-        </p>
+        <h3>{t("dasha.panel.timelineTitle")}</h3>
+        <p className="dasha-timeline-hint">{t("dasha.panel.timelineHint")}</p>
 
-        <div className="dasha-view-switcher" aria-label="Dasha timeline views">
+        <div className="dasha-view-switcher" aria-label={t("dasha.panel.viewsAria")}>
           {(["timeline", "lens", "table"] as DashaViewMode[]).map((mode) => (
             <button
               key={mode}
@@ -1052,7 +1116,11 @@ export default function NakshatraDashaPanel({
               className={`dasha-view-button${viewMode === mode ? " dasha-view-button--active" : ""}`}
               onClick={() => setViewMode(mode)}
             >
-              {mode === "timeline" ? "Timeline" : mode === "lens" ? "Lens" : "Table"}
+              {mode === "timeline"
+                ? t("dasha.panel.viewTimeline")
+                : mode === "lens"
+                  ? t("dasha.panel.viewLens")
+                  : t("dasha.panel.viewTable")}
             </button>
           ))}
         </div>
@@ -1089,7 +1157,7 @@ export default function NakshatraDashaPanel({
                   type="button"
                   style={{ color: LEVEL_COLORS[step.level] }}
                 >
-                  {step.planet}
+                  {planetName(step.planet, t)}
                 </button>
               </span>
             ))}
@@ -1100,11 +1168,11 @@ export default function NakshatraDashaPanel({
         {combinationInsight && (
           <div className="dasha-combo-card anim-fade-in">
             <div className="dasha-combo-header">
-              <span className="dasha-combo-label">Combined Influence</span>
+              <span className="dasha-combo-label">{t("dasha.panel.combined")}</span>
               <div className="dasha-combo-lords">
                 {combinationInsight.lords.map((lord, idx) => (
                   <span key={lord + idx} className="dasha-combo-lord-chip" style={{ backgroundColor: `color-mix(in srgb, ${dashaColor(lord)} 13%, transparent)`, color: dashaInk(lord), borderColor: `color-mix(in srgb, ${dashaColor(lord)} 27%, transparent)` }}>
-                    {lord}
+                    {planetName(lord, t)}
                     {idx < combinationInsight.lords.length - 1 && <span className="dasha-combo-arrow">&rarr;</span>}
                   </span>
                 ))}
@@ -1113,13 +1181,14 @@ export default function NakshatraDashaPanel({
             <p className="dasha-combo-effect">
               {combinationInsight.effect}
               {chainInsightLoading && !combinationInsight.generated && (
-                <span className="dasha-combo-pending"> Reading this chain…</span>
+                <span className="dasha-combo-pending"> {t("dasha.panel.readingChain")}</span>
               )}
             </p>
             <div className="dasha-combo-themes">
               {combinationInsight.themes.map((theme, idx) => (
                 <span key={theme} className="dasha-combo-theme-tag">
-                  {combinationInsight.lords[idx]}: {theme}
+                  {planetName(combinationInsight.lords[idx], t)}:{" "}
+                  {themeLabelFor(combinationInsight.lords[idx], t, "dasha.panel.themeActive")}
                 </span>
               ))}
             </div>
@@ -1147,7 +1216,7 @@ export default function NakshatraDashaPanel({
           return (
             <div className="dasha-level-section">
               <span className="dasha-level-label" style={{ color: LEVEL_COLORS[1] }}>
-                {LEVEL_LABELS[1]}
+                {levelLabel(1)}
               </span>
 
               {/* ── Gantt track wrapper ── */}
@@ -1177,7 +1246,12 @@ export default function NakshatraDashaPanel({
                            */
                           "--dasha-color": baseColor,
                         } as CSSProperties}
-                        title={`${period.planet}: ${period.years} years (${period.start_date} – ${period.end_date})`}
+                        title={t("dasha.panel.barTitle", {
+                          planet: planetName(period.planet, t),
+                          years: String(period.years),
+                          start: period.start_date,
+                          end: period.end_date,
+                        })}
                         onClick={(e) => {
                           handleBarClick(
                             period.planet,
@@ -1227,7 +1301,7 @@ export default function NakshatraDashaPanel({
                           }
                         }}
                       >
-                        <span className="dasha-gantt-label">{period.planet}</span>
+                        <span className="dasha-gantt-label">{planetName(period.planet, t)}</span>
                       </div>
                     );
                   })}
@@ -1237,9 +1311,11 @@ export default function NakshatraDashaPanel({
                     <div
                       className="dasha-gantt-needle"
                       style={{ left: `${todayPct}%` }}
-                      title="Today"
+                      title={t("dasha.panel.today")}
                     >
-                      <span className="dasha-gantt-needle-label">TODAY</span>
+                      <span className="dasha-gantt-needle-label">
+                        {t("dasha.panel.today").toLocaleUpperCase(LOCALE_TAGS[language])}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -1255,13 +1331,15 @@ export default function NakshatraDashaPanel({
                     className="dasha-active-card-planet"
                     style={{ color: dashaInk(activePeriod.planet) }}
                   >
-                    {activePeriod.planet}
+                    {planetName(activePeriod.planet, t)}
                   </span>
-                  <span className="dasha-active-card-badge">Active Maha Dasha</span>
+                  <span className="dasha-active-card-badge">{t("dasha.panel.activeMaha")}</span>
                   <div className="dasha-active-card-meta">
                     <span>{formatDate(activePeriod.start_date)} &ndash; {formatDate(activePeriod.end_date)}</span>
                     {activeDaysRemaining !== null && (
-                      <span className="dasha-active-card-days">{activeDaysRemaining.toLocaleString()} days remaining</span>
+                      <span className="dasha-active-card-days">
+                        {t("dasha.daysRemaining", { days: activeDaysRemaining.toLocaleString(LOCALE_TAGS[language]) })}
+                      </span>
                     )}
                   </div>
                 </div>
@@ -1274,7 +1352,7 @@ export default function NakshatraDashaPanel({
         {viewMode === "timeline" && currentSubPeriods && currentSubPeriods.length > 0 && (
           <div className="dasha-level-section anim-fade-in">
             <span className="dasha-level-label" style={{ color: LEVEL_COLORS[currentDrillLevel] || LEVEL_COLORS[5] }}>
-              {LEVEL_LABELS[currentDrillLevel] || `Level ${currentDrillLevel}`}
+              {levelLabel(currentDrillLevel)}
             </span>
             <div className="dasha-timeline">
               {currentSubPeriods.map((sub, index) => {
@@ -1298,7 +1376,7 @@ export default function NakshatraDashaPanel({
                          nine of them said nothing about whose period it was. */
                       "--dasha-color": dashaColor(sub.planet),
                     } as CSSProperties}
-                    title={`${sub.planet}: ${formatDate(sub.start_date)} – ${formatDate(sub.end_date)}`}
+                    title={`${planetName(sub.planet, t)}: ${formatDate(sub.start_date)} – ${formatDate(sub.end_date)}`}
                     onClick={(e) => {
                       handleBarClick(
                         sub.planet,
@@ -1352,7 +1430,7 @@ export default function NakshatraDashaPanel({
                       }
                     }}
                   >
-                    <span className="dasha-label">{sub.planet}</span>
+                    <span className="dasha-label">{planetName(sub.planet, t)}</span>
                   </div>
                 );
               })}
@@ -1360,7 +1438,7 @@ export default function NakshatraDashaPanel({
             <div className="dasha-sub-dates">
               {currentSubPeriods.map((sub, index) => (
                 <small key={`date-${index}`} className="dasha-sub-date-label">
-                  {sub.planet}: {formatDate(sub.start_date)} – {formatDate(sub.end_date)}
+                  {planetName(sub.planet, t)}: {formatDate(sub.start_date)} – {formatDate(sub.end_date)}
                 </small>
               ))}
             </div>
@@ -1373,12 +1451,12 @@ export default function NakshatraDashaPanel({
             <div className="dasha-lens-header">
               <div>
                 <span className="dasha-level-label" style={{ color: LEVEL_COLORS[displayLevel] || LEVEL_COLORS[5] }}>
-                  {LEVEL_LABELS[displayLevel] || `Level ${displayLevel}`}
+                  {levelLabel(displayLevel)}
                 </span>
                 <h4>
                   {selectedParent
-                    ? `${selectedParent.planet} sub-period lens`
-                    : "Maha Dasha chapter lens"}
+                    ? t("dasha.panel.lensSub", { planet: planetName(selectedParent.planet, t) })
+                    : t("dasha.panel.lensMaha")}
                 </h4>
               </div>
               {selectedParent && (
@@ -1392,9 +1470,9 @@ export default function NakshatraDashaPanel({
               {visiblePeriods.map((period, index) => {
                 const isCurrent = isCurrentPeriod(period.start_date, period.end_date);
                 const color = dashaColor(period.planet);
-                const theme = DASHA_LORD_THEMES[period.planet]?.theme ?? "Sub-period influence";
+                const theme = themeLabelFor(period.planet, t, "dasha.panel.themeSubPeriod");
                 const duration = period.years
-                  ? `${period.years.toFixed(2)} years`
+                  ? t("dasha.panel.durationYears", { count: formatYears(period.years, 2) })
                   : formatPeriodDuration(period.start_date, period.end_date);
 
                 return (
@@ -1432,9 +1510,9 @@ export default function NakshatraDashaPanel({
                   >
                     <div className="dasha-lens-card-top">
                       <span>{String(index + 1).padStart(2, "0")}</span>
-                      {isCurrent && <strong>Active now</strong>}
+                      {isCurrent && <strong>{t("dasha.activeNow")}</strong>}
                     </div>
-                    <h5 style={{ color }}>{period.planet}</h5>
+                    <h5 style={{ color }}>{planetName(period.planet, t)}</h5>
                     <p>{theme}</p>
                     <div className="dasha-subtle-details">
                       {getSubtlePeriodDetails(period).map((detail) => (
@@ -1444,7 +1522,7 @@ export default function NakshatraDashaPanel({
                     <small>{formatDate(period.start_date)} - {formatDate(period.end_date)}</small>
                     <small>{duration}</small>
                     {period.level < 5 && (
-                      <small className="dasha-lens-drill">Open next branch</small>
+                      <small className="dasha-lens-drill">{t("dasha.panel.openBranch")}</small>
                     )}
                   </article>
                 );
@@ -1457,24 +1535,24 @@ export default function NakshatraDashaPanel({
           <section className="dasha-table-panel anim-fade-in">
             <div className="dasha-table-header">
               <span className="dasha-level-label" style={{ color: LEVEL_COLORS[displayLevel] || LEVEL_COLORS[5] }}>
-                {LEVEL_LABELS[displayLevel] || `Level ${displayLevel}`}
+                {levelLabel(displayLevel)}
               </span>
               <p>
                 {selectedParent
-                  ? `Sub-periods inside ${selectedParent.planet}`
-                  : "Full Maha Dasha sequence"}
+                  ? t("dasha.panel.tableSub", { planet: planetName(selectedParent.planet, t) })
+                  : t("dasha.panel.tableMaha")}
               </p>
             </div>
             <div className="dasha-table-scroll">
               <table className="dasha-period-table">
                 <thead>
                   <tr>
-                    <th>Lord</th>
-                    <th>Theme</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Duration</th>
-                    <th>Status</th>
+                    <th>{t("dasha.lord")}</th>
+                    <th>{t("dasha.panel.colTheme")}</th>
+                    <th>{t("dasha.panel.colStart")}</th>
+                    <th>{t("dasha.panel.colEnd")}</th>
+                    <th>{t("dasha.panel.colDuration")}</th>
+                    <th>{t("dasha.panel.colStatus")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1485,14 +1563,18 @@ export default function NakshatraDashaPanel({
                       <tr key={`${period.planet}-${period.start_date}-${index}`} className={isCurrent ? "dasha-period-row--current" : ""}>
                         <td>
                           <span className="dasha-period-planet" style={{ color }}>
-                            {period.planet}
+                            {planetName(period.planet, t)}
                           </span>
                         </td>
                         <td>{DASHA_LORD_THEMES[period.planet]?.theme ?? "Timing influence"}</td>
                         <td>{formatDate(period.start_date)}</td>
                         <td>{formatDate(period.end_date)}</td>
-                        <td>{period.years ? `${period.years.toFixed(2)} years` : formatPeriodDuration(period.start_date, period.end_date)}</td>
-                        <td>{isCurrent ? "Active now" : "Upcoming / past"}</td>
+                        <td>
+                          {period.years
+                            ? t("dasha.panel.durationYears", { count: formatYears(period.years, 2) })
+                            : formatPeriodDuration(period.start_date, period.end_date)}
+                        </td>
+                        <td>{isCurrent ? t("dasha.activeNow") : t("dasha.panel.upcomingOrPast")}</td>
                       </tr>
                     );
                   })}
@@ -1505,7 +1587,10 @@ export default function NakshatraDashaPanel({
         {loadingLevel !== null && (
           <div className="dasha-loading anim-fade-in">
             <span className="dasha-loading-spinner" />
-            <span>{t("dasha.loading")} {LEVEL_LABELS[loadingLevel] || "sub-periods"}…</span>
+            <span>
+              {t("dasha.loading")}{" "}
+              {LEVEL_LABEL_KEYS[loadingLevel] ? levelLabel(loadingLevel) : t("dasha.panel.subPeriods")}…
+            </span>
           </div>
         )}
 
@@ -1520,20 +1605,20 @@ export default function NakshatraDashaPanel({
               className="dasha-popup-close"
               onClick={() => setPopup(null)}
               type="button"
-              aria-label="Close"
+              aria-label={t("dasha.panel.close")}
             >
               &times;
             </button>
 
             <div className="dasha-popup-header">
-              <span className="dasha-popup-planet">{popup.planet}</span>
+              <span className="dasha-popup-planet">{planetName(popup.planet, t)}</span>
               <span className="dasha-popup-theme">{interpretation.theme}</span>
               {popup.isCurrent && <span className="dasha-popup-badge">{t("dasha.activeNow")}</span>}
             </div>
 
             <div className="dasha-popup-dates">
               <span className="dasha-popup-level-badge" style={{ color: LEVEL_COLORS[popup.level] || LEVEL_COLORS[5] }}>
-                {LEVEL_LABELS[popup.level] || `Level ${popup.level}`}
+                {levelLabel(popup.level)}
               </span>
               {" "}{formatDate(popup.startDate)} &ndash; {formatDate(popup.endDate)}
               {popup.years ? ` · ${popup.years} ${t("dasha.years")}` : ""}
@@ -1550,7 +1635,11 @@ export default function NakshatraDashaPanel({
             {interpretation.houseNote && interpretation.placement && (
               <div className="dasha-popup-house">
                 <p className="dasha-popup-house-header">
-                  {popup.planet} in {interpretation.placement.sign} (House {interpretation.placement.house})
+                  {t("dasha.panel.placement", {
+                    planet: planetName(popup.planet, t),
+                    sign: signName(interpretation.placement.sign, t),
+                    house: String(interpretation.placement.house),
+                  })}
                 </p>
                 <p className="dasha-popup-house-text">{interpretation.houseNote}</p>
               </div>
@@ -1558,7 +1647,11 @@ export default function NakshatraDashaPanel({
 
             {popup.level < 5 && (
               <p className="dasha-popup-drill-hint">
-                {t("dasha.drillDeeper", { level: LEVEL_LABELS[popup.level + 1] || "deeper sub-periods" })}
+                {t("dasha.drillDeeper", {
+                  level: LEVEL_LABEL_KEYS[popup.level + 1]
+                    ? levelLabel(popup.level + 1)
+                    : t("dasha.panel.deeperSubPeriods"),
+                })}
               </p>
             )}
           </div>

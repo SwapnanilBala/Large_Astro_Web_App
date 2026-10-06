@@ -31,7 +31,8 @@ export type MajorLifeShift = {
 const DAY_MS = 86_400_000;
 const YEAR_DAYS = 365.25;
 
-const PLANET_THEMES: Record<string, string> = {
+/* Exported for the catalogs test: the cards word these by planet. */
+export const PLANET_THEMES: Record<string, string> = {
   Sun: "authority, identity, and visibility",
   Moon: "emotional foundations, family, and inner safety",
   Mars: "courage, conflict, and decisive action",

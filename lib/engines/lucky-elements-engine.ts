@@ -26,7 +26,9 @@ type PlanetAttributes = {
   direction: string;
 };
 
-const PLANET_LUCKY: Record<string, PlanetAttributes> = {
+/* The tables are exported for the catalogs test: the interface words every
+   colour, gem, metal, direction, item and omen in them (insights.lucky.*). */
+export const PLANET_LUCKY: Record<string, PlanetAttributes> = {
   Sun:     { colors: ["Deep Red", "Orange"],       number: 1, gemstone: "Ruby",             day: "Sunday",    metal: "Gold",     direction: "East" },
   Moon:    { colors: ["White", "Cream"],            number: 2, gemstone: "Pearl",            day: "Monday",    metal: "Silver",   direction: "Northwest" },
   Mars:    { colors: ["Red", "Scarlet"],            number: 9, gemstone: "Red Coral",        day: "Tuesday",   metal: "Copper",   direction: "South" },
@@ -38,7 +40,7 @@ const PLANET_LUCKY: Record<string, PlanetAttributes> = {
   Ketu:    { colors: ["Grey", "Earthy"],            number: 7, gemstone: "Cat's Eye",        day: "Tuesday",   metal: "Iron",     direction: "Northeast" },
 };
 
-const PLANET_GEMSTONE_INTENTIONS: Record<string, string> = {
+export const PLANET_GEMSTONE_INTENTIONS: Record<string, string> = {
   Sun: "Support confidence, clarity, and constructive visibility.",
   Moon: "Support emotional steadiness, rest, and receptivity.",
   Mars: "Support courage, momentum, and decisive action.",
@@ -50,7 +52,7 @@ const PLANET_GEMSTONE_INTENTIONS: Record<string, string> = {
   Ketu: "Support reflection, discernment, and spiritual focus.",
 };
 
-const PLANET_CAUTIONS: Record<string, { colors: string[]; items: string[]; omens: string[] }> = {
+export const PLANET_CAUTIONS: Record<string, { colors: string[]; items: string[]; omens: string[] }> = {
   Sun: {
     colors: ["Dull Black", "Ash Grey"],
     items: ["Cracked mirrors", "faded gold"],
@@ -183,6 +185,29 @@ function challengingLords(
 
 /* ── Main computation ── */
 
+/* The fortune domains' fixed copy, and the safety note, for the same reason. */
+export const FORTUNE_DOMAIN_COPY = {
+  learning: {
+    title: "Learning & mentors",
+    focus: "Deep study, trusted guides, long-range travel, and choices that expand your perspective.",
+    basis: "9th-house lord",
+  },
+  growth: {
+    title: "Growth & opportunity",
+    focus: "Generosity, teaching, and taking the wider view when an opening asks for faith and preparation.",
+    basis: "Jupiter’s natal placement",
+  },
+  momentum: {
+    title: "Personal momentum",
+    focus: "The practical choices that make opportunity easier to recognize and act on consistently.",
+    basis: "Ascendant-lord influence",
+    yogakarakaBasis: "Yogakaraka influence",
+  },
+} as const;
+
+export const GEMSTONE_SAFETY_NOTE =
+  "Gemstone remedies are traditional spiritual practices, not guarantees. Consult a qualified Vedic astrologer before purchasing or wearing a remedial gemstone.";
+
 function buildFortuneDomains(
   planets: PlanetPosition[],
   ninthLord: string,
@@ -191,27 +216,28 @@ function buildFortuneDomains(
 ) {
   const getPlanetHouse = (planet: string) => findPlanet(planets, planet)?.house ?? null;
 
+  const { learning, growth, momentum } = FORTUNE_DOMAIN_COPY;
   return [
     {
-      title: "Learning & mentors",
-      focus: "Deep study, trusted guides, long-range travel, and choices that expand your perspective.",
+      title: learning.title,
+      focus: learning.focus,
       key_planet: ninthLord,
       planet_house: getPlanetHouse(ninthLord),
-      basis: "9th-house lord",
+      basis: learning.basis,
     },
     {
-      title: "Growth & opportunity",
-      focus: "Generosity, teaching, and taking the wider view when an opening asks for faith and preparation.",
+      title: growth.title,
+      focus: growth.focus,
       key_planet: "Jupiter",
       planet_house: getPlanetHouse("Jupiter"),
-      basis: "Jupiter’s natal placement",
+      basis: growth.basis,
     },
     {
-      title: "Personal momentum",
-      focus: "The practical choices that make opportunity easier to recognize and act on consistently.",
+      title: momentum.title,
+      focus: momentum.focus,
       key_planet: primaryPlanet,
       planet_house: getPlanetHouse(primaryPlanet),
-      basis: hasYogakaraka ? "Yogakaraka influence" : "Ascendant-lord influence",
+      basis: hasYogakaraka ? momentum.yogakarakaBasis : momentum.basis,
     },
   ];
 }
@@ -321,7 +347,7 @@ export function computeLuckyElements(
       metal: secondaryGemAttr.metal,
       intention: PLANET_GEMSTONE_INTENTIONS[secondaryGemPlanet] ?? PLANET_GEMSTONE_INTENTIONS.Moon,
     },
-    safety_note: "Gemstone remedies are traditional spiritual practices, not guarantees. Consult a qualified Vedic astrologer before purchasing or wearing a remedial gemstone.",
+    safety_note: GEMSTONE_SAFETY_NOTE,
   };
   const fortuneDomains = buildFortuneDomains(
     planets,

@@ -5,6 +5,7 @@ import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
+import { planetName, signAbbreviation, signName } from "@/lib/chart-labels";
 import styles from "./varshaphal-panel.module.css";
 
 type VarshaphalPanelProps = {
@@ -155,6 +156,44 @@ function joinThemes(themes: string[], tr: Translator): string {
   return themes.join(tr("timing.varshaphal.andSeparator"));
 }
 
+/* The engine's profection themes (HOUSE_THEMES in lib/engines/varshaphal-engine.ts),
+   thirty-six fixed words, by timing.varshaphal.profectionThemes.<slug>. */
+export function profectionThemeKey(theme: string): string {
+  return `timing.varshaphal.profectionThemes.${theme.toLowerCase().replace(/[^a-z]+/g, "_")}`;
+}
+
+function profectionTheme(theme: string, tr: Translator): string {
+  const key = profectionThemeKey(theme);
+  const text = tr(key);
+  return text === key ? theme : text;
+}
+
+/* Two themes inside a sentence: lower case, except in German, which
+   capitalises its nouns. */
+function themesInSentence(themes: string[], tr: Translator, language: string): string {
+  const joined = joinThemes(themes.map((theme) => profectionTheme(theme, tr)), tr);
+  return language === "de" ? joined : joined.toLowerCase();
+}
+
+/* Why the engine chose the year lord (computeVarshesh): four fixed reasons,
+   three of them naming a sign. One it has not met is shown as sent. */
+const YEAR_LORD_REASONS: Array<[RegExp, string]> = [
+  [/^Lord of solar return ascendant \((\w+)\)$/, "timing.varshaphal.yearLordReasons.returnAscendant"],
+  [/^Lord of Muntha sign \((\w+)\)$/, "timing.varshaphal.yearLordReasons.munthaSign"],
+  [/^Lord of natal ascendant \((\w+)\)$/, "timing.varshaphal.yearLordReasons.natalAscendant"],
+  [/^Default to return ascendant lord$/, "timing.varshaphal.yearLordReasons.default"],
+];
+
+function yearLordReason(reason: string, tr: Translator): string {
+  for (const [pattern, key] of YEAR_LORD_REASONS) {
+    const match = pattern.exec(reason);
+    if (!match) continue;
+    const text = tr(key, match[1] ? { sign: signName(match[1], tr) } : undefined);
+    return text === key ? reason : text;
+  }
+  return reason;
+}
+
 function buildYearTimeline(data: VarshaphalResult, tr: Translator): TimelineMonth[] {
   const returnMonth = wrapMonth(new Date(data.solarReturnMoment).getMonth());
   const activatedHouse = data.profection.activatedHouse;
@@ -176,7 +215,7 @@ function buildYearTimeline(data: VarshaphalResult, tr: Translator): TimelineMont
         month,
         title: tr("timing.varshaphal.timeline.solarReturn"),
         note: tr("timing.varshaphal.timeline.solarReturnNote", {
-          sign: data.returnChart.ascendant.sign,
+          sign: signName(data.returnChart.ascendant.sign, tr),
         }),
         tone: "peak",
       };
@@ -209,10 +248,10 @@ function buildYearTimeline(data: VarshaphalResult, tr: Translator): TimelineMont
   });
 }
 
-function getAnnualTheme(data: VarshaphalResult, tr: Translator): string {
-  const themes = joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase();
+function getAnnualTheme(data: VarshaphalResult, tr: Translator, language: string): string {
+  const themes = themesInSentence(data.profection.themes.slice(0, 2), tr, language);
   return tr("timing.varshaphal.hero.theme", {
-    planet: data.varshesh.planet,
+    planet: planetName(data.varshesh.planet, tr),
     house: String(data.profection.activatedHouse),
     themes: themes || tr("timing.varshaphal.hero.themesFallback"),
   });
@@ -220,12 +259,13 @@ function getAnnualTheme(data: VarshaphalResult, tr: Translator): string {
 
 function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
 
   return (
     <section className={styles.themeHero} aria-labelledby="annual-compass-title">
       <div className={styles.themeHeroCopy}>
         <span className={styles.eyebrow}>{tr("timing.varshaphal.hero.eyebrow")}</span>
-        <h3 id="annual-compass-title">{getAnnualTheme(data, tr)}</h3>
+        <h3 id="annual-compass-title">{getAnnualTheme(data, tr, language)}</h3>
         <p>{data.yearSummary.yearLordInterpretation}</p>
         <span className={styles.cycleLabel}>
           {tr("timing.varshaphal.hero.cycle", {
@@ -243,7 +283,7 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
           <strong>{houseShort(data.profection.activatedHouse, tr)}</strong>
           <small>
             {tr("timing.varshaphal.hero.signAge", {
-              sign: data.profection.activatedSign,
+              sign: signName(data.profection.activatedSign, tr),
               age: String(data.profection.age),
             })}
           </small>
@@ -251,12 +291,12 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
         <div className={styles.themeStat}>
           <span>{tr("timing.varshaphal.hero.muntha")}</span>
           <strong>{houseShort(data.muntha.house, tr)}</strong>
-          <small>{data.muntha.sign}</small>
+          <small>{signName(data.muntha.sign, tr)}</small>
         </div>
         <div className={styles.themeStat}>
           <span>{tr("timing.varshaphal.hero.yearLord")}</span>
-          <strong>{data.varshesh.planet}</strong>
-          <small>{data.varshesh.reason}</small>
+          <strong>{planetName(data.varshesh.planet, tr)}</strong>
+          <small>{yearLordReason(data.varshesh.reason, tr)}</small>
         </div>
       </div>
     </section>
@@ -265,8 +305,9 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
 
 function YearInFocus({ data }: { data: VarshaphalResult }) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
   const themes =
-    joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase() ||
+    themesInSentence(data.profection.themes.slice(0, 2), tr, language) ||
     tr("timing.varshaphal.yearInFocus.themesFallback");
 
   return (
@@ -292,7 +333,7 @@ function YearInFocus({ data }: { data: VarshaphalResult }) {
         <article className={styles.summaryCard}>
           <span>{tr("timing.varshaphal.yearInFocus.bestUseLabel")}</span>
           <strong>
-            {tr("timing.varshaphal.yearInFocus.bestUseValue", { planet: data.varshesh.planet })}
+            {tr("timing.varshaphal.yearInFocus.bestUseValue", { planet: planetName(data.varshesh.planet, tr) })}
           </strong>
           <p>{data.yearSummary.yearLordInterpretation}</p>
         </article>
@@ -313,9 +354,9 @@ type FocusCard = {
   prompt: string;
 };
 
-function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
+function buildFocusCards(data: VarshaphalResult, tr: Translator, language: string): FocusCard[] {
   const themes =
-    joinThemes(data.profection.themes.slice(0, 2), tr).toLowerCase() ||
+    themesInSentence(data.profection.themes.slice(0, 2), tr, language) ||
     tr("timing.varshaphal.focusAreas.themesFallback");
   const cards: FocusCard[] = [
     {
@@ -325,8 +366,8 @@ function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
       }),
       source: tr("timing.varshaphal.focusAreas.profectionSource"),
       detail: tr("timing.varshaphal.focusAreas.profectionDetail", {
-        sign: data.profection.activatedSign,
-        lord: data.profection.lordOfYear,
+        sign: signName(data.profection.activatedSign, tr),
+        lord: planetName(data.profection.lordOfYear, tr),
       }),
       prompt: tr("timing.varshaphal.focusAreas.profectionPrompt"),
     },
@@ -335,7 +376,7 @@ function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
         house: String(data.muntha.house),
       }),
       source: tr("timing.varshaphal.focusAreas.munthaSource"),
-      detail: tr("timing.varshaphal.focusAreas.munthaDetail", { sign: data.muntha.sign }),
+      detail: tr("timing.varshaphal.focusAreas.munthaDetail", { sign: signName(data.muntha.sign, tr) }),
       prompt: tr("timing.varshaphal.focusAreas.munthaPrompt"),
     },
   ];
@@ -343,19 +384,19 @@ function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
   if (data.profection.activatedPlanets.length > 0) {
     cards.push({
       title: tr("timing.varshaphal.focusAreas.activatedTitle", {
-        planets: joinThemes(data.profection.activatedPlanets, tr),
+        planets: joinThemes(data.profection.activatedPlanets.map((planet) => planetName(planet, tr)), tr),
       }),
       source: tr("timing.varshaphal.focusAreas.activatedSource"),
       detail: tr("timing.varshaphal.focusAreas.activatedDetail", {
-        sign: data.profection.activatedSign,
+        sign: signName(data.profection.activatedSign, tr),
       }),
       prompt: tr("timing.varshaphal.focusAreas.activatedPrompt"),
     });
   } else {
     cards.push({
-      title: tr("timing.varshaphal.focusAreas.yearLordTitle", { planet: data.varshesh.planet }),
+      title: tr("timing.varshaphal.focusAreas.yearLordTitle", { planet: planetName(data.varshesh.planet, tr) }),
       source: tr("timing.varshaphal.focusAreas.yearLordSource"),
-      detail: data.varshesh.reason,
+      detail: yearLordReason(data.varshesh.reason, tr),
       prompt: tr("timing.varshaphal.focusAreas.yearLordPrompt"),
     });
   }
@@ -365,6 +406,7 @@ function buildFocusCards(data: VarshaphalResult, tr: Translator): FocusCard[] {
 
 function FocusAreas({ data }: { data: VarshaphalResult }) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
 
   return (
     <section className={styles.prioritySection} aria-labelledby="focus-areas-title">
@@ -373,7 +415,7 @@ function FocusAreas({ data }: { data: VarshaphalResult }) {
         <h3 id="focus-areas-title">{tr("timing.varshaphal.focusAreas.title")}</h3>
       </div>
       <div className={styles.priorityGrid}>
-        {buildFocusCards(data, tr).map((item, index) => (
+        {buildFocusCards(data, tr, language).map((item, index) => (
           <article key={item.source} className={styles.priorityCard}>
             <span className={styles.priorityNumber}>{String(index + 1).padStart(2, "0")}</span>
             <span className={styles.sourceLabel}>{item.source}</span>
@@ -406,7 +448,7 @@ function buildMajorForces(data: VarshaphalResult, tr: Translator): MajorForce[] 
       planet,
       label,
       placement: tr("timing.varshaphal.forces.placement", {
-        sign: placement.sign,
+        sign: signName(placement.sign, tr),
         house: String(placement.house),
         degree: placement.degree_in_sign.toFixed(1),
       }),
@@ -417,7 +459,7 @@ function buildMajorForces(data: VarshaphalResult, tr: Translator): MajorForce[] 
   addForce(
     data.varshesh.planet,
     tr("timing.varshaphal.forces.yearLord"),
-    tr("timing.varshaphal.forces.yearLordDetail", { planet: data.varshesh.planet }),
+    tr("timing.varshaphal.forces.yearLordDetail", { planet: planetName(data.varshesh.planet, tr) }),
   );
 
   const moon = placements.find((planet) => planet.name === "Moon");
@@ -455,7 +497,7 @@ function MajorForces({ data }: { data: VarshaphalResult }) {
         {buildMajorForces(data, tr).map((force) => (
           <article key={force.planet} className={styles.forceCard}>
             <span className={styles.sourceLabel}>{force.label}</span>
-            <h4>{force.planet}</h4>
+            <h4>{planetName(force.planet, tr)}</h4>
             <strong>{force.placement}</strong>
             <p>{force.detail}</p>
           </article>
@@ -547,7 +589,7 @@ function buildTimingWindows(
       title: month.title,
       note: month.tone === "peak"
         ? tr("timing.varshaphal.windows.launchNote", {
-            sign: data.returnChart.ascendant.sign,
+            sign: signName(data.returnChart.ascendant.sign, tr),
           })
         : month.note,
     }));
@@ -771,7 +813,9 @@ function ProfectionWheel({
             : "timing.varshaphal.wheel.segmentLabel",
           {
             house: String(houseNum),
-            sign: signs[houseNum] ?? tr("timing.varshaphal.wheel.signUnavailable"),
+            sign: signs[houseNum]
+              ? signName(signs[houseNum], tr)
+              : tr("timing.varshaphal.wheel.signUnavailable"),
           }
         )}
         onClick={() => setSelectedHouse(houseNum)}
@@ -790,8 +834,8 @@ function ProfectionWheel({
     const ly = cy + labelR * Math.sin(midAngle);
 
     const sign = signs[houseNum] ?? "";
-    // Abbreviate sign to 3 letters
-    const abbrev = sign.slice(0, 3);
+    /* Three letters in a Latin alphabet, the whole name in Devanagari or Bengali. */
+    const abbrev = sign ? signAbbreviation(sign, tr) : "";
 
     labels.push(
       <text
@@ -915,10 +959,10 @@ function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
           return (
             <article key={planet.name} className={styles.placementCard}>
               <span className={styles.sourceLabel}>{placementLabelText(labels[0], tr)}</span>
-              <h4>{planet.name}</h4>
+              <h4>{planetName(planet.name, tr)}</h4>
               <strong>
                 {tr("timing.varshaphal.placements.signHouse", {
-                  sign: planet.sign,
+                  sign: signName(planet.sign, tr),
                   house: String(planet.house),
                 })}
               </strong>
@@ -937,8 +981,8 @@ function KeyReturnPlacements({ data }: { data: VarshaphalResult }) {
         <div className={styles.placementTable}>
           {placements.map((planet) => (
             <div key={planet.name} className={styles.placementRow}>
-              <strong>{planet.name}</strong>
-              <span>{planet.sign}</span>
+              <strong>{planetName(planet.name, tr)}</strong>
+              <span>{signName(planet.sign, tr)}</span>
               <span>{houseShort(planet.house, tr)}</span>
               <span>{planet.degree_in_sign.toFixed(1)}°</span>
               <span>
@@ -1209,7 +1253,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                 </div>
                 <div>
                   <span>{tr("timing.varshaphal.profection.natalSign")}</span>
-                  <strong>{data.profection.activatedSign}</strong>
+                  <strong>{signName(data.profection.activatedSign, tr)}</strong>
                   <small>
                     {tr("timing.varshaphal.profection.signOnHouse", {
                       house: houseShort(data.profection.activatedHouse, tr),
@@ -1218,13 +1262,13 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                 </div>
                 <div>
                   <span>{tr("timing.varshaphal.profection.lordOfYear")}</span>
-                  <strong>{data.profection.lordOfYear}</strong>
+                  <strong>{planetName(data.profection.lordOfYear, tr)}</strong>
                   <small>{tr("timing.varshaphal.profection.lordNote")}</small>
                 </div>
                 <div>
                   <span>{tr("timing.varshaphal.profection.natalActivation")}</span>
                   <strong>
-                    {data.profection.activatedPlanets.join(", ") ||
+                    {data.profection.activatedPlanets.map((planet) => planetName(planet, tr)).join(", ") ||
                       tr("timing.varshaphal.profection.none")}
                   </strong>
                   <small>{tr("timing.varshaphal.profection.natalActivationNote")}</small>
@@ -1232,7 +1276,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
               </div>
               <div className={styles.profectionThemes}>
                 {data.profection.themes.map((theme) => (
-                  <span key={theme}>{theme}</span>
+                  <span key={theme}>{profectionTheme(theme, tr)}</span>
                 ))}
               </div>
             </section>
@@ -1266,7 +1310,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                   {tr("timing.varshaphal.returnChart.returnAscendant")}
                 </span>
                 <span className={styles.detailValue}>
-                  {data.returnChart.ascendant.sign}{" "}
+                  {signName(data.returnChart.ascendant.sign, tr)}{" "}
                   {data.returnChart.ascendant.degree_in_sign.toFixed(2)}°
                 </span>
               </div>
@@ -1276,7 +1320,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                 </span>
                 <span className={styles.detailValue}>
                   {tr("timing.varshaphal.returnChart.munthaValue", {
-                    sign: data.muntha.sign,
+                    sign: signName(data.muntha.sign, tr),
                     house: String(data.muntha.house),
                   })}
                 </span>
@@ -1286,11 +1330,11 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                   {tr("timing.varshaphal.returnChart.varshesh")}
                 </span>
                 <span className={styles.detailValue}>
-                  {data.varshesh.planet}
+                  {planetName(data.varshesh.planet, tr)}
                 </span>
               </div>
               <div className={styles.returnReason}>
-                {data.varshesh.reason}
+                {yearLordReason(data.varshesh.reason, tr)}
               </div>
             </section>
 
@@ -1306,7 +1350,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
             <p>
               <strong>
                 {tr("timing.varshaphal.interpretation.asYearLord", {
-                  planet: data.varshesh.planet,
+                  planet: planetName(data.varshesh.planet, tr),
                 })}
               </strong>{" "}
               {data.yearSummary.yearLordInterpretation}

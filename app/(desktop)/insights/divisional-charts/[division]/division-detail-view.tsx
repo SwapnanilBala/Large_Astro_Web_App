@@ -12,7 +12,8 @@ import type {
   DivisionalChartDetail,
   DivisionalDetailPosition,
 } from "@/lib/divisional-chart-detail";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import { planetName, pointName, signName } from "@/lib/chart-labels";
 import divisionalMessages from "@/messages/en.divisional.json";
 import styles from "./divisional-chart-detail.module.css";
 
@@ -42,8 +43,9 @@ type PositionRow = {
 type TimingPlacement = {
   kind: "mahadasha" | "antardasha";
   planet: string;
-  /** Pre-formatted on the server; empty when no date could be formatted. */
-  range: string;
+  /** The period's dates as the engine gives them; empty when it gives none. */
+  start: string;
+  end: string;
 };
 
 type DivisionDetailViewProps = {
@@ -59,6 +61,8 @@ type DivisionDetailViewProps = {
     ephemerisProvider: string;
     ayanamsha: string;
     houseSystem: string;
+    /** The registry's code for the house system, which names it in the catalog. */
+    houseSystemCode: string;
   };
   /** Every division the payload returned, for the adjacent-varga pager. */
   availableDivisions: number[];
@@ -124,6 +128,43 @@ function humanizeToken(value: string): string {
   return value
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+/* The engine's dignities (PlanetDignity), worded by divisional.detail.dignities. */
+export const DIGNITIES = ["exalted", "own_sign", "debilitated", "neutral"] as const;
+
+function dignityLabel(tr: Translate, dignity: string): string {
+  const key = `divisional.detail.dignities.${dignity}`;
+  const text = tr(key);
+  return text === key ? humanizeToken(dignity) : text;
+}
+
+/* The registry's house systems (HOUSE_SYSTEMS), by code. */
+export const HOUSE_SYSTEM_CODES = ["whole_sign", "equal", "placidus", "koch", "campanus", "regiomontanus"] as const;
+
+function houseSystemLabel(tr: Translate, code: string, english: string): string {
+  const key = `divisional.detail.method.houseSystems.${code}`;
+  const text = tr(key);
+  return text === key ? english : text;
+}
+
+/*
+ * A dasha period's months, in the reader's language: "Mar 2024 – Sep 2026".
+ *
+ * Formatted in UTC, so the server's render and the browser's agree whatever
+ * either one's time zone is; the engine's dates are calendar dates, which UTC
+ * leaves on the day they name. Empty when neither end can be read, which the
+ * view words as copy.
+ */
+function formatDateRange(locale: string, start: string, end: string): string {
+  const format = (value: string) => {
+    if (!value) return "";
+    const date = new Date(value);
+    return Number.isNaN(date.getTime())
+      ? value
+      : new Intl.DateTimeFormat(locale, { month: "short", year: "numeric", timeZone: "UTC" }).format(date);
+  };
+  return [format(start), format(end)].filter(Boolean).join(" – ");
 }
 
 function formatBoundary(
@@ -250,8 +291,15 @@ export default function DivisionDetailView({
   birthTimeFallback,
 }: DivisionDetailViewProps) {
   const tr = useRouteMessages(divisionalMessages);
+  const { language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const guideText = (field: DivisionalGuideField) =>
     tr(divisionalGuideKey(detail.division, field));
+  const house = (number: number | null) =>
+    number === null ? "—" : tr("divisional.detail.houseShort", { house: String(number) });
+  /* The varga's own line, from the catalog; the engine's if it has none. */
+  const themeKey = `divisional.panel.themes.d${detail.division}`;
+  const theme = tr(themeKey) === themeKey ? detail.description : tr(themeKey);
 
   const rowByName = new Map(positionRows.map((row) => [row.position.name, row]));
   const houseBySign = new Map(detail.houses.map((house) => [house.sign, house]));
@@ -351,7 +399,7 @@ export default function DivisionDetailView({
           <article>
             <span>{tr("divisional.detail.purpose.purpose")}</span>
             <h2>{guideText("focus")}</h2>
-            <p>{detail.description}</p>
+            <p>{theme}</p>
           </article>
           <article>
             <span>{tr("divisional.detail.purpose.clientQuestion")}</span>
@@ -393,18 +441,22 @@ export default function DivisionDetailView({
             <article>
               <span>{tr("divisional.detail.glance.divisionalAscendant")}</span>
               <strong>
-                {detail.ascendantSign ?? tr("divisional.detail.glance.unavailable")}
+                {detail.ascendantSign
+                  ? signName(detail.ascendantSign, tr)
+                  : tr("divisional.detail.glance.unavailable")}
               </strong>
             </article>
             <article>
               <span>{tr("divisional.detail.glance.ascendantLord")}</span>
               <strong>
-                {ascendantLord ?? tr("divisional.detail.glance.unavailable")}
+                {ascendantLord
+                  ? planetName(ascendantLord, tr)
+                  : tr("divisional.detail.glance.unavailable")}
               </strong>
               {ascendantLord && rowByName.get(ascendantLord) ? (
                 <small>
-                  {rowByName.get(ascendantLord)?.position.vargaSign} · H
-                  {rowByName.get(ascendantLord)?.position.wholeSignHouse ?? "—"}
+                  {signName(rowByName.get(ascendantLord)?.position.vargaSign ?? "", tr)} ·{" "}
+                  {house(rowByName.get(ascendantLord)?.position.wholeSignHouse ?? null)}
                 </small>
               ) : null}
             </article>
@@ -412,7 +464,7 @@ export default function DivisionDetailView({
               <span>{tr("divisional.detail.glance.recurrences")}</span>
               <strong>{detail.repeatedNames.length}</strong>
               <small>
-                {detail.repeatedNames.join(", ") ||
+                {detail.repeatedNames.map((name) => pointName(name, tr)).join(", ") ||
                   tr("divisional.detail.glance.none")}
               </small>
             </article>
@@ -420,8 +472,9 @@ export default function DivisionDetailView({
               <span>{tr("divisional.detail.glance.nearestBoundary")}</span>
               <strong>{formatBoundary(tr, nearestBoundaryRow?.boundary ?? null)}</strong>
               <small>
-                {nearestBoundaryRow?.position.name ??
-                  tr("divisional.detail.glance.unavailable")}
+                {nearestBoundaryRow
+                  ? pointName(nearestBoundaryRow.position.name, tr)
+                  : tr("divisional.detail.glance.unavailable")}
               </small>
             </article>
           </div>
@@ -449,32 +502,32 @@ export default function DivisionDetailView({
               })}
             >
               {SOUTH_INDIAN_LAYOUT.map(({ sign, area }) => {
-                const house = houseBySign.get(sign);
-                if (!house) return null;
+                const cell = houseBySign.get(sign);
+                if (!cell) return null;
                 return (
                   <article
                     key={sign}
-                    className={`${styles.houseCell} ${house.isFocusHouse ? styles.houseCellFocus : ""}`}
+                    className={`${styles.houseCell} ${cell.isFocusHouse ? styles.houseCellFocus : ""}`}
                     style={{ gridArea: area }}
                     aria-label={tr("divisional.detail.map.houseLabel", {
-                      sign,
-                      house: String(house.houseNumber),
-                      ruler: house.signRuler,
+                      sign: signName(sign, tr),
+                      house: String(cell.houseNumber),
+                      ruler: planetName(cell.signRuler, tr),
                     })}
                   >
                     <div className={styles.houseTopline}>
-                      <strong>{sign}</strong>
-                      <span>H{house.houseNumber}</span>
+                      <strong>{signName(sign, tr)}</strong>
+                      <span>{house(cell.houseNumber)}</span>
                     </div>
                     <small>
-                      {tr("divisional.detail.map.lord", { ruler: house.signRuler })}
+                      {tr("divisional.detail.map.lord", { ruler: planetName(cell.signRuler, tr) })}
                     </small>
                     <div className={styles.houseOccupants}>
-                      {house.occupants.length > 0 ? (
-                        house.occupants.map((name) => (
+                      {cell.occupants.length > 0 ? (
+                        cell.occupants.map((name) => (
                           <span key={name}>
                             <i aria-hidden="true">{PLANET_GLYPHS[name] ?? "•"}</i>
-                            {name}
+                            {pointName(name, tr)}
                           </span>
                         ))
                       ) : (
@@ -510,7 +563,7 @@ export default function DivisionDetailView({
             </div>
             <span className={styles.methodTag}>
               {tr("divisional.detail.placements.focusHouses", {
-                houses: detail.focusHouses.map((house) => `H${house}`).join(" · "),
+                houses: detail.focusHouses.map((number) => house(number)).join(" · "),
               })}
             </span>
           </div>
@@ -530,9 +583,9 @@ export default function DivisionDetailView({
                       {PLANET_GLYPHS[position.name] ?? "•"}
                     </span>
                     <div>
-                      <h3>{position.name}</h3>
+                      <h3>{pointName(position.name, tr)}</h3>
                       <p>
-                        {position.vargaSign} · H{position.wholeSignHouse ?? "—"}
+                        {signName(position.vargaSign, tr)} · {house(position.wholeSignHouse)}
                       </p>
                     </div>
                   </div>
@@ -554,15 +607,15 @@ export default function DivisionDetailView({
                     ) : null}
                   </div>
                   <dl className={styles.placementFacts}>
-                    <div><dt>{tr("divisional.detail.placements.signLord")}</dt><dd>{position.signRuler ?? "—"}</dd></div>
-                    <div><dt>{tr("divisional.detail.placements.dignity")}</dt><dd>{position.dignity ? humanizeToken(position.dignity) : tr("divisional.detail.placements.notAssigned")}</dd></div>
+                    <div><dt>{tr("divisional.detail.placements.signLord")}</dt><dd>{position.signRuler ? planetName(position.signRuler, tr) : "—"}</dd></div>
+                    <div><dt>{tr("divisional.detail.placements.dignity")}</dt><dd>{position.dignity ? dignityLabel(tr, position.dignity) : tr("divisional.detail.placements.notAssigned")}</dd></div>
                     <div><dt>{tr("divisional.detail.placements.boundary")}</dt><dd>{formatBoundary(tr, boundary)}</dd></div>
                     <div><dt>{tr("divisional.detail.placements.d1Repeat")}</dt><dd>{position.repeatsD1 ? tr("divisional.detail.placements.yes") : tr("divisional.detail.placements.no")}</dd></div>
                   </dl>
                   {position.conjunctionPeers.length > 0 ? (
                     <p className={styles.peerNote}>
                       {tr("divisional.detail.placements.peers", {
-                        peers: position.conjunctionPeers.join(", "),
+                        peers: position.conjunctionPeers.map((name) => pointName(name, tr)).join(", "),
                       })}
                     </p>
                   ) : null}
@@ -623,14 +676,14 @@ export default function DivisionDetailView({
                     <th scope="row">
                       <span className={styles.tablePlanet}>
                         <i aria-hidden="true">{PLANET_GLYPHS[position.name] ?? "•"}</i>
-                        {position.name}
+                        {pointName(position.name, tr)}
                       </span>
                     </th>
-                    <td>{position.rashiSign}</td>
-                    <td>{position.vargaSign}</td>
+                    <td>{signName(position.rashiSign, tr)}</td>
+                    <td>{signName(position.vargaSign, tr)}</td>
                     <td>{position.wholeSignHouse ?? "—"}</td>
-                    <td>{position.signRuler ?? "—"}</td>
-                    <td>{position.dignity ? humanizeToken(position.dignity) : "—"}</td>
+                    <td>{position.signRuler ? planetName(position.signRuler, tr) : "—"}</td>
+                    <td>{position.dignity ? dignityLabel(tr, position.dignity) : "—"}</td>
                     <td>
                       {position.repeatsD1 ? (
                         <span className={styles.repeatMarker}>
@@ -674,11 +727,14 @@ export default function DivisionDetailView({
                 return (
                   <article key={timing.kind}>
                     <span>{tr(TIMING_LABEL_KEY[timing.kind])}</span>
-                    <h3>{timing.planet}</h3>
-                    <p>{timing.range || tr("divisional.detail.dates.unavailable")}</p>
+                    <h3>{planetName(timing.planet, tr)}</h3>
+                    <p>
+                      {formatDateRange(locale, timing.start, timing.end) ||
+                        tr("divisional.detail.dates.unavailable")}
+                    </p>
                     {row ? (
                       <dl>
-                        <div><dt>{tr("divisional.detail.vargaSign", { label: detail.label })}</dt><dd>{row.position.vargaSign}</dd></div>
+                        <div><dt>{tr("divisional.detail.vargaSign", { label: detail.label })}</dt><dd>{signName(row.position.vargaSign, tr)}</dd></div>
                         <div><dt>{tr("divisional.detail.timing.wholeSignHouse")}</dt><dd>{row.position.wholeSignHouse ?? "—"}</dd></div>
                         <div><dt>{tr("divisional.detail.timing.boundary")}</dt><dd>{formatBoundary(tr, row.boundary)}</dd></div>
                       </dl>
@@ -707,7 +763,7 @@ export default function DivisionDetailView({
             <div><dt>{tr("divisional.detail.method.engine")}</dt><dd>{engine.engineLabel}</dd></div>
             <div><dt>{tr("divisional.detail.method.ephemerisProvider")}</dt><dd>{engine.ephemerisProvider}</dd></div>
             <div><dt>{tr("divisional.detail.method.ayanamsha")}</dt><dd>{engine.ayanamsha}</dd></div>
-            <div><dt>{tr("divisional.detail.method.natalHouseMethod")}</dt><dd>{engine.houseSystem}</dd></div>
+            <div><dt>{tr("divisional.detail.method.natalHouseMethod")}</dt><dd>{houseSystemLabel(tr, engine.houseSystemCode, engine.houseSystem)}</dd></div>
             <div><dt>{tr("divisional.detail.method.vargaHouseDisplay")}</dt><dd>{tr("divisional.detail.method.vargaHouseDisplayValue", { label: detail.label })}</dd></div>
             <div><dt>{tr("divisional.detail.method.birthTimeStatus")}</dt><dd>{reliability}</dd></div>
           </dl>

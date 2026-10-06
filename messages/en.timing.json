@@ -151,6 +151,43 @@
       "calendar": {
         "summary": "Auspicious window — {activity} ({score}/100 {quality})",
         "factor": "{name}: {value} — {quality}"
+      },
+      "factors": {
+        "tithi": "Tithi",
+        "nakshatra": "Nakshatra",
+        "yoga": "Yoga",
+        "karana": "Karana",
+        "weekday": "Weekday",
+        "rahukaala": "Rahukaala",
+        "yamaghantaka": "Yamaghantaka",
+        "hora": "Hora"
+      },
+      "periodStates": {
+        "active": "Active",
+        "clear": "Clear"
+      },
+      "horaValue": "{planet} hora",
+      "factorQualities": {
+        "nanda_joyful": "Nanda (joyful)",
+        "bhadra_auspicious": "Bhadra (auspicious)",
+        "jaya_victorious": "Jaya (victorious)",
+        "rikta_empty": "Rikta (empty)",
+        "purna_full_complete": "Purna (full/complete)",
+        "fixed_dhruva": "Fixed (Dhruva)",
+        "movable_chara": "Movable (Chara)",
+        "soft_tender_mridu": "Soft/Tender (Mridu)",
+        "sharp_fierce_tikshna": "Sharp/Fierce (Tikshna)",
+        "mixed_sadharana": "Mixed (Sadharana)",
+        "auspicious": "auspicious",
+        "inauspicious": "inauspicious",
+        "neutral": "neutral",
+        "favorable": "favorable"
+      },
+      "windowQualities": {
+        "excellent": "excellent",
+        "good": "good",
+        "fair": "fair",
+        "poor": "poor"
       }
     },
     "varshaphal": {
@@ -367,6 +404,50 @@
       },
       "interpretation": {
         "asYearLord": "{planet} as Year Lord:"
+      },
+      "profectionThemes": {
+        "self": "Self",
+        "identity": "identity",
+        "personal_direction": "personal direction",
+        "finances": "Finances",
+        "values": "values",
+        "material_security": "material security",
+        "communication": "Communication",
+        "siblings": "siblings",
+        "short_travel": "short travel",
+        "home": "Home",
+        "family": "family",
+        "emotional_roots": "emotional roots",
+        "creativity": "Creativity",
+        "children": "children",
+        "romance": "romance",
+        "health": "Health",
+        "service": "service",
+        "daily_routines": "daily routines",
+        "partnerships": "Partnerships",
+        "marriage": "marriage",
+        "contracts": "contracts",
+        "transformation": "Transformation",
+        "shared_resources": "shared resources",
+        "occult": "occult",
+        "higher_learning": "Higher learning",
+        "long_travel": "long travel",
+        "philosophy": "philosophy",
+        "career": "Career",
+        "public_life": "public life",
+        "authority": "authority",
+        "friends": "Friends",
+        "aspirations": "aspirations",
+        "community": "community",
+        "spirituality": "Spirituality",
+        "endings": "endings",
+        "solitude": "solitude"
+      },
+      "yearLordReasons": {
+        "returnAscendant": "Lord of solar return ascendant ({sign})",
+        "munthaSign": "Lord of Muntha sign ({sign})",
+        "natalAscendant": "Lord of natal ascendant ({sign})",
+        "default": "Default to return ascendant lord"
       }
     }
   }

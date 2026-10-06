@@ -5,26 +5,30 @@ import type { ChartApiResponse } from "@/lib/astro-types";
 import {
   computeMajorLifeShifts,
   type MajorLifeShift,
+  type MajorShiftKind,
   type MajorShiftStatus,
 } from "@/lib/engines/major-shifts-engine";
+import { planetName } from "@/lib/chart-labels";
 import {
   formatShiftPivot,
   formatShiftWindow,
   lifeShiftId,
 } from "@/lib/life-shift-reading";
 import { useLifeShiftReadings } from "./use-life-shift-readings";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "../insights.module.css";
 
-const STATUS_LABEL: Record<MajorShiftStatus, string> = {
-  past: "Past chapter",
-  active: "Active now",
-  upcoming: "Upcoming",
+const STATUS_LABEL_KEY: Record<MajorShiftStatus, string> = {
+  past: "insights.shifts.past",
+  active: "insights.shifts.active",
+  upcoming: "insights.shifts.upcoming",
 };
 
 /* formatShiftPivot and formatShiftWindow live in lib/life-shift-reading.ts
    because the prompt needs the identical words: a reading that says "late
    2028" under a card headed "March 2029" reads as a contradiction rather
-   than as two roundings of one date. */
+   than as two roundings of one date. The card names the same month in the
+   reader's language; the prompt keeps en-US. */
 
 function statusClass(status: MajorShiftStatus): string {
   if (status === "past") return styles.lifeShiftCardPast;
@@ -41,6 +45,45 @@ function statusClass(status: MajorShiftStatus): string {
  * is what the route is for, but it is a complete answer and a blank card is
  * not.
  */
+type Translate = (key: string, params?: Record<string, string>) => string;
+
+/*
+ * The engine's chapter names and themes are a closed set: a mahadasha for each
+ * planet and three returns. They print through insights.shifts.labels and
+ * .themes; anything else prints as the engine wrote it. The narrative and the
+ * evidence line stay the engine's English, as its reading prose does.
+ */
+export const RETURN_KEYS: Partial<Record<MajorShiftKind, string>> = {
+  "saturn-return": "saturnReturn",
+  "jupiter-return": "jupiterReturn",
+  "nodal-return": "nodalReturn",
+};
+
+/* The engine names a return's occurrence in words, then falls back to "5th". */
+export const SHIFT_ORDINALS = ["first", "second", "third", "fourth"] as const;
+
+function worded(t: Translate, key: string, fallback: string, params?: Record<string, string>): string {
+  const text = t(key, params);
+  return text === key ? fallback : text;
+}
+
+function shiftLabel(shift: MajorLifeShift, t: Translate): string {
+  if (shift.kind === "mahadasha") {
+    return worded(t, "insights.shifts.labels.mahadasha", shift.label, { planet: planetName(shift.planet, t) });
+  }
+  const kind = RETURN_KEYS[shift.kind];
+  const ordinal = /\((\w+)\)$/.exec(shift.label)?.[1] as (typeof SHIFT_ORDINALS)[number] | undefined;
+  if (!kind || !ordinal || !SHIFT_ORDINALS.includes(ordinal)) return shift.label;
+  return worded(t, `insights.shifts.labels.${kind}`, shift.label, {
+    ordinal: worded(t, `insights.shifts.ordinals.${ordinal}`, ordinal),
+  });
+}
+
+function shiftTheme(shift: MajorLifeShift, t: Translate): string {
+  const id = shift.kind === "mahadasha" ? shift.planet.toLowerCase() : RETURN_KEYS[shift.kind];
+  return id ? worded(t, `insights.shifts.themes.${id}`, shift.theme) : shift.theme;
+}
+
 function ShiftCard({
   shift,
   reading,
@@ -52,20 +95,22 @@ function ShiftCard({
      page, where the cards sit directly under the h1. */
   headingLevel: 2 | 3;
 }) {
+  const { t, language } = useTranslation();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}>
       <header className={styles.lifeShiftHeader}>
         <span className={styles.lifeShiftIndex}>#{shift.index}</span>
-        <span className={styles.lifeShiftStatus}>{STATUS_LABEL[shift.status]}</span>
+        <span className={styles.lifeShiftStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
       </header>
-      <p className={styles.lifeShiftLabel}>{shift.label}</p>
-      <Heading>{shift.theme}</Heading>
+      <p className={styles.lifeShiftLabel}>{shiftLabel(shift, t)}</p>
+      <Heading>{shiftTheme(shift, t)}</Heading>
       <p className={styles.lifeShiftWindow}>
-        <strong>Pivot:</strong> {formatShiftPivot(shift.pivotIso)} · age {shift.ageAtPivot}
+        <strong>{t("insights.shifts.pivot")}</strong> {formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])} ·{" "}
+        {t("insights.shifts.age", { age: String(shift.ageAtPivot) })}
         <br />
-        <strong>Window:</strong>{" "}
-        {formatShiftWindow(shift.windowStartIso, shift.windowEndIso)}
+        <strong>{t("insights.shifts.window")}</strong>{" "}
+        {formatShiftWindow(shift.windowStartIso, shift.windowEndIso, LOCALE_TAGS[language])}
       </p>
       <p>{reading ?? shift.narrative}</p>
       {shift.evidence && <small>{shift.evidence}</small>}
@@ -89,6 +134,7 @@ export default function MajorShiftsPanel({
   payload: ChartApiResponse;
   variant?: "brief" | "full";
 }) {
+  const { t } = useTranslation();
   const isBrief = variant === "brief";
   const shifts: MajorLifeShift[] = useMemo(
     () => computeMajorLifeShifts(payload),
@@ -122,10 +168,7 @@ export default function MajorShiftsPanel({
   if (shifts.length === 0) {
     return (
       <div className={styles.lifeShiftsPanel}>
-        <p className={styles.sectionIntro}>
-          Not enough birth-data context on this chart to estimate major life
-          shift windows. Re-run with a confirmed birth time to unlock this section.
-        </p>
+        <p className={styles.sectionIntro}>{t("insights.shifts.empty")}</p>
       </div>
     );
   }
@@ -133,9 +176,7 @@ export default function MajorShiftsPanel({
   return (
     <div className={styles.lifeShiftsPanel}>
       <p className={styles.sectionIntro}>
-        {isBrief
-          ? "The chapter you are in now. Dates are planning windows, not deadlines."
-          : "Focus on the chapter that is active now and the next major transition. Dates are planning windows, not deadlines."}
+        {isBrief ? t("insights.shifts.introBrief") : t("insights.shifts.introFull")}
       </p>
 
       <div className={styles.lifeShiftsTimeline}>
@@ -155,7 +196,9 @@ export default function MajorShiftsPanel({
       {!isBrief && pastShifts.length > 0 && (
         <details className={styles.lifeShiftsArchive}>
           <summary>
-            View {pastShifts.length} past chapter{pastShifts.length === 1 ? "" : "s"}
+            {pastShifts.length === 1
+              ? t("insights.shifts.viewPastOne")
+              : t("insights.shifts.viewPastOther", { count: String(pastShifts.length) })}
           </summary>
           <div className={styles.lifeShiftsTimeline}>
             {pastShifts.map((shift) => (

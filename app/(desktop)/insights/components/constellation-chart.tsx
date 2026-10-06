@@ -7,6 +7,7 @@ import { wheelPlacement } from "@/lib/constellation-geometry";
 import { useChartWorker } from "@/lib/hooks/useChartWorker";
 import type { ChartWorkerOutput } from "@/lib/hooks/useChartWorker";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { planetName, retrogradeMark, signName } from "@/lib/chart-labels";
 import { PLANET_COLORS } from "@/lib/planet-colors";
 import sharedMessages from "@/messages/en.shared.json";
 
@@ -367,11 +368,11 @@ export default function ConstellationChart({
         viewBox="0 0 600 600"
         className="constellation-svg"
         role="img"
-        aria-label={t("shared.constellationAria", { ascendant: ascendantSign })}
+        aria-label={t("shared.constellationAria", { ascendant: signName(ascendantSign, t) })}
         initial="hidden"
         animate="visible"
       >
-        <title>{t("shared.constellationTitle", { ascendant: ascendantSign })}</title>
+        <title>{t("shared.constellationTitle", { ascendant: signName(ascendantSign, t) })}</title>
         <defs>
           {/* Sky background gradient */}
           <radialGradient id="cSkyGrad" cx="50%" cy="50%" r="70%">
@@ -673,7 +674,7 @@ export default function ConstellationChart({
             dominantBaseline="central"
             style={{ fontFamily: "var(--font-display), serif" }}
           >
-            {SIGN_SYMBOLS[ascendantSign] ?? ""} {ascendantSign}
+            {SIGN_SYMBOLS[ascendantSign] ?? ""} {signName(ascendantSign, t)}
           </text>
           <text
             x={CX} y={CY + 30}
@@ -725,8 +726,8 @@ export default function ConstellationChart({
                       dominantBaseline="central"
                       style={{ fontFamily: "var(--font-display), serif" }}
                     >
-                      {PLANET_SYMBOLS[tooltip.planet] ?? ""} {tooltip.planet}
-                      {tooltip.isRetrograde ? " (R)" : ""}
+                      {PLANET_SYMBOLS[tooltip.planet] ?? ""} {planetName(tooltip.planet, t)}
+                      {tooltip.isRetrograde ? ` (${retrogradeMark(t)})` : ""}
                     </text>
                     <text
                       x={tx + 118} y={ty + 52}
@@ -736,7 +737,7 @@ export default function ConstellationChart({
                       dominantBaseline="central"
                       style={{ fontFamily: "var(--font-body), sans-serif" }}
                     >
-                      {SIGN_SYMBOLS[tooltip.sign] ?? ""} {tooltip.sign} {tooltip.degree.toFixed(2)}&deg;
+                      {SIGN_SYMBOLS[tooltip.sign] ?? ""} {signName(tooltip.sign, t)} {tooltip.degree.toFixed(2)}&deg;
                     </text>
                     <text
                       x={tx + 118} y={ty + 78}

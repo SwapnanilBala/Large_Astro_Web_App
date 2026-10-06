@@ -63,16 +63,16 @@ export const MAX_LIFE_SHIFTS = 5;
  * the model wrote "late 2028" under a card headed "March 2029", which reads as
  * a contradiction rather than as two roundings of one date.
  */
-export function formatShiftPivot(pivotIso: string): string {
-  return new Date(pivotIso).toLocaleDateString("en-US", {
+export function formatShiftPivot(pivotIso: string, locale = "en-US"): string {
+  return new Date(pivotIso).toLocaleDateString(locale, {
     month: "long",
     year: "numeric",
   });
 }
 
-export function formatShiftWindow(startIso: string, endIso: string): string {
+export function formatShiftWindow(startIso: string, endIso: string, locale = "en-US"): string {
   const fmt = (value: string) =>
-    new Date(value).toLocaleDateString("en-US", { month: "short", year: "numeric" });
+    new Date(value).toLocaleDateString(locale, { month: "short", year: "numeric" });
   return `${fmt(startIso)} → ${fmt(endIso)}`;
 }
 

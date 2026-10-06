@@ -1,4 +1,5 @@
-import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
+import type { DomainRuleImpact, LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
+import { planetName, signName } from "@/lib/chart-labels";
 
 /*
  * Presentation copy and helpers for the seven life domains.
@@ -19,6 +20,44 @@ export type DomainReadCopy = {
 };
 
 /* â”€â”€â”€ Domain Icon Map â”€â”€â”€ */
+type Translate = (key: string, params?: Record<string, string>) => string;
+
+/* The engine's closed sets the life areas pages word themselves. */
+export const RULE_IMPACTS: readonly DomainRuleImpact[] = ["support", "pressure", "activation", "context"];
+export const CONFIRMATION_STATUSES = ["confirmed", "qualified", "improved", "contradictory", "insufficient"] as const;
+export const CONCLUSION_STRENGTHS = ["strong", "moderate", "cautious"] as const;
+export const SUBTHEME_BANDS = ["leading", "supporting", "developing"] as const;
+export const EVIDENCE_STATUSES = ["support", "pressure", "mixed", "context"] as const;
+export const EVIDENCE_FAMILIES = ["primary", "supporting", "divisional", "strength", "house_support", "yoga", "timing", "contradiction"] as const;
+
+/* The engine's activity bands, a closed set (LifeDomainInsight.signal_profile). */
+export const ACTIVITY_BANDS = ["developing", "active", "prominent"] as const;
+
+/** A life area's name in the reader's language: lifeDomains.names, else the engine's label. */
+export function domainName(domain: { key: LifeDomainKey; label: string }, t: Translate): string {
+  const key = `lifeDomains.names.${domain.key}`;
+  const text = t(key);
+  return text === key ? domain.label : text;
+}
+
+/** The same name inside a sentence ("Full reading for love life"): lower case,
+    except in German, which capitalises its nouns. */
+export function domainNameInSentence(
+  domain: { key: LifeDomainKey; label: string },
+  t: Translate,
+  language: string,
+): string {
+  const name = domainName(domain, t);
+  return language === "de" ? name : name.toLowerCase();
+}
+
+/** The badge for an activity band: "developing activity", in the reader's language. */
+export function activityBadge(band: string, t: Translate): string {
+  const key = `lifeDomains.activity.${band}`;
+  const text = t(key);
+  return text === key ? `${band} activity` : text;
+}
+
 export const DOMAIN_ICONS: Record<LifeDomainKey, string> = {
   love_life: "\u2661",
   career: "\u2726",
@@ -29,78 +68,58 @@ export const DOMAIN_ICONS: Record<LifeDomainKey, string> = {
   travel_destinations: "\u2708",
 };
 
-export const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
-  love_life: {
-    description:
-      "Separates attraction, partnership durability, emotional availability, and the timing that makes connection easier to sustain.",
-    clarity:
-      "Do not judge love from Venus alone. Read the 7th house for partnership, the 5th for romance, the house lord for delivery, and timing triggers for when the pattern becomes visible.",
-    decisionRule:
-      "A relationship signal is stronger when support, watchout, and timing notes repeat the same theme.",
-    boundaryRule:
-      "If the watchout contradicts the support, treat the watchout as the condition that must be managed before the support pays off.",
-  },
-  career: {
-    description:
-      "Distinguishes vocation, workload, authority, public reputation, service pressure, and the route through which professional recognition is built.",
-    clarity:
-      "Do not read career from the 10th house alone. Weigh the 10th sign, its lord, the 6th house work pattern, and Saturn's discipline filter together.",
-    decisionRule:
-      "Career moves are cleaner when the timing trigger reinforces both the 10th-house promise and the lord's placement.",
-    boundaryRule:
-      "If pressure houses are involved, advancement may require systems, mentors, and repeatable proof before visibility arrives.",
-  },
-  family: {
-    description:
-      "Clarifies home life, inherited emotional patterns, family support, private stability, and the habits that make belonging feel reliable.",
-    clarity:
-      "Read the 4th house for emotional ground, the 2nd for lineage and speech, the Moon for felt safety, and the house lord for where repair happens.",
-    decisionRule:
-      "Family guidance is strongest when the support pattern names the same need as the long-game statement.",
-    boundaryRule:
-      "When the watchout is active, protect steadiness first; resolution works better after the emotional baseline is restored.",
-  },
-  inheritance: {
-    description:
-      "Frames shared resources, legacy, debt, hidden obligations, family assets, and the maturity needed around resource transitions.",
-    clarity:
-      "Read the 8th house for transferred resources, the 2nd for stored value, Jupiter for stewardship, and the lord placement for the route of responsibility.",
-    decisionRule:
-      "Treat inheritance signals as practical planning prompts when they repeat across support, watchout, and timing sections.",
-    boundaryRule:
-      "If the watchout names hidden cost or delay, prioritize documentation, transparency, and patient sequencing.",
-  },
-  influence: {
-    description:
-      "Looks at public impact, allies, social reach, authority, reputation, and the conditions that help your voice move people.",
-    clarity:
-      "Read the 11th house for networks, the 10th for public standing, the Sun for visibility, and the lord for where influence is earned.",
-    decisionRule:
-      "Influence grows fastest when timing triggers amplify an existing support pattern rather than forcing visibility too early.",
-    boundaryRule:
-      "If the watchout names diffusion or delay, narrow the audience and make the message easier to repeat.",
-  },
-  life_cycle: {
-    description:
-      "Connects identity, reinvention, recovery cycles, resilience, and the periods where life asks for a cleaner version of self-direction.",
-    clarity:
-      "Read the 1st house for identity, the 8th for transformation, the Moon for adaptation, and the lord placement for the terrain of change.",
-    decisionRule:
-      "A life-cycle signal deserves priority when timing notes and long-game guidance both point toward the same kind of maturity.",
-    boundaryRule:
-      "If the watchout is active, slow the pace and make the next step smaller, clearer, and easier to sustain.",
-  },
-  travel_destinations: {
-    description:
-      "Clarifies long-distance travel, short journeys, relocation pull, foreign links, pilgrimage themes, and what makes a place feel meaningful.",
-    clarity:
-      "Read the 9th house for distance and meaning, the 3rd for movement and logistics, Jupiter for expansion, and the lord placement for travel purpose.",
-    decisionRule:
-      "Travel signals become practical when timing triggers support both opportunity and preparation.",
-    boundaryRule:
-      "If watchouts name friction, treat planning, documents, health, and timing buffers as part of the reading rather than afterthoughts.",
-  },
+/* The four reading lines for each area. They are the same for every chart, so
+   they are the app's copy rather than the engine's, and read in the visitor's
+   language: lifeAreas.copy.<area>.<field>, in the life-areas route catalog. */
+export const DOMAIN_READ_FIELDS = ["description", "clarity", "decisionRule", "boundaryRule"] as const;
+
+export function domainReadCopy(domain: LifeDomainKey, t: Translate): DomainReadCopy {
+  const copy = {} as DomainReadCopy;
+  for (const field of DOMAIN_READ_FIELDS) copy[field] = t(`lifeAreas.copy.${domain}.${field}`);
+  return copy;
+}
+
+/* The evidence claims the rule engine writes (buildDomainClaims). It sends no
+   id with them, and the seven labels are fixed, so they are matched by their
+   English. An unknown label is shown as it came. */
+const CLAIM_LABEL_KEYS: Record<string, string> = {
+  "Primary house": "lifeAreas.claims.primaryHouse",
+  "Sign on that house": "lifeAreas.claims.houseSign",
+  "House lord": "lifeAreas.claims.houseLord",
+  "Lord placement": "lifeAreas.claims.lordPlacement",
+  "Supporting house": "lifeAreas.claims.supportingHouse",
+  "Supporting lord": "lifeAreas.claims.supportingLord",
+  "Anchor planet": "lifeAreas.claims.anchorPlanet",
 };
+
+export const CLAIM_LABEL_KEY_LIST = Object.values(CLAIM_LABEL_KEYS);
+
+export function claimLabel(label: string, t: Translate): string {
+  const key = CLAIM_LABEL_KEYS[label];
+  if (!key) return label;
+  const text = t(key);
+  return text === key ? label : text;
+}
+
+/** A claim's value -- "10th house", a sign or a planet -- in the reader's language. */
+export function claimValue(value: string, t: Translate): string {
+  const house = /^(\d{1,2})(?:st|nd|rd|th) house$/.exec(value);
+  if (house) {
+    const key = `lifeAreas.claims.houses.h${house[1]}`;
+    const text = t(key);
+    return text === key ? value : text;
+  }
+  /* Both fall back to what they were given, so a value that is neither a sign
+     nor a planet passes through unchanged. */
+  return signName(planetName(value, t), t);
+}
+
+/** A word from one of the engine's closed sets, or the engine's own word if a
+    newer engine sends one the catalog has not met. */
+export function engineWord(key: string, fallback: string, t: Translate): string {
+  const text = t(key);
+  return text === key ? fallback : text;
+}
 
 /**
  * The technical read-out for a domain.
@@ -109,33 +128,37 @@ export const DOMAIN_READ_COPY: Record<LifeDomainKey, DomainReadCopy> = {
  * transit language are correct here, because this now renders only inside the
  * evidence disclosure.
  */
-export function buildDomainRules(domain: LifeDomainInsight) {
+export function buildDomainRules(domain: LifeDomainInsight, t: Translate) {
   if (Array.isArray(domain.rule_hits) && domain.rule_hits.length > 0) {
-    return domain.rule_hits.map((rule) => ({
-      label: `${rule.impact === "pressure" ? "Pressure" : rule.impact === "support" ? "Support" : rule.impact === "activation" ? "Activation" : "Context"} · ${rule.label}`,
-      body: rule.technical_note,
-    }));
+    return domain.rule_hits.map((rule) => {
+      const impact = RULE_IMPACTS.includes(rule.impact) ? rule.impact : "context";
+      return {
+        /* The impact is ours to word; the rule's own label is the engine's. */
+        label: `${t(`lifeAreas.ruleImpact.${impact}`)} · ${rule.label}`,
+        body: rule.technical_note,
+      };
+    });
   }
 
   return [
     {
-      label: "House rule",
+      label: t("lifeAreas.ruleLabels.house"),
       body: `${domain.headline} Use this as the baseline before judging specific events.`,
     },
     {
-      label: "Evidence rule",
+      label: t("lifeAreas.ruleLabels.evidence"),
       body:
         domain.supporting_patterns[0] ??
         "Give more weight to patterns that repeat across houses, lord placements, and timing indicators.",
     },
     {
-      label: "Timing rule",
+      label: t("lifeAreas.ruleLabels.timing"),
       body:
         domain.timing_triggers[0] ??
         "Use timing triggers as activation windows, not as isolated promises.",
     },
     {
-      label: "Action rule",
+      label: t("lifeAreas.ruleLabels.action"),
       body: domain.guidance,
     },
   ];

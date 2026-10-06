@@ -31,7 +31,7 @@ export default function BottomNav() {
   if (isHidden) return null;
 
   return (
-    <nav className={styles.bottomNav} aria-label="Mobile navigation">
+    <nav className={styles.bottomNav} aria-label={t("bottomNav.aria")}>
       {NAV_ITEMS.map(item => {
         const isActive = item.href === '/'
           ? pathname === item.href

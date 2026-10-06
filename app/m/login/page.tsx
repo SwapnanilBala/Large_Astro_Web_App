@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getDailySkyLine } from "@/app/(desktop)/login/dailySky";
+import { getDailySky } from "@/app/(desktop)/login/dailySky";
 import { missingGoogleConfig } from "@/lib/identity/google-oauth";
 import MobileLogin from "./mobile-login";
 
@@ -20,7 +20,7 @@ export default async function MobileLoginPage({ searchParams }: Props) {
   const params = await searchParams;
   /* Shared with the desktop page rather than reimplemented — it is a pure
      server helper, so importing it across trees costs the client nothing. */
-  const skyLine = await getDailySkyLine();
+  const sky = await getDailySky();
 
   /* Decided on the server so a deployment without Google credentials shows no
      button at all, rather than one that fails when pressed. Same check the
@@ -30,7 +30,7 @@ export default async function MobileLoginPage({ searchParams }: Props) {
   return (
     <MobileLogin
       returnTo={getSingle(params.returnTo)}
-      skyLine={skyLine}
+      sky={sky}
       googleEnabled={googleEnabled}
       signInError={getSingle(params.error)}
     />

@@ -4,6 +4,7 @@ import PageTransition from "@/app/components/PageTransition";
 import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import HouseSupportPanel from "@/app/(desktop)/insights/components/house-support-panel";
 import {
+  HouseSupportHeroKicker,
   HouseSupportHeroLead,
   HouseSupportHeroTitle,
   HouseSupportMissingState,
@@ -86,7 +87,7 @@ export default async function HouseSupportPage({ searchParams }: HouseSupportPag
     <PageTransition>
       <DetailPageShell
         backHref={`/insights?${historyQs}#house-support`}
-        kicker="Ashtakavarga · House support"
+        kicker={<HouseSupportHeroKicker />}
         title={<HouseSupportHeroTitle name={payload.client.name} />}
         lead={<HouseSupportHeroLead />}
         icon={<FiGrid />}

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import LoginPageClient from "./page-client";
-import { getDailySkyLine } from "./dailySky";
+import { getDailySky } from "./dailySky";
 import { missingGoogleConfig } from "@/lib/identity/google-oauth";
 
 type LoginPageProps = {
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const params = await searchParams;
-  const skyLine = await getDailySkyLine();
+  const sky = await getDailySky();
 
   /* Decided on the server so a deployment without Google credentials shows no
      button at all, rather than one that fails when pressed. The check reuses
@@ -29,7 +29,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <LoginPageClient
       returnTo={getSingle(params.returnTo)}
-      skyLine={skyLine}
+      sky={sky}
       googleEnabled={googleEnabled}
       signInError={getSingle(params.error)}
     />

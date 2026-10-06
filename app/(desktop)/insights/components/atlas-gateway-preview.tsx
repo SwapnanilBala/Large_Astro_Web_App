@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import type { DivisionalChartInfo } from "@/lib/astro-types";
+import { useTranslation } from "@/lib/i18n-context";
+import { planetAbbreviation, planetName, signName } from "@/lib/chart-labels";
 import {
   HOUSES,
   HOUSE_POLYGONS,
@@ -20,27 +22,35 @@ import styles from "./reading-gateway-previews.module.css";
 const MINI_LABEL_FONT = 25;
 
 const FEATURED_CHARTS = [
-  { division: 1, focus: "Life and identity" },
-  { division: 9, focus: "Relationships and purpose" },
-  { division: 10, focus: "Career and contribution" },
+  { division: 1, focusKey: "insights.atlasPreview.focus.d1" },
+  { division: 9, focusKey: "insights.atlasPreview.focus.d9" },
+  { division: 10, focusKey: "insights.atlasPreview.focus.d10" },
 ] as const;
 
 function ChartMiniature({ chart, ascendantSign }: { chart: DivisionalChartInfo; ascendantSign: string }) {
+  const { t } = useTranslation();
   const size = NORTH_INDIAN_SIZE;
-  const placements = chart.positions.map((position) => `${position.name} in ${position.divisional_sign}`).join(", ");
+  const placements = chart.positions
+    .map((position) =>
+      t("insights.atlasPreview.placement", {
+        planet: position.name === "Ascendant" ? t("lagnaChart.ascendant") : planetName(position.name, t),
+        sign: signName(position.divisional_sign, t),
+      }),
+    )
+    .join(", ");
 
   return (
     <svg
       viewBox={`0 0 ${size} ${size}`}
       className={styles.miniChart}
       role="img"
-      aria-label={`${chart.label} whole-sign chart: ${placements}`}
+      aria-label={t("insights.atlasPreview.chartAria", { chart: chart.label, placements })}
     >
       {HOUSES.map((house) => {
         const sign = signForHouse(ascendantSign, house);
         const positions = chart.positions.filter((position) => position.divisional_sign === sign);
         const layout = layoutHouseLabels(positions.map((position) => ({
-          abbrev: position.name === "Ascendant" ? "Asc" : position.name.slice(0, 2),
+          abbrev: position.name === "Ascendant" ? t("lagnaChart.abbrev.ascendant") : planetAbbreviation(position.name, t),
           degree: "",
           retrograde: false,
         })), LABEL_BOXES[house], MINI_LABEL_FONT / LABEL_FONT.abbrev);
@@ -87,15 +97,20 @@ export default function AtlasGatewayPreview({
   charts: Record<number, DivisionalChartInfo>;
   historyQs: string;
 }) {
+  const { t } = useTranslation();
   const featured = FEATURED_CHARTS.filter(({ division }) => charts[division]);
 
   if (!featured.length) {
-    return <p className={styles.previewEmpty}>Explore the {Object.keys(charts).length} available divisional charts in your atlas.</p>;
+    return (
+      <p className={styles.previewEmpty}>
+        {t("insights.atlasPreview.empty", { count: String(Object.keys(charts).length) })}
+      </p>
+    );
   }
 
   return (
-    <nav className={styles.atlasGrid} aria-label="Featured divisional charts">
-      {featured.map(({ division, focus }) => {
+    <nav className={styles.atlasGrid} aria-label={t("insights.atlasPreview.aria")}>
+      {featured.map(({ division, focusKey }) => {
         const chart = charts[division];
         const ascendant = chart.positions.find((position) => position.name === "Ascendant");
         const canDraw = ascendant && signNumber(ascendant.divisional_sign) > 0;
@@ -110,8 +125,12 @@ export default function AtlasGatewayPreview({
               {canDraw && <ChartMiniature chart={chart} ascendantSign={ascendant.divisional_sign} />}
               <figcaption className={styles.atlasCaption}>
                 <strong>D{division} <ArrowUpRight aria-hidden="true" /></strong>
-                <span>{focus}</span>
-                <small>{canDraw ? `${ascendant.divisional_sign} ascendant` : "Ascendant unavailable"}</small>
+                <span>{t(focusKey)}</span>
+                <small>
+                  {canDraw
+                    ? t("insights.atlasPreview.ascendant", { sign: signName(ascendant.divisional_sign, t) })
+                    : t("insights.atlasPreview.noAscendant")}
+                </small>
               </figcaption>
             </figure>
           </Link>

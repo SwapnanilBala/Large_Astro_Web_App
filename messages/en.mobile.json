@@ -184,7 +184,7 @@
     "askPlace": "Where were you born?",
     "askPlaceHelper": "The place of birth, not where you live now — this is what locks the coordinates and the time zone."
   },
-"account": {
+  "account": {
     "kicker": "Your Account",
     "heading": "Sign in",
     "headingSignedIn": "You’re signed in",
@@ -205,7 +205,14 @@
     "error_exchange_failed": "Google couldn’t complete the sign-in. Try again.",
     "error_email_unverified": "Google hasn’t verified the email on that account, so it can’t be used to sign in.",
     "error_signin_failed": "Something went wrong finishing sign-in. Try again.",
-    "error_unknown": "Sign-in didn’t finish. Try again."
+    "error_unknown": "Sign-in didn’t finish. Try again.",
+    "sky": {
+      "moonIn": "Moon in {sign}",
+      "mercuryDirect": "Mercury direct",
+      "mercuryRetrograde": "Mercury retrograde",
+      "aligned": "Skies aligned · New beginnings",
+      "sunClear": "Sun in {sign} · Skies clear"
+    }
   },
   "chartSync": {
     "askQuestion": "Save your charts to your account?",

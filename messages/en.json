@@ -5,7 +5,10 @@
     "menu": "Menu",
     "signIn": "Sign in",
     "account": "Account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "skipToContent": "Skip to main content",
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu"
   },
   "home": {
     "kicker": "Astro Intelligence Studio",
@@ -390,7 +393,424 @@
     "advancedHeading": "Advanced Vedic Modules",
     "palmKicker": "Palmistry",
     "palmHeading": "Palm Reading Analysis",
-    "ascendantSign": "Ascendant Sign"
+    "ascendantSign": "Ascendant Sign",
+    "fortunePanel": {
+      "fallbackColor": "your primary color",
+      "fallbackDirection": "your preferred direction",
+      "primaryOpening": "Primary opening",
+      "primaryDetail": "Use {color} for the week’s most important meeting, outreach, or first step.",
+      "supportWindow": "Support window",
+      "supportDetail": "Use this day for refinement, follow-through, and conversations that benefit from patience.",
+      "dailyAnchor": "Daily anchor",
+      "anyDay": "Any day",
+      "directionFocus": "{direction} focus",
+      "anchorDetail": "Start one intentional task facing {direction}; let the number {number} be a small visual reminder of your priorities.",
+      "weekEyebrow": "Practical fortune",
+      "weekTitle": "Week Ahead",
+      "weekLead": "Small, chart-aligned moments to make the next seven days feel more intentional.",
+      "primaryRecommendation": "Primary recommendation",
+      "secondaryRecommendation": "Secondary recommendation",
+      "gemEyebrow": "Traditional practice",
+      "gemTitle": "Gemstone Guidance",
+      "gemLead": "Use these as intention-setting references grounded in the planets that support your chart.",
+      "planet": "Planet",
+      "wearDay": "Wear day",
+      "pairWith": "Pair with",
+      "domainsEyebrow": "Where fortune grows",
+      "domainsTitle": "Fortune Domains",
+      "domainsLead": "These are the life areas where preparation, perspective, and the right connections can compound.",
+      "house": "house {house}",
+      "cautionTitle": "Unlucky Colors, Items & Bad Omens",
+      "colorsToAvoid": "Colors to avoid",
+      "items": "Items",
+      "badOmens": "Bad omens"
+    },
+    "page": {
+      "nav": {
+        "aria": "Results page sections",
+        "overview": "Overview",
+        "chart": "Chart",
+        "lifeAreas": "Life areas",
+        "timing": "Timing",
+        "more": "More"
+      },
+      "takeaways": {
+        "kicker": "Top 3 Takeaways",
+        "heading": "What deserves attention first",
+        "highestSignal": "Highest signal",
+        "chartSignal": "Chart signal",
+        "currentTiming": "Current timing",
+        "dashaActive": "{planet} dasha is active",
+        "antardashaBody": "{planet} antardasha narrows the period into more immediate choices and responses.",
+        "dashaBody": "Use the current dasha as the main timing lens for near-term decisions.",
+        "runsThrough": "Runs through {date}",
+        "strongestPlanet": "Strongest planet",
+        "strongestTitle": "{planet} leads the strength map",
+        "strongestBody": "This planet is one of the cleaner sources of support to lean on when the chart feels noisy.",
+        "orientation": "Chart orientation",
+        "orientationTitle": "{sign} rising sets the approach"
+      },
+      "domains": {
+        "kicker": "Life domain analysis",
+        "queuedHeading": "Your deeper reading is ready to begin",
+        "loadingHeading": "Calculating seven life areas separately",
+        "queuedLead": "The detailed formulas will start as you approach this section, keeping the first part of your report fast.",
+        "loadingLead": "We are comparing the promise, supporting ruler, pressure points, and timing path for each area—not recycling one general reading.",
+        "stepHouses": "House and ruler relationships",
+        "stepStrength": "Strength and pressure signals",
+        "stepTiming": "Timing and tailored synthesis",
+        "errorHeading": "The detailed reading did not finish",
+        "errorFailed": "We could not complete the domain formulas.",
+        "errorEmpty": "The domain analysis returned no results."
+      },
+      "hero": {
+        "actionsAria": "Report actions",
+        "copyLink": "Copy link",
+        "copied": "Current chart link copied.",
+        "copyFailed": "Could not copy the current chart link.",
+        "scriptLead": "Read it as a map,",
+        "scriptTail": "not a verdict.",
+        "rising": "{sign} rising",
+        "identityAria": "Chart identity",
+        "period": "Period"
+      },
+      "zone": {
+        "kicker": "Ultimate Module",
+        "title": "Connected Insight Zone",
+        "subtitle": "Seven areas, each read against its own evidence. Most active first; the full workup opens on its own page.",
+        "fullReadingFor": "Full reading for {area}"
+      },
+      "houseSupport": {
+        "kicker": "House support",
+        "heading": "How much support your chart receives from the houses",
+        "link": "What each house is responsible for"
+      },
+      "details": {
+        "kicker": "Chart details",
+        "title": "Placements and calculation settings",
+        "placements": "<strong>{count}</strong> placements",
+        "houses": "<strong>{count}</strong> houses",
+        "method": "Calculation method",
+        "fallback": "Fallback calculation",
+        "mainMethod": "Main method",
+        "ayanamsha": "Ayanamsha",
+        "subMethod": "Sub method",
+        "houseSystem": "House system"
+      },
+      "dasha": {
+        "kicker": "Timing detail",
+        "title": "Dasha periods and sub-periods",
+        "maha": "<strong>{planet}</strong> maha dasha",
+        "antar": "<strong>{planet}</strong> antardasha",
+        "until": "to {date}"
+      },
+      "gateways": {
+        "timing": {
+          "eyebrow": "01 / Timing and electional",
+          "heading": "Your Timing",
+          "blurb": "Explore upcoming periods and windows for important beginnings.",
+          "footnote": "Starting windows are scored against your own chart.",
+          "cta": "Explore your timing"
+        },
+        "atlas": {
+          "eyebrow": "02 / Divisional charts",
+          "heading": "Your Chart Atlas",
+          "blurb": "See how your birth chart unfolds across identity, relationships, and career.",
+          "footnote": "Higher divisions depend on the accuracy of your birth time.",
+          "cta": "View all {count} charts"
+        },
+        "reading": {
+          "eyebrow": "03 / Findings and evidence",
+          "heading": "Your Reading, Explained",
+          "blurb": "Connect the patterns in your life with the placements in your chart.",
+          "footnote": "Your complete reading includes every matched finding and its evidence.",
+          "cta": "Read every finding"
+        }
+      },
+      "lifeShifts": {
+        "kicker": "Major Life Shifts",
+        "title": "Active and upcoming life shifts",
+        "link": "Every chapter, past and ahead"
+      },
+      "fortune": {
+        "heading": "Your Practical Fortune",
+        "subtitle": "Everyday magic, made simple.",
+        "color": "Lucky color",
+        "colorCaption": "Wear it when it matters.",
+        "number": "Lucky number",
+        "numberCaption": "Turns tend to land on it.",
+        "day": "Lucky day",
+        "dayCaption": "Begin things here.",
+        "stone": "Lucky stone",
+        "stoneCaption": "Amplifies your intent.",
+        "kicker": "Secondary details",
+        "title": "Lucky elements and practical fortune",
+        "summaryKinds": "Colours, numbers, days",
+        "keyedTo": "keyed to <strong>{sign}</strong> lagna"
+      },
+      "next": {
+        "kicker": "Explore next",
+        "heading": "Keep going with a focused tool",
+        "lead": "Three clear next steps, without repeating the reading you just finished.",
+        "transitsTitle": "Current transits",
+        "transitsBody": "Compare today’s sky with your natal chart.",
+        "partnerTitle": "Partner comparison",
+        "partnerBody": "Compare two complete birth profiles.",
+        "advancedTitle": "All advanced tools",
+        "advancedBody": "Choose another specialist reading.",
+        "openTool": "Open tool",
+        "browseTools": "Browse tools"
+      }
+    },
+    "sky": {
+      "kicker": "Today's sky",
+      "now": "Right now",
+      "planetIn": "{planet} in {sign}",
+      "inSign": "in {sign}",
+      "noteLead": "Where the planets are today,",
+      "noteTail": "not where they were at your birth."
+    },
+    "evidence": {
+      "finding": "A finding from your chart",
+      "aria": "Chart evidence for this finding",
+      "placement": "The placement behind it",
+      "none": "No matched findings are available for this chart.",
+      "findings": "Chart findings",
+      "combinations": "Lifetime combinations",
+      "scope": "Karmic patterns and inherited themes"
+    },
+    "timingPreview": {
+      "chapter": "Current chapter",
+      "until": "Until {date}",
+      "stops": {
+        "forecast": {
+          "label": "Forecast",
+          "note": "Periods now and next"
+        },
+        "muhurta": {
+          "label": "Muhurta",
+          "note": "When to begin"
+        },
+        "yearAhead": {
+          "label": "Year ahead",
+          "note": "Your annual chart"
+        }
+      }
+    },
+    "atlasPreview": {
+      "focus": {
+        "d1": "Life and identity",
+        "d9": "Relationships and purpose",
+        "d10": "Career and contribution"
+      },
+      "placement": "{planet} in {sign}",
+      "chartAria": "{chart} whole-sign chart: {placements}",
+      "empty": "Explore the {count} available divisional charts in your atlas.",
+      "aria": "Featured divisional charts",
+      "ascendant": "{sign} ascendant",
+      "noAscendant": "Ascendant unavailable"
+    },
+    "story": {
+      "stages": {
+        "calculating": "Completing the calculation",
+        "verifying": "Cross-checking the chart",
+        "writing": "Writing your reading",
+        "typesetting": "Typesetting the PDF"
+      },
+      "inProgress": "{stage}...",
+      "downloadReading": "Download reading",
+      "downloadPdf": "Download PDF",
+      "dialogTitle": "Your PDF is being written",
+      "dialogLead": "Every chapter is being composed against your own placements, to pin-point accuracy. This takes a couple of minutes, and it is worth the wait.",
+      "dialogNote": "Keep this tab open. The download starts on its own when the report is ready.",
+      "error": "The report did not pass generation. Please try again.",
+      "kicker": "Personal reading",
+      "chapters": "{count} verified chapters covering identity, relationships, family, vocation, resources, timing, and grounded action."
+    },
+    "shifts": {
+      "past": "Past chapter",
+      "active": "Active now",
+      "upcoming": "Upcoming",
+      "pivot": "Pivot:",
+      "age": "age {age}",
+      "window": "Window:",
+      "empty": "Not enough birth-data context on this chart to estimate major life shift windows. Re-run with a confirmed birth time to unlock this section.",
+      "introBrief": "The chapter you are in now. Dates are planning windows, not deadlines.",
+      "introFull": "Focus on the chapter that is active now and the next major transition. Dates are planning windows, not deadlines.",
+      "viewPastOne": "View 1 past chapter",
+      "viewPastOther": "View {count} past chapters",
+      "labels": {
+        "mahadasha": "{planet} mahadasha begins",
+        "saturnReturn": "Saturn return ({ordinal})",
+        "jupiterReturn": "Jupiter return ({ordinal})",
+        "nodalReturn": "Nodal return ({ordinal})"
+      },
+      "ordinals": {
+        "first": "first",
+        "second": "second",
+        "third": "third",
+        "fourth": "fourth"
+      },
+      "themes": {
+        "sun": "authority, identity, and visibility",
+        "moon": "emotional foundations, family, and inner safety",
+        "mars": "courage, conflict, and decisive action",
+        "mercury": "communication, study, and adaptive thinking",
+        "jupiter": "expansion, faith, teaching, and ethical growth",
+        "venus": "love, partnership, money, and pleasure",
+        "saturn": "discipline, responsibility, and karmic reckoning",
+        "rahu": "ambition, hunger, and unfamiliar terrain",
+        "ketu": "release, withdrawal, and inward mastery",
+        "saturnReturn": "structure, responsibility, and the cost of choices",
+        "jupiterReturn": "expansion, meaning, and a wider field of play",
+        "nodalReturn": "fate axis — what you reach for and what you release"
+      }
+    },
+    "snapshots": {
+      "intro": "Sign, degree, house, and dignity for every graha. Open a card for the exact longitude and motion.",
+      "retrograde": "Retrograde",
+      "combust": "Combust",
+      "longitude": "Longitude",
+      "motion": "Motion",
+      "direct": "Direct",
+      "dignity": "Dignity",
+      "speed": "{speed}°/day",
+      "dignities": {
+        "domicile": "Domicile",
+        "exalted": "Exalted",
+        "detriment": "Detriment",
+        "fall": "Fall",
+        "neutral": "Neutral"
+      }
+    },
+    "lucky": {
+      "colors": {
+        "deep_red": "Deep Red",
+        "orange": "Orange",
+        "white": "White",
+        "cream": "Cream",
+        "red": "Red",
+        "scarlet": "Scarlet",
+        "green": "Green",
+        "emerald": "Emerald",
+        "yellow": "Yellow",
+        "golden": "Golden",
+        "pink": "Pink",
+        "blue": "Blue",
+        "dark": "Dark",
+        "smoky": "Smoky",
+        "ultraviolet": "Ultraviolet",
+        "grey": "Grey",
+        "earthy": "Earthy",
+        "dull_black": "Dull Black",
+        "ash_grey": "Ash Grey",
+        "murky_brown": "Murky Brown",
+        "clouded_grey": "Clouded Grey",
+        "rust_red": "Rust Red",
+        "harsh_neon": "Harsh Neon",
+        "dusty_green": "Dusty Green",
+        "mixed_mud": "Mixed Mud",
+        "sallow_yellow": "Sallow Yellow",
+        "muddy_gold": "Muddy Gold",
+        "washed_pink": "Washed Pink",
+        "stained_white": "Stained White",
+        "flat_black": "Flat Black",
+        "cold_blue": "Cold Blue",
+        "smoky_black": "Smoky Black",
+        "electric_purple": "Electric Purple",
+        "dust_grey": "Dust Grey",
+        "pale_brown": "Pale Brown"
+      },
+      "gems": {
+        "ruby": "Ruby",
+        "pearl": "Pearl",
+        "red_coral": "Red Coral",
+        "emerald": "Emerald",
+        "yellow_sapphire": "Yellow Sapphire",
+        "diamond": "Diamond",
+        "blue_sapphire": "Blue Sapphire",
+        "hessonite_garnet": "Hessonite Garnet",
+        "cat_s_eye": "Cat's Eye"
+      },
+      "metals": {
+        "gold": "Gold",
+        "silver": "Silver",
+        "copper": "Copper",
+        "bronze": "Bronze",
+        "platinum": "Platinum",
+        "iron": "Iron",
+        "lead": "Lead"
+      },
+      "directions": {
+        "east": "East",
+        "northwest": "Northwest",
+        "south": "South",
+        "north": "North",
+        "northeast": "Northeast",
+        "southeast": "Southeast",
+        "west": "West",
+        "southwest": "Southwest"
+      },
+      "items": {
+        "cracked_mirrors": "Cracked mirrors",
+        "faded_gold": "faded gold",
+        "stagnant_water": "Stagnant water",
+        "chipped_silver": "chipped silver",
+        "broken_blades": "Broken blades",
+        "burnt_tools": "burnt tools",
+        "torn_papers": "Torn papers",
+        "faulty_pens": "faulty pens",
+        "empty_wallets": "Empty wallets",
+        "damaged_books": "damaged books",
+        "wilted_flowers": "Wilted flowers",
+        "scratched_perfume_bottles": "scratched perfume bottles",
+        "rusty_iron": "Rusty iron",
+        "worn_shoes": "worn shoes",
+        "synthetic_stones": "Synthetic stones",
+        "frayed_cords": "frayed cords",
+        "frayed_cloth": "Frayed cloth",
+        "broken_beads": "broken beads"
+      },
+      "omens": {
+        "repeated_authority_clashes_before_starting": "Repeated authority clashes before starting",
+        "unsettled_sleep_or_repeated_water_spills": "Unsettled sleep or repeated water spills",
+        "arguments_cuts_or_sparks_before_departure": "Arguments, cuts, or sparks before departure",
+        "misplaced_documents_or_repeated_message_errors": "Misplaced documents or repeated message errors",
+        "broken_promises_from_advisers_or_teachers": "Broken promises from advisers or teachers",
+        "spoiled_sweets_or_repeated_social_awkwardness": "Spoiled sweets or repeated social awkwardness",
+        "blocked_paths_delays_or_broken_machinery": "Blocked paths, delays, or broken machinery",
+        "confusing_shortcuts_or_sudden_misinformation": "Confusing shortcuts or sudden misinformation",
+        "sudden_detachment_lost_keys_or_repeated_silence": "Sudden detachment, lost keys, or repeated silence"
+      },
+      "intentions": {
+        "sun": "Support confidence, clarity, and constructive visibility.",
+        "moon": "Support emotional steadiness, rest, and receptivity.",
+        "mars": "Support courage, momentum, and decisive action.",
+        "mercury": "Support clear communication, learning, and discernment.",
+        "jupiter": "Support wisdom, learning, and expansive opportunities.",
+        "venus": "Support harmony, creativity, and relationship grace.",
+        "saturn": "Support patience, responsibility, and durable progress.",
+        "rahu": "Support grounded ambition while resisting shortcuts.",
+        "ketu": "Support reflection, discernment, and spiritual focus."
+      },
+      "safetyNote": "Gemstone remedies are traditional spiritual practices, not guarantees. Consult a qualified Vedic astrologer before purchasing or wearing a remedial gemstone.",
+      "domainTitles": {
+        "learning_mentors": "Learning & mentors",
+        "growth_opportunity": "Growth & opportunity",
+        "personal_momentum": "Personal momentum"
+      },
+      "domainFocus": {
+        "learning_mentors": "Deep study, trusted guides, long-range travel, and choices that expand your perspective.",
+        "growth_opportunity": "Generosity, teaching, and taking the wider view when an opening asks for faith and preparation.",
+        "personal_momentum": "The practical choices that make opportunity easier to recognize and act on consistently."
+      },
+      "domainBasis": {
+        "9th_house_lord": "9th-house lord",
+        "jupiter_s_natal_placement": "Jupiter’s natal placement",
+        "yogakaraka_influence": "Yogakaraka influence",
+        "ascendant_lord_influence": "Ascendant-lord influence"
+      }
+    }
   },
   "dasha": {
     "kicker": "VEDIC TIMING SYSTEM",
@@ -417,7 +837,82 @@
     "daysRemaining": "{days} days remaining",
     "periodProgress": "Period Progress",
     "stepBack": "Back",
-    "stepBackTo": "Back to {level}"
+    "stepBackTo": "Back to {level}",
+    "panel": {
+      "level": "Level {level}",
+      "subPeriods": "sub-periods",
+      "deeperSubPeriods": "deeper sub-periods",
+      "durationYears": "{count} years",
+      "durationMonths": "{count} months",
+      "durationDays": "{count} days",
+      "chapterKicker": "Current life chapter",
+      "chainJoin": "to",
+      "meterAria": "Current antardasha progress",
+      "complete": "complete",
+      "stackAria": "Active dasha stack",
+      "detailsLoading": "Timing details loading",
+      "auditKicker": "Calculation audit",
+      "auditHeading": "See the exact inputs behind this timing result",
+      "hideAudit": "Hide audit",
+      "showAudit": "Show audit",
+      "auditNote": "If a dasha result looks off, compare this box with the chart source you expected before changing the interpretation.",
+      "auditEngine": "Engine",
+      "auditBirthTime": "Birth Time Used",
+      "auditCoordinates": "Coordinates",
+      "auditCoordinatesNote": "Latitude and longitude used for this chart",
+      "auditMoon": "Moon Position",
+      "auditMoonValue": "{sign} {degree} deg",
+      "auditSidereal": "Sidereal longitude {degree} deg",
+      "auditNakshatra": "Nakshatra Seed",
+      "auditPada": "Pada {pada}",
+      "auditIntoNakshatra": "{degree} deg into the nakshatra",
+      "auditCompleteAtBirth": "{percent}% complete at birth",
+      "auditSeed": "Birth Dasha Seed",
+      "auditSeedLord": "{planet} Mahadasha",
+      "auditElapsed": "Elapsed at birth: {elapsed} / {total} years",
+      "auditRemaining": "Remaining at birth: {remaining} years",
+      "auditWindow": "Window: {start} to {end} local",
+      "auditTimingCheck": "Timing Check",
+      "auditTimingNote": "When the current period was looked up, on your clock",
+      "dashaLabel": "Dasha",
+      "timelineTitle": "Vimshottari Dasha Timeline",
+      "timelineHint": "Click a dasha to open Antardasha, then keep selecting branches for Pratyantar, Sookshma, and Prana timing.",
+      "viewsAria": "Dasha timeline views",
+      "viewTimeline": "Timeline",
+      "viewLens": "Lens",
+      "viewTable": "Table",
+      "combined": "Combined Influence",
+      "readingChain": "Reading this chain…",
+      "barTitle": "{planet}: {years} years ({start} – {end})",
+      "today": "Today",
+      "activeMaha": "Active Maha Dasha",
+      "lensSub": "{planet} sub-period lens",
+      "lensMaha": "Maha Dasha chapter lens",
+      "openBranch": "Open next branch",
+      "tableSub": "Sub-periods inside {planet}",
+      "tableMaha": "Full Maha Dasha sequence",
+      "colTheme": "Theme",
+      "colStart": "Start",
+      "colEnd": "End",
+      "colDuration": "Duration",
+      "colStatus": "Status",
+      "upcomingOrPast": "Upcoming / past",
+      "close": "Close",
+      "placement": "{planet} in {sign} (House {house})",
+      "themes": {
+        "sun": "Authority & Self-Expression",
+        "moon": "Emotions & Public Life",
+        "mars": "Energy & Courage",
+        "mercury": "Intellect & Communication",
+        "jupiter": "Wisdom & Expansion",
+        "venus": "Love & Luxury",
+        "saturn": "Discipline & Karma",
+        "rahu": "Ambition & Transformation",
+        "ketu": "Spirituality & Detachment"
+      },
+      "themeActive": "Active timing influence",
+      "themeSubPeriod": "Sub-period influence"
+    }
   },
   "transits": {
     "kicker": "CURRENT SKY",
@@ -425,7 +920,9 @@
     "computedAt": "Computed at",
     "positions": "Current Positions",
     "aspects": "Active Transit Aspects",
-    "noAspects": "No active transit aspects."
+    "noAspects": "No active transit aspects.",
+    "aspectsAria": "Transit aspects to natal planets",
+    "aspectLine": "<strong>{transit}</strong> {aspect} natal <strong>{natal}</strong>"
   },
   "navamsa": {
     "kicker": "DIVISIONAL CHART",
@@ -440,14 +937,28 @@
     "vargottamaCount": "{count} Vargottama planet(s)",
     "vargottamaCountZero": "No Vargottama planets in your chart",
     "vargottamaExplanation": "Vargottama planets carry their significations with clarity and consistency across both material and spiritual dimensions.",
-    "clickHint": "Click any planet row to see detailed Navamsa interpretation"
+    "clickHint": "Click any planet row to see detailed Navamsa interpretation",
+    "tableAria": "Navamsa planetary positions",
+    "vargottamaLabel": "Vargottama",
+    "signLabel": "Navamsa {sign}",
+    "legendAria": "Dignity colour legend",
+    "dignities": {
+      "exalted": "Exalted",
+      "own": "Own Sign",
+      "moolatrikona": "Moolatrikona",
+      "friend": "Friend Sign",
+      "neutral": "Neutral",
+      "enemy": "Enemy Sign",
+      "debilitated": "Debilitated"
+    }
   },
   "aspects": {
     "kicker": "PLANETARY RELATIONSHIPS",
     "heading": "Aspect Analysis",
     "vedicDrishti": "Vedic Drishti",
     "applying": "Applying",
-    "separating": "Separating"
+    "separating": "Separating",
+    "listAria": "Planetary aspects"
   },
   "compatibility": {
     "kicker": "Synastry Analysis",
@@ -521,7 +1032,8 @@
   },
   "bottomNav": {
     "home": "Home",
-    "insights": "Insights"
+    "insights": "Insights",
+    "aria": "Mobile navigation"
   },
   "errorBoundary": {
     "heading": "Something went wrong",
@@ -594,7 +1106,14 @@
     "fields": "{filled}/{total} fields",
     "nearlyFormed": "Chart atmosphere is nearly formed",
     "addDetails": "Add details to wake the chart",
-    "readyPercent": "{percent}% ready"
+    "readyPercent": "{percent}% ready",
+    "markers": {
+      "sun": "SUN",
+      "moon": "MOON",
+      "ascendant": "ASC",
+      "midheaven": "MC",
+      "houses": "HOUSES"
+    }
   },
   "zodiacSigns": {
     "aries": "Aries",
@@ -646,7 +1165,40 @@
     "error_exchange_failed": "Google couldn’t complete the sign-in. Try again.",
     "error_email_unverified": "Google hasn’t verified the email on that account, so it can’t be used to sign in.",
     "error_signin_failed": "Something went wrong finishing sign-in. Try again.",
-    "error_unknown": "Sign-in didn’t finish. Try again."
+    "error_unknown": "Sign-in didn’t finish. Try again.",
+    "facts": {
+      "aries1": "The first sign · ruled by Mars, it carries the spark of new beginnings and the courage to step into the unknown.",
+      "aries2": "In Vedic lore the Sun is exalted in Mesha · the spring equinox once anchored the year's true beginning here.",
+      "taurus1": "Venus's earthy domain · patient, sensual, and steadfast as the bull that guards the field.",
+      "taurus2": "The Pleiades sit on Taurus' shoulder · Vedic seers call these seven sisters Krittika, the flame nymphs.",
+      "gemini1": "Castor is not one star but six · a sextuple system bound by gravity, masquerading as a single point of light.",
+      "gemini2": "Mercury's airy twins · the messenger sign of curiosity, language, and the threshold between worlds.",
+      "cancer1": "The Moon's own house · Vedic tradition names it Karka, the keeper of memory, lineage, and the inner tide.",
+      "cancer2": "At its heart lies the Beehive Cluster, M44 · a swarm of nearly a thousand stars Galileo first resolved in 1609.",
+      "leo1": "Regulus, the Little King, sits almost exactly on the ecliptic · the Sun crosses it directly each August.",
+      "leo2": "In Vedic tradition Simha is the Sun's own house · royalty, gold, and the spine all answer to its rulership.",
+      "virgo1": "The second-largest constellation in the sky · Virgo sprawls across 1,294 square degrees of celestial real estate.",
+      "virgo2": "Mercury is exalted here · in Vedic lore Kanya holds the discernment that turns raw experience into wisdom.",
+      "libra1": "The only zodiac sign represented by an object · once these scales were the claws of the neighboring scorpion.",
+      "libra2": "Saturn is exalted in Tula · the cosmic measure that weighs every action against its quiet counterweight.",
+      "scorpio1": "Antares, the scorpion's heart, is so vast it would swallow Mars' orbit if dropped where our Sun now stands.",
+      "scorpio2": "Vedic astrology calls this sign Vrishchika · tied to Ketu, the south lunar node and keeper of buried karmic threads.",
+      "sagittarius1": "Sagittarius points straight at the galactic core · the supermassive black hole Sgr A* lies inside its boundary.",
+      "sagittarius2": "Jupiter's fiery domain · in Vedic lore Dhanu is the archer of dharma, aiming the soul toward higher meaning.",
+      "capricorn1": "The sea-goat is one of the oldest mythic figures · drawn by the Sumerians more than four thousand years ago.",
+      "capricorn2": "Saturn rules here · Makara is the slow climb from the ocean's depths toward the disciplined summit of the world.",
+      "aquarius1": "The Aquarid meteor shower each May is debris from Halley's Comet · last seen in 1986 and not due back until 2061.",
+      "aquarius2": "Aquarius hosts the Helix Nebula, 650 light-years away · often called the Eye of God, gazing back from the dark.",
+      "pisces1": "Two fish swimming in opposite directions · the soul's final dissolve before rebirth into a fresh zodiac round.",
+      "pisces2": "Vedic astrology calls Pisces Meena · Jupiter's own sign and Venus's exaltation, the ocean where wisdom finally rests."
+    },
+    "sky": {
+      "moonIn": "Moon in {sign}",
+      "mercuryDirect": "Mercury direct",
+      "mercuryRetrograde": "Mercury retrograde",
+      "aligned": "Skies aligned · New beginnings",
+      "sunClear": "Sun in {sign} · Skies clear"
+    }
   },
   "chartSync": {
     "kicker": "Saving your chart",
@@ -730,5 +1282,26 @@
       "noteOne": "{planet} sits in this part of the chart.",
       "noteMany": "{planets} concentrate in this part of the chart."
     }
+  },
+  "lifeDomains": {
+    "names": {
+      "love_life": "Love Life",
+      "career": "Career",
+      "family": "Family",
+      "inheritance": "Inheritance",
+      "influence": "Influence",
+      "life_cycle": "Life Cycle",
+      "travel_destinations": "Travel & Destinations"
+    },
+    "activity": {
+      "developing": "developing activity",
+      "active": "active activity",
+      "prominent": "prominent activity"
+    }
+  },
+  "planetOrb": {
+    "orb": "{planet} orb",
+    "activeDasha": "active dasha planet",
+    "strength": "{percent}% strength"
   }
 }

@@ -1,0 +1,96 @@
+{
+  "advanced": {
+    "gate": {
+      "kicker": "Members only",
+      "heading": "The advanced reading needs an account",
+      "lead": "This section writes a full reading of your chart -- the timing, the aspects, the harmonics and the strengths -- and keeps every table behind it. It is the most expensive thing the app does, so it is kept for people who have signed in.",
+      "signIn": "Sign in to continue"
+    },
+    "header": {
+      "backToInsights": "Back to Insights",
+      "breadcrumbAria": "Reading location",
+      "yourReading": "Your reading",
+      "advanced": "Advanced",
+      "kicker": "Deep Dive Tools",
+      "focusKicker": "Focused workspace",
+      "title": "Advanced & Palm Analysis",
+      "lead": "Nakshatra cycles, Dasha timing, Navamsa refinements, divisional charts, planetary yogas, transit overlays, Ashtakavarga scores, Shadbala strength, and palm reading — all in one dedicated space.",
+      "moreKicker": "More to explore",
+      "moreTitle": "Other advanced tools",
+      "workspaceAria": "{name} workspace"
+    },
+    "focus": {
+      "transits": {
+        "breadcrumb": "Current transits",
+        "status": "Live chart overlay",
+        "description": "The current sky is shown against your natal chart, so the active themes stay front and centre."
+      },
+      "palm": {
+        "breadcrumb": "Chart + palm synthesis",
+        "status": "A palm photo is needed",
+        "description": "Upload a clear palm photo to bring its patterns together with the context from your birth chart."
+      }
+    },
+    "locked": {
+      "dasha": {
+        "title": "Nakshatra and Dasha timing",
+        "description": "Unlock lunar mansion analysis, current dasha sequencing, and timing-sensitive drill-downs."
+      },
+      "aspects": {
+        "title": "Planetary aspect matrix",
+        "description": "See the strongest harmonious and friction-heavy contacts in the natal chart, ranked by orb."
+      },
+      "navamsa": {
+        "title": "Navamsa D9 refinement",
+        "description": "Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
+      },
+      "divisional": {
+        "title": "Divisional Varga Charts",
+        "description": "Unlock the complete supported divisional atlas for natal foundations, wealth, relationships, career, ancestry, resilience, and more."
+      },
+      "transits": {
+        "title": "Live transits",
+        "description": "Track the current sky against the natal chart to understand active triggers and near-term windows."
+      },
+      "ashtakavarga": {
+        "title": "Ashtakavarga scoring",
+        "description": "Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
+      }
+    },
+    "story": {
+      "writing": "Writing your reading",
+      "secondRun": "Taking a second run at it…",
+      "secondsLeftOne": "About {count} second left",
+      "secondsLeftOther": "About {count} seconds left",
+      "almost": "Almost there…",
+      "tablesMeanwhile": "Every table is one click away below in the meantime.",
+      "readingChart": "Reading your chart…",
+      "sessionEnded": "Your session ended.",
+      "signInAgain": "Sign in again",
+      "sessionEndedTail": "to rewrite this reading. Every table is still here, below.",
+      "limit": "You have used today's readings. Every table is still here, below.",
+      "unavailable": "The reading could not be written just now.",
+      "writingSection": "Writing this section…",
+      "show": {
+        "timing": "Show the timing detail",
+        "aspects": "Show the aspect table",
+        "navamsa": "Show the navamsa chart",
+        "divisional": "Show the divisional charts",
+        "strength": "Show the strength table",
+        "yogas": "Show the yoga list",
+        "transits": "Show the transit detail",
+        "ashtakavarga": "Show the point tables"
+      },
+      "hide": {
+        "timing": "Hide the timing detail",
+        "aspects": "Hide the aspect table",
+        "navamsa": "Hide the navamsa chart",
+        "divisional": "Hide the divisional charts",
+        "strength": "Hide the strength table",
+        "yogas": "Hide the yoga list",
+        "transits": "Hide the transit detail",
+        "ashtakavarga": "Hide the point tables"
+      }
+    }
+  }
+}

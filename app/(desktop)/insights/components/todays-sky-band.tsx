@@ -1,7 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import PlanetOrb, { type PlanetName } from "@/app/components/PlanetOrb";
 import type { ChartApiResponse } from "@/lib/astro-types";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
+import { planetName, signName } from "@/lib/chart-labels";
 import styles from "../insights.module.css";
 
 /*
@@ -34,25 +37,28 @@ function isOrbPlanet(name: string): name is PlanetName {
   return ORB_PLANETS.has(name);
 }
 
-/*
- * Explicit en-US rather than the runtime locale.
- *
- * `Intl.DateTimeFormat(undefined, ...)` resolves differently in Node and in the
- * browser, and this string is rendered on both sides -- which is a hydration
- * mismatch, and React discards the tree rather than patching it.
- */
-const SKY_DATE = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
 export type TodaysSkyBandProps = {
   transits: ChartApiResponse["transits"];
 };
 
 export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
+  const { t, language } = useTranslation();
+  /*
+   * In the interface language, through LOCALE_TAGS rather than the runtime
+   * locale: `Intl.DateTimeFormat(undefined, ...)` resolves differently in Node
+   * and in the browser, and this string is rendered on both sides -- a
+   * hydration mismatch, and React discards the tree rather than patching it.
+   */
+  const skyDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat(LOCALE_TAGS[language], {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        timeZone: "UTC",
+      }),
+    [language]
+  );
   const positions = (transits?.positions ?? []).filter((position) =>
     isOrbPlanet(position.name)
   );
@@ -62,7 +68,7 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
   if (positions.length === 0) return null;
 
   const asOf = transits?.computed_at_utc
-    ? SKY_DATE.format(new Date(transits.computed_at_utc))
+    ? skyDate.format(new Date(transits.computed_at_utc))
     : null;
 
   return (
@@ -71,9 +77,9 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
       aria-labelledby="todays-sky-heading"
     >
       <div className={styles.skyLabel}>
-        <p className={styles.heroPlanetKicker}>Today&apos;s sky</p>
+        <p className={styles.heroPlanetKicker}>{t("insights.sky.kicker")}</p>
         <h2 id="todays-sky-heading" className={styles.heroPlanetTitle}>
-          {asOf ?? "Right now"}
+          {asOf ?? t("insights.sky.now")}
         </h2>
       </div>
 
@@ -89,10 +95,15 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
                      straight from sm (24) to md (36), and +50% overshoots a
                      strip that is meant to be a quiet reference. */
                   className={styles.skyOrb}
-                  ariaLabel={`${position.name} in ${position.sign}`}
+                  ariaLabel={t("insights.sky.planetIn", {
+                    planet: planetName(position.name, t),
+                    sign: signName(position.sign, t),
+                  })}
                 />
-                <span className={styles.skyPlanetName}>{position.name}</span>
-                <span className={styles.skyPlanetSign}>in {position.sign}</span>
+                <span className={styles.skyPlanetName}>{planetName(position.name, t)}</span>
+                <span className={styles.skyPlanetSign}>
+                  {t("insights.sky.inSign", { sign: signName(position.sign, t) })}
+                </span>
               </li>
             ))}
           </ul>
@@ -100,8 +111,8 @@ export default function TodaysSkyBand({ transits }: TodaysSkyBandProps) {
       </div>
 
       <p className={styles.skyNote}>
-        Where the planets are today,
-        <span>not where they were at your birth.</span>
+        {t("insights.sky.noteLead")}
+        <span>{t("insights.sky.noteTail")}</span>
       </p>
     </section>
   );

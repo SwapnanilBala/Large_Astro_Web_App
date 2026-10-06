@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslation } from "@/lib/i18n-context";
+import { dailySkyLine, type DailySky } from "@/lib/daily-sky-line";
 import { useAccount } from "@/lib/use-account";
 import { useGoogleSignIn } from "@/lib/use-google-signin";
 import { resolveLandingDestination } from "@/lib/landing-redirect";
@@ -21,7 +22,7 @@ import styles from "./login.module.css";
 
 type Props = {
   returnTo?: string;
-  skyLine?: string;
+  sky?: DailySky;
   /** False when the server has no Google credentials configured. */
   googleEnabled?: boolean;
   /** Error code the OAuth callback bounced back with, if any. */
@@ -86,7 +87,7 @@ const ICON = {
 
 export default function MobileLogin({
   returnTo,
-  skyLine,
+  sky,
   googleEnabled = false,
   signInError,
 }: Props) {
@@ -139,7 +140,7 @@ export default function MobileLogin({
 
         <div className={styles.mainLayout}>
           <section className={styles.hero} aria-labelledby="mobile-account-heading">
-            {skyLine && <span className={styles.sky}>{skyLine}</span>}
+            {sky && <span className={styles.sky}>{dailySkyLine(sky, t)}</span>}
             <p className={styles.eyebrow}>{t("account.kicker")}</p>
             <h1 id="mobile-account-heading" className={styles.heading}>
               {signedIn ? t("account.headingSignedIn") : t("account.heading")}

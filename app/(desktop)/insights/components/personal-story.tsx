@@ -14,6 +14,7 @@ import {
   parseStoryProse,
 } from "@/lib/story-prose";
 import { useHydrated } from "@/lib/use-hydrated";
+import { useTranslation } from "@/lib/i18n-context";
 import styles from "./personal-story.module.css";
 
 export type PersonalStoryProps = {
@@ -42,14 +43,14 @@ type GenerationStage =
  * reports.
  */
 const STAGES = [
-  { id: "calculating", label: "Completing the calculation" },
-  { id: "verifying", label: "Cross-checking the chart" },
-  { id: "writing", label: "Writing your reading" },
-  { id: "typesetting", label: "Typesetting the PDF" },
-] as const satisfies ReadonlyArray<{ id: Exclude<GenerationStage, "idle" | "error">; label: string }>;
+  { id: "calculating", labelKey: "insights.story.stages.calculating" },
+  { id: "verifying", labelKey: "insights.story.stages.verifying" },
+  { id: "writing", labelKey: "insights.story.stages.writing" },
+  { id: "typesetting", labelKey: "insights.story.stages.typesetting" },
+] as const satisfies ReadonlyArray<{ id: Exclude<GenerationStage, "idle" | "error">; labelKey: string }>;
 
-const STAGE_LABELS = Object.fromEntries(
-  STAGES.map((stage) => [stage.id, `${stage.label}...`]),
+const STAGE_LABEL_KEYS = Object.fromEntries(
+  STAGES.map((stage) => [stage.id, stage.labelKey]),
 ) as Record<Exclude<GenerationStage, "idle" | "error">, string>;
 
 const STAGE_ORDER = STAGES.map((stage) => stage.id) as ReadonlyArray<string>;
@@ -86,6 +87,7 @@ export default function PersonalStory({
   compact = false,
   queryString,
 }: PersonalStoryProps) {
+  const { t } = useTranslation();
   const [stage, setStage] = useState<GenerationStage>("idle");
   /* The dialog is portalled, so it cannot render until there is a document. */
   const mounted = useHydrated();
@@ -179,10 +181,12 @@ export default function PersonalStory({
 
   const generating = stage !== "idle" && stage !== "error";
   const buttonLabel = generating
-    ? STAGE_LABELS[stage as Exclude<GenerationStage, "idle" | "error">]
+    ? t("insights.story.inProgress", {
+        stage: t(STAGE_LABEL_KEYS[stage as Exclude<GenerationStage, "idle" | "error">]),
+      })
     : compact
-      ? "Download reading"
-      : "Download PDF";
+      ? t("insights.story.downloadReading")
+      : t("insights.story.downloadPdf");
 
   /*
    * The dialog, not a second button label.
@@ -213,12 +217,10 @@ export default function PersonalStory({
           <Sparkles size={20} />
         </span>
         <h2 id="story-dialog-title" className={styles.dialogTitle}>
-          Your PDF is being written
+          {t("insights.story.dialogTitle")}
         </h2>
         <p id="story-dialog-lead" className={styles.dialogLead}>
-          Every chapter is being composed against your own placements, to
-          pin-point accuracy. This takes a couple of minutes, and it is worth
-          the wait.
+          {t("insights.story.dialogLead")}
         </p>
 
         <ol className={styles.stageList}>
@@ -234,16 +236,13 @@ export default function PersonalStory({
             return (
               <li key={item.id} className={`${styles.stageRow} ${state}`}>
                 <span className={styles.stageDot} aria-hidden="true" />
-                {item.label}
+                {t(item.labelKey)}
               </li>
             );
           })}
         </ol>
 
-        <p className={styles.dialogNote}>
-          Keep this tab open. The download starts on its own when the report is
-          ready.
-        </p>
+        <p className={styles.dialogNote}>{t("insights.story.dialogNote")}</p>
       </div>
     </div>
   ) : null;
@@ -291,7 +290,7 @@ export default function PersonalStory({
         {downloadAction}
         {stage === "error" && (
           <p className={styles.error} role="alert">
-            The report did not pass generation. Please try again.
+            {t("insights.story.error")}
           </p>
         )}
       </div>
@@ -301,11 +300,10 @@ export default function PersonalStory({
   return (
     <section className={[styles.storyRow, className].filter(Boolean).join(" ")}>
       <div className={styles.copy}>
-        <p className={styles.kicker}>Personal reading</p>
+        <p className={styles.kicker}>{t("insights.story.kicker")}</p>
         <h2 className={styles.title}>{previewStory.title}</h2>
         <p className={styles.subtitle}>
-          {previewStory.chapters.length} verified chapters covering identity,
-          relationships, family, vocation, resources, timing, and grounded action.
+          {t("insights.story.chapters", { count: String(previewStory.chapters.length) })}
         </p>
       </div>
 
@@ -314,7 +312,7 @@ export default function PersonalStory({
         {downloadAction}
         {stage === "error" && (
           <p className={styles.error} role="alert">
-            The report did not pass generation. Please try again.
+            {t("insights.story.error")}
           </p>
         )}
       </div>

@@ -2,6 +2,8 @@
 
 import { memo, useId } from "react";
 import type { CSSProperties, ReactNode } from "react";
+import { useTranslation } from "@/lib/i18n-context";
+import { planetName } from "@/lib/chart-labels";
 import styles from "./PlanetOrb.module.css";
 
 export type PlanetName =
@@ -57,6 +59,7 @@ function PlanetOrb({
   ariaLabel,
   className = "",
 }: PlanetOrbProps) {
+  const { t } = useTranslation();
   const tooltipId = useId();
   const planetClass = PLANET_CLASS_MAP[planet] ?? styles.sun;
   const sizeClass = SIZE_CLASS_MAP[size];
@@ -83,9 +86,9 @@ function PlanetOrb({
   const generatedAriaLabel =
     ariaLabel ??
     [
-      `${planet} orb`,
-      active ? "active dasha planet" : null,
-      strengthPercent !== null ? `${strengthPercent}% strength` : null,
+      t("planetOrb.orb", { planet: planetName(planet, t) }),
+      active ? t("planetOrb.activeDasha") : null,
+      strengthPercent !== null ? t("planetOrb.strength", { percent: String(strengthPercent) }) : null,
     ]
       .filter(Boolean)
       .join(", ");
@@ -110,7 +113,7 @@ function PlanetOrb({
   return (
     <span className={styles.wrapper}>
       {orbEl}
-      {showLabel ? <span className={styles.label}>{planet}</span> : null}
+      {showLabel ? <span className={styles.label}>{planetName(planet, t)}</span> : null}
       {hasTooltip ? (
         <span id={tooltipId} role="tooltip" className={styles.tooltip}>
           {tooltip}

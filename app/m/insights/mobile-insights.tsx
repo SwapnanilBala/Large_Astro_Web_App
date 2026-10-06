@@ -17,6 +17,7 @@ import {
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
 import { nakshatraName, planetAbbreviation, planetName, signName } from "@/lib/chart-labels";
+import Emphasise from "@/app/components/Emphasise";
 import MobileRasiChart, { bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
 import styles from "./insights.module.css";
@@ -80,36 +81,6 @@ function periodProgress(start: string, end: string, asOf: number): number | null
    subcomponent calling the hook again: RuleCard renders once per finding, and
    the hook flattens the catalog per mount. */
 type Translate = (key: string, params?: Record<string, string>) => string;
-
-/* Only these two tags, matched literally. */
-const EMPHASIS = /<(b|strong)>([\s\S]*?)<\/\1>/g;
-
-/**
- * Renders a catalog string whose emphasis is marked up inside the string.
- *
- * The alternative is cutting the sentence at every tag boundary, which hands a
- * translator " and " as a key of its own and pins the word order to English --
- * the house-group legend below would arrive as twelve fragments. Keeping the
- * markup in the string keeps it one sentence, and a language that emphasises a
- * different word can move the tags.
- *
- * Real elements, not innerHTML: the tag set is fixed and the text between the
- * tags is only ever inserted as a child, so a translation cannot bring markup
- * of its own along.
- */
-function Emphasise({ text }: { text: string }) {
-  const parts: React.ReactNode[] = [];
-  let cursor = 0;
-  for (const match of text.matchAll(EMPHASIS)) {
-    const at = match.index ?? 0;
-    if (at > cursor) parts.push(text.slice(cursor, at));
-    const Tag = match[1] as "b" | "strong";
-    parts.push(<Tag key={at}>{match[2]}</Tag>);
-    cursor = at + match[0].length;
-  }
-  if (cursor < text.length) parts.push(text.slice(cursor));
-  return <>{parts}</>;
-}
 
 function formatDegree(value: number): string {
   const degrees = Math.floor(value);

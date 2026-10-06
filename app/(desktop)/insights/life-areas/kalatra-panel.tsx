@@ -25,12 +25,23 @@ const POLARITY_MARK: Record<string, string> = {
   context: "·",
 };
 
+/* The engine's five facets, titled by lifeAreas.kalatraFacets.<key>. */
+export const KALATRA_FACET_KEYS = [
+  "physical_intimacy",
+  "privacy_and_rest",
+  "in_laws",
+  "bond_durability",
+  "desire_pattern",
+] as const;
+
 function Facet({ facet, tr }: { facet: KalatraFacet; tr: KalatraPanelProps["tr"] }) {
+  const titleKey = `lifeAreas.kalatraFacets.${facet.key}`;
+  const title = tr(titleKey) === titleKey ? facet.label : tr(titleKey);
   return (
     <article className={styles.kalatraCard}>
       <header className={styles.kalatraCardHead}>
         <div>
-          <strong>{facet.label}</strong>
+          <strong>{title}</strong>
           <small>{tr(`lifeAreas.kalatraBand.${facet.band}`)}</small>
         </div>
         {/* The score is a meter, not a grade: it exists so the five facets can
@@ -40,7 +51,7 @@ function Facet({ facet, tr }: { facet: KalatraFacet; tr: KalatraPanelProps["tr"]
           className={styles.kalatraMeter}
           role="img"
           aria-label={tr("lifeAreas.kalatraMeterLabel", {
-            label: facet.label,
+            label: title,
             score: String(facet.score),
           })}
         >

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
-import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import DetailPageBackLink from "./detail-page-back-link";
 import styles from "./detail-page-shell.module.css";
 
 /*
@@ -9,12 +8,16 @@ import styles from "./detail-page-shell.module.css";
  * Background, back button top and bottom, centred hero. The body is whatever
  * the page is actually for. Server component on purpose: none of this needs
  * state, so a page whose body is static stays static.
+ *
+ * It has no translator for the same reason, so the pages pass their kicker,
+ * title and lead as small client components that read their own keys, and
+ * the back links are one too.
  */
 
 type DetailPageShellProps = {
   /** Where "Back to your reading" goes, anchor included. */
   backHref: string;
-  kicker: string;
+  kicker: ReactNode;
   title: ReactNode;
   lead: ReactNode;
   icon: ReactNode;
@@ -32,10 +35,7 @@ export default function DetailPageShell({
   return (
     <div className={styles.page} /* the desktop layout owns <main> */>
       <div className={styles.shell}>
-        <Link href={backHref} className={styles.backButton}>
-          <FiArrowLeft aria-hidden="true" />
-          Back to your reading
-        </Link>
+        <DetailPageBackLink href={backHref} className={styles.backButton} />
 
         <header className={styles.hero}>
           <div className={styles.heroIcon} aria-hidden="true">
@@ -48,10 +48,7 @@ export default function DetailPageShell({
 
         {children}
 
-        <Link href={backHref} className={styles.backButtonBottom}>
-          <FiArrowLeft aria-hidden="true" />
-          Back to your reading
-        </Link>
+        <DetailPageBackLink href={backHref} className={styles.backButtonBottom} />
       </div>
     </div>
   );

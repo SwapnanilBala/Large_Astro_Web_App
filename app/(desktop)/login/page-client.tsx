@@ -17,6 +17,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/lib/i18n-context";
+import { dailySkyLine, type DailySky } from "@/lib/daily-sky-line";
 import { useAccount } from "@/lib/use-account";
 import { resolveLandingDestination } from "@/lib/landing-redirect";
 import PageTransition from "@/app/components/PageTransition";
@@ -29,7 +30,7 @@ import styles from "./login.module.css";
 
 type LoginPageClientProps = {
   returnTo?: string;
-  skyLine?: string;
+  sky?: DailySky;
   /** False when the server has no Google credentials configured. */
   googleEnabled?: boolean;
   /** Error code the OAuth callback bounced back with, if any. */
@@ -38,7 +39,7 @@ type LoginPageClientProps = {
 
 export default function LoginPageClient({
   returnTo,
-  skyLine,
+  sky,
   googleEnabled = false,
   signInError,
 }: LoginPageClientProps) {
@@ -109,7 +110,7 @@ export default function LoginPageClient({
         <section className={`${styles.panel} ${settling ? styles.panelSettling : ""}`}>
           {settling && <span className={styles.shimmerSweep} aria-hidden="true" />}
           <div className={styles.header}>
-            {skyLine && <p className={styles.skyLine}>✦ {skyLine} ✦</p>}
+            {sky && <p className={styles.skyLine}>✦ {dailySkyLine(sky, t)} ✦</p>}
             <p className="kicker">{t("account.kicker")}</p>
             <h1 className={styles.heading}>
               {shaped(t("account.heading"), t("account.headingSignedIn"))}

@@ -5,6 +5,7 @@ import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-she
 import MajorShiftsPanel from "@/app/(desktop)/insights/components/major-shifts-panel";
 import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBoundary";
 import LifeShiftsNotice from "./life-shifts-notice";
+import LifeAreasText from "../life-areas/life-areas-text";
 import {
   chartParamsToQuery,
   getChartPayload,
@@ -67,9 +68,9 @@ export default async function LifeShiftsPage({ searchParams }: LifeShiftsPagePro
     <PageTransition>
       <DetailPageShell
         backHref={`/insights?${historyQs}#life-shifts`}
-        kicker="Major life shifts"
-        title={`${payload.client.name}'s life chapters`}
-        lead="Every chapter this chart marks out — the one running now, what follows it, and the ones already behind you. Dates are planning windows, not deadlines."
+        kicker={<LifeAreasText k="lifeAreas.lifeShifts.heroKicker" />}
+        title={<LifeAreasText k="lifeAreas.lifeShifts.heroTitle" name={payload.client.name} />}
+        lead={<LifeAreasText k="lifeAreas.lifeShifts.heroLead" />}
         icon={<FiTrendingUp />}
       >
         <PanelErrorBoundary panelName="Major Life Shifts">

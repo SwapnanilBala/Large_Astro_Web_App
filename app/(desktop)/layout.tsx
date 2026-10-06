@@ -6,6 +6,7 @@ import Navbar from "@/app/components/Navbar";
 import BottomNav from "@/app/components/BottomNav";
 import FreeUsagePrompt from "@/app/components/FreeUsagePrompt";
 import ViewportScaler from "@/app/components/ViewportScaler";
+import SkipToContent from "@/app/components/SkipToContent";
 import { ToastProvider } from "@/lib/toast-context";
 import DesktopLanguageProvider from "@/lib/i18n-desktop";
 import { chartHistoryKey } from "@/lib/chart-history-store";
@@ -121,12 +122,10 @@ export default function DesktopLayout({
   return (
     <div className={`${cinzel.variable} ${newsreader.variable}`}>
       <script dangerouslySetInnerHTML={{ __html: NAVBAR_MARKS }} />
-      <a href="#main-content" className="skip-nav">
-        Skip to main content
-      </a>
       <ViewportScaler />
       <GradientBlobs />
       <DesktopLanguageProvider>
+        <SkipToContent />
         <ToastProvider>
           <Navbar />
           <main id="main-content" tabIndex={-1}>

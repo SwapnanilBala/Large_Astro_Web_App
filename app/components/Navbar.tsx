@@ -254,7 +254,7 @@ export default function Navbar() {
             className="navbar-hamburger"
             onClick={openDrawer}
             type="button"
-            aria-label={drawerOpen ? "Close navigation menu" : "Open navigation menu"}
+            aria-label={drawerOpen ? t("navbar.closeMenu") : t("navbar.openMenu")}
             aria-expanded={drawerOpen}
             aria-controls="mobile-navigation-drawer"
           >
@@ -292,7 +292,7 @@ export default function Navbar() {
             className="drawer-close-btn"
             onClick={closeDrawer}
             type="button"
-            aria-label="Close navigation menu"
+            aria-label={t("navbar.closeMenu")}
           >
             {"\u2715"}
           </button>

@@ -13,9 +13,10 @@ import styles from "../insights.module.css";
 import advStyles from "./advanced.module.css";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { parseBirthSex } from "@/lib/birth-sex";
-import { useTranslation } from "@/lib/i18n-context";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import advancedMessages from "@/messages/en.advanced.json";
 import { readerFromBirthSex, type PalmReader } from "@/lib/palm-readings/reader";
-import type { AdvancedFocusView } from "./advanced-views";
+import { LOCKED_PREVIEWS, type AdvancedFocusView } from "./advanced-views";
 import {
   StoryOpening,
   StoryProgress,
@@ -196,19 +197,17 @@ const PalmReadingPanel = dynamic(() => import("../components/palm-reading-panel"
 const ShadbalaPanel = dynamic(() => import("../components/shadbala-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 const YogasPanel = dynamic(() => import("../components/yogas-panel"), { ssr: false, loading: () => <PanelSkeleton /> });
 
+type Translate = (key: string, params?: Record<string, string>) => string;
+
 /* ─── Locked Feature Preview ─── */
-function LockedFeaturePreview({
-  title,
-  description,
-}: {
-  title: string;
-  description: string;
-}) {
+/* What stands in for a module whose data this chart does not have. */
+function LockedFeaturePreview({ module }: { module: (typeof LOCKED_PREVIEWS)[number] }) {
+  const tr = useRouteMessages(advancedMessages);
   return (
     <div className={styles.lockedPreview}>
       <div className={styles.lockedIcon}>&#128274;</div>
-      <h3>{title}</h3>
-      <p>{description}</p>
+      <h3>{tr(`advanced.locked.${module}.title`)}</h3>
+      <p>{tr(`advanced.locked.${module}.description`)}</p>
     </div>
   );
 }
@@ -289,20 +288,15 @@ type FocusWorkspaceCopy = {
   description: string;
 };
 
-const FOCUS_WORKSPACE_COPY: Record<AdvancedFocusView, FocusWorkspaceCopy> = {
-  transits: {
-    breadcrumb: "Current transits",
-    status: "Live chart overlay",
-    description:
-      "The current sky is shown against your natal chart, so the active themes stay front and centre.",
-  },
-  palm: {
-    breadcrumb: "Chart + palm synthesis",
-    status: "A palm photo is needed",
-    description:
-      "Upload a clear palm photo to bring its patterns together with the context from your birth chart.",
-  },
-};
+/* Each focused view's breadcrumb, status line and standfirst, by key:
+   advanced.focus.<view>.*, in the route catalog. */
+function focusWorkspaceCopy(view: AdvancedFocusView, tr: Translate): FocusWorkspaceCopy {
+  return {
+    breadcrumb: tr(`advanced.focus.${view}.breadcrumb`),
+    status: tr(`advanced.focus.${view}.status`),
+    description: tr(`advanced.focus.${view}.description`),
+  };
+}
 
 function LiveTransitsModule({
   payload,
@@ -317,10 +311,7 @@ function LiveTransitsModule({
           {payload.transits ? (
             <TransitsPanel transits={payload.transits} />
           ) : (
-            <LockedFeaturePreview
-              title="Live transits"
-              description="Track the current sky against the natal chart to understand active triggers and near-term windows."
-            />
+            <LockedFeaturePreview module="transits" />
           )}
       </PanelErrorBoundary>
     </LazyPanel>
@@ -356,13 +347,14 @@ function FocusWorkspace({
   jyotishContext: JyotishContext | undefined;
   palmReader: PalmReader;
 }) {
-  const copy = FOCUS_WORKSPACE_COPY[focusView];
+  const tr = useRouteMessages(advancedMessages);
+  const copy = focusWorkspaceCopy(focusView, tr);
 
   return (
     <section
       id={`${focusView}-workspace`}
       className={advStyles.focusWorkspace}
-      aria-label={`${copy.breadcrumb} workspace`}
+      aria-label={tr("advanced.header.workspaceAria", { name: copy.breadcrumb })}
     >
       <div className={advStyles.focusWorkspaceHeader}>
         <span className={advStyles.focusStatus}>{copy.status}</span>
@@ -402,6 +394,7 @@ export default function AdvancedContent({
   focusView,
 }: AdvancedContentProps) {
   const { t } = useTranslation();
+  const tr = useRouteMessages(advancedMessages);
   const shouldReduceMotion = useReducedMotion();
   /* One request writes every passage on this page; see the route for why it
      cannot be one per module. */
@@ -414,7 +407,7 @@ export default function AdvancedContent({
   const returnToReadingHref = focusView
     ? `${insightsHref}#continue-reading`
     : insightsHref;
-  const focusCopy = focusView ? FOCUS_WORKSPACE_COPY[focusView] : null;
+  const focusCopy = focusView ? focusWorkspaceCopy(focusView, tr) : null;
 
   return (
     <ParallaxContainer>
@@ -431,20 +424,20 @@ export default function AdvancedContent({
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 22 }}
           >
             {focusCopy ? (
-              <nav className={advStyles.breadcrumb} aria-label="Reading location">
+              <nav className={advStyles.breadcrumb} aria-label={tr("advanced.header.breadcrumbAria")}>
                 <Link href={returnToReadingHref} className={advStyles.breadcrumbBack}>
                   <FiArrowLeft size={16} />
-                  Your reading
+                  {tr("advanced.header.yourReading")}
                 </Link>
                 <span aria-hidden="true">/</span>
-                <span>Advanced</span>
+                <span>{tr("advanced.header.advanced")}</span>
                 <span aria-hidden="true">/</span>
                 <span aria-current="page">{focusCopy.breadcrumb}</span>
               </nav>
             ) : (
               <Link href={returnToReadingHref} className={advStyles.backLink}>
                 <FiArrowLeft size={16} />
-                Back to Insights
+                {tr("advanced.header.backToInsights")}
               </Link>
             )}
           </motion.div>
@@ -457,19 +450,13 @@ export default function AdvancedContent({
             transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 180, damping: 22 }}
           >
             <p className={advStyles.heroKicker}>
-              {focusCopy ? "Focused workspace" : "Deep Dive Tools"}
+              {focusCopy ? tr("advanced.header.focusKicker") : tr("advanced.header.kicker")}
             </p>
             <h1 className={advStyles.heroTitle}>
-              {focusCopy ? focusCopy.breadcrumb : "Advanced & Palm Analysis"}
+              {focusCopy ? focusCopy.breadcrumb : tr("advanced.header.title")}
             </h1>
             <p className={advStyles.heroLead}>
-              {focusCopy ? focusCopy.description : (
-                <>
-              Nakshatra cycles, Dasha timing, Navamsa refinements, divisional charts,
-              planetary yogas, transit overlays, Ashtakavarga scores, Shadbala strength,
-              and palm reading — all in one dedicated space.
-                </>
-              )}
+              {focusCopy ? focusCopy.description : tr("advanced.header.lead")}
             </p>
           </motion.div>
 
@@ -484,8 +471,8 @@ export default function AdvancedContent({
 
           {/* ─── Advanced Modules Grid (Collapsible) ─── */}
           <CollapsibleSection
-            kicker={focusView ? "More to explore" : t("insights.advancedKicker")}
-            title={focusView ? "Other advanced tools" : t("insights.advancedHeading")}
+            kicker={focusView ? tr("advanced.header.moreKicker") : t("insights.advancedKicker")}
+            title={focusView ? tr("advanced.header.moreTitle") : t("insights.advancedHeading")}
             defaultOpen={!focusView}
             className={styles.cardRules}
           >
@@ -501,7 +488,7 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20 }}
               >
-                <StorySection moduleKey="timing" state={storyState} detailLabel="the timing detail">
+                <StorySection moduleKey="timing" state={storyState} detail="timing">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Nakshatra & Dasha">
                         {payload.chart.nakshatra && payload.chart.dasha ? (
@@ -512,10 +499,7 @@ export default function AdvancedContent({
                             planets={payload.chart.planets}
                           />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Nakshatra and Dasha timing"
-                            description="Unlock lunar mansion analysis, current dasha sequencing, and timing-sensitive drill-downs."
-                          />
+                          <LockedFeaturePreview module="dasha" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -530,16 +514,13 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.1 }}
               >
-                <StorySection moduleKey="aspects" state={storyState} detailLabel="the aspect table">
+                <StorySection moduleKey="aspects" state={storyState} detail="aspects">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Planetary Aspects">
                         {payload.chart.aspects && payload.chart.aspects.length > 0 ? (
                           <AspectsPanel aspects={payload.chart.aspects} />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Planetary aspect matrix"
-                            description="See the strongest harmonious and friction-heavy contacts in the natal chart, ranked by orb."
-                          />
+                          <LockedFeaturePreview module="aspects" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -554,16 +535,13 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.15 }}
               >
-                <StorySection moduleKey="navamsa" state={storyState} detailLabel="the navamsa chart">
+                <StorySection moduleKey="navamsa" state={storyState} detail="navamsa">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Navamsa D9 Chart">
                         {payload.chart.navamsa && payload.chart.navamsa.length > 0 ? (
                           <NavamsaChart navamsa={payload.chart.navamsa} />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Navamsa D9 refinement"
-                            description="Open the D9 layer to evaluate maturity patterns, deeper relationship signatures, and inner promise."
-                          />
+                          <LockedFeaturePreview module="navamsa" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -578,16 +556,13 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.18 }}
               >
-                <StorySection moduleKey="divisional" state={storyState} detailLabel="the divisional charts">
+                <StorySection moduleKey="divisional" state={storyState} detail="divisional">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Divisional Charts">
                         {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 ? (
                           <DivisionalChartsPanel divisionalCharts={payload.chart.divisional_charts} />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Divisional Varga Charts"
-                            description="Unlock the complete supported divisional atlas for natal foundations, wealth, relationships, career, ancestry, resilience, and more."
-                          />
+                          <LockedFeaturePreview module="divisional" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -603,7 +578,7 @@ export default function AdvancedContent({
                   viewport={{ once: true, margin: "-60px" }}
                   transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.12 }}
                 >
-                  <StorySection moduleKey="strength" state={storyState} detailLabel="the strength table">
+                  <StorySection moduleKey="strength" state={storyState} detail="strength">
                     <LazyPanel>
                       <PanelErrorBoundary panelName="Shadbala Analysis">
                           <ShadbalaPanel
@@ -626,7 +601,7 @@ export default function AdvancedContent({
                   viewport={{ once: true, margin: "-60px" }}
                   transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.15 }}
                 >
-                  <StorySection state={storyState} detailLabel="the yoga list">
+                  <StorySection state={storyState} detail="yogas">
                     <LazyPanel>
                       <PanelErrorBoundary panelName="Planetary Yogas">
                         <YogasPanel yogas={payload.chart.yogas} />
@@ -646,16 +621,13 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.2 }}
               >
-                <StorySection moduleKey="transits" state={storyState} detailLabel="the transit detail">
+                <StorySection moduleKey="transits" state={storyState} detail="transits">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Live Transits">
                         {payload.transits ? (
                           <TransitsPanel transits={payload.transits} />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Live transits"
-                            description="Track the current sky against the natal chart to understand active triggers and near-term windows."
-                          />
+                          <LockedFeaturePreview module="transits" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -670,7 +642,7 @@ export default function AdvancedContent({
                 viewport={{ once: true, margin: "-60px" }}
                 transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 200, damping: 20, delay: 0.25 }}
               >
-                <StorySection moduleKey="ashtakavarga" state={storyState} detailLabel="the point tables">
+                <StorySection moduleKey="ashtakavarga" state={storyState} detail="ashtakavarga">
                   <LazyPanel>
                     <PanelErrorBoundary panelName="Ashtakavarga">
                         {payload.ashtakavarga ? (
@@ -679,10 +651,7 @@ export default function AdvancedContent({
                             transits={payload.transits}
                           />
                         ) : (
-                          <LockedFeaturePreview
-                            title="Ashtakavarga scoring"
-                            description="Unlock the classical Vedic transit strength system showing bindu distribution across all 12 signs."
-                          />
+                          <LockedFeaturePreview module="ashtakavarga" />
                         )}
                     </PanelErrorBoundary>
                   </LazyPanel>
@@ -716,7 +685,7 @@ export default function AdvancedContent({
           >
             <Link href={returnToReadingHref} className={advStyles.backLink}>
               <FiArrowLeft size={16} />
-              {focusView ? "Back to your reading" : "Back to Insights"}
+              {focusView ? t("insights.backToReading") : tr("advanced.header.backToInsights")}
             </Link>
           </motion.div>
         </section>

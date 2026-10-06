@@ -3,6 +3,7 @@
 import { useState, memo } from "react";
 import type { NavamsaPositionInfo } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { planetName, signName } from "@/lib/chart-labels";
 import { getNavamsaInterpretation } from "./navamsa-interpretations";
 
 type NavamsaChartProps = {
@@ -16,6 +17,7 @@ type NavamsaChartProps = {
  * card, where four of them measured under 2:1. globals.css carries both sets.
  * The glow is derived from the same token so the two cannot drift.
  */
+/* `label` is the English; the chart prints navamsa.dignities.<key>. */
 const DIGNITY_COLORS: Record<string, { color: string; label: string; glow: string }> = {
   exalted:      { color: "var(--dignity-exalted)",      label: "Exalted",       glow: "color-mix(in srgb, var(--dignity-exalted) 40%, transparent)" },
   own:          { color: "var(--dignity-own)",          label: "Own Sign",      glow: "color-mix(in srgb, var(--dignity-own) 30%, transparent)" },
@@ -28,7 +30,7 @@ const DIGNITY_COLORS: Record<string, { color: string; label: string; glow: strin
 
 // Legend entries — only show dignities that need explanation (skip neutral by
 // default; include it so users know the key is complete).
-const DIGNITY_LEGEND_ORDER = [
+export const DIGNITY_LEGEND_ORDER = [
   "exalted",
   "own",
   "moolatrikona",
@@ -53,6 +55,10 @@ const PLANET_GLYPHS: Record<string, string> = {
 
 function NavamsaChart({ navamsa }: NavamsaChartProps) {
   const { t } = useTranslation();
+  const dignityLabel = (key: string) => {
+    const text = t(`navamsa.dignities.${key}`);
+    return text === `navamsa.dignities.${key}` ? (DIGNITY_COLORS[key] ?? DIGNITY_COLORS.neutral).label : text;
+  };
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
 
   const handleToggle = (name: string) => {
@@ -74,7 +80,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
         ).length;
         const vargottamaPlanets = navamsa
           .filter((p) => p.rashi_sign === p.navamsa_sign)
-          .map((p) => p.name);
+          .map((p) => planetName(p.name, t));
 
         return (
           <div className="navamsa-summary-card">
@@ -94,7 +100,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
         );
       })()}
 
-      <div className="navamsa-table" role="table" aria-label="Navamsa planetary positions">
+      <div className="navamsa-table" role="table" aria-label={t("navamsa.tableAria")}>
         <div className="navamsa-row navamsa-row--header" role="row">
           <span role="columnheader">{t("navamsa.planet")}</span>
           <span role="columnheader">{t("navamsa.rashiSign")}</span>
@@ -111,12 +117,15 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
             isVargottama
           );
 
-          const dignityKey = position.dignity ?? "neutral";
-          const dignityInfo = DIGNITY_COLORS[dignityKey] ?? DIGNITY_COLORS.neutral;
+          const dignityKey = position.dignity && DIGNITY_COLORS[position.dignity] ? position.dignity : "neutral";
+          const dignityInfo = DIGNITY_COLORS[dignityKey];
+          const name = planetName(position.name, t);
+          const rashiSign = signName(position.rashi_sign, t);
+          const navamsaSign = signName(position.navamsa_sign, t);
           const glyph = PLANET_GLYPHS[position.name] ?? position.name;
 
           // Tooltip text shown on hover of the planet cell
-          const tooltipText = `${position.name} · ${dignityInfo.label} · ${position.navamsa_sign}`;
+          const tooltipText = `${name} · ${dignityLabel(dignityKey)} · ${navamsaSign}`;
 
           const planetStyle: React.CSSProperties = {
             color: dignityInfo.color,
@@ -155,16 +164,16 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
                     className="navamsa-planet-name"
                     style={planetStyle}
                   >
-                    {position.name}
+                    {name}
                   </span>
                 </span>
 
-                <span className="navamsa-sign" role="cell">{position.rashi_sign}</span>
+                <span className="navamsa-sign" role="cell">{rashiSign}</span>
                 <span className="navamsa-arrow" role="cell" aria-hidden="true">&rarr;</span>
                 <span className="navamsa-sign" role="cell">
-                  {position.navamsa_sign}
+                  {navamsaSign}
                   {isVargottama && (
-                    <small className="navamsa-vargottama-label">Vargottama</small>
+                    <small className="navamsa-vargottama-label">{t("navamsa.vargottamaLabel")}</small>
                   )}
                 </span>
               </div>
@@ -173,7 +182,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
                 <div className="navamsa-insight anim-fade-in">
                   <div className="navamsa-insight-block">
                     <span className="navamsa-insight-label">
-                      {t("navamsa.inNavamsa", { planet: position.name, sign: position.navamsa_sign })}
+                      {t("navamsa.inNavamsa", { planet: name, sign: navamsaSign })}
                     </span>
                     <p className="navamsa-insight-text">
                       {interpretation.planetMeaning}
@@ -181,7 +190,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
                   </div>
                   <div className="navamsa-insight-block">
                     <span className="navamsa-insight-label">
-                      Navamsa {position.navamsa_sign}
+                      {t("navamsa.signLabel", { sign: navamsaSign })}
                     </span>
                     <p className="navamsa-insight-text">
                       {interpretation.signMeaning}
@@ -205,7 +214,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
       </div>
 
       {/* ── Dignity Legend ── */}
-      <div className="navamsa-dignity-legend" aria-label="Dignity colour legend">
+      <div className="navamsa-dignity-legend" aria-label={t("navamsa.legendAria")}>
         {DIGNITY_LEGEND_ORDER.map((key) => {
           const d = DIGNITY_COLORS[key];
           return (
@@ -217,7 +226,7 @@ function NavamsaChart({ navamsa }: NavamsaChartProps) {
               >
                 ●
               </span>
-              {d.label}
+              {dignityLabel(key)}
             </span>
           );
         })}

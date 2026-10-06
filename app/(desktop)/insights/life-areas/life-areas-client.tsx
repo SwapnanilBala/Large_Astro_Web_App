@@ -3,8 +3,13 @@
 import { useMemo, useState } from "react";
 import {
   DOMAIN_ICONS,
-  DOMAIN_READ_COPY,
+  activityBadge,
   buildDomainRules,
+  claimLabel,
+  claimValue,
+  domainName,
+  domainReadCopy,
+  engineWord,
 } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
@@ -74,8 +79,8 @@ export default function LifeAreasClient({
   const classics = useAreaClassics(historyQs, language);
   if (!domain) return null;
 
-  const copy = DOMAIN_READ_COPY[domain.key];
-  const rules = buildDomainRules(domain);
+  const copy = domainReadCopy(domain.key, tr);
+  const rules = buildDomainRules(domain, tr);
   const timingWindows = getLifeDomainTimingWindows(domain, dasha);
 
   return (
@@ -106,7 +111,7 @@ export default function LifeAreasClient({
                     {DOMAIN_ICONS[entry.key]}
                   </span>
                 )}
-                {entry.label}
+                {domainName(entry, tr)}
               </button>
             ))}
           </div>
@@ -115,14 +120,12 @@ export default function LifeAreasClient({
         <article className={styles.domainCard}>
           <div className={styles.domainHeader}>
             <div>
-              <p className={styles.kicker}>{domain.label}</p>
+              <p className={styles.kicker}>{domainName(domain, tr)}</p>
               <h2>{domain.display.headline}</h2>
             </div>
             {domain.signal_profile?.activity_band && (
               <span className={styles.domainSignalBadge}>
-                {tr("lifeAreas.activityBadge", {
-                  band: domain.signal_profile.activity_band,
-                })}
+                {activityBadge(domain.signal_profile.activity_band, tr)}
               </span>
             )}
           </div>
@@ -135,12 +138,18 @@ export default function LifeAreasClient({
             <div className={styles.domainEvidenceVerdict}>
               <div>
                 <span className={styles.domainVerdictLabel}>
-                  {domain.evidence_matrix.confirmation_status.replace("_", " ")}
+                  {engineWord(
+                    `lifeAreas.confirmation.${domain.evidence_matrix.confirmation_status}`,
+                    domain.evidence_matrix.confirmation_status.replace("_", " "),
+                    tr,
+                  )}
                 </span>
                 <strong>
-                  {tr("lifeAreas.conclusionStrength", {
-                    strength: domain.evidence_matrix.conclusion_strength,
-                  })}
+                  {engineWord(
+                    `lifeAreas.conclusion.${domain.evidence_matrix.conclusion_strength}`,
+                    `${domain.evidence_matrix.conclusion_strength} conclusion`,
+                    tr,
+                  )}
                 </strong>
               </div>
               <p>{domain.evidence_matrix.synthesis}</p>
@@ -187,7 +196,9 @@ export default function LifeAreasClient({
                     </span>
                     <div>
                       <strong>{subtheme.label}</strong>
-                      <small>{subtheme.band}</small>
+                      <small>
+                        {engineWord(`lifeAreas.subthemeBands.${subtheme.band}`, subtheme.band, tr)}
+                      </small>
                     </div>
                     <p>{subtheme.summary}</p>
                   </article>
@@ -218,8 +229,8 @@ export default function LifeAreasClient({
 
           <div className={styles.domainTimingWindows}>
             {timingWindows.map((window) => (
-              <section key={window.label}>
-                <h3>{window.label}</h3>
+              <section key={window.id}>
+                <h3>{engineWord(`lifeAreas.timingWindows.${window.id}`, window.label, tr)}</h3>
                 <p>{window.value}</p>
               </section>
             ))}
@@ -289,9 +300,9 @@ export default function LifeAreasClient({
                 <dl className={styles.claims}>
                   {domain.evidence.claims.map((claim) => (
                     <div key={claim.label} className={styles.claim}>
-                      <dt className={styles.claimLabel}>{claim.label}</dt>
+                      <dt className={styles.claimLabel}>{claimLabel(claim.label, tr)}</dt>
                       <dd className={styles.claimValue}>
-                        {claim.value}
+                        {claimValue(claim.value, tr)}
                         {claim.detail && (
                           <span className={styles.claimDetail}>{claim.detail}</span>
                         )}
@@ -313,8 +324,10 @@ export default function LifeAreasClient({
                     {domain.evidence_matrix.entries.map((entry) => (
                       <section key={entry.family}>
                         <div>
-                          <h4>{entry.label}</h4>
-                          <span data-status={entry.status}>{entry.status}</span>
+                          <h4>{engineWord(`lifeAreas.families.${entry.family}`, entry.label, tr)}</h4>
+                          <span data-status={entry.status}>
+                            {engineWord(`lifeAreas.evidenceStatus.${entry.status}`, entry.status, tr)}
+                          </span>
                         </div>
                         <p>{entry.summary}</p>
                       </section>

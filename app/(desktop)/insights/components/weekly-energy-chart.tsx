@@ -30,6 +30,13 @@ const H = 300;
    Bengali -- at the 16-unit size in weekly-energy-panel.module.css. The panel
    draws this chart at 0.75-0.85 of its units, so 16 is about 12-14px. */
 const PAD = { top: 24, right: 124, bottom: 54, left: 44 };
+
+/* The engine's three bands, worded as the chart's own band labels are. */
+const BAND_KEYS: Record<string, string> = {
+  high: "shared.weeklyEnergyBandHigh",
+  balanced: "shared.weeklyEnergyBandBalanced",
+  low: "shared.weeklyEnergyBandLow",
+};
 const PLOT_W = W - PAD.left - PAD.right;
 const PLOT_H = H - PAD.top - PAD.bottom;
 
@@ -63,6 +70,8 @@ export type WeeklyEnergyChartProps = {
   idPrefix: string;
   /** The parent's translator, so this stays hook-free. See the note above. */
   t: (key: string, params?: Record<string, string>) => string;
+  /** The reader's locale, for the weekday and day labels. */
+  locale: string;
 };
 
 function clamp(value: number, min: number, max: number): number {
@@ -90,6 +99,7 @@ export default function WeeklyEnergyChart({
   animate,
   idPrefix,
   t,
+  locale,
 }: WeeklyEnergyChartProps) {
   const titleId = `${idPrefix}-title`;
   const descId = `${idPrefix}-desc`;
@@ -220,7 +230,7 @@ export default function WeeklyEnergyChart({
         <g className={styles.callout} transform={`translate(${peakPoint.x}, ${calloutY})`}>
           <text textAnchor={calloutAnchor} dx={calloutDx} className={styles.calloutDay}>
             {peak.is_significant
-              ? formatDayShort(peak.date)
+              ? formatDayShort(peak.date, locale)
               : t("shared.weeklyEnergySteadyWeek")}
           </text>
           <text
@@ -235,7 +245,7 @@ export default function WeeklyEnergyChart({
 
         <g className={styles.axis} aria-hidden="true">
           {points.map((p) => {
-            const { weekday, day } = formatDayAxis(p.day.date);
+            const { weekday, day } = formatDayAxis(p.day.date, locale);
             return (
               <text key={`axis-${p.day.date}`} x={p.x} y={svgCoord(H - PAD.bottom + 20)} textAnchor="middle">
                 <tspan x={p.x}>{weekday}</tspan>
@@ -263,10 +273,10 @@ export default function WeeklyEnergyChart({
         <tbody>
           {days.map((day) => (
             <tr key={day.date}>
-              <th scope="row">{formatDayAxis(day.date).weekday}</th>
+              <th scope="row">{formatDayAxis(day.date, locale).weekday}</th>
               <td>{day.date}</td>
               <td>{day.score}</td>
-              <td>{day.band}</td>
+              <td>{BAND_KEYS[day.band] ? t(BAND_KEYS[day.band]) : day.band}</td>
             </tr>
           ))}
         </tbody>

@@ -11,10 +11,6 @@ import strengthMessages from "@/messages/en.strength.json";
  * to stay a server component and cannot call useRouteMessages. These are the
  * pieces of it that are only text: the two dead ends, and the hero's title and
  * lead. The page still decides which one renders and supplies the values.
- *
- * The hero's `kicker` is not here. DetailPageShell types that prop as `string`
- * rather than ReactNode, so it cannot take a rendered fragment, and that file
- * is not part of this change.
  */
 
 /** Shown when the URL is missing birth details entirely. */
@@ -69,6 +65,12 @@ export function HouseSupportUnavailableState({
       </Link>
     </section>
   );
+}
+
+/** The hero kicker, passed to DetailPageShell's ReactNode `kicker`. */
+export function HouseSupportHeroKicker() {
+  const tr = useRouteMessages(strengthMessages);
+  return <>{tr("strength.page.heroKicker")}</>;
 }
 
 /** The hero heading, passed to DetailPageShell's ReactNode `title`. */

@@ -4,6 +4,7 @@ import PageTransition from "@/app/components/PageTransition";
 import DetailPageShell from "@/app/(desktop)/insights/components/detail-page-shell";
 import LifeAreasClient from "./life-areas-client";
 import LifeAreasNotice from "./life-areas-notice";
+import LifeAreasText from "./life-areas-text";
 import {
   chartParamsToQuery,
   getChartPayload,
@@ -96,9 +97,9 @@ export default async function LifeAreasPage({ searchParams }: LifeAreasPageProps
     <PageTransition>
       <DetailPageShell
         backHref={`/insights?${historyQs}#ultimate`}
-        kicker="Ultimate Module · Life areas"
-        title={`${payload.client.name}'s life areas in full`}
-        lead="Each area runs its own evidence matrix across natal promise, supporting factors, divisional confirmation, measured strength, house support, combinations, timing, and contradictions."
+        kicker={<LifeAreasText k="lifeAreas.hero.kicker" />}
+        title={<LifeAreasText k="lifeAreas.hero.title" name={payload.client.name} />}
+        lead={<LifeAreasText k="lifeAreas.hero.lead" />}
         icon={<FiCompass />}
       >
         <LifeAreasClient

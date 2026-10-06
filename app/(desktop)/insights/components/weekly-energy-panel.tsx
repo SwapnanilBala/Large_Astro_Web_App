@@ -12,7 +12,7 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useRouteMessages, useTranslation } from "@/lib/i18n-context";
 import sharedMessages from "@/messages/en.shared.json";
 import { addWeeks, currentWeekStart, formatWeekRangeLabel } from "@/lib/format-week";
 import type { WeeklyEnergyResponse } from "@/lib/astro-types";
@@ -47,6 +47,8 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
   /* Resolves both the baseline namespaces this panel reads (quotes.*) and the
      "shared" catalog the chart below needs, which the layout does not ship. */
   const t = useRouteMessages(sharedMessages);
+  const { language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const shouldReduceMotion = useReducedMotion();
 
   const [weekStart, setWeekStart] = useState(() => currentWeekStart());
@@ -165,7 +167,7 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
   const isBusy = loadState === "loading";
   /* The label follows the pager immediately; the chart catches up. Without
      this the header would lag a click behind on a slow request. */
-  const label = formatWeekRangeLabel(weekStart);
+  const label = formatWeekRangeLabel(weekStart, locale);
 
   return (
     <section
@@ -245,7 +247,8 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             bands={data.bands}
             peak={data.peak}
             altText={data.chart_alt_text}
-            weekLabel={data.week.label}
+            weekLabel={formatWeekRangeLabel(data.week.start_date, locale)}
+            locale={locale}
             animate={!shouldReduceMotion}
             idPrefix="weekly-energy"
             t={t}

@@ -20,6 +20,7 @@ import {
   type DivisionalGuideField,
 } from "@/lib/divisional-chart-guide";
 import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import { pointName, signName } from "@/lib/chart-labels";
 import divisionalMessages from "@/messages/en.divisional.json";
 import { useVargaCommentary } from "./use-varga-commentary";
 import styles from "./divisional-charts.module.css";
@@ -155,6 +156,9 @@ export default function DivisionalChartsClient({
      description the engine returned. */
   const guideText = (field: DivisionalGuideField) =>
     tr(divisionalGuideKey(selectedDivision, field));
+  /* A supporting chart's one line: the catalog's theme, else the engine's. */
+  const themeKey = `divisional.panel.themes.d${selectedDivision}`;
+  const themeText = tr(themeKey) === themeKey ? charts[selectedDivision]?.description : tr(themeKey);
   const reliability = reliabilityCopy(tr, birthTimeAccuracy, birthTimeFallback);
   const backHref = `/insights?${historyQs}#divisional-charts`;
 
@@ -270,7 +274,7 @@ export default function DivisionalChartsClient({
                 <p className={styles.kicker}>
                   {guide ? guideText("name") : tr("divisional.atlas.detail.fallbackName")}
                 </p>
-                <h2>{guide ? guideText("focus") : chart.description}</h2>
+                <h2>{guide ? guideText("focus") : themeText}</h2>
               </div>
               {guide && (
                 <Link
@@ -293,7 +297,7 @@ export default function DivisionalChartsClient({
             )}
 
             <p className={styles.detailLead}>
-              {guide ? guideText("summary") : chart.description}
+              {guide ? guideText("summary") : themeText}
             </p>
 
             {/*
@@ -346,9 +350,9 @@ export default function DivisionalChartsClient({
             )}
 
             <div className={styles.snapshotGrid}>
-              <article><span>{tr("divisional.atlas.snapshot.divisionalAscendant")}</span><strong>{ascendant?.divisional_sign ?? "—"}</strong></article>
-              <article><span>{tr("divisional.atlas.snapshot.sun")}</span><strong>{sun?.divisional_sign ?? "—"}</strong></article>
-              <article><span>{tr("divisional.atlas.snapshot.moon")}</span><strong>{moon?.divisional_sign ?? "—"}</strong></article>
+              <article><span>{tr("divisional.atlas.snapshot.divisionalAscendant")}</span><strong>{ascendant ? signName(ascendant.divisional_sign, tr) : "—"}</strong></article>
+              <article><span>{tr("divisional.atlas.snapshot.sun")}</span><strong>{sun ? signName(sun.divisional_sign, tr) : "—"}</strong></article>
+              <article><span>{tr("divisional.atlas.snapshot.moon")}</span><strong>{moon ? signName(moon.divisional_sign, tr) : "—"}</strong></article>
               <article><span>{tr("divisional.atlas.snapshot.repeats")}</span><strong>{repeatedPositions.length}</strong></article>
             </div>
           </section>
@@ -389,11 +393,11 @@ export default function DivisionalChartsClient({
                   >
                     <span className={styles.planet} role="cell">
                       <i aria-hidden="true">{PLANET_GLYPHS[position.name] ?? "•"}</i>
-                      {position.name}
+                      {pointName(position.name, tr)}
                     </span>
-                    <span role="cell">{position.rashi_sign}</span>
+                    <span role="cell">{signName(position.rashi_sign, tr)}</span>
                     <span role="cell">
-                      {position.divisional_sign}
+                      {signName(position.divisional_sign, tr)}
                       {repeats && <small>{tr("divisional.atlas.positions.repeats")}</small>}
                     </span>
                   </div>

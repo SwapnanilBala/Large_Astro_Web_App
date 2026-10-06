@@ -16,10 +16,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./ZodiacFloater.module.css";
+import { useTranslation } from "@/lib/i18n-context";
+import { signName } from "@/lib/chart-labels";
 
 type ZodiacFact = {
   sign: string;
   glyph: string;
+  /* A catalog key (signIn.facts.*): the fact is read in the visitor's language. */
   fact: string;
 };
 
@@ -38,30 +41,30 @@ type SlotState = {
 // 24 facts: 2 per zodiac sign. Sidereal/Vedic flavor where it fits.
 // Each line stays under ~140 chars; sign + U+00B7 middot + fact.
 const FACTS: ReadonlyArray<ZodiacFact> = [
-  { sign: "Aries", glyph: "♈", fact: "The first sign · ruled by Mars, it carries the spark of new beginnings and the courage to step into the unknown." },
-  { sign: "Aries", glyph: "♈", fact: "In Vedic lore the Sun is exalted in Mesha · the spring equinox once anchored the year's true beginning here." },
-  { sign: "Taurus", glyph: "♉", fact: "Venus's earthy domain · patient, sensual, and steadfast as the bull that guards the field." },
-  { sign: "Taurus", glyph: "♉", fact: "The Pleiades sit on Taurus' shoulder · Vedic seers call these seven sisters Krittika, the flame nymphs." },
-  { sign: "Gemini", glyph: "♊", fact: "Castor is not one star but six · a sextuple system bound by gravity, masquerading as a single point of light." },
-  { sign: "Gemini", glyph: "♊", fact: "Mercury's airy twins · the messenger sign of curiosity, language, and the threshold between worlds." },
-  { sign: "Cancer", glyph: "♋", fact: "The Moon's own house · Vedic tradition names it Karka, the keeper of memory, lineage, and the inner tide." },
-  { sign: "Cancer", glyph: "♋", fact: "At its heart lies the Beehive Cluster, M44 · a swarm of nearly a thousand stars Galileo first resolved in 1609." },
-  { sign: "Leo", glyph: "♌", fact: "Regulus, the Little King, sits almost exactly on the ecliptic · the Sun crosses it directly each August." },
-  { sign: "Leo", glyph: "♌", fact: "In Vedic tradition Simha is the Sun's own house · royalty, gold, and the spine all answer to its rulership." },
-  { sign: "Virgo", glyph: "♍", fact: "The second-largest constellation in the sky · Virgo sprawls across 1,294 square degrees of celestial real estate." },
-  { sign: "Virgo", glyph: "♍", fact: "Mercury is exalted here · in Vedic lore Kanya holds the discernment that turns raw experience into wisdom." },
-  { sign: "Libra", glyph: "♎", fact: "The only zodiac sign represented by an object · once these scales were the claws of the neighboring scorpion." },
-  { sign: "Libra", glyph: "♎", fact: "Saturn is exalted in Tula · the cosmic measure that weighs every action against its quiet counterweight." },
-  { sign: "Scorpio", glyph: "♏", fact: "Antares, the scorpion's heart, is so vast it would swallow Mars' orbit if dropped where our Sun now stands." },
-  { sign: "Scorpio", glyph: "♏", fact: "Vedic astrology calls this sign Vrishchika · tied to Ketu, the south lunar node and keeper of buried karmic threads." },
-  { sign: "Sagittarius", glyph: "♐", fact: "Sagittarius points straight at the galactic core · the supermassive black hole Sgr A* lies inside its boundary." },
-  { sign: "Sagittarius", glyph: "♐", fact: "Jupiter's fiery domain · in Vedic lore Dhanu is the archer of dharma, aiming the soul toward higher meaning." },
-  { sign: "Capricorn", glyph: "♑", fact: "The sea-goat is one of the oldest mythic figures · drawn by the Sumerians more than four thousand years ago." },
-  { sign: "Capricorn", glyph: "♑", fact: "Saturn rules here · Makara is the slow climb from the ocean's depths toward the disciplined summit of the world." },
-  { sign: "Aquarius", glyph: "♒", fact: "The Aquarid meteor shower each May is debris from Halley's Comet · last seen in 1986 and not due back until 2061." },
-  { sign: "Aquarius", glyph: "♒", fact: "Aquarius hosts the Helix Nebula, 650 light-years away · often called the Eye of God, gazing back from the dark." },
-  { sign: "Pisces", glyph: "♓", fact: "Two fish swimming in opposite directions · the soul's final dissolve before rebirth into a fresh zodiac round." },
-  { sign: "Pisces", glyph: "♓", fact: "Vedic astrology calls Pisces Meena · Jupiter's deepest exaltation, the ocean where wisdom finally rests." },
+  { sign: "Aries", glyph: "♈", fact: "signIn.facts.aries1" },
+  { sign: "Aries", glyph: "♈", fact: "signIn.facts.aries2" },
+  { sign: "Taurus", glyph: "♉", fact: "signIn.facts.taurus1" },
+  { sign: "Taurus", glyph: "♉", fact: "signIn.facts.taurus2" },
+  { sign: "Gemini", glyph: "♊", fact: "signIn.facts.gemini1" },
+  { sign: "Gemini", glyph: "♊", fact: "signIn.facts.gemini2" },
+  { sign: "Cancer", glyph: "♋", fact: "signIn.facts.cancer1" },
+  { sign: "Cancer", glyph: "♋", fact: "signIn.facts.cancer2" },
+  { sign: "Leo", glyph: "♌", fact: "signIn.facts.leo1" },
+  { sign: "Leo", glyph: "♌", fact: "signIn.facts.leo2" },
+  { sign: "Virgo", glyph: "♍", fact: "signIn.facts.virgo1" },
+  { sign: "Virgo", glyph: "♍", fact: "signIn.facts.virgo2" },
+  { sign: "Libra", glyph: "♎", fact: "signIn.facts.libra1" },
+  { sign: "Libra", glyph: "♎", fact: "signIn.facts.libra2" },
+  { sign: "Scorpio", glyph: "♏", fact: "signIn.facts.scorpio1" },
+  { sign: "Scorpio", glyph: "♏", fact: "signIn.facts.scorpio2" },
+  { sign: "Sagittarius", glyph: "♐", fact: "signIn.facts.sagittarius1" },
+  { sign: "Sagittarius", glyph: "♐", fact: "signIn.facts.sagittarius2" },
+  { sign: "Capricorn", glyph: "♑", fact: "signIn.facts.capricorn1" },
+  { sign: "Capricorn", glyph: "♑", fact: "signIn.facts.capricorn2" },
+  { sign: "Aquarius", glyph: "♒", fact: "signIn.facts.aquarius1" },
+  { sign: "Aquarius", glyph: "♒", fact: "signIn.facts.aquarius2" },
+  { sign: "Pisces", glyph: "♓", fact: "signIn.facts.pisces1" },
+  { sign: "Pisces", glyph: "♓", fact: "signIn.facts.pisces2" },
 ];
 
 const SIDES: ReadonlyArray<Side> = ["left", "right"];
@@ -102,6 +105,7 @@ function prefersReducedMotion(): boolean {
 }
 
 export default function ZodiacFloater() {
+  const { t } = useTranslation();
   // Slots start empty; the effect populates them after mount so SSR output
   // is stable and identical between server and client.
   const [slots, setSlots] = useState<Partial<Record<SlotKey, SlotState>>>({});
@@ -221,9 +225,9 @@ export default function ZodiacFloater() {
               <div key={state.id} className={`${styles.bubble} ${phaseClass(state.phase, side)}`}>
                 <div className={styles.signLine}>
                   <span className={styles.glyph}>{state.fact.glyph}</span>
-                  <span className={styles.signName}>{state.fact.sign}</span>
+                  <span className={styles.signName}>{signName(state.fact.sign, t)}</span>
                 </div>
-                <p className={styles.factText}>{state.fact.fact}</p>
+                <p className={styles.factText}>{t(state.fact.fact)}</p>
               </div>
             </div>
           );

@@ -72,7 +72,8 @@ const SIGN_RULERS: Record<string, string> = {
   Pisces: "Jupiter",
 };
 
-const HOUSE_THEMES: Record<number, string[]> = {
+/* Exported for the catalogs test: the panel words each theme by its slug. */
+export const HOUSE_THEMES: Record<number, string[]> = {
   1: ["Self", "identity", "personal direction"],
   2: ["Finances", "values", "material security"],
   3: ["Communication", "siblings", "short travel"],

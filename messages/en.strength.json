@@ -12,7 +12,8 @@
       "calculationFailed": "Chart calculation failed",
       "backToReading": "Back to your reading",
       "heroTitle": "{name}'s house support in full",
-      "heroLead": "How much support each of the twelve houses holds, what each one is responsible for, and the arithmetic behind both."
+      "heroLead": "How much support each of the twelve houses holds, what each one is responsible for, and the arithmetic behind both.",
+      "heroKicker": "Ashtakavarga · House support"
     },
     "bhavaNames": {
       "1": "Tanu",

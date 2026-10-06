@@ -3,6 +3,8 @@
 import { useState, memo } from "react";
 import type { TransitData } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { aspectName, planetName, pointName, signName } from "@/lib/chart-labels";
+import Emphasise from "@/app/components/Emphasise";
 import { getTransitInterpretation } from "./transit-interpretations";
 
 type TransitsPanelProps = {
@@ -51,8 +53,8 @@ function TransitsPanel({ transits }: TransitsPanelProps) {
           <div className="transits-grid">
             {transits.positions.map((position) => (
               <article key={position.name} className="transit-card">
-                <h4>{position.name}</h4>
-                <p>{position.sign}</p>
+                <h4>{pointName(position.name, t)}</h4>
+                <p>{signName(position.sign, t)}</p>
                 <small>{position.degree_in_sign.toFixed(2)}&deg;</small>
               </article>
             ))}
@@ -61,7 +63,7 @@ function TransitsPanel({ transits }: TransitsPanelProps) {
 
         <div className="transits-col">
           <h3>{t("transits.aspects")}</h3>
-          <div className="transit-aspect-list" role="list" aria-label="Transit aspects to natal planets">
+          <div className="transit-aspect-list" role="list" aria-label={t("transits.aspectsAria")}>
             {tightestAspects.map((aspect, index) => {
               const isExpanded = expandedIndex === index;
               const interpretation = getTransitInterpretation(
@@ -87,9 +89,13 @@ function TransitsPanel({ transits }: TransitsPanelProps) {
                 >
                   <div className="transit-aspect-header">
                     <span className="transit-aspect-text">
-                      <strong>{aspect.transit_planet}</strong>{" "}
-                      {aspect.aspect_type}{" "}
-                      natal <strong>{aspect.natal_planet}</strong>
+                      <Emphasise
+                        text={t("transits.aspectLine", {
+                          transit: planetName(aspect.transit_planet, t),
+                          aspect: aspectName(aspect.aspect_type, t),
+                          natal: planetName(aspect.natal_planet, t),
+                        })}
+                      />
                     </span>
                     <span className="transit-aspect-orb">
                       {aspect.orb.toFixed(2)}&deg;

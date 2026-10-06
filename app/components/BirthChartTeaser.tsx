@@ -204,10 +204,10 @@ export default function BirthChartTeaser({
   }, [sunSignQuery, birthTime]);
 
   const astrolabeMarkers = [
-    { label: "SUN", angle: -55, radius: 33, active: hasDate, className: styles.sunMarker },
-    { label: "MOON", angle: 34, radius: 28, active: hasName && hasDate, className: styles.moonMarker },
-    { label: "ASC", angle: 132, radius: 36, active: hasLocation, className: styles.ascMarker },
-    { label: "MC", angle: 226, radius: 24, active: hasTimeSignal, className: styles.houseMarker },
+    { id: "sun", label: t("birthChartTeaser.markers.sun"), angle: -55, radius: 33, active: hasDate, className: styles.sunMarker },
+    { id: "moon", label: t("birthChartTeaser.markers.moon"), angle: 34, radius: 28, active: hasName && hasDate, className: styles.moonMarker },
+    { id: "ascendant", label: t("birthChartTeaser.markers.ascendant"), angle: 132, radius: 36, active: hasLocation, className: styles.ascMarker },
+    { id: "midheaven", label: t("birthChartTeaser.markers.midheaven"), angle: 226, radius: 24, active: hasTimeSignal, className: styles.houseMarker },
   ];
 
   const unlockRingStates = {
@@ -232,7 +232,7 @@ export default function BirthChartTeaser({
         : t("birthChartTeaser.unlocksFromBirthDate"),
       active: hasDate,
       accent: sunSign ? ELEMENT_COLORS[sunSign.element] : "#C89B3C",
-      icon: SunIcon ? <SunIcon /> : "SUN",
+      icon: SunIcon ? <SunIcon /> : t("birthChartTeaser.markers.sun"),
     },
     {
       label: t("birthChartTeaser.moon"),
@@ -240,7 +240,7 @@ export default function BirthChartTeaser({
       meta: hasTimeSignal ? t("birthChartTeaser.refinesWithTimeSignal") : t("birthChartTeaser.needsDateAndTime"),
       active: hasName && hasDate,
       accent: "#6CE1D4",
-      icon: "MOON",
+      icon: t("birthChartTeaser.markers.moon"),
     },
     {
       label: t("birthChartTeaser.ascendant"),
@@ -248,7 +248,7 @@ export default function BirthChartTeaser({
       meta: t("birthChartTeaser.risingPointUsesBirthplace"),
       active: hasLocation,
       accent: "#8C64DC",
-      icon: "ASC",
+      icon: t("birthChartTeaser.markers.ascendant"),
     },
     {
       label: t("birthChartTeaser.houses"),
@@ -256,7 +256,7 @@ export default function BirthChartTeaser({
       meta: hasExactTime ? t("birthChartTeaser.exactTimingActive") : chartConfidence,
       active: hasTimeSignal,
       accent: "#F07068",
-      icon: "HOUSES",
+      icon: t("birthChartTeaser.markers.houses"),
     },
   ];
 
@@ -353,7 +353,7 @@ export default function BirthChartTeaser({
             ))}
             {astrolabeMarkers.map((marker) => (
               <span
-                key={marker.label}
+                key={marker.id}
                 className={[
                   styles.planetMarker,
                   marker.className,

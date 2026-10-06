@@ -6,6 +6,7 @@ import type { ForecastAspectInsight, ForecastReading } from "@/lib/astro-types";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
+import { aspectName, planetName } from "@/lib/chart-labels";
 
 type FutureForecastPanelProps = {
   queryString: string;
@@ -138,9 +139,9 @@ function downloadForecastCalendarEvent(
   const signals = getMajorSignals(forecast)
     .map((signal) =>
       tr("timing.forecast.calendar.signalLine", {
-        transit: signal.transit_planet,
-        aspect: signal.aspect_type,
-        natal: signal.natal_planet,
+        transit: planetName(signal.transit_planet, tr),
+        aspect: aspectName(signal.aspect_type, tr),
+        natal: planetName(signal.natal_planet, tr),
         orb: signal.orb.toFixed(2),
       })
     )
@@ -197,9 +198,9 @@ function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
       <div>
         <strong>
           {tr("timing.forecast.signal.title", {
-            transit: signal.transit_planet,
-            aspect: signal.aspect_type,
-            natal: signal.natal_planet,
+            transit: planetName(signal.transit_planet, tr),
+            aspect: aspectName(signal.aspect_type, tr),
+            natal: planetName(signal.natal_planet, tr),
           })}
         </strong>
         <p>{compactTransitText(signal.interpretation)}</p>
@@ -217,7 +218,13 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
   const openingItems = forecast.opportunities.filter((item) => matchesLifeArea(item, lifeArea));
   const cautionItems = forecast.cautions.filter((item) => matchesLifeArea(item, lifeArea));
   const majorSignals = getMajorSignals(forecast);
-  const emptyNote = tr("timing.forecast.card.filterEmpty", { area: lifeArea });
+  /* The area inside a sentence: its label in lower case, except in German,
+     which capitalises its nouns. English reads as the old raw value did. */
+  const areaLabelKey = LIFE_AREAS.find((area) => area.value === lifeArea)?.labelKey;
+  const areaLabel = areaLabelKey ? tr(areaLabelKey) : lifeArea;
+  const emptyNote = tr("timing.forecast.card.filterEmpty", {
+    area: language === "de" ? areaLabel : areaLabel.toLowerCase(),
+  });
 
   return (
     <article className="forecast-card">
@@ -231,7 +238,7 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
           <h3>{forecast.headline}</h3>
         </div>
         <span className="access-pill access-pill--premium">
-          {forecast.dasha.current_dasha} / {forecast.dasha.current_antardasha}
+          {planetName(forecast.dasha.current_dasha, tr)} / {planetName(forecast.dasha.current_antardasha, tr)}
         </span>
       </div>
 

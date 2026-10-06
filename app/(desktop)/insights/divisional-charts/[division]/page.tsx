@@ -60,30 +60,6 @@ function validTimingLord(value?: string): string | null {
   return name && name !== "Unknown" ? name : null;
 }
 
-/*
- * Formatted here rather than in the view because Intl resolves against the
- * runtime's time zone: doing it in a client component would format once on the
- * server and again on hydration, and a date near a month boundary could
- * disagree between the two. An empty string means nothing could be formatted,
- * which the view renders as translated copy.
- */
-function formatDateRange(start?: string, end?: string): string {
-  const options: Intl.DateTimeFormatOptions = {
-    month: "short",
-    year: "numeric",
-  };
-  const format = (value?: string) => {
-    if (!value) return "";
-    const date = new Date(value);
-    return Number.isNaN(date.getTime())
-      ? value
-      : new Intl.DateTimeFormat("en", options).format(date);
-  };
-  const formattedStart = format(start);
-  const formattedEnd = format(end);
-  return [formattedStart, formattedEnd].filter(Boolean).join(" – ");
-}
-
 export async function generateMetadata({
   params,
   searchParams,
@@ -198,20 +174,16 @@ export default async function DivisionalChartDetailPage({
       ? {
           kind: "mahadasha" as const,
           planet: currentMahadasha,
-          range: formatDateRange(
-            payload.chart.dasha?.current_dasha_start,
-            payload.chart.dasha?.current_dasha_end,
-          ),
+          start: payload.chart.dasha?.current_dasha_start ?? "",
+          end: payload.chart.dasha?.current_dasha_end ?? "",
         }
       : null,
     currentAntardasha
       ? {
           kind: "antardasha" as const,
           planet: currentAntardasha,
-          range: formatDateRange(
-            payload.chart.dasha?.current_antardasha_start,
-            payload.chart.dasha?.current_antardasha_end,
-          ),
+          start: payload.chart.dasha?.current_antardasha_start ?? "",
+          end: payload.chart.dasha?.current_antardasha_end ?? "",
         }
       : null,
   ].filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -229,6 +201,12 @@ export default async function DivisionalChartDetailPage({
         ephemerisProvider: payload.engine.ephemeris_provider,
         ayanamsha: payload.engine.ayanamsha,
         houseSystem: payload.engine.house_system,
+        /* The payload names the house system in English only; its code comes
+           from the engine preset it was cast with. */
+        houseSystemCode:
+          payload.engine.available_engines.find(
+            (preset) => preset.engine_id === payload.engine.engine_id,
+          )?.house_system_code ?? "",
       }}
       availableDivisions={Object.keys(payload.chart.divisional_charts ?? {}).map(
         Number,

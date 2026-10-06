@@ -1,19 +1,21 @@
-// Server-only utility that produces a single short line describing today's sky.
-// Used above the Lagna Atelier login form. Reuses the existing pure-JS
-// astronomy stack (astronomy-engine via lib/engines/swiss-ephemeris-engine).
+// Server-only utility that reads today's sky for the line above the Lagna
+// Atelier login form. Reuses the existing pure-JS astronomy stack
+// (astronomy-engine via lib/engines/swiss-ephemeris-engine).
 //
 // The codebase is a Vedic / sidereal app (Lahiri ayanamsa, Vimshottari dasha,
 // nakshatras), so we report the sidereal Moon sign and Mercury direct/retrograde
 // status — two facets that meaningfully change day-to-day.
+//
+// It returns facts, not a sentence: the sign-in pages word them in the reader's
+// language (lib/daily-sky-line.ts).
 
 import { computeTransitPositions } from "@/lib/engines/swiss-ephemeris-engine";
 import { calculateNakshatra } from "@/lib/engines/nakshatra-engine";
+import type { DailySky } from "@/lib/daily-sky-line";
 
-// Day-keyed cache. The line only changes day-to-day, so a tiny in-memory map
+// Day-keyed cache. The facts only change day-to-day, so a tiny in-memory map
 // keyed by YYYY-MM-DD (UTC) is sufficient — no need for unstable_cache.
-const dailyCache = new Map<string, string>();
-
-const MIDDOT = "·"; // U+00B7
+const dailyCache = new Map<string, DailySky>();
 
 function dayKeyUTC(d: Date): string {
   const y = d.getUTCFullYear();
@@ -41,47 +43,42 @@ function isMercuryRetrograde(reference: Date): boolean {
 }
 
 /**
- * Return a short evocative line describing today's sky, suitable for display
- * above the login form. Format: `"<facet> · <facet>"`.
+ * Today's sky, for the line above the login form.
  *
- * The string is cached at module level keyed by UTC date — same value for all
- * callers within a given day, recomputed at the next UTC midnight.
+ * Cached at module level keyed by UTC date — the same value for all callers
+ * within a given day, recomputed at the next UTC midnight.
  */
-export async function getDailySkyLine(date?: Date): Promise<string> {
+export async function getDailySky(date?: Date): Promise<DailySky> {
   const now = date ?? new Date();
   const key = dayKeyUTC(now);
 
   const cached = dailyCache.get(key);
   if (cached !== undefined) return cached;
 
-  let line: string;
+  let sky: DailySky;
   try {
     const positions = computeTransitPositions(now);
     const moon = positions.find((p) => p.name === "Moon");
-    const mercuryRetro = isMercuryRetrograde(now);
 
     if (!moon) {
       // Astronomy engine should always return Moon — this is paranoia.
-      line = `Skies aligned ${MIDDOT} New beginnings`;
+      sky = { kind: "aligned" };
     } else {
-      const nak = calculateNakshatra(moon.longitude);
-      const mercuryStatus = mercuryRetro ? "retrograde" : "direct";
-      line = `Moon in ${moon.sign} ${MIDDOT} Mercury ${mercuryStatus}`;
-
-      // If the line is long, fall back to a more compact composition that
-      // pairs Moon sign with the current nakshatra instead of Mercury.
-      if (line.length > 50) {
-        line = `Moon in ${moon.sign} ${MIDDOT} ${nak.name}`;
-      }
+      sky = {
+        kind: "moon",
+        moonSign: moon.sign,
+        mercuryRetrograde: isMercuryRetrograde(now),
+        nakshatra: calculateNakshatra(moon.longitude).name,
+      };
     }
   } catch {
     // Defensive fallback so the login page never breaks because of an
     // ephemeris hiccup. Pure-date sun-sign approximation (tropical).
-    line = `Sun in ${tropicalSunSignFromDate(now)} ${MIDDOT} Skies clear`;
+    sky = { kind: "sun", sunSign: tropicalSunSignFromDate(now) };
   }
 
-  dailyCache.set(key, line);
-  return line;
+  dailyCache.set(key, sky);
+  return sky;
 }
 
 // --------------------------------------------------------------------------

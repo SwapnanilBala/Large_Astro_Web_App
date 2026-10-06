@@ -8,6 +8,7 @@ import {
 } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
+import { nakshatraName, planetName } from "@/lib/chart-labels";
 import styles from "./muhurta-panel.module.css";
 
 // --------------------------------------------------------------------------
@@ -177,6 +178,73 @@ function formatWindowDate(isoStr: string, locale: string): string {
   });
 }
 
+/*
+ * The engine's factors (lib/engines/muhurta-engine.ts) name themselves, their
+ * values and their qualities in English, from closed sets, and what can be
+ * looked up is. A tithi, yoga or karana is a Sanskrit name, written as the
+ * engine writes it.
+ */
+export const FACTOR_IDS: Record<string, string> = {
+  Tithi: "tithi",
+  Nakshatra: "nakshatra",
+  Yoga: "yoga",
+  Karana: "karana",
+  Weekday: "weekday",
+  Rahukaala: "rahukaala",
+  Yamaghantaka: "yamaghantaka",
+  Hora: "hora",
+};
+
+/* The engine's weekday names (WEEKDAY_NAMES in lib/engines/panchanga.ts), from Sunday. */
+const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+
+/* "Soft/Tender (Mridu)" -> "soft_tender_mridu", the catalog's key for it. */
+export function muhurtaSlug(text: string): string {
+  return text.toLowerCase().replace(/[^a-z]+/g, "_").replace(/^_+|_+$/g, "");
+}
+
+function lookup(tr: Translator, key: string, fallback: string): string {
+  const text = tr(key);
+  return text === key ? fallback : text;
+}
+
+function weekdayName(english: string, locale: string): string {
+  const index = WEEKDAYS.indexOf(english);
+  if (index < 0) return english;
+  /* 1 January 2023 was a Sunday. */
+  return new Intl.DateTimeFormat(locale, { weekday: "long", timeZone: "UTC" }).format(
+    new Date(Date.UTC(2023, 0, 1 + index)),
+  );
+}
+
+type FactorText = { name: string; value: string; quality: string };
+
+function factorText(factor: { name: string; value: string; quality: string }, tr: Translator, locale: string): FactorText {
+  const id = FACTOR_IDS[factor.name];
+  const name = id ? lookup(tr, `timing.muhurta.factors.${id}`, factor.name) : factor.name;
+  let value = factor.value;
+  if (id === "nakshatra") value = nakshatraName(factor.value, tr);
+  else if (id === "weekday") value = weekdayName(factor.value, locale);
+  else if (id === "rahukaala" || id === "yamaghantaka") {
+    value = lookup(tr, `timing.muhurta.periodStates.${muhurtaSlug(factor.value)}`, factor.value);
+  } else if (id === "hora") {
+    const planet = /^(\w+) hora$/.exec(factor.value)?.[1];
+    if (planet) value = tr("timing.muhurta.horaValue", { planet: planetName(planet, tr) });
+  }
+  const quality = lookup(tr, `timing.muhurta.factorQualities.${muhurtaSlug(factor.quality)}`, factor.quality);
+  return { name, value, quality };
+}
+
+/* The activity as the reader reads it; the response's own label is English. */
+function activityText(result: MuhurtaResponse, tr: Translator): string {
+  const option = ACTIVITIES.find((activity) => activity.value === result.activity);
+  return option ? tr(option.labelKey) : result.activity_label;
+}
+
+function windowQuality(quality: string, tr: Translator): string {
+  return lookup(tr, `timing.muhurta.windowQualities.${quality}`, quality);
+}
+
 function qualityColor(quality: MuhurtaWindow["quality"]): string {
   switch (quality) {
     case "excellent": return "#1a7b6e";
@@ -198,7 +266,7 @@ function ScoreDial({ score, quality }: { score: number; quality: MuhurtaWindow["
     <div
       className={styles.scoreDial}
       role="img"
-      aria-label={tr("timing.muhurta.scoreDialLabel", { score: String(score), quality })}
+      aria-label={tr("timing.muhurta.scoreDialLabel", { score: String(score), quality: windowQuality(quality, tr) })}
     >
       <svg viewBox="0 0 48 48" width="52" height="52" aria-hidden="true">
         <circle className={styles.dialTrack} cx="24" cy="24" r={DIAL_RADIUS} />
@@ -219,7 +287,7 @@ function ScoreDial({ score, quality }: { score: number; quality: MuhurtaWindow["
         </text>
       </svg>
       <span className={styles.dialQuality} style={{ color }}>
-        {quality}
+        {windowQuality(quality, tr)}
       </span>
     </div>
   );
@@ -287,23 +355,17 @@ function escapeIcs(text: string): string {
     .replace(/\r?\n/g, "\\n");
 }
 
-function buildIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator): string {
+function buildIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator, locale: string): string {
   const start = new Date(w.start);
   const end = new Date(w.end);
   const uid = `muhurta-${start.getTime()}-${Math.round(w.score)}@astro-insights`;
   const summary = tr("timing.muhurta.calendar.summary", {
     activity: activityLabel,
     score: String(w.score),
-    quality: w.quality,
+    quality: windowQuality(w.quality, tr),
   });
   const description = `${w.recommendation}\n\n${w.factors
-    .map((f) =>
-      tr("timing.muhurta.calendar.factor", {
-        name: f.name,
-        value: f.value,
-        quality: f.quality,
-      }),
-    )
+    .map((f) => tr("timing.muhurta.calendar.factor", { ...factorText(f, tr, locale) }))
     .join("\n")}`;
   return [
     "BEGIN:VCALENDAR",
@@ -321,8 +383,8 @@ function buildIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator): stri
   ].join("\r\n");
 }
 
-function downloadIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator): void {
-  const blob = new Blob([buildIcs(w, activityLabel, tr)], {
+function downloadIcs(w: MuhurtaWindow, activityLabel: string, tr: Translator, locale: string): void {
+  const blob = new Blob([buildIcs(w, activityLabel, tr, locale)], {
     type: "text/calendar;charset=utf-8",
   });
   const url = URL.createObjectURL(blob);
@@ -402,14 +464,12 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
           start: formatWindowTime(w.start, locale),
           end: formatWindowTime(w.end, locale),
           score: String(w.score),
-          quality: w.quality,
+          quality: windowQuality(w.quality, tr),
         }),
         "",
         ...w.factors.map((f) =>
           tr("timing.muhurta.factorTitle", {
-            name: f.name,
-            value: f.value,
-            quality: f.quality,
+            ...factorText(f, tr, locale),
             score: formatScore(f.score),
           }),
         ),
@@ -644,7 +704,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
 
       {!isLoading && result && result.windows.length === 0 && (
         <p className={styles.empty}>
-          {tr("timing.muhurta.emptyRange", { activity: result.activity_label })}
+          {tr("timing.muhurta.emptyRange", { activity: activityText(result, tr) })}
         </p>
       )}
 
@@ -762,14 +822,14 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                     </div>
 
                     <div className={styles.factors}>
-                      {w.factors.map((f) => (
+                      {w.factors.map((f) => {
+                        const text = factorText(f, tr, locale);
+                        return (
                         <div
                           key={f.name}
                           className={factorClass(f.score)}
                           title={tr("timing.muhurta.factorTitle", {
-                            name: f.name,
-                            value: f.value,
-                            quality: f.quality,
+                            ...text,
                             score: formatScore(f.score),
                           })}
                         >
@@ -778,14 +838,15 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                           </span>
                           <span className={styles.factorBody}>
                             <span className={styles.factorTop}>
-                              <span className={styles.factorName}>{f.name}</span>
+                              <span className={styles.factorName}>{text.name}</span>
                               <span className={styles.factorScore}>{formatScore(f.score)}</span>
                             </span>
-                            <span className={styles.factorValue}>{f.value}</span>
-                            <span className={styles.factorQuality}>{f.quality}</span>
+                            <span className={styles.factorValue}>{text.value}</span>
+                            <span className={styles.factorQuality}>{text.quality}</span>
                           </span>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     <p className={styles.recommendation}>{w.recommendation}</p>
@@ -794,7 +855,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                       <button
                         type="button"
                         className={styles.actionBtn}
-                        onClick={() => downloadIcs(w, result.activity_label, tr)}
+                        onClick={() => downloadIcs(w, activityText(result, tr), tr, locale)}
                       >
                         {tr("timing.muhurta.addToCalendar")}
                       </button>
@@ -802,7 +863,7 @@ export default function MuhurtaPanel({ queryString }: MuhurtaPanelProps) {
                         type="button"
                         className={styles.actionBtn}
                         onClick={() =>
-                          void copyWindow(w, key, result.activity_label)
+                          void copyWindow(w, key, activityText(result, tr))
                         }
                       >
                         {copiedKey === key ? tr("timing.muhurta.copied") : tr("timing.muhurta.copy")}

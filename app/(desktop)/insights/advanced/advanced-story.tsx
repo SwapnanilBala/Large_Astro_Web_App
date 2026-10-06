@@ -4,6 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ReactNode } from "react";
 import { useHydrated } from "@/lib/use-hydrated";
+import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import advancedMessages from "@/messages/en.advanced.json";
 import advStyles from "./advanced.module.css";
 import type { AdvancedModuleKey } from "@/lib/engines/advanced-digest";
 
@@ -203,6 +205,7 @@ export function StoryProgress({ state }: { state: StoryState }) {
      the DOM, correct in every computed style, and entirely off screen.
      The portal needs document.body, so nothing renders until hydration. */
   const mounted = useHydrated();
+  const tr = useRouteMessages(advancedMessages);
 
   if (state.status !== "loading" || !mounted) return null;
 
@@ -215,15 +218,17 @@ export function StoryProgress({ state }: { state: StoryState }) {
       className={advStyles.storyProgress}
       role="status"
       aria-live="polite"
-      aria-label="Writing your reading"
+      aria-label={tr("advanced.story.writing")}
     >
-      <p className={advStyles.storyProgressTitle}>Writing your reading</p>
+      <p className={advStyles.storyProgressTitle}>{tr("advanced.story.writing")}</p>
       <p className={advStyles.storyProgressNote}>
         {state.attempt > 1
-          ? "Taking a second run at it…"
+          ? tr("advanced.story.secondRun")
           : remainingSeconds > 0
-            ? `About ${remainingSeconds} second${remainingSeconds === 1 ? "" : "s"} left`
-            : "Almost there…"}
+            ? tr(remainingSeconds === 1 ? "advanced.story.secondsLeftOne" : "advanced.story.secondsLeftOther", {
+                count: String(remainingSeconds),
+              })
+            : tr("advanced.story.almost")}
       </p>
       {/* aria-hidden: the sentence above already says it, and a screen reader
           announcing a percentage four times a second is unusable. */}
@@ -232,19 +237,20 @@ export function StoryProgress({ state }: { state: StoryState }) {
       </div>
       {/* The sections are collapsed while this runs, but their toggles work
           from first paint -- so this says "one click away", not "open". */}
-      <p className={advStyles.storyProgressHint}>
-        Every table is one click away below in the meantime.
-      </p>
+      <p className={advStyles.storyProgressHint}>{tr("advanced.story.tablesMeanwhile")}</p>
     </aside>,
     document.body,
   );
 }
 
 export function StoryOpening({ state }: { state: StoryState }) {
+  const tr = useRouteMessages(advancedMessages);
+  const { t } = useTranslation();
+
   if (state.status === "loading") {
     return (
       <p className={`${advStyles.storyOpening} ${advStyles.storyPending}`}>
-        Reading your chart&#8230;
+        {tr("advanced.story.readingChart")}
       </p>
     );
   }
@@ -254,19 +260,19 @@ export function StoryOpening({ state }: { state: StoryState }) {
       <p className={advStyles.storyOpening}>
         {state.reason === "signedOut" ? (
           <>
-            Your session ended.{" "}
+            {tr("advanced.story.sessionEnded")}{" "}
             <a className={advStyles.storyToggle} href="/login">
-              Sign in again
+              {tr("advanced.story.signInAgain")}
             </a>{" "}
-            to rewrite this reading. Every table is still here, below.
+            {tr("advanced.story.sessionEndedTail")}
           </>
         ) : state.reason === "limit" ? (
-          <>You have used today&#39;s readings. Every table is still here, below.</>
+          <>{tr("advanced.story.limit")}</>
         ) : (
           <>
-            The reading could not be written just now.{" "}
+            {tr("advanced.story.unavailable")}{" "}
             <button type="button" className={advStyles.storyToggle} onClick={state.retry}>
-              Try again
+              {t("errorBoundary.tryAgain")}
             </button>
           </>
         )}
@@ -288,10 +294,23 @@ type StorySectionProps = {
    */
   moduleKey?: AdvancedModuleKey;
   state: StoryState;
-  /** What the toggle is called, e.g. "the aspect table". */
-  detailLabel: string;
+  /** Which panel the toggle opens: it reads "Show the aspect table" from
+      advanced.story.show.<detail>, and "Hide ..." from .hide. */
+  detail: (typeof STORY_DETAILS)[number];
   children: ReactNode;
 };
+
+/* The panels a StorySection can hold, by their toggle's keys. */
+export const STORY_DETAILS = [
+  "timing",
+  "aspects",
+  "navamsa",
+  "divisional",
+  "strength",
+  "yogas",
+  "transits",
+  "ashtakavarga",
+] as const;
 
 /**
  * One module: its passage, then its panel behind a toggle.
@@ -300,7 +319,8 @@ type StorySectionProps = {
  * because a collapsed section with nothing above it is strictly worse than the
  * page we started with.
  */
-export function StorySection({ moduleKey, state, detailLabel, children }: StorySectionProps) {
+export function StorySection({ moduleKey, state, detail, children }: StorySectionProps) {
+  const tr = useRouteMessages(advancedMessages);
   const passage =
     moduleKey && state.status === "ready" ? state.story.passages[moduleKey] : undefined;
   const hasPassage = Boolean(passage);
@@ -318,7 +338,7 @@ export function StorySection({ moduleKey, state, detailLabel, children }: StoryS
     <div className={advStyles.storySection}>
       {isLoading && (
         <p className={`${advStyles.storyPassage} ${advStyles.storyPending}`}>
-          Writing this section&#8230;
+          {tr("advanced.story.writingSection")}
         </p>
       )}
       {passage && <p className={advStyles.storyPassage}>{passage}</p>}
@@ -332,7 +352,7 @@ export function StorySection({ moduleKey, state, detailLabel, children }: StoryS
           setIsOpen(!open);
         }}
       >
-        {open ? `Hide ${detailLabel}` : `Show ${detailLabel}`}
+        {tr(open ? `advanced.story.hide.${detail}` : `advanced.story.show.${detail}`)}
       </button>
 
       {open && <div className={advStyles.storyDetail}>{children}</div>}

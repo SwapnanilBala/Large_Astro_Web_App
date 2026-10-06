@@ -3,6 +3,7 @@
 import { useState, memo } from "react";
 import type { DivisionalChartInfo } from "@/lib/astro-types";
 import { useRouteMessages } from "@/lib/i18n-context";
+import { pointName, signName } from "@/lib/chart-labels";
 import divisionalMessages from "@/messages/en.divisional.json";
 
 // --------------------------------------------------------------------------
@@ -155,12 +156,12 @@ function DivisionalChartsPanel({
                 <span className="divisional-planet-glyph" aria-hidden="true">
                   {glyph}
                 </span>
-                <span className="divisional-planet-name">{pos.name}</span>
+                <span className="divisional-planet-name">{pointName(pos.name, tr)}</span>
               </span>
-              <span className="divisional-sign" role="cell">{pos.rashi_sign}</span>
+              <span className="divisional-sign" role="cell">{signName(pos.rashi_sign, tr)}</span>
               <span className="divisional-arrow" role="cell" aria-hidden="true">&rarr;</span>
               <span className="divisional-sign" role="cell">
-                {pos.divisional_sign}
+                {signName(pos.divisional_sign, tr)}
                 {isSameSign && (
                   <small className="divisional-same-label">
                     {tr("divisional.panel.same")}

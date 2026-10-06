@@ -33,6 +33,9 @@ const BROWSER_MODULES = [
   /* Planet, sign and nakshatra names in the reader's language: the mobile chart,
      its tables and the reading room's yoga list. */
   "lib/chart-labels.ts",
+  /* The sky line above both sign-in forms, worded on the client; the facts
+     come from app/(desktop)/login/dailySky.ts, which runs the ephemeris. */
+  "lib/daily-sky-line.ts",
 ];
 
 const NODE_BUILTIN =

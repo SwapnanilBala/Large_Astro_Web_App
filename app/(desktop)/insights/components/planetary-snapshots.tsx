@@ -4,6 +4,7 @@ import { useState, memo } from "react";
 import type { CSSProperties } from "react";
 import type { PlanetPosition } from "@/lib/astro-types";
 import { useTranslation } from "@/lib/i18n-context";
+import { planetName, signName } from "@/lib/chart-labels";
 import PlanetOrb from "@/app/components/PlanetOrb";
 import type { PlanetName } from "@/app/components/PlanetOrb";
 import styles from "./planetary-snapshots.module.css";
@@ -42,6 +43,10 @@ function getDignityLabel(planet: PlanetPosition): string | null {
 
 const SUPPORTIVE_DIGNITIES = new Set(["Domicile", "Exalted"]);
 
+/* The labels above stay English, for the check beside them; what prints is
+   insights.snapshots.dignities.<label>. */
+export const SNAPSHOT_DIGNITIES = ["Domicile", "Exalted", "Detriment", "Fall", "Neutral"] as const;
+
 type PlanetarySnapshotsProps = {
   planets: PlanetPosition[];
 };
@@ -56,6 +61,11 @@ type PlanetarySnapshotsProps = {
 function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
   const { t } = useTranslation();
   const [expandedPlanet, setExpandedPlanet] = useState<string | null>(null);
+  const dignityText = (dignity: string) => {
+    const key = `insights.snapshots.dignities.${dignity.toLowerCase()}`;
+    const text = t(key);
+    return text === key ? dignity : text;
+  };
 
   function handleToggle(name: string) {
     setExpandedPlanet((prev) => (prev === name ? null : name));
@@ -66,10 +76,7 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
       <div className={styles.header}>
         <p className={styles.kicker}>{t("insights.planetKicker")}</p>
         <h2 className={styles.heading}>{t("insights.planetHeading")}</h2>
-        <p className={styles.intro}>
-          Sign, degree, house, and dignity for every graha. Open a card for the exact
-          longitude and motion.
-        </p>
+        <p className={styles.intro}>{t("insights.snapshots.intro")}</p>
       </div>
 
       <div className={styles.grid}>
@@ -94,7 +101,7 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
               >
                 <span className={styles.identity}>
                   <PlanetOrb planet={planet.name as PlanetName} size="sm" />
-                  <span className={styles.name}>{planet.name}</span>
+                  <span className={styles.name}>{planetName(planet.name, t)}</span>
                   {/* Status markers ride the identity row rather than the chip
                       row below: three chips wrap on a narrow column, and one
                       wrapped card stretches its whole grid row. */}
@@ -102,8 +109,8 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
                     <span
                       className={styles.marker}
                       role="img"
-                      aria-label="Retrograde"
-                      title="Retrograde"
+                      aria-label={t("insights.snapshots.retrograde")}
+                      title={t("insights.snapshots.retrograde")}
                     >
                       ℞
                     </span>
@@ -112,8 +119,8 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
                     <span
                       className={`${styles.marker} ${styles.markerCombust}`}
                       role="img"
-                      aria-label="Combust"
-                      title="Combust"
+                      aria-label={t("insights.snapshots.combust")}
+                      title={t("insights.snapshots.combust")}
                     >
                       ☌
                     </span>
@@ -127,7 +134,7 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
                 </span>
 
                 <span className={styles.placement}>
-                  <span className={styles.sign}>{planet.sign}</span>
+                  <span className={styles.sign}>{signName(planet.sign, t)}</span>
                   <span className={styles.degree}>
                     {planet.degree_in_sign.toFixed(2)}°
                   </span>
@@ -145,7 +152,7 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
                           : styles.chipWeak
                       }`}
                     >
-                      {dignity}
+                      {dignityText(dignity)}
                     </span>
                   )}
                 </span>
@@ -158,23 +165,23 @@ function PlanetarySnapshots({ planets }: PlanetarySnapshotsProps) {
                 <div className={styles.drawerInner}>
                   <dl className={styles.detailList}>
                     <div className={styles.detailRow}>
-                      <dt className={styles.detailLabel}>Longitude</dt>
+                      <dt className={styles.detailLabel}>{t("insights.snapshots.longitude")}</dt>
                       <dd className={styles.detailValue}>
                         {planet.longitude.toFixed(2)}°
                       </dd>
                     </div>
                     <div className={styles.detailRow}>
-                      <dt className={styles.detailLabel}>Motion</dt>
+                      <dt className={styles.detailLabel}>{t("insights.snapshots.motion")}</dt>
                       <dd className={styles.detailValue}>
-                        {planet.is_retrograde ? "Retrograde" : "Direct"}
+                        {planet.is_retrograde ? t("insights.snapshots.retrograde") : t("insights.snapshots.direct")}
                         {typeof planet.speed === "number"
-                          ? ` · ${planet.speed.toFixed(3)}°/day`
+                          ? ` · ${t("insights.snapshots.speed", { speed: planet.speed.toFixed(3) })}`
                           : ""}
                       </dd>
                     </div>
                     <div className={styles.detailRow}>
-                      <dt className={styles.detailLabel}>Dignity</dt>
-                      <dd className={styles.detailValue}>{dignity ?? "Neutral"}</dd>
+                      <dt className={styles.detailLabel}>{t("insights.snapshots.dignity")}</dt>
+                      <dd className={styles.detailValue}>{dignityText(dignity ?? "Neutral")}</dd>
                     </div>
                   </dl>
                 </div>

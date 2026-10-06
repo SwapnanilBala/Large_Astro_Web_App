@@ -5,6 +5,9 @@ import type {
 } from "@/lib/astro-types";
 
 export type LifeDomainTimingWindow = {
+  /** Which of the three windows: the page words its heading from this. */
+  id: "current" | "next" | "caution";
+  /** The heading in English. */
   label: string;
   value: string;
 };
@@ -44,18 +47,21 @@ export function getLifeDomainTimingWindows(
   if (!dasha || activationPlanets.size === 0) {
     return [
       {
+        id: "current",
         label: "Current activation",
         value:
           domain.display.timing[0] ??
           "Watch for repeated signals before treating this domain as active.",
       },
       {
+        id: "next",
         label: "Next stronger cycle",
         value:
           domain.display.timing[1] ??
           "The next clean opening comes when support and practical evidence repeat the same theme.",
       },
       {
+        id: "caution",
         label: "Caution condition",
         value:
           caution ??
@@ -83,9 +89,10 @@ export function getLifeDomainTimingWindows(
       "No later major activation period is present in the available timeline; use the current evidence rather than inventing a date.";
 
   return [
-    { label: "Current activation", value: currentValue },
-    { label: "Next stronger cycle", value: nextValue },
+    { id: "current", label: "Current activation", value: currentValue },
+    { id: "next", label: "Next stronger cycle", value: nextValue },
     {
+      id: "caution",
       label: "Caution condition",
       value:
         caution ??

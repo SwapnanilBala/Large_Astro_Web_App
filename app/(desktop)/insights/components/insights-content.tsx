@@ -130,10 +130,18 @@ import type {
   LifeDomainInsightsResponse,
   TopLifeDomainSummary,
 } from "@/lib/astro-types";
-import { useTranslation } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
+import { planetName, signName } from "@/lib/chart-labels";
+import Emphasise from "@/app/components/Emphasise";
 import { localScopedKey } from "@/lib/local-scope";
 import { TRADITION_ORDER } from "@/lib/engines/engine-registry";
-import { DOMAIN_ICONS } from "@/app/(desktop)/insights/components/life-domain-copy";
+import { luckyTerm, weekdayName } from "./lucky-terms";
+import {
+  DOMAIN_ICONS,
+  activityBadge,
+  domainName,
+  domainNameInSentence,
+} from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
 import { useDomainBriefs } from "@/lib/use-domain-briefs";
 
@@ -363,18 +371,19 @@ function CollapsibleSection({
  * child, and `ultimate` is on the life-domain module.
  */
 const SECTION_ANCHORS = [
-  { id: "overview", label: "Overview" },
-  { id: "chart-map", label: "Chart" },
-  { id: "ultimate", label: "Life areas" },
-  { id: "timing", label: "Timing" },
-  { id: "continue-reading", label: "More" },
+  { id: "overview", labelKey: "insights.page.nav.overview" },
+  { id: "chart-map", labelKey: "insights.page.nav.chart" },
+  { id: "ultimate", labelKey: "insights.page.nav.lifeAreas" },
+  { id: "timing", labelKey: "insights.page.nav.timing" },
+  { id: "continue-reading", labelKey: "insights.page.nav.more" },
 ];
 
 const SECTION_ANCHOR_LABELS: Record<string, string> = Object.fromEntries(
-  SECTION_ANCHORS.map((anchor) => [anchor.id, anchor.label])
+  SECTION_ANCHORS.map((anchor) => [anchor.id, anchor.labelKey])
 );
 
 function SectionAnchorNav() {
+  const { t } = useTranslation();
   const [activeAnchorId, setActiveAnchorId] = useState(SECTION_ANCHORS[0].id);
   const [availableAnchorIds, setAvailableAnchorIds] = useState(
     SECTION_ANCHORS.map((anchor) => anchor.id)
@@ -485,14 +494,15 @@ function SectionAnchorNav() {
   }, []);
 
   return (
-    <nav className={styles.anchorNav} aria-label="Results page sections">
+    <nav className={styles.anchorNav} aria-label={t("insights.page.nav.aria")}>
       {/* Rendered from availableAnchorIds, which is in document order, so the
           pills read left to right in the order the reader will meet the
           sections -- and cannot disagree with the scan line that highlights
           them. */}
       {availableAnchorIds.map((id) => {
-        const label = SECTION_ANCHOR_LABELS[id];
-        if (!label) return null;
+        const labelKey = SECTION_ANCHOR_LABELS[id];
+        if (!labelKey) return null;
+        const label = t(labelKey);
         const isActive = id === activeAnchorId;
         return (
           <a
@@ -531,29 +541,29 @@ type TopTakeaway = {
  * the off-by-one entirely; the panel remains the place for day precision.
  */
 /*
- * Still en-US, deliberately, while its callers are.
- *
- * Both of them wrap this in English the catalog has no key for -- "Runs
- * through {date}" in buildTopTakeaways, and "<strong>{planet}</strong> maha
- * dasha … to {date}" in the panel summary below. LOCALE_TAGS[language] is what
- * this wants the day that copy moves into the catalog; localising the date on
- * its own would only put "12 मार्च 2030" inside an English sentence, which is
- * a worse mix than the uniform English it is today.
+ * In the reader's locale, now that both callers are catalog sentences --
+ * "Runs through {date}" in buildTopTakeaways, and the dasha section's "to
+ * {date}". `locale` is LOCALE_TAGS[language], never undefined, for the
+ * hydration reason LOCALE_TAGS describes.
  */
-function formatMonthYear(iso: string): string | null {
+function formatMonthYear(iso: string, locale: string): string | null {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(iso)) return null;
   const date = new Date(`${iso}T00:00:00Z`);
   if (Number.isNaN(date.getTime())) return null;
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(locale, {
     month: "short",
     year: "numeric",
     timeZone: "UTC",
   });
 }
 
+type Translate = (key: string, params?: Record<string, string>) => string;
+
 function buildTopTakeaways(
   payload: ChartApiResponse,
-  serverTopDomain: TopLifeDomainSummary | null = null,
+  serverTopDomain: TopLifeDomainSummary | null,
+  t: Translate,
+  locale: string,
 ): TopTakeaway[] {
   const priorityRank = { high: 0, medium: 1, low: 2 };
   const sortedRules = [...payload.chart.deterministic_rules].sort(
@@ -583,7 +593,10 @@ function buildTopTakeaways(
 
   if (primaryRule) {
     takeaways.push({
-      label: primaryRule.priority === "high" ? "Highest signal" : "Chart signal",
+      label:
+        primaryRule.priority === "high"
+          ? t("insights.page.takeaways.highestSignal")
+          : t("insights.page.takeaways.chartSignal"),
       title: primaryRule.display.headline,
       body: primaryRule.display.body,
       tone: "gold",
@@ -592,13 +605,17 @@ function buildTopTakeaways(
 
   if (dasha) {
     takeaways.push({
-      label: "Current timing",
-      title: `${dasha.current_dasha} dasha is active`,
+      label: t("insights.page.takeaways.currentTiming"),
+      title: t("insights.page.takeaways.dashaActive", { planet: planetName(dasha.current_dasha, t) }),
       body: dasha.current_antardasha
-        ? `${dasha.current_antardasha} antardasha narrows the period into more immediate choices and responses.`
-        : "Use the current dasha as the main timing lens for near-term decisions.",
+        ? t("insights.page.takeaways.antardashaBody", {
+            planet: planetName(dasha.current_antardasha, t),
+          })
+        : t("insights.page.takeaways.dashaBody"),
       meta: dasha.current_dasha_end
-        ? `Runs through ${formatMonthYear(dasha.current_dasha_end) ?? dasha.current_dasha_end}`
+        ? t("insights.page.takeaways.runsThrough", {
+            date: formatMonthYear(dasha.current_dasha_end, locale) ?? dasha.current_dasha_end,
+          })
         : undefined,
       tone: "teal",
     });
@@ -617,9 +634,9 @@ function buildTopTakeaways(
 
   if (strongestPlanet && takeaways.length < 3) {
     takeaways.push({
-      label: "Strongest planet",
-      title: `${strongestPlanet.planet} leads the strength map`,
-      body: "This planet is one of the cleaner sources of support to lean on when the chart feels noisy.",
+      label: t("insights.page.takeaways.strongestPlanet"),
+      title: t("insights.page.takeaways.strongestTitle", { planet: planetName(strongestPlanet.planet, t) }),
+      body: t("insights.page.takeaways.strongestBody"),
       meta: undefined,
       tone: "coral",
     });
@@ -627,8 +644,8 @@ function buildTopTakeaways(
 
   if (takeaways.length < 3) {
     takeaways.push({
-      label: "Chart orientation",
-      title: `${payload.chart.ascendant.sign} rising sets the approach`,
+      label: t("insights.page.takeaways.orientation"),
+      title: t("insights.page.takeaways.orientationTitle", { sign: signName(payload.chart.ascendant.sign, t) }),
       body: payload.chart.summary,
       meta: undefined,
       tone: "gold",
@@ -652,7 +669,8 @@ function TopTakeawaysModule({
   serverTopDomain: TopLifeDomainSummary | null;
 }) {
   const shouldReduceMotion = useReducedMotion();
-  const takeaways = buildTopTakeaways(payload, serverTopDomain);
+  const { t, language } = useTranslation();
+  const takeaways = buildTopTakeaways(payload, serverTopDomain, t, LOCALE_TAGS[language]);
 
   return (
     <motion.section
@@ -663,9 +681,9 @@ function TopTakeawaysModule({
       transition={shouldReduceMotion ? { duration: 0 } : { type: "spring", stiffness: 190, damping: 22 }}
     >
       <div className={styles.takeawaysHeader}>
-        <p className={styles.kicker}>Top 3 Takeaways</p>
+        <p className={styles.kicker}>{t("insights.page.takeaways.kicker")}</p>
         <h2 id="top-takeaways-heading" className={styles.takeawaysTitle}>
-          What deserves attention first
+          {t("insights.page.takeaways.heading")}
         </h2>
       </div>
       <div className={styles.takeawaysGrid}>
@@ -693,6 +711,7 @@ function TopTakeawaysModule({
 }
 
 function LifeDomainLoadingState({ queued }: { queued: boolean }) {
+  const { t } = useTranslation();
   return (
     <section
       className={styles.domainLoading}
@@ -700,23 +719,23 @@ function LifeDomainLoadingState({ queued }: { queued: boolean }) {
       aria-busy={!queued}
     >
       <div className={styles.domainLoadingHeader}>
-        <p className={styles.kicker}>Life domain analysis</p>
+        <p className={styles.kicker}>{t("insights.page.domains.kicker")}</p>
         <h2>
           {queued
-            ? "Your deeper reading is ready to begin"
-            : "Calculating seven life areas separately"}
+            ? t("insights.page.domains.queuedHeading")
+            : t("insights.page.domains.loadingHeading")}
         </h2>
         <p>
           {queued
-            ? "The detailed formulas will start as you approach this section, keeping the first part of your report fast."
-            : "We are comparing the promise, supporting ruler, pressure points, and timing path for each area—not recycling one general reading."}
+            ? t("insights.page.domains.queuedLead")
+            : t("insights.page.domains.loadingLead")}
         </p>
       </div>
 
       <div className={styles.domainLoadingSteps} aria-hidden="true">
-        <span>House and ruler relationships</span>
-        <span>Strength and pressure signals</span>
-        <span>Timing and tailored synthesis</span>
+        <span>{t("insights.page.domains.stepHouses")}</span>
+        <span>{t("insights.page.domains.stepStrength")}</span>
+        <span>{t("insights.page.domains.stepTiming")}</span>
       </div>
 
       <div className={styles.domainLoadingSkeleton} aria-hidden="true">
@@ -735,14 +754,15 @@ function LifeDomainErrorState({
   message: string;
   onRetry: () => void;
 }) {
+  const { t } = useTranslation();
   return (
     <section className={styles.domainLoadError} role="alert">
-      <p className={styles.kicker}>Life domain analysis</p>
-      <h2>The detailed reading did not finish</h2>
+      <p className={styles.kicker}>{t("insights.page.domains.kicker")}</p>
+      <h2>{t("insights.page.domains.errorHeading")}</h2>
       <p>{message}</p>
       <button type="button" className={styles.domainRetryButton} onClick={onRetry}>
         <FiRefreshCw size={16} />
-        Try again
+        {t("errorBoundary.tryAgain")}
       </button>
     </section>
   );
@@ -764,7 +784,8 @@ export default function InsightsContent({
   historyQs,
   topLifeDomain = null,
 }: InsightsContentProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
+  const locale = LOCALE_TAGS[language];
   const { pushToast } = useToast();
   const router = useRouter();
   const shouldReduceMotion = useReducedMotion();
@@ -962,25 +983,27 @@ export default function InsightsContent({
           signal: controller.signal,
         });
         if (!response.ok) {
-          throw new Error("We could not complete the domain formulas.");
+          throw new Error("failed");
         }
 
         const result = (await response.json()) as LifeDomainInsightsResponse;
         if (!Array.isArray(result.insights) || result.insights.length === 0) {
-          throw new Error("The domain analysis returned no results.");
+          throw new Error("empty");
         }
         if (controller.signal.aborted) return;
 
         setDomainFetch({ key, status: "ready", insights: result.insights });
       } catch (error) {
         if (controller.signal.aborted) return;
+        /* A catalog key rather than a sentence, so the message renders in the
+           reader's language; a network failure reads as "failed" too. */
         setDomainFetch({
           key,
           status: "error",
           error:
-            error instanceof Error
-              ? error.message
-              : "We could not complete the domain formulas.",
+            error instanceof Error && error.message === "empty"
+              ? "insights.page.domains.errorEmpty"
+              : "insights.page.domains.errorFailed",
         });
       }
     };
@@ -1046,34 +1069,34 @@ export default function InsightsContent({
     const tiles: Array<{ label: string; value: string; caption: string }> = [];
     if (lucky.primary_colors?.[0]) {
       tiles.push({
-        label: "Lucky color",
-        value: lucky.primary_colors[0],
-        caption: "Wear it when it matters.",
+        label: t("insights.page.fortune.color"),
+        value: luckyTerm("colors", lucky.primary_colors[0], t),
+        caption: t("insights.page.fortune.colorCaption"),
       });
     }
     if (typeof lucky.lucky_numbers?.[0] === "number") {
       tiles.push({
-        label: "Lucky number",
+        label: t("insights.page.fortune.number"),
         value: String(lucky.lucky_numbers[0]),
-        caption: "Turns tend to land on it.",
+        caption: t("insights.page.fortune.numberCaption"),
       });
     }
     if (lucky.lucky_day) {
       tiles.push({
-        label: "Lucky day",
-        value: lucky.lucky_day,
-        caption: "Begin things here.",
+        label: t("insights.page.fortune.day"),
+        value: weekdayName(lucky.lucky_day, locale),
+        caption: t("insights.page.fortune.dayCaption"),
       });
     }
     if (lucky.primary_gemstone) {
       tiles.push({
-        label: "Lucky stone",
-        value: lucky.primary_gemstone,
-        caption: "Amplifies your intent.",
+        label: t("insights.page.fortune.stone"),
+        value: luckyTerm("gems", lucky.primary_gemstone, t),
+        caption: t("insights.page.fortune.stoneCaption"),
       });
     }
     return tiles;
-  }, [payload.chart.lucky_elements]);
+  }, [payload.chart.lucky_elements, t, locale]);
 
   const payloadWithDomainInsights: ChartApiResponse =
     domainInsights.length > 0
@@ -1091,9 +1114,9 @@ export default function InsightsContent({
       await navigator.clipboard.writeText(
         `${window.location.origin}/insights?${historyQs}`
       );
-      pushToast("Current chart link copied.", "success");
+      pushToast(t("insights.page.hero.copied"), "success");
     } catch {
-      pushToast("Could not copy the current chart link.", "error");
+      pushToast(t("insights.page.hero.copyFailed"), "error");
     }
   };
 
@@ -1173,14 +1196,14 @@ export default function InsightsContent({
               <span className={styles.titleSuffix}>{t("insights.headingSuffix")}</span>
             </h1>
             <p className={styles.lead}>{payload.chart.summary}</p>
-            <div className={styles.heroActions} aria-label="Report actions">
+            <div className={styles.heroActions} aria-label={t("insights.page.hero.actionsAria")}>
               <button
                 type="button"
                 className={styles.heroAction}
                 onClick={() => void copyCurrentChartLink()}
               >
                 <FiCopy size={16} />
-                Copy link
+                {t("insights.page.hero.copyLink")}
               </button>
               <PersonalStory
                 payload={payloadWithDomainInsights}
@@ -1202,8 +1225,8 @@ export default function InsightsContent({
               complementary landmark may not sit inside <main>. */}
           <div className={styles.heroAside}>
             <p className={styles.heroScript}>
-              Read it as a map,
-              <span>not a verdict.</span>
+              {t("insights.page.hero.scriptLead")}
+              <span>{t("insights.page.hero.scriptTail")}</span>
             </p>
             <ScriptRule className={`${decor.inline} ${decor.decorGold} ${decor.rule}`} />
             {/*
@@ -1228,27 +1251,27 @@ export default function InsightsContent({
                   className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm} ${styles.medallionSparkle}`}
                 />
                 <span className={styles.medallionSign}>
-                  {payload.chart.ascendant.sign} rising
+                  {t("insights.page.hero.rising", { sign: signName(payload.chart.ascendant.sign, t) })}
                 </span>
               </div>
 
-              <dl className={styles.medallionFacts} aria-label="Chart identity">
+              <dl className={styles.medallionFacts} aria-label={t("insights.page.hero.identityAria")}>
                 {heroIdentity.sun && (
                   <div>
-                    <dt>Sun</dt>
-                    <dd>{heroIdentity.sun}</dd>
+                    <dt>{planetName("Sun", t)}</dt>
+                    <dd>{signName(heroIdentity.sun, t)}</dd>
                   </div>
                 )}
                 {heroIdentity.moon && (
                   <div>
-                    <dt>Moon</dt>
-                    <dd>{heroIdentity.moon}</dd>
+                    <dt>{planetName("Moon", t)}</dt>
+                    <dd>{signName(heroIdentity.moon, t)}</dd>
                   </div>
                 )}
                 {payload.chart.dasha?.current_dasha && (
                   <div>
-                    <dt>Period</dt>
-                    <dd>{payload.chart.dasha.current_dasha}</dd>
+                    <dt>{t("insights.page.hero.period")}</dt>
+                    <dd>{planetName(payload.chart.dasha.current_dasha, t)}</dd>
                   </div>
                 )}
               </dl>
@@ -1305,7 +1328,7 @@ export default function InsightsContent({
           >
               {domainLoadState === "error" ? (
                 <LifeDomainErrorState
-                  message={domainLoadError}
+                  message={t(domainLoadError)}
                   onRetry={() => setDomainRetryToken((value) => value + 1)}
                 />
               ) : selectedDomainInsight ? (
@@ -1320,16 +1343,13 @@ export default function InsightsContent({
                     used to list all eight evidence families; that sentence is
                     now on the page that actually shows them. */}
                 <div className={styles.zoneHeader}>
-                  <p className={styles.kicker}>Ultimate Module</p>
+                  <p className={styles.kicker}>{t("insights.page.zone.kicker")}</p>
                   <h2 className={styles.zoneTitle}>
                     <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
-                    Connected Insight Zone
+                    {t("insights.page.zone.title")}
                     <Sparkle className={`${decor.inline} ${decor.decorGold} ${decor.sparkleSm}`} />
                   </h2>
-                  <p className={styles.zoneSubtitle}>
-                    Seven areas, each read against its own evidence. Most active
-                    first; the full workup opens on its own page.
-                  </p>
+                  <p className={styles.zoneSubtitle}>{t("insights.page.zone.subtitle")}</p>
                 </div>
 
                 {/*
@@ -1339,7 +1359,7 @@ export default function InsightsContent({
                   doing the work the reference draws as a highlighted card, so
                   there was no new state to invent.
                 */}
-                <div className={styles.zoneCards} role="tablist" aria-label="Life areas">
+                <div className={styles.zoneCards} role="tablist" aria-label={t("insights.page.nav.lifeAreas")}>
                   {rankedDomainInsights.map((domain) => (
                     <button
                       key={domain.key}
@@ -1355,7 +1375,7 @@ export default function InsightsContent({
                         </span>
                       )}
                       <span className={styles.zoneCardText}>
-                        <span className={styles.zoneCardTitle}>{domain.label}</span>
+                        <span className={styles.zoneCardTitle}>{domainName(domain, t)}</span>
                         <span className={styles.zoneCardBody}>
                           {domain.display.headline}
                         </span>
@@ -1386,13 +1406,13 @@ export default function InsightsContent({
                     <div className={styles.domainHeader}>
                       <div>
                         <p className={styles.kicker}>
-                          {selectedDomainInsight.label}
+                          {domainName(selectedDomainInsight, t)}
                         </p>
                         <h3>{selectedDomainInsight.display.headline}</h3>
                       </div>
                       {selectedDomainInsight.signal_profile?.activity_band && (
                         <span className={styles.domainSignalBadge}>
-                          {selectedDomainInsight.signal_profile.activity_band} activity
+                          {activityBadge(selectedDomainInsight.signal_profile.activity_band, t)}
                         </span>
                       )}
                     </div>
@@ -1418,7 +1438,9 @@ export default function InsightsContent({
                       href={`${lifeAreasHref}&domain=${selectedDomainInsight.key}`}
                       className={styles.domainOpenLink}
                     >
-                      Full reading for {selectedDomainInsight.label.toLowerCase()}
+                      {t("insights.page.zone.fullReadingFor", {
+                        area: domainNameInSentence(selectedDomainInsight, t, language),
+                      })}
                       <span aria-hidden="true">&rarr;</span>
                     </Link>
                   </motion.article>
@@ -1440,9 +1462,9 @@ export default function InsightsContent({
               variants={bentoItemFromRight}
               aria-labelledby="house-support-heading"
             >
-              <p className={styles.kicker}>House support</p>
+              <p className={styles.kicker}>{t("insights.page.houseSupport.kicker")}</p>
               <h2 id="house-support-heading" className={styles.rowPanelTitle}>
-                How much support your chart receives from the houses
+                {t("insights.page.houseSupport.heading")}
               </h2>
               <PanelErrorBoundary panelName="House Support">
                 <HouseSupportPanel
@@ -1452,7 +1474,7 @@ export default function InsightsContent({
                 />
               </PanelErrorBoundary>
               <Link href={houseSupportHref} className={styles.sectionOpenLink}>
-                What each house is responsible for
+                {t("insights.page.houseSupport.link")}
                 <FiArrowUpRight aria-hidden="true" />
               </Link>
             </motion.section>
@@ -1460,18 +1482,26 @@ export default function InsightsContent({
         </motion.div>
 
         <CollapsibleSection
-          kicker="Chart details"
-          title="Placements and calculation settings"
+          kicker={t("insights.page.details.kicker")}
+          title={t("insights.page.details.title")}
           defaultOpen={false}
           className={styles.chartDetails}
           persistKey={`${sectionStateScope}:chart-details`}
           summary={
             <>
               <span>
-                <strong>{payload.chart.planets.length}</strong> placements
+                <Emphasise
+                  text={t("insights.page.details.placements", {
+                    count: String(payload.chart.planets.length),
+                  })}
+                />
               </span>
               <span>
-                <strong>{payload.chart.houses.length}</strong> houses
+                <Emphasise
+                  text={t("insights.page.details.houses", {
+                    count: String(payload.chart.houses.length),
+                  })}
+                />
               </span>
               {payload.chart.calculation_audit?.ayanamsha && (
                 <span>{payload.chart.calculation_audit.ayanamsha}</span>
@@ -1485,11 +1515,11 @@ export default function InsightsContent({
                 giving it a 240px rail was what squeezed the placement grid. */}
             <section className={styles.calculationPanel}>
               <div className={styles.calculationIdentity}>
-                <p className={styles.kicker}>Calculation method</p>
+                <p className={styles.kicker}>{t("insights.page.details.method")}</p>
                 <h3>{payload.engine.engine_label}</h3>
                 <p className={styles.calculationProvider}>
                   {payload.engine.fallback_mode
-                    ? "Fallback calculation"
+                    ? t("insights.page.details.fallback")
                     : payload.engine.ephemeris_provider}
                 </p>
               </div>
@@ -1501,7 +1531,8 @@ export default function InsightsContent({
                 <div className={styles.methodTier}>
                   <div className={styles.methodTierHead}>
                     <span className={styles.methodTierKicker}>
-                      Main method <span aria-hidden="true">·</span> Ayanamsha
+                      {t("insights.page.details.mainMethod")} <span aria-hidden="true">·</span>{" "}
+                      {t("insights.page.details.ayanamsha")}
                     </span>
                     <span className={styles.methodTierValue}>
                       {methodAxes.active
@@ -1513,7 +1544,7 @@ export default function InsightsContent({
                     <div
                       className={styles.methodChips}
                       role="radiogroup"
-                      aria-label="Main method, ayanamsha"
+                      aria-label={`${t("insights.page.details.mainMethod")}, ${t("insights.page.details.ayanamsha")}`}
                     >
                       {methodAxes.traditions.map((tradition) => {
                         const isActive = tradition.key === methodAxes.active?.key;
@@ -1543,7 +1574,8 @@ export default function InsightsContent({
                 <div className={styles.methodTier}>
                   <div className={styles.methodTierHead}>
                     <span className={styles.methodTierKicker}>
-                      Sub method <span aria-hidden="true">·</span> House system
+                      {t("insights.page.details.subMethod")} <span aria-hidden="true">·</span>{" "}
+                      {t("insights.page.details.houseSystem")}
                     </span>
                     {/* The catalog label, not payload.engine.house_system:
                         the registry calls whole sign "Whole Sign" and the
@@ -1560,7 +1592,7 @@ export default function InsightsContent({
                     <div
                       className={styles.methodChips}
                       role="radiogroup"
-                      aria-label="Sub method, house system"
+                      aria-label={`${t("insights.page.details.subMethod")}, ${t("insights.page.details.houseSystem")}`}
                     >
                       {methodAxes.styles.map((engine) => {
                         const isActive =
@@ -1601,8 +1633,8 @@ export default function InsightsContent({
         {payload.chart.nakshatra && payload.chart.dasha && (
           <CollapsibleSection
             id="vimshottari-dashas"
-            kicker="Timing detail"
-            title="Dasha periods and sub-periods"
+            kicker={t("insights.page.dasha.kicker")}
+            title={t("insights.page.dasha.title")}
             defaultOpen={true}
             className={`${styles.cardRules} ${styles.cardDasha}`}
             /* `:open-default` retires the keys written while this section
@@ -1614,18 +1646,28 @@ export default function InsightsContent({
             summary={
               <>
                 <span>
-                  <strong>{payload.chart.dasha.current_dasha}</strong> maha dasha
+                  <Emphasise
+                    text={t("insights.page.dasha.maha", {
+                      planet: planetName(payload.chart.dasha.current_dasha, t),
+                    })}
+                  />
                 </span>
                 {payload.chart.dasha.current_antardasha && (
                   <span>
-                    <strong>{payload.chart.dasha.current_antardasha}</strong> antardasha
+                    <Emphasise
+                      text={t("insights.page.dasha.antar", {
+                        planet: planetName(payload.chart.dasha.current_antardasha, t),
+                      })}
+                    />
                   </span>
                 )}
                 {payload.chart.dasha.current_dasha_end && (
                   <span>
-                    to{" "}
-                    {formatMonthYear(payload.chart.dasha.current_dasha_end) ??
-                      payload.chart.dasha.current_dasha_end}
+                    {t("insights.page.dasha.until", {
+                      date:
+                        formatMonthYear(payload.chart.dasha.current_dasha_end, locale) ??
+                        payload.chart.dasha.current_dasha_end,
+                    })}
                   </span>
                 )}
               </>
@@ -1661,12 +1703,12 @@ export default function InsightsContent({
             <SectionGateway
               href={`/insights/timing?${historyQs}`}
               icon={<Clock3 />}
-              eyebrow="01 / Timing and electional"
+              eyebrow={t("insights.page.gateways.timing.eyebrow")}
               variant="timing"
-              heading="Your Timing"
-              blurb="Explore upcoming periods and windows for important beginnings."
-              footnote="Starting windows are scored against your own chart."
-              ctaLabel="Explore your timing"
+              heading={t("insights.page.gateways.timing.heading")}
+              blurb={t("insights.page.gateways.timing.blurb")}
+              footnote={t("insights.page.gateways.timing.footnote")}
+              ctaLabel={t("insights.page.gateways.timing.cta")}
             >
               <TimingGatewayPreview dasha={payload.chart.dasha} href={`/insights/timing?${historyQs}`} />
             </SectionGateway>
@@ -1678,12 +1720,14 @@ export default function InsightsContent({
                 <SectionGateway
                   href={`/insights/divisional-charts?${historyQs}`}
                   icon={<Layers3 />}
-                  eyebrow="02 / Divisional charts"
+                  eyebrow={t("insights.page.gateways.atlas.eyebrow")}
                   variant="atlas"
-                  heading="Your Chart Atlas"
-                  blurb="See how your birth chart unfolds across identity, relationships, and career."
-                  footnote="Higher divisions depend on the accuracy of your birth time."
-                  ctaLabel={`View all ${Object.keys(payload.chart.divisional_charts).length} charts`}
+                  heading={t("insights.page.gateways.atlas.heading")}
+                  blurb={t("insights.page.gateways.atlas.blurb")}
+                  footnote={t("insights.page.gateways.atlas.footnote")}
+                  ctaLabel={t("insights.page.gateways.atlas.cta", {
+                    count: String(Object.keys(payload.chart.divisional_charts).length),
+                  })}
                 >
                   <AtlasGatewayPreview charts={payload.chart.divisional_charts} historyQs={historyQs} />
                 </SectionGateway>
@@ -1696,12 +1740,12 @@ export default function InsightsContent({
             <SectionGateway
               href={`/insights/full-reading?${historyQs}`}
               icon={<BookOpen />}
-              eyebrow="03 / Findings and evidence"
+              eyebrow={t("insights.page.gateways.reading.eyebrow")}
               variant="reading"
-              heading="Your Reading, Explained"
-              blurb="Connect the patterns in your life with the placements in your chart."
-              footnote="Your complete reading includes every matched finding and its evidence."
-              ctaLabel="Read every finding"
+              heading={t("insights.page.gateways.reading.heading")}
+              blurb={t("insights.page.gateways.reading.blurb")}
+              footnote={t("insights.page.gateways.reading.footnote")}
+              ctaLabel={t("insights.page.gateways.reading.cta")}
             >
               <ReadingEvidencePreview rules={payload.chart.deterministic_rules} yogaCount={payload.chart.yogas?.length ?? 0} />
             </SectionGateway>
@@ -1711,8 +1755,8 @@ export default function InsightsContent({
 
         <CollapsibleSection
           id="life-shifts"
-          kicker="Major Life Shifts"
-          title="Active and upcoming life shifts"
+          kicker={t("insights.page.lifeShifts.kicker")}
+          title={t("insights.page.lifeShifts.title")}
           defaultOpen={true}
           className={styles.cardKarma}
           persistKey={`${sectionStateScope}:life-shifts`}
@@ -1726,7 +1770,7 @@ export default function InsightsContent({
             </PanelErrorBoundary>
           </LazyPanel>
           <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>
-            Every chapter, past and ahead
+            {t("insights.page.lifeShifts.link")}
             <FiArrowUpRight aria-hidden="true" />
           </Link>
         </CollapsibleSection>
@@ -1740,9 +1784,9 @@ export default function InsightsContent({
             <div className={styles.fortuneIntro}>
               <SunGlyph className={`${decor.inline} ${decor.decorGold} ${decor.sun}`} />
               <h2 id="fortune-band-heading" className={styles.fortuneTitle}>
-                Your Practical Fortune
+                {t("insights.page.fortune.heading")}
               </h2>
-              <p className={styles.fortuneSubtitle}>Everyday magic, made simple.</p>
+              <p className={styles.fortuneSubtitle}>{t("insights.page.fortune.subtitle")}</p>
               <Flourish className={`${decor.inline} ${decor.decorGold} ${decor.flourish}`} />
             </div>
 
@@ -1773,16 +1817,20 @@ export default function InsightsContent({
         {payload.chart.lucky_elements && (
           <CollapsibleSection
             id="fortune"
-            kicker="Secondary details"
-            title="Lucky elements and practical fortune"
+            kicker={t("insights.page.fortune.kicker")}
+            title={t("insights.page.fortune.title")}
             defaultOpen={true}
             className={styles.cardRules}
             persistKey={`${sectionStateScope}:fortune`}
             summary={
               <>
-                <span>Colours, numbers, days</span>
+                <span>{t("insights.page.fortune.summaryKinds")}</span>
                 <span>
-                  keyed to <strong>{payload.chart.ascendant.sign}</strong> lagna
+                  <Emphasise
+                    text={t("insights.page.fortune.keyedTo", {
+                      sign: signName(payload.chart.ascendant.sign, t),
+                    })}
+                  />
                 </span>
               </>
             }
@@ -1807,39 +1855,43 @@ export default function InsightsContent({
         >
           <div className={styles.continuationHeader}>
             <div>
-              <p className={styles.kicker}>Explore next</p>
+              <p className={styles.kicker}>{t("insights.page.next.kicker")}</p>
               <h2 id="continue-reading-heading" className={styles.continuationTitle}>
-                Keep going with a focused tool
+                {t("insights.page.next.heading")}
               </h2>
             </div>
-            <p className={styles.continuationLead}>
-              Three clear next steps, without repeating the reading you just finished.
-            </p>
+            <p className={styles.continuationLead}>{t("insights.page.next.lead")}</p>
           </div>
 
           <div className={`${styles.continuationActions} ${styles.continuationActionsCompact}`}>
             <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
               <span className={styles.continuationActionBody}>
-                <strong>Current transits</strong>
-                <span>Compare today’s sky with your natal chart.</span>
+                <strong>{t("insights.page.next.transitsTitle")}</strong>
+                <span>{t("insights.page.next.transitsBody")}</span>
               </span>
-              <span className={styles.continuationRoute}>Open tool <span aria-hidden="true">→</span></span>
+              <span className={styles.continuationRoute}>
+                {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
+              </span>
             </Link>
 
             <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
               <span className={styles.continuationActionBody}>
-                <strong>Partner comparison</strong>
-                <span>Compare two complete birth profiles.</span>
+                <strong>{t("insights.page.next.partnerTitle")}</strong>
+                <span>{t("insights.page.next.partnerBody")}</span>
               </span>
-              <span className={styles.continuationRoute}>Open tool <span aria-hidden="true">→</span></span>
+              <span className={styles.continuationRoute}>
+                {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
+              </span>
             </Link>
 
             <Link href={advancedInsightsHref} className={styles.continuationAction} data-tone="gold">
               <span className={styles.continuationActionBody}>
-                <strong>All advanced tools</strong>
-                <span>Choose another specialist reading.</span>
+                <strong>{t("insights.page.next.advancedTitle")}</strong>
+                <span>{t("insights.page.next.advancedBody")}</span>
               </span>
-              <span className={styles.continuationRoute}>Browse tools <span aria-hidden="true">→</span></span>
+              <span className={styles.continuationRoute}>
+                {t("insights.page.next.browseTools")} <span aria-hidden="true">→</span>
+              </span>
             </Link>
           </div>
         </motion.section>

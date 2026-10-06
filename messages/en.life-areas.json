@@ -3,8 +3,6 @@
     "navLabel": "Life areas",
     "chooseArea": "Choose a life area",
     "mostActiveFirst": "Most active first",
-    "activityBadge": "{band} activity",
-    "conclusionStrength": "{strength} conclusion",
     "readingDepth": "Reading depth",
     "modeDetailed": "Detailed",
     "modeAction": "Action Plan",
@@ -36,7 +34,10 @@
       "errorKicker": "Life chapters",
       "errorHeading": "The life chapters could not be prepared.",
       "errorFallback": "No chart data was returned.",
-      "backToReading": "Back to your reading"
+      "backToReading": "Back to your reading",
+      "heroKicker": "Major life shifts",
+      "heroTitle": "{name}'s life chapters",
+      "heroLead": "Every chapter this chart marks out — the one running now, what follows it, and the ones already behind you. Dates are planning windows, not deadlines."
     },
     "kalatraHeading": "Married life in detail",
     "kalatraNote": "Five facets, each read from its own house",
@@ -60,6 +61,135 @@
       "noteLabel": "translator's note",
       "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka.",
       "creditStrijataka": "Passages marked Strijataka are quoted as printed in B. Suryanarain Rao's Strijataka, or Female Horoscopy (1931), a book on women's birth charts. Words in square brackets are ours, not the book's."
+    },
+    "hero": {
+      "kicker": "Ultimate Module · Life areas",
+      "title": "{name}'s life areas in full",
+      "lead": "Each area runs its own evidence matrix across natal promise, supporting factors, divisional confirmation, measured strength, house support, combinations, timing, and contradictions."
+    },
+    "confirmation": {
+      "confirmed": "confirmed",
+      "qualified": "qualified",
+      "improved": "improved",
+      "contradictory": "contradictory",
+      "insufficient": "insufficient"
+    },
+    "conclusion": {
+      "strong": "strong conclusion",
+      "moderate": "moderate conclusion",
+      "cautious": "cautious conclusion"
+    },
+    "subthemeBands": {
+      "leading": "leading",
+      "supporting": "supporting",
+      "developing": "developing"
+    },
+    "timingWindows": {
+      "current": "Current activation",
+      "next": "Next stronger cycle",
+      "caution": "Caution condition"
+    },
+    "families": {
+      "primary": "Natal promise",
+      "supporting": "Supporting factors",
+      "divisional": "Divisional confirmation",
+      "strength": "Delivery capacity",
+      "house_support": "House support",
+      "yoga": "Combination support",
+      "timing": "Timing and activation",
+      "contradiction": "Contradiction check"
+    },
+    "evidenceStatus": {
+      "support": "support",
+      "pressure": "pressure",
+      "mixed": "mixed",
+      "context": "context"
+    },
+    "ruleImpact": {
+      "support": "Support",
+      "pressure": "Pressure",
+      "activation": "Activation",
+      "context": "Context"
+    },
+    "ruleLabels": {
+      "house": "House rule",
+      "evidence": "Evidence rule",
+      "timing": "Timing rule",
+      "action": "Action rule"
+    },
+    "claims": {
+      "primaryHouse": "Primary house",
+      "houseSign": "Sign on that house",
+      "houseLord": "House lord",
+      "lordPlacement": "Lord placement",
+      "supportingHouse": "Supporting house",
+      "supportingLord": "Supporting lord",
+      "anchorPlanet": "Anchor planet",
+      "houses": {
+        "h1": "1st house",
+        "h2": "2nd house",
+        "h3": "3rd house",
+        "h4": "4th house",
+        "h5": "5th house",
+        "h6": "6th house",
+        "h7": "7th house",
+        "h8": "8th house",
+        "h9": "9th house",
+        "h10": "10th house",
+        "h11": "11th house",
+        "h12": "12th house"
+      }
+    },
+    "copy": {
+      "love_life": {
+        "description": "Separates attraction, partnership durability, emotional availability, and the timing that makes connection easier to sustain.",
+        "clarity": "Do not judge love from Venus alone. Read the 7th house for partnership, the 5th for romance, the house lord for delivery, and timing triggers for when the pattern becomes visible.",
+        "decisionRule": "A relationship signal is stronger when support, watchout, and timing notes repeat the same theme.",
+        "boundaryRule": "If the watchout contradicts the support, treat the watchout as the condition that must be managed before the support pays off."
+      },
+      "career": {
+        "description": "Distinguishes vocation, workload, authority, public reputation, service pressure, and the route through which professional recognition is built.",
+        "clarity": "Do not read career from the 10th house alone. Weigh the 10th sign, its lord, the 6th house work pattern, and Saturn's discipline filter together.",
+        "decisionRule": "Career moves are cleaner when the timing trigger reinforces both the 10th-house promise and the lord's placement.",
+        "boundaryRule": "If pressure houses are involved, advancement may require systems, mentors, and repeatable proof before visibility arrives."
+      },
+      "family": {
+        "description": "Clarifies home life, inherited emotional patterns, family support, private stability, and the habits that make belonging feel reliable.",
+        "clarity": "Read the 4th house for emotional ground, the 2nd for lineage and speech, the Moon for felt safety, and the house lord for where repair happens.",
+        "decisionRule": "Family guidance is strongest when the support pattern names the same need as the long-game statement.",
+        "boundaryRule": "When the watchout is active, protect steadiness first; resolution works better after the emotional baseline is restored."
+      },
+      "inheritance": {
+        "description": "Frames shared resources, legacy, debt, hidden obligations, family assets, and the maturity needed around resource transitions.",
+        "clarity": "Read the 8th house for transferred resources, the 2nd for stored value, Jupiter for stewardship, and the lord placement for the route of responsibility.",
+        "decisionRule": "Treat inheritance signals as practical planning prompts when they repeat across support, watchout, and timing sections.",
+        "boundaryRule": "If the watchout names hidden cost or delay, prioritize documentation, transparency, and patient sequencing."
+      },
+      "influence": {
+        "description": "Looks at public impact, allies, social reach, authority, reputation, and the conditions that help your voice move people.",
+        "clarity": "Read the 11th house for networks, the 10th for public standing, the Sun for visibility, and the lord for where influence is earned.",
+        "decisionRule": "Influence grows fastest when timing triggers amplify an existing support pattern rather than forcing visibility too early.",
+        "boundaryRule": "If the watchout names diffusion or delay, narrow the audience and make the message easier to repeat."
+      },
+      "life_cycle": {
+        "description": "Connects identity, reinvention, recovery cycles, resilience, and the periods where life asks for a cleaner version of self-direction.",
+        "clarity": "Read the 1st house for identity, the 8th for transformation, the Moon for adaptation, and the lord placement for the terrain of change.",
+        "decisionRule": "A life-cycle signal deserves priority when timing notes and long-game guidance both point toward the same kind of maturity.",
+        "boundaryRule": "If the watchout is active, slow the pace and make the next step smaller, clearer, and easier to sustain."
+      },
+      "travel_destinations": {
+        "description": "Clarifies long-distance travel, short journeys, relocation pull, foreign links, pilgrimage themes, and what makes a place feel meaningful.",
+        "clarity": "Read the 9th house for distance and meaning, the 3rd for movement and logistics, Jupiter for expansion, and the lord placement for travel purpose.",
+        "decisionRule": "Travel signals become practical when timing triggers support both opportunity and preparation.",
+        "boundaryRule": "If watchouts name friction, treat planning, documents, health, and timing buffers as part of the reading rather than afterthoughts."
+      }
+    },
+    "kalatraFacets": {
+      "physical_intimacy": "The physical side",
+      "privacy_and_rest": "Privacy, rest and the bed",
+      "in_laws": "The family you marry into",
+      "bond_durability": "Whether the bond holds",
+      "desire_pattern": "The shape of desire"
     }
   }
 }

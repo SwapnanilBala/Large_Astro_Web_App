@@ -1,11 +1,18 @@
-import { render, screen, cleanup } from "@testing-library/react";
+import type { ReactNode } from "react";
+import { render as renderBare, screen, cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 import type { DeterministicRule, DivisionalChartInfo } from "@/lib/astro-types";
+import { LanguageProvider } from "@/lib/i18n-context";
+import en from "@/messages/en.json";
 import AtlasGatewayPreview from "./atlas-gateway-preview";
 import TimingGatewayPreview from "./timing-gateway-preview";
 import ReadingEvidencePreview from "./reading-evidence-preview";
 
 afterEach(cleanup);
+
+/* The previews read their labels through the desktop provider, in English here. */
+const render = (node: ReactNode) =>
+  renderBare(<LanguageProvider baseMessages={en}>{node}</LanguageProvider>);
 
 function chart(division: number, ascendantSign = "Aries"): DivisionalChartInfo {
   return {

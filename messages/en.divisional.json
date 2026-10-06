@@ -341,7 +341,15 @@
         "vargaHouseDisplayValue": "Whole-sign houses derived from the {label} Ascendant",
         "birthTimeStatus": "Birth-time status",
         "cautionTitle": "Interpretive boundary",
-        "cautionBody": "This page reports calculated signs, whole-sign houses, rulers, classical dignity, and timing-lord location. It does not infer exact divisional aspects, treat sign recurrence as automatically positive, or let {label} override D1."
+        "cautionBody": "This page reports calculated signs, whole-sign houses, rulers, classical dignity, and timing-lord location. It does not infer exact divisional aspects, treat sign recurrence as automatically positive, or let {label} override D1.",
+        "houseSystems": {
+          "whole_sign": "Whole Sign",
+          "equal": "Equal",
+          "placidus": "Placidus",
+          "koch": "Koch",
+          "campanus": "Campanus",
+          "regiomontanus": "Regiomontanus"
+        }
       },
       "pager": {
         "label": "Adjacent key divisional charts",
@@ -351,6 +359,13 @@
       "footer": {
         "note": "Divisional charts refine a natal promise; they do not replace it. Stronger conclusions require reliable birth data and agreement with independent evidence.",
         "returnLink": "Return to your full reading"
+      },
+      "houseShort": "H{house}",
+      "dignities": {
+        "exalted": "Exalted",
+        "own_sign": "Own Sign",
+        "debilitated": "Debilitated",
+        "neutral": "Neutral"
       }
     }
   }

@@ -76,6 +76,15 @@ export function planetName(planet: string, tr: Translate): string {
   return resolve(tr, planetNameKey(planet), planet);
 }
 
+/* The ascendant, which the engine's position tables list beside the planets
+   as "Ascendant". */
+export const ASCENDANT_NAME_KEY = "lagnaChart.ascendant";
+
+/** A row of a position table: a planet, or the ascendant. */
+export function pointName(point: string, tr: Translate): string {
+  return point === "Ascendant" ? resolve(tr, ASCENDANT_NAME_KEY, point) : planetName(point, tr);
+}
+
 /** A planet as it is written in a chart cell: Su, Mo, Ma; सू, चं, मं in Hindi. */
 export function planetAbbreviation(planet: string, tr: Translate): string {
   const id = planetId(planet);
@@ -111,6 +120,24 @@ export function signName(sign: string, tr: Translate): string {
 export function signAbbreviation(sign: string, tr: Translate): string {
   const name = signName(sign, tr);
   return /^\p{Script=Latin}/u.test(name) ? Array.from(name).slice(0, 3).join("") : name;
+}
+
+/* ── Aspects ── */
+
+/* The five every engine here names: lib/engines/aspect-engine.ts and the
+   compatibility service's ASPECT_DEFS. Their translations were made for the
+   compatibility page and sit in the desktop baseline. */
+const ASPECT_IDS: ReadonlySet<string> = new Set(["conjunction", "opposition", "trine", "square", "sextile"]);
+
+/** The catalog key for an aspect's name. */
+export function aspectNameKey(aspect: string): string | null {
+  const id = aspect.toLowerCase();
+  return ASPECT_IDS.has(id) ? `compatibility.aspectTypes.${id}` : null;
+}
+
+/** "Square" as the reader reads it: Quadrat, केंद्र. */
+export function aspectName(aspect: string, tr: Translate): string {
+  return resolve(tr, aspectNameKey(aspect), aspect);
 }
 
 /* ── Nakshatras ── */

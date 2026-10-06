@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 import { sessionFromCookieStore } from "@/lib/identity/require-session";
@@ -8,6 +7,7 @@ import MissingChartNotice from "@/app/components/MissingChartNotice";
 import { buildChartHistoryQuery, readChartParams } from "@/lib/chart-params";
 import PageTransition from "@/app/components/PageTransition";
 import { getAdvancedFocusView } from "./advanced-views";
+import AdvancedGate from "./advanced-gate";
 import { chartPageMetadata } from "@/lib/page-metadata";
 
 export const maxDuration = 60;
@@ -114,30 +114,10 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
             queryString={buildChartHistoryQuery(chartParams)}
             labelKey="home.back"
           />
-          <section className="dashboard-shell advanced-gate">
-            <p className="kicker">Members only</p>
-            <h1>The advanced reading needs an account</h1>
-            <p className="lead">
-              This section writes a full reading of your chart -- the timing, the
-              aspects, the harmonics and the strengths -- and keeps every table
-              behind it. It is the most expensive thing the app does, so it is
-              kept for people who have signed in.
-            </p>
-            <div className="advanced-gate-actions">
-              <Link
-                href={`/login?returnTo=${encodeURIComponent(returnTo)}`}
-                className="ghost-link advanced-gate-primary"
-              >
-                Sign in to continue
-              </Link>
-              <Link
-                href={`/insights?${buildChartHistoryQuery(chartParams)}`}
-                className="ghost-link"
-              >
-                Back to your reading
-              </Link>
-            </div>
-          </section>
+          <AdvancedGate
+            signInHref={`/login?returnTo=${encodeURIComponent(returnTo)}`}
+            readingHref={`/insights?${buildChartHistoryQuery(chartParams)}`}
+          />
         </div>
       </PageTransition>
     );
