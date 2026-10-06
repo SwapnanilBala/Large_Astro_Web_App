@@ -2,7 +2,7 @@
  * Render the personal-story PDF for one fixed sample chart.
  *
  *   npm run pdf:sample                 -- engine prose, free, instant
- *   npm run pdf:sample -- --prose      -- Opus 5 written prose, BILLED, ~2 min
+ *   npm run pdf:sample -- --prose      -- Haiku 4.5 written prose, BILLED
  *   npm run pdf:sample -- --prose --fresh   -- ignore the cached prose
  *
  * WHY --prose EXISTS. The engine's own prose is 1,100 words for the whole
@@ -44,18 +44,18 @@ import { PersonalStoryPdfDocument } from "@/app/(desktop)/insights/components/pe
 const root = process.env.STORY_PDF_ROOT || path.resolve(__dirname, "..");
 const fonts = path.join(root, "public", "fonts");
 const outputDir = path.join(root, "output", "pdf");
-const proseCachePath = () => path.join(outputDir, `sample-prose-${effort}.json`);
+const proseCachePath = () => path.join(outputDir, `sample-prose-${MODEL}.json`);
 const routePath = path.join(root, "app", "api", "chart", "story-prose", "route.ts");
 
 const wantProse = process.argv.includes("--prose");
 const wantFresh = process.argv.includes("--fresh");
 /*
- * Which effort to render. The route writes every report at low since
- * 2026-10-04, so that is the default; the flag stays for comparing levels,
- * and each level caches separately.
+ * The model the route writes with: Claude Haiku 4.5 since 2026-10-06. It
+ * takes no effort setting, so the --effort flag that compared levels on Opus
+ * is gone. Prose caches per model, so a file an earlier model wrote is never
+ * passed off as this one's.
  */
-const effort = (process.argv.find((a) => a.startsWith("--effort="))?.slice(9)
-  ?? "low") as "low" | "medium" | "high" | "xhigh" | "max";
+const MODEL = "claude-haiku-4-5";
 
 Font.register({
   family: "Cinzel",
@@ -144,14 +144,13 @@ async function writtenProse(story: PersonalStory) {
   const client = new Anthropic({ apiKey, timeout: 250_000 });
   const facts = buildStoryProseFacts(story, birth.name);
 
-  console.log(`prose: calling claude-opus-5-5 at ${effort} effort, one call, please wait...`);
+  console.log(`prose: calling ${MODEL}, one call, please wait...`);
   const startedAt = Date.now();
   const response = await client.messages
     .stream({
-      model: "claude-opus-5-5",
+      model: MODEL,
       max_tokens: 32000,
       output_config: {
-        effort,
         format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
       },
       system: [{ type: "text", text: readSystemPrompt() }],
@@ -160,12 +159,13 @@ async function writtenProse(story: PersonalStory) {
     .finalMessage();
   const elapsed = Date.now() - startedAt;
 
+  /* Claude Haiku 4.5, $ per token. */
   const usage = response.usage;
   const cost =
-    (usage.input_tokens ?? 0) * 5e-6 +
-    (usage.output_tokens ?? 0) * 25e-6 +
-    (usage.cache_read_input_tokens ?? 0) * 0.5e-6 +
-    (usage.cache_creation_input_tokens ?? 0) * 6.25e-6;
+    (usage.input_tokens ?? 0) * 1e-6 +
+    (usage.output_tokens ?? 0) * 5e-6 +
+    (usage.cache_read_input_tokens ?? 0) * 0.1e-6 +
+    (usage.cache_creation_input_tokens ?? 0) * 1.25e-6;
   console.log(
     `prose: ${(elapsed / 1000).toFixed(1)}s  in ${usage.input_tokens}  out ${usage.output_tokens}  ` +
       `${response.stop_reason}  $${cost.toFixed(4)}`,
@@ -216,7 +216,7 @@ async function main() {
   mkdirSync(outputDir, { recursive: true });
   const outputPath = path.join(
     outputDir,
-    wantProse ? `sample-client-personal-story-${effort}.pdf` : "sample-client-personal-story.pdf",
+    wantProse ? `sample-client-personal-story-${MODEL}.pdf` : "sample-client-personal-story.pdf",
   );
 
   await renderToFile(

@@ -5,13 +5,15 @@
  * which costs nothing and is the way to check the selection.
  *
  *   npx tsx scripts/knowledge/sample-area-classics.ts 1985-11-02 06:15 --dry
- *   npx tsx scripts/knowledge/sample-area-classics.ts 1990-05-15 10:30 Hindi low 7001
- *   npx tsx scripts/knowledge/sample-area-classics.ts 1990-05-16 11:09 English low 7001 --lat=35.69 --lng=139.69 --tz=540
- *   npx tsx scripts/knowledge/sample-area-classics.ts 1992-03-08 14:20 English low 7001 --sex=female --dry
+ *   npx tsx scripts/knowledge/sample-area-classics.ts 1990-05-15 10:30 Hindi 7001
+ *   npx tsx scripts/knowledge/sample-area-classics.ts 1990-05-16 11:09 English 7001 --lat=35.69 --lng=139.69 --tz=540
+ *   npx tsx scripts/knowledge/sample-area-classics.ts 1992-03-08 14:20 English 7001 --sex=female --dry
  *
- * Arguments: birth date, birth time, the language as the prompt names it, the
- * effort, and the port of a running dev server, which is where the chart comes
- * from. The place defaults to Bengaluru (+5:30); --lat, --lng and --tz
+ * Arguments: birth date, birth time, the language as the prompt names it, and
+ * the port of a running dev server, which is where the chart comes from.
+ * (There was an effort argument before the route moved to Claude Haiku 4.5 on
+ * 2026-10-06; Haiku takes no effort setting.) The place defaults to Bengaluru
+ * (+5:30); --lat, --lng and --tz
  * (minutes east of UTC) choose another; --sex=female or --sex=male is the
  * reader's sex at birth, which opens the chapters on women's charts. Passages
  * are read from the corpus files rather than the table, withheld ones dropped,
@@ -43,7 +45,7 @@ config({ path: ".env.local", quiet: true });
 
 async function main() {
   const args = process.argv.slice(2);
-  const [date = "1985-11-02", time = "06:15", language = "English", effort = "low", port = "7001"] = args.filter(
+  const [date = "1985-11-02", time = "06:15", language = "English", port = "7001"] = args.filter(
     (arg) => !arg.startsWith("--"),
   );
   const flag = (name: string, fallback: string) =>
@@ -97,9 +99,8 @@ async function main() {
 
   const started = Date.now();
   const response = await new Anthropic().messages.create({
-    model: "claude-opus-5-5",
+    model: "claude-haiku-4-5",
     max_tokens: 6000,
-    output_config: { effort: effort as "low" | "medium" | "high" },
     system: [{ type: "text", text: AREA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
     messages: [
       {
@@ -111,7 +112,7 @@ async function main() {
   const readings = areaReadingsFrom(response.content, selection);
 
   console.log(
-    `\n${selection.length} areas | ${effort} | ${((Date.now() - started) / 1000).toFixed(1)}s |`,
+    `\n${selection.length} areas | ${response.model} | ${((Date.now() - started) / 1000).toFixed(1)}s |`,
     `${response.usage.input_tokens} in + ${response.usage.cache_read_input_tokens ?? 0} cached +`,
     `${response.usage.output_tokens} out | ${response.stop_reason}`,
   );

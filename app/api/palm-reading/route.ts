@@ -22,15 +22,15 @@ function logApiError(route: string, error: unknown, context?: Record<string, unk
 }
 
 /*
- * Claude Opus 5.5 reads the palm; GPT-4o is the fallback.
+ * Claude Opus 5 reads the palm; GPT-4o is the fallback.
  *
- * (Opus 5 until 2026-10-04, when every route moved to Opus 5.5 at low effort
- * to hold costs down: 20% cheaper per token, and documented to read images
- * more accurately at every effort. The timings below were measured on Opus 5.
- * Opus 5.5 tends to think somewhat more per turn at the same effort, which is
- * exactly the truncation risk this header describes, so MAX_READING_TOKENS
- * went from 16000 to 24000 -- headroom is free, since billing is per token
- * generated. Re-measure once the account's monthly limit allows.)
+ * (Opus 5 again since 2026-10-06, at low effort, by the owner's call. It was
+ * Opus 5.5 at low from 2026-10-04, when every route moved to it to hold costs
+ * down, and the other routes went on to Claude Haiku 4.5 on the 6th. The
+ * timings below were measured on Opus 5, so they describe this route again.
+ * MAX_READING_TOKENS stays at the 24000 it was raised to for Opus 5.5:
+ * truncation is this route's failure mode, and headroom is free, since
+ * billing is per token generated.)
  *
  * It was GPT-4o alone, and the reading it produced was accurate about the hand
  * and generic about the person -- the failure mode being that palmistry prose
@@ -523,13 +523,13 @@ async function readWithClaude({ image, mediaType, systemPrompt, userText }: Visi
     timeout: ANTHROPIC_TIMEOUT_MS,
   });
 
-  /* Streamed because max_tokens is 6000 and high effort thinks before it
-     writes: the SDK asks for streaming at this size precisely so a long
-     generation cannot trip an HTTP timeout. finalMessage() hands back the
-     assembled message, since nothing here renders token by token. */
+  /* Streamed because of the size of MAX_READING_TOKENS, and because Opus
+     thinks before it writes: the SDK asks for streaming at this size precisely
+     so a long generation cannot trip an HTTP timeout. finalMessage() hands
+     back the assembled message, since nothing here renders token by token. */
   const response = await client.messages
     .stream({
-      model: "claude-opus-5-5",
+      model: "claude-opus-5",
       max_tokens: MAX_READING_TOKENS,
       /* `low` on purpose, and measured -- see the header. Higher effort
          spends the token budget on thinking and truncates the document. */

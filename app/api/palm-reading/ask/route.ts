@@ -18,8 +18,8 @@ import {
  * this route is the conversation about it, which is the part people actually
  * came for and the part a fixed JSON schema structurally cannot provide.
  *
- * Provider: Anthropic, Claude Opus 5.5 (Opus 5 until 2026-10-04), reading
- * ANTHROPIC_API_KEY -- shared with every chart route.
+ * Provider: Anthropic, Claude Opus 5 (Opus 5.5 from 2026-10-04 to 2026-10-06),
+ * reading ANTHROPIC_API_KEY -- shared with every chart route.
  *
  * THE SHAPE OF THE ABUSE PROBLEM, because it differs from every other LLM route
  * here and the difference is the whole design. The chart routes rebuild their
@@ -224,14 +224,16 @@ export async function POST(request: NextRequest) {
     ];
 
     const response = await client.messages.create({
-      model: "claude-opus-5-5",
+      model: "claude-opus-5",
       max_tokens: MAX_ANSWER_TOKENS,
-      /* Low, like every route since 2026-10-04 (the owner's call, to hold
-         costs down). This was medium on Opus 5, because choosing which palm
-         feature bears on a question is a judgement rather than the phrasing
-         job the chart routes do; Opus 5.5's low is documented to land close
-         to Opus 5's higher settings. Re-measure once the account's monthly
-         limit allows. Thinking is omitted, which on this model runs adaptive. */
+      /* Opus 5 at low, alongside the reading itself, by the owner's call on
+         2026-10-06. Before 2026-10-04 this was Opus 5 at medium, because
+         choosing which palm feature bears on a question is a judgement rather
+         than the phrasing job the chart routes do; low is a step below that
+         and has not been measured here. If answers start missing the feature
+         a question turns on, this is the dial. Re-measure once the account's
+         monthly limit allows. Thinking is omitted, which on this model runs
+         adaptive. */
       output_config: { effort: "low" },
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },

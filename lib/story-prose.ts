@@ -5,7 +5,7 @@ import type {
 } from "@/lib/story-engine";
 
 /**
- * The Opus pass over the PDF report's prose.
+ * The written pass over the PDF report's prose.
  *
  * What the deterministic engine produces is correct and thin. Measured on the
  * sample chart: nine chapters, each an opening sentence plus a single paragraph

@@ -106,6 +106,18 @@ type LlmBudgetConfig = {
  * daily totals are left as they were: they bound a bad day, and a cheaper
  * call only widens the margin.
  *
+ * 2026-10-06: every route except palm reading and its follow-up questions
+ * moved to Claude Haiku 4.5, the owner's call to cut the bill again. Haiku is
+ * $1/$5 per million tokens, a quarter of Opus 5.5's rates, and with `thinking`
+ * omitted it does not think, so the thinking that was most of the output bill
+ * is gone as well. Two things in the llm_usage lines change with it: there is
+ * no effort to log, so those routes log the model instead; and Haiku caches
+ * nothing under a 4,096-token prefix, which is every chart route's system
+ * prompt, so their cacheReadTokens read 0, and where the figures below
+ * mention a cached system prefix they describe Opus. Palm reading and its
+ * follow-ups went back to Claude Opus 5 at low effort. The daily totals stay
+ * as they were, for the reason above.
+ *
  * The route totals are whole-deployment numbers rather than per-instance ones,
  * so they bite where they read. They are sized by what a call costs: dasha
  * readings use Claude Opus 5 with a cached system prefix, while palm reading uses
@@ -118,8 +130,8 @@ type LlmBudgetConfig = {
  * on thinking and truncates the reading mid-JSON; see its own header. The
  * conclusion drawn here was right and the reason given for it had gone stale.)
  *
- * Follow-up questions sit between the two: Opus 5 at medium effort, max_tokens
- * 700, with a cached system prefix but a per-reading context that cannot be
+ * Follow-up questions sit between the two: Opus 5 at low effort (medium before
+ * 2026-10-04), max_tokens 700, with a cached system prefix but a per-reading context that cannot be
  * shared between callers. Cheap per call, but a conversation is many calls
  * where a reading is one, so the route total is set well above palm reading's
  * while the per-caller number stays the same -- the ceiling that matters for a
@@ -234,7 +246,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
   "/api/chart/domain-brief": {
-    // One paid call covers all seven areas, at low effort for every caller.
+    // One paid call covers all seven areas, the same briefs for every caller.
     perDay: 2500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
@@ -253,9 +265,10 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
-  /* The classical note in the yoga section: Opus 5.5 at low effort over at most
-     five yogas' passages, cited, against a cached system prefix. Measured on
-     two sample charts on 2026-10-04: 1,142-1,530 input tokens plus a
+  /* The classical note in the yoga section: Haiku 4.5 since 2026-10-06, over
+     at most five yogas' passages, cited. Measured on Opus 5.5 at low effort,
+     against a cached system prefix, on two sample charts on 2026-10-04:
+     1,142-1,530 input tokens plus a
      1,248-token prefix, and 544-855 output tokens, which is $0.016-$0.029 a
      call, about half a varga atlas. Output is two thirds of it, so the
      word ceiling in the prompt is the lever, as on current-period.
@@ -272,10 +285,10 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
-  /* The classical notes on the life-areas page: the same model and effort as
-     the yoga note, but one call writes every area -- up to seven documents of
-     six short passages, about 3,000 input tokens, and seven notes of at most
-     70 words, about 1,000-1,300 output tokens with thinking. At the yoga
+  /* The classical notes on the life-areas page: the same model as the yoga
+     note, but one call writes every area -- up to seven documents of six
+     short passages, about 3,000 input tokens, and seven notes of at most 70
+     words, about 1,000-1,300 output tokens with Opus 5.5's thinking. At the yoga
      note's measured rates that is roughly $0.04 a call. That figure is an
      ESTIMATE from token counts, made on 2026-10-04 when the account's monthly
      limit stopped a live measurement; replace it from the llm_usage lines.

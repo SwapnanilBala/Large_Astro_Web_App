@@ -11,10 +11,8 @@ export const DOMAIN_BRIEF_KEYS = [
 ] as const satisfies readonly LifeDomainKey[];
 
 export type DomainBriefs = Partial<Record<LifeDomainKey, string>>;
-export type DomainBriefEffort = "low" | "medium";
 export type DomainBriefResponse = {
   brief: string;
   briefs: DomainBriefs;
-  effort: DomainBriefEffort;
   cached: boolean;
 };

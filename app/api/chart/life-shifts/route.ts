@@ -39,6 +39,17 @@ import {
  */
 
 /*
+ * ── MODEL -- Claude Haiku 4.5, since 2026-10-06 ──────────────────────────
+ *
+ * Every route but palm reading moved to Haiku 4.5 that day, by the owner's
+ * call, to hold the bill down further: $1/$5 per million tokens against Opus
+ * 5.5's $4/$20. Haiku takes no effort setting -- `output_config.effort` is a
+ * 400 on it -- and with `thinking` omitted it does not reason first. The sweep
+ * below found the length instruction doing the work rather than the effort
+ * dial, and that instruction is the part that carries over to a model without
+ * one. Re-measure from the llm_usage lines once the account's monthly limit
+ * allows. The history, from when this was an effort question:
+ *
  * ── EFFORT -- low on Opus 5.5, the same at both lengths ──────────────────
  *
  * Low since 2026-10-04, when every chart route moved to Claude Opus 5.5 at
@@ -89,7 +100,7 @@ import {
  * rather than on evidence from this sweep; low is a defensible saving if the
  * route total ever comes under pressure.
  */
-const EFFORT = "low" as const;
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 60;
 
@@ -295,12 +306,11 @@ export async function POST(request: NextRequest) {
      * problem to the API, which is where it is actually solved.
      */
     const response = await client.messages.parse({
-      model: "claude-opus-5-5",
-      /* Headroom for thinking plus five short paragraphs, not a target. */
+      model: MODEL,
+      /* Headroom for five short paragraphs, not a target. */
       max_tokens: 12000,
-      /* thinking is omitted, which on this model runs adaptive by default. */
+      /* No `thinking` and no effort; see the note on MODEL above. */
       output_config: {
-        effort: EFFORT,
         format: zodOutputFormat(ReadingsSchema),
       },
       system: [
@@ -319,16 +329,16 @@ export async function POST(request: NextRequest) {
     });
 
     /*
-     * One line per uncached call, so the effort question can be settled from
-     * logs rather than from arithmetic. Estimating spend from prompt sizes
-     * gets the input side roughly right and says nothing about the output
-     * side, which is where the money is -- thinking bills at the output rate.
+     * One line per uncached call, with the model on it, so the model question
+     * can be settled from logs rather than from arithmetic. Estimating spend
+     * from prompt sizes gets the input side roughly right and says nothing
+     * about the output side.
      */
     console.info(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/chart/life-shifts",
       event: "llm_usage",
-      effort: EFFORT,
+      model: MODEL,
       depth,
       shifts: facts.length,
       stopReason: response.stop_reason,
@@ -347,18 +357,17 @@ export async function POST(request: NextRequest) {
     }
 
     /*
-     * Truncation is a failure, not a short answer. Thinking counts against
-     * max_tokens, so a run that reasons past the ceiling returns whatever it
-     * had reached -- with a schema that is usually unparseable, but a run that
-     * stopped after three readings would parse fine and quietly ship two
-     * chapters with nothing new to say.
+     * Truncation is a failure, not a short answer. A run that reaches the
+     * ceiling returns whatever it had reached -- with a schema that is usually
+     * unparseable, but a run that stopped after three readings would parse
+     * fine and quietly ship two chapters with nothing new to say.
      */
     if (response.stop_reason === "max_tokens") {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        model: MODEL,
         depth,
         outputTokens: response.usage.output_tokens,
       }));
@@ -408,7 +417,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/life-shifts",
         event: "llm_short_set",
-        effort: EFFORT,
+        model: MODEL,
         depth,
         asked: facts.length,
         returned: readings.length,

@@ -1542,7 +1542,7 @@
         "kicker": "Für dieses Horoskop gedeutet",
         "pending": "Deine Stellungen werden gedeutet…",
         "failed": "Die Anmerkungen zu diesem Horoskop sind gerade nicht verfügbar. Die Hinweise oben gelten weiterhin.",
-        "attribution": "Von Claude (Opus 5) für deine Stellungen geschrieben. Lies es als Ergänzung zu den Hinweisen oben, nicht als Ersatz."
+        "attribution": "Von Claude (Haiku 4.5) für deine Stellungen geschrieben. Lies es als Ergänzung zu den Hinweisen oben, nicht als Ersatz."
       }
     },
     "panel": {

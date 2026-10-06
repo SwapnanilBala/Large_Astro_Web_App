@@ -4,7 +4,7 @@ import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { parseBirthSex } from "@/lib/birth-sex";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
-import { DOMAIN_BRIEF_KEYS, type DomainBriefs, type DomainBriefEffort } from "@/lib/domain-briefs";
+import { DOMAIN_BRIEF_KEYS, type DomainBriefs } from "@/lib/domain-briefs";
 import {
   chartParamsToBirthInput,
   getLifeDomainPayload,
@@ -49,6 +49,11 @@ import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
  */
 
 export const maxDuration = 60;
+
+/* Claude Haiku 4.5 since 2026-10-06, the owner's call to hold costs down
+   (Opus 5.5 at low effort before). It takes no effort setting, and with
+   `thinking` omitted it does not reason before it writes. */
+const MODEL = "claude-haiku-4-5";
 
 const REQUEST_TIMEOUT_MS = 50_000;
 const CACHE_HEADER = "private, no-store";
@@ -147,7 +152,6 @@ async function writeBriefs(
   request: NextRequest,
   insights: LifeDomainInsight[],
   facts: string,
-  effort: DomainBriefEffort,
 ): Promise<DomainBriefs> {
   if (!process.env.ANTHROPIC_API_KEY) {
     throw new ApiError(
@@ -181,10 +185,9 @@ async function writeBriefs(
   });
   const startedAt = Date.now();
   const response = await client.messages.parse({
-    model: "claude-opus-5-5",
+    model: MODEL,
     max_tokens: 6000,
     output_config: {
-      effort,
       format: {
         type: "json_schema",
         schema: {
@@ -205,7 +208,7 @@ async function writeBriefs(
     timestamp: new Date().toISOString(),
     route: "/api/chart/domain-brief",
     event: "llm_usage",
-    effort,
+    model: MODEL,
     domains: insights.length,
     elapsedMs: Date.now() - startedAt,
     stopReason: response.stop_reason,
@@ -284,18 +287,17 @@ export async function GET(request: NextRequest) {
     const facts = readerLine + ranked.map((entry, index) =>
       `Area key: ${entry.key}\n${buildFacts(entry, index + 1, ranked.length)}`,
     ).join("\n\n---\n\n");
-    /* Low for everyone since 2026-10-04, the owner's call to hold costs down
-       across the sections; a Google sign-in used to buy medium. With one
-       effort there is nothing to decide per caller, so no session lookup, and
-       an account and a guest share the same cached briefs. */
-    const effort: DomainBriefEffort = "low";
+    /* The same briefs for everyone. A Google sign-in used to buy medium
+       effort over a guest's low, and since 2026-10-06 the model takes no
+       effort setting at all, so there is nothing to decide per caller, no
+       session lookup, and an account and a guest share the same cache entry.
 
-    /* Keyed on facts and effort rather than on the birth parameters. Same
-       evidence and effort mean the same briefs, and any engine change --
+       Keyed on facts and model rather than on the birth parameters. Same
+       evidence and model mean the same briefs, and any engine change --
        or in what this route decides to send -- misses the cache on its own
        without a version to remember to bump. */
     const key = makeCacheKey("domain_brief", {
-      effort,
+      model: MODEL,
       prompt_version: DOMAIN_BRIEF_PROMPT_VERSION,
       facts,
     });
@@ -303,15 +305,15 @@ export async function GET(request: NextRequest) {
     const cached = cache.get(key);
     if (cached) {
       return NextResponse.json(
-        { brief: cached[insight.key], briefs: cached, effort, cached: true },
+        { brief: cached[insight.key], briefs: cached, cached: true },
         { headers: { "Cache-Control": CACHE_HEADER } },
       );
     }
 
-    // Rapid tab changes share one paid call for this chart and effort.
+    // Rapid tab changes share one paid call for this chart.
     let writing = inFlight.get(key);
     if (!writing) {
-      writing = writeBriefs(request, ranked, facts, effort)
+      writing = writeBriefs(request, ranked, facts)
         .then((briefs) => {
           remember(key, briefs);
           return briefs;
@@ -321,7 +323,7 @@ export async function GET(request: NextRequest) {
     }
     const briefs = await writing;
     return NextResponse.json(
-      { brief: briefs[insight.key], briefs, effort, cached: false },
+      { brief: briefs[insight.key], briefs, cached: false },
       { headers: { "Cache-Control": CACHE_HEADER } },
     );
   } catch (error) {

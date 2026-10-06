@@ -56,8 +56,10 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * and will be wicked").
  */
 
-const MODEL = "claude-opus-5-5";
-const EFFORT = "low" as const;
+/* Claude Haiku 4.5 since 2026-10-06, the owner's call to hold costs down
+   (Opus 5.5 at low effort before). It takes no effort setting, and with
+   `thinking` omitted it does not reason before it writes. */
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 60;
 
@@ -196,9 +198,8 @@ export async function POST(request: NextRequest) {
     const names = selection.map(({ yoga }) => DEFINITIONS.get(yoga.id)?.name ?? yoga.id);
     const response = await client.messages.create({
       model: MODEL,
-      /* Headroom for thinking plus a short note, not a target. */
+      /* Headroom for a short note, not a target. */
       max_tokens: 4000,
-      output_config: { effort: EFFORT },
       system: [{ type: "text", text: YOGA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages: [
         {
@@ -208,14 +209,13 @@ export async function POST(request: NextRequest) {
       ],
     });
 
-    /* One line per uncached call, as on every paid route here, so the effort
+    /* One line per uncached call, as on every paid route here, so the model
        and budget questions are settled from logs rather than from arithmetic. */
     console.info(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/chart/yoga-classics",
       event: "llm_usage",
       model: MODEL,
-      effort: EFFORT,
       yogas: selection.length,
       passages: selection.reduce((sum, { passages }) => sum + passages.length, 0),
       language: languageCode,
@@ -229,8 +229,8 @@ export async function POST(request: NextRequest) {
     if (response.stop_reason === "refusal") {
       throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The classical note was declined.");
     }
-    /* Truncation is a failure, not a short answer: thinking counts against
-       max_tokens, and a note cut off mid-sentence is worse than none. */
+    /* Truncation is a failure, not a short answer: a note cut off
+       mid-sentence is worse than none. */
     if (response.stop_reason === "max_tokens") {
       throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The classical note ran past its token ceiling.");
     }

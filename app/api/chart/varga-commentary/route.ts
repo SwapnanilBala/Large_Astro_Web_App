@@ -41,6 +41,21 @@ import {
  *   deliberately not meant to present as independent verdicts, and paying a
  *   model to comment on them would undo that. A request naming one is refused.
  *
+ * ── MODEL -- Claude Haiku 4.5, since 2026-10-06 ──────────────────────────
+ *
+ * Every route but palm reading moved to Haiku 4.5 that day, by the owner's
+ * call, to hold the bill down further: $1/$5 per million tokens against Opus
+ * 5.5's $4/$20. Haiku takes no effort setting -- `output_config.effort` is a
+ * 400 on it -- and with `thinking` omitted it does not reason first. This is
+ * one of the two routes that move is most likely to show on (the PDF report
+ * is the other), for the reason the history below gives: the notes have to
+ * read each other, and that is the part less reasoning dropped first. The
+ * prompt asks for the
+ * cross-varga observation outright; if the notes start reading as ten
+ * separate paragraphs, the model is the dial now. Re-measure from the
+ * llm_usage lines once the account's monthly limit allows. The history, from
+ * when this was an effort question:
+ *
  * ── EFFORT -- low on Opus 5.5 ─────────────────────────────────────────────
  *
  * Low since 2026-10-04, when every chart route moved to Claude Opus 5.5 at
@@ -85,7 +100,7 @@ import {
  * model owns how it reads.
  */
 
-const EFFORT = "low" as const;
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 60;
 
@@ -323,12 +338,11 @@ export async function POST(request: NextRequest) {
      * that problem to the API, which is where it is actually solved.
      */
     const response = await client.messages.parse({
-      model: "claude-opus-5-5",
-      /* Headroom for thinking plus ten paragraphs, not a target. */
+      model: MODEL,
+      /* Headroom for ten paragraphs, not a target. */
       max_tokens: 16000,
-      /* thinking is omitted, which on this model runs adaptive by default. */
+      /* No `thinking` and no effort; see MODEL in the header. */
       output_config: {
-        effort: EFFORT,
         format: zodOutputFormat(NotesSchema),
       },
       system: [
@@ -351,17 +365,16 @@ export async function POST(request: NextRequest) {
     });
 
     /*
-     * One line per uncached call, so the effort question can be settled from
-     * logs rather than from arithmetic -- the same reason the dasha route
-     * carries one. Thinking bills at the output rate and is most of what a
-     * request at this effort generates, so `outputTokens` is the number that
-     * matters when someone next reaches for this dial.
+     * One line per uncached call, with the model on it, so the model question
+     * can be settled from logs rather than from arithmetic -- the same reason
+     * the dasha route carries one. `outputTokens` is the number that matters
+     * when someone next reaches for this dial.
      */
     console.info(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/chart/varga-commentary",
       event: "llm_usage",
-      effort: EFFORT,
+      model: MODEL,
       divisions: facts.length,
       language: languageCode,
       stopReason: response.stop_reason,
@@ -380,18 +393,17 @@ export async function POST(request: NextRequest) {
     }
 
     /*
-     * Truncation is a failure, not a short answer. Thinking counts against
-     * `max_tokens`, so a run that reasons past the ceiling returns whatever it
-     * had reached -- with a schema that is usually unparseable, but a run that
-     * stopped after six notes would parse fine and quietly ship four missing
-     * ones. Checking the stop reason catches both.
+     * Truncation is a failure, not a short answer. A run that reaches the
+     * ceiling returns whatever it had reached -- with a schema that is usually
+     * unparseable, but a run that stopped after six notes would parse fine and
+     * quietly ship four missing ones. Checking the stop reason catches both.
      */
     if (response.stop_reason === "max_tokens") {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/varga-commentary",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        model: MODEL,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(
@@ -446,7 +458,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/varga-commentary",
         event: "llm_notes_incomplete",
-        effort: EFFORT,
+        model: MODEL,
         asked: facts.length,
         returned: notes.length,
         missing,

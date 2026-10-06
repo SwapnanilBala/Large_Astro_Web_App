@@ -211,12 +211,13 @@ export async function GET(request: NextRequest) {
       .join("\n");
 
     const response = await client.messages.parse({
-      model: "claude-opus-5-5",
+      /* Haiku 4.5 since 2026-10-06, the owner's call to hold costs down (Opus
+         5.5 at low effort before). Seven short passages, not an essay: with
+         `thinking` omitted the page does not wait on reasoning it does not
+         need, and Haiku takes no effort setting at all. */
+      model: "claude-haiku-4-5",
       max_tokens: 4000,
-      /* Seven short passages, not an essay. Low effort keeps the page from
-         waiting on reasoning it does not need. */
       output_config: {
-        effort: "low",
         format: { type: "json_schema", schema: buildSchema(digest.available) },
       },
       system: [

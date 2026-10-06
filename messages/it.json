@@ -1542,7 +1542,7 @@
         "kicker": "Letto per questa carta",
         "pending": "Lettura delle tue posizioni…",
         "failed": "Le note per questa carta non sono disponibili al momento. La guida qui sopra resta valida.",
-        "attribution": "Scritto per le tue posizioni da Claude (Opus 5). Leggilo insieme alla guida qui sopra, non al suo posto."
+        "attribution": "Scritto per le tue posizioni da Claude (Haiku 4.5). Leggilo insieme alla guida qui sopra, non al suo posto."
       }
     },
     "panel": {

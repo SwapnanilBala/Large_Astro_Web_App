@@ -27,6 +27,18 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  */
 
 /*
+ * MODEL -- Claude Haiku 4.5, by the owner's call on 2026-10-06.
+ *
+ * Every route but palm reading moved to Haiku 4.5 that day, to hold the bill
+ * down further: $1/$5 per million tokens against Opus 5.5's $4/$20. Haiku
+ * takes no effort setting -- `output_config.effort` is a 400 on it -- and with
+ * `thinking` omitted it answers without reasoning first, so the dial the
+ * history below is about does not exist on this model. What carries over is
+ * the prompt line that asks for the date window, which is the one thing low
+ * effort was measured to drop. Re-measure from the llm_usage lines once the
+ * account's monthly limit allows. The history, from when this was an effort
+ * question:
+ *
  * EFFORT -- low on Opus 5.5, by the owner's call on 2026-10-04.
  *
  * Every chart route moved to Claude Opus 5.5 at low effort that day, to hold
@@ -67,7 +79,7 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
  * 6-second call, and a longer one only makes a genuinely stuck request take
  * longer to fall back to the deterministic sentence.
  */
-const EFFORT = "low" as const;
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 30;
 
@@ -214,12 +226,11 @@ export async function POST(request: NextRequest) {
       .join("\n");
 
     const response = await client.messages.create({
-      model: "claude-opus-5-5",
-      /* Headroom for thinking, not a target. The visible answer is still 2-3
-         sentences; see the note on EFFORT above for why this is not 1000. */
+      model: MODEL,
+      /* Headroom, not a target. The visible answer is 2-3 sentences; see the
+         history under MODEL above for why this is not 1000. */
       max_tokens: 8000,
-      /* thinking is omitted, which on this model runs adaptive by default. */
-      output_config: { effort: EFFORT },
+      /* No `thinking` and no effort; see the note on MODEL above. */
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],
@@ -232,19 +243,19 @@ export async function POST(request: NextRequest) {
     });
 
     /*
-     * What the effort experiment is actually measured on.
+     * What any measurement of this route is made on.
      *
      * Estimating the spend from prompt sizes gets the input side about right
-     * and tells you nothing about the output side, which is where the money is
-     * -- thinking is billed at the output rate and is most of what a request at
-     * this effort generates. One line per uncached call, so the question can be
-     * settled from logs rather than from arithmetic.
+     * and tells you nothing about the output side. One line per uncached call,
+     * with the model on it, so the question can be settled from logs rather
+     * than from arithmetic -- and the lines from before 2026-10-06 compared
+     * with the ones after.
      */
     console.info(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/chart/dasha-interpretation",
       event: "llm_usage",
-      effort: EFFORT,
+      model: MODEL,
       depth: lords.length,
       stopReason: response.stop_reason,
       inputTokens: response.usage.input_tokens,
@@ -264,18 +275,18 @@ export async function POST(request: NextRequest) {
     /*
      * Truncation is a failure, not a short answer.
      *
-     * Thinking counts against `max_tokens` here, so a run that reasons past the
-     * ceiling returns whatever prose it had reached -- which is a sentence
-     * ending mid-clause, and which would otherwise be cached and shown as if it
-     * were the reading. The panel falls back to its deterministic sentence on a
-     * non-OK response, so failing is the better of the two.
+     * A run that reaches the ceiling returns whatever prose it had reached --
+     * which is a sentence ending mid-clause, and which would otherwise be
+     * cached and shown as if it were the reading. The panel falls back to its
+     * deterministic sentence on a non-OK response, so failing is the better of
+     * the two.
      */
     if (response.stop_reason === "max_tokens") {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/dasha-interpretation",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        model: MODEL,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(

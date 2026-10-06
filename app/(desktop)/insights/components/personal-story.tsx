@@ -35,10 +35,11 @@ type GenerationStage =
 /*
  * The four steps, in order, as the dialog lists them.
  *
- * `writing` is the one that matters: it is a single Opus 5 call at high effort
- * over the whole nine-chapter report, and it measures at about three minutes.
- * The other three are fast. Listing all four with the current one marked is
- * what makes a three-minute wait legible -- a spinner alone reads as a hang,
+ * `writing` is the one that matters: it is a single Claude call over the whole
+ * nine-chapter report (Haiku 4.5 since 2026-10-06), and it measured about
+ * three minutes as Opus 5 at high effort, which is what this was designed
+ * around. The other three are fast. Listing all four with the current one
+ * marked is what makes a long wait legible -- a spinner alone reads as a hang,
  * and a progress bar would have to invent a percentage the model never
  * reports.
  */
@@ -119,8 +120,9 @@ export default function PersonalStory({
       }
 
       /*
-       * The written pass. One Opus 5 call at high effort over the whole
-       * report, which takes about three minutes -- hence the dialog.
+       * The written pass. One Claude call over the whole report (Haiku 4.5
+       * since 2026-10-06), which took about three minutes at Opus 5's high
+       * effort -- hence the dialog.
        *
        * Deliberately not fatal. Every way this can fail (no API key, the daily
        * budget spent, a rate limit, the model declining, a timeout) leaves the

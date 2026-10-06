@@ -172,7 +172,7 @@
         "kicker": "Read for this chart",
         "pending": "Reading your placements…",
         "failed": "Notes for this chart are unavailable right now. The guidance above still applies.",
-        "attribution": "Written for your placements by Claude (Opus 5). Read it alongside the guidance above, not instead of it."
+        "attribution": "Written for your placements by Claude (Haiku 4.5). Read it alongside the guidance above, not instead of it."
       }
     },
     "panel": {

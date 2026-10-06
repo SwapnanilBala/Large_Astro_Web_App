@@ -58,8 +58,10 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * nothing is dropped rather than shipped.
  */
 
-const MODEL = "claude-opus-5-5";
-const EFFORT = "low" as const;
+/* Claude Haiku 4.5 since 2026-10-06, as on the yoga note (Opus 5.5 at low
+   effort before). It takes no effort setting, and with `thinking` omitted it
+   does not reason before it writes. */
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 60;
 
@@ -134,9 +136,8 @@ async function writeReadings(
   const startedAt = Date.now();
   const response = await client.messages.create({
     model: MODEL,
-    /* Headroom for thinking plus seven short notes, not a target. */
+    /* Headroom for seven short notes, not a target. */
     max_tokens: 6000,
-    output_config: { effort: EFFORT },
     system: [{ type: "text", text: AREA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
     messages: [
       {
@@ -154,7 +155,6 @@ async function writeReadings(
     route: "/api/chart/area-classics",
     event: "llm_usage",
     model: MODEL,
-    effort: EFFORT,
     areas: selection.length,
     passages: selection.reduce((sum, { passages }) => sum + passages.length, 0),
     language: languageCode,

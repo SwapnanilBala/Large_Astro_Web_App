@@ -199,6 +199,13 @@ describe("/api/palm-reading/ask", () => {
     expect(createMock.mock.calls.at(-1)![0].max_tokens).toBe(700);
   });
 
+  it("asks Claude Opus 5 at low effort, like the reading itself", async () => {
+    await ask({ reading: READING, question: "anything" });
+    const call = createMock.mock.calls.at(-1)![0];
+    expect(call.model).toBe("claude-opus-5");
+    expect(call.output_config).toEqual({ effort: "low" });
+  });
+
   it("reports a refusal as an error rather than as an answer", async () => {
     createMock.mockResolvedValue({
       stop_reason: "refusal",

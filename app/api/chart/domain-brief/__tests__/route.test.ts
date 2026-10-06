@@ -80,14 +80,14 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Ultimate Module Opus briefs", () => {
-  it("writes all seven guest areas at low effort and spends only one budget unit", async () => {
+describe("Ultimate Module briefs", () => {
+  it("writes all seven guest areas on Haiku 4.5 and spends only one budget unit", async () => {
     for (const key of DOMAIN_BRIEF_KEYS) {
       const response = await GET(request(key));
       expect(response.status).toBe(200);
       expect(response.headers.get("Cache-Control")).toBe("private, no-store");
       expect(await response.json()).toMatchObject({
-        brief: `Guest ${key} brief.`, effort: "low", cached: key !== DOMAIN_BRIEF_KEYS[0],
+        brief: `Guest ${key} brief.`, cached: key !== DOMAIN_BRIEF_KEYS[0],
         briefs: Object.fromEntries(DOMAIN_BRIEF_KEYS.map((area) => [area, `Guest ${area} brief.`])),
       });
     }
@@ -95,19 +95,20 @@ describe("Ultimate Module Opus briefs", () => {
     expect(mocks.budget).toHaveBeenCalledTimes(1);
     expect(mocks.resolveSession).not.toHaveBeenCalled();
     const call = mocks.parse.mock.calls[0][0];
-    expect(call.model).toBe("claude-opus-5-5");
-    expect(call.output_config.effort).toBe("low");
+    expect(call.model).toBe("claude-haiku-4-5");
+    // Haiku 4.5 rejects an effort setting with a 400, so none may be sent.
+    expect(call.output_config).not.toHaveProperty("effort");
     expect(call.output_config.format.schema.required).toEqual([...DOMAIN_BRIEF_KEYS]);
     for (const key of DOMAIN_BRIEF_KEYS) expect(call.messages[0].content).toContain(`${key} strength`);
   });
 
-  it("writes at low effort for a signed-in reader too, and takes no effort from the URL", async () => {
+  it("writes the same briefs for a signed-in reader, and takes no effort from the URL", async () => {
     mocks.resolveSession.mockResolvedValue({ userId: "google-user", email: "reader@gmail.com" });
     const response = await GET(request("career", "astro_session=valid-token", "&effort=high&signedIn=true"));
     expect(response.status).toBe(200);
-    expect(await response.json()).toMatchObject({ effort: "low" });
-    expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("low");
-    // One effort for everyone, so there is no caller to resolve.
+    expect(await response.json()).not.toHaveProperty("effort");
+    expect(mocks.parse.mock.calls[0][0].output_config).not.toHaveProperty("effort");
+    // One request shape for everyone, so there is no caller to resolve.
     expect(mocks.resolveSession).not.toHaveBeenCalled();
   });
 
@@ -115,18 +116,18 @@ describe("Ultimate Module Opus briefs", () => {
     mocks.resolveSession.mockRejectedValue(new Error("database offline"));
     const response = await GET(request("inheritance", "astro_session=valid-token"));
     expect(response.status).toBe(200);
-    expect(mocks.parse.mock.calls[0][0].output_config.effort).toBe("low");
+    expect(mocks.parse.mock.calls[0][0].model).toBe("claude-haiku-4-5");
   });
 
   it("shares one cache between guests and accounts", async () => {
     await GET(request());
     const account = await GET(request("career", "astro_session=valid-token"));
-    expect(await account.json()).toMatchObject({ brief: "Guest career brief.", effort: "low", cached: true });
+    expect(await account.json()).toMatchObject({ brief: "Guest career brief.", cached: true });
     expect(mocks.parse).toHaveBeenCalledTimes(1);
     expect(mocks.budget).toHaveBeenCalledTimes(1);
   });
 
-  it("coalesces overlapping tab requests into one Opus call", async () => {
+  it("coalesces overlapping tab requests into one call", async () => {
     let finish!: (value: ReturnType<typeof providerResponse>) => void;
     mocks.parse.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
     const first = GET(request("career"));
@@ -164,7 +165,7 @@ describe("Ultimate Module Opus briefs", () => {
     expect(mocks.parse).not.toHaveBeenCalled();
   });
 
-  it("validates birth details and domain keys before calling Opus", async () => {
+  it("validates birth details and domain keys before calling the model", async () => {
     expect((await GET(new NextRequest("https://example.test/api/chart/domain-brief?domain=career"))).status).toBe(400);
     expect((await GET(request("unknown"))).status).toBe(400);
     expect(mocks.parse).not.toHaveBeenCalled();

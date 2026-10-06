@@ -42,6 +42,18 @@ import {
  */
 
 /*
+ * MODEL -- Claude Haiku 4.5, by the owner's call on 2026-10-06.
+ *
+ * Every route but palm reading moved to Haiku 4.5 that day, to hold the bill
+ * down further: $1/$5 per million tokens against Opus 5.5's $4/$20. Haiku
+ * takes no effort setting -- `output_config.effort` is a 400 on it -- and with
+ * `thinking` omitted it answers without reasoning first, so the dial below is
+ * gone. What the history found is that the prompt does the work here: the word
+ * ceiling bounds the length, and the rule to work each placement in is what
+ * the check below was about. Re-measure from the llm_usage lines once the
+ * account's monthly limit allows. The history, from when this was an effort
+ * question:
+ *
  * EFFORT -- low on Opus 5.5, by the owner's call on 2026-10-04.
  *
  * Every chart route moved to Claude Opus 5.5 at low effort that day, to hold
@@ -89,7 +101,7 @@ import {
  * it, nothing measured comes near it, and headroom is free because billing is
  * per token generated.
  */
-const EFFORT = "low" as const;
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 30;
 
@@ -282,11 +294,10 @@ export async function POST(request: NextRequest) {
     });
 
     const response = await client.messages.create({
-      model: "claude-opus-5-5",
-      /* Headroom for thinking, not a target; see the note on EFFORT above. */
+      model: MODEL,
+      /* Headroom, not a target; see the history under MODEL above. */
       max_tokens: 8000,
-      /* thinking is omitted, which on this model runs adaptive by default. */
-      output_config: { effort: EFFORT },
+      /* No `thinking` and no effort; see the note on MODEL above. */
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],
@@ -294,15 +305,15 @@ export async function POST(request: NextRequest) {
     });
 
     /*
-     * One line per uncached call, which is what the effort note above is
-     * measured on. Estimating spend from prompt sizes gets the input side
-     * roughly right and says nothing about the output side, where the money is.
+     * One line per uncached call, with the model on it, which is what the
+     * note above is measured on. Estimating spend from prompt sizes gets the
+     * input side roughly right and says nothing about the output side.
      */
     console.info(JSON.stringify({
       timestamp: new Date().toISOString(),
       route: "/api/chart/current-period",
       event: "llm_usage",
-      effort: EFFORT,
+      model: MODEL,
       depth: facts.stack.length,
       placements: facts.stack.filter((step) => step.sign).length,
       stopReason: response.stop_reason,
@@ -321,17 +332,17 @@ export async function POST(request: NextRequest) {
     }
 
     /*
-     * Truncation is a failure, not a short reading. Thinking counts against
-     * `max_tokens`, so a run that reasons past the ceiling returns whatever
-     * prose it had reached -- a sentence ending mid-clause, which would
-     * otherwise be cached and shown as if it were the reading.
+     * Truncation is a failure, not a short reading. A run that reaches the
+     * ceiling returns whatever prose it had reached -- a sentence ending
+     * mid-clause, which would otherwise be cached and shown as if it were the
+     * reading.
      */
     if (response.stop_reason === "max_tokens") {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/current-period",
         event: "llm_output_truncated",
-        effort: EFFORT,
+        model: MODEL,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(

@@ -21,6 +21,20 @@ import {
  * lib/story-prose.ts carries what this may and may not rewrite, and why. This
  * file is the call.
  *
+ * ── MODEL -- Claude Haiku 4.5, since 2026-10-06 ──────────────────────────
+ *
+ * Every route but palm reading moved to Haiku 4.5 that day, by the owner's
+ * call, to hold the bill down further: $1/$5 per million tokens against Opus
+ * 5.5's $4/$20, on what was the dearest call in the app. Haiku takes no effort
+ * setting -- `output_config.effort` is a 400 on it -- and with `thinking`
+ * omitted it does not reason first. This is one of the two routes that move
+ * is most likely to show on (the varga atlas is the other), for the reason
+ * the history below gives: what the extra thinking bought was the nine
+ * chapters agreeing with each other. If the report starts repeating itself
+ * between chapters, the model is the dial now, and a fresh measurement is the
+ * way to decide. Re-measure once the account's monthly limit allows. The
+ * history, from when this was an effort question:
+ *
  * ── EFFORT -- low on Opus 5.5, for everyone ───────────────────────────────
  *
  * Since 2026-10-04, when the owner moved every route to Claude Opus 5.5 at
@@ -72,9 +86,10 @@ import {
  *
  * ── WHY IT STREAMS ────────────────────────────────────────────────────────
  *
- * `max_tokens` is 32000: about 4,500 tokens of prose plus whatever adaptive
- * thinking spends at high effort, which on a job this size is most of the
- * budget. The SDK asks for streaming at that size precisely so a long
+ * `max_tokens` is 32000: about 4,500 tokens of prose, and the rest headroom
+ * left from when adaptive thinking at high effort spent most of the budget --
+ * headroom is free, since billing is per token generated. The SDK asks for
+ * streaming at that size precisely so a long
  * generation cannot trip an HTTP timeout, and `finalMessage()` hands back the
  * assembled message since nothing here renders token by token.
  *
@@ -93,7 +108,7 @@ import {
  * page is.
  */
 
-const EFFORT = "low" as const;
+const MODEL = "claude-haiku-4-5";
 
 export const maxDuration = 300;
 
@@ -133,8 +148,10 @@ const SUPPORT_LEVELS = new Set(["well-supported", "supported", "exploratory"]);
 /*
  * Frozen, so it is the cacheable prefix. Everything that varies per reader --
  * the placements, the drafts -- goes in the user turn after the breakpoint.
- * At roughly 1,200 tokens this is the largest cached prefix in the app, and
- * across readers it is the same bytes every time.
+ * At roughly 1,200 tokens this is the largest prefix in the app, and across
+ * readers it is the same bytes every time. Haiku 4.5 caches nothing under
+ * 4,096 tokens, so it is not cached now; the marker stays for a model that
+ * would.
  */
 const SYSTEM_PROMPT = `You write the prose for a printed Vedic astrology report -- a bound PDF a client keeps, not a web page they skim.
 
@@ -231,8 +248,9 @@ function parseFacts(value: unknown): StoryProseFacts {
 }
 
 /**
- * Canonical, so the same report hits the same entry however it arrives. With
- * one effort for every caller there is one entry per chart, shared by all.
+ * Canonical, so the same report hits the same entry however it arrives. Every
+ * caller is written for the same way, so there is one entry per chart, shared
+ * by all.
  */
 function cacheKey(facts: StoryProseFacts): string {
   const canonical = [
@@ -270,7 +288,6 @@ export async function POST(request: NextRequest) {
     }
 
     const facts = parseFacts(body.facts);
-    const effort = EFFORT;
     const key = cacheKey(facts);
 
     const cached = cache.get(key);
@@ -315,11 +332,10 @@ export async function POST(request: NextRequest) {
     const startedAt = Date.now();
     const response = await client.messages
       .stream({
-        model: "claude-opus-5-5",
+        model: MODEL,
         max_tokens: 32000,
-        /* thinking is omitted, which on this model runs adaptive by default. */
+        /* No `thinking` and no effort; see MODEL in the header. */
         output_config: {
-          effort,
           format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
         },
         system: [
@@ -335,8 +351,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       route: "/api/chart/story-prose",
       event: "llm_usage",
-      model: "claude-opus-5-5",
-      effort,
+      model: MODEL,
       chapters: facts.chapters.length,
       elapsedMs,
       stopReason: response.stop_reason,
@@ -355,14 +370,14 @@ export async function POST(request: NextRequest) {
     }
 
     /* Truncation is a failure, not a short report. At this size a run that
-       reasons past the ceiling returns unparseable JSON anyway, but checking
-       the stop reason says so in the log rather than in a parse error. */
+       reaches the ceiling returns unparseable JSON anyway, but checking the
+       stop reason says so in the log rather than in a parse error. */
     if (response.stop_reason === "max_tokens") {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
         route: "/api/chart/story-prose",
         event: "llm_output_truncated",
-        effort,
+        model: MODEL,
         outputTokens: response.usage.output_tokens,
       }));
       throw new ApiError(
@@ -417,7 +432,7 @@ export async function POST(request: NextRequest) {
         timestamp: new Date().toISOString(),
         route: "/api/chart/story-prose",
         event: "llm_chapters_incomplete",
-        effort,
+        model: MODEL,
         asked: facts.chapters.length,
         returned: cleaned.chapters.length,
         missing,
