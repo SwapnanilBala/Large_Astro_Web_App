@@ -48,6 +48,52 @@ const DEFINITIONS = new Map(YOGA_DEFINITIONS.map((definition) => [definition.id,
 /** How a translator's note is marked in the text the model reads; the prompt names it. */
 export const NOTE_PREFIX = "Translator's note: ";
 
+/*
+ * Phrases the model reads in other words than the book's. "Free from
+ * diseases" is how the books promise good health, and a model shown it writes
+ * it back, even when told not to (measured on Haiku and on the Opus retry
+ * alike): the content line keeps illness out of every note, even as an
+ * absence. So the copy the model reads says it as a note may, in square
+ * brackets, which the prompt already reads as the app's words; the passage
+ * printed under the note keeps the book's. Every classical note reads
+ * passages through it: the yoga section's, each life area's, and "Ask the
+ * classics".
+ *
+ * The books' words for a spouse and their "king" go the same way, for the
+ * same reason (2026-10-07). Told to write "your partner" and "someone with
+ * standing", Haiku 5.5 still quoted the verse inline -- "will have a mean
+ * wife", "you will be a king" -- in 9 of 27 English life-area notes across
+ * four charts, every one a note the check then sends to Opus. A model cannot
+ * copy a word it was never shown. For a woman's chart this is also what
+ * READER_LINES asks for: the Brihat Jataka's wife is her partner.
+ */
+const MODEL_WORDING: readonly (readonly [RegExp, string])[] = [
+  [/\bfree from (?:all |serious )?(?:diseases?|ailments?|sickness|illness(?:es)?)\b/gi, "[of robust health]"],
+  [/\b(?:wives|husbands)\b/gi, "[partners]"],
+  [/\b(?:wife|husband)'s\b/gi, "[partner's]"],
+  [/\b(?:wife|husband)\b/gi, "[partner]"],
+  [/\b(?:(?:the|a) )?kingdoms?\b/gi, "[a position of power]"],
+  [/\b(?:the )?kings\b/gi, "[people of standing]"],
+  [/\b(?:(?:the|a) )?king's\b/gi, "[someone with standing's]"],
+  [/\b(?:(?:the|a) )?king\b/gi, "[someone with standing]"],
+  [/\b(?:(?:the|a) )?queens?\b/gi, "[a woman of standing]"],
+];
+
+/** A passage as the model reads it: the book's words, but for MODEL_WORDING. */
+export function modelText(text: string): string {
+  return MODEL_WORDING.reduce((current, [pattern, wording]) => current.replace(pattern, wording), text);
+}
+
+/**
+ * Said again at the very end of every classical note's instruction, where
+ * Haiku reads it last. In the system prompt alone it still wrote "wife",
+ * "the king" and "you will be poor" now and then, in English, which most
+ * readers use; classical-note-check.ts catches what still slips.
+ */
+export const CLOSING_REMINDERS =
+  ' Say "your partner", never "husband", "wife" or "wives"; say "someone with standing", never "king";' +
+  ' put a harsh verdict in one neutral phrase ("the book warns of lean years"), never as "you will be poor".';
+
 /**
  * The rules every classical note follows, whatever it is about: the yoga
  * section's and each life area's. One constant, so the two prompts cannot
@@ -85,7 +131,8 @@ ${CLASSICAL_NOTE_RULES}
 export function yogaClassicsInstruction(names: string[], languageName: string): string {
   return (
     `Write the note in ${languageName}, about these ${names.length} yogas in this order: ` +
-    `${names.join(", ")}. Keep the yoga names as written here.`
+    `${names.join(", ")}. Keep the yoga names as written here.` +
+    CLOSING_REMINDERS
   );
 }
 
@@ -184,7 +231,7 @@ export function yogaDocuments(selection: YogaWithPassages[]): Anthropic.Document
            has to know which blocks are notes to attribute them honestly. */
         content: passages.map((passage) => ({
           type: "text",
-          text: passage.kind === "note" ? `${NOTE_PREFIX}${passage.text}` : passage.text,
+          text: passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text),
         })),
       },
       citations: { enabled: true },

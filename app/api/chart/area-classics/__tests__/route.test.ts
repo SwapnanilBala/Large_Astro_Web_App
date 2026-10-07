@@ -175,19 +175,34 @@ describe("the life areas' notes", () => {
     expect(mocks.create).toHaveBeenCalledTimes(1);
   });
 
-  it("ships an English area that names an illness, and logs it", async () => {
-    mocks.create.mockResolvedValueOnce(
-      answer(plain("[love_life] "), cited("You will be free from disease and fond of romance.", 0), plain("\n\n[career] "), cited(CAREER_EN, 1)),
-    );
+  it("asks Opus again for an English area that names an illness, since 2026-10-07", async () => {
+    mocks.create
+      .mockResolvedValueOnce(
+        answer(plain("[love_life] "), cited("You will be free from disease and fond of romance.", 0), plain("\n\n[career] "), cited(CAREER_EN, 1)),
+      )
+      .mockResolvedValueOnce(answer(plain("[love_life] "), cited("You are drawn to romance.", 0)));
     const body = await read(await GET(request("en")));
     expect(Object.keys(body.readings).sort()).toEqual(["career", "love_life"]);
-    expect(mocks.create).toHaveBeenCalledTimes(1);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+    expect(mocks.create.mock.calls[1][0].model).toBe("claude-opus-5-5");
     const logged = vi.mocked(console.warn).mock.calls.map(([line]) => JSON.parse(String(line)));
     expect(logged).toContainEqual(
       expect.objectContaining({
         event: "llm_note_check",
-        flagged: [{ area: "love_life", problems: [{ kind: "content", terms: ["disease"] }], blocks: false }],
+        flagged: [{ area: "love_life", problems: [{ kind: "content", terms: ["disease"] }], blocks: true }],
       }),
     );
+  });
+
+  it("asks Opus again for an English area that says king", async () => {
+    mocks.create
+      .mockResolvedValueOnce(
+        answer(plain("[love_life] "), cited("You are drawn to romance.", 0), plain("\n\n[career] "), cited("The king will favour you.", 1)),
+      )
+      /* The retry is sent only the failed area's document, so it cites document 0. */
+      .mockResolvedValueOnce(answer(plain("[career] "), cited("Someone with standing will favour you.", 0)));
+    const body = await read(await GET(request("en")));
+    expect(Object.keys(body.readings).sort()).toEqual(["career", "love_life"]);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
   });
 });

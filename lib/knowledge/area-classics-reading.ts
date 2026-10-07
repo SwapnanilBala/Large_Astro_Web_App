@@ -7,7 +7,15 @@ import type { ClassicalReading } from "./classical-reading";
 import type { KNOWLEDGE_LIFE_AREAS } from "./corpus";
 import { heldPlacements, housesOf, nakshatraName, placementsHold } from "./placements";
 import { BRIHAT_JATAKA_1885, KNOWLEDGE_SOURCES, STRIJATAKA_1931 } from "./sources";
-import { CLASSICAL_NOTE_RULES, NOTE_PREFIX, readingFrom, speaksToChart, type PassageRow } from "./yoga-classics-reading";
+import {
+  CLASSICAL_NOTE_RULES,
+  CLOSING_REMINDERS,
+  NOTE_PREFIX,
+  modelText,
+  readingFrom,
+  speaksToChart,
+  type PassageRow,
+} from "./yoga-classics-reading";
 
 /*
  * "From the classics" on the life-areas page: what the Brihat Jataka says
@@ -252,7 +260,7 @@ export function areaDocuments(selection: readonly AreaSelection[]): Anthropic.Do
         type: "content",
         content: passages.map((passage) => ({
           type: "text",
-          text: passage.kind === "note" ? `${NOTE_PREFIX}${passage.text}` : passage.text,
+          text: passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text),
         })),
       },
       citations: { enabled: true },
@@ -301,7 +309,8 @@ export function areaClassicsInstruction(
   return (
     `Write the notes in ${languageName}, one paragraph for each of these ${areas.length} areas, ` +
     `in this order, each opening with its marker: ${areas.join("; ")}.` +
-    (sex ? READER_LINES[sex] : "")
+    (sex ? READER_LINES[sex] : "") +
+    CLOSING_REMINDERS
   );
 }
 

@@ -64,8 +64,11 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  *
  * As on the yoga note, each area's paragraph is checked before it ships
  * (lib/knowledge/classical-note-check.ts), and the areas that fail -- uncited,
- * or for a Hindi or Bengali reader in the wrong script or with a forbidden
- * word -- are asked for once more on Opus 5.5, in one call that sends only
+ * in the wrong script for a Hindi or Bengali reader, with a word the content
+ * line forbids in any language, or in English with "king" or the book's
+ * insults turned on the reader (enforced everywhere since 2026-10-07, where
+ * outside Hindi and Bengali it was only logged before) -- are asked for once
+ * more on Opus 5.5, in one call that sends only
  * their documents. The areas that passed are kept whatever the retry does,
  * and nothing is charged to the reader's allowance twice.
  */

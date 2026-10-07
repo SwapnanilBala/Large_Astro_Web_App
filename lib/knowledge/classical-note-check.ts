@@ -26,15 +26,19 @@ import type { ClassicalReading } from "./classical-reading";
  *   illness, blindness or disability, caste, eunuchs and prostitution, found
  *   as whole words in the note's language, and in English as well for the
  *   two scripts English words slip into.
+ * - The tone, in English: the book's "king", which CLASSICAL_NOTE_RULES asks
+ *   to be "someone with standing", and the book's insults turned on the reader
+ *   ("you will be poor"), where the rules ask for one neutral phrase ("the
+ *   book warns of lean years"). Haiku slipped into both on the notes and on
+ *   "Ask the classics", in English, the language most readers use.
  *
- * A note that fails is retried once on Opus 5.5 by its route, which is the
- * owner's call for Hindi and Bengali, the languages the measurement found
- * broken. In the others a banned word is only logged and the note still
- * ships, so the logs can show whether enforcing it there would pay.
+ * A note that fails is retried once on Opus 5.5 by its route. Until
+ * 2026-10-07 that was so only in Hindi and Bengali, the languages the first
+ * measurement found broken, and elsewhere a banned word was only logged and
+ * the note still shipped. The owner's call that day: every failure blocks,
+ * in every language, English first among them. A retry costs about three
+ * cents on Opus; the note a reader would otherwise see broke the content line.
  */
-
-/** Reader languages in which a failed check keeps a note from shipping. */
-export const ENFORCED_LANGUAGES: ReadonlySet<string> = new Set(["hi", "bn"]);
 
 /** The script a note is written in, for the languages not written in Latin letters. */
 const SCRIPTS: Record<string, RegExp> = {
@@ -193,6 +197,43 @@ export function bannedTerms(text: string, languageCode: string): string[] {
   return [...found];
 }
 
+/*
+ * The tone rules, in English, where they can be read off the words. The
+ * book's "king" (and its kingdom and queen) means someone with standing,
+ * which the note should say instead. An insult is caught only where it is
+ * turned on the reader -- "you will be poor", "makes you foolish" -- because
+ * naming what the book warned of ("the book warns of poverty") is what the
+ * rules ask for. The insults are the books' own harsh verdicts; the labels
+ * the owner cleared for the printed verses (unchaste, of bad character, and
+ * the like) are not among them.
+ */
+const HARSH = `(?:${[
+  "poor", "penniless", "destitute", "wicked", "sinful", "cruel", "deceitful", "dishonest", "ugly",
+  "miserable", "wretched", "despised", "hated", "foolish", "stupid", "lazy", "dirty", "vile",
+  "quarrelsome", "cowardly", "ungrateful", "shameless",
+].join("|")})`;
+/* String.raw throughout, so every backslash reaches the RegExp as written. */
+const TONE_PATTERNS: readonly RegExp[] = [
+  /\b(?:king|kings|king's|kingdom|kingdoms|queen|queens)\b/gi,
+  new RegExp(
+    String.raw`\byou(?:'ll|'re| will| would| may| might| are| shall)(?: (?:be|become|grow|remain|turn out|end up))?(?: (?:very|quite|rather|somewhat|so|too|\w+ly))? ` +
+      HARSH +
+      String.raw`\b`,
+    "gi",
+  ),
+  new RegExp(String.raw`\b(?:makes?|made|leaves?|left|renders?|keeps?) you (?:(?:very|quite|rather|somewhat|so|too|\w+ly) )?` + HARSH + String.raw`\b`, "gi"),
+];
+
+/** The tone slips in an English note, as written, each once; nothing for a note in another language. */
+export function toneSlips(text: string, languageCode: string): string[] {
+  if (Object.hasOwn(BANNED_TERMS, languageCode) && languageCode !== "en") return [];
+  const found = new Set<string>();
+  for (const pattern of TONE_PATTERNS) {
+    for (const match of text.matchAll(pattern)) found.add(match[0].toLowerCase());
+  }
+  return [...found];
+}
+
 /**
  * Why an answer could not be shipped as a note: the model declined, ran out
  * of tokens, cited nothing (a decline in words usually does), or failed
@@ -204,11 +245,13 @@ export type NoteProblem =
   /** Written mostly outside the reader's script: an English note for a Hindi reader. */
   | { kind: "script"; share: number }
   /** Says what the content line forbids; the words, for the log. */
-  | { kind: "content"; terms: string[] };
+  | { kind: "content"; terms: string[] }
+  /** An English note that says "king", or turns the book's insults on the reader; the phrases, for the log. */
+  | { kind: "tone"; phrases: string[] };
 
 export type NoteCheck = {
   problems: NoteProblem[];
-  /** Whether the problems keep the note from shipping, which they do only in ENFORCED_LANGUAGES. */
+  /** Whether the problems keep the note from shipping: any problem does, in any language. */
   blocks: boolean;
 };
 
@@ -224,5 +267,7 @@ export function checkNote(reading: ClassicalReading, languageCode: string): Note
   if (share !== null && share < MIN_SCRIPT_SHARE) problems.push({ kind: "script", share: Math.round(share * 100) / 100 });
   const terms = bannedTerms(text, languageCode);
   if (terms.length > 0) problems.push({ kind: "content", terms });
-  return { problems, blocks: problems.length > 0 && ENFORCED_LANGUAGES.has(languageCode) };
+  const tone = toneSlips(text, languageCode);
+  if (tone.length > 0) problems.push({ kind: "tone", phrases: tone });
+  return { problems, blocks: problems.length > 0 };
 }

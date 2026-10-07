@@ -9,12 +9,12 @@ import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import { AREA_NAMES } from "../knowledge/area-classics-reading";
 import type { ClassicalReading } from "../knowledge/classical-reading";
 import {
-  ENFORCED_LANGUAGES,
   MIN_SCRIPT_SHARE,
   bannedTerms,
   checkNote,
   noteText,
   scriptShare,
+  toneSlips,
 } from "../knowledge/classical-note-check";
 import { KNOWLEDGE_SOURCES } from "../knowledge/sources";
 import en from "@/messages/en.json";
@@ -159,11 +159,50 @@ describe("checking a note", () => {
     expect(checkNote(note(ENGLISH), "en")).toEqual({ problems: [], blocks: false });
   });
 
-  it("only reports a banned word outside Hindi and Bengali", () => {
-    expect([...ENFORCED_LANGUAGES].sort()).toEqual(["bn", "hi"]);
+  it("stops a banned word in every language, English first among them (2026-10-07)", () => {
     expect(checkNote(note("Der Anapha Yoga befreit dich von Krankheit.[1]"), "de")).toEqual({
       problems: [{ kind: "content", terms: ["krankheit"] }],
-      blocks: false,
+      blocks: true,
     });
+    expect(checkNote(note("With Venus in your 7th house, your wife will be devoted to you.[1]"), "en")).toEqual({
+      problems: [{ kind: "content", terms: ["wife"] }],
+      blocks: true,
+    });
+    expect(checkNote(note("Your Anapha Yoga brings freedom from disease.[1]"), "en").blocks).toBe(true);
+  });
+
+  it("stops an English note that says king, or turns the book's insults on the reader", () => {
+    expect(checkNote(note("You will be respected by the king.[1]"), "en")).toEqual({
+      problems: [{ kind: "tone", phrases: ["king"] }],
+      blocks: true,
+    });
+    expect(checkNote(note("With Mercury in Capricorn, you will be poor.[1]"), "en").problems).toEqual([
+      { kind: "tone", phrases: ["you will be poor"] },
+    ]);
+  });
+});
+
+describe("the tone the notes keep, in English", () => {
+  it.each([
+    ["You will be poor and quarrelsome.", ["you will be poor"]],
+    ["You'll become very lazy.", ["you'll become very lazy"]],
+    ["Mercury makes you foolish.", ["makes you foolish"]],
+    ["Respected by the king, in the king's palace, ruling a kingdom.", ["king", "kingdom"]],
+  ])("finds %j", (text, phrases) => {
+    expect(toneSlips(text, "en")).toEqual(phrases);
+  });
+
+  it.each([
+    "The book warns of poverty and of lean years.",
+    "You will be rich, kind and learned.",
+    "With your Raja Yoga, someone with standing favours you.",
+    "Kingfishers and the Brihat Jataka.",
+  ])("lets %j through", (text) => {
+    expect(toneSlips(text, "en")).toEqual([]);
+  });
+
+  it("reads only English, and a language without a list as English", () => {
+    expect(toneSlips("Du wirst vom König geehrt, the king.", "de")).toEqual([]);
+    expect(toneSlips("you will be poor", "xx")).toEqual(["you will be poor"]);
   });
 });

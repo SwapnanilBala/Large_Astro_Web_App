@@ -60,9 +60,12 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * ── CHECKED, THEN RETRIED ONCE ─────────────────────────────────────────────
  *
  * Haiku writes the note, and what it writes is checked before it ships
- * (lib/knowledge/classical-note-check.ts): cited, and for a Hindi or Bengali
- * reader written in their script and free of the words the content line
- * forbids. Measured, about half its Hindi and Bengali notes failed. A note
+ * (lib/knowledge/classical-note-check.ts): cited, written in a Hindi or
+ * Bengali reader's script, free in any language of the words the content line
+ * forbids, and in English free of "king" and of the book's insults turned on
+ * the reader (enforced everywhere since 2026-10-07; outside Hindi and Bengali
+ * it was only logged before). Measured on Haiku 4.5, about half its Hindi and
+ * Bengali notes failed. A note
  * that fails is asked for once more, on Opus 5.5, from the same request and
  * within the same budget unit, and is not shipped if that fails too.
  */

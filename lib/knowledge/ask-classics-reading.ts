@@ -8,7 +8,16 @@ import type { ClassicalReading } from "./classical-reading";
 import { READER_LINES, countedByAnyArea, describePlacement, type AreaChart } from "./area-classics-reading";
 import { heldPlacements, placementsHold } from "./placements";
 import { BRIHAT_JATAKA_1885, KNOWLEDGE_SOURCES, STRIJATAKA_1931 } from "./sources";
-import { CLASSICAL_NOTE_RULES, NOTE_PREFIX, speaksToChart, type PassageRow } from "./yoga-classics-reading";
+import {
+  CLASSICAL_NOTE_RULES,
+  CLOSING_REMINDERS,
+  NOTE_PREFIX,
+  modelText,
+  speaksToChart,
+  type PassageRow,
+} from "./yoga-classics-reading";
+
+export { modelText };
 import { COMMENTARY_LANGUAGES } from "../varga-commentary";
 
 /*
@@ -197,24 +206,6 @@ export function questionDocumentGroups(passages: readonly PassageRow[], chart: A
   });
 }
 
-/*
- * Phrases the model reads in other words than the book's. "Free from
- * diseases" is how the books promise good health, and a model shown it writes
- * it back, even when told not to (measured on Haiku and on the Opus retry
- * alike): the content line keeps illness out of every note, even as an
- * absence. So the copy the model reads says it as a note may, in square
- * brackets, which the prompt already reads as the app's words; the passage
- * printed under the answer keeps the book's.
- */
-const MODEL_WORDING: readonly (readonly [RegExp, string])[] = [
-  [/\bfree from (?:all |serious )?(?:diseases?|ailments?|sickness|illness(?:es)?)\b/gi, "[of robust health]"],
-];
-
-/** A passage as the model reads it: the book's words, but for MODEL_WORDING. */
-export function modelText(text: string): string {
-  return MODEL_WORDING.reduce((current, [pattern, wording]) => current.replace(pattern, wording), text);
-}
-
 /**
  * One citable document per book: each passage a content block, so a citation
  * names whole passages; the chart conditions they were chosen for go in
@@ -345,7 +336,7 @@ export function askClassicsInstruction(
     /* Said again last, where Haiku reads it: in the system prompt alone it
        closed answers with what the books leave out. */
     " Answer only from the passages: do not remark on what they leave out, and do not end with a summary." +
-    ' Put a harsh verdict in one neutral phrase ("the book warns of lean years"), never as "you will be poor".' +
+    CLOSING_REMINDERS +
     /* Last of all: Haiku, handed an English question and English passages,
        answered a Hindi reader in English. */
     (english ? "" : ` Write every sentence in ${language}, although the question and the passages are in English.`)

@@ -223,3 +223,20 @@ describe("what the browser sends", () => {
     expect(yogaClassicsRequest(many)).toHaveLength(YOGA_CLASSICS_MAX_REQUEST);
   });
 });
+
+describe("the passages as the model reads them", () => {
+  it("say partner and someone with standing where the book says wife, husband and king, in brackets as the app's words", async () => {
+    const { modelText } = await import("../knowledge/yoga-classics-reading");
+    expect(modelText("will have a mean wife, and his wives will quarrel")).toBe("will have a mean [partner], and his [partners] will quarrel");
+    expect(modelText("devoted to her husband and the husband's family")).toBe("devoted to her [partner] and the [partner's] family");
+    expect(modelText("respected by the king, in the king's palace, ruling a kingdom, a friend of kings")).toBe(
+      "respected by [someone with standing], in [someone with standing's] palace, ruling [a position of power], a friend of [people of standing]",
+    );
+    expect(modelText("will be free from diseases")).toBe("will be [of robust health]");
+  });
+
+  it("leave words that only contain them alone", async () => {
+    const { modelText } = await import("../knowledge/yoga-classics-reading");
+    expect(modelText("husbandry, kingly bearing, a kingfisher")).toBe("husbandry, kingly bearing, a kingfisher");
+  });
+});

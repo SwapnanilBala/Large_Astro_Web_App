@@ -21,7 +21,7 @@ import {
   type AreaSelection,
 } from "../knowledge/area-classics-reading";
 import { PLACEMENT_KEYS, chartPlacementKeys, heldPlacements, housesOf, placementsHold } from "../knowledge/placements";
-import { CLASSICAL_NOTE_RULES, NOTE_PREFIX, type PassageRow } from "../knowledge/yoga-classics-reading";
+import { CLASSICAL_NOTE_RULES, CLOSING_REMINDERS, NOTE_PREFIX, type PassageRow } from "../knowledge/yoga-classics-reading";
 
 const row = (
   ref: string,
@@ -240,7 +240,8 @@ describe("what the model is sent", () => {
   it("names the areas in order, under their markers, in the reader's language", () => {
     expect(areaClassicsInstruction(selection, "Hindi")).toBe(
       "Write the notes in Hindi, one paragraph for each of these 2 areas, in this order, each opening with its marker: " +
-        "[love_life] love and marriage; [career] work and career.",
+        "[love_life] love and marriage; [career] work and career." +
+        CLOSING_REMINDERS,
     );
   });
 

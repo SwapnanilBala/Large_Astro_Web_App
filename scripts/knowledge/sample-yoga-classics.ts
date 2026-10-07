@@ -25,6 +25,9 @@ import { resolve } from "node:path";
 import { YOGA_DEFINITIONS } from "../../lib/engines/yoga-engine";
 import { knowledgeCorpusSchema } from "../../lib/knowledge/corpus";
 import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
+import { checkNote } from "../../lib/knowledge/classical-note-check";
+import type { ClassicalReading } from "../../lib/knowledge/classical-reading";
+import { COMMENTARY_LANGUAGES } from "../../lib/varga-commentary";
 import { rankYogas, yogaClassicsRequest } from "../../lib/knowledge/yoga-classics";
 import {
   YOGA_CLASSICS_SYSTEM_PROMPT,
@@ -37,6 +40,15 @@ import {
 import type { YogaDetectionResult } from "../../lib/astro-types";
 
 config({ path: ".env.local", quiet: true });
+
+/* The route's check judges by language code; the scripts take the name the prompt uses. */
+const languageCode = (name: string) =>
+  Object.entries(COMMENTARY_LANGUAGES).find(([, label]) => label === name || label.startsWith(`${name},`))?.[0] ?? "en";
+const verdict = (reading: ClassicalReading, name: string) => {
+  const check = checkNote(reading, languageCode(name));
+  return check.problems.length > 0 ? `BLOCKED ${JSON.stringify(check.problems)}` : "passes";
+};
+
 
 async function main() {
   const args = process.argv.slice(2);
@@ -92,7 +104,7 @@ async function main() {
     `${response.usage.output_tokens} out | ${response.stop_reason}`,
   );
   console.log(`\n${text}\n`);
-  console.log(`${text.replace(/\[[\d,]+\]/g, "").split(/\s+/).filter(Boolean).length} words`);
+  console.log(`${text.replace(/\[[\d,]+\]/g, "").split(/\s+/).filter(Boolean).length} words, ${verdict(reading, language)}`);
   for (const source of reading.sources) {
     console.log(`[${source.number}] ${source.ref} ${source.kind}: ${source.text.slice(0, 100)}`);
   }

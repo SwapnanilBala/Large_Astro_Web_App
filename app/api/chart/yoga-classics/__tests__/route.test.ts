@@ -157,15 +157,26 @@ describe("the yoga note", () => {
     expect(mocks.create).toHaveBeenCalledTimes(1);
   });
 
-  it("ships a German note that names an illness, and logs it", async () => {
-    mocks.create.mockResolvedValueOnce(answer(cited("Der Sunapha Yoga befreit dich von Krankheit.")));
+  it("asks Opus again for a German note that names an illness, since 2026-10-07", async () => {
+    mocks.create
+      .mockResolvedValueOnce(answer(cited("Der Sunapha Yoga befreit dich von Krankheit.")))
+      .mockResolvedValueOnce(answer(cited("Der Sunapha Yoga schenkt dir Ansehen.")));
     const response = await POST(request("de"));
     expect(response.status).toBe(200);
-    expect(mocks.create).toHaveBeenCalledTimes(1);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+    expect(mocks.create.mock.calls[1][0].model).toBe("claude-opus-5-5");
     const logged = vi.mocked(console.warn).mock.calls.map(([line]) => JSON.parse(String(line)));
     expect(logged).toContainEqual(
-      expect.objectContaining({ event: "llm_note_check", language: "de", blocks: false }),
+      expect.objectContaining({ event: "llm_note_check", language: "de", blocks: true }),
     );
+  });
+
+  it("asks Opus again for an English note that turns the book's insult on the reader", async () => {
+    mocks.create
+      .mockResolvedValueOnce(answer(cited("With Kemadruma, you will be poor.")))
+      .mockResolvedValueOnce(answer(cited("The book warns of lean years.")));
+    expect((await POST(request("en"))).status).toBe(200);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
   });
 
   it("reads a language that is only a property of every object as English", async () => {
