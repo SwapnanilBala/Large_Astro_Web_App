@@ -290,10 +290,11 @@ describe("what the model is sent", () => {
   it("asks the question as written, in English, with the year's periods only for a year question", () => {
     const periods = [{ maha: "Saturn", antar: "Mercury", until: "2026-12-06" }];
     const year = askClassicsInstruction(CAREER, periods, "female");
-    expect(year).toContain(`"${CAREER.text}"`);
+    expect(year).toContain(`The reader asked about the year ahead: "${CAREER.text}"`);
+    expect(year).toContain("open with the sentence naming this year's periods");
     expect(year).toContain("Write the answer in English.");
     expect(year).toContain("Saturn–Mercury until December 2026");
-    expect(year).toContain('use this sentence as written: "This year runs under your Saturn period, in its Mercury sub-period."');
+    expect(year).toContain('to use as written: "This year runs under your Saturn period, in its Mercury sub-period."');
     expect(year).toContain('"your partner"');
     const life = askClassicsInstruction(ASK_QUESTIONS.strengths, periods);
     expect(life).not.toContain("Saturn");
@@ -335,5 +336,44 @@ describe("the words the model reads", () => {
     const kemadruma = row("13.12.1", { lifeAreas: ["wealth"], yogaIds: ["kemadruma"] });
     const chart: AreaChart = { ...CHART, yogas: [{ id: "kemadruma", planets: [] }] };
     expect(answersQuestion(kemadruma, ASK_QUESTIONS.money_year, chart)).toBe(false);
+  });
+});
+
+describe("the answer's language", () => {
+  const periods = [{ maha: "Saturn", antar: "Mercury", until: "2026-12-06" }];
+
+  it("is the reader's, written straight in it, with the period sentence translated rather than quoted", () => {
+    const german = askClassicsInstruction(CAREER, periods, undefined, "de");
+    expect(german).toContain('Write the answer in German, addressing the reader informally as "du".');
+    expect(german).toContain("to give translated and saying only what it says");
+    expect(german).not.toContain("to use as written");
+    expect(askClassicsInstruction(CAREER, periods, undefined, "hi")).toContain("Write the answer in Hindi.");
+  });
+
+  it.each(["xx", "constructor", "__proto__", ""])("is English for %j", (code) => {
+    const instruction = askClassicsInstruction(CAREER, periods, undefined, code);
+    expect(instruction).toContain("Write the answer in English.");
+    expect(instruction).toContain("to use as written");
+  });
+});
+
+describe("the answer as the card prints it", () => {
+  it("loses a markdown heading the model opened with, and keeps every source", async () => {
+    const { withoutHeadings } = await import("../knowledge/ask-classics-reading");
+    const reading = withoutHeadings({
+      segments: [
+        { text: "# Deine Liebe im kommenden Jahr\n\nDieses Jahr steht unter deiner Saturn-Periode. ", sources: [] },
+        { text: "## Heading\n", sources: [2] },
+        { text: "Mit Venus in Steinbock wirst du von allen gemocht.", sources: [1] },
+      ],
+      sources: [],
+    });
+    expect(reading.segments.map((segment) => segment.text)).toEqual([
+      "\nDieses Jahr steht unter deiner Saturn-Periode. ",
+      "",
+      "Mit Venus in Steinbock wirst du von allen gemocht.",
+    ]);
+    expect(reading.segments.map((segment) => segment.sources)).toEqual([[], [2], [1]]);
+    expect(withoutHeadings({ segments: [{ text: "C# and #1 stay.", sources: [] }], sources: [] }).segments[0].text).toBe("C# and #1 stay.");
   });
 });

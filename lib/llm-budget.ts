@@ -337,7 +337,16 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      checks is retried once on Opus 5.5 at low effort inside the same unit,
      about $0.03, as on the other classical notes. 600 a day is about $2 if
      nothing retries and about $20 if everything does, inside the $22 every
-     dear route here is held to. */
+     dear route here is held to.
+
+     2026-10-07: questions the reader types, and answers in every language.
+     A typed question is screened first, on Haiku with a structured output:
+     about 830 input and 30 output tokens, under $0.001, measured. The screen
+     and the answer are one unit, and a question the screen refuses still
+     spends it, so trying instructions over and over costs the caller their
+     day, not the route's. Hindi and Bengali answers retry on Opus about half
+     the time, as on the other notes, which the $20 worst case above already
+     assumes of every unit. */
   "/api/chart/ask-classics": {
     perDay: 600,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,

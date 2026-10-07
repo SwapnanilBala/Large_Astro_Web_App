@@ -6,13 +6,24 @@ import type { KNOWLEDGE_LIFE_AREAS } from "./corpus";
  * the shapes the route answers in. Safe to ship to the browser: the panel
  * reads the ids from here, and its labels from the route catalog.
  *
- * A question is fixed here rather than typed by the reader, so nothing the
- * browser writes reaches the model; the browser sends only an id. Its `text`
- * is what the search embeds and what the model is asked, in English whatever
- * the page language, because the passages and their summaries are English.
+ * Two kinds. A fixed question is written here, and the browser sends only its
+ * id. A typed question is the reader's own words, which reach one model only,
+ * the screen (lib/knowledge/ask-screen.ts); what is searched and answered is
+ * the screen's English rewrite of it. Either way the question is English by
+ * the time it is embedded and asked, because the passages and their summaries
+ * are English; the answer is written in the reader's language.
  */
 
 type Topic = (typeof KNOWLEDGE_LIFE_AREAS)[number];
+
+/** The longest question a reader may type, in characters. */
+export const ASK_TYPED_MAX_LENGTH = 200;
+/** The shortest: anything less is not a question. */
+export const ASK_TYPED_MIN_LENGTH = 3;
+
+/** Why a typed question is not answered, as the screen judged it. */
+export const ASK_REFUSALS = ["instructions", "forbidden_topic", "not_about_chart"] as const;
+export type AskRefusal = (typeof ASK_REFUSALS)[number];
 
 export const ASK_QUESTION_IDS = [
   "career_year",
@@ -99,6 +110,16 @@ export type AskClassicsAvailability = {
  */
 export type AskClassicsAnswer = {
   question: AskQuestionId;
+  reading: ClassicalReading | null;
+  cached: boolean;
+};
+
+/**
+ * A typed question's answer. `refused` says why the screen would not let it
+ * through, and then there is no reading; otherwise `reading` is as above.
+ */
+export type AskTypedAnswer = {
+  refused: AskRefusal | null;
   reading: ClassicalReading | null;
   cached: boolean;
 };

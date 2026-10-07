@@ -4,10 +4,12 @@ import type { BirthSex } from "../birth-sex";
 import { DASHA_YEARS, NAKSHATRA_LORDS, YEAR_DAYS } from "../engines/nakshatra-engine";
 import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import { ASK_QUESTION_IDS, ASK_QUESTIONS, type AskQuestion, type AskQuestionId } from "./ask-questions";
+import type { ClassicalReading } from "./classical-reading";
 import { READER_LINES, countedByAnyArea, describePlacement, type AreaChart } from "./area-classics-reading";
 import { heldPlacements, placementsHold } from "./placements";
 import { BRIHAT_JATAKA_1885, KNOWLEDGE_SOURCES, STRIJATAKA_1931 } from "./sources";
 import { CLASSICAL_NOTE_RULES, NOTE_PREFIX, speaksToChart, type PassageRow } from "./yoga-classics-reading";
+import { COMMENTARY_LANGUAGES } from "../varga-commentary";
 
 /*
  * "Ask the classics" on the life-areas page: a reader picks a question, and
@@ -243,6 +245,20 @@ export function questionDocuments(groups: readonly QuestionDocumentGroup[]): Ant
   });
 }
 
+/**
+ * The answer without the markdown headings a model now and then opens it
+ * with ("# Deine Liebe im kommenden Jahr"), which the prompt forbids and the
+ * card would print as they are: the card already heads the answer with the
+ * question. A segment the heading leaves empty is dropped unless it carries
+ * sources, whose numbers belong to it.
+ */
+export function withoutHeadings(reading: ClassicalReading): ClassicalReading {
+  const segments = reading.segments
+    .map((segment) => ({ ...segment, text: segment.text.replace(/(^|\n)[ \t]*#{1,6}[ \t][^\n]*(?:\n|$)/g, "$1") }))
+    .filter((segment) => segment.text.trim().length > 0 || segment.sources.length > 0);
+  return { ...reading, segments };
+}
+
 /* ── The prompt ───────────────────────────────────────────────────────────── */
 
 /* Frozen, so it is the cacheable prefix; the documents, the question and the periods follow in the user turn. */
@@ -258,7 +274,7 @@ Answer the question from the passages.
 - Say which condition in the chart a statement rests on ("with Venus in your 7th house, ...").
 - A passage that lists results of several kinds may be used only for its results that bear on the question.
 - Words in square brackets inside a passage are the app's, not the book's: the opening words a passage needs to read alone, or a wording chosen in place of one too harsh to print. Follow them, and never restore what they replace.
-- When the question asks about the year ahead: the books describe what a chart promises, not when it comes. The instruction names the planetary periods (Vimshottari dasha) that run over the next twelve months. Name them, if at all, in the one plain sentence the instruction gives, and where a passage concerns one of their planets you may say so ("... and the Brihat Jataka says of Saturn in Sagittarius ..."). Never say what a period itself does, supports, brings or strengthens, and never promise an event, a date or an outcome.
+- When the question asks about the year ahead: the books describe what a chart promises, not when it comes. The instruction names the planetary periods (Vimshottari dasha) that run over the next twelve months. Name them, if at all, in the one plain sentence the instruction gives, and where a passage concerns one of their planets you may say so ("... and the Brihat Jataka says of Saturn in Sagittarius ..."). Never say what a period itself does, supports, brings or strengthens, and never promise an event, a date or an outcome. Do not say that the books cannot tell when, or say nothing about the year, and do not apologise: give the periods' sentence and what the passages promise, and stop.
 - When the question is about health: speak only of vitality, strength and constitution as the passages describe them. Where a passage promises freedom from disease, say "robust health" or "a strong constitution": never write disease, illness, sickness or ailment, even to say the reader is free of them. Never name an injury, a weak organ or a remedy.
 ${CLASSICAL_NOTE_RULES}`;
 
@@ -287,18 +303,51 @@ export function periodSentence(periods: readonly YearPeriod[]): string {
   return `This year runs ${parts.join(", ")}.`;
 }
 
-/** The user turn's closing instruction: the question, the language, the year's periods, and who the reader is. */
-export function askClassicsInstruction(question: AskQuestion, periods: readonly YearPeriod[], sex?: BirthSex): string {
+/**
+ * The user turn's closing instruction: the question, the language, the year's
+ * periods, and who the reader is.
+ *
+ * The question is English whatever the page language, and the answer is
+ * written straight in the reader's language rather than written in English
+ * and translated afterwards: the citations are attached to the answer's own
+ * words, and a translation of it would leave them pointing into text that is
+ * no longer there. An unknown language code is English, as on the other notes.
+ */
+export function askClassicsInstruction(
+  question: AskQuestion,
+  periods: readonly YearPeriod[],
+  sex?: BirthSex,
+  languageCode = "en",
+): string {
+  const english = !Object.hasOwn(COMMENTARY_LANGUAGES, languageCode) || languageCode === "en";
+  const language = english ? COMMENTARY_LANGUAGES.en : COMMENTARY_LANGUAGES[languageCode];
+  /*
+   * A year question is put as what it can be answered with. Asked plainly
+   * "what does the year ahead hold", Haiku objected, in English, German and
+   * Hindi alike, that the passages say nothing about the year, however the
+   * system prompt forbade it; told what the answer is made of, it gives it.
+   */
+  const yearly = question.span === "year";
+  const asked = yearly
+    ? `The reader asked about the year ahead: "${question.text}" The books speak to what a chart promises, and that promise is the answer: ` +
+      (periods.length > 0 ? "open with the sentence naming this year's periods, then say " : "say ") +
+      "what the passages promise for this part of life."
+    : `The reader's question: "${question.text}"`;
   const year =
-    question.span === "year" && periods.length > 0
+    yearly && periods.length > 0
       ? ` Over the next twelve months the reader is in these planetary periods (Maha Dasha–Antardasha): ${describePeriods(periods)}.` +
-        ` If you name them, use this sentence as written: "${periodSentence(periods)}"`
+        (english
+          ? ` The sentence naming them, to use as written: "${periodSentence(periods)}"`
+          : ` The sentence naming them, to give translated and saying only what it says: "${periodSentence(periods)}"`)
       : "";
   return (
-    `The reader's question: "${question.text}" Write the answer in English.${year}${sex ? READER_LINES[sex] : ""}` +
+    `${asked} Write the answer in ${language}.${year}${sex ? READER_LINES[sex] : ""}` +
     /* Said again last, where Haiku reads it: in the system prompt alone it
        closed answers with what the books leave out. */
     " Answer only from the passages: do not remark on what they leave out, and do not end with a summary." +
-    ' Put a harsh verdict in one neutral phrase ("the book warns of lean years"), never as "you will be poor".'
+    ' Put a harsh verdict in one neutral phrase ("the book warns of lean years"), never as "you will be poor".' +
+    /* Last of all: Haiku, handed an English question and English passages,
+       answered a Hindi reader in English. */
+    (english ? "" : ` Write every sentence in ${language}, although the question and the passages are in English.`)
   );
 }

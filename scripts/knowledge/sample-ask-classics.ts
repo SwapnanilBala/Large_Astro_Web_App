@@ -7,15 +7,19 @@
  * be sent, which costs one embedding call per question and nothing else.
  *
  *   npx tsx scripts/knowledge/sample-ask-classics.ts 1990-01-01 10:00 all 7001 --sex=female --dry
- *   npx tsx scripts/knowledge/sample-ask-classics.ts 1985-11-02 06:15 health,career_year 7001
+ *   npx tsx scripts/knowledge/sample-ask-classics.ts 1985-11-02 06:15 health,career_year 7001 --language=de
+ *   npx tsx scripts/knowledge/sample-ask-classics.ts 1985-11-02 06:15 none 7001 "--ask=Wie wird mein Liebesleben?"
  *
- * Arguments: birth date, birth time, the questions (ids from
- * lib/knowledge/ask-questions.ts, comma-separated, or "all"), and the port of
- * a running dev server, which is where the chart comes from. The place
- * defaults to Bengaluru (+5:30); --lat, --lng and --tz (minutes east of UTC)
- * choose another; --sex=female or --sex=male opens the chapters on women's
- * charts. Each question without --dry is one paid call on Claude Haiku 4.5,
- * about $0.003, and the answer is put through the route's content check.
+ * Arguments: birth date, birth time, the fixed questions (ids from
+ * lib/knowledge/ask-questions.ts, comma-separated, "all" or "none"), and the
+ * port of a running dev server, which is where the chart comes from. Each
+ * --ask= is a typed question, put through the route's screen first (about
+ * $0.0005), which prints its verdict and rewrite. --language= is the answer's
+ * language (default en). The place defaults to Bengaluru (+5:30); --lat,
+ * --lng and --tz (minutes east of UTC) choose another; --sex=female or
+ * --sex=male opens the chapters on women's charts. Each question answered
+ * without --dry is one paid call on Claude Haiku 4.5, about $0.003, and the
+ * answer is put through the route's content check in that language.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -36,9 +40,17 @@ import {
   questionDocumentGroups,
   questionDocuments,
   selectQuestionPassages,
+  withoutHeadings,
   yearPeriods,
 } from "../../lib/knowledge/ask-classics-reading";
-import { ASK_QUESTION_IDS, ASK_QUESTIONS, isAskQuestionId } from "../../lib/knowledge/ask-questions";
+import { ASK_QUESTION_IDS, ASK_QUESTIONS, isAskQuestionId, type AskQuestion } from "../../lib/knowledge/ask-questions";
+import {
+  ASK_SCREEN_SCHEMA,
+  ASK_SCREEN_SYSTEM_PROMPT,
+  parseScreen,
+  screenInput,
+  screenMessage,
+} from "../../lib/knowledge/ask-screen";
 import { checkNote } from "../../lib/knowledge/classical-note-check";
 import { KNOWLEDGE_EMBEDDING_DIMENSIONS, KNOWLEDGE_EMBEDDING_MODEL } from "../../lib/knowledge/embedding";
 import { queryPassagesNearQuestion } from "../../lib/knowledge/passage-queries";
@@ -54,8 +66,12 @@ async function main() {
     args.find((arg) => arg.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;
   const dry = args.includes("--dry");
   const sex = parseBirthSex(flag("sex", ""));
-  const ids = which === "all" ? [...ASK_QUESTION_IDS] : which.split(",").filter(isAskQuestionId);
-  if (ids.length === 0) throw new Error(`No known question in "${which}". Known: ${ASK_QUESTION_IDS.join(", ")}.`);
+  const language = flag("language", "en");
+  const typed = args.filter((arg) => arg.startsWith("--ask=")).map((arg) => arg.slice(6));
+  const ids = which === "all" ? [...ASK_QUESTION_IDS] : which === "none" ? [] : which.split(",").filter(isAskQuestionId);
+  if (ids.length === 0 && typed.length === 0) {
+    throw new Error(`No known question in "${which}" and no --ask. Known: ${ASK_QUESTION_IDS.join(", ")}.`);
+  }
 
   const query = new URLSearchParams({
     name: `Sample ${date} ${time}`,
@@ -85,8 +101,27 @@ async function main() {
   const db = drizzle({ client: neon(url) });
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   const client = new Anthropic();
-  for (const id of ids) {
-    const question = ASK_QUESTIONS[id];
+  const asked: { label: string; question: AskQuestion }[] = ids.map((id) => ({ label: id, question: ASK_QUESTIONS[id] }));
+  for (const text of typed) {
+    const input = screenInput(text);
+    const started = Date.now();
+    const screened = await client.messages.create({
+      model: "claude-haiku-4-5",
+      max_tokens: 400,
+      system: [{ type: "text", text: ASK_SCREEN_SYSTEM_PROMPT }],
+      messages: [{ role: "user", content: screenMessage(input) }],
+      output_config: { format: { type: "json_schema", schema: ASK_SCREEN_SCHEMA as unknown as Record<string, unknown> } },
+    });
+    const raw = screened.content.find((block) => block.type === "text")?.text ?? "";
+    const result = screened.stop_reason === "refusal" ? { verdict: "not_about_chart" as const } : parseScreen(raw);
+    console.log(
+      `
+screen | ${((Date.now() - started) / 1000).toFixed(1)}s | ${screened.usage.input_tokens} in + ${screened.usage.output_tokens} out` +
+        ` | "${input}" -> ${result ? (result.verdict === "answer" ? `answer: "${result.question.text}" ${JSON.stringify(result.question.topics)} ${result.question.span}` : result.verdict) : `UNREADABLE ${raw}`}`,
+    );
+    if (result?.verdict === "answer") asked.push({ label: `typed "${input}"`, question: result.question });
+  }
+  for (const { label: id, question } of asked) {
     const periods = question.span === "year" ? yearPeriods(chart.dasha) : [];
     /* As lib/knowledge/question-embedding.ts asks, which is server-only and so not importable here. */
     const embedded = await openai.embeddings.create({
@@ -123,14 +158,14 @@ async function main() {
       messages: [
         {
           role: "user",
-          content: [...questionDocuments(groups), { type: "text", text: askClassicsInstruction(question, periods, sex) }],
+          content: [...questionDocuments(groups), { type: "text", text: askClassicsInstruction(question, periods, sex, language) }],
         },
       ],
     });
-    const reading = readingFrom(response.content, groups);
+    const reading = withoutHeadings(readingFrom(response.content, groups));
     const text = reading.segments.map((s) => s.text + (s.sources.length ? `[${s.sources.join(",")}]` : "")).join("");
     const words = text.replace(/\[[\d,]+\]/g, "").split(/\s+/).filter(Boolean).length;
-    const check = checkNote(reading, "en");
+    const check = checkNote(reading, language);
     console.log(
       `${response.model} | ${((Date.now() - started) / 1000).toFixed(1)}s | ${response.usage.input_tokens} in + ` +
         `${response.usage.output_tokens} out | ${response.stop_reason} | ${words} words | ` +
