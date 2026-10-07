@@ -2514,6 +2514,34 @@
       "caution": "Condizione di cautela",
       "current": "Attivazione attuale",
       "next": "Prossimo ciclo più forte"
+    },
+    "ask": {
+      "kicker": "Chiedi ai classici",
+      "heading": "Fai una domanda ai libri",
+      "lead": "Scegli una domanda o scrivi la tua. La risposta attinge solo ai passi le cui condizioni si verificano nel tuo tema natale, e ogni affermazione rimanda al passo da cui proviene.",
+      "chooseLabel": "Domande che puoi fare",
+      "loading": "Cerchiamo le domande a cui il tuo tema natale può rispondere…",
+      "empty": "I libri non dicono nulla su questa domanda per il tuo tema natale.",
+      "limited": "Per oggi è tutto. Torna domani per fare altre domande.",
+      "limitedSignIn": "Per oggi è tutto. Accedi per fare altre domande.",
+      "failed": "Non è stato possibile rispondere a questa domanda in questo momento. Ponila di nuovo per riprovare.",
+      "ownLabel": "Oppure fai la tua domanda",
+      "ownPlaceholder": "Per esempio: che tipo di lavoro fa per me?",
+      "ownSubmit": "Chiedi",
+      "ownHint": "Domande sul tuo tema natale, fino a {max} caratteri. Ognuna conta tra le domande di oggi.",
+      "refusedInstructions": "Sembra un'istruzione più che una domanda. Chiedi qualcosa sul tuo tema natale.",
+      "refusedForbidden": "Le letture non trattano questo argomento. Prova con una domanda su un altro aspetto della tua vita.",
+      "refusedNotAboutChart": "I libri possono rispondere solo a domande sul tuo tema natale: lavoro, denaro, amore, famiglia, carattere e simili.",
+      "questions": {
+        "career_year": "La mia carriera nel prossimo anno",
+        "love_year": "La mia vita sentimentale nel prossimo anno",
+        "money_year": "Il denaro nel prossimo anno",
+        "health": "Salute e vitalità",
+        "marriage": "Il matrimonio e il partner",
+        "strengths": "I miei punti di forza",
+        "children": "Figli",
+        "standing": "Reputazione e posizione"
+      }
     }
   },
   "fullReading": {

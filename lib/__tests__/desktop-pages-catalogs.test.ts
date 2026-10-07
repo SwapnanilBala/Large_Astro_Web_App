@@ -63,6 +63,7 @@ import { SNAPSHOT_DIGNITIES } from "@/app/(desktop)/insights/components/planetar
 import { luckyTermKey } from "@/app/(desktop)/insights/components/lucky-terms";
 import { DASHA_THEME_PLANETS } from "@/app/(desktop)/insights/components/nakshatra-dasha-panel";
 import { KALATRA_FACET_KEYS } from "@/app/(desktop)/insights/life-areas/kalatra-panel";
+import { ASK_QUESTION_IDS } from "@/lib/knowledge/ask-questions";
 import { RETURN_KEYS, SHIFT_ORDINALS } from "@/app/(desktop)/insights/components/major-shifts-panel";
 import { PLANET_THEMES } from "@/lib/engines/major-shifts-engine";
 import {
@@ -135,6 +136,7 @@ const SOURCE_FILES = [
   "app/(desktop)/insights/components/weekly-energy-panel.tsx",
   "app/(desktop)/insights/divisional-charts/divisional-charts-client.tsx",
   "app/(desktop)/insights/divisional-charts/[division]/division-detail-view.tsx",
+  "app/(desktop)/insights/life-areas/ask-classics-panel.tsx",
   "app/(desktop)/insights/life-areas/kalatra-panel.tsx",
   "app/(desktop)/insights/life-areas/life-areas-client.tsx",
   "app/(desktop)/insights/life-areas/life-areas-text.tsx",
@@ -235,6 +237,7 @@ RUNTIME_KEYS.push(
   "insights.lucky.safetyNote",
   ...DASHA_THEME_PLANETS.map((planet) => `dasha.panel.themes.${planet.toLowerCase()}`),
   ...KALATRA_FACET_KEYS.map((facet) => `lifeAreas.kalatraFacets.${facet}`),
+  ...ASK_QUESTION_IDS.map((id) => `lifeAreas.ask.questions.${id}`),
   "insights.shifts.labels.mahadasha",
   ...Object.values(RETURN_KEYS).flatMap((kind) => [`insights.shifts.labels.${kind}`, `insights.shifts.themes.${kind}`]),
   ...SHIFT_ORDINALS.map((ordinal) => `insights.shifts.ordinals.${ordinal}`),

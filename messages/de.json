@@ -2514,6 +2514,34 @@
       "caution": "Wann Vorsicht geboten ist",
       "current": "Aktuelle Aktivierung",
       "next": "Nächster stärkerer Zyklus"
+    },
+    "ask": {
+      "kicker": "Frag die Klassiker",
+      "heading": "Stell den Büchern eine Frage",
+      "lead": "Wähle eine Frage oder stell deine eigene. Die Antwort stützt sich nur auf die Textstellen, deren Bedingungen in deinem Horoskop erfüllt sind, und jede Aussage verweist auf die Stelle, aus der sie stammt.",
+      "chooseLabel": "Fragen, die du stellen kannst",
+      "loading": "Wir suchen die Fragen, auf die dein Horoskop eine Antwort hat…",
+      "empty": "Zu dieser Frage sagen die Bücher für dein Horoskop nichts.",
+      "limited": "Das waren alle Fragen für heute. Komm morgen wieder, um mehr zu fragen.",
+      "limitedSignIn": "Das waren alle Fragen für heute. Melde dich an, um mehr zu fragen.",
+      "failed": "Diese Frage konnte gerade nicht beantwortet werden. Stell sie noch einmal, um es erneut zu versuchen.",
+      "ownLabel": "Oder stell deine eigene Frage",
+      "ownPlaceholder": "Zum Beispiel: Welche Arbeit passt zu mir?",
+      "ownSubmit": "Fragen",
+      "ownHint": "Fragen zu deinem eigenen Horoskop, bis zu {max} Zeichen. Jede zählt zu den Fragen von heute.",
+      "refusedInstructions": "Das klingt eher nach einer Anweisung als nach einer Frage. Frag etwas zu deinem eigenen Horoskop.",
+      "refusedForbidden": "Darauf gehen die Deutungen nicht ein. Versuch es mit einer Frage zu einem anderen Bereich deines Lebens.",
+      "refusedNotAboutChart": "Die Bücher können nur Fragen zu deinem eigenen Horoskop beantworten: Arbeit, Geld, Liebe, Familie, Charakter und Ähnliches.",
+      "questions": {
+        "career_year": "Mein Beruf im kommenden Jahr",
+        "love_year": "Mein Liebesleben im kommenden Jahr",
+        "money_year": "Geld im kommenden Jahr",
+        "health": "Gesundheit und Vitalität",
+        "marriage": "Ehe und Partnerschaft",
+        "strengths": "Meine natürlichen Stärken",
+        "children": "Kinder",
+        "standing": "Ansehen und Stellung"
+      }
     }
   },
   "fullReading": {

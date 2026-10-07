@@ -2514,6 +2514,34 @@
       "caution": "Condición de cautela",
       "current": "Activación actual",
       "next": "Próximo ciclo más fuerte"
+    },
+    "ask": {
+      "kicker": "Pregunta a los clásicos",
+      "heading": "Haz una pregunta a los libros",
+      "lead": "Elige una pregunta o escribe la tuya. La respuesta sale solo de los pasajes cuyas condiciones se cumplen en tu carta, y cada afirmación remite al pasaje del que procede.",
+      "chooseLabel": "Preguntas que puedes hacer",
+      "loading": "Buscando las preguntas que tu carta puede responder…",
+      "empty": "Los libros no dicen nada sobre esta pregunta para tu carta.",
+      "limited": "Eso es todo por hoy. Vuelve mañana para hacer más preguntas.",
+      "limitedSignIn": "Eso es todo por hoy. Inicia sesión para hacer más preguntas.",
+      "failed": "No se pudo responder a esta pregunta ahora mismo. Vuelve a hacerla para intentarlo otra vez.",
+      "ownLabel": "O haz tu propia pregunta",
+      "ownPlaceholder": "Por ejemplo: ¿Qué tipo de trabajo me conviene?",
+      "ownSubmit": "Preguntar",
+      "ownHint": "Preguntas sobre tu propia carta, de hasta {max} caracteres. Cada una cuenta para las preguntas de hoy.",
+      "refusedInstructions": "Eso parece una instrucción, no una pregunta. Pregunta algo sobre tu propia carta.",
+      "refusedForbidden": "Las lecturas no tratan ese tema. Prueba con una pregunta sobre otra parte de tu vida.",
+      "refusedNotAboutChart": "Los libros solo pueden responder preguntas sobre tu propia carta: trabajo, dinero, amor, familia, carácter y temas parecidos.",
+      "questions": {
+        "career_year": "Mi carrera en el próximo año",
+        "love_year": "Mi vida amorosa en el próximo año",
+        "money_year": "El dinero en el próximo año",
+        "health": "Salud y vitalidad",
+        "marriage": "El matrimonio y mi pareja",
+        "strengths": "Mis fortalezas naturales",
+        "children": "Hijos",
+        "standing": "Reputación y posición"
+      }
     }
   },
   "fullReading": {

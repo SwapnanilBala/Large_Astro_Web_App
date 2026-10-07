@@ -2514,6 +2514,34 @@
       "caution": "Condition de prudence",
       "current": "Activation actuelle",
       "next": "Prochain cycle plus fort"
+    },
+    "ask": {
+      "kicker": "Interroger les classiques",
+      "heading": "Posez une question aux livres",
+      "lead": "Choisissez une question ou posez la vôtre. La réponse ne s'appuie que sur les passages dont les conditions se vérifient dans votre thème, et chaque affirmation renvoie au passage dont elle provient.",
+      "chooseLabel": "Questions que vous pouvez poser",
+      "loading": "Recherche des questions auxquelles votre thème peut répondre…",
+      "empty": "Les livres ne disent rien sur cette question pour votre thème.",
+      "limited": "C'est tout pour aujourd'hui. Revenez demain pour poser d'autres questions.",
+      "limitedSignIn": "C'est tout pour aujourd'hui. Connectez-vous pour poser d'autres questions.",
+      "failed": "Impossible de répondre à cette question pour le moment. Posez-la de nouveau pour réessayer.",
+      "ownLabel": "Ou posez votre propre question",
+      "ownPlaceholder": "Par exemple : quel type de travail me convient ?",
+      "ownSubmit": "Demander",
+      "ownHint": "Des questions sur votre propre thème, de {max} caractères au plus. Chacune compte parmi les questions du jour.",
+      "refusedInstructions": "Cela ressemble à une consigne plutôt qu'à une question. Demandez quelque chose sur votre propre thème.",
+      "refusedForbidden": "Les lectures n'abordent pas ce sujet. Essayez une question sur un autre aspect de votre vie.",
+      "refusedNotAboutChart": "Les livres ne peuvent répondre qu'aux questions sur votre propre thème : travail, argent, amour, famille, caractère, etc.",
+      "questions": {
+        "career_year": "Ma carrière dans l'année à venir",
+        "love_year": "Ma vie amoureuse dans l'année à venir",
+        "money_year": "L'argent dans l'année à venir",
+        "health": "Santé et vitalité",
+        "marriage": "Mariage et vie de couple",
+        "strengths": "Mes forces naturelles",
+        "children": "Enfants",
+        "standing": "Réputation et statut"
+      }
     }
   },
   "fullReading": {

@@ -142,6 +142,68 @@
   line-height: 1.6;
 }
 
+.askForm {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.askFormLabel {
+  color: var(--area-gold);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
+  font-weight: 700;
+}
+
+.askFormRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 0.6rem;
+}
+
+.askInput {
+  flex: 1 1 18rem;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid rgba(200, 155, 60, 0.28);
+  border-radius: 12px;
+  background: rgba(255, 243, 210, 0.04);
+  color: var(--area-ink);
+  font-family: inherit;
+  font-size: var(--text-ui);
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.askInput::placeholder {
+  color: var(--area-soft);
+  opacity: 0.8;
+}
+
+.askInput:focus-visible {
+  outline: 2px solid rgba(224, 184, 92, 0.55);
+  outline-offset: 1px;
+  border-color: rgba(224, 184, 92, 0.62);
+}
+
+/* The global button style gives every button a top margin, which would drop
+   this one below the input it sits beside. */
+.askSubmit {
+  margin-top: 0;
+  flex: 0 0 auto;
+}
+
+.askHint {
+  margin: 0;
+  color: var(--area-soft);
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
+:global(html[data-theme="light"]) .askInput {
+  border-color: var(--border-soft);
+  background: rgba(255, 255, 255, 0.7);
+}
+
 .domainHeader {
   display: flex;
   align-items: flex-start;
