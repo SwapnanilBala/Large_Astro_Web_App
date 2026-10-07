@@ -119,6 +119,16 @@ type LlmBudgetConfig = {
  * follow-ups went back to Claude Opus 5 at low effort. The daily totals stay
  * as they were, for the reason above.
  *
+ * 2026-10-07: the same routes moved to Claude Haiku 5.5 at low effort
+ * (lib/llm-models.ts), the owner's call. It is $0.10/$0.50 per million tokens
+ * for prompts up to 100K tokens, a tenth of Haiku 4.5, though its tokenizer
+ * counts the same text about 30% higher and low effort may spend a little on
+ * thinking. It also caches from 512 tokens, so the system prompts the routes
+ * already mark are cached again and cacheReadTokens stop reading 0. Every
+ * Haiku figure below was measured on Haiku 4.5 and is now a ceiling about
+ * eight times too high; the Opus retries cost what they did. The daily
+ * totals stay, for the reason above.
+ *
  * The route totals are whole-deployment numbers rather than per-instance ones,
  * so they bite where they read. They are sized by what a call costs: dasha
  * readings use Claude Opus 5 with a cached system prefix, while palm reading uses

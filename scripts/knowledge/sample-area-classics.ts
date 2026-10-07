@@ -11,8 +11,8 @@
  *
  * Arguments: birth date, birth time, the language as the prompt names it, and
  * the port of a running dev server, which is where the chart comes from.
- * (There was an effort argument before the route moved to Claude Haiku 4.5 on
- * 2026-10-06; Haiku takes no effort setting.) The place defaults to Bengaluru
+ * It runs the route's model and effort (lib/llm-models.ts), Claude Haiku 5.5
+ * at low effort since 2026-10-07. The place defaults to Bengaluru
  * (+5:30); --lat, --lng and --tz
  * (minutes east of UTC) choose another; --sex=female or --sex=male is the
  * reader's sex at birth, which opens the chapters on women's charts. Passages
@@ -37,6 +37,7 @@ import {
   type AreaChart,
 } from "../../lib/knowledge/area-classics-reading";
 import { knowledgeCorpusSchema } from "../../lib/knowledge/corpus";
+import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
 import { parseBirthSex } from "../../lib/birth-sex";
 import { chartPlacementKeys } from "../../lib/knowledge/placements";
 import type { PassageRow } from "../../lib/knowledge/yoga-classics-reading";
@@ -99,8 +100,9 @@ async function main() {
 
   const started = Date.now();
   const response = await new Anthropic().messages.create({
-    model: "claude-haiku-4-5",
+    model: CHART_MODEL,
     max_tokens: 6000,
+    output_config: { effort: CHART_EFFORT },
     system: [{ type: "text", text: AREA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
     messages: [
       {

@@ -164,7 +164,7 @@ describe("a question", () => {
     expect(search.chartKeys).toContain("Mars.house.10");
 
     const sent = mocks.create.mock.calls[0][0];
-    expect(sent.model).toBe("claude-haiku-4-5");
+    expect(sent.model).toBe("claude-haiku-5-5");
     const content = sent.messages[0].content;
     expect(content[0].type).toBe("document");
     const instruction = content[content.length - 1].text as string;

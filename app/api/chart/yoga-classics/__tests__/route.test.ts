@@ -88,16 +88,16 @@ afterEach(() => {
 });
 
 describe("the yoga note", () => {
-  it("is written on Haiku 4.5 alone when Haiku's note passes", async () => {
+  it("is written on Haiku 5.5 alone, at low effort, when Haiku's note passes", async () => {
     mocks.create.mockResolvedValueOnce(HINDI);
     const response = await POST(request("hi"));
     expect(response.status).toBe(200);
     expect(words(await text(response))).toContain("स्वयं अर्जित धन");
     expect(mocks.create).toHaveBeenCalledTimes(1);
     const [body] = mocks.create.mock.calls[0];
-    expect(body.model).toBe("claude-haiku-4-5");
-    // Haiku 4.5 rejects an effort setting with a 400.
-    expect(body).not.toHaveProperty("output_config");
+    expect(body.model).toBe("claude-haiku-5-5");
+    // The shared chart setting (lib/llm-models.ts).
+    expect(body.output_config).toEqual({ effort: "low" });
   });
 
   it.each([

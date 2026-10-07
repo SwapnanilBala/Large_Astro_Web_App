@@ -102,15 +102,15 @@ afterEach(() => {
 });
 
 describe("the life areas' notes", () => {
-  it("are written on Haiku 4.5 alone when every area passes", async () => {
+  it("are written on Haiku 5.5 alone, at low effort, when every area passes", async () => {
     mocks.create.mockResolvedValueOnce(
       answer(plain("[love_life] "), cited(LOVE_HI, 0), plain("\n\n[career] "), cited(CAREER_HI, 1)),
     );
     const body = await read(await GET(request("hi")));
     expect(Object.keys(body.readings).sort()).toEqual(["career", "love_life"]);
     expect(mocks.create).toHaveBeenCalledTimes(1);
-    expect(mocks.create.mock.calls[0][0].model).toBe("claude-haiku-4-5");
-    expect(mocks.create.mock.calls[0][0]).not.toHaveProperty("output_config");
+    expect(mocks.create.mock.calls[0][0].model).toBe("claude-haiku-5-5");
+    expect(mocks.create.mock.calls[0][0].output_config).toEqual({ effort: "low" });
   });
 
   it("asks Opus 5.5 again for only the areas that failed, and keeps the ones that passed", async () => {

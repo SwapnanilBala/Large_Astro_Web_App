@@ -2,7 +2,7 @@
  * Render the personal-story PDF for one fixed sample chart.
  *
  *   npm run pdf:sample                 -- engine prose, free, instant
- *   npm run pdf:sample -- --prose      -- Haiku 4.5 written prose, BILLED
+ *   npm run pdf:sample -- --prose      -- Haiku 5.5 written prose, BILLED
  *   npm run pdf:sample -- --prose --fresh   -- ignore the cached prose
  *
  * WHY --prose EXISTS. The engine's own prose is 1,100 words for the whole
@@ -26,6 +26,7 @@ import React from "react";
 import { Font, renderToFile } from "@react-pdf/renderer";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { buildChart } from "@/lib/engines/chart-service";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import type { BirthDetailsInput } from "@/lib/engines/compatibility-service";
 import { buildPersonalStory, type PersonalStory } from "@/lib/story-engine";
 import { verifyChartForStory } from "@/lib/story-verification";
@@ -50,12 +51,12 @@ const routePath = path.join(root, "app", "api", "chart", "story-prose", "route.t
 const wantProse = process.argv.includes("--prose");
 const wantFresh = process.argv.includes("--fresh");
 /*
- * The model the route writes with: Claude Haiku 4.5 since 2026-10-06. It
- * takes no effort setting, so the --effort flag that compared levels on Opus
- * is gone. Prose caches per model, so a file an earlier model wrote is never
- * passed off as this one's.
+ * The model and effort the route writes with (lib/llm-models.ts): Claude
+ * Haiku 5.5 at low effort since 2026-10-07, Haiku 4.5 from 2026-10-06. Prose
+ * caches per model, so a file an earlier model wrote is never passed off as
+ * this one's.
  */
-const MODEL = "claude-haiku-4-5";
+const MODEL = CHART_MODEL;
 
 Font.register({
   family: "Cinzel",
@@ -151,6 +152,7 @@ async function writtenProse(story: PersonalStory) {
       model: MODEL,
       max_tokens: 32000,
       output_config: {
+        effort: CHART_EFFORT,
         format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
       },
       system: [{ type: "text", text: readSystemPrompt() }],
@@ -159,13 +161,15 @@ async function writtenProse(story: PersonalStory) {
     .finalMessage();
   const elapsed = Date.now() - startedAt;
 
-  /* Claude Haiku 4.5, $ per token. */
+  /* Claude Haiku 5.5, $ per token, on its rate card for prompts of 100K
+     tokens or fewer: $0.10 in, $0.50 out, cache reads 0.1x and 5-minute
+     cache writes 1.25x the input rate. */
   const usage = response.usage;
   const cost =
-    (usage.input_tokens ?? 0) * 1e-6 +
-    (usage.output_tokens ?? 0) * 5e-6 +
-    (usage.cache_read_input_tokens ?? 0) * 0.1e-6 +
-    (usage.cache_creation_input_tokens ?? 0) * 1.25e-6;
+    (usage.input_tokens ?? 0) * 0.1e-6 +
+    (usage.output_tokens ?? 0) * 0.5e-6 +
+    (usage.cache_read_input_tokens ?? 0) * 0.01e-6 +
+    (usage.cache_creation_input_tokens ?? 0) * 0.125e-6;
   console.log(
     `prose: ${(elapsed / 1000).toFixed(1)}s  in ${usage.input_tokens}  out ${usage.output_tokens}  ` +
       `${response.stop_reason}  $${cost.toFixed(4)}`,

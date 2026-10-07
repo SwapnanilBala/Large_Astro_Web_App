@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { parseBirthSex } from "@/lib/birth-sex";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import { DOMAIN_BRIEF_KEYS, type DomainBriefs } from "@/lib/domain-briefs";
 import {
@@ -50,10 +51,9 @@ import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
 
 export const maxDuration = 60;
 
-/* Claude Haiku 4.5 since 2026-10-06, the owner's call to hold costs down
-   (Opus 5.5 at low effort before). It takes no effort setting, and with
-   `thinking` omitted it does not reason before it writes. */
-const MODEL = "claude-haiku-4-5";
+/* Claude Haiku 5.5 at low effort since 2026-10-07 (lib/llm-models.ts):
+   Haiku 4.5 from 2026-10-06, Opus 5.5 at low effort before. */
+const MODEL = CHART_MODEL;
 
 const REQUEST_TIMEOUT_MS = 50_000;
 const CACHE_HEADER = "private, no-store";
@@ -188,6 +188,7 @@ async function writeBriefs(
     model: MODEL,
     max_tokens: 6000,
     output_config: {
+      effort: CHART_EFFORT,
       format: {
         type: "json_schema",
         schema: {

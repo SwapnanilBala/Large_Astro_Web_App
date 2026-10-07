@@ -52,6 +52,7 @@ import { embedQuestion } from "@/lib/knowledge/question-embedding";
 import { passagesForChart, passagesNearQuestion } from "@/lib/knowledge/retrieve";
 import { readingFrom } from "@/lib/knowledge/yoga-classics-reading";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 
 /*
@@ -104,11 +105,12 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * Opus 5.5 at low effort inside the same budget unit, as on the other notes.
  */
 
-/* Claude Haiku 4.5, as on the other classical notes since 2026-10-06; the screen too. */
-const MODEL = "claude-haiku-4-5";
+/* Claude Haiku 5.5 at low effort, as on the other classical notes
+   (lib/llm-models.ts); the screen too. */
+const MODEL = CHART_MODEL;
 
 type Ask = Pick<Anthropic.MessageCreateParamsNonStreaming, "model" | "output_config">;
-const FIRST: Ask = { model: MODEL };
+const FIRST: Ask = { model: MODEL, output_config: { effort: CHART_EFFORT } };
 const RETRY: Ask = { model: "claude-opus-5-5", output_config: { effort: "low" } };
 
 export const maxDuration = 60;
@@ -219,11 +221,14 @@ async function screen(request: NextRequest, spending: Spend, input: string): Pro
   const response = await anthropic.messages.create(
     {
       model: MODEL,
-      /* Four short fields; headroom, not a target. */
-      max_tokens: 400,
+      /* Four short fields, and any thinking, which counts here too; headroom, not a target. */
+      max_tokens: 2000,
       system: [{ type: "text", text: ASK_SCREEN_SYSTEM_PROMPT }],
       messages: [{ role: "user", content: screenMessage(input) }],
-      output_config: { format: { type: "json_schema", schema: ASK_SCREEN_SCHEMA as unknown as Record<string, unknown> } },
+      output_config: {
+        effort: CHART_EFFORT,
+        format: { type: "json_schema", schema: ASK_SCREEN_SCHEMA as unknown as Record<string, unknown> },
+      },
     },
     { timeout: SCREEN_TIMEOUT_MS },
   );

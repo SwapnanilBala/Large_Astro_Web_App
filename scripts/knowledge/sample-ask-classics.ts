@@ -15,10 +15,11 @@
  * port of a running dev server, which is where the chart comes from. Each
  * --ask= is a typed question, put through the route's screen first (about
  * $0.0005), which prints its verdict and rewrite. --language= is the answer's
- * language (default en). The place defaults to Bengaluru (+5:30); --lat,
+ * language (default en). --thinking=off sends thinking disabled, to compare
+ * against the routes' low effort. The place defaults to Bengaluru (+5:30); --lat,
  * --lng and --tz (minutes east of UTC) choose another; --sex=female or
  * --sex=male opens the chapters on women's charts. Each question answered
- * without --dry is one paid call on Claude Haiku 4.5, about $0.003, and the
+ * without --dry is one paid call on the route's model (lib/llm-models.ts), and the
  * answer is put through the route's content check in that language.
  */
 
@@ -55,6 +56,7 @@ import { checkNote } from "../../lib/knowledge/classical-note-check";
 import { KNOWLEDGE_EMBEDDING_DIMENSIONS, KNOWLEDGE_EMBEDDING_MODEL } from "../../lib/knowledge/embedding";
 import { queryPassagesNearQuestion } from "../../lib/knowledge/passage-queries";
 import { chartPlacementKeys } from "../../lib/knowledge/placements";
+import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
 import { readingFrom } from "../../lib/knowledge/yoga-classics-reading";
 
 config({ path: ".env.local", quiet: true });
@@ -67,6 +69,8 @@ async function main() {
   const dry = args.includes("--dry");
   const sex = parseBirthSex(flag("sex", ""));
   const language = flag("language", "en");
+  /* Only for comparing; the routes send low effort and leave thinking adaptive. */
+  const thinking = flag("thinking", "") === "off" ? ({ thinking: { type: "disabled" } } as const) : {};
   const typed = args.filter((arg) => arg.startsWith("--ask=")).map((arg) => arg.slice(6));
   const ids = which === "all" ? [...ASK_QUESTION_IDS] : which === "none" ? [] : which.split(",").filter(isAskQuestionId);
   if (ids.length === 0 && typed.length === 0) {
@@ -106,11 +110,14 @@ async function main() {
     const input = screenInput(text);
     const started = Date.now();
     const screened = await client.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 400,
+      model: CHART_MODEL,
+      max_tokens: 2000,
       system: [{ type: "text", text: ASK_SCREEN_SYSTEM_PROMPT }],
       messages: [{ role: "user", content: screenMessage(input) }],
-      output_config: { format: { type: "json_schema", schema: ASK_SCREEN_SCHEMA as unknown as Record<string, unknown> } },
+      output_config: {
+        effort: CHART_EFFORT,
+        format: { type: "json_schema", schema: ASK_SCREEN_SCHEMA as unknown as Record<string, unknown> },
+      },
     });
     const raw = screened.content.find((block) => block.type === "text")?.text ?? "";
     const result = screened.stop_reason === "refusal" ? { verdict: "not_about_chart" as const } : parseScreen(raw);
@@ -152,8 +159,10 @@ screen | ${((Date.now() - started) / 1000).toFixed(1)}s | ${screened.usage.input
     }
     const started = Date.now();
     const response = await client.messages.create({
-      model: "claude-haiku-4-5",
+      model: CHART_MODEL,
       max_tokens: 3000,
+      output_config: { effort: CHART_EFFORT },
+      ...thinking,
       system: [{ type: "text", text: ASK_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages: [
         {
@@ -168,7 +177,7 @@ screen | ${((Date.now() - started) / 1000).toFixed(1)}s | ${screened.usage.input
     const check = checkNote(reading, language);
     console.log(
       `${response.model} | ${((Date.now() - started) / 1000).toFixed(1)}s | ${response.usage.input_tokens} in + ` +
-        `${response.usage.output_tokens} out | ${response.stop_reason} | ${words} words | ` +
+        `${response.usage.output_tokens} out + ${response.usage.cache_read_input_tokens ?? 0} cached | ${response.stop_reason} | ${words} words | ` +
         (reading.sources.length === 0 ? "UNCITED" : check.problems.length > 0 ? `CHECK FAILS ${JSON.stringify(check.problems)}` : "passes"),
     );
     console.log(text);

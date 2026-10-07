@@ -4,8 +4,10 @@ import type { ClassicalReading } from "./classical-reading";
  * What a classical note has to pass before a reader sees it, checked in code
  * rather than trusted to the prompt.
  *
- * Both "From the classics" notes are written by Claude Haiku 4.5 since
- * e178ac3, and measured on 2026-10-06 (five charts, the routes' own requests)
+ * Both "From the classics" notes were written by Claude Haiku 4.5 from
+ * e178ac3 (Haiku 5.5 at low effort since 2026-10-07, lib/llm-models.ts, which
+ * has not yet been measured against these checks), and measured on 2026-10-06
+ * (five charts, the routes' own requests)
  * it did not always keep to its instructions. Asked for Hindi or Bengali,
  * about half its notes either declined, in Hindi and citing nothing, or came
  * back in English; and in any language it now and then said what

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget, resolveLlmCaller } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   PARAGRAPHS_PER_CHAPTER,
@@ -21,7 +22,13 @@ import {
  * lib/story-prose.ts carries what this may and may not rewrite, and why. This
  * file is the call.
  *
- * ── MODEL -- Claude Haiku 4.5, since 2026-10-06 ──────────────────────────
+ * ── MODEL -- Claude Haiku 5.5 at low effort, since 2026-10-07 ────────────
+ *
+ * The owner's call again (lib/llm-models.ts); Claude Haiku 4.5 from
+ * 2026-10-06 until then. Haiku 5.5 costs a tenth of what Haiku 4.5 did, and
+ * unlike it takes an effort setting and thinks by default; low keeps the
+ * thinking to what the job needs, the nearest to how Haiku 4.5 ran. What
+ * follows was written for Haiku 4.5.
  *
  * Every route but palm reading moved to Haiku 4.5 that day, by the owner's
  * call, to hold the bill down further: $1/$5 per million tokens against Opus
@@ -109,7 +116,7 @@ import {
  * page is.
  */
 
-const MODEL = "claude-haiku-4-5";
+const MODEL = CHART_MODEL;
 
 export const maxDuration = 300;
 
@@ -151,9 +158,9 @@ const SUPPORT_LEVELS = new Set(["well-supported", "supported", "exploratory"]);
  * Frozen, so it is the cacheable prefix. Everything that varies per reader --
  * the placements, the drafts -- goes in the user turn after the breakpoint.
  * At roughly 1,200 tokens this is the largest prefix in the app, and across
- * readers it is the same bytes every time. Haiku 4.5 caches nothing under
- * 4,096 tokens, so it is not cached now; the marker stays for a model that
- * would.
+ * readers it is the same bytes every time. Haiku 4.5 cached nothing under
+ * 4,096 tokens; Haiku 5.5 caches from 512, so since 2026-10-07 the marker
+ * pays.
  */
 const SYSTEM_PROMPT = `You write the prose for a printed Vedic astrology report -- a bound PDF a client keeps, not a web page they skim.
 
@@ -306,8 +313,9 @@ export async function POST(request: NextRequest) {
     const params: Anthropic.MessageStreamParams = {
       model: MODEL,
       max_tokens: 32000,
-      /* No `thinking` and no effort; see MODEL in the header. */
+      /* Low effort, thinking as little as the job needs; see MODEL in the header. */
       output_config: {
+        effort: CHART_EFFORT,
         format: { type: "json_schema", schema: STORY_PROSE_SCHEMA as unknown as Record<string, unknown> },
       },
       system: [

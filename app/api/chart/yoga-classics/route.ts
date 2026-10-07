@@ -21,6 +21,7 @@ import {
   type YogaWithPassages,
 } from "@/lib/knowledge/yoga-classics-reading";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 
 /*
@@ -66,16 +67,15 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * within the same budget unit, and is not shipped if that fails too.
  */
 
-/* Claude Haiku 4.5 since 2026-10-06, the owner's call to hold costs down
-   (Opus 5.5 at low effort before). It takes no effort setting, and with
-   `thinking` omitted it does not reason before it writes. */
-const MODEL = "claude-haiku-4-5";
+/* Claude Haiku 5.5 at low effort since 2026-10-07 (lib/llm-models.ts):
+   Haiku 4.5 from 2026-10-06, Opus 5.5 at low effort before. */
+const MODEL = CHART_MODEL;
 
 /* The one retry: what the note ran on before, which wrote the Hindi notes
    correctly when Haiku did not. Slower (7-21 s against 2-15 s) and about six
    times the price of a Haiku note, so it is only ever the retry. */
 type Ask = Pick<Anthropic.MessageCreateParamsNonStreaming, "model" | "output_config">;
-const FIRST: Ask = { model: MODEL };
+const FIRST: Ask = { model: MODEL, output_config: { effort: CHART_EFFORT } };
 const RETRY: Ask = { model: "claude-opus-5-5", output_config: { effort: "low" } };
 
 export const maxDuration = 60;

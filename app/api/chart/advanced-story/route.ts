@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { sessionFromRequest } from "@/lib/identity/require-session";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
@@ -211,13 +212,15 @@ export async function GET(request: NextRequest) {
       .join("\n");
 
     const response = await client.messages.parse({
-      /* Haiku 4.5 since 2026-10-06, the owner's call to hold costs down (Opus
-         5.5 at low effort before). Seven short passages, not an essay: with
-         `thinking` omitted the page does not wait on reasoning it does not
-         need, and Haiku takes no effort setting at all. */
-      model: "claude-haiku-4-5",
-      max_tokens: 4000,
+      /* Haiku 5.5 at low effort since 2026-10-07 (lib/llm-models.ts): Haiku
+         4.5 from 2026-10-06, Opus 5.5 at low effort before. Seven short
+         passages, not an essay, so the page should not wait on reasoning it
+         does not need. The cap leaves room for any thinking and for Haiku
+         5.5's tokenizer, which counts the same text about 30% higher. */
+      model: CHART_MODEL,
+      max_tokens: 6000,
       output_config: {
+        effort: CHART_EFFORT,
         format: { type: "json_schema", schema: buildSchema(digest.available) },
       },
       system: [

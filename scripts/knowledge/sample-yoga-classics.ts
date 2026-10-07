@@ -10,8 +10,8 @@
  *
  * Arguments: birth date, birth time, the language as the prompt names it, and
  * the port of a running dev server, which is where the chart and its yogas
- * come from. (There was an effort argument before the route moved to Claude
- * Haiku 4.5 on 2026-10-06; Haiku takes no effort setting.) The place defaults
+ * come from. It runs the route's model and effort (lib/llm-models.ts), Claude
+ * Haiku 5.5 at low effort since 2026-10-07. The place defaults
  * to Bengaluru (+5:30); --lat, --lng and --tz (minutes east of UTC) choose
  * another. Passages are read from the corpus file rather than the table,
  * withheld ones dropped, so it needs no database. Each run is one paid call,
@@ -24,6 +24,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { YOGA_DEFINITIONS } from "../../lib/engines/yoga-engine";
 import { knowledgeCorpusSchema } from "../../lib/knowledge/corpus";
+import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
 import { rankYogas, yogaClassicsRequest } from "../../lib/knowledge/yoga-classics";
 import {
   YOGA_CLASSICS_SYSTEM_PROMPT,
@@ -71,8 +72,9 @@ async function main() {
 
   const started = Date.now();
   const response = await new Anthropic().messages.create({
-    model: "claude-haiku-4-5",
+    model: CHART_MODEL,
     max_tokens: 4000,
+    output_config: { effort: CHART_EFFORT },
     system: [{ type: "text", text: YOGA_CLASSICS_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
     messages: [
       {

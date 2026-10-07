@@ -5,6 +5,7 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 import { z } from "zod";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import { IMPORTANT_DIVISION_NUMBERS } from "@/lib/divisional-chart-guide";
 import {
@@ -41,7 +42,13 @@ import {
  *   deliberately not meant to present as independent verdicts, and paying a
  *   model to comment on them would undo that. A request naming one is refused.
  *
- * ── MODEL -- Claude Haiku 4.5, since 2026-10-06 ──────────────────────────
+ * ── MODEL -- Claude Haiku 5.5 at low effort, since 2026-10-07 ────────────
+ *
+ * The owner's call again (lib/llm-models.ts); Claude Haiku 4.5 from
+ * 2026-10-06 until then. Haiku 5.5 costs a tenth of what Haiku 4.5 did, and
+ * unlike it takes an effort setting and thinks by default; low keeps the
+ * thinking to what the job needs, the nearest to how Haiku 4.5 ran. What
+ * follows was written for Haiku 4.5.
  *
  * Every route but palm reading moved to Haiku 4.5 that day, by the owner's
  * call, to hold the bill down further: $1/$5 per million tokens against Opus
@@ -100,7 +107,7 @@ import {
  * model owns how it reads.
  */
 
-const MODEL = "claude-haiku-4-5";
+const MODEL = CHART_MODEL;
 
 export const maxDuration = 60;
 
@@ -343,8 +350,9 @@ export async function POST(request: NextRequest) {
       model: MODEL,
       /* Headroom for ten paragraphs, not a target. */
       max_tokens: 16000,
-      /* No `thinking` and no effort; see MODEL in the header. */
+      /* Low effort, thinking as little as the job needs; see MODEL in the header. */
       output_config: {
+        effort: CHART_EFFORT,
         format: zodOutputFormat(NotesSchema),
       },
       system: [

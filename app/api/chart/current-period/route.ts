@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   CURRENT_PERIOD_LEVELS,
@@ -42,7 +43,12 @@ import {
  */
 
 /*
- * MODEL -- Claude Haiku 4.5, by the owner's call on 2026-10-06.
+ * MODEL -- Claude Haiku 5.5 at low effort, by the owner's call on 2026-10-07
+ * (lib/llm-models.ts); Claude Haiku 4.5 from 2026-10-06 until then.
+ *
+ * Haiku 5.5 costs a tenth of what Haiku 4.5 did, and unlike it takes an effort
+ * setting and thinks by default; low keeps the thinking to what the job needs,
+ * the nearest to how Haiku 4.5 ran. What follows was written for Haiku 4.5.
  *
  * Every route but palm reading moved to Haiku 4.5 that day, to hold the bill
  * down further: $1/$5 per million tokens against Opus 5.5's $4/$20. Haiku
@@ -101,7 +107,7 @@ import {
  * it, nothing measured comes near it, and headroom is free because billing is
  * per token generated.
  */
-const MODEL = "claude-haiku-4-5";
+const MODEL = CHART_MODEL;
 
 export const maxDuration = 30;
 
@@ -297,7 +303,8 @@ export async function POST(request: NextRequest) {
       model: MODEL,
       /* Headroom, not a target; see the history under MODEL above. */
       max_tokens: 8000,
-      /* No `thinking` and no effort; see the note on MODEL above. */
+      /* Low effort, thinking as little as the job needs; see the note on MODEL above. */
+      output_config: { effort: CHART_EFFORT },
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],

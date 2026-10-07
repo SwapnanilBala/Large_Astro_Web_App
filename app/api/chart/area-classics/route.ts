@@ -25,6 +25,7 @@ import type { AreaClassicsResponse } from "@/lib/knowledge/classical-reading";
 import { chartPlacementKeys } from "@/lib/knowledge/placements";
 import { passagesForChart } from "@/lib/knowledge/retrieve";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 
 /*
@@ -69,14 +70,13 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  * and nothing is charged to the reader's allowance twice.
  */
 
-/* Claude Haiku 4.5 since 2026-10-06, as on the yoga note (Opus 5.5 at low
-   effort before). It takes no effort setting, and with `thinking` omitted it
-   does not reason before it writes. */
-const MODEL = "claude-haiku-4-5";
+/* Claude Haiku 5.5 at low effort since 2026-10-07 (lib/llm-models.ts):
+   Haiku 4.5 from 2026-10-06, Opus 5.5 at low effort before. */
+const MODEL = CHART_MODEL;
 
 /* The one retry, as on the yoga note: what the notes ran on before. */
 type Ask = Pick<Anthropic.MessageCreateParamsNonStreaming, "model" | "output_config">;
-const FIRST: Ask = { model: MODEL };
+const FIRST: Ask = { model: MODEL, output_config: { effort: CHART_EFFORT } };
 const RETRY: Ask = { model: "claude-opus-5-5", output_config: { effort: "low" } };
 
 export const maxDuration = 60;
