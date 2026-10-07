@@ -150,6 +150,31 @@ describe("the signed-out tier", () => {
     expect(refused.scope).toBe("anonymous");
   });
 
+  it("gives Ask the classics twelve questions signed out and twenty-four signed in, the one exception", async () => {
+    const route = "/api/chart/ask-classics";
+    const address = requestFrom("203.0.113.9", route);
+    for (let i = 0; i < 12; i += 1) {
+      expect((await consumeLlmBudget(route, address, NOON)).allowed).toBe(true);
+    }
+    const refused = await consumeLlmBudget(route, address, NOON);
+    expect(refused.allowed).toBe(false);
+    if (refused.allowed) throw new Error("unreachable");
+    expect(refused.scope).toBe("anonymous");
+
+    const account = signedInAs("user-ask", route);
+    for (let i = 0; i < 24; i += 1) {
+      expect((await consumeLlmBudget(route, account, NOON)).allowed).toBe(true);
+    }
+    expect((await consumeLlmBudget(route, account, NOON)).allowed).toBe(false);
+
+    /* The other routes keep the shared tiers. */
+    const elsewhere = requestFrom("203.0.113.9");
+    for (let i = 0; i < PER_ADDRESS; i += 1) {
+      expect((await consumeLlmBudget("/api/chart/domain-brief", elsewhere, NOON)).allowed).toBe(true);
+    }
+    expect((await consumeLlmBudget("/api/chart/domain-brief", elsewhere, NOON)).allowed).toBe(false);
+  });
+
   it("hands the same person the full allowance once they sign in", async () => {
     const address = requestFrom("203.0.113.5", "/api/palm-reading");
     for (let i = 0; i < PER_ADDRESS; i += 1) {

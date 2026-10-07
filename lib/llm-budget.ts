@@ -127,7 +127,11 @@ type LlmBudgetConfig = {
  * already mark are cached again and cacheReadTokens stop reading 0. Every
  * Haiku figure below was measured on Haiku 4.5 and is now a ceiling about
  * eight times too high; the Opus retries cost what they did. The daily
- * totals stay, for the reason above.
+ * totals stay, for the reason above. Also from that day the classical notes'
+ * checks block in every language, English included, and in English they
+ * catch "king" and insults turned on the reader, so English notes can retry
+ * on Opus too; the worst cases written below already assume every unit
+ * retries.
  *
  * The route totals are whole-deployment numbers rather than per-instance ones,
  * so they bite where they read. They are sized by what a call costs: dasha
@@ -357,10 +361,20 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      day, not the route's. Hindi and Bengali answers retry on Opus about half
      the time, as on the other notes, which the $20 worst case above already
      assumes of every unit. */
+  /* 2026-10-07, the owner's call: more questions a day than the other routes
+     allow, the one exception to "4 free, 8 signed in". Eight ready questions
+     and a box to type more were a visitor's allowance spent in one visit,
+     and an answer now costs about $0.001 on Haiku 5.5 at low effort. Twelve
+     signed out and twenty-four signed in keep the shape the tiers have
+     (signing in buys twice as much). The route total rises to 700 from 600:
+     about $0.70 a day if nothing retries, and $22 if every unit retried on
+     Opus, the ceiling every dear route here is held to. The panel words its
+     own limit message and states no number, so nothing else needs to change
+     with these. */
   "/api/chart/ask-classics": {
-    perDay: 600,
-    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
-    perAnonPerDay: LLM_FREE_PER_DAY,
+    perDay: 700,
+    perCallerPerDay: 24,
+    perAnonPerDay: 12,
   },
   /* Sized by where it renders rather than by what one call costs, which is
      the opposite way round from the atlas above it. A call here is cheaper
