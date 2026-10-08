@@ -778,7 +778,7 @@
     },
     "story": {
       "chapters": "{count} chapitres vérifiés couvrant l'identité, les relations, la famille, la vocation, les ressources, le timing et l'action concrète.",
-      "dialogLead": "Chaque chapitre est composé d'après vos propres positions, avec une précision millimétrée. Cela prend quelques minutes, et l'attente en vaut la peine.",
+      "dialogLead": "Chaque chapitre est composé d'après vos propres positions, avec une précision millimétrée. Cela prend environ une minute, et l'attente en vaut la peine.",
       "dialogNote": "Gardez cet onglet ouvert. Le téléchargement démarre de lui-même quand le rapport est prêt.",
       "dialogTitle": "Votre PDF est en cours de rédaction",
       "downloadPdf": "Télécharger le PDF",

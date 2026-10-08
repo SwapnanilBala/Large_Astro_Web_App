@@ -778,7 +778,7 @@
     },
     "story": {
       "chapters": "{count} geprüfte Kapitel zu Identität, Beziehungen, Familie, Berufung, Ressourcen, Timing und konkretem Handeln.",
-      "dialogLead": "Jedes Kapitel wird punktgenau auf deine eigenen Stellungen hin verfasst. Das dauert ein paar Minuten, und das Warten lohnt sich.",
+      "dialogLead": "Jedes Kapitel wird punktgenau auf deine eigenen Stellungen hin verfasst. Das dauert etwa eine Minute, und das Warten lohnt sich.",
       "dialogNote": "Lass diesen Tab geöffnet. Der Download startet von selbst, sobald der Bericht fertig ist.",
       "dialogTitle": "Dein PDF wird geschrieben",
       "downloadPdf": "PDF herunterladen",

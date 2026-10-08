@@ -778,7 +778,7 @@
     },
     "story": {
       "chapters": "{count} capítulos verificados sobre identidad, relaciones, familia, vocación, recursos, tiempos y acción práctica.",
-      "dialogLead": "Cada capítulo se está redactando a partir de tus propias posiciones, con precisión milimétrica. Tarda un par de minutos, y la espera merece la pena.",
+      "dialogLead": "Cada capítulo se está redactando a partir de tus propias posiciones, con precisión milimétrica. Tarda alrededor de un minuto, y la espera merece la pena.",
       "dialogNote": "Mantén esta pestaña abierta. La descarga empieza sola cuando el informe esté listo.",
       "dialogTitle": "Estamos escribiendo tu PDF",
       "downloadPdf": "Descargar PDF",

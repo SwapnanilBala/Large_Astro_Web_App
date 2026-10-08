@@ -621,7 +621,7 @@
       "downloadReading": "Download reading",
       "downloadPdf": "Download PDF",
       "dialogTitle": "Your PDF is being written",
-      "dialogLead": "Every chapter is being composed against your own placements, to pin-point accuracy. This takes a couple of minutes, and it is worth the wait.",
+      "dialogLead": "Every chapter is being composed against your own placements, to pin-point accuracy. This takes about a minute, and it is worth the wait.",
       "dialogNote": "Keep this tab open. The download starts on its own when the report is ready.",
       "error": "The report did not pass generation. Please try again.",
       "kicker": "Personal reading",
