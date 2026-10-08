@@ -791,7 +791,11 @@
         "typesetting": "Mise en page du PDF",
         "verifying": "Vérification croisée de la carte",
         "writing": "Rédaction de votre lecture"
-      }
+      },
+      "progressLabel": "Progression du rapport",
+      "progressPlanning": "Préparation des chapitres…",
+      "progressChapter": "Rédaction du chapitre {current} sur {total}",
+      "progressIntroduction": "Rédaction de l'introduction…"
     },
     "timingPreview": {
       "chapter": "Chapitre actuel",

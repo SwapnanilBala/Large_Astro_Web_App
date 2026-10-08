@@ -9,9 +9,11 @@ import {
   type PersonalStory as PersonalStoryData,
 } from "@/lib/story-engine";
 import {
+  STORY_PROSE_STREAM_TYPE,
   applyStoryProse,
   buildStoryProseFacts,
-  parseStoryProse,
+  readStoryProseResponse,
+  type StoryProseProgressLine,
 } from "@/lib/story-prose";
 import { useHydrated } from "@/lib/use-hydrated";
 import { useTranslation } from "@/lib/i18n-context";
@@ -40,9 +42,13 @@ type GenerationStage =
  * day before), and it measured about
  * three minutes as Opus 5 at high effort, which is what this was designed
  * around. The other three are fast. Listing all four with the current one
- * marked is what makes a long wait legible -- a spinner alone reads as a hang,
- * and a progress bar would have to invent a percentage the model never
- * reports.
+ * marked is what makes a long wait legible -- a spinner alone reads as a hang.
+ *
+ * Since 2026-10-08 a percentage runs above them. The model reports none, so
+ * the writing step's share of it is measured instead: the prose route streams
+ * how many words have been written against the length the prompt asks for,
+ * and which chapter the model is on (lib/story-prose.ts, proseProgress). The
+ * other steps are quick and hold fixed points on the bar.
  */
 const STAGES = [
   { id: "calculating", labelKey: "insights.story.stages.calculating" },
@@ -56,6 +62,27 @@ const STAGE_LABEL_KEYS = Object.fromEntries(
 ) as Record<Exclude<GenerationStage, "idle" | "error">, string>;
 
 const STAGE_ORDER = STAGES.map((stage) => stage.id) as ReadonlyArray<string>;
+
+/*
+ * Where each step puts the bar. Writing is nearly all of the wait, so it runs
+ * the bar from WRITING_FROM to WRITING_FROM + WRITING_SPAN as the words come
+ * in; the PDF's typesetting holds the last stretch until the file is saved.
+ */
+const PERCENT_AT: Record<Exclude<GenerationStage, "idle" | "error">, number> = {
+  calculating: 2,
+  verifying: 6,
+  writing: 8,
+  typesetting: 95,
+};
+const WRITING_FROM = 8;
+const WRITING_SPAN = 84;
+
+/** The bar's figure, from the step and, while writing, the measured share of the words. */
+export function storyPercent(stage: GenerationStage, writing: StoryProseProgressLine | null): number {
+  if (stage === "idle" || stage === "error") return 0;
+  if (stage !== "writing") return PERCENT_AT[stage];
+  return Math.round(WRITING_FROM + (writing?.fraction ?? 0) * WRITING_SPAN);
+}
 
 function slugify(value: string): string {
   const normalized = value
@@ -89,14 +116,17 @@ export default function PersonalStory({
   compact = false,
   queryString,
 }: PersonalStoryProps) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const [stage, setStage] = useState<GenerationStage>("idle");
+  /* The prose route's latest progress line, while it writes. */
+  const [writing, setWriting] = useState<StoryProseProgressLine | null>(null);
   /* The dialog is portalled, so it cannot render until there is a document. */
   const mounted = useHydrated();
   const previewStory = useMemo(() => buildPersonalStory(payload), [payload]);
 
   const handleDownload = useCallback(async () => {
     if (stage !== "idle" && stage !== "error") return;
+    setWriting(null);
     setStage("calculating");
 
     try {
@@ -135,15 +165,15 @@ export default function PersonalStory({
       setStage("writing");
       try {
         const facts = buildStoryProseFacts(story);
+        /* Asked for progress lines; a cache hit still comes back as plain JSON. */
         const response = await fetch("/api/chart/story-prose", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", Accept: `${STORY_PROSE_STREAM_TYPE}, application/json` },
           body: JSON.stringify({ facts }),
         });
-        if (response.ok) {
-          const result = await response.json() as { prose?: unknown };
-          const prose = parseStoryProse(result.prose);
-          if (prose) story = applyStoryProse(story, prose);
+        const prose = await readStoryProseResponse(response, setWriting);
+        if (prose) {
+          story = applyStoryProse(story, prose);
         } else {
           console.warn("story prose unavailable:", response.status);
         }
@@ -183,6 +213,24 @@ export default function PersonalStory({
   }, [payload, queryString, stage]);
 
   const generating = stage !== "idle" && stage !== "error";
+  const percent = storyPercent(stage, writing);
+  const percentLabel = new Intl.NumberFormat(language, { style: "percent", maximumFractionDigits: 0 }).format(percent / 100);
+  /* What the writing step is doing, under the bar; the other steps are named in the list below it. */
+  /* Before the first word the model is planning, which streams nothing to
+     measure (about 40 of a report's 55 seconds on Haiku 5.5): the bar shows
+     movement there rather than a number it does not have. */
+  const planning = stage === "writing" && (!writing || writing.phase === "planning");
+  const progressDetail =
+    stage !== "writing"
+      ? null
+      : planning || !writing
+        ? t("insights.story.progressPlanning")
+        : writing.chaptersStarted > 0
+          ? t("insights.story.progressChapter", {
+              current: String(writing.chaptersStarted),
+              total: String(writing.chapters),
+            })
+          : t("insights.story.progressIntroduction");
   const buttonLabel = generating
     ? t("insights.story.inProgress", {
         stage: t(STAGE_LABEL_KEYS[stage as Exclude<GenerationStage, "idle" | "error">]),
@@ -225,6 +273,24 @@ export default function PersonalStory({
         <p id="story-dialog-lead" className={styles.dialogLead}>
           {t("insights.story.dialogLead")}
         </p>
+
+        <div className={styles.progress}>
+          <div
+            className={planning ? `${styles.progressTrack} ${styles.progressPlanning}` : styles.progressTrack}
+            role="progressbar"
+            aria-label={t("insights.story.progressLabel")}
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={percent}
+            aria-valuetext={progressDetail ? `${percentLabel}, ${progressDetail}` : percentLabel}
+          >
+            <span className={styles.progressFill} style={{ width: `${percent}%` }} />
+          </div>
+          <p className={styles.progressFigures}>
+            <strong>{percentLabel}</strong>
+            {progressDetail && <span>{progressDetail}</span>}
+          </p>
+        </div>
 
         <ol className={styles.stageList}>
           {STAGES.map((item) => {

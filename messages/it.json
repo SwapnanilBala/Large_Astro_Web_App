@@ -791,7 +791,11 @@
         "typesetting": "Impaginazione del PDF",
         "verifying": "Verifica incrociata della carta",
         "writing": "Stesura della tua lettura"
-      }
+      },
+      "progressLabel": "Avanzamento del report",
+      "progressPlanning": "Pianificazione dei capitoli…",
+      "progressChapter": "Stesura del capitolo {current} di {total}",
+      "progressIntroduction": "Stesura dell'introduzione…"
     },
     "timingPreview": {
       "chapter": "Capitolo attuale",

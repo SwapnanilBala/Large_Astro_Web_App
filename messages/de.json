@@ -791,7 +791,11 @@
         "typesetting": "Das PDF wird gesetzt",
         "verifying": "Das Horoskop wird gegengeprüft",
         "writing": "Deine Deutung wird geschrieben"
-      }
+      },
+      "progressLabel": "Fortschritt des Berichts",
+      "progressPlanning": "Die Kapitel werden geplant…",
+      "progressChapter": "Kapitel {current} von {total} wird geschrieben",
+      "progressIntroduction": "Die Einleitung wird geschrieben…"
     },
     "timingPreview": {
       "chapter": "Aktuelles Kapitel",

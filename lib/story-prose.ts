@@ -86,6 +86,126 @@ export type StoryProse = {
 export const PARAGRAPHS_PER_CHAPTER = 2;
 export const WORDS_PER_PARAGRAPH = "110 to 140";
 
+/*
+ * How far a report is while it is being written, for the dialog's progress
+ * bar. The model reports no percentage, but the route streams its answer, and
+ * the answer's length is set by the prompt: so the words written so far, over
+ * the words the prompt asks for, is a measurement rather than a guess, and the
+ * chapter ids written so far say which chapter it is on. The midpoints of the
+ * asked-for lengths stand in for the target; a report that runs long is held
+ * just short of done until it is done.
+ */
+const [PARAGRAPH_MIN, PARAGRAPH_MAX] = (WORDS_PER_PARAGRAPH.match(/\d+/g) ?? ["110", "140"]).map(Number);
+const PARAGRAPH_WORDS = Math.round((PARAGRAPH_MIN + PARAGRAPH_MAX) / 2);
+/* The introduction's 60-90, the preface's two paragraphs, each chapter's opening of a sentence or two. */
+const INTRODUCTION_WORDS = 75;
+const PREFACE_PARAGRAPHS = 2;
+const OPENING_WORDS = 30;
+/** The most the bar shows before the report is finished. */
+export const PROSE_PROGRESS_CEILING = 0.97;
+
+/** Roughly how many words a report of this many chapters is asked for. */
+export function expectedProseWords(chapterCount: number): number {
+  return (
+    INTRODUCTION_WORDS +
+    PREFACE_PARAGRAPHS * PARAGRAPH_WORDS +
+    chapterCount * (OPENING_WORDS + PARAGRAPHS_PER_CHAPTER * PARAGRAPH_WORDS)
+  );
+}
+
+export type ProseProgress = {
+  /** From 0 to PROSE_PROGRESS_CEILING: words written over words asked for. */
+  fraction: number;
+  /** Chapters the model has begun, from 0 to the number asked for. */
+  chaptersStarted: number;
+};
+
+/**
+ * Progress from the JSON written so far. Words are runs of letters, so the
+ * punctuation and quotes of the JSON do not count; its few keys are taken
+ * back out.
+ */
+export function proseProgress(partialJson: string, chapterCount: number): ProseProgress {
+  const words = partialJson.match(/\p{L}[\p{L}\p{M}'’-]*/gu)?.length ?? 0;
+  const keys = partialJson.match(/"(?:introduction|preface|chapters|id|opening|narrative)"\s*:/g)?.length ?? 0;
+  const chaptersStarted = Math.min(chapterCount, partialJson.match(/"id"\s*:/g)?.length ?? 0);
+  const fraction = Math.min(PROSE_PROGRESS_CEILING, Math.max(0, (words - keys) / expectedProseWords(chapterCount)));
+  return { fraction, chaptersStarted };
+}
+
+/**
+ * What /api/chart/story-prose streams when asked for progress (an Accept of
+ * STORY_PROSE_STREAM_TYPE): one JSON object per line. `planning` is the model
+ * thinking before it writes, when there is nothing to measure yet.
+ */
+export const STORY_PROSE_STREAM_TYPE = "application/x-ndjson";
+
+export type StoryProseStreamLine =
+  | { type: "progress"; phase: "planning" | "writing"; fraction: number; chaptersStarted: number; chapters: number }
+  | { type: "done"; prose: StoryProse; cached: boolean }
+  | { type: "error"; message: string };
+
+export type StoryProseProgressLine = Extract<StoryProseStreamLine, { type: "progress" }>;
+
+/**
+ * The route's answer, whichever it sent: progress lines, each handed to
+ * `onProgress`, ending in the prose; or, for a cache hit, plain JSON at once.
+ * Null when there is no prose to apply -- an error status, an `error` line, a
+ * stream that broke off, or a shape that does not check -- which the caller
+ * meets by keeping the engine's own prose, as before.
+ */
+export async function readStoryProseResponse(
+  response: Response,
+  onProgress: (line: StoryProseProgressLine) => void,
+): Promise<StoryProse | null> {
+  if (!response.ok) return null;
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!contentType.includes(STORY_PROSE_STREAM_TYPE) || !response.body) {
+    const result = (await response.json().catch(() => null)) as { prose?: unknown } | null;
+    return parseStoryProse(result?.prose);
+  }
+
+  const found: { prose: StoryProse | null } = { prose: null };
+  const take = (line: string) => {
+    if (!line.trim()) return;
+    let parsed: Partial<StoryProseStreamLine> & Record<string, unknown>;
+    try {
+      parsed = JSON.parse(line);
+    } catch {
+      return;
+    }
+    if (parsed.type === "progress") {
+      const chapters = Number.isFinite(parsed.chapters) ? Math.max(0, Number(parsed.chapters)) : 0;
+      onProgress({
+        type: "progress",
+        phase: parsed.phase === "writing" ? "writing" : "planning",
+        fraction: Math.min(1, Math.max(0, Number(parsed.fraction) || 0)),
+        chaptersStarted: Math.min(chapters, Math.max(0, Math.floor(Number(parsed.chaptersStarted) || 0))),
+        chapters,
+      });
+    } else if (parsed.type === "done") {
+      found.prose = parseStoryProse(parsed.prose);
+    }
+  };
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let buffered = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffered += decoder.decode(value, { stream: true });
+    let newline = buffered.indexOf("\n");
+    while (newline >= 0) {
+      take(buffered.slice(0, newline));
+      buffered = buffered.slice(newline + 1);
+      newline = buffered.indexOf("\n");
+    }
+  }
+  take(buffered + decoder.decode());
+  return found.prose;
+}
+
 /**
  * The facts worth sending, from a built story.
  *

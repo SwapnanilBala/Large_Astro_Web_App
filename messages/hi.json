@@ -791,7 +791,11 @@
         "typesetting": "PDF के पन्ने सजाए जा रहे हैं",
         "verifying": "कुंडली की दोबारा जाँच हो रही है",
         "writing": "आपका पाठ लिखा जा रहा है"
-      }
+      },
+      "progressLabel": "रिपोर्ट की प्रगति",
+      "progressPlanning": "अध्यायों की योजना बन रही है…",
+      "progressChapter": "{total} में से अध्याय {current} लिखा जा रहा है",
+      "progressIntroduction": "भूमिका लिखी जा रही है…"
     },
     "timingPreview": {
       "chapter": "वर्तमान अध्याय",

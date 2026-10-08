@@ -8,12 +8,15 @@ import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   PARAGRAPHS_PER_CHAPTER,
   STORY_PROSE_SCHEMA,
+  STORY_PROSE_STREAM_TYPE,
   WORDS_PER_PARAGRAPH,
   missingProseChapters,
   parseStoryProse,
+  proseProgress,
   renderStoryProseFacts,
   type StoryProse,
   type StoryProseFacts,
+  type StoryProseStreamLine,
 } from "@/lib/story-prose";
 
 /*
@@ -99,7 +102,20 @@ import {
  * headroom is free, since billing is per token generated. The SDK asks for
  * streaming at that size precisely so a long
  * generation cannot trip an HTTP timeout, and `finalMessage()` hands back the
- * assembled message since nothing here renders token by token.
+ * assembled message.
+ *
+ * ── PROGRESS, FOR A READER WAITING ON THE FILE ─────────────────────────────
+ *
+ * Asked with `Accept: application/x-ndjson` (STORY_PROSE_STREAM_TYPE), the
+ * route answers with a stream of one-line JSON objects instead of one JSON
+ * body: `progress` lines while the model writes, measured from the text
+ * streamed so far against the length the prompt asks for (proseProgress in
+ * lib/story-prose.ts), then `done` with the prose, or `error`. The dialog
+ * turns them into a percentage. Everything that can fail before the paid call
+ * -- the body, the budget, the key -- still fails as an ordinary JSON error
+ * with its status, and a cache hit still answers with plain JSON at once, so a
+ * client that asked for progress has to read either. Without that Accept the
+ * route behaves exactly as before.
  *
  * That is also why the output schema is hand-written in lib/story-prose.ts
  * rather than built with `zodOutputFormat`: that helper exists for
@@ -300,6 +316,107 @@ function clean(value: string): string {
   return stripInlineMarkdown(value).trim();
 }
 
+/**
+ * A finished message, checked and cleaned: the usage line, the stop reason, the
+ * JSON, the shape, the markdown, and a log line for a short set. Throws an
+ * ApiError for anything that cannot ship. Shared by the plain and the progress
+ * answers, so the two cannot drift apart on what counts as a report.
+ */
+function finish(response: Anthropic.Message, facts: StoryProseFacts, elapsedMs: number): StoryProse {
+  console.info(JSON.stringify({
+    timestamp: new Date().toISOString(),
+    route: "/api/chart/story-prose",
+    event: "llm_usage",
+    model: MODEL,
+    chapters: facts.chapters.length,
+    elapsedMs,
+    stopReason: response.stop_reason,
+    inputTokens: response.usage.input_tokens,
+    outputTokens: response.usage.output_tokens,
+    cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+    cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+  }));
+
+  if (response.stop_reason === "refusal") {
+    throw new ApiError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      "The written report was declined.",
+      { details: { category: response.stop_details?.category ?? null } },
+    );
+  }
+
+  /* Truncation is a failure, not a short report. At this size a run that
+     reaches the ceiling returns unparseable JSON anyway, but checking the
+     stop reason says so in the log rather than in a parse error. */
+  if (response.stop_reason === "max_tokens") {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/story-prose",
+      event: "llm_output_truncated",
+      model: MODEL,
+      outputTokens: response.usage.output_tokens,
+    }));
+    throw new ApiError(
+      ErrorCode.EXTERNAL_SERVICE_ERROR,
+      "The written report ran past its token ceiling.",
+    );
+  }
+
+  const text = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+
+  let parsedJson: unknown;
+  try {
+    parsedJson = JSON.parse(text);
+  } catch {
+    throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The written report was not valid JSON.");
+  }
+
+  const prose = parseStoryProse(parsedJson);
+  if (!prose) {
+    throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The written report was the wrong shape.");
+  }
+
+  const cleaned: StoryProse = {
+    introduction: clean(prose.introduction),
+    preface: prose.preface.map(clean).filter(Boolean),
+    chapters: prose.chapters.map((chapter) => ({
+      id: chapter.id,
+      opening: clean(chapter.opening),
+      narrative: chapter.narrative.map(clean).filter(Boolean),
+    })).filter((chapter) => chapter.narrative.length > 0),
+  };
+
+  if (cleaned.chapters.length === 0) {
+    throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No written chapters were returned.");
+  }
+
+  /*
+   * A short set is survivable here and worth a log line.
+   *
+   * applyStoryProse merges per chapter, so a chapter the model skipped keeps
+   * the engine's draft -- the report is mixed rather than missing, and a
+   * reader cannot tell except that one chapter reads more plainly. The same
+   * failure on the varga route was a model writing nine notes when asked for
+   * ten; there is no reason to think a nine-chapter document is immune.
+   */
+  const missing = missingProseChapters(facts, cleaned);
+  if (missing.length > 0) {
+    console.warn(JSON.stringify({
+      timestamp: new Date().toISOString(),
+      route: "/api/chart/story-prose",
+      event: "llm_chapters_incomplete",
+      model: MODEL,
+      asked: facts.chapters.length,
+      returned: cleaned.chapters.length,
+      missing,
+    }));
+  }
+  return cleaned;
+}
+
 export async function POST(request: NextRequest) {
   try {
     let body: { facts?: unknown };
@@ -328,6 +445,7 @@ export async function POST(request: NextRequest) {
        handed the same caller, so a miss does not read it twice. */
     const caller = await resolveLlmCaller(request);
     const key = cacheKey(caller.key, params);
+    const wantsProgress = (request.headers.get("accept") ?? "").includes(STORY_PROSE_STREAM_TYPE);
 
     const cached = cache.get(key);
     if (cached) {
@@ -368,124 +486,103 @@ export async function POST(request: NextRequest) {
       timeout: REQUEST_TIMEOUT_MS,
     });
 
+    if (wantsProgress) return progressResponse(client, params, facts, key);
+
     const startedAt = Date.now();
     /* The same object the key was built from, so the two cannot disagree. */
     const response = await client.messages.stream(params).finalMessage();
-
-    const elapsedMs = Date.now() - startedAt;
-
-    console.info(JSON.stringify({
-      timestamp: new Date().toISOString(),
-      route: "/api/chart/story-prose",
-      event: "llm_usage",
-      model: MODEL,
-      chapters: facts.chapters.length,
-      elapsedMs,
-      stopReason: response.stop_reason,
-      inputTokens: response.usage.input_tokens,
-      outputTokens: response.usage.output_tokens,
-      cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
-      cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
-    }));
-
-    if (response.stop_reason === "refusal") {
-      throw new ApiError(
-        ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "The written report was declined.",
-        { details: { category: response.stop_details?.category ?? null } },
-      );
-    }
-
-    /* Truncation is a failure, not a short report. At this size a run that
-       reaches the ceiling returns unparseable JSON anyway, but checking the
-       stop reason says so in the log rather than in a parse error. */
-    if (response.stop_reason === "max_tokens") {
-      console.warn(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: "/api/chart/story-prose",
-        event: "llm_output_truncated",
-        model: MODEL,
-        outputTokens: response.usage.output_tokens,
-      }));
-      throw new ApiError(
-        ErrorCode.EXTERNAL_SERVICE_ERROR,
-        "The written report ran past its token ceiling.",
-      );
-    }
-
-    const text = response.content
-      .filter((block): block is Anthropic.TextBlock => block.type === "text")
-      .map((block) => block.text)
-      .join("");
-
-    let parsedJson: unknown;
-    try {
-      parsedJson = JSON.parse(text);
-    } catch {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The written report was not valid JSON.");
-    }
-
-    const prose = parseStoryProse(parsedJson);
-    if (!prose) {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "The written report was the wrong shape.");
-    }
-
-    const cleaned: StoryProse = {
-      introduction: clean(prose.introduction),
-      preface: prose.preface.map(clean).filter(Boolean),
-      chapters: prose.chapters.map((chapter) => ({
-        id: chapter.id,
-        opening: clean(chapter.opening),
-        narrative: chapter.narrative.map(clean).filter(Boolean),
-      })).filter((chapter) => chapter.narrative.length > 0),
-    };
-
-    if (cleaned.chapters.length === 0) {
-      throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No written chapters were returned.");
-    }
-
-    /*
-     * A short set is survivable here and worth a log line.
-     *
-     * applyStoryProse merges per chapter, so a chapter the model skipped keeps
-     * the engine's draft -- the report is mixed rather than missing, and a
-     * reader cannot tell except that one chapter reads more plainly. The same
-     * failure on the varga route was a model writing nine notes when asked for
-     * ten; there is no reason to think a nine-chapter document is immune.
-     */
-    const missing = missingProseChapters(facts, cleaned);
-    if (missing.length > 0) {
-      console.warn(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        route: "/api/chart/story-prose",
-        event: "llm_chapters_incomplete",
-        model: MODEL,
-        asked: facts.chapters.length,
-        returned: cleaned.chapters.length,
-        missing,
-      }));
-    }
-
+    const cleaned = finish(response, facts, Date.now() - startedAt);
     remember(key, cleaned);
     return NextResponse.json({ prose: cleaned, cached: false });
   } catch (error) {
-    if (!(error instanceof ApiError)) {
-      /* Most specific first: a 400 from us is a bug, a 429 is worth retrying,
-         a connection error is the network. */
-      if (error instanceof Anthropic.BadRequestError) {
-        console.error("story-prose: bad request to Anthropic", error.message);
-      } else if (error instanceof Anthropic.AuthenticationError) {
-        console.error("story-prose: ANTHROPIC_API_KEY rejected");
-      } else if (error instanceof Anthropic.RateLimitError) {
-        console.error("story-prose: rate limited");
-      } else if (error instanceof Anthropic.APIConnectionTimeoutError) {
-        console.error("story-prose: timed out after", REQUEST_TIMEOUT_MS, "ms");
-      } else if (error instanceof Anthropic.APIError) {
-        console.error("story-prose: Anthropic error", error.status, error.message);
-      } else {
-        console.error("story-prose: unexpected", error);
-      }
-    }
+    logFailure(error);
     return errorResponse(error, "The written report could not be prepared.");
   }
+}
+
+/* Most specific first: a 400 from us is a bug, a 429 is worth retrying, a
+   connection error is the network. An ApiError was ours and says so itself. */
+function logFailure(error: unknown) {
+  if (error instanceof ApiError) return;
+  if (error instanceof Anthropic.BadRequestError) {
+    console.error("story-prose: bad request to Anthropic", error.message);
+  } else if (error instanceof Anthropic.AuthenticationError) {
+    console.error("story-prose: ANTHROPIC_API_KEY rejected");
+  } else if (error instanceof Anthropic.RateLimitError) {
+    console.error("story-prose: rate limited");
+  } else if (error instanceof Anthropic.APIConnectionTimeoutError) {
+    console.error("story-prose: timed out after", REQUEST_TIMEOUT_MS, "ms");
+  } else if (error instanceof Anthropic.APIError) {
+    console.error("story-prose: Anthropic error", error.status, error.message);
+  } else {
+    console.error("story-prose: unexpected", error);
+  }
+}
+
+/**
+ * The paid call, answered as progress lines (see PROGRESS in the header).
+ *
+ * A line goes out only when the whole percentage or the chapter changes, so a
+ * report is a hundred-odd lines rather than one per token. If the reader goes
+ * away mid-report the call still finishes and is cached for them, as a plain
+ * request's would be: the money is spent either way, and a second click then
+ * costs nothing.
+ */
+function progressResponse(
+  client: Anthropic,
+  params: Anthropic.MessageStreamParams,
+  facts: StoryProseFacts,
+  key: string,
+): Response {
+  const chapters = facts.chapters.length;
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      /* A reader who left has cancelled the stream; writing to it then throws, and nothing is owed. */
+      const send = (line: StoryProseStreamLine) => {
+        try {
+          controller.enqueue(encoder.encode(`${JSON.stringify(line)}\n`));
+        } catch {
+          /* gone */
+        }
+      };
+      const startedAt = Date.now();
+      let shown = { percent: -1, chaptersStarted: -1 };
+      try {
+        send({ type: "progress", phase: "planning", fraction: 0, chaptersStarted: 0, chapters });
+        const stream = client.messages.stream(params);
+        stream.on("text", (_delta, snapshot) => {
+          const { fraction, chaptersStarted } = proseProgress(snapshot, chapters);
+          const percent = Math.floor(fraction * 100);
+          if (percent === shown.percent && chaptersStarted === shown.chaptersStarted) return;
+          shown = { percent, chaptersStarted };
+          send({ type: "progress", phase: "writing", fraction, chaptersStarted, chapters });
+        });
+        const response = await stream.finalMessage();
+        const cleaned = finish(response, facts, Date.now() - startedAt);
+        remember(key, cleaned);
+        send({ type: "done", prose: cleaned, cached: false });
+      } catch (error) {
+        logFailure(error);
+        send({
+          type: "error",
+          message: error instanceof ApiError ? error.message : "The written report could not be prepared.",
+        });
+      } finally {
+        try {
+          controller.close();
+        } catch {
+          /* already cancelled */
+        }
+      }
+    },
+  });
+  return new Response(body, {
+    headers: {
+      "Content-Type": `${STORY_PROSE_STREAM_TYPE}; charset=utf-8`,
+      "Cache-Control": "no-store",
+      /* Lines go out as written rather than when a proxy's buffer fills. */
+      "X-Accel-Buffering": "no",
+    },
+  });
 }

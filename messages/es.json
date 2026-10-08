@@ -791,7 +791,11 @@
         "typesetting": "Maquetando el PDF",
         "verifying": "Verificando la carta",
         "writing": "Escribiendo tu lectura"
-      }
+      },
+      "progressLabel": "Progreso del informe",
+      "progressPlanning": "Planificando los capítulos…",
+      "progressChapter": "Escribiendo el capítulo {current} de {total}",
+      "progressIntroduction": "Escribiendo la introducción…"
     },
     "timingPreview": {
       "chapter": "Capítulo actual",

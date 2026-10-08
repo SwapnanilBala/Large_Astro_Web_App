@@ -791,7 +791,11 @@
         "typesetting": "PDF সাজানো হচ্ছে",
         "verifying": "কুণ্ডলী মিলিয়ে দেখা হচ্ছে",
         "writing": "আপনার পাঠ লেখা হচ্ছে"
-      }
+      },
+      "progressLabel": "রিপোর্টের অগ্রগতি",
+      "progressPlanning": "অধ্যায়গুলির পরিকল্পনা চলছে…",
+      "progressChapter": "{total}টির মধ্যে অধ্যায় {current} লেখা হচ্ছে",
+      "progressIntroduction": "ভূমিকা লেখা হচ্ছে…"
     },
     "timingPreview": {
       "chapter": "বর্তমান অধ্যায়",

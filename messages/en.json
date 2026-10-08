@@ -625,7 +625,11 @@
       "dialogNote": "Keep this tab open. The download starts on its own when the report is ready.",
       "error": "The report did not pass generation. Please try again.",
       "kicker": "Personal reading",
-      "chapters": "{count} verified chapters covering identity, relationships, family, vocation, resources, timing, and grounded action."
+      "chapters": "{count} verified chapters covering identity, relationships, family, vocation, resources, timing, and grounded action.",
+      "progressLabel": "Report progress",
+      "progressPlanning": "Planning the chapters…",
+      "progressChapter": "Writing chapter {current} of {total}",
+      "progressIntroduction": "Writing the introduction…"
     },
     "shifts": {
       "past": "Past chapter",

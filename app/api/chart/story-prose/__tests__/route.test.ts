@@ -187,3 +187,81 @@ describe("story prose cache", () => {
     expect(mocks.stream).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("story prose progress, for the reader waiting on the PDF", () => {
+  /* messages.stream(...) as the progress answer uses it: text handlers fed the
+     report in pieces, then finalMessage. */
+  function streamingOf(written: StoryProse, pieces = 6, stop = "end_turn") {
+    const text = JSON.stringify(written);
+    const handlers: Array<(delta: string, snapshot: string) => void> = [];
+    const stream = {
+      on(event: string, handler: (delta: string, snapshot: string) => void) {
+        if (event === "text") handlers.push(handler);
+        return stream;
+      },
+      finalMessage: async () => {
+        const size = Math.ceil(text.length / pieces);
+        for (let at = 0; at < text.length; at += size) {
+          for (const handler of handlers) handler(text.slice(at, at + size), text.slice(0, at + size));
+        }
+        return {
+          stop_reason: stop,
+          content: [{ type: "text", text }],
+          usage: { input_tokens: 4000, output_tokens: 3000, cache_read_input_tokens: 0, cache_creation_input_tokens: 0 },
+        };
+      },
+    };
+    return stream;
+  }
+
+  function progressRequest(body: StoryProseFacts) {
+    return new NextRequest("https://example.test/api/chart/story-prose", {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/x-ndjson, application/json" },
+      body: JSON.stringify({ facts: body }),
+    });
+  }
+
+  const lines = async (response: Response) =>
+    (await response.text())
+      .split("\n")
+      .filter(Boolean)
+      .map((line) => JSON.parse(line) as Record<string, unknown>);
+
+  it("streams a planning line, then rising progress, then the prose, and caches it", async () => {
+    mocks.stream.mockReturnValue(streamingOf(prose("Genuine")));
+    const response = await POST(progressRequest(facts()));
+    expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+    const got = await lines(response);
+
+    expect(got[0]).toEqual({ type: "progress", phase: "planning", fraction: 0, chaptersStarted: 0, chapters: 2 });
+    const progress = got.filter((line) => line.type === "progress" && line.phase === "writing");
+    expect(progress.length).toBeGreaterThan(0);
+    const fractions = progress.map((line) => line.fraction as number);
+    expect([...fractions].sort((a, b) => a - b)).toEqual(fractions);
+    expect(progress.at(-1)?.chaptersStarted).toBe(2);
+    expect(got.at(-1)).toEqual({ type: "done", prose: prose("Genuine"), cached: false });
+
+    /* The same reader's second download is the plain cached answer. */
+    expect(await (await POST(progressRequest(facts()))).json()).toEqual({ prose: prose("Genuine"), cached: true });
+    expect(mocks.stream).toHaveBeenCalledTimes(1);
+    expect(mocks.budget).toHaveBeenCalledTimes(1);
+  });
+
+  it("ends with an error line, and caches nothing, when the report cannot ship", async () => {
+    mocks.stream.mockReturnValue(streamingOf(prose("Cut"), 6, "max_tokens"));
+    const got = await lines(await POST(progressRequest(facts())));
+    expect(got.at(-1)).toEqual({ type: "error", message: "The written report ran past its token ceiling." });
+
+    mocks.stream.mockReturnValue(streamingOf(prose("Genuine")));
+    expect((await lines(await POST(progressRequest(facts())))).at(-1)).toMatchObject({ type: "done", cached: false });
+  });
+
+  it("still refuses before streaming, as plain JSON with its status, when the day's allowance is spent", async () => {
+    mocks.budget.mockResolvedValue({ allowed: false, scope: "anonymous", retryAfterSeconds: 60 });
+    const response = await POST(progressRequest(facts()));
+    expect(response.status).toBe(429);
+    expect(response.headers.get("content-type")).toContain("application/json");
+    expect(mocks.stream).not.toHaveBeenCalled();
+  });
+});
