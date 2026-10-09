@@ -228,19 +228,6 @@ export const ForecastInputSchema = BirthInputSchema.extend({
 
 export type ForecastInput = z.infer<typeof ForecastInputSchema>;
 
-/** Dasha sub-period expansion. */
-export const DashaSubperiodsInputSchema = z.object({
-  parent_lord: z.string().min(1, "parent_lord is required"),
-  parent_start: z.string().min(1, "parent_start is required"),
-  parent_end: z.string().min(1, "parent_end is required"),
-  level: z.coerce.number().int().min(2).max(5).default(2),
-  parent_lords: z.string().default(""),
-  sequence_start: z.string().optional(),
-  sequence_end: z.string().optional(),
-});
-
-export type DashaSubperiodsInput = z.infer<typeof DashaSubperiodsInputSchema>;
-
 /** Compatibility endpoint: two birth inputs. */
 export const CompatibilityInputSchema = z.object({
   primary: BirthInputSchema,

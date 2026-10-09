@@ -117,7 +117,7 @@ describe("per-account ceiling", () => {
     expect((await consumeLlmBudget("/api/chart/domain-brief", caller, NOON)).allowed).toBe(false);
     /* Same caller, different route, untouched allowance. */
     expect(
-      (await consumeLlmBudget("/api/chart/dasha-interpretation", caller, NOON)).allowed,
+      (await consumeLlmBudget("/api/chart/current-period", caller, NOON)).allowed,
     ).toBe(true);
   });
 });

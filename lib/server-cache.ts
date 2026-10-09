@@ -127,7 +127,6 @@ interface GlobalCaches {
   chart: ServerCache;
   lifeDomains: ServerCache;
   forecast: ServerCache;
-  dasha: ServerCache;
   compatibility: ServerCache;
   suggest: ServerCache;
   geocode: ServerCache;
@@ -145,8 +144,6 @@ function createCaches(): GlobalCaches {
     lifeDomains: new ServerCache("life_domains_v2", 300, 60 * 60 * 1000),
     /** 100 entries, 5 min TTL */
     forecast: new ServerCache("forecast", 100, 5 * 60 * 1000),
-    /** 200 entries, 30 min TTL */
-    dasha: new ServerCache("dasha", 200, 30 * 60 * 1000),
     /** 200 entries, 1 hour TTL */
     compatibility: new ServerCache("compatibility", 200, 60 * 60 * 1000),
     /** 300 entries, 24 hour TTL — autocomplete suggestions */

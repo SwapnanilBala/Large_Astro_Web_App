@@ -3,7 +3,7 @@
  * change is one edit rather than ten. Every route that writes a reading or a
  * note on the cheap model reads these: advanced-story, area-classics,
  * ask-classics (the answer and the screen), current-period,
- * dasha-interpretation, domain-brief, life-shifts, story-prose,
+ * dasha-reading, domain-brief, life-shifts, story-prose,
  * varga-commentary and yoga-classics, and the sampling scripts that mirror
  * them. Palm reading and the Opus retries choose their own models.
  *

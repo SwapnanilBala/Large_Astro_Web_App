@@ -46,17 +46,15 @@ type RateLimitConfig = {
 const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
   "/api/chart/forecast": { limit: 20, windowMs: 60_000 },
   "/api/chart/life-domains": { limit: 20, windowMs: 60_000 },
-  "/api/chart/dasha-subperiods": { limit: 40, windowMs: 60_000 },
-  /* Paid LLM calls. Drilling through a dasha chain or clicking along the
-     Ultimate Module's seven cards fires these in quick succession, so the
-     window has to allow a real session; the spend ceiling that actually
-     protects the key is the per-day budget in lib/llm-budget.ts. */
-  "/api/chart/dasha-interpretation": { limit: 12, windowMs: 60_000 },
   /* Longest-prefix match puts this ahead of "/api/chart", which is the point
      of the sort below. Asked once per chart on mount and then served from
      cache, so a real visitor needs it a handful of times an hour at most --
      six is the atlas's number, for the same reason. */
   "/api/chart/current-period": { limit: 6, windowMs: 60_000 },
+  /* Paid LLM calls. Clicking along the Ultimate Module's seven cards fires
+     these in quick succession, so the window has to allow a real session; the
+     spend ceiling that actually protects the key is the per-day budget in
+     lib/llm-budget.ts. */
   "/api/chart/domain-brief": { limit: 12, windowMs: 60_000 },
   /* The atlas asks once per chart and then reads from cache, so a real visitor
      needs this a handful of times an hour at most. Low enough that a loop is

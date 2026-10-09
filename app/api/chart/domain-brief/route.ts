@@ -29,15 +29,15 @@ import type { LifeDomainInsight, LifeDomainKey } from "@/lib/astro-types";
  * genuinely cannot do, because the number of evidence combinations is not a
  * content project.
  *
- * Same contract as /api/chart/dasha-interpretation, and deliberately so: the
+ * The contract the written routes here keep, and deliberately so: the
  * engine decides what is true -- which domain, how active, which evidence
  * families support and which press -- and the model is only allowed to phrase
  * it. The deterministic body stays underneath as the fallback, so a missing key,
  * a refusal, a timeout or an exhausted budget all leave the panel exactly as it
  * was before this route existed.
  *
- * Provider note: Anthropic, reading ANTHROPIC_API_KEY, shared with the dasha
- * route and, since palm reading moved to Opus 5, with /api/palm-reading and
+ * Provider note: Anthropic, reading ANTHROPIC_API_KEY, shared with the other
+ * chart routes and, since palm reading moved to Opus 5, with /api/palm-reading and
  * /api/palm-reading/ask. OpenAI survives only as the palm route's fallback.
  *
  * Abuse note: the only thing a caller controls here is the birth parameters and

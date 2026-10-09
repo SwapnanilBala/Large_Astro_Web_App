@@ -27,8 +27,8 @@ import {
  * it says what the chart is like. A layman reads it as a wall of notation.
  *
  * So the engine keeps deciding what is true and the model is only allowed to
- * phrase it -- the same contract as /api/chart/domain-brief and
- * /api/chart/dasha-interpretation. The panels are unchanged underneath; they
+ * phrase it -- the same contract as /api/chart/domain-brief. The panels are
+ * unchanged underneath; they
  * move behind a disclosure and the passage stands in front.
  *
  * ONE call, not one per module, and this is a constraint rather than a

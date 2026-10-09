@@ -32,10 +32,11 @@ import {
  * reader's Saturn-Mercury different from another's, and it is three-quarters of
  * the input here.
  *
- * Not a shorter chain through /api/chart/dasha-interpretation: that route takes
- * lords and dates only, and refuses two-lord chains because the panel's
- * built-in map already covers them well. See lib/current-period-reading.ts for
- * the longer version of why these stayed two routes.
+ * Not /api/chart/dasha-reading, which reads whichever period the reader picks,
+ * down to a Sookshma, from the chart and the classical passages, and is paid
+ * for by a click. This one is bought on mount for every visitor, so it stays
+ * one short paragraph. See lib/current-period-reading.ts for the longer version
+ * of why these are two routes.
  *
  * Provider note: Anthropic, like every LLM route here. A missing
  * ANTHROPIC_API_KEY takes this route with it, and the card falls back to the

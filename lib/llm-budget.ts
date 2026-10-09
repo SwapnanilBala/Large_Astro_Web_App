@@ -73,7 +73,6 @@ import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
 import { clientKey } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
-  | "/api/chart/dasha-interpretation"
   | "/api/chart/current-period"
   | "/api/chart/domain-brief"
   | "/api/chart/advanced-story"
@@ -135,8 +134,8 @@ type LlmBudgetConfig = {
  * retries.
  *
  * The route totals are whole-deployment numbers rather than per-instance ones,
- * so they bite where they read. They are sized by what a call costs: dasha
- * readings use Claude Opus 5 with a cached system prefix, while palm reading uses
+ * so they bite where they read. They are sized by what a call costs: the short
+ * text routes use Claude Opus 5 with a cached system prefix, while palm reading uses
  * Opus 5 vision over an image with nothing cached, and its reading is about
  * five thousand output tokens -- $0.125 of output alone, so roughly $0.15 a
  * call. An order of magnitude dearer, hence 100 a day against 2500.
@@ -156,7 +155,7 @@ type LlmBudgetConfig = {
  * The varga commentary is the dearest of the text routes and the one a visitor
  * can only spend once. Opus 5 at medium effort, ten notes in a single response
  * against the same cached system prefix: 2831 input and 1799 output tokens
- * measured, which is $0.0596 a call -- about seven times a dasha chain. The
+ * measured, which is $0.0596 a call -- about seven times a one-paragraph note. The
  * atlas asks for all ten key vargas at once, on mount, so one atlas visit is
  * one call and there is no drill-down that could make it many.
  *
@@ -172,7 +171,7 @@ type LlmBudgetConfig = {
  *
  * That makes 400 a count of distinct charts per day rather than of
  * interactions, and it is a ceiling rather than a forecast: 400 x $0.0596 is
- * about $24, and only a day that exhausts the route reaches it. The two cheap
+ * about $24, and only a day that exhausts the route reaches it. The cheap
  * text routes can afford 2500 because they cost fractions of a cent; this one
  * cannot, and sizing it like them would have put a $150 day one cache miss
  * away.
@@ -210,8 +209,8 @@ type LlmBudgetConfig = {
  *
  * These were 2 and 10, then 5 and 15, and are now 4 and 8. The first move was a
  * raise, because the ceiling a real session met first was the one on the
- * cheapest route -- a five-level dasha drill-down reaches dozens of distinct
- * chains. This one is a cut, because the mix stopped being cheap: the varga
+ * cheapest route -- a five-level dasha drill-down reached dozens of distinct
+ * chains (its paid chain reading was removed on 2026-10-08). This one is a cut, because the mix stopped being cheap: the varga
  * commentary is $0.0596 a call, and an allowance sized against routes that cost
  * fractions of a cent stopped describing what a caller can actually spend.
  *
@@ -222,7 +221,7 @@ type LlmBudgetConfig = {
  *
  * WHAT THE CUT BUYS is mostly bounded at the route rather than at the caller.
  * The text routes cache, so only *distinct* requests count -- revisiting a
- * dasha chain or a domain is free -- and their totals did not move. Palm
+ * dasha period or a domain is free -- and their totals did not move. Palm
  * reading is where a per-caller number is real money, and its total halved:
  * 100 a day is about $15 of exposure where 200 was about $30.
  *
@@ -238,19 +237,14 @@ type LlmBudgetConfig = {
  * worth. That is the trade, made deliberately.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
-  "/api/chart/dasha-interpretation": {
-    perDay: 2500,
-    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
-    perAnonPerDay: LLM_FREE_PER_DAY,
-  },
   /* The same arithmetic as life-shifts below, and the same answer, reached
-     from the other direction. A call here is about what the drill-down above
-     costs -- $0.0115 measured against its $0.0090, one paragraph either way
-     against the same cached prefix -- but it is not driven by clicking: the
-     panel asks on mount, and the panel is on the results page, so this is
-     bought by *visitors* rather than by the few who drill. That is the whole
-     difference between 2500 and 1200, which is about $14 of exposure on a day
-     that exhausts the route.
+     from the other direction. A call here was about what the dasha
+     drill-down's chain reading cost -- $0.0115 measured against its $0.0090,
+     one paragraph either way against a cached prefix -- but it is not driven
+     by clicking: the panel asks on mount, and the panel is on the results
+     page, so this is bought by *visitors* rather than by the few who drill.
+     That is the whole difference between that route's 2500 and this one's
+     1200, which is about $14 of exposure on a day that exhausts the route.
 
      What holds it there is the cache key, which is the stack plus a coarse
      progress band rather than the live percentage the card prints. A chart
@@ -382,7 +376,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      over the period's facts and up to ten cited passages, about the size of
      an "Ask the classics" answer, so about $0.001 a reading. It is bought by
      a click on "Read this period", never on mount or on a drill, so this is
-     paid by readers who ask, as the drill-down's chain reading was. The tiers
+     paid by readers who ask, as the old drill-down's chain reading was. The tiers
      stay the standard four and eight: the sign-in prompt states those numbers
      for "Dasha readings", and an exception would make it wrong. The total is
      Ask the classics' 700 for the same reason: $22 if every unit retried on

@@ -1,7 +1,8 @@
 /**
  * Run one LLM route's real prompt at several effort levels and print what each costs.
  *
- * Written for the question "is medium worth it on the dasha route", which
+ * Written for the question "is medium worth it on the dasha chain route" (that
+ * route was removed on 2026-10-08; the default is now current-period), which
  * cannot be answered from prompt sizes: the input side is easy to estimate and
  * is not where the money is. Thinking bills at the output rate, is most of what
  * a request generates at any effort above low, and is invisible until a real
@@ -33,14 +34,6 @@ const routeFile = (...parts) => join(HERE, "..", "app", "api", ...parts, "route.
 /* Claude Opus 5, $ per token. */
 const PRICE = { input: 5 / 1e6, output: 25 / 1e6, cacheRead: 0.5 / 1e6, cacheWrite: 6.25 / 1e6 };
 const MODEL = "claude-opus-5-5";
-
-const LEVEL_LABELS = {
-  1: "Maha Dasha",
-  2: "Antardasha",
-  3: "Pratyantardasha",
-  4: "Sookshma Dasha",
-  5: "Prana Dasha",
-};
 
 const SIGNS = [
   "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
@@ -203,24 +196,6 @@ const CURRENT_PERIOD_STACK = [
 ];
 
 const ROUTES = {
-  dasha: {
-    file: routeFile("chart", "dasha-interpretation"),
-    maxTokens: 8000,
-    /* Three shapes the panel actually produces: the shallowest chain this route
-       accepts, a middling one, and the deepest. Depth is the only thing that
-       varies in the user turn, so it is the only axis worth sweeping. */
-    cases: [
-      { label: "Sun > Saturn > Moon", lords: ["Sun", "Saturn", "Moon"], startDate: "2026-01-04", endDate: "2026-03-19" },
-      { label: "Venus > Mercury > Ketu > Jupiter", lords: ["Venus", "Mercury", "Ketu", "Jupiter"], startDate: "2027-06-11", endDate: "2027-07-02" },
-      { label: "Rahu > Mars > Sun > Venus > Saturn", lords: ["Rahu", "Mars", "Sun", "Venus", "Saturn"], startDate: "2029-02-17", endDate: "2029-02-23" },
-    ],
-    userTurn: ({ lords, startDate, endDate }) => {
-      const chain = lords
-        .map((lord, index) => `${LEVEL_LABELS[index + 1] ?? `level ${index + 1}`}: ${lord}`)
-        .join("\n");
-      return `${chain}\n\nThe ${lords[lords.length - 1]} period runs ${startDate} to ${endDate}.`;
-    },
-  },
   varga: {
     file: routeFile("chart", "varga-commentary"),
     maxTokens: 16000,
@@ -324,7 +299,7 @@ async function main() {
   const { default: Anthropic } = await import("@anthropic-ai/sdk");
   const client = new Anthropic({ apiKey, timeout: 120_000 });
 
-  const routeName = arg("route", "dasha");
+  const routeName = arg("route", "current-period");
   const route = ROUTES[routeName];
   if (!route) {
     console.error(`unknown --route ${routeName}. Known: ${Object.keys(ROUTES).join(", ")}`);

@@ -5,15 +5,16 @@ import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types
 /**
  * The facts the running dasha stack contributes to its written reading.
  *
- * Why this is not `/api/chart/dasha-interpretation` with a shorter chain: that
- * route answers "what does this chain of lords mean", takes lords and dates and
- * nothing else, and refuses two-lord chains on purpose -- the panel's 81-entry
- * DASHA_COMBO_EFFECTS map already covers maha -> antar and costs nothing. The
- * current-period card is a different question with a different input. It knows
- * the reader's natal placements for these particular lords, the nakshatra the
- * whole Vimshottari sequence is counted from, and how far through the period
- * they are, and none of those fit through that route's door. Widening it to
- * take them would give one route two prompts and two contracts.
+ * Why this is not `/api/chart/dasha-reading` asked about today's periods: that
+ * route reads one period the reader picks, from the chart's facts and the
+ * classical passages, cited, and it is paid for by a click. This card is the
+ * same subject at a different price. It is bought on mount for every visitor
+ * who opens the timing section, so it is one short paragraph from closed-
+ * vocabulary facts -- the reader's natal placements for these particular lords,
+ * the nakshatra the whole Vimshottari sequence is counted from, and how far
+ * through the period they are -- cached by a coarse progress band. Answering it
+ * through the period reading would buy a cited reading for everyone who
+ * scrolls past.
  *
  * Every field here comes from a closed vocabulary -- nine lords, twelve signs,
  * twelve houses, twenty-seven nakshatras, ISO dates -- which is what lets the
