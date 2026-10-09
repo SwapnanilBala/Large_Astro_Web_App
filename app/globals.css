@@ -1679,22 +1679,6 @@ label:has(.autocomplete-wrapper.is-open) {
   color: var(--accent-aqua);
 }
 
-.dasha-command-kicker {
-  margin: 0 0 0.35rem;
-  color: var(--accent-aqua);
-  font-size: 1.08rem;
-  font-weight: 800;
-  letter-spacing: 0.1rem;
-  text-transform: uppercase;
-}
-
-/* ── Gantt-style Maha Dasha Timeline ── */
-
-@keyframes timelineReveal {
-  from { clip-path: inset(0 100% 0 0); }
-  to   { clip-path: inset(0 0%   0 0); }
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }}
 
@@ -2739,20 +2723,6 @@ label:has(.autocomplete-wrapper.is-open) {
   }}
 
 @media (max-width: 680px) {
-
-  .dasha-lens-header,
-  .dasha-table-header {
-    flex-direction: column;
-  }
-
-  .dasha-view-switcher {
-    width: 100%;
-  }
-
-  .dasha-view-button {
-    flex: 1 1 0;
-    text-align: center;
-  }
 
   .dasha-audit-header {
     flex-direction: column;
@@ -5221,7 +5191,6 @@ html[data-account-label] .navbar-signout.navbar-pending-account {
    ═══════════════════════════════════════════════ */
 .navamsa-row:focus-visible,
 .transit-aspect-item:focus-visible,
-.dasha-breadcrumb-item:focus-visible,
 a:focus-visible {
   outline: 2px solid var(--accent-aqua);
   outline-offset: 2px;
@@ -8059,11 +8028,6 @@ html[data-theme="light"] .navbar-signout:hover {
    "dark background + color: var(--ink|--text|--accent)" rather than by eye. */
 html[data-theme="light"] .back-btn {
   background: var(--surface-frosted);
-  border-color: var(--border-medium);
-}
-
-html[data-theme="light"] .dasha-popup {
-  background: var(--bg-glass-strong);
   border-color: var(--border-medium);
 }
 

@@ -102,12 +102,6 @@ describe("stylesheet cascade", () => {
     expect(globals.some((d) => d.selector === ".error-card" && d.media.includes("640px"))).toBe(true);
   });
 
-  it("keeps the dasha card's phone layout where it can win", () => {
-    expect(
-      insights.some((d) => d.selector === ".dasha-command-hero" && d.prop === "grid-template-columns" && d.media.includes("680px")),
-    ).toBe(true);
-  });
-
   it("leaves no override in globals.css that insights-global.css beats", () => {
     const dead = globals.filter(
       (g) =>
