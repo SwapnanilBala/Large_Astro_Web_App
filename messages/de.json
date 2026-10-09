@@ -916,6 +916,96 @@
       "viewsAria": "Ansichten der Dasha-Zeitleiste",
       "viewTable": "Tabelle",
       "viewTimeline": "Zeitleiste"
+    },
+    "now": {
+      "through": "{percent} vergangen",
+      "yearsLeft": "noch {count} Jahre",
+      "monthsLeft": "noch {count} Monate",
+      "daysLeft": "noch {count} Tage",
+      "seed": "Gezählt ab deinem Geburts-Nakshatra {nakshatra} (Pada {pada}), dessen Herrscher {planet} die Abfolge eröffnet."
+    },
+    "explorer": {
+      "hint": "Wähle eine Periode, um die Perioden darin zu öffnen, bis hinunter zu Sookshma. Ihre Deutung steht darunter.",
+      "inside": "innerhalb von {planet}",
+      "barLabel": "{planet} {level}, {start} bis {end}"
+    },
+    "reading": {
+      "kicker": "Deutung der Periode",
+      "statusNow": "Läuft gerade",
+      "statusPast": "Schon vorbei",
+      "statusUpcoming": "Steht noch bevor",
+      "window": "{level} · {dates} · {length}",
+      "factsHeading": "Wo die Planeten dieser Periode in deinem Horoskop stehen",
+      "placed": "In {sign}, dein {house}: {meaning}",
+      "rules": "Herrscher über: {houses}",
+      "houseWithMeaning": "{house} ({meaning})",
+      "actsThrough": "Herrscht über kein Zeichen und gibt deshalb die Ergebnisse von {planet}, in {sign}, deinem {house} ({meaning})",
+      "with": "mit {planets}",
+      "retrograde": "rückläufig",
+      "combust": "nahe der Sonne",
+      "relationsHeading": "Wie jede Ebene zur darüberliegenden steht",
+      "invite": "Eine Deutung dieser Periode, für dein Horoskop geschrieben: wo ihre Planeten stehen und was die klassischen Bücher über sie sagen.",
+      "read": "Diese Periode deuten",
+      "failed": "Die Deutung konnte gerade nicht geschrieben werden.",
+      "limited": "Die Periodendeutungen für heute sind aufgebraucht. Morgen gibt es neue.",
+      "limitedSignIn": "Du hast die kostenlosen Periodendeutungen für heute aufgebraucht. Melde dich an, um mehr zu lesen.",
+      "empty": "Die klassischen Bücher sagen für dein Horoskop nichts über die Planeten dieser Periode.",
+      "meanings": {
+        "h1": "das Selbst, Körper, Haltung",
+        "h2": "Geld, Familie, Sprache",
+        "h3": "Mut, Geschwister, kurze Reisen",
+        "h4": "Zuhause, Mutter, Besitz",
+        "h5": "Kinder, Lernen, Kreativität",
+        "h6": "Rivalen, Schulden, Arbeitsalltag",
+        "h7": "Partnerschaft, Ehe, Verträge",
+        "h8": "plötzlicher Wandel, gemeinsames Geld, Verborgenes",
+        "h9": "Glück, Lehrer, Glaube, weite Reisen",
+        "h10": "Beruf, Ansehen, öffentliches Wirken",
+        "h11": "Gewinne, Freunde, Wünsche",
+        "h12": "Ausgaben, Ausland, Rückzug"
+      },
+      "dignity": {
+        "exalted": "erhöht",
+        "debilitated": "im Fall",
+        "own": "im eigenen Zeichen",
+        "friend": "in befreundetem Zeichen",
+        "neutral": "in neutralem Zeichen",
+        "enemy": "in feindlichem Zeichen"
+      },
+      "kinds": {
+        "self": "{planet} regiert diese Ebene und die darüber: die eigene Unterperiode des Planeten, mit voller Kraft.",
+        "same": "{planet} steht im selben Zeichen wie {parent}: Die beiden arbeiten zusammen.",
+        "angle": "{planet} steht in einem Winkel zu {parent} (4., 7. oder 10.): Sie stützen einander.",
+        "trine": "{planet} steht im Trigon zu {parent} (5. oder 9.): Sie wirken im Einklang.",
+        "growth": "{planet} und {parent} stehen 3. und 11. zueinander: Mühe, die sich mit der Zeit auszahlt.",
+        "adjacent": "{planet} und {parent} stehen 2. und 12. zueinander: ein nachbarlicher Zug, weder dafür noch dagegen.",
+        "strained": "{planet} und {parent} stehen 6. und 8. zueinander: Die beiden ziehen gegeneinander."
+      },
+      "note": {
+        "heading": "Was diese Periode in den Vordergrund rückt",
+        "pending": "Wir deuten diese Periode in deinem Horoskop…",
+        "kicker": "Aus den Klassikern",
+        "sourcesLabel": "Die Textstellen ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, Kap. {ref}",
+        "noteLabel": "Anmerkung des Übersetzers",
+        "credit": "Die Zahlen verweisen auf die Verse, aus denen die Aussagen stammen, zitiert im gedruckten Wortlaut der englischen Übersetzung des Brihat Jataka von Varahamihira, die N. Chidambaram Iyer 1885 vorlegte.",
+        "creditStrijataka": "Die mit Strijataka gekennzeichneten Textstellen stammen aus „Strijataka, or Female Horoscopy“ (1931) von B. Suryanarain Rao, einem Buch über die Geburtshoroskope von Frauen, und sind im gedruckten Wortlaut zitiert. Wörter in eckigen Klammern sind unsere Ergänzungen, nicht Teil des Buchs."
+      },
+      "houses": {
+        "h1": "1. Haus",
+        "h2": "2. Haus",
+        "h3": "3. Haus",
+        "h4": "4. Haus",
+        "h5": "5. Haus",
+        "h6": "6. Haus",
+        "h7": "7. Haus",
+        "h8": "8. Haus",
+        "h9": "9. Haus",
+        "h10": "10. Haus",
+        "h11": "11. Haus",
+        "h12": "12. Haus"
+      }
     }
   },
   "transits": {

@@ -497,6 +497,8 @@ export default function AdvancedContent({
                             dasha={payload.chart.dasha}
                             audit={payload.chart.calculation_audit}
                             planets={payload.chart.planets}
+                            ascendantSign={payload.chart.ascendant.sign}
+                            historyQs={historyQs}
                           />
                         ) : (
                           <LockedFeaturePreview module="dasha" />

@@ -61,7 +61,8 @@ import { HOUSE_SYSTEMS } from "@/lib/engines/engine-registry";
 import { ASCENDANT_NAME_KEY, aspectNameKey } from "@/lib/chart-labels";
 import { SNAPSHOT_DIGNITIES } from "@/app/(desktop)/insights/components/planetary-snapshots";
 import { luckyTermKey } from "@/app/(desktop)/insights/components/lucky-terms";
-import { DASHA_THEME_PLANETS } from "@/app/(desktop)/insights/components/nakshatra-dasha-panel";
+import { DASHA_THEME_PLANETS } from "@/app/(desktop)/insights/components/dasha-themes";
+import { DIGNITIES as PERIOD_DIGNITIES, RELATION_KINDS } from "@/lib/dasha-reading-facts";
 import { KALATRA_FACET_KEYS } from "@/app/(desktop)/insights/life-areas/kalatra-panel";
 import { ASK_QUESTION_IDS } from "@/lib/knowledge/ask-questions";
 import { RETURN_KEYS, SHIFT_ORDINALS } from "@/app/(desktop)/insights/components/major-shifts-panel";
@@ -112,6 +113,10 @@ const SOURCE_FILES = [
   "app/(desktop)/insights/advanced/advanced-story.tsx",
   "app/(desktop)/insights/components/aspects-panel.tsx",
   "app/(desktop)/insights/components/constellation-chart.tsx",
+  "app/(desktop)/insights/components/dasha-format.ts",
+  "app/(desktop)/insights/components/dasha-now.tsx",
+  "app/(desktop)/insights/components/dasha-period-card.tsx",
+  "app/(desktop)/insights/components/dasha-timeline.tsx",
   "app/(desktop)/insights/components/atlas-gateway-preview.tsx",
   "app/(desktop)/insights/components/detail-page-back-link.tsx",
   "app/(desktop)/insights/components/divisional-charts-panel.tsx",
@@ -236,6 +241,11 @@ RUNTIME_KEYS.push(
   ...Object.keys(PLANET_GEMSTONE_INTENTIONS).map((planet) => `insights.lucky.intentions.${planet.toLowerCase()}`),
   "insights.lucky.safetyNote",
   ...DASHA_THEME_PLANETS.map((planet) => `dasha.panel.themes.${planet.toLowerCase()}`),
+  /* The dasha period card: each house by number, what it stands for, a planet's dignity, and how a level meets the one above. */
+  ...Array.from({ length: 12 }, (_, index) => `dasha.reading.houses.h${index + 1}`),
+  ...Array.from({ length: 12 }, (_, index) => `dasha.reading.meanings.h${index + 1}`),
+  ...PERIOD_DIGNITIES.map((dignity) => `dasha.reading.dignity.${dignity}`),
+  ...RELATION_KINDS.map((kind) => `dasha.reading.kinds.${kind}`),
   ...KALATRA_FACET_KEYS.map((facet) => `lifeAreas.kalatraFacets.${facet}`),
   ...ASK_QUESTION_IDS.map((id) => `lifeAreas.ask.questions.${id}`),
   "insights.shifts.labels.mahadasha",

@@ -916,6 +916,96 @@
       },
       "themeActive": "Active timing influence",
       "themeSubPeriod": "Sub-period influence"
+    },
+    "now": {
+      "through": "{percent} through",
+      "yearsLeft": "{count} years left",
+      "monthsLeft": "{count} months left",
+      "daysLeft": "{count} days left",
+      "seed": "Counted from your birth nakshatra, {nakshatra} (pada {pada}), whose lord {planet} opens the sequence."
+    },
+    "explorer": {
+      "hint": "Pick a period to open the ones inside it, down to Sookshma. Its reading is below.",
+      "inside": "inside {planet}",
+      "barLabel": "{planet} {level}, {start} to {end}"
+    },
+    "reading": {
+      "kicker": "Period reading",
+      "statusNow": "Running now",
+      "statusPast": "Already over",
+      "statusUpcoming": "Still to come",
+      "window": "{level} · {dates} · {length}",
+      "factsHeading": "Where its planets stand in your chart",
+      "placed": "In {sign}, your {house}: {meaning}",
+      "rules": "Rules your {houses}",
+      "houseWithMeaning": "{house} ({meaning})",
+      "actsThrough": "Owns no sign, so it gives the results of {planet}, in {sign}, your {house} ({meaning})",
+      "with": "with {planets}",
+      "retrograde": "retrograde",
+      "combust": "close to the Sun",
+      "relationsHeading": "How each level meets the one above",
+      "invite": "A reading of this period written for your chart: where its planets stand, and what the classical books say of them.",
+      "read": "Read this period",
+      "failed": "The reading could not be written just now.",
+      "limited": "Today's period readings are used up. They return tomorrow.",
+      "limitedSignIn": "You have used today's free period readings. Sign in for more.",
+      "empty": "The classical books say nothing about this period's planets for your chart.",
+      "meanings": {
+        "h1": "self, body, outlook",
+        "h2": "money, family, speech",
+        "h3": "courage, siblings, short trips",
+        "h4": "home, mother, property",
+        "h5": "children, learning, creativity",
+        "h6": "rivals, debts, daily work",
+        "h7": "partnership, marriage, contracts",
+        "h8": "sudden change, shared money, the hidden",
+        "h9": "fortune, teachers, faith, long journeys",
+        "h10": "career, standing, public work",
+        "h11": "gains, friends, wishes",
+        "h12": "expenses, foreign places, retreat"
+      },
+      "dignity": {
+        "exalted": "exalted",
+        "debilitated": "debilitated",
+        "own": "in its own sign",
+        "friend": "in a friend's sign",
+        "neutral": "in a neutral sign",
+        "enemy": "in an enemy's sign"
+      },
+      "kinds": {
+        "self": "{planet} rules this level and the one above it: its own sub-period, at full strength.",
+        "same": "{planet} shares a sign with {parent}: the two work together.",
+        "angle": "{planet} stands in an angle from {parent} (4th, 7th or 10th): the two support each other.",
+        "trine": "{planet} stands in a trine from {parent} (5th or 9th): the two work in harmony.",
+        "growth": "{planet} and {parent} are 3rd and 11th from each other: effort that pays off over time.",
+        "adjacent": "{planet} and {parent} are 2nd and 12th from each other: a neighbouring pull, neither for nor against.",
+        "strained": "{planet} and {parent} are 6th and 8th from each other: the two pull against each other."
+      },
+      "note": {
+        "heading": "What this period brings forward",
+        "pending": "Reading this period in your chart…",
+        "kicker": "From the classics",
+        "sourcesLabel": "The passages ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, ch. {ref}",
+        "noteLabel": "translator's note",
+        "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka.",
+        "creditStrijataka": "Passages marked Strijataka are quoted as printed in B. Suryanarain Rao's Strijataka, or Female Horoscopy (1931), a book on women's birth charts. Words in square brackets are ours, not the book's."
+      },
+      "houses": {
+        "h1": "1st house",
+        "h2": "2nd house",
+        "h3": "3rd house",
+        "h4": "4th house",
+        "h5": "5th house",
+        "h6": "6th house",
+        "h7": "7th house",
+        "h8": "8th house",
+        "h9": "9th house",
+        "h10": "10th house",
+        "h11": "11th house",
+        "h12": "12th house"
+      }
     }
   },
   "transits": {

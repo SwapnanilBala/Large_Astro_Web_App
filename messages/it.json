@@ -916,6 +916,96 @@
       "viewsAria": "Viste della linea temporale delle dasha",
       "viewTable": "Tabella",
       "viewTimeline": "Linea temporale"
+    },
+    "now": {
+      "through": "{percent} trascorso",
+      "yearsLeft": "mancano {count} anni",
+      "monthsLeft": "mancano {count} mesi",
+      "daysLeft": "mancano {count} giorni",
+      "seed": "Contato dal tuo nakshatra di nascita, {nakshatra} (pada {pada}), il cui signore, {planet}, apre la sequenza."
+    },
+    "explorer": {
+      "hint": "Scegli un periodo per aprire quelli che contiene, fino a Sookshma. La sua lettura è qui sotto.",
+      "inside": "dentro {planet}",
+      "barLabel": "{planet} {level}, dal {start} al {end}"
+    },
+    "reading": {
+      "kicker": "Lettura del periodo",
+      "statusNow": "In corso",
+      "statusPast": "Già concluso",
+      "statusUpcoming": "Ancora da venire",
+      "window": "{level} · {dates} · {length}",
+      "factsHeading": "Dove si trovano i suoi pianeti nel tuo tema natale",
+      "placed": "In {sign}, la tua {house}: {meaning}",
+      "rules": "Governa: {houses}",
+      "houseWithMeaning": "{house} ({meaning})",
+      "actsThrough": "Non governa alcun segno, quindi dà i risultati di {planet}, in {sign}, la tua {house} ({meaning})",
+      "with": "con {planets}",
+      "retrograde": "retrogrado",
+      "combust": "vicino al Sole",
+      "relationsHeading": "Come ogni livello incontra quello superiore",
+      "invite": "Una lettura di questo periodo scritta per il tuo tema natale: dove si trovano i suoi pianeti e che cosa ne dicono i libri classici.",
+      "read": "Leggi questo periodo",
+      "failed": "Non è stato possibile scrivere la lettura in questo momento.",
+      "limited": "Le letture dei periodi di oggi sono esaurite. Tornano domani.",
+      "limitedSignIn": "Hai usato le letture dei periodi gratuite di oggi. Accedi per leggerne altre.",
+      "empty": "I libri classici non dicono nulla sui pianeti di questo periodo per il tuo tema natale.",
+      "meanings": {
+        "h1": "sé, corpo, atteggiamento",
+        "h2": "denaro, famiglia, parola",
+        "h3": "coraggio, fratelli, brevi viaggi",
+        "h4": "casa, madre, beni",
+        "h5": "figli, studio, creatività",
+        "h6": "rivali, debiti, lavoro quotidiano",
+        "h7": "coppia, matrimonio, contratti",
+        "h8": "cambiamenti improvvisi, denaro condiviso, ciò che è nascosto",
+        "h9": "fortuna, maestri, fede, lunghi viaggi",
+        "h10": "carriera, posizione, vita pubblica",
+        "h11": "guadagni, amici, desideri",
+        "h12": "spese, l'estero, ritiro"
+      },
+      "dignity": {
+        "exalted": "esaltato",
+        "debilitated": "debilitato",
+        "own": "nel suo segno proprio",
+        "friend": "in segno amico",
+        "neutral": "in segno neutrale",
+        "enemy": "in segno nemico"
+      },
+      "kinds": {
+        "self": "{planet} governa questo livello e quello superiore: è il suo stesso sottoperiodo, al massimo della forza.",
+        "same": "{planet} condivide il segno con {parent}: i due lavorano insieme.",
+        "angle": "{planet} è in angolo rispetto a {parent} (4ª, 7ª o 10ª): si sostengono a vicenda.",
+        "trine": "{planet} è in trigono rispetto a {parent} (5ª o 9ª): lavorano in armonia.",
+        "growth": "{planet} e {parent} sono in 3ª e 11ª l'uno dall'altro: un impegno che dà frutto nel tempo.",
+        "adjacent": "{planet} e {parent} sono in 2ª e 12ª l'uno dall'altro: un'influenza vicina, né a favore né contro.",
+        "strained": "{planet} e {parent} sono in 6ª e 8ª l'uno dall'altro: tirano in direzioni opposte."
+      },
+      "note": {
+        "heading": "Che cosa porta in primo piano questo periodo",
+        "pending": "Lettura di questo periodo nel tuo tema natale…",
+        "kicker": "Dai classici",
+        "sourcesLabel": "I passi ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, cap. {ref}",
+        "noteLabel": "nota del traduttore",
+        "credit": "I numeri rimandano ai versi da cui sono tratti, citati come sono stampati nella traduzione inglese del Brihat Jataka di Varahamihira curata da N. Chidambaram Iyer nel 1885.",
+        "creditStrijataka": "I passi segnati Strijataka sono citati come sono stampati in Strijataka, or Female Horoscopy (1931), il libro di B. Suryanarain Rao sui temi natali delle donne. Le parole tra parentesi quadre sono nostre, non del libro."
+      },
+      "houses": {
+        "h1": "1ª casa",
+        "h2": "2ª casa",
+        "h3": "3ª casa",
+        "h4": "4ª casa",
+        "h5": "5ª casa",
+        "h6": "6ª casa",
+        "h7": "7ª casa",
+        "h8": "8ª casa",
+        "h9": "9ª casa",
+        "h10": "10ª casa",
+        "h11": "11ª casa",
+        "h12": "12ª casa"
+      }
     }
   },
   "transits": {

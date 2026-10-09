@@ -916,6 +916,96 @@
       "viewsAria": "Vues de la chronologie des dashas",
       "viewTable": "Tableau",
       "viewTimeline": "Chronologie"
+    },
+    "now": {
+      "through": "{percent} écoulé",
+      "yearsLeft": "encore {count} ans",
+      "monthsLeft": "encore {count} mois",
+      "daysLeft": "encore {count} jours",
+      "seed": "Compté à partir de votre nakshatra de naissance, {nakshatra} (pada {pada}), dont le maître, {planet}, ouvre la séquence."
+    },
+    "explorer": {
+      "hint": "Choisissez une période pour ouvrir celles qu'elle contient, jusqu'à Sookshma. Sa lecture apparaît en dessous.",
+      "inside": "dans {planet}",
+      "barLabel": "{planet} {level}, du {start} au {end}"
+    },
+    "reading": {
+      "kicker": "Lecture de la période",
+      "statusNow": "En cours",
+      "statusPast": "Déjà terminée",
+      "statusUpcoming": "À venir",
+      "window": "{level} · {dates} · {length}",
+      "factsHeading": "La place de ses planètes dans votre thème",
+      "placed": "En {sign}, votre {house} : {meaning}",
+      "rules": "Gouverne : {houses}",
+      "houseWithMeaning": "{house} ({meaning})",
+      "actsThrough": "Ne gouverne aucun signe, il donne donc les résultats de {planet}, en {sign}, votre {house} ({meaning})",
+      "with": "avec {planets}",
+      "retrograde": "rétrograde",
+      "combust": "proche du Soleil",
+      "relationsHeading": "Comment chaque niveau rejoint celui du dessus",
+      "invite": "Une lecture de cette période écrite pour votre thème : la place de ses planètes, et ce qu'en disent les livres classiques.",
+      "read": "Lire cette période",
+      "failed": "La lecture n'a pas pu être rédigée pour le moment.",
+      "limited": "Les lectures de périodes du jour sont épuisées. Elles reviennent demain.",
+      "limitedSignIn": "Vous avez utilisé les lectures de périodes gratuites du jour. Connectez-vous pour en lire davantage.",
+      "empty": "Les livres classiques ne disent rien des planètes de cette période pour votre thème.",
+      "meanings": {
+        "h1": "soi, corps, attitude",
+        "h2": "argent, famille, parole",
+        "h3": "courage, frères et sœurs, petits trajets",
+        "h4": "foyer, mère, biens",
+        "h5": "enfants, études, créativité",
+        "h6": "rivaux, dettes, travail quotidien",
+        "h7": "couple, mariage, contrats",
+        "h8": "changements soudains, argent partagé, ce qui est caché",
+        "h9": "fortune, maîtres, foi, longs voyages",
+        "h10": "carrière, position, vie publique",
+        "h11": "gains, amis, souhaits",
+        "h12": "dépenses, l'étranger, retraite"
+      },
+      "dignity": {
+        "exalted": "en exaltation",
+        "debilitated": "en chute",
+        "own": "en domicile",
+        "friend": "en signe ami",
+        "neutral": "en signe neutre",
+        "enemy": "en signe ennemi"
+      },
+      "kinds": {
+        "self": "{planet} gouverne ce niveau et celui du dessus : c'est sa propre sous-période, à pleine force.",
+        "same": "{planet} partage un signe avec {parent} : les deux travaillent ensemble.",
+        "angle": "{planet} est en angle par rapport à {parent} (4e, 7e ou 10e) : ils se soutiennent.",
+        "trine": "{planet} est en trigone par rapport à {parent} (5e ou 9e) : ils agissent en harmonie.",
+        "growth": "{planet} et {parent} sont en 3e et 11e l'un de l'autre : un effort qui porte ses fruits avec le temps.",
+        "adjacent": "{planet} et {parent} sont en 2e et 12e l'un de l'autre : une influence voisine, ni pour ni contre.",
+        "strained": "{planet} et {parent} sont en 6e et 8e l'un de l'autre : ils tirent en sens contraire."
+      },
+      "note": {
+        "heading": "Ce que cette période met en avant",
+        "pending": "Lecture de cette période dans votre thème…",
+        "kicker": "Selon les classiques",
+        "sourcesLabel": "Les passages ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, ch. {ref}",
+        "noteLabel": "note du traducteur",
+        "credit": "Les numéros renvoient aux versets dont ils sont tirés, cités tels qu'ils sont imprimés dans la traduction anglaise du Brihat Jataka de Varahamihira par N. Chidambaram Iyer (1885).",
+        "creditStrijataka": "Les passages marqués Strijataka sont cités tels qu'ils sont imprimés dans Strijataka, or Female Horoscopy (1931), le livre de B. Suryanarain Rao sur les thèmes natals des femmes. Les mots entre crochets sont de nous, non du livre."
+      },
+      "houses": {
+        "h1": "1re maison",
+        "h2": "2e maison",
+        "h3": "3e maison",
+        "h4": "4e maison",
+        "h5": "5e maison",
+        "h6": "6e maison",
+        "h7": "7e maison",
+        "h8": "8e maison",
+        "h9": "9e maison",
+        "h10": "10e maison",
+        "h11": "11e maison",
+        "h12": "12e maison"
+      }
     }
   },
   "transits": {

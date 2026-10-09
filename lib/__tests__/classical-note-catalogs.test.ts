@@ -15,6 +15,7 @@ import { join } from "node:path";
 import { CLASSICAL_NOTE_KEYS, WOMENS_BOOK_NOTE_KEYS } from "@/lib/knowledge/classical-reading";
 import enStrength from "@/messages/en.strength.json";
 import enLifeAreas from "@/messages/en.life-areas.json";
+import en from "@/messages/en.json";
 import es from "@/messages/es.json";
 import bn from "@/messages/bn.json";
 import hi from "@/messages/hi.json";
@@ -58,6 +59,14 @@ const CARDS = [
     page: ["app", "(desktop)", "insights", "life-areas", "life-areas-client.tsx"],
     prefix: "lifeAreas.classics",
     english: enLifeAreas as Tree,
+    keys: [...CLASSICAL_NOTE_KEYS, ...WOMENS_BOOK_NOTE_KEYS],
+  },
+  {
+    name: "the dasha period's reading",
+    page: ["app", "(desktop)", "insights", "components", "dasha-period-card.tsx"],
+    prefix: "dasha.reading.note",
+    english: en as Tree,
+    /* A woman's period reading can quote the book on women's charts. */
     keys: [...CLASSICAL_NOTE_KEYS, ...WOMENS_BOOK_NOTE_KEYS],
   },
 ];

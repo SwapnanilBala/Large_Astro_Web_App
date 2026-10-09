@@ -916,6 +916,96 @@
       "viewsAria": "Vistas de la línea de tiempo dasha",
       "viewTable": "Tabla",
       "viewTimeline": "Línea de tiempo"
+    },
+    "now": {
+      "through": "{percent} recorrido",
+      "yearsLeft": "quedan {count} años",
+      "monthsLeft": "quedan {count} meses",
+      "daysLeft": "quedan {count} días",
+      "seed": "Contado desde tu nakshatra de nacimiento, {nakshatra} (pada {pada}), cuyo regente, {planet}, abre la secuencia."
+    },
+    "explorer": {
+      "hint": "Elige un periodo para abrir los que contiene, hasta Sookshma. Su lectura aparece debajo.",
+      "inside": "dentro de {planet}",
+      "barLabel": "{planet} {level}, del {start} al {end}"
+    },
+    "reading": {
+      "kicker": "Lectura del periodo",
+      "statusNow": "En curso",
+      "statusPast": "Ya terminó",
+      "statusUpcoming": "Aún por venir",
+      "window": "{level} · {dates} · {length}",
+      "factsHeading": "Dónde están sus planetas en tu carta",
+      "placed": "En {sign}, tu {house}: {meaning}",
+      "rules": "Rige: {houses}",
+      "houseWithMeaning": "{house} ({meaning})",
+      "actsThrough": "No rige ningún signo, así que da los resultados de {planet}, en {sign}, tu {house} ({meaning})",
+      "with": "con {planets}",
+      "retrograde": "retrógrado",
+      "combust": "cerca del Sol",
+      "relationsHeading": "Cómo se encuentra cada nivel con el de arriba",
+      "invite": "Una lectura de este periodo escrita para tu carta: dónde están sus planetas y qué dicen de ellos los libros clásicos.",
+      "read": "Leer este periodo",
+      "failed": "No se pudo escribir la lectura ahora mismo.",
+      "limited": "Las lecturas de periodos de hoy se han agotado. Vuelven mañana.",
+      "limitedSignIn": "Ya usaste las lecturas de periodos gratuitas de hoy. Inicia sesión para leer más.",
+      "empty": "Los libros clásicos no dicen nada sobre los planetas de este periodo para tu carta.",
+      "meanings": {
+        "h1": "uno mismo, cuerpo, actitud",
+        "h2": "dinero, familia, palabra",
+        "h3": "valor, hermanos, viajes cortos",
+        "h4": "hogar, madre, propiedades",
+        "h5": "hijos, estudios, creatividad",
+        "h6": "rivales, deudas, trabajo diario",
+        "h7": "pareja, matrimonio, contratos",
+        "h8": "cambios súbitos, dinero compartido, lo oculto",
+        "h9": "fortuna, maestros, fe, viajes largos",
+        "h10": "carrera, posición, vida pública",
+        "h11": "ganancias, amigos, deseos",
+        "h12": "gastos, el extranjero, retiro"
+      },
+      "dignity": {
+        "exalted": "exaltado",
+        "debilitated": "debilitado",
+        "own": "en su signo propio",
+        "friend": "en signo amigo",
+        "neutral": "en signo neutral",
+        "enemy": "en signo enemigo"
+      },
+      "kinds": {
+        "self": "{planet} rige este nivel y el de arriba: es su propio subperiodo, con toda su fuerza.",
+        "same": "{planet} comparte signo con {parent}: los dos trabajan juntos.",
+        "angle": "{planet} está en un ángulo respecto a {parent} (4.º, 7.º o 10.º): se apoyan mutuamente.",
+        "trine": "{planet} está en trígono respecto a {parent} (5.º o 9.º): trabajan en armonía.",
+        "growth": "{planet} y {parent} están a 3.º y 11.º el uno del otro: un esfuerzo que da fruto con el tiempo.",
+        "adjacent": "{planet} y {parent} están a 2.º y 12.º el uno del otro: una influencia vecina, ni a favor ni en contra.",
+        "strained": "{planet} y {parent} están a 6.º y 8.º el uno del otro: tiran en sentidos opuestos."
+      },
+      "note": {
+        "heading": "Lo que este periodo pone en primer plano",
+        "pending": "Leyendo este periodo en tu carta…",
+        "kicker": "De los clásicos",
+        "sourcesLabel": "Los pasajes ({count})",
+        "sourceRef": "Brihat Jataka {ref}",
+        "sourceRefStrijataka": "Strijataka, cap. {ref}",
+        "noteLabel": "nota del traductor",
+        "credit": "Los números remiten a los versos de los que proceden, citados tal como se imprimieron en la traducción inglesa del Brihat Jataka de Varahamihira hecha por N. Chidambaram Iyer en 1885.",
+        "creditStrijataka": "Los pasajes marcados Strijataka se citan tal como se imprimieron en Strijataka, or Female Horoscopy (1931), el libro de B. Suryanarain Rao sobre las cartas natales de mujeres. Las palabras entre corchetes son nuestras, no del libro."
+      },
+      "houses": {
+        "h1": "Casa 1",
+        "h2": "Casa 2",
+        "h3": "Casa 3",
+        "h4": "Casa 4",
+        "h5": "Casa 5",
+        "h6": "Casa 6",
+        "h7": "Casa 7",
+        "h8": "Casa 8",
+        "h9": "Casa 9",
+        "h10": "Casa 10",
+        "h11": "Casa 11",
+        "h12": "Casa 12"
+      }
     }
   },
   "transits": {

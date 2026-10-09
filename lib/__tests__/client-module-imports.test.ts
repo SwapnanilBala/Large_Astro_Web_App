@@ -37,6 +37,13 @@ const BROWSER_MODULES = [
   /* Planet, sign and nakshatra names in the reader's language: the mobile chart,
      its tables and the reading room's yoga list. */
   "lib/chart-labels.ts",
+  /* The dasha panel's periods, four levels deep, and where a period's planets
+     stand in the chart; the second reads the placement vocabulary for its
+     aspect rule. The passages and the prompt stay in
+     lib/knowledge/dasha-reading.ts, which no client file imports. */
+  "lib/dasha-periods.ts",
+  "lib/dasha-reading-facts.ts",
+  "lib/knowledge/placements.ts",
   /* The sky line above both sign-in forms, worded on the client; the facts
      come from app/(desktop)/login/dailySky.ts, which runs the ephemeris. */
   "lib/daily-sky-line.ts",

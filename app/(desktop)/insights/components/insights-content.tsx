@@ -1676,17 +1676,21 @@ export default function InsightsContent({
           >
             {/* Mounted on arrival, not at idle: its mount fires the paid
                 current-period reading. So the placeholder reserves the height
-                instead. Measured 1,553 / 1,459 / 1,391 / 1,285px at 1024 / 1280 /
-                1440 / 1920 wide -- roughly 1860px - 30vw -- where a 200px default
-                made the Timing tab's jump a 0.66 CLS. This tracks it about 60-100px
-                under, so a chart with less to say still never leaves a gap. */}
-            <LazyPanel minHeight="clamp(1150px, calc(1760px - 30vw), 1500px)">
+                instead, where a 200px default once made the Timing tab's jump a
+                0.66 CLS. Since the four-level redesign (2026-10-08) the panel
+                measures 1,583-1,770 / 1,548-1,668 / 1,562px at 1024 / 1440 /
+                1920 wide over three charts -- the card is shorter when the Maha
+                Dasha and Antardasha share a lord. This tracks the typical chart
+                about 60-80px under, so the shortest still barely leaves a gap. */}
+            <LazyPanel minHeight="clamp(1380px, calc(1805px - 20vw), 1620px)">
               <PanelErrorBoundary panelName="Vimshottari Dashas">
                   <NakshatraDashaPanel
                     nakshatra={payload.chart.nakshatra}
                     dasha={payload.chart.dasha}
                     audit={payload.chart.calculation_audit}
                     planets={payload.chart.planets}
+                    ascendantSign={payload.chart.ascendant.sign}
+                    historyQs={historyQs}
                   />
               </PanelErrorBoundary>
             </LazyPanel>
