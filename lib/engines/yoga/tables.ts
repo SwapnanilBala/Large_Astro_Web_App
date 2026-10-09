@@ -33,6 +33,31 @@ export const PLANET_DEBILITATIONS: Record<string, string> = {
   Mars: "Cancer", Jupiter: "Capricorn", Saturn: "Aries",
 };
 
+/* Natural friendship (naisargika maitri), as Varahamihira gives it (Brihat
+   Jataka 2.15): whom each planet counts a friend and an enemy; everyone else
+   is neutral. Not symmetric -- the Moon counts Mercury a friend, Mercury
+   counts the Moon an enemy. Rahu and Ketu are not in it. The shadbala engine
+   keeps its own copy as Sets. */
+export const NATURAL_FRIENDS: Record<string, string[]> = {
+  Sun: ["Moon", "Mars", "Jupiter"],
+  Moon: ["Sun", "Mercury"],
+  Mars: ["Sun", "Moon", "Jupiter"],
+  Mercury: ["Sun", "Venus"],
+  Jupiter: ["Sun", "Moon", "Mars"],
+  Venus: ["Mercury", "Saturn"],
+  Saturn: ["Mercury", "Venus"],
+};
+
+export const NATURAL_ENEMIES: Record<string, string[]> = {
+  Sun: ["Venus", "Saturn"],
+  Moon: [],
+  Mars: ["Mercury"],
+  Mercury: ["Moon"],
+  Jupiter: ["Mercury", "Venus"],
+  Venus: ["Sun", "Moon"],
+  Saturn: ["Sun", "Moon", "Mars"],
+};
+
 export const NATURAL_BENEFICS = ["Jupiter", "Venus", "Mercury"];
 export const NATURAL_MALEFICS = ["Sun", "Mars", "Saturn", "Rahu", "Ketu"];
 export const CLASSICAL_PLANETS = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];

@@ -2,14 +2,7 @@ import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
-import {
-  chartParamsToBirthInput,
-  getChartPayload,
-  hasAllChartParams,
-  readChartParams,
-} from "@/lib/chart-params";
-import type { ChartApiResponse } from "@/lib/astro-types";
-import { parseBirthSex, type BirthSex } from "@/lib/birth-sex";
+import type { BirthSex } from "@/lib/birth-sex";
 import type { AreaChart } from "@/lib/knowledge/area-classics-reading";
 import {
   ASK_CANDIDATE_LIMIT,
@@ -45,9 +38,9 @@ import {
   screenMessage,
   type ScreenResult,
 } from "@/lib/knowledge/ask-screen";
+import { readerFrom, type Reader } from "@/lib/knowledge/chart-reader";
 import { checkNote, type NoteFailure, type NoteProblem } from "@/lib/knowledge/classical-note-check";
 import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
-import { chartPlacementKeys } from "@/lib/knowledge/placements";
 import { embedQuestion } from "@/lib/knowledge/question-embedding";
 import { passagesForChart, passagesNearQuestion } from "@/lib/knowledge/retrieve";
 import { readingFrom } from "@/lib/knowledge/yoga-classics-reading";
@@ -351,36 +344,6 @@ async function write(request: NextRequest, spending: Spend, asking: Asking, rece
 
 /* ── The chart and the passages ───────────────────────────────────────────── */
 
-type Reader = { payload: ChartApiResponse; chart: AreaChart; sex: BirthSex | undefined };
-
-/** The reader's chart, rebuilt from the birth details in the query: the same cached chart the page was rendered from. */
-function readerFrom(searchParams: URLSearchParams): Reader {
-  const chartParams = readChartParams(Object.fromEntries(searchParams.entries()));
-  if (!hasAllChartParams(chartParams)) {
-    throw new ApiError(ErrorCode.VALIDATION_FAILED, "Complete birth details are required to ask the classics.");
-  }
-  try {
-    chartParamsToBirthInput(chartParams);
-  } catch (error) {
-    throw new ApiError(ErrorCode.VALIDATION_FAILED, error instanceof Error ? error.message : "Invalid birth details.");
-  }
-  const payload = getChartPayload(chartParams);
-  const sex = parseBirthSex(chartParams.birthSex);
-  const chart: AreaChart = {
-    keys: chartPlacementKeys({
-      planets: payload.chart.planets,
-      ascendantSign: payload.chart.ascendant.sign,
-      navamsa: payload.chart.navamsa,
-      moonNakshatra: payload.chart.nakshatra?.name,
-      sex,
-    }),
-    yogas: (payload.chart.yogas ?? [])
-      .filter((yoga) => yoga.present)
-      .map((yoga) => ({ id: yoga.yoga_id, planets: yoga.involved_planets })),
-  };
-  return { payload, chart, sex };
-}
-
 /**
  * The candidates for a question: the search's, nearest first, or when the
  * question cannot be embedded, the chart's own passages for its topics.
@@ -485,7 +448,7 @@ export async function GET(request: NextRequest) {
     if (requested !== null && !isAskQuestionId(requested)) {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, "Unknown question.");
     }
-    const reader = readerFrom(searchParams);
+    const reader = readerFrom(searchParams, "to ask the classics");
 
     if (requested === null) {
       const rows = await passagesForChart({
@@ -522,7 +485,7 @@ export async function POST(request: NextRequest) {
     const input = screenInput(text);
     if (input.length < ASK_TYPED_MIN_LENGTH) throw new ApiError(ErrorCode.VALIDATION_FAILED, "The question is too short.");
 
-    const reader = readerFrom(request.nextUrl.searchParams);
+    const reader = readerFrom(request.nextUrl.searchParams, "to ask the classics");
     const language = languageOf(requestedLanguage);
     const spending: Spend = { spent: false };
 

@@ -81,6 +81,7 @@ export type LlmRouteKey =
   | "/api/chart/yoga-classics"
   | "/api/chart/area-classics"
   | "/api/chart/ask-classics"
+  | "/api/chart/dasha-reading"
   | "/api/chart/life-shifts"
   | "/api/chart/story-prose"
   | "/api/palm-reading"
@@ -375,6 +376,21 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perDay: 700,
     perCallerPerDay: 24,
     perAnonPerDay: 12,
+  },
+  /* The reading for one dasha period the reader picks on the timeline, from
+     a Maha Dasha down to a Sookshma (2026-10-08): Haiku 5.5 at low effort
+     over the period's facts and up to ten cited passages, about the size of
+     an "Ask the classics" answer, so about $0.001 a reading. It is bought by
+     a click on "Read this period", never on mount or on a drill, so this is
+     paid by readers who ask, as the drill-down's chain reading was. The tiers
+     stay the standard four and eight: the sign-in prompt states those numbers
+     for "Dasha readings", and an exception would make it wrong. The total is
+     Ask the classics' 700 for the same reason: $22 if every unit retried on
+     Opus, the ceiling every dear route here is held to. */
+  "/api/chart/dasha-reading": {
+    perDay: 700,
+    perCallerPerDay: LLM_ACCOUNT_PER_DAY,
+    perAnonPerDay: LLM_FREE_PER_DAY,
   },
   /* Sized by where it renders rather than by what one call costs, which is
      the opposite way round from the atlas above it. A call here is cheaper

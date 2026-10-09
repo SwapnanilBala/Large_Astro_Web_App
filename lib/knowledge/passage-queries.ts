@@ -1,4 +1,4 @@
-import { and, arrayContained, arrayOverlaps, cosineDistance, desc, eq, isNotNull, not, or, sql } from "drizzle-orm";
+import { and, arrayContained, arrayOverlaps, cosineDistance, desc, eq, inArray, isNotNull, not, or, sql } from "drizzle-orm";
 import type { NeonHttpDatabase } from "drizzle-orm/neon-http";
 import { knowledgePassages } from "../db/schema";
 import type { PassageRow } from "./yoga-classics-reading";
@@ -131,6 +131,48 @@ export async function queryPassagesNearQuestion(
         appliesCondition(args.chartKeys, args.yogaIds),
       ),
     )
+    .orderBy(desc(similarity))
+    .limit(args.limit);
+  return rows.map(({ similarity: score, ...row }) => ({ ...asPassage(row), similarity: Number(score) }));
+}
+
+/** The topics no period's reading draws on; see LEFT_OUT_TOPICS in dasha-reading.ts, which checks them again. */
+const PERIOD_LEFT_OUT_TOPICS = ["longevity", "health"];
+
+/** The books a period's reading quotes: the Brihat Jataka and the book on women's charts, not the Samhita's palm chapters. */
+const PERIOD_SOURCES = ["brihat-jataka-1885", "strijataka-1931"];
+
+/**
+ * Every shown passage that applies to the chart and could be read into one
+ * of its periods: the same applies-to-this-chart conditions as above, results
+ * of some kind (a topic), none about lifespan or health. Which planet of the
+ * period a passage concerns is decided in dasha-reading.ts, where it can be
+ * tested; a chart has a few dozen of these, so they are all fetched.
+ *
+ * With an embedding of the period's description, each comes back with its
+ * cosine similarity to it, scored exactly for the reason given on
+ * queryPassagesNearQuestion; without one (the embedding failed), unscored.
+ */
+export async function queryPassagesForPeriod(
+  db: PassageDb,
+  args: { chartKeys: string[]; yogaIds: string[]; embedding?: number[] | null; limit: number },
+): Promise<Array<PassageRow & { similarity?: number }>> {
+  const conditions = and(
+    eq(knowledgePassages.withheld, false),
+    inArray(knowledgePassages.source, PERIOD_SOURCES),
+    sql`cardinality(${knowledgePassages.lifeAreas}) > 0`,
+    not(arrayOverlaps(knowledgePassages.lifeAreas, PERIOD_LEFT_OUT_TOPICS)),
+    appliesCondition(args.chartKeys, args.yogaIds),
+  );
+  if (!args.embedding) {
+    const rows = await db.select(COLUMNS).from(knowledgePassages).where(conditions).limit(args.limit);
+    return rows.map(asPassage);
+  }
+  const similarity = sql<number>`1 - (${cosineDistance(knowledgePassages.embedding, args.embedding)})`;
+  const rows = await db
+    .select({ ...COLUMNS, similarity })
+    .from(knowledgePassages)
+    .where(and(conditions, isNotNull(knowledgePassages.embedding)))
     .orderBy(desc(similarity))
     .limit(args.limit);
   return rows.map(({ similarity: score, ...row }) => ({ ...asPassage(row), similarity: Number(score) }));

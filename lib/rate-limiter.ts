@@ -74,6 +74,10 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      the first time. Ten a minute is a reader going through the questions,
      not a loop. */
   "/api/chart/ask-classics": { limit: 10, windowMs: 60_000 },
+  /* One request per "Read this period" click, and a period read once is
+     answered from the panel's own copy after that. Ten a minute is a reader
+     reading their way down a chain and across its neighbours, not a loop. */
+  "/api/chart/dasha-reading": { limit: 10, windowMs: 60_000 },
   /* Same shape as the atlas: asked once per chart on mount and then served
      from cache. Slightly higher because the panel mounts on two pages, so a
      visitor who opens the results page and then /insights/life-shifts

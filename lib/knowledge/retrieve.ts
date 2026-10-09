@@ -3,6 +3,7 @@ import "server-only";
 import { getDb } from "../db/client";
 import {
   queryPassagesForChart,
+  queryPassagesForPeriod,
   queryPassagesNearQuestion,
   queryPassagesTaggedWith,
   type ScoredPassage,
@@ -37,4 +38,14 @@ export function passagesNearQuestion(args: {
   limit: number;
 }): Promise<ScoredPassage[]> {
   return queryPassagesNearQuestion(getDb(), args);
+}
+
+/** The chart's passages a period's reading may draw on, scored against the period when it was embedded; see queryPassagesForPeriod. */
+export function passagesForPeriod(args: {
+  chartKeys: string[];
+  yogaIds: string[];
+  embedding?: number[] | null;
+  limit: number;
+}): Promise<Array<PassageRow & { similarity?: number }>> {
+  return queryPassagesForPeriod(getDb(), args);
 }
