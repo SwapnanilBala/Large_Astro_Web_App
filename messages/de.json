@@ -877,7 +877,8 @@
       "yearsLeft": "noch {count} Jahre",
       "monthsLeft": "noch {count} Monate",
       "daysLeft": "noch {count} Tage",
-      "seed": "Gezählt ab deinem Geburts-Nakshatra {nakshatra} (Pada {pada}), dessen Herrscher {planet} die Abfolge eröffnet."
+      "seed": "Gezählt ab deinem Geburts-Nakshatra {nakshatra} (Pada {pada}), dessen Herrscher {planet} die Abfolge eröffnet.",
+      "template": "Dein Leben wird derzeit von {mahaTheme} (Mahadasha {maha}) geprägt und durch {antarTheme} (Antardasha {antar}) verfeinert."
     },
     "explorer": {
       "hint": "Wähle eine Periode, um die Perioden darin zu öffnen, bis hinunter zu Sookshma. Ihre Deutung steht darunter.",

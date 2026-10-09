@@ -1,5 +1,6 @@
 import { SIGN_ORDER } from "@/lib/constellation-geometry";
 import { NAKSHATRAS } from "@/lib/engines/panchanga";
+import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types";
 
 /**
@@ -17,8 +18,9 @@ import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types
  * scrolls past.
  *
  * Every field here comes from a closed vocabulary -- nine lords, twelve signs,
- * twelve houses, twenty-seven nakshatras, ISO dates -- which is what lets the
- * route validate rather than sanitize. The panel is a client component, so its
+ * twelve houses, twenty-seven nakshatras, ISO dates, and beside them the
+ * language codes COMMENTARY_LANGUAGES names -- which is what lets the route
+ * validate rather than sanitize. The panel is a client component, so its
  * request body is caller-controlled and reaches a prompt; a field that admitted
  * free text would be the one place worth attacking. There is no such field.
  */
@@ -53,10 +55,24 @@ export type CurrentPeriodFacts = {
   progressPercent: number;
 };
 
+/** What the panel sends: the facts, and the language the reading is to be written in. */
+export type CurrentPeriodRequest = CurrentPeriodFacts & { language: string };
+
 export type CurrentPeriodResponse = {
   reading: string;
   cached: boolean;
 };
+
+/**
+ * The language a reading is written in: a code COMMENTARY_LANGUAGES names, or
+ * English, as on the other commentary routes. Not an error, because a page in
+ * a language that table has not caught up with should still get a reading. An
+ * own key only: `in` would take "constructor" and ask for a reading in
+ * "function Object() { [native code] }".
+ */
+export function currentPeriodLanguage(value: unknown): string {
+  return typeof value === "string" && Object.hasOwn(COMMENTARY_LANGUAGES, value) ? value : "en";
+}
 
 /** Both ends of what the panel can send, so the route can say so in one place. */
 export const MIN_CURRENT_PERIOD_STEPS = 2;
@@ -93,10 +109,10 @@ export function currentPeriodPhase(progressPercent: number): string {
 
 /*
  * Worded here rather than in the panel, and deliberately not with the panel's
- * own `formatDate`: that one is locale-tagged, so a French reader's prompt would
- * carry "12 mars 2019" into an English reading. The card and the reading do
- * diverge in wording for non-English locales as a result, which is the same
- * trade every written route here already makes -- the prose is English.
+ * own `formatDate`: that one is locale-tagged, and the facts go to the model in
+ * English whatever the page's language, as on the classical notes. The model
+ * writes the reading in the reader's language from them (see
+ * renderCurrentPeriodFacts).
  */
 function formatPeriodDate(iso: string): string {
   const parsed = new Date(`${iso}T00:00:00`);
@@ -182,10 +198,17 @@ export function buildCurrentPeriodFacts(
 }
 
 /**
- * The user turn. Shared so the route and scripts/effort-compare.mjs cannot
- * measure a different prompt from the one that ships.
+ * The user turn: the facts, then the language. Shared so the route and
+ * scripts/effort-compare.mjs cannot measure a different prompt from the one
+ * that ships.
+ *
+ * The reading is written straight in the reader's language from English
+ * facts, the way the classical notes are, rather than written in English and
+ * translated afterwards. An unknown language code is English.
  */
-export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts): string {
+export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts, languageCode = "en"): string {
+  const code = currentPeriodLanguage(languageCode);
+  const language = COMMENTARY_LANGUAGES[code];
   const rows = facts.stack.map((step, index) => {
     const level = CURRENT_PERIOD_LEVELS[index] ?? `level ${index + 1}`;
     const placement =
@@ -201,6 +224,10 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts): string {
     rows.join("\n"),
     `Birth nakshatra: ${facts.nakshatra.name}, pada ${facts.nakshatra.pada}, ruled by ${facts.nakshatra.lord}.`,
     `The ${innermostLevel} ${currentPeriodPhase(facts.progressPercent)}.`,
+    `Write the paragraph in ${language}.` +
+      /* Last, where the model reads it: handed English facts, Haiku answered
+         a Hindi reader in English on the classical notes until told this. */
+      (code === "en" ? "" : ` Write every sentence in ${language}, although the facts above are in English.`),
   ].join("\n\n");
 }
 
@@ -212,12 +239,14 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts): string {
  * and the chart, but the route takes them from the browser, so a request
  * could pair a real stack with signs and houses of its own choosing and file
  * a reading written about them under the real chart's entry, for every
- * visitor with that stack to be served.
+ * visitor with that stack to be served. And the language, first: the same
+ * stack in two languages is two readings, and a Hindi page must never be
+ * served the English one.
  */
-export function currentPeriodCacheKey(facts: CurrentPeriodFacts): string {
+export function currentPeriodCacheKey(facts: CurrentPeriodFacts, languageCode = "en"): string {
   const stack = facts.stack
     .map((step) => `${step.lord}@${step.startDate}..${step.endDate}@${step.sign ?? "-"}/${step.house ?? "-"}`)
     .join(">");
   const { name, lord, pada } = facts.nakshatra;
-  return `${stack}|${name}/${lord}/${pada}|${currentPeriodPhase(facts.progressPercent)}`;
+  return `${currentPeriodLanguage(languageCode)}:${stack}|${name}/${lord}/${pada}|${currentPeriodPhase(facts.progressPercent)}`;
 }

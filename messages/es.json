@@ -877,7 +877,8 @@
       "yearsLeft": "quedan {count} años",
       "monthsLeft": "quedan {count} meses",
       "daysLeft": "quedan {count} días",
-      "seed": "Contado desde tu nakshatra de nacimiento, {nakshatra} (pada {pada}), cuyo regente, {planet}, abre la secuencia."
+      "seed": "Contado desde tu nakshatra de nacimiento, {nakshatra} (pada {pada}), cuyo regente, {planet}, abre la secuencia.",
+      "template": "En este momento, tu vida está moldeada por {mahaTheme} (Maha Dasha de {maha}) y matizada por {antarTheme} (Antardasha de {antar})."
     },
     "explorer": {
       "hint": "Elige un periodo para abrir los que contiene, hasta Sookshma. Su lectura aparece debajo.",

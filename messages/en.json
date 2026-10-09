@@ -877,7 +877,8 @@
       "yearsLeft": "{count} years left",
       "monthsLeft": "{count} months left",
       "daysLeft": "{count} days left",
-      "seed": "Counted from your birth nakshatra, {nakshatra} (pada {pada}), whose lord {planet} opens the sequence."
+      "seed": "Counted from your birth nakshatra, {nakshatra} (pada {pada}), whose lord {planet} opens the sequence.",
+      "template": "Your life is currently shaped by {mahaTheme} ({maha} Maha Dasha), refined through {antarTheme} ({antar} Antardasha)."
     },
     "explorer": {
       "hint": "Pick a period to open the ones inside it, down to Sookshma. Its reading is below.",

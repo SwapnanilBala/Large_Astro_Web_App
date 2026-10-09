@@ -173,7 +173,8 @@ const CURRENT_PERIOD_LEVELS = ["Maha Dasha", "Antardasha", "Pratyantardasha"];
    lib/current-period-reading.ts. Duplicated for the same reason the other two
    render helpers here are: this file is .mjs and cannot import the TypeScript.
    The SYSTEM_PROMPT is still read from the route, so only the user turn can
-   drift -- check it against the lib if a sweep reads oddly. */
+   drift -- check it against the lib if a sweep reads oddly. Measured in
+   English, so the closing language line is the English one. */
 function renderCurrentPeriodFacts({ stack, nakshatra, phase }) {
   const rows = stack.map((step, index) => {
     const level = CURRENT_PERIOD_LEVELS[index] ?? `level ${index + 1}`;
@@ -186,6 +187,7 @@ function renderCurrentPeriodFacts({ stack, nakshatra, phase }) {
     rows.join("\n"),
     `Birth nakshatra: ${nakshatra.name}, pada ${nakshatra.pada}, ruled by ${nakshatra.lord}.`,
     `The ${innermost} ${phase}.`,
+    "Write the paragraph in English.",
   ].join("\n\n");
 }
 

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   currentPeriodCacheKey,
+  currentPeriodLanguage,
   renderCurrentPeriodFacts,
   type CurrentPeriodFacts,
 } from "../current-period-reading";
+import { COMMENTARY_LANGUAGES } from "../varga-commentary";
 
 /*
  * The current-period reading is cached by its facts and shared by every
@@ -50,5 +52,50 @@ describe("the current-period cache key", () => {
       stack: FACTS.stack.map((step) => ({ lord: step.lord, startDate: step.startDate, endDate: step.endDate })),
     };
     expect(currentPeriodCacheKey(bare)).not.toBe(currentPeriodCacheKey(FACTS));
+  });
+
+  it("separates the same facts in two languages, which the prompt is given", () => {
+    expect(renderCurrentPeriodFacts(FACTS, "hi")).not.toBe(renderCurrentPeriodFacts(FACTS, "en"));
+    expect(currentPeriodCacheKey(FACTS, "hi")).not.toBe(currentPeriodCacheKey(FACTS, "en"));
+    expect(currentPeriodCacheKey(FACTS, "hi")).not.toBe(currentPeriodCacheKey(FACTS, "bn"));
+    expect(currentPeriodCacheKey(FACTS)).toBe(currentPeriodCacheKey(FACTS, "en"));
+  });
+});
+
+/*
+ * The reading is written straight in the reader's language from English
+ * facts, as the classical notes are, and the language is said last: handed
+ * English facts and nothing more, the model answers in English.
+ */
+describe("the current-period reading's language", () => {
+  it("is asked for last, with the reminder the classical notes give", () => {
+    const prompt = renderCurrentPeriodFacts(FACTS, "hi");
+    expect(prompt.startsWith(renderCurrentPeriodFacts(FACTS, "en").replace(/\n\nWrite the paragraph in English\.$/, ""))).toBe(true);
+    expect(prompt.endsWith(
+      "\n\nWrite the paragraph in Hindi. Write every sentence in Hindi, although the facts above are in English.",
+    )).toBe(true);
+  });
+
+  it("asks a German reading to say du", () => {
+    expect(renderCurrentPeriodFacts(FACTS, "de")).toContain('Write the paragraph in German, addressing the reader informally as "du".');
+  });
+
+  it("says English plainly, without the reminder", () => {
+    const prompt = renderCurrentPeriodFacts(FACTS, "en");
+    expect(prompt.endsWith("\n\nWrite the paragraph in English.")).toBe(true);
+    expect(prompt).not.toContain("Write every sentence");
+  });
+
+  it("keeps every language the commentary routes write in", () => {
+    for (const code of Object.keys(COMMENTARY_LANGUAGES)) {
+      expect(currentPeriodLanguage(code)).toBe(code);
+    }
+  });
+
+  it.each(["constructor", "__proto__", "toString", "xx", "", 7, null, undefined])("reads %j as English", (code) => {
+    expect(currentPeriodLanguage(code)).toBe("en");
+    if (typeof code !== "string") return;
+    expect(renderCurrentPeriodFacts(FACTS, code)).toBe(renderCurrentPeriodFacts(FACTS, "en"));
+    expect(currentPeriodCacheKey(FACTS, code)).toBe(currentPeriodCacheKey(FACTS, "en"));
   });
 });

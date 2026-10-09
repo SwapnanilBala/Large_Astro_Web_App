@@ -877,7 +877,8 @@
       "yearsLeft": "encore {count} ans",
       "monthsLeft": "encore {count} mois",
       "daysLeft": "encore {count} jours",
-      "seed": "Compté à partir de votre nakshatra de naissance, {nakshatra} (pada {pada}), dont le maître, {planet}, ouvre la séquence."
+      "seed": "Compté à partir de votre nakshatra de naissance, {nakshatra} (pada {pada}), dont le maître, {planet}, ouvre la séquence.",
+      "template": "En ce moment, votre vie est façonnée par {mahaTheme} (Maha Dasha {maha}) et nuancée par {antarTheme} (Antardasha {antar})."
     },
     "explorer": {
       "hint": "Choisissez une période pour ouvrir celles qu'elle contient, jusqu'à Sookshma. Sa lecture apparaît en dessous.",

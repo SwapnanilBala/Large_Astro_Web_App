@@ -12,6 +12,7 @@ import {
   NAKSHATRA_SET,
   SIGN_SET,
   currentPeriodCacheKey,
+  currentPeriodLanguage,
   renderCurrentPeriodFacts,
   type CurrentPeriodFacts,
   type CurrentPeriodStep,
@@ -31,6 +32,11 @@ import {
  * the pratyantardasha when the chart supplies one. That is what makes one
  * reader's Saturn-Mercury different from another's, and it is three-quarters of
  * the input here.
+ *
+ * Written in the reader's language, which the panel sends as it was when the
+ * panel mounted: the facts go to the model in English and it writes the
+ * reading in Hindi or German directly, as on the classical notes, so the
+ * paragraph under the dial reads in the same language as the card around it.
  *
  * Not /api/chart/dasha-reading, which reads whichever period the reader picks,
  * down to a Sookshma, from the chart and the classical passages, and is paid
@@ -120,8 +126,9 @@ const REQUEST_TIMEOUT_MS = 20_000;
  * This is a mount-time call on the most visited surface in the app, so the
  * cache is doing more work than the drill-down's: every visitor who opens the
  * timing section asks for it, and a reader who navigates away and back asks
- * twice. Keyed on the stack, the nakshatra and the progress *band* -- see
- * lib/current-period-reading.ts for why a band and not the live percentage.
+ * twice. Keyed on the language, the stack, the nakshatra and the progress
+ * *band* -- see lib/current-period-reading.ts for why a band and not the live
+ * percentage.
  *
  * Bounded, so a long-lived server cannot grow it without limit.
  */
@@ -138,8 +145,8 @@ function remember(key: string, value: string) {
 
 /*
  * Frozen, so it is the cacheable prefix. Everything that varies per request --
- * the lords, their placements, the dates, the phase -- goes in the user turn,
- * after the breakpoint.
+ * the lords, their placements, the dates, the phase, the language -- goes in
+ * the user turn, after the breakpoint.
  */
 const SYSTEM_PROMPT = `You write the "what this means for you" paragraph on the current-period card of a Vedic astrology report.
 
@@ -161,6 +168,7 @@ type Body = {
   stack?: unknown;
   nakshatra?: unknown;
   progressPercent?: unknown;
+  language?: unknown;
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -257,8 +265,11 @@ export async function POST(request: NextRequest) {
       nakshatra: parseNakshatra(body.nakshatra),
       progressPercent: parseProgress(body.progressPercent),
     };
+    /* An unknown language is English rather than an error, as on the other
+       commentary routes. */
+    const language = currentPeriodLanguage(body.language);
 
-    const key = currentPeriodCacheKey(facts);
+    const key = currentPeriodCacheKey(facts, language);
     const cached = cache.get(key);
     if (cached) {
       return NextResponse.json({ reading: cached, cached: true });
@@ -309,7 +320,7 @@ export async function POST(request: NextRequest) {
       system: [
         { type: "text", text: SYSTEM_PROMPT, cache_control: { type: "ephemeral" } },
       ],
-      messages: [{ role: "user", content: renderCurrentPeriodFacts(facts) }],
+      messages: [{ role: "user", content: renderCurrentPeriodFacts(facts, language) }],
     });
 
     /*
@@ -324,6 +335,7 @@ export async function POST(request: NextRequest) {
       model: MODEL,
       depth: facts.stack.length,
       placements: facts.stack.filter((step) => step.sign).length,
+      language,
       stopReason: response.stop_reason,
       inputTokens: response.usage.input_tokens,
       outputTokens: response.usage.output_tokens,

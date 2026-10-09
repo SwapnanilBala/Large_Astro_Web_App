@@ -9,7 +9,7 @@ import { useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import { DashaNow } from "./dasha-now";
 import { DashaPeriodCard } from "./dasha-period-card";
 import { DashaTimeline } from "./dasha-timeline";
-import { DASHA_LORD_THEMES } from "./dasha-themes";
+import { themeLabelFor } from "./dasha-themes";
 import { useCurrentPeriodReading } from "./use-current-period-reading";
 import { useDashaReading } from "./use-dasha-reading";
 import styles from "./nakshatra-dasha-panel.module.css";
@@ -97,18 +97,24 @@ export default function NakshatraDashaPanel({
    * Above everything that renders because this is a hook, and it is the one
    * call in this panel that fires without a click, so it is the one worth
    * reading twice before changing: whatever is passed here is bought, once per
-   * mount, for every visitor who opens the timing section.
+   * mount, for every visitor who opens the timing section, in the language the
+   * page has when it mounts -- the hook reads that itself, once.
    */
   const antardashaProgress = nowPath[1] ? progressAt(nowPath[1], now) * 100 : 0;
   const currentPeriodReading = useCurrentPeriodReading(dasha, nakshatra, planets, antardashaProgress);
-  const mahaTheme = DASHA_LORD_THEMES[dasha.current_dasha];
-  const antarTheme = DASHA_LORD_THEMES[dasha.current_antardasha];
+  const mahaTheme = themeLabelFor(dasha.current_dasha, t);
+  const antarTheme = themeLabelFor(dasha.current_antardasha, t);
   /* The template stays the fallback rather than the thing replaced: it is on
      screen from the first paint, and it is what remains if the reading never
-     arrives. */
+     arrives, or arrives in a language the reader has since left. */
   const templateSummary =
     mahaTheme && antarTheme
-      ? `Your life is currently shaped by ${mahaTheme.theme} (${dasha.current_dasha} Maha Dasha), refined through ${antarTheme.theme} (${dasha.current_antardasha} Antardasha). Key themes include ${mahaTheme.keywords.slice(0, 3).join(", ")} blended with ${antarTheme.keywords.slice(0, 3).join(", ")}.`
+      ? t("dasha.now.template", {
+          mahaTheme,
+          maha: planetName(dasha.current_dasha, t),
+          antarTheme,
+          antar: planetName(dasha.current_antardasha, t),
+        })
       : null;
 
   const pick = (span: DashaSpan) => setFocus((previous) => [...previous.slice(0, span.level - 1), span]);

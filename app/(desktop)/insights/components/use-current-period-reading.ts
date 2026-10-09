@@ -4,14 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types";
 import {
   buildCurrentPeriodFacts,
+  type CurrentPeriodRequest,
   type CurrentPeriodResponse,
 } from "@/lib/current-period-reading";
+import { useTranslation } from "@/lib/i18n-context";
 
 export type CurrentPeriodReadingState = "pending" | "ready" | "failed";
 
 export type CurrentPeriodReading = {
   state: CurrentPeriodReadingState;
-  /** The written reading, or null until `ready`. */
+  /** The written reading, or null until `ready`, and null in a language other than the one it was written in. */
   reading: string | null;
 };
 
@@ -37,6 +39,19 @@ export type CurrentPeriodReading = {
  *   worse: it is a field off a payload object that any parent re-render can
  *   hand back by a new identity, and the current stack cannot change without
  *   a navigation, which unmounts this anyway.
+ *
+ * THE LANGUAGE IS TAKEN ONCE TOO, at mount, and the reading is written in it.
+ * A switch afterwards does not ask again: that would buy a second reading to
+ * re-word one already paid for, on the most visited surface in the app. The
+ * new language applies on the next visit. Until then the card shows its
+ * template, which follows the language as it changes, rather than a paragraph
+ * in the language the reader has just left; switching back brings the reading
+ * back. The period readings below it behave the same way (useDashaReading).
+ *
+ * Taken at mount is late enough. The language provider starts every visitor
+ * at English and adopts their stored choice in the render after hydration;
+ * this hook only mounts after that, because the panel is loaded through
+ * dynamic(..., { ssr: false }) inside a LazyPanel.
  *
  * DELIBERATELY NOT ABORTED ON UNMOUNT, which is the interesting half. An
  * AbortController does not survive contact with a *latched* `startedRef`: in
@@ -82,6 +97,7 @@ export function useCurrentPeriodReading(
   planets: PlanetPosition[] | undefined,
   progressPercent: number,
 ): CurrentPeriodReading {
+  const { language } = useTranslation();
   const [state, setState] = useState<CurrentPeriodReadingState>("pending");
   const [reading, setReading] = useState<string | null>(null);
   const startedRef = useRef(false);
@@ -92,17 +108,20 @@ export function useCurrentPeriodReading(
   const [facts] = useState(() =>
     buildCurrentPeriodFacts(dasha, nakshatra, planets, progressPercent),
   );
+  /* And the language, for the reasons in the note above. */
+  const [requestLanguage] = useState(language);
 
   useEffect(() => {
     if (!facts || startedRef.current) return;
     startedRef.current = true;
 
+    const body: CurrentPeriodRequest = { ...facts, language: requestLanguage };
     void (async () => {
       try {
         const response = await fetch("/api/chart/current-period", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(facts),
+          body: JSON.stringify(body),
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = (await response.json()) as Partial<CurrentPeriodResponse>;
@@ -117,8 +136,11 @@ export function useCurrentPeriodReading(
         setState("failed");
       }
     })();
-  }, [facts]);
+  }, [facts, requestLanguage]);
 
-  /* No facts means nothing to ask for, which reads the same as a failure. */
-  return { state: facts ? state : "failed", reading };
+  /* No facts means nothing to ask for, which reads the same as a failure. So
+     does a reading in a language the page has left: there is none coming in
+     this one. */
+  if (!facts || language !== requestLanguage) return { state: "failed", reading: null };
+  return { state, reading };
 }
