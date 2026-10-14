@@ -1,6 +1,6 @@
 /**
  * The reading for one Vimshottari period: which passages a period's planets
- * get, the documents and facts the model is sent, and the instruction. The
+ * get, the numbered passages and facts the model is sent, and the instruction. The
  * route and the network are not involved.
  */
 import { describe, expect, it } from "vitest";
@@ -14,15 +14,19 @@ import {
   PERIOD_PARTS_PER_VERSE,
   PERIOD_PASSAGE_LIMIT,
   PERIOD_PER_LORD_LIMIT,
+  COPY_RUN_WORDS,
   concernFor,
+  copiedPassages,
   dashaReadingInstruction,
   describeLord,
   describePeriod,
   durationOf,
+  endsMidSentence,
   periodCanonical,
   periodDocumentGroups,
-  periodDocuments,
+  periodPassageListing,
   periodQueryText,
+  readingFromMarkers,
   selectPeriodPassages,
   usableForPeriod,
   voicesOf,
@@ -202,17 +206,53 @@ describe("what the model is sent", () => {
     expect(groups[0].conditions).toEqual(["Saturn.sign.Scorpio"]);
   });
 
-  it("as citable documents that name the planet and its levels, in the app's wording", () => {
-    const documents = periodDocuments(groups, FACTS);
-    expect(documents[0].title).toBe("The Brihat Jataka of Varaha Mihira: on Saturn");
-    expect(documents[0].context).toContain("Chosen for Saturn, the Maha Dasha lord of this period");
-    expect(documents[0].context).toContain("Saturn in Scorpio");
-    expect(documents[2].context).toContain("whose results it gives through Mars");
-    const blocks = (documents[0].source as { content: { text: string }[] }).content.map((block) => block.text);
-    expect(blocks[0]).toContain("[partner]");
-    expect(blocks[0]).not.toMatch(/\bwife\b/);
-    expect(blocks[1].startsWith(NOTE_PREFIX)).toBe(true);
-    expect(documents.every((document) => document.citations?.enabled)).toBe(true);
+  it("as numbered passages under the planet and book they were chosen for, in the app's wording", () => {
+    const listing = periodPassageListing(groups, FACTS);
+    const lines = listing.split("\n");
+    expect(lines[0]).toBe(
+      "Chosen for Saturn, the Maha Dasha lord of this period, from The Brihat Jataka of Varaha Mihira. Conditions met in the chart: Saturn in Scorpio.",
+    );
+    expect(lines[1]).toBe("[1] (18.17) [A person born with Saturn in sign Scorpio] will have a mean [partner].");
+    expect(lines[2]).toBe(`[2] (18.17) ${NOTE_PREFIX}Other authorities differ.`);
+    expect(listing).not.toMatch(/\bwife\b/);
+    expect(listing).toContain("[3] (9) Sani in 2");
+    expect(listing).toContain("whose results it gives through Mars");
+    expect(listing.match(/^\[\d+\]/gm)).toEqual(["[1]", "[2]", "[3]", "[4]"]);
+  });
+
+  it("reads the model's marks back as sources, numbered in the order the reading first cites them", () => {
+    const { reading, strayMarks } = readingFromMarkers(
+      "Money and **talk** come first [3]. The book links this to detachment [1, 3], and to [9] nothing.",
+      groups,
+    );
+    expect(strayMarks).toBe(1);
+    expect(reading.sources.map(({ number, book, ref }) => `${number} ${book} ${ref}`)).toEqual([
+      "1 strijataka-1931 9",
+      "2 brihat-jataka-1885 18.17",
+    ]);
+    expect(reading.segments).toEqual([
+      { text: "Money and talk come first", sources: [1] },
+      { text: ". The book links this to detachment", sources: [2, 1] },
+      { text: ", and to", sources: [] },
+      { text: " nothing.", sources: [] },
+    ]);
+    expect(readingFromMarkers("No marks at all.", groups).reading.sources).toEqual([]);
+  });
+
+  it("finds a passage copied word for word, in the book's words or the app's", () => {
+    const passages = groups.flatMap((group) => group.passages);
+    const copied = (text: string) => copiedPassages({ segments: [{ text, sources: [1] }], sources: [] }, passages);
+    expect(copied("The book says a person born with Saturn in sign Scorpio will have a mean partner here.")).toHaveLength(1);
+    expect(copied("The Brihat Jataka ties Saturn in Scorpio to a cooler kind of partnership.")).toEqual([]);
+    expect(COPY_RUN_WORDS).toBe(8);
+  });
+
+  it("knows a reading that stops mid-sentence, in any script", () => {
+    const ends = (text: string) => endsMidSentence({ segments: [{ text, sources: [] }], sources: [] });
+    expect(ends("It ends well.")).toBe(false);
+    expect(ends("यह अवधि धन पर केंद्रित है।")).toBe(false);
+    expect(ends("Contracts need watching. The")).toBe(true);
+    expect(ends("")).toBe(true);
   });
 
   it("with the period, its planets' places and relations, and only the houses they name", () => {
@@ -227,6 +267,9 @@ describe("what the model is sent", () => {
     expect(text).toContain("Rahu (Pratyantardasha) is 6th from Mercury (Antardasha), 6th and 8th from each other, so the two are at odds.");
     expect(text).toContain(`the 7th: ${HOUSE_MEANINGS[7]}`);
     expect(text).not.toContain("the 3rd:");
+    expect(text).toContain("What makes this period itself:\nHouses several of the period's planets touch");
+    expect(text).toContain("the 2nd (Saturn and Mercury)");
+    expect(text).toContain("What the period's own planet, Mercury, brings that the levels above do not touch: the 7th.");
     expect(describeLord(FACTS.lords[0])).not.toContain("aspected");
   });
 
@@ -246,6 +289,7 @@ describe("what the model is sent", () => {
   it("closes with the language, the reader and the reminders, and asks for one paragraph for a Maha Dasha alone", () => {
     const english = dashaReadingInstruction(PATH, FACTS, "now", "female");
     expect(english).toContain("Write the reading for this period in English: two short paragraphs");
+    expect(english).toContain("Do not recite the planets' signs, houses or rulerships");
     expect(english).toContain("The reader is a woman.");
     expect(english).toContain(CLOSING_REMINDERS);
     expect(english).not.toContain("Write every sentence in");
@@ -264,8 +308,12 @@ describe("what the model is sent", () => {
 });
 
 describe("the prompt", () => {
-  it("carries the rules every classical note follows", () => {
+  it("carries the rules every classical note follows, asks for marks, and names the stock phrases", () => {
     expect(DASHA_READING_SYSTEM_PROMPT).toContain(CLASSICAL_NOTE_RULES);
+    expect(DASHA_READING_SYSTEM_PROMPT).toContain("like [2] or [1,3]");
+    expect(DASHA_READING_SYSTEM_PROMPT).toContain('"backdrop", "sets the stage"');
+    /* The shared rules still say "its document's title"; each group of passages names its book. */
+    expect(DASHA_READING_SYSTEM_PROMPT.replace(CLASSICAL_NOTE_RULES, "")).not.toMatch(/\bdocuments?\b/);
   });
 
   it("says what the houses stand for inside the content line", () => {

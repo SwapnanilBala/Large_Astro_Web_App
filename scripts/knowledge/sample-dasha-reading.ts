@@ -18,7 +18,8 @@
  * chapters on women's charts. The place defaults to Bengaluru (+5:30); --lat,
  * --lng and --tz (minutes east of UTC) choose another. Each period read
  * without --dry is one paid call on the route's model (lib/llm-models.ts), and
- * the reading is put through the route's content check in that language.
+ * the reading is put through the route's content check in that language, and
+ * the check for passages copied word for word.
  */
 
 import Anthropic from "@anthropic-ai/sdk";
@@ -36,16 +37,18 @@ import { withoutHeadings } from "../../lib/knowledge/ask-classics-reading";
 import { checkNote } from "../../lib/knowledge/classical-note-check";
 import {
   DASHA_READING_SYSTEM_PROMPT,
+  copiedPassages,
   dashaReadingInstruction,
+  endsMidSentence,
   periodDocumentGroups,
-  periodDocuments,
+  periodPassageListing,
   periodQueryText,
+  readingFromMarkers,
   selectPeriodPassages,
 } from "../../lib/knowledge/dasha-reading";
 import { KNOWLEDGE_EMBEDDING_DIMENSIONS, KNOWLEDGE_EMBEDDING_MODEL } from "../../lib/knowledge/embedding";
 import { queryPassagesForPeriod } from "../../lib/knowledge/passage-queries";
 import { chartPlacementKeys } from "../../lib/knowledge/placements";
-import { readingFrom } from "../../lib/knowledge/yoga-classics-reading";
 import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
 
 config({ path: ".env.local", quiet: true });
@@ -144,19 +147,37 @@ async function main() {
     const started = Date.now();
     const response = await client.messages.create({
       model: CHART_MODEL,
-      max_tokens: 3000,
+      max_tokens: 6000,
       output_config: { effort: CHART_EFFORT },
       system: [{ type: "text", text: DASHA_READING_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
-      messages: [{ role: "user", content: [...periodDocuments(groups, facts), { type: "text", text: instruction }] }],
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: `The passages:\n${periodPassageListing(groups, facts)}` },
+            { type: "text", text: instruction },
+          ],
+        },
+      ],
     });
-    const reading = withoutHeadings(readingFrom(response.content, groups));
+    const written = response.content.map((block) => (block.type === "text" ? block.text : "")).join("");
+    const reading = withoutHeadings(readingFromMarkers(written, groups).reading);
     const text = reading.segments.map((s) => s.text + (s.sources.length ? `[${s.sources.join(",")}]` : "")).join("");
     const words = text.replace(/\[[\d,]+\]/g, "").split(/\s+/).filter(Boolean).length;
     const check = checkNote(reading, language);
+    const copied = copiedPassages(reading, groups.flatMap((group) => group.passages));
     console.log(
       `${response.model} | ${((Date.now() - started) / 1000).toFixed(1)}s | ${response.usage.input_tokens} in + ` +
         `${response.usage.output_tokens} out + ${response.usage.cache_read_input_tokens ?? 0} cached | ${response.stop_reason} | ${words} words | ` +
-        (reading.sources.length === 0 ? "UNCITED" : check.problems.length > 0 ? `CHECK FAILS ${JSON.stringify(check.problems)}` : "passes"),
+        (reading.sources.length === 0
+          ? "UNCITED"
+          : endsMidSentence(reading)
+            ? "CUT SHORT"
+            : check.problems.length > 0
+            ? `CHECK FAILS ${JSON.stringify(check.problems)}`
+            : copied.length > 0
+              ? `COPIED ${JSON.stringify(copied)}`
+              : "passes"),
     );
     console.log(text);
     for (const source of reading.sources) console.log(`   [${source.number}] ${source.book} ${source.ref}: ${source.text.slice(0, 90)}`);

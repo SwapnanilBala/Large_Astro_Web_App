@@ -88,20 +88,8 @@ const ROWS = PAYLOAD.chart.planets.map((planet, index) =>
   passage(`18.${index + 1}`, { placements: [`${planet.name}.sign.${planet.sign}`] }),
 );
 
-const cited = (text: string) => ({
-  type: "text",
-  text,
-  citations: [
-    {
-      type: "content_block_location",
-      document_index: 0,
-      start_block_index: 0,
-      end_block_index: 1,
-      cited_text: "The verse",
-      document_title: "Brihat Jataka",
-    },
-  ],
-});
+/* The model marks a classical result with its passage's number, which the route turns into a source. */
+const marked = (text: string) => ({ type: "text", text });
 
 const answer = (...content: unknown[]) => ({
   stop_reason: "end_turn",
@@ -126,7 +114,7 @@ beforeEach(async () => {
   mocks.budget.mockResolvedValue({ allowed: true, remaining: 100, callerRemaining: 3 });
   mocks.embed.mockResolvedValue(new Array(1024).fill(0.01));
   mocks.forPeriod.mockResolvedValue(ROWS);
-  mocks.create.mockResolvedValue(answer(cited("With this planet in your chart, the Brihat Jataka ties the period to steady work.")));
+  mocks.create.mockResolvedValue(answer(marked("With this planet in your chart, the Brihat Jataka ties the period to steady work [1].")));
   vi.spyOn(console, "info").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});
   ({ POST } = await import("../route"));
@@ -151,8 +139,10 @@ describe("reading a period", () => {
     const sent = mocks.create.mock.calls[0][0];
     expect(sent.model).toBe("claude-haiku-5-5");
     expect(sent.output_config).toEqual({ effort: "low" });
+    expect(sent.max_tokens).toBe(6000);
     const content = sent.messages[0].content;
-    expect(content.filter((block: { type: string }) => block.type === "document").length).toBeGreaterThan(0);
+    expect(content[0].text).toMatch(/^The passages:\nChosen for /);
+    expect(content[0].text).toContain("[1] (18.");
     const instruction = content[content.length - 1].text as string;
     expect(instruction).toContain(`the Antardasha of ${LORDS[1]}`);
     expect(instruction).toContain("The chart rises in Libra");
@@ -190,8 +180,8 @@ describe("reading a period", () => {
 
   it("asks once more on Opus when the first reading fails its check", async () => {
     mocks.create
-      .mockResolvedValueOnce(answer(cited("Your wife will be devoted to you.")))
-      .mockResolvedValueOnce(answer(cited("Your partner is devoted to you, the Brihat Jataka holds.")));
+      .mockResolvedValueOnce(answer(marked("Your wife will be devoted to you [1].")))
+      .mockResolvedValueOnce(answer(marked("Your partner is devoted to you, the Brihat Jataka holds [1].")));
     const response = await POST(request({ lords: LORDS, start: START }));
     expect(response.status).toBe(200);
     expect(mocks.create).toHaveBeenCalledTimes(2);
@@ -203,6 +193,36 @@ describe("reading a period", () => {
     mocks.create.mockResolvedValue(answer({ type: "text", text: "An uncited reading." }));
     const response = await POST(request({ lords: LORDS, start: START }));
     expect(response.status).toBe(502);
+  });
+
+  it("asks once more on Opus when the reading copies a verse word for word", async () => {
+    const verse = "A person born so will be indifferent to work and will be merciless.";
+    mocks.forPeriod.mockResolvedValue(ROWS.map((row) => ({ ...row, text: verse })));
+    mocks.create
+      .mockResolvedValueOnce(answer(marked(`The book says a person born so will be indifferent to work and will be merciless [1].`)))
+      .mockResolvedValueOnce(answer(marked("The book ties this placement to a cool, detached attitude to work [1].")));
+    const response = await POST(request({ lords: LORDS, start: START }));
+    expect(response.status).toBe(200);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+    expect(mocks.create.mock.calls[1][0].model).toBe("claude-opus-5-5");
+    expect((await response.json()).reading.segments[0].text).toContain("cool, detached attitude");
+  });
+
+  it("asks once more when the reading stops mid-sentence", async () => {
+    mocks.create
+      .mockResolvedValueOnce(answer(marked("Money and talk at home come first [1]. The")))
+      .mockResolvedValueOnce(answer(marked("Money and talk at home come first [1].")));
+    const response = await POST(request({ lords: LORDS, start: START }));
+    expect(response.status).toBe(200);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+  });
+
+  it("drops a mark for a passage it was not given", async () => {
+    mocks.create.mockResolvedValue(answer(marked("Steady work comes first [1], and more [42].")));
+    const response = await POST(request({ lords: LORDS, start: START }));
+    const body = await response.json();
+    expect(body.reading.sources).toHaveLength(1);
+    expect(JSON.stringify(body.reading.segments)).not.toContain("42");
   });
 });
 

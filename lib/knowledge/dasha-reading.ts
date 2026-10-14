@@ -1,18 +1,33 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import type { BirthSex } from "../birth-sex";
-import type { DashaLevel, DashaSpan, DashaStatus } from "../dasha-periods";
+import type { DashaSpan, DashaStatus } from "../dasha-periods";
 import { spanDays } from "../dasha-periods";
-import { housesRuledBy, isNode, type LordFacts, type LordRelation, type PeriodFacts } from "../dasha-reading-facts";
+import { housesRuledBy, isNode, type LordFacts, type PeriodFacts } from "../dasha-reading-facts";
+import {
+  HOUSE_MEANINGS,
+  LEVEL_NAMES,
+  STOCK_PHRASES,
+  describeFocus,
+  describeLord,
+  describeRelation,
+  housesNamed,
+  houseList,
+  levelList,
+  nameList,
+  ordinal,
+} from "../dasha-period-words";
 import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import { COMMENTARY_LANGUAGES } from "../varga-commentary";
 import { READER_LINES, countedByAnyArea, describePlacement, type AreaChart, type ChartYoga } from "./area-classics-reading";
 import { heldPlacements, placementsHold } from "./placements";
+import type { ClassicalReading, ClassicalSource } from "./classical-reading";
 import { BRIHAT_JATAKA_1885, KNOWLEDGE_SOURCES, STRIJATAKA_1931 } from "./sources";
+import { stripInlineMarkdown } from "../prompt-input";
 import {
   CLASSICAL_NOTE_RULES,
   CLOSING_REMINDERS,
   NOTE_PREFIX,
   modelText,
+  passageRef,
   speaksToChart,
   type PassageRow,
 } from "./yoga-classics-reading";
@@ -47,32 +62,7 @@ export const PERIOD_PER_LORD_LIMIT = 5;
 /** Parts of one verse a planet may take: a verse split into its results is still one voice. */
 export const PERIOD_PARTS_PER_VERSE = 2;
 
-export const LEVEL_NAMES: Record<DashaLevel, string> = {
-  1: "Maha Dasha",
-  2: "Antardasha",
-  3: "Pratyantardasha",
-  4: "Sookshma Dasha",
-};
-
-/**
- * What each house stands for, as the reading may interpret it. Worded inside
- * the content line: the 6th as rivals and daily work rather than illness, the
- * 8th as sudden change rather than lifespan, the 12th as expenses and retreat.
- */
-export const HOUSE_MEANINGS: Record<number, string> = {
-  1: "the self, the body and vitality, one's outlook",
-  2: "money and savings, family, speech, food",
-  3: "courage and initiative, siblings, short journeys, communication",
-  4: "home and mother, property and vehicles, inner contentment",
-  5: "children, intelligence and learning, creativity, romance",
-  6: "rivals and competition, debts, daily work and service",
-  7: "partnership and marriage, contracts, dealings with others",
-  8: "sudden change, shared and inherited money, research, what is hidden",
-  9: "fortune, father and teachers, faith, long journeys, higher learning",
-  10: "career and standing, authority, public work",
-  11: "gains and income, friends and networks, wishes fulfilled",
-  12: "expenses, foreign places, retreat and rest, letting go",
-};
+export { HOUSE_MEANINGS, LEVEL_NAMES, describeLord, describeRelation };
 
 /** Topics a period's reading never draws on: lifespan, and health, which the content line all but closes. */
 const LEFT_OUT_TOPICS = new Set(["longevity", "health"]);
@@ -91,12 +81,6 @@ export const CONCERNS = ["placement", "yoga", "lordship", "aspect"] as const;
 export type Concern = (typeof CONCERNS)[number];
 
 export type PeriodPassage = { passage: PeriodCandidate; lord: string; concern: Concern };
-
-const ordinal = (n: number) => {
-  const tens = n % 100;
-  if (tens >= 11 && tens <= 13) return `${n}th`;
-  return `${n}${({ 1: "st", 2: "nd", 3: "rd" } as Record<number, string>)[n % 10] ?? "th"}`;
-};
 
 function bookOrder(a: PassageRow, b: PassageRow): number {
   return bookRank(a.source) - bookRank(b.source) || a.chapter - b.chapter || a.verse - b.verse || a.part - b.part;
@@ -255,41 +239,94 @@ export function periodDocumentGroups(
   });
 }
 
-const levelList = (levels: readonly DashaLevel[]) =>
-  levels.map((level) => LEVEL_NAMES[level]).join(" and ");
-
 /**
- * One citable document per planet and book: each passage a content block, so
- * a citation names whole passages; which planet they were chosen for, and the
- * chart conditions they rest on, go in `context`, which the model reads but
- * cannot cite. Every string here comes from the corpus, the catalogue, the
- * chart or lib/knowledge/sources.ts, never from the browser.
+ * The chosen passages as the model reads them: numbered, grouped by the
+ * planet each was chosen for and its book, each group saying which chart
+ * conditions and yogas its passages rest on. The model marks a classical
+ * result with its passage's number, [2] or [1,3], and readingFromMarkers turns
+ * the marks into the reading's sources.
+ *
+ * Numbered text rather than the citations feature, measured on 2026-10-14.
+ * With citations on, Haiku 5.5 now and then wrote its paraphrase and then the
+ * cited verse itself as the next block -- "... doing other people's work" and
+ * then "will be independent, fierce, poor, will do the work of other people"
+ * -- or made the verse the object of its sentence ("the book holds that [the
+ * verse]"), in about half of sixteen readings. Asked to mark numbers instead,
+ * eight readings of the same periods pasted nothing and read the same.
+ *
+ * Every string here comes from the corpus, the catalogue, the chart or
+ * lib/knowledge/sources.ts, never from the browser.
  */
-export function periodDocuments(groups: readonly PeriodDocumentGroup[], facts: PeriodFacts): Anthropic.DocumentBlockParam[] {
-  return groups.map(({ lord, source, passages, conditions, yogaNames }) => {
-    const book = KNOWLEDGE_SOURCES[source] ?? BRIHAT_JATAKA_1885;
-    const lordFacts = facts.lords.find((entry) => entry.lord === lord);
-    const voices = lordFacts ? voicesOf(lordFacts).filter((voice) => voice !== lord) : [];
-    return {
-      type: "document",
-      title: `${book.title}: on ${lord}`,
-      context:
+export function periodPassageListing(groups: readonly PeriodDocumentGroup[], facts: PeriodFacts): string {
+  let number = 0;
+  return groups
+    .map(({ lord, source, passages, conditions, yogaNames }) => {
+      const book = KNOWLEDGE_SOURCES[source] ?? BRIHAT_JATAKA_1885;
+      const lordFacts = facts.lords.find((entry) => entry.lord === lord);
+      const voices = lordFacts ? voicesOf(lordFacts).filter((voice) => voice !== lord) : [];
+      const header =
         `Chosen for ${lord}, the ${lordFacts ? levelList(lordFacts.levels) : "period"} lord of this period` +
         (voices.length > 0 ? `, whose results it gives through ${voices.join(" and ")}; the passages may concern them` : "") +
-        ". Each passage's condition holds in the reader's chart. " +
-        (conditions.length > 0 ? `Conditions met by placement: ${conditions.map(describePlacement).join("; ")}. ` : "") +
-        (yogaNames.length > 0 ? `Yogas the chart has that passages speak of: ${yogaNames.join(", ")}. ` : "") +
-        `The passages are from ${book.described}.`,
-      source: {
-        type: "content",
-        content: passages.map((passage) => ({
-          type: "text",
-          text: passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text),
-        })),
-      },
-      citations: { enabled: true },
-    };
-  });
+        `, from ${book.title}. ` +
+        (conditions.length > 0 ? `Conditions met in the chart: ${conditions.map(describePlacement).join("; ")}. ` : "") +
+        (yogaNames.length > 0 ? `Yogas the chart has that passages speak of: ${yogaNames.join(", ")}.` : "");
+      const lines = passages.map((passage) => {
+        number += 1;
+        const text = passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text);
+        return `[${number}] (${passageRef(passage)}) ${text}`;
+      });
+      return [header.trim(), ...lines].join("\n");
+    })
+    .join("\n\n");
+}
+
+/** A source mark the model writes after the words it supports: [2] or [1, 3]. */
+const MARK = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
+
+/**
+ * The reading the model wrote, with its marks turned into sources: segments of
+ * text, each carrying the numbers of the passages after its words, the sources
+ * numbered in the order the reading first cites them, as on the other
+ * classical notes. A mark for a passage it was not given is dropped and
+ * counted.
+ */
+export function readingFromMarkers(
+  text: string,
+  groups: readonly PeriodDocumentGroup[],
+): { reading: ClassicalReading; strayMarks: number } {
+  const passages = groups.flatMap((group) => group.passages);
+  const numbers = new Map<number, number>();
+  const sources: ClassicalSource[] = [];
+  const segments: ClassicalReading["segments"] = [];
+  let strayMarks = 0;
+  const clean = stripInlineMarkdown(text);
+  let cursor = 0;
+  for (const match of clean.matchAll(MARK)) {
+    const before = clean.slice(cursor, match.index).replace(/[ \t]+$/, "");
+    cursor = (match.index ?? 0) + match[0].length;
+    const cited: number[] = [];
+    for (const given of match[1].split(",").map((value) => Number(value.trim()))) {
+      const passage = passages[given - 1];
+      if (!passage) {
+        strayMarks += 1;
+        continue;
+      }
+      let number = numbers.get(given);
+      if (number === undefined) {
+        number = sources.length + 1;
+        numbers.set(given, number);
+        sources.push({ number, book: passage.source, ref: passageRef(passage), kind: passage.kind, text: passage.text });
+      }
+      if (!cited.includes(number)) cited.push(number);
+    }
+    segments.push({ text: before, sources: cited });
+  }
+  const rest = clean.slice(cursor);
+  if (rest.length > 0) segments.push({ text: rest, sources: [] });
+  return {
+    reading: { segments: segments.filter((segment) => segment.text.length > 0 || segment.sources.length > 0), sources },
+    strayMarks,
+  };
 }
 
 /* ── The facts, in words ─────────────────────────────────────────────────── */
@@ -319,91 +356,12 @@ const STATUS_WORDS: Record<DashaStatus, string> = {
   upcoming: "still to come",
 };
 
-const DIGNITY_WORDS: Record<string, string> = {
-  exalted: "exalted",
-  debilitated: "debilitated",
-  own: "in its own sign",
-  friend: "in the sign of a natural friend",
-  neutral: "in the sign of a planet it is neutral to",
-  enemy: "in the sign of a natural enemy",
-};
-
-const RELATION_WORDS: Record<string, string> = {
-  same: "in the same sign",
-  angle: "in an angle from it, so the two support each other",
-  trine: "in a trine from it, so the two work together",
-  growth: "3rd and 11th from each other, a relation of effort that grows",
-  adjacent: "2nd and 12th from each other, a neighbouring pull",
-  strained: "6th and 8th from each other, so the two are at odds",
-};
-
-const houseList = (houses: readonly number[]) => {
-  const words = houses.map((house) => `the ${ordinal(house)}`);
-  return words.length <= 1 ? (words[0] ?? "") : `${words.slice(0, -1).join(", ")} and ${words[words.length - 1]}`;
-};
-
-const nameList = (names: readonly string[]) =>
-  names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
-
-/** A planet as a sentence names it: "the Sun", "the Moon", "Mars". */
-const inProse = (planet: string) => (planet === "Sun" || planet === "Moon" ? `the ${planet}` : planet);
-
-/** One planet's line: "Saturn (Maha Dasha lord): in Scorpio, the 2nd house; ...". */
-export function describeLord(facts: LordFacts): string {
-  const parts = [`in ${facts.sign}, the ${ordinal(facts.house)} house`];
-  if (facts.dignity) parts.push(DIGNITY_WORDS[facts.dignity]);
-  if (facts.retrograde) parts.push("retrograde");
-  if (facts.combust) parts.push("close to the Sun (combust)");
-  if (facts.rules.length > 0) parts.push(`rules ${houseList(facts.rules)} house${facts.rules.length > 1 ? "s" : ""}`);
-  if (isNode(facts.lord)) {
-    parts.push(
-      facts.actsThrough
-        ? `owns no sign, so gives the results of ${inProse(facts.actsThrough.lord)}, the lord of ${facts.sign}, which sits in ${facts.actsThrough.sign}, the ${ordinal(facts.actsThrough.house)} house` +
-            (facts.with.length > 0 ? `, and of the planets with it` : "")
-        : "owns no sign",
-    );
-  }
-  if (facts.with.length > 0) parts.push(`with ${nameList(facts.with.map(inProse))}`);
-  if (facts.aspectedBy.length > 0) parts.push(`aspected by ${nameList(facts.aspectedBy.map(inProse))}`);
-  return `${facts.lord} (${levelList(facts.levels)} lord): ${parts.join("; ")}.`;
-}
-
-/** How one level's planet stands to the planet above it. */
-export function describeRelation(relation: LordRelation): string {
-  const level = LEVEL_NAMES[relation.level];
-  const parentLevel = LEVEL_NAMES[(relation.level - 1) as DashaLevel];
-  if (relation.kind === "self") {
-    return `${relation.lord} rules both the ${parentLevel} and its ${level}: its own sub-period, the planet at its fullest.`;
-  }
-  const where =
-    relation.kind === "same"
-      ? `in the same sign as ${inProse(relation.parent)} (${parentLevel})`
-      : `${ordinal(relation.distance)} from ${inProse(relation.parent)} (${parentLevel}), ${RELATION_WORDS[relation.kind]}`;
-  const regard =
-    relation.friendship === "neutral"
-      ? `; ${inProse(relation.parent)} is neutral to ${inProse(relation.lord)} by nature`
-      : relation.friendship
-        ? `; ${inProse(relation.parent)} counts ${inProse(relation.lord)} a natural ${relation.friendship}`
-        : "";
-  const subject = inProse(relation.lord);
-  return `${subject.charAt(0).toUpperCase()}${subject.slice(1)} (${level}) is ${where}${regard}.`;
-}
-
-/** Every house the facts name, in order: where the planets sit, what they rule, and where a node's lord sits. */
-function housesNamed(facts: PeriodFacts): number[] {
-  const houses = new Set<number>();
-  for (const lord of facts.lords) {
-    houses.add(lord.house);
-    for (const house of lord.rules) houses.add(house);
-    if (lord.actsThrough) houses.add(lord.actsThrough.house);
-  }
-  return [...houses].sort((a, b) => a - b);
-}
-
 /**
  * The period and its planets, in words, for the model: the deepest period,
  * the levels it sits inside, each planet's place in the chart, how each
- * stands to the one above, and what the houses named stand for.
+ * stands to the one above, what the houses named stand for, and what makes
+ * the period itself -- the houses its planets share, what its own planet adds,
+ * and how those houses show up in ordinary life (lib/dasha-period-words.ts).
  */
 export function describePeriod(path: readonly DashaSpan[], facts: PeriodFacts, status: DashaStatus): string {
   const deepest = path[path.length - 1];
@@ -419,6 +377,7 @@ export function describePeriod(path: readonly DashaSpan[], facts: PeriodFacts, s
     `What the houses named here stand for: ${housesNamed(facts)
       .map((house) => `the ${ordinal(house)}: ${HOUSE_MEANINGS[house]}`)
       .join("; ")}.`,
+    `What makes this period itself:\n${describeFocus(facts, deepest.planet)}`,
   ]
     .filter(Boolean)
     .join("\n\n");
@@ -454,18 +413,20 @@ export const DASHA_READING_SYSTEM_PROMPT = `You write the reading for one planet
 
 How the periods work, for your own understanding: the Vimshottari dasha divides a life into periods ruled by planets, nested in levels. The Maha Dasha runs for years; it divides into Antardashas of months to years, those into Pratyantardashas of weeks to months, and those into Sookshma dashas of days to weeks. A period brings forward what the birth chart promises through its planet: the matters of the house it sits in and of the houses it rules, coloured by its sign, its dignity and the planets with it, and the classical results of its placements and yogas. The Brihat Jataka itself holds that the results it gives for houses, signs, aspects and yogas come in the period of the planet that produces them. Rahu and Ketu own no sign, and give the results of the lord of the sign they occupy and of the planets with them. Each level works inside the one above it: the deepest level named is the period this reading is for, and its planet is what sets it apart from the periods around it; the levels above it are its backdrop.
 
-You are given the period and the levels it sits inside; the chart facts for each of its planets; how each planet stands to the one above it; what the houses named stand for; and documents of passages from the classical books. Each document holds passages chosen because their condition holds in the reader's chart and they concern one of the period's planets, which the document's context names: ${BRIHAT_JATAKA_1885.described}, or, for a woman's chart, also ${STRIJATAKA_1931.described}.
+You are given the period and the levels it sits inside; the chart facts for each of its planets; how each planet stands to the one above it; what the houses named stand for; what makes the period itself; and numbered passages from the classical books, grouped by the planet each was chosen for. Each passage was chosen because its condition holds in the reader's chart and it concerns one of the period's planets; each group says which planet, and the chart conditions and yogas its passages rest on. The books are ${BRIHAT_JATAKA_1885.described}, or, for a woman's chart, also ${STRIJATAKA_1931.described}.
 
 Write the reading:
 - Two short paragraphs, 100 to 140 words in all and never more than 150; a single paragraph of up to 110 words when the period is a Maha Dasha on its own. The reading sits in a card under the timeline; a long reading is one that gets cut.
-- First paragraph: the backdrop, what the planets of the higher levels bring forward in this chart. Second paragraph: what the period's own planet focuses within it, and how it stands to the planet above it.
-- Build it from both kinds of material. State a chart fact plainly and say which fact a statement rests on ("with Saturn ruling your 4th and 5th houses, ..."); interpret a house only through what it stands for, as given. Every classical result comes from a passage: cite it and attribute it to its book. Never present your own reading of a fact as the books' view.
-- Name each planet's period by its level the first time ("your Saturn Maha Dasha", "its Mercury sub-period"), plainly after that. Do not repeat the dates: the card shows them.
-- Describe what the period emphasises and favours, as tendencies. Never promise an event, never give a date or an age, and never say that something will certainly happen. For a period already over, write in the past tense; for one still to come, say what it is set to bring forward.
-- A planet in the same sign as the planet above it, or in an angle or a trine from it, or its natural friend, works with it; one 6th or 8th from it, or its natural enemy, pulls against it. Say so once, in plain words, where it matters. Counting from one planet to another is not a house of the chart: never read a house's meaning into it.
-- A passage that lists results of several kinds may be used only for the results that fit this period's planets and houses.
+- The card beside the reading already lists each planet's sign, house, rulerships and dignity, so never recite them. Use a fact only to explain something, in a clause, and never list houses with their meanings.
+- Open with what is distinctive about this period: the one or two parts of life it concentrates on (the houses its planets share, given to you) and what its own planet newly brings.
+- Make it concrete. Say how this tends to show up in ordinary life, choosing one or two of the everyday examples given for those houses, as tendencies, not events.
+- Give the ease or friction between the levels in one sentence, from how each planet stands to the one above. Counting from one planet to another is not a house of the chart: never read a house's meaning into it.
+- Bring in the books' view where a passage bears on the period: put it in your own words, attribute it to its book, and mark it with the passage's number in square brackets right after the words it supports, like [2] or [1,3]. Every classical result carries its number, nothing else carries one, and never write a number you were not given. Never present your own reading of a fact as the books' view. A passage that lists results of several kinds may be used only for the results that fit this period's planets and houses.
+- Name a planet's period by its level the first time ("your Saturn Maha Dasha", "its Mercury sub-period"). Do not repeat the dates: the card shows them.
+- Avoid stock astrology phrasing. Never write ${STOCK_PHRASES.map((phrase) => `"${phrase}"`).join(", ")}.
+- Never promise an event, never give a date or an age, and never say that something will certainly happen. For a period already over, write in the past tense; for one still to come, say what it is set to bring forward.
 - Words in square brackets inside a passage are the app's, not the book's: the opening words a passage needs to read alone, or a wording chosen in place of one too harsh to print. Follow them, and never restore what they replace.
-- Speak of the 6th house as rivals, debts and daily work, the 8th as sudden change and what is hidden, and the 12th as expenses, foreign places and retreat, never as illness, lifespan or loss of life.
+- Speak of the 6th house as rivals, debts and daily work, the 8th as sudden change and what is hidden, and the 12th as spending, foreign places and retreat, never as illness, lifespan or loss of life.
 ${CLASSICAL_NOTE_RULES}`;
 
 /**
@@ -488,13 +449,12 @@ export function dashaReadingInstruction(
     `${describePeriod(path, facts, status)}\n\n` +
     `Write the reading for this period in ${language}: ` +
     (single
-      ? "one paragraph on what its planet brings forward in this chart."
-      : `two short paragraphs, the backdrop of the ${nameList(path.slice(0, -1).map((span) => `${span.planet} ${LEVEL_NAMES[span.level]}`))}, then what the ${path[path.length - 1].planet} ${LEVEL_NAMES[path[path.length - 1].level]} focuses within it.`) +
+      ? "one paragraph on what it concentrates on, how that tends to show up, and the books' view."
+      : "two short paragraphs: what it concentrates on and how that tends to show up, then the ease or friction between the levels and the books' view.") +
     (sex ? READER_LINES[sex] : "") +
-    " Cite a passage for every classical result, but say in your own plain words what the book ties to the placement, never in the passage's sentence:" +
-    ' not "a person born with Saturn in sign Scorpio will be indifferent to work and will be merciless[1]" but "the Brihat Jataka ties Saturn in Scorpio to a cool, detached attitude to work[1]";' +
-    ' not "if he occupy the 2nd house, the person will be wealthy[2]" but "it links Mercury in your 2nd house with wealth[2]".' +
-    " Do not repeat the dates, give no advice or warnings of your own, stay under 150 words, and do not end with a summary." +
+    " Mark every classical result with its passage's number, say in your own plain words what the book ties to the placement, and never quote the passage's sentence:" +
+    ' not "will be indifferent to work and will be merciless[1]" but "a cool, detached attitude to work[1]".' +
+    " Do not recite the planets' signs, houses or rulerships, which the card shows; do not repeat the dates; give no advice or warnings of your own; stay under 150 words; and do not end with a summary." +
     CLOSING_REMINDERS +
     (english ? "" : ` Write every sentence in ${language}, although the facts and the passages are in English.`)
   );
@@ -515,4 +475,56 @@ export function periodCanonical(
       )
       .join(";"),
   ].join("#");
+}
+
+/* ── Copied verses, and readings cut short ─────────────────────────────────── */
+
+/** Words in a row that count as a passage copied rather than put in the reading's own words. */
+export const COPY_RUN_WORDS = 8;
+
+const copyWords = (text: string) =>
+  text
+    .normalize("NFC")
+    .toLowerCase()
+    .replace(/[\[\]]/g, " ")
+    .split(/[^\p{L}\p{N}']+/u)
+    .filter(Boolean);
+
+/**
+ * Runs of COPY_RUN_WORDS or more words the reading shares with one of its
+ * passages, as the book or as the app's rewording of it: a verse copied into
+ * the reading instead of said in its own words.
+ *
+ * The prompt asks for its own words, with examples, and Haiku mostly obeys; but
+ * with citations on it now and then pastes the cited verse inline -- "will be
+ * indifferent to work and will be merciless" -- which the content check cannot
+ * see, since none of those words is banned. The verse is printed under the
+ * reading anyway, word for word, for anyone who wants it.
+ */
+export function copiedPassages(reading: ClassicalReading, passages: readonly PassageRow[]): string[] {
+  const runs = new Set<string>();
+  for (const passage of passages) {
+    for (const text of [passage.text, modelText(passage.text)]) {
+      const words = copyWords(text);
+      for (let start = 0; start + COPY_RUN_WORDS <= words.length; start++) {
+        runs.add(words.slice(start, start + COPY_RUN_WORDS).join(" "));
+      }
+    }
+  }
+  const words = copyWords(reading.segments.map((segment) => segment.text).join(" "));
+  const copied: string[] = [];
+  for (let start = 0; start + COPY_RUN_WORDS <= words.length; start++) {
+    const run = words.slice(start, start + COPY_RUN_WORDS).join(" ");
+    if (runs.has(run)) {
+      copied.push(run);
+      start += COPY_RUN_WORDS - 1;
+    }
+  }
+  return copied;
+}
+
+/** Whether a reading stops mid-sentence: its last words end without a full stop, in any of the seven languages. */
+export function endsMidSentence(reading: ClassicalReading): boolean {
+  const last = [...reading.segments].reverse().find((segment) => segment.text.trim().length > 0);
+  return !last || !/[.!?।॥…)"'”’]$/u.test(last.text.trim());
 }

@@ -10,18 +10,20 @@ import { checkNote, type NoteFailure, type NoteProblem } from "@/lib/knowledge/c
 import type { ClassicalReading, ClassicalReadingResponse } from "@/lib/knowledge/classical-reading";
 import {
   DASHA_READING_SYSTEM_PROMPT,
+  copiedPassages,
   dashaReadingInstruction,
+  endsMidSentence,
   periodCanonical,
   periodDocumentGroups,
-  periodDocuments,
+  periodPassageListing,
   periodQueryText,
+  readingFromMarkers,
   selectPeriodPassages,
   type PeriodDocumentGroup,
 } from "@/lib/knowledge/dasha-reading";
 import { withoutHeadings } from "@/lib/knowledge/ask-classics-reading";
 import { embedQuestion } from "@/lib/knowledge/question-embedding";
 import { passagesForPeriod } from "@/lib/knowledge/retrieve";
-import { readingFrom } from "@/lib/knowledge/yoga-classics-reading";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
@@ -87,7 +89,9 @@ const CACHE_HEADER = "private, no-store";
 /** Candidates fetched for a chart: every passage that applies, which is a few dozen. */
 const CANDIDATE_LIMIT = 200;
 
-const FAILED: Record<NoteFailure, string> = {
+const FAILED: Record<NoteFailure | "copied" | "cut", string> = {
+  copied: "The reading copied its passages instead of putting them in its own words.",
+  cut: "The reading stopped mid-sentence.",
   refusal: "The reading was declined.",
   max_tokens: "The reading ran past its token ceiling.",
   uncited: "The reading came back without its sources.",
@@ -161,7 +165,10 @@ async function spend(request: NextRequest) {
   }
 }
 
-type Written = { reading: ClassicalReading } | { failure: NoteFailure };
+/* "copied": the reading pasted a passage in instead of saying it in its own words (copiedPassages);
+   "cut": it stopped mid-sentence. */
+type Failure = NoteFailure | "copied" | "cut";
+type Written = { reading: ClassicalReading } | { failure: Failure };
 
 type Writing = {
   path: DashaSpan[];
@@ -185,14 +192,15 @@ async function writeReading(
   const response = await anthropic.messages.create(
     {
       ...ask,
-      /* Headroom for two short paragraphs, and Opus's thinking on the retry, not a target. */
-      max_tokens: 3000,
+      /* Headroom for two short paragraphs and the thinking before them, not a
+         target: Haiku 5.5 at low effort once spent all of 3000 thinking. */
+      max_tokens: 6000,
       system: [{ type: "text", text: DASHA_READING_SYSTEM_PROMPT, cache_control: { type: "ephemeral" } }],
       messages: [
         {
           role: "user",
           content: [
-            ...periodDocuments(groups, facts),
+            { type: "text", text: `The passages:\n${periodPassageListing(groups, facts)}` },
             { type: "text", text: dashaReadingInstruction(path, facts, status, sex, language) },
           ],
         },
@@ -218,13 +226,33 @@ async function writeReading(
   if (response.stop_reason === "refusal") return { failure: "refusal" };
   if (response.stop_reason === "max_tokens") return { failure: "max_tokens" };
 
-  const reading = withoutHeadings(readingFrom(response.content, groups));
+  const passages = groups.flatMap((group) => group.passages);
+  const written = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+  const { reading: marked, strayMarks } = readingFromMarkers(written, groups);
+  const reading = withoutHeadings(marked);
+  if (strayMarks > 0) log("warn", "llm_note_stray_marks", { model: ask.model, attempt, strayMarks });
   if (reading.sources.length === 0) return { failure: "uncited" };
+  /* Measured: a run that ended on a lone cited "The", which would have
+     shipped as a reading stopping mid-sentence. */
+  if (endsMidSentence(reading)) {
+    log("warn", "llm_note_cut", { model: ask.model, attempt, depth: path.length, language, blocks: true });
+    return { failure: "cut" };
+  }
   const check = checkNote(reading, language);
   if (check.problems.length > 0) {
     const problems: NoteProblem[] = check.problems;
     log("warn", "llm_note_check", { model: ask.model, attempt, depth: path.length, language, problems, blocks: true });
     return { failure: "check" };
+  }
+  /* A verse pasted in rather than put in the reading's own words: the content
+     check cannot see it, since none of its words is banned. */
+  const copied = copiedPassages(reading, passages);
+  if (copied.length > 0) {
+    log("warn", "llm_note_copied", { model: ask.model, attempt, depth: path.length, language, runs: copied.length, blocks: true });
+    return { failure: "copied" };
   }
   return { reading };
 }

@@ -44,6 +44,9 @@ const BROWSER_MODULES = [
   "lib/dasha-periods.ts",
   "lib/dasha-reading-facts.ts",
   "lib/knowledge/placements.ts",
+  /* The words both dasha readings describe a period in; the current-period
+     paragraph's facts are built in the browser from them. */
+  "lib/dasha-period-words.ts",
   /* The sky line above both sign-in forms, worded on the client; the facts
      come from app/(desktop)/login/dailySky.ts, which runs the ephemeris. */
   "lib/daily-sky-line.ts",
