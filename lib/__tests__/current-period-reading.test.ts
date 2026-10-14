@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   currentPeriodCacheKey,
+  currentPeriodChart,
   currentPeriodLanguage,
   renderCurrentPeriodFacts,
   type CurrentPeriodFacts,
@@ -97,5 +98,49 @@ describe("the current-period reading's language", () => {
     if (typeof code !== "string") return;
     expect(renderCurrentPeriodFacts(FACTS, code)).toBe(renderCurrentPeriodFacts(FACTS, "en"));
     expect(currentPeriodCacheKey(FACTS, code)).toBe(currentPeriodCacheKey(FACTS, "en"));
+  });
+});
+
+/*
+ * With the chart, the paragraph is written from the facts the period reading
+ * uses: rulerships, how each level stands to the one above, and the houses
+ * several lords share. A chart is all or nothing.
+ */
+const PLANETS = [
+  { name: "Sun", sign: "Leo" },
+  { name: "Moon", sign: "Taurus" },
+  { name: "Mars", sign: "Aries" },
+  { name: "Mercury", sign: "Virgo" },
+  { name: "Jupiter", sign: "Pisces" },
+  { name: "Venus", sign: "Cancer" },
+  { name: "Saturn", sign: "Capricorn" },
+  { name: "Rahu", sign: "Gemini" },
+  { name: "Ketu", sign: "Sagittarius" },
+];
+
+describe("the current-period chart", () => {
+  it("is built only when the rising sign and all nine planets are known", () => {
+    expect(currentPeriodChart("Aries", PLANETS)?.planets).toHaveLength(9);
+    expect(currentPeriodChart("Aries", PLANETS.slice(1))).toBeUndefined();
+    expect(currentPeriodChart("Aries", [...PLANETS.slice(1), { name: "Sun", sign: "Leo-ish" }])).toBeUndefined();
+    expect(currentPeriodChart("Atlantis", PLANETS)).toBeUndefined();
+    expect(currentPeriodChart(undefined, PLANETS)).toBeUndefined();
+  });
+
+  it("gives the prompt the chart's facts in place of each row's house", () => {
+    const withChart: CurrentPeriodFacts = { ...FACTS, chart: currentPeriodChart("Aries", PLANETS) };
+    const prompt = renderCurrentPeriodFacts(withChart);
+    expect(prompt).toContain("The chart rises in Aries");
+    expect(prompt).toContain("What makes these periods themselves:");
+    expect(prompt).toContain("How each level's planet stands to the one above it:");
+    expect(prompt).not.toContain(", house 10");
+    expect(renderCurrentPeriodFacts(FACTS)).toContain(", house 10");
+  });
+
+  it("separates the same stack with and without a chart, or with another chart", () => {
+    const withChart: CurrentPeriodFacts = { ...FACTS, chart: currentPeriodChart("Aries", PLANETS) };
+    const otherRising: CurrentPeriodFacts = { ...FACTS, chart: currentPeriodChart("Taurus", PLANETS) };
+    expect(currentPeriodCacheKey(withChart)).not.toBe(currentPeriodCacheKey(FACTS));
+    expect(currentPeriodCacheKey(otherRising)).not.toBe(currentPeriodCacheKey(withChart));
   });
 });

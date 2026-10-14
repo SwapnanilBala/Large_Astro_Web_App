@@ -101,7 +101,7 @@ export default function NakshatraDashaPanel({
    * page has when it mounts -- the hook reads that itself, once.
    */
   const antardashaProgress = nowPath[1] ? progressAt(nowPath[1], now) * 100 : 0;
-  const currentPeriodReading = useCurrentPeriodReading(dasha, nakshatra, planets, antardashaProgress);
+  const currentPeriodReading = useCurrentPeriodReading(dasha, nakshatra, planets, antardashaProgress, ascendantSign);
   const mahaTheme = themeLabelFor(dasha.current_dasha, t);
   const antarTheme = themeLabelFor(dasha.current_antardasha, t);
   /* The template stays the fallback rather than the thing replaced: it is on

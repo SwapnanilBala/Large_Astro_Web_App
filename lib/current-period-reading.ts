@@ -2,6 +2,8 @@ import { SIGN_ORDER } from "@/lib/constellation-geometry";
 import { NAKSHATRAS } from "@/lib/engines/panchanga";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types";
+import { periodFacts } from "@/lib/dasha-reading-facts";
+import { HOUSE_MEANINGS, describeFocus, describeLord, describeRelation, housesNamed, ordinal } from "@/lib/dasha-period-words";
 
 /**
  * The facts the running dasha stack contributes to its written reading.
@@ -16,6 +18,14 @@ import type { DashaInfo, NakshatraInfo, PlanetPosition } from "@/lib/astro-types
  * through the period they are -- cached by a coarse progress band. Answering it
  * through the period reading would buy a cited reading for everyone who
  * scrolls past.
+ *
+ * Since 2026-10-14 the facts also carry the chart's rising sign and the nine
+ * planets' signs, so the paragraph is written from what the period reading is
+ * written from (lib/dasha-reading-facts.ts, lib/dasha-period-words.ts): the
+ * houses each lord rules, how each level stands to the one above, and the
+ * houses several of the lords share, with the everyday ways they show up.
+ * Handed only "Saturn in Scorpio, house 2", Haiku wrote "Saturn asks you to
+ * build steadiness in what you value" for everyone with that placement.
  *
  * Every field here comes from a closed vocabulary -- nine lords, twelve signs,
  * twelve houses, twenty-seven nakshatras, ISO dates, and beside them the
@@ -47,9 +57,17 @@ export type CurrentPeriodStep = {
   house?: number;
 };
 
+/** The chart as the paragraph reads it: the rising sign and where the nine planets are, by sign. */
+export type CurrentPeriodChart = {
+  ascendantSign: string;
+  planets: { name: string; sign: string }[];
+};
+
 export type CurrentPeriodFacts = {
   /** Outermost first: Maha Dasha, Antardasha, and the Pratyantardasha if known. */
   stack: CurrentPeriodStep[];
+  /** The chart's rising sign and planets, when the panel has them; without it the paragraph has each lord's sign and house only. */
+  chart?: CurrentPeriodChart;
   nakshatra: { name: string; lord: string; pada: number };
   /** How far through the innermost period the reader is, 0-100. */
   progressPercent: number;
@@ -142,6 +160,7 @@ export function buildCurrentPeriodFacts(
   nakshatra: NakshatraInfo,
   planets: PlanetPosition[] | undefined,
   progressPercent: number,
+  ascendantSign?: string,
 ): CurrentPeriodFacts | null {
   const placementOf = (lord: string): Pick<CurrentPeriodStep, "sign" | "house"> => {
     const position = planets?.find((planet) => planet.name === lord);
@@ -190,11 +209,46 @@ export function buildCurrentPeriodFacts(
   if (stack.length < MIN_CURRENT_PERIOD_STEPS) return null;
   if (!NAKSHATRA_SET.has(nakshatra.name) || !LORD_SET.has(nakshatra.lord)) return null;
 
+  const chart = currentPeriodChart(ascendantSign, planets);
   return {
     stack,
+    ...(chart ? { chart } : {}),
     nakshatra: { name: nakshatra.name, lord: nakshatra.lord, pada: nakshatra.pada },
     progressPercent,
   };
+}
+
+/**
+ * The rising sign and the nine planets' signs, or undefined unless every one
+ * is known: the facts read houses and rulerships from them, and a chart
+ * missing a planet would describe a sky that never was.
+ */
+export function currentPeriodChart(
+  ascendantSign: string | undefined,
+  planets: readonly Pick<PlanetPosition, "name" | "sign">[] | undefined,
+): CurrentPeriodChart | undefined {
+  if (!ascendantSign || !SIGN_SET.has(ascendantSign) || !planets) return undefined;
+  const placed = VIMSHOTTARI_LORDS.map((name) => planets.find((planet) => planet.name === name));
+  if (placed.some((planet) => !planet || !SIGN_SET.has(planet.sign))) return undefined;
+  return { ascendantSign, planets: placed.map((planet) => ({ name: planet!.name, sign: planet!.sign })) };
+}
+
+/** The chart's facts for the stack, in words, or "" when the facts carry no chart. */
+function describeChart(facts: CurrentPeriodFacts): string {
+  if (!facts.chart) return "";
+  const lords = facts.stack.map((step) => step.lord);
+  const period = periodFacts(facts.chart, lords);
+  if (!period) return "";
+  return [
+    `The chart rises in ${period.ascendantSign}; houses are whole signs counted from it.\n${period.lords.map(describeLord).join("\n")}`,
+    period.relations.length > 0 ? `How each level's planet stands to the one above it:\n${period.relations.map(describeRelation).join("\n")}` : "",
+    `What the houses named here stand for: ${housesNamed(period)
+      .map((house) => `the ${ordinal(house)}: ${HOUSE_MEANINGS[house]}`)
+      .join("; ")}.`,
+    `What makes these periods themselves:\n${describeFocus(period, lords[lords.length - 1])}`,
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 /**
@@ -211,8 +265,10 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts, languageCode
   const language = COMMENTARY_LANGUAGES[code];
   const rows = facts.stack.map((step, index) => {
     const level = CURRENT_PERIOD_LEVELS[index] ?? `level ${index + 1}`;
+    /* With the chart, its facts below place every lord by whole sign; the
+       house here follows the chart's house system and could disagree. */
     const placement =
-      step.sign && step.house
+      !facts.chart && step.sign && step.house
         ? `, natal ${step.lord} in ${step.sign}, house ${step.house}`
         : "";
     return `${level}: ${step.lord} (${formatPeriodWindow(step.startDate, step.endDate)})${placement}`;
@@ -222,6 +278,7 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts, languageCode
 
   return [
     rows.join("\n"),
+    describeChart(facts),
     `Birth nakshatra: ${facts.nakshatra.name}, pada ${facts.nakshatra.pada}, ruled by ${facts.nakshatra.lord}.`,
     `The ${innermostLevel} ${currentPeriodPhase(facts.progressPercent)}.`,
     `Write the paragraph in ${language}.` +
@@ -248,5 +305,8 @@ export function currentPeriodCacheKey(facts: CurrentPeriodFacts, languageCode = 
     .map((step) => `${step.lord}@${step.startDate}..${step.endDate}@${step.sign ?? "-"}/${step.house ?? "-"}`)
     .join(">");
   const { name, lord, pada } = facts.nakshatra;
-  return `${currentPeriodLanguage(languageCode)}:${stack}|${name}/${lord}/${pada}|${currentPeriodPhase(facts.progressPercent)}`;
+  const chart = facts.chart
+    ? `${facts.chart.ascendantSign}:${facts.chart.planets.map((planet) => `${planet.name}@${planet.sign}`).join(",")}`
+    : "-";
+  return `${currentPeriodLanguage(languageCode)}:${stack}|${chart}|${name}/${lord}/${pada}|${currentPeriodPhase(facts.progressPercent)}`;
 }

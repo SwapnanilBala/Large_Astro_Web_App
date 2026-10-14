@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
+import { STOCK_PHRASES } from "@/lib/dasha-period-words";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   CURRENT_PERIOD_LEVELS,
@@ -12,8 +13,10 @@ import {
   NAKSHATRA_SET,
   SIGN_SET,
   currentPeriodCacheKey,
+  currentPeriodChart,
   currentPeriodLanguage,
   renderCurrentPeriodFacts,
+  type CurrentPeriodChart,
   type CurrentPeriodFacts,
   type CurrentPeriodStep,
 } from "@/lib/current-period-reading";
@@ -152,20 +155,22 @@ const SYSTEM_PROMPT = `You write the "what this means for you" paragraph on the 
 
 You are given the Vimshottari dasha stack the reader is living in right now, outermost first: the Maha Dasha, its Antardasha, and the Pratyantardasha when the chart supplies one. Each lord conditions the one after it -- the outer periods set the terms the innermost one plays out -- so this is one reading about how they combine, not two or three readings stacked up.
 
-You are also given where each of those lords sits in the reader's birth chart, and the nakshatra the whole sequence is counted from. Use the placements. They are what makes this reader's Saturn period different from every other reader's Saturn period, and a reading that names only the lords could have been written without seeing the chart.
+You are also given where each of those lords stands in the reader's birth chart -- its sign, its house counted from the rising sign, the houses it rules, the planets with it -- how each lord stands to the one above it, what the houses named stand for, and what makes these periods themselves: the houses several of their lords share, which is where their weight falls, what the innermost lord adds, and the everyday ways those houses show up. That is what makes this reader's Saturn period different from every other reader's. When the chart is not supplied you have each lord's sign and house only; work from those.
 
 Rules:
 - Exactly 3 sentences, one paragraph, no more than 80 words in total. This is a card in a report, not an essay; a long sentence is not a way around the count.
-- Every lord in the stack must do some work. Say what the Maha Dasha asks for across its long span, then what the inner period is doing with that now.
-- Work each lord's sign and house into what you say about it, rather than listing the placement and then ignoring it.
+- First sentence: the one or two parts of life these periods concentrate on, and why, in a clause ("with Saturn and Mercury both in your 2nd house, ..."). Second: how that tends to show up in ordinary life, from the everyday examples given. Third: the ease or friction between the levels, and where in the innermost period the reader stands.
 - Say where in the period the reader stands using the phrasing you are given for it. Do not convert it to a percentage, a number of days, or a date.
-- Write about the texture of the period: what it asks for, what it makes easier or harder. Address the reader as "you".
-- State nothing you were not given. No degrees, no aspects, no yogas, no transits, no other planets, and no signs or houses beyond the ones supplied.
+- Never recite the placements as a list; use a fact only to explain something. Address the reader as "you".
+- State nothing you were not given. No degrees, no aspects, no yogas, no transits, and no planets, signs or houses beyond the ones supplied.
+- Avoid stock astrology phrasing. Never write ${STOCK_PHRASES.map((phrase) => `"${phrase}"`).join(", ")}.
 - No predictions of specific events, no health, legal, or financial advice, and nothing fatalistic. A dasha describes conditions, not outcomes.
+- Speak of the 6th house as rivals, debts and daily work, the 8th as sudden change and what is hidden, and the 12th as spending, foreign places and retreat, never as illness, lifespan or loss of life.
 - Plain prose. You may name the levels Maha Dasha and Antardasha, because the card printed beside this paragraph names them too.`;
 
 type Body = {
   stack?: unknown;
+  chart?: unknown;
   nakshatra?: unknown;
   progressPercent?: unknown;
   language?: unknown;
@@ -243,6 +248,28 @@ function parseNakshatra(value: unknown): CurrentPeriodFacts["nakshatra"] {
   return { name, lord, pada };
 }
 
+/*
+ * The chart, when the panel sends one: a rising sign and the nine planets'
+ * signs, all from closed sets. Optional, so an older page still gets a
+ * reading; but a chart is all or nothing, since the facts read houses and
+ * rulerships from every planet in it.
+ */
+function parseChart(value: unknown): CurrentPeriodChart | undefined {
+  if (value === undefined) return undefined;
+  const row = (value ?? {}) as Record<string, unknown>;
+  const planets = Array.isArray(row.planets)
+    ? row.planets.map((entry) => {
+        const planet = (entry ?? {}) as Record<string, unknown>;
+        return { name: String(planet.name ?? ""), sign: String(planet.sign ?? "") };
+      })
+    : undefined;
+  const chart = currentPeriodChart(String(row.ascendantSign ?? ""), planets);
+  if (!chart || planets?.length !== chart.planets.length || planets.some((planet) => !LORD_SET.has(planet.name))) {
+    throw new ApiError(ErrorCode.VALIDATION_FAILED, "`chart` needs a rising sign and the nine planets' signs.");
+  }
+  return chart;
+}
+
 function parseProgress(value: unknown): number {
   const percent = Number(value);
   if (!Number.isFinite(percent) || percent < 0 || percent > 100) {
@@ -260,8 +287,10 @@ export async function POST(request: NextRequest) {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, "Request body must be JSON.");
     }
 
+    const chart = parseChart(body.chart);
     const facts: CurrentPeriodFacts = {
       stack: parseStack(body.stack),
+      ...(chart ? { chart } : {}),
       nakshatra: parseNakshatra(body.nakshatra),
       progressPercent: parseProgress(body.progressPercent),
     };
@@ -335,6 +364,7 @@ export async function POST(request: NextRequest) {
       model: MODEL,
       depth: facts.stack.length,
       placements: facts.stack.filter((step) => step.sign).length,
+      chart: Boolean(facts.chart),
       language,
       stopReason: response.stop_reason,
       inputTokens: response.usage.input_tokens,

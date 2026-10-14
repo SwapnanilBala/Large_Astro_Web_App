@@ -96,6 +96,7 @@ export function useCurrentPeriodReading(
   nakshatra: NakshatraInfo,
   planets: PlanetPosition[] | undefined,
   progressPercent: number,
+  ascendantSign?: string,
 ): CurrentPeriodReading {
   const { language } = useTranslation();
   const [state, setState] = useState<CurrentPeriodReadingState>("pending");
@@ -106,7 +107,7 @@ export function useCurrentPeriodReading(
      state keeps the effect free of anything that changes, where a ref updated
      during render is something React's rules forbid. */
   const [facts] = useState(() =>
-    buildCurrentPeriodFacts(dasha, nakshatra, planets, progressPercent),
+    buildCurrentPeriodFacts(dasha, nakshatra, planets, progressPercent, ascendantSign),
   );
   /* And the language, for the reasons in the note above. */
   const [requestLanguage] = useState(language);

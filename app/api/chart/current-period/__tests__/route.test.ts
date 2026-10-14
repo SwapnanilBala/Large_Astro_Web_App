@@ -30,7 +30,22 @@ const STACK = [
   { lord: "Mercury", startDate: "2025-01-10", endDate: "2027-09-20", sign: "Virgo", house: 6 },
 ];
 
-function request(language?: unknown) {
+const CHART = {
+  ascendantSign: "Aries",
+  planets: [
+    { name: "Sun", sign: "Leo" },
+    { name: "Moon", sign: "Taurus" },
+    { name: "Mars", sign: "Aries" },
+    { name: "Mercury", sign: "Virgo" },
+    { name: "Jupiter", sign: "Pisces" },
+    { name: "Venus", sign: "Cancer" },
+    { name: "Saturn", sign: "Capricorn" },
+    { name: "Rahu", sign: "Gemini" },
+    { name: "Ketu", sign: "Sagittarius" },
+  ],
+};
+
+function request(language?: unknown, chart?: unknown) {
   return new NextRequest("https://example.test/api/chart/current-period", {
     method: "POST",
     body: JSON.stringify({
@@ -38,6 +53,7 @@ function request(language?: unknown) {
       nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
       progressPercent: 40,
       language,
+      chart,
     }),
   });
 }
@@ -119,5 +135,30 @@ describe("the current-period reading's language", () => {
       .mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, unknown>)
       .find((line) => line.event === "llm_usage");
     expect(usage?.language).toBe("it");
+  });
+});
+
+describe("the current-period reading's chart", () => {
+  it("writes from the chart's facts when the panel sends them, and files that reading apart", async () => {
+    expect((await POST(request("en", CHART))).status).toBe(200);
+    expect(userTurn()).toContain("The chart rises in Aries");
+    expect(userTurn()).toContain("What makes these periods themselves:");
+    expect((await (await POST(request("en"))).json()).cached).toBe(false);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a chart missing a planet, or one it does not know", async () => {
+    const missing = { ...CHART, planets: CHART.planets.slice(1) };
+    const stranger = { ...CHART, planets: [...CHART.planets.slice(1), { name: "Pluto", sign: "Leo" }] };
+    const noRising = { planets: CHART.planets };
+    for (const chart of [missing, stranger, noRising, "Aries"]) {
+      expect((await POST(request("en", chart))).status).toBe(400);
+    }
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
+  it("tells the model to keep clear of stock phrasing", async () => {
+    await POST(request("en", CHART));
+    expect(sent().system[0].text).toContain('Never write "backdrop", "sets the stage"');
   });
 });
