@@ -17,6 +17,7 @@ import {
   chapterQueryText,
   lifeShiftsInstruction,
   shiftChapters,
+  shiftBatches,
   shiftPassageListing,
   shiftsCanonical,
   type ShiftChapter,
@@ -27,11 +28,13 @@ import { passagesForPeriod } from "@/lib/knowledge/retrieve";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { LIFE_SHIFTS_EFFORT, LIFE_SHIFTS_MODEL } from "@/lib/llm-models";
 import {
+  LIFE_SHIFTS_STREAM_TYPE,
   MAX_LIFE_SHIFTS,
   lifeShiftId,
   type LifeShiftDepth,
   type LifeShiftReading,
   type LifeShiftReadingResponse,
+  type LifeShiftStreamLine,
 } from "@/lib/life-shift-reading";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
 
@@ -318,14 +321,17 @@ async function writeReadings(
 }
 
 /**
- * The readings for every chapter that can have one: one call for the set,
- * then, while there is time, one more for just the chapters whose reading
- * failed its check or never came. A set that is still short ships short; the
- * rest keep the engine's words.
+ * The readings for every chapter of a batch that can have one: one call for
+ * the batch, then, while there is time, one more for just the chapters whose
+ * reading failed its check or never came. A batch that is still short ships
+ * short, maybe empty; the rest keep the engine's words.
  */
-async function write(request: NextRequest, sets: ShiftChapterPassages[], writing: Writing, receivedAt: number) {
-  const anthropic = client();
-  await spend(request);
+async function writeBatch(
+  anthropic: Anthropic,
+  sets: readonly ShiftChapterPassages[],
+  writing: Writing,
+  receivedAt: number,
+): Promise<LifeShiftReading[]> {
   const first = await writeReadings(anthropic, 1, sets, writing);
   const readings = new Map(first.readings);
   if (first.failed.size > 0) {
@@ -352,17 +358,100 @@ async function write(request: NextRequest, sets: ShiftChapterPassages[], writing
       }
     }
   }
-  const shipped: LifeShiftReading[] = sets.flatMap(({ chapter }) => {
+  return sets.flatMap(({ chapter }) => {
     const reading = readings.get(chapter.id);
     return reading ? [{ id: chapter.id, reading }] : [];
   });
-  if (shipped.length === 0) {
-    throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, "No life shift readings could be written.");
-  }
+}
+
+const NOTHING_WRITTEN = "No life shift readings could be written.";
+
+/** The whole set in one call, as JSON: the results page's one chapter, or any set with nothing to split. */
+async function write(request: NextRequest, sets: ShiftChapterPassages[], writing: Writing, receivedAt: number) {
+  const anthropic = client();
+  await spend(request);
+  const shipped = await writeBatch(anthropic, sets, writing, receivedAt);
+  if (shipped.length === 0) throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, NOTHING_WRITTEN);
   return shipped;
 }
 
-function failure(error: unknown) {
+/*
+ * ── THE CHAPTERS AHEAD, IN A CALL OF THEIR OWN ─────────────────────────────
+ *
+ * /insights/life-shifts shows the active and the next chapter at the top and
+ * folds the past ones away, but asked for all of them in one call it waited
+ * 13-15s for the lot. A set holding both is now written as two calls side by
+ * side -- the chapters ahead, and the past -- each with its own retry, and,
+ * when the client asks for the stream, each batch goes out as it lands. Still
+ * one unit of the reader's allowance, spent once before either call, and
+ * cached as one set when both are done. The passages are chosen across the
+ * whole set first, so the two calls never cite the same verse. They cannot
+ * see each other's readings, so the rule against repeating an observation
+ * holds within a batch only; chapters ahead and past rarely overlap.
+ */
+
+/** The set as batches written side by side, each sent down the stream as it is written; `settle` gets the whole set at the end. */
+function streamedResponse(
+  setsFor: () => Promise<ShiftChapterPassages[]>,
+  batches: string[][],
+  writing: Writing,
+  receivedAt: number,
+  settle: (readings: LifeShiftReading[]) => void,
+): Response {
+  const anthropic = client();
+  const encoder = new TextEncoder();
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      /* A reader who left has cancelled the stream; writing to it then throws, and nothing is owed. */
+      const send = (line: LifeShiftStreamLine) => {
+        try {
+          controller.enqueue(encoder.encode(`${JSON.stringify(line)}\n`));
+        } catch {
+          /* gone */
+        }
+      };
+      const written: LifeShiftReading[] = [];
+      try {
+        const sets = await setsFor();
+        await Promise.all(
+          batches.map(async (ids) => {
+            const batch = sets.filter((set) => ids.includes(set.chapter.id));
+            try {
+              const readings = await writeBatch(anthropic, batch, writing, receivedAt);
+              if (readings.length === 0) return;
+              written.push(...readings);
+              send({ type: "readings", readings });
+            } catch (error) {
+              /* The other batch may still land. */
+              logFailure(error);
+            }
+          }),
+        );
+      } catch (error) {
+        logFailure(error);
+      }
+      const order = batches.flat();
+      written.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+      settle(written);
+      send(written.length > 0 ? { type: "done", cached: false } : { type: "error", message: NOTHING_WRITTEN });
+      try {
+        controller.close();
+      } catch {
+        /* already cancelled */
+      }
+    },
+  });
+  return new Response(body, {
+    headers: {
+      "Content-Type": `${LIFE_SHIFTS_STREAM_TYPE}; charset=utf-8`,
+      "Cache-Control": "no-store",
+      /* Lines go out as written rather than when a proxy's buffer fills. */
+      "X-Accel-Buffering": "no",
+    },
+  });
+}
+
+function logFailure(error: unknown) {
   if (!(error instanceof ApiError)) {
     if (error instanceof Anthropic.BadRequestError) {
       console.error("life-shifts: bad request to Anthropic", error.message);
@@ -378,6 +467,10 @@ function failure(error: unknown) {
       console.error("life-shifts: unexpected", error);
     }
   }
+}
+
+function failure(error: unknown) {
+  logFailure(error);
   return errorResponse(error, "The life shift readings could not be prepared.");
 }
 
@@ -411,20 +504,49 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(hit);
     }
 
-    let writing = inFlight.get(key);
-    if (!writing) {
+    const setsFor = async () => {
+      const sets = chapterPassages(chapters, await candidatesFor(reader, chapters), reader.chart, depth);
+      log("info", "shift_retrieval", {
+        depth,
+        chosen: sets.map(({ chapter, groups }) => ({
+          id: chapter.id,
+          passages: groups.flatMap((group) => group.passages.map((passage) => `${group.lord}:${passage.id}`)),
+        })),
+      });
+      return sets;
+    };
+    const writing: Writing = { depth, language, sex: reader.sex };
+
+    /* Two batches down a stream when the client asks for it and the set holds
+       both chapters ahead and past; a request arriving while the same set is
+       being written waits for it below, as JSON. */
+    const batches = shiftBatches(chapters, depth);
+    const wantsStream = (request.headers.get("accept") ?? "").includes(LIFE_SHIFTS_STREAM_TYPE);
+    if (wantsStream && batches.length > 1 && !inFlight.has(key)) {
       client();
-      writing = (async () => {
-        const sets = chapterPassages(chapters, await candidatesFor(reader, chapters), reader.chart, depth);
-        log("info", "shift_retrieval", {
-          depth,
-          chosen: sets.map(({ chapter, groups }) => ({
-            id: chapter.id,
-            passages: groups.flatMap((group) => group.passages.map((passage) => `${group.lord}:${passage.id}`)),
-          })),
+      await spend(request);
+      let settle: (readings: LifeShiftReading[]) => void = () => {};
+      const settled = new Promise<LifeShiftReading[]>((resolve) => {
+        settle = resolve;
+      })
+        .then((readings) => {
+          if (readings.length === 0) throw new ApiError(ErrorCode.EXTERNAL_SERVICE_ERROR, NOTHING_WRITTEN);
+          remember(key, readings);
+          return readings;
+        })
+        .finally(() => {
+          inFlight.delete(key);
         });
-        return write(request, sets, { depth, language, sex: reader.sex }, receivedAt);
-      })()
+      /* Nobody may be waiting on it, and a set that failed must not surface as unhandled. */
+      settled.catch(() => {});
+      inFlight.set(key, settled);
+      return streamedResponse(setsFor, batches, writing, receivedAt, settle);
+    }
+
+    let pending = inFlight.get(key);
+    if (!pending) {
+      client();
+      pending = (async () => write(request, await setsFor(), writing, receivedAt))()
         .then((readings) => {
           remember(key, readings);
           return readings;
@@ -432,9 +554,9 @@ export async function POST(request: NextRequest) {
         .finally(() => {
           inFlight.delete(key);
         });
-      inFlight.set(key, writing);
+      inFlight.set(key, pending);
     }
-    const written: LifeShiftReadingResponse = { readings: await writing, cached: false };
+    const written: LifeShiftReadingResponse = { readings: await pending, cached: false };
     return NextResponse.json(written);
   } catch (error) {
     return failure(error);

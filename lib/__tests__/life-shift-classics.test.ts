@@ -14,6 +14,7 @@ import {
   chapterQueryText,
   describeChapter,
   lifeShiftsInstruction,
+  shiftBatches,
   shiftChapters,
   shiftPassageListing,
   shiftsCanonical,
@@ -187,5 +188,21 @@ describe("the prompt", () => {
     const later = shiftChapters([{ ...SATURN, status: "active" }], PAYLOAD);
     expect(shiftsCanonical(chapters, CHART, "headline")).not.toBe(shiftsCanonical(chapters, CHART, "compact"));
     expect(shiftsCanonical(chapters, CHART, "headline")).not.toBe(shiftsCanonical(later, CHART, "headline"));
+  });
+});
+
+describe("the batches a set is written in", () => {
+  const AHEAD = base({ kind: "saturn-return", label: "Saturn return (second)", pivotIso: "2044-09-01T00:00:00.000Z", status: "upcoming" });
+
+  it("puts the chapters still ahead in a call of their own on the life chapters page", () => {
+    const chapters = shiftChapters([SATURN, AHEAD, NODES], PAYLOAD);
+    expect(shiftBatches(chapters, "compact")).toEqual([[lifeShiftId(AHEAD)], [lifeShiftId(SATURN), lifeShiftId(NODES)]]);
+  });
+
+  it("keeps one call when there is nothing to split, and for the results page's one chapter", () => {
+    const past = shiftChapters([SATURN, NODES], PAYLOAD);
+    expect(shiftBatches(past, "compact")).toEqual([past.map((chapter) => chapter.id)]);
+    const ahead = shiftChapters([AHEAD], PAYLOAD);
+    expect(shiftBatches(ahead, "headline")).toEqual([[lifeShiftId(AHEAD)]]);
   });
 });

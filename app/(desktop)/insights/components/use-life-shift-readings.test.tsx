@@ -30,7 +30,37 @@ const SHIFT: MajorLifeShift = {
 const READING = { segments: [{ text: "Written for you.", sources: [1] }], sources: [{ number: 1, book: "brihat-jataka-1885", ref: "18.19", kind: "verse", text: "The verse." }] };
 
 function respond(body: unknown, ok = true) {
-  return vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok, status: ok ? 200 : 429, json: async () => body } as Response);
+  return vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    ok,
+    status: ok ? 200 : 429,
+    headers: new Headers({ "content-type": "application/json" }),
+    json: async () => body,
+  } as Response);
+}
+
+/* The route's NDJSON stream, one line released at a time by `release`. */
+function streaming(lines: unknown[]) {
+  const encoder = new TextEncoder();
+  let push: (() => void) | null = null;
+  let sent = 0;
+  const body = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      return new Promise<void>((resolve) => {
+        push = () => {
+          if (sent < lines.length) controller.enqueue(encoder.encode(`${JSON.stringify(lines[sent++])}\n`));
+          if (sent >= lines.length) controller.close();
+          resolve();
+        };
+      });
+    },
+  });
+  const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue({
+    ok: true,
+    status: 200,
+    headers: new Headers({ "content-type": "application/x-ndjson; charset=utf-8" }),
+    body,
+  } as Response);
+  return { fetchSpy, release: () => push?.() };
 }
 
 beforeEach(() => {
@@ -80,6 +110,29 @@ describe("the life shift readings hook", () => {
     const { result } = renderHook(() => useLifeShiftReadings([], "compact", CHART_QS));
     expect(result.current.state).toBe("failed");
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("asks for the stream, and shows each batch as it lands", async () => {
+    const PAST = { ...SHIFT, pivotIso: "2007-06-18T00:00:00.000Z" };
+    const { fetchSpy, release } = streaming([
+      { type: "readings", readings: [{ id: lifeShiftId(SHIFT), reading: READING }] },
+      { type: "readings", readings: [{ id: lifeShiftId(PAST), reading: READING }] },
+      { type: "done", cached: false },
+    ]);
+    const { result } = renderHook(() => useLifeShiftReadings([SHIFT, PAST], "compact", CHART_QS));
+    await waitFor(() => expect(fetchSpy).toHaveBeenCalledTimes(1));
+    expect(new Headers(fetchSpy.mock.calls[0][1]?.headers).get("accept")).toContain("application/x-ndjson");
+
+    release();
+    await waitFor(() => expect(result.current.readings.size).toBe(1));
+    /* The first batch is on the page; the other chapter is still being written. */
+    expect(result.current.state).toBe("pending");
+    expect(result.current.readings.has(lifeShiftId(SHIFT))).toBe(true);
+
+    release();
+    release();
+    await waitFor(() => expect(result.current.state).toBe("ready"));
+    expect(result.current.readings.size).toBe(2);
   });
 
   it("keeps the template wording when the route refuses", async () => {

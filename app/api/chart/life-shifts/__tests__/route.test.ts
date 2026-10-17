@@ -123,11 +123,22 @@ const ROWS = PAYLOAD.chart.planets.map((planet, index) =>
   passage(`18.${index + 1}`, { placements: [`${planet.name}.sign.${planet.sign}`] }),
 );
 
-function request(body: unknown, query = "birthDate=1985-11-02&name=Reader") {
+function request(body: unknown, query = "birthDate=1985-11-02&name=Reader", headers: Record<string, string> = {}) {
   return new NextRequest(`https://example.test/api/chart/life-shifts?${query}`, {
     method: "POST",
     body: JSON.stringify(body),
+    headers,
   });
+}
+
+const STREAM = { Accept: "application/x-ndjson, application/json" };
+
+/** The stream's lines, parsed. */
+async function lines(response: Response) {
+  return (await response.text())
+    .split("\n")
+    .filter((line) => line.trim())
+    .map((line) => JSON.parse(line) as { type: string; readings?: { id: string }[] });
 }
 
 type Sent = {
@@ -316,5 +327,75 @@ describe("the life shift readings", () => {
     const body = await (await POST(request({ ids: [lifeShiftId(SATURN)], depth: "headline" }))).json();
     expect(body.readings[0].reading.sources).toHaveLength(1);
     expect(JSON.stringify(body.readings[0].reading.segments)).not.toContain("42");
+  });
+});
+
+describe("the chapters ahead, in a call of their own", () => {
+  const SET = { ids: [lifeShiftId(VENUS), lifeShiftId(SATURN), lifeShiftId(JUPITER)], depth: "compact" };
+
+  it("writes the chapters ahead and the past in two calls, streaming each batch, for one unit", async () => {
+    const response = await POST(request(SET, undefined, STREAM));
+    expect(response.headers.get("content-type")).toContain("application/x-ndjson");
+    const got = await lines(response);
+
+    expect(mocks.parse).toHaveBeenCalledTimes(2);
+    const asked = mocks.parse.mock.calls.map(([params]) => idsAsked(params as Sent));
+    expect(asked).toContainEqual([lifeShiftId(VENUS)]);
+    expect(asked).toContainEqual([lifeShiftId(SATURN), lifeShiftId(JUPITER)]);
+    expect(mocks.budget).toHaveBeenCalledTimes(1);
+
+    expect(got.filter((line) => line.type === "readings")).toHaveLength(2);
+    expect(got[got.length - 1].type).toBe("done");
+    const ids = got.flatMap((line) => line.readings?.map((entry) => entry.id) ?? []);
+    expect(ids.sort()).toEqual(SET.ids.slice().sort());
+  });
+
+  it("never cites one verse in both calls", async () => {
+    await lines(await POST(request(SET, undefined, STREAM)));
+    const cited = mocks.parse.mock.calls.map(([params]) =>
+      [...(params as Sent).messages[0].content[0].text.matchAll(/^\[\d+\] \(([\d.]+)\)/gm)].map(([, ref]) => ref),
+    );
+    expect(cited[0].filter((ref) => cited[1].includes(ref))).toEqual([]);
+  });
+
+  it("files the whole set once both are written, and answers it again as JSON", async () => {
+    await lines(await POST(request(SET, undefined, STREAM)));
+    const again = await POST(request(SET, undefined, STREAM));
+    expect(again.headers.get("content-type")).toContain("application/json");
+    const body = await again.json();
+    expect(body.cached).toBe(true);
+    expect(body.readings.map((entry: { id: string }) => entry.id)).toEqual(SET.ids);
+    expect(mocks.parse).toHaveBeenCalledTimes(2);
+  });
+
+  it("still sends the batch that was written when the other fails", async () => {
+    mocks.parse.mockImplementation(async (params: Sent) => {
+      if (idsAsked(params).includes(lifeShiftId(SATURN))) throw new Error("overloaded");
+      return answering((id, mark) => `Steady work for ${id.slice(0, 6)}, the book holds ${mark}.`)(params);
+    });
+    const got = await lines(await POST(request(SET, undefined, STREAM)));
+    expect(got.map((line) => line.type)).toEqual(["readings", "done"]);
+    expect(got[0].readings?.map((entry) => entry.id)).toEqual([lifeShiftId(VENUS)]);
+  });
+
+  it("says so in the stream when neither batch could be written", async () => {
+    mocks.parse.mockRejectedValue(new Error("overloaded"));
+    const got = await lines(await POST(request(SET, undefined, STREAM)));
+    expect(got.map((line) => line.type)).toEqual(["error"]);
+  });
+
+  it("answers in one call, as JSON, when there is nothing to split or the client did not ask", async () => {
+    const headline = await POST(request({ ids: [lifeShiftId(VENUS)], depth: "headline" }, undefined, STREAM));
+    expect(headline.headers.get("content-type")).toContain("application/json");
+    const plain = await POST(request(SET));
+    expect(plain.headers.get("content-type")).toContain("application/json");
+    expect(mocks.parse).toHaveBeenCalledTimes(2);
+  });
+
+  it("refuses a spent allowance with its status, before any stream begins", async () => {
+    mocks.budget.mockResolvedValue({ allowed: false, scope: "anonymous", retryAfterSeconds: 3600 });
+    const response = await POST(request(SET, undefined, STREAM));
+    expect(response.status).toBe(429);
+    expect(mocks.parse).not.toHaveBeenCalled();
   });
 });

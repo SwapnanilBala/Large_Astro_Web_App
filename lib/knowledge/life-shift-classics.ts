@@ -304,6 +304,18 @@ export function shiftPassageListing(sets: readonly ShiftChapterPassages[]): stri
     .join("\n\n");
 }
 
+/**
+ * The chapters still ahead (active or upcoming), then the past: two batches,
+ * written side by side, when a compact set holds both; else the set as one.
+ * The results page's single headline chapter is never split.
+ */
+export function shiftBatches(chapters: readonly ShiftChapter[], depth: LifeShiftDepth): string[][] {
+  const ahead = chapters.filter((chapter) => chapter.status !== "past").map((chapter) => chapter.id);
+  const past = chapters.filter((chapter) => chapter.status === "past").map((chapter) => chapter.id);
+  if (depth === "headline" || ahead.length === 0 || past.length === 0) return [chapters.map((chapter) => chapter.id)];
+  return [ahead, past];
+}
+
 /* ── The prompt ───────────────────────────────────────────────────────────── */
 
 /* Frozen, so it is the cacheable prefix; the chapters, the passages and the language follow in the user turn. */

@@ -55,11 +55,12 @@ const SOURCE_STRINGS = "dasha.reading.note";
 
 /*
  * How long the readings usually take to arrive, for the progress bar shown
- * while they are written (Opus 5.5 low, measured 2026-10-16/17): the results
- * page's one long chapter in 6-10s, the life chapters page's set of up to
- * five in 13-15s, each with the passage search before it.
+ * while they are written (Opus 5.5 low, measured 2026-10-16/17, the passage
+ * search included): the results page's one long chapter in 6-10s; on the
+ * life chapters page the chapters still ahead, written in a call of their own
+ * and streamed, in 6.5-11s, and the past ones beside them in 9.5-14.5s.
  */
-const EXPECTED_MS = { headline: 9_000, compact: 16_000 } as const;
+const EXPECTED_MS = { headline: 9_000, ahead: 9_000, past: 13_000 } as const;
 type Translate = (key: string, params?: Record<string, string>) => string;
 
 /*
@@ -222,7 +223,7 @@ export default function MajorShiftsPanel({
             key={lifeShiftId(shift)}
             shift={shift}
             reading={readings.get(lifeShiftId(shift))}
-            waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "compact"] : undefined}
+            waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "ahead"] : undefined}
             headingLevel={isBrief ? 3 : 2}
           />
         ))}
@@ -244,7 +245,7 @@ export default function MajorShiftsPanel({
                 key={lifeShiftId(shift)}
                 shift={shift}
                 reading={readings.get(lifeShiftId(shift))}
-                waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "compact"] : undefined}
+                waitingMs={readingState === "pending" ? EXPECTED_MS.past : undefined}
                 headingLevel={isBrief ? 3 : 2}
               />
             ))}

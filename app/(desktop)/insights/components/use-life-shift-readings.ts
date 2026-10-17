@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { MajorLifeShift } from "@/lib/engines/major-shifts-engine";
 import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
 import {
+  LIFE_SHIFTS_STREAM_TYPE,
   MAX_LIFE_SHIFTS,
   lifeShiftId,
   type LifeShiftDepth,
@@ -79,7 +80,8 @@ export function useLifeShiftReadings(
 ): LifeShiftReadings {
   const [result, setResult] = useState<{
     language: string;
-    state: Exclude<LifeShiftReadingsState, "pending">;
+    /* "pending" while a stream has delivered some chapters and not the rest. */
+    state: LifeShiftReadingsState;
     readings: Map<string, ClassicalReading>;
   } | null>(null);
   const startedRef = useRef(false);
@@ -103,17 +105,31 @@ export function useLifeShiftReadings(
       try {
         const response = await fetch(`/api/chart/life-shifts?${query}`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          /* The stream when the route splits the set (the chapters ahead in a
+             call of their own); plain JSON otherwise, and always on a cache hit. */
+          headers: { "Content-Type": "application/json", Accept: `${LIFE_SHIFTS_STREAM_TYPE}, application/json` },
           body: JSON.stringify({ ids, depth: requestDepth, language }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const data = (await response.json()) as { readings?: LifeShiftReading[] };
         const next = new Map<string, ClassicalReading>();
-        for (const entry of data.readings ?? []) {
-          if (entry && typeof entry.id === "string" && Array.isArray(entry.reading?.segments) && Array.isArray(entry.reading?.sources)) {
-            next.set(entry.id, entry.reading);
+        const take = (entries: unknown) => {
+          for (const entry of Array.isArray(entries) ? (entries as LifeShiftReading[]) : []) {
+            if (entry && typeof entry.id === "string" && Array.isArray(entry.reading?.segments) && Array.isArray(entry.reading?.sources)) {
+              next.set(entry.id, entry.reading);
+            }
           }
+        };
+        const streamed = (response.headers.get("content-type") ?? "").includes(LIFE_SHIFTS_STREAM_TYPE);
+        if (streamed && response.body) {
+          /* Each batch shows as it lands; the cards still waiting keep their bar. */
+          await readLines(response.body, (line) => {
+            if (line.type !== "readings") return;
+            take(line.readings);
+            if (next.size > 0) setResult({ language, state: "pending", readings: new Map(next) });
+          });
+        } else {
+          take(((await response.json()) as { readings?: unknown }).readings);
         }
         if (next.size === 0) throw new Error("no readings");
         setResult({ language, state: "ready", readings: next });
@@ -137,4 +153,32 @@ export function useLifeShiftReadings(
   if (ids.length === 0) return { state: "failed", readings: NO_READINGS };
   if (!result || result.language !== language) return { state: "pending", readings: NO_READINGS };
   return { state: result.state, readings: result.readings };
+}
+
+/** Each line of an NDJSON body, parsed; a line that is not JSON is skipped. */
+async function readLines(body: ReadableStream<Uint8Array>, onLine: (line: Record<string, unknown>) => void) {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffered = "";
+  const take = (text: string) => {
+    if (!text.trim()) return;
+    try {
+      const parsed: unknown = JSON.parse(text);
+      if (parsed && typeof parsed === "object") onLine(parsed as Record<string, unknown>);
+    } catch {
+      /* not a line of ours */
+    }
+  };
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffered += decoder.decode(value, { stream: true });
+    let newline = buffered.indexOf("\n");
+    while (newline >= 0) {
+      take(buffered.slice(0, newline));
+      buffered = buffered.slice(newline + 1);
+      newline = buffered.indexOf("\n");
+    }
+  }
+  take(buffered + decoder.decode());
 }

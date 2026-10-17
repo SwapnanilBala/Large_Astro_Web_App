@@ -20,6 +20,25 @@ export type LifeShiftReadingResponse = {
   cached: boolean;
 };
 
+/*
+ * Asked with `Accept: application/x-ndjson`, the route answers a set that
+ * holds both chapters still ahead (active or upcoming) and past ones as a
+ * stream of one-line JSON objects: a `readings` line for each batch as it is
+ * written -- the chapters ahead in a call of their own, beside the past ones,
+ * so the cards the reader is looking at usually fill in a few seconds sooner
+ * -- then `done`, or
+ * `error` if nothing could be written. Everything that can fail before the
+ * paid call still fails as an ordinary JSON error with its status, and a
+ * cache hit, or a set with nothing to split, answers with plain JSON, so a
+ * client that asks for the stream reads either.
+ */
+export const LIFE_SHIFTS_STREAM_TYPE = "application/x-ndjson";
+
+export type LifeShiftStreamLine =
+  | { type: "readings"; readings: LifeShiftReading[] }
+  | { type: "done"; cached: false }
+  | { type: "error"; message: string };
+
 /**
  * How much room a reading gets, which is a property of the page rather than
  * of the chapter.
