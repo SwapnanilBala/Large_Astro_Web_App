@@ -394,14 +394,15 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      Against that, the panel asks only for the chapters it actually renders
      (one on the results page, up to five on /insights/life-shifts) and the
      route caches by chapter set, so a chart costs one call rather than one
-     per view. 1200 while it ran on Haiku; 600 since 2026-10-16, when it moved
-     to Opus 5.5 low with the classics: measured at $0.014-0.024 for the one
-     headline chapter and about $0.04 for five, so a full day is about $24 if
-     every unit were the five-chapter call, a little more with retries:
-     near the ceiling the dear routes here are held to. A bad day is a section falling back to its
-     templates rather than a bill. Revisit it against the llm_usage lines. */
+     per view. 1200 while it ran on Haiku; on Opus 5.5 low with the classics
+     since 2026-10-16, measured at $0.014-0.024 for the one headline chapter
+     and about $0.04 for five. 400 a day, the owner's call (600 for a day
+     before): about $16 if every unit were the five-chapter call, a little
+     more with retries, inside the $22 the dear routes here are held to. A bad
+     day is a section falling back to its templates rather than a bill.
+     Revisit it against the llm_usage lines. */
   "/api/chart/life-shifts": {
-    perDay: 600,
+    perDay: 400,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
