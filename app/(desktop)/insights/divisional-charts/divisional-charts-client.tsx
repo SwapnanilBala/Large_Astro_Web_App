@@ -23,7 +23,11 @@ import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
 import { pointName, signName } from "@/lib/chart-labels";
 import divisionalMessages from "@/messages/en.divisional.json";
 import { useVargaCommentary } from "./use-varga-commentary";
+import { ReadingProgress } from "../components/reading-progress";
 import styles from "./divisional-charts.module.css";
+
+/* The ten key vargas' notes are written in one Haiku call, about 15s. */
+const VARGA_NOTES_EXPECTED_MS = 15_000;
 
 /** What useRouteMessages hands back — a translator with interpolation. */
 type Translate = (key: string, params?: Record<string, string>) => string;
@@ -318,12 +322,10 @@ export default function DivisionalChartsClient({
                       {tr("divisional.atlas.notes.attribution")}
                     </p>
                   </>
+                ) : commentary.state === "pending" ? (
+                  <ReadingProgress label={tr("divisional.atlas.notes.pending")} expectedMs={VARGA_NOTES_EXPECTED_MS} />
                 ) : (
-                  <p className={styles.noteStatus}>
-                    {commentary.state === "pending"
-                      ? tr("divisional.atlas.notes.pending")
-                      : tr("divisional.atlas.notes.failed")}
-                  </p>
+                  <p className={styles.noteStatus}>{tr("divisional.atlas.notes.failed")}</p>
                 )}
               </div>
             )}

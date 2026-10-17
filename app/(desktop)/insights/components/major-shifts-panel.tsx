@@ -16,6 +16,7 @@ import {
 } from "@/lib/life-shift-reading";
 import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
 import { ClassicalParagraphs, ClassicalSources } from "./classical-note";
+import { ReadingProgress } from "./reading-progress";
 import { useLifeShiftReadings } from "./use-life-shift-readings";
 import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "../insights.module.css";
@@ -51,6 +52,14 @@ function statusClass(status: MajorShiftStatus): string {
  * the dasha period reading's, which cites the same books the same way.
  */
 const SOURCE_STRINGS = "dasha.reading.note";
+
+/*
+ * How long the readings usually take to arrive, for the progress bar shown
+ * while they are written (Opus 5.5 low, measured 2026-10-16/17): the results
+ * page's one long chapter in 6-10s, the life chapters page's set of up to
+ * five in 13-15s, each with the passage search before it.
+ */
+const EXPECTED_MS = { headline: 9_000, compact: 16_000 } as const;
 type Translate = (key: string, params?: Record<string, string>) => string;
 
 /*
@@ -93,10 +102,13 @@ function shiftTheme(shift: MajorLifeShift, t: Translate): string {
 function ShiftCard({
   shift,
   reading,
+  waitingMs,
   headingLevel,
 }: {
   shift: MajorLifeShift;
   reading?: ClassicalReading;
+  /** While this chapter's reading is being written: how long it usually takes. Its template shows dimmed under the bar. */
+  waitingMs?: number;
   /* 3 inside an /insights section, which supplies the h2; 2 on the life-shifts
      page, where the cards sit directly under the h1. */
   headingLevel: 2 | 3;
@@ -124,6 +136,11 @@ function ShiftCard({
             <ClassicalParagraphs reading={reading} />
           </div>
           <ClassicalSources reading={reading} tr={t} prefix={SOURCE_STRINGS} />
+        </>
+      ) : waitingMs ? (
+        <>
+          <ReadingProgress label={t("insights.story.stages.writing")} expectedMs={waitingMs} />
+          <p className={styles.lifeShiftWaiting}>{shift.narrative}</p>
         </>
       ) : (
         <p>{shift.narrative}</p>
@@ -178,7 +195,7 @@ export default function MajorShiftsPanel({
      `shifts` instead was a five-chapter call on the most visited page in
      the app, four fifths of it for cards that page never draws. */
   const renderedShifts = isBrief ? featuredShifts : [...featuredShifts, ...pastShifts];
-  const { readings } = useLifeShiftReadings(
+  const { state: readingState, readings } = useLifeShiftReadings(
     renderedShifts,
     isBrief ? "headline" : "compact",
     historyQs,
@@ -205,6 +222,7 @@ export default function MajorShiftsPanel({
             key={lifeShiftId(shift)}
             shift={shift}
             reading={readings.get(lifeShiftId(shift))}
+            waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "compact"] : undefined}
             headingLevel={isBrief ? 3 : 2}
           />
         ))}
@@ -226,6 +244,7 @@ export default function MajorShiftsPanel({
                 key={lifeShiftId(shift)}
                 shift={shift}
                 reading={readings.get(lifeShiftId(shift))}
+                waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "compact"] : undefined}
                 headingLevel={isBrief ? 3 : 2}
               />
             ))}

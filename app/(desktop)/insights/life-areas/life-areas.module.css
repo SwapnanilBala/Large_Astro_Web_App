@@ -235,6 +235,16 @@
   text-transform: capitalize;
 }
 
+.domainBriefProgress {
+  margin: 0 0 0.7rem;
+}
+
+/* The engine's own reading while the written brief is in flight, as on
+   /insights: readable, and plainly about to be refined. */
+.domainOverview[data-refining="true"] {
+  opacity: 0.62;
+}
+
 .domainOverview {
   margin: 0;
   max-width: 74ch;

@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouteMessages } from "@/lib/i18n-context";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import palmMessages from "@/messages/en.palm.json";
+import { ReadingProgress } from "./reading-progress";
 import type { JyotishContext, PalmReadingJSON } from "@/lib/palm-readings/types";
+
+/* One answer from Opus at low effort, usually about ten seconds. */
+const ANSWER_EXPECTED_MS = 12_000;
 
 /*
  * Follow-up questions about the reading on screen.
@@ -179,7 +183,7 @@ export default function PalmQaPanel({
                  hearing that something is loading. */
               aria-live="polite"
             >
-              <p>{tr("palm.qa.thinking")}</p>
+              <ReadingProgress label={tr("palm.qa.thinking")} expectedMs={ANSWER_EXPECTED_MS} />
             </div>
           )}
         </div>

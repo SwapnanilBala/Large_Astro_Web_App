@@ -14,6 +14,7 @@ import palmMessages from "@/messages/en.palm.json";
 import { PALM_READERS, type PalmReader } from "@/lib/palm-readings/reader";
 import PalmAnnotation from "./PalmAnnotation";
 import PalmQaPanel from "./palm-qa-panel";
+import { ReadingProgress } from "./reading-progress";
 
 /* ────────────────────────────────────────────────
    Types
@@ -184,6 +185,10 @@ const ANALYZING_STAGES = [
   { after: 92_000, key: "palm.analyzing.stageWriting" },
   { after: 125_000, key: "palm.analyzing.stageFinishing" },
 ] as const;
+
+/* A full palm reading on Opus at low effort: about two minutes, as the
+   patience line says and the stages above are paced for. */
+const PALM_EXPECTED_MS = 120_000;
 
 const MAX_PALM_IMAGE_BYTES = 5 * 1024 * 1024;
 
@@ -904,6 +909,13 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
               {tr(ANALYZING_STAGES[analyzingStage].key)}
               <span className="palm-dots" />
             </p>
+            {/* The stage line above says what is happening; this says how far. */}
+            <ReadingProgress
+              className="palm-loading-progress"
+              label={tr(ANALYZING_STAGES[analyzingStage].key)}
+              expectedMs={PALM_EXPECTED_MS}
+              showLabel={false}
+            />
             <p className="palm-loading-patience">{tr("palm.analyzing.patience")}</p>
           </div>
           {/* Skeleton layout */}

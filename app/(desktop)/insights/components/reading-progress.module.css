@@ -1,0 +1,60 @@
+/* The wait for a written reading: a line, a percentage, a thin bar. Sized as
+   a label, so it reads the same inside a card, a note or a chat turn. */
+
+.progress {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 34rem;
+  width: 100%;
+}
+
+.head {
+  align-items: baseline;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+}
+
+/* With no label beside it, the percentage sits at the bar's end. */
+.head:has(> .percent:only-child) {
+  justify-content: flex-end;
+}
+
+.label {
+  color: var(--ink-soft);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
+  line-height: 1.45;
+  min-width: 0;
+}
+
+.percent {
+  color: var(--accent-gold);
+  flex: none;
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.track {
+  background: color-mix(in srgb, var(--ink-main) 12%, transparent);
+  border-radius: 999px;
+  height: 4px;
+  overflow: hidden;
+}
+
+/* Width is set inline from the elapsed time; the transition smooths the
+   250ms ticks into continuous movement. */
+.fill {
+  background: var(--accent-gold);
+  border-radius: inherit;
+  height: 100%;
+  transition: width 260ms linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

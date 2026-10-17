@@ -23,6 +23,8 @@ export function YogaClassicsCard({ yogas }: { yogas: YogaDetectionResult[] }) {
       tr={tr}
       prefix="strength.yogas.classics"
       headingId="yoga-classics-heading"
+      /* A note per yoga in one call: a little longer than a single note. */
+      expectedMs={12_000}
     />
   );
 }

@@ -129,6 +129,8 @@ export function AskClassicsPanel({ historyQs, tr }: AskClassicsPanelProps) {
           heading={heading}
           headingId="ask-classics-answer-heading"
           className="classical-note--single"
+          /* A typed question is screened first, then answered. */
+          expectedMs={12_000}
         />
       )}
       {answer?.status === "empty" && <p className={styles.askMessage}>{tr("lifeAreas.ask.empty")}</p>}

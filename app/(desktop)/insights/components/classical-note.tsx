@@ -2,6 +2,7 @@
 
 import { Fragment } from "react";
 import { WOMENS_BOOK_SLUG, readingParagraphs, type ClassicalReading } from "@/lib/knowledge/classical-reading";
+import { ReadingProgress } from "./reading-progress";
 
 /**
  * "From the classics": what the books say, with every statement numbered
@@ -30,9 +31,23 @@ type ClassicalNoteProps = {
   heading?: string;
   headingId: string;
   className?: string;
+  /** How long this note usually takes to write, for the progress bar while it is. */
+  expectedMs?: number;
 };
 
-export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, className }: ClassicalNoteProps) {
+/* A classical note on Haiku 5.5: the passage search, then one call, 6-11s. */
+const DEFAULT_EXPECTED_MS = 10_000;
+
+export function ClassicalNote({
+  state,
+  reading,
+  tr,
+  prefix,
+  heading,
+  headingId,
+  className,
+  expectedMs = DEFAULT_EXPECTED_MS,
+}: ClassicalNoteProps) {
   if (state === "empty" || state === "failed") return null;
   if (state === "ready" && !reading) return null;
 
@@ -56,7 +71,7 @@ export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, 
         </>
       ) : (
         <div className="classical-note-pending" role="status">
-          <p>{tr(`${prefix}.pending`)}</p>
+          <ReadingProgress label={tr(`${prefix}.pending`)} expectedMs={expectedMs} />
           <span className="classical-note-bar" aria-hidden="true" />
           <span className="classical-note-bar" aria-hidden="true" />
           <span className="classical-note-bar classical-note-bar--short" aria-hidden="true" />

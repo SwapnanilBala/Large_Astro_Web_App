@@ -1466,6 +1466,11 @@
   line-height: 1.65;
 }
 
+.palm-loading-progress {
+  margin: 0.9rem auto 0;
+  max-width: 22rem;
+}
+
 .palm-loading-patience {
   margin: 0.5rem 0 0;
   max-width: 34ch;

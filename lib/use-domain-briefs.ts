@@ -15,6 +15,9 @@ type BriefState = {
 
 const EMPTY_STATE: BriefState = { key: null, briefs: {}, failedFor: null, offline: false };
 
+/** How long one area's brief usually takes to write (Haiku 5.5 low), for the progress bar while it is. */
+export const DOMAIN_BRIEF_EXPECTED_MS = 8_000;
+
 export function useDomainBriefs(historyQs: string, domain: LifeDomainKey, enabled = true) {
   const { account, status } = useAccount();
   // This scopes browser state only; the endpoint writes every brief at one effort.

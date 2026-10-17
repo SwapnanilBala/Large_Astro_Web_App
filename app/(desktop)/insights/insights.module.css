@@ -4086,6 +4086,10 @@
   text-transform: uppercase;
 }
 
+.domainBriefProgress {
+  margin: 0 0 0.7rem;
+}
+
 .domainOverview {
   font-family: var(--font-newsreader), Georgia, serif;
   font-size: 1.12rem;
@@ -4712,6 +4716,12 @@
 /* A written reading: its paragraphs take the card's paragraph style, with
    room between them, and the passages and credit below keep the classical
    note's smaller sizes, which .lifeShiftCard p would otherwise override. */
+/* The engine's template while the written reading is on its way: still
+   there, so the card keeps its height, but plainly not the final word. */
+.lifeShiftCard p.lifeShiftWaiting {
+  opacity: 0.5;
+}
+
 .lifeShiftReading {
   display: grid;
   gap: 0.6rem;

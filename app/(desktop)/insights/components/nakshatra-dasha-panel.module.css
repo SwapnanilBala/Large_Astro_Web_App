@@ -284,9 +284,12 @@
   line-height: 1.6;
 }
 
-.pending {
-  color: var(--text-tertiary);
-  font-style: italic;
+.meaningProgress {
+  margin: 0.15rem 0 0.6rem;
+}
+
+.meaning p.meaningWaiting {
+  opacity: 0.5;
 }
 
 /* ── The timeline, zoomed down to the period picked ────────────────────── */

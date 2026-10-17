@@ -143,7 +143,8 @@ import {
   domainNameInSentence,
 } from "@/app/(desktop)/insights/components/life-domain-copy";
 import { useToast } from "@/lib/toast-context";
-import { useDomainBriefs } from "@/lib/use-domain-briefs";
+import { DOMAIN_BRIEF_EXPECTED_MS, useDomainBriefs } from "@/lib/use-domain-briefs";
+import { ReadingProgress } from "./reading-progress";
 
 type InsightsContentProps = {
   payload: ChartApiResponse;
@@ -1419,7 +1420,17 @@ export default function InsightsContent({
                     </div>
 
                     {/* The written brief when one has arrived, the engine's own
-                        body until then and for good if none ever does. */}
+                        body until then and for good if none ever does; a bar
+                        over it, while it is written, says which it is. Keyed
+                        by area, since each area's brief is its own request. */}
+                    {domainBriefPending && !domainBriefs[selectedDomainInsight.key] && (
+                      <ReadingProgress
+                        key={selectedDomainInsight.key}
+                        className={styles.domainBriefProgress}
+                        label={t("insights.story.stages.writing")}
+                        expectedMs={DOMAIN_BRIEF_EXPECTED_MS}
+                      />
+                    )}
                     <p
                       className={styles.domainOverview}
                       data-refining={

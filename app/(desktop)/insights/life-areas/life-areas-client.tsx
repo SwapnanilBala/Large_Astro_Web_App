@@ -14,7 +14,8 @@ import {
 import { getLifeDomainTimingWindows } from "@/lib/life-domain-timing";
 import type { DashaInfo, LifeDomainInsight } from "@/lib/astro-types";
 import { useRouteMessages, useTranslation } from "@/lib/i18n-context";
-import { useDomainBriefs } from "@/lib/use-domain-briefs";
+import { DOMAIN_BRIEF_EXPECTED_MS, useDomainBriefs } from "@/lib/use-domain-briefs";
+import { ReadingProgress } from "@/app/(desktop)/insights/components/reading-progress";
 import lifeAreasMessages from "@/messages/en.life-areas.json";
 import { ClassicalNote } from "@/app/(desktop)/insights/components/classical-note";
 import KalatraPanel from "./kalatra-panel";
@@ -131,7 +132,15 @@ export default function LifeAreasClient({
             )}
           </div>
 
-          <p className={styles.domainOverview} aria-busy={pending}>
+          {pending && (
+            <ReadingProgress
+              key={domain.key}
+              className={styles.domainBriefProgress}
+              label={tr("insights.story.stages.writing")}
+              expectedMs={DOMAIN_BRIEF_EXPECTED_MS}
+            />
+          )}
+          <p className={styles.domainOverview} data-refining={pending ? "true" : undefined} aria-busy={pending}>
             {briefs[domain.key] ?? domain.display.body}
           </p>
 
@@ -226,6 +235,8 @@ export default function LifeAreasClient({
             prefix="lifeAreas.classics"
             headingId="area-classics-heading"
             className="classical-note--single"
+            /* Every life area's note is written in one call. */
+            expectedMs={15_000}
           />
 
           <div className={styles.domainTimingWindows}>

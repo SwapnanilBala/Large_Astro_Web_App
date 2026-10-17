@@ -7,6 +7,7 @@ import { nakshatraName, planetName } from "@/lib/chart-labels";
 import { PLANET_COLORS, PLANET_INK } from "@/lib/constellation-geometry";
 import { useTranslation } from "@/lib/i18n-context";
 import { formatLeft, formatPercent, formatSpan, formatToday } from "./dasha-format";
+import { ReadingProgress } from "./reading-progress";
 import styles from "./nakshatra-dasha-panel.module.css";
 
 /*
@@ -29,6 +30,9 @@ export const planetStyle = (planet: string) =>
     "--planet": PLANET_COLORS[planet] ?? "#6ce1d4",
     "--planet-ink": PLANET_INK[planet] ?? "var(--accent-aqua)",
   }) as CSSProperties;
+
+/* How long the written paragraph usually takes (Haiku 5.5 low, 6-11s measured 2026-10-17). */
+const MEANING_EXPECTED_MS = 8_000;
 
 const SIZE = 240;
 const CENTRE = SIZE / 2;
@@ -139,11 +143,17 @@ export function DashaNow({ path, now, focusedDepth, onFocus, nakshatra, meaning 
       {meaning.text && (
         <div className={styles.meaning}>
           <h4>{t("dasha.currentSummaryLabel")}</h4>
-          <p>
-            {meaning.text}
-            {/* Quiet, and only while the template is what is showing. */}
-            {meaning.pending && <span className={styles.pending}> {t("dasha.currentReadingPending")}</span>}
-          </p>
+          {/* While the paragraph is written, the template stays, dimmed, under a
+              progress bar, so the card keeps its height and is not taken for the
+              reading. */}
+          {meaning.pending && (
+            <ReadingProgress
+              className={styles.meaningProgress}
+              label={t("dasha.currentReadingPending")}
+              expectedMs={MEANING_EXPECTED_MS}
+            />
+          )}
+          <p className={meaning.pending ? styles.meaningWaiting : undefined}>{meaning.text}</p>
         </div>
       )}
     </section>
