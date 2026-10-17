@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { MajorLifeShift } from "@/lib/engines/major-shifts-engine";
+import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
 import {
   MAX_LIFE_SHIFTS,
   lifeShiftId,
@@ -13,8 +14,8 @@ export type LifeShiftReadingsState = "pending" | "ready" | "failed";
 
 export type LifeShiftReadings = {
   state: LifeShiftReadingsState;
-  /** Chapter id -> the reading written for it. Empty until `ready`. */
-  readings: Map<string, string>;
+  /** Chapter id -> the cited reading written for it. Empty until `ready`. */
+  readings: Map<string, ClassicalReading>;
 };
 
 /**
@@ -39,14 +40,18 @@ export type LifeShiftReadings = {
  *   clearing the ref is meaningless anyway.
  *
  *   Taking the inputs once, as state, covers re-renders: the effect depends
- *   on nothing that can change. Depending on `shifts` looks
+ *   on nothing that can change but the language. Depending on `shifts` looks
  *   more correct and is worse: the array is rebuilt by a useMemo in the panel,
  *   and any parent re-render that changed its identity would re-fetch every
  *   reading. The chapters cannot change without a navigation, which unmounts
  *   this anyway.
  *
- * What is sent is the chart's query string and the ids of the chapters, not
- * the chapters themselves: the route rebuilds the chart and writes the facts
+ * The reading is written in the page's language, so a language switch asks
+ * again, and readings in the old language are not shown meanwhile: they are
+ * filed with the language they were written in.
+ *
+ * What is sent is the chart's query string, the ids of the chapters and the
+ * language, not the chapters themselves: the route rebuilds the chart and writes the facts
  * the model reads from it, so nothing typed into a request reaches the
  * prompt. The readings come back on the same ids the panel files them under.
  *
@@ -62,14 +67,21 @@ export type LifeShiftReadings = {
  * other half of that trade -- the one chapter the results page does buy is
  * the one worth writing at length.
  */
+const NO_READINGS: Map<string, ClassicalReading> = new Map();
+
 export function useLifeShiftReadings(
   shifts: MajorLifeShift[],
   depth: LifeShiftDepth,
   /** The chart's query string, which the route rebuilds the chapters from. */
   historyQs: string,
+  /** The page's language, which the readings are written in. */
+  language: string = "en",
 ): LifeShiftReadings {
-  const [state, setState] = useState<LifeShiftReadingsState>("pending");
-  const [readings, setReadings] = useState<Map<string, string>>(() => new Map());
+  const [result, setResult] = useState<{
+    language: string;
+    state: Exclude<LifeShiftReadingsState, "pending">;
+    readings: Map<string, ClassicalReading>;
+  } | null>(null);
   const startedRef = useRef(false);
   /* Taken once, from the render this hook mounted with. The request is once
      per mounted lifetime, so these are the only inputs it will ever send;
@@ -92,26 +104,25 @@ export function useLifeShiftReadings(
         const response = await fetch(`/api/chart/life-shifts?${query}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ids, depth: requestDepth }),
+          body: JSON.stringify({ ids, depth: requestDepth, language }),
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = (await response.json()) as { readings?: LifeShiftReading[] };
-        const next = new Map<string, string>();
+        const next = new Map<string, ClassicalReading>();
         for (const entry of data.readings ?? []) {
-          if (entry && typeof entry.reading === "string" && entry.reading.trim()) {
-            next.set(entry.id, entry.reading.trim());
+          if (entry && typeof entry.id === "string" && Array.isArray(entry.reading?.segments) && Array.isArray(entry.reading?.sources)) {
+            next.set(entry.id, entry.reading);
           }
         }
         if (next.size === 0) throw new Error("no readings");
-        setReadings(next);
-        setState("ready");
+        setResult({ language, state: "ready", readings: next });
       } catch (error) {
         if (controller.signal.aborted) return;
         /* Quiet on purpose. Every failure here has the same consequence for
            the reader, which is that the chapters keep their template wording. */
         console.warn("life shift readings unavailable:", error);
-        setState("failed");
+        setResult({ language, state: "failed", readings: new Map() });
       }
     })();
 
@@ -120,8 +131,10 @@ export function useLifeShiftReadings(
       /* So the StrictMode remount can ask again; see the note above. */
       startedRef.current = false;
     };
-  }, [ids, requestDepth, query]);
+  }, [ids, requestDepth, query, language]);
 
   /* No chapters means nothing to ask for, which reads the same as a failure. */
-  return { state: ids.length === 0 ? "failed" : state, readings };
+  if (ids.length === 0) return { state: "failed", readings: NO_READINGS };
+  if (!result || result.language !== language) return { state: "pending", readings: NO_READINGS };
+  return { state: result.state, readings: result.readings };
 }

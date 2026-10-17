@@ -4709,6 +4709,25 @@
   overflow-wrap: anywhere;
 }
 
+/* A written reading: its paragraphs take the card's paragraph style, with
+   room between them, and the passages and credit below keep the classical
+   note's smaller sizes, which .lifeShiftCard p would otherwise override. */
+.lifeShiftReading {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.lifeShiftCard :global(.classical-note-verses) {
+  margin: 0;
+}
+
+.lifeShiftCard :global(p.classical-note-credit) {
+  color: var(--ink-soft);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-meta);
+  line-height: 1.5;
+}
+
 .lifeShiftWindow {
   font-family: var(--font-body), sans-serif !important;
   font-size: var(--text-ui) !important;

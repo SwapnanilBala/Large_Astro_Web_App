@@ -1,41 +1,18 @@
+import type { MajorLifeShift } from "./engines/major-shifts-engine";
+import type { ClassicalReading } from "./knowledge/classical-reading";
 
-import type { MajorLifeShift, MajorShiftStatus } from "./engines/major-shifts-engine";
-
-/**
- * The facts one life chapter contributes to its written reading.
- *
- * Deliberately thin, for the same reason lib/varga-commentary.ts is: the
- * engine has already decided every date, every planet and every placement in
- * here. The model's job is to say what the chapter asks of the reader, not to
- * work out when it is. Anything the model would have to *derive* -- an aspect,
- * a house lord, a strength -- is left out rather than half-supplied, because a
- * prompt that hands over two thirds of a calculation invites the model to
- * finish it.
- *
- * Dates arrive already worded, not as ISO. The page prints "March 2029" and
- * "Jun 2028 → Dec 2029"; handing the model the same strings is what stops a
- * reading from naming a month the card above it does not.
+/*
+ * What the life-shifts panel and its route share: the chapter ids, the depth,
+ * the response, and the date wording both the card and the prompt use. The
+ * facts, the passages and the prompt are the server's
+ * (lib/knowledge/life-shift-classics.ts); this module is bundled for the
+ * browser.
  */
-export type LifeShiftFacts = {
-  /** Matches the React key the panel already files this chapter under. */
-  id: string;
-  label: string;
-  planet: string;
-  theme: string;
-  status: MajorShiftStatus;
-  ageAtPivot: number;
-  /** "March 2029" */
-  pivot: string;
-  /** "Jun 2028 → Dec 2029" */
-  window: string;
-  /** The engine's own one-line justification, e.g. "Cycle: ~29.5 years | Natal Saturn: Leo / H10". */
-  evidence: string;
-};
 
-/** One chapter's reading, as written for this chart. */
+/** One chapter's reading, as written for this chart: cited segments and the passages they rest on. */
 export type LifeShiftReading = {
   id: string;
-  reading: string;
+  reading: ClassicalReading;
 };
 
 export type LifeShiftReadingResponse = {
@@ -79,41 +56,4 @@ export function formatShiftWindow(startIso: string, endIso: string, locale = "en
 /** The key the panel renders this chapter under, and the id the reading comes back on. */
 export function lifeShiftId(shift: Pick<MajorLifeShift, "kind" | "pivotIso">): string {
   return `${shift.kind}-${shift.pivotIso}`;
-}
-
-export function buildLifeShiftFacts(shifts: MajorLifeShift[]): LifeShiftFacts[] {
-  return shifts.slice(0, MAX_LIFE_SHIFTS).map((shift) => ({
-    id: lifeShiftId(shift),
-    label: shift.label,
-    planet: shift.planet,
-    theme: shift.theme,
-    status: shift.status,
-    ageAtPivot: shift.ageAtPivot,
-    pivot: formatShiftPivot(shift.pivotIso),
-    window: formatShiftWindow(shift.windowStartIso, shift.windowEndIso),
-    evidence: shift.evidence,
-  }));
-}
-
-/* lifeShiftCacheKey lives in ./life-shift-reading-server: it needs node:crypto,
-   and this module is also bundled for the browser. */
-
-/** How the facts are laid out for the model, shared with scripts/effort-compare.mjs. */
-export function renderLifeShiftFacts(facts: LifeShiftFacts[]): string {
-  return facts
-    .map((fact) =>
-      [
-        `id: ${fact.id}`,
-        `chapter: ${fact.label}`,
-        `planet: ${fact.planet}`,
-        `standing theme: ${fact.theme}`,
-        `where it sits: ${fact.status}`,
-        `pivot: ${fact.pivot} (age ${fact.ageAtPivot})`,
-        `window: ${fact.window}`,
-        fact.evidence ? `evidence: ${fact.evidence}` : "",
-      ]
-        .filter(Boolean)
-        .join("\n"),
-    )
-    .join("\n\n");
 }

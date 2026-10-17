@@ -27,6 +27,8 @@ const SHIFT: MajorLifeShift = {
   evidence: "Cycle: ~29.5 years | Natal Saturn: Capricorn / H9",
 };
 
+const READING = { segments: [{ text: "Written for you.", sources: [1] }], sources: [{ number: 1, book: "brihat-jataka-1885", ref: "18.19", kind: "verse", text: "The verse." }] };
+
 function respond(body: unknown, ok = true) {
   return vi.spyOn(globalThis, "fetch").mockResolvedValue({ ok, status: ok ? 200 : 429, json: async () => body } as Response);
 }
@@ -40,17 +42,37 @@ afterEach(() => {
 });
 
 describe("the life shift readings hook", () => {
-  it("sends the chart's query and the chapter ids, and none of the chapters' words", async () => {
-    const fetchSpy = respond({ readings: [{ id: lifeShiftId(SHIFT), reading: "Written for you." }], cached: false });
-    const { result } = renderHook(() => useLifeShiftReadings([SHIFT], "headline", CHART_QS));
+  it("sends the chart's query, the chapter ids and the language, and none of the chapters' words", async () => {
+    const fetchSpy = respond({ readings: [{ id: lifeShiftId(SHIFT), reading: READING }], cached: false });
+    const { result } = renderHook(() => useLifeShiftReadings([SHIFT], "headline", CHART_QS, "hi"));
     await waitFor(() => expect(result.current.state).toBe("ready"));
 
     expect(fetchSpy).toHaveBeenCalledTimes(1);
     const [url, init] = fetchSpy.mock.calls[0];
     expect(url).toBe(`/api/chart/life-shifts?${CHART_QS}`);
-    expect(JSON.parse(String(init?.body))).toEqual({ ids: [lifeShiftId(SHIFT)], depth: "headline" });
+    expect(JSON.parse(String(init?.body))).toEqual({ ids: [lifeShiftId(SHIFT)], depth: "headline", language: "hi" });
     expect(String(init?.body)).not.toContain(SHIFT.label);
-    expect(result.current.readings.get(lifeShiftId(SHIFT))).toBe("Written for you.");
+    expect(result.current.readings.get(lifeShiftId(SHIFT))).toEqual(READING);
+  });
+
+  it("asks again when the page's language changes, showing nothing from the old language meanwhile", async () => {
+    const fetchSpy = respond({ readings: [{ id: lifeShiftId(SHIFT), reading: READING }], cached: false });
+    const { result, rerender } = renderHook(({ language }) => useLifeShiftReadings([SHIFT], "compact", CHART_QS, language), {
+      initialProps: { language: "en" },
+    });
+    await waitFor(() => expect(result.current.state).toBe("ready"));
+    rerender({ language: "de" });
+    expect(result.current.state).toBe("pending");
+    expect(result.current.readings.size).toBe(0);
+    await waitFor(() => expect(result.current.state).toBe("ready"));
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(JSON.parse(String(fetchSpy.mock.calls[1][1]?.body)).language).toBe("de");
+  });
+
+  it("ignores a reading that is not a cited reading", async () => {
+    respond({ readings: [{ id: lifeShiftId(SHIFT), reading: "plain text" }], cached: false });
+    const { result } = renderHook(() => useLifeShiftReadings([SHIFT], "compact", CHART_QS));
+    await waitFor(() => expect(result.current.state).toBe("failed"));
   });
 
   it("asks for nothing, and reads as failed, when there is no chapter", () => {

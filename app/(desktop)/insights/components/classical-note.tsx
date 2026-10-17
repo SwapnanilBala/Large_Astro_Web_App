@@ -36,11 +36,6 @@ export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, 
   if (state === "empty" || state === "failed") return null;
   if (state === "ready" && !reading) return null;
 
-  /* Each book gets its own credit, shown when the reading quotes it. */
-  const fromWomensBook = (book: string) => book === WOMENS_BOOK_SLUG;
-  const quotesWomensBook = reading?.sources.some((source) => fromWomensBook(source.book)) ?? false;
-  const quotesOtherBooks = reading?.sources.some((source) => !fromWomensBook(source.book)) ?? false;
-
   return (
     <section
       className={className ? `classical-note ${className}` : "classical-note"}
@@ -55,41 +50,9 @@ export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, 
       {state === "ready" && reading ? (
         <>
           <div className="classical-note-reading">
-            {readingParagraphs(reading).map((pieces, index) => (
-              <p key={index}>
-                {pieces.map((piece, pieceIndex) => (
-                  <Fragment key={pieceIndex}>
-                    {piece.text}
-                    {piece.sources.length > 0 && <sup className="classical-note-mark">{piece.sources.join(",")}</sup>}
-                  </Fragment>
-                ))}
-              </p>
-            ))}
+            <ClassicalParagraphs reading={reading} />
           </div>
-
-          {/* Closed by default: the note is the card, the verses are its evidence. */}
-          <details className="classical-note-verses">
-            <summary>{tr(`${prefix}.sourcesLabel`, { count: String(reading.sources.length) })}</summary>
-            <ol className="classical-note-sources">
-              {reading.sources.map((source) => (
-                <li key={source.number}>
-                  <span className="classical-note-source-ref">
-                    {fromWomensBook(source.book)
-                      ? tr(`${prefix}.sourceRefStrijataka`, { ref: source.ref })
-                      : tr(`${prefix}.sourceRef`, { ref: source.ref })}
-                    {source.kind === "note" && ` · ${tr(`${prefix}.noteLabel`)}`}
-                  </span>
-                  {/* Quoted in the books' English whatever the page language. */}
-                  <q className="classical-note-source-text" lang="en">
-                    {source.text}
-                  </q>
-                </li>
-              ))}
-            </ol>
-          </details>
-
-          {quotesOtherBooks && <p className="classical-note-credit">{tr(`${prefix}.credit`)}</p>}
-          {quotesWomensBook && <p className="classical-note-credit">{tr(`${prefix}.creditStrijataka`)}</p>}
+          <ClassicalSources reading={reading} tr={tr} prefix={prefix} />
         </>
       ) : (
         <div className="classical-note-pending" role="status">
@@ -100,5 +63,67 @@ export function ClassicalNote({ state, reading, tr, prefix, heading, headingId, 
         </div>
       )}
     </section>
+  );
+}
+
+/** The reading's paragraphs, each statement followed by the numbers of the passages it rests on. */
+export function ClassicalParagraphs({ reading }: { reading: ClassicalReading }) {
+  return readingParagraphs(reading).map((pieces, index) => (
+    <p key={index}>
+      {pieces.map((piece, pieceIndex) => (
+        <Fragment key={pieceIndex}>
+          {piece.text}
+          {piece.sources.length > 0 && <sup className="classical-note-mark">{piece.sources.join(",")}</sup>}
+        </Fragment>
+      ))}
+    </p>
+  ));
+}
+
+/**
+ * The passages a reading cites, as the books have them, behind a disclosure,
+ * and the credit for each book it quotes. Shared with the life shifts cards,
+ * which print a cited reading inside a card of their own.
+ */
+export function ClassicalSources({
+  reading,
+  tr,
+  prefix,
+}: {
+  reading: ClassicalReading;
+  tr: (key: string, params?: Record<string, string>) => string;
+  prefix: string;
+}) {
+  /* Each book gets its own credit, shown when the reading quotes it. */
+  const fromWomensBook = (book: string) => book === WOMENS_BOOK_SLUG;
+  const quotesWomensBook = reading.sources.some((source) => fromWomensBook(source.book));
+  const quotesOtherBooks = reading.sources.some((source) => !fromWomensBook(source.book));
+  if (reading.sources.length === 0) return null;
+  return (
+    <>
+      {/* Closed by default: the note is the card, the verses are its evidence. */}
+      <details className="classical-note-verses">
+        <summary>{tr(`${prefix}.sourcesLabel`, { count: String(reading.sources.length) })}</summary>
+        <ol className="classical-note-sources">
+          {reading.sources.map((source) => (
+            <li key={source.number}>
+              <span className="classical-note-source-ref">
+                {fromWomensBook(source.book)
+                  ? tr(`${prefix}.sourceRefStrijataka`, { ref: source.ref })
+                  : tr(`${prefix}.sourceRef`, { ref: source.ref })}
+                {source.kind === "note" && ` · ${tr(`${prefix}.noteLabel`)}`}
+              </span>
+              {/* Quoted in the books' English whatever the page language. */}
+              <q className="classical-note-source-text" lang="en">
+                {source.text}
+              </q>
+            </li>
+          ))}
+        </ol>
+      </details>
+
+      {quotesOtherBooks && <p className="classical-note-credit">{tr(`${prefix}.credit`)}</p>}
+      {quotesWomensBook && <p className="classical-note-credit">{tr(`${prefix}.creditStrijataka`)}</p>}
+    </>
   );
 }

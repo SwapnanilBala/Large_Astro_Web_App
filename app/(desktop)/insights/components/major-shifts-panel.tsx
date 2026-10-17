@@ -14,6 +14,8 @@ import {
   formatShiftWindow,
   lifeShiftId,
 } from "@/lib/life-shift-reading";
+import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
+import { ClassicalParagraphs, ClassicalSources } from "./classical-note";
 import { useLifeShiftReadings } from "./use-life-shift-readings";
 import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "../insights.module.css";
@@ -37,14 +39,18 @@ function statusClass(status: MajorShiftStatus): string {
 }
 
 /*
- * `reading` is what /api/chart/life-shifts wrote for this chapter, and the
- * engine's own `narrative` is what shows until it lands -- and instead of it
- * if the route is unavailable, out of budget, or declines. The template is
- * never removed from the page, only covered: nine planet tones and three
- * return shapes is thin enough that two charts get the same paragraph, which
- * is what the route is for, but it is a complete answer and a blank card is
- * not.
+ * `reading` is what /api/chart/life-shifts wrote for this chapter, from the
+ * chart and the classics, with the passages it cites; the engine's own
+ * `narrative` is what shows until it lands -- and instead of it if the route
+ * is unavailable, out of budget, or declines. The template is never removed
+ * from the page, only covered: nine planet tones and three return shapes is
+ * thin enough that two charts get the same paragraph, which is what the route
+ * is for, but it is a complete answer and a blank card is not.
+ *
+ * The passages' strings (the count, "Brihat Jataka 18.13", the credits) are
+ * the dasha period reading's, which cites the same books the same way.
  */
+const SOURCE_STRINGS = "dasha.reading.note";
 type Translate = (key: string, params?: Record<string, string>) => string;
 
 /*
@@ -90,7 +96,7 @@ function ShiftCard({
   headingLevel,
 }: {
   shift: MajorLifeShift;
-  reading?: string;
+  reading?: ClassicalReading;
   /* 3 inside an /insights section, which supplies the h2; 2 on the life-shifts
      page, where the cards sit directly under the h1. */
   headingLevel: 2 | 3;
@@ -112,7 +118,16 @@ function ShiftCard({
         <strong>{t("insights.shifts.window")}</strong>{" "}
         {formatShiftWindow(shift.windowStartIso, shift.windowEndIso, LOCALE_TAGS[language])}
       </p>
-      <p>{reading ?? shift.narrative}</p>
+      {reading ? (
+        <>
+          <div className={styles.lifeShiftReading}>
+            <ClassicalParagraphs reading={reading} />
+          </div>
+          <ClassicalSources reading={reading} tr={t} prefix={SOURCE_STRINGS} />
+        </>
+      ) : (
+        <p>{shift.narrative}</p>
+      )}
       {shift.evidence && <small>{shift.evidence}</small>}
     </article>
   );
@@ -137,7 +152,7 @@ export default function MajorShiftsPanel({
   historyQs: string;
   variant?: "brief" | "full";
 }) {
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const isBrief = variant === "brief";
   const shifts: MajorLifeShift[] = useMemo(
     () => computeMajorLifeShifts(payload),
@@ -167,6 +182,7 @@ export default function MajorShiftsPanel({
     renderedShifts,
     isBrief ? "headline" : "compact",
     historyQs,
+    language,
   );
 
   if (shifts.length === 0) {

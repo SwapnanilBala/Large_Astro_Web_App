@@ -97,7 +97,8 @@ const DIGNITY_WORDS: Record<string, string> = {
   enemy: "in the sign of a natural enemy",
 };
 
-const RELATION_WORDS: Record<string, string> = {
+/** How two planets stand by the distance between their signs, for any reading that compares two. */
+export const RELATION_WORDS: Record<string, string> = {
   same: "in the same sign",
   angle: "in an angle from it, so the two support each other",
   trine: "in a trine from it, so the two work together",
@@ -121,6 +122,11 @@ export const levelList = (levels: readonly DashaLevel[]) => levels.map((level) =
 
 /** One planet's line: "Saturn (Maha Dasha lord): in Scorpio, the 2nd house; ...". */
 export function describeLord(facts: LordFacts): string {
+  return `${facts.lord} (${levelList(facts.levels)} lord): ${lordPlacement(facts)}.`;
+}
+
+/** Where a planet stands, without its level: "in Scorpio, the 2nd house; rules the 3rd and 4th houses; ...". */
+export function lordPlacement(facts: LordFacts): string {
   const parts = [`in ${facts.sign}, the ${ordinal(facts.house)} house`];
   if (facts.dignity) parts.push(DIGNITY_WORDS[facts.dignity]);
   if (facts.retrograde) parts.push("retrograde");
@@ -136,7 +142,7 @@ export function describeLord(facts: LordFacts): string {
   }
   if (facts.with.length > 0) parts.push(`with ${nameList(facts.with.map(inProse))}`);
   if (facts.aspectedBy.length > 0) parts.push(`aspected by ${nameList(facts.aspectedBy.map(inProse))}`);
-  return `${facts.lord} (${levelList(facts.levels)} lord): ${parts.join("; ")}.`;
+  return parts.join("; ");
 }
 
 /** How one level's planet stands to the planet above it. */

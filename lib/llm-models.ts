@@ -3,9 +3,9 @@
  * change is one edit rather than ten. Every route that writes a reading or a
  * note on the cheap model reads these: advanced-story, area-classics,
  * ask-classics (the answer and the screen), current-period,
- * dasha-reading, domain-brief, life-shifts, story-prose,
- * varga-commentary and yoga-classics, and the sampling scripts that mirror
- * them. Palm reading and the Opus retries choose their own models.
+ * dasha-reading, domain-brief, story-prose, varga-commentary and
+ * yoga-classics, and the sampling scripts that mirror them. Palm reading, the
+ * Opus retries and the life shifts (below) choose their own models.
  *
  * History: Opus 5.5 at low effort until 2026-10-06; Claude Haiku 4.5 from
  * then, the owner's call to cut costs, run without thinking; Claude Haiku 5.5
@@ -25,3 +25,13 @@
 export const CHART_MODEL = "claude-haiku-5-5";
 
 export const CHART_EFFORT = "low" as const;
+
+/*
+ * The life shifts section, on Opus 5.5 at low effort since 2026-10-16: the
+ * owner's call, when it began reading the classics. Its readings are short
+ * (a five-chapter call writes about 600 words), so the output side that makes
+ * Opus dear stays small.
+ */
+export const LIFE_SHIFTS_MODEL = "claude-opus-5-5";
+
+export const LIFE_SHIFTS_EFFORT = "low" as const;
