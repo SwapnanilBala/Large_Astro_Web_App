@@ -177,7 +177,7 @@ export default function InsightsLoader({
         >
           <div className="ambient ambient-left" />
           <div className="ambient ambient-right" />
-          <section className="dashboard-shell">
+          <section className="dashboard-shell" data-guide-error>
             <p className="kicker">{t("shared.chartErrorKicker")}</p>
             <h1>{t("shared.chartErrorHeading")}</h1>
             <p className="lead">{t("shared.chartErrorLead")}</p>

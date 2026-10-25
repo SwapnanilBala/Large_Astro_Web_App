@@ -1024,7 +1024,7 @@ export default function Home() {
         <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formLayout}>
             {/* LEFT COLUMN: one question */}
-            <div className={styles.formColumn}>
+            <div className={styles.formColumn} data-guide-intake data-guide-question={activeQuestion.id} data-guide-title={activeQuestion.heading} data-guide-helper={activeQuestion.helper}>
               <div className={styles.formSectionCard}>
                 <div className={styles.cardAura} aria-hidden="true" />
 

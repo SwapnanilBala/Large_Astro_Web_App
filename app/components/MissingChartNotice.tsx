@@ -21,7 +21,7 @@ export default function MissingChartNotice() {
   const { t } = useTranslation();
 
   return (
-    <section className="dashboard-shell">
+    <section className="dashboard-shell" data-guide-error>
       <p className="kicker">{t("insights.missingKicker")}</p>
       <h1>{t("insights.missingHeading")}</h1>
       <p className="lead">{t("insights.missingLead")}</p>

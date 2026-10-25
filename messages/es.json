@@ -1153,7 +1153,7 @@
     "showAround": "Muéstrame el sitio",
     "dismiss": "Explorar por mi cuenta",
     "chartTitle": "Tu carta está lista. ¿Por dónde empezar?",
-    "chartBody": "Descubre tu lectura en cuatro pasos breves. Puedes salir cuando quieras.",
+    "chartBody": "Sigue los controles destacados para explorar tu carta. Puedes saltar a un tema o salir cuando quieras.",
     "startTour": "Iniciar introducción a la carta",
     "replay": "Repetir introducción a la carta",
     "tourUnavailable": "La introducción estará disponible cuando se cargue tu carta. Puedes abrirla desde Ayuda.",
@@ -1249,6 +1249,78 @@
         "name": "Fuerza planetaria",
         "body": "Medida calculada según reglas astrológicas. Una puntuación mayor no garantiza mejores resultados en la vida."
       }
+    },
+    "walkthrough": {
+      "launchTitle": "Déjame guiarte en la página",
+      "launchBody": "El recorrido destaca controles reales y propone una acción en cada paso.",
+      "guidePage": "Guíame en esta página",
+      "savedChart": "Guíame por mi carta guardada",
+      "everyVisit": "Disponible en cada visita. Repetir la guía no cambia ni borra tus cartas.",
+      "overview": "Cómo se organiza el sitio",
+      "tryThis": "Prueba esto",
+      "jumpTo": "Ir a un tema",
+      "focusField": "Ir a este campo",
+      "tryChart": "Cambiar la vista de la carta",
+      "openArea": "Abrir la lectura de esta área",
+      "choosePeriod": "Ir a las opciones de período",
+      "openTiming": "Abrir herramientas de tiempo",
+      "openReading": "Abrir lectura completa",
+      "openAtlas": "Explorar cartas divisionales",
+      "useDefault": "Crear mi carta con el predeterminado",
+      "chooseTradition": "Ir a las tradiciones",
+      "chooseHouses": "Ir a los estilos de casas",
+      "loading": "Abriendo la página para el recorrido…",
+      "unavailable": "Todavía no hay una carta lista aquí. Puedes reintentar en la página, crear una carta o salir y volver a Ayuda.",
+      "Summary": {
+        "task": "Lee un punto destacado y localiza el de tu período actual. Las secciones siguientes muestran los detalles."
+      },
+      "Chart": {
+        "task": "Alterna entre las vistas y busca la fila Ascendente en la tabla. Ambos diagramas representan las mismas posiciones de nacimiento."
+      },
+      "Timing": {
+        "task": "Elige una fila del período actual para seleccionarlo en la línea temporal y su lectura. Compara las fechas; los períodos pequeños están dentro de los grandes."
+      },
+      "Explore": {
+        "task": "Abre la lectura completa y elige un hallazgo o combinación. Lee su explicación y usa el enlace de regreso para volver aquí."
+      },
+      "intake": {
+        "name": "Escribe el nombre de la lectura. El sexo al nacer es opcional. Continúa a la fecha con el botón bajo el formulario; la guía seguirá tu siguiente pregunta.",
+        "birthDate": "Escribe tu fecha de nacimiento o usa el calendario y continúa a la hora. Usa la fecha registrada donde naciste.",
+        "birthTime": "Escribe la hora registrada. Si no la sabes, usa la opción desconocida y elige una parte aproximada del día. Continúa al lugar.",
+        "place": "Busca tu lugar de nacimiento y elige una sugerencia o usa los campos manuales. Cuando esté listo, usa el botón principal para elegir un método; la guía continúa allí."
+      },
+      "LifeAreas": {
+        "title": "Elige una pregunta sobre tu vida",
+        "body": "Elige un área de vida y lee su interpretación y factores de apoyo. Puedes volver al resumen con el enlace de regreso.",
+        "task": "Elige una tarjeta de área, lee su resumen y abre la lectura completa de esa área para ver los factores y la orientación."
+      },
+      "Forecast": {
+        "title": "Encuentra pronósticos y herramientas de fechas",
+        "body": "Explora pronósticos, elección de fechas y la carta anual. Los dashas están en el resumen. Las fechas dependen de tus datos de nacimiento.",
+        "task": "Abre las herramientas de tiempo y elige la sección adecuada a tu pregunta. Los dashas siguen en este resumen; vuelve con el enlace de regreso."
+      },
+      "Atlas": {
+        "title": "Profundiza cuando quieras",
+        "body": "Estas cartas derivan de las posiciones natales para examinar temas concretos. Empieza por el resumen; las divisiones más finas requieren una hora precisa.",
+        "task": "Abre el atlas y elige una carta según su tema. Lee primero su explicación; puedes volver a la carta natal cuando quieras."
+      },
+      "Default": {
+        "title": "Empieza con un método preparado",
+        "body": "Empieza con Lahiri y casas de signo completo, nuestro cálculo predeterminado. Puedes explorar otros métodos después.",
+        "task": "Usa el predeterminado para crear tu carta o continúa para comparar opciones. Si la creas, la guía continúa en la carta."
+      },
+      "Tradition": {
+        "title": "Elige la referencia del zodíaco",
+        "body": "La tradición fija la referencia del zodíaco. El sistema de casas divide la carta en doce áreas de vida.",
+        "task": "Selecciona una tradición y lee su descripción. Conserva Lahiri si tienes dudas. La selección aparece junto al botón de generación."
+      },
+      "Houses": {
+        "title": "Elige la división de las casas",
+        "body": "La tradición fija la referencia del zodíaco. El sistema de casas divide la carta en doce áreas de vida.",
+        "task": "Selecciona un estilo y lee su explicación, o conserva Signo completo. Después pulsa Ver mi carta; la guía continúa cuando esté lista."
+      },
+      "minimize": "Minimizar gu?a",
+      "restore": "Mostrar instrucciones"
     }
   },
   "planetNames": {

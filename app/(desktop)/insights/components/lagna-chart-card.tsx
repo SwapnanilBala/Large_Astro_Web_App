@@ -134,7 +134,7 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
           <p className={styles.kicker}>{t("lagnaChart.kicker")}</p>
           <h2 className={styles.title}>{t("lagnaChart.rising", { sign: signName(ascendant.sign) })}</h2>
         </div>
-        <div className={styles.switch} role="group" aria-label={t("lagnaChart.styleGroup")}>
+        <div className={styles.switch} data-guide-chart-style role="group" aria-label={t("lagnaChart.styleGroup")}>
           {STYLE_OPTIONS.map((option) => (
             <button
               key={option.style}

@@ -1153,7 +1153,7 @@
     "showAround": "Mostrami il sito",
     "dismiss": "Esploro da solo",
     "chartTitle": "Il tuo tema è pronto. Da dove iniziare?",
-    "chartBody": "Scopri la tua lettura in quattro brevi passi. Puoi uscire quando vuoi.",
+    "chartBody": "Segui i controlli evidenziati per esplorare il tema. Puoi saltare a un argomento o uscire quando vuoi.",
     "startTour": "Inizia l’introduzione al tema",
     "replay": "Ripeti l’introduzione al tema",
     "tourUnavailable": "L’introduzione sarà disponibile quando il tema sarà caricato. Puoi riaprirla da Aiuto.",
@@ -1249,6 +1249,78 @@
         "name": "Forza planetaria",
         "body": "Misura calcolata secondo regole astrologiche. Un punteggio più alto non garantisce migliori risultati nella vita."
       }
+    },
+    "walkthrough": {
+      "launchTitle": "Lasciati guidare nella pagina",
+      "launchBody": "La guida evidenzia i controlli reali e propone un’azione a ogni passo.",
+      "guidePage": "Guidami in questa pagina",
+      "savedChart": "Guidami nel mio tema salvato",
+      "everyVisit": "Disponibile a ogni visita. Ripetere la guida non modifica né cancella i tuoi temi.",
+      "overview": "Come è organizzato il sito",
+      "tryThis": "Prova così",
+      "jumpTo": "Vai a un argomento",
+      "focusField": "Portami a questo campo",
+      "tryChart": "Cambia vista del tema",
+      "openArea": "Apri la lettura di quest’area",
+      "choosePeriod": "Vai alle scelte del periodo",
+      "openTiming": "Apri gli strumenti dei tempi",
+      "openReading": "Apri la lettura completa",
+      "openAtlas": "Esplora i temi divisionali",
+      "useDefault": "Crea il mio tema con il predefinito",
+      "chooseTradition": "Vai alle tradizioni",
+      "chooseHouses": "Vai agli stili delle case",
+      "loading": "Apertura della pagina per la guida…",
+      "unavailable": "Non c’è ancora un tema pronto qui. Riprova dalla pagina, crea un tema o riapri Aiuto più tardi.",
+      "Summary": {
+        "task": "Leggi un punto principale e trova quello del periodo attuale. Le sezioni seguenti ne mostrano i dettagli."
+      },
+      "Chart": {
+        "task": "Alterna le viste e cerca la riga Ascendente nella tabella. I diagrammi rappresentano le stesse posizioni natali."
+      },
+      "Timing": {
+        "task": "Scegli una riga del periodo attuale per selezionarlo nella linea temporale e nella lettura. Confronta le date; i periodi piccoli sono inclusi nei grandi."
+      },
+      "Explore": {
+        "task": "Apri la lettura completa e scegli un risultato o una combinazione. Leggi la spiegazione e usa il collegamento di ritorno."
+      },
+      "intake": {
+        "name": "Inserisci il nome della lettura. Il sesso alla nascita è facoltativo. Continua alla data con il pulsante sotto il modulo; la guida segue la prossima domanda.",
+        "birthDate": "Inserisci la data di nascita o usa il calendario, poi continua all’ora. Usa la data registrata nel luogo di nascita.",
+        "birthTime": "Inserisci l’ora registrata. Se non la conosci, usa l’opzione sconosciuta e scegli una parte approssimativa del giorno. Continua al luogo.",
+        "place": "Cerca il luogo di nascita e seleziona un suggerimento o usa i campi manuali. Quando tutto è pronto, il pulsante principale apre la scelta del metodo; la guida prosegue lì."
+      },
+      "LifeAreas": {
+        "title": "Scegli una domanda sulla tua vita",
+        "body": "Scegli un’area della vita e leggi l’interpretazione e i fattori associati. Il collegamento di ritorno riapre il riepilogo.",
+        "task": "Scegli una scheda di area, leggi il riepilogo e apri la lettura completa di quell’area per fattori e indicazioni."
+      },
+      "Forecast": {
+        "title": "Trova previsioni e strumenti per le date",
+        "body": "Esplora previsioni, scelta delle date e tema annuale. I dasha sono nel riepilogo. Le date dipendono dai dati di nascita.",
+        "task": "Apri gli strumenti e scegli la sezione adatta alla domanda. I dasha restano in questo riepilogo; usa il collegamento di ritorno."
+      },
+      "Atlas": {
+        "title": "Approfondisci quando vuoi",
+        "body": "Questi temi derivano dalle posizioni natali per esaminare argomenti specifici. Inizia dal riepilogo; le divisioni fini richiedono un’ora precisa.",
+        "task": "Apri l’atlante e scegli un tema secondo il suo argomento. Leggi prima la spiegazione; puoi sempre tornare al tema natale."
+      },
+      "Default": {
+        "title": "Inizia con un metodo pronto",
+        "body": "Inizia con Lahiri e case a segno intero, il nostro calcolo predefinito. Potrai esplorare altri metodi in seguito.",
+        "task": "Usa il predefinito per creare il tema o continua per confrontare le scelte. La guida prosegue nel tema creato."
+      },
+      "Tradition": {
+        "title": "Scegli il riferimento dello zodiaco",
+        "body": "La tradizione stabilisce il riferimento dello zodiaco. Il sistema di case divide il tema in dodici aree della vita.",
+        "task": "Seleziona una tradizione e leggi la descrizione. Mantieni Lahiri se hai dubbi. La scelta appare accanto al pulsante di creazione."
+      },
+      "Houses": {
+        "title": "Scegli la divisione delle case",
+        "body": "La tradizione stabilisce il riferimento dello zodiaco. Il sistema di case divide il tema in dodici aree della vita.",
+        "task": "Scegli uno stile e leggi la spiegazione o mantieni Segno intero. Poi usa Vedi il mio tema; la guida continua quando è pronto."
+      },
+      "minimize": "Riduci guida",
+      "restore": "Mostra istruzioni"
     }
   },
   "planetNames": {

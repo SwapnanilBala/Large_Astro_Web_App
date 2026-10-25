@@ -1153,7 +1153,7 @@
     "showAround": "Me faire découvrir le site",
     "dismiss": "Explorer librement",
     "chartTitle": "Votre thème est prêt. Par où commencer ?",
-    "chartBody": "Découvrez votre lecture en quatre étapes courtes. Vous pouvez quitter à tout moment.",
+    "chartBody": "Suivez les contrôles mis en évidence pour explorer votre thème. Passez à un sujet ou quittez à tout moment.",
     "startTour": "Découvrir mon thème",
     "replay": "Revoir la visite du thème",
     "tourUnavailable": "La visite sera disponible une fois votre thème chargé. Retrouvez-la dans Aide.",
@@ -1249,6 +1249,78 @@
         "name": "Force planétaire",
         "body": "Mesure calculée suivant des règles astrologiques. Un score élevé ne garantit pas une vie plus favorable."
       }
+    },
+    "walkthrough": {
+      "launchTitle": "Laissez-vous guider sur la page",
+      "launchBody": "La visite met en évidence les vrais contrôles et propose une action à chaque étape.",
+      "guidePage": "Me guider sur cette page",
+      "savedChart": "Me guider dans mon thème enregistré",
+      "everyVisit": "Disponible à chaque visite. Revoir la visite ne modifie ni ne supprime vos thèmes.",
+      "overview": "Comment le site est organisé",
+      "tryThis": "À essayer",
+      "jumpTo": "Aller à un sujet",
+      "focusField": "Aller à ce champ",
+      "tryChart": "Changer la vue du thème",
+      "openArea": "Ouvrir la lecture de ce domaine",
+      "choosePeriod": "Aller aux choix de périodes",
+      "openTiming": "Ouvrir les outils de cycles",
+      "openReading": "Ouvrir la lecture complète",
+      "openAtlas": "Explorer les thèmes divisionnels",
+      "useDefault": "Créer mon thème avec le réglage par défaut",
+      "chooseTradition": "Aller aux traditions",
+      "chooseHouses": "Aller aux systèmes de maisons",
+      "loading": "Ouverture de la page pour votre visite…",
+      "unavailable": "Aucun thème prêt n’est encore disponible ici. Réessayez sur la page, créez un thème ou revenez dans Aide plus tard.",
+      "Summary": {
+        "task": "Lisez un point essentiel et trouvez celui de votre période actuelle. Les sections suivantes en montrent les détails."
+      },
+      "Chart": {
+        "task": "Alternez les vues puis trouvez la ligne Ascendant dans le tableau. Les deux diagrammes décrivent les mêmes positions natales."
+      },
+      "Timing": {
+        "task": "Choisissez une ligne de période actuelle pour la sélectionner dans la chronologie et la lecture. Comparez les dates ; les petites périodes sont incluses dans les grandes."
+      },
+      "Explore": {
+        "task": "Ouvrez la lecture complète et choisissez un résultat ou une combinaison. Lisez son explication puis utilisez le lien de retour."
+      },
+      "intake": {
+        "name": "Saisissez le nom de la lecture. Le sexe à la naissance est facultatif. Continuez vers la date avec le bouton sous le formulaire ; la visite suit votre progression.",
+        "birthDate": "Saisissez votre date de naissance ou utilisez le calendrier, puis continuez vers l’heure. Utilisez la date enregistrée au lieu de naissance.",
+        "birthTime": "Saisissez l’heure enregistrée. Si vous l’ignorez, choisissez une heure inconnue et une partie approximative de la journée. Continuez vers le lieu.",
+        "place": "Cherchez votre lieu de naissance et choisissez une suggestion, ou utilisez les champs manuels. Le bouton principal vous conduit au choix de méthode ; la visite y continue."
+      },
+      "LifeAreas": {
+        "title": "Choisissez une question sur votre vie",
+        "body": "Choisissez un domaine de vie, puis lisez son interprétation et les facteurs associés. Le lien de retour vous ramène à l’aperçu.",
+        "task": "Choisissez une carte de domaine, lisez son résumé puis ouvrez sa lecture complète pour les facteurs et conseils associés."
+      },
+      "Forecast": {
+        "title": "Trouvez prévisions et outils de dates",
+        "body": "Explorez les prévisions, le choix des dates et le thème annuel. Les dashas sont dans l’aperçu. Les dates dépendent des données de naissance.",
+        "task": "Ouvrez les outils et choisissez la section adaptée à votre question. Les dashas restent dans cet aperçu ; le lien de retour vous y ramène."
+      },
+      "Atlas": {
+        "title": "Approfondissez à votre rythme",
+        "body": "Ces thèmes sont dérivés des positions natales pour examiner des sujets précis. Commencez par l’aperçu ; les divisions fines exigent une heure précise.",
+        "task": "Ouvrez l’atlas et choisissez un thème selon son sujet. Lisez d’abord son explication ; vous pouvez revenir au thème natal à tout moment."
+      },
+      "Default": {
+        "title": "Commencez avec une méthode prête",
+        "body": "Commencez avec Lahiri et les maisons en signes entiers, notre calcul par défaut. Explorez les autres méthodes plus tard.",
+        "task": "Utilisez le réglage par défaut pour créer votre thème ou continuez pour comparer les choix. La visite se poursuit sur le thème créé."
+      },
+      "Tradition": {
+        "title": "Choisissez la référence du zodiaque",
+        "body": "La tradition fixe le point de référence du zodiaque. Le système de maisons partage le thème en douze domaines de vie.",
+        "task": "Choisissez une tradition et lisez sa description. Gardez Lahiri en cas de doute. Le choix apparaît près du bouton de création."
+      },
+      "Houses": {
+        "title": "Choisissez la division des maisons",
+        "body": "La tradition fixe le point de référence du zodiaque. Le système de maisons partage le thème en douze domaines de vie.",
+        "task": "Choisissez un système et lisez sa description, ou gardez les signes entiers. Cliquez ensuite sur Voir mon thème ; la visite continuera."
+      },
+      "minimize": "R?duire la visite",
+      "restore": "Afficher les instructions"
     }
   },
   "planetNames": {

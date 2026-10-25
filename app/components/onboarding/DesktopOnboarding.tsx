@@ -14,7 +14,7 @@ import {
 } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ArrowRight, BookOpen, CircleHelp, Compass, X } from "lucide-react";
+import { BookOpen, CircleHelp, Compass, X } from "lucide-react";
 import { readChartHistory } from "@/lib/chart-history-store";
 import {
   parseGuidance,
@@ -26,6 +26,8 @@ import {
 import { useHydrated } from "@/lib/use-hydrated";
 import { useRouteMessages } from "@/lib/i18n-context";
 import messages from "@/messages/en.onboarding.json";
+import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
+import GuidedWalkthrough from "./GuidedWalkthrough";
 import styles from "./desktop-onboarding.module.css";
 
 const TERMS = [
@@ -44,7 +46,8 @@ type Term = (typeof TERMS)[number];
 type HelpTab = "intro" | "basics";
 type Session = {
   path: string;
-  mode: "help" | "tour";
+  mode: "help" | "tour" | "intake" | "method";
+  pendingFrom?: string;
   tab: HelpTab;
   term?: Term;
 };
@@ -53,6 +56,7 @@ type GuidanceContext = {
   returning: boolean;
   openHelp: (tab?: HelpTab, term?: Term) => void;
   startTour: () => void;
+  startPageTour: () => void;
 };
 const Context = createContext<GuidanceContext | null>(null);
 const serverSnapshot = () => null;
@@ -63,14 +67,6 @@ function useGuidance() {
 function useCopy() {
   return useRouteMessages(messages);
 }
-
-// Stable page anchors, independent of layout class names and translated text.
-const TOUR = [
-  { target: "#top-takeaways", key: "Summary" },
-  { target: "#birth-chart-guide, #chart-map", key: "Chart" },
-  { target: "#vimshottari-dashas, #timing", key: "Timing" },
-  { target: "#core", key: "Explore" },
-] as const;
 
 const SECTION_KEYS: Record<string, string> = {
   "life-areas": "lifeAreas",
@@ -102,15 +98,24 @@ export function DesktopOnboardingProvider({
   const [session, setSession] = useState<Session | null>(null);
   const returnFocus = useRef<HTMLElement | null>(null);
   const active = session?.path === path ? session : null;
-  // Discard the session on navigation so Back cannot resurrect an old tour.
-  if (session && session.path !== path) setSession(null);
+  // A guide started by the reader follows the actual form -> method -> chart
+  // flow. Other navigation closes it; Back never resurrects a finished guide.
+  if (session && session.path !== path && session.pendingFrom !== path) {
+    if (session.mode === "intake" && path === "/engine-select")
+      setSession({ ...session, path, mode: "method" });
+    else if (session.mode === "method" && path === "/insights")
+      setSession({ ...session, path, mode: "tour" });
+    else setSession(null);
+  } else if (session?.pendingFrom && session.path === path) {
+    setSession({ ...session, pendingFrom: undefined });
+  }
 
   function open(mode: Session["mode"], tab: HelpTab = "intro", term?: Term) {
     returnFocus.current =
       document.activeElement instanceof HTMLElement
         ? document.activeElement
         : null;
-    if (mode === "tour")
+    if (mode !== "help")
       saveGuidance({ welcomeDismissed: true, chartDismissed: true });
     setSession({ path, mode, tab, term });
   }
@@ -133,6 +138,8 @@ export function DesktopOnboardingProvider({
         returning,
         openHelp: (tab, term) => open("help", tab, term),
         startTour: () => open("tour"),
+        startPageTour: () =>
+          open(path === "/engine-select" ? "method" : "intake"),
       }}
     >
       {children}
@@ -143,10 +150,30 @@ export function DesktopOnboardingProvider({
           term={active.term}
           close={close}
           startTour={() => open("tour")}
+          startPageTour={() =>
+            open(path === "/engine-select" ? "method" : "intake")
+          }
+          queueSavedTour={() => {
+            returnFocus.current = document.querySelector<HTMLElement>(
+              "[data-desktop-help]",
+            );
+            saveGuidance({ welcomeDismissed: true, chartDismissed: true });
+            setSession({
+              path: "/insights",
+              pendingFrom: path,
+              mode: "tour",
+              tab: "intro",
+            });
+          }}
         />
       )}
-      {active?.mode === "tour" && (
-        <ChartTour key={path} close={close} audience={preferences.audience} />
+      {active && active.mode !== "help" && (
+        <GuidedWalkthrough
+          key={path}
+          mode={active.mode === "tour" ? "chart" : active.mode}
+          close={close}
+          audience={preferences.audience}
+        />
       )}
     </Context.Provider>
   );
@@ -294,7 +321,11 @@ export function DefaultMethodGuidance({
   const t = useCopy();
   const [comparing, setComparing] = useState(false);
   return (
-    <aside className={styles.method} aria-labelledby="default-method-title">
+    <aside
+      className={styles.method}
+      data-guide-default
+      aria-labelledby="default-method-title"
+    >
       <h2 id="default-method-title">{t("onboarding.defaultTitle")}</h2>
       <p>{t("onboarding.defaultBody")}</p>
       <div className={styles.actions}>
@@ -370,11 +401,15 @@ function HelpPanel({
   term,
   close,
   startTour,
+  startPageTour,
+  queueSavedTour,
 }: {
   tab: HelpTab;
   term?: Term;
   close: () => void;
   startTour: () => void;
+  startPageTour: () => void;
+  queueSavedTour: () => void;
 }) {
   const t = useCopy();
   const context = useGuidance();
@@ -385,6 +420,7 @@ function HelpPanel({
   const titleId = useId();
   const section = SECTION_KEYS[path.split("/")[2]];
   const chartReady = !!document.querySelector("[data-chart-ready]");
+  const lastChart = useLatestChartQuery();
 
   useEffect(() => {
     const node = dialog.current;
@@ -457,6 +493,57 @@ function HelpPanel({
       {tab === "intro" ? (
         <div className={styles.panelBody}>
           <p>{t("onboarding.introLead")}</p>
+          <div className={styles.launchCard}>
+            <h3>{t("onboarding.walkthrough.launchTitle")}</h3>
+            <p>{t("onboarding.walkthrough.launchBody")}</p>
+            <div className={styles.actions}>
+              {chartReady ? (
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={startTour}
+                >
+                  {t(
+                    context?.preferences.tourCompleted
+                      ? "onboarding.replay"
+                      : "onboarding.startTour",
+                  )}
+                </button>
+              ) : path === "/" || path === "/engine-select" ? (
+                <button
+                  type="button"
+                  className={styles.primary}
+                  onClick={startPageTour}
+                >
+                  {t("onboarding.walkthrough.guidePage")}
+                </button>
+              ) : null}
+              {!chartReady && lastChart && (
+                <Link
+                  className={
+                    path === "/" || path === "/engine-select"
+                      ? styles.quiet
+                      : styles.primary
+                  }
+                  href={`/insights?${lastChart}`}
+                  onClick={queueSavedTour}
+                >
+                  {t("onboarding.walkthrough.savedChart")}
+                </Link>
+              )}
+              {!chartReady &&
+                !lastChart &&
+                path !== "/" &&
+                path !== "/engine-select" && (
+                  <Link href="/" className={styles.primary} onClick={close}>
+                    {t("onboarding.createChart")}
+                  </Link>
+                )}
+            </div>
+            <p className={styles.note}>
+              {t("onboarding.walkthrough.everyVisit")}
+            </p>
+          </div>
           <fieldset className={styles.audience}>
             <legend>{t("onboarding.audience")}</legend>
             {(["beginner", "experienced"] as const).map((audience) => (
@@ -472,30 +559,21 @@ function HelpPanel({
               </label>
             ))}
           </fieldset>
-          <ol className={styles.introSteps}>
-            {["intake", "method", "reading"].map((step) => (
-              <li key={step}>
-                <h3>{t(`onboarding.${step}Title`)}</h3>
-                <p>{t(`onboarding.${step}Body`)}</p>
-              </li>
-            ))}
-          </ol>
+          <details className={styles.inlineHelp}>
+            <summary>{t("onboarding.walkthrough.overview")}</summary>
+            <ol className={styles.introSteps}>
+              {["intake", "method", "reading"].map((step) => (
+                <li key={step}>
+                  <h3>{t(`onboarding.${step}Title`)}</h3>
+                  <p>{t(`onboarding.${step}Body`)}</p>
+                </li>
+              ))}
+            </ol>
+          </details>
           {section && <SectionGuidance />}
           <p className={styles.note}>{t("onboarding.interpretation")}</p>
           <div className={styles.actions}>
-            {chartReady ? (
-              <button
-                type="button"
-                className={styles.primary}
-                onClick={startTour}
-              >
-                {t(
-                  context?.preferences.tourCompleted
-                    ? "onboarding.replay"
-                    : "onboarding.startTour",
-                )}
-              </button>
-            ) : path === "/" ? (
+            {chartReady ? null : path === "/" ? (
               <button
                 type="button"
                 className={styles.primary}
@@ -514,9 +592,6 @@ function HelpPanel({
               </Link>
             ) : null}
           </div>
-          {!chartReady && (
-            <p className={styles.note}>{t("onboarding.tourUnavailable")}</p>
-          )}
         </div>
       ) : (
         <div className={styles.panelBody}>
@@ -536,172 +611,5 @@ function HelpPanel({
         </div>
       )}
     </dialog>
-  );
-}
-
-function ChartTour({
-  close,
-  audience,
-}: {
-  close: () => void;
-  audience: GuidancePreferences["audience"];
-}) {
-  const t = useCopy();
-  const [steps] = useState(() =>
-    TOUR.map((step) => {
-      // Prefer the specific target even when its fallback is a parent element.
-      const target = step.target
-        .split(", ")
-        .find((selector) => document.querySelector(selector));
-      return target ? { ...step, target } : null;
-    }).filter((step) => step !== null),
-  );
-  const [position, setPosition] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const heading = useRef<HTMLHeadingElement>(null);
-  const [chartKey] = useState(
-    () =>
-      document.querySelector<HTMLElement>("[data-chart-ready]")?.dataset
-        .chartReady,
-  );
-  const step = steps[position];
-
-  useEffect(() => {
-    const check = () => {
-      const otherDialog = [
-        ...document.querySelectorAll<HTMLElement>(
-          '[aria-modal="true"], dialog[open]',
-        ),
-      ].some(
-        (node) =>
-          !node.hasAttribute("data-onboarding-ui") &&
-          !node.hidden &&
-          node.getAttribute("aria-hidden") !== "true",
-      );
-      setPaused(
-        otherDialog || !window.matchMedia("(min-width: 1024px)").matches,
-      );
-      const marker = document.querySelector<HTMLElement>("[data-chart-ready]");
-      if (
-        !marker ||
-        marker.dataset.chartReady !== chartKey ||
-        !step ||
-        !document.querySelector(step.target)
-      )
-        close();
-    };
-    check();
-    const observer = new MutationObserver(check);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: [
-        "aria-modal",
-        "open",
-        "aria-hidden",
-        "data-chart-ready",
-      ],
-    });
-    window.addEventListener("resize", check);
-    return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", check);
-    };
-  }, [chartKey, step, close]);
-
-  useEffect(() => {
-    if (!step || paused) return;
-    const target = document.querySelector<HTMLElement>(step.target);
-    if (!target) return;
-    target.classList.add(styles.tourTarget);
-    target.scrollIntoView({ block: "start", behavior: "instant" });
-    heading.current?.focus({ preventScroll: true });
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        close();
-      }
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      target.classList.remove(styles.tourTarget);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [step, paused, close]);
-
-  if (!step || paused) return null;
-  const last = position === steps.length - 1;
-  const readingLink = document
-    .querySelector<HTMLAnchorElement>('#core a[href*="/insights/full-reading"]')
-    ?.getAttribute("href");
-  const finish = () => {
-    saveGuidance({
-      tourCompleted: true,
-      chartDismissed: true,
-      welcomeDismissed: true,
-    });
-    close();
-  };
-  return (
-    <section
-      className={styles.tourPanel}
-      data-onboarding-ui
-      role="region"
-      aria-label={t("onboarding.tourLabel")}
-    >
-      <div className={styles.tourTop}>
-        <span>
-          {t("onboarding.progress", {
-            position: String(position + 1),
-            total: String(steps.length),
-          })}
-        </span>
-        <button
-          type="button"
-          className={styles.iconButton}
-          aria-label={t("onboarding.exit")}
-          onClick={close}
-        >
-          <X size={19} />
-        </button>
-      </div>
-      <h2 tabIndex={-1} ref={heading}>
-        {t(`onboarding.tour${step.key}Title`)}
-      </h2>
-      <p>
-        {t(
-          `onboarding.tour${step.key}${audience === "experienced" ? "Expert" : "Body"}`,
-        )}
-      </p>
-      <div className={styles.actions}>
-        <button
-          type="button"
-          className={styles.quiet}
-          disabled={position === 0}
-          onClick={() => setPosition(position - 1)}
-        >
-          {t("onboarding.previous")}
-        </button>
-        <button
-          type="button"
-          className={styles.primary}
-          onClick={() => (last ? finish() : setPosition(position + 1))}
-        >
-          {t(last ? "onboarding.finish" : "onboarding.next")}
-          {!last && <ArrowRight size={15} aria-hidden="true" />}
-        </button>
-      </div>
-      {last && readingLink && (
-        <Link
-          className={styles.readingLink}
-          href={readingLink}
-          onClick={finish}
-        >
-          {t("onboarding.exploreReading")}
-          <ArrowRight size={15} aria-hidden="true" />
-        </Link>
-      )}
-    </section>
   );
 }

@@ -1153,7 +1153,7 @@
     "showAround": "Zeig mir die Website",
     "dismiss": "Selbst erkunden",
     "chartTitle": "Dein Horoskop ist bereit. Wo anfangen?",
-    "chartBody": "Lerne deine Deutung in vier kurzen Schritten kennen. Du kannst jederzeit aufhören.",
+    "chartBody": "Folge den hervorgehobenen Bedienelementen. Du kannst zu Themen springen oder jederzeit aufhören.",
     "startTour": "Horoskop-Einführung starten",
     "replay": "Horoskop-Einführung wiederholen",
     "tourUnavailable": "Die Einführung ist verfügbar, sobald dein Horoskop geladen wurde. Du findest sie jederzeit unter Hilfe.",
@@ -1249,6 +1249,78 @@
         "name": "Planetenstärke",
         "body": "Eine nach astrologischen Regeln berechnete Größe. Ein höherer Wert garantiert kein besseres Lebensergebnis."
       }
+    },
+    "walkthrough": {
+      "launchTitle": "Lass dich auf der Seite führen",
+      "launchBody": "Die Führung hebt echte Bedienelemente hervor und gibt dir bei jedem Schritt eine Aufgabe.",
+      "guidePage": "Durch diese Seite führen",
+      "savedChart": "Durch mein gespeichertes Horoskop führen",
+      "everyVisit": "Bei jedem Besuch verfügbar. Die Führung verändert oder löscht keine Horoskope.",
+      "overview": "So ist die Website aufgebaut",
+      "tryThis": "Probiere es aus",
+      "jumpTo": "Zu einem Thema springen",
+      "focusField": "Zu diesem Feld",
+      "tryChart": "Horoskopansicht wechseln",
+      "openArea": "Deutung dieses Lebensbereichs öffnen",
+      "choosePeriod": "Zur Periodenauswahl",
+      "openTiming": "Zeitwerkzeuge öffnen",
+      "openReading": "Vollständige Deutung öffnen",
+      "openAtlas": "Teilhoroskope erkunden",
+      "useDefault": "Mein Horoskop mit Standard erstellen",
+      "chooseTradition": "Zu den Traditionen",
+      "chooseHouses": "Zu den Häusersystemen",
+      "loading": "Die Seite für deine Führung wird geöffnet…",
+      "unavailable": "Hier ist noch kein fertiges Horoskop verfügbar. Versuche es auf der Seite erneut, erstelle eines oder öffne Hilfe später.",
+      "Summary": {
+        "task": "Lies einen Hinweis und finde die Karte zu deiner aktuellen Periode. Die Bereiche darunter zeigen die Einzelheiten."
+      },
+      "Chart": {
+        "task": "Wechsle die Ansicht und finde die Zeile Aszendent in der Tabelle. Beide Diagramme zeigen dieselben Geburtspositionen."
+      },
+      "Timing": {
+        "task": "Wähle eine Zeile der aktuellen Perioden für Zeitachse und Deutung. Vergleiche die Daten; kleinere Perioden liegen innerhalb größerer."
+      },
+      "Explore": {
+        "task": "Öffne die vollständige Deutung und wähle ein Ergebnis oder eine Kombination. Lies die Erklärung und nutze den Zurück-Link."
+      },
+      "intake": {
+        "name": "Gib den Namen für die Deutung ein. Das Geburtsgeschlecht ist freiwillig. Gehe mit dem Button unter dem Formular zur Geburtsdatum-Frage; die Führung folgt dir.",
+        "birthDate": "Gib dein Geburtsdatum ein oder nutze den Kalender. Gehe dann zur Geburtszeit weiter. Nutze das am Geburtsort aufgezeichnete Datum.",
+        "birthTime": "Gib die aufgezeichnete Uhrzeit ein. Falls unbekannt, wähle unbekannte Zeit und einen ungefähren Tagesabschnitt. Gehe dann zum Geburtsort.",
+        "place": "Suche den Geburtsort und wähle einen Vorschlag oder nutze die manuellen Felder. Wenn alles bereit ist, führt der Hauptbutton zur Methode; die Führung geht dort weiter."
+      },
+      "LifeAreas": {
+        "title": "Wähle eine Frage zu deinem Leben",
+        "body": "Wähle einen Lebensbereich und lies seine Deutung sowie die zugehörigen Faktoren. Der Zurück-Link führt zur Übersicht.",
+        "task": "Wähle eine Lebensbereichskarte, lies die Zusammenfassung und öffne die vollständige Deutung für Faktoren und Hinweise."
+      },
+      "Forecast": {
+        "title": "Finde Prognosen und Datumswerkzeuge",
+        "body": "Erkunde Prognosen, Terminwahl und Jahreshoroskop. Dashas stehen in der Übersicht. Die Daten hängen von deinen Geburtsangaben ab.",
+        "task": "Öffne die Zeitwerkzeuge und wähle den passenden Bereich. Die Dashas bleiben in dieser Übersicht; der Zurück-Link führt hierher."
+      },
+      "Atlas": {
+        "title": "Vertiefe dich nach Bedarf",
+        "body": "Diese Horoskope werden aus Geburtspositionen für bestimmte Themen abgeleitet. Beginne mit der Übersicht; feine Teilungen erfordern eine genaue Geburtszeit.",
+        "task": "Öffne den Atlas und wähle ein Horoskop nach seinem Thema. Lies zuerst die Erklärung; du kannst jederzeit zum Geburtshoroskop zurück."
+      },
+      "Default": {
+        "title": "Starte mit einer fertigen Methode",
+        "body": "Beginne mit Lahiri und Ganzzeichenhäusern, unserer Standardberechnung. Andere Methoden kannst du später erkunden.",
+        "task": "Erstelle das Horoskop mit Standard oder vergleiche weitere Optionen. Nach der Erstellung wird die Führung im Horoskop fortgesetzt."
+      },
+      "Tradition": {
+        "title": "Wähle den Tierkreis-Bezugspunkt",
+        "body": "Die Tradition legt den Bezugspunkt des Tierkreises fest. Das Häusersystem teilt das Horoskop in zwölf Lebensbereiche.",
+        "task": "Wähle eine Tradition und lies die Beschreibung. Bei Unsicherheit behalte Lahiri. Die Wahl steht beim Erstellen-Button."
+      },
+      "Houses": {
+        "title": "Wähle die Häusereinteilung",
+        "body": "Die Tradition legt den Bezugspunkt des Tierkreises fest. Das Häusersystem teilt das Horoskop in zwölf Lebensbereiche.",
+        "task": "Wähle einen Stil und lies die Erklärung oder behalte Ganzzeichenhäuser. Nutze danach Mein Horoskop ansehen; die Führung geht dort weiter."
+      },
+      "minimize": "F?hrung verkleinern",
+      "restore": "Anleitung anzeigen"
     }
   },
   "planetNames": {

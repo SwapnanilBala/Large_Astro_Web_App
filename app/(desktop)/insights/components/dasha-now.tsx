@@ -56,7 +56,7 @@ export function DashaNow({ path, now, focusedDepth, onFocus, nakshatra, meaning 
   const levelLabel = (level: number) => t(LEVEL_LABEL_KEYS[level] ?? "dasha.mahaDasha");
 
   return (
-    <section className={styles.now} aria-labelledby="dasha-now-title">
+    <section className={styles.now} data-guide-current-period aria-labelledby="dasha-now-title">
       <div className={styles.dialWrap}>
         <svg className={styles.dial} viewBox={`0 0 ${SIZE} ${SIZE}`} aria-hidden="true">
           {path.map((span, index) => {

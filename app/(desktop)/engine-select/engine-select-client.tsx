@@ -184,6 +184,7 @@ export default function EngineSelectClient({
         <div
           className={`${styles.rail} ${styles.animRail}`}
           role="radiogroup"
+          data-guide-tradition
           aria-label={t("engineSelect.heading")}
         >
           {engineGroups.map((group, index) => {
@@ -256,7 +257,7 @@ export default function EngineSelectClient({
             </p>
           </details>
 
-          <div className={styles.styleBlock}>
+          <div className={styles.styleBlock} data-guide-houses>
             <span className={styles.styleLabel} id="engine-style-label">
               {t("engineSelect.styleLabel")}
             </span>

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { ReactNode } from "react";
 import {
   cleanup,
   fireEvent,
@@ -26,6 +27,17 @@ import {
 
 const route = vi.hoisted(() => ({ path: "/insights" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.path }));
+
+function PageFixture({ children }: { children?: ReactNode }) {
+  return (
+    <LanguageProvider baseMessages={{}}>
+      <DesktopOnboardingProvider>
+        <DesktopHelpButton />
+        {children}
+      </DesktopOnboardingProvider>
+    </LanguageProvider>
+  );
+}
 
 function Fixture({
   chartKey = "fixture",
@@ -72,6 +84,14 @@ beforeEach(() => {
     })),
   );
   Element.prototype.scrollIntoView = vi.fn();
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      unobserve() {}
+      disconnect() {}
+    },
+  );
   HTMLDialogElement.prototype.showModal = function () {
     this.setAttribute("open", "");
   };
@@ -86,6 +106,146 @@ afterEach(() => {
 });
 
 describe("desktop onboarding", () => {
+  it("offers a saved-chart walkthrough after invitations were dismissed", async () => {
+    route.path = "/";
+    localStorage.setItem(
+      chartHistoryKey(),
+      JSON.stringify([{ name: "Reader", queryString: "fixture=kept" }]),
+    );
+    saveGuidance({
+      welcomeDismissed: true,
+      chartDismissed: true,
+      tourCompleted: true,
+    });
+    const view = render(
+      <PageFixture>
+        <div data-guide-intake data-guide-question="name" />
+      </PageFixture>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Help" }));
+    const savedLink = screen.getByRole("link", {
+      name: "Guide me through my saved chart",
+    });
+    expect(savedLink).toHaveAttribute("href", "/insights?fixture=kept");
+    savedLink.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(savedLink);
+    route.path = "/insights";
+    view.rerender(
+      <PageFixture>
+        <div data-chart-ready="fixture=kept" />
+        <section id="top-takeaways">Summary</section>
+      </PageFixture>,
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Start with Top Takeaways" }),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("follows actual intake questions through method selection into the chart", async () => {
+    route.path = "/";
+    const view = render(
+      <PageFixture>
+        <div
+          data-guide-intake
+          data-guide-question="name"
+          data-guide-title="Your name"
+          data-guide-helper="Enter a name"
+        >
+          <input aria-label="Name" />
+        </div>
+      </PageFixture>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Help" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Guide me on this page" }),
+    );
+    expect(
+      screen.getByRole("heading", { name: "Your name" }),
+    ).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Take me to this field" }),
+    );
+    expect(screen.getByRole("textbox", { name: "Name" })).toHaveFocus();
+    view.rerender(
+      <PageFixture>
+        <div
+          data-guide-intake
+          data-guide-question="birthDate"
+          data-guide-title="Your birthday"
+          data-guide-helper="Choose a date"
+        />
+      </PageFixture>,
+    );
+    await waitFor(() => expect(screen.getByText("2 of 4")).toBeInTheDocument());
+    expect(
+      screen.getByRole("heading", { name: "Your birthday" }),
+    ).toBeInTheDocument();
+    view.rerender(<PageFixture />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Opening the page for your walkthrough",
+    );
+    route.path = "/engine-select";
+    view.rerender(
+      <PageFixture>
+        <aside data-guide-default>
+          <button>Default</button>
+        </aside>
+      </PageFixture>,
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Start with a ready-made method" }),
+      ).toBeInTheDocument(),
+    );
+    route.path = "/insights";
+    view.rerender(
+      <PageFixture>
+        <div data-chart-ready="fixture" />
+        <section id="top-takeaways">Summary</section>
+      </PageFixture>,
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByRole("heading", { name: "Start with Top Takeaways" }),
+      ).toBeInTheDocument(),
+    );
+  });
+
+  it("keeps a requested tour pending while its chart loads, and explains errors", async () => {
+    route.path = "/";
+    localStorage.setItem(
+      chartHistoryKey(),
+      JSON.stringify([{ name: "Reader", queryString: "fixture=1" }]),
+    );
+    const view = render(<PageFixture />);
+    fireEvent.click(screen.getByRole("button", { name: "Help" }));
+    const savedLink = screen.getByRole("link", {
+      name: "Guide me through my saved chart",
+    });
+    savedLink.addEventListener("click", (event) => event.preventDefault());
+    fireEvent.click(savedLink);
+    route.path = "/insights";
+    view.rerender(<PageFixture />);
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Opening the page for your walkthrough",
+    );
+    view.rerender(
+      <PageFixture>
+        <div data-guide-error />
+      </PageFixture>,
+    );
+    await waitFor(() =>
+      expect(screen.getByRole("status")).toHaveTextContent(
+        "cannot find a ready chart",
+      ),
+    );
+    expect(
+      screen.getByRole("link", { name: "Create a chart" }),
+    ).toHaveAttribute("href", "/");
+  });
+
   it("offers guidance without starting a tour and remembers dismissal on remount", () => {
     const view = render(<Fixture />);
     expect(screen.getByText("New to Lagna Atelier?")).toBeInTheDocument();

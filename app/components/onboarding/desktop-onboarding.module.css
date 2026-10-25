@@ -275,8 +275,8 @@
   right: 1.5rem;
   bottom: 1.5rem;
   z-index: 950;
-  width: 350px;
-  max-height: calc(100dvh - 7rem);
+  width: 380px;
+  max-height: calc(100dvh - 200px);
   overflow: auto;
   padding: 1.2rem 1.4rem;
   border: 1px solid var(--accent-gold);
@@ -292,6 +292,14 @@
   align-items: center;
   color: var(--accent-gold);
   font-size: var(--text-meta);
+}
+.tourControls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.tourMinimized {
+  width: 300px;
 }
 .tourPanel h2 {
   margin: 0.4rem 0 0.6rem;
@@ -321,6 +329,101 @@
   margin-top: 1rem;
   color: var(--heading-teal);
   font-size: var(--text-meta);
+}
+.launchCard {
+  padding: 1rem;
+  margin: 1rem 0;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.launchCard h3 {
+  margin: 0;
+  font: 600 1.05rem/1.4 var(--font-body);
+}
+.launchCard p {
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+  margin: 0.5rem 0 0.8rem;
+}
+.launchCard .note {
+  margin-bottom: 0;
+}
+.tryTask {
+  padding: 0.8rem 0.9rem;
+  margin: 0.85rem 0;
+  border-left: 2px solid var(--accent-teal);
+  background: var(--surface);
+  border-radius: var(--radius-sm);
+}
+.tryTask strong {
+  color: var(--heading-teal);
+  font-size: var(--text-meta);
+}
+.tryTask p {
+  margin: 0.35rem 0 0;
+  font-size: var(--text-meta);
+}
+.stepAction {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0;
+  margin: 0 0 0.8rem;
+  min-height: 0;
+  color: var(--heading-teal);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+  font: 500 var(--text-meta) / 1.5 var(--font-body);
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  cursor: pointer;
+}
+.tourContents {
+  margin-top: 0.85rem;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+}
+.tourContents summary {
+  cursor: pointer;
+}
+.tourContents ol {
+  padding-left: 1.4rem;
+  margin: 0.65rem 0 0;
+}
+.tourContents button {
+  background: transparent;
+  border: 0;
+  color: var(--text-secondary);
+  font: inherit;
+  text-align: left;
+  padding: 0.3rem 0;
+  margin: 0;
+  min-height: 0;
+  box-shadow: none;
+  text-shadow: none;
+  cursor: pointer;
+}
+.tourContents button[aria-current="step"] {
+  color: var(--accent-gold);
+  text-decoration: underline;
+}
+.stepAction::before,
+.stepAction::after,
+.tourContents button::before,
+.tourContents button::after {
+  display: none;
+}
+.stepAction:focus-visible,
+.tourContents button:focus-visible,
+.tourContents summary:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 4px;
 }
 .helpButton,
 .primary,
