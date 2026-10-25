@@ -1,4 +1,5 @@
 "use client";
+import { SectionGuidance } from "@/app/components/onboarding/DesktopOnboarding";
 
 import type { ChangeEvent, Dispatch, SetStateAction } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -814,6 +815,7 @@ export default function CompatibilityPageClient({
           <p className="lead">{t("compatibility.intro")}</p>
         </header>
 
+        <SectionGuidance />
         <div className="compatibility-grid">
           <ProfileCard
             title={t("compatibility.yourChart")}

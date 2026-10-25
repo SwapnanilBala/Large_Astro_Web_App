@@ -1,4 +1,5 @@
 "use client";
+import { SectionGuidance, TermHelp } from "@/app/components/onboarding/DesktopOnboarding";
 
 import Link from "next/link";
 import { FiArrowLeft, FiBookOpen } from "react-icons/fi";
@@ -65,6 +66,8 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
           )}
         </p>
       </header>
+      <SectionGuidance />
+      <TermHelp terms={["yoga", "strength"]} />
 
       {rules.length > 0 && (
         <section className={styles.section}>

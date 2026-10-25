@@ -19,6 +19,7 @@ import {
 import { useTranslation } from "@/lib/i18n-context";
 import TraditionGlyph from "@/app/components/TraditionGlyph";
 import styles from "./engine-select.module.css";
+import { DefaultMethodGuidance } from "@/app/components/onboarding/DesktopOnboarding";
 
 /*
  * Two axes, not twelve cards.
@@ -176,7 +177,9 @@ export default function EngineSelectClient({
         <p className={styles.lead}>{t("engineSelect.lead")}</p>
       </header>
 
-      <div className={styles.split}>
+      <DefaultMethodGuidance disabled={isPending} onContinue={() => handleGenerate(DEFAULT_ENGINE_ID)} />
+
+      <div className={styles.split} id="calculation-methods">
         {/* --- Left rail: the tradition --- */}
         <div
           className={`${styles.rail} ${styles.animRail}`}

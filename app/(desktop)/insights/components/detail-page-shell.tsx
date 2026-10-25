@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import DetailPageBackLink from "./detail-page-back-link";
 import styles from "./detail-page-shell.module.css";
+import { SectionGuidance } from "@/app/components/onboarding/DesktopOnboarding";
 
 /*
  * The frame every "opened from the results page" page sits in.
@@ -46,6 +47,7 @@ export default function DetailPageShell({
           <p className={styles.lead}>{lead}</p>
         </header>
 
+        <SectionGuidance />
         {children}
 
         <DetailPageBackLink href={backHref} className={styles.backButtonBottom} />

@@ -1139,7 +1139,117 @@
   "onboarding": {
     "ariaLabel": "Einführungsanimation. Klicke oder drücke Escape, um sie zu überspringen.",
     "tagline": "Dein kosmischer Bauplan, entschlüsselt",
-    "skipHint": "Klicke oder drücke Esc, um zu überspringen"
+    "skipHint": "Klicke oder drücke Esc, um zu überspringen",
+    "help": "Hilfe",
+    "close": "Hilfe schließen",
+    "title": "Orientierung, wann immer du sie brauchst",
+    "introTab": "Kurze Einführung",
+    "basicsTab": "Astrologie-Grundlagen",
+    "beginner": "Ich bin neu in der Astrologie",
+    "experienced": "Ich kenne Astrologie",
+    "audience": "Wie vertraut bist du mit Astrologie?",
+    "welcomeTitle": "Zum ersten Mal bei Lagna Atelier?",
+    "welcomeBody": "Erstelle dein Geburtshoroskop, erkunde deine aktuelle Lebensphase und entdecke Deutungen zu deinen Interessen. Vorkenntnisse sind nicht nötig.",
+    "showAround": "Zeig mir die Website",
+    "dismiss": "Selbst erkunden",
+    "chartTitle": "Dein Horoskop ist bereit. Wo anfangen?",
+    "chartBody": "Lerne deine Deutung in vier kurzen Schritten kennen. Du kannst jederzeit aufhören.",
+    "startTour": "Horoskop-Einführung starten",
+    "replay": "Horoskop-Einführung wiederholen",
+    "tourUnavailable": "Die Einführung ist verfügbar, sobald dein Horoskop geladen wurde. Du findest sie jederzeit unter Hilfe.",
+    "introLead": "Beginne mit einer hilfreichen Deutung und erkunde die Einzelheiten in deinem Tempo.",
+    "intakeTitle": "1. Geburtsdaten eingeben",
+    "intakeBody": "Gib Datum, Uhrzeit und Geburtsort an. Falls du die Uhrzeit nicht kennst, wähle ungefähr oder unbekannt.",
+    "methodTitle": "2. Berechnungsmethode wählen",
+    "methodBody": "Unsicher? Nutze Lahiri mit Ganzzeichenhäusern, unsere Standardeinstellung. Methoden kannst du später vergleichen.",
+    "readingTitle": "3. Mit der Zusammenfassung beginnen",
+    "readingBody": "Lies zuerst die wichtigsten Hinweise. Erkunde dann Lebensbereiche, Zeitzyklen oder die gesamte Deutung. Mein Horoskop führt dich zum letzten Horoskop zurück.",
+    "startDetails": "Mit Geburtsdaten beginnen",
+    "createChart": "Horoskop erstellen",
+    "interpretation": "Planetenpositionen werden berechnet; Deutungen interpretieren sie astrologisch. Sie beschreiben mögliche Themen, keine garantierten Ereignisse. Einige längere Texte werden mit KI erstellt.",
+    "uncertainTime": "Bei ungefährer oder unbekannter Geburtszeit können sich Aszendent, Häuser und zeitabhängige Deutungen ändern. Betrachte diese Teile als vorläufig.",
+    "defaultTitle": "Welche Methode soll ich wählen?",
+    "defaultBody": "Beginne mit Lahiri und Ganzzeichenhäusern, unserer Standardberechnung. Andere Methoden kannst du später erkunden.",
+    "useDefault": "Mit Standard fortfahren",
+    "compare": "Methoden vergleichen",
+    "methodExplain": "Die Tradition legt den Bezugspunkt des Tierkreises fest. Das Häusersystem teilt das Horoskop in zwölf Lebensbereiche.",
+    "whyDetails": "Warum diese Angaben?",
+    "detailsBody": "Das Datum bestimmt die Planetenpositionen. Die Uhrzeit hilft, Aszendent und Häuser zu berechnen. Verwende deinen Geburtsort. Letzte Horoskope bleiben in diesem Browser; das Speichern im Konto ist eine separate, freiwillige Wahl.",
+    "termsLabel": "Begriffe verstehen",
+    "termHelp": "{term} erklären",
+    "sectionHelp": "So nutzt du diesen Bereich",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "exit": "Einführung verlassen",
+    "finish": "Einführung beenden",
+    "progress": "{position} von {total}",
+    "tourLabel": "Horoskop-Einführung",
+    "tourSummaryTitle": "Beginne mit den wichtigsten Hinweisen",
+    "tourSummaryBody": "Die kurzen Hinweise geben dir einen Einstieg. Du musst nicht jedes Symbol kennen, um mit dem Lesen zu beginnen.",
+    "tourSummaryExpert": "Die Zusammenfassung zeigt die wichtigsten Signale und die aktuelle Periode. Die folgenden Bereiche liefern die Details.",
+    "tourChartTitle": "Lerne dein Geburtshoroskop kennen",
+    "tourChartBody": "Das Diagramm zeigt die Planetenpositionen bei der Geburt. Lagna bedeutet Aszendent, Häuser stehen für Lebensbereiche. Unbekannte Begriffe findest du unter Hilfe.",
+    "tourChartExpert": "Wechsle zwischen Konstellationsansicht und nordindischer Darstellung und prüfe die Planetenpositionen neben dem Horoskop.",
+    "tourTimingTitle": "Erkunde deine aktuelle Periode",
+    "tourTimingBody": "Ein Dasha ist eine Planetenperiode der vedischen Astrologie. Erkunde hier die Perioden und öffne unten den Zeitbereich für Prognosen und weitere Werkzeuge.",
+    "tourTimingExpert": "Prüfe hier die Vimshottari-Perioden. Der Zeitbereich bietet Prognosen, Jahreshoroskope und Werkzeuge zur Terminwahl.",
+    "tourExploreTitle": "Wähle deine nächste Deutung",
+    "tourExploreBody": "Die vollständige Deutung verbindet die Ergebnisse des Horoskops. Lebensbereiche findest du in der Übersicht. Mein Horoskop bringt dich zurück; Hilfe wiederholt die Einführung.",
+    "tourExploreExpert": "Öffne die vollständige Deutung für Ergebnisse und Planetenkombinationen. Lebensbereiche und Teilhoroskope findest du in der Übersicht.",
+    "exploreReading": "Vollständige Deutung öffnen",
+    "sections": {
+      "lifeAreas": "Wähle einen Lebensbereich und lies seine Deutung sowie die zugehörigen Faktoren. Der Zurück-Link führt zur Übersicht.",
+      "timing": "Erkunde Prognosen, Terminwahl und Jahreshoroskop. Dashas stehen in der Übersicht. Die Daten hängen von deinen Geburtsangaben ab.",
+      "fullReading": "Wähle ein Ergebnis oder eine Planetenkombination für die Erklärung. Erkunde ein Thema nach dem anderen und kehre jederzeit zur Übersicht zurück.",
+      "divisional": "Diese Horoskope werden aus Geburtspositionen für bestimmte Themen abgeleitet. Beginne mit der Übersicht; feine Teilungen erfordern eine genaue Geburtszeit.",
+      "advanced": "Die Tabellen zeigen Berechnungen und Faktoren hinter der Deutung. Für einen einfachen Einstieg nutze die Übersicht.",
+      "compatibility": "Gib die Geburtsdaten der anderen Person ein, um beide Horoskope zu vergleichen. Lies einzelne Faktoren und die Gesamtdeutung.",
+      "houseSupport": "Erkunde die Verteilung der Unterstützung auf die Häuser. Diese Werte sind nur ein Faktor der gesamten Deutung.",
+      "lifeShifts": "Erkunde gedeutete Veränderungen und die zugehörigen Perioden. Die Datierungen hängen von den Geburtsangaben ab.",
+      "palm": "Lies oder vergleiche gespeicherte Handlesungen. Beachte beim Fotografieren die Hinweise und prüfe das Bild vor dem Senden."
+    },
+    "terms": {
+      "chart": {
+        "name": "Geburtshoroskop",
+        "body": "Eine Karte der Planetenpositionen für Datum, Uhrzeit und Ort deiner Geburt. Sie ist die Grundlage der Deutungen."
+      },
+      "lagna": {
+        "name": "Lagna / Aszendent",
+        "body": "Das Zeichen, das bei der Geburt am östlichen Horizont aufstieg. Es orientiert die Häuser und hängt von der Geburtszeit ab."
+      },
+      "house": {
+        "name": "Haus",
+        "body": "Eine von zwölf Einteilungen für Lebensbereiche wie Arbeit oder Beziehungen. Das gewählte Häusersystem bestimmt die Grenzen."
+      },
+      "dasha": {
+        "name": "Dasha",
+        "body": "Eine Planetenperiode der vedischen Astrologie zur Deutung von Themen im Zeitverlauf. Sie enthält kleinere Unterperioden."
+      },
+      "transit": {
+        "name": "Transit",
+        "body": "Planetenposition zu einem bestimmten Zeitpunkt, verglichen mit dem Geburtshoroskop. Sie ergänzt die Positionen bei der Geburt."
+      },
+      "nakshatra": {
+        "name": "Nakshatra",
+        "body": "Eine von 27 Einteilungen des vedischen Tierkreises. Das Mond-Nakshatra bei der Geburt dient zur Berechnung der Dasha-Folge."
+      },
+      "yoga": {
+        "name": "Yoga",
+        "body": "Eine Planetenkombination mit einer astrologischen Deutung. Ihre Bedeutung hängt vom gesamten Horoskop ab und garantiert kein Ergebnis."
+      },
+      "divisional": {
+        "name": "Teilhoroskop",
+        "body": "Ein aus Geburtspositionen abgeleitetes Horoskop für bestimmte Themen. Feine Teilungen reagieren besonders auf die Genauigkeit der Geburtszeit."
+      },
+      "ayanamsha": {
+        "name": "Ayanamsha",
+        "body": "Der Bezugsversatz des siderischen Tierkreises. Eine andere Tradition kann Zeichen oder Grade nahe den Grenzen verschieben."
+      },
+      "strength": {
+        "name": "Planetenstärke",
+        "body": "Eine nach astrologischen Regeln berechnete Größe. Ein höherer Wert garantiert kein besseres Lebensergebnis."
+      }
+    }
   },
   "planetNames": {
     "sun": "Sonne",

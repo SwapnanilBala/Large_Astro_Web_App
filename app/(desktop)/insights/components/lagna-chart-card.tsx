@@ -15,6 +15,7 @@ import {
 import { GRAHA_ORDER, PLANET_COLORS } from "@/lib/planet-colors";
 import { useChartStyle, type ChartStyle } from "@/lib/use-chart-style";
 import styles from "./lagna-chart-card.module.css";
+import { TermHelp } from "@/app/components/onboarding/DesktopOnboarding";
 
 /*
  * The birth chart card on the results page: the chart in the reader's chosen
@@ -147,6 +148,7 @@ export default function LagnaChartCard({ payload }: { payload: ChartApiResponse 
           ))}
         </div>
       </header>
+      <TermHelp terms={["chart", "lagna", "house"]} />
 
       <div className={styles.body}>
         <div className={styles.chart}>

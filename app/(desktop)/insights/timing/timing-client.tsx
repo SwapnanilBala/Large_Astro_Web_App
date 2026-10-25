@@ -7,6 +7,7 @@ import PanelErrorBoundary from "@/app/(desktop)/insights/components/PanelErrorBo
 import { useRouteMessages } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
 import styles from "./timing.module.css";
+import { SectionGuidance } from "@/app/components/onboarding/DesktopOnboarding";
 
 /*
  * Timing and electional, on its own page.
@@ -88,6 +89,8 @@ export default function TimingClient({ clientName, historyQs, birthDate }: Props
         <h1 className={styles.title}>{tr("timing.client.title")}</h1>
         <p className={styles.lead}>{tr("timing.client.lead")}</p>
       </header>
+
+      <SectionGuidance />
 
       {SECTIONS.map((section) => (
         <section key={section.id} id={section.id} className={styles.section}>

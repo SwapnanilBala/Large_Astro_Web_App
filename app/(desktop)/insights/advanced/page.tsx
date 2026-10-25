@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { SectionGuidance } from "@/app/components/onboarding/DesktopOnboarding";
 import dynamic from "next/dynamic";
 import { sessionFromCookieStore } from "@/lib/identity/require-session";
 import BackButton from "@/app/components/BackButton";
@@ -127,6 +128,7 @@ export default async function AdvancedPage({ searchParams }: AdvancedPageProps) 
     <PageTransition>
     <div className="insights-shell below-navbar">
       <BackToReadingButton queryString={buildChartHistoryQuery(chartParams)} labelKey="home.back" />
+      <SectionGuidance />
       <AdvancedLoader chartParams={chartParams} focusView={focusView} />
     </div>
     </PageTransition>

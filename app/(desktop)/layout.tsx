@@ -9,6 +9,7 @@ import ViewportScaler from "@/app/components/ViewportScaler";
 import SkipToContent from "@/app/components/SkipToContent";
 import { ToastProvider } from "@/lib/toast-context";
 import DesktopLanguageProvider from "@/lib/i18n-desktop";
+import { DesktopOnboardingProvider } from "@/app/components/onboarding/DesktopOnboarding";
 import { chartHistoryKey } from "@/lib/chart-history-store";
 import { ACCOUNT_LABEL_KEY, ACCOUNT_LABEL_MAX_AGE_MS } from "@/lib/account-label";
 
@@ -127,15 +128,17 @@ export default function DesktopLayout({
       <DesktopLanguageProvider>
         <SkipToContent />
         <ToastProvider>
-          <Navbar />
-          <main id="main-content" tabIndex={-1}>
-            {children}
-          </main>
-          <BottomNav />
-          {/* Mounted once for the whole shell rather than per panel: the three
-              features that can raise it sit on two different routes, and one
-              of them is a lazily-imported child several levels down. */}
-          <FreeUsagePrompt />
+          <DesktopOnboardingProvider>
+            <Navbar />
+            <main id="main-content" tabIndex={-1}>
+              {children}
+            </main>
+            <BottomNav />
+            {/* Mounted once for the whole shell rather than per panel: the three
+                features that can raise it sit on two different routes, and one
+                of them is a lazily-imported child several levels down. */}
+            <FreeUsagePrompt />
+          </DesktopOnboardingProvider>
         </ToastProvider>
       </DesktopLanguageProvider>
     </div>

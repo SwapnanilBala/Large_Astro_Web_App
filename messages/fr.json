@@ -1139,7 +1139,117 @@
   "onboarding": {
     "ariaLabel": "Animation d'introduction. Cliquez ou appuyez sur Échap pour passer.",
     "tagline": "Votre plan cosmique, décodé",
-    "skipHint": "Cliquez ou appuyez sur Échap pour passer"
+    "skipHint": "Cliquez ou appuyez sur Échap pour passer",
+    "help": "Aide",
+    "close": "Fermer l’aide",
+    "title": "Un peu de repères, quand vous en avez besoin",
+    "introTab": "Introduction rapide",
+    "basicsTab": "Bases de l’astrologie",
+    "beginner": "Je découvre l’astrologie",
+    "experienced": "Je connais l’astrologie",
+    "audience": "Connaissez-vous l’astrologie ?",
+    "welcomeTitle": "Première visite sur Lagna Atelier ?",
+    "welcomeBody": "Créez votre thème natal, explorez votre période actuelle et découvrez des lectures sur les sujets qui vous intéressent. Aucune connaissance préalable nécessaire.",
+    "showAround": "Me faire découvrir le site",
+    "dismiss": "Explorer librement",
+    "chartTitle": "Votre thème est prêt. Par où commencer ?",
+    "chartBody": "Découvrez votre lecture en quatre étapes courtes. Vous pouvez quitter à tout moment.",
+    "startTour": "Découvrir mon thème",
+    "replay": "Revoir la visite du thème",
+    "tourUnavailable": "La visite sera disponible une fois votre thème chargé. Retrouvez-la dans Aide.",
+    "introLead": "Commencez par une lecture utile, puis explorez à votre rythme.",
+    "intakeTitle": "1. Saisissez vos données de naissance",
+    "intakeBody": "Indiquez la date, l’heure et le lieu de naissance. Si vous ignorez l’heure, choisissez une heure approximative ou inconnue.",
+    "methodTitle": "2. Choisissez une méthode de calcul",
+    "methodBody": "En cas de doute, utilisez Lahiri avec les maisons en signes entiers, notre réglage par défaut. Vous pourrez comparer ensuite.",
+    "readingTitle": "3. Commencez par les points essentiels",
+    "readingBody": "Lisez le résumé, puis explorez les domaines de vie, les périodes ou la lecture complète. Mon thème vous ramène au dernier thème.",
+    "startDetails": "Commencer par mes données",
+    "createChart": "Créer un thème",
+    "interpretation": "Les positions sont calculées ; les lectures les interprètent selon l’astrologie. Elles décrivent des thèmes possibles, sans garantir les événements. Certaines lectures longues utilisent du texte généré par IA.",
+    "uncertainTime": "Une heure approximative ou inconnue peut modifier l’ascendant, les maisons et les lectures sensibles à l’heure. Considérez ces parties comme provisoires.",
+    "defaultTitle": "Vous hésitez sur la méthode ?",
+    "defaultBody": "Commencez avec Lahiri et les maisons en signes entiers, notre calcul par défaut. Explorez les autres méthodes plus tard.",
+    "useDefault": "Continuer avec le réglage par défaut",
+    "compare": "Comparer les méthodes",
+    "methodExplain": "La tradition fixe le point de référence du zodiaque. Le système de maisons partage le thème en douze domaines de vie.",
+    "whyDetails": "Pourquoi ces données ?",
+    "detailsBody": "La date permet de calculer les positions. L’heure aide à déterminer l’ascendant et les maisons. Utilisez votre lieu de naissance. Les thèmes récents restent dans ce navigateur ; leur sauvegarde sur un compte est un choix distinct et facultatif.",
+    "termsLabel": "Comprendre les termes",
+    "termHelp": "Expliquer {term}",
+    "sectionHelp": "Comment utiliser cette section",
+    "previous": "Retour",
+    "next": "Suivant",
+    "exit": "Quitter la visite",
+    "finish": "Terminer la visite",
+    "progress": "{position} sur {total}",
+    "tourLabel": "Découverte du thème",
+    "tourSummaryTitle": "Commencez par les points essentiels",
+    "tourSummaryBody": "Ces courts points vous donnent des repères. Il n’est pas nécessaire de connaître tous les symboles pour commencer.",
+    "tourSummaryExpert": "Le résumé présente les principaux signaux du thème et la période actuelle. Les sections suivantes en donnent le détail.",
+    "tourChartTitle": "Découvrez votre thème natal",
+    "tourChartBody": "Ce schéma représente les positions à la naissance. Lagna désigne l’ascendant ; les maisons représentent des domaines de vie. Consultez Aide pour les termes inconnus.",
+    "tourChartExpert": "Alternez les vues constellation et nord-indienne, et consultez les positions à côté du thème.",
+    "tourTimingTitle": "Explorez votre période actuelle",
+    "tourTimingBody": "Un dasha est une période planétaire de l’astrologie védique. Explorez les périodes ici, puis ouvrez la page des cycles pour les prévisions et autres outils.",
+    "tourTimingExpert": "Consultez ici les périodes Vimshottari. La page des cycles propose prévisions, thème annuel et outils d’astrologie élective.",
+    "tourExploreTitle": "Choisissez votre prochaine lecture",
+    "tourExploreBody": "La lecture complète rassemble les interprétations du thème. Les domaines de vie sont aussi accessibles depuis l’aperçu. Mon thème permet de revenir ; Aide de revoir la visite.",
+    "tourExploreExpert": "Ouvrez la lecture complète pour les résultats et combinaisons planétaires. Explorez aussi les domaines de vie et thèmes divisionnels depuis l’aperçu.",
+    "exploreReading": "Ouvrir la lecture complète",
+    "sections": {
+      "lifeAreas": "Choisissez un domaine de vie, puis lisez son interprétation et les facteurs associés. Le lien de retour vous ramène à l’aperçu.",
+      "timing": "Explorez les prévisions, le choix des dates et le thème annuel. Les dashas sont dans l’aperçu. Les dates dépendent des données de naissance.",
+      "fullReading": "Choisissez un résultat ou une combinaison pour lire son explication. Explorez un sujet à la fois et revenez librement à l’aperçu.",
+      "divisional": "Ces thèmes sont dérivés des positions natales pour examiner des sujets précis. Commencez par l’aperçu ; les divisions fines exigent une heure précise.",
+      "advanced": "Les tableaux présentent les calculs et facteurs derrière les lectures. Pour une introduction simple, commencez par l’aperçu.",
+      "compatibility": "Saisissez les données de l’autre personne pour comparer deux thèmes. Lisez les facteurs individuels et l’interprétation générale.",
+      "houseSupport": "Explorez la répartition du soutien entre les maisons. Ces scores ne sont qu’un facteur parmi ceux de la lecture.",
+      "lifeShifts": "Explorez les changements interprétés et les périodes associées. Les dates dépendent des données de naissance.",
+      "palm": "Lisez ou comparez les lectures de paume enregistrées. Suivez les consignes de capture et vérifiez la photo avant l’envoi."
+    },
+    "terms": {
+      "chart": {
+        "name": "Thème natal",
+        "body": "Carte des positions planétaires pour votre date, heure et lieu de naissance. Elle sert de point de départ aux lectures."
+      },
+      "lagna": {
+        "name": "Lagna / Ascendant",
+        "body": "Signe qui se levait à l’horizon oriental à la naissance. Il oriente les maisons et dépend de l’heure."
+      },
+      "house": {
+        "name": "Maison",
+        "body": "Une des douze divisions associées à des domaines de vie, comme le travail ou les relations. Le système choisi fixe les divisions."
+      },
+      "dasha": {
+        "name": "Dasha",
+        "body": "Période planétaire utilisée en astrologie védique pour interpréter des thèmes dans le temps. Elle contient des sous-périodes."
+      },
+      "transit": {
+        "name": "Transit",
+        "body": "Position d’une planète à un moment donné, comparée au thème natal. Elle constitue une autre couche que les positions de naissance."
+      },
+      "nakshatra": {
+        "name": "Nakshatra",
+        "body": "Une des 27 divisions du zodiaque védique. Le nakshatra lunaire de naissance sert au calcul de la suite des dashas."
+      },
+      "yoga": {
+        "name": "Yoga",
+        "body": "Combinaison planétaire ayant une interprétation astrologique. Son sens dépend du thème entier et ne garantit aucun résultat."
+      },
+      "divisional": {
+        "name": "Thème divisionnel",
+        "body": "Thème dérivé des positions natales pour examiner un sujet précis. Les divisions fines sont sensibles à la précision de l’heure."
+      },
+      "ayanamsha": {
+        "name": "Ayanamsha",
+        "body": "Décalage de référence du zodiaque sidéral. Un changement de tradition peut déplacer signes ou degrés près des limites."
+      },
+      "strength": {
+        "name": "Force planétaire",
+        "body": "Mesure calculée suivant des règles astrologiques. Un score élevé ne garantit pas une vie plus favorable."
+      }
+    }
   },
   "planetNames": {
     "sun": "Soleil",

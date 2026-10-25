@@ -9,6 +9,7 @@ import { useTranslation, LANGUAGE_CODES, LANGUAGE_NAMES, type Language } from "@
 import { useLatestChartQuery } from "@/lib/use-latest-chart-query";
 import { useHydrated } from "@/lib/use-hydrated";
 import ThemeToggle from "@/app/components/ThemeToggle";
+import { DesktopHelpButton } from "@/app/components/onboarding/DesktopOnboarding";
 import { ChevronDownIcon, GlobeIcon } from "@/app/components/locale-icons";
 
 export default function Navbar() {
@@ -131,6 +132,7 @@ export default function Navbar() {
 
         {/* -- Right side: lang selector + auth (desktop) + hamburger (mobile) -- */}
         <div className="navbar-right">
+          <DesktopHelpButton />
           <ThemeToggle />
 
           {/* Language Selector - always visible.

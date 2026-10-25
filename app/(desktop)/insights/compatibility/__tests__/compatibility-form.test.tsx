@@ -6,7 +6,10 @@ import { formatBirthDateDisplay } from "@/lib/intake-normalize";
 import { ToastProvider } from "@/lib/toast-context";
 import CompatibilityPageClient from "../page-client";
 
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), back: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), back: vi.fn() }),
+  usePathname: () => "/insights/compatibility",
+}));
 
 /*
  * A birth date typed into the compatibility form in the interface language.

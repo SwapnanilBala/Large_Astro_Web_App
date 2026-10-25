@@ -1,0 +1,378 @@
+.desktopOnly,
+.invitation,
+.method,
+.inlineHelp,
+.terms,
+.helpButton {
+  font-family: var(--font-body);
+}
+.helpButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.7rem;
+  color: var(--text-primary);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  font-size: var(--text-meta);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.invitation {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1.15rem 1.35rem;
+  margin: 0 0 1.5rem;
+  text-align: left;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+}
+.invitationIcon {
+  flex-shrink: 0;
+  color: var(--accent-gold);
+}
+.invitation > div:first-of-type {
+  flex: 1;
+}
+.invitation h2,
+.method h2 {
+  margin: 0 0 0.35rem;
+  font: 600 1.05rem/1.4 var(--font-body);
+  color: var(--text-primary);
+}
+.invitation p,
+.method p,
+.inlineHelp p {
+  margin: 0.35rem 0;
+  font-size: var(--text-ui);
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+.invitation .actions {
+  flex: 0 0 auto;
+  max-width: 24rem;
+  justify-content: flex-end;
+}
+.actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+.primary,
+.quiet,
+.tabButtons button,
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-md);
+  font: 500 var(--text-meta) / 1.4 var(--font-body);
+  cursor: pointer;
+  text-decoration: none;
+}
+.primary {
+  background: var(--accent-gold);
+  color: var(--bg-deep);
+}
+.quiet {
+  background: transparent;
+  color: var(--text-secondary);
+  border-color: transparent;
+}
+.primary:disabled,
+.quiet:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.helpButton:hover,
+.quiet:hover:not(:disabled),
+.tabButtons button:hover,
+.iconButton:hover {
+  background: var(--surface-hover);
+}
+.helpButton:focus-visible,
+.primary:focus-visible,
+.quiet:focus-visible,
+.tabButtons button:focus-visible,
+.iconButton:focus-visible,
+.terms button:focus-visible,
+.inlineHelp summary:focus-visible,
+.glossary summary:focus-visible,
+.readingLink:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 4px;
+}
+.method {
+  padding: 1.25rem 1.5rem;
+  margin: 0 0 1.5rem;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+}
+.method .actions {
+  margin-top: 0.85rem;
+}
+.inlineHelp {
+  margin: 0.8rem 0 1.25rem;
+  padding: 0.8rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+.inlineHelp summary {
+  cursor: pointer;
+  color: var(--text-primary);
+  font-size: var(--text-meta);
+}
+.terms {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+  margin: 0.5rem 0;
+}
+.terms button {
+  padding: 0.15rem 0;
+  border: 0;
+  background: transparent;
+  color: var(--heading-teal);
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2rem;
+  cursor: pointer;
+}
+.dialog {
+  width: min(640px, calc(100vw - 4rem));
+  max-height: min(760px, calc(100dvh - 5rem));
+  padding: 1.6rem;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-body);
+}
+.dialog::backdrop {
+  background: rgb(0 0 0 / 0.55);
+}
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+.panelHeader h2 {
+  margin: 0;
+  font: 500 1.65rem/1.35 var(--font-newsreader);
+}
+.iconButton {
+  padding: 0.45rem;
+  flex-shrink: 0;
+  color: var(--text-secondary);
+  background: transparent;
+  border-color: transparent;
+}
+.tabButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 1.3rem 0;
+}
+.tabButtons button {
+  background: transparent;
+  color: var(--text-secondary);
+}
+.tabButtons button[aria-pressed="true"] {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  background: var(--accent-gold-glow);
+}
+.panelBody > p,
+.introSteps p,
+.glossary p {
+  font-size: var(--text-ui);
+  line-height: 1.7;
+  color: var(--text-secondary);
+}
+.audience {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+}
+.audience legend {
+  font-size: var(--text-meta);
+  color: var(--text-secondary);
+  padding: 0 0.3rem;
+}
+.audience label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.4rem 1.25rem 0.4rem 0;
+  font-size: var(--text-meta);
+  cursor: pointer;
+}
+.audience input {
+  appearance: auto;
+  width: 1rem;
+  height: 1rem;
+  min-height: 0;
+  flex: 0 0 1rem;
+  padding: 0;
+  margin: 0;
+  accent-color: var(--accent-gold);
+  box-shadow: none;
+}
+.introSteps {
+  list-style: none;
+  margin: 1.25rem 0;
+  padding: 0;
+}
+.introSteps li {
+  margin: 1rem 0;
+}
+.introSteps h3 {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.introSteps p {
+  margin: 0;
+}
+.note {
+  color: var(--text-secondary);
+  font: 400 var(--text-meta) / 1.65 var(--font-body);
+}
+.glossary details {
+  border-top: 1px solid var(--border-soft);
+  padding: 0.9rem 0;
+}
+.glossary summary {
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--text-primary);
+  scroll-margin-block: 2rem;
+}
+.glossary p {
+  margin: 0.65rem 0 0;
+}
+.tourPanel {
+  position: fixed;
+  right: 1.5rem;
+  bottom: 1.5rem;
+  z-index: 950;
+  width: 350px;
+  max-height: calc(100dvh - 7rem);
+  overflow: auto;
+  padding: 1.2rem 1.4rem;
+  border: 1px solid var(--accent-gold);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-xl);
+  font-family: var(--font-body);
+}
+.tourTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--accent-gold);
+  font-size: var(--text-meta);
+}
+.tourPanel h2 {
+  margin: 0.4rem 0 0.6rem;
+  font: 500 1.45rem/1.35 var(--font-newsreader);
+}
+.tourPanel h2:focus {
+  outline: none;
+}
+.tourPanel p {
+  margin: 0.4rem 0 1rem;
+  color: var(--text-secondary);
+  font-size: var(--text-ui);
+  line-height: 1.65;
+}
+.tourPanel .actions {
+  justify-content: space-between;
+}
+.tourTarget {
+  outline: 2px solid var(--accent-gold) !important;
+  outline-offset: 6px;
+  scroll-margin-block: calc(var(--navbar-h, 108px) + 5rem);
+}
+.readingLink {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  color: var(--heading-teal);
+  font-size: var(--text-meta);
+}
+.helpButton,
+.primary,
+.quiet,
+.tabButtons button,
+.iconButton,
+.terms button {
+  margin-top: 0;
+  box-shadow: none;
+  text-shadow: none;
+  transform: none;
+}
+.helpButton::before,
+.helpButton::after,
+.primary::before,
+.primary::after,
+.quiet::before,
+.quiet::after,
+.tabButtons button::before,
+.tabButtons button::after,
+.iconButton::before,
+.iconButton::after,
+.terms button::before,
+.terms button::after {
+  display: none;
+}
+.terms button {
+  min-height: 0;
+  border-radius: 0;
+}
+.iconButton {
+  min-height: 0;
+}
+@media (max-width: 1150px) {
+  .invitation {
+    flex-wrap: wrap;
+  }
+  .invitation .actions {
+    max-width: none;
+    margin-left: 2.4rem;
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 1023px) {
+  .desktopOnly,
+  .helpButton,
+  .invitation,
+  .method,
+  .inlineHelp,
+  .terms,
+  .tourPanel,
+  .dialog {
+    display: none;
+  }
+}

@@ -47,6 +47,7 @@ import PremiumInput from "@/app/components/PremiumInput";
 import PremiumButton from "@/app/components/PremiumButton";
 import PremiumToggle from "@/app/components/PremiumToggle";
 import styles from "./page.module.css";
+import { WelcomeGuidance, BirthDetailsHelp } from "@/app/components/onboarding/DesktopOnboarding";
 const BirthChartTeaser = dynamic(() => import("@/app/components/BirthChartTeaser"), {
   ssr: false,
   loading: () => null,
@@ -1018,6 +1019,8 @@ export default function Home() {
 
       {/* === MAIN CONTENT === */}
       <div className={styles.mainContent}>
+        <WelcomeGuidance />
+        <BirthDetailsHelp />
         <form ref={formRef} className={styles.intakeForm} onSubmit={submitProfile}>
           <div className={styles.formLayout}>
             {/* LEFT COLUMN: one question */}

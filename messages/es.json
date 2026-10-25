@@ -1139,7 +1139,117 @@
   "onboarding": {
     "ariaLabel": "Animación de introducción. Haz clic o presiona Escape para saltar.",
     "tagline": "Tu mapa cósmico, decodificado",
-    "skipHint": "Haz clic o presiona Esc para saltar"
+    "skipHint": "Haz clic o presiona Esc para saltar",
+    "help": "Ayuda",
+    "close": "Cerrar ayuda",
+    "title": "Orientación cuando la necesites",
+    "introTab": "Introducción rápida",
+    "basicsTab": "Conceptos de astrología",
+    "beginner": "Soy principiante",
+    "experienced": "Conozco la astrología",
+    "audience": "¿Cuánto sabes de astrología?",
+    "welcomeTitle": "¿Es tu primera visita a Lagna Atelier?",
+    "welcomeBody": "Crea tu carta natal, explora tu período actual y descubre lecturas sobre los temas que te interesan. No necesitas conocimientos de astrología.",
+    "showAround": "Muéstrame el sitio",
+    "dismiss": "Explorar por mi cuenta",
+    "chartTitle": "Tu carta está lista. ¿Por dónde empezar?",
+    "chartBody": "Descubre tu lectura en cuatro pasos breves. Puedes salir cuando quieras.",
+    "startTour": "Iniciar introducción a la carta",
+    "replay": "Repetir introducción a la carta",
+    "tourUnavailable": "La introducción estará disponible cuando se cargue tu carta. Puedes abrirla desde Ayuda.",
+    "introLead": "Empieza con una lectura útil y explora los detalles a tu ritmo.",
+    "intakeTitle": "1. Introduce tus datos de nacimiento",
+    "intakeBody": "Indica la fecha, hora y lugar de nacimiento. Si no sabes la hora, elige la opción aproximada o desconocida.",
+    "methodTitle": "2. Elige un método de cálculo",
+    "methodBody": "Si tienes dudas, usa Lahiri con casas de signo completo, nuestro método predeterminado. Puedes comparar métodos después.",
+    "readingTitle": "3. Empieza con los puntos destacados",
+    "readingBody": "Lee el resumen y luego explora áreas de vida, períodos o la lectura completa. Mi carta te devuelve a tu carta más reciente.",
+    "startDetails": "Empezar con mis datos",
+    "createChart": "Crear una carta",
+    "interpretation": "Las posiciones planetarias se calculan; las lecturas las interpretan según la astrología. Describen posibles temas, no hechos garantizados. Algunas lecturas extensas usan texto generado por IA.",
+    "uncertainTime": "Con una hora aproximada o desconocida pueden cambiar el ascendente, las casas y las lecturas sensibles a la hora. Considera esas partes provisionales.",
+    "defaultTitle": "¿No sabes qué método elegir?",
+    "defaultBody": "Empieza con Lahiri y casas de signo completo, nuestro cálculo predeterminado. Puedes explorar otros métodos después.",
+    "useDefault": "Continuar con el predeterminado",
+    "compare": "Comparar métodos",
+    "methodExplain": "La tradición fija la referencia del zodíaco. El sistema de casas divide la carta en doce áreas de vida.",
+    "whyDetails": "¿Por qué pedimos estos datos?",
+    "detailsBody": "La fecha permite calcular posiciones planetarias. La hora ayuda a determinar el ascendente y las casas. Usa tu lugar de nacimiento. Las cartas recientes se guardan en este navegador; guardarlas en una cuenta es una opción aparte.",
+    "termsLabel": "Entender los términos",
+    "termHelp": "Explicar {term}",
+    "sectionHelp": "Cómo usar esta sección",
+    "previous": "Atrás",
+    "next": "Siguiente",
+    "exit": "Salir de la introducción",
+    "finish": "Terminar introducción",
+    "progress": "{position} de {total}",
+    "tourLabel": "Introducción a la carta",
+    "tourSummaryTitle": "Empieza con los puntos destacados",
+    "tourSummaryBody": "Estos breves puntos te ayudan a empezar. No necesitas comprender todos los símbolos para leer.",
+    "tourSummaryExpert": "El resumen destaca señales de la carta y el período actual. Las secciones siguientes muestran los detalles.",
+    "tourChartTitle": "Conoce tu carta natal",
+    "tourChartBody": "El diagrama representa posiciones planetarias al nacer. Lagna es el ascendente y las casas representan áreas de vida. Consulta Ayuda cuando lo necesites.",
+    "tourChartExpert": "Alterna entre las vistas de constelación y del norte de India, y consulta las posiciones junto a la carta.",
+    "tourTimingTitle": "Explora tu período actual",
+    "tourTimingBody": "Un dasha es un período planetario de la astrología védica. Explora aquí los períodos y abre la sección de tiempos para ver pronósticos y otras herramientas.",
+    "tourTimingExpert": "Consulta aquí los períodos Vimshottari. La página de tiempos ofrece pronósticos, cartas anuales y herramientas de elección de fechas.",
+    "tourExploreTitle": "Elige tu siguiente lectura",
+    "tourExploreBody": "La lectura completa reúne interpretaciones de la carta. También puedes explorar áreas de vida desde el resumen. Mi carta te permite volver y Ayuda repetir la introducción.",
+    "tourExploreExpert": "Abre la lectura completa para ver hallazgos y combinaciones planetarias. Explora áreas de vida o cartas divisionales desde el resumen.",
+    "exploreReading": "Abrir lectura completa",
+    "sections": {
+      "lifeAreas": "Elige un área de vida y lee su interpretación y factores de apoyo. Puedes volver al resumen con el enlace de regreso.",
+      "timing": "Explora pronósticos, elección de fechas y la carta anual. Los dashas están en el resumen. Las fechas dependen de tus datos de nacimiento.",
+      "fullReading": "Elige un hallazgo o combinación planetaria para leer su explicación. Explora un tema cada vez y vuelve al resumen cuando quieras.",
+      "divisional": "Estas cartas derivan de las posiciones natales para examinar temas concretos. Empieza por el resumen; las divisiones más finas requieren una hora precisa.",
+      "advanced": "Consulta las tablas para revisar los cálculos que apoyan la lectura. El resumen ofrece una introducción sencilla.",
+      "compatibility": "Introduce los datos de la otra persona para comparar las cartas. Lee los factores individuales y la interpretación general.",
+      "houseSupport": "Explora cómo se distribuye el apoyo entre las casas. Estas puntuaciones son solo un factor dentro de la lectura.",
+      "lifeShifts": "Explora cambios interpretados a lo largo del tiempo y los períodos que los apoyan. Las fechas dependen de los datos de nacimiento.",
+      "palm": "Lee o compara lecturas guardadas de la palma. Sigue las instrucciones de captura y revisa la foto antes de enviarla."
+    },
+    "terms": {
+      "chart": {
+        "name": "Carta natal",
+        "body": "Mapa de posiciones planetarias para tu fecha, hora y lugar de nacimiento. Es el punto de partida de las lecturas."
+      },
+      "lagna": {
+        "name": "Lagna / Ascendente",
+        "body": "Signo que ascendía en el horizonte oriental al nacer. Orienta las casas y depende de la hora de nacimiento."
+      },
+      "house": {
+        "name": "Casa",
+        "body": "Una de doce divisiones asociadas con áreas de vida, como trabajo o relaciones. Su división depende del sistema elegido."
+      },
+      "dasha": {
+        "name": "Dasha",
+        "body": "Período planetario usado en astrología védica para interpretar temas a lo largo del tiempo. Contiene períodos menores."
+      },
+      "transit": {
+        "name": "Tránsito",
+        "body": "Posición de un planeta en un momento determinado, comparada con la carta natal. Es una capa distinta de las posiciones de nacimiento."
+      },
+      "nakshatra": {
+        "name": "Nakshatra",
+        "body": "Una de 27 divisiones del zodíaco védico. El nakshatra lunar al nacer se usa para calcular la secuencia de dashas."
+      },
+      "yoga": {
+        "name": "Yoga",
+        "body": "Combinación planetaria con una interpretación astrológica. Depende del conjunto de la carta y no promete un resultado."
+      },
+      "divisional": {
+        "name": "Carta divisional",
+        "body": "Carta derivada de posiciones natales para estudiar temas concretos. Las divisiones finas son sensibles a la precisión de la hora."
+      },
+      "ayanamsha": {
+        "name": "Ayanamsha",
+        "body": "Desfase de referencia del zodíaco sideral. Cambiar de tradición puede modificar signos o grados cerca de sus límites."
+      },
+      "strength": {
+        "name": "Fuerza planetaria",
+        "body": "Medida calculada según reglas astrológicas. Una puntuación mayor no garantiza mejores resultados en la vida."
+      }
+    }
   },
   "planetNames": {
     "sun": "Sol",

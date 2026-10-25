@@ -1139,7 +1139,117 @@
   "onboarding": {
     "ariaLabel": "Animazione introduttiva. Fai clic o premi Escape per saltare.",
     "tagline": "Il tuo disegno cosmico, decodificato",
-    "skipHint": "Fai clic o premi Esc per saltare"
+    "skipHint": "Fai clic o premi Esc per saltare",
+    "help": "Aiuto",
+    "close": "Chiudi aiuto",
+    "title": "Una guida quando ne hai bisogno",
+    "introTab": "Introduzione rapida",
+    "basicsTab": "Basi di astrologia",
+    "beginner": "Sono alle prime armi",
+    "experienced": "Conosco l’astrologia",
+    "audience": "Quanto conosci l’astrologia?",
+    "welcomeTitle": "Prima visita a Lagna Atelier?",
+    "welcomeBody": "Crea il tuo tema natale, esplora il periodo attuale e scopri letture sugli argomenti che ti interessano. Non servono conoscenze di astrologia.",
+    "showAround": "Mostrami il sito",
+    "dismiss": "Esploro da solo",
+    "chartTitle": "Il tuo tema è pronto. Da dove iniziare?",
+    "chartBody": "Scopri la tua lettura in quattro brevi passi. Puoi uscire quando vuoi.",
+    "startTour": "Inizia l’introduzione al tema",
+    "replay": "Ripeti l’introduzione al tema",
+    "tourUnavailable": "L’introduzione sarà disponibile quando il tema sarà caricato. Puoi riaprirla da Aiuto.",
+    "introLead": "Inizia con una lettura utile ed esplora i dettagli al tuo ritmo.",
+    "intakeTitle": "1. Inserisci i dati di nascita",
+    "intakeBody": "Indica data, ora e luogo di nascita. Se non conosci l’ora, scegli l’opzione approssimativa o sconosciuta.",
+    "methodTitle": "2. Scegli un metodo di calcolo",
+    "methodBody": "Hai dubbi? Usa Lahiri con case a segno intero, il nostro metodo predefinito. Puoi confrontare i metodi in seguito.",
+    "readingTitle": "3. Inizia dai punti principali",
+    "readingBody": "Leggi prima il riepilogo, poi esplora aree della vita, periodi o lettura completa. Il mio tema ti riporta al tema più recente.",
+    "startDetails": "Inizia dai dati di nascita",
+    "createChart": "Crea un tema",
+    "interpretation": "Le posizioni planetarie sono calcolate; le letture le interpretano secondo l’astrologia. Descrivono temi possibili, non eventi garantiti. Alcune letture lunghe usano testo generato dall’IA.",
+    "uncertainTime": "Con un’ora approssimativa o sconosciuta possono cambiare ascendente, case e letture sensibili all’ora. Considera provvisorie queste parti.",
+    "defaultTitle": "Non sai quale metodo scegliere?",
+    "defaultBody": "Inizia con Lahiri e case a segno intero, il nostro calcolo predefinito. Potrai esplorare altri metodi in seguito.",
+    "useDefault": "Continua con il predefinito",
+    "compare": "Confronta i metodi",
+    "methodExplain": "La tradizione stabilisce il riferimento dello zodiaco. Il sistema di case divide il tema in dodici aree della vita.",
+    "whyDetails": "Perché questi dati?",
+    "detailsBody": "La data permette di calcolare le posizioni planetarie. L’ora aiuta a determinare ascendente e case. Usa il luogo di nascita. I temi recenti restano in questo browser; salvarli su un account è una scelta separata e facoltativa.",
+    "termsLabel": "Comprendere i termini",
+    "termHelp": "Spiega {term}",
+    "sectionHelp": "Come usare questa sezione",
+    "previous": "Indietro",
+    "next": "Avanti",
+    "exit": "Esci dall’introduzione",
+    "finish": "Termina introduzione",
+    "progress": "{position} di {total}",
+    "tourLabel": "Introduzione al tema",
+    "tourSummaryTitle": "Inizia dai punti principali",
+    "tourSummaryBody": "Questi brevi punti ti aiutano a iniziare. Non devi capire ogni simbolo per cominciare a leggere.",
+    "tourSummaryExpert": "Il riepilogo presenta i segnali principali del tema e il periodo attuale. Le sezioni successive mostrano i dettagli.",
+    "tourChartTitle": "Conosci il tuo tema natale",
+    "tourChartBody": "Il diagramma rappresenta le posizioni alla nascita. Lagna significa ascendente; le case rappresentano aree della vita. Consulta Aiuto per i termini sconosciuti.",
+    "tourChartExpert": "Alterna le viste costellazione e nord-indiana e consulta le posizioni accanto al tema.",
+    "tourTimingTitle": "Esplora il periodo attuale",
+    "tourTimingBody": "Un dasha è un periodo planetario dell’astrologia vedica. Esplora qui i periodi, poi apri la sezione dei tempi per previsioni e altri strumenti.",
+    "tourTimingExpert": "Consulta qui i periodi Vimshottari. La pagina dei tempi offre previsioni, tema annuale e strumenti per scegliere le date.",
+    "tourExploreTitle": "Scegli la prossima lettura",
+    "tourExploreBody": "La lettura completa riunisce le interpretazioni del tema. Puoi esplorare anche le aree della vita dal riepilogo. Il mio tema ti riporta qui; Aiuto ripete l’introduzione.",
+    "tourExploreExpert": "Apri la lettura completa per risultati e combinazioni planetarie. Esplora aree della vita e temi divisionali dal riepilogo.",
+    "exploreReading": "Apri la lettura completa",
+    "sections": {
+      "lifeAreas": "Scegli un’area della vita e leggi l’interpretazione e i fattori associati. Il collegamento di ritorno riapre il riepilogo.",
+      "timing": "Esplora previsioni, scelta delle date e tema annuale. I dasha sono nel riepilogo. Le date dipendono dai dati di nascita.",
+      "fullReading": "Scegli un risultato o una combinazione planetaria per leggerne la spiegazione. Esplora un argomento alla volta e torna al riepilogo quando vuoi.",
+      "divisional": "Questi temi derivano dalle posizioni natali per esaminare argomenti specifici. Inizia dal riepilogo; le divisioni fini richiedono un’ora precisa.",
+      "advanced": "Consulta le tabelle per i calcoli e i fattori dietro le letture. Per un’introduzione semplice inizia dal riepilogo.",
+      "compatibility": "Inserisci i dati dell’altra persona per confrontare due temi. Leggi i singoli fattori e l’interpretazione generale.",
+      "houseSupport": "Esplora la distribuzione del sostegno tra le case. Questi punteggi sono solo un fattore della lettura complessiva.",
+      "lifeShifts": "Esplora i cambiamenti interpretati e i periodi associati. Le date dipendono dai dati di nascita.",
+      "palm": "Leggi o confronta le letture della mano salvate. Segui le istruzioni fotografiche e controlla la foto prima di inviarla."
+    },
+    "terms": {
+      "chart": {
+        "name": "Tema natale",
+        "body": "Mappa delle posizioni planetarie per data, ora e luogo di nascita. È il punto di partenza delle letture."
+      },
+      "lagna": {
+        "name": "Lagna / Ascendente",
+        "body": "Il segno che sorgeva all’orizzonte orientale alla nascita. Orienta le case e dipende dall’ora di nascita."
+      },
+      "house": {
+        "name": "Casa",
+        "body": "Una delle dodici divisioni associate ad aree della vita, come lavoro o relazioni. Le divisioni dipendono dal sistema scelto."
+      },
+      "dasha": {
+        "name": "Dasha",
+        "body": "Periodo planetario usato nell’astrologia vedica per interpretare temi nel tempo. Contiene periodi minori."
+      },
+      "transit": {
+        "name": "Transito",
+        "body": "Posizione di un pianeta in un dato momento, confrontata con il tema natale. È un livello distinto dalle posizioni alla nascita."
+      },
+      "nakshatra": {
+        "name": "Nakshatra",
+        "body": "Una delle 27 divisioni dello zodiaco vedico. Il nakshatra lunare alla nascita serve a calcolare la sequenza dei dasha."
+      },
+      "yoga": {
+        "name": "Yoga",
+        "body": "Combinazione planetaria con un’interpretazione astrologica. Il significato dipende dall’intero tema e non garantisce un risultato."
+      },
+      "divisional": {
+        "name": "Tema divisionale",
+        "body": "Tema derivato dalle posizioni natali per esaminare argomenti specifici. Le divisioni fini sono sensibili alla precisione dell’ora."
+      },
+      "ayanamsha": {
+        "name": "Ayanamsha",
+        "body": "Scarto di riferimento dello zodiaco siderale. Cambiare tradizione può spostare segni o gradi vicino ai confini."
+      },
+      "strength": {
+        "name": "Forza planetaria",
+        "body": "Misura calcolata secondo regole astrologiche. Un punteggio più alto non garantisce migliori risultati nella vita."
+      }
+    }
   },
   "planetNames": {
     "sun": "Sole",

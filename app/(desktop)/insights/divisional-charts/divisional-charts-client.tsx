@@ -1,4 +1,5 @@
 "use client";
+import { SectionGuidance, TermHelp } from "@/app/components/onboarding/DesktopOnboarding";
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
@@ -226,6 +227,8 @@ export default function DivisionalChartsClient({
             )}
           </div>
         </header>
+        <SectionGuidance />
+        <TermHelp terms={["divisional", "lagna"]} />
 
         <div className={styles.board}>
           {/* ── Column 1: every calculated varga ── */}

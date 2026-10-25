@@ -35,6 +35,7 @@ import {
 import decor from "./decor/insights-decor.module.css";
 import WeeklyEnergyPanel from "./weekly-energy-panel";
 import LagnaChartCard from "./lagna-chart-card";
+import { ChartGuidance, TermHelp } from "@/app/components/onboarding/DesktopOnboarding";
 import { FiArrowUpRight } from "react-icons/fi";
 
 // Lightweight skeleton for lazy-loaded panels
@@ -676,6 +677,7 @@ function TopTakeawaysModule({
 
   return (
     <motion.section
+      id="top-takeaways"
       className={styles.takeaways}
       aria-labelledby="top-takeaways-heading"
       initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
@@ -1283,6 +1285,8 @@ export default function InsightsContent({
 
         <TodaysSkyBand transits={payload.transits} />
 
+        <ChartGuidance chartKey={historyQs} uncertainTime={Boolean(payload.client.birth_time_fallback || (payload.client.birth_time_accuracy && payload.client.birth_time_accuracy !== "exact"))} />
+
         <TopTakeawaysModule
           payload={payloadWithDomainInsights}
           serverTopDomain={isLifeDomainLocked ? null : topLifeDomain}
@@ -1299,6 +1303,7 @@ export default function InsightsContent({
           {/* Left: the birth chart in the reader's chosen style, its planet
               positions, and the three signals read off it, in one card. */}
           <motion.div
+            id="birth-chart-guide"
             className={`${styles.cardChart} ${styles.cardDepthFront}`}
             variants={bentoItemFromLeft}
           >
@@ -1716,6 +1721,7 @@ export default function InsightsContent({
         <div className={styles.gatewayGrid}>
           {/* ─── Timing & electional (gateway to its own page) ─── */}
           <GatewaySection id="timing">
+            <TermHelp terms={["dasha", "transit"]} />
             <SectionGateway
               href={`/insights/timing?${historyQs}`}
               icon={<Clock3 />}
