@@ -112,7 +112,7 @@
     "memberLoginAria": "Se connecter à un profil enregistré sur cet appareil",
     "actionHint": "Complétez tous les champs pour générer votre carte",
     "actionHintMissing": "Ajoutez {fields} pour continuer.",
-    "trustMicrocopy": "Chiffré · Jamais partagé · ~60 secondes",
+    "trustMicrocopy": "Vos données de naissance sont enregistrées dans ce navigateur. Nous ne les enregistrons dans votre compte que si vous activez la synchronisation des thèmes.",
     "stickyComplete": "{count}/{total} complété",
     "stickyContinue": "Continuer",
     "mysticalPhrase1": "Écrit dans les étoiles",

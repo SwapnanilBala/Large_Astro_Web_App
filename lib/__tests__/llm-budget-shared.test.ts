@@ -87,9 +87,9 @@ vi.mock("@/lib/identity/session", () => ({
       : null,
 }));
 
-/* Four free, then eight once registered. */
-const PER_ACCOUNT = 8;
-const PER_ADDRESS = 4;
+/* Ten free, then twenty once registered. */
+const PER_ACCOUNT = 20;
+const PER_ADDRESS = 10;
 
 /* Palm reading's whole-deployment ceiling for one day. */
 const PALM_ROUTE_TOTAL = 100;
@@ -208,7 +208,7 @@ describe("one ceiling across instances", () => {
       expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
     }
 
-    /* Four left, not ten: the same person routed to a different instance. */
+    /* Only the unspent allowance remains on a different instance. */
     const second = await newInstance();
     for (let i = 0; i < PER_ACCOUNT - 6; i += 1) {
       expect((await second.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);

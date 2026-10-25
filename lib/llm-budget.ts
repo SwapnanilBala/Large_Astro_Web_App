@@ -199,42 +199,15 @@ type LlmBudgetConfig = {
  * download of the same reading is free, and no caller is served a report that
  * another caller's download paid for.
  *
- * THE TWO TIERS are 4 free, then 8 once registered, on every route in the
- * table. An address is a weak name for a person in both directions at once --
- * a proxy pool makes one abuser look like thousands, a campus NAT makes
- * thousands of people look like one -- so no number set on it is right, and the
- * signed-out one is still set below a working allowance. Registering is what
- * buys a real one, because an account is a name a caller cannot mint by the
- * thousand and cannot have imposed on them by their employer's router.
+ * THE TWO TIERS are 10 calls per signed-out address and 20 per signed-in
+ * account, per route per UTC day (raised on 2026-10-25). Ask the classics is
+ * the exception, with 15 questions signed out and 25 signed in.
  *
- * These were 2 and 10, then 5 and 15, and are now 4 and 8. The first move was a
- * raise, because the ceiling a real session met first was the one on the
- * cheapest route -- a five-level dasha drill-down reached dozens of distinct
- * chains (its paid chain reading was removed on 2026-10-08). This one is a cut, because the mix stopped being cheap: the varga
- * commentary is $0.0596 a call, and an allowance sized against routes that cost
- * fractions of a cent stopped describing what a caller can actually spend.
- *
- * The shape is unchanged -- signed-out is a taste, an account is the working
- * allowance -- but the gap between them narrowed from threefold to twofold. So
- * registering now buys twice as much rather than three times as much, and the
- * sign-in prompt lands one reading earlier than it used to.
- *
- * WHAT THE CUT BUYS is mostly bounded at the route rather than at the caller.
- * The text routes cache, so only *distinct* requests count -- revisiting a
- * dasha period or a domain is free -- and their totals did not move. Palm
- * reading is where a per-caller number is real money, and its total halved:
- * 100 a day is about $15 of exposure where 200 was about $30.
- *
- * Note which way the *proportions* went. A signed-out address can now take 4%
- * of palm reading's day and an account 8%, up from 2.5% and 7.5%, because the
- * route total came down further than the tiers did. That is the intended shape
- * -- the number that bounds the bill is the route's, and the per-caller tiers
- * exist to stop one visitor eating it, which 8 out of 100 still does.
- *
- * Follow-up questions remain the one place where the per-caller number is a
- * *conversation* rather than that many features used, and eight is where this
- * change will be felt first: it is a short thread where fifteen was a session's
- * worth. That is the trade, made deliberately.
+ * An address is a weak name for a person: a proxy pool makes one caller look
+ * like thousands, while a campus NAT makes thousands look like one. Accounts
+ * therefore have their own allowance, independent of their network address.
+ * Cache hits do not spend either allowance. The whole-deployment route totals
+ * remain the spend ceilings, even with these larger per-caller allowances.
  */
 const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
   /* The same arithmetic as life-shifts below, and the same answer, reached
@@ -356,20 +329,13 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      day, not the route's. Hindi and Bengali answers retry on Opus about half
      the time, as on the other notes, which the $20 worst case above already
      assumes of every unit. */
-  /* 2026-10-07, the owner's call: more questions a day than the other routes
-     allow, the one exception to "4 free, 8 signed in". Eight ready questions
-     and a box to type more were a visitor's allowance spent in one visit,
-     and an answer now costs about $0.001 on Haiku 5.5 at low effort. Twelve
-     signed out and twenty-four signed in keep the shape the tiers have
-     (signing in buys twice as much). The route total rises to 700 from 600:
-     about $0.70 a day if nothing retries, and $22 if every unit retried on
-     Opus, the ceiling every dear route here is held to. The panel words its
-     own limit message and states no number, so nothing else needs to change
-     with these. */
+  /* Ask the classics has its own tiers: 15 questions signed out and 25 signed
+     in, raised on 2026-10-25. The route total stays at 700. The panel words
+     its own limit message and states no number. */
   "/api/chart/ask-classics": {
     perDay: 700,
-    perCallerPerDay: 24,
-    perAnonPerDay: 12,
+    perCallerPerDay: 25,
+    perAnonPerDay: 15,
   },
   /* The reading for one dasha period the reader picks on the timeline, from
      a Maha Dasha down to a Sookshma (2026-10-08): Haiku 5.5 at low effort
@@ -377,7 +343,7 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
      an "Ask the classics" answer, so about $0.001 a reading. It is bought by
      a click on "Read this period", never on mount or on a drill, so this is
      paid by readers who ask, as the old drill-down's chain reading was. The tiers
-     stay the standard four and eight: the sign-in prompt states those numbers
+     use the shared guest and account allowances: the sign-in prompt reads them
      for "Dasha readings", and an exception would make it wrong. The total is
      Ask the classics' 700 for the same reason: $22 if every unit retried on
      Opus, the ceiling every dear route here is held to. */

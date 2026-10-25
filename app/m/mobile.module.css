@@ -433,6 +433,13 @@
   color: var(--text-tertiary);
 }
 
+.trustMicrocopy {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
 /* The way back when a page cannot render — incomplete chart details reach
    both the results route and the method chooser. The one filled control on
    the page, because it is the only thing to do there. */

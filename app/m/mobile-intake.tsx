@@ -559,6 +559,9 @@ export default function MobileIntake() {
           {question.title}
         </h1>
         <p className={styles.lead}>{question.lead}</p>
+        {step === 1 && (
+          <p className={styles.trustMicrocopy}>{t("home.trustMicrocopy")}</p>
+        )}
       </header>
 
       {step === 1 && (

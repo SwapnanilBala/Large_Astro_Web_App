@@ -990,6 +990,7 @@ export default function Home() {
             "Map the sky at your first breath to reveal your Lagna, houses, and planetary story.",
           )}
         </p>
+        <p className={styles.trustMicrocopy}>{t("home.trustMicrocopy")}</p>
       </header>
 
       {/*
@@ -1537,8 +1538,6 @@ export default function Home() {
                     </span>
                   )}
                 </div>
-
-                <p className={styles.trustMicrocopy}>{t("home.trustMicrocopy")}</p>
               </div>
 
               {/* Whole-form shortcuts stay secondary to the current question's action. */}

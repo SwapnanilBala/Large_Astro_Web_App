@@ -15,7 +15,7 @@
  */
 
 /** Paid calls one signed-out address may make in one UTC day, per route. */
-export const LLM_FREE_PER_DAY = 4;
+export const LLM_FREE_PER_DAY = 10;
 
 /** Paid calls one signed-in account may make in one UTC day, per route. */
-export const LLM_ACCOUNT_PER_DAY = 8;
+export const LLM_ACCOUNT_PER_DAY = 20;

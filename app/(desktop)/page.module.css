@@ -2642,6 +2642,12 @@
   font-size: var(--text-meta);
 }
 
+.streamlinedHeader .trustMicrocopy {
+  max-width: 45rem;
+  font-size: var(--text-meta);
+  line-height: 1.6;
+}
+
 /* Whole-form shortcuts sit after the task and read as quiet disclosures. */
 .quickActionsRow {
   display: flex;

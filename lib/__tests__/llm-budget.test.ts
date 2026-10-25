@@ -51,9 +51,9 @@ const {
 const NOON = Date.UTC(2026, 8, 12, 12, 0, 0);
 const NEXT_DAY = NOON + 86_400_000;
 
-/* Four free, then eight once registered, the same on every route. */
-const PER_ACCOUNT = 8;
-const PER_ADDRESS = 4;
+/* Ten free, then twenty once registered, except for Ask the classics. */
+const PER_ACCOUNT = 20;
+const PER_ADDRESS = 10;
 
 /* Palm reading's whole-deployment ceiling for one day. */
 const PALM_ROUTE_TOTAL = 100;
@@ -150,10 +150,10 @@ describe("the signed-out tier", () => {
     expect(refused.scope).toBe("anonymous");
   });
 
-  it("gives Ask the classics twelve questions signed out and twenty-four signed in, the one exception", async () => {
+  it("gives Ask the classics fifteen questions signed out and twenty-five signed in", async () => {
     const route = "/api/chart/ask-classics";
     const address = requestFrom("203.0.113.9", route);
-    for (let i = 0; i < 12; i += 1) {
+    for (let i = 0; i < 15; i += 1) {
       expect((await consumeLlmBudget(route, address, NOON)).allowed).toBe(true);
     }
     const refused = await consumeLlmBudget(route, address, NOON);
@@ -162,7 +162,7 @@ describe("the signed-out tier", () => {
     expect(refused.scope).toBe("anonymous");
 
     const account = signedInAs("user-ask", route);
-    for (let i = 0; i < 24; i += 1) {
+    for (let i = 0; i < 25; i += 1) {
       expect((await consumeLlmBudget(route, account, NOON)).allowed).toBe(true);
     }
     expect((await consumeLlmBudget(route, account, NOON)).allowed).toBe(false);

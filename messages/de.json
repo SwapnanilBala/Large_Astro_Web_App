@@ -112,7 +112,7 @@
     "memberLoginAria": "Bei einem auf diesem Gerät gespeicherten Profil anmelden",
     "actionHint": "Fülle alle Felder aus, um dein Horoskop zu erstellen",
     "actionHintMissing": "Zum Fortfahren fehlt noch: {fields}.",
-    "trustMicrocopy": "Verschlüsselt · Nie weitergegeben · ~60 Sekunden",
+    "trustMicrocopy": "Deine Geburtsdaten werden in diesem Browser gespeichert. Wir speichern sie nur dann in deinem Konto, wenn du die Synchronisierung deiner Horoskope aktivierst.",
     "stickyComplete": "{count}/{total} ausgefüllt",
     "stickyContinue": "Weiter",
     "mysticalPhrase1": "In den Sternen geschrieben",
