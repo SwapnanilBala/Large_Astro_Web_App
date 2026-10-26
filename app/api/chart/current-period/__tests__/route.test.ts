@@ -162,3 +162,25 @@ describe("the current-period reading's chart", () => {
     expect(sent().system[0].text).toContain('Never write "backdrop", "sets the stage"');
   });
 });
+
+describe("the current-period reading's phase", () => {
+  it("is the Antardasha's when the stack runs to a Pratyantardasha, and the model is told so", async () => {
+    const threeLevels = new NextRequest("https://example.test/api/chart/current-period", {
+      method: "POST",
+      body: JSON.stringify({
+        stack: [...STACK, { lord: "Mars", startDate: "2026-09-01", endDate: "2026-11-04", sign: "Aries", house: 1 }],
+        chart: CHART,
+        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
+        progressPercent: 69,
+        language: "en",
+      }),
+    });
+    expect((await POST(threeLevels)).status).toBe(200);
+    expect(userTurn()).toContain("Pratyantardasha: Mars");
+    expect(userTurn()).toContain("\n\nThe Antardasha is well past its midpoint.\n\n");
+    expect(userTurn()).not.toMatch(/The Pratyantardasha (is|has)/);
+    expect(sent().system[0].text).toContain("where in the Antardasha the reader stands");
+    expect(sent().system[0].text).toContain("it describes the Antardasha only, never the Pratyantardasha");
+    expect(sent().system[0].text).not.toContain("innermost period");
+  });
+});

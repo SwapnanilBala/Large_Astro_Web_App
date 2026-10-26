@@ -159,8 +159,8 @@ You are also given where each of those lords stands in the reader's birth chart 
 
 Rules:
 - Exactly 3 sentences, one paragraph, no more than 80 words in total. This is a card in a report, not an essay; a long sentence is not a way around the count.
-- First sentence: the one or two parts of life these periods concentrate on, and why, in a clause ("with Saturn and Mercury both in your 2nd house, ..."). Second: how that tends to show up in ordinary life, from the everyday examples given. Third: the ease or friction between the levels, and where in the innermost period the reader stands.
-- Say where in the period the reader stands using the phrasing you are given for it. Do not convert it to a percentage, a number of days, or a date.
+- First sentence: the one or two parts of life these periods concentrate on, and why, in a clause ("with Saturn and Mercury both in your 2nd house, ..."). Second: how that tends to show up in ordinary life, from the everyday examples given. Third: the ease or friction between the levels, and where in the Antardasha the reader stands.
+- Say where in the Antardasha the reader stands using the phrasing you are given for it; it describes the Antardasha only, never the Pratyantardasha. Do not convert it to a percentage, a number of days, or a date.
 - Never recite the placements as a list; use a fact only to explain something. Address the reader as "you".
 - State nothing you were not given. No degrees, no aspects, no yogas, no transits, and no planets, signs or houses beyond the ones supplied.
 - Avoid stock astrology phrasing. Never write ${STOCK_PHRASES.map((phrase) => `"${phrase}"`).join(", ")}.

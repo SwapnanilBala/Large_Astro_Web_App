@@ -38,6 +38,20 @@ import { HOUSE_MEANINGS, describeFocus, describeLord, describeRelation, housesNa
 /** Outermost first. Deeper levels are the drill-down's business, not this card's. */
 export const CURRENT_PERIOD_LEVELS = ["Maha Dasha", "Antardasha", "Pratyantardasha"] as const;
 
+/*
+ * The level the phase line describes: the Antardasha, however deep the stack.
+ *
+ * It is the level the panel measures (nakshatra-dasha-panel.tsx), and the one
+ * whose band holds still: an Antardasha runs months to years, so its phase
+ * moves a handful of times and a cached reading stays true, where a
+ * Pratyantardasha's would cross a band every week or two and buy a new
+ * reading each time. The card the paragraph sits in prints every level's own
+ * progress. Until 2026-10-26 the line named the innermost level instead, so a
+ * three-level stack gave the Pratyantardasha the Antardasha's phase, and a
+ * reader 60% through a Pratyantardasha was told it was well past its midpoint.
+ */
+export const PHASE_LEVEL = CURRENT_PERIOD_LEVELS[1];
+
 export const VIMSHOTTARI_LORDS = [
   "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu",
 ] as const;
@@ -69,7 +83,7 @@ export type CurrentPeriodFacts = {
   /** The chart's rising sign and planets, when the panel has them; without it the paragraph has each lord's sign and house only. */
   chart?: CurrentPeriodChart;
   nakshatra: { name: string; lord: string; pada: number };
-  /** How far through the innermost period the reader is, 0-100. */
+  /** How far through the Antardasha the reader is, 0-100, whatever the stack's depth; see PHASE_LEVEL. */
   progressPercent: number;
 };
 
@@ -159,7 +173,7 @@ export function buildCurrentPeriodFacts(
   dasha: DashaInfo,
   nakshatra: NakshatraInfo,
   planets: PlanetPosition[] | undefined,
-  progressPercent: number,
+  antardashaProgress: number,
   ascendantSign?: string,
 ): CurrentPeriodFacts | null {
   const placementOf = (lord: string): Pick<CurrentPeriodStep, "sign" | "house"> => {
@@ -214,7 +228,7 @@ export function buildCurrentPeriodFacts(
     stack,
     ...(chart ? { chart } : {}),
     nakshatra: { name: nakshatra.name, lord: nakshatra.lord, pada: nakshatra.pada },
-    progressPercent,
+    progressPercent: antardashaProgress,
   };
 }
 
@@ -274,13 +288,11 @@ export function renderCurrentPeriodFacts(facts: CurrentPeriodFacts, languageCode
     return `${level}: ${step.lord} (${formatPeriodWindow(step.startDate, step.endDate)})${placement}`;
   });
 
-  const innermostLevel = CURRENT_PERIOD_LEVELS[facts.stack.length - 1] ?? "innermost period";
-
   return [
     rows.join("\n"),
     describeChart(facts),
     `Birth nakshatra: ${facts.nakshatra.name}, pada ${facts.nakshatra.pada}, ruled by ${facts.nakshatra.lord}.`,
-    `The ${innermostLevel} ${currentPeriodPhase(facts.progressPercent)}.`,
+    `The ${PHASE_LEVEL} ${currentPeriodPhase(facts.progressPercent)}.`,
     `Write the paragraph in ${language}.` +
       /* Last, where the model reads it: handed English facts, Haiku answered
          a Hindi reader in English on the classical notes until told this. */

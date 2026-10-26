@@ -99,11 +99,11 @@ function renderCurrentPeriodFacts({ stack, nakshatra, phase }) {
       step.sign && step.house ? `, natal ${step.lord} in ${step.sign}, house ${step.house}` : "";
     return `${level}: ${step.lord} (${step.window})${placement}`;
   });
-  const innermost = CURRENT_PERIOD_LEVELS[stack.length - 1] ?? "innermost period";
   return [
     rows.join("\n"),
     `Birth nakshatra: ${nakshatra.name}, pada ${nakshatra.pada}, ruled by ${nakshatra.lord}.`,
-    `The ${innermost} ${phase}.`,
+    /* The Antardasha's phase however deep the stack, as PHASE_LEVEL says. */
+    `The Antardasha ${phase}.`,
     "Write the paragraph in English.",
   ].join("\n\n");
 }

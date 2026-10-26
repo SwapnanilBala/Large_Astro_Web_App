@@ -102,6 +102,30 @@ describe("the current-period reading's language", () => {
 });
 
 /*
+ * The panel measures the Antardasha, so the phase is the Antardasha's however
+ * deep the stack. It used to be labelled with the innermost level, which gave
+ * a Pratyantardasha 60% through the Antardasha's "well past its midpoint".
+ */
+describe("the current-period phase", () => {
+  const THREE_LEVELS: CurrentPeriodFacts = {
+    ...FACTS,
+    stack: [...FACTS.stack, { lord: "Mars", startDate: "2026-09-01", endDate: "2026-11-04", sign: "Aries", house: 1 }],
+    progressPercent: 69,
+  };
+
+  it("describes the Antardasha when the stack runs to a Pratyantardasha", () => {
+    const prompt = renderCurrentPeriodFacts(THREE_LEVELS);
+    expect(prompt).toContain("Pratyantardasha: Mars");
+    expect(prompt).toContain("\n\nThe Antardasha is well past its midpoint.\n\n");
+    expect(prompt).not.toMatch(/The Pratyantardasha (is|has)/);
+  });
+
+  it("describes the Antardasha when it is the innermost level, as before", () => {
+    expect(renderCurrentPeriodFacts(FACTS)).toContain("\n\nThe Antardasha is around its midpoint.\n\n");
+  });
+});
+
+/*
  * With the chart, the paragraph is written from the facts the period reading
  * uses: rulerships, how each level stands to the one above, and the houses
  * several lords share. A chart is all or nothing.
