@@ -59,16 +59,20 @@ export const MAX_LIFE_SHIFTS = 5;
  * the model wrote "late 2028" under a card headed "March 2029", which reads as
  * a contradiction rather than as two roundings of one date.
  */
+/* In UTC, as the engine counts: in the viewer's own zone a pivot late on the
+   last day of a month printed as the next month on the card, against the
+   month the prompt named on the server. */
 export function formatShiftPivot(pivotIso: string, locale = "en-US"): string {
   return new Date(pivotIso).toLocaleDateString(locale, {
     month: "long",
     year: "numeric",
+    timeZone: "UTC",
   });
 }
 
 export function formatShiftWindow(startIso: string, endIso: string, locale = "en-US"): string {
   const fmt = (value: string) =>
-    new Date(value).toLocaleDateString(locale, { month: "short", year: "numeric" });
+    new Date(value).toLocaleDateString(locale, { month: "short", year: "numeric", timeZone: "UTC" });
   return `${fmt(startIso)} → ${fmt(endIso)}`;
 }
 

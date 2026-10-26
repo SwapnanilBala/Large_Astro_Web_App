@@ -87,10 +87,28 @@ function statusFor(now: Date, start: Date, end: Date): MajorShiftStatus {
   return "active";
 }
 
+/*
+ * The audit writes the birth instant to the minute with no offset
+ * ("1998-03-10T03:45"), and `new Date` reads a string like that in the
+ * machine's own time zone. So the returns, counted from birth, fell hours
+ * apart on the server (UTC on Vercel) and in a reader's browser, and with
+ * them the chapter ids the panel sends and the route looks up: the route
+ * found "none of those chapters", and the card kept its template, for every
+ * reader not on UTC (found 2026-10-26). Read as what it is, UTC, the
+ * chapters come out the same on every machine. A date alone is already UTC.
+ */
+function parseUtcInstant(value: string | undefined | null): Date | null {
+  if (!value) return null;
+  const zoned = !value.includes("T") || /(?:[zZ]|[+-]\d{2}:?\d{2})$/.test(value);
+  return parseDate(zoned ? value : `${value}Z`);
+}
+
 function findBirthDate(payload: ChartApiResponse): Date | null {
   const audit = payload.chart.calculation_audit;
+  /* The local time is the fallback only; read as UTC too, it is off by the
+     birthplace's offset, hours against cycles of years, but the same everywhere. */
   const birthIso = audit?.birth_utc_iso ?? audit?.birth_local_iso;
-  const direct = parseDate(birthIso ?? null);
+  const direct = parseUtcInstant(birthIso ?? null);
   if (direct) return direct;
   const firstPeriod = payload.chart.dasha?.periods?.[0];
   return parseDate(firstPeriod?.sequence_start_date ?? firstPeriod?.start_date ?? null);
