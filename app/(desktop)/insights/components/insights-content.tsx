@@ -51,6 +51,7 @@ function LazyPanel({
   rootMargin = "200px",
   minHeight = 200,
   mountWhenIdle = false,
+  holdMinHeight = true,
 }: {
   children: React.ReactNode;
   fallback?: React.ReactNode;
@@ -61,6 +62,12 @@ function LazyPanel({
   /* Also mount once the browser is idle after load, not only on arrival. See
      the effect below for when that is the right trade. */
   mountWhenIdle?: boolean;
+  /* Keep the reservation once mounted, as the default does, or let the panel
+     size itself. Release it only for a panel that mounts well ahead of the
+     reader (a wide rootMargin) and can come out shorter than its reservation:
+     the shift then happens out of sight, where a reservation kept would leave
+     a gap on screen. */
+  holdMinHeight?: boolean;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -106,7 +113,7 @@ function LazyPanel({
   }, [rootMargin]);
 
   return (
-    <div ref={ref} className={styles.lazyPanel} style={{ minHeight }}>
+    <div ref={ref} className={styles.lazyPanel} style={{ minHeight: isVisible && !holdMinHeight ? undefined : minHeight }}>
       {isVisible ? children : (fallback ?? <PanelSkeleton minHeight={minHeight} />)}
     </div>
   );
@@ -1721,7 +1728,6 @@ export default function InsightsContent({
         <div className={styles.gatewayGrid}>
           {/* ─── Timing & electional (gateway to its own page) ─── */}
           <GatewaySection id="timing">
-            <TermHelp terms={["dasha", "transit"]} />
             <SectionGateway
               href={`/insights/timing?${historyQs}`}
               icon={<Clock3 />}
@@ -1731,6 +1737,7 @@ export default function InsightsContent({
               blurb={t("insights.page.gateways.timing.blurb")}
               footnote={t("insights.page.gateways.timing.footnote")}
               ctaLabel={t("insights.page.gateways.timing.cta")}
+              help={<TermHelp terms={["dasha", "transit"]} />}
             >
               <TimingGatewayPreview dasha={payload.chart.dasha} href={`/insights/timing?${historyQs}`} />
             </SectionGateway>
@@ -1786,7 +1793,10 @@ export default function InsightsContent({
           {/* 800px rather than the 200px default: the warm above means the
               module is already in memory, so the only thing left to buy is
               enough lead time to render before the section is actually read. */}
-          <LazyPanel minHeight={560} rootMargin="800px">
+          {/* Released once mounted: the one card and the chapter row come to
+              well under the 560px reserved for them, which left a gap above
+              the link on every visit. */}
+          <LazyPanel minHeight={560} rootMargin="800px" holdMinHeight={false}>
             <PanelErrorBoundary panelName="Major Life Shifts">
               <MajorShiftsPanel payload={payload} historyQs={historyQs} variant="brief" />
             </PanelErrorBoundary>

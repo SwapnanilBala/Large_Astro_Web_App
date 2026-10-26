@@ -4716,6 +4716,130 @@
 /* A written reading: its paragraphs take the card's paragraph style, with
    room between them, and the passages and credit below keep the classical
    note's smaller sizes, which .lifeShiftCard p would otherwise override. */
+/* The card's two halves: what the chapter is, and what is written about it.
+   Stacked in a narrow card, with the card's own spacing. */
+.lifeShiftMeta,
+.lifeShiftBody {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+/*
+ * The results page's one chapter spans the whole section, and stacked like
+ * the narrow cards its reading ran as a single line nearly 1,900px long. On a
+ * wide screen the facts take a column of their own and the reading sits beside
+ * them at a readable measure.
+ */
+@media (min-width: 900px) {
+  .lifeShiftCardWide {
+    display: grid;
+    grid-template-columns: minmax(15rem, 21rem) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    column-gap: 0;
+    row-gap: 0.9rem;
+  }
+
+  .lifeShiftCardWide .lifeShiftMeta {
+    grid-column: 1;
+    grid-row: 1;
+    padding-right: clamp(1.25rem, 2.6vw, 2.5rem);
+  }
+
+  .lifeShiftCardWide .lifeShiftBody {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    max-width: 72ch;
+    padding-left: clamp(1.25rem, 2.6vw, 2.5rem);
+    border-left: 1px solid var(--line-soft);
+  }
+
+  /* Straight under the dates, with the facts it belongs to. */
+  .lifeShiftCard.lifeShiftCardWide small {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: start;
+    margin-top: 0;
+    margin-right: clamp(1.25rem, 2.6vw, 2.5rem);
+  }
+}
+
+/* Wider still, a reading held to a readable measure left half the card
+   empty; it runs in two columns instead, at the same measure each. */
+@media (min-width: 1500px) {
+  .lifeShiftCardWide .lifeShiftBody {
+    max-width: none;
+  }
+
+  .lifeShiftCardWide .lifeShiftReading {
+    display: block;
+    column-count: 2;
+    column-gap: clamp(2rem, 3vw, 3rem);
+    column-rule: 1px solid var(--line-soft);
+  }
+
+  .lifeShiftCardWide .lifeShiftReading p {
+    margin: 0 0 0.6rem;
+  }
+}
+
+/* Every chapter in date order under the results page's card. */
+.lifeShiftStrip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lifeShiftStep {
+  display: grid;
+  align-content: start;
+  gap: 0.2rem;
+  min-width: 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.lifeShiftStepCurrent {
+  border-color: color-mix(in srgb, var(--accent-gold) 60%, transparent);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-gold) 30%, transparent) inset;
+}
+
+.lifeShiftStepStatus {
+  color: var(--ink-soft);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-label);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.lifeShiftStepStatus:lang(hi),
+.lifeShiftStepStatus:lang(bn) {
+  letter-spacing: 0;
+}
+
+.lifeShiftStepLabel {
+  color: var(--ink-main);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
+  font-weight: 650;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.lifeShiftStepDate {
+  color: var(--ink-soft);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-ui);
+  font-variant-numeric: tabular-nums;
+}
+
 /* The engine's template while the written reading is on its way: still
    there, so the card keeps its height, but plainly not the final word. */
 .lifeShiftCard p.lifeShiftWaiting {

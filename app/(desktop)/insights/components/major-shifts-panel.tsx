@@ -105,9 +105,12 @@ function ShiftCard({
   reading,
   waitingMs,
   headingLevel,
+  wide = false,
 }: {
   shift: MajorLifeShift;
   reading?: ClassicalReading;
+  /** The results page's one chapter, alone across the section: its facts beside the reading rather than above it. */
+  wide?: boolean;
   /** While this chapter's reading is being written: how long it usually takes. Its template shows dimmed under the bar. */
   waitingMs?: number;
   /* 3 inside an /insights section, which supplies the h2; 2 on the life-shifts
@@ -117,37 +120,71 @@ function ShiftCard({
   const { t, language } = useTranslation();
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
-    <article className={`${styles.lifeShiftCard} ${statusClass(shift.status)}`}>
-      <header className={styles.lifeShiftHeader}>
-        <span className={styles.lifeShiftIndex}>#{shift.index}</span>
-        <span className={styles.lifeShiftStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
-      </header>
-      <p className={styles.lifeShiftLabel}>{shiftLabel(shift, t)}</p>
-      <Heading>{shiftTheme(shift, t)}</Heading>
-      <p className={styles.lifeShiftWindow}>
-        <strong>{t("insights.shifts.pivot")}</strong> {formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])} ·{" "}
-        {t("insights.shifts.age", { age: String(shift.ageAtPivot) })}
-        <br />
-        <strong>{t("insights.shifts.window")}</strong>{" "}
-        {formatShiftWindow(shift.windowStartIso, shift.windowEndIso, LOCALE_TAGS[language])}
-      </p>
-      {reading ? (
-        <>
-          <div className={styles.lifeShiftReading}>
-            <ClassicalParagraphs reading={reading} />
-          </div>
-          <ClassicalSources reading={reading} tr={t} prefix={SOURCE_STRINGS} />
-        </>
-      ) : waitingMs ? (
-        <>
-          <ReadingProgress label={t("insights.story.stages.writing")} expectedMs={waitingMs} />
-          <p className={styles.lifeShiftWaiting}>{shift.narrative}</p>
-        </>
-      ) : (
-        <p>{shift.narrative}</p>
-      )}
+    <article
+      className={`${styles.lifeShiftCard} ${statusClass(shift.status)}${wide ? ` ${styles.lifeShiftCardWide}` : ""}`}
+    >
+      <div className={styles.lifeShiftMeta}>
+        <header className={styles.lifeShiftHeader}>
+          <span className={styles.lifeShiftIndex}>#{shift.index}</span>
+          <span className={styles.lifeShiftStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
+        </header>
+        <p className={styles.lifeShiftLabel}>{shiftLabel(shift, t)}</p>
+        <Heading>{shiftTheme(shift, t)}</Heading>
+        <p className={styles.lifeShiftWindow}>
+          <strong>{t("insights.shifts.pivot")}</strong> {formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])} ·{" "}
+          {t("insights.shifts.age", { age: String(shift.ageAtPivot) })}
+          <br />
+          <strong>{t("insights.shifts.window")}</strong>{" "}
+          {formatShiftWindow(shift.windowStartIso, shift.windowEndIso, LOCALE_TAGS[language])}
+        </p>
+      </div>
+      <div className={styles.lifeShiftBody}>
+        {reading ? (
+          <>
+            <div className={styles.lifeShiftReading}>
+              <ClassicalParagraphs reading={reading} />
+            </div>
+            <ClassicalSources reading={reading} tr={t} prefix={SOURCE_STRINGS} />
+          </>
+        ) : waitingMs ? (
+          <>
+            <ReadingProgress label={t("insights.story.stages.writing")} expectedMs={waitingMs} />
+            <p className={styles.lifeShiftWaiting}>{shift.narrative}</p>
+          </>
+        ) : (
+          <p>{shift.narrative}</p>
+        )}
+      </div>
       {shift.evidence && <small>{shift.evidence}</small>}
     </article>
+  );
+}
+
+/*
+ * Every chapter the engine found, in date order, as a row of small steps under
+ * the results page's one card: where the chapter on show sits among the
+ * others, past and ahead, before the reader follows the link to read them.
+ */
+function ChapterStrip({ shifts, current }: { shifts: MajorLifeShift[]; current: Set<string> }) {
+  const { t, language } = useTranslation();
+  return (
+    <ol className={styles.lifeShiftStrip} aria-label={t("insights.page.lifeShifts.link")}>
+      {shifts.map((shift) => {
+        const id = lifeShiftId(shift);
+        const here = current.has(id);
+        return (
+          <li
+            key={id}
+            className={`${styles.lifeShiftStep} ${statusClass(shift.status)}${here ? ` ${styles.lifeShiftStepCurrent}` : ""}`}
+            aria-current={here ? "step" : undefined}
+          >
+            <span className={styles.lifeShiftStepStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
+            <span className={styles.lifeShiftStepLabel}>{shiftLabel(shift, t)}</span>
+            <span className={styles.lifeShiftStepDate}>{formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -225,9 +262,12 @@ export default function MajorShiftsPanel({
             reading={readings.get(lifeShiftId(shift))}
             waitingMs={readingState === "pending" ? EXPECTED_MS[isBrief ? "headline" : "ahead"] : undefined}
             headingLevel={isBrief ? 3 : 2}
+            wide={isBrief}
           />
         ))}
       </div>
+
+      {isBrief && shifts.length > 1 && <ChapterStrip shifts={shifts} current={featuredKeys} />}
 
       {/* Past chapters are already behind a disclosure, but on the results
           page they are still markup, still measured, and still one click from
