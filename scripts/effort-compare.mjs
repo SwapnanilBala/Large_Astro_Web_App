@@ -33,8 +33,8 @@ import { dirname, join } from "node:path";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const routeFile = (...parts) => join(HERE, "..", "app", "api", ...parts, "route.ts");
 
-/* Claude Opus 5, $ per token. */
-const PRICE = { input: 5 / 1e6, output: 25 / 1e6, cacheRead: 0.5 / 1e6, cacheWrite: 6.25 / 1e6 };
+/* Claude Opus 5.5, $ per token; cache writes at the 5-minute rate (1.25x input). */
+const PRICE = { input: 4 / 1e6, output: 20 / 1e6, cacheRead: 0.2 / 1e6, cacheWrite: 5 / 1e6 };
 const MODEL = "claude-opus-5-5";
 
 const SIGNS = [
