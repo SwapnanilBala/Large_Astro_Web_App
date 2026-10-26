@@ -3,7 +3,7 @@
     "gate": {
       "kicker": "Members only",
       "heading": "The advanced reading needs an account",
-      "lead": "This section writes a full reading of your chart -- the timing, the aspects, the harmonics and the strengths -- and keeps every table behind it. It is the most expensive thing the app does, so it is kept for people who have signed in.",
+      "lead": "This section writes a full reading of your chart -- the timing, the aspects, the harmonics and the strengths -- and keeps every table behind it. Sign in to open it.",
       "signIn": "Sign in to continue"
     },
     "header": {

@@ -904,7 +904,7 @@
       "read": "Diese Periode deuten",
       "failed": "Die Deutung konnte gerade nicht geschrieben werden.",
       "limited": "Die Periodendeutungen für heute sind aufgebraucht. Morgen gibt es neue.",
-      "limitedSignIn": "Du hast die kostenlosen Periodendeutungen für heute aufgebraucht. Melde dich an, um mehr zu lesen.",
+      "limitedSignIn": "Du hast die Periodendeutungen für heute aufgebraucht. Melde dich an, um mehr zu lesen.",
       "empty": "Die klassischen Bücher sagen für dein Horoskop nichts über die Planeten dieser Periode.",
       "meanings": {
         "h1": "das Selbst, Körper, Haltung",
@@ -3272,7 +3272,7 @@
     "gate": {
       "heading": "Für die erweiterte Deutung brauchst du ein Konto",
       "kicker": "Nur für Mitglieder",
-      "lead": "Hier entsteht eine vollständige Deutung deines Horoskops – Timing, Aspekte, Teilhoroskope und Stärken – samt allen Tabellen, auf denen sie beruht. Nichts in der App ist aufwendiger, deshalb ist dieser Bereich allen vorbehalten, die angemeldet sind.",
+      "lead": "Hier entsteht eine vollständige Deutung deines Horoskops – Timing, Aspekte, Teilhoroskope und Stärken – samt allen Tabellen, auf denen sie beruht. Melde dich an, um ihn zu öffnen.",
       "signIn": "Zum Fortfahren anmelden"
     },
     "header": {

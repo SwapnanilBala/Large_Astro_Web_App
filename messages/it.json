@@ -904,7 +904,7 @@
       "read": "Leggi questo periodo",
       "failed": "Non è stato possibile scrivere la lettura in questo momento.",
       "limited": "Le letture dei periodi di oggi sono esaurite. Tornano domani.",
-      "limitedSignIn": "Hai usato le letture dei periodi gratuite di oggi. Accedi per leggerne altre.",
+      "limitedSignIn": "Hai usato le letture dei periodi di oggi. Accedi per leggerne altre.",
       "empty": "I libri classici non dicono nulla sui pianeti di questo periodo per il tuo tema natale.",
       "meanings": {
         "h1": "sé, corpo, atteggiamento",
@@ -3272,7 +3272,7 @@
     "gate": {
       "heading": "La lettura avanzata richiede un account",
       "kicker": "Area riservata",
-      "lead": "Questa sezione scrive una lettura completa della tua carta — i tempi, gli aspetti, le armoniche e le forze — e conserva ogni tabella su cui si basa. È la cosa più costosa che l'app fa, quindi è riservata a chi ha effettuato l'accesso.",
+      "lead": "Questa sezione scrive una lettura completa della tua carta — i tempi, gli aspetti, le armoniche e le forze — e conserva ogni tabella su cui si basa. Accedi per aprirla.",
       "signIn": "Accedi per continuare"
     },
     "header": {

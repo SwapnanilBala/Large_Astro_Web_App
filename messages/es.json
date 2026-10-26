@@ -904,7 +904,7 @@
       "read": "Leer este periodo",
       "failed": "No se pudo escribir la lectura ahora mismo.",
       "limited": "Las lecturas de periodos de hoy se han agotado. Vuelven mañana.",
-      "limitedSignIn": "Ya usaste las lecturas de periodos gratuitas de hoy. Inicia sesión para leer más.",
+      "limitedSignIn": "Ya usaste las lecturas de periodos de hoy. Inicia sesión para leer más.",
       "empty": "Los libros clásicos no dicen nada sobre los planetas de este periodo para tu carta.",
       "meanings": {
         "h1": "uno mismo, cuerpo, actitud",
@@ -3272,7 +3272,7 @@
     "gate": {
       "heading": "La lectura avanzada necesita una cuenta",
       "kicker": "Solo para miembros",
-      "lead": "Esta sección escribe una lectura completa de tu carta —los tiempos, los aspectos, los armónicos y las fuerzas— y conserva todas las tablas en las que se basa. Es lo más costoso que hace la aplicación, así que está reservada a quienes han iniciado sesión.",
+      "lead": "Esta sección escribe una lectura completa de tu carta —los tiempos, los aspectos, los armónicos y las fuerzas— y conserva todas las tablas en las que se basa. Inicia sesión para abrirla.",
       "signIn": "Inicia sesión para continuar"
     },
     "header": {

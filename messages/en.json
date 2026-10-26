@@ -904,7 +904,7 @@
       "read": "Read this period",
       "failed": "The reading could not be written just now.",
       "limited": "Today's period readings are used up. They return tomorrow.",
-      "limitedSignIn": "You have used today's free period readings. Sign in for more.",
+      "limitedSignIn": "You have used today's period readings. Sign in for more.",
       "empty": "The classical books say nothing about this period's planets for your chart.",
       "meanings": {
         "h1": "self, body, outlook",

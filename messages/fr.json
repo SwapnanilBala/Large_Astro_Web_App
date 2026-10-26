@@ -904,7 +904,7 @@
       "read": "Lire cette période",
       "failed": "La lecture n'a pas pu être rédigée pour le moment.",
       "limited": "Les lectures de périodes du jour sont épuisées. Elles reviennent demain.",
-      "limitedSignIn": "Vous avez utilisé les lectures de périodes gratuites du jour. Connectez-vous pour en lire davantage.",
+      "limitedSignIn": "Vous avez utilisé les lectures de périodes du jour. Connectez-vous pour en lire davantage.",
       "empty": "Les livres classiques ne disent rien des planètes de cette période pour votre thème.",
       "meanings": {
         "h1": "soi, corps, attitude",
@@ -3272,7 +3272,7 @@
     "gate": {
       "heading": "La lecture avancée nécessite un compte",
       "kicker": "Réservé aux membres",
-      "lead": "Cette section rédige une lecture complète de votre carte — le timing, les aspects, les harmoniques et les forces — et conserve tous les tableaux sur lesquels elle s'appuie. C'est ce que l'application fait de plus coûteux : elle est donc réservée aux personnes connectées.",
+      "lead": "Cette section rédige une lecture complète de votre carte — le timing, les aspects, les harmoniques et les forces — et conserve tous les tableaux sur lesquels elle s'appuie. Connectez-vous pour l'ouvrir.",
       "signIn": "Se connecter pour continuer"
     },
     "header": {
