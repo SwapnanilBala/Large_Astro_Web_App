@@ -8,13 +8,15 @@
  * a request generates at any effort above low, and is invisible until a real
  * call reports `usage.output_tokens`.
  *
- * The system prompt is read out of the route file rather than copied here, so
- * this measures the prompt that actually ships and cannot quietly drift from
- * it. The user turn is built the same way the route builds it.
+ * The prompt is never copied here, so this measures the prompt that actually
+ * ships and cannot quietly drift from it: current-period imports its system
+ * prompt and user turn from lib/, which is why this runs under tsx; the varga
+ * prompt is read out of its route file, and the reader refuses one that
+ * interpolates.
  *
- *   ANTHROPIC_API_KEY=sk-ant-... node scripts/effort-compare.mjs
- *   ... node scripts/effort-compare.mjs --efforts low,medium,high --repeat 2
- *   ... node scripts/effort-compare.mjs --route varga --efforts low,medium,high
+ *   ANTHROPIC_API_KEY=sk-ant-... npx tsx scripts/effort-compare.mjs
+ *   ... npx tsx scripts/effort-compare.mjs --efforts low,medium,high --repeat 2
+ *   ... npx tsx scripts/effort-compare.mjs --route varga --efforts low,medium,high
  *
  * `--route` picks which route's prompt to sweep; ROUTES below is the registry.
  * It grew a second entry rather than a second script so that "read the prompt
@@ -25,7 +27,7 @@
  * total before exiting. Default is 3 cases x 2 efforts = 6 calls.
  */
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { dirname, join } from "node:path";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -81,78 +83,87 @@ function renderVargaFacts(facts) {
     .join("\n\n");
 }
 
-/* One synthetic reader -- Venus mahadasha, natal Venus in Aquarius / H10,
-   Saturn in Capricorn / H9. The life-shifts route, which shared it, now reads
-   the classics; sample it with scripts/knowledge/sample-life-shifts.ts. */
-const CURRENT_PERIOD_LEVELS = ["Maha Dasha", "Antardasha", "Pratyantardasha"];
-
-/* Mirrors renderCurrentPeriodFacts and currentPeriodPhase in
-   lib/current-period-reading.ts. Duplicated for the same reason the other two
-   render helpers here are: this file is .mjs and cannot import the TypeScript.
-   The SYSTEM_PROMPT is still read from the route, so only the user turn can
-   drift -- check it against the lib if a sweep reads oddly. Measured in
-   English, so the closing language line is the English one. */
-function renderCurrentPeriodFacts({ stack, nakshatra, phase }) {
-  const rows = stack.map((step, index) => {
-    const level = CURRENT_PERIOD_LEVELS[index] ?? `level ${index + 1}`;
-    const placement =
-      step.sign && step.house ? `, natal ${step.lord} in ${step.sign}, house ${step.house}` : "";
-    return `${level}: ${step.lord} (${step.window})${placement}`;
-  });
-  return [
-    rows.join("\n"),
-    `Birth nakshatra: ${nakshatra.name}, pada ${nakshatra.pada}, ruled by ${nakshatra.lord}.`,
-    /* The Antardasha's phase however deep the stack, as PHASE_LEVEL says. */
-    `The Antardasha ${phase}.`,
-    "Write the paragraph in English.",
-  ].join("\n\n");
-}
-
+/* One synthetic reader, the D1 chart above: Taurus rising, a Venus Maha Dasha
+   with natal Venus in Aquarius (10th), a Saturn Antardasha with Saturn in
+   Capricorn (9th), a Mercury Pratyantardasha with Mercury in Aries (12th), and
+   the Moon in Scorpio, in Anuradha. */
 const CURRENT_PERIOD_STACK = [
-  { lord: "Venus", window: "Nov 6, 2023 - Nov 6, 2043", sign: "Aquarius", house: 10 },
-  { lord: "Saturn", window: "Jan 6, 2027 - Mar 8, 2030", sign: "Capricorn", house: 9 },
-  { lord: "Mercury", window: "Aug 14, 2027 - Jan 11, 2028", sign: "Aries", house: 12 },
+  { lord: "Venus", startDate: "2023-11-06", endDate: "2043-11-06", sign: "Aquarius", house: 10 },
+  { lord: "Saturn", startDate: "2027-01-06", endDate: "2030-03-08", sign: "Capricorn", house: 9 },
+  { lord: "Mercury", startDate: "2027-08-14", endDate: "2028-01-11", sign: "Aries", house: 12 },
 ];
+const CURRENT_PERIOD_CHART = {
+  ascendantSign: D1.Ascendant,
+  planets: POINTS.filter((name) => name !== "Ascendant").map((name) => ({ name, sign: D1[name] })),
+};
+const CURRENT_PERIOD_NAKSHATRA = { name: "Anuradha", lord: "Saturn", pada: 2 };
+
+/*
+ * The shipped prompt and user turn, imported rather than copied. The copy this
+ * replaced drifted twice: it never learnt the chart facts added on 2026-10-14,
+ * and the system prompt read out of the route stopped at the backtick inside
+ * its stock-phrase list, so sweeps sent a prompt cut off mid-rule. Importing
+ * TypeScript with the app's `@/` paths needs tsx, hence `npx tsx`.
+ */
+async function loadCurrentPeriod() {
+  const lib = (name) => pathToFileURL(join(HERE, "..", "lib", name)).href;
+  try {
+    const [{ CURRENT_PERIOD_SYSTEM_PROMPT }, { renderCurrentPeriodFacts }] = await Promise.all([
+      import(lib("current-period-prompt.ts")),
+      import(lib("current-period-reading.ts")),
+    ]);
+    /* Measured in English, as the route writes for an English page. */
+    return { system: CURRENT_PERIOD_SYSTEM_PROMPT, userTurn: ({ facts }) => renderCurrentPeriodFacts(facts, "en") };
+  } catch (error) {
+    console.error("The current-period route imports its prompt from lib/; run this with `npx tsx scripts/effort-compare.mjs`.");
+    throw error;
+  }
+}
 
 const ROUTES = {
   varga: {
-    file: routeFile("chart", "varga-commentary"),
     maxTokens: 16000,
     cases: [{ label: "ten key vargas", facts: vargaFacts() }],
-    userTurn: ({ facts }) =>
-      `Write exactly ${facts.length} notes, one for each of these vargas: ` +
-      `${facts.map((fact) => fact.label).join(", ")}.\n\n${renderVargaFacts(facts)}`,
+    load: async () => ({
+      system: readSystemPrompt(routeFile("chart", "varga-commentary")),
+      userTurn: ({ facts }) =>
+        `Write exactly ${facts.length} notes, one for each of these vargas: ` +
+        `${facts.map((fact) => fact.label).join(", ")}.\n\n${renderVargaFacts(facts)}`,
+    }),
   },
   "current-period": {
-    file: routeFile("chart", "current-period"),
     maxTokens: 8000,
-    /* The two shapes the card actually renders. Stack depth is one axis: a
-       chart without a pratyantardasha sends two lords. The other is whether
-       the chart carried positions at all, which is what decides if the
-       placements -- the input this route exists for -- are in the prompt; the
-       third case is the same stack with them stripped, so a sweep shows
-       directly what they buy. */
+    /* The shapes the card renders. Stack depth is one axis: a chart without a
+       pratyantardasha sends two lords. The other is whether the panel had the
+       chart, which decides if the prompt carries rulerships, relations and
+       shared houses or each lord's sign and house only; the third case is the
+       three-lord stack without it, so a sweep shows what the chart buys. The
+       percentage is the Antardasha's, as the panel sends it. */
     cases: [
       {
-        label: "two lords, with placements",
-        stack: CURRENT_PERIOD_STACK.slice(0, 2),
-        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
-        phase: "is around its midpoint",
+        label: "two lords, with the chart",
+        facts: {
+          stack: CURRENT_PERIOD_STACK.slice(0, 2),
+          chart: CURRENT_PERIOD_CHART,
+          nakshatra: CURRENT_PERIOD_NAKSHATRA,
+          progressPercent: 50,
+        },
       },
       {
-        label: "three lords, with placements",
-        stack: CURRENT_PERIOD_STACK,
-        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
-        phase: "is in its closing stretch",
+        label: "three lords, with the chart",
+        facts: {
+          stack: CURRENT_PERIOD_STACK,
+          chart: CURRENT_PERIOD_CHART,
+          nakshatra: CURRENT_PERIOD_NAKSHATRA,
+          progressPercent: 92,
+        },
       },
       {
-        label: "three lords, no placements",
-        stack: CURRENT_PERIOD_STACK.map(({ lord, window }) => ({ lord, window })),
-        nakshatra: { name: "Rohini", lord: "Moon", pada: 2 },
-        phase: "has only just opened",
+        label: "three lords, signs and houses only",
+        facts: { stack: CURRENT_PERIOD_STACK, nakshatra: CURRENT_PERIOD_NAKSHATRA, progressPercent: 5 },
       },
     ],
-    userTurn: renderCurrentPeriodFacts,
+    load: loadCurrentPeriod,
   },
 };
 
@@ -173,6 +184,12 @@ function readSystemPrompt(file) {
   let out = "";
   while (i < src.length && src[i] !== "`") {
     if (src[i] === "\\") { out += src[i] + src[i + 1]; i += 2; continue; }
+    /* An interpolation is code this reader cannot run, and a backtick inside
+       one would end the prompt early. Refuse rather than send half of it: the
+       route should export its prompt from lib/, as current-period does. */
+    if (src[i] === "$" && src[i + 1] === "{") {
+      throw new Error(`SYSTEM_PROMPT in ${file} interpolates a value; import it from lib/ instead of reading the source.`);
+    }
     out += src[i];
     i += 1;
   }
@@ -189,6 +206,17 @@ function costOf(usage) {
 }
 
 async function main() {
+  /* --dry prints what would be sent and stops: no key, no calls, no cost. */
+  if (process.argv.includes("--dry")) {
+    const routeName = arg("route", "current-period");
+    const route = ROUTES[routeName];
+    if (!route) throw new Error(`unknown --route ${routeName}`);
+    const { system, userTurn } = await route.load();
+    console.log(`=== system (${system.length} chars)\n${system}`);
+    for (const testCase of route.cases) console.log(`\n=== ${testCase.label}\n${userTurn(testCase)}`);
+    return;
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error("ANTHROPIC_API_KEY is not set. This script makes billed API calls.");
@@ -207,7 +235,7 @@ async function main() {
 
   const efforts = arg("efforts", "low,medium").split(",").map((s) => s.trim()).filter(Boolean);
   const repeat = Number(arg("repeat", "1"));
-  const system = readSystemPrompt(route.file);
+  const { system, userTurn } = await route.load();
 
   console.log(`model ${MODEL}  |  route ${routeName}  |  efforts ${efforts.join(", ")}  |  ${route.cases.length} cases x ${repeat}`);
   console.log(`system prompt ${system.length} chars\n`);
@@ -226,7 +254,7 @@ async function main() {
             max_tokens: route.maxTokens,
             output_config: { effort },
             system: [{ type: "text", text: system }],
-            messages: [{ role: "user", content: route.userTurn(testCase) }],
+            messages: [{ role: "user", content: userTurn(testCase) }],
           });
         } catch (error) {
           console.log(`    ${effort.padEnd(6)} ERROR ${error?.status ?? ""} ${error?.message ?? error}`);
