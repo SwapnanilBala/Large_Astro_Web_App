@@ -99,7 +99,7 @@
 .guidanceHeader > p {
   max-width: 48ch;
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.02rem;
   line-height: 1.55;
   margin: 0;
@@ -153,7 +153,7 @@
 .domainCard p,
 .guidanceCard > p {
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 0.96rem;
   line-height: 1.52;
   margin: 0.5rem 0 0;
@@ -202,7 +202,7 @@
 .gemstoneSafety {
   border-left: 2px solid var(--accent-coral);
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: var(--text-ui);
   line-height: 1.55;
   margin: 0.85rem 0 0;
@@ -454,7 +454,7 @@
   border-top: 1px solid rgba(200, 155, 60, 0.10);
   font-size: 1.18rem;
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   line-height: 1.6;
 }
 

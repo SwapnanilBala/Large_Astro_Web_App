@@ -176,7 +176,7 @@
 }
 .panelHeader h2 {
   margin: 0;
-  font: 500 1.65rem/1.35 var(--font-newsreader);
+  font: 500 1.65rem/1.35 var(--font-prose);
 }
 .iconButton {
   padding: 0.45rem;
@@ -303,7 +303,7 @@
 }
 .tourPanel h2 {
   margin: 0.4rem 0 0.6rem;
-  font: 500 1.45rem/1.35 var(--font-newsreader);
+  font: 500 1.45rem/1.35 var(--font-prose);
 }
 .tourPanel h2:focus {
   outline: none;

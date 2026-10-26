@@ -270,7 +270,7 @@
 .detailLead {
   margin: 1rem 0;
   color: var(--varga-soft);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.08rem;
   line-height: 1.56;
 }
@@ -768,7 +768,7 @@
 .noteBody {
   margin: 0;
   color: var(--varga-ink);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1rem;
   line-height: 1.55;
 }

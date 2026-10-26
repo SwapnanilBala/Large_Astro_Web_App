@@ -337,7 +337,7 @@
 .domainSubthemeHeader h3 {
   margin: 0;
   color: var(--area-gold);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.05rem;
   font-weight: 600;
 }
@@ -449,7 +449,7 @@
 .domainStatement h3 {
   margin: 0 0 0.4rem;
   color: var(--area-gold);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.05rem;
   font-weight: 600;
 }
@@ -470,7 +470,7 @@
 .domainCol h3 {
   margin: 0 0 0.5rem;
   color: var(--area-gold);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1rem;
   font-weight: 600;
 }
@@ -502,7 +502,7 @@
 .domainActionPanel h3 {
   margin: 0 0 0.4rem;
   color: var(--area-gold);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.02rem;
   font-weight: 600;
 }

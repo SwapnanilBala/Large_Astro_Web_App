@@ -1305,7 +1305,7 @@
 }
 
 .palm-summary-card p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0;
   color: var(--ink-main);
   font-size: 1.42rem;
@@ -1313,7 +1313,7 @@
 }
 
 .palm-hand-note {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-soft);
   margin: 0;
@@ -1373,7 +1373,7 @@
 .palm-strength--absent { color: #888; border: 1px solid rgba(136, 136, 136, 0.3); }
 
 .palm-line-desc {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-soft);
   margin: 0 0 0.35rem;
@@ -1381,7 +1381,7 @@
 }
 
 .palm-line-interp {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.32rem;
   color: var(--ink-main);
   margin: 0;
@@ -1408,7 +1408,7 @@
 }
 
 .palm-section-card p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0.4rem 0 0;
   font-size: 1.35rem;
   color: var(--ink-main);
@@ -1459,7 +1459,7 @@
 }
 
 .palm-guidance p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0;
   font-size: 1.38rem;
   color: var(--ink-main);
@@ -1543,7 +1543,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(122, 196, 205, 0.2);
   color: var(--ink-main);
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
 }
 
 /* The topic-gate refusal. Styled as an aside rather than as an answer so it
@@ -1787,7 +1787,7 @@
 }
 
 .palm-trajectory-item p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0;
   font-size: 1.35rem;
   color: var(--ink-main);
@@ -1813,7 +1813,7 @@
 }
 
 .palm-subsection :is(h3, h4) {
-  font-family: var(--font-newsreader), Georgia, serif, Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif, Georgia, serif;
   margin: 0 0 0.3rem;
   font-size: 1.28rem;
   font-weight: 600;
@@ -1824,7 +1824,7 @@
 }
 
 .palm-subsection p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0;
   font-size: 1.35rem;
   color: var(--ink-main);

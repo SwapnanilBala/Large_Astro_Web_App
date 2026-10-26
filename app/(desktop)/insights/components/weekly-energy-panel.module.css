@@ -42,7 +42,7 @@
 }
 
 .subtitle {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 1rem;
   color: var(--text-secondary);
@@ -291,7 +291,7 @@
 }
 
 .cardBody {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 0.96rem;
   color: var(--text-secondary);
   line-height: 1.48;
@@ -316,7 +316,7 @@
 }
 
 .vibeBody {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1rem;
   color: var(--text-secondary);
   line-height: 1.55;
@@ -326,7 +326,7 @@
 /* ── Quote ── */
 
 .quote {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 1.02rem;
   color: var(--text-secondary);

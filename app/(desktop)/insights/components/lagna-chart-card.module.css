@@ -276,7 +276,7 @@
 .glanceNote {
   margin: 0;
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 0.98rem;
   line-height: 1.55;
 }

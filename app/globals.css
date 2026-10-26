@@ -4,23 +4,24 @@
    *
    * Three roles, and the point of naming them is that each face does one job.
    *
-   * --font-display is Cinzel, loaded in app/(desktop)/layout.tsx. Cinzel has no
-   * lowercase: its lowercase glyphs are small caps. That is right for a title
-   * and wrong for everything else, so it belongs on headings at roughly 1.3rem
-   * and up and nowhere near a label. It was on 111 rules under 1.3rem before
-   * this, which is why so much of the app read as unbroken small caps.
+   * The faces, chosen by the owner on 2026-10-26 for clarity, are loaded in
+   * app/(desktop)/layout.tsx:
    *
-   * --font-newsreader is Newsreader, also loaded there. It is the prose face:
-   * leads, paragraphs, the written readings.
+   * --font-display is Marcellus, for titles and headings. It replaced Cinzel,
+   * which has no lowercase (its lowercase glyphs are small caps), so headings
+   * that used to read as unbroken small caps now read as words. It is still a
+   * display face: headings at roughly 1.3rem and up, nowhere near a label.
    *
-   * --font-body was referenced by 36 rules and defined nowhere, so all 36 fell
-   * past an unloaded 'Inter' to generic sans-serif. Every one of those
-   * fallbacks named a sans, so that is what it is -- the UI face, for labels,
-   * kickers, buttons, badges and numbers. Plus Jakarta Sans leads the stack
-   * because 13 rules already name it; it is not loaded, so today this resolves
-   * to the platform UI font. Loading Jakarta later needs no CSS change.
+   * --font-prose is Source Serif 4 (Newsreader before): leads, paragraphs,
+   * the written readings.
+   *
+   * --font-body is the UI face, for labels, kickers, buttons, badges and
+   * numbers: Inter, as --font-ui. That variable exists only inside the desktop
+   * shell, so the stack here is the platform UI font, and .desktop-shell
+   * below puts Inter in front of it. Plus Jakarta Sans, which 13 rules still
+   * name after the variable, is not loaded and never wins.
    */
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+  --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   /*
@@ -31,12 +32,17 @@
    * sentence -- a note, a legend, a footer -- goes no lower than --text-ui.
    * Both floors were raised in 2026-10 from 12.5px and 13px, which still read
    * as squinting text on the dark ground, especially in uppercase.
+   *
+   * On 2026-10-26 everything went up a step for clarity, at the owner's ask:
+   * the root size is 108% (see html below), which scales the 700-odd sizes
+   * written in rem as well as these tokens, and prose went up a little more.
+   * The pixel values are at the browser's default 16px.
    */
-  --text-meta: 0.875rem;   /* 14px  -- table numbers, fine print */
-  --text-label: 0.875rem;  /* 14px  -- uppercase kickers and badges */
-  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, nav pills, sentences */
-  --text-body: 1.0625rem;  /* 17px  -- prose */
-  --text-lead: 1.1875rem;  /* 19px  -- the lead under a title */
+  --text-meta: 0.875rem;   /* 15.1px -- table numbers, fine print */
+  --text-label: 0.875rem;  /* 15.1px -- uppercase kickers and badges */
+  --text-ui: 0.95rem;      /* 16.4px -- buttons, links, nav pills, sentences */
+  --text-body: 1.1rem;     /* 19px  -- prose (17px before) */
+  --text-lead: 1.1875rem;  /* 20.5px -- the lead under a title */
 
   /* ── Premium Cosmic Design Tokens ── */
   
@@ -237,12 +243,34 @@
   box-sizing: border-box;
 }
 
+/*
+ * One step up for the whole desktop tree: every size written in rem, and the
+ * type tokens above, grow by 8%. A percentage rather than pixels, so a reader
+ * who has set a larger default in their browser still gets it, scaled.
+ * Media queries are unaffected, since they measure in the browser's own
+ * default. This file loads only in the desktop tree; /m keeps its sizes.
+ */
+html {
+  font-size: 108%;
+}
+
+/*
+ * The desktop layout's wrapper, where the webfont variables are defined.
+ * --font-body is redefined here because --font-ui exists only from this
+ * element down; on :root it would resolve to nothing.
+ */
+.desktop-shell {
+  --font-body: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--font-body);
+}
+
 html,
 body {
   margin: 0;
   min-height: 100%;
   /* The UI face, via the token, so there is one place to change it. Prose sets
-     --font-newsreader explicitly; this is everything else. */
+     --font-prose explicitly; this is everything else. */
   font-family: var(--font-body);
   color: var(--text-primary);
   line-height: 1.6;
@@ -278,7 +306,8 @@ body::before {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* The UI face unless a rule names the display face. */
+  font-family: var(--font-body);
   color: var(--text-primary);
   letter-spacing: -0.02em;
   line-height: 1.3;
@@ -568,7 +597,7 @@ h1 {
   color: var(--ink-soft);
   /* Prose. This inherited the UI sans from body, which is why the lead read as
      interface copy rather than as the opening line of a reading. */
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: var(--text-lead);
   font-weight: 400;
   line-height: 1.6;
@@ -5759,7 +5788,7 @@ html[data-theme="light"] .autocomplete-dropdown::after {
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 1.1rem 0.55rem 0.85rem;
-  font-family: "Plus Jakarta Sans", -apple-system, sans-serif;
+  font-family: var(--font-body);
   font-size: 1.1rem;
   font-weight: 600;
   letter-spacing: 0.03em;

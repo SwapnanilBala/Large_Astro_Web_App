@@ -382,7 +382,7 @@
 }
 
 .lead {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: clamp(1.18rem, 1.3vw, 1.16rem);
   color: var(--ink-soft);
   line-height: 1.62;
@@ -640,19 +640,19 @@
 }
 
 /*
- * Newsreader italic, not a handwriting face.
+ * The prose italic (Source Serif 4), not a handwriting face.
  *
  * The reference sets these accents in a script. Adding one costs another
  * 30-50KB of preloaded woff2 on every desktop route to serve two lines, and
  * --font-accent -- which the tree references but never defines -- has one
  * existing consumer whose rendering would change the moment it resolved.
- * Newsreader is already loaded with its italic, so this is free.
+ * The prose face is already loaded with its italic, so this is free.
  */
 .heroScript {
   display: grid;
   gap: 0.1rem;
   margin: 0;
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: clamp(1rem, 1.3vw, 1.18rem);
   line-height: 1.35;
@@ -694,7 +694,7 @@
 }
 
 .fortuneSubtitle {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 1.05rem;
   color: var(--text-secondary);
@@ -753,7 +753,7 @@
 .fortuneCaption {
   margin: 0;
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 0.94rem;
   line-height: 1.45;
 }
@@ -791,7 +791,7 @@
 }
 
 .zoneSubtitle {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 1.12rem;
   line-height: 1.45;
@@ -887,7 +887,7 @@
 
 .zoneCardBody {
   color: var(--text-secondary);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 0.96rem;
   line-height: 1.42;
   /* The headline is generated, so its length is not fixed. The clamp keeps the
@@ -925,7 +925,7 @@
 }
 
 .rowPanelTitle {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: clamp(1rem, 1.3vw, 1.2rem);
   font-weight: 600;
   line-height: 1.25;
@@ -999,7 +999,7 @@
   padding-inline-end: var(--band-pad);
   border-inline-start: 1px solid var(--line-soft);
   padding-inline-start: clamp(0.9rem, 1.8vw, 1.6rem);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 1rem;
   line-height: 1.35;
@@ -1392,7 +1392,7 @@
 .takeawayBody {
   color: var(--ink-soft);
   display: -webkit-box;
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: clamp(1.22rem, 1.32vw, 1.36rem);
   line-height: 1.55;
   margin: 0;
@@ -1698,7 +1698,7 @@
 
 .takeawayCard h3 {
   color: var(--ink-main);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: clamp(1.32rem, 1.55vw, 1.58rem);
   font-weight: 600;
   line-height: 1.22;
@@ -2644,7 +2644,7 @@
 
 /* ── Section Intro ── */
 .sectionIntro {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: var(--text-body);
   color: var(--ink-soft);
   line-height: 1.6;
@@ -2680,7 +2680,7 @@
 }
 
 .ruleInsight {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.44rem;
   color: var(--ink-main);
   line-height: 1.6;
@@ -2690,7 +2690,7 @@
 
 /* Now the body of the evidence disclosure rather than a line under every card. */
 .ruleBasis {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.28rem;
   color: var(--ink-soft);
   display: block;
@@ -2714,7 +2714,7 @@
 }
 
 .evidenceSummary {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.22rem;
   color: var(--ink-soft);
   cursor: pointer;
@@ -2806,7 +2806,7 @@
   background: rgba(240, 112, 104, 0.08);
   border-left: 2px solid var(--accent-coral);
   border-radius: 0 10px 10px 0;
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.35rem;
   color: var(--accent-coral);
   line-height: 1.5;
@@ -2823,7 +2823,7 @@
 }
 
 .themeSummary h4 {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.4rem;
@@ -2831,7 +2831,7 @@
 }
 
 .themeSummary p {
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.4rem;
   color: var(--ink-soft);
   margin: 0.2rem 0;
@@ -2968,7 +2968,7 @@
   max-width: 390px;
   margin: 0;
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), "Newsreader", Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.28rem;
   line-height: 1.45;
 }
@@ -3066,7 +3066,7 @@
 
 .insightHubCardBody span {
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), "Newsreader", Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.1rem;
   line-height: 1.35;
 }
@@ -3126,7 +3126,7 @@
   max-width: 390px;
   margin: 0;
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), "Newsreader", Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.1rem;
   line-height: 1.5;
 }
@@ -3265,7 +3265,7 @@
 
 .continuationActionBody > span:not(.continuationRecommendation) {
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), "Newsreader", Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.06rem;
   line-height: 1.35;
 }
@@ -3601,7 +3601,7 @@
 }
 
 .lockedPreview h3 {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.35rem;
   color: var(--ink-main);
   margin: 0 0 0.5rem;
@@ -3632,7 +3632,7 @@
 
 .domainPriorityPanel h3 {
   color: var(--ink-main);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.55rem;
   line-height: 1.25;
   margin: 0.15rem 0 0.45rem;
@@ -3899,7 +3899,7 @@
 }
 
 .domainHeader h3 {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.5rem;
   color: var(--ink-main);
   margin: 0.25rem 0 0;
@@ -4133,7 +4133,7 @@
 }
 
 .domainOverview {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.12rem;
   color: var(--text-secondary);
   line-height: 1.7;
@@ -4215,7 +4215,7 @@
 .domainTimingWindows h4,
 .domainActionPanel h4 {
   color: var(--accent-teal);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.02rem;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -4261,7 +4261,7 @@
 
 .domainStatement h4,
 .domainRulesPanel h4 {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.24rem;
   color: var(--accent-gold);
   margin: 0 0 0.45rem;
@@ -4309,7 +4309,7 @@
 }
 
 .domainCol h4 {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.22rem;
   color: var(--accent-gold);
   margin: 0 0 0.5rem;
@@ -4738,7 +4738,7 @@
 .lifeShiftCard :is(h2, h3) {
   letter-spacing: 0.04em;
   color: var(--ink-main);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.42rem;
   line-height: 1.28;
   margin: 0;
@@ -4748,7 +4748,7 @@
 
 .lifeShiftCard p {
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.28rem;
   line-height: 1.6;
   margin: 0;
@@ -4960,7 +4960,7 @@
 .lifeShiftsNote {
   border-left: 3px solid rgba(108, 225, 212, 0.45);
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.26rem;
   line-height: 1.6;
   margin: 0;

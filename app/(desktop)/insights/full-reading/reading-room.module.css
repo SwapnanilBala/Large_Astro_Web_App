@@ -362,7 +362,7 @@
 }
 
 .rowTitle {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.08rem;
   line-height: 1.35;
   color: var(--ink-main);
@@ -446,7 +446,7 @@
 .title {
   margin: 0.6rem 0 0;
   color: var(--ink-main);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: clamp(1.55rem, 1.15rem + 0.9vw, 2.1rem);
   font-weight: 600;
   line-height: 1.22;
@@ -456,7 +456,7 @@
 .subtitle {
   margin: 0.3rem 0 0;
   color: var(--accent-gold);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.15rem;
   font-style: italic;
 }
@@ -478,7 +478,7 @@
   max-width: 66ch;
   margin: 0;
   color: var(--ink-main);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.22rem;
   line-height: 1.75;
 }
@@ -498,7 +498,7 @@
 .otherSide p:last-child {
   margin: 0.35rem 0 0;
   color: var(--ink-soft);
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.1rem;
   font-style: italic;
   line-height: 1.65;

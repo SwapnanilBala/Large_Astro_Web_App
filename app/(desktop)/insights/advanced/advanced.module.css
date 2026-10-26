@@ -247,7 +247,7 @@
 .storyOpening {
   margin: 0 0 1.6rem;
   max-width: 68ch;
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-size: 1.22rem;
   line-height: 1.7;
   color: var(--ink-main);
@@ -260,7 +260,7 @@
 }
 
 .storyPassage {
-  font-family: var(--font-newsreader), Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   margin: 0;
   max-width: 68ch;
   font-size: var(--text-body);

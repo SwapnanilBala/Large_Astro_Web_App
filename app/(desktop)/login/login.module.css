@@ -79,7 +79,7 @@
 /* Daily sky microcopy — subtle italic line above the kicker */
 .skyLine {
   margin: 0 0 0.7rem;
-  font-family: var(--font-newsreader), 'Newsreader', Georgia, serif;
+  font-family: var(--font-prose), Georgia, serif;
   font-style: italic;
   font-size: 0.95rem;
   letter-spacing: 0.04em;
