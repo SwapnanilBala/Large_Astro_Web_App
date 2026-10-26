@@ -628,21 +628,21 @@
         "atlas": {
           "blurb": "Sieh, wie sich dein Geburtshoroskop in Identität, Beziehungen und Beruf entfaltet.",
           "cta": "Alle {count} Horoskope ansehen",
-          "eyebrow": "02 / Teilhoroskope",
+          "eyebrow": "Teilhoroskope",
           "footnote": "Höhere Teilhoroskope hängen von der Genauigkeit deiner Geburtszeit ab.",
           "heading": "Dein Horoskop-Atlas"
         },
         "reading": {
           "blurb": "Verbinde die Muster in deinem Leben mit den Stellungen in deinem Horoskop.",
           "cta": "Alle Erkenntnisse lesen",
-          "eyebrow": "03 / Erkenntnisse und Belege",
+          "eyebrow": "Erkenntnisse und Belege",
           "footnote": "Deine vollständige Deutung enthält jede ermittelte Erkenntnis samt ihren Belegen.",
           "heading": "Deine Deutung, erklärt"
         },
         "timing": {
           "blurb": "Erkunde kommende Perioden und Zeitfenster für wichtige Anfänge.",
           "cta": "Dein Timing erkunden",
-          "eyebrow": "01 / Timing und Zeitwahl",
+          "eyebrow": "Timing und Zeitwahl",
           "footnote": "Die Zeitfenster für Anfänge werden an deinem eigenen Horoskop gemessen.",
           "heading": "Dein Timing"
         }

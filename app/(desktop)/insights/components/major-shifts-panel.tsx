@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
+import Link from "next/link";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import {
   computeMajorLifeShifts,
@@ -12,6 +13,7 @@ import { planetName } from "@/lib/chart-labels";
 import {
   formatShiftPivot,
   formatShiftWindow,
+  lifeShiftAnchor,
   lifeShiftId,
 } from "@/lib/life-shift-reading";
 import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
@@ -121,7 +123,8 @@ function ShiftCard({
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article
-      className={`${styles.lifeShiftCard} ${statusClass(shift.status)}${wide ? ` ${styles.lifeShiftCardWide}` : ""}`}
+      id={lifeShiftAnchor(shift)}
+      className={`${styles.lifeShiftCard} ${styles.anchorTarget} ${statusClass(shift.status)}${wide ? ` ${styles.lifeShiftCardWide}` : ""}`}
     >
       <div className={styles.lifeShiftMeta}>
         <header className={styles.lifeShiftHeader}>
@@ -163,9 +166,17 @@ function ShiftCard({
 /*
  * Every chapter the engine found, in date order, as a row of small steps under
  * the results page's one card: where the chapter on show sits among the
- * others, past and ahead, before the reader follows the link to read them.
+ * others, past and ahead. Each opens that chapter on /insights/life-shifts.
  */
-function ChapterStrip({ shifts, current }: { shifts: MajorLifeShift[]; current: Set<string> }) {
+function ChapterStrip({
+  shifts,
+  current,
+  historyQs,
+}: {
+  shifts: MajorLifeShift[];
+  current: Set<string>;
+  historyQs: string;
+}) {
   const { t, language } = useTranslation();
   return (
     <ol className={styles.lifeShiftStrip} aria-label={t("insights.page.lifeShifts.link")}>
@@ -173,14 +184,17 @@ function ChapterStrip({ shifts, current }: { shifts: MajorLifeShift[]; current: 
         const id = lifeShiftId(shift);
         const here = current.has(id);
         return (
-          <li
-            key={id}
-            className={`${styles.lifeShiftStep} ${statusClass(shift.status)}${here ? ` ${styles.lifeShiftStepCurrent}` : ""}`}
-            aria-current={here ? "step" : undefined}
-          >
-            <span className={styles.lifeShiftStepStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
-            <span className={styles.lifeShiftStepLabel}>{shiftLabel(shift, t)}</span>
-            <span className={styles.lifeShiftStepDate}>{formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])}</span>
+          <li key={id}>
+            <Link
+              href={`/insights/life-shifts?${historyQs}#${lifeShiftAnchor(shift)}`}
+              className={`${styles.lifeShiftStep} ${statusClass(shift.status)}${here ? ` ${styles.lifeShiftStepCurrent}` : ""}`}
+              aria-current={here ? "step" : undefined}
+              prefetch={false}
+            >
+              <span className={styles.lifeShiftStepStatus}>{t(STATUS_LABEL_KEY[shift.status])}</span>
+              <span className={styles.lifeShiftStepLabel}>{shiftLabel(shift, t)}</span>
+              <span className={styles.lifeShiftStepDate}>{formatShiftPivot(shift.pivotIso, LOCALE_TAGS[language])}</span>
+            </Link>
           </li>
         );
       })}
@@ -240,6 +254,48 @@ export default function MajorShiftsPanel({
     language,
   );
 
+  /* The results page's chapter row links to each chapter here by its anchor.
+     A past chapter sits inside the closed archive, where the browser cannot
+     scroll to it, so a link to one opens the archive and then goes to it. */
+  const archiveRef = useRef<HTMLDetailsElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (isBrief) return;
+    /* The readings land after the jump and grow the cards above the one
+       linked to, which pushed it down the page; so the chapter is kept in
+       place while the panel settles, until the reader does anything at all. */
+    let follow: ResizeObserver | null = null;
+    const stopFollowing = () => {
+      follow?.disconnect();
+      follow = null;
+    };
+    const reveal = () => {
+      stopFollowing();
+      const anchor = decodeURIComponent(window.location.hash.slice(1));
+      const target = anchor ? document.getElementById(anchor) : null;
+      const panel = panelRef.current;
+      if (!target || !panel || !panel.contains(target)) return;
+      const archive = archiveRef.current;
+      if (archive && archive.contains(target)) archive.open = true;
+      const align = () => target.scrollIntoView({ block: "start" });
+      requestAnimationFrame(align);
+      follow = new ResizeObserver(align);
+      follow.observe(panel);
+    };
+    const READER_INPUT = ["wheel", "touchstart", "keydown", "mousedown"] as const;
+    reveal();
+    window.addEventListener("hashchange", reveal);
+    for (const type of READER_INPUT) window.addEventListener(type, stopFollowing, { passive: true });
+    /* And not forever: by then the readings have landed or failed. */
+    const timer = window.setTimeout(stopFollowing, 20_000);
+    return () => {
+      stopFollowing();
+      window.clearTimeout(timer);
+      window.removeEventListener("hashchange", reveal);
+      for (const type of READER_INPUT) window.removeEventListener(type, stopFollowing);
+    };
+  }, [isBrief]);
+
   if (shifts.length === 0) {
     return (
       <div className={styles.lifeShiftsPanel}>
@@ -249,7 +305,7 @@ export default function MajorShiftsPanel({
   }
 
   return (
-    <div className={styles.lifeShiftsPanel}>
+    <div ref={panelRef} className={styles.lifeShiftsPanel}>
       <p className={styles.sectionIntro}>
         {isBrief ? t("insights.shifts.introBrief") : t("insights.shifts.introFull")}
       </p>
@@ -267,13 +323,16 @@ export default function MajorShiftsPanel({
         ))}
       </div>
 
-      {isBrief && shifts.length > 1 && <ChapterStrip shifts={shifts} current={featuredKeys} />}
+      {isBrief && shifts.length > 1 && <ChapterStrip shifts={shifts} current={featuredKeys} historyQs={historyQs} />}
 
       {/* Past chapters are already behind a disclosure, but on the results
           page they are still markup, still measured, and still one click from
           a wall of text under a section that opens by default. */}
       {!isBrief && pastShifts.length > 0 && (
-        <details className={styles.lifeShiftsArchive}>
+        /* suppressHydrationWarning: a link to a chapter in here has Chrome open
+           the archive itself before hydration, so its `open` differs from the
+           server's; the effect above then agrees with it. */
+        <details ref={archiveRef} className={styles.lifeShiftsArchive} suppressHydrationWarning>
           <summary>
             {pastShifts.length === 1
               ? t("insights.shifts.viewPastOne")

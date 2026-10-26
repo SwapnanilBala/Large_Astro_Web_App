@@ -76,6 +76,15 @@ export function formatShiftWindow(startIso: string, endIso: string, locale = "en
   return `${fmt(startIso)} → ${fmt(endIso)}`;
 }
 
+/**
+ * The chapter's anchor on /insights/life-shifts, for the results page's
+ * chapter row to link to: the kind and the pivot's day, which the engine
+ * already keeps unique, without the instant's colons and dots.
+ */
+export function lifeShiftAnchor(shift: Pick<MajorLifeShift, "kind" | "pivotIso">): string {
+  return `chapter-${shift.kind}-${shift.pivotIso.slice(0, 10)}`;
+}
+
 /** The key the panel renders this chapter under, and the id the reading comes back on. */
 export function lifeShiftId(shift: Pick<MajorLifeShift, "kind" | "pivotIso">): string {
   return `${shift.kind}-${shift.pivotIso}`;

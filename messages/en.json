@@ -506,21 +506,21 @@
       },
       "gateways": {
         "timing": {
-          "eyebrow": "01 / Timing and electional",
+          "eyebrow": "Timing and electional",
           "heading": "Your Timing",
           "blurb": "Explore upcoming periods and windows for important beginnings.",
           "footnote": "Starting windows are scored against your own chart.",
           "cta": "Explore your timing"
         },
         "atlas": {
-          "eyebrow": "02 / Divisional charts",
+          "eyebrow": "Divisional charts",
           "heading": "Your Chart Atlas",
           "blurb": "See how your birth chart unfolds across identity, relationships, and career.",
           "footnote": "Higher divisions depend on the accuracy of your birth time.",
           "cta": "View all {count} charts"
         },
         "reading": {
-          "eyebrow": "03 / Findings and evidence",
+          "eyebrow": "Findings and evidence",
           "heading": "Your Reading, Explained",
           "blurb": "Connect the patterns in your life with the placements in your chart.",
           "footnote": "Your complete reading includes every matched finding and its evidence.",

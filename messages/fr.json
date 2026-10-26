@@ -628,21 +628,21 @@
         "atlas": {
           "blurb": "Voyez comment votre carte natale se déploie entre identité, relations et carrière.",
           "cta": "Voir les {count} cartes",
-          "eyebrow": "02 / Cartes divisionnaires",
+          "eyebrow": "Cartes divisionnaires",
           "footnote": "Les divisions supérieures dépendent de la précision de votre heure de naissance.",
           "heading": "Votre Atlas des Cartes"
         },
         "reading": {
           "blurb": "Reliez les motifs de votre vie aux positions de votre carte.",
           "cta": "Lire tous les résultats",
-          "eyebrow": "03 / Résultats et indices",
+          "eyebrow": "Résultats et indices",
           "footnote": "Votre lecture complète inclut chaque résultat retenu, avec ses indices.",
           "heading": "Votre Lecture, Expliquée"
         },
         "timing": {
           "blurb": "Explorez les périodes à venir et les fenêtres propices aux commencements importants.",
           "cta": "Explorer votre timing",
-          "eyebrow": "01 / Timing et élective",
+          "eyebrow": "Timing et élective",
           "footnote": "Les fenêtres de départ sont notées par rapport à votre propre carte.",
           "heading": "Votre Timing"
         }

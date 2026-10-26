@@ -1235,6 +1235,48 @@
   grid-column: 1 / -1;
 }
 
+/*
+ * A group of sections below the life areas, named as the section nav names it
+ * (Timing, More): its own column with the page's gap, under a heading that
+ * reads as a divider -- a label and a rule across the page. Every property is
+ * pinned, since globals.css styles a bare h2 (gold, its own size and tracking).
+ */
+.pageGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dashboard-gap);
+  min-width: 0;
+}
+
+.pageGroupHeading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: clamp(0.75rem, 1.6vw, 1.5rem) 0 0;
+  padding: 0;
+  color: var(--accent-gold);
+  font-family: var(--font-body), sans-serif;
+  font-size: var(--text-label);
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+}
+
+.pageGroupHeading::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--accent-gold) 45%, transparent), var(--line-soft) 40%, transparent);
+}
+
+.pageGroupHeading:lang(hi),
+.pageGroupHeading:lang(bn) {
+  letter-spacing: 0;
+}
+
 .anchorTarget {
   /* Navbar (108) + the sticky section nav (~46) + breathing room. Before the
      nav actually stuck this only had to clear the navbar. */
@@ -4794,6 +4836,12 @@
   list-style: none;
 }
 
+.lifeShiftStrip > li {
+  display: grid;
+  min-width: 0;
+}
+
+/* Each step is a link to its chapter on /insights/life-shifts. */
 .lifeShiftStep {
   display: grid;
   align-content: start;
@@ -4803,6 +4851,25 @@
   border: 1px solid var(--line-soft);
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.02);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.lifeShiftStep:hover {
+  border-color: color-mix(in srgb, var(--accent-gold) 45%, transparent);
+  background: color-mix(in srgb, var(--accent-gold) 6%, transparent);
+}
+
+.lifeShiftStep:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lifeShiftStep {
+    transition: none;
+  }
 }
 
 .lifeShiftStepCurrent {

@@ -383,8 +383,9 @@ const SECTION_ANCHORS = [
   { id: "overview", labelKey: "insights.page.nav.overview" },
   { id: "chart-map", labelKey: "insights.page.nav.chart" },
   { id: "ultimate", labelKey: "insights.page.nav.lifeAreas" },
-  { id: "timing", labelKey: "insights.page.nav.timing" },
-  { id: "continue-reading", labelKey: "insights.page.nav.more" },
+  /* The groups, not their first sections: a tab lands on the group's heading. */
+  { id: "timing-group", labelKey: "insights.page.nav.timing" },
+  { id: "explore-group", labelKey: "insights.page.nav.more" },
 ];
 
 const SECTION_ANCHOR_LABELS: Record<string, string> = Object.fromEntries(
@@ -1650,163 +1651,6 @@ export default function InsightsContent({
           </div>
         </CollapsibleSection>
 
-        {/* The two reference panels sit together, then the three doorways.
-            Previously the dasha table was wedged between the timing gateway
-            and the varga gateway, which split the doorways apart and left the
-            page a single column of full-width bars all the way down. */}
-        {payload.chart.nakshatra && payload.chart.dasha && (
-          <CollapsibleSection
-            id="vimshottari-dashas"
-            kicker={t("insights.page.dasha.kicker")}
-            title={t("insights.page.dasha.title")}
-            defaultOpen={true}
-            className={`${styles.cardRules} ${styles.cardDasha}`}
-            /* `:open-default` retires the keys written while this section
-               defaulted closed. The section persists on every mount, not only
-               on a click, so every earlier visitor has "closed" stored whether
-               they chose it or not -- reusing the old key would leave the new
-               default visible to first-time readers only. */
-            persistKey={`${sectionStateScope}:vimshottari-dashas:open-default`}
-            summary={
-              <>
-                <span>
-                  <Emphasise
-                    text={t("insights.page.dasha.maha", {
-                      planet: planetName(payload.chart.dasha.current_dasha, t),
-                    })}
-                  />
-                </span>
-                {payload.chart.dasha.current_antardasha && (
-                  <span>
-                    <Emphasise
-                      text={t("insights.page.dasha.antar", {
-                        planet: planetName(payload.chart.dasha.current_antardasha, t),
-                      })}
-                    />
-                  </span>
-                )}
-                {payload.chart.dasha.current_dasha_end && (
-                  <span>
-                    {t("insights.page.dasha.until", {
-                      date:
-                        formatMonthYear(payload.chart.dasha.current_dasha_end, locale) ??
-                        payload.chart.dasha.current_dasha_end,
-                    })}
-                  </span>
-                )}
-              </>
-            }
-          >
-            {/* Mounted on arrival, not at idle: its mount fires the paid
-                current-period reading. So the placeholder reserves the height
-                instead, where a 200px default once made the Timing tab's jump a
-                0.66 CLS. Since the four-level redesign (2026-10-08) the panel
-                measures 1,583-1,770 / 1,548-1,668 / 1,562px at 1024 / 1440 /
-                1920 wide over three charts -- the card is shorter when the Maha
-                Dasha and Antardasha share a lord. This tracks the typical chart
-                about 60-80px under, so the shortest still barely leaves a gap. */}
-            <LazyPanel minHeight="clamp(1380px, calc(1805px - 20vw), 1620px)">
-              <PanelErrorBoundary panelName="Vimshottari Dashas">
-                  <NakshatraDashaPanel
-                    nakshatra={payload.chart.nakshatra}
-                    dasha={payload.chart.dasha}
-                    audit={payload.chart.calculation_audit}
-                    planets={payload.chart.planets}
-                    ascendantSign={payload.chart.ascendant.sign}
-                    historyQs={historyQs}
-                  />
-              </PanelErrorBoundary>
-            </LazyPanel>
-          </CollapsibleSection>
-        )}
-
-        {/* Row F. .gatewayGrid keeps its own auto-fit rule: it wins over
-            .cardRowAuto on both columns and gap anyway (measured: 2 tracks at
-            25.92px, which is --gateway-gap), and it carries the
-            `:last-child:nth-child(odd)` full-width span that .cardRowAuto has
-            no equivalent for. Adding the shared class here changed nothing. */}
-        <div className={styles.gatewayGrid}>
-          {/* ─── Timing & electional (gateway to its own page) ─── */}
-          <GatewaySection id="timing">
-            <SectionGateway
-              href={`/insights/timing?${historyQs}`}
-              icon={<Clock3 />}
-              eyebrow={t("insights.page.gateways.timing.eyebrow")}
-              variant="timing"
-              heading={t("insights.page.gateways.timing.heading")}
-              blurb={t("insights.page.gateways.timing.blurb")}
-              footnote={t("insights.page.gateways.timing.footnote")}
-              ctaLabel={t("insights.page.gateways.timing.cta")}
-              help={<TermHelp terms={["dasha", "transit"]} />}
-            >
-              <TimingGatewayPreview dasha={payload.chart.dasha} href={`/insights/timing?${historyQs}`} />
-            </SectionGateway>
-          </GatewaySection>
-
-          {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
-            <GatewaySection id="divisional-charts">
-              <PanelErrorBoundary panelName="Divisional Chart Atlas">
-                <SectionGateway
-                  href={`/insights/divisional-charts?${historyQs}`}
-                  icon={<Layers3 />}
-                  eyebrow={t("insights.page.gateways.atlas.eyebrow")}
-                  variant="atlas"
-                  heading={t("insights.page.gateways.atlas.heading")}
-                  blurb={t("insights.page.gateways.atlas.blurb")}
-                  footnote={t("insights.page.gateways.atlas.footnote")}
-                  ctaLabel={t("insights.page.gateways.atlas.cta", {
-                    count: String(Object.keys(payload.chart.divisional_charts).length),
-                  })}
-                >
-                  <AtlasGatewayPreview charts={payload.chart.divisional_charts} historyQs={historyQs} />
-                </SectionGateway>
-              </PanelErrorBoundary>
-            </GatewaySection>
-          )}
-
-          {/* ─── Full reading (gateway to its own page) ─── */}
-          <GatewaySection id="core">
-            <SectionGateway
-              href={`/insights/full-reading?${historyQs}`}
-              icon={<BookOpen />}
-              eyebrow={t("insights.page.gateways.reading.eyebrow")}
-              variant="reading"
-              heading={t("insights.page.gateways.reading.heading")}
-              blurb={t("insights.page.gateways.reading.blurb")}
-              footnote={t("insights.page.gateways.reading.footnote")}
-              ctaLabel={t("insights.page.gateways.reading.cta")}
-            >
-              <ReadingEvidencePreview rules={payload.chart.deterministic_rules} yogaCount={payload.chart.yogas?.length ?? 0} />
-            </SectionGateway>
-          </GatewaySection>
-        </div>
-
-
-        <CollapsibleSection
-          id="life-shifts"
-          kicker={t("insights.page.lifeShifts.kicker")}
-          title={t("insights.page.lifeShifts.title")}
-          defaultOpen={true}
-          className={styles.cardKarma}
-          persistKey={`${sectionStateScope}:life-shifts`}
-        >
-          {/* 800px rather than the 200px default: the warm above means the
-              module is already in memory, so the only thing left to buy is
-              enough lead time to render before the section is actually read. */}
-          {/* Released once mounted: the one card and the chapter row come to
-              well under the 560px reserved for them, which left a gap above
-              the link on every visit. */}
-          <LazyPanel minHeight={560} rootMargin="800px" holdMinHeight={false}>
-            <PanelErrorBoundary panelName="Major Life Shifts">
-              <MajorShiftsPanel payload={payload} historyQs={historyQs} variant="brief" />
-            </PanelErrorBoundary>
-          </LazyPanel>
-          <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>
-            {t("insights.page.lifeShifts.link")}
-            <FiArrowUpRight aria-hidden="true" />
-          </Link>
-        </CollapsibleSection>
-
         {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
         {payload.chart.lucky_elements && fortuneTiles.length > 0 && (
           <section
@@ -1876,57 +1720,247 @@ export default function InsightsContent({
           </CollapsibleSection>
         )}
 
-        <motion.section
-          id="continue-reading"
-          className={`${styles.continuationHub} ${styles.anchorTarget}`}
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-60px" }}
-          transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.28 }}
-          aria-labelledby="continue-reading-heading"
+        {/*
+          The page below the life areas, in two groups named as the section nav
+          names them, so a tab always lands on what it says. Until 2026-10-26
+          the dasha panel sat under "Life areas" (the Timing tab started at the
+          timing doorway), and three doorways to other pages sat between it and
+          the life shifts, so the reading's doorway ran straight into a timing
+          section with nothing to say where one ended. Now: Timing is the dasha
+          periods, then the life shifts, then the door to the timing pages;
+          More is the doors to the atlas and the full reading, then the tools.
+          The ids inside (vimshottari-dashas, life-shifts, timing, core, ...)
+          are unchanged, since deep links and the walkthrough target them.
+        */}
+        <section
+          id="timing-group"
+          className={`${styles.pageGroup} ${styles.anchorTarget}`}
+          aria-labelledby="timing-group-heading"
         >
-          <div className={styles.continuationHeader}>
-            <div>
-              <p className={styles.kicker}>{t("insights.page.next.kicker")}</p>
-              <h2 id="continue-reading-heading" className={styles.continuationTitle}>
-                {t("insights.page.next.heading")}
-              </h2>
+          <h2 id="timing-group-heading" className={styles.pageGroupHeading}>
+            {t("insights.page.nav.timing")}
+          </h2>
+          {payload.chart.nakshatra && payload.chart.dasha && (
+            <CollapsibleSection
+              id="vimshottari-dashas"
+              kicker={t("insights.page.dasha.kicker")}
+              title={t("insights.page.dasha.title")}
+              defaultOpen={true}
+              className={`${styles.cardRules} ${styles.cardDasha}`}
+              /* `:open-default` retires the keys written while this section
+                 defaulted closed. The section persists on every mount, not only
+                 on a click, so every earlier visitor has "closed" stored whether
+                 they chose it or not -- reusing the old key would leave the new
+                 default visible to first-time readers only. */
+              persistKey={`${sectionStateScope}:vimshottari-dashas:open-default`}
+              summary={
+                <>
+                  <span>
+                    <Emphasise
+                      text={t("insights.page.dasha.maha", {
+                        planet: planetName(payload.chart.dasha.current_dasha, t),
+                      })}
+                    />
+                  </span>
+                  {payload.chart.dasha.current_antardasha && (
+                    <span>
+                      <Emphasise
+                        text={t("insights.page.dasha.antar", {
+                          planet: planetName(payload.chart.dasha.current_antardasha, t),
+                        })}
+                      />
+                    </span>
+                  )}
+                  {payload.chart.dasha.current_dasha_end && (
+                    <span>
+                      {t("insights.page.dasha.until", {
+                        date:
+                          formatMonthYear(payload.chart.dasha.current_dasha_end, locale) ??
+                          payload.chart.dasha.current_dasha_end,
+                      })}
+                    </span>
+                  )}
+                </>
+              }
+            >
+              {/* Mounted on arrival, not at idle: its mount fires the paid
+                  current-period reading. So the placeholder reserves the height
+                  instead, where a 200px default once made the Timing tab's jump a
+                  0.66 CLS. Since the four-level redesign (2026-10-08) the panel
+                  measures 1,583-1,770 / 1,548-1,668 / 1,562px at 1024 / 1440 /
+                  1920 wide over three charts -- the card is shorter when the Maha
+                  Dasha and Antardasha share a lord. This tracks the typical chart
+                  about 60-80px under, so the shortest still barely leaves a gap. */}
+              <LazyPanel minHeight="clamp(1380px, calc(1805px - 20vw), 1620px)">
+                <PanelErrorBoundary panelName="Vimshottari Dashas">
+                    <NakshatraDashaPanel
+                      nakshatra={payload.chart.nakshatra}
+                      dasha={payload.chart.dasha}
+                      audit={payload.chart.calculation_audit}
+                      planets={payload.chart.planets}
+                      ascendantSign={payload.chart.ascendant.sign}
+                      historyQs={historyQs}
+                    />
+                </PanelErrorBoundary>
+              </LazyPanel>
+            </CollapsibleSection>
+          )}
+
+          <CollapsibleSection
+            id="life-shifts"
+            kicker={t("insights.page.lifeShifts.kicker")}
+            title={t("insights.page.lifeShifts.title")}
+            defaultOpen={true}
+            className={styles.cardKarma}
+            persistKey={`${sectionStateScope}:life-shifts`}
+          >
+            {/* 800px rather than the 200px default: the warm above means the
+                module is already in memory, so the only thing left to buy is
+                enough lead time to render before the section is actually read. */}
+            {/* Released once mounted: the one card and the chapter row come to
+                well under the 560px reserved for them, which left a gap above
+                the link on every visit. */}
+            <LazyPanel minHeight={560} rootMargin="800px" holdMinHeight={false}>
+              <PanelErrorBoundary panelName="Major Life Shifts">
+                <MajorShiftsPanel payload={payload} historyQs={historyQs} variant="brief" />
+              </PanelErrorBoundary>
+            </LazyPanel>
+            <Link href={lifeShiftsHref} className={styles.sectionOpenLink}>
+              {t("insights.page.lifeShifts.link")}
+              <FiArrowUpRight aria-hidden="true" />
+            </Link>
+          </CollapsibleSection>
+
+          {/* One doorway on its own row: .gatewayGrid spans an odd last card across both tracks. */}
+          <div className={styles.gatewayGrid}>
+            {/* ─── Timing & electional (gateway to its own page) ─── */}
+            <GatewaySection id="timing">
+              <SectionGateway
+                href={`/insights/timing?${historyQs}`}
+                icon={<Clock3 />}
+                eyebrow={t("insights.page.gateways.timing.eyebrow")}
+                variant="timing"
+                heading={t("insights.page.gateways.timing.heading")}
+                blurb={t("insights.page.gateways.timing.blurb")}
+                footnote={t("insights.page.gateways.timing.footnote")}
+                ctaLabel={t("insights.page.gateways.timing.cta")}
+                help={<TermHelp terms={["dasha", "transit"]} />}
+              >
+                <TimingGatewayPreview dasha={payload.chart.dasha} href={`/insights/timing?${historyQs}`} />
+              </SectionGateway>
+            </GatewaySection>
+          </div>
+        </section>
+
+        <section
+          id="explore-group"
+          className={`${styles.pageGroup} ${styles.anchorTarget}`}
+          aria-labelledby="explore-group-heading"
+        >
+          <h2 id="explore-group-heading" className={styles.pageGroupHeading}>
+            {t("insights.page.nav.more")}
+          </h2>
+          {/* .gatewayGrid keeps its own auto-fit rule, and the
+              `:last-child:nth-child(odd)` full-width span that .cardRowAuto has
+              no equivalent for. */}
+          <div className={styles.gatewayGrid}>
+            {payload.chart.divisional_charts && Object.keys(payload.chart.divisional_charts).length > 0 && (
+              <GatewaySection id="divisional-charts">
+                <PanelErrorBoundary panelName="Divisional Chart Atlas">
+                  <SectionGateway
+                    href={`/insights/divisional-charts?${historyQs}`}
+                    icon={<Layers3 />}
+                    eyebrow={t("insights.page.gateways.atlas.eyebrow")}
+                    variant="atlas"
+                    heading={t("insights.page.gateways.atlas.heading")}
+                    blurb={t("insights.page.gateways.atlas.blurb")}
+                    footnote={t("insights.page.gateways.atlas.footnote")}
+                    ctaLabel={t("insights.page.gateways.atlas.cta", {
+                      count: String(Object.keys(payload.chart.divisional_charts).length),
+                    })}
+                  >
+                    <AtlasGatewayPreview charts={payload.chart.divisional_charts} historyQs={historyQs} />
+                  </SectionGateway>
+                </PanelErrorBoundary>
+              </GatewaySection>
+            )}
+
+            {/* ─── Full reading (gateway to its own page) ─── */}
+            <GatewaySection id="core">
+              <SectionGateway
+                href={`/insights/full-reading?${historyQs}`}
+                icon={<BookOpen />}
+                eyebrow={t("insights.page.gateways.reading.eyebrow")}
+                variant="reading"
+                heading={t("insights.page.gateways.reading.heading")}
+                blurb={t("insights.page.gateways.reading.blurb")}
+                footnote={t("insights.page.gateways.reading.footnote")}
+                ctaLabel={t("insights.page.gateways.reading.cta")}
+                /* The reading is two things, every finding and the yogas, so
+                   the doorway opens onto both. */
+                secondary={
+                  (payload.chart.yogas?.length ?? 0) > 0
+                    ? { href: `/insights/full-reading?${historyQs}#yogas`, label: t("insights.yogaHeading") }
+                    : undefined
+                }
+              >
+                <ReadingEvidencePreview rules={payload.chart.deterministic_rules} yogaCount={payload.chart.yogas?.length ?? 0} />
+              </SectionGateway>
+            </GatewaySection>
+          </div>
+
+          <motion.section
+            id="continue-reading"
+            className={`${styles.continuationHub} ${styles.anchorTarget}`}
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.28 }}
+            aria-labelledby="continue-reading-heading"
+          >
+            <div className={styles.continuationHeader}>
+              <div>
+                <p className={styles.kicker}>{t("insights.page.next.kicker")}</p>
+                <h2 id="continue-reading-heading" className={styles.continuationTitle}>
+                  {t("insights.page.next.heading")}
+                </h2>
+              </div>
+              <p className={styles.continuationLead}>{t("insights.page.next.lead")}</p>
             </div>
-            <p className={styles.continuationLead}>{t("insights.page.next.lead")}</p>
-          </div>
 
-          <div className={`${styles.continuationActions} ${styles.continuationActionsCompact}`}>
-            <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
-              <span className={styles.continuationActionBody}>
-                <strong>{t("insights.page.next.transitsTitle")}</strong>
-                <span>{t("insights.page.next.transitsBody")}</span>
-              </span>
-              <span className={styles.continuationRoute}>
-                {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
-              </span>
-            </Link>
+            <div className={`${styles.continuationActions} ${styles.continuationActionsCompact}`}>
+              <Link href={transitWorkspaceHref} className={styles.continuationAction} data-tone="sky">
+                <span className={styles.continuationActionBody}>
+                  <strong>{t("insights.page.next.transitsTitle")}</strong>
+                  <span>{t("insights.page.next.transitsBody")}</span>
+                </span>
+                <span className={styles.continuationRoute}>
+                  {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
+                </span>
+              </Link>
 
-            <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
-              <span className={styles.continuationActionBody}>
-                <strong>{t("insights.page.next.partnerTitle")}</strong>
-                <span>{t("insights.page.next.partnerBody")}</span>
-              </span>
-              <span className={styles.continuationRoute}>
-                {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
-              </span>
-            </Link>
+              <Link href={compatibilityHref} className={styles.continuationAction} data-tone="rose">
+                <span className={styles.continuationActionBody}>
+                  <strong>{t("insights.page.next.partnerTitle")}</strong>
+                  <span>{t("insights.page.next.partnerBody")}</span>
+                </span>
+                <span className={styles.continuationRoute}>
+                  {t("insights.page.next.openTool")} <span aria-hidden="true">→</span>
+                </span>
+              </Link>
 
-            <Link href={advancedInsightsHref} className={styles.continuationAction} data-tone="gold">
-              <span className={styles.continuationActionBody}>
-                <strong>{t("insights.page.next.advancedTitle")}</strong>
-                <span>{t("insights.page.next.advancedBody")}</span>
-              </span>
-              <span className={styles.continuationRoute}>
-                {t("insights.page.next.browseTools")} <span aria-hidden="true">→</span>
-              </span>
-            </Link>
-          </div>
-        </motion.section>
+              <Link href={advancedInsightsHref} className={styles.continuationAction} data-tone="gold">
+                <span className={styles.continuationActionBody}>
+                  <strong>{t("insights.page.next.advancedTitle")}</strong>
+                  <span>{t("insights.page.next.advancedBody")}</span>
+                </span>
+                <span className={styles.continuationRoute}>
+                  {t("insights.page.next.browseTools")} <span aria-hidden="true">→</span>
+                </span>
+              </Link>
+            </div>
+          </motion.section>
+        </section>
 
         {/* â”€â”€â”€ Footer Actions â”€â”€â”€ */}
         <motion.div

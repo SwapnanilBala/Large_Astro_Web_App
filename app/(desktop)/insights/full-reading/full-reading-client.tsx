@@ -70,7 +70,7 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
       <TermHelp terms={["yoga", "strength"]} />
 
       {rules.length > 0 && (
-        <section className={styles.section}>
+        <section id="findings" className={styles.section}>
           <div className={styles.sectionHead}>
             <p className={styles.sectionKicker}>{tr("fullReading.patternsKicker")}</p>
             <h2>{tr("fullReading.patternsHeading")}</h2>
@@ -82,8 +82,9 @@ export default function FullReadingClient({ payload, historyQs }: Props) {
         </section>
       )}
 
+      {/* Linked from the reading doorway on /insights ("Your Planetary Yogas"). */}
       {yogas.length > 0 && (
-        <section className={styles.section}>
+        <section id="yogas" className={styles.section}>
           <div className={styles.sectionHead}>
             <p className={styles.sectionKicker}>
               {tr("fullReading.combinationsKicker")}

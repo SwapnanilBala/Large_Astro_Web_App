@@ -18,6 +18,8 @@ type SectionGatewayProps = {
   ctaLabel: string;
   /** Help for the section's terms, on the eyebrow's line: inside the card, so it cannot push one card's heading below its neighbour's. */
   help?: ReactNode;
+  /** A second destination beside the main one, after it: the reading's doorway opens both every finding and the yogas. */
+  secondary?: { href: string; label: string };
 };
 
 export default function SectionGateway({
@@ -31,6 +33,7 @@ export default function SectionGateway({
   footnote,
   ctaLabel,
   help,
+  secondary,
 }: SectionGatewayProps) {
   return (
     <div className={styles.gateway} data-variant={variant}>
@@ -54,10 +57,18 @@ export default function SectionGateway({
         ) : (
           <span />
         )}
-        <Link href={href} className={styles.openLink} prefetch={false}>
-          {ctaLabel}
-          <ArrowUpRight aria-hidden="true" />
-        </Link>
+        <div className={styles.links}>
+          <Link href={href} className={styles.openLink} prefetch={false}>
+            {ctaLabel}
+            <ArrowUpRight aria-hidden="true" />
+          </Link>
+          {secondary && (
+            <Link href={secondary.href} className={styles.openLink} prefetch={false}>
+              {secondary.label}
+              <ArrowUpRight aria-hidden="true" />
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className={styles.preview}>{children}</div>
