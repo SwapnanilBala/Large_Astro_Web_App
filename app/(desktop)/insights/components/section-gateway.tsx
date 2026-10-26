@@ -16,6 +16,8 @@ type SectionGatewayProps = {
   /** Small print beside the call to action. */
   footnote?: string;
   ctaLabel: string;
+  /** Help for the section's terms, on the eyebrow's line: inside the card, so it cannot push one card's heading below its neighbour's. */
+  help?: ReactNode;
 };
 
 export default function SectionGateway({
@@ -28,14 +30,18 @@ export default function SectionGateway({
   children,
   footnote,
   ctaLabel,
+  help,
 }: SectionGatewayProps) {
   return (
     <div className={styles.gateway} data-variant={variant}>
       <header className={styles.copy}>
-        <p className={styles.eyebrow}>
-          <span className={styles.icon} aria-hidden="true">{icon}</span>
-          {eyebrow}
-        </p>
+        <div className={styles.eyebrowRow}>
+          <p className={styles.eyebrow}>
+            <span className={styles.icon} aria-hidden="true">{icon}</span>
+            {eyebrow}
+          </p>
+          {help && <div className={styles.help}>{help}</div>}
+        </div>
         <h3>{heading}</h3>
         <p className={styles.blurb}>{blurb}</p>
       </header>

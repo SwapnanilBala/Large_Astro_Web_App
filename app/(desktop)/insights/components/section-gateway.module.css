@@ -1,3 +1,9 @@
+/*
+ * A framed card, like every other section on the page. Unframed, the three
+ * doorways floated on the page background, and the last of them ran straight
+ * into the life shifts section below with nothing to say where one ended and
+ * the other began. The top edge carries the doorway's own colour.
+ */
 .gateway {
   --gateway-accent: var(--accent-gold);
   display: grid;
@@ -5,8 +11,12 @@
   gap: 1.5rem;
   height: 100%;
   min-width: 0;
-  padding: 1.6rem 0 1rem;
-  border-top: 1px solid var(--line-soft);
+  padding: 1.5rem 1.6rem 1.25rem;
+  border: 1px solid var(--line-soft);
+  border-top: 2px solid color-mix(in srgb, var(--gateway-accent) 55%, transparent);
+  border-radius: 16px;
+  background: var(--surface-frosted);
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.16), 0 1px 0 rgba(255, 255, 255, 0.035) inset;
   color: var(--ink-main);
 }
 
@@ -23,11 +33,28 @@
   min-width: 0;
 }
 
+/* The eyebrow, and on the same line, at the far end, any help for the terms. */
+.eyebrowRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.35rem 1rem;
+  /* As tall as the help line, so a doorway with help and one without start
+     their headings at the same height side by side. */
+  min-height: 1.85rem;
+  margin: 0 0 0.85rem;
+}
+
+.help > * {
+  margin: 0;
+}
+
 .eyebrow {
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  margin: 0 0 0.85rem;
+  margin: 0;
   color: var(--gateway-accent);
   font-size: var(--text-label);
   font-weight: 700;
@@ -155,7 +182,7 @@
 @media (max-width: 600px) {
   .gateway {
     gap: 1.25rem;
-    padding-top: 1.25rem;
+    padding: 1.25rem 1.1rem 1rem;
     grid-template-rows: auto auto auto;
   }
 
