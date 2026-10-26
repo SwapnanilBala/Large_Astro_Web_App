@@ -1651,75 +1651,6 @@ export default function InsightsContent({
           </div>
         </CollapsibleSection>
 
-        {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
-        {payload.chart.lucky_elements && fortuneTiles.length > 0 && (
-          <section
-            className={`${styles.band} ${styles.fortuneBand}`}
-            aria-labelledby="fortune-band-heading"
-          >
-            <div className={styles.fortuneIntro}>
-              <SunGlyph className={`${decor.inline} ${decor.decorGold} ${decor.sun}`} />
-              <h2 id="fortune-band-heading" className={styles.fortuneTitle}>
-                {t("insights.page.fortune.heading")}
-              </h2>
-              <p className={styles.fortuneSubtitle}>{t("insights.page.fortune.subtitle")}</p>
-              <Flourish className={`${decor.inline} ${decor.decorGold} ${decor.flourish}`} />
-            </div>
-
-            {/*
-              The four tiles the reference puts in this strip, read straight off
-              lucky_elements. The full panel is still underneath in its own
-              collapsible -- nothing was moved out of it, this is a summary of
-              what it already holds, so that section's saved open/closed state
-              keeps working exactly as before.
-            */}
-            <dl className={styles.fortuneTiles}>
-              {fortuneTiles.map((tile) => (
-                <div key={tile.label} className={styles.fortuneTile}>
-                  <dt className={styles.fortuneLabel}>{tile.label}</dt>
-                  <dd className={styles.fortuneValue}>{tile.value}</dd>
-                  <dd className={styles.fortuneCaption}>{tile.caption}</dd>
-                </div>
-              ))}
-            </dl>
-
-            {/* Last, so it lands in the band's third track. It used to be an
-                absolutely-positioned overlay and overlapped the final tile by
-                134x64px; a track of its own makes that impossible. */}
-            <LeafSprig className={`${decor.inline} ${decor.decorGold} ${styles.fortuneLeaf}`} />
-          </section>
-        )}
-
-        {payload.chart.lucky_elements && (
-          <CollapsibleSection
-            id="fortune"
-            kicker={t("insights.page.fortune.kicker")}
-            title={t("insights.page.fortune.title")}
-            defaultOpen={true}
-            className={styles.cardRules}
-            persistKey={`${sectionStateScope}:fortune`}
-            summary={
-              <>
-                <span>{t("insights.page.fortune.summaryKinds")}</span>
-                <span>
-                  <Emphasise
-                    text={t("insights.page.fortune.keyedTo", {
-                      sign: signName(payload.chart.ascendant.sign, t),
-                    })}
-                  />
-                </span>
-              </>
-            }
-          >
-            {/* Idle-mounted: no requests, and a height the placeholder cannot guess. */}
-            <LazyPanel mountWhenIdle>
-              <PanelErrorBoundary panelName="Lucky Elements">
-                <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
-              </PanelErrorBoundary>
-            </LazyPanel>
-          </CollapsibleSection>
-        )}
-
         {/*
           The page below the life areas, in two groups named as the section nav
           names them, so a tab always lands on what it says. Until 2026-10-26
@@ -1728,7 +1659,8 @@ export default function InsightsContent({
           the life shifts, so the reading's doorway ran straight into a timing
           section with nothing to say where one ended. Now: Timing is the dasha
           periods, then the life shifts, then the door to the timing pages;
-          More is the doors to the atlas and the full reading, then the tools.
+          More is the lucky elements (where they sat before, under the life
+          shifts), the doors to the atlas and the full reading, then the tools.
           The ids inside (vimshottari-dashas, life-shifts, timing, core, ...)
           are unchanged, since deep links and the walkthrough target them.
         */}
@@ -1860,6 +1792,77 @@ export default function InsightsContent({
           <h2 id="explore-group-heading" className={styles.pageGroupHeading}>
             {t("insights.page.nav.more")}
           </h2>
+          {/* Under the timing group, where it sat under the life shifts before
+              the page was grouped. */}
+          {/* â”€â”€â”€ Lucky Elements â”€â”€â”€ */}
+          {payload.chart.lucky_elements && fortuneTiles.length > 0 && (
+            <section
+              className={`${styles.band} ${styles.fortuneBand}`}
+              aria-labelledby="fortune-band-heading"
+            >
+              <div className={styles.fortuneIntro}>
+                <SunGlyph className={`${decor.inline} ${decor.decorGold} ${decor.sun}`} />
+                <h2 id="fortune-band-heading" className={styles.fortuneTitle}>
+                  {t("insights.page.fortune.heading")}
+                </h2>
+                <p className={styles.fortuneSubtitle}>{t("insights.page.fortune.subtitle")}</p>
+                <Flourish className={`${decor.inline} ${decor.decorGold} ${decor.flourish}`} />
+              </div>
+
+              {/*
+                The four tiles the reference puts in this strip, read straight off
+                lucky_elements. The full panel is still underneath in its own
+                collapsible -- nothing was moved out of it, this is a summary of
+                what it already holds, so that section's saved open/closed state
+                keeps working exactly as before.
+              */}
+              <dl className={styles.fortuneTiles}>
+                {fortuneTiles.map((tile) => (
+                  <div key={tile.label} className={styles.fortuneTile}>
+                    <dt className={styles.fortuneLabel}>{tile.label}</dt>
+                    <dd className={styles.fortuneValue}>{tile.value}</dd>
+                    <dd className={styles.fortuneCaption}>{tile.caption}</dd>
+                  </div>
+                ))}
+              </dl>
+
+              {/* Last, so it lands in the band's third track. It used to be an
+                  absolutely-positioned overlay and overlapped the final tile by
+                  134x64px; a track of its own makes that impossible. */}
+              <LeafSprig className={`${decor.inline} ${decor.decorGold} ${styles.fortuneLeaf}`} />
+            </section>
+          )}
+
+          {payload.chart.lucky_elements && (
+            <CollapsibleSection
+              id="fortune"
+              kicker={t("insights.page.fortune.kicker")}
+              title={t("insights.page.fortune.title")}
+              defaultOpen={true}
+              className={styles.cardRules}
+              persistKey={`${sectionStateScope}:fortune`}
+              summary={
+                <>
+                  <span>{t("insights.page.fortune.summaryKinds")}</span>
+                  <span>
+                    <Emphasise
+                      text={t("insights.page.fortune.keyedTo", {
+                        sign: signName(payload.chart.ascendant.sign, t),
+                      })}
+                    />
+                  </span>
+                </>
+              }
+            >
+              {/* Idle-mounted: no requests, and a height the placeholder cannot guess. */}
+              <LazyPanel mountWhenIdle>
+                <PanelErrorBoundary panelName="Lucky Elements">
+                  <LuckyElementsPanel luckyElements={payload.chart.lucky_elements} />
+                </PanelErrorBoundary>
+              </LazyPanel>
+            </CollapsibleSection>
+          )}
+
           {/* .gatewayGrid keeps its own auto-fit rule, and the
               `:last-child:nth-child(odd)` full-width span that .cardRowAuto has
               no equivalent for. */}
