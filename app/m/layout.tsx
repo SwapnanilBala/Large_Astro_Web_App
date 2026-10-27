@@ -9,7 +9,8 @@ import styles from "./mobile.module.css";
  *
  * Sibling of app/(desktop)/layout.tsx, not a child of it. The root layout is
  * bare, so this tree loads mobile-shell.css and nothing else — no globals.css,
- * no webfonts, no navigation, no animated background, no ToastProvider.
+ * no navigation, no animated background, no ToastProvider. It declares its
+ * own webfonts below.
  *
  * Separate routes mean /m and / can serve the same content at two URLs, so
  * every mobile page declares a canonical pointing at its desktop twin. Without
@@ -39,27 +40,65 @@ export const viewport: Viewport = {
 };
 
 /*
- * One weight, one subset, headings only.
+ * The desktop's three faces, in the same roles, since 2026-10-26 (the owner
+ * asked for the mobile site to match the desktop's change for clarity):
+ * - Marcellus for headings, where Newsreader was. Sentence case, as before.
+ * - Source Serif 4 for the few serif sentences: the pull quotes, the summary,
+ *   the method line and the italic subtitle.
+ * - Inter for everything the system sans used to set. Numbers stay on the
+ *   system monospace (--font-mono).
  *
- * Newsreader, the serif the desktop reading already sets its prose in, in
- * sentence case. It replaces Cinzel, whose inscription capitals are the stock
- * astrology-app look and wrapped badly on a handset once a heading ran past a
- * few words ("WHICH HOUSE IS RESPONSIBLE FOR WHAT"). Body copy stays on the
- * system stack and numbers on the system monospace (--font-mono), so this is
- * still the only face the tree downloads.
+ * Marcellus and Inter are on every page, so they are preloaded (63KB). Source
+ * Serif is not: only the results pages draw with it, and a face that is not
+ * preloaded is fetched only once text on the page needs it, so the intake page
+ * and the login never download it, and the italic comes only with a subtitle.
  *
- * display:swap so it can never block first paint.
+ * Declared at 400 to 700 like the desktop's, for the same reason: a rule
+ * asking for 600 gets the real face rather than a synthesized bold. The files
+ * are in app/fonts, so the build never fetches them; see the README there.
+ * next/font accepts only literals here, hence every entry written out.
  *
- * The file is in app/fonts, the static 400 instance Google served for this
- * request, so the build never fetches it; see the README there.
+ * display:swap so none of them can block first paint.
  */
-const newsreader = localFont({
-  src: "../fonts/newsreader-latin-400-normal.woff2",
-  weight: "400",
-  style: "normal",
+const marcellus = localFont({
+  src: [
+    { path: "../fonts/marcellus-latin-400-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/marcellus-latin-400-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/marcellus-latin-400-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/marcellus-latin-400-normal.woff2", weight: "700", style: "normal" },
+  ],
   display: "swap",
   variable: "--font-display-m",
   adjustFontFallback: "Times New Roman",
+});
+
+const sourceSerif = localFont({
+  src: [
+    { path: "../fonts/source-serif-4-latin-wght-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/source-serif-4-latin-wght-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/source-serif-4-latin-wght-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/source-serif-4-latin-wght-normal.woff2", weight: "700", style: "normal" },
+    { path: "../fonts/source-serif-4-latin-wght-italic.woff2", weight: "400", style: "italic" },
+    { path: "../fonts/source-serif-4-latin-wght-italic.woff2", weight: "500", style: "italic" },
+    { path: "../fonts/source-serif-4-latin-wght-italic.woff2", weight: "600", style: "italic" },
+    { path: "../fonts/source-serif-4-latin-wght-italic.woff2", weight: "700", style: "italic" },
+  ],
+  display: "swap",
+  preload: false,
+  variable: "--font-prose-m",
+  adjustFontFallback: "Times New Roman",
+});
+
+const inter = localFont({
+  src: [
+    { path: "../fonts/inter-latin-wght-normal.woff2", weight: "400", style: "normal" },
+    { path: "../fonts/inter-latin-wght-normal.woff2", weight: "500", style: "normal" },
+    { path: "../fonts/inter-latin-wght-normal.woff2", weight: "600", style: "normal" },
+    { path: "../fonts/inter-latin-wght-normal.woff2", weight: "700", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-ui-m",
+  adjustFontFallback: "Arial",
 });
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
@@ -68,7 +107,7 @@ export default function MobileLayout({ children }: { children: React.ReactNode }
      no main region. */
   return (
     <MobileLanguageProvider>
-      <main id="main-content" className={`${newsreader.variable} ${styles.shell}`}>
+      <main id="main-content" className={`${marcellus.variable} ${sourceSerif.variable} ${inter.variable} ${styles.shell}`}>
         {children}
       </main>
     </MobileLanguageProvider>

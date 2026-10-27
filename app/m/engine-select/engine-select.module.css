@@ -137,7 +137,7 @@
 .method {
   margin: 0;
   padding-left: 0.75rem;
-  font-family: var(--font-display);
+  font-family: var(--font-prose);
   font-size: 1rem;
   line-height: 1.5;
   color: var(--text-primary);

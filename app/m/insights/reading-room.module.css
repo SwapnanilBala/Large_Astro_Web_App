@@ -2,7 +2,7 @@
  * The reading room in the /m dress (app/components/reading-room, stacked).
  *
  * The same rooms the desktop full reading shows, set the almanac way: ink and
- * paper, hairline rules instead of boxes, Newsreader for what reads as a
+ * paper, hairline rules instead of boxes, Marcellus for what reads as a
  * heading, the monospace for labels and figures. Vermilion marks one thing,
  * the open item -- the "open choice" it is kept for -- and the pull quote
  * that the mobile reading cards already rule in it. Chosen filters are inked,
@@ -294,7 +294,7 @@
 .subtitle {
   margin: 0.2rem 0 0;
   color: var(--text-secondary);
-  font-family: var(--font-display);
+  font-family: var(--font-prose);
   font-size: 1.0625rem;
   font-style: italic;
 }
@@ -329,7 +329,7 @@
 .otherSide p:last-child {
   margin: 0.3rem 0 0;
   color: var(--text-primary);
-  font-family: var(--font-display);
+  font-family: var(--font-prose);
   font-size: 1rem;
   line-height: 1.55;
 }

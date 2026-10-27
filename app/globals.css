@@ -248,7 +248,7 @@
  * type tokens above, grow by 8%. A percentage rather than pixels, so a reader
  * who has set a larger default in their browser still gets it, scaled.
  * Media queries are unaffected, since they measure in the browser's own
- * default. This file loads only in the desktop tree; /m keeps its sizes.
+ * default. /m takes the same step in its own mobile-shell.css.
  */
 html {
   font-size: 108%;

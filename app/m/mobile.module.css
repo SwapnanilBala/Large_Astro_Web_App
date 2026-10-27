@@ -37,18 +37,30 @@
 }
 
 /* The intake's top line: the name of the house, and the way in for someone
-   who already has charts saved. */
+   who already has charts saved.
+
+   Each item holds to one line, and the controls drop below the name when the
+   row cannot fit them all: at the larger sizes the row is tight on a 375px
+   phone and too wide for a 320px one, and a longer "Sign in" in another
+   language takes more. Before, the name and the link each broke in two
+   instead ("Lagna / Atelier", "Sign / in").
+
+   The row is also the one place that did not take the step up: the name,
+   the link and the two controls keep the sizes they had (17px, 15px and the
+   44px touch floor), so the row still fits in one line on a 375px phone. */
 .topBar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  min-height: 2.75rem;
+  gap: 0.5rem;
+  min-height: 44px;
 }
 
 .wordmark {
+  white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 1.0625rem;
+  font-size: 1rem;
   letter-spacing: 0.01em;
   color: var(--text-primary);
 }
@@ -60,7 +72,8 @@
   align-items: center;
   min-height: 2.75rem;
   padding: 0 0.25rem;
-  font-size: 0.9375rem;
+  white-space: nowrap;
+  font-size: 0.875rem;
   color: var(--text-primary);
   text-decoration: underline;
   text-decoration-color: var(--border-medium);
@@ -70,7 +83,9 @@
 .topActions {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.375rem;
+  /* Right-aligned on a line of its own, too. */
+  margin-left: auto;
 }
 
 /* The language and theme controls: outlined, not filled, so the screen's one
@@ -80,7 +95,7 @@
    Inked, like the tree's chips; no vermilion. */
 .languagePill,
 .themeButton {
-  height: 2.75rem;
+  height: 44px;
   border: 1px solid var(--text-tertiary);
   color: var(--text-primary);
   background: transparent;
@@ -94,7 +109,7 @@
   padding: 0 0.7rem 0 0.6rem;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: var(--text-ui);
+  font-size: var(--text-label);
   letter-spacing: 0.04em;
 }
 
@@ -141,7 +156,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
+  width: 44px;
   flex-shrink: 0;
   padding: 0;
   border-radius: 50%;
@@ -329,6 +344,13 @@
   background: transparent;
   border: 1px solid var(--border-medium);
   border-radius: 999px;
+}
+
+/* An odd chip out takes the whole row rather than half of it. The third of
+   the sex-at-birth chips, "Prefer not to say", broke onto two lines inside
+   its pill in half a row once the type grew a step. */
+.chip:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
 /* A chosen chip is inked in, not lit up: the vermilion is kept for the action

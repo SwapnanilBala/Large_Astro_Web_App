@@ -104,6 +104,12 @@
   border-left: 1px solid var(--border-subtle);
 }
 
+/* The last third ends at the page's own edge, so it needs no gap there, and
+   the 10px are what "Capricorn" needs to fit on a 360px phone. */
+.identityItem:last-child {
+  padding-right: 0;
+}
+
 .identityLabel {
   font-family: var(--font-mono);
   font-size: var(--text-meta);
@@ -113,7 +119,10 @@
 .identityValue {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 1.25rem;
+  /* 19.4px, a shade under the 20px it was before the step up: Marcellus runs
+     wider than Newsreader did, and at 1.25rem "Capricorn" broke as
+     "Capricor / n" in a third of a 375px phone (see :last-child above). */
+  font-size: 1.125rem;
   line-height: 1.2;
   /* A third of a phone is narrow for "Shatabhisha" or German "Wassermann":
      break at a syllable, with a hyphen, where the browser knows the language,
@@ -385,7 +394,7 @@
   margin: 0.15rem 0 0;
   padding-left: 0.85rem;
   border-left: 2px solid var(--accent);
-  font-family: var(--font-display);
+  font-family: var(--font-prose);
   font-size: 1rem;
   line-height: 1.55;
   color: var(--text-primary);
@@ -473,7 +482,7 @@
 
 .summary {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-prose);
   font-size: 1.0625rem;
   line-height: 1.6;
   color: var(--text-primary);

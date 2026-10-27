@@ -31,9 +31,9 @@
    * live for the desktop tree, never reaches this one. Same numbers on purpose:
    * two scales would drift.
    */
-  --text-meta: 0.875rem;   /* 14px  -- table numbers, fine print */
-  --text-label: 0.875rem;  /* 14px  -- uppercase labels and badges */
-  --text-ui: 0.95rem;      /* 15.2px -- buttons, links, tabs, sentences */
+  --text-meta: 0.875rem;   /* 15px  -- table numbers, fine print */
+  --text-label: 0.875rem;  /* 15px  -- uppercase labels and badges */
+  --text-ui: 0.95rem;      /* 16.4px -- buttons, links, tabs, sentences */
 
   --text-primary: #ece6da;
   --text-secondary: #b3aa99;
@@ -70,7 +70,8 @@
      the face costs nothing to load. Hindi and Bengali set them in --font-text
      instead; see the :lang() rule below. */
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", "Roboto Mono", Menlo, Consolas, monospace;
-  /* Running text: the system's own sans, for the same reason. */
+  /* Running text. The system's own sans here; <main> puts Inter in front of
+     it (see the rule there), the only place Inter's variable exists. */
   --font-text: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial,
     sans-serif;
 
@@ -156,9 +157,17 @@ html[data-theme="light"] {
  * becomes invalid at computed-value time. font-family then falls back to
  * inherit and every heading silently renders in the system stack, which is
  * exactly what happened the first time.
+ *
+ * The same goes for the other two faces: --font-prose and --font-text are
+ * (re)declared here, and font-family is set again on <main>, because the
+ * html and body rule below resolves --font-text before Inter exists.
  */
 main {
   --font-display: var(--font-display-m, Georgia), Georgia, "Times New Roman", serif;
+  --font-prose: var(--font-prose-m, Georgia), Georgia, "Times New Roman", serif;
+  --font-text: var(--font-ui-m, -apple-system), -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: var(--font-text);
 }
 
 /*
@@ -192,9 +201,7 @@ body {
   min-height: 100%;
   background: var(--bg-deep);
   color: var(--text-primary);
-  /* System stack for the body. The desktop tree preloads Cinzel and
-     Newsreader — 145KB of woff2. This tree loads one 22KB weight of
-     Newsreader for its headings (layout.tsx) and nothing else. */
+  /* The system stack, for anything outside <main>, which sets Inter. */
   font-family: var(--font-text);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -202,6 +209,16 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   overflow-x: hidden;
+}
+
+/*
+ * One step up, the same as the desktop tree's: every size written in rem, and
+ * the type tokens, grow by 8% (body copy 16 to 17.3px, labels 14 to 15px). A
+ * percentage, so a larger default set in the browser still counts. The 44px
+ * touch floor and the 16px language select are in px and stay as they are.
+ */
+html {
+  font-size: 108%;
 }
 
 /* Touch targets are the one thing worth enforcing globally: a 44px minimum is
