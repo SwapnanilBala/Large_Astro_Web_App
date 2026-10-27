@@ -143,6 +143,20 @@ await send("Emulation.setDeviceMetricsOverride", {
   screenHeight: height,
 });
 if (mobile) await send("Emulation.setTouchEmulationEnabled", { enabled: true, maxTouchPoints: 5 });
+/* Touch emulation does not change the pointer media features, so without this
+   a phone-width shot still matched (pointer: fine) and skipped every
+   (pointer: coarse) rule -- the 44px tap targets among them -- that a phone
+   gets. */
+if (mobile) {
+  await send("Emulation.setEmulatedMedia", {
+    features: [
+      { name: "pointer", value: "coarse" },
+      { name: "any-pointer", value: "coarse" },
+      { name: "hover", value: "none" },
+      { name: "any-hover", value: "none" },
+    ],
+  });
+}
 
 if (initFile) {
   const { readFileSync } = await import("node:fs");
