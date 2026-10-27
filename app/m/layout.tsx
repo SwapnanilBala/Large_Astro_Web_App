@@ -35,6 +35,11 @@ export const viewport: Viewport = {
   /* Deliberately not locking maximumScale — pinch-zoom is an accessibility
    * affordance and disabling it fails WCAG 1.4.4. */
   viewportFit: "cover",
+  /* Android Chrome then shrinks the page to the space above the on-screen
+     keyboard, so the fixed Continue bar sits on the keyboard instead of
+     under it. Safari ignores this; use-keyboard-layout.ts lifts the bar
+     there. */
+  interactiveWidget: "resizes-content",
   /* The almanac's ink, so the browser chrome around the page matches it. */
   themeColor: "#15130f",
 };

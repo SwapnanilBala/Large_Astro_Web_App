@@ -381,7 +381,9 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
+  /* On top of the on-screen keyboard where the browser lays the keyboard
+     over the page (Safari); 0 everywhere else. See use-keyboard-layout.ts. */
+  bottom: var(--keyboard-inset, 0px);
   /* Outranks anything a field opens. The bar is fixed and the suggestion list
      is absolute, so without a stated order the two are settled by whichever
      happens to come later in the markup — which put a list of place names
@@ -544,4 +546,46 @@
   border: none;
   text-decoration: underline;
   text-underline-offset: 0.2em;
+}
+
+/*
+ * While the on-screen keyboard is open (use-keyboard-layout.ts sets the
+ * attribute), the form keeps only what the answer needs: the progress line,
+ * the question on one line, the field and its choices, and a slim bar. The
+ * top row, the counter, the explanation, the privacy line and the bar's hint
+ * fold away until the keyboard closes. On a large Android phone the keyboard
+ * leaves about 440px, and before this the header alone filled most of it, so
+ * the field being typed in sat behind the bar.
+ */
+.page[data-keyboard="open"] {
+  gap: 1rem;
+  padding-top: 0.75rem;
+}
+
+.page[data-keyboard="open"] .topBar,
+.page[data-keyboard="open"] .step,
+.page[data-keyboard="open"] .lead,
+.page[data-keyboard="open"] .trustMicrocopy,
+.page[data-keyboard="open"] .actionHint {
+  display: none;
+}
+
+.page[data-keyboard="open"] .title {
+  margin-top: 0.6rem;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.page[data-keyboard="open"] .actions {
+  padding: 0.5rem 1.25rem;
+}
+
+.page[data-keyboard="open"] .button {
+  min-height: 44px;
+}
+
+/* While place suggestions show, choosing one is the next step, so the bar
+   steps aside and the list takes its room (mobile-shell.css). */
+.page[data-keyboard="open"]:has(:global(.autocomplete-dropdown)) .actions {
+  display: none;
 }

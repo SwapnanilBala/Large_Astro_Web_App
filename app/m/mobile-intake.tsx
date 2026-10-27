@@ -36,6 +36,7 @@ import { normalizeTimeInputValue } from "@/lib/time-input";
 import { useHydrated } from "@/lib/use-hydrated";
 import { useTheme } from "@/lib/use-theme";
 import styles from "./mobile.module.css";
+import { useKeyboardLayout } from "./use-keyboard-layout";
 
 /* The four questions, in order. */
 type Step = 1 | 2 | 3 | 4;
@@ -142,6 +143,10 @@ export default function MobileIntake() {
   const [submitting, setSubmitting] = useState(false);
   const geoAbort = useRef<AbortController | null>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  /* Folds the header and moves the bar while the on-screen keyboard is open;
+     see use-keyboard-layout.ts. */
+  const formRef = useRef<HTMLFormElement>(null);
+  useKeyboardLayout(formRef, { field: `.${styles.field}`, actions: `.${styles.actions}` });
   /* The question last shown, so the heading takes focus when it changes but
      not on arrival, where it would steal focus from nothing. */
   const shownStep = useRef<Step>(1);
@@ -473,7 +478,7 @@ export default function MobileIntake() {
           : { title: t("home.askPlace"), lead: t("home.askPlaceHelper"), cta: t("home.next") };
 
   return (
-    <form className={styles.page} onSubmit={onSubmit} noValidate>
+    <form ref={formRef} className={styles.page} onSubmit={onSubmit} noValidate>
       <div className={styles.topBar}>
         <span className={styles.wordmark}>Lagna Atelier</span>
         <div className={styles.topActions}>

@@ -315,6 +315,22 @@ button:focus-visible {
   justify-content: center;
 }
 
+/*
+ * With the keyboard open, the list runs from the field down to the top of
+ * the keyboard (--keyboard-list-room, measured in use-keyboard-layout.ts)
+ * rather than the fixed cap above, which on a large Android phone ended
+ * below the keyboard, and the rows are tighter, so three or four places show
+ * instead of one and a half. 7.5rem is the floor if the measurement is off.
+ */
+form[data-keyboard="open"] .autocomplete-dropdown {
+  max-height: max(7.5rem, var(--keyboard-list-room, 16rem));
+}
+
+form[data-keyboard="open"] .autocomplete-item {
+  gap: 0;
+  padding-block: 0.45rem;
+}
+
 .autocomplete-item.active {
   background: var(--surface-strong);
 }
