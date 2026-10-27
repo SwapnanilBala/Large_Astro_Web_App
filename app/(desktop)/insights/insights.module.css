@@ -5522,6 +5522,11 @@
     min-height: 44px;
   }
 
+  /* "View 1 past chapter" was a 28px line. */
+  .lifeShiftsArchive > summary {
+    padding-block: 0.6rem;
+  }
+
   .actionBtn {
     min-height: 44px;
     padding: 10px 16px;

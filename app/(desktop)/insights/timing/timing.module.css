@@ -167,3 +167,46 @@
 :global(html[data-theme="light"]) .sectionKicker {
   color: var(--accent-teal-dim);
 }
+
+/* ── Phones ──
+ *
+ * Each of the three panels draws its own card, and sat inside this one inside
+ * the page: measured at 390px, up to 190px of the width went to nested
+ * padding (page 43, this wrapper 31, the panel 54, its card 37, a month 26),
+ * and the forecast's lists wrapped every two or three words. On a phone this
+ * wrapper steps aside and the panels' own cards slim down; the forecast's
+ * one-line verdict, set as a 32px heading, comes down to a reading size.
+ * Last in the file, after every rule it overrides.
+ */
+@media (max-width: 600px) {
+  .page {
+    width: min(100% - 1.5rem, 74rem);
+  }
+
+  .panel,
+  :global(html[data-theme="light"]) .panel {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+  }
+
+  .panel :global(.rules-panel) {
+    margin-top: 0;
+    padding: 1rem 0.9rem;
+  }
+
+  .panel :global(.forecast-card) {
+    padding: 0.85rem;
+  }
+
+  .panel :global(.forecast-column) {
+    padding: 0.75rem 0.8rem;
+  }
+
+  .panel :global(.forecast-card-header h3) {
+    font-size: 1.25rem;
+    line-height: 1.35;
+  }
+}

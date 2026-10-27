@@ -423,3 +423,11 @@
     transition: none;
   }
 }
+
+/* Touch: the week pager's round buttons are 30px for a mouse. */
+@media (pointer: coarse) {
+  .pagerButton {
+    width: 44px;
+    height: 44px;
+  }
+}

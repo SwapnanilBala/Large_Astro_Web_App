@@ -367,3 +367,11 @@
 :global(html[data-theme="light"]) .chartPlaceholder {
   background: #fbf5ea;
 }
+
+/* Touch: the style switch's segments opt out of the 44px button rule to share
+   the pill's inset; on a coarse pointer they grow to it instead. */
+@media (pointer: coarse) {
+  .switchOption {
+    min-height: 44px;
+  }
+}

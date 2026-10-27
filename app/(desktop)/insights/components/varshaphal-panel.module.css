@@ -1330,3 +1330,24 @@
   background: var(--chip-coral-surface);
   border-color: rgba(176, 50, 44, 0.28);
 }
+
+/* Phones: the panel and its cards each gave up 1-1.5rem a side inside the
+   timing page's own frame; see the note at the end of timing.module.css. */
+@media (max-width: 600px) {
+  .panel {
+    margin-top: 0;
+    padding: 1rem 0.9rem;
+  }
+
+  .timelineCard,
+  .section {
+    padding: 0.8rem;
+  }
+}
+
+/* Touch: the disclosure's summary is a 23px line otherwise. */
+@media (pointer: coarse) {
+  .allPlacements summary {
+    padding-block: 0.7rem;
+  }
+}

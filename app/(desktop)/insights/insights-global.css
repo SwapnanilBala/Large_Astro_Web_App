@@ -4239,3 +4239,32 @@ html[data-theme="light"] .navamsa-summary-card h4 {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Touch targets the tree's 44px rule cannot reach ──
+ *
+ * globals.css gives every button and link 44px on a coarse pointer, but by
+ * element selector, so a control that sets its own height with a class keeps
+ * it: the forecast's theme filters stayed 33px and "Save to calendar" 36px on
+ * a phone. Summaries were never covered. The inline link keeps its look and
+ * gains an invisible hit area instead.
+ */
+@media (pointer: coarse) {
+  .forecast-filter,
+  .forecast-calendar-button {
+    min-height: 44px;
+  }
+
+  .classical-note-verses summary {
+    padding-block: 0.7rem;
+  }
+
+  .compat-inline-link {
+    position: relative;
+  }
+
+  .compat-inline-link::after {
+    content: "";
+    position: absolute;
+    inset: -0.8rem -0.5rem;
+  }
+}
