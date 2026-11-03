@@ -171,3 +171,26 @@ describe("the caller as the limits count them", () => {
     expect(checkRateLimit(neighbour)?.allowed).toBe(true);
   });
 });
+
+describe("the Android sign-in routes", () => {
+  const from = (path: string, ip: string) =>
+    new Request(`https://example.test${path}`, {
+      method: "POST",
+      headers: { "x-vercel-forwarded-for": ip },
+    });
+
+  it("allows ten exchanges a minute per caller, then refuses", () => {
+    const path = "/api/auth/google/android";
+    for (let i = 0; i < 10; i++) expect(checkRateLimit(from(path, "198.51.100.40"))?.allowed).toBe(true);
+    expect(checkRateLimit(from(path, "198.51.100.40"))?.allowed).toBe(false);
+  });
+
+  it("counts nonces apart from exchanges, so one cannot spend the other", () => {
+    const ip = "198.51.100.41";
+    for (let i = 0; i < 10; i++) {
+      expect(checkRateLimit(from("/api/auth/google/android/nonce", ip))?.allowed).toBe(true);
+    }
+    expect(checkRateLimit(from("/api/auth/google/android/nonce", ip))?.allowed).toBe(false);
+    expect(checkRateLimit(from("/api/auth/google/android", ip))?.allowed).toBe(true);
+  });
+});

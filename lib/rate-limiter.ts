@@ -99,6 +99,12 @@ const ROUTE_LIMITS: Record<string, RateLimitConfig> = {
      on the chart-style switch. Thirty a minute is a person toggling to compare
      the two drawings, not a loop. */
   "/api/account/preferences": { limit: 30, windowMs: 60_000 },
+  /* The Android app's sign-in: one nonce and one exchange per tap of the
+     button. Ten a minute is a person retrying a cancelled sheet, not a loop
+     filling auth_nonces or hammering the token check. Listed separately so
+     that asking for nonces cannot spend the exchange's allowance. */
+  "/api/auth/google/android/nonce": { limit: 10, windowMs: 60_000 },
+  "/api/auth/google/android": { limit: 10, windowMs: 60_000 },
 };
 
 /**
