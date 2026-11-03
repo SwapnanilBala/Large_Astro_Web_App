@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { ChartSyncFactsSchema, ChartSyncRequestSchema, firstZodError } from "@/lib/schemas";
 import { CALCULATION_VERSION, chartFactsFromQueryString } from "@/lib/sync/facts";
-import { countCharts, listCharts, saveChart } from "@/lib/sync/charts";
-import { revokeAllConsent } from "@/lib/sync/consent";
+import { countCharts, findChartClient, listCharts, saveChart } from "@/lib/sync/charts";
+import { revokeAllConsent, revokeConsent } from "@/lib/sync/consent";
 import { findRequestAccount } from "@/lib/sync/account";
 
 /**
@@ -12,7 +12,11 @@ import { findRequestAccount } from "@/lib/sync/account";
  *
  *   GET     what is stored, for hydrating an empty browser
  *   POST    store this chart — requires consent in the body
- *   DELETE  withdraw consent and delete what it was permitting
+ *   DELETE  withdraw consent and delete what it was permitting, for the
+ *           whole account or (?chartId=) for one person
+ *
+ * The browser is signed in by its cookie, the Android app by a bearer header;
+ * findRequestAccount reads either.
  *
  * All three used to serve a guest as well as a signed-in visitor:
  * `lib/sync/workspace` resolved a browser to an `anon:<device>` workspace and
@@ -125,15 +129,32 @@ export async function POST(request: NextRequest) {
   }
 }
 
+const CHART_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 /**
- * Withdraw consent for everything on this account.
+ * Withdraw consent: for everything on this account, or for one person.
+ *
+ *   DELETE /api/sync/charts                 everything ("stop syncing")
+ *   DELETE /api/sync/charts?chartId=<uuid>  the person that chart is about
  *
  * Deletes the birth profiles and, by cascade, the calculations over them; the
  * consent rows stay, marked revoked, because "permission was given and then
  * withdrawn" is the fact an audit needs and a delete would destroy.
+ *
+ * The one-chart form is how the Android app deletes a synced chart. Consent
+ * and birth details are kept per person, so it removes that person's birth
+ * details and every chart over them, not one calculation: a delete that left
+ * the birth date on the server would be the letter of a delete without the
+ * substance. A chart id that is not this account's answers like one that is
+ * already gone, so nothing is learned about other accounts.
  */
 export async function DELETE(request: NextRequest) {
   try {
+    const chartId = request.nextUrl.searchParams.get("chartId");
+    if (chartId !== null && !CHART_ID.test(chartId)) {
+      throw new ApiError(ErrorCode.VALIDATION_FAILED, "chartId must be a chart id.");
+    }
+
     const account = await findRequestAccount(request);
 
     /* Nothing stored is the desired end state, so saying so is not a lie and
@@ -142,11 +163,18 @@ export async function DELETE(request: NextRequest) {
       return noStore(NextResponse.json({ revoked: 0, remaining: 0 }));
     }
 
-    const revoked = await revokeAllConsent(account.userId);
+    let revoked: number;
+    if (chartId === null) {
+      revoked = await revokeAllConsent(account.userId);
+    } else {
+      const clientId = await findChartClient(account.userId, chartId);
+      revoked = clientId && (await revokeConsent(account.userId, clientId)) ? 1 : 0;
+    }
     const remaining = await countCharts(account.userId);
 
     return noStore(NextResponse.json({ revoked, remaining }));
-  } catch {
+  } catch (error) {
+    if (error instanceof ApiError) return errorResponse(error);
     return storeUnavailable();
   }
 }

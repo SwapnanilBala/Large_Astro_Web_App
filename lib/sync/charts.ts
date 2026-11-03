@@ -344,6 +344,32 @@ export async function listCharts(userId: string): Promise<SyncedChart[]> {
   });
 }
 
+/**
+ * The person a stored chart is about, on this account only.
+ *
+ * Null for a chart that is not this account's, so one account can never learn
+ * whether an id belongs to another.
+ */
+export async function findChartClient(
+  userId: string,
+  chartId: string,
+): Promise<string | null> {
+  const rows = await getDb()
+    .select({ clientId: birthProfiles.clientId })
+    .from(chartCalculations)
+    .innerJoin(
+      birthProfiles,
+      and(
+        eq(birthProfiles.id, chartCalculations.birthProfileId),
+        eq(birthProfiles.userId, chartCalculations.userId),
+      ),
+    )
+    .where(and(eq(chartCalculations.id, chartId), eq(chartCalculations.userId, userId)))
+    .limit(1);
+
+  return rows[0]?.clientId ?? null;
+}
+
 /** How many charts are stored, for deciding whether hydration has work to do. */
 export async function countCharts(userId: string): Promise<number> {
   const rows = await getDb()
