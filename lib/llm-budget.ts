@@ -69,7 +69,7 @@ import {
   type SharedLlmCounts,
 } from "@/lib/db/llm-budget-counters";
 import { sessionFromRequest } from "@/lib/identity/require-session";
-import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY } from "@/lib/llm-budget-tiers";
+import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY, PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { clientKey } from "@/lib/rate-limiter";
 
 export type LlmRouteKey =
@@ -93,6 +93,12 @@ type LlmBudgetConfig = {
   perCallerPerDay: number;
   /** Paid calls one signed-out address may make in one UTC day. */
   perAnonPerDay: number;
+  /**
+   * Paid calls one caller, signed in or not, may make in one UTC week
+   * (Monday to Sunday), on top of the daily allowances. Only palm reading
+   * has one; see PALM_READINGS_PER_WEEK.
+   */
+  perCallerPerWeek?: number;
 };
 
 /*
@@ -381,6 +387,9 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perDay: 100,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
+    /* The owner's hard cap, 2026-11-02: two readings a week for anyone. The
+       daily numbers above still bound a bad day across every caller. */
+    perCallerPerWeek: PALM_READINGS_PER_WEEK,
   },
   "/api/palm-reading/ask": {
     perDay: 1500,
@@ -436,6 +445,35 @@ function rollOver(now: number) {
     counters.clear();
     countersDay = day;
   }
+  const week = utcWeekStart(now);
+  if (week !== weeklyCountersWeek) {
+    weeklyCounters.clear();
+    weeklyCountersWeek = week;
+  }
+}
+
+/*
+ * The weekly allowance (perCallerPerWeek), counted in the same table as the
+ * daily ones: a row keyed by the week's Monday instead of the day, under the
+ * route's name with WEEKLY_SUFFIX, so it can never be read as a daily count.
+ * The prune keeps seven days of rows, and a Monday is at most six days old
+ * while its week runs, so the weekly rows outlive their week and no longer.
+ */
+const WEEKLY_SUFFIX = "#week";
+
+/** This instance's view of the weekly counts, for the current UTC week only. */
+const weeklyCounters = new Map<string, number>();
+let weeklyCountersWeek = -1;
+
+/** The day number of the UTC Monday that starts `now`'s week. Day 0 was a Thursday. */
+function utcWeekStart(now: number) {
+  const day = utcDayNumber(now);
+  return day - ((day + 3) % 7);
+}
+
+function secondsUntilNextUtcWeek(now: number) {
+  const nextMonday = (utcWeekStart(now) + 7) * MS_PER_DAY;
+  return Math.max(1, Math.ceil((nextMonday - now) / 1000));
 }
 
 /**
@@ -446,8 +484,12 @@ function rollOver(now: number) {
  * again tomorrow" is the wrong thing to tell someone whose actual position is
  * "sign in and carry on". The routes pass this through to the client so the
  * refusal can read as an invitation rather than a wall.
+ *
+ * `weekly` is the per-caller weekly cap (perCallerPerWeek), which signing in
+ * does not lift, so it must not read as that invitation either. Its
+ * retryAfterSeconds runs to the next UTC Monday, not to midnight.
  */
-export type LlmBudgetScope = "global" | "caller" | "anonymous";
+export type LlmBudgetScope = "global" | "caller" | "anonymous" | "weekly";
 
 export type LlmBudgetResult =
   | { allowed: true; remaining: number; callerRemaining: number }
@@ -458,7 +500,11 @@ export type LlmBudgetResult =
     };
 
 function refuse(scope: LlmBudgetScope, now: number): LlmBudgetResult {
-  return { allowed: false, scope, retryAfterSeconds: secondsUntilUtcMidnight(now) };
+  return {
+    allowed: false,
+    scope,
+    retryAfterSeconds: scope === "weekly" ? secondsUntilNextUtcWeek(now) : secondsUntilUtcMidnight(now),
+  };
 }
 
 /**
@@ -559,16 +605,29 @@ export async function consumeLlmBudget(
     return refuse(callerScope, now);
   }
 
+  /* Checked before anything is reserved, so a caller who has had this week's
+     readings stops adding to today's totals -- which bound every caller's
+     day, not only theirs. */
+  const weeklyLimit = config.perCallerPerWeek;
+  const localWeekly = weeklyCounters.get(callerKey) ?? 0;
+  if (weeklyLimit !== undefined && localWeekly >= weeklyLimit) {
+    return refuse("weekly", now);
+  }
+
   /* Reserved locally before the await, so that concurrent calls on this
      instance cannot all pass the check above on the same stale reading, and so
      the ceiling still exists at all if the round trip below never happens. */
   counters.set(globalKey, localGlobal + 1);
   counters.set(callerKey, localCaller + 1);
+  if (weeklyLimit !== undefined) weeklyCounters.set(callerKey, localWeekly + 1);
 
+  /* With a weekly cap, what this caller has left is the smaller of the two. */
+  const weeklyRemaining = (used: number) =>
+    weeklyLimit === undefined ? Number.POSITIVE_INFINITY : weeklyLimit - used;
   const localResult: LlmBudgetResult = {
     allowed: true,
     remaining: config.perDay - localGlobal - 1,
-    callerRemaining: callerLimit - localCaller - 1,
+    callerRemaining: Math.min(callerLimit - localCaller - 1, weeklyRemaining(localWeekly + 1)),
   };
 
   if (!isSharedLlmCounterConfigured() || now < sharedUnavailableUntil) {
@@ -577,8 +636,18 @@ export async function consumeLlmBudget(
 
   const day = utcDayNumber(now);
   let shared: SharedLlmCounts;
+  let sharedWeekly: number | undefined;
   try {
-    shared = await bumpSharedLlmCounters(utcDayKey(day), route, caller.key);
+    /* Both rows in one round trip's time. The weekly row's own route total
+       ("*") comes along with the upsert and is a free count of the week. */
+    const [daily, weekly] = await Promise.all([
+      bumpSharedLlmCounters(utcDayKey(day), route, caller.key),
+      weeklyLimit === undefined
+        ? Promise.resolve(undefined)
+        : bumpSharedLlmCounters(utcDayKey(utcWeekStart(now)), `${route}${WEEKLY_SUFFIX}`, caller.key),
+    ]);
+    shared = daily;
+    sharedWeekly = weekly?.caller;
   } catch (error) {
     sharedUnavailableUntil = now + SHARED_OUTAGE_COOLDOWN_MS;
     console.warn(JSON.stringify({
@@ -602,6 +671,9 @@ export async function consumeLlmBudget(
      instance stops asking. */
   counters.set(globalKey, Math.max(counters.get(globalKey) ?? 0, shared.routeTotal));
   counters.set(callerKey, Math.max(counters.get(callerKey) ?? 0, shared.caller));
+  if (sharedWeekly !== undefined) {
+    weeklyCounters.set(callerKey, Math.max(weeklyCounters.get(callerKey) ?? 0, sharedWeekly));
+  }
 
   /* Strictly greater, because the returned counts already include this call. */
   if (shared.routeTotal > config.perDay) {
@@ -610,11 +682,14 @@ export async function consumeLlmBudget(
   if (shared.caller > callerLimit) {
     return refuse(callerScope, now);
   }
+  if (weeklyLimit !== undefined && sharedWeekly !== undefined && sharedWeekly > weeklyLimit) {
+    return refuse("weekly", now);
+  }
 
   return {
     allowed: true,
     remaining: config.perDay - shared.routeTotal,
-    callerRemaining: callerLimit - shared.caller,
+    callerRemaining: Math.min(callerLimit - shared.caller, weeklyRemaining(sharedWeekly ?? localWeekly + 1)),
   };
 }
 
@@ -639,6 +714,8 @@ export function readLlmBudgetUsage(route: LlmRouteKey, now: number = Date.now())
 export function __resetLlmBudgetForTests() {
   counters.clear();
   countersDay = -1;
+  weeklyCounters.clear();
+  weeklyCountersWeek = -1;
   sharedUnavailableUntil = 0;
   prunedDay = -1;
 }

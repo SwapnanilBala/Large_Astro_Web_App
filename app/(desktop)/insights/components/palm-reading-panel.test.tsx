@@ -125,6 +125,33 @@ const sentBody = () =>
   JSON.parse(String((vi.mocked(fetch).mock.calls[0][1] as RequestInit).body)) as Record<string, unknown>;
 
 describe("PalmReadingPanel", () => {
+  it("says when the week's two readings are used, and when the next one opens", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm();
+    await act(async () => {
+      answer(
+        new Response(
+          JSON.stringify({
+            error: {
+              code: "RATE_LIMITED",
+              message: "You have had this week's 2 palm readings. Your next one opens on Monday.",
+              details: { scope: "weekly", retryAfterSeconds: 129600, resetsAt: "2026-09-14T00:00:00.000Z" },
+            },
+          }),
+          { status: 429, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+    });
+    const opens = new Date("2026-09-14T00:00:00.000Z").toLocaleDateString("en-US", {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+    expect(
+      await screen.findByText(`You've had this week's 2 palm readings. Your next one opens on ${opens}.`),
+    ).toBeInTheDocument();
+  });
+
   it("asks whose hand it is, and sends no hand rule until the reader says", async () => {
     setReducedMotion(true);
     await analyzeAPalm(() => {

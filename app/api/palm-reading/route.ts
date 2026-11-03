@@ -3,6 +3,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
+import { PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { classicalHandSection } from "@/lib/palm-readings/classical-hand";
 import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
 import { shapePalmReading } from "@/lib/palm-readings/reading-shape";
@@ -720,14 +721,25 @@ export async function POST(request: NextRequest) {
         event: "llm_budget_exhausted",
         scope: budget.scope,
       }));
+      /* The weekly cap is the one a reader will usually meet first, and the
+         palm panel words it in the reader's language from `scope` and
+         `resetsAt`; this English is for anything else that reads the route. */
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
-        budget.scope === "anonymous"
-          ? "Sign in to read another palm today."
-          : budget.scope === "caller"
-            ? "You have reached today's palm reading limit. Please try again tomorrow."
-            : "Palm reading is at capacity for today. Please try again tomorrow.",
-        { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
+        budget.scope === "weekly"
+          ? `You have had this week's ${PALM_READINGS_PER_WEEK} palm readings. Your next one opens on Monday.`
+          : budget.scope === "anonymous"
+            ? "Sign in to read another palm today."
+            : budget.scope === "caller"
+              ? "You have reached today's palm reading limit. Please try again tomorrow."
+              : "Palm reading is at capacity for today. Please try again tomorrow.",
+        {
+          details: {
+            retryAfterSeconds: budget.retryAfterSeconds,
+            scope: budget.scope,
+            resetsAt: new Date(Date.now() + budget.retryAfterSeconds * 1000).toISOString(),
+          },
+        },
       );
     }
 

@@ -58,6 +58,10 @@ const PER_ADDRESS = 10;
 /* Palm reading's whole-deployment ceiling for one day. */
 const PALM_ROUTE_TOTAL = 100;
 
+/* The PDF report's, for the tests about the daily ceiling that palm reading's
+   weekly cap of two would now cut short. */
+const STORY_PROSE_ROUTE_TOTAL = 60;
+
 function requestFrom(ip: string, path = "/api/chart/domain-brief") {
   return new Request(`https://example.test${path}`, {
     headers: { "x-real-ip": ip },
@@ -138,17 +142,6 @@ describe("the signed-out tier", () => {
     expect(refused.scope).toBe("anonymous");
   });
 
-  it("gives palm reading the same allowance, on the dearest route of them all", async () => {
-    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
-    for (let i = 0; i < PER_ADDRESS; i += 1) {
-      expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
-    }
-
-    const refused = await consumeLlmBudget("/api/palm-reading", caller, NOON);
-    expect(refused.allowed).toBe(false);
-    if (refused.allowed) throw new Error("unreachable");
-    expect(refused.scope).toBe("anonymous");
-  });
 
   it("gives Ask the classics fifteen questions signed out and twenty-five signed in", async () => {
     const route = "/api/chart/ask-classics";
@@ -176,31 +169,31 @@ describe("the signed-out tier", () => {
   });
 
   it("hands the same person the full allowance once they sign in", async () => {
-    const address = requestFrom("203.0.113.5", "/api/palm-reading");
+    const address = requestFrom("203.0.113.5", "/api/chart/story-prose");
     for (let i = 0; i < PER_ADDRESS; i += 1) {
-      await consumeLlmBudget("/api/palm-reading", address, NOON);
+      await consumeLlmBudget("/api/chart/story-prose", address, NOON);
     }
-    expect((await consumeLlmBudget("/api/palm-reading", address, NOON)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/chart/story-prose", address, NOON)).allowed).toBe(false);
 
     /* Signing in is a different bucket, not a top-up of the spent one: the
        taste is what it costs the funnel, and it is not deducted twice. */
-    const account = signedInAs("user-a", "/api/palm-reading");
+    const account = signedInAs("user-a", "/api/chart/story-prose");
     for (let i = 0; i < PER_ACCOUNT; i += 1) {
-      expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
+      expect((await consumeLlmBudget("/api/chart/story-prose", account, NOON)).allowed).toBe(true);
     }
-    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/chart/story-prose", account, NOON)).allowed).toBe(false);
   });
 
   it("does not let a campus NAT spend an account's allowance, or the reverse", async () => {
     /* Everyone here shares 203.0.113.1 -- the address `signedInAs` uses. */
-    const account = signedInAs("user-a", "/api/palm-reading");
+    const account = signedInAs("user-a", "/api/chart/story-prose");
     for (let i = 0; i < PER_ACCOUNT; i += 1) {
-      await consumeLlmBudget("/api/palm-reading", account, NOON);
+      await consumeLlmBudget("/api/chart/story-prose", account, NOON);
     }
-    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/chart/story-prose", account, NOON)).allowed).toBe(false);
 
-    const neighbour = requestFrom("203.0.113.1", "/api/palm-reading");
-    expect((await consumeLlmBudget("/api/palm-reading", neighbour, NOON)).allowed).toBe(true);
+    const neighbour = requestFrom("203.0.113.1", "/api/chart/story-prose");
+    expect((await consumeLlmBudget("/api/chart/story-prose", neighbour, NOON)).allowed).toBe(true);
   });
 
   it("reports the remaining allowance of the tier that applies", async () => {
@@ -217,9 +210,75 @@ describe("the signed-out tier", () => {
   });
 });
 
+/*
+ * Palm reading's weekly cap: two readings a UTC week (Monday to Sunday) for
+ * anyone, signed in or not, the owner's call of 2026-11-02. NOON is a
+ * Saturday, so its week began on Monday 2026-09-07 and the next one opens on
+ * Monday 2026-09-14 at 00:00 UTC, 36 hours later.
+ */
+describe("palm reading's weekly cap", () => {
+  const NEXT_MONDAY = Date.UTC(2026, 8, 14, 0, 0, 0);
+
+  it("lets a visitor have two readings a week, then names the week as the limit", async () => {
+    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+    expect(await consumeLlmBudget("/api/palm-reading", caller, NOON)).toMatchObject({ allowed: true, callerRemaining: 1 });
+    expect(await consumeLlmBudget("/api/palm-reading", caller, NOON)).toMatchObject({ allowed: true, callerRemaining: 0 });
+
+    const refused = await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    expect(refused.allowed).toBe(false);
+    if (refused.allowed) throw new Error("unreachable");
+    /* Not "anonymous": signing in would not lift it, so it must not raise the
+       sign-in prompt that scope stands for. */
+    expect(refused.scope).toBe("weekly");
+    expect(refused.retryAfterSeconds).toBe((NEXT_MONDAY - NOON) / 1000);
+  });
+
+  it("gives an account the same two", async () => {
+    const account = signedInAs("user-a", "/api/palm-reading");
+    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
+    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
+    expect(await consumeLlmBudget("/api/palm-reading", account, NOON)).toMatchObject({ allowed: false, scope: "weekly" });
+  });
+
+  it("does not reset at midnight, only on Monday", async () => {
+    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+    await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    await consumeLlmBudget("/api/palm-reading", caller, NOON);
+
+    /* Sunday: a new day, the same week. */
+    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_MONDAY - 1)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_MONDAY)).allowed).toBe(true);
+  });
+
+  it("keeps one caller's spent week out of everyone else's", async () => {
+    const spent = requestFrom("203.0.113.5", "/api/palm-reading");
+    await consumeLlmBudget("/api/palm-reading", spent, NOON);
+    await consumeLlmBudget("/api/palm-reading", spent, NOON);
+    expect((await consumeLlmBudget("/api/palm-reading", spent, NOON)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.6"), NOON)).allowed).toBe(true);
+  });
+
+  it("does not let a caller past their week add to the day's route total", async () => {
+    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+    for (let i = 0; i < 10; i += 1) {
+      await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    }
+    /* Only the two readings count; the day's 100 bounds every caller. */
+    expect(readLlmBudgetUsage("/api/palm-reading", NOON).used).toBe(2);
+  });
+
+  it("leaves the other routes on their daily allowances", async () => {
+    const caller = requestFrom("203.0.113.5");
+    for (let i = 0; i < PER_ADDRESS; i += 1) {
+      expect((await consumeLlmBudget("/api/chart/domain-brief", caller, NOON)).allowed).toBe(true);
+    }
+  });
+});
+
 describe("route ceiling", () => {
   it("refuses a caller who has never called once the route total is spent", async () => {
-    /* It takes ceil(PALM_ROUTE_TOTAL / PER_ACCOUNT) distinct accounts to spend
+    /* It takes ceil(STORY_PROSE_ROUTE_TOTAL / PER_ACCOUNT) distinct accounts to spend
        the whole route budget without any one of them tripping its per-caller
        limit. This is the distributed case the per-IP sliding window cannot see
        at all.
@@ -228,24 +287,24 @@ describe("route ceiling", () => {
        each": that arithmetic was true only while the per-account number was a
        divisor of 200, and it broke the day the tier was raised. The two
        literal 200s below this comment survived that lesson and broke the day
-       the route total was halved; they are PALM_ROUTE_TOTAL now too. */
+       the route total was halved; they are STORY_PROSE_ROUTE_TOTAL now too. */
     let spent = 0;
-    for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
-      const caller = signedInAs(`user-${n}`, "/api/palm-reading");
-      const take = Math.min(PER_ACCOUNT, PALM_ROUTE_TOTAL - spent);
+    for (let n = 0; spent < STORY_PROSE_ROUTE_TOTAL; n += 1) {
+      const caller = signedInAs(`user-${n}`, "/api/chart/story-prose");
+      const take = Math.min(PER_ACCOUNT, STORY_PROSE_ROUTE_TOTAL - spent);
       for (let i = 0; i < take; i += 1) {
-        expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+        expect((await consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
         spent += 1;
       }
     }
 
-    expect(readLlmBudgetUsage("/api/palm-reading", NOON)).toEqual({
-      used: PALM_ROUTE_TOTAL,
-      limit: PALM_ROUTE_TOTAL,
+    expect(readLlmBudgetUsage("/api/chart/story-prose", NOON)).toEqual({
+      used: STORY_PROSE_ROUTE_TOTAL,
+      limit: STORY_PROSE_ROUTE_TOTAL,
     });
 
-    const fresh = signedInAs("user-late", "/api/palm-reading");
-    const refused = await consumeLlmBudget("/api/palm-reading", fresh, NOON);
+    const fresh = signedInAs("user-late", "/api/chart/story-prose");
+    const refused = await consumeLlmBudget("/api/chart/story-prose", fresh, NOON);
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
     expect(refused.scope).toBe("global");
@@ -323,13 +382,13 @@ describe("caller identity", () => {
 
   it("treats a cookie that resolves to nobody as signed out", async () => {
     /* An expired or forged token must not buy the larger allowance. */
-    const forged = new Request("https://example.test/api/palm-reading", {
+    const forged = new Request("https://example.test/api/chart/story-prose", {
       headers: { cookie: "astro_session=not-a-real-token", "x-real-ip": "203.0.113.5" },
     });
     for (let i = 0; i < PER_ADDRESS; i += 1) {
-      expect((await consumeLlmBudget("/api/palm-reading", forged, NOON)).allowed).toBe(true);
+      expect((await consumeLlmBudget("/api/chart/story-prose", forged, NOON)).allowed).toBe(true);
     }
-    const refused = await consumeLlmBudget("/api/palm-reading", forged, NOON);
+    const refused = await consumeLlmBudget("/api/chart/story-prose", forged, NOON);
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
     expect(refused.scope).toBe("anonymous");

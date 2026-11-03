@@ -7,7 +7,8 @@ import { AlertTriangle } from "lucide-react";
 import type { DrawingUtils, HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
 import { MEDIAPIPE_HAND_MODEL_URL, MEDIAPIPE_WASM_BASE } from "@/lib/palm-readings/mediapipe";
-import { useRouteMessages } from "@/lib/i18n-context";
+import { LOCALE_TAGS, useRouteMessages, useTranslation } from "@/lib/i18n-context";
+import { PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { announceIfFreeUsageExhausted } from "@/lib/free-usage-store";
 import { usePrefersReducedMotion } from "@/lib/use-media-query";
 import palmMessages from "@/messages/en.palm.json";
@@ -251,6 +252,7 @@ type PalmReadingPanelProps = {
 
 export default function PalmReadingPanel({ jyotishContext, initialReader = "unspecified" }: PalmReadingPanelProps = {}) {
   const tr = useRouteMessages(palmMessages);
+  const { language } = useTranslation();
 
   /* ── state ── */
   const [phase, setPhase] = useState<Phase>("idle");
@@ -549,6 +551,19 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
            left on screen once it has been dismissed. */
         void announceIfFreeUsageExhausted(res, "palmReading");
         const err = await res.json();
+        /* The weekly cap (PALM_READINGS_PER_WEEK) is the refusal a reader
+           meets most, so it is worded here, in their language, with the date
+           the next reading opens; the route's English covers the rest. */
+        const details = err.error?.details;
+        if (details?.scope === "weekly") {
+          const opens = new Date(details.resetsAt ?? Date.now() + (details.retryAfterSeconds ?? 0) * 1000);
+          throw new Error(
+            tr("palm.errors.weeklyLimit", {
+              count: String(PALM_READINGS_PER_WEEK),
+              date: opens.toLocaleDateString(LOCALE_TAGS[language], { weekday: "long", day: "numeric", month: "long" }),
+            }),
+          );
+        }
         throw new Error(
           err.error?.message || err.detail || tr("palm.errors.analysisFailed"),
         );

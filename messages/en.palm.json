@@ -139,7 +139,8 @@
       "unsupportedType": "Please upload a JPEG, PNG, or WebP image.",
       "analysisFailed": "Analysis failed",
       "generic": "Something went wrong",
-      "saveFailed": "Failed to save reading"
+      "saveFailed": "Failed to save reading",
+      "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}."
     },
     "history": {
       "kicker": "Your archive",

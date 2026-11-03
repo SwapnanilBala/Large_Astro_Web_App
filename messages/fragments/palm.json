@@ -1,0 +1,44 @@
+{
+  "es": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "Ya has hecho las {count} lecturas de la palma de esta semana. La próxima estará disponible el {date}."
+      }
+    }
+  },
+  "fr": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "Vous avez déjà eu les {count} lectures de la paume de cette semaine. La prochaine sera disponible le {date}."
+      }
+    }
+  },
+  "it": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "Hai già fatto le {count} letture della mano di questa settimana. La prossima sarà disponibile {date}."
+      }
+    }
+  },
+  "de": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "Du hast die {count} Handdeutungen dieser Woche schon genutzt. Die nächste ist ab {date} möglich."
+      }
+    }
+  },
+  "hi": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "इस सप्ताह के आपके {count} हस्तरेखा पठन पूरे हो चुके हैं। अगला पठन {date} से उपलब्ध होगा।"
+      }
+    }
+  },
+  "bn": {
+    "palm": {
+      "errors": {
+        "weeklyLimit": "এই সপ্তাহের আপনার {count}টি হস্তরেখা পাঠ শেষ হয়েছে। পরের পাঠ {date} থেকে পাওয়া যাবে।"
+      }
+    }
+  }
+}

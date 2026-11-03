@@ -91,8 +91,11 @@ vi.mock("@/lib/identity/session", () => ({
 const PER_ACCOUNT = 20;
 const PER_ADDRESS = 10;
 
-/* Palm reading's whole-deployment ceiling for one day. */
-const PALM_ROUTE_TOTAL = 100;
+/* The PDF report's whole-deployment ceiling for one day. These tests are about
+   the daily counter, and palm reading -- the route they used to run on -- now
+   also has a weekly cap of two per caller, which no daily number here can
+   reach past; the PDF report has the same per-caller allowances and none. */
+const STORY_PROSE_ROUTE_TOTAL = 60;
 
 /* Calls each instance puts in flight in the race below: enough that the two
    together exceed the per-account ceiling, while each instance's own memory
@@ -124,13 +127,13 @@ function seed(route: string, caller: string, count: number, utcDay = TODAY) {
   rows.set(rowKey(utcDay, route, caller), count);
 }
 
-function requestFrom(ip: string, path = "/api/palm-reading") {
+function requestFrom(ip: string, path = "/api/chart/story-prose") {
   return new Request(`https://example.test${path}`, {
     headers: { "x-real-ip": ip },
   });
 }
 
-function signedInAs(userId: string, path = "/api/palm-reading") {
+function signedInAs(userId: string, path = "/api/chart/story-prose") {
   return new Request(`https://example.test${path}`, {
     headers: { cookie: `astro_session=${TOKEN_PREFIX}${userId}`, "x-real-ip": "203.0.113.1" },
   });
@@ -169,29 +172,29 @@ afterEach(() => {
 describe("one ceiling across instances", () => {
   it("refuses a fresh instance once another has spent the route total", async () => {
     const first = await newInstance();
-    /* Enough accounts to spend palm reading's whole day with nobody tripping
+    /* Enough accounts to spend the PDF report's whole day with nobody tripping
        their own limit — the distributed case, now spent on one instance.
-       Derived from PER_ACCOUNT and PALM_ROUTE_TOTAL: the old "20 accounts at
+       Derived from PER_ACCOUNT and STORY_PROSE_ROUTE_TOTAL: the old "20 accounts at
        10 each" only held while the per-account number divided the total, and
        every literal in this file has now outlived the number it described at
        least once. */
     let spent = 0;
-    for (let n = 0; spent < PALM_ROUTE_TOTAL; n += 1) {
+    for (let n = 0; spent < STORY_PROSE_ROUTE_TOTAL; n += 1) {
       const caller = signedInAs(`user-${n}`);
-      const take = Math.min(PER_ACCOUNT, PALM_ROUTE_TOTAL - spent);
+      const take = Math.min(PER_ACCOUNT, STORY_PROSE_ROUTE_TOTAL - spent);
       for (let i = 0; i < take; i += 1) {
-        expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+        expect((await first.consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
         spent += 1;
       }
     }
-    expect(rows.get(rowKey(TODAY, "/api/palm-reading", ROUTE_TOTAL_CALLER))).toBe(PALM_ROUTE_TOTAL);
+    expect(rows.get(rowKey(TODAY, "/api/chart/story-prose", ROUTE_TOTAL_CALLER))).toBe(STORY_PROSE_ROUTE_TOTAL);
 
     /* The instance that has counted nothing. Under the old per-instance
        ceiling this was a second whole route total; the table is what stops
        it. */
     const second = await newInstance();
     const refused = await second.consumeLlmBudget(
-      "/api/palm-reading",
+      "/api/chart/story-prose",
       signedInAs("user-late"),
       NOON,
     );
@@ -205,16 +208,16 @@ describe("one ceiling across instances", () => {
 
     const first = await newInstance();
     for (let i = 0; i < 6; i += 1) {
-      expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+      expect((await first.consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
     }
 
     /* Only the unspent allowance remains on a different instance. */
     const second = await newInstance();
     for (let i = 0; i < PER_ACCOUNT - 6; i += 1) {
-      expect((await second.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+      expect((await second.consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
     }
 
-    const refused = await second.consumeLlmBudget("/api/palm-reading", caller, NOON);
+    const refused = await second.consumeLlmBudget("/api/chart/story-prose", caller, NOON);
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
     expect(refused.scope).toBe("caller");
@@ -223,15 +226,15 @@ describe("one ceiling across instances", () => {
   it("reports remaining from the shared total, not from what it spent itself", async () => {
     /* Three quarters of the route's day already spent by other instances,
        while this one has counted nothing. */
-    const spentElsewhere = Math.floor(PALM_ROUTE_TOTAL * 0.75);
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, spentElsewhere);
+    const spentElsewhere = Math.floor(STORY_PROSE_ROUTE_TOTAL * 0.75);
+    seed("/api/chart/story-prose", ROUTE_TOTAL_CALLER, spentElsewhere);
 
     const instance = await newInstance();
-    const result = await instance.consumeLlmBudget("/api/palm-reading", signedInAs("user-a"), NOON);
+    const result = await instance.consumeLlmBudget("/api/chart/story-prose", signedInAs("user-a"), NOON);
 
     expect(result).toEqual({
       allowed: true,
-      remaining: PALM_ROUTE_TOTAL - spentElsewhere - 1,
+      remaining: STORY_PROSE_ROUTE_TOTAL - spentElsewhere - 1,
       callerRemaining: PER_ACCOUNT - 1,
     });
   });
@@ -240,13 +243,13 @@ describe("one ceiling across instances", () => {
     const instance = await newInstance();
     const caller = requestFrom("203.0.113.5");
 
-    await instance.consumeLlmBudget("/api/palm-reading", caller, NOON);
-    await instance.consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY);
+    await instance.consumeLlmBudget("/api/chart/story-prose", caller, NOON);
+    await instance.consumeLlmBudget("/api/chart/story-prose", caller, NEXT_DAY);
 
     expect(bumpCalls.map((call) => call.utcDay)).toEqual(["2026-09-12", "2026-09-13"]);
     /* A new day is a new row, so the allowance is whole again. The caller is
        namespaced `ip:` so an address and an account can never share a row. */
-    expect(rows.get(rowKey("2026-09-13", "/api/palm-reading", "ip:203.0.113.5"))).toBe(1);
+    expect(rows.get(rowKey("2026-09-13", "/api/chart/story-prose", "ip:203.0.113.5"))).toBe(1);
   });
 });
 
@@ -268,10 +271,10 @@ describe("concurrent increments", () => {
 
     const inFlight = [
       ...Array.from({ length: RACE_PER_INSTANCE }, () =>
-        first.consumeLlmBudget("/api/palm-reading", caller, NOON),
+        first.consumeLlmBudget("/api/chart/story-prose", caller, NOON),
       ),
       ...Array.from({ length: RACE_PER_INSTANCE }, () =>
-        second.consumeLlmBudget("/api/palm-reading", caller, NOON),
+        second.consumeLlmBudget("/api/chart/story-prose", caller, NOON),
       ),
     ];
 
@@ -297,7 +300,7 @@ describe("concurrent increments", () => {
     /* Two left in the day, spent by other instances. */
     /* Two short of the route total, so exactly two of the ten below can win
        however they interleave. */
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, PALM_ROUTE_TOTAL - 2);
+    seed("/api/chart/story-prose", ROUTE_TOTAL_CALLER, STORY_PROSE_ROUTE_TOTAL - 2);
 
     const instance = await newInstance();
     gate = (() => {
@@ -311,7 +314,7 @@ describe("concurrent increments", () => {
     /* Ten distinct addresses, so no per-caller limit is in play and nothing but
        the route total can refuse them. The instance's own memory says zero. */
     const inFlight = Array.from({ length: 10 }, (_unused, n) =>
-      instance.consumeLlmBudget("/api/palm-reading", requestFrom(`203.0.113.${n}`), NOON),
+      instance.consumeLlmBudget("/api/chart/story-prose", requestFrom(`203.0.113.${n}`), NOON),
     );
     await flush();
     expect(bumpCalls).toHaveLength(10);
@@ -327,17 +330,17 @@ describe("concurrent increments", () => {
   });
 
   it("stops paying for round trips once the shared counter says the route is spent", async () => {
-    seed("/api/palm-reading", ROUTE_TOTAL_CALLER, PALM_ROUTE_TOTAL);
+    seed("/api/chart/story-prose", ROUTE_TOTAL_CALLER, STORY_PROSE_ROUTE_TOTAL);
 
     const instance = await newInstance();
-    const first = await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.1"), NOON);
+    const first = await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom("203.0.113.1"), NOON);
     expect(first.allowed).toBe(false);
     expect(bumpCalls).toHaveLength(1);
 
     /* Five more callers this instance has never seen. Each one is a row the
        table would grow by if the refusal needed a query to reach. */
     for (let n = 2; n < 7; n += 1) {
-      const refused = await instance.consumeLlmBudget("/api/palm-reading", requestFrom(`203.0.113.${n}`), NOON);
+      const refused = await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom(`203.0.113.${n}`), NOON);
       expect(refused.allowed).toBe(false);
     }
     expect(bumpCalls).toHaveLength(1);
@@ -354,10 +357,10 @@ describe("when the shared counter is unreachable", () => {
 
     /* The route still works — degraded to what it was before the table. */
     for (let i = 0; i < PER_ACCOUNT; i += 1) {
-      expect((await instance.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+      expect((await instance.consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
     }
     /* And degraded is not absent: the in-memory ceiling is still a ceiling. */
-    const refused = await instance.consumeLlmBudget("/api/palm-reading", caller, NOON);
+    const refused = await instance.consumeLlmBudget("/api/chart/story-prose", caller, NOON);
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
     expect(refused.scope).toBe("caller");
@@ -372,7 +375,7 @@ describe("when the shared counter is unreachable", () => {
 
     const instance = await newInstance();
     for (let n = 0; n < 5; n += 1) {
-      await instance.consumeLlmBudget("/api/palm-reading", requestFrom(`203.0.113.${n}`), NOON);
+      await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom(`203.0.113.${n}`), NOON);
     }
     /* One attempt, then the breaker: an outage must not add a database timeout
        to the latency of every LLM request. */
@@ -385,17 +388,17 @@ describe("when the shared counter is unreachable", () => {
 
     const instance = await newInstance();
     const caller = signedInAs("user-a");
-    await instance.consumeLlmBudget("/api/palm-reading", caller, NOON);
+    await instance.consumeLlmBudget("/api/chart/story-prose", caller, NOON);
     expect(bumpCalls).toHaveLength(1);
 
     failWith = null;
-    const recovered = await instance.consumeLlmBudget("/api/palm-reading", caller, NOON + 30_000);
+    const recovered = await instance.consumeLlmBudget("/api/chart/story-prose", caller, NOON + 30_000);
     expect(bumpCalls).toHaveLength(2);
     /* The call made during the outage never reached the table, so the shared
        count starts from this one. Undercounting is the cost of degrading. */
     expect(recovered).toEqual({
       allowed: true,
-      remaining: PALM_ROUTE_TOTAL - 1,
+      remaining: STORY_PROSE_ROUTE_TOTAL - 1,
       callerRemaining: PER_ACCOUNT - 1,
     });
   });
@@ -405,12 +408,12 @@ describe("pruning spent days", () => {
   it("asks once per instance per day for anything older than a week", async () => {
     const instance = await newInstance();
     for (let n = 0; n < 5; n += 1) {
-      await instance.consumeLlmBudget("/api/palm-reading", requestFrom(`203.0.113.${n}`), NOON);
+      await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom(`203.0.113.${n}`), NOON);
     }
 
     expect(pruneCalls).toEqual(["2026-09-05"]);
 
-    await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.9"), NEXT_DAY);
+    await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom("203.0.113.9"), NEXT_DAY);
     expect(pruneCalls).toEqual(["2026-09-05", "2026-09-06"]);
   });
 
@@ -418,7 +421,7 @@ describe("pruning spent days", () => {
     pruneFailsWith = new Error("deadlock detected");
 
     const instance = await newInstance();
-    const result = await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.5"), NOON);
+    const result = await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom("203.0.113.5"), NOON);
 
     /* The delete is fire-and-forget, so a failed one must neither reach the
        caller nor escape as an unhandled rejection — which vitest fails on, so
@@ -426,9 +429,48 @@ describe("pruning spent days", () => {
     expect(pruneCalls).toEqual(["2026-09-05"]);
     expect(result).toEqual({
       allowed: true,
-      remaining: PALM_ROUTE_TOTAL - 1,
+      remaining: STORY_PROSE_ROUTE_TOTAL - 1,
       callerRemaining: PER_ADDRESS - 1,
     });
     await Promise.resolve();
+  });
+});
+
+/*
+ * Palm reading's weekly cap in the shared table: a row keyed by the week's
+ * Monday (2026-09-07 for NOON, a Saturday) under the route's name plus
+ * "#week", so a reader cannot get a third reading by landing on another
+ * instance.
+ */
+describe("palm reading's weekly row", () => {
+  const WEEK_OF_NOON = "2026-09-07";
+
+  it("carries one caller's week from instance to instance", async () => {
+    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+    const first = await newInstance();
+    expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+    const second = await newInstance();
+    expect((await second.consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY)).allowed).toBe(true);
+
+    const third = await newInstance();
+    expect(await third.consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY)).toMatchObject({
+      allowed: false,
+      scope: "weekly",
+    });
+    expect(rows.get(rowKey(WEEK_OF_NOON, "/api/palm-reading#week", "ip:203.0.113.5"))).toBe(3);
+  });
+
+  it("is a row the daily prune leaves alone while its week runs", async () => {
+    const instance = await newInstance();
+    await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.5", "/api/palm-reading"), NOON);
+    /* The prune deletes days before this one; the week's Monday is after it. */
+    expect(pruneCalls).toEqual(["2026-09-05"]);
+    expect(WEEK_OF_NOON > pruneCalls[0]).toBe(true);
+  });
+
+  it("is not written for a route without a weekly cap", async () => {
+    const instance = await newInstance();
+    await instance.consumeLlmBudget("/api/chart/story-prose", requestFrom("203.0.113.5"), NOON);
+    expect(bumpCalls.map((call) => call.route)).toEqual(["/api/chart/story-prose"]);
   });
 });
