@@ -121,6 +121,29 @@ export const authSessions = pgTable(
 );
 
 /**
+ * One-use nonces for the Android app's Google sign-in.
+ *
+ * The web flow keeps its nonce in a short-lived cookie; the app is not a
+ * browser, so the server keeps it here instead. Only the SHA-256 is stored,
+ * like a session token. A sign-in deletes its row in the same statement that
+ * checks it, so a token minted for that nonce cannot be replayed, even inside
+ * its hour of life. Rows nobody used are pruned as new ones are issued.
+ */
+export const authNonces = pgTable(
+  "auth_nonces",
+  {
+    nonceHash: varchar("nonce_hash", { length: 64 }).primaryKey(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("auth_nonces_expiry_idx").on(table.expiresAt),
+    check("auth_nonces_hash_check", sql`${table.nonceHash} ~ '^[0-9a-f]{64}$'`),
+    check("auth_nonces_window_check", sql`${table.expiresAt} > ${table.createdAt}`),
+  ],
+);
+
+/**
  * How a signed-in person likes the site drawn, so the choice follows them
  * from device to device.
  *
