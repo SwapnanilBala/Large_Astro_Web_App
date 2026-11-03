@@ -278,6 +278,27 @@ CRITICAL: omit conditional sections entirely when their inputs are absent. Never
 const HAND_RULE_GUIDELINE = `- When a [READER] line is given, the tradition reads a woman's left hand and a man's right. In dominant_hand_note, say which hand the photo shows and whether it is that hand. If it is the other hand, still give the full reading, and say so plainly and kindly in that note.`;
 
 /*
+ * Both modes. Left from right is a rule, not a judgement, and the model had
+ * it backwards: measured 2026-11-02 on one palm photo and its mirror image,
+ * Opus 5 named the hand wrongly both times ("the thumb sits on the right of
+ * the image ... this is your left palm"), and then told a man he had
+ * photographed the hand the tradition does not read for him. So the rule is
+ * stated, with the two cases that reverse it.
+ */
+const HAND_SIDE_GUIDELINE = `- Decide which hand is shown from where the thumb is, before writing dominant_hand_note. With the palm facing the camera and the fingers pointing up, a RIGHT hand has its thumb on the RIGHT side of the image and a LEFT hand has its thumb on the LEFT. This is how you see your own palm when you look at it. It reverses when the fingers point down, and when the photo shows the back of the hand rather than the palm. If the thumb is out of frame, say the hand is uncertain rather than guessing.`;
+
+/*
+ * Both modes. The reading screen, the saved readings and the comparison all
+ * draw these points over the photo, so a line in the wrong place is the most
+ * visible mistake the reading can make. Measured 2026-11-02: one reading put
+ * all four lines in the lower third of the palm, below the creases they
+ * named. The points are fractions of the whole image, and a palm photo is
+ * mostly fingers and background, so the model is asked to find the
+ * landmarks first and to keep the lines in the order the hand has them.
+ */
+const LINE_COORDINATES_GUIDELINE = `- line_coordinates are fractions of the WHOLE image, fingers, wrist and background included, not of the palm alone. Find the landmarks first: the creases at the base of the fingers, the wrist, the web between thumb and index finger, and the edge of the palm below the little finger. Then trace each line where you see it: the heart line runs across the upper palm, just below the finger bases, from the little-finger edge towards the index or middle finger; the head line starts at or near the thumb-index web and crosses the palm below the heart line; the life line starts near the same web and curves down around the base of the thumb towards the wrist; the fate line rises from near the wrist towards the middle finger. Each point must sit on the crease itself. Check before answering that the heart line's points are higher in the image (smaller y) than the head line's.`;
+
+/*
  * Both modes. The photo is the one input here that nothing checks before the
  * model reads it, and it can carry writing: on the palm, on a card held up
  * beside it, in a screenshot. Writing is something seen, like a ring or a
@@ -297,10 +318,12 @@ const STANDARD_GUIDELINES = `Important guidelines:
 - For relationships_and_emotional, be empathetic and constructive.
 - For health_and_vitality, focus on wellness and self-care rather than medical diagnoses.
 - ALWAYS assess image_quality first. Be honest: if the image is blurry, poorly lit, partial, or fingers are cropped, list the issues and set reliable_for_reading=false when rating is "poor". Still produce the full reading, but temper the interpretive depth for poor images.
+${HAND_SIDE_GUIDELINE}
 ${HAND_RULE_GUIDELINE}
 ${IMAGE_TEXT_GUIDELINE}
 - ALWAYS provide line_confidence for all four lines. Lines that are "not_detected" must still appear in the "lines" section, with description and interpretation noting the absence.
 - ALWAYS provide line_coordinates as normalized [0,1] points (origin top-left). Minimum 3 points per detected line (start, middle, end); up to 6 for clearly curved lines. OMIT a line's coordinate key entirely when its visibility is "not_detected".
+${LINE_COORDINATES_GUIDELINE}
 - If the image is unclear or not a palm, still return the JSON structure but note the limitation in the relevant fields and in image_quality.`;
 
 const CLASSICAL_GUIDELINES = `Important guidelines (Hasta Samudrika Shastra mode):
@@ -310,10 +333,12 @@ const CLASSICAL_GUIDELINES = `Important guidelines (Hasta Samudrika Shastra mode
 - Frame interpretations through the classical lens of dharma, karma, ayu, artha, and moksha rather than modern psychology.
 - The life line (Ayu Rekha) traditionally indicates pranic vitality — explicitly note it does NOT fix lifespan.
 - ALWAYS assess image_quality first. Be honest about blur, lighting, partial palms, or cropped fingers; set reliable_for_reading=false when rating is "poor".
+${HAND_SIDE_GUIDELINE}
 ${HAND_RULE_GUIDELINE}
 ${IMAGE_TEXT_GUIDELINE}
 - ALWAYS provide line_confidence for all four lines. "not_detected" lines must still appear in "lines" with the absence noted.
 - ALWAYS provide line_coordinates as normalized [0,1] points (origin top-left). 3-6 points per detected line. OMIT a line's coordinate key entirely when its visibility is "not_detected".
+${LINE_COORDINATES_GUIDELINE}
 - classical_framework_notes MUST be included in this mode.`;
 
 /*
