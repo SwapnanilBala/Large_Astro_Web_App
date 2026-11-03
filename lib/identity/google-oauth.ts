@@ -17,8 +17,8 @@ import "server-only";
  *   nonce    — the id_token was minted for this sign-in, not replayed
  */
 
-import { createHash, randomBytes } from "node:crypto";
-import { createRemoteJWKSet, jwtVerify } from "jose";
+import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
+import { createRemoteJWKSet, jwtVerify, type JWTVerifyGetKey } from "jose";
 
 const AUTHORIZE_ENDPOINT = "https://accounts.google.com/o/oauth2/v2/auth";
 const TOKEN_ENDPOINT = "https://oauth2.googleapis.com/token";
@@ -156,17 +156,67 @@ export async function exchangeCode(
     throw new Error("Google token response carried no id_token");
   }
 
-  const { payload: claims } = await jwtVerify(payload.id_token, jwks, {
-    issuer: ISSUERS,
+  return verifyGoogleIdToken(payload.id_token, {
     audience: config.clientId,
+    expectedNonce,
+  });
+}
+
+/** Where the signing keys come from; a local key set in the tests. */
+export type GoogleKeySource = JWTVerifyGetKey;
+
+export type VerifyGoogleIdTokenOptions = {
+  /** The client the token must be minted for: AUTH_GOOGLE_ID, and only it. */
+  audience: string;
+  /** The nonce this sign-in sent; the token must carry exactly it. */
+  expectedNonce: string;
+  /**
+   * When given, `azp` must be one of these. The Android flow passes the
+   * Android client ids: Google mints a phone's token with `aud` set to the web
+   * client (the app's serverClientId) and `azp` set to the Android client that
+   * asked, and it only hands that one to this package with this signature.
+   */
+  authorizedParties?: readonly string[];
+  /** Defaults to Google's published keys, cached and refetched on rotation. */
+  keys?: GoogleKeySource;
+};
+
+/**
+ * Verify a Google id_token and return the identity in it.
+ *
+ * One check for both ways in: the web callback, which gets its token from the
+ * token endpoint, and the Android app, which gets its token on the phone and
+ * posts it. Throws on any failure; callers answer every throw the same coarse
+ * way.
+ */
+export async function verifyGoogleIdToken(
+  idToken: string,
+  options: VerifyGoogleIdTokenOptions,
+): Promise<GoogleIdentity> {
+  const { payload: claims } = await jwtVerify(idToken, options.keys ?? jwks, {
+    issuer: ISSUERS,
+    audience: options.audience,
     algorithms: ["RS256"],
     /* Google's own leeway guidance; without a bound, a clock skew of hours
        would be accepted. */
     clockTolerance: 60,
+    /* jose checks `exp` only when it is present. A token without one would
+       never expire, so it is required rather than trusted to be there. */
+    requiredClaims: ["exp", "iat", "sub"],
   });
 
-  if (typeof claims.nonce !== "string" || claims.nonce !== expectedNonce) {
+  if (
+    typeof claims.nonce !== "string" ||
+    !constantTimeEquals(claims.nonce, options.expectedNonce)
+  ) {
     throw new Error("Google id_token nonce did not match this sign-in");
+  }
+
+  if (options.authorizedParties) {
+    const azp = typeof claims.azp === "string" ? claims.azp : "";
+    if (!azp || !options.authorizedParties.includes(azp)) {
+      throw new Error("Google id_token was issued to a client this app does not list");
+    }
   }
 
   const subject = typeof claims.sub === "string" ? claims.sub : "";
@@ -186,6 +236,39 @@ export async function exchangeCode(
     emailVerified,
     name: typeof claims.name === "string" ? claims.name : null,
   };
+}
+
+function constantTimeEquals(a: string, b: string): boolean {
+  const left = Buffer.from(a);
+  const right = Buffer.from(b);
+  if (left.length !== right.length) return false;
+  return timingSafeEqual(left, right);
+}
+
+export type GoogleAndroidConfig = {
+  /** The web client id. The phone asks Google for tokens minted for it. */
+  audience: string;
+  /** The Android client ids (debug, release, Play signing). */
+  authorizedParties: string[];
+};
+
+/**
+ * What the Android sign-in needs, or null when it is not set up.
+ *
+ * No secret: an id_token is checked against Google's public keys. The web
+ * client id is the audience, and AUTH_GOOGLE_ANDROID_IDS lists the Android
+ * clients a token may have been handed to. Null rather than a throw, so the
+ * route can say "not set up yet" instead of a 500.
+ */
+export function readGoogleAndroidConfig(): GoogleAndroidConfig | null {
+  const audience = process.env.AUTH_GOOGLE_ID?.trim();
+  const authorizedParties = (process.env.AUTH_GOOGLE_ANDROID_IDS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  if (!audience || authorizedParties.length === 0) return null;
+  return { audience, authorizedParties };
 }
 
 /** Cookie attributes for the three short-lived handshake values. */
