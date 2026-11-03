@@ -399,6 +399,20 @@ describe("caller identity", () => {
     expect(await resolveLlmCaller(requestFrom("203.0.113.5"))).toEqual({ key: "ip:203.0.113.5", signedIn: false });
   });
 
+  it("gives the Android app's bearer session the signed-in allowance", async () => {
+    const app = new Request("https://example.test/api/chart/story-prose", {
+      headers: { authorization: `Bearer ${TOKEN_PREFIX}app-user-1`, "x-real-ip": "203.0.113.5" },
+    });
+    expect(await resolveLlmCaller(app)).toEqual({ key: "user:app-user-1", signedIn: true });
+
+    /* A bearer value that resolves to nobody is a signed-out caller, counted by
+       address, and never gets the account's twenty. */
+    const stale = new Request("https://example.test/api/chart/story-prose", {
+      headers: { authorization: "Bearer revoked-or-made-up-token", "x-real-ip": "203.0.113.5" },
+    });
+    expect(await resolveLlmCaller(stale)).toEqual({ key: "ip:203.0.113.5", signedIn: false });
+  });
+
   it("spends one allowance whether it is handed the request or the caller read from it", async () => {
     /* The PDF report reads its caller before its cache and hands that over,
        so the session is looked up once. Both ways must reach one bucket. */

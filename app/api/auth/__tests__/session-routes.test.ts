@@ -29,6 +29,15 @@ function request(cookie?: string) {
   });
 }
 
+/** 32 random bytes in base64url, the shape createSession mints. */
+const APP_TOKEN = "Zm9vYmFyYmF6cXV4cXV1eGNvcmdlZ3JhdWx0Z2FycGx5";
+
+function bearerRequest(token: string, cookie?: string) {
+  return new NextRequest("http://localhost:7001/api/auth/session", {
+    headers: { authorization: `Bearer ${token}`, ...(cookie ? { cookie } : {}) },
+  });
+}
+
 /** The `Set-Cookie` header for a given name, if the response writes one. */
 function setCookie(response: Response, name: string) {
   return response.headers
@@ -123,6 +132,75 @@ describe("POST /api/auth/signout", () => {
     const response = await POST(request());
 
     expect(response.status).toBe(200);
-    expect(revokeSession).toHaveBeenCalledWith(undefined);
+    expect(revokeSession).toHaveBeenCalledWith(null);
+  });
+
+  it("revokes the app's bearer session, and still clears any cookie", async () => {
+    revokeSession.mockResolvedValue(undefined);
+
+    const response = await POST(
+      bearerRequest(APP_TOKEN, `${SESSION_COOKIE}=a-browser-token`),
+    );
+
+    expect(response.status).toBe(200);
+    expect(revokeSession).toHaveBeenCalledTimes(1);
+    expect(revokeSession).toHaveBeenCalledWith(APP_TOKEN);
+    expect(setCookie(response, SESSION_COOKIE)).toContain("Max-Age=0");
+  });
+});
+
+describe("the Android app's bearer header", () => {
+  it("is read by /api/auth/session", async () => {
+    resolveSession.mockResolvedValue(SIGNED_IN);
+
+    const response = await GET(bearerRequest(APP_TOKEN));
+
+    expect(resolveSession).toHaveBeenCalledWith(APP_TOKEN);
+    await expect(response.json()).resolves.toEqual({
+      user: { email: "someone@example.test", displayName: "Someone" },
+    });
+  });
+
+  it("wins over a cookie when both are sent", async () => {
+    resolveSession.mockResolvedValue(SIGNED_IN);
+
+    await GET(bearerRequest(APP_TOKEN, `${SESSION_COOKIE}=a-browser-token`));
+
+    expect(resolveSession).toHaveBeenCalledWith(APP_TOKEN);
+  });
+
+  it("reports nobody signed in for a revoked or expired token", async () => {
+    /* resolveSession is what refuses a revoked row; the route must not
+       second-guess it with anything cached. */
+    resolveSession.mockResolvedValue(null);
+
+    const response = await GET(bearerRequest(APP_TOKEN));
+
+    await expect(response.json()).resolves.toEqual({ user: null });
+  });
+
+  it("treats a malformed bearer value as no token, not as the cookie", async () => {
+    resolveSession.mockResolvedValue(SIGNED_IN);
+
+    const response = await GET(
+      new NextRequest("http://localhost:7001/api/auth/session", {
+        headers: { authorization: "Bearer not a token!", cookie: `${SESSION_COOKIE}=a-token` },
+      }),
+    );
+
+    expect(resolveSession).toHaveBeenCalledWith(null);
+    expect(response.status).toBe(200);
+  });
+
+  it("leaves another scheme to the cookie", async () => {
+    resolveSession.mockResolvedValue(SIGNED_IN);
+
+    await GET(
+      new NextRequest("http://localhost:7001/api/auth/session", {
+        headers: { authorization: "Basic dXNlcjpwYXNz", cookie: `${SESSION_COOKIE}=a-token` },
+      }),
+    );
+
+    expect(resolveSession).toHaveBeenCalledWith("a-token");
   });
 });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import { sessionTokenFromRequest } from "@/lib/identity/require-session";
 import { SESSION_COOKIE, revokeSession } from "@/lib/identity/session";
 
 export const runtime = "nodejs";
@@ -19,7 +20,10 @@ export const dynamic = "force-dynamic";
  * so a store that is failing this way is visible rather than silent.
  */
 export async function POST(request: NextRequest) {
-  const token = request.cookies.get(SESSION_COOKIE)?.value;
+  /* The app's bearer token when it sends one, the cookie otherwise: the
+     session this request is signed in with is the one that ends. The cookie is
+     cleared below either way. */
+  const token = sessionTokenFromRequest(request);
 
   try {
     await revokeSession(token);

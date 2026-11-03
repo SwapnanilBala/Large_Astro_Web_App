@@ -38,7 +38,7 @@ function storeUnavailable() {
 
 export async function GET(request: NextRequest) {
   try {
-    const account = await findRequestAccount(request.cookies);
+    const account = await findRequestAccount(request);
     if (!account) {
       return noStore(NextResponse.json({ signedIn: false, preferences: null }));
     }
@@ -57,7 +57,7 @@ export async function PUT(request: NextRequest) {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, firstZodError(parsed.error));
     }
 
-    const account = await findRequestAccount(request.cookies);
+    const account = await findRequestAccount(request);
     if (!account) {
       throw new ApiError(ErrorCode.UNAUTHORIZED, "Sign in to keep preferences on your account.");
     }

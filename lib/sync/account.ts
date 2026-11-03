@@ -23,25 +23,22 @@ import "server-only";
  * points at, so there is no longer anything for a read to create by accident.
  */
 
-import { SESSION_COOKIE, resolveSession } from "@/lib/identity/session";
+import { sessionTokenFromRequest } from "@/lib/identity/require-session";
+import { resolveSession } from "@/lib/identity/session";
 
 export type RequestAccount = {
   userId: string;
 };
 
-/** The subset of NextRequest.cookies this module needs. */
-export type CookieReader = {
-  get(name: string): { value: string } | undefined;
-};
-
 /**
  * The account this request belongs to, or null when nobody is signed in.
  *
- * Creates nothing: sign-in is the only thing that writes `auth_users`.
+ * Reads the session from the browser's cookie or the Android app's bearer
+ * header, through the one reader every route shares. Creates nothing: sign-in
+ * is the only thing that writes `auth_users`. A lookup failure is thrown, not
+ * swallowed, so the routes can answer 503 rather than "you have no charts".
  */
-export async function findRequestAccount(
-  cookies: CookieReader,
-): Promise<RequestAccount | null> {
-  const session = await resolveSession(cookies.get(SESSION_COOKIE)?.value);
+export async function findRequestAccount(request: Request): Promise<RequestAccount | null> {
+  const session = await resolveSession(sessionTokenFromRequest(request));
   return session ? { userId: session.userId } : null;
 }

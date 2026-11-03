@@ -54,7 +54,7 @@ function storeUnavailable() {
 
 export async function GET(request: NextRequest) {
   try {
-    const account = await findRequestAccount(request.cookies);
+    const account = await findRequestAccount(request);
 
     /* Signed out is a normal state, not an error: it is what every first visit
        looks like. An empty list is the honest answer. */
@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
       throw new ApiError(ErrorCode.VALIDATION_FAILED, firstZodError(facts.error));
     }
 
-    const account = await findRequestAccount(request.cookies);
+    const account = await findRequestAccount(request);
 
     if (!account) {
       throw new ApiError(
@@ -134,7 +134,7 @@ export async function POST(request: NextRequest) {
  */
 export async function DELETE(request: NextRequest) {
   try {
-    const account = await findRequestAccount(request.cookies);
+    const account = await findRequestAccount(request);
 
     /* Nothing stored is the desired end state, so saying so is not a lie and
        a 404 would make the client handle a case that does not matter. */

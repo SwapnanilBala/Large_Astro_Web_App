@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { SESSION_COOKIE, resolveSession } from "@/lib/identity/session";
+import { sessionTokenFromRequest } from "@/lib/identity/require-session";
+import { resolveSession } from "@/lib/identity/session";
 
 export const runtime = "nodejs";
 
@@ -15,6 +16,9 @@ export const dynamic = "force-dynamic";
  * `cookies()` there makes every route in the desktop tree dynamic, and 32 pages
  * that render fine as static are not worth trading for a name in the navbar.
  *
+ * The Android app asks the same question with its bearer header
+ * (lib/identity/require-session.ts reads either), and gets the same answer.
+ *
  * Only the fields the navbar renders are returned. The session id, user id and
  * token never cross into the browser, so a script that manages to read this
  * response learns a display name and an email it could already see on screen.
@@ -27,7 +31,7 @@ function noStore(response: NextResponse) {
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await resolveSession(request.cookies.get(SESSION_COOKIE)?.value);
+    const user = await resolveSession(sessionTokenFromRequest(request));
 
     return noStore(
       NextResponse.json({
