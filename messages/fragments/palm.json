@@ -5,7 +5,11 @@
         "weeklyLimit": "Ya has hecho las {count} lecturas de la palma de esta semana. La próxima estará disponible el {date}.",
         "notAPalm": "Esta foto no parece mostrar una palma abierta. Fotografía el interior de tu mano, de cara a la cámara. Esta foto no cuenta como lectura.",
         "backOfHand": "Parece el dorso de una mano. Gira la mano y fotografía la palma. Esta foto no cuenta como lectura.",
-        "unclearPhoto": "Las líneas de esta palma apenas se distinguen. Vuelve a intentarlo con más luz, con la cámara firme y toda la palma dentro del encuadre. Esta foto no cuenta como lectura."
+        "unclearPhoto": "Las líneas de esta palma apenas se distinguen. Vuelve a intentarlo con más luz, con la cámara firme y toda la palma dentro del encuadre. Esta foto no cuenta como lectura.",
+        "signInRequired": "Inicia sesión para leer tu palma."
+      },
+      "qa": {
+        "signInRequired": "Inicia sesión para preguntar sobre tu lectura de la palma."
       }
     }
   },
@@ -15,7 +19,11 @@
         "weeklyLimit": "Vous avez déjà eu les {count} lectures de la paume de cette semaine. La prochaine sera disponible le {date}.",
         "notAPalm": "Cette photo ne semble pas montrer une paume ouverte. Photographiez l'intérieur de votre main, tourné vers l'objectif. Cette photo n'est pas comptée comme une lecture.",
         "backOfHand": "On dirait le dos d'une main. Retournez votre main et photographiez votre paume. Cette photo n'est pas comptée comme une lecture.",
-        "unclearPhoto": "Les lignes de cette paume sont difficiles à distinguer. Réessayez avec plus de lumière, l'appareil bien stable et toute la paume dans le cadre. Cette photo n'est pas comptée comme une lecture."
+        "unclearPhoto": "Les lignes de cette paume sont difficiles à distinguer. Réessayez avec plus de lumière, l'appareil bien stable et toute la paume dans le cadre. Cette photo n'est pas comptée comme une lecture.",
+        "signInRequired": "Connectez-vous pour obtenir la lecture de votre paume."
+      },
+      "qa": {
+        "signInRequired": "Connectez-vous pour poser des questions sur la lecture de votre paume."
       }
     }
   },
@@ -25,7 +33,11 @@
         "weeklyLimit": "Hai già fatto le {count} letture della mano di questa settimana. La prossima sarà disponibile {date}.",
         "notAPalm": "Questa foto non sembra mostrare un palmo aperto. Fotografa l'interno della mano, rivolto verso la fotocamera. Questa foto non conta come lettura.",
         "backOfHand": "Sembra il dorso di una mano. Gira la mano e fotografa il palmo. Questa foto non conta come lettura.",
-        "unclearPhoto": "Le linee di questo palmo si distinguono a fatica. Riprova con più luce, tenendo ferma la fotocamera e con tutto il palmo nell'inquadratura. Questa foto non conta come lettura."
+        "unclearPhoto": "Le linee di questo palmo si distinguono a fatica. Riprova con più luce, tenendo ferma la fotocamera e con tutto il palmo nell'inquadratura. Questa foto non conta come lettura.",
+        "signInRequired": "Accedi per la lettura della tua mano."
+      },
+      "qa": {
+        "signInRequired": "Accedi per fare domande sulla lettura della tua mano."
       }
     }
   },
@@ -35,7 +47,11 @@
         "weeklyLimit": "Du hast die {count} Handdeutungen dieser Woche schon genutzt. Die nächste ist ab {date} möglich.",
         "notAPalm": "Dieses Foto scheint keine offene Handfläche zu zeigen. Fotografiere bitte die Innenseite deiner Hand, der Kamera zugewandt. Dieses Foto zählt nicht als Deutung.",
         "backOfHand": "Das sieht nach einem Handrücken aus. Dreh deine Hand bitte um und fotografiere die Handfläche. Dieses Foto zählt nicht als Deutung.",
-        "unclearPhoto": "Die Linien dieser Handfläche sind kaum zu erkennen. Versuch es bitte noch einmal bei hellerem Licht, mit ruhiger Kamera und der ganzen Handfläche im Bild. Dieses Foto zählt nicht als Deutung."
+        "unclearPhoto": "Die Linien dieser Handfläche sind kaum zu erkennen. Versuch es bitte noch einmal bei hellerem Licht, mit ruhiger Kamera und der ganzen Handfläche im Bild. Dieses Foto zählt nicht als Deutung.",
+        "signInRequired": "Melde dich an, um deine Hand deuten zu lassen."
+      },
+      "qa": {
+        "signInRequired": "Melde dich an, um Fragen zu deiner Handdeutung zu stellen."
       }
     }
   },
@@ -45,7 +61,11 @@
         "weeklyLimit": "इस सप्ताह के आपके {count} हस्तरेखा पठन पूरे हो चुके हैं। अगला पठन {date} से उपलब्ध होगा।",
         "notAPalm": "यह तस्वीर खुली हथेली की नहीं लगती। अपने हाथ के अंदरूनी हिस्से की तस्वीर लें, हथेली कैमरे की ओर रखें। यह तस्वीर आपके पठनों में नहीं गिनी गई।",
         "backOfHand": "यह हाथ का पिछला हिस्सा लगता है। अपना हाथ पलटें और हथेली की तस्वीर लें। यह तस्वीर आपके पठनों में नहीं गिनी गई।",
-        "unclearPhoto": "इस हथेली की रेखाएँ ठीक से दिखाई नहीं दे रहीं। तेज़ रोशनी में, कैमरा स्थिर रखकर और पूरी हथेली फ़्रेम में लेकर फिर से कोशिश करें। यह तस्वीर आपके पठनों में नहीं गिनी गई।"
+        "unclearPhoto": "इस हथेली की रेखाएँ ठीक से दिखाई नहीं दे रहीं। तेज़ रोशनी में, कैमरा स्थिर रखकर और पूरी हथेली फ़्रेम में लेकर फिर से कोशिश करें। यह तस्वीर आपके पठनों में नहीं गिनी गई।",
+        "signInRequired": "अपनी हस्तरेखा पढ़वाने के लिए साइन इन करें।"
+      },
+      "qa": {
+        "signInRequired": "अपने हस्तरेखा पठन के बारे में पूछने के लिए साइन इन करें।"
       }
     }
   },
@@ -55,7 +75,11 @@
         "weeklyLimit": "এই সপ্তাহের আপনার {count}টি হস্তরেখা পাঠ শেষ হয়েছে। পরের পাঠ {date} থেকে পাওয়া যাবে।",
         "notAPalm": "এই ছবিতে খোলা হাতের তালু দেখা যাচ্ছে বলে মনে হচ্ছে না। হাতের ভেতরের দিকটা ক্যামেরার দিকে রেখে ছবি তুলুন। এই ছবিটি আপনার পাঠের মধ্যে গোনা হয়নি।",
         "backOfHand": "এটি হাতের উল্টো পিঠ বলে মনে হচ্ছে। হাতটি উল্টে তালুর ছবি তুলুন। এই ছবিটি আপনার পাঠের মধ্যে গোনা হয়নি।",
-        "unclearPhoto": "এই তালুর রেখাগুলো ঠিকমতো বোঝা যাচ্ছে না। আরও উজ্জ্বল আলোয়, ক্যামেরা স্থির রেখে এবং পুরো তালু ফ্রেমের মধ্যে রেখে আবার চেষ্টা করুন। এই ছবিটি আপনার পাঠের মধ্যে গোনা হয়নি।"
+        "unclearPhoto": "এই তালুর রেখাগুলো ঠিকমতো বোঝা যাচ্ছে না। আরও উজ্জ্বল আলোয়, ক্যামেরা স্থির রেখে এবং পুরো তালু ফ্রেমের মধ্যে রেখে আবার চেষ্টা করুন। এই ছবিটি আপনার পাঠের মধ্যে গোনা হয়নি।",
+        "signInRequired": "আপনার হস্তরেখা পড়াতে সাইন ইন করুন।"
+      },
+      "qa": {
+        "signInRequired": "আপনার হস্তরেখা পাঠ নিয়ে প্রশ্ন করতে সাইন ইন করুন।"
       }
     }
   }

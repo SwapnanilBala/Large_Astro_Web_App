@@ -93,8 +93,8 @@ const PER_ADDRESS = 10;
 
 /* The PDF report's whole-deployment ceiling for one day. These tests are about
    the daily counter, and palm reading -- the route they used to run on -- now
-   also has a weekly cap of two per caller, which no daily number here can
-   reach past; the PDF report has the same per-caller allowances and none. */
+   also has a weekly cap of two per account and no signed-out allowance,
+   which no daily number here can reach past; the PDF report has the same per-caller allowances and none. */
 const STORY_PROSE_ROUTE_TOTAL = 60;
 
 /* Calls each instance puts in flight in the race below: enough that the two
@@ -445,8 +445,8 @@ describe("pruning spent days", () => {
 describe("palm reading's weekly row", () => {
   const WEEK_OF_NOON = "2026-09-07";
 
-  it("carries one caller's week from instance to instance", async () => {
-    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+  it("carries one account's week from instance to instance", async () => {
+    const caller = signedInAs("user-a", "/api/palm-reading");
     const first = await newInstance();
     expect((await first.consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
     const second = await newInstance();
@@ -457,12 +457,12 @@ describe("palm reading's weekly row", () => {
       allowed: false,
       scope: "weekly",
     });
-    expect(rows.get(rowKey(WEEK_OF_NOON, "/api/palm-reading#week", "ip:203.0.113.5"))).toBe(3);
+    expect(rows.get(rowKey(WEEK_OF_NOON, "/api/palm-reading#week", "user:user-a"))).toBe(3);
   });
 
   it("is a row the daily prune leaves alone while its week runs", async () => {
     const instance = await newInstance();
-    await instance.consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.5", "/api/palm-reading"), NOON);
+    await instance.consumeLlmBudget("/api/palm-reading", signedInAs("user-a", "/api/palm-reading"), NOON);
     /* The prune deletes days before this one; the week's Monday is after it. */
     expect(pruneCalls).toEqual(["2026-09-05"]);
     expect(WEEK_OF_NOON > pruneCalls[0]).toBe(true);

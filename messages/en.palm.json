@@ -143,7 +143,8 @@
       "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}.",
       "notAPalm": "This photo doesn't look like an open palm. Please photograph the inside of your hand, facing the camera. This didn't use up a reading.",
       "backOfHand": "This looks like the back of a hand. Please turn your hand over and photograph your palm. This didn't use up a reading.",
-      "unclearPhoto": "The lines on this palm are hard to make out. Please try again in brighter light, with the camera steady and the whole palm in the frame. This didn't use up a reading."
+      "unclearPhoto": "The lines on this palm are hard to make out. Please try again in brighter light, with the camera steady and the whole palm in the frame. This didn't use up a reading.",
+      "signInRequired": "Sign in to read your palm."
     },
     "history": {
       "kicker": "Your archive",
@@ -236,7 +237,8 @@
       "footnote": "Tendencies and potentials, never fixed destiny.",
       "starterCareer": "What does my palm say about where my work is heading?",
       "starterTiming": "What should I be paying attention to over the next year?",
-      "starterStrength": "Which line on my hand is strongest, and what does it mean?"
+      "starterStrength": "Which line on my hand is strongest, and what does it mean?",
+      "signInRequired": "Sign in to ask about your palm reading."
     }
   }
 }

@@ -69,6 +69,7 @@ import {
   type SharedLlmCounts,
 } from "@/lib/db/llm-budget-counters";
 import { sessionFromRequest } from "@/lib/identity/require-session";
+import type { SessionUser } from "@/lib/identity/session";
 import { LLM_ACCOUNT_PER_DAY, LLM_FREE_PER_DAY, PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { clientKey } from "@/lib/rate-limiter";
 
@@ -94,9 +95,9 @@ type LlmBudgetConfig = {
   /** Paid calls one signed-out address may make in one UTC day. */
   perAnonPerDay: number;
   /**
-   * Paid calls one caller, signed in or not, may make in one UTC week
-   * (Monday to Sunday), on top of the daily allowances. Only palm reading
-   * has one; see PALM_READINGS_PER_WEEK.
+   * Paid calls one caller may make in one UTC week (Monday to Sunday), on top
+   * of the daily allowances. Only palm reading has one, and since palm reading
+   * requires an account it is counted per account; see PALM_READINGS_PER_WEEK.
    */
   perCallerPerWeek?: number;
 };
@@ -207,7 +208,9 @@ type LlmBudgetConfig = {
  *
  * THE TWO TIERS are 10 calls per signed-out address and 20 per signed-in
  * account, per route per UTC day (raised on 2026-10-25). Ask the classics is
- * the exception, with 15 questions signed out and 25 signed in.
+ * the exception, with 15 questions signed out and 25 signed in. Palm reading
+ * and its questions are the other one: they have no signed-out tier at all,
+ * since an account is required to use them.
  *
  * An address is a weak name for a person: a proxy pool makes one caller look
  * like thousands, while a campus NAT makes thousands look like one. Accounts
@@ -383,18 +386,23 @@ const LLM_BUDGETS: Record<LlmRouteKey, LlmBudgetConfig> = {
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
     perAnonPerDay: LLM_FREE_PER_DAY,
   },
+  /* Palm reading and its questions require an account (the owner's call of
+     2026-11-04): both routes answer 401 before they reach this module. A
+     signed-out allowance of nought is the second lock on that door, so a
+     route that ever forgot its own check would be refused here rather than
+     handing out readings by address. */
   "/api/palm-reading": {
     perDay: 100,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
-    perAnonPerDay: LLM_FREE_PER_DAY,
-    /* The owner's hard cap, 2026-11-02: two readings a week for anyone. The
+    perAnonPerDay: 0,
+    /* The owner's hard cap, 2026-11-02: two readings a week per account. The
        daily numbers above still bound a bad day across every caller. */
     perCallerPerWeek: PALM_READINGS_PER_WEEK,
   },
   "/api/palm-reading/ask": {
     perDay: 1500,
     perCallerPerDay: LLM_ACCOUNT_PER_DAY,
-    perAnonPerDay: LLM_FREE_PER_DAY,
+    perAnonPerDay: 0,
   },
 };
 
@@ -485,8 +493,8 @@ function secondsUntilNextUtcWeek(now: number) {
  * "sign in and carry on". The routes pass this through to the client so the
  * refusal can read as an invitation rather than a wall.
  *
- * `weekly` is the per-caller weekly cap (perCallerPerWeek), which signing in
- * does not lift, so it must not read as that invitation either. Its
+ * `weekly` is the per-account weekly cap (perCallerPerWeek), which nothing
+ * the reader does lifts, so it must not read as that invitation either. Its
  * retryAfterSeconds runs to the next UTC Monday, not to midnight.
  */
 export type LlmBudgetScope = "global" | "caller" | "anonymous" | "weekly";
@@ -540,10 +548,19 @@ export type LlmCaller = {
 export async function resolveLlmCaller(request: Request): Promise<LlmCaller> {
   const session = await sessionFromRequest(request);
   if (session) {
-    return { key: `user:${session.userId}`, signedIn: true };
+    return llmCallerForSession(session);
   }
   /* An IPv6 caller counts as its /64; see clientKey. */
   return { key: `ip:${clientKey(request)}`, signedIn: false };
+}
+
+/**
+ * The caller for a session a route has already read -- palm reading checks
+ * for one before anything else -- so the session is looked up once, and the
+ * account's key is spelled in one place.
+ */
+export function llmCallerForSession(session: Pick<SessionUser, "userId">): LlmCaller {
+  return { key: `user:${session.userId}`, signedIn: true };
 }
 
 /**

@@ -211,58 +211,70 @@ describe("the signed-out tier", () => {
 });
 
 /*
- * Palm reading's weekly cap: two readings a UTC week (Monday to Sunday) for
- * anyone, signed in or not, the owner's call of 2026-11-02. NOON is a
+ * Palm reading's weekly cap: two readings a UTC week (Monday to Sunday) per
+ * account, the owner's call of 2026-11-02; since 2026-11-04 palm reading
+ * requires an account, so a signed-out address gets none. NOON is a
  * Saturday, so its week began on Monday 2026-09-07 and the next one opens on
  * Monday 2026-09-14 at 00:00 UTC, 36 hours later.
  */
 describe("palm reading's weekly cap", () => {
   const NEXT_MONDAY = Date.UTC(2026, 8, 14, 0, 0, 0);
 
-  it("lets a visitor have two readings a week, then names the week as the limit", async () => {
-    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
-    expect(await consumeLlmBudget("/api/palm-reading", caller, NOON)).toMatchObject({ allowed: true, callerRemaining: 1 });
-    expect(await consumeLlmBudget("/api/palm-reading", caller, NOON)).toMatchObject({ allowed: true, callerRemaining: 0 });
+  it("lets an account have two readings a week, then names the week as the limit", async () => {
+    const account = signedInAs("user-a", "/api/palm-reading");
+    expect(await consumeLlmBudget("/api/palm-reading", account, NOON)).toMatchObject({ allowed: true, callerRemaining: 1 });
+    expect(await consumeLlmBudget("/api/palm-reading", account, NOON)).toMatchObject({ allowed: true, callerRemaining: 0 });
 
-    const refused = await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    const refused = await consumeLlmBudget("/api/palm-reading", account, NOON);
     expect(refused.allowed).toBe(false);
     if (refused.allowed) throw new Error("unreachable");
-    /* Not "anonymous": signing in would not lift it, so it must not raise the
-       sign-in prompt that scope stands for. */
     expect(refused.scope).toBe("weekly");
     expect(refused.retryAfterSeconds).toBe((NEXT_MONDAY - NOON) / 1000);
   });
 
-  it("gives an account the same two", async () => {
-    const account = signedInAs("user-a", "/api/palm-reading");
-    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
-    expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
-    expect(await consumeLlmBudget("/api/palm-reading", account, NOON)).toMatchObject({ allowed: false, scope: "weekly" });
+  /* The routes answer 401 before they get here; this is the second lock. */
+  it.each(["/api/palm-reading", "/api/palm-reading/ask"] as const)(
+    "gives a signed-out address nothing on %s",
+    async (route) => {
+      const refused = await consumeLlmBudget(route, requestFrom("203.0.113.5", route), NOON);
+      expect(refused).toMatchObject({ allowed: false, scope: "anonymous" });
+      expect(readLlmBudgetUsage(route, NOON).used).toBe(0);
+    },
+  );
+
+  it("counts the week by account, not by the address it arrives from", async () => {
+    /* signedInAs puts every account behind the same address. */
+    const first = signedInAs("user-a", "/api/palm-reading");
+    await consumeLlmBudget("/api/palm-reading", first, NOON);
+    await consumeLlmBudget("/api/palm-reading", first, NOON);
+    expect((await consumeLlmBudget("/api/palm-reading", first, NOON)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", signedInAs("user-b", "/api/palm-reading"), NOON)).allowed).toBe(true);
+  });
+
+  it("takes a caller already read from the session", async () => {
+    const { llmCallerForSession } = await import("@/lib/llm-budget");
+    const caller = llmCallerForSession({ userId: "user-a" });
+    await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    /* The same account through the cookie shares that week. */
+    await consumeLlmBudget("/api/palm-reading", signedInAs("user-a", "/api/palm-reading"), NOON);
+    expect(await consumeLlmBudget("/api/palm-reading", caller, NOON)).toMatchObject({ allowed: false, scope: "weekly" });
   });
 
   it("does not reset at midnight, only on Monday", async () => {
-    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
-    await consumeLlmBudget("/api/palm-reading", caller, NOON);
-    await consumeLlmBudget("/api/palm-reading", caller, NOON);
+    const account = signedInAs("user-a", "/api/palm-reading");
+    await consumeLlmBudget("/api/palm-reading", account, NOON);
+    await consumeLlmBudget("/api/palm-reading", account, NOON);
 
     /* Sunday: a new day, the same week. */
-    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_DAY)).allowed).toBe(false);
-    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_MONDAY - 1)).allowed).toBe(false);
-    expect((await consumeLlmBudget("/api/palm-reading", caller, NEXT_MONDAY)).allowed).toBe(true);
-  });
-
-  it("keeps one caller's spent week out of everyone else's", async () => {
-    const spent = requestFrom("203.0.113.5", "/api/palm-reading");
-    await consumeLlmBudget("/api/palm-reading", spent, NOON);
-    await consumeLlmBudget("/api/palm-reading", spent, NOON);
-    expect((await consumeLlmBudget("/api/palm-reading", spent, NOON)).allowed).toBe(false);
-    expect((await consumeLlmBudget("/api/palm-reading", requestFrom("203.0.113.6"), NOON)).allowed).toBe(true);
+    expect((await consumeLlmBudget("/api/palm-reading", account, NEXT_DAY)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", account, NEXT_MONDAY - 1)).allowed).toBe(false);
+    expect((await consumeLlmBudget("/api/palm-reading", account, NEXT_MONDAY)).allowed).toBe(true);
   });
 
   it("does not let a caller past their week add to the day's route total", async () => {
-    const caller = requestFrom("203.0.113.5", "/api/palm-reading");
+    const account = signedInAs("user-a", "/api/palm-reading");
     for (let i = 0; i < 10; i += 1) {
-      await consumeLlmBudget("/api/palm-reading", caller, NOON);
+      await consumeLlmBudget("/api/palm-reading", account, NOON);
     }
     /* Only the two readings count; the day's 100 bounds every caller. */
     expect(readLlmBudgetUsage("/api/palm-reading", NOON).used).toBe(2);
@@ -310,14 +322,16 @@ describe("route ceiling", () => {
     expect(refused.scope).toBe("global");
   });
 
+  /* On the PDF report: palm reading, where this used to run, has no
+     signed-out allowance any more. */
   it("stops signed-out callers too, however many addresses they have", async () => {
-    for (let n = 0; n < PALM_ROUTE_TOTAL; n += 1) {
-      const caller = requestFrom(`198.51.${Math.floor(n / 256)}.${n % 256}`, "/api/palm-reading");
-      expect((await consumeLlmBudget("/api/palm-reading", caller, NOON)).allowed).toBe(true);
+    for (let n = 0; n < STORY_PROSE_ROUTE_TOTAL; n += 1) {
+      const caller = requestFrom(`198.51.${Math.floor(n / 256)}.${n % 256}`, "/api/chart/story-prose");
+      expect((await consumeLlmBudget("/api/chart/story-prose", caller, NOON)).allowed).toBe(true);
     }
     const refused = await consumeLlmBudget(
-      "/api/palm-reading",
-      requestFrom("203.0.113.99", "/api/palm-reading"),
+      "/api/chart/story-prose",
+      requestFrom("203.0.113.99", "/api/chart/story-prose"),
       NOON,
     );
     expect(refused.allowed).toBe(false);
@@ -325,6 +339,18 @@ describe("route ceiling", () => {
     /* The route total, not the address's own: a proxy pool defeats the
        per-caller tier and this is the layer that is left. */
     expect(refused.scope).toBe("global");
+  });
+});
+
+describe("palm reading's route total", () => {
+  it("stops a hundred accounts' worth of readings in a day", async () => {
+    for (let n = 0; n < PALM_ROUTE_TOTAL; n += 1) {
+      const account = signedInAs(`user-${n}`, "/api/palm-reading");
+      expect((await consumeLlmBudget("/api/palm-reading", account, NOON)).allowed).toBe(true);
+    }
+    expect(
+      await consumeLlmBudget("/api/palm-reading", signedInAs("user-late", "/api/palm-reading"), NOON),
+    ).toMatchObject({ allowed: false, scope: "global" });
   });
 });
 

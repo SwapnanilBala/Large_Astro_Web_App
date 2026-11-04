@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import OpenAI from "openai";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
-import { consumeLlmBudget } from "@/lib/llm-budget";
+import { sessionFromRequest } from "@/lib/identity/require-session";
+import { consumeLlmBudget, llmCallerForSession } from "@/lib/llm-budget";
 import { PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { classicalHandSection } from "@/lib/palm-readings/classical-hand";
 import { checkPalmPhoto, palmPhotoRefusalError } from "@/lib/palm-readings/photo-check";
@@ -641,6 +642,18 @@ async function readWithGpt4o({ image, mediaType, systemPrompt, userText }: Visio
 
 export async function POST(request: NextRequest) {
   try {
+    /* Signed in, or nothing: the owner's call of 2026-11-04. Checked first, so
+       a signed-out caller costs one session lookup and never a budget slot or
+       a model call. The browser sends the cookie, the Android app a bearer
+       header; sessionFromRequest reads either. `scope: "sign_in"` is what the
+       clients key their sign-in prompt on. */
+    const session = await sessionFromRequest(request);
+    if (!session) {
+      throw new ApiError(ErrorCode.UNAUTHORIZED, "Sign in to read your palm.", {
+        details: { scope: "sign_in" },
+      });
+    }
+
     const contentLength = Number(request.headers.get("content-length") ?? "0");
     if (contentLength > MAX_JSON_BODY_BYTES) {
       throw new ApiError(
@@ -720,7 +733,7 @@ export async function POST(request: NextRequest) {
        detail "high", with no cache behind it. The proxy's 5-per-minute limit
        still allows 7,200 a day from one address, so the daily ceiling is the
        one that bounds the bill. */
-    const budget = await consumeLlmBudget("/api/palm-reading", request);
+    const budget = await consumeLlmBudget("/api/palm-reading", llmCallerForSession(session));
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
@@ -730,16 +743,16 @@ export async function POST(request: NextRequest) {
       }));
       /* The weekly cap is the one a reader will usually meet first, and the
          palm panel words it in the reader's language from `scope` and
-         `resetsAt`; this English is for anything else that reads the route. */
+         `resetsAt`; this English is for anything else that reads the route.
+         Every caller here is signed in, so there is no signed-out tier left
+         to name. */
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
         budget.scope === "weekly"
           ? `You have had this week's ${PALM_READINGS_PER_WEEK} palm readings. Your next one opens on Monday.`
-          : budget.scope === "anonymous"
-            ? "Sign in to read another palm today."
-            : budget.scope === "caller"
-              ? "You have reached today's palm reading limit. Please try again tomorrow."
-              : "Palm reading is at capacity for today. Please try again tomorrow.",
+          : budget.scope === "global"
+            ? "Palm reading is at capacity for today. Please try again tomorrow."
+            : "You have reached today's palm reading limit. Please try again tomorrow.",
         {
           details: {
             retryAfterSeconds: budget.retryAfterSeconds,

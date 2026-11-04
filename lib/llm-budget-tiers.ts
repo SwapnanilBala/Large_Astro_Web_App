@@ -22,9 +22,9 @@ export const LLM_FREE_PER_DAY = 10;
 export const LLM_ACCOUNT_PER_DAY = 20;
 
 /**
- * Palm readings one caller may have in one UTC week, Monday to Sunday,
- * signed in or not: the owner's hard cap of 2026-11-02. A reading is the
- * dearest call in the app (about $0.17 on Opus 5), and the daily allowances
- * above let one address spend ten of them a day.
+ * Palm readings one account may have in one UTC week, Monday to Sunday: the
+ * owner's hard cap of 2026-11-02. A reading is the dearest call in the app
+ * (about $0.17 on Opus 5). Since 2026-11-04 palm reading requires an account,
+ * so there is no signed-out allowance for it at all.
  */
 export const PALM_READINGS_PER_WEEK = 2;

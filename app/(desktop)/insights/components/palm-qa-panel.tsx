@@ -120,7 +120,13 @@ export default function PalmQaPanel({
           /* The route sends a usable sentence for the cases a reader can act
              on -- out of questions for today, sign in for more -- so prefer it
              over our generic copy when it is there. */
-          setError(payload?.error?.message ?? tr("palm.qa.errorGeneric"));
+          setError(
+            /* Questions need an account, like the reading; a 401 means the
+               session ended while the page was open. */
+            response.status === 401
+              ? tr("palm.qa.signInRequired")
+              : payload?.error?.message ?? tr("palm.qa.errorGeneric"),
+          );
           /* Take the optimistic question back out: leaving it in a thread that
              never got an answer reads as though it was ignored. */
           setTurns((previous) => previous.slice(0, -1));

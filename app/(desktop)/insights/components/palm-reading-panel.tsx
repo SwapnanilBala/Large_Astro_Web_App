@@ -569,6 +569,11 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
            appears -- the dialog is the call to action, the banner is what is
            left on screen once it has been dismissed. */
         void announceIfFreeUsageExhausted(res, "palmReading");
+        /* Palm reading needs an account. This page already asks for one, so
+           a 401 here means the session ended while the page was open. */
+        if (res.status === 401) {
+          throw new Error(tr("palm.errors.signInRequired"));
+        }
         const err = await res.json();
         /* The weekly cap (PALM_READINGS_PER_WEEK) is the refusal a reader
            meets most, so it is worded here, in their language, with the date
