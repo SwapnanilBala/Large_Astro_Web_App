@@ -1,7 +1,10 @@
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { LanguageProvider } from "@/lib/i18n-context";
+import deCatalog from "@/messages/de.json";
 import PalmReadingPanel from "./palm-reading-panel";
 
 /*
@@ -89,9 +92,39 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-async function analyzeAPalm(beforePhoto?: () => void) {
+/* The route's 422 for a photo its check refused; its English is not what the panel shows. */
+const photoRefusal = (reason: string) =>
+  new Response(
+    JSON.stringify({ error: { code: "VALIDATION_FAILED", message: "route English", details: { reason } } }),
+    { status: 422, headers: { "Content-Type": "application/json" } },
+  );
+
+/* German as the provider's baseline: the catalog, and the strings staged for it until the fold. */
+function germanMessages(): Record<string, unknown> {
+  const merge = (into: Record<string, unknown>, from: Record<string, unknown>) => {
+    for (const [key, value] of Object.entries(from)) {
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        into[key] = merge({ ...((into[key] as Record<string, unknown>) ?? {}) }, value as Record<string, unknown>);
+      } else {
+        into[key] = value;
+      }
+    }
+    return into;
+  };
+  const tree = merge({}, deCatalog as Record<string, unknown>);
+  const dir = join(process.cwd(), "messages", "fragments");
+  if (existsSync(dir)) {
+    for (const file of readdirSync(dir).filter((name) => name.endsWith(".json"))) {
+      const fragment = JSON.parse(readFileSync(join(dir, file), "utf8")) as Record<string, Record<string, unknown>>;
+      if (fragment.de) merge(tree, fragment.de);
+    }
+  }
+  return tree;
+}
+
+async function analyzeAPalm(beforePhoto?: () => void, baseMessages: Record<string, unknown> = {}) {
   const { container } = render(
-    <LanguageProvider baseMessages={{}}>
+    <LanguageProvider baseMessages={baseMessages as never}>
       <PalmReadingPanel />
     </LanguageProvider>,
   );
@@ -149,6 +182,34 @@ describe("PalmReadingPanel", () => {
     });
     expect(
       await screen.findByText(`You've had this week's 2 palm readings. Your next one opens on ${opens}.`),
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["not_a_palm", "This photo doesn't look like an open palm."],
+    ["back_of_hand", "This looks like the back of a hand."],
+    ["unclear", "The lines on this palm are hard to make out."],
+  ])("says why the photo check refused a photo (%s), and that it used no reading", async (reason, opening) => {
+    setReducedMotion(true);
+    await analyzeAPalm();
+    await act(async () => {
+      answer(photoRefusal(reason));
+    });
+    const message = await screen.findByText((text) => text.startsWith(opening));
+    expect(message.textContent).toContain("This didn't use up a reading.");
+    expect(message.textContent).not.toContain("route English");
+  });
+
+  it("words a refused photo in the reader's language", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm(undefined, germanMessages());
+    await act(async () => {
+      answer(photoRefusal("back_of_hand"));
+    });
+    expect(
+      await screen.findByText(
+        "Das sieht nach einem Handrücken aus. Dreh deine Hand bitte um und fotografiere die Handfläche. Dieses Foto zählt nicht als Deutung.",
+      ),
     ).toBeInTheDocument();
   });
 
