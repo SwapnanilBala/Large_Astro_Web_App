@@ -2,6 +2,7 @@ import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { LanguageProvider } from "@/lib/i18n-context";
+import palmMessages from "@/messages/en.palm.json";
 import PalmReadingPanel from "./palm-reading-panel";
 
 /*
@@ -150,6 +151,22 @@ describe("PalmReadingPanel", () => {
     expect(
       await screen.findByText(`You've had this week's 2 palm readings. Your next one opens on ${opens}.`),
     ).toBeInTheDocument();
+  });
+
+  it("asks the reader to sign in when the route answers 401", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm();
+    await act(async () => {
+      answer(
+        new Response(
+          JSON.stringify({
+            error: { code: "UNAUTHORIZED", message: "Sign in to read your palm.", details: { scope: "sign_in" } },
+          }),
+          { status: 401, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+    });
+    expect(await screen.findByText(palmMessages.palm.errors.signInRequired)).toBeInTheDocument();
   });
 
   it("asks whose hand it is, and sends no hand rule until the reader says", async () => {

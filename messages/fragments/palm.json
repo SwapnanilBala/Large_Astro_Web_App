@@ -2,42 +2,66 @@
   "es": {
     "palm": {
       "errors": {
-        "weeklyLimit": "Ya has hecho las {count} lecturas de la palma de esta semana. La próxima estará disponible el {date}."
+        "weeklyLimit": "Ya has hecho las {count} lecturas de la palma de esta semana. La próxima estará disponible el {date}.",
+        "signInRequired": "Inicia sesión para leer tu palma."
+      },
+      "qa": {
+        "signInRequired": "Inicia sesión para preguntar sobre tu lectura de la palma."
       }
     }
   },
   "fr": {
     "palm": {
       "errors": {
-        "weeklyLimit": "Vous avez déjà eu les {count} lectures de la paume de cette semaine. La prochaine sera disponible le {date}."
+        "weeklyLimit": "Vous avez déjà eu les {count} lectures de la paume de cette semaine. La prochaine sera disponible le {date}.",
+        "signInRequired": "Connectez-vous pour obtenir la lecture de votre paume."
+      },
+      "qa": {
+        "signInRequired": "Connectez-vous pour poser des questions sur la lecture de votre paume."
       }
     }
   },
   "it": {
     "palm": {
       "errors": {
-        "weeklyLimit": "Hai già fatto le {count} letture della mano di questa settimana. La prossima sarà disponibile {date}."
+        "weeklyLimit": "Hai già fatto le {count} letture della mano di questa settimana. La prossima sarà disponibile {date}.",
+        "signInRequired": "Accedi per la lettura della tua mano."
+      },
+      "qa": {
+        "signInRequired": "Accedi per fare domande sulla lettura della tua mano."
       }
     }
   },
   "de": {
     "palm": {
       "errors": {
-        "weeklyLimit": "Du hast die {count} Handdeutungen dieser Woche schon genutzt. Die nächste ist ab {date} möglich."
+        "weeklyLimit": "Du hast die {count} Handdeutungen dieser Woche schon genutzt. Die nächste ist ab {date} möglich.",
+        "signInRequired": "Melde dich an, um deine Hand deuten zu lassen."
+      },
+      "qa": {
+        "signInRequired": "Melde dich an, um Fragen zu deiner Handdeutung zu stellen."
       }
     }
   },
   "hi": {
     "palm": {
       "errors": {
-        "weeklyLimit": "इस सप्ताह के आपके {count} हस्तरेखा पठन पूरे हो चुके हैं। अगला पठन {date} से उपलब्ध होगा।"
+        "weeklyLimit": "इस सप्ताह के आपके {count} हस्तरेखा पठन पूरे हो चुके हैं। अगला पठन {date} से उपलब्ध होगा।",
+        "signInRequired": "अपनी हस्तरेखा पढ़वाने के लिए साइन इन करें।"
+      },
+      "qa": {
+        "signInRequired": "अपने हस्तरेखा पठन के बारे में पूछने के लिए साइन इन करें।"
       }
     }
   },
   "bn": {
     "palm": {
       "errors": {
-        "weeklyLimit": "এই সপ্তাহের আপনার {count}টি হস্তরেখা পাঠ শেষ হয়েছে। পরের পাঠ {date} থেকে পাওয়া যাবে।"
+        "weeklyLimit": "এই সপ্তাহের আপনার {count}টি হস্তরেখা পাঠ শেষ হয়েছে। পরের পাঠ {date} থেকে পাওয়া যাবে।",
+        "signInRequired": "আপনার হস্তরেখা পড়াতে সাইন ইন করুন।"
+      },
+      "qa": {
+        "signInRequired": "আপনার হস্তরেখা পাঠ নিয়ে প্রশ্ন করতে সাইন ইন করুন।"
       }
     }
   }

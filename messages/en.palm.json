@@ -140,7 +140,8 @@
       "analysisFailed": "Analysis failed",
       "generic": "Something went wrong",
       "saveFailed": "Failed to save reading",
-      "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}."
+      "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}.",
+      "signInRequired": "Sign in to read your palm."
     },
     "history": {
       "kicker": "Your archive",
@@ -230,6 +231,7 @@
       "thinking": "Looking at your palm again…",
       "threadFull": "That's every question for this reading. Take a new reading to carry on.",
       "errorGeneric": "That question could not be answered. Please try again.",
+      "signInRequired": "Sign in to ask about your palm reading.",
       "footnote": "Tendencies and potentials, never fixed destiny.",
       "starterCareer": "What does my palm say about where my work is heading?",
       "starterTiming": "What should I be paying attention to over the next year?",
