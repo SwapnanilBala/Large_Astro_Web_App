@@ -437,7 +437,7 @@ function failure(error: unknown) {
       console.error("ask-classics: unexpected", error);
     }
   }
-  return errorResponse(error, "The classics could not be asked.");
+  return errorResponse(error, "The classics could not be asked.", { route: "/api/chart/ask-classics" });
 }
 
 export async function GET(request: NextRequest) {

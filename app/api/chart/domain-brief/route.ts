@@ -346,6 +346,6 @@ export async function GET(request: NextRequest) {
         console.error("domain-brief: unexpected", error);
       }
     }
-    return errorResponse(error, "The life-area brief could not be prepared.");
+    return errorResponse(error, "The life-area brief could not be prepared.", { route: "/api/chart/domain-brief" });
   }
 }

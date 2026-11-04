@@ -410,6 +410,6 @@ export async function POST(request: NextRequest) {
         console.error("current-period: unexpected", error);
       }
     }
-    return errorResponse(error, "The current-period reading could not be prepared.");
+    return errorResponse(error, "The current-period reading could not be prepared.", { route: "/api/chart/current-period" });
   }
 }

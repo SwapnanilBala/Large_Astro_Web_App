@@ -391,6 +391,6 @@ export async function GET(request: NextRequest) {
         console.error("area-classics: unexpected", error);
       }
     }
-    return errorResponse(error, "The classical notes could not be prepared.");
+    return errorResponse(error, "The classical notes could not be prepared.", { route: "/api/chart/area-classics" });
   }
 }

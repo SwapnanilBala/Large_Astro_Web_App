@@ -94,6 +94,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Varshaphal API error:", error);
-    return errorResponse(error, "Varshaphal calculation failed");
+    return errorResponse(error, "Varshaphal calculation failed", { route: "/api/varshaphal" });
   }
 }

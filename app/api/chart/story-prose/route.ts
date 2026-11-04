@@ -496,7 +496,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ prose: cleaned, cached: false });
   } catch (error) {
     logFailure(error);
-    return errorResponse(error, "The written report could not be prepared.");
+    return errorResponse(error, "The written report could not be prepared.", { route: "/api/chart/story-prose" });
   }
 }
 

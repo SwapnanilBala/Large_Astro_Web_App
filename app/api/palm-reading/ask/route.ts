@@ -285,6 +285,6 @@ export async function POST(request: NextRequest) {
         console.error("palm-ask: unexpected", error);
       }
     }
-    return errorResponse(error, "That question could not be answered.");
+    return errorResponse(error, "That question could not be answered.", { route: "/api/palm-reading/ask" });
   }
 }

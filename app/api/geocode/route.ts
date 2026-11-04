@@ -168,6 +168,6 @@ export async function GET(request: NextRequest) {
         { status: 504 },
       );
     }
-    return errorResponse(error, "Geocoding request failed");
+    return errorResponse(error, "Geocoding request failed", { route: "/api/geocode" });
   }
 }

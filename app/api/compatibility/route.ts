@@ -64,6 +64,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Compatibility API error:", error);
-    return errorResponse(error, "Compatibility calculation failed");
+    return errorResponse(error, "Compatibility calculation failed", { route: "/api/compatibility" });
   }
 }

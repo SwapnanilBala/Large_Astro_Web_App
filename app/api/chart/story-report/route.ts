@@ -71,6 +71,6 @@ export async function GET(request: NextRequest) {
       route: "/api/chart/story-report [GET]",
       error: error instanceof Error ? error.message : String(error),
     }));
-    return errorResponse(error, "Verified story generation failed");
+    return errorResponse(error, "Verified story generation failed", { route: "/api/chart/story-report" });
   }
 }

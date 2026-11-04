@@ -49,6 +49,6 @@ export async function GET(request: NextRequest) {
       route: "/api/chart/life-domains [GET]",
       error: error instanceof Error ? error.message : String(error),
     }));
-    return errorResponse(error, "Life-domain analysis failed");
+    return errorResponse(error, "Life-domain analysis failed", { route: "/api/chart/life-domains" });
   }
 }

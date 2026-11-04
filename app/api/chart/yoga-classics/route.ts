@@ -355,6 +355,6 @@ export async function POST(request: NextRequest) {
         console.error("yoga-classics: unexpected", error);
       }
     }
-    return errorResponse(error, "The classical note could not be prepared.");
+    return errorResponse(error, "The classical note could not be prepared.", { route: "/api/chart/yoga-classics" });
   }
 }

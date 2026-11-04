@@ -118,6 +118,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Muhurta API error:", error);
-    return errorResponse(error, "Muhurta calculation failed");
+    return errorResponse(error, "Muhurta calculation failed", { route: "/api/muhurta" });
   }
 }
