@@ -15,17 +15,31 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ChartApiResponse } from "@/lib/astro-types";
 import { buildChart } from "@/lib/engines/chart-service";
 import type { BirthDetailsInput } from "@/lib/engines/compatibility-service";
 import { LanguageProvider, type MessageTree } from "@/lib/i18n-context";
 import MobileLanguageProvider from "@/lib/i18n-mobile";
 import hi from "@/messages/hi.json";
+import en from "@/messages/en.mobile-insights.json";
 import MobileInsights from "./mobile-insights";
 
 /* It records the visit and talks to the sync API; neither is under test. */
 vi.mock("./mobile-chart-sync", () => ({ default: () => null }));
+
+/* Today's written readings ask their routes; here every route is down, so the
+   page shows what it shows without them. */
+const fetchMock = vi.fn(async (_input: RequestInfo | URL, _init?: RequestInit) => ({ ok: false, status: 503, json: async () => ({}) }) as Response);
+beforeEach(() => {
+  fetchMock.mockClear();
+  vi.stubGlobal("fetch", fetchMock);
+  vi.spyOn(console, "warn").mockImplementation(() => {});
+});
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 const BENGALURU: BirthDetailsInput = {
   name: "Test",
@@ -59,14 +73,16 @@ const TROMSO: BirthDetailsInput = {
 /* `messages` renders the page in another language. The provider cannot
    import() a language file under vitest, so that catalog goes in as the
    baseline instead, as BackButton.test.tsx does. */
-function renderPage(birth: BirthDetailsInput, engine_id: string, messages?: MessageTree) {
+/* The page opens on the tab its hash names; most of these look at the chart. */
+function renderPage(birth: BirthDetailsInput, engine_id: string, messages?: MessageTree, tab = "chart") {
+  window.history.replaceState(null, "", `#${tab}`);
   const payload = buildChart({ ...birth, engine_id }) as unknown as ChartApiResponse;
   const page = (
     <MobileInsights
       payload={payload}
       error=""
       desktopHref="/insights"
-      historyQs=""
+      historyQs="name=Test&birthDate=1990-05-15"
       birthDate={birth.birth_date}
       birthTime={birth.birth_time}
       kalatra={null}
@@ -189,7 +205,7 @@ describe("MobileInsights chart names in Hindi", () => {
   });
 
   it("names the dasha lords in Hindi", () => {
-    renderPage(BENGALURU, "lahiri_classic", hindi);
+    renderPage(BENGALURU, "lahiri_classic", hindi, "timing");
     const periods = screen.getByRole("columnheader", { name: hi.mobileInsights.colPeriod }).closest("table")!;
     const lords = within(periods)
       .getAllByRole("rowheader")
@@ -197,8 +213,10 @@ describe("MobileInsights chart names in Hindi", () => {
     expect(lords.length).toBeGreaterThan(0);
     expect(lords.filter((lord) => LATIN.test(lord))).toEqual([]);
 
+    fireEvent.click(screen.getByRole("tab", { name: hi.mobileInsights.tabToday }));
     const now = screen.getByRole("heading", { name: hi.mobileInsights.nowLabel }).closest("section")!;
     expect(now.querySelector("p")!.textContent).not.toMatch(LATIN);
+    fireEvent.click(screen.getByRole("tab", { name: hi.mobileInsights.tabChart }));
     expect(screen.getByText(/^पद \d · /).textContent).not.toMatch(LATIN);
   });
 
@@ -245,5 +263,65 @@ describe("MobileInsights chart names in Hindi", () => {
     expect(readouts[0].textContent).toMatch(/^कर्क · \d+$/);
     expect(readouts.map((readout) => readout.textContent).filter((text) => LATIN.test(text ?? ""))).toEqual([]);
     expect(screen.getAllByText(/^\S+, \d+ बिंदु$/)).toHaveLength(12);
+  });
+});
+
+/*
+ * The page in tabs: Today, Chart, Timing, Readings, Ask. The hash names the
+ * tab, so a link or a reload opens on it; Today's written readings start only
+ * once Today is on screen, since each comes out of the reader's daily
+ * allowance.
+ */
+describe("MobileInsights tabs", () => {
+  const tabNamed = (key: keyof typeof en.mobileInsights) => screen.getByRole("tab", { name: en.mobileInsights[key] as string });
+
+  it("opens on Today, with where the reader is in their timeline", () => {
+    renderPage(BENGALURU, "lahiri_classic", undefined, "");
+    expect(screen.getAllByRole("tab")).toHaveLength(5);
+    expect(tabNamed("tabToday").getAttribute("aria-selected")).toBe("true");
+    expect(screen.getByRole("heading", { name: en.mobileInsights.nowLabel })).toBeTruthy();
+    /* The chart's table is a tab away. */
+    expect(screen.queryByRole("columnheader", { name: "Hse" })).toBeNull();
+  });
+
+  it("asks for Today's readings on Today, and not for a link to another tab", () => {
+    renderPage(BENGALURU, "lahiri_classic", undefined, "chart");
+    expect(fetchMock).not.toHaveBeenCalled();
+    fireEvent.click(tabNamed("tabToday"));
+    const asked = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(asked).toContain("/api/chart/current-period");
+    expect(asked.some((url) => url.startsWith("/api/chart/life-shifts?name=Test"))).toBe(true);
+  });
+
+  it("names the tab in the address, and moves between tabs with the arrow keys", () => {
+    renderPage(BENGALURU, "lahiri_classic", undefined, "");
+    fireEvent.click(tabNamed("tabTiming"));
+    expect(window.location.hash).toBe("#timing");
+    expect(tabNamed("tabTiming").getAttribute("aria-selected")).toBe("true");
+    fireEvent.keyDown(screen.getByRole("tablist"), { key: "ArrowRight" });
+    expect(window.location.hash).toBe("#readings");
+    fireEvent.keyDown(screen.getByRole("tablist"), { key: "End" });
+    expect(window.location.hash).toBe("#ask");
+  });
+
+  it("puts the dasha cycle on Timing, with the way on to the timing pages", () => {
+    renderPage(BENGALURU, "lahiri_classic", undefined, "timing");
+    expect(screen.getByRole("columnheader", { name: en.mobileInsights.colPeriod })).toBeTruthy();
+    const timing = screen.getByRole("link", { name: new RegExp(en.mobileInsights.timingToolsLink) });
+    expect(timing.getAttribute("href")).toBe("/insights/timing?name=Test&birthDate=1990-05-15");
+    const chapters = screen.getByRole("link", { name: new RegExp(en.mobileInsights.shiftsLink) });
+    expect(chapters.getAttribute("href")).toBe("/insights/life-shifts?name=Test&birthDate=1990-05-15");
+  });
+
+  it("shows four readings that deserve attention, and the rest on request", () => {
+    const payload = renderPage(BENGALURU, "lahiri_classic", undefined, "readings");
+    const high = (payload.chart.deterministic_rules ?? []).filter((rule) => rule.priority === "high").length;
+    const shown = () => screen.getAllByRole("heading", { level: 3 }).length;
+    expect(shown()).toBe(Math.min(4, high));
+    if (high > 4) {
+      const more = screen.getByRole("button", { name: new RegExp(`^${high - 4} more reading`) });
+      fireEvent.click(more);
+      expect(shown()).toBe(high);
+    }
   });
 });

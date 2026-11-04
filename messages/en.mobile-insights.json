@@ -69,7 +69,92 @@
     "systemKoch": "Koch",
     "systemCampanus": "Campanus",
     "systemRegiomontanus": "Regiomontanus",
-    "systemPorphyry": "Porphyry"
+    "systemPorphyry": "Porphyry",
+    "tabToday": "Today",
+    "tabChart": "Chart",
+    "tabTiming": "Timing",
+    "tabAsk": "Ask",
+    "meaningLabel": "What This Means For You",
+    "meaningPending": "Reading your current period…",
+    "writing": "Writing your reading",
+    "shiftsKicker": "Major Life Shifts",
+    "shiftsLink": "Every chapter, past and ahead",
+    "timingToolsLink": "Explore your timing",
+    "shifts": {
+      "past": "Past chapter",
+      "active": "Active now",
+      "upcoming": "Upcoming",
+      "pivot": "Pivot:",
+      "age": "age {age}",
+      "window": "Window:",
+      "labels": {
+        "mahadasha": "{planet} mahadasha begins",
+        "saturnReturn": "Saturn return ({ordinal})",
+        "jupiterReturn": "Jupiter return ({ordinal})",
+        "nodalReturn": "Nodal return ({ordinal})"
+      },
+      "ordinals": {
+        "first": "first",
+        "second": "second",
+        "third": "third",
+        "fourth": "fourth"
+      },
+      "themes": {
+        "sun": "authority, identity, and visibility",
+        "moon": "emotional foundations, family, and inner safety",
+        "mars": "courage, conflict, and decisive action",
+        "mercury": "communication, study, and adaptive thinking",
+        "jupiter": "expansion, faith, teaching, and ethical growth",
+        "venus": "love, partnership, money, and pleasure",
+        "saturn": "discipline, responsibility, and karmic reckoning",
+        "rahu": "ambition, hunger, and unfamiliar terrain",
+        "ketu": "release, withdrawal, and inward mastery",
+        "saturnReturn": "structure, responsibility, and the cost of choices",
+        "jupiterReturn": "expansion, meaning, and a wider field of play",
+        "nodalReturn": "fate axis — what you reach for and what you release"
+      }
+    },
+    "sources": {
+      "label": "The passages ({count})",
+      "ref": "Brihat Jataka {ref}",
+      "refStrijataka": "Strijataka, ch. {ref}",
+      "note": "translator's note",
+      "credit": "The numbers point to the verses they come from, quoted as printed in N. Chidambaram Iyer's 1885 English translation of Varahamihira's Brihat Jataka.",
+      "creditStrijataka": "Passages marked Strijataka are quoted as printed in B. Suryanarain Rao's Strijataka, or Female Horoscopy (1931), a book on women's birth charts. Words in square brackets are ours, not the book's."
+    },
+    "askPending": "Reading the classics for your chart…",
+    "ask": {
+      "kicker": "Ask the classics",
+      "heading": "Put a question to the books",
+      "lead": "Pick a question or ask your own. The answer is drawn only from the passages whose conditions hold in your chart, and every statement points to the passage it comes from.",
+      "chooseLabel": "Questions you can ask",
+      "loading": "Finding the questions your chart can answer…",
+      "empty": "The books have nothing on this question for your chart.",
+      "limited": "That is all the questions for today. Come back tomorrow to ask more.",
+      "limitedSignIn": "That is all the questions for today. Sign in to ask more.",
+      "failed": "This question could not be answered just now. Ask it again to try once more.",
+      "ownLabel": "Or ask your own question",
+      "ownPlaceholder": "For example: What kind of work suits me?",
+      "ownHint": "Questions about your own chart, up to {max} characters. Each one counts toward today's questions.",
+      "refusedInstructions": "That reads like an instruction rather than a question. Ask something about your own chart.",
+      "refusedForbidden": "The readings do not go into that. Try a question about another part of your life.",
+      "refusedNotAboutChart": "The books can only answer questions about your own chart: work, money, love, family, character and the like.",
+      "submit": "Ask",
+      "questions": {
+        "career_year": "My career in the year ahead",
+        "love_year": "My love life in the year ahead",
+        "money_year": "Money in the year ahead",
+        "health": "Health and vitality",
+        "marriage": "Marriage and my partner",
+        "strengths": "My natural strengths",
+        "children": "Children",
+        "standing": "Reputation and standing"
+      }
+    },
+    "tabsLabel": "Sections of your reading",
+    "tabReadings": "Readings",
+    "moreReadingsOne": "{count} more reading",
+    "moreReadingsOther": "{count} more readings"
   },
   "nakshatraNames": {
     "ashwini": "Ashwini",

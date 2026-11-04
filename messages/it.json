@@ -2896,7 +2896,92 @@
     "systemPorphyry": "Porfirio",
     "yogasTitle": "Yoga",
     "karmaTitle": "Karma e vocazione",
-    "karmaSubtitle": "Ciò che la carta ha portato con sé e il lavoro a cui indica"
+    "karmaSubtitle": "Ciò che la carta ha portato con sé e il lavoro a cui indica",
+    "tabToday": "Oggi",
+    "tabChart": "Carta",
+    "tabTiming": "Tempi",
+    "tabAsk": "Chiedi",
+    "meaningLabel": "Cosa Significa Per Te",
+    "meaningPending": "Interpretazione del tuo periodo attuale…",
+    "writing": "Stesura della tua lettura",
+    "shiftsKicker": "Grandi svolte di vita",
+    "shiftsLink": "Ogni capitolo, passato e futuro",
+    "timingToolsLink": "Esplora i tuoi tempi",
+    "shifts": {
+      "past": "Capitolo passato",
+      "active": "Attivo ora",
+      "upcoming": "In arrivo",
+      "pivot": "Svolta:",
+      "age": "età {age}",
+      "window": "Finestra:",
+      "labels": {
+        "mahadasha": "Inizia la Mahadasha di {planet}",
+        "saturnReturn": "Ritorno di Saturno ({ordinal})",
+        "jupiterReturn": "Ritorno di Giove ({ordinal})",
+        "nodalReturn": "Ritorno nodale ({ordinal})"
+      },
+      "ordinals": {
+        "first": "primo",
+        "second": "secondo",
+        "third": "terzo",
+        "fourth": "quarto"
+      },
+      "themes": {
+        "sun": "Autorità, identità e visibilità",
+        "moon": "Fondamenta emotive, famiglia e sicurezza interiore",
+        "mars": "Coraggio, conflitto e azione decisa",
+        "mercury": "Comunicazione, studio e pensiero flessibile",
+        "jupiter": "Espansione, fede, insegnamento e crescita etica",
+        "venus": "Amore, coppia, denaro e piacere",
+        "saturn": "Disciplina, responsabilità e resa dei conti karmica",
+        "rahu": "Ambizione, brama e terreni inesplorati",
+        "ketu": "Liberazione, ritiro e padronanza interiore",
+        "saturnReturn": "Struttura, responsabilità e il prezzo delle scelte",
+        "jupiterReturn": "Espansione, significato e un campo d'azione più ampio",
+        "nodalReturn": "L'asse del destino — ciò che cerchi e ciò che lasci andare"
+      }
+    },
+    "sources": {
+      "label": "I passi ({count})",
+      "ref": "Brihat Jataka {ref}",
+      "refStrijataka": "Strijataka, cap. {ref}",
+      "note": "nota del traduttore",
+      "credit": "I numeri rimandano ai versi da cui sono tratti, citati come sono stampati nella traduzione inglese del Brihat Jataka di Varahamihira curata da N. Chidambaram Iyer nel 1885.",
+      "creditStrijataka": "I passi segnati Strijataka sono citati come sono stampati in Strijataka, or Female Horoscopy (1931), il libro di B. Suryanarain Rao sui temi natali delle donne. Le parole tra parentesi quadre sono nostre, non del libro."
+    },
+    "askPending": "Lettura dei classici per il tuo tema natale…",
+    "ask": {
+      "kicker": "Chiedi ai classici",
+      "heading": "Fai una domanda ai libri",
+      "lead": "Scegli una domanda o scrivi la tua. La risposta attinge solo ai passi le cui condizioni si verificano nel tuo tema natale, e ogni affermazione rimanda al passo da cui proviene.",
+      "chooseLabel": "Domande che puoi fare",
+      "loading": "Cerchiamo le domande a cui il tuo tema natale può rispondere…",
+      "empty": "I libri non dicono nulla su questa domanda per il tuo tema natale.",
+      "limited": "Per oggi è tutto. Torna domani per fare altre domande.",
+      "limitedSignIn": "Per oggi è tutto. Accedi per fare altre domande.",
+      "failed": "Non è stato possibile rispondere a questa domanda in questo momento. Ponila di nuovo per riprovare.",
+      "ownLabel": "Oppure fai la tua domanda",
+      "ownPlaceholder": "Per esempio: che tipo di lavoro fa per me?",
+      "ownHint": "Domande sul tuo tema natale, fino a {max} caratteri. Ognuna conta tra le domande di oggi.",
+      "refusedInstructions": "Sembra un'istruzione più che una domanda. Chiedi qualcosa sul tuo tema natale.",
+      "refusedForbidden": "Le letture non trattano questo argomento. Prova con una domanda su un altro aspetto della tua vita.",
+      "refusedNotAboutChart": "I libri possono rispondere solo a domande sul tuo tema natale: lavoro, denaro, amore, famiglia, carattere e simili.",
+      "submit": "Chiedi",
+      "questions": {
+        "career_year": "La mia carriera nel prossimo anno",
+        "love_year": "La mia vita sentimentale nel prossimo anno",
+        "money_year": "Il denaro nel prossimo anno",
+        "health": "Salute e vitalità",
+        "marriage": "Il matrimonio e il partner",
+        "strengths": "I miei punti di forza",
+        "children": "Figli",
+        "standing": "Reputazione e posizione"
+      }
+    },
+    "tabsLabel": "Sezioni della tua lettura",
+    "tabReadings": "Letture",
+    "moreReadingsOne": "Ancora {count} lettura",
+    "moreReadingsOther": "Altre {count} letture"
   },
   "strength": {
     "planets": {
