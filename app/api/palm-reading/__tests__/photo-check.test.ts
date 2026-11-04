@@ -24,7 +24,15 @@ vi.mock("@anthropic-ai/sdk", async (importOriginal) => {
     },
   };
 });
-vi.mock("@/lib/llm-budget", () => ({ consumeLlmBudget: mocks.budget }));
+vi.mock("@/lib/llm-budget", () => ({
+  consumeLlmBudget: mocks.budget,
+  llmCallerForSession: (session: { userId: string }) => ({ key: `user:${session.userId}`, signedIn: true }),
+}));
+/* Palm reading needs an account (feat/palm-requires-sign-in); these tests are
+   about what happens after that gate, so every request is a signed-in reader. */
+vi.mock("@/lib/identity/require-session", () => ({
+  sessionFromRequest: async () => ({ sessionId: "session-1", userId: "user-a" }),
+}));
 
 const READING = {
   overall_summary: "A hand of steady lines.",
