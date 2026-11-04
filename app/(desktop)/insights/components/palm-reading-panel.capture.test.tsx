@@ -1,6 +1,6 @@
 import { createElement, type ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { act, fireEvent, render, waitFor } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { LanguageProvider } from "@/lib/i18n-context";
 import PalmReadingPanel from "./palm-reading-panel";
 
@@ -65,6 +65,8 @@ vi.mock("framer-motion", () => ({
 }));
 
 const PHOTO_BASE64 = "Q0xFQU4=";
+/** Every stream the fake camera handed out, with its one track's stop(). */
+let streams: { stop: ReturnType<typeof vi.fn> }[] = [];
 const contexts = new WeakMap<HTMLCanvasElement, unknown>();
 
 function recordingContext(canvas: HTMLCanvasElement) {
@@ -95,9 +97,17 @@ beforeEach(() => {
     setTimeout(() => cb(performance.now()), 5) as unknown as number,
   );
   vi.stubGlobal("cancelAnimationFrame", (id: number) => clearTimeout(id));
+  streams = [];
   Object.defineProperty(navigator, "mediaDevices", {
     configurable: true,
-    value: { getUserMedia: async () => ({ getTracks: () => [{ stop: () => {} }] }) },
+    value: {
+      getUserMedia: vi.fn(async () => {
+        const stop = vi.fn();
+        const stream = { getTracks: () => [{ stop }], stop };
+        streams.push(stream);
+        return stream as unknown as MediaStream;
+      }),
+    },
   });
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (this: HTMLCanvasElement) {
     if (!contexts.has(this)) contexts.set(this, recordingContext(this));
@@ -116,6 +126,79 @@ beforeEach(() => {
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+});
+
+function renderPanel() {
+  return render(
+    <LanguageProvider baseMessages={{}}>
+      <PalmReadingPanel />
+    </LanguageProvider>,
+  );
+}
+
+async function openCamera(container: HTMLElement, button = ".palm-btn-camera") {
+  fireEvent.click(container.querySelector(button) as HTMLButtonElement);
+  return waitFor(() => {
+    const video = container.querySelector("video.palm-camera-video") as HTMLVideoElement | null;
+    if (!video) throw new Error("camera mode not open yet");
+    return video;
+  });
+}
+
+async function waitForShutter(container: HTMLElement) {
+  return waitFor(() => {
+    const button = container.querySelector(".palm-capture-btn") as HTMLButtonElement | null;
+    if (!button || button.disabled) throw new Error("no hand detected yet");
+    return button;
+  });
+}
+
+/*
+ * The <video> renders only in camera mode, so it does not exist when the
+ * stream arrives. startCamera used to hand the stream to an element that was
+ * not there, and the camera never showed: no frames, no hand, a shutter that
+ * stayed disabled. These pin the stream reaching the element once it mounts,
+ * and the camera being let go however camera mode ends.
+ */
+describe("PalmReadingPanel camera start", () => {
+  it("gives the stream to the video once camera mode has mounted it", async () => {
+    const { container } = renderPanel();
+    await act(async () => {});
+    const video = await openCamera(container);
+    expect(streams).toHaveLength(1);
+    await waitFor(() => expect(video.srcObject).toBe(streams[0]));
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+  });
+
+  it("stops the camera on Cancel", async () => {
+    const { container } = renderPanel();
+    await act(async () => {});
+    await openCamera(container);
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    expect(streams[0].stop).toHaveBeenCalled();
+    expect(container.querySelector("video")).toBeNull();
+  });
+
+  it("stops the camera when the panel goes away", async () => {
+    const { container, unmount } = renderPanel();
+    await act(async () => {});
+    await openCamera(container);
+    unmount();
+    expect(streams[0].stop).toHaveBeenCalled();
+  });
+
+  it("stops the camera on capture, and gives Retake's new stream to the new video", async () => {
+    const { container } = renderPanel();
+    await act(async () => {});
+    await openCamera(container);
+    fireEvent.click(await waitForShutter(container));
+    expect(streams[0].stop).toHaveBeenCalled();
+
+    const video = await openCamera(container, ".palm-captured-phase .palm-btn-camera");
+    expect(streams).toHaveLength(2);
+    await waitFor(() => expect(video.srcObject).toBe(streams[1]));
+    expect(streams[1].stop).not.toHaveBeenCalled();
+  });
 });
 
 describe("PalmReadingPanel camera capture", () => {
