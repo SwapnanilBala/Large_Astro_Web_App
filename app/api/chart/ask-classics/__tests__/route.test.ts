@@ -79,20 +79,8 @@ const passage = (ref: string, fields: Partial<PassageRow & { similarity: number 
   };
 };
 
-const cited = (text: string) => ({
-  type: "text",
-  text,
-  citations: [
-    {
-      type: "content_block_location",
-      document_index: 0,
-      start_block_index: 0,
-      end_block_index: 1,
-      cited_text: "The verse",
-      document_title: "Brihat Jataka",
-    },
-  ],
-});
+/* An answer that marks its statement with the first listed passage's number, before its full stop. */
+const cited = (text: string) => ({ type: "text", text: text.replace(/([.।])$/u, "[1]$1") });
 
 const answer = (...content: unknown[]) => ({
   stop_reason: "end_turn",
@@ -149,7 +137,7 @@ describe("a question", () => {
     expect(mocks.create).not.toHaveBeenCalled();
   });
 
-  it("is searched by its own words and the chart, then answered with citations", async () => {
+  it("is searched by its own words and the chart, then answered from numbered passages", async () => {
     const response = await GET(request("&question=career_year"));
     expect(response.status).toBe(200);
     const body = await response.json();
@@ -166,7 +154,9 @@ describe("a question", () => {
     const sent = mocks.create.mock.calls[0][0];
     expect(sent.model).toBe("claude-haiku-5-5");
     const content = sent.messages[0].content;
-    expect(content[0].type).toBe("document");
+    expect(content[0].text).toContain("The passages:\n");
+    expect(content[0].text).toContain("[1] (10.4) The verse 10.4.");
+    expect(content[0].text).toContain("[2] (18.10) The verse 18.10.");
     const instruction = content[content.length - 1].text as string;
     expect(instruction).toContain(ASK_QUESTIONS.career_year.text);
     expect(instruction).toContain("Write the answer in English.");
@@ -201,9 +191,9 @@ describe("a question", () => {
 
   it("is asked once more on Opus when the answer cites nothing, or says what the content line forbids", async () => {
     mocks.create
-      .mockResolvedValueOnce(answer({ type: "text", text: "I cannot say.", citations: null }))
+      .mockResolvedValueOnce(answer({ type: "text", text: "I cannot say." }))
       .mockResolvedValueOnce(answer(cited("You will enjoy freedom from disease.")))
-      .mockResolvedValueOnce(answer({ type: "text", text: "Nothing.", citations: null }))
+      .mockResolvedValueOnce(answer({ type: "text", text: "Nothing." }))
       .mockResolvedValueOnce(answer(cited("With Mars in your 10th house, you rise in your work.")));
 
     const uncited = await GET(request("&question=career_year"));
@@ -213,6 +203,36 @@ describe("a question", () => {
     const recovered = await GET(request("&question=career_year"));
     expect(recovered.status).toBe(200);
     expect(mocks.budget).toHaveBeenCalledTimes(2);
+  });
+
+  it("is asked once more on Opus when the answer copies a verse word for word", async () => {
+    mocks.near.mockResolvedValue([
+      passage("10.4", { text: "The person will be learned in the Sastras and will carry messages for others." }),
+    ]);
+    mocks.create
+      .mockResolvedValueOnce(answer(cited("With Mars in your 10th house, you will be learned in the Sastras and will carry messages.")))
+      .mockResolvedValueOnce(answer(cited("With Mars in your 10th house, the Brihat Jataka ties you to learning and to work as a go-between.")));
+    const response = await GET(request("&question=career_year"));
+    expect(response.status).toBe(200);
+    expect(mocks.create).toHaveBeenCalledTimes(2);
+    expect(mocks.create.mock.calls[1][0].model).toBe("claude-opus-5-5");
+    expect((await response.json()).reading.segments[0].text).toContain("go-between");
+    expect(mocks.budget).toHaveBeenCalledTimes(1);
+  });
+
+  it("is asked once more on Opus when the answer stops mid-sentence", async () => {
+    mocks.create
+      .mockResolvedValueOnce(answer({ type: "text", text: "With Mars in your 10th house, you rise in your work[1], and the" }))
+      .mockResolvedValueOnce(answer(cited("With Mars in your 10th house, you rise in your work.")));
+    const response = await GET(request("&question=career_year"));
+    expect(response.status).toBe(200);
+    expect(mocks.create.mock.calls[1][0].model).toBe("claude-opus-5-5");
+  });
+
+  it("drops a mark for a passage it was not given", async () => {
+    mocks.create.mockResolvedValueOnce(answer({ type: "text", text: "With Mars in your 10th house, you rise in your work[1][7]." }));
+    const body = await (await GET(request("&question=career_year"))).json();
+    expect(body.reading.sources.map((source: { ref: string }) => source.ref)).toEqual(["10.4"]);
   });
 
   it("is refused politely when today's allowance is spent", async () => {

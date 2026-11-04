@@ -12,7 +12,7 @@ import {
   askClassicsInstruction,
   periodLords,
   questionDocumentGroups,
-  questionDocuments,
+  questionPassageListing,
   selectQuestionPassages,
   withoutHeadings,
   yearPeriods,
@@ -41,9 +41,9 @@ import {
 import { readerFrom, type Reader } from "@/lib/knowledge/chart-reader";
 import { checkNote, type NoteFailure, type NoteProblem } from "@/lib/knowledge/classical-note-check";
 import type { ClassicalReading } from "@/lib/knowledge/classical-reading";
+import { copiedPassages, endsMidSentence, readingFromMarkers } from "@/lib/knowledge/dasha-reading";
 import { embedQuestion } from "@/lib/knowledge/question-embedding";
 import { passagesForChart, passagesNearQuestion } from "@/lib/knowledge/retrieve";
-import { readingFrom } from "@/lib/knowledge/yoga-classics-reading";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { CHART_EFFORT, CHART_MODEL } from "@/lib/llm-models";
 import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
@@ -91,9 +91,13 @@ import { COMMENTARY_LANGUAGES } from "@/lib/varga-commentary";
  *
  * The answer is written straight in the reader's language, from English
  * passages, as the other classical notes are; translating an English answer
- * afterwards would cut the citations loose from the words they belong to. An
- * answer that cites nothing is not shipped, and the content line is checked in
- * code (lib/knowledge/classical-note-check.ts) in every language, Hindi and
+ * afterwards would cut the source marks loose from the words they belong to.
+ * The passages go as a numbered listing and the answer marks each statement
+ * with its passage's number, as on the dasha readings: with the citations
+ * feature, Haiku pasted the verses themselves into most answers. An answer
+ * that cites nothing, stops mid-sentence or copies a passage word for word is
+ * not shipped, and the content line is checked in code
+ * (lib/knowledge/classical-note-check.ts) in every language, Hindi and
  * Bengali for their script too. A failed answer is asked for once more on
  * Opus 5.5 at low effort inside the same budget unit, as on the other notes.
  */
@@ -115,7 +119,13 @@ const DEADLINE_MS = 55_000;
 const RETRY_MIN_MS = 15_000;
 const CACHE_HEADER = "private, no-store";
 
-const FAILED: Record<NoteFailure, string> = {
+/* "copied": the answer pasted a passage in instead of saying it in its own words (copiedPassages);
+   "cut": it stopped mid-sentence. */
+type Failure = NoteFailure | "copied" | "cut";
+
+const FAILED: Record<Failure, string> = {
+  copied: "The answer copied its passages instead of putting them in its own words.",
+  cut: "The answer stopped mid-sentence.",
   refusal: "The answer was declined.",
   max_tokens: "The answer ran past its token ceiling.",
   uncited: "The answer came back without its sources.",
@@ -250,7 +260,7 @@ async function screen(request: NextRequest, spending: Spend, input: string): Pro
 
 /* ── The answer ───────────────────────────────────────────────────────────── */
 
-type Written = { reading: ClassicalReading } | { failure: NoteFailure };
+type Written = { reading: ClassicalReading } | { failure: Failure };
 
 type Asking = {
   /** For the logs: the fixed question's id, or "typed". */
@@ -282,7 +292,7 @@ async function writeAnswer(
         {
           role: "user",
           content: [
-            ...questionDocuments(groups),
+            { type: "text", text: `The passages:\n${questionPassageListing(groups)}` },
             { type: "text", text: askClassicsInstruction(question, periods, sex, language) },
           ],
         },
@@ -308,13 +318,33 @@ async function writeAnswer(
   if (response.stop_reason === "refusal") return { failure: "refusal" };
   if (response.stop_reason === "max_tokens") return { failure: "max_tokens" };
 
-  const reading = withoutHeadings(readingFrom(response.content, groups));
+  const written = response.content
+    .filter((block): block is Anthropic.TextBlock => block.type === "text")
+    .map((block) => block.text)
+    .join("");
+  const { reading: marked, strayMarks } = readingFromMarkers(written, groups);
+  const reading = withoutHeadings(marked);
+  if (strayMarks > 0) log("warn", "llm_note_stray_marks", { model: ask.model, attempt, question: label, strayMarks });
   if (reading.sources.length === 0) return { failure: "uncited" };
+  if (endsMidSentence(reading)) {
+    log("warn", "llm_note_cut", { model: ask.model, attempt, question: label, language, blocks: true });
+    return { failure: "cut" };
+  }
   const check = checkNote(reading, language);
   if (check.problems.length > 0) {
     const problems: NoteProblem[] = check.problems;
     log("warn", "llm_note_check", { model: ask.model, attempt, question: label, language, problems, blocks: true });
     return { failure: "check" };
+  }
+  /* A verse pasted in rather than put in the answer's own words: the content
+     check cannot see it, since none of its words is banned. */
+  const copied = copiedPassages(
+    reading,
+    groups.flatMap((group) => group.passages),
+  );
+  if (copied.length > 0) {
+    log("warn", "llm_note_copied", { model: ask.model, attempt, question: label, language, runs: copied.length, blocks: true });
+    return { failure: "copied" };
   }
   return { reading };
 }
