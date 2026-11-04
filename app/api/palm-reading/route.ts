@@ -5,6 +5,7 @@ import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
 import { consumeLlmBudget } from "@/lib/llm-budget";
 import { PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { classicalHandSection } from "@/lib/palm-readings/classical-hand";
+import { checkPalmPhoto, palmPhotoRefusalError } from "@/lib/palm-readings/photo-check";
 import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
 import { shapePalmReading } from "@/lib/palm-readings/reading-shape";
 import { safeLabel, safeNumber } from "@/lib/prompt-input";
@@ -707,6 +708,12 @@ export async function POST(request: NextRequest) {
         { statusCode: 503 },
       );
     }
+
+    /* A look at the photo on Haiku first (lib/palm-readings/photo-check.ts),
+       a fraction of a cent, so a photo that is not a palm costs no reading
+       and none of the reader's allowance. It fails open: null on any error. */
+    const photoRefusal = await checkPalmPhoto({ image, mediaType: mediaType as VisionRequest["mediaType"] });
+    if (photoRefusal) throw palmPhotoRefusalError(photoRefusal);
 
     /* Nothing above this line costs money; everything below it does, and this
        is the most expensive call in the app -- vision over a 5MB image at
