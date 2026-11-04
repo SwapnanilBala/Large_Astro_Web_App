@@ -286,16 +286,37 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
   const DrawingUtilsClassRef = useRef<typeof DrawingUtils | null>(null);
   const reduceMotion = usePrefersReducedMotion();
 
+  const mountedRef = useRef(false);
+  /* The canvas drawingUtilsRef draws on: the overlay is a new element each
+     time camera mode opens, so a Retake has to rebuild it. */
+  const drawingCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
   /* Declared ahead of the mount effect below, whose cleanup calls it. Refs
      only, so the first render's copy that cleanup holds is as good as any. */
-  const stopCamera = () => {
+  const stopCamera = useCallback(() => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
     if (rafRef.current) {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = null;
     }
-  };
+  }, []);
+
+  /* The <video> only renders in camera mode, so startCamera cannot hand it
+     the stream: the element does not exist yet when the stream arrives (it
+     used to try, found no element, and the camera never showed). The stream
+     waits in streamRef and is given to the element here, as it mounts --
+     on the first open and on every Retake alike. */
+  const attachVideo = useCallback((el: HTMLVideoElement | null) => {
+    videoRef.current = el;
+    const stream = streamRef.current;
+    if (!el || !stream || el.srcObject === stream) return;
+    el.srcObject = stream;
+    el.play().catch(() => {
+      /* autoPlay starts it as well; a refused play() is not a failed camera. */
+    });
+  }, []);
 
   /* ── MediaPipe initialization ── */
   const initMediaPipe = useCallback(async () => {
@@ -330,8 +351,10 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     initMediaPipe();
     return () => {
+      mountedRef.current = false;
       stopCamera();
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       if (handLandmarkerRef.current) {
@@ -354,11 +377,13 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
         return;
       }
 
-      // Lazily init DrawingUtils when canvas is available
-      if (!du && DrawingUtilsClassRef.current) {
+      // Lazily init DrawingUtils when canvas is available, and again when a
+      // Retake has mounted a new overlay canvas
+      if ((!du || drawingCanvasRef.current !== canvas) && DrawingUtilsClassRef.current) {
         const ctx2d = canvas.getContext("2d");
         if (ctx2d) {
           drawingUtilsRef.current = new DrawingUtilsClassRef.current(ctx2d);
+          drawingCanvasRef.current = canvas;
         }
         rafRef.current = requestAnimationFrame(detect);
         return;
@@ -400,34 +425,42 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
   }, []);
 
   /* ── camera lifecycle ── */
-  const startCamera = async () => {
-    setError(null);
+  const openStream = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      return await navigator.mediaDevices.getUserMedia({
         video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
       });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        await videoRef.current.play();
-      }
-      streamRef.current = stream;
-      setPhase("camera");
-      detectLoop();
     } catch {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
-        }
-        streamRef.current = stream;
-        setPhase("camera");
-        detectLoop();
-      } catch {
-        setError(tr("palm.errors.cameraDenied"));
-      }
+      return navigator.mediaDevices.getUserMedia({ video: true });
     }
   };
+
+  const startCamera = async () => {
+    setError(null);
+    stopCamera();
+    let stream: MediaStream;
+    try {
+      stream = await openStream();
+    } catch {
+      setError(tr("palm.errors.cameraDenied"));
+      return;
+    }
+    // Closed while the browser was asking: nothing will show it, so let it go.
+    if (!mountedRef.current) {
+      stream.getTracks().forEach((t) => t.stop());
+      return;
+    }
+    streamRef.current = stream;
+    attachVideo(videoRef.current); // only if the element is already there
+    setPhase("camera");
+    detectLoop();
+  };
+
+  /* Leaving camera mode, however it happens, lets the camera go. */
+  useEffect(() => {
+    if (phase !== "camera") return;
+    return stopCamera;
+  }, [phase, stopCamera]);
 
   /* ── capture frame ── */
   const captureFrame = () => {
@@ -818,7 +851,7 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
         <div className="palm-camera-phase">
           <div className="palm-camera-wrap">
             <video
-              ref={videoRef}
+              ref={attachVideo}
               playsInline
               muted
               autoPlay
