@@ -1597,7 +1597,12 @@
       "unsupportedType": "Téléversez une image JPEG, PNG ou WebP.",
       "analysisFailed": "L'analyse a échoué",
       "generic": "Une erreur est survenue",
-      "saveFailed": "Impossible d'enregistrer la lecture"
+      "saveFailed": "Impossible d'enregistrer la lecture",
+      "weeklyLimit": "Vous avez déjà eu les {count} lectures de la paume de cette semaine. La prochaine sera disponible le {date}.",
+      "notAPalm": "Cette photo ne semble pas montrer une paume ouverte. Photographiez l'intérieur de votre main, tourné vers l'objectif. Cette photo n'est pas comptée comme une lecture.",
+      "backOfHand": "On dirait le dos d'une main. Retournez votre main et photographiez votre paume. Cette photo n'est pas comptée comme une lecture.",
+      "unclearPhoto": "Les lignes de cette paume sont difficiles à distinguer. Réessayez avec plus de lumière, l'appareil bien stable et toute la paume dans le cadre. Cette photo n'est pas comptée comme une lecture.",
+      "signInRequired": "Connectez-vous pour obtenir la lecture de votre paume."
     },
     "history": {
       "kicker": "Vos archives",
@@ -1690,7 +1695,8 @@
       "footnote": "Des tendances et des potentiels, jamais un destin figé.",
       "starterCareer": "Que dit ma paume sur la direction que prend mon travail ?",
       "starterTiming": "À quoi devrais-je prêter attention au cours de l'année à venir ?",
-      "starterStrength": "Quelle ligne de ma main est la plus forte, et que signifie-t-elle ?"
+      "starterStrength": "Quelle ligne de ma main est la plus forte, et que signifie-t-elle ?",
+      "signInRequired": "Connectez-vous pour poser des questions sur la lecture de votre paume."
     }
   },
   "divisional": {

@@ -214,6 +214,46 @@ describe("PalmReadingPanel", () => {
     ).toBeInTheDocument();
   });
 
+  it("asks a German reader to sign in, in German", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm(undefined, germanMessages());
+    await act(async () => {
+      answer(
+        new Response(
+          JSON.stringify({
+            error: { code: "UNAUTHORIZED", message: "Sign in to read your palm.", details: { scope: "sign_in" } },
+          }),
+          { status: 401, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+    });
+    expect(await screen.findByText("Melde dich an, um deine Hand deuten zu lassen.")).toBeInTheDocument();
+  });
+
+  it("words the weekly limit in German, with the day the next reading opens", async () => {
+    setReducedMotion(true);
+    await analyzeAPalm(undefined, germanMessages());
+    await act(async () => {
+      answer(
+        new Response(
+          JSON.stringify({
+            error: {
+              code: "RATE_LIMITED",
+              message: "route English",
+              details: { scope: "weekly", resetsAt: "2026-11-09T00:00:00.000Z" },
+            },
+          }),
+          { status: 429, headers: { "Content-Type": "application/json" } },
+        ),
+      );
+    });
+    const message = await screen.findByText((text) => text.startsWith("Du hast die "));
+    expect(message.textContent).toMatch(
+      /^Du hast die \d+ Handdeutungen dieser Woche schon genutzt\. Die nächste ist ab \S.* möglich\.$/,
+    );
+    expect(message.textContent).not.toContain("route English");
+  });
+
   it("asks the reader to sign in when the route answers 401", async () => {
     setReducedMotion(true);
     await analyzeAPalm();

@@ -1597,7 +1597,12 @@
       "unsupportedType": "Lade bitte ein Bild im Format JPEG, PNG oder WebP hoch.",
       "analysisFailed": "Analyse fehlgeschlagen",
       "generic": "Etwas ist schiefgelaufen",
-      "saveFailed": "Die Deutung konnte nicht gespeichert werden"
+      "saveFailed": "Die Deutung konnte nicht gespeichert werden",
+      "weeklyLimit": "Du hast die {count} Handdeutungen dieser Woche schon genutzt. Die nächste ist ab {date} möglich.",
+      "notAPalm": "Dieses Foto scheint keine offene Handfläche zu zeigen. Fotografiere bitte die Innenseite deiner Hand, der Kamera zugewandt. Dieses Foto zählt nicht als Deutung.",
+      "backOfHand": "Das sieht nach einem Handrücken aus. Dreh deine Hand bitte um und fotografiere die Handfläche. Dieses Foto zählt nicht als Deutung.",
+      "unclearPhoto": "Die Linien dieser Handfläche sind kaum zu erkennen. Versuch es bitte noch einmal bei hellerem Licht, mit ruhiger Kamera und der ganzen Handfläche im Bild. Dieses Foto zählt nicht als Deutung.",
+      "signInRequired": "Melde dich an, um deine Hand deuten zu lassen."
     },
     "history": {
       "kicker": "Dein Archiv",
@@ -1690,7 +1695,8 @@
       "footnote": "Tendenzen und Potenziale, nie ein festes Schicksal.",
       "starterCareer": "Was sagt meine Hand darüber, wohin sich meine Arbeit entwickelt?",
       "starterTiming": "Worauf sollte ich im kommenden Jahr achten?",
-      "starterStrength": "Welche Linie meiner Hand ist am stärksten, und was bedeutet sie?"
+      "starterStrength": "Welche Linie meiner Hand ist am stärksten, und was bedeutet sie?",
+      "signInRequired": "Melde dich an, um Fragen zu deiner Handdeutung zu stellen."
     }
   },
   "divisional": {

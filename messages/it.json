@@ -1597,7 +1597,12 @@
       "unsupportedType": "Carica un'immagine JPEG, PNG o WebP.",
       "analysisFailed": "Analisi non riuscita",
       "generic": "Qualcosa è andato storto",
-      "saveFailed": "Impossibile salvare la lettura"
+      "saveFailed": "Impossibile salvare la lettura",
+      "weeklyLimit": "Hai già fatto le {count} letture della mano di questa settimana. La prossima sarà disponibile {date}.",
+      "notAPalm": "Questa foto non sembra mostrare un palmo aperto. Fotografa l'interno della mano, rivolto verso la fotocamera. Questa foto non conta come lettura.",
+      "backOfHand": "Sembra il dorso di una mano. Gira la mano e fotografa il palmo. Questa foto non conta come lettura.",
+      "unclearPhoto": "Le linee di questo palmo si distinguono a fatica. Riprova con più luce, tenendo ferma la fotocamera e con tutto il palmo nell'inquadratura. Questa foto non conta come lettura.",
+      "signInRequired": "Accedi per la lettura della tua mano."
     },
     "history": {
       "kicker": "Il tuo archivio",
@@ -1690,7 +1695,8 @@
       "footnote": "Tendenze e potenzialità, mai un destino fissato.",
       "starterCareer": "Cosa dice il mio palmo sulla direzione del mio lavoro?",
       "starterTiming": "A cosa dovrei prestare attenzione nel prossimo anno?",
-      "starterStrength": "Qual è la linea più forte della mia mano e cosa significa?"
+      "starterStrength": "Qual è la linea più forte della mia mano e cosa significa?",
+      "signInRequired": "Accedi per fare domande sulla lettura della tua mano."
     }
   },
   "divisional": {
