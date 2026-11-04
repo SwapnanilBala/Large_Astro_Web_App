@@ -241,6 +241,14 @@ const READER_HINT_KEYS: Record<PalmReader, string> = {
   unspecified: "palm.panel.readerHintUnspecified",
 };
 
+/* Why the route's photo check refused a photo (details.reason on its 422),
+   and what the reader is told. Literal keys, as above. */
+const PHOTO_REFUSAL_KEYS = {
+  not_a_palm: "palm.errors.notAPalm",
+  back_of_hand: "palm.errors.backOfHand",
+  unclear: "palm.errors.unclearPhoto",
+} as const;
+
 /* ────────────────────────────────────────────────
    Component
    ──────────────────────────────────────────────── */
@@ -575,6 +583,13 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
             }),
           );
         }
+        /* A photo the route's check refused (lib/palm-readings/photo-check.ts):
+           a 422 naming why, which cost the reader no reading. */
+        const photoRefusal =
+          typeof details?.reason === "string" && Object.hasOwn(PHOTO_REFUSAL_KEYS, details.reason)
+            ? PHOTO_REFUSAL_KEYS[details.reason as keyof typeof PHOTO_REFUSAL_KEYS]
+            : null;
+        if (res.status === 422 && photoRefusal) throw new Error(tr(photoRefusal));
         throw new Error(
           err.error?.message || err.detail || tr("palm.errors.analysisFailed"),
         );

@@ -140,7 +140,10 @@
       "analysisFailed": "Analysis failed",
       "generic": "Something went wrong",
       "saveFailed": "Failed to save reading",
-      "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}."
+      "weeklyLimit": "You've had this week's {count} palm readings. Your next one opens on {date}.",
+      "notAPalm": "This photo doesn't look like an open palm. Please photograph the inside of your hand, facing the camera. This didn't use up a reading.",
+      "backOfHand": "This looks like the back of a hand. Please turn your hand over and photograph your palm. This didn't use up a reading.",
+      "unclearPhoto": "The lines on this palm are hard to make out. Please try again in brighter light, with the camera steady and the whole palm in the frame. This didn't use up a reading."
     },
     "history": {
       "kicker": "Your archive",
