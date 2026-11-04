@@ -56,6 +56,20 @@
   color: var(--on-accent);
 }
 
+/* Narrower phones (360-375px): a little less room round each label, so the
+   English five still fit without the fade. */
+@media (max-width: 380px) {
+  .tabs {
+    gap: 0.1rem;
+    padding-inline: 0.55rem;
+  }
+
+  .tab {
+    padding: 0 0.42rem;
+    font-size: 0.9rem;
+  }
+}
+
 .tab:focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
