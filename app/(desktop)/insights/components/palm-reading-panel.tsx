@@ -4,7 +4,8 @@ import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { AlertTriangle } from "lucide-react";
-import type { DrawingUtils, HandLandmarker, NormalizedLandmark } from "@mediapipe/tasks-vision";
+import type { DrawingUtils, HandLandmarker } from "@mediapipe/tasks-vision";
+import { encodeCleanFrame } from "@/lib/palm-readings/capture-frame";
 import { savePalmReading } from "@/lib/palm-readings/local-store";
 import { MEDIAPIPE_HAND_MODEL_URL, MEDIAPIPE_WASM_BASE } from "@/lib/palm-readings/mediapipe";
 import { LOCALE_TAGS, useRouteMessages, useTranslation } from "@/lib/i18n-context";
@@ -281,7 +282,6 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
   const handLandmarkerRef = useRef<HandLandmarker | null>(null);
   const drawingUtilsRef = useRef<DrawingUtils | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const lastLandmarksRef = useRef<NormalizedLandmark[] | null>(null);
   const handConnectionsRef = useRef<typeof HandLandmarker.HAND_CONNECTIONS | null>(null);
   const DrawingUtilsClassRef = useRef<typeof DrawingUtils | null>(null);
   const reduceMotion = usePrefersReducedMotion();
@@ -379,7 +379,6 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
         const score = results.handedness?.[0]?.[0]?.score ?? 0;
         setHandDetected(true);
         setHandScore(score);
-        lastLandmarksRef.current = results.landmarks[0];
 
         du.drawConnectors(results.landmarks[0], handConnectionsRef.current ?? undefined, {
           color: "#6ce1d4",
@@ -393,7 +392,6 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
       } else {
         setHandDetected(false);
         setHandScore(0);
-        lastLandmarksRef.current = null;
       }
 
       rafRef.current = requestAnimationFrame(detect);
@@ -437,31 +435,11 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
     const canvas = captureCanvasRef.current;
     if (!video || !canvas) return;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    ctx.drawImage(video, 0, 0);
-
-    // Draw landmarks on captured image too
-    if (lastLandmarksRef.current && DrawingUtilsClassRef.current && handConnectionsRef.current) {
-      try {
-        const du2 = new DrawingUtilsClassRef.current(ctx);
-        du2.drawConnectors(lastLandmarksRef.current, handConnectionsRef.current, {
-          color: "#6ce1d4",
-          lineWidth: 2,
-        });
-        du2.drawLandmarks(lastLandmarksRef.current, {
-          color: "#f2c26c",
-          lineWidth: 1,
-          radius: 3,
-        });
-      } catch { /* fallback: no landmarks on capture */ }
-    }
-
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
-    const base64 = dataUrl.split(",")[1];
+    // The frame alone: the landmarks stay on the live overlay, never on the
+    // photo the reader is sent (see lib/palm-readings/capture-frame.ts).
+    const frame = encodeCleanFrame(video, canvas);
+    if (!frame) return;
+    const { dataUrl, base64 } = frame;
     if (Math.floor((base64.length * 3) / 4) > MAX_PALM_IMAGE_BYTES) {
       setError(tr("palm.errors.captureTooLarge"));
       return;
@@ -599,7 +577,6 @@ export default function PalmReadingPanel({ jyotishContext, initialReader = "unsp
     setSaveError(null);
     setImageQualityDismissed(false);
     clearRevealTimers();
-    lastLandmarksRef.current = null;
   };
 
   /* ── which reveal sections actually apply to this reading? ── */
