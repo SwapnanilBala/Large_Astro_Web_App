@@ -495,6 +495,6 @@ export async function POST(request: NextRequest) {
         console.error("varga-commentary: unexpected", error);
       }
     }
-    return errorResponse(error, "The chart notes could not be prepared.");
+    return errorResponse(error, "The chart notes could not be prepared.", { route: "/api/chart/varga-commentary" });
   }
 }

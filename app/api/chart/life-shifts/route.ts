@@ -471,7 +471,7 @@ function logFailure(error: unknown) {
 
 function failure(error: unknown) {
   logFailure(error);
-  return errorResponse(error, "The life shift readings could not be prepared.");
+  return errorResponse(error, "The life shift readings could not be prepared.", { route: "/api/chart/life-shifts" });
 }
 
 /** `{ ids, depth, language }` in the body, the birth details in the query. */

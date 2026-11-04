@@ -313,7 +313,7 @@ function failure(error: unknown) {
       console.error("dasha-reading: unexpected", error);
     }
   }
-  return errorResponse(error, "The period could not be read.");
+  return errorResponse(error, "The period could not be read.", { route: "/api/chart/dasha-reading" });
 }
 
 /** `{ lords, start, language }` in the body, the birth details in the query. */

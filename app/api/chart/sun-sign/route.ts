@@ -87,6 +87,6 @@ export async function GET(request: NextRequest) {
       engine_id: engineId,
     });
   } catch (error) {
-    return errorResponse(error, "Sun sign lookup failed");
+    return errorResponse(error, "Sun sign lookup failed", { route: "/api/chart/sun-sign" });
   }
 }

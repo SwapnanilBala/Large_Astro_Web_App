@@ -279,6 +279,6 @@ export async function GET(request: NextRequest) {
         console.error("advanced-story: unexpected", error);
       }
     }
-    return errorResponse(error, "The advanced story could not be prepared.");
+    return errorResponse(error, "The advanced story could not be prepared.", { route: "/api/chart/advanced-story" });
   }
 }

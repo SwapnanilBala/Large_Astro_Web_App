@@ -81,6 +81,6 @@ export async function GET(request: NextRequest) {
       route: "/api/chart/weekly-energy [GET]",
       error: error instanceof Error ? error.message : String(error),
     }));
-    return errorResponse(error, "Weekly energy calculation failed");
+    return errorResponse(error, "Weekly energy calculation failed", { route: "/api/chart/weekly-energy" });
   }
 }

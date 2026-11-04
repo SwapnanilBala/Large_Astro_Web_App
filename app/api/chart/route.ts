@@ -100,7 +100,7 @@ export async function GET(request: NextRequest) {
     logApiError("/api/chart [GET]", error, {
       params: Object.fromEntries(request.nextUrl.searchParams.entries()),
     });
-    return errorResponse(error, "Chart calculation failed");
+    return errorResponse(error, "Chart calculation failed", { route: "/api/chart" });
   }
 }
 
@@ -164,6 +164,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     logApiError("/api/chart [POST]", error);
-    return errorResponse(error, "Chart calculation failed");
+    return errorResponse(error, "Chart calculation failed", { route: "/api/chart" });
   }
 }

@@ -76,6 +76,6 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error("Forecast API error:", error);
-    return errorResponse(error, "Forecast calculation failed");
+    return errorResponse(error, "Forecast calculation failed", { route: "/api/chart/forecast" });
   }
 }
