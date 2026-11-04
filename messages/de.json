@@ -2896,7 +2896,92 @@
     "systemPorphyry": "Porphyrius",
     "yogasTitle": "Yogas",
     "karmaTitle": "Karma und Berufung",
-    "karmaSubtitle": "Was das Horoskop mitgebracht hat und auf welche Arbeit es hinweist"
+    "karmaSubtitle": "Was das Horoskop mitgebracht hat und auf welche Arbeit es hinweist",
+    "tabToday": "Heute",
+    "tabChart": "Horoskop",
+    "tabTiming": "Timing",
+    "tabAsk": "Fragen",
+    "meaningLabel": "Was das für dich bedeutet",
+    "meaningPending": "Deine aktuelle Periode wird gedeutet…",
+    "writing": "Deine Deutung wird geschrieben",
+    "shiftsKicker": "Große Lebenswenden",
+    "shiftsLink": "Alle Kapitel, vergangene und kommende",
+    "timingToolsLink": "Dein Timing erkunden",
+    "shifts": {
+      "past": "Vergangenes Kapitel",
+      "active": "Jetzt aktiv",
+      "upcoming": "Bevorstehend",
+      "pivot": "Wendepunkt:",
+      "age": "Alter {age}",
+      "window": "Zeitfenster:",
+      "labels": {
+        "mahadasha": "Beginn der Mahadasha {planet}",
+        "saturnReturn": "{ordinal} Saturnrückkehr",
+        "jupiterReturn": "{ordinal} Jupiterrückkehr",
+        "nodalReturn": "{ordinal} Rückkehr der Mondknoten"
+      },
+      "ordinals": {
+        "first": "Erste",
+        "second": "Zweite",
+        "third": "Dritte",
+        "fourth": "Vierte"
+      },
+      "themes": {
+        "sun": "Autorität, Identität und Sichtbarkeit",
+        "moon": "Emotionale Grundlagen, Familie und innere Sicherheit",
+        "mars": "Mut, Konflikt und entschlossenes Handeln",
+        "mercury": "Kommunikation, Studium und anpassungsfähiges Denken",
+        "jupiter": "Erweiterung, Glaube, Lehre und ethisches Wachstum",
+        "venus": "Liebe, Partnerschaft, Geld und Genuss",
+        "saturn": "Disziplin, Verantwortung und karmische Abrechnung",
+        "rahu": "Ehrgeiz, Hunger und unbekanntes Terrain",
+        "ketu": "Loslassen, Rückzug und innere Meisterschaft",
+        "saturnReturn": "Struktur, Verantwortung und der Preis von Entscheidungen",
+        "jupiterReturn": "Erweiterung, Sinn und ein größeres Spielfeld",
+        "nodalReturn": "Schicksalsachse – wonach du greifst und was du loslässt"
+      }
+    },
+    "sources": {
+      "label": "Die Textstellen ({count})",
+      "ref": "Brihat Jataka {ref}",
+      "refStrijataka": "Strijataka, Kap. {ref}",
+      "note": "Anmerkung des Übersetzers",
+      "credit": "Die Zahlen verweisen auf die Verse, aus denen die Aussagen stammen, zitiert im gedruckten Wortlaut der englischen Übersetzung des Brihat Jataka von Varahamihira, die N. Chidambaram Iyer 1885 vorlegte.",
+      "creditStrijataka": "Die mit Strijataka gekennzeichneten Textstellen stammen aus „Strijataka, or Female Horoscopy“ (1931) von B. Suryanarain Rao, einem Buch über die Geburtshoroskope von Frauen, und sind im gedruckten Wortlaut zitiert. Wörter in eckigen Klammern sind unsere Ergänzungen, nicht Teil des Buchs."
+    },
+    "askPending": "Wir lesen für dein Horoskop in den Klassikern nach…",
+    "ask": {
+      "kicker": "Frag die Klassiker",
+      "heading": "Stell den Büchern eine Frage",
+      "lead": "Wähle eine Frage oder stell deine eigene. Die Antwort stützt sich nur auf die Textstellen, deren Bedingungen in deinem Horoskop erfüllt sind, und jede Aussage verweist auf die Stelle, aus der sie stammt.",
+      "chooseLabel": "Fragen, die du stellen kannst",
+      "loading": "Wir suchen die Fragen, auf die dein Horoskop eine Antwort hat…",
+      "empty": "Zu dieser Frage sagen die Bücher für dein Horoskop nichts.",
+      "limited": "Das waren alle Fragen für heute. Komm morgen wieder, um mehr zu fragen.",
+      "limitedSignIn": "Das waren alle Fragen für heute. Melde dich an, um mehr zu fragen.",
+      "failed": "Diese Frage konnte gerade nicht beantwortet werden. Stell sie noch einmal, um es erneut zu versuchen.",
+      "ownLabel": "Oder stell deine eigene Frage",
+      "ownPlaceholder": "Zum Beispiel: Welche Arbeit passt zu mir?",
+      "ownHint": "Fragen zu deinem eigenen Horoskop, bis zu {max} Zeichen. Jede zählt zu den Fragen von heute.",
+      "refusedInstructions": "Das klingt eher nach einer Anweisung als nach einer Frage. Frag etwas zu deinem eigenen Horoskop.",
+      "refusedForbidden": "Darauf gehen die Deutungen nicht ein. Versuch es mit einer Frage zu einem anderen Bereich deines Lebens.",
+      "refusedNotAboutChart": "Die Bücher können nur Fragen zu deinem eigenen Horoskop beantworten: Arbeit, Geld, Liebe, Familie, Charakter und Ähnliches.",
+      "submit": "Fragen",
+      "questions": {
+        "career_year": "Mein Beruf im kommenden Jahr",
+        "love_year": "Mein Liebesleben im kommenden Jahr",
+        "money_year": "Geld im kommenden Jahr",
+        "health": "Gesundheit und Vitalität",
+        "marriage": "Ehe und Partnerschaft",
+        "strengths": "Meine natürlichen Stärken",
+        "children": "Kinder",
+        "standing": "Ansehen und Stellung"
+      }
+    },
+    "tabsLabel": "Bereiche deiner Deutung",
+    "tabReadings": "Deutungen",
+    "moreReadingsOne": "{count} weitere Deutung",
+    "moreReadingsOther": "{count} weitere Deutungen"
   },
   "strength": {
     "planets": {

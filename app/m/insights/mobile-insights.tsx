@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import type { ChartApiResponse, DashaInfo, DeterministicRule } from "@/lib/astro-types";
@@ -20,6 +20,9 @@ import { nakshatraName, planetAbbreviation, planetName, signName } from "@/lib/c
 import Emphasise from "@/app/components/Emphasise";
 import MobileRasiChart, { bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
+import { useHydrated } from "@/lib/use-hydrated";
+import { MobileMeaning, MobileTurningPoint } from "./mobile-today";
+import tabStyles from "./mobile-tabs.module.css";
 import styles from "./insights.module.css";
 
 /* The full reading's three rooms, fetched when their section is opened. All
@@ -34,6 +37,36 @@ const MobileYogasRoom = dynamic(() =>
 const MobileKarmaRoom = dynamic(() =>
   import("./mobile-reading-rooms").then((module) => module.MobileKarmaRoom),
 );
+/* Ask the classics brings its questions list and the cited-reading view; only
+   a reader who opens the tab pays for them. */
+const MobileAsk = dynamic(() => import("./mobile-ask").then((module) => module.MobileAsk));
+
+/*
+ * The tabs, since 2026-10-27 (the owner chose this layout from three drawn
+ * options): Today, Chart, Timing, Readings, Ask. The page had grown to some
+ * fifteen screens in one column, and the written readings the desktop gives
+ * -- what the current periods mean, the life chapter running now, the
+ * classics -- were not on the phone at all.
+ *
+ * The tab is the URL's hash (#timing), read with useSyncExternalStore, so a
+ * shared link or a reload opens on the same tab and render reads no browser
+ * state. Its server snapshot is Today.
+ */
+const TABS = ["today", "chart", "timing", "readings", "ask"] as const;
+type TabId = (typeof TABS)[number];
+
+function subscribeToHash(onChange: () => void) {
+  window.addEventListener("hashchange", onChange);
+  return () => window.removeEventListener("hashchange", onChange);
+}
+
+function tabFromHash(): TabId {
+  const hash = window.location.hash.slice(1);
+  return (TABS as readonly string[]).includes(hash) ? (hash as TabId) : "today";
+}
+
+/* Readings shown before "N more readings": the rest are a tap away. */
+const ATTENTION_SHOWN = 4;
 
 /*
  * Mobile results view.
@@ -413,6 +446,76 @@ export default function MobileInsights({
   const [openEvidence, setOpenEvidence] = useState<Record<string, boolean>>({});
   const toggleEvidence = (key: string) =>
     setOpenEvidence((prev) => ({ ...prev, [key]: !prev[key] }));
+  const [showAllAttention, setShowAllAttention] = useState(false);
+
+  const tab = useSyncExternalStore<TabId>(subscribeToHash, tabFromHash, () => "today");
+  const hydrated = useHydrated();
+  /* Every tab the reader has opened stays mounted, hidden, so going back to
+     one keeps its open sections and the readings it has written. Today is the
+     server's; the rest are added as they are shown, during render (the
+     sanctioned way to adjust state to a value read in render). */
+  const [visited, setVisited] = useState<ReadonlySet<TabId>>(() => new Set<TabId>(["today"]));
+  if (!visited.has(tab)) setVisited(new Set([...visited, tab]));
+  /* Today's written readings come out of the reader's daily allowance, so they
+     start only once Today is on screen in the browser. Hydration reads the
+     server's tab (Today) whatever the hash says, which would have spent them
+     for a link to #chart. */
+  const [todaySeen, setTodaySeen] = useState(false);
+  if (hydrated && tab === "today" && !todaySeen) setTodaySeen(true);
+  const tabsRef = useRef<HTMLDivElement>(null);
+
+  /* The bar's edge fade, while there is more of it to scroll to, and the
+     selected tab kept in view -- both on the element itself, not in state. */
+  useEffect(() => {
+    const bar = tabsRef.current;
+    if (!bar) return;
+    const mark = () => {
+      bar.dataset.more = String(bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1);
+    };
+    mark();
+    bar.addEventListener("scroll", mark, { passive: true });
+    /* The labels widen when the web font lands and when the language
+       changes; the bar itself does not resize, so watch the tabs. */
+    const resized = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(mark);
+    for (const button of bar.children) resized?.observe(button);
+    resized?.observe(bar);
+    return () => {
+      bar.removeEventListener("scroll", mark);
+      resized?.disconnect();
+    };
+  }, [hydrated, language]);
+
+  useEffect(() => {
+    document.getElementById(`m-tab-${tab}`)?.scrollIntoView?.({ block: "nearest", inline: "nearest" });
+  }, [tab]);
+
+  const selectTab = (next: TabId) => {
+    if (next === tab) return;
+    window.history.replaceState(null, "", `#${next}`);
+    window.dispatchEvent(new HashChangeEvent("hashchange"));
+    /* A tab opens at its top. From deep in a long tab, where the bar is stuck
+       to the top of the screen, scroll back to just under the header -- where
+       the bar sits unstuck. */
+    const bar = tabsRef.current;
+    const header = bar?.previousElementSibling;
+    const headerBottom = header?.getBoundingClientRect().bottom ?? 0;
+    if (bar && headerBottom < 0) window.scrollTo({ top: window.scrollY + headerBottom });
+  };
+
+  /* The tablist pattern: the arrows move between tabs, Home and End to the ends. */
+  const onTabKey = (event: KeyboardEvent<HTMLDivElement>) => {
+    const at = TABS.indexOf(tab);
+    const to =
+      event.key === "ArrowRight" ? (at + 1) % TABS.length
+        : event.key === "ArrowLeft" ? (at - 1 + TABS.length) % TABS.length
+          : event.key === "Home" ? 0
+            : event.key === "End" ? TABS.length - 1
+              : -1;
+    if (to < 0) return;
+    event.preventDefault();
+    selectTab(TABS[to]);
+    document.getElementById(`m-tab-${TABS[to]}`)?.focus();
+  };
 
   if (error || !payload) {
     return (
@@ -456,6 +559,26 @@ export default function MobileInsights({
   const nowEnd = dasha ? dasha.current_antardasha_end || dasha.current_dasha_end : "";
   const nowProgress = dasha ? periodProgress(nowStart, nowEnd, asOf) : null;
 
+  const tabLabel: Record<TabId, string> = {
+    today: tr("mobileInsights.tabToday"),
+    chart: tr("mobileInsights.tabChart"),
+    timing: tr("mobileInsights.tabTiming"),
+    readings: tr("mobileInsights.tabReadings"),
+    ask: tr("mobileInsights.tabAsk"),
+  };
+
+  /* The Antardasha's share gone, as a percentage: what the current-period
+     route is told about where in the period the reader stands. */
+  const antardashaPercent = nowProgress === null ? 0 : Math.round(nowProgress * 100);
+
+  const panel = (id: TabId) => ({
+    id: `m-tab-${id}-panel`,
+    role: "tabpanel" as const,
+    "aria-labelledby": `m-tab-${id}`,
+    className: tabStyles.panel,
+    hidden: tab !== id,
+  });
+
   return (
     <div className={shell.page}>
       <header className={shell.header}>
@@ -471,300 +594,373 @@ export default function MobileInsights({
         </p>
       </header>
 
-      {/* The answer before the reference: where the reader is in their
-          timeline, then who the chart says they are, then the chart. */}
-      {dasha && (
-        <section className={styles.now} aria-labelledby="m-now-heading">
-          <h2 id="m-now-heading" className={styles.nowLabel}>
-            {tr("mobileInsights.nowLabel")}
-          </h2>
-          <p className={styles.nowTitle}>
-            {planetName(dasha.current_dasha, tr)}
-            {dasha.current_antardasha && (
-              <>
-                <span className={styles.nowJoin} aria-hidden="true">
-                  {" · "}
-                </span>
-                {planetName(dasha.current_antardasha, tr)}
-              </>
-            )}
-          </p>
-          <p className={styles.nowMeta}>
-            {tr("mobileInsights.toDate", { date: formatDate(nowEnd, dateFormat) })}
-          </p>
-          {nowProgress !== null && (
-            <div className={styles.nowTrack} aria-hidden="true">
-              <span className={styles.nowFill} style={{ width: `${(nowProgress * 100).toFixed(1)}%` }} />
-              <span className={styles.nowDot} style={{ left: `${(nowProgress * 100).toFixed(1)}%` }} />
-            </div>
-          )}
-          {nowProgress !== null && (
-            <p className={styles.nowRange} aria-hidden="true">
-              <span>{formatDate(nowStart, dateFormat)}</span>
-              <span>{formatDate(nowEnd, dateFormat)}</span>
-            </p>
-          )}
-        </section>
-      )}
+      <div ref={tabsRef} className={tabStyles.tabs} role="tablist" aria-label={tr("mobileInsights.tabsLabel")} onKeyDown={onTabKey}>
+        {TABS.map((id) => (
+          <button
+            key={id}
+            id={`m-tab-${id}`}
+            type="button"
+            role="tab"
+            className={tabStyles.tab}
+            aria-selected={tab === id}
+            aria-controls={`m-tab-${id}-panel`}
+            tabIndex={tab === id ? 0 : -1}
+            onClick={() => selectTab(id)}
+          >
+            {tabLabel[id]}
+          </button>
+        ))}
+      </div>
 
-      <dl className={styles.identity}>
-        <div className={styles.identityItem}>
-          <dt className={styles.identityLabel}>{tr("mobileInsights.factLagna")}</dt>
-          <dd className={styles.identityValue}>{signName(ascendant.sign, tr)}</dd>
-          <dd className={styles.identityMeta}>{formatDegree(ascendant.degree_in_sign)}</dd>
-        </div>
-        {nakshatra && (
-          <div className={styles.identityItem}>
-            <dt className={styles.identityLabel}>{tr("mobileInsights.factNakshatra")}</dt>
-            <dd className={styles.identityValue}>{nakshatraName(nakshatra.name, tr)}</dd>
-            <dd className={styles.identityMeta}>
-              {tr("mobileInsights.padaLord", {
-                pada: String(nakshatra.pada),
-                lord: planetName(nakshatra.lord, tr),
-              })}
-            </dd>
-          </div>
-        )}
-        {moon && (
-          <div className={styles.identityItem}>
-            <dt className={styles.identityLabel}>{tr("mobileInsights.factMoonSign")}</dt>
-            <dd className={styles.identityValue}>{signName(moon.sign, tr)}</dd>
-            <dd className={styles.identityMeta}>{formatDegree(moon.degree_in_sign)}</dd>
-          </div>
-        )}
-      </dl>
-
-      {/* The chart above the table on purpose: it answers "what does my chart
-          look like" at a glance, and the table answers "what exactly is where"
-          for anyone who wants the numbers. */}
-      <MobileRasiChart
-        ascendantSign={ascendant.sign}
-        planets={planets}
-        houseSystem={houseSystem}
-        tr={tr}
-        formatDegree={formatDegree}
-      />
-
-      <Section
-        title={tr("mobileInsights.planetaryPositions")}
-        subtitle={tr("mobileInsights.grahaCount", { count: String(planets.length) })}
-        defaultOpen
-      >
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th scope="col">{tr("mobileInsights.colGraha")}</th>
-              <th scope="col">{tr("mobileInsights.colSign")}</th>
-              <th scope="col" className={styles.numeric}>{tr("mobileInsights.colDeg")}</th>
-              <th scope="col" className={styles.numeric}>{tr("mobileInsights.colHouse")}</th>
-              {bhavaSystem && (
-                <th scope="col" className={styles.numeric}>{tr("mobileInsights.colBhava")}</th>
+      {/* Today: where the reader is, what it means, the chapter running now. */}
+      <div {...panel("today")}>
+          {/* The answer before the reference: where the reader is in their
+              timeline, then who the chart says they are, then the chart. */}
+          {dasha && (
+            <section className={styles.now} aria-labelledby="m-now-heading">
+              <h2 id="m-now-heading" className={styles.nowLabel}>
+                {tr("mobileInsights.nowLabel")}
+              </h2>
+              <p className={styles.nowTitle}>
+                {planetName(dasha.current_dasha, tr)}
+                {dasha.current_antardasha && (
+                  <>
+                    <span className={styles.nowJoin} aria-hidden="true">
+                      {" · "}
+                    </span>
+                    {planetName(dasha.current_antardasha, tr)}
+                  </>
+                )}
+              </p>
+              <p className={styles.nowMeta}>
+                {tr("mobileInsights.toDate", { date: formatDate(nowEnd, dateFormat) })}
+              </p>
+              {nowProgress !== null && (
+                <div className={styles.nowTrack} aria-hidden="true">
+                  <span className={styles.nowFill} style={{ width: `${(nowProgress * 100).toFixed(1)}%` }} />
+                  <span className={styles.nowDot} style={{ left: `${(nowProgress * 100).toFixed(1)}%` }} />
+                </div>
               )}
-            </tr>
-          </thead>
-          <tbody>
-            {planets.map((planet) => (
-              <tr key={planet.name}>
-                {/* Plain spans, not <abbr title>: a tooltip is unreachable on
-                    a touch screen, so the meaning goes in the legend below. */}
-                <th scope="row" className={styles.planetName}>
-                  {planetName(planet.name, tr)}
-                  {planet.is_retrograde && (
-                    <span className={styles.flag}>{tr("mobileInsights.flagRetrograde")}</span>
-                  )}
-                  {planet.is_combust && (
-                    <span className={styles.flag}>{tr("mobileInsights.flagCombust")}</span>
-                  )}
-                </th>
-                <td>
-                  {/* The glyph is the fastest way to scan a column of signs;
-                      the name stays because the glyph alone is not legible to
-                      everyone. aria-hidden so it is not read twice. */}
-                  <span className={styles.signGlyph} aria-hidden="true">
-                    {/* U+FE0E forces text presentation. Without it the system
-                        emoji font claims the zodiac symbols and renders them as
-                        colour emoji, which ignores the text colour and reads
-                        as a row of purple boxes. */}
-                    {SIGN_SYMBOLS[planet.sign] ? `${SIGN_SYMBOLS[planet.sign]}︎` : ""}
-                  </span>
-                  {signName(planet.sign, tr)}
-                </td>
-                <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
-                {/* Counted by sign, so it matches the number in the chart's
-                    cell above; the bhava, where it can differ, has its own
-                    column. */}
-                <td className={styles.numeric}>{signHouse(planet.sign, ascendant.sign) ?? planet.house}</td>
-                {bhavaSystem && <td className={styles.numeric}>{planet.house}</td>}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {planets.some((p) => p.is_retrograde || p.is_combust) && (
-          <p className={styles.legend}>{tr("mobileInsights.flagLegend")}</p>
-        )}
-        {bhavaSystem && (
-          <p className={styles.legend}>{tr("mobileInsights.bhavaLegend", { system: bhavaSystem })}</p>
-        )}
-      </Section>
-
-      {houseSupport && (
-        <Section
-          title={tr("mobileInsights.houseRolesTitle")}
-          subtitle={tr("mobileInsights.houseRolesSubtitle")}
-        >
-          <HouseRoleList houses={houseSupport.houses} tr={tr} />
-        </Section>
-      )}
-
-      {highPriority.length > 0 && (
-        <Section
-          title={tr("mobileInsights.attentionTitle")}
-          /* Both keys spelled out rather than picked by expression: the mobile
-             coverage test reads plain-string arguments, and a key assembled
-             from a ternary inside the call would be invisible to it. */
-          subtitle={
-            highPriority.length === 1
-              ? tr("mobileInsights.attentionSubtitleOne", { count: "1" })
-              : tr("mobileInsights.attentionSubtitleOther", {
-                  count: String(highPriority.length),
-                })
-          }
-          defaultOpen
-        >
-          <ul className={styles.rules}>
-            {highPriority.map((rule) => (
-              <RuleCard
-                key={rule.instance_key}
-                rule={rule}
-                open={Boolean(openEvidence[`top:${rule.instance_key}`])}
-                onToggle={() => toggleEvidence(`top:${rule.instance_key}`)}
-                tr={tr}
-              />
-            ))}
-          </ul>
-        </Section>
-      )}
-
-      {dasha && (
-        <Section
-          title={tr("mobileInsights.dashaTitle")}
-          subtitle={tr("mobileInsights.dashaPeriodCount", {
-            count: String(dasha.periods.length),
-          })}
-          /* Open, to match the timing detail on the desktop page: the current
-             dasha is the timing answer both pages exist to give, and it was
-             the one thing you had to tap for. */
-          defaultOpen
-        >
-          <p className={styles.currentDasha}>
-            <Emphasise
-              text={tr("mobileInsights.dashaCurrent", {
-                dasha: planetName(dasha.current_dasha, tr),
-                antardasha: dasha.current_antardasha ? ` / ${planetName(dasha.current_antardasha, tr)}` : "",
-                date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end, dateFormat),
-              })}
-            />
-          </p>
-          <DashaLifeBar periods={dasha.periods} asOf={asOf} tr={tr} />
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th scope="col">{tr("mobileInsights.colPeriod")}</th>
-                <th scope="col">{tr("mobileInsights.colFrom")}</th>
-                <th scope="col">{tr("mobileInsights.colTo")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dasha.periods.map((period) => (
-                <tr
-                  key={`${period.planet}-${period.start_date}`}
-                  /* By date, not by planet: the cycle can name a planet twice
-                     (Mercury opens and closes this one), and only one of the
-                     two rows is now. */
-                  className={
-                    asOf >= Date.parse(period.start_date) && asOf < Date.parse(period.end_date)
-                      ? styles.currentRow
-                      : undefined
-                  }
-                >
-                  <th scope="row" className={styles.planetName}>{planetName(period.planet, tr)}</th>
-                  <td className={styles.numeric}>{formatDate(period.start_date, dateFormat)}</td>
-                  <td className={styles.numeric}>{formatDate(period.end_date, dateFormat)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </Section>
-      )}
-
-      {/* After the dasha table and before the summary: it is a deep read rather
-          than a headline, and the sections above it are the ones somebody opens
-          the page for. Closed by default -- unlike the dasha table above it,
-          which is one of those headlines. */}
-      {kalatra && (
-        <Section
-          title={tr("mobileInsights.kalatraTitle")}
-          subtitle={tr("mobileInsights.kalatraSubtitle", {
-            count: String(kalatra.facets.length),
-          })}
-        >
-          <ul className={styles.facets}>
-            {kalatra.facets.map((facet) => (
-              <KalatraFacetCard key={facet.key} facet={facet} tr={tr} />
-            ))}
-          </ul>
-          <p className={styles.facetMethod}>{kalatra.method}</p>
-          {kalatra.mangal.present && (
-            <p className={styles.facetMethod}>{tr("mobileInsights.kalatraMangalCaveat")}</p>
+              {nowProgress !== null && (
+                <p className={styles.nowRange} aria-hidden="true">
+                  <span>{formatDate(nowStart, dateFormat)}</span>
+                  <span>{formatDate(nowEnd, dateFormat)}</span>
+                </p>
+              )}
+            </section>
           )}
-        </Section>
+        {/* Written for this chart, so mounted once the tab has been shown in
+            the browser: a link to another tab does not spend a reading here. */}
+        {todaySeen && dasha && nakshatra && (
+          <MobileMeaning
+            dasha={dasha}
+            nakshatra={nakshatra}
+            planets={planets}
+            ascendantSign={ascendant.sign}
+            antardashaPercent={antardashaPercent}
+            tr={tr}
+          />
+        )}
+        {todaySeen && <MobileTurningPoint payload={payload} historyQs={historyQs} tr={tr} />}
+          {/* Below the reading, above the footer: the question is worth asking
+              where somebody has finished, not in front of what they came for. */}
+          <MobileChartSync
+            historyQs={historyQs}
+            name={client.name}
+            city={client.city}
+            birthDate={birthDate}
+            ascendantSign={ascendant.sign}
+            sunSign={planets.find((planet) => planet.name === "Sun")?.sign ?? null}
+            moonSign={planets.find((planet) => planet.name === "Moon")?.sign ?? null}
+          />
+      </div>
+
+      {/* Chart: who the chart says the reader is, and what exactly is where. */}
+      {visited.has("chart") && (
+        <div {...panel("chart")}>
+            <dl className={styles.identity}>
+              <div className={styles.identityItem}>
+                <dt className={styles.identityLabel}>{tr("mobileInsights.factLagna")}</dt>
+                <dd className={styles.identityValue}>{signName(ascendant.sign, tr)}</dd>
+                <dd className={styles.identityMeta}>{formatDegree(ascendant.degree_in_sign)}</dd>
+              </div>
+              {nakshatra && (
+                <div className={styles.identityItem}>
+                  <dt className={styles.identityLabel}>{tr("mobileInsights.factNakshatra")}</dt>
+                  <dd className={styles.identityValue}>{nakshatraName(nakshatra.name, tr)}</dd>
+                  <dd className={styles.identityMeta}>
+                    {tr("mobileInsights.padaLord", {
+                      pada: String(nakshatra.pada),
+                      lord: planetName(nakshatra.lord, tr),
+                    })}
+                  </dd>
+                </div>
+              )}
+              {moon && (
+                <div className={styles.identityItem}>
+                  <dt className={styles.identityLabel}>{tr("mobileInsights.factMoonSign")}</dt>
+                  <dd className={styles.identityValue}>{signName(moon.sign, tr)}</dd>
+                  <dd className={styles.identityMeta}>{formatDegree(moon.degree_in_sign)}</dd>
+                </div>
+              )}
+            </dl>
+            {/* The chart above the table on purpose: it answers "what does my chart
+                look like" at a glance, and the table answers "what exactly is where"
+                for anyone who wants the numbers. */}
+            <MobileRasiChart
+              ascendantSign={ascendant.sign}
+              planets={planets}
+              houseSystem={houseSystem}
+              tr={tr}
+              formatDegree={formatDegree}
+            />
+
+            <Section
+              title={tr("mobileInsights.planetaryPositions")}
+              subtitle={tr("mobileInsights.grahaCount", { count: String(planets.length) })}
+              defaultOpen
+            >
+              <table className={styles.table}>
+                <thead>
+                  <tr>
+                    <th scope="col">{tr("mobileInsights.colGraha")}</th>
+                    <th scope="col">{tr("mobileInsights.colSign")}</th>
+                    <th scope="col" className={styles.numeric}>{tr("mobileInsights.colDeg")}</th>
+                    <th scope="col" className={styles.numeric}>{tr("mobileInsights.colHouse")}</th>
+                    {bhavaSystem && (
+                      <th scope="col" className={styles.numeric}>{tr("mobileInsights.colBhava")}</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {planets.map((planet) => (
+                    <tr key={planet.name}>
+                      {/* Plain spans, not <abbr title>: a tooltip is unreachable on
+                          a touch screen, so the meaning goes in the legend below. */}
+                      <th scope="row" className={styles.planetName}>
+                        {planetName(planet.name, tr)}
+                        {planet.is_retrograde && (
+                          <span className={styles.flag}>{tr("mobileInsights.flagRetrograde")}</span>
+                        )}
+                        {planet.is_combust && (
+                          <span className={styles.flag}>{tr("mobileInsights.flagCombust")}</span>
+                        )}
+                      </th>
+                      <td>
+                        {/* The glyph is the fastest way to scan a column of signs;
+                            the name stays because the glyph alone is not legible to
+                            everyone. aria-hidden so it is not read twice. */}
+                        <span className={styles.signGlyph} aria-hidden="true">
+                          {/* U+FE0E forces text presentation. Without it the system
+                              emoji font claims the zodiac symbols and renders them as
+                              colour emoji, which ignores the text colour and reads
+                              as a row of purple boxes. */}
+                          {SIGN_SYMBOLS[planet.sign] ? `${SIGN_SYMBOLS[planet.sign]}︎` : ""}
+                        </span>
+                        {signName(planet.sign, tr)}
+                      </td>
+                      <td className={styles.numeric}>{formatDegree(planet.degree_in_sign)}</td>
+                      {/* Counted by sign, so it matches the number in the chart's
+                          cell above; the bhava, where it can differ, has its own
+                          column. */}
+                      <td className={styles.numeric}>{signHouse(planet.sign, ascendant.sign) ?? planet.house}</td>
+                      {bhavaSystem && <td className={styles.numeric}>{planet.house}</td>}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {planets.some((p) => p.is_retrograde || p.is_combust) && (
+                <p className={styles.legend}>{tr("mobileInsights.flagLegend")}</p>
+              )}
+              {bhavaSystem && (
+                <p className={styles.legend}>{tr("mobileInsights.bhavaLegend", { system: bhavaSystem })}</p>
+              )}
+            </Section>
+
+            {houseSupport && (
+              <Section
+                title={tr("mobileInsights.houseRolesTitle")}
+                subtitle={tr("mobileInsights.houseRolesSubtitle")}
+              >
+                <HouseRoleList houses={houseSupport.houses} tr={tr} />
+              </Section>
+            )}
+        </div>
       )}
 
-      {chart.summary && (
-        <Section title={tr("mobileInsights.summaryTitle")}>
-          <p className={styles.summary}>{chart.summary}</p>
-        </Section>
+      {/* Timing: the whole dasha cycle, and the way on to the timing tools and
+          every life chapter, which are full pages of their own. */}
+      {visited.has("timing") && (
+        <div {...panel("timing")}>
+            {dasha && (
+              <Section
+                title={tr("mobileInsights.dashaTitle")}
+                subtitle={tr("mobileInsights.dashaPeriodCount", {
+                  count: String(dasha.periods.length),
+                })}
+                /* Open, to match the timing detail on the desktop page: the current
+                   dasha is the timing answer both pages exist to give, and it was
+                   the one thing you had to tap for. */
+                defaultOpen
+              >
+                <p className={styles.currentDasha}>
+                  <Emphasise
+                    text={tr("mobileInsights.dashaCurrent", {
+                      dasha: planetName(dasha.current_dasha, tr),
+                      antardasha: dasha.current_antardasha ? ` / ${planetName(dasha.current_antardasha, tr)}` : "",
+                      date: formatDate(dasha.current_antardasha_end || dasha.current_dasha_end, dateFormat),
+                    })}
+                  />
+                </p>
+                <DashaLifeBar periods={dasha.periods} asOf={asOf} tr={tr} />
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th scope="col">{tr("mobileInsights.colPeriod")}</th>
+                      <th scope="col">{tr("mobileInsights.colFrom")}</th>
+                      <th scope="col">{tr("mobileInsights.colTo")}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dasha.periods.map((period) => (
+                      <tr
+                        key={`${period.planet}-${period.start_date}`}
+                        /* By date, not by planet: the cycle can name a planet twice
+                           (Mercury opens and closes this one), and only one of the
+                           two rows is now. */
+                        className={
+                          asOf >= Date.parse(period.start_date) && asOf < Date.parse(period.end_date)
+                            ? styles.currentRow
+                            : undefined
+                        }
+                      >
+                        <th scope="row" className={styles.planetName}>{planetName(period.planet, tr)}</th>
+                        <td className={styles.numeric}>{formatDate(period.start_date, dateFormat)}</td>
+                        <td className={styles.numeric}>{formatDate(period.end_date, dateFormat)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Section>
+            )}
+          <nav className={tabStyles.links}>
+            <Link href={`/insights/timing?${historyQs}`} className={tabStyles.onward} prefetch={false}>
+              <span>{tr("mobileInsights.timingToolsLink")}</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+            <Link href={`/insights/life-shifts?${historyQs}`} className={tabStyles.onward} prefetch={false}>
+              <span>{tr("mobileInsights.shiftsLink")}</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </nav>
+        </div>
       )}
 
-      {/* The full reading, as the desktop page lays it out: one line per item,
-          and the item tapped opens underneath its row with its evidence. */}
-      {(rules ?? []).length > highPriority.length && (
-        <Section
-          title={tr("mobileInsights.allReadingsTitle")}
-          subtitle={tr("mobileInsights.allReadingsSubtitle", {
-            count: String((rules ?? []).length),
-          })}
-        >
-          <MobileFindingsRoom rules={rules ?? []} />
-        </Section>
+      {/* Readings: what deserves attention, then everything the chart holds. */}
+      {visited.has("readings") && (
+        <div {...panel("readings")}>
+            {highPriority.length > 0 && (
+              <Section
+                title={tr("mobileInsights.attentionTitle")}
+                /* Both keys spelled out rather than picked by expression: the mobile
+                   coverage test reads plain-string arguments, and a key assembled
+                   from a ternary inside the call would be invisible to it. */
+                subtitle={
+                  highPriority.length === 1
+                    ? tr("mobileInsights.attentionSubtitleOne", { count: "1" })
+                    : tr("mobileInsights.attentionSubtitleOther", {
+                        count: String(highPriority.length),
+                      })
+                }
+                defaultOpen
+              >
+                <ul className={styles.rules}>
+                  {(showAllAttention ? highPriority : highPriority.slice(0, ATTENTION_SHOWN)).map((rule) => (
+                    <RuleCard
+                      key={rule.instance_key}
+                      rule={rule}
+                      open={Boolean(openEvidence[`top:${rule.instance_key}`])}
+                      onToggle={() => toggleEvidence(`top:${rule.instance_key}`)}
+                      tr={tr}
+                    />
+                  ))}
+                </ul>
+                {!showAllAttention && highPriority.length > ATTENTION_SHOWN && (
+                  <button type="button" className={tabStyles.moreButton} onClick={() => setShowAllAttention(true)}>
+                    <span>
+                      {highPriority.length - ATTENTION_SHOWN === 1
+                        ? tr("mobileInsights.moreReadingsOne", { count: "1" })
+                        : tr("mobileInsights.moreReadingsOther", { count: String(highPriority.length - ATTENTION_SHOWN) })}
+                    </span>
+                    <span aria-hidden="true">↓</span>
+                  </button>
+                )}
+              </Section>
+            )}
+            {/* After the dasha table and before the summary: it is a deep read rather
+                than a headline, and the sections above it are the ones somebody opens
+                the page for. Closed by default -- unlike the dasha table above it,
+                which is one of those headlines. */}
+            {kalatra && (
+              <Section
+                title={tr("mobileInsights.kalatraTitle")}
+                subtitle={tr("mobileInsights.kalatraSubtitle", {
+                  count: String(kalatra.facets.length),
+                })}
+              >
+                <ul className={styles.facets}>
+                  {kalatra.facets.map((facet) => (
+                    <KalatraFacetCard key={facet.key} facet={facet} tr={tr} />
+                  ))}
+                </ul>
+                <p className={styles.facetMethod}>{kalatra.method}</p>
+                {kalatra.mangal.present && (
+                  <p className={styles.facetMethod}>{tr("mobileInsights.kalatraMangalCaveat")}</p>
+                )}
+              </Section>
+            )}
+
+            {chart.summary && (
+              <Section title={tr("mobileInsights.summaryTitle")}>
+                <p className={styles.summary}>{chart.summary}</p>
+              </Section>
+            )}
+
+            {/* The full reading, as the desktop page lays it out: one line per item,
+                and the item tapped opens underneath its row with its evidence. */}
+            {(rules ?? []).length > highPriority.length && (
+              <Section
+                title={tr("mobileInsights.allReadingsTitle")}
+                subtitle={tr("mobileInsights.allReadingsSubtitle", {
+                  count: String((rules ?? []).length),
+                })}
+              >
+                <MobileFindingsRoom rules={rules ?? []} />
+              </Section>
+            )}
+
+            {(chart.yogas ?? []).length > 0 && (
+              <Section
+                title={tr("mobileInsights.yogasTitle")}
+                subtitle={tr("mobileInsights.allReadingsSubtitle", {
+                  count: String((chart.yogas ?? []).length),
+                })}
+              >
+                <MobileYogasRoom yogas={chart.yogas ?? []} />
+              </Section>
+            )}
+
+            <Section title={tr("mobileInsights.karmaTitle")} subtitle={tr("mobileInsights.karmaSubtitle")}>
+              <MobileKarmaRoom payload={payload} />
+            </Section>
+        </div>
       )}
 
-      {(chart.yogas ?? []).length > 0 && (
-        <Section
-          title={tr("mobileInsights.yogasTitle")}
-          subtitle={tr("mobileInsights.allReadingsSubtitle", {
-            count: String((chart.yogas ?? []).length),
-          })}
-        >
-          <MobileYogasRoom yogas={chart.yogas ?? []} />
-        </Section>
+      {visited.has("ask") && (
+        <div {...panel("ask")}>
+          <MobileAsk historyQs={historyQs} tr={tr} />
+        </div>
       )}
-
-      <Section title={tr("mobileInsights.karmaTitle")} subtitle={tr("mobileInsights.karmaSubtitle")}>
-        <MobileKarmaRoom payload={payload} />
-      </Section>
-
-      {/* Below the reading, above the footer: the question is worth asking
-          where somebody has finished, not in front of what they came for. */}
-      <MobileChartSync
-        historyQs={historyQs}
-        name={client.name}
-        city={client.city}
-        birthDate={birthDate}
-        ascendantSign={ascendant.sign}
-        sunSign={planets.find((planet) => planet.name === "Sun")?.sign ?? null}
-        moonSign={planets.find((planet) => planet.name === "Moon")?.sign ?? null}
-      />
 
       <footer className={styles.footer}>
         <Link className={styles.textLink} href="/m">

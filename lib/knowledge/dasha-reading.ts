@@ -292,7 +292,7 @@ const MARK = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
  */
 export function readingFromMarkers(
   text: string,
-  groups: readonly PeriodDocumentGroup[],
+  groups: readonly { passages: readonly PassageRow[] }[],
 ): { reading: ClassicalReading; strayMarks: number } {
   const passages = groups.flatMap((group) => group.passages);
   const numbers = new Map<number, number>();

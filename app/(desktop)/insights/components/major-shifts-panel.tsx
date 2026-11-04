@@ -6,10 +6,9 @@ import type { ChartApiResponse } from "@/lib/astro-types";
 import {
   computeMajorLifeShifts,
   type MajorLifeShift,
-  type MajorShiftKind,
   type MajorShiftStatus,
 } from "@/lib/engines/major-shifts-engine";
-import { planetName } from "@/lib/chart-labels";
+import { STATUS_LABEL_KEY, featuredShifts as chaptersShownFirst, shiftLabel, shiftTheme } from "./life-shift-labels";
 import {
   formatShiftPivot,
   formatShiftWindow,
@@ -22,12 +21,6 @@ import { ReadingProgress } from "./reading-progress";
 import { useLifeShiftReadings } from "./use-life-shift-readings";
 import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
 import styles from "../insights.module.css";
-
-const STATUS_LABEL_KEY: Record<MajorShiftStatus, string> = {
-  past: "insights.shifts.past",
-  active: "insights.shifts.active",
-  upcoming: "insights.shifts.upcoming",
-};
 
 /* formatShiftPivot and formatShiftWindow live in lib/life-shift-reading.ts
    because the prompt needs the identical words: a reading that says "late
@@ -63,44 +56,10 @@ const SOURCE_STRINGS = "dasha.reading.note";
  * and streamed, in 6.5-11s, and the past ones beside them in 9.5-14.5s.
  */
 const EXPECTED_MS = { headline: 9_000, ahead: 9_000, past: 13_000 } as const;
-type Translate = (key: string, params?: Record<string, string>) => string;
 
-/*
- * The engine's chapter names and themes are a closed set: a mahadasha for each
- * planet and three returns. They print through insights.shifts.labels and
- * .themes; anything else prints as the engine wrote it. The narrative and the
- * evidence line stay the engine's English, as its reading prose does.
- */
-export const RETURN_KEYS: Partial<Record<MajorShiftKind, string>> = {
-  "saturn-return": "saturnReturn",
-  "jupiter-return": "jupiterReturn",
-  "nodal-return": "nodalReturn",
-};
-
-/* The engine names a return's occurrence in words, then falls back to "5th". */
-export const SHIFT_ORDINALS = ["first", "second", "third", "fourth"] as const;
-
-function worded(t: Translate, key: string, fallback: string, params?: Record<string, string>): string {
-  const text = t(key, params);
-  return text === key ? fallback : text;
-}
-
-function shiftLabel(shift: MajorLifeShift, t: Translate): string {
-  if (shift.kind === "mahadasha") {
-    return worded(t, "insights.shifts.labels.mahadasha", shift.label, { planet: planetName(shift.planet, t) });
-  }
-  const kind = RETURN_KEYS[shift.kind];
-  const ordinal = /\((\w+)\)$/.exec(shift.label)?.[1] as (typeof SHIFT_ORDINALS)[number] | undefined;
-  if (!kind || !ordinal || !SHIFT_ORDINALS.includes(ordinal)) return shift.label;
-  return worded(t, `insights.shifts.labels.${kind}`, shift.label, {
-    ordinal: worded(t, `insights.shifts.ordinals.${ordinal}`, ordinal),
-  });
-}
-
-function shiftTheme(shift: MajorLifeShift, t: Translate): string {
-  const id = shift.kind === "mahadasha" ? shift.planet.toLowerCase() : RETURN_KEYS[shift.kind];
-  return id ? worded(t, `insights.shifts.themes.${id}`, shift.theme) : shift.theme;
-}
+/* The chapter labels moved to ./life-shift-labels so the phone page can use
+   them; re-exported for the catalogs test, which imports them from here. */
+export { RETURN_KEYS, SHIFT_ORDINALS } from "./life-shift-labels";
 
 function ShiftCard({
   shift,
@@ -228,10 +187,7 @@ export default function MajorShiftsPanel({
     [payload],
   );
 
-  const forwardShifts = shifts
-    .filter((shift) => shift.status === "active" || shift.status === "upcoming")
-    .slice(0, isBrief ? 1 : 2);
-  const featuredShifts = forwardShifts.length > 0 ? forwardShifts : shifts.slice(-1);
+  const featuredShifts = chaptersShownFirst(shifts, isBrief ? 1 : 2);
   const featuredKeys = new Set(featuredShifts.map(lifeShiftId));
   const pastShifts = shifts.filter(
     (shift) => shift.status === "past" && !featuredKeys.has(lifeShiftId(shift)),

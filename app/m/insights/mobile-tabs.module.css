@@ -1,0 +1,451 @@
+/*
+ * The phone results page in tabs (Today, Chart, Timing, Readings, Ask), and
+ * the pieces only the tabs brought: the written readings on Today, the cited
+ * reading, the way on to the timing pages, and Ask the classics. The almanac
+ * look throughout: ink and paper, rules rather than boxes where it can, one
+ * vermilion for what is "now". Tokens only, so the light theme follows.
+ */
+
+/* ── The tabs ────────────────────────────────────────────────────── */
+
+/* Stuck under the browser's bar as the reader scrolls a tab, edge to edge
+   across the page's side padding. */
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  gap: 0.2rem;
+  margin: -0.5rem -1.25rem 0;
+  padding: 0.55rem 0.75rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--bg-deep);
+  border-bottom: 1px solid var(--border-medium);
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+/* When the labels run past the screen (German, say), the last one fades out
+   at the edge, saying there is more to swipe to; scrolled to the end, it
+   does not. Set from the bar's own scroll position. */
+.tabs[data-more="true"] {
+  mask-image: linear-gradient(90deg, #000 calc(100% - 2.5rem), transparent);
+}
+
+/* All five fit a 390px screen in English and share out what is left; a
+   longer language scrolls the bar sideways instead of squeezing a label. */
+.tab {
+  flex: 1 0 auto;
+  min-height: 2.75rem;
+  padding: 0 0.5rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-text);
+  font-size: var(--text-ui);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tab[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+/* Narrower phones (360-375px): a little less room round each label, so the
+   English five still fit without the fade. */
+@media (max-width: 380px) {
+  .tabs {
+    gap: 0.1rem;
+    padding-inline: 0.55rem;
+  }
+
+  .tab {
+    padding: 0 0.42rem;
+    font-size: 0.9rem;
+  }
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+}
+
+/* A tab's panel: the page's own column and gap. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.panel[hidden] {
+  display: none;
+}
+
+/* The bar draws the line under itself, so a tab's first section does not
+   draw a second one a few pixels below it. */
+.panel > :first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+/* ── Today's cards ───────────────────────────────────────────────── */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 1rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.cardKicker {
+  margin: 0;
+  font-family: var(--font-text);
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.cardKicker:lang(hi),
+.cardKicker:lang(bn) {
+  letter-spacing: 0;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.cardTheme {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--text-secondary);
+}
+
+.cardMeta {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-meta);
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.turningStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  font-size: var(--text-label);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+
+.turningStatus:lang(hi),
+.turningStatus:lang(bn) {
+  letter-spacing: 0;
+}
+
+.card[data-status="active"] .turningStatus {
+  color: var(--accent-text);
+}
+
+.dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--text-tertiary);
+}
+
+.card[data-status="active"] .dot {
+  background: var(--accent);
+}
+
+.prose {
+  margin: 0.25rem 0 0;
+  font-family: var(--font-prose);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* The engine's own words while the written reading is on its way. */
+.waiting {
+  opacity: 0.5;
+}
+
+/* The way on to a deeper page, as a full-width row: a 48px target. */
+.onward {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--border-soft);
+  color: var(--accent-text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* The desktop's progress bar, given this tree's tokens: it reads the
+   desktop's names for ink, gold and the body face. */
+.progressHost {
+  --ink-soft: var(--text-secondary);
+  --ink-main: var(--text-primary);
+  --accent-gold: var(--accent-text);
+  --font-body: var(--font-text);
+  margin-top: 0.35rem;
+}
+
+/* ── A cited reading ─────────────────────────────────────────────── */
+
+.cited {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.25rem;
+}
+
+.cited p {
+  margin: 0;
+  font-family: var(--font-prose);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+/* A reference mark at the label size, not shrunk as superscripts are: it is
+   the reader's only way to the passage. */
+.mark {
+  margin-left: 0.1em;
+  font-family: var(--font-text);
+  font-size: var(--text-meta);
+  font-weight: 700;
+  line-height: 0;
+  color: var(--accent-text);
+}
+
+.sources {
+  margin-top: 0.35rem;
+}
+
+.sources summary {
+  display: flex;
+  align-items: center;
+  min-height: 2.75rem;
+  color: var(--accent-text);
+  font-size: var(--text-label);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.sources ol {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0.25rem 0 0;
+  padding-left: 1.4rem;
+}
+
+.sources li {
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+
+.sourceRef {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.sources q {
+  font-style: italic;
+}
+
+.credit {
+  margin: 0.75rem 0 0;
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+/* ── Timing's way on ─────────────────────────────────────────────── */
+
+.links {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-medium);
+}
+
+.links .onward {
+  margin-top: 0;
+}
+
+.links .onward:first-child {
+  border-top: 0;
+}
+
+/* ── Readings: the rest of the list on request ───────────────────── */
+
+.moreButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 3rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--border-soft);
+  background: none;
+  color: var(--accent-text);
+  font-family: var(--font-text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* ── Ask the classics ────────────────────────────────────────────── */
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.askHeading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.askLead {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.askChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.askChip {
+  min-height: 2.75rem;
+  padding: 0.5rem 0.95rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-primary);
+  font-family: var(--font-text);
+  font-size: 0.9375rem;
+  line-height: 1.3;
+  text-align: left;
+}
+
+.askChip[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.askForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.askLabel {
+  font-size: var(--text-label);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.askRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* 16px and up, or iOS zooms the page in when the field takes focus. */
+.askInput {
+  flex: 1;
+  min-width: 0;
+  min-height: 2.9rem;
+  padding: 0 0.85rem;
+  border: 1px solid var(--border-medium);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text-primary);
+  font-family: var(--font-text);
+  font-size: 1rem;
+}
+
+.askSubmit {
+  flex: none;
+  min-height: 2.9rem;
+  padding: 0 1.1rem;
+  border: 0;
+  border-radius: 10px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--font-text);
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.askSubmit:disabled {
+  opacity: 0.45;
+}
+
+.askHint {
+  margin: 0;
+  font-size: var(--text-meta);
+  line-height: 1.5;
+  color: var(--text-tertiary);
+}
+
+.askMessage {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.answer {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-medium);
+}
+
+.answerHeading {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 400;
+  line-height: 1.25;
+}

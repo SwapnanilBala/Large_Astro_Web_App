@@ -1,4 +1,3 @@
-import type Anthropic from "@anthropic-ai/sdk";
 import type { DashaInfo } from "../astro-types";
 import type { BirthSex } from "../birth-sex";
 import { DASHA_YEARS, NAKSHATRA_LORDS, YEAR_DAYS } from "../engines/nakshatra-engine";
@@ -13,6 +12,7 @@ import {
   CLOSING_REMINDERS,
   NOTE_PREFIX,
   modelText,
+  passageRef,
   speaksToChart,
   type PassageRow,
 } from "./yoga-classics-reading";
@@ -34,7 +34,7 @@ import { COMMENTARY_LANGUAGES } from "../varga-commentary";
  * route falls back to the chart's order and the answer is still grounded.
  */
 
-/** Passages sent with a question: about 700 input tokens, enough for a five-sentence answer to cite. */
+/** Passages sent with a question: about 700 input tokens, enough for a five-sentence answer to draw on. */
 export const ASK_PASSAGE_LIMIT = 8;
 
 /** Candidates the search returns before the selection here narrows them. */
@@ -183,17 +183,17 @@ export function selectQuestionPassages(
     .sort((a, b) => bookRank(a.source) - bookRank(b.source) || bookOrder(a, b));
 }
 
-/** The books, in the order their documents are sent: the Brihat Jataka first, then the book on women's charts. */
+/** The books, in the order their passages are listed: the Brihat Jataka first, then the book on women's charts. */
 const BOOK_ORDER = [BRIHAT_JATAKA_1885.slug, STRIJATAKA_1931.slug];
 const bookRank = (slug: string) => (BOOK_ORDER.includes(slug) ? BOOK_ORDER.indexOf(slug) : BOOK_ORDER.length);
 
-/** One document's worth: the chosen passages from one book, and the chart conditions they rest on. */
+/** One book's share: the chosen passages from one book, and the chart conditions they rest on. */
 export type QuestionDocumentGroup = { source: string; passages: PassageRow[]; conditions: string[]; yogaNames: string[] };
 
 /**
- * The chosen passages split by book, since a citation names a document and
- * the reader is owed the right book's name. The documents are sent in this
- * order, and citations are read back against it.
+ * The chosen passages split by book, since the reader is owed the right
+ * book's name. They are listed and numbered in this order, and the answer's
+ * marks are read back against it (readingFromMarkers).
  */
 export function questionDocumentGroups(passages: readonly PassageRow[], chart: AreaChart): QuestionDocumentGroup[] {
   const books = [...new Set(passages.map((passage) => passage.source))].sort((a, b) => bookRank(a) - bookRank(b));
@@ -207,33 +207,40 @@ export function questionDocumentGroups(passages: readonly PassageRow[], chart: A
 }
 
 /**
- * One citable document per book: each passage a content block, so a citation
- * names whole passages; the chart conditions they were chosen for go in
- * `context`, which the model reads but cannot cite. Every string here comes
- * from the corpus, the catalogue, the vocabulary or lib/knowledge/sources.ts,
- * never from the browser.
+ * The chosen passages as the model reads them: numbered across the books,
+ * grouped by book, each group saying which chart conditions and yogas its
+ * passages rest on. The answer marks a statement with its passage's number,
+ * [2] or [1,3], and readingFromMarkers turns the marks into the reading's
+ * sources.
+ *
+ * Numbered text rather than the citations feature, as on the dasha readings
+ * (lib/knowledge/dasha-reading.ts, periodPassageListing). Measured on
+ * 2026-11-04: with citations on, Haiku 5.5 wrote the cited verse itself into
+ * 11 of 15 answers -- "you will be learned in the Sastras; will carry
+ * messages", "[A person born with Mercury in sign Aries or Scorpio] will be
+ * poor" -- which no content check can see, since none of those words is
+ * banned.
+ *
+ * Every string here comes from the corpus, the catalogue, the vocabulary or
+ * lib/knowledge/sources.ts, never from the browser.
  */
-export function questionDocuments(groups: readonly QuestionDocumentGroup[]): Anthropic.DocumentBlockParam[] {
-  return groups.map(({ source, passages, conditions, yogaNames }) => {
-    const book = KNOWLEDGE_SOURCES[source] ?? BRIHAT_JATAKA_1885;
-    return {
-      type: "document",
-      title: book.title,
-      context:
-        "Each passage was chosen because its condition holds in the reader's chart and it bears on the question. " +
-        (conditions.length > 0 ? `Conditions met by placement: ${conditions.map(describePlacement).join("; ")}. ` : "") +
-        (yogaNames.length > 0 ? `Yogas the chart has that passages speak of: ${yogaNames.join(", ")}. ` : "") +
-        `The passages are from ${book.described}.`,
-      source: {
-        type: "content",
-        content: passages.map((passage) => ({
-          type: "text",
-          text: passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text),
-        })),
-      },
-      citations: { enabled: true },
-    };
-  });
+export function questionPassageListing(groups: readonly QuestionDocumentGroup[]): string {
+  let number = 0;
+  return groups
+    .map(({ source, passages, conditions, yogaNames }) => {
+      const book = KNOWLEDGE_SOURCES[source] ?? BRIHAT_JATAKA_1885;
+      const header =
+        `From ${book.described}. ` +
+        (conditions.length > 0 ? `Conditions met in the chart: ${conditions.map(describePlacement).join("; ")}. ` : "") +
+        (yogaNames.length > 0 ? `Yogas the chart has that passages speak of: ${yogaNames.join(", ")}.` : "");
+      const lines = passages.map((passage) => {
+        number += 1;
+        const text = passage.kind === "note" ? `${NOTE_PREFIX}${modelText(passage.text)}` : modelText(passage.text);
+        return `[${number}] (${passageRef(passage)}) ${text}`;
+      });
+      return [header.trim(), ...lines].join("\n");
+    })
+    .join("\n\n");
 }
 
 /**
@@ -252,16 +259,17 @@ export function withoutHeadings(reading: ClassicalReading): ClassicalReading {
 
 /* ── The prompt ───────────────────────────────────────────────────────────── */
 
-/* Frozen, so it is the cacheable prefix; the documents, the question and the periods follow in the user turn. */
+/* Frozen, so it is the cacheable prefix; the passages, the question and the periods follow in the user turn. */
 export const ASK_CLASSICS_SYSTEM_PROMPT = `You answer a reader's question about their Vedic birth chart from the classical books, in a card on their life-areas page.
 
-You are given the question and documents of passages, each document from one book: ${BRIHAT_JATAKA_1885.described}; or, for a woman's chart, also ${STRIJATAKA_1931.described}. Each passage was chosen because its condition holds in the reader's chart and it bears on the question, and each document's context lists those conditions.
+You are given the question and numbered passages, grouped by book: ${BRIHAT_JATAKA_1885.described}; or, for a woman's chart, also ${STRIJATAKA_1931.described}. Each passage was chosen because its condition holds in the reader's chart and it bears on the question, and each group lists those conditions.
 
 Answer the question from the passages.
 
 - Three to five sentences, no more than 110 words, in one paragraph or two. The answer is shown in a card; a long answer is an answer that gets cut.
-- Ground every statement in the passages and cite the passage it comes from. Say nothing the passages do not say. Where they do not answer part of the question, leave that part alone rather than guess.
-- Every sentence rests on a cited passage, except one that names the year's periods. Stop when the passages are used: no closing summary, no interpretation of your own, and no remark about what the books leave out.
+- Ground every statement in the passages and mark it with the number of the passage it comes from, in square brackets right after the words it supports, like [2] or [1,3]. Never write a number you were not given. Say nothing the passages do not say. Where they do not answer part of the question, leave that part alone rather than guess.
+- Put what a passage says in your own plain words, never its own sentence: the passages are printed under the answer, word for word, for anyone who wants them.
+- Every sentence rests on a marked passage, except one that names the year's periods. Stop when the passages are used: no closing summary, no interpretation of your own, and no remark about what the books leave out.
 - Say which condition in the chart a statement rests on ("with Venus in your 7th house, ...").
 - A passage that lists results of several kinds may be used only for its results that bear on the question.
 - Words in square brackets inside a passage are the app's, not the book's: the opening words a passage needs to read alone, or a wording chosen in place of one too harsh to print. Follow them, and never restore what they replace.
@@ -300,7 +308,7 @@ export function periodSentence(periods: readonly YearPeriod[]): string {
  *
  * The question is English whatever the page language, and the answer is
  * written straight in the reader's language rather than written in English
- * and translated afterwards: the citations are attached to the answer's own
+ * and translated afterwards: the source marks sit on the answer's own
  * words, and a translation of it would leave them pointing into text that is
  * no longer there. An unknown language code is English, as on the other notes.
  */
@@ -336,6 +344,9 @@ export function askClassicsInstruction(
     /* Said again last, where Haiku reads it: in the system prompt alone it
        closed answers with what the books leave out. */
     " Answer only from the passages: do not remark on what they leave out, and do not end with a summary." +
+    /* With the dasha readings' example, which ended their pasted verses there. */
+    " Mark every statement from a passage with its number, say in your own plain words what the book ties to the placement, and never quote the passage's sentence:" +
+    ' not "will be indifferent to work and will be merciless[1]" but "a cool, detached attitude to work[1]".' +
     CLOSING_REMINDERS +
     /* Last of all: Haiku, handed an English question and English passages,
        answered a Hindi reader in English. */

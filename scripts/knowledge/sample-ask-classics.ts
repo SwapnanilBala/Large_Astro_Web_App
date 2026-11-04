@@ -39,7 +39,7 @@ import {
   describePeriods,
   periodLords,
   questionDocumentGroups,
-  questionDocuments,
+  questionPassageListing,
   selectQuestionPassages,
   withoutHeadings,
   yearPeriods,
@@ -53,11 +53,11 @@ import {
   screenMessage,
 } from "../../lib/knowledge/ask-screen";
 import { checkNote } from "../../lib/knowledge/classical-note-check";
+import { copiedPassages, endsMidSentence, readingFromMarkers } from "../../lib/knowledge/dasha-reading";
 import { KNOWLEDGE_EMBEDDING_DIMENSIONS, KNOWLEDGE_EMBEDDING_MODEL } from "../../lib/knowledge/embedding";
 import { queryPassagesNearQuestion } from "../../lib/knowledge/passage-queries";
 import { chartPlacementKeys } from "../../lib/knowledge/placements";
 import { CHART_EFFORT, CHART_MODEL } from "../../lib/llm-models";
-import { readingFrom } from "../../lib/knowledge/yoga-classics-reading";
 
 config({ path: ".env.local", quiet: true });
 
@@ -167,18 +167,26 @@ screen | ${((Date.now() - started) / 1000).toFixed(1)}s | ${screened.usage.input
       messages: [
         {
           role: "user",
-          content: [...questionDocuments(groups), { type: "text", text: askClassicsInstruction(question, periods, sex, language) }],
+          content: [
+            { type: "text", text: `The passages:\n${questionPassageListing(groups)}` },
+            { type: "text", text: askClassicsInstruction(question, periods, sex, language) },
+          ],
         },
       ],
     });
-    const reading = withoutHeadings(readingFrom(response.content, groups));
+    const written = response.content.map((block) => (block.type === "text" ? block.text : "")).join("");
+    const reading = withoutHeadings(readingFromMarkers(written, groups).reading);
     const text = reading.segments.map((s) => s.text + (s.sources.length ? `[${s.sources.join(",")}]` : "")).join("");
     const words = text.replace(/\[[\d,]+\]/g, "").split(/\s+/).filter(Boolean).length;
     const check = checkNote(reading, language);
+    const copied = copiedPassages(reading, passages);
+    const cut = endsMidSentence(reading);
     console.log(
       `${response.model} | ${((Date.now() - started) / 1000).toFixed(1)}s | ${response.usage.input_tokens} in + ` +
         `${response.usage.output_tokens} out + ${response.usage.cache_read_input_tokens ?? 0} cached | ${response.stop_reason} | ${words} words | ` +
-        (reading.sources.length === 0 ? "UNCITED" : check.problems.length > 0 ? `CHECK FAILS ${JSON.stringify(check.problems)}` : "passes"),
+        (reading.sources.length === 0 ? "UNCITED" : check.problems.length > 0 ? `CHECK FAILS ${JSON.stringify(check.problems)}` : "passes") +
+        (copied.length > 0 ? ` | COPIED ${JSON.stringify(copied)}` : "") +
+        (cut ? " | CUT SHORT" : ""),
     );
     console.log(text);
   }

@@ -22,7 +22,7 @@ import {
   periodLords,
   periodSentence,
   questionDocumentGroups,
-  questionDocuments,
+  questionPassageListing,
   selectQuestionPassages,
   yearPeriods,
   type CandidatePassage,
@@ -275,16 +275,21 @@ describe("what the model is sent", () => {
     row("9.40.1", { source: "strijataka-1931", lifeAreas: ["career"], placements: ["Mars.house.10", "reader.sex.female"] }),
   ];
 
-  it("is one cited document per book, its conditions in the context and its notes marked", () => {
+  it("is one numbered list across the books, grouped by book with its conditions, its notes marked", () => {
     const groups = questionDocumentGroups(passages, CHART);
     expect(groups.map(({ source }) => source)).toEqual(["brihat-jataka-1885", "strijataka-1931"]);
-    const documents = questionDocuments(groups);
-    expect(documents[0].title).toContain("Brihat Jataka");
-    expect(documents[0].context).toContain("Mars in the 10th house");
-    expect(documents[0].citations).toEqual({ enabled: true });
-    const blocks = (documents[0].source as { content: { text: string }[] }).content.map((block) => block.text);
-    expect(blocks).toEqual(["text of 18.8.1", `${NOTE_PREFIX}text of 18.8.2`]);
-    expect(documents[1].context).toContain("the reader is a woman");
+    const [brihat, stri] = questionPassageListing(groups).split("\n\n");
+    expect(brihat).toContain("Brihat Jataka");
+    expect(brihat).toContain("Mars in the 10th house");
+    expect(brihat).toContain("[1] (18.8) text of 18.8.1");
+    expect(brihat).toContain(`[2] (18.8) ${NOTE_PREFIX}text of 18.8.2`);
+    expect(stri).toContain("the reader is a woman");
+    expect(stri).toMatch(/\[3\] \([^)]*\) text of 9\.40\.1/);
+  });
+
+  it("asks for each statement marked with its passage's number, in the answer's own words", () => {
+    expect(ASK_CLASSICS_SYSTEM_PROMPT).toContain("like [2] or [1,3]");
+    expect(askClassicsInstruction(CAREER, [])).toContain("never quote the passage's sentence");
   });
 
   it("asks the question as written, in English, with the year's periods only for a year question", () => {
@@ -327,8 +332,7 @@ describe("the words the model reads", () => {
       [{ ...row("21.10.1", { lifeAreas: ["health"], placements: ["Mars.house.10"] }), text: "will be free from diseases" }],
       CHART,
     );
-    const block = (questionDocuments(groups)[0].source as { content: { text: string }[] }).content[0].text;
-    expect(block).toBe("will be [of robust health]");
+    expect(questionPassageListing(groups)).toContain("[1] (21.10) will be [of robust health]");
     expect(groups[0].passages[0].text).toBe("will be free from diseases");
   });
 

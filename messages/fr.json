@@ -2896,7 +2896,92 @@
     "systemPorphyry": "Porphyre",
     "yogasTitle": "Yogas",
     "karmaTitle": "Karma et vocation",
-    "karmaSubtitle": "Ce que la carte a apporté, et le travail vers lequel elle oriente"
+    "karmaSubtitle": "Ce que la carte a apporté, et le travail vers lequel elle oriente",
+    "tabToday": "Aujourd'hui",
+    "tabChart": "Carte",
+    "tabTiming": "Timing",
+    "tabAsk": "Demander",
+    "meaningLabel": "Ce Que Cela Signifie Pour Vous",
+    "meaningPending": "Lecture de votre période actuelle…",
+    "writing": "Rédaction de votre lecture",
+    "shiftsKicker": "Grands Tournants de Vie",
+    "shiftsLink": "Tous les chapitres, passés et à venir",
+    "timingToolsLink": "Explorer votre timing",
+    "shifts": {
+      "past": "Chapitre passé",
+      "active": "En cours",
+      "upcoming": "À venir",
+      "pivot": "Pivot :",
+      "age": "à {age} ans",
+      "window": "Fenêtre :",
+      "labels": {
+        "mahadasha": "Début de la mahadasha {planet}",
+        "saturnReturn": "Retour de Saturne ({ordinal})",
+        "jupiterReturn": "Retour de Jupiter ({ordinal})",
+        "nodalReturn": "Retour nodal ({ordinal})"
+      },
+      "ordinals": {
+        "first": "premier",
+        "second": "deuxième",
+        "third": "troisième",
+        "fourth": "quatrième"
+      },
+      "themes": {
+        "sun": "Autorité, identité et visibilité",
+        "moon": "Fondations émotionnelles, famille et sécurité intérieure",
+        "mars": "Courage, conflit et action décisive",
+        "mercury": "Communication, étude et esprit d'adaptation",
+        "jupiter": "Expansion, foi, enseignement et croissance éthique",
+        "venus": "Amour, partenariat, argent et plaisir",
+        "saturn": "Discipline, responsabilité et bilan karmique",
+        "rahu": "Ambition, appétit et terrain inconnu",
+        "ketu": "Lâcher-prise, retrait et maîtrise intérieure",
+        "saturnReturn": "Structure, responsabilité et prix des choix",
+        "jupiterReturn": "Expansion, sens et terrain de jeu élargi",
+        "nodalReturn": "Axe du destin — ce vers quoi vous tendez et ce que vous lâchez"
+      }
+    },
+    "sources": {
+      "label": "Les passages ({count})",
+      "ref": "Brihat Jataka {ref}",
+      "refStrijataka": "Strijataka, ch. {ref}",
+      "note": "note du traducteur",
+      "credit": "Les numéros renvoient aux versets dont ils sont tirés, cités tels qu'ils sont imprimés dans la traduction anglaise du Brihat Jataka de Varahamihira par N. Chidambaram Iyer (1885).",
+      "creditStrijataka": "Les passages marqués Strijataka sont cités tels qu'ils sont imprimés dans Strijataka, or Female Horoscopy (1931), le livre de B. Suryanarain Rao sur les thèmes natals des femmes. Les mots entre crochets sont de nous, non du livre."
+    },
+    "askPending": "Lecture des classiques pour votre thème…",
+    "ask": {
+      "kicker": "Interroger les classiques",
+      "heading": "Posez une question aux livres",
+      "lead": "Choisissez une question ou posez la vôtre. La réponse ne s'appuie que sur les passages dont les conditions se vérifient dans votre thème, et chaque affirmation renvoie au passage dont elle provient.",
+      "chooseLabel": "Questions que vous pouvez poser",
+      "loading": "Recherche des questions auxquelles votre thème peut répondre…",
+      "empty": "Les livres ne disent rien sur cette question pour votre thème.",
+      "limited": "C'est tout pour aujourd'hui. Revenez demain pour poser d'autres questions.",
+      "limitedSignIn": "C'est tout pour aujourd'hui. Connectez-vous pour poser d'autres questions.",
+      "failed": "Impossible de répondre à cette question pour le moment. Posez-la de nouveau pour réessayer.",
+      "ownLabel": "Ou posez votre propre question",
+      "ownPlaceholder": "Par exemple : quel type de travail me convient ?",
+      "ownHint": "Des questions sur votre propre thème, de {max} caractères au plus. Chacune compte parmi les questions du jour.",
+      "refusedInstructions": "Cela ressemble à une consigne plutôt qu'à une question. Demandez quelque chose sur votre propre thème.",
+      "refusedForbidden": "Les lectures n'abordent pas ce sujet. Essayez une question sur un autre aspect de votre vie.",
+      "refusedNotAboutChart": "Les livres ne peuvent répondre qu'aux questions sur votre propre thème : travail, argent, amour, famille, caractère, etc.",
+      "submit": "Demander",
+      "questions": {
+        "career_year": "Ma carrière dans l'année à venir",
+        "love_year": "Ma vie amoureuse dans l'année à venir",
+        "money_year": "L'argent dans l'année à venir",
+        "health": "Santé et vitalité",
+        "marriage": "Mariage et vie de couple",
+        "strengths": "Mes forces naturelles",
+        "children": "Enfants",
+        "standing": "Réputation et statut"
+      }
+    },
+    "tabsLabel": "Sections de votre lecture",
+    "tabReadings": "Lectures",
+    "moreReadingsOne": "{count} lecture de plus",
+    "moreReadingsOther": "{count} lectures de plus"
   },
   "strength": {
     "planets": {

@@ -2896,7 +2896,92 @@
     "systemPorphyry": "Porfirio",
     "yogasTitle": "Yogas",
     "karmaTitle": "Karma y vocación",
-    "karmaSubtitle": "Lo que la carta trajo consigo y el trabajo al que apunta"
+    "karmaSubtitle": "Lo que la carta trajo consigo y el trabajo al que apunta",
+    "tabToday": "Hoy",
+    "tabChart": "Carta",
+    "tabTiming": "Tiempos",
+    "tabAsk": "Preguntar",
+    "meaningLabel": "Lo Que Esto Significa Para Ti",
+    "meaningPending": "Interpretando tu período actual…",
+    "writing": "Escribiendo tu lectura",
+    "shiftsKicker": "Grandes cambios de vida",
+    "shiftsLink": "Todos los capítulos, pasados y futuros",
+    "timingToolsLink": "Explora tus tiempos",
+    "shifts": {
+      "past": "Capítulo pasado",
+      "active": "Activo ahora",
+      "upcoming": "Próximo",
+      "pivot": "Punto de giro:",
+      "age": "edad {age}",
+      "window": "Ventana:",
+      "labels": {
+        "mahadasha": "Comienza la mahadasha de {planet}",
+        "saturnReturn": "{ordinal} retorno de Saturno",
+        "jupiterReturn": "{ordinal} retorno de Júpiter",
+        "nodalReturn": "{ordinal} retorno nodal"
+      },
+      "ordinals": {
+        "first": "Primer",
+        "second": "Segundo",
+        "third": "Tercer",
+        "fourth": "Cuarto"
+      },
+      "themes": {
+        "sun": "Autoridad, identidad y visibilidad",
+        "moon": "Bases emocionales, familia y seguridad interior",
+        "mars": "Valor, conflicto y acción decidida",
+        "mercury": "Comunicación, estudio y pensamiento flexible",
+        "jupiter": "Expansión, fe, enseñanza y crecimiento ético",
+        "venus": "Amor, pareja, dinero y placer",
+        "saturn": "Disciplina, responsabilidad y rendición de cuentas kármica",
+        "rahu": "Ambición, hambre y terreno desconocido",
+        "ketu": "Desprendimiento, retiro y dominio interior",
+        "saturnReturn": "Estructura, responsabilidad y el precio de las decisiones",
+        "jupiterReturn": "Expansión, sentido y un campo de juego más amplio",
+        "nodalReturn": "Eje del destino — lo que buscas y lo que sueltas"
+      }
+    },
+    "sources": {
+      "label": "Los pasajes ({count})",
+      "ref": "Brihat Jataka {ref}",
+      "refStrijataka": "Strijataka, cap. {ref}",
+      "note": "nota del traductor",
+      "credit": "Los números remiten a los versos de los que proceden, citados tal como se imprimieron en la traducción inglesa del Brihat Jataka de Varahamihira hecha por N. Chidambaram Iyer en 1885.",
+      "creditStrijataka": "Los pasajes marcados Strijataka se citan tal como se imprimieron en Strijataka, or Female Horoscopy (1931), el libro de B. Suryanarain Rao sobre las cartas natales de mujeres. Las palabras entre corchetes son nuestras, no del libro."
+    },
+    "askPending": "Leyendo los clásicos para tu carta…",
+    "ask": {
+      "kicker": "Pregunta a los clásicos",
+      "heading": "Haz una pregunta a los libros",
+      "lead": "Elige una pregunta o escribe la tuya. La respuesta sale solo de los pasajes cuyas condiciones se cumplen en tu carta, y cada afirmación remite al pasaje del que procede.",
+      "chooseLabel": "Preguntas que puedes hacer",
+      "loading": "Buscando las preguntas que tu carta puede responder…",
+      "empty": "Los libros no dicen nada sobre esta pregunta para tu carta.",
+      "limited": "Eso es todo por hoy. Vuelve mañana para hacer más preguntas.",
+      "limitedSignIn": "Eso es todo por hoy. Inicia sesión para hacer más preguntas.",
+      "failed": "No se pudo responder a esta pregunta ahora mismo. Vuelve a hacerla para intentarlo otra vez.",
+      "ownLabel": "O haz tu propia pregunta",
+      "ownPlaceholder": "Por ejemplo: ¿Qué tipo de trabajo me conviene?",
+      "ownHint": "Preguntas sobre tu propia carta, de hasta {max} caracteres. Cada una cuenta para las preguntas de hoy.",
+      "refusedInstructions": "Eso parece una instrucción, no una pregunta. Pregunta algo sobre tu propia carta.",
+      "refusedForbidden": "Las lecturas no tratan ese tema. Prueba con una pregunta sobre otra parte de tu vida.",
+      "refusedNotAboutChart": "Los libros solo pueden responder preguntas sobre tu propia carta: trabajo, dinero, amor, familia, carácter y temas parecidos.",
+      "submit": "Preguntar",
+      "questions": {
+        "career_year": "Mi carrera en el próximo año",
+        "love_year": "Mi vida amorosa en el próximo año",
+        "money_year": "El dinero en el próximo año",
+        "health": "Salud y vitalidad",
+        "marriage": "El matrimonio y mi pareja",
+        "strengths": "Mis fortalezas naturales",
+        "children": "Hijos",
+        "standing": "Reputación y posición"
+      }
+    },
+    "tabsLabel": "Secciones de tu lectura",
+    "tabReadings": "Lecturas",
+    "moreReadingsOne": "{count} lectura más",
+    "moreReadingsOther": "{count} lecturas más"
   },
   "strength": {
     "planets": {
