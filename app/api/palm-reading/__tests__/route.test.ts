@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({
   stream: vi.fn(),
   budget: vi.fn(),
+  resolveSession: vi.fn(),
 }));
 
 vi.mock("@anthropic-ai/sdk", async (importOriginal) => {
@@ -15,7 +16,19 @@ vi.mock("@anthropic-ai/sdk", async (importOriginal) => {
     },
   };
 });
-vi.mock("@/lib/llm-budget", () => ({ consumeLlmBudget: mocks.budget }));
+vi.mock("@/lib/llm-budget", () => ({
+  consumeLlmBudget: mocks.budget,
+  llmCallerForSession: (session: { userId: string }) => ({ key: `user:${session.userId}`, signedIn: true }),
+}));
+/* The real session reader (cookie or bearer header) over a fake store: a
+   token of the form `session-for-<id>` is that account, anything else is no
+   one. */
+vi.mock("@/lib/identity/session", () => ({
+  SESSION_COOKIE: "astro_session",
+  resolveSession: mocks.resolveSession,
+}));
+
+const TOKEN = "session-for-user-a-0123456789";
 
 const READING = {
   overall_summary: "A hand of steady lines.",
@@ -40,9 +53,13 @@ const answer = (text: string, stop_reason = "end_turn") => ({
   finalMessage: async () => ({ stop_reason, content: [{ type: "text", text }], usage: { input_tokens: 1, output_tokens: 1 } }),
 });
 
-function request(body: Record<string, unknown> = {}) {
+function request(
+  body: Record<string, unknown> = {},
+  headers: Record<string, string> = { cookie: `astro_session=${TOKEN}` },
+) {
   return new NextRequest("https://example.test/api/palm-reading", {
     method: "POST",
+    headers,
     body: JSON.stringify({ image: "aGVsbG8gcGFsbQ==", mediaType: "image/jpeg", ...body }),
   });
 }
@@ -55,6 +72,11 @@ beforeEach(async () => {
   vi.stubEnv("ANTHROPIC_API_KEY", "test-key");
   vi.stubEnv("OPENAI_API_KEY", "");
   mocks.budget.mockResolvedValue({ allowed: true, remaining: 10, callerRemaining: 3 });
+  mocks.resolveSession.mockImplementation(async (token: string | null | undefined) =>
+    token?.startsWith("session-for-")
+      ? { sessionId: "session-1", userId: token.slice("session-for-".length) }
+      : null,
+  );
   vi.spyOn(console, "info").mockImplementation(() => {});
   vi.spyOn(console, "warn").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
@@ -64,6 +86,41 @@ beforeEach(async () => {
 afterEach(() => {
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
+});
+
+describe("the palm reading route's sign-in gate", () => {
+  it.each([
+    ["no session at all", {}],
+    ["a cookie that names no session", { cookie: "astro_session=session-unknown-0123456789" }],
+    ["a malformed bearer header", { authorization: "Bearer not a token" }],
+  ])("answers 401 to %s, before the budget or the model", async (_label, headers) => {
+    const response = await POST(request({}, headers as Record<string, string>));
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({
+      error: { code: "UNAUTHORIZED", message: "Sign in to read your palm.", details: { scope: "sign_in" } },
+    });
+    expect(mocks.budget).not.toHaveBeenCalled();
+    expect(mocks.stream).not.toHaveBeenCalled();
+  });
+
+  it("answers 401 even to a body it would refuse, so the gate comes first", async () => {
+    const response = await POST(request({ image: "" }, {}));
+    expect(response.status).toBe(401);
+  });
+
+  it.each([
+    ["the browser's cookie", { cookie: `astro_session=${TOKEN}` }],
+    ["the app's bearer header", { authorization: `Bearer ${TOKEN}` }],
+  ])("reads the palm for %s, spending that account's allowance", async (_label, headers) => {
+    mocks.stream.mockReturnValueOnce(answer(JSON.stringify(READING)));
+    const response = await POST(request({}, headers));
+    expect(response.status).toBe(200);
+    expect(mocks.budget).toHaveBeenCalledWith("/api/palm-reading", {
+      key: "user:user-a-0123456789",
+      signedIn: true,
+    });
+    expect(mocks.stream).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("the palm reading route", () => {

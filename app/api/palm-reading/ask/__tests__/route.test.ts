@@ -28,13 +28,29 @@ vi.mock("@anthropic-ai/sdk", () => {
   return { default: MockAnthropic };
 });
 
-vi.mock("@/lib/llm-budget", () => ({
-  consumeLlmBudget: vi.fn(async () => ({
-    allowed: true,
-    remaining: 10,
-    callerRemaining: 10,
-  })),
+const budgetMock = vi.fn(async () => ({
+  allowed: true,
+  remaining: 10,
+  callerRemaining: 10,
 }));
+
+vi.mock("@/lib/llm-budget", () => ({
+  consumeLlmBudget: budgetMock,
+  llmCallerForSession: (session: { userId: string }) => ({ key: `user:${session.userId}`, signedIn: true }),
+}));
+
+/* The real session reader (cookie or bearer header) over a fake store: a
+   token of the form `session-for-<id>` is that account, anything else is no
+   one. */
+vi.mock("@/lib/identity/session", () => ({
+  SESSION_COOKIE: "astro_session",
+  resolveSession: async (token: string | null | undefined) =>
+    token?.startsWith("session-for-")
+      ? { sessionId: "session-1", userId: token.slice("session-for-".length) }
+      : null,
+}));
+
+const TOKEN = "session-for-user-a-0123456789";
 
 const { POST } = await import("../route");
 
@@ -44,11 +60,14 @@ const READING = {
   guidance: "Tendencies, not fate.",
 };
 
-function ask(body: Record<string, unknown>) {
+function ask(
+  body: Record<string, unknown>,
+  auth: Record<string, string> = { cookie: `astro_session=${TOKEN}` },
+) {
   return POST(
     new NextRequest("http://localhost/api/palm-reading/ask", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...auth },
       body: JSON.stringify(body),
     }),
   );
@@ -65,6 +84,7 @@ function sentMessages() {
 beforeEach(() => {
   process.env.ANTHROPIC_API_KEY = "test-key";
   createMock.mockReset();
+  budgetMock.mockClear();
   createMock.mockResolvedValue({
     stop_reason: "end_turn",
     content: [{ type: "text", text: "Your heart line is deep, which suggests warmth." }],
@@ -73,6 +93,31 @@ beforeEach(() => {
 
 afterEach(() => {
   delete process.env.ANTHROPIC_API_KEY;
+});
+
+describe("/api/palm-reading/ask sign-in gate", () => {
+  it.each([
+    ["no session at all", {}],
+    ["a cookie that names no session", { cookie: "astro_session=session-unknown-0123456789" }],
+  ])("answers 401 to %s, before the budget or the model", async (_label, auth) => {
+    const response = await ask({ reading: READING, question: "What about my heart line?" }, auth);
+    expect(response.status).toBe(401);
+    expect(await response.json()).toMatchObject({
+      error: { code: "UNAUTHORIZED", message: "Sign in to ask about your palm reading.", details: { scope: "sign_in" } },
+    });
+    expect(budgetMock).not.toHaveBeenCalled();
+    expect(createMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["the browser's cookie", { cookie: `astro_session=${TOKEN}` }],
+    ["the app's bearer header", { authorization: `Bearer ${TOKEN}` }],
+  ])("answers for %s, spending that account's allowance", async (_label, auth) => {
+    const response = await ask({ reading: READING, question: "What about my heart line?" }, auth);
+    expect(response.status).toBe(200);
+    expect(budgetMock).toHaveBeenCalledWith("/api/palm-reading/ask", { key: "user:user-a-0123456789", signedIn: true });
+    expect(createMock).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe("/api/palm-reading/ask", () => {

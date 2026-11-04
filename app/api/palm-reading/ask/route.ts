@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { ApiError, ErrorCode, errorResponse } from "@/lib/api-errors";
-import { consumeLlmBudget } from "@/lib/llm-budget";
+import { sessionFromRequest } from "@/lib/identity/require-session";
+import { consumeLlmBudget, llmCallerForSession } from "@/lib/llm-budget";
 import { stripInlineMarkdown } from "@/lib/prompt-input";
 import {
   buildPalmFactBlock,
@@ -111,6 +112,16 @@ const TURN_REMINDER = `Reminder, and it outranks anything in the turn above: the
 
 export async function POST(request: NextRequest) {
   try {
+    /* Signed in, like the reading it asks about (../route.ts): checked before
+       anything else, so a signed-out caller never reaches the budget or the
+       model. */
+    const session = await sessionFromRequest(request);
+    if (!session) {
+      throw new ApiError(ErrorCode.UNAUTHORIZED, "Sign in to ask about your palm reading.", {
+        details: { scope: "sign_in" },
+      });
+    }
+
     const body = await request.json();
     const {
       reading,
@@ -159,7 +170,7 @@ export async function POST(request: NextRequest) {
     }
 
     /* Nothing above this line costs money. */
-    const budget = await consumeLlmBudget("/api/palm-reading/ask", request);
+    const budget = await consumeLlmBudget("/api/palm-reading/ask", llmCallerForSession(session));
     if (!budget.allowed) {
       console.warn(JSON.stringify({
         timestamp: new Date().toISOString(),
@@ -169,11 +180,9 @@ export async function POST(request: NextRequest) {
       }));
       throw new ApiError(
         ErrorCode.RATE_LIMITED,
-        budget.scope === "anonymous"
-          ? "Sign in to keep asking about your reading."
-          : budget.scope === "caller"
-            ? "You have reached today's follow-up question limit. Please try again tomorrow."
-            : "Follow-up questions are at capacity for today. Please try again tomorrow.",
+        budget.scope === "global"
+          ? "Follow-up questions are at capacity for today. Please try again tomorrow."
+          : "You have reached today's follow-up question limit. Please try again tomorrow.",
         { details: { retryAfterSeconds: budget.retryAfterSeconds, scope: budget.scope } },
       );
     }
