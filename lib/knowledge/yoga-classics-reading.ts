@@ -1,6 +1,7 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import { stripInlineMarkdown } from "../prompt-input";
+import { tidySegments } from "./classical-reading";
 import { BRIHAT_JATAKA_1885 } from "./sources";
 import type {
   YogaClassicsReading,
@@ -278,5 +279,7 @@ export function readingFrom(
     if (text.length > 0) segments.push({ text, sources: cited });
   }
 
-  return { segments, sources };
+  /* A citation that points at nothing leaves its block uncited, with the space
+     the model put before the cited words still at the seam: tidySegments joins it. */
+  return { segments: tidySegments(segments), sources };
 }

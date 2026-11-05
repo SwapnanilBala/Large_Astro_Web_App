@@ -233,8 +233,8 @@ describe("what the model is sent", () => {
     expect(reading.segments).toEqual([
       { text: "Money and talk come first", sources: [1] },
       { text: ". The book links this to detachment", sources: [2, 1] },
-      { text: ", and to", sources: [] },
-      { text: " nothing.", sources: [] },
+      /* The dropped [9] leaves one run, not two with a seam between them. */
+      { text: ", and to nothing.", sources: [] },
     ]);
     expect(readingFromMarkers("No marks at all.", groups).reading.sources).toEqual([]);
   });

@@ -75,6 +75,111 @@ export type AreaClassicsResponse = {
   cached: boolean;
 };
 
+/*
+ * Punctuation that never takes a space before it. French puts one before
+ * ; : ! ? and », and those stay off the list so a French note keeps it.
+ */
+const CLOSING_PUNCTUATION = /^[.,…)\]।॥”’]/u;
+/* Plain spaces and tabs: a no-break space was put there on purpose, so it stays. */
+const PLAIN_SPACE = /^[ \t]+$/;
+
+const trailingSpace = (text: string) => /\s*$/u.exec(text)![0];
+const leadingSpace = (text: string) => /^\s*/u.exec(text)![0];
+
+/**
+ * The one stretch of whitespace to leave where two runs meet: a paragraph
+ * break wins over a space, a doubled plain space is one, and a plain space
+ * before closing punctuation goes.
+ */
+function seamSpace(leftSpace: string, rightSpace: string, tail: string): string {
+  const both = leftSpace + rightSpace;
+  let space: string;
+  if (both.includes("\n")) space = leftSpace.includes("\n") ? leftSpace : rightSpace;
+  else if (PLAIN_SPACE.test(both)) space = " ";
+  else space = leftSpace || rightSpace;
+  return CLOSING_PUNCTUATION.test(tail) && PLAIN_SPACE.test(space) ? "" : space;
+}
+
+/**
+ * Tidies the seam between `previous` and the run that follows it: rewrites
+ * `previous.text` in place and returns the following run's text. The space
+ * stays on the side that had it (the left first), so a clean seam is
+ * returned untouched.
+ */
+function seam(previous: ClassicalSegment, text: string): string {
+  const leftSpace = trailingSpace(previous.text);
+  const rightSpace = leadingSpace(text);
+  const tail = text.slice(rightSpace.length);
+  /* Nothing after the space yet: it waits for whatever comes next. */
+  if ((!leftSpace && !rightSpace) || !tail) return text;
+  const space = seamSpace(leftSpace, rightSpace, tail);
+  if (!leftSpace) return space + tail;
+  previous.text = previous.text.slice(0, previous.text.length - leftSpace.length) + space;
+  return tail;
+}
+
+/** Two runs with nothing between them, as one. */
+function joinRuns(left: string, right: string): string {
+  const run = { text: left, sources: [] };
+  const rest = seam(run, right);
+  return run.text + rest;
+}
+
+/**
+ * The reading's segments with the whitespace a mark leaves behind cleaned up.
+ *
+ * Wherever a mark is taken out of the model's text -- turned into a segment's
+ * sources, dropped because it names a passage that was not sent, or a
+ * citation the API returned that points at nothing -- the space the model
+ * wrote before it is left at the seam. Unresolved, the seam printed "a
+ * strained partnership ." or "unequal , and"; resolved, "partnership ¹.".
+ * So:
+ * - a cited segment ends on its words, and the whitespace after them moves
+ *   on to the next segment, so the mark sits right after what it supports;
+ * - a cited segment with no words of its own gives its numbers to the words
+ *   before it (two marks in a row print as "1,2", not "12");
+ * - two uncited segments in a row, which is what a dropped mark leaves, are
+ *   one run;
+ * - and at every seam ("unequal [9] , and slow [1]" puts one before a cited
+ *   run) a doubled space is one and a plain space before closing punctuation
+ *   goes.
+ *
+ * Idempotent, so a reading cached before this existed is cleaned up when it
+ * is rendered, and a clean one passes through as it was.
+ */
+export function tidySegments(segments: readonly ClassicalSegment[]): ClassicalSegment[] {
+  const out: ClassicalSegment[] = [];
+  /* Whitespace taken off the end of a cited segment, waiting for the next run. */
+  let carried = "";
+  for (const segment of segments) {
+    let text = carried + segment.text;
+    carried = "";
+    const previous = out.at(-1);
+    if (previous && segment.sources.length === 0 && previous.sources.length === 0) {
+      previous.text = joinRuns(previous.text, text);
+      continue;
+    }
+    if (previous) text = seam(previous, text);
+    if (segment.sources.length === 0) {
+      out.push({ text, sources: [] });
+      continue;
+    }
+    carried = trailingSpace(text);
+    text = text.slice(0, text.length - carried.length);
+    if (!text && previous) {
+      /* A mark straight after the previous run's words: it belongs to them. */
+      const before = trailingSpace(previous.text);
+      previous.text = previous.text.slice(0, previous.text.length - before.length);
+      carried = before + carried;
+      for (const number of segment.sources) if (!previous.sources.includes(number)) previous.sources.push(number);
+      continue;
+    }
+    out.push({ text, sources: [...segment.sources] });
+  }
+  /* Whitespace after the last mark ends the reading; there is nothing to carry it to. */
+  return out.filter((segment) => segment.text.length > 0 || segment.sources.length > 0);
+}
+
 /**
  * The reading as paragraphs of cited pieces, for rendering.
  *
@@ -85,7 +190,8 @@ export type AreaClassicsResponse = {
  */
 export function readingParagraphs(reading: ClassicalReading): ClassicalSegment[][] {
   const paragraphs: ClassicalSegment[][] = [[]];
-  for (const segment of reading.segments) {
+  /* Tidied here too, for readings cached before the routes tidied them. */
+  for (const segment of tidySegments(reading.segments)) {
     const parts = segment.text.split(/\n\s*\n/);
     parts.forEach((part, index) => {
       if (index > 0) paragraphs.push([]);

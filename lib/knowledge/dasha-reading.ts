@@ -19,7 +19,7 @@ import { YOGA_DEFINITIONS } from "../engines/yoga-engine";
 import { COMMENTARY_LANGUAGES } from "../varga-commentary";
 import { READER_LINES, countedByAnyArea, describePlacement, type AreaChart, type ChartYoga } from "./area-classics-reading";
 import { heldPlacements, placementsHold } from "./placements";
-import type { ClassicalReading, ClassicalSource } from "./classical-reading";
+import { tidySegments, type ClassicalReading, type ClassicalSource } from "./classical-reading";
 import { BRIHAT_JATAKA_1885, KNOWLEDGE_SOURCES, STRIJATAKA_1931 } from "./sources";
 import { stripInlineMarkdown } from "../prompt-input";
 import {
@@ -288,7 +288,8 @@ const MARK = /\[(\d+(?:\s*,\s*\d+)*)\]/g;
  * text, each carrying the numbers of the passages after its words, the sources
  * numbered in the order the reading first cites them, as on the other
  * classical notes. A mark for a passage it was not given is dropped and
- * counted.
+ * counted, and the seam either kind of mark leaves is joined cleanly
+ * (tidySegments): no space before punctuation, no doubled space.
  */
 export function readingFromMarkers(
   text: string,
@@ -324,7 +325,7 @@ export function readingFromMarkers(
   const rest = clean.slice(cursor);
   if (rest.length > 0) segments.push({ text: rest, sources: [] });
   return {
-    reading: { segments: segments.filter((segment) => segment.text.length > 0 || segment.sources.length > 0), sources },
+    reading: { segments: tidySegments(segments), sources },
     strayMarks,
   };
 }
