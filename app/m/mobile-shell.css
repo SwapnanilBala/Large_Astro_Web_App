@@ -189,6 +189,33 @@ main {
   --font-mono: var(--font-text);
 }
 
+/*
+ * Hindi and Bengali are never tracked out.
+ *
+ * Their letters hang from one headline stroke (the shirorekha), and
+ * letter-spacing cuts it: a tracked kicker read "यह पाठ क्यों" as six islands.
+ * text-transform: uppercase does nothing for either script, so the tracking
+ * buys them nothing in exchange.
+ *
+ * Here rather than beside each label, so a label written tomorrow is covered
+ * without anyone remembering. !important because the labels are module
+ * classes loaded after this file, and a module's `.kicker` would otherwise
+ * win on order; it also beats a letter-spacing written inline. The trade-off,
+ * accepted: Latin bits inside a Hindi or Bengali label ("HI", "H7", a degree)
+ * lose their tracking too. lib/__tests__/indic-letter-spacing.test.ts keeps
+ * this rule and its twin in app/globals.css in place.
+ */
+:lang(hi),
+:lang(bn),
+:lang(hi)::before,
+:lang(bn)::before,
+:lang(hi)::after,
+:lang(bn)::after,
+:lang(hi)::placeholder,
+:lang(bn)::placeholder {
+  letter-spacing: 0 !important;
+}
+
 *,
 *::before,
 *::after {

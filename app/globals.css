@@ -8223,3 +8223,35 @@ html[data-theme="light"] .aspect-badge--vedic {
   border-color: rgba(242, 194, 108, 0.85);
   background: linear-gradient(135deg, #f7d089, #dcb972);
 }
+
+/*
+ * ── Hindi and Bengali are never tracked out ──
+ *
+ * Their letters hang from one headline stroke (the shirorekha), and
+ * letter-spacing cuts it: a tracked kicker read "यह पाठ क्यों" as six islands.
+ * text-transform: uppercase does nothing for either script, so the tracking
+ * buys them nothing in exchange.
+ *
+ * One rule for the whole desktop tree rather than one beside each label, so a
+ * label written tomorrow is covered without anyone remembering. !important
+ * because most labels are module classes (globals.css cannot name them, and
+ * they load later and would win on order); it also beats a letterSpacing
+ * written inline. It is the last rule in this file because the
+ * react-datepicker rules above set letter-spacing !important at the same
+ * specificity. Module rules that do that carry their own :lang override.
+ *
+ * The trade-off, accepted: Latin bits inside a Hindi or Bengali label ("HI",
+ * "H7", a degree) lose their tracking too. The /m tree has the same rule in
+ * app/m/mobile-shell.css; lib/__tests__/indic-letter-spacing.test.ts keeps
+ * both in place.
+ */
+:lang(hi),
+:lang(bn),
+:lang(hi)::before,
+:lang(bn)::before,
+:lang(hi)::after,
+:lang(bn)::after,
+:lang(hi)::placeholder,
+:lang(bn)::placeholder {
+  letter-spacing: 0 !important;
+}

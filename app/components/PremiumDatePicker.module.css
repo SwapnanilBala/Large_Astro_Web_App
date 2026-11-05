@@ -490,6 +490,16 @@
     background 0.2s ease !important;
 }
 
+/* Month names in Hindi and Bengali hang from one headline stroke, which
+   tracking cuts. The shells' :lang reset cannot outrank the !important above,
+   so it is restated here. */
+.calendarPopup :global(.react-datepicker__month-select):lang(hi),
+.calendarPopup :global(.react-datepicker__month-select):lang(bn),
+.calendarPopup :global(.react-datepicker__year-select):lang(hi),
+.calendarPopup :global(.react-datepicker__year-select):lang(bn) {
+  letter-spacing: 0 !important;
+}
+
 .calendarPopup :global(.react-datepicker__month-select:hover),
 .calendarPopup :global(.react-datepicker__year-select:hover) {
   border-color: rgba(232, 200, 154, 0.54) !important;
