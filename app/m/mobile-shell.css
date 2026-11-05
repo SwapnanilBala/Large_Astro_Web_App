@@ -163,11 +163,39 @@ html[data-theme="light"] {
  * html and body rule below resolves --font-text before Inter exists.
  */
 main {
-  --font-display: var(--font-display-m, Georgia), Georgia, "Times New Roman", serif;
+  --font-display: var(--font-display-m, Georgia), "Lagna Display Indic", Georgia, "Times New Roman", serif;
   --font-prose: var(--font-prose-m, Georgia), Georgia, "Times New Roman", serif;
   --font-text: var(--font-ui-m, -apple-system), -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   font-family: var(--font-text);
+}
+
+/*
+ * Hindi and Bengali headings in one weight, like Marcellus: the system's own
+ * Indic face at its regular weight, declared for every weight, and only for
+ * those two scripts. Without it a heading's 600 got the fallback's real bold,
+ * heavy beside the single-weight Latin in the same line. The same faces are
+ * declared in app/globals.css for the desktop tree, which explains the
+ * local() names; a platform where none matches falls back as before.
+ */
+@font-face {
+  font-family: "Lagna Display Indic";
+  src: local("Nirmala UI"), local("NirmalaUI"), local("Noto Sans Devanagari"),
+    local("Noto Sans Devanagari Regular"), local("NotoSansDevanagari-Regular"),
+    local("Kohinoor Devanagari Regular"), local("KohinoorDevanagari-Regular");
+  font-weight: 100 900;
+  font-style: normal;
+  unicode-range: U+0900-097F, U+1CD0-1CFF, U+A8E0-A8FF;
+}
+
+@font-face {
+  font-family: "Lagna Display Indic";
+  src: local("Nirmala UI"), local("NirmalaUI"), local("Noto Sans Bengali"),
+    local("Noto Sans Bengali Regular"), local("NotoSansBengali-Regular"),
+    local("Kohinoor Bangla Regular"), local("KohinoorBangla-Regular");
+  font-weight: 100 900;
+  font-style: normal;
+  unicode-range: U+0980-09FF;
 }
 
 /*
@@ -187,6 +215,33 @@ main {
 :lang(hi),
 :lang(bn) {
   --font-mono: var(--font-text);
+}
+
+/*
+ * Hindi and Bengali are never tracked out.
+ *
+ * Their letters hang from one headline stroke (the shirorekha), and
+ * letter-spacing cuts it: a tracked kicker read "यह पाठ क्यों" as six islands.
+ * text-transform: uppercase does nothing for either script, so the tracking
+ * buys them nothing in exchange.
+ *
+ * Here rather than beside each label, so a label written tomorrow is covered
+ * without anyone remembering. !important because the labels are module
+ * classes loaded after this file, and a module's `.kicker` would otherwise
+ * win on order; it also beats a letter-spacing written inline. The trade-off,
+ * accepted: Latin bits inside a Hindi or Bengali label ("HI", "H7", a degree)
+ * lose their tracking too. lib/__tests__/indic-letter-spacing.test.ts keeps
+ * this rule and its twin in app/globals.css in place.
+ */
+:lang(hi),
+:lang(bn),
+:lang(hi)::before,
+:lang(bn)::before,
+:lang(hi)::after,
+:lang(bn)::after,
+:lang(hi)::placeholder,
+:lang(bn)::placeholder {
+  letter-spacing: 0 !important;
 }
 
 *,

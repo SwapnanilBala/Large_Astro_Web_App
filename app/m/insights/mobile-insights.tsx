@@ -689,10 +689,13 @@ export default function MobileInsights({
                   <dt className={styles.identityLabel}>{tr("mobileInsights.factNakshatra")}</dt>
                   <dd className={styles.identityValue}>{nakshatraName(nakshatra.name, tr)}</dd>
                   <dd className={styles.identityMeta}>
+                    {/* The separator keeps to the pada, so a narrow column
+                        wraps as "Pada 3 ·" / "Jupiter" and never strands the
+                        dot on a line of its own. */}
                     {tr("mobileInsights.padaLord", {
                       pada: String(nakshatra.pada),
                       lord: planetName(nakshatra.lord, tr),
-                    })}
+                    }).replace(" · ", "\u00a0· ")}
                   </dd>
                 </div>
               )}

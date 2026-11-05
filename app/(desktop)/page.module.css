@@ -1021,6 +1021,15 @@
   letter-spacing: 0.04em !important;
 }
 
+/* Hindi and Bengali are never tracked out (see the end of globals.css); that
+   rule cannot outrank this !important one, so it is restated here. */
+.formSectionCard :global(label):lang(hi),
+.formSectionCard :global(label):lang(bn),
+.autocompleteWrapper label:lang(hi),
+.autocompleteWrapper label:lang(bn) {
+  letter-spacing: 0 !important;
+}
+
 .formSectionCard :global(input),
 .formSectionCard :global(textarea),
 .formSectionCard :global(select),
@@ -1177,6 +1186,12 @@
      this pair is left tangled on purpose — see af2c6d1. */
   font-weight: 700 !important;
   letter-spacing: 0.04em !important;
+}
+
+/* Hindi and Bengali are never tracked out; see the label rule above. */
+.primaryAction :global(button) > div:first-child:lang(hi),
+.primaryAction :global(button) > div:first-child:lang(bn) {
+  letter-spacing: 0 !important;
 }
 
 /* :not(:disabled) is the whole point of this selector.

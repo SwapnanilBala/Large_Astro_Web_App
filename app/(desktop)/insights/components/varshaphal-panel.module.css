@@ -394,14 +394,20 @@
   padding: 0.48rem 0.65rem;
 }
 
+/* Thirds, except that none is narrower than its longest word: the tracked
+   "PROFECTION" label is 113px and its third had 101px, so it ran over the
+   card's padding to the border. Where three labels cannot share a row
+   (German "JAHRESHERRSCHER"), the last card moves to a row of its own
+   instead of spilling out of the hero. */
 .themeStats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
 }
 
 .themeStat {
-  min-width: 0;
+  flex: 1 1 0;
+  min-width: min-content;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   background: rgba(8, 12, 24, 0.24);
@@ -837,8 +843,8 @@
     grid-template-columns: 1fr;
   }
 
-  .themeStats {
-    grid-template-columns: 1fr;
+  .themeStat {
+    flex-basis: 100%;
   }
 
   .overviewHeader,

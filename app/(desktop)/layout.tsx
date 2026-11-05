@@ -55,6 +55,10 @@ import { ACCOUNT_LABEL_KEY, ACCOUNT_LABEL_MAX_AGE_MS } from "@/lib/account-label
  * resolve to the 700 face instead of a weight nothing here was designed with.
  * They are written out in full because next/font reads these arguments at
  * build time and accepts only literals.
+ *
+ * Marcellus is Latin-only. The variable here is --font-display-latin, and
+ * .desktop-shell in globals.css builds --font-display from it with a
+ * Devanagari and Bengali face behind it, held to one weight like Marcellus.
  */
 const marcellus = localFont({
   src: [
@@ -64,7 +68,7 @@ const marcellus = localFont({
     { path: "../fonts/marcellus-latin-400-normal.woff2", weight: "700", style: "normal" },
   ],
   display: "swap",
-  variable: "--font-display",
+  variable: "--font-display-latin",
   adjustFontFallback: "Times New Roman",
 });
 
