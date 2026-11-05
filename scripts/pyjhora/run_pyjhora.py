@@ -16,8 +16,9 @@ scripts/pyjhora/out/pyjhora-results.json. Two separate questions are answered:
 
    Rahu is compared twice. PyJHora's chart uses the true (osculating) node,
    and its node switch does not reach drik.dhasavarga, so the mean node is
-   taken from the Swiss Ephemeris directly. Our engine's "true node" turned
-   out to track the mean node, and reporting both makes that visible.
+   taken from the Swiss Ephemeris directly. Until 2026-11 our engine's "true
+   node" tracked the mean node; it is the true node now, and reporting both
+   keeps a slip back to the mean node visible.
 
 Run with the Python from scripts/pyjhora/setup.mjs:
     <venv python> scripts/pyjhora/run_pyjhora.py

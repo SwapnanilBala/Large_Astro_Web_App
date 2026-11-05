@@ -88,8 +88,13 @@ import { COMBINATION_RULES } from "./definitions/combination";
  * v8 (2026-10-04): the two other Kalatra yogas joined it, Chandra-Shukra
  * (more than one marriage) and Mangala-Shani (marrying late), from the same
  * chapter. Same reasons, same decision on rarity.json.
+ *
+ * v9 (2026-11-04): no rule or yoga changed. Rahu and Ketu are the true node
+ * now (they were the mean node under a "true node" label), so rule and yoga
+ * output that reads them changes for a few percent of charts. rarity.json was
+ * regenerated against the new positions.
  */
-export const RULES_SCHEMA_VERSION = "rules-2026-10-v8";
+export const RULES_SCHEMA_VERSION = "rules-2026-11-v9";
 
 /**
  * Declaration order is emission order, and emission order is what the desktop
