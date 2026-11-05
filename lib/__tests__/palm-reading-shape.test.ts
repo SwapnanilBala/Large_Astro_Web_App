@@ -10,6 +10,7 @@ import {
   MAX_LIST_ITEMS,
   MAX_POINTS,
   MAX_PROSE_CHARS,
+  parseReadingText,
   shapePalmReading,
 } from "../palm-readings/reading-shape";
 import type { PalmReadingJSON } from "../palm-readings/types";
@@ -202,3 +203,32 @@ describe("values outside their sets", () => {
   });
 });
 
+describe("parseReadingText", () => {
+  const whole = JSON.stringify(READING);
+
+  it("reads an answer that is only the object", () => {
+    expect(parseReadingText(whole)).toEqual(READING);
+  });
+
+  it("finds the object among words around it", () => {
+    expect(parseReadingText(`Here is the reading:\n${whole}\nDone.`)).toEqual(READING);
+  });
+
+  /* Measured 2026-11-04: an object short of fields, a sentence saying so, and the whole object again. */
+  it("takes the last whole reading when the model wrote it twice", () => {
+    const first = JSON.stringify({ overall_summary: "First go.", guidance: 'Short {and} with "braces" in it.' });
+    const text = `${first}\n\nWait, that is missing some required keys. Let me restate the complete object.\n\n${whole}`;
+    expect(parseReadingText(text)).toEqual(READING);
+  });
+
+  it("prefers a reading to an object that is not one, and skips what does not parse", () => {
+    expect(parseReadingText(`${whole} {"note": "after"}`)).toEqual(READING);
+    expect(parseReadingText(`${whole} {"note": "after"} {broken`)).toEqual(READING);
+    expect(parseReadingText(`words {"note": "only"} words`)).toEqual({ note: "only" });
+  });
+
+  it("is undefined when nothing in the text parses", () => {
+    expect(parseReadingText("no json here")).toBeUndefined();
+    expect(parseReadingText('{"overall_summary": ')).toBeUndefined();
+  });
+});

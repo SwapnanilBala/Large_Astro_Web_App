@@ -9,7 +9,7 @@ import { classicalHandSection } from "@/lib/palm-readings/classical-hand";
 import { photoFrame, type PhotoFrame } from "@/lib/palm-readings/image-size";
 import { checkPalmPhoto, palmPhotoRefusalError } from "@/lib/palm-readings/photo-check";
 import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
-import { shapePalmReading } from "@/lib/palm-readings/reading-shape";
+import { parseReadingText, shapePalmReading } from "@/lib/palm-readings/reading-shape";
 import { checkLineTraces, palmBounds } from "@/lib/palm-readings/trace-check";
 import { safeLabel, safeNumber } from "@/lib/prompt-input";
 
@@ -847,19 +847,14 @@ export async function POST(request: NextRequest) {
     }
 
     // -- Parse JSON from response --
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(rawText);
-    } catch {
-      // Try to extract JSON object from surrounding text
-      const match = rawText.match(/\{[\s\S]*\}/);
-      if (!match) {
-        throw new ApiError(
-          ErrorCode.EXTERNAL_SERVICE_ERROR,
-          "Failed to parse palm reading response as JSON",
-        );
-      }
-      parsed = JSON.parse(match[0]);
+    /* The whole text, or the object in it the model settled on
+       (parseReadingText in reading-shape.ts). */
+    const parsed = parseReadingText(rawText);
+    if (parsed === undefined) {
+      throw new ApiError(
+        ErrorCode.EXTERNAL_SERVICE_ERROR,
+        "Failed to parse palm reading response as JSON",
+      );
     }
 
     /* Only the documented fields, typed and capped, go back to the browser

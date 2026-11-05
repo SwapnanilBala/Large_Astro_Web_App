@@ -217,6 +217,63 @@ function classicalNotes(value: unknown): PalmClassicalFrameworkNotes | undefined
   };
 }
 
+/** Every top-level {...} in the text, string-aware, in order. */
+function topLevelObjects(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"' && depth > 0) inString = true;
+    else if (c === "{") {
+      if (depth === 0) start = i;
+      depth += 1;
+    } else if (c === "}" && depth > 0) {
+      depth -= 1;
+      if (depth === 0) out.push(text.slice(start, i + 1));
+    }
+  }
+  return out;
+}
+
+/**
+ * The model's answer as a value, or undefined when no JSON object in it
+ * parses.
+ *
+ * Usually the whole text is the object. Otherwise it is looked for: words
+ * around it, or -- measured 2026-11-04, one reading in eight -- a first
+ * object that left fields out, a sentence saying so, and the whole object
+ * again. Of the objects that parse, the last with an overall_summary wins,
+ * since that is the one the model settled on.
+ */
+export function parseReadingText(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    /* looked for below */
+  }
+  let fallback: unknown;
+  for (const candidate of topLevelObjects(text).reverse()) {
+    let value: unknown;
+    try {
+      value = JSON.parse(candidate);
+    } catch {
+      continue;
+    }
+    if (isObject(value) && typeof value.overall_summary === "string") return value;
+    fallback ??= value;
+  }
+  return fallback;
+}
+
 /**
  * The reading rebuilt from its documented fields, or null when the answer is
  * not a palm reading at all (not an object, or no summary).
