@@ -82,10 +82,16 @@
 }
 
 /* Lagna, nakshatra and moon sign: three facts in a ruled row rather than
-   three cards, which left the third alone on a line of its own. */
+   three cards, which left the third alone on a line of its own.
+
+   Each third is as wide as its name, and what is left over is shared out
+   evenly. Equal thirds left the nakshatra, the longest of the three names,
+   in the narrowest column (it has a rule on both sides), so "Shatabhisha"
+   and "Bhadrapada" broke mid-word even on a 375px phone while "Cancer" sat
+   in a third twice its size. */
 .identity {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(3, auto);
   margin: 0;
   border-top: 1px solid var(--border-medium);
   border-bottom: 1px solid var(--border-medium);
@@ -96,11 +102,13 @@
   flex-direction: column;
   gap: 0.1rem;
   min-width: 0;
-  padding: 0.75rem 0.6rem 0.8rem 0;
+  /* 0.5rem rather than 0.6rem a side: the 7px across the row are what
+     "Sagittarius · Shatabhisha · Capricorn" needs to stay whole at 360px. */
+  padding: 0.75rem 0.5rem 0.8rem 0;
 }
 
 .identityItem + .identityItem {
-  padding-left: 0.6rem;
+  padding-left: 0.5rem;
   border-left: 1px solid var(--border-subtle);
 }
 
@@ -124,9 +132,9 @@
      "Capricor / n" in a third of a 375px phone (see :last-child above). */
   font-size: 1.125rem;
   line-height: 1.2;
-  /* A third of a phone is narrow for "Shatabhisha" or German "Wassermann":
-     break at a syllable, with a hyphen, where the browser knows the language,
-     and anywhere only where it does not. */
+  /* The last resort, for three long names at once (German "Wassermann" either
+     side of "Purva Bhadrapada"): break at a syllable, with a hyphen, where
+     the browser knows the language, and anywhere only where it does not. */
   -webkit-hyphens: auto;
   hyphens: auto;
   overflow-wrap: anywhere;
@@ -138,6 +146,51 @@
   font-size: var(--text-meta);
   line-height: 1.35;
   color: var(--text-secondary);
+  /* "Pada 3 · Jupiter" can wrap, so it should not decide how wide its third
+     is: sized as if empty, it still fills whatever the name leaves it. */
+  contain: inline-size;
+}
+
+/* Under 350px (a 320px phone) three names across leave about 85px each,
+   and "Capricorn" alone needs more. The row becomes a small table instead,
+   one fact a line: label, name, and the degree or pada at the right. Every
+   name then has the width of the page less its label, and none has to break.
+   subgrid lines the three rows' columns up with one another. */
+@media (max-width: 349.98px) {
+  .identity {
+    /* The pada and lord give way first, down to their longest word, so the
+       name keeps the room it needs. */
+    grid-template-columns: max-content minmax(0, auto) minmax(min-content, 1fr);
+    column-gap: 0.5rem;
+  }
+
+  .identityItem,
+  .identityItem + .identityItem {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    /* A subgrid takes its own gap over the table's, and the flex gap above
+       would leave label and name touching. */
+    gap: 0 0.5rem;
+    align-items: baseline;
+    padding: 0.55rem 0;
+    border-left: 0;
+  }
+
+  .identityItem + .identityItem {
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  /* 17.3px at 320: German "Wassermann" beside "Mondzeichen" and "Jupiter"
+     is the widest line this table has to hold. */
+  .identityValue {
+    font-size: clamp(1rem, 5.4vw, 1.125rem);
+  }
+
+  .identityMeta {
+    contain: none;
+    text-align: right;
+  }
 }
 
 /* ── Sections ────────────────────────────────────────────────────── */
