@@ -28,8 +28,10 @@ import type {
        late.
    v9: sex at birth, when given, picks love life's instinct planet: the
        partner's significator, Jupiter for a woman and Venus for a man. Not
-       given stays Venus, as before. */
-export const LIFE_DOMAIN_RULES_VERSION = "2026-10-domain-v9";
+       given stays Venus, as before.
+   v10: no rule changed; Rahu and Ketu are the true node now, not the mean
+       one, so the evidence that reads them moves with them. */
+export const LIFE_DOMAIN_RULES_VERSION = "2026-11-domain-v10";
 
 type LifeDomainRuleInput = {
   key: LifeDomainKey;

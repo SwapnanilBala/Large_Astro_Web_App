@@ -3,6 +3,7 @@
 
 import * as Astronomy from "astronomy-engine";
 import { getEnginePreset } from "./engine-registry";
+import { TRUE_NODE_CONSTANT, TRUE_NODE_TERMS } from "./true-node-series";
 
 // --------------------------------------------------------------------------
 // Types
@@ -377,57 +378,72 @@ function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
 }
 
 // --------------------------------------------------------------------------
-// True Lunar Node (Rahu) calculation — osculating node
+// Rahu: the true (osculating) lunar node
 // --------------------------------------------------------------------------
+//
+// The mean node moves steadily backwards, 19.3° a year. The true node is
+// where the plane of the Moon's actual orbit (its position and velocity at
+// that instant) cuts the ecliptic; the Sun's pull swings it up to ±1.7° about
+// the mean one, mostly with a 173-day period (the 2(D − F) term, −1.4979° in
+// Meeus). Rahu here is the true node, as in Swiss Ephemeris's SE_TRUE_NODE,
+// Jagannatha Hora and PyJHora.
+//
+// Until 2026-11 this function was named computeTrueLunarNode but returned the
+// mean node plus the principal nutation term (17″), presented as a ±1.5°
+// oscillation. With the true ayanamsha, that was Swiss Ephemeris's MEAN node
+// to 0.0001°.
+//
+// The correction true − mean comes from a series fitted to Swiss Ephemeris
+// (true-node-series.ts, written by scripts/true-node/fit-true-node.py, which
+// explains why it is not taken from astronomy-engine's Moon: the node
+// magnifies that Moon's latitude errors about twenty times).
+// lib/__tests__/true-node-swiss-reference.test.ts holds the result to
+// swe.TRUE_NODE.
 
-function computeTrueLunarNode(jd_ut: number): number {
-  // True (osculating) longitude of the ascending lunar node (Rahu).
-  // Computed as the mean node plus the principal nutation in longitude,
-  // which causes the node to oscillate ~±1.5° around the mean position.
-  //
-  // Source: Meeus, "Astronomical Algorithms" (2nd ed.)
-  //   - Chapter 22: mean longitude of the ascending node (Ω)
-  //   - Chapter 22 / Table 22.A: nutation in longitude (dominant terms)
-  //   - L₀ (mean Sun longitude): Meeus eq. 25.2
-  //   - L_moon (mean Moon longitude): Meeus Table 47.A fundamental arguments
+/** Meeus's fundamental arguments (ch. 47) at T Julian centuries TT, in radians. */
+function fundamentalArguments(T: number): [number, number, number, number, number, number] {
+  const T2 = T * T;
+  return [
+    degToRad(297.8501921 + 445267.1114034 * T - 0.0018819 * T2), // D
+    degToRad(357.5291092 + 35999.0502909 * T - 0.0001536 * T2), // M
+    degToRad(134.9633964 + 477198.8675055 * T + 0.0087414 * T2), // M'
+    degToRad(93.272095 + 483202.0175233 * T - 0.0036539 * T2), // F
+    degToRad(125.0445479 - 1934.1362891 * T + 0.0020754 * T2), // Ω
+    degToRad(119.75 + 131.849 * T), // A1 (Venus)
+  ];
+}
 
-  const T = (jd_ut - J2000) / 36525.0; // Julian centuries from J2000.0
+/** True node minus mean node, in degrees. */
+function trueNodeCorrection(T: number): number {
+  const args = fundamentalArguments(T);
+  let arcsec = TRUE_NODE_CONSTANT.c0 + TRUE_NODE_CONSTANT.c1 * T;
+  for (const term of TRUE_NODE_TERMS) {
+    let phase = 0;
+    for (let i = 0; i < 6; i++) phase += term[i] * args[i];
+    const s = Math.sin(phase);
+    const c = Math.cos(phase);
+    arcsec += term[6] * s + term[7] * c;
+    if (term.length > 8) arcsec += T * (term[8] * s + term[9] * c);
+  }
+  return arcsec / 3600;
+}
 
-  // Mean longitude of the ascending node (Ω)
-  const omega =
-    125.04452 -
-    1934.136261 * T +
-    0.0020708 * T * T +
-    (T * T * T) / 450000.0;
+/**
+ * Tropical longitude of the true ascending lunar node (Rahu), counted from
+ * the true equinox of date like the planets, so it takes the true ayanamsha.
+ */
+function computeTrueLunarNode(time: Astronomy.AstroTime): number {
+  const T = time.tt / 36525; // Julian centuries TT from J2000.0
 
-  // Mean longitude of the Sun (L₀) — Meeus eq. 25.2
-  const L0 =
-    280.46646 +
-    36000.76983 * T +
-    0.0003032 * T * T;
+  // Mean longitude of the ascending node, mean equinox of date (Meeus 47.7)
+  const meanNode =
+    125.0445479 -
+    1934.1362891 * T +
+    0.0020754 * T * T +
+    (T * T * T) / 467441 -
+    (T * T * T * T) / 60616000;
 
-  // Mean longitude of the Moon (L_moon) — Meeus Table 47.A
-  const Lmoon =
-    218.3165 +
-    481267.8813 * T;
-
-  // Principal nutation in longitude (ΔΩ), converted from arcseconds to degrees.
-  // Dominant terms from Meeus Table 22.A:
-  //   −17.20″ sin(Ω)  −1.32″ sin(2L₀)  −0.23″ sin(2L_moon)  +0.21″ sin(2Ω)
-  const omegaRad = degToRad(omega);
-  const L0Rad = degToRad(L0);
-  const LmoonRad = degToRad(Lmoon);
-
-  const nutationArcsec =
-    -17.20 * Math.sin(omegaRad) -
-    1.32 * Math.sin(2 * L0Rad) -
-    0.23 * Math.sin(2 * LmoonRad) +
-    0.21 * Math.sin(2 * omegaRad);
-
-  const nutationDeg = nutationArcsec / 3600.0;
-
-  // True node = mean node + nutation correction
-  return normalize(omega + nutationDeg);
+  return normalize(meanNode + trueNodeCorrection(T) + nutationInLongitude(time));
 }
 
 // --------------------------------------------------------------------------
@@ -939,20 +955,21 @@ export function calculate(input: BirthInput): SwissEngineResult {
     placements.push({ name: planetName, longitude: siderealLon, speed });
   }
 
-  // Rahu (True Lunar Node — osculating node)
-  // computeTrueLunarNode adds nutation to the mean node, so it is counted
-  // from the true equinox and takes the true ayanamsha like the planets.
-  const rahuTropical = computeTrueLunarNode(jd_ut);
+  // Rahu, the true node: counted from the true equinox, so it takes the true
+  // ayanamsha like the planets.
+  const rahuTropical = computeTrueLunarNode(time);
   const rahuSidereal = normalize(rahuTropical - bodyAyanamsa);
 
-  const rahuTropical2 = computeTrueLunarNode(jd_ut2);
+  const rahuTropical2 = computeTrueLunarNode(time2);
   const rahuSidereal2 = normalize(rahuTropical2 - bodyAyanamsa2);
   let rahuDiff = rahuSidereal2 - rahuSidereal;
   if (rahuDiff > 180) rahuDiff -= 360;
   if (rahuDiff < -180) rahuDiff += 360;
   const rahuSpeed = rahuDiff / DT;
 
-  // Rahu and Ketu are always retrograde (mean motion is negative)
+  // Rahu and Ketu are read as always retrograde. The true node does turn
+  // direct for a few days at a time; the speed is held negative regardless,
+  // so isRetrograde() keeps the classical reading.
   placements.push({ name: "Rahu", longitude: rahuSidereal, speed: Math.min(rahuSpeed, -0.001) });
 
   // Ketu (opposite of Rahu)
@@ -1092,8 +1109,8 @@ export function computeTransitPositions(
     });
   }
 
-  // Rahu
-  const rahuTropical = computeTrueLunarNode(jd_ut);
+  // Rahu (true node)
+  const rahuTropical = computeTrueLunarNode(time);
   const rahuSidereal = normalize(rahuTropical - ayanamsa);
   const rahuInfo = getSign(rahuSidereal);
   positions.push({

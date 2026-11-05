@@ -94,9 +94,9 @@ function main() {
     CHARTS_FILE,
     JSON.stringify({
       seed: SEED,
-      // The engine calls its Rahu the true node; this comparison found it
-      // tracks the mean node, so the label says what it computes.
-      engine: "lahiri_classic (Lahiri ayanamsa, whole-sign houses, Rahu at the mean node)",
+      // Until 2026-11 the engine called its Rahu the true node while this
+      // comparison found the mean node; the label says what it computes.
+      engine: "lahiri_classic (Lahiri ayanamsa, whole-sign houses, Rahu at the true node)",
       pyjhora_functions: [...new Set(YOGA_PAIRS.map((pair) => pair.theirs))],
       charts,
     })
