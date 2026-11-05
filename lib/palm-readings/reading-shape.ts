@@ -140,13 +140,29 @@ function lineConfidence(value: unknown): PalmReadingJSON["line_confidence"] {
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
+/* How far past the edge of the image a point may stray and still be clamped
+   onto it. A point further out than this was traced in some other frame (the
+   palm alone, or the image's width used for its height), so its line is not
+   drawn at all: clamping it would only fold the error onto the border. The
+   rest of the trace checks are in trace-check.ts. */
+export const OFF_IMAGE_TOLERANCE = 0.02;
+
+const onImage = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) && value >= -OFF_IMAGE_TOLERANCE && value <= 1 + OFF_IMAGE_TOLERANCE;
+
 function lineCoordinates(value: unknown): PalmLineCoordinates | undefined {
   if (!isObject(value)) return undefined;
   const out: PalmLineCoordinates = {};
   for (const key of LINE_KEYS) {
     if (!Array.isArray(value[key])) continue;
-    const points = (value[key] as unknown[])
-      .filter(isObject)
+    const raw = (value[key] as unknown[]).filter(isObject);
+    const offImage = raw.some(
+      (point) =>
+        (typeof point.x === "number" && Number.isFinite(point.x) && !onImage(point.x)) ||
+        (typeof point.y === "number" && Number.isFinite(point.y) && !onImage(point.y)),
+    );
+    if (offImage) continue;
+    const points = raw
       .map((point) => ({ x: unit(point.x), y: unit(point.y) }))
       .filter((point): point is { x: number; y: number } => point.x !== undefined && point.y !== undefined)
       .slice(0, MAX_POINTS);
@@ -199,6 +215,63 @@ function classicalNotes(value: unknown): PalmClassicalFrameworkNotes | undefined
       observation: text(raw.observation),
     })),
   };
+}
+
+/** Every top-level {...} in the text, string-aware, in order. */
+function topLevelObjects(text: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = -1;
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (c === "\\") escaped = true;
+      else if (c === '"') inString = false;
+      continue;
+    }
+    if (c === '"' && depth > 0) inString = true;
+    else if (c === "{") {
+      if (depth === 0) start = i;
+      depth += 1;
+    } else if (c === "}" && depth > 0) {
+      depth -= 1;
+      if (depth === 0) out.push(text.slice(start, i + 1));
+    }
+  }
+  return out;
+}
+
+/**
+ * The model's answer as a value, or undefined when no JSON object in it
+ * parses.
+ *
+ * Usually the whole text is the object. Otherwise it is looked for: words
+ * around it, or -- measured 2026-11-04, one reading in eight -- a first
+ * object that left fields out, a sentence saying so, and the whole object
+ * again. Of the objects that parse, the last with an overall_summary wins,
+ * since that is the one the model settled on.
+ */
+export function parseReadingText(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    /* looked for below */
+  }
+  let fallback: unknown;
+  for (const candidate of topLevelObjects(text).reverse()) {
+    let value: unknown;
+    try {
+      value = JSON.parse(candidate);
+    } catch {
+      continue;
+    }
+    if (isObject(value) && typeof value.overall_summary === "string") return value;
+    fallback ??= value;
+  }
+  return fallback;
 }
 
 /**

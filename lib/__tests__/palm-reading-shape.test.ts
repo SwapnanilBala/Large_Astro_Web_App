@@ -10,6 +10,7 @@ import {
   MAX_LIST_ITEMS,
   MAX_POINTS,
   MAX_PROSE_CHARS,
+  parseReadingText,
   shapePalmReading,
 } from "../palm-readings/reading-shape";
 import type { PalmReadingJSON } from "../palm-readings/types";
@@ -174,10 +175,10 @@ describe("values outside their sets", () => {
     expect(shaped.image_quality).toBeUndefined();
   });
 
-  it("clamps confidences and coordinates to the unit range, and drops points that are not numbers", () => {
+  it("clamps confidences and near-edge coordinates to the unit range, and drops points that are not numbers", () => {
     const answer = clone(READING) as unknown as Record<string, unknown>;
     (answer.line_confidence as Record<string, Record<string, unknown>>).heart_line.confidence = 7;
-    (answer.line_coordinates as Record<string, unknown>).heart_line = [{ x: -1, y: 2 }, { x: "0.5", y: 0.5 }, { x: 0.4, y: 0.4 }];
+    (answer.line_coordinates as Record<string, unknown>).heart_line = [{ x: -0.01, y: 1.015 }, { x: "0.5", y: 0.5 }, { x: 0.4, y: 0.4 }];
     (answer.line_coordinates as Record<string, unknown>).thumb_line = [{ x: 0.1, y: 0.1 }];
     const shaped = shapePalmReading(answer)!;
     expect(shaped.line_confidence?.heart_line?.confidence).toBe(1);
@@ -185,9 +186,49 @@ describe("values outside their sets", () => {
     expect(Object.keys(shaped.line_coordinates ?? {})).toEqual(["heart_line"]);
   });
 
+  /* A point well off the image means the line was traced in another frame;
+     clamping it would fold the error onto the border, so the line is not drawn. */
+  it("leaves out a line with a point well off the image, keeping the others", () => {
+    const answer = clone(READING) as unknown as Record<string, unknown>;
+    (answer.line_coordinates as Record<string, unknown>).life_line = [{ x: 0.7, y: 0.8 }, { x: 0.6, y: 1.25 }, { x: 0.5, y: 1.4 }];
+    (answer.line_coordinates as Record<string, unknown>).fate_line = [{ x: -0.3, y: 0.8 }, { x: 0.5, y: 0.7 }, { x: 0.5, y: 0.6 }];
+    const shaped = shapePalmReading(answer)!;
+    expect(Object.keys(shaped.line_coordinates ?? {})).toEqual(["heart_line"]);
+  });
+
   it("follows the prompt's rule when the reliability flag is missing", () => {
     const answer = clone(READING) as unknown as Record<string, unknown>;
     answer.image_quality = { rating: "poor", issues: ["blurry"], notes: "Hard to see." };
     expect(shapePalmReading(answer)!.image_quality?.reliable_for_reading).toBe(false);
+  });
+});
+
+describe("parseReadingText", () => {
+  const whole = JSON.stringify(READING);
+
+  it("reads an answer that is only the object", () => {
+    expect(parseReadingText(whole)).toEqual(READING);
+  });
+
+  it("finds the object among words around it", () => {
+    expect(parseReadingText(`Here is the reading:\n${whole}\nDone.`)).toEqual(READING);
+  });
+
+  /* Measured 2026-11-04: an object short of fields, a sentence saying so, and the whole object again. */
+  it("takes the last whole reading when the model wrote it twice", () => {
+    const first = JSON.stringify({ overall_summary: "First go.", guidance: 'Short {and} with "braces" in it.' });
+    const text = `${first}\n\nWait, that is missing some required keys. Let me restate the complete object.\n\n${whole}`;
+    expect(parseReadingText(text)).toEqual(READING);
+  });
+
+  it("prefers a reading to an object that is not one, and skips what does not parse", () => {
+    expect(parseReadingText(`${whole} {"note": "after"}`)).toEqual(READING);
+    expect(parseReadingText(`${whole} {"note": "after"} {broken`)).toEqual(READING);
+    expect(parseReadingText(`words {"note": "only"} words`)).toEqual({ note: "only" });
+  });
+
+  it("is undefined when nothing in the text parses", () => {
+    expect(parseReadingText("no json here")).toBeUndefined();
+    expect(parseReadingText('{"overall_summary": ')).toBeUndefined();
   });
 });
