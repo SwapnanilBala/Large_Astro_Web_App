@@ -262,7 +262,45 @@ html {
 .desktop-shell {
   --font-body: var(--font-ui), -apple-system, BlinkMacSystemFont, 'Segoe UI',
     Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* Marcellus, then its Devanagari and Bengali stand-in (below). */
+  --font-display: var(--font-display-latin), "Lagna Display Indic";
   font-family: var(--font-body);
+}
+
+/*
+ * Hindi and Bengali titles in one weight, like Marcellus.
+ *
+ * Marcellus has no Devanagari or Bengali, so those letters fall back to the
+ * system's Indic face. Marcellus has a single weight and answers every
+ * heading's 600 or 700 with it, but the fallback has a real bold, so a Hindi
+ * title came out heavy beside the light Latin in the same line: "Asha" thin
+ * and "के जीवन क्षेत्र" black, "5 नव॰ 2026" with a bold month between light
+ * figures. These faces are the system's own Indic fonts at their regular
+ * weight, declared for every weight so a bold request lands on the regular
+ * face too, and limited to the two scripts so Latin text never reaches them.
+ *
+ * local() names: Windows (Nirmala UI covers both scripts), Android (Noto),
+ * Apple (Kohinoor), full name then PostScript name. A platform where none
+ * matches skips the face and falls back as before.
+ */
+@font-face {
+  font-family: "Lagna Display Indic";
+  src: local("Nirmala UI"), local("NirmalaUI"), local("Noto Sans Devanagari"),
+    local("Noto Sans Devanagari Regular"), local("NotoSansDevanagari-Regular"),
+    local("Kohinoor Devanagari Regular"), local("KohinoorDevanagari-Regular");
+  font-weight: 100 900;
+  font-style: normal;
+  unicode-range: U+0900-097F, U+1CD0-1CFF, U+A8E0-A8FF;
+}
+
+@font-face {
+  font-family: "Lagna Display Indic";
+  src: local("Nirmala UI"), local("NirmalaUI"), local("Noto Sans Bengali"),
+    local("Noto Sans Bengali Regular"), local("NotoSansBengali-Regular"),
+    local("Kohinoor Bangla Regular"), local("KohinoorBangla-Regular");
+  font-weight: 100 900;
+  font-style: normal;
+  unicode-range: U+0980-09FF;
 }
 
 html,
