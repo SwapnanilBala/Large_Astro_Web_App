@@ -91,22 +91,31 @@ const MILLISECONDS_PER_DAY = 86400000;
 // --------------------------------------------------------------------------
 // Ayanamsha reference values per sidereal mode
 //
-// Each preset defines a reference epoch (as Julian Day) and the ayanamsha
-// value at that epoch in degrees. The ayanamsha for an arbitrary date is then
-// computed by adding the IAU 2006 general-precession increment accumulated
-// between the reference epoch and the target date.
+// Each preset defines a reference epoch (as Julian Day) and the MEAN
+// ayanamsha at that epoch in degrees (no nutation). The ayanamsha for an
+// arbitrary date is then computed by adding the IAU 2006 general precession
+// in longitude accumulated between the reference epoch and the target date.
+// See "Mean and true ayanamsha" below for how nutation enters.
 //
 // Sources / reference points:
 //   Fagan-Bradley - Swiss Ephemeris SE_SIDM_FAGAN_BRADLEY:
 //                   24.042044444 deg at JD 2433282.42346.
-//   Lahiri        – Indian Astronomical Ephemeris / Rashtriya Panchang:
-//                   23°51'11" at J2000.0 (JD 2451545.0), calibrated so that
-//                   Spica (Chitra) sits at 0° Libra (180° sidereal longitude).
+//   Lahiri        – the Indian Calendar Reform Committee's definition, as
+//                   Swiss Ephemeris SE_SIDM_LAHIRI holds it: 23°15'00.658" on
+//                   1956 March 21 0h TT (JD 2435553.5). That figure is a TRUE
+//                   ayanamsha (it includes that day's nutation, 16.77"), so
+//                   the mean value stored here is 23.250182778 - 0.004658035.
+//                   Do not swap in the Rashtriya Panchang's "23°51'11" at
+//                   J2000": that too is a true value (mean 23°51'25.5" plus
+//                   nutation -13.9"), and treating it as mean put every
+//                   sidereal longitude 14.5" too far forward.
 //   Raman         – Swiss Ephemeris SE_SIDM_RAMAN reference:
 //                   21°00'51.984" at J1900.0 (Newcomb-based definition)
 //   Krishnamurti  – KP system: 22°22'25.44" at J1900.0 (JD 2415020.0)
-//                   (derived so that KP ayanamsha ≈ 23°46'25" at J2000.0,
-//                   matching the standard Krishnamurti Paddhati tables)
+//                   (meant to give about 23°46'25" at J2000.0; with the p_A
+//                   precession below it gives 23°46'15", and it sits a
+//                   steady 36" above Swiss Ephemeris SE_SIDM_KRISHNAMURTI,
+//                   a difference of definition, not of rate)
 //   Yukteshwar    - Swiss Ephemeris SE_SIDM_YUKTESHWAR:
 //                   360 - 338.917778 deg at J1900.0.
 //
@@ -128,8 +137,8 @@ const AYANAMSA_REF: Record<string, AyanamsaRef> = {
     jd_epoch: 2433282.42346,
   },
   SE_SIDM_LAHIRI: {
-    value_deg: 23 + 51 / 60 + 11 / 3600, // 23°51'11" (IAE / Rashtriya Panchang)
-    jd_epoch: 2451545.0,                   // J2000.0 (1 Jan 2000 12h TT)
+    value_deg: 23.250182778 - 0.004658035, // 23°15'00.658" true, less nutation
+    jd_epoch: 2435553.5,                   // 1956 March 21 0h TT
   },
   SE_SIDM_RAMAN: {
     // Swiss Ephemeris defines Raman at J1900 as 360° - 338.98556°.
@@ -254,32 +263,36 @@ function julianDayOf(input: BirthInput): number {
 // --------------------------------------------------------------------------
 // IAU 2006 general precession in longitude
 //
-// The general precession in longitude ψ_A (arcseconds) as a function of
-// Julian centuries T from J2000.0 (Capitaine et al. 2003 / IAU 2006):
+// The general precession in longitude p_A (arcseconds) as a function of
+// Julian centuries T from J2000.0 (Capitaine et al. 2003, eq. 39 / IAU 2006):
 //
-//   ψ_A = 5038.481507″ T
-//        −    1.0790069″ T²
-//        −    0.00114045″ T³
-//        +    0.000132851″ T⁴
-//        −    0.0000000951″ T⁵
+//   p_A = 5028.796195″ T
+//        +    1.1054348″ T²
+//        +    0.00007964″ T³
+//        −    0.000023857″ T⁴
+//        −    0.0000000383″ T⁵
 //
-// This replaces the older constant-rate 50.24″/yr approximation and gives
-// substantially better accuracy for dates far from J2000.0.
+// p_A is measured along the ecliptic of date, which is where an ayanamsha is
+// measured. Until 2026-11 this used ψ_A (5038.48″ T ...), the precession of
+// the equator on the fixed J2000 ecliptic. That runs 9.7″ a century fast, so
+// every ayanamsha drifted away from its reference epoch by about 0.1″ a year.
+// With p_A, Lahiri, Fagan-Bradley, Raman and Yukteshwar match Swiss Ephemeris
+// 2.10.03 to under 1″ from 1900 to 2060.
 // --------------------------------------------------------------------------
 
 /**
- * Evaluate the IAU 2006 general precession polynomial at T Julian centuries
+ * Evaluate the IAU 2006 general precession in longitude at T Julian centuries
  * from J2000.0. Returns the accumulated precession in **degrees**.
  */
 function precessionIAU2006(T: number): number {
   // Polynomial in arcseconds
-  const psiA =
-    5038.481507 * T
-    - 1.0790069 * T * T
-    - 0.00114045 * T * T * T
-    + 0.000132851 * T * T * T * T
-    - 0.0000000951 * T * T * T * T * T;
-  return psiA / 3600.0; // convert arcseconds → degrees
+  const pA =
+    5028.796195 * T
+    + 1.1054348 * T * T
+    + 0.00007964 * T * T * T
+    - 0.000023857 * T * T * T * T
+    - 0.0000000383 * T * T * T * T * T;
+  return pA / 3600.0; // convert arcseconds → degrees
 }
 
 // --------------------------------------------------------------------------
@@ -312,9 +325,47 @@ function computeTruePushyaAyanamsa(jd_ut: number): number {
   return normalize(ecliptic.elon - TRUE_PUSHYA_TARGET_LONGITUDE);
 }
 
+// --------------------------------------------------------------------------
+// Mean and true ayanamsha
+//
+// computeAyanamsa returns the MEAN ayanamsha: the distance from the mean
+// equinox of date to the sidereal zero point. What gets subtracted depends on
+// which equinox a longitude is counted from:
+//
+//   - Planets, the Sun, the Moon and the node come out of astronomy-engine in
+//     the TRUE ecliptic and equinox of date (they include nutation in
+//     longitude, Δψ, up to ±17.2″). They take the true ayanamsha, mean + Δψ
+//     (apparentAyanamsa), so nutation cancels.
+//   - The ascendant and house cusps are built from mean sidereal time and
+//     the mean obliquity (houseSkyAt), so they are counted from the mean
+//     equinox and take the mean ayanamsha as it is.
+//
+// That is the Lahiri convention (the Indian Astronomical Ephemeris prints
+// nirayana = apparent sayana − true ayanamsha) and what Swiss Ephemeris,
+// Jagannatha Hora and PyJHora do: a sidereal longitude carries no nutation.
+// Until 2026-11 the planets took the mean ayanamsha, which left Δψ in every
+// sidereal planet. Through the Moon that moved the dasha balance: with the
+// Lahiri anchor and precession errors above, Maha Dasha dates ran 0 to 5
+// days early against Swiss Ephemeris.
+// --------------------------------------------------------------------------
+
+/** Nutation in longitude Δψ (IAU 2000B) at `time`, in degrees. */
+function nutationInLongitude(time: Astronomy.AstroTime): number {
+  return Astronomy.e_tilt(time).dpsi / 3600;
+}
+
+/** The true ayanamsha for longitudes counted from the true equinox of date. */
+function apparentAyanamsa(meanAyanamsa: number, time: Astronomy.AstroTime): number {
+  return meanAyanamsa + nutationInLongitude(time);
+}
+
 function computeAyanamsa(jd_ut: number, siderealModeName: string): number {
   if (siderealModeName === "SE_SIDM_TRUE_PUSHYA") {
-    return computeTruePushyaAyanamsa(jd_ut);
+    // The star is placed in the true ecliptic of date, so this is a true
+    // ayanamsha; take the nutation out to return the mean one like the rest.
+    return normalize(
+      computeTruePushyaAyanamsa(jd_ut) - nutationInLongitude(astroTimeFromJulianDay(jd_ut))
+    );
   }
 
   const ref = AYANAMSA_REF[siderealModeName] ?? AYANAMSA_REF.SE_SIDM_LAHIRI;
@@ -865,14 +916,19 @@ export function calculate(input: BirthInput): SwissEngineResult {
     )
   );
 
+  // Bodies are true-of-date, so they take the true ayanamsha; the houses
+  // below take the mean one (see "Mean and true ayanamsha").
+  const bodyAyanamsa = apparentAyanamsa(ayanamsa, time);
+  const bodyAyanamsa2 = apparentAyanamsa(ayanamsa2, time2);
+
   const placements: Array<{ name: string; longitude: number; speed: number }> = [];
 
   for (const [planetName, body] of Object.entries(PLANET_BODIES)) {
     const tropicalLon = getTropicalLongitude(body, time);
-    const siderealLon = normalize(tropicalLon - ayanamsa);
+    const siderealLon = normalize(tropicalLon - bodyAyanamsa);
 
     const tropicalLon2 = getTropicalLongitude(body, time2);
-    const siderealLon2 = normalize(tropicalLon2 - ayanamsa2);
+    const siderealLon2 = normalize(tropicalLon2 - bodyAyanamsa2);
 
     // Angular difference handling 360° wraparound
     let diff = siderealLon2 - siderealLon;
@@ -884,11 +940,13 @@ export function calculate(input: BirthInput): SwissEngineResult {
   }
 
   // Rahu (True Lunar Node — osculating node)
+  // computeTrueLunarNode adds nutation to the mean node, so it is counted
+  // from the true equinox and takes the true ayanamsha like the planets.
   const rahuTropical = computeTrueLunarNode(jd_ut);
-  const rahuSidereal = normalize(rahuTropical - ayanamsa);
+  const rahuSidereal = normalize(rahuTropical - bodyAyanamsa);
 
   const rahuTropical2 = computeTrueLunarNode(jd_ut2);
-  const rahuSidereal2 = normalize(rahuTropical2 - ayanamsa2);
+  const rahuSidereal2 = normalize(rahuTropical2 - bodyAyanamsa2);
   let rahuDiff = rahuSidereal2 - rahuSidereal;
   if (rahuDiff > 180) rahuDiff -= 360;
   if (rahuDiff < -180) rahuDiff += 360;
@@ -1011,8 +1069,9 @@ export function computeTransitPositions(
     utcDate.getUTCSeconds()
   );
 
-  const ayanamsa = computeAyanamsa(jd_ut, preset.sidereal_mode_name);
   const time = Astronomy.MakeTime(utcDate);
+  // True ayanamsha: these are all true-of-date bodies (see "Mean and true ayanamsha").
+  const ayanamsa = apparentAyanamsa(computeAyanamsa(jd_ut, preset.sidereal_mode_name), time);
 
   const positions: Array<{
     name: string;
