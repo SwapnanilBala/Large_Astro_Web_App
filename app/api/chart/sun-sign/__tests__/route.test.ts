@@ -24,7 +24,7 @@ describe("/api/chart/sun-sign", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
       sign: "Aquarius",
-      degree_in_sign: 29.9764,
+      degree_in_sign: 29.9691, // Swiss Ephemeris 2.10.03: 29.9693
       engine_id: "lahiri_classic",
     });
   });
@@ -42,7 +42,7 @@ describe("/api/chart/sun-sign", () => {
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
       sign: "Pisces",
-      degree_in_sign: 0.0179,
+      degree_in_sign: 0.0106, // Swiss Ephemeris 2.10.03: 0.0108
       engine_id: "lahiri_classic",
     });
   });
