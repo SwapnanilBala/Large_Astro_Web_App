@@ -27,7 +27,17 @@ const PANEL_SOURCE = readFileSync(
   join(process.cwd(), "app", "(desktop)", "insights", "components", "palm-reading-panel.tsx"),
   "utf8",
 );
-const KEYS = [...new Set([...PANEL_SOURCE.matchAll(/["'](palm\.errors\.\w+)["']/g)].map((m) => m[1]))];
+/* The Q&A panel's sign-in ask is the same refusal on the other palm route, so it is checked here too. */
+const QA_PANEL_SOURCE = readFileSync(
+  join(process.cwd(), "app", "(desktop)", "insights", "components", "palm-qa-panel.tsx"),
+  "utf8",
+);
+const KEYS = [
+  ...new Set([
+    ...[...PANEL_SOURCE.matchAll(/["'](palm\.errors\.\w+)["']/g)].map((m) => m[1]),
+    ...[...QA_PANEL_SOURCE.matchAll(/["'](palm\.qa\.signInRequired)["']/g)].map((m) => m[1]),
+  ]),
+];
 
 const TRANSLATIONS: Record<string, Tree> = { es, bn, hi, it: it_, fr, de };
 const FRAGMENT_DIR = join(process.cwd(), "messages", "fragments");
@@ -44,7 +54,16 @@ describe("the palm panel's error messages", () => {
     const refusals = PALM_PHOTO_VERDICTS.filter((verdict) => verdict !== "palm");
     expect(Object.keys(PALM_PHOTO_REFUSAL_MESSAGES).sort()).toEqual([...refusals].sort());
     for (const reason of refusals) expect(PANEL_SOURCE).toMatch(new RegExp(`\\b${reason}: "palm\\.errors\\.\\w+"`));
-    expect(KEYS).toEqual(expect.arrayContaining(["palm.errors.notAPalm", "palm.errors.backOfHand", "palm.errors.unclearPhoto"]));
+    expect(KEYS).toEqual(
+      expect.arrayContaining([
+        "palm.errors.notAPalm",
+        "palm.errors.backOfHand",
+        "palm.errors.unclearPhoto",
+        "palm.errors.weeklyLimit",
+        "palm.errors.signInRequired",
+        "palm.qa.signInRequired",
+      ]),
+    );
   });
 
   it("are all in the palm catalog's English", () => {
@@ -67,8 +86,10 @@ describe("the palm panel's error messages", () => {
   });
 
   it("never say AI, paid or free", () => {
-    for (const tree of [en as Tree, ...FRAGMENTS.flatMap((f) => Object.values(f) as Tree[])]) {
-      for (const key of ["palm.errors.notAPalm", "palm.errors.backOfHand", "palm.errors.unclearPhoto"]) {
+    /* The catalogs too: once the fragments are folded and deleted, that is where the strings live. */
+    const trees = [en as Tree, ...Object.values(TRANSLATIONS), ...FRAGMENTS.flatMap((f) => Object.values(f) as Tree[])];
+    for (const tree of trees) {
+      for (const key of KEYS) {
         const value = lookup(tree, key);
         if (typeof value !== "string") continue;
         expect(value).not.toMatch(/\bAI\b|\bIA\b|\bKI\b/);
