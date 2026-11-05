@@ -49,6 +49,12 @@ const READING = {
   guidance: "Teach.",
 };
 
+/* The header of a 1200 x 1600 PNG: all the route reads of a photo's size. */
+const PORTRAIT_PNG = Buffer.from([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52,
+  0, 0, 0x04, 0xb0, 0, 0, 0x06, 0x40, 8, 6, 0, 0, 0,
+]).toString("base64");
+
 const answer = (text: string, stop_reason = "end_turn") => ({
   finalMessage: async () => ({ stop_reason, content: [{ type: "text", text }], usage: { input_tokens: 1, output_tokens: 1 } }),
 });
@@ -174,6 +180,22 @@ describe("the palm reading route", () => {
     const response = await POST(request());
     expect(response.status).toBe(200);
     expect((await response.json()).guidance).toBe("Teach.");
+  });
+
+  it("tells the model the photo's size, and asks where the palm lies", async () => {
+    mocks.stream.mockReturnValueOnce(answer(JSON.stringify(READING)));
+    await POST(request({ image: PORTRAIT_PNG, mediaType: "image/png" }));
+    const call = mocks.stream.mock.calls[0][0];
+    const userText = call.messages[0].content[1].text as string;
+    expect(userText).toContain("[PHOTO] The photo is 1200 x 1600 pixels, portrait: its height is 1.33 times its width.");
+    expect(userText).toContain("divided by the full height (1600)");
+    expect(call.system[0].text).toContain('"palm_bounds"');
+  });
+
+  it("names no size when the photo's header cannot be read", async () => {
+    mocks.stream.mockReturnValueOnce(answer(JSON.stringify(READING)));
+    await POST(request());
+    expect(mocks.stream.mock.calls[0][0].messages[0].content[1].text).not.toContain("[PHOTO]");
   });
 
   it("refuses an answer that is not a palm reading", async () => {

@@ -6,6 +6,7 @@ import { sessionFromRequest } from "@/lib/identity/require-session";
 import { consumeLlmBudget, llmCallerForSession } from "@/lib/llm-budget";
 import { PALM_READINGS_PER_WEEK } from "@/lib/llm-budget-tiers";
 import { classicalHandSection } from "@/lib/palm-readings/classical-hand";
+import { photoFrame, type PhotoFrame } from "@/lib/palm-readings/image-size";
 import { checkPalmPhoto, palmPhotoRefusalError } from "@/lib/palm-readings/photo-check";
 import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
 import { shapePalmReading } from "@/lib/palm-readings/reading-shape";
@@ -214,6 +215,13 @@ const BASE_SCHEMA_BLOCK = `Return ONLY valid JSON — no markdown fencing, no ex
     "head_line":  { "visibility": "clear" | "partial" | "faint" | "not_detected", "confidence": 0.0 to 1.0 },
     "life_line":  { "visibility": "clear" | "partial" | "faint" | "not_detected", "confidence": 0.0 to 1.0 },
     "fate_line":  { "visibility": "clear" | "partial" | "faint" | "not_detected", "confidence": 0.0 to 1.0 }
+  },
+  "palm_bounds": {
+    // Where the palm itself lies, as fractions of the WHOLE image like line_coordinates.
+    "top": 0.0,                // y of the creases at the base of the fingers
+    "bottom": 0.0,             // y of the wrist crease
+    "thumb_side": 0.0,         // x of the palm's edge on the thumb side
+    "little_finger_side": 0.0  // x of the palm's edge below the little finger
   },
   "line_coordinates": {
     // Normalized coordinates 0.0-1.0 relative to the image, origin top-left, x to the right, y down.
@@ -488,10 +496,31 @@ function sanitizeJyotishContext(raw: unknown): JyotishContext | undefined {
   return out;
 }
 
+/*
+ * The photo's size, from its header (lib/palm-readings/image-size.ts), so the
+ * model is told the frame its coordinates are fractions of. The traces that
+ * landed too low were, on the measured photos, scaled down the image rather
+ * than shifted (each line's y about 1.25 to 1.45 times where its crease is),
+ * as if y had been measured in some other frame than this one; so the line
+ * names the divisor for y as well as for x. Numbers only: nothing the
+ * browser wrote reaches this line.
+ */
+function photoFrameLine(frame: PhotoFrame): string {
+  const { width, height } = frame;
+  const shape =
+    height > width
+      ? `portrait: its height is ${(height / width).toFixed(2)} times its width`
+      : width > height
+        ? `landscape: its width is ${(width / height).toFixed(2)} times its height`
+        : "square";
+  return `[PHOTO] The photo is ${width} x ${height} pixels, ${shape}. Give every palm_bounds and line_coordinates value as a fraction of this whole frame: x is the distance from the left edge divided by the full width (${width}), y is the distance from the top edge divided by the full height (${height}).`;
+}
+
 function buildUserMessage(
   classicalMode: boolean,
   jyotish: JyotishContext | undefined,
   reader: PalmReader,
+  frame: PhotoFrame | null,
 ): string {
   const parts: string[] = [];
 
@@ -502,6 +531,8 @@ function buildUserMessage(
   /* A closed set, parsed by parsePalmReader: no browser string reaches the prompt. */
   const handRule = readerLine(reader);
   if (handRule) parts.push(handRule);
+
+  if (frame) parts.push(photoFrameLine(frame));
 
   parts.push("Analyze this palm image and provide a detailed palmistry reading.");
 
@@ -710,6 +741,9 @@ export async function POST(request: NextRequest) {
     const isClassicalMode = classicalMode === true;
     const sanitizedJyotish = sanitizeJyotishContext(jyotishContext);
     const palmReader = parsePalmReader(reader);
+    /* Null when the header cannot say; the prompt then names no size, and
+       only the trace checks that need no frame run. */
+    const frame = photoFrame(image);
 
     // -- Check API keys --
     /* Either provider can serve this, so the route is only down when neither
@@ -770,7 +804,7 @@ export async function POST(request: NextRequest) {
       /* The Brihat Samhita's hand marks for this reader, uncited (lib/palm-readings/classical-hand.ts). */
       systemPrompt:
         (isClassicalMode ? CLASSICAL_SYSTEM_PROMPT : STANDARD_SYSTEM_PROMPT) + classicalHandSection(palmReader),
-      userText: buildUserMessage(isClassicalMode, sanitizedJyotish, palmReader),
+      userText: buildUserMessage(isClassicalMode, sanitizedJyotish, palmReader, frame),
     };
 
     let rawText = "";
