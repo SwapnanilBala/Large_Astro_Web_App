@@ -140,13 +140,29 @@ function lineConfidence(value: unknown): PalmReadingJSON["line_confidence"] {
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
+/* How far past the edge of the image a point may stray and still be clamped
+   onto it. A point further out than this was traced in some other frame (the
+   palm alone, or the image's width used for its height), so its line is not
+   drawn at all: clamping it would only fold the error onto the border. The
+   rest of the trace checks are in trace-check.ts. */
+export const OFF_IMAGE_TOLERANCE = 0.02;
+
+const onImage = (value: unknown) =>
+  typeof value === "number" && Number.isFinite(value) && value >= -OFF_IMAGE_TOLERANCE && value <= 1 + OFF_IMAGE_TOLERANCE;
+
 function lineCoordinates(value: unknown): PalmLineCoordinates | undefined {
   if (!isObject(value)) return undefined;
   const out: PalmLineCoordinates = {};
   for (const key of LINE_KEYS) {
     if (!Array.isArray(value[key])) continue;
-    const points = (value[key] as unknown[])
-      .filter(isObject)
+    const raw = (value[key] as unknown[]).filter(isObject);
+    const offImage = raw.some(
+      (point) =>
+        (typeof point.x === "number" && Number.isFinite(point.x) && !onImage(point.x)) ||
+        (typeof point.y === "number" && Number.isFinite(point.y) && !onImage(point.y)),
+    );
+    if (offImage) continue;
+    const points = raw
       .map((point) => ({ x: unit(point.x), y: unit(point.y) }))
       .filter((point): point is { x: number; y: number } => point.x !== undefined && point.y !== undefined)
       .slice(0, MAX_POINTS);

@@ -174,14 +174,24 @@ describe("values outside their sets", () => {
     expect(shaped.image_quality).toBeUndefined();
   });
 
-  it("clamps confidences and coordinates to the unit range, and drops points that are not numbers", () => {
+  it("clamps confidences and near-edge coordinates to the unit range, and drops points that are not numbers", () => {
     const answer = clone(READING) as unknown as Record<string, unknown>;
     (answer.line_confidence as Record<string, Record<string, unknown>>).heart_line.confidence = 7;
-    (answer.line_coordinates as Record<string, unknown>).heart_line = [{ x: -1, y: 2 }, { x: "0.5", y: 0.5 }, { x: 0.4, y: 0.4 }];
+    (answer.line_coordinates as Record<string, unknown>).heart_line = [{ x: -0.01, y: 1.015 }, { x: "0.5", y: 0.5 }, { x: 0.4, y: 0.4 }];
     (answer.line_coordinates as Record<string, unknown>).thumb_line = [{ x: 0.1, y: 0.1 }];
     const shaped = shapePalmReading(answer)!;
     expect(shaped.line_confidence?.heart_line?.confidence).toBe(1);
     expect(shaped.line_coordinates?.heart_line).toEqual([{ x: 0, y: 1 }, { x: 0.4, y: 0.4 }]);
+    expect(Object.keys(shaped.line_coordinates ?? {})).toEqual(["heart_line"]);
+  });
+
+  /* A point well off the image means the line was traced in another frame;
+     clamping it would fold the error onto the border, so the line is not drawn. */
+  it("leaves out a line with a point well off the image, keeping the others", () => {
+    const answer = clone(READING) as unknown as Record<string, unknown>;
+    (answer.line_coordinates as Record<string, unknown>).life_line = [{ x: 0.7, y: 0.8 }, { x: 0.6, y: 1.25 }, { x: 0.5, y: 1.4 }];
+    (answer.line_coordinates as Record<string, unknown>).fate_line = [{ x: -0.3, y: 0.8 }, { x: 0.5, y: 0.7 }, { x: 0.5, y: 0.6 }];
+    const shaped = shapePalmReading(answer)!;
     expect(Object.keys(shaped.line_coordinates ?? {})).toEqual(["heart_line"]);
   });
 
@@ -191,3 +201,4 @@ describe("values outside their sets", () => {
     expect(shapePalmReading(answer)!.image_quality?.reliable_for_reading).toBe(false);
   });
 });
+

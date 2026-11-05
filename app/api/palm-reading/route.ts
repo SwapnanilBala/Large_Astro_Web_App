@@ -10,6 +10,7 @@ import { photoFrame, type PhotoFrame } from "@/lib/palm-readings/image-size";
 import { checkPalmPhoto, palmPhotoRefusalError } from "@/lib/palm-readings/photo-check";
 import { parsePalmReader, readerLine, type PalmReader } from "@/lib/palm-readings/reader";
 import { shapePalmReading } from "@/lib/palm-readings/reading-shape";
+import { checkLineTraces, palmBounds } from "@/lib/palm-readings/trace-check";
 import { safeLabel, safeNumber } from "@/lib/prompt-input";
 
 // ---------------------------------------------------------------------------
@@ -873,6 +874,26 @@ export async function POST(request: NextRequest) {
         ErrorCode.EXTERNAL_SERVICE_ERROR,
         "No reading was returned.",
       );
+    }
+
+    /* A trace that cannot be right is left out rather than drawn
+       (lib/palm-readings/trace-check.ts): the reading's words stay, and
+       both clients draw a missing line as no line. palm_bounds is read here
+       and not passed on. */
+    const traces = checkLineTraces(reading.line_coordinates, {
+      frame,
+      bounds: palmBounds((parsed as { palm_bounds?: unknown } | null)?.palm_bounds),
+    });
+    if (traces.coordinates) reading.line_coordinates = traces.coordinates;
+    else delete reading.line_coordinates;
+    if (traces.dropped.length > 0) {
+      console.warn(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        route: "/api/palm-reading",
+        event: "line_traces_dropped",
+        dropped: traces.dropped,
+        served_by: servedBy,
+      }));
     }
 
     /* Not decorative: when a reading comes back thinner than the panel

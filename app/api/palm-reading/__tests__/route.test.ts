@@ -182,6 +182,34 @@ describe("the palm reading route", () => {
     expect((await response.json()).guidance).toBe("Teach.");
   });
 
+  /* lib/palm-readings/trace-check.ts: a trace that cannot be right is left
+     out, the reading's words are kept, and palm_bounds stays on the server. */
+  it("leaves out a trace that cannot be right, and keeps the rest of the reading", async () => {
+    const coordinates = {
+      heart_line: [{ x: 0.25, y: 0.86 }, { x: 0.44, y: 0.8 }, { x: 0.62, y: 0.75 }],
+      life_line: [{ x: 0.7, y: 0.59 }, { x: 0.64, y: 0.68 }, { x: 0.6, y: 0.78 }],
+    };
+    mocks.stream.mockReturnValueOnce(
+      answer(JSON.stringify({ ...READING, line_coordinates: coordinates, palm_bounds: { top: 0.47, bottom: 0.9, thumb_side: 0.72, little_finger_side: 0.22 } })),
+    );
+    const response = await POST(request({ image: PORTRAIT_PNG, mediaType: "image/png" }));
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body.line_coordinates).toEqual({ life_line: coordinates.life_line });
+    expect(body.lines.heart_line.description).toBe("Deep.");
+    expect(body).not.toHaveProperty("palm_bounds");
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining('"line_traces_dropped"'));
+  });
+
+  it("drops line_coordinates altogether when no trace is left", async () => {
+    mocks.stream.mockReturnValueOnce(
+      answer(JSON.stringify({ ...READING, line_coordinates: { heart_line: [{ x: 0.5, y: 0.5 }, { x: 0.6, y: 0.5 }] } })),
+    );
+    const body = await (await POST(request())).json();
+    expect(body).not.toHaveProperty("line_coordinates");
+    expect(body.overall_summary).toBe(READING.overall_summary);
+  });
+
   it("tells the model the photo's size, and asks where the palm lies", async () => {
     mocks.stream.mockReturnValueOnce(answer(JSON.stringify(READING)));
     await POST(request({ image: PORTRAIT_PNG, mediaType: "image/png" }));
