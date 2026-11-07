@@ -2109,7 +2109,258 @@
     "weeklyEnergyErrorTitle": "L'energia di questa settimana non si è caricata",
     "weeklyEnergyIdleNote": "L'energia settimanale è pronta per il caricamento",
     "weeklyEnergyLoadingNote": "Lettura della settimana in arrivo",
-    "weeklyEnergyForecastTitle": "Previsione Settimanale"
+    "weeklyEnergyForecastTitle": "Previsione Settimanale",
+    "weeklyEnergyCopy": {
+      "cards": {
+        "action": {
+          "title": "Nuove opportunità",
+          "excellent": "Uno sguardo nuovo apre porte. {day} è il momento migliore.",
+          "good": "C'è slancio se fai il primo passo. {day} è l'apertura.",
+          "fair": "Spingi con delicatezza, senza forzare. {day} ti dà più margine.",
+          "poor": "Non è la settimana per forzare qualcosa di nuovo. Aspetta e preparati."
+        },
+        "rest": {
+          "title": "Flusso emotivo",
+          "excellent": "Più facilità nei legami, e {day} è il giorno più morbido.",
+          "good": "Questa settimana ti ricarichi facilmente. Approfittane {day}.",
+          "fair": "Il riposo c'è, ma va scelto. {day} è il più facile.",
+          "poor": "Riposare ti costerà fatica. Proteggilo comunque."
+        },
+        "communication": {
+          "title": "Scintilla creativa",
+          "excellent": "Le tue idee trovano sostegno. Dillo {day}.",
+          "good": "Le tue parole arrivano bene questa settimana, soprattutto {day}.",
+          "fair": "Sii più semplice del solito. {day} è la finestra più chiara.",
+          "poor": "Preparati a ripeterti. Mettilo per iscritto."
+        },
+        "money": {
+          "title": "Progresso costante",
+          "excellent": "Piccoli passi creano grandi cambiamenti, e {day} li moltiplica.",
+          "good": "Le questioni pratiche si muovono. {day} è il giorno per sbrigarle.",
+          "fair": "Il progresso è lento ma reale. {day} è il momento migliore.",
+          "poor": "Mantieni la posizione invece di allargarla."
+        },
+        "relationships": {
+          "title": "Terreno comune",
+          "excellent": "C'è una fiducia più profonda a portata di mano. {day} è il giorno per chiedere.",
+          "good": "Questa settimana le persone ti vengono incontro, soprattutto {day}.",
+          "fair": "Fai tu il primo passo, con dolcezza. {day} è la finestra più gentile.",
+          "poor": "Dai alle conversazioni più spazio di quanto sembrino chiedere."
+        },
+        "study": {
+          "title": "Concentrazione",
+          "excellent": "Anche il materiale difficile entra bene, soprattutto {day}.",
+          "good": "Una buona settimana per imparare qualcosa di strutturale. Inizia {day}.",
+          "fair": "La concentrazione arriva a ondate. {day} porta la più lunga.",
+          "poor": "Ripassa invece di affrontare qualcosa di nuovo."
+        },
+        "travel": {
+          "title": "Strada aperta",
+          "excellent": "Muoverti ti fa bene. {day} è il giorno per partire.",
+          "good": "Un cambio d'aria ti aiuterebbe. {day} è il più limpido.",
+          "fair": "Viaggia leggero e lascia margine. {day} è il più tranquillo.",
+          "poor": "Rimanda ciò che si può rimandare."
+        }
+      },
+      "titles": {
+        "nakshatra": {
+          "rises": "La chiarezza cresce",
+          "settles": "La chiarezza si posa",
+          "turns": "La chiarezza cambia",
+          "holds": "La chiarezza tiene",
+          "builds": "La chiarezza prende forma"
+        },
+        "tithi": {
+          "rises": "La pienezza cresce",
+          "settles": "La pienezza si posa",
+          "turns": "La pienezza cambia",
+          "holds": "La pienezza tiene",
+          "builds": "La pienezza prende forma"
+        },
+        "yoga": {
+          "rises": "La grazia cresce",
+          "settles": "La grazia si posa",
+          "turns": "La grazia cambia",
+          "holds": "La grazia tiene",
+          "builds": "La grazia prende forma"
+        },
+        "karana": {
+          "rises": "La stabilità cresce",
+          "settles": "La stabilità si posa",
+          "turns": "La stabilità cambia",
+          "holds": "La stabilità tiene",
+          "builds": "La stabilità prende forma"
+        },
+        "weekday": {
+          "rises": "Il ritmo cresce",
+          "settles": "Il ritmo si posa",
+          "turns": "Il ritmo cambia",
+          "holds": "Il ritmo tiene",
+          "builds": "Il ritmo prende forma"
+        },
+        "tarabala": {
+          "rises": "La fortuna cresce",
+          "settles": "La fortuna si posa",
+          "turns": "La fortuna cambia",
+          "holds": "La fortuna tiene",
+          "builds": "La fortuna prende forma"
+        },
+        "chandrabala": {
+          "rises": "Il sentire cresce",
+          "settles": "Il sentire si posa",
+          "turns": "Il sentire cambia",
+          "holds": "Il sentire tiene",
+          "builds": "Il sentire prende forma"
+        },
+        "transit_aspect": {
+          "rises": "Il sostegno cresce",
+          "settles": "Il sostegno si posa",
+          "turns": "Il sostegno cambia",
+          "holds": "Il sostegno tiene",
+          "builds": "Il sostegno prende forma"
+        }
+      },
+      "openers": {
+        "nakshatra": {
+          "rises": "Una settimana di luce e di slancio gentile.",
+          "settles": "Una settimana che si fa più quieta e più facile da leggere.",
+          "turns": "Una settimana di bruschi cambi di visibilità.",
+          "holds": "Una settimana di chiarezza costante e senza fretta.",
+          "builds": "Una settimana che si mette a fuoco verso la metà."
+        },
+        "tithi": {
+          "rises": "Una settimana che si riempie man mano che procede.",
+          "settles": "Una settimana di compimento più che di inizio.",
+          "turns": "Una settimana di giorni pieni e giorni vuoti in rapida successione.",
+          "holds": "Una settimana dal peso uniforme e generoso.",
+          "builds": "Una settimana che si raccoglie attorno a qualcosa a metà strada."
+        },
+        "yoga": {
+          "rises": "Una settimana che si apre di più quanto più ci entri.",
+          "settles": "Una settimana che si chiude con più gentilezza di come inizia.",
+          "turns": "Una settimana di passi incerti e di sollievi improvvisi.",
+          "holds": "Una settimana di buona volontà quieta e affidabile.",
+          "builds": "Una settimana con le ore migliori al centro."
+        },
+        "karana": {
+          "rises": "Una settimana che si consolida man mano che procede.",
+          "settles": "Una settimana che verso la fine ti chiede meno.",
+          "turns": "Una settimana che cambia idea più di una volta.",
+          "holds": "Una settimana di terreno piano dall'inizio alla fine.",
+          "builds": "Una settimana che si consolida a metà."
+        },
+        "weekday": {
+          "rises": "Una settimana che trova il suo passo tardi.",
+          "settles": "Una settimana che rallenta verso un ritmo più sostenibile.",
+          "turns": "Una settimana dal tempo mutevole.",
+          "holds": "Una settimana con un battito costante.",
+          "builds": "Una settimana che prende il suo passo a metà."
+        },
+        "tarabala": {
+          "rises": "Una settimana di fortuna crescente e di tempi più favorevoli.",
+          "settles": "Una settimana le cui difficoltà si ritirano man mano.",
+          "turns": "Una settimana di fortuna alterna, distribuita in modo irregolare.",
+          "holds": "Una settimana di favore costante e senza drammi.",
+          "builds": "Una settimana con le ore più fortunate al centro."
+        },
+        "chandrabala": {
+          "rises": "Una settimana che si scalda man mano.",
+          "settles": "Una settimana che si fa più calma e più raccolta.",
+          "turns": "Una settimana di umore mutevole.",
+          "holds": "Una settimana di umore sereno.",
+          "builds": "Una settimana che si fa più profonda verso la metà."
+        },
+        "transit_aspect": {
+          "rises": "Una settimana in cui cresce il sostegno che arriva da fuori.",
+          "settles": "Una settimana in cui la pressione si allenta.",
+          "turns": "Una settimana in cui aiuti e ostacoli si alternano in fretta.",
+          "holds": "Una settimana di appoggio costante.",
+          "builds": "Una settimana il cui sostegno si concentra a metà."
+        }
+      },
+      "guidance": {
+        "clear": {
+          "rises": "Fidati di ciò che sembra leggero e lasciati portare.",
+          "settles": "Lascia che le cose arrivino invece di inseguirle.",
+          "turns": "Sii flessibile sui piani e fermo sulle priorità.",
+          "holds": "Mantieni la routine che sta già funzionando.",
+          "builds": "Metti la cosa importante a metà settimana."
+        },
+        "nakshatra": {
+          "rises": "Fidati di ciò che è leggero, lascia andare ciò che pesa.",
+          "settles": "Scegli l'opzione più gentile, quando c'è.",
+          "turns": "Non leggere una giornata difficile come un verdetto.",
+          "holds": "Questa settimana, la ripetizione non è stagnazione.",
+          "builds": "Tieni le conversazioni delicate per metà settimana."
+        },
+        "tithi": {
+          "rises": "Porta a termine qualcosa prima di iniziare la cosa successiva.",
+          "settles": "Chiudi ciò che è aperto invece di aprire altro.",
+          "turns": "Aspettati che alcuni giorni diano meno di quanto promettono.",
+          "holds": "Un piccolo sforzo costante vale più di una sola spinta.",
+          "builds": "Lascia che i primi giorni siano di preparazione."
+        },
+        "yoga": {
+          "rises": "Lascia passare le ore storte invece di combatterle.",
+          "settles": "Una difficoltà all'inizio non segna tutta la settimana.",
+          "turns": "Tieni un margine attorno a tutto ciò che conta.",
+          "holds": "Asseconda la corrente, non andarle contro.",
+          "builds": "Proteggi la metà della settimana dalle interruzioni."
+        },
+        "karana": {
+          "rises": "Lascia un po' di gioco in agenda per i tratti difficili.",
+          "settles": "Non impegnarti su orari fissi nei giorni difficili.",
+          "turns": "Le mezze giornate ti serviranno meglio di quelle intere.",
+          "holds": "Stabile, e senza sorprese: questo è il piano.",
+          "builds": "Fai prima il lavoro facile."
+        },
+        "weekday": {
+          "rises": "Sposta i compiti impegnativi verso la fine della settimana.",
+          "settles": "I primi giorni chiederanno più degli ultimi.",
+          "turns": "Adatta il compito al giorno, non il contrario.",
+          "holds": "Va bene qualsiasi giorno: scegline uno e comincia.",
+          "builds": "Il peso va messo a metà settimana."
+        },
+        "tarabala": {
+          "rises": "I tempi migliorano con il passare della settimana. Aspetta quando puoi.",
+          "settles": "Lascia passare i giorni più duri senza trarre conclusioni.",
+          "turns": "Alcuni giorni, semplicemente, non sono fatti per decidere.",
+          "holds": "Questa settimana niente si impone, in nessuna direzione.",
+          "builds": "Rimanda la decisione a metà settimana."
+        },
+        "chandrabala": {
+          "rises": "La variabile è il tuo umore. Osservalo, non obbedirgli.",
+          "settles": "Concediti più quiete del solito.",
+          "turns": "Sentimenti e fatti non andranno d'accordo. Preferisci i fatti.",
+          "holds": "Un umore sereno merita di essere protetto.",
+          "builds": "Riposa presto, così a metà settimana avrai energie da spendere."
+        },
+        "transit_aspect": {
+          "rises": "La pressione esterna si allenta. Usa lo spazio quando arriva.",
+          "settles": "Ciò che ti premeva addosso questa settimana molla la presa.",
+          "turns": "A cambiare sono i tempi degli altri, non i tuoi.",
+          "holds": "Pressione costante, gestita con costanza.",
+          "builds": "Aspettati le interferenze maggiori a metà settimana."
+        }
+      },
+      "peak": {
+        "nakshatra": "Massima chiarezza",
+        "tithi": "Massima pienezza",
+        "yoga": "Massima grazia",
+        "karana": "Massima stabilità",
+        "weekday": "Massimo ritmo",
+        "tarabala": "Massima fortuna",
+        "chandrabala": "Massimo sentire",
+        "transit_aspect": "Massimo sostegno"
+      },
+      "alt": "Energia settimanale per {week}: {days}. Media: {average}.",
+      "altDay": "{day} {score} ({band})",
+      "altBands": {
+        "high": "alta",
+        "balanced": "equilibrata",
+        "low": "bassa"
+      }
+    }
   },
   "timing": {
     "page": {
@@ -2200,6 +2451,64 @@
         "focusLine": "Focus: {area}",
         "signalsBlock": "Segnali principali:\n{signals}",
         "signalLine": "{transit} {aspect} natale {natal} (orbe di {orb}°)"
+      },
+      "text": {
+        "headline": "Il giorno {date} cade nel periodo {dasha} / {antardasha}, una fase incentrata su {antardashaFocus}.",
+        "headlineLayered": "Il giorno {date} cade nel periodo {dasha} / {antardasha}, e il tratto attuale lo guida {pratyantar}: {pratyantarFocus} dentro una stagione di {antardashaFocus}.",
+        "overviewOpen": "Il giorno {date}, il ciclo temporale più ampio mette l'accento su {dashaFocus}, mentre il sottoperiodo attivo si concentra su {antardashaFocus}.",
+        "overviewLayer": "Al suo interno, il ciclo più breve è guidato da {pratyantar}, ed è questo a spostare per ora l'accento verso {pratyantarFocus} e {pratyantarHouseTheme}.",
+        "overviewClose": "Le case natali attivate puntano verso {dashaHouseTheme} e {antardashaHouseTheme}, quindi conviene vivere questa fase come un tempo di aggiustamenti mirati, non di attesa passiva.",
+        "focusMahadasha": "La Maha Dasha di {planet} tiene il focus di lungo periodo su {houseTheme}, attraverso la tua casa natale {house}.",
+        "focusPratyantar": "La Pratyantardasha di {planet} guida il tratto attuale e porta {focus} su {houseTheme}, attraverso la tua casa natale {house}.",
+        "focusAntardasha": "L'Antardasha di {planet} affina la storia a breve termine attorno a {houseTheme}, attraverso la tua casa natale {house}.",
+        "transitSupportive": "{transit} in {aspect} con {natal} natale sostiene {theme}, con tempi più puliti e meno attrito del solito.",
+        "transitChallenging": "{transit} in {aspect} con {natal} natale mette sotto pressione {theme}, quindi ritmo e giudizio contano più della velocità.",
+        "transitMixed": "{transit} in {aspect} con {natal} natale attiva con forza {theme}; il risultato dipende da quanto consapevolmente gestisci questa spinta.",
+        "natalThemeFallback": "quell'area della tua vita",
+        "periodFocus": {
+          "sun": "visibilità, leadership e definizione di sé",
+          "moon": "vita emotiva, schemi familiari e sensibilità",
+          "mars": "azione, competizione, iniziativa e coraggio",
+          "mercury": "strategia, comunicazione, studio e commercio",
+          "jupiter": "crescita, guida, fede e opportunità più alte",
+          "venus": "relazioni, benessere, risorse e senso artistico",
+          "saturn": "disciplina, karma, responsabilità e resistenza",
+          "rahu": "ambizione, aperture improvvise, innovazione e desiderio",
+          "ketu": "distacco, riallineamento interiore, chiusure e potatura spirituale"
+        },
+        "opportunities": {
+          "sun": "Prendi in mano le decisioni che richiedono chiarezza, autorevolezza e una posizione più netta.",
+          "moon": "Rafforza i ritmi di casa, il sostegno emotivo e il lavoro che dipende dalla fiducia o dalla cura degli altri.",
+          "mars": "Buttati nei compiti che premiano l'esecuzione audace, l'impegno tecnico e la soluzione diretta dei problemi.",
+          "mercury": "È un buon momento per scrivere, pianificare, studiare, trattare, fare colloqui e chiudere accordi con più chiarezza.",
+          "jupiter": "Punta su insegnamento, mentoring, pianificazione e decisioni di lungo respiro che richiedono saggezza.",
+          "venus": "Favorevole per alleanze, attrazione, estetica e per migliorare con intenzione la qualità della tua vita.",
+          "saturn": "Il lavoro che richiede costanza, maturità e una ristrutturazione di lungo periodo può approfondirsi molto in questa fase.",
+          "rahu": "Legami con l'estero, tecnologia, reinvenzione e strade non convenzionali possono portare svolte nette.",
+          "ketu": "Ottimo per fare un passo indietro, affinare l'intuito e lasciare andare schemi che non ti somigliano più."
+        },
+        "cautions": {
+          "sun": "Non lasciare che scontri di ego o sforzi eccessivi consumino lo slancio che andrebbe investito in progressi duraturi.",
+          "moon": "Decisioni guidate dall'umore e il darti troppo agli altri possono offuscare il giudizio se il riposo è irregolare.",
+          "mars": "Attenzione a impazienza, parole impulsive, conflitti che si inaspriscono e impegni che sfiniscono il corpo.",
+          "mercury": "Concentrazione dispersa, troppa analisi o dire sì troppo in fretta possono creare rumore evitabile.",
+          "jupiter": "L'ottimismo ha comunque bisogno di struttura; non dare per scontato che ogni espansione sia sostenibile.",
+          "venus": "Spese per il piacere, evitamento passivo o idealizzare le persone possono indebolire il segnale pratico.",
+          "saturn": "Un ritardo non è sempre un no, ma amarezza, stanchezza e rigidità vanno gestite attivamente.",
+          "rahu": "Fai molta attenzione a ossessioni, segnali ambigui, scorciatoie rischiose e a chi vende troppe certezze.",
+          "ketu": "Ritiro, confusione e perdita di motivazione per le cose del mondo possono affacciarsi se trascuri le routine che ti radicano."
+        },
+        "natalThemes": {
+          "sun": "identità, fiducia in sé, leadership e visibilità",
+          "moon": "emozioni, vita domestica e stabilità interiore",
+          "mars": "slancio, tolleranza al conflitto e azione decisa",
+          "mercury": "apprendimento, negoziazione, commercio e comunicazione",
+          "jupiter": "crescita, saggezza, guida e opportunità",
+          "venus": "relazioni, piacere, flusso di denaro ed estetica",
+          "saturn": "disciplina, dovere, struttura e risultati di lungo periodo",
+          "rahu": "ambizione, scossoni, legami con l'estero e aperture non convenzionali",
+          "ketu": "lasciar andare, spiritualità, distacco e rinnovamento interiore"
+        }
       }
     },
     "muhurta": {
