@@ -751,7 +751,15 @@
       "upcoming": "À venir",
       "viewPastOne": "Voir 1 chapitre passé",
       "viewPastOther": "Voir les {count} chapitres passés",
-      "window": "Fenêtre :"
+      "window": "Fenêtre :",
+      "evidence": {
+        "cycle": "Cycle : environ {years} ans",
+        "lasts": "Dure environ {years} ans",
+        "lord": "Seigneur de la mahadasha : {planet}",
+        "natal": "{planet} à la naissance : {placement}",
+        "node": "{planet} : {placement}",
+        "placement": "{sign} / maison {house}"
+      }
     },
     "sky": {
       "inSign": "en {sign}",

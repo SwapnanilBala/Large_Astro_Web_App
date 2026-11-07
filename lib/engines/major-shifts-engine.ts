@@ -26,7 +26,48 @@ export type MajorLifeShift = {
   theme: string;
   narrative: string;
   evidence: string;
+  /** The evidence line's pieces, for printing it in the reader's language;
+      `evidence` is their English, joined with " | ". */
+  evidenceParts?: ShiftEvidencePart[];
 };
+
+/**
+ * One piece of a chapter's evidence line, in the engine's English names:
+ * "Cycle: ~29.5 years", "Natal Saturn: Capricorn / H9", "Rahu: Capricorn / H6",
+ * "Mahadasha lord: Venus", "Lasts ~20 years".
+ */
+export type ShiftEvidencePart =
+  | { kind: "cycle"; years: string }
+  | { kind: "natal"; planet: string; sign: string; house: number }
+  | { kind: "node"; planet: string; sign: string; house: number }
+  | { kind: "lord"; planet: string }
+  | { kind: "lasts"; years: string };
+
+/** A part as the engine has always written it. */
+export function evidencePartEnglish(part: ShiftEvidencePart): string {
+  switch (part.kind) {
+    case "cycle":
+      return `Cycle: ~${part.years} years`;
+    case "natal":
+      return `Natal ${part.planet}: ${part.sign} / H${part.house}`;
+    case "node":
+      return `${part.planet}: ${part.sign} / H${part.house}`;
+    case "lord":
+      return `Mahadasha lord: ${part.planet}`;
+    case "lasts":
+      return `Lasts ~${part.years} years`;
+  }
+}
+
+function evidenceFrom(parts: ShiftEvidencePart[]): { evidence: string; evidenceParts: ShiftEvidencePart[] } {
+  return { evidence: parts.map(evidencePartEnglish).join(" | "), evidenceParts: parts };
+}
+
+/* A planet's natal sign and house as an evidence part, when the chart has it. */
+function placementPart(kind: "natal" | "node", planet: string, planets: PlanetPosition[]): ShiftEvidencePart[] {
+  const match = planets.find((p) => p.name === planet);
+  return match ? [{ kind, planet, sign: match.sign, house: match.house }] : [];
+}
 
 const DAY_MS = 86_400_000;
 const YEAR_DAYS = 365.25;
@@ -147,13 +188,11 @@ function describeMahadasha(
     ageAtPivot,
     theme,
     narrative,
-    evidence: [
-      `Mahadasha lord: ${planet}`,
-      `Lasts ~${period.years} years`,
-      placement ? `Natal ${planet}: ${placement}` : "",
-    ]
-      .filter(Boolean)
-      .join(" | "),
+    ...evidenceFrom([
+      { kind: "lord", planet },
+      { kind: "lasts", years: `${period.years}` },
+      ...placementPart("natal", planet, payload.chart.planets),
+    ]),
   };
 }
 
@@ -170,7 +209,7 @@ function describePlanetaryReturn(
   let theme: string;
   let halfWidth: number;
   let narrative: string;
-  let evidence: string;
+  let evidenceParts: ShiftEvidencePart[];
 
   if (kind === "saturn-return") {
     pivot = addYears(birth, SATURN_RETURN_YEARS * occurrence);
@@ -180,9 +219,7 @@ function describePlanetaryReturn(
     halfWidth = 365;
     const placement = planetHouseTag("Saturn", payload.chart.planets);
     narrative = `Saturn comes back to its birth position around age ${Math.round(diffYears(pivot, birth))}. This is the classic life pivot: commitments harden, false structures crack, and the area where Saturn sits in your chart${placement ? ` (${placement})` : ""} demands a more honest version. Expect a 9 to 18 month rebuild, not an event.`;
-    evidence = ["Cycle: ~29.5 years", placement ? `Natal Saturn: ${placement}` : ""]
-      .filter(Boolean)
-      .join(" | ");
+    evidenceParts = [{ kind: "cycle", years: "29.5" }, ...placementPart("natal", "Saturn", payload.chart.planets)];
   } else if (kind === "jupiter-return") {
     pivot = addYears(birth, JUPITER_RETURN_YEARS * occurrence);
     planet = "Jupiter";
@@ -191,9 +228,7 @@ function describePlanetaryReturn(
     halfWidth = 240;
     const placement = planetHouseTag("Jupiter", payload.chart.planets);
     narrative = `Jupiter completes its 12-year cycle near age ${Math.round(diffYears(pivot, birth))}. Doors that felt locked tend to open; teachers, study, travel, or new ethical frames arrive. Where Jupiter sits in your chart${placement ? ` (${placement})` : ""} is the room that gets enlarged.`;
-    evidence = ["Cycle: ~11.9 years", placement ? `Natal Jupiter: ${placement}` : ""]
-      .filter(Boolean)
-      .join(" | ");
+    evidenceParts = [{ kind: "cycle", years: "11.9" }, ...placementPart("natal", "Jupiter", payload.chart.planets)];
   } else {
     pivot = addYears(birth, NODAL_RETURN_YEARS * occurrence);
     planet = "Rahu / Ketu";
@@ -203,13 +238,11 @@ function describePlanetaryReturn(
     const rahuPlacement = planetHouseTag("Rahu", payload.chart.planets);
     const ketuPlacement = planetHouseTag("Ketu", payload.chart.planets);
     narrative = `The lunar nodes return to their natal axis around age ${Math.round(diffYears(pivot, birth))}. This is when the soul direction asserts itself — Rahu's hunger${rahuPlacement ? ` (${rahuPlacement})` : ""} pulls you forward while Ketu${ketuPlacement ? ` (${ketuPlacement})` : ""} loosens what is finished. Decisions made here often look obvious in hindsight.`;
-    evidence = [
-      "Cycle: ~18.6 years",
-      rahuPlacement ? `Rahu: ${rahuPlacement}` : "",
-      ketuPlacement ? `Ketu: ${ketuPlacement}` : "",
-    ]
-      .filter(Boolean)
-      .join(" | ");
+    evidenceParts = [
+      { kind: "cycle", years: "18.6" },
+      ...placementPart("node", "Rahu", payload.chart.planets),
+      ...placementPart("node", "Ketu", payload.chart.planets),
+    ];
   }
 
   const window = clampWindow(pivot, halfWidth);
@@ -223,7 +256,7 @@ function describePlanetaryReturn(
     ageAtPivot: Math.max(0, Math.round(diffYears(pivot, birth))),
     theme,
     narrative,
-    evidence,
+    ...evidenceFrom(evidenceParts),
   };
 }
 

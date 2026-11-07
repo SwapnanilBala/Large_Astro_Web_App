@@ -751,7 +751,15 @@
       "upcoming": "आगामी",
       "viewPastOne": "1 बीता अध्याय देखें",
       "viewPastOther": "{count} बीते अध्याय देखें",
-      "window": "अवधि:"
+      "window": "अवधि:",
+      "evidence": {
+        "cycle": "चक्र: लगभग {years} वर्ष",
+        "lasts": "अवधि लगभग {years} वर्ष",
+        "lord": "महादशा स्वामी: {planet}",
+        "natal": "जन्म कुंडली में {planet}: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / भाव {house}"
+      }
     },
     "sky": {
       "inSign": "{sign} में",

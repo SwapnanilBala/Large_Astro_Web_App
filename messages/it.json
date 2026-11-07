@@ -751,7 +751,15 @@
       "upcoming": "In arrivo",
       "viewPastOne": "Vedi 1 capitolo passato",
       "viewPastOther": "Vedi {count} capitoli passati",
-      "window": "Finestra:"
+      "window": "Finestra:",
+      "evidence": {
+        "cycle": "Ciclo: circa {years} anni",
+        "lasts": "Dura circa {years} anni",
+        "lord": "Signore della mahadasha: {planet}",
+        "natal": "{planet} natale: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / casa {house}"
+      }
     },
     "sky": {
       "inSign": "in {sign}",

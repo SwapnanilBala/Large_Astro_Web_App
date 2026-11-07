@@ -1,5 +1,5 @@
 import type { MajorLifeShift, MajorShiftKind, MajorShiftStatus } from "@/lib/engines/major-shifts-engine";
-import { planetName } from "@/lib/chart-labels";
+import { planetName, signName } from "@/lib/chart-labels";
 
 /*
  * How a life chapter is named and themed in the reader's language, shared by
@@ -74,4 +74,42 @@ export function shiftTheme(shift: MajorLifeShift, t: Translate, prefix: string =
 export function featuredShifts(shifts: readonly MajorLifeShift[], count: number): MajorLifeShift[] {
   const forward = shifts.filter((shift) => shift.status === "active" || shift.status === "upcoming").slice(0, count);
   return forward.length > 0 ? forward : shifts.slice(-1);
+}
+
+/*
+ * The evidence line under a chapter ("Cycle: ~18.6 years | Rahu: Capricorn /
+ * H6") in the reader's language, from the parts the engine sends beside its
+ * English (MajorLifeShift.evidenceParts). The wording is the Android app's
+ * (strings_life_chapters.xml), so the two read alike. Without parts, or with a
+ * catalog that lacks a key, the engine's English is printed.
+ */
+export function shiftEvidence(shift: MajorLifeShift, t: Translate, locale: string, prefix: string = DESKTOP): string {
+  const parts = shift.evidenceParts;
+  if (!parts || parts.length === 0) return shift.evidence;
+  const key = (name: string) => `${prefix}.evidence.${name}`;
+  /* Latin digits in every language, as the rest of the page prints them;
+     only the decimal mark follows the reader (29,5 in German). */
+  const years = (value: string) => {
+    const number = Number(value);
+    return Number.isFinite(number)
+      ? new Intl.NumberFormat(`${locale}-u-nu-latn`, { maximumFractionDigits: 1 }).format(number)
+      : value;
+  };
+  const placement = (sign: string, house: number) =>
+    t(key("placement"), { sign: signName(sign, t), house: String(house) });
+  const words = parts.map((part) => {
+    switch (part.kind) {
+      case "cycle":
+        return t(key("cycle"), { years: years(part.years) });
+      case "lasts":
+        return t(key("lasts"), { years: years(part.years) });
+      case "lord":
+        return t(key("lord"), { planet: planetName(part.planet, t) });
+      case "natal":
+        return t(key("natal"), { planet: planetName(part.planet, t), placement: placement(part.sign, part.house) });
+      case "node":
+        return t(key("node"), { planet: planetName(part.planet, t), placement: placement(part.sign, part.house) });
+    }
+  });
+  return words.some((word) => word.startsWith(`${prefix}.evidence.`)) ? shift.evidence : words.join(" | ");
 }

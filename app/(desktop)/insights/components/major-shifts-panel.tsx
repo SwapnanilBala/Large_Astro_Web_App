@@ -8,7 +8,7 @@ import {
   type MajorLifeShift,
   type MajorShiftStatus,
 } from "@/lib/engines/major-shifts-engine";
-import { STATUS_LABEL_KEY, featuredShifts as chaptersShownFirst, shiftLabel, shiftTheme } from "./life-shift-labels";
+import { STATUS_LABEL_KEY, featuredShifts as chaptersShownFirst, shiftEvidence, shiftLabel, shiftTheme } from "./life-shift-labels";
 import {
   formatShiftPivot,
   formatShiftWindow,
@@ -117,7 +117,7 @@ function ShiftCard({
           <p>{shift.narrative}</p>
         )}
       </div>
-      {shift.evidence && <small>{shift.evidence}</small>}
+      {shift.evidence && <small>{shiftEvidence(shift, t, LOCALE_TAGS[language])}</small>}
     </article>
   );
 }

@@ -751,7 +751,15 @@
       "upcoming": "Bevorstehend",
       "viewPastOne": "1 vergangenes Kapitel ansehen",
       "viewPastOther": "{count} vergangene Kapitel ansehen",
-      "window": "Zeitfenster:"
+      "window": "Zeitfenster:",
+      "evidence": {
+        "cycle": "Zyklus: etwa {years} Jahre",
+        "lasts": "Dauert etwa {years} Jahre",
+        "lord": "Herrscher der Mahadasha: {planet}",
+        "natal": "{planet} im Geburtshoroskop: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / Haus {house}"
+      }
     },
     "sky": {
       "inSign": "in {sign}",

@@ -751,7 +751,15 @@
       "upcoming": "Próximo",
       "viewPastOne": "Ver 1 capítulo pasado",
       "viewPastOther": "Ver {count} capítulos pasados",
-      "window": "Ventana:"
+      "window": "Ventana:",
+      "evidence": {
+        "cycle": "Ciclo: unos {years} años",
+        "lasts": "Dura unos {years} años",
+        "lord": "Señor de la mahadasha: {planet}",
+        "natal": "{planet} natal: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / casa {house}"
+      }
     },
     "sky": {
       "inSign": "en {sign}",

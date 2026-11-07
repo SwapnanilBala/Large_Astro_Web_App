@@ -670,6 +670,14 @@
         "saturnReturn": "structure, responsibility, and the cost of choices",
         "jupiterReturn": "expansion, meaning, and a wider field of play",
         "nodalReturn": "fate axis — what you reach for and what you release"
+      },
+      "evidence": {
+        "cycle": "Cycle: ~{years} years",
+        "lasts": "Lasts ~{years} years",
+        "lord": "Mahadasha lord: {planet}",
+        "natal": "Natal {planet}: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / H{house}"
       }
     },
     "snapshots": {

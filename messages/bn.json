@@ -751,7 +751,15 @@
       "upcoming": "আসন্ন",
       "viewPastOne": "একটি অতীত অধ্যায় দেখুন",
       "viewPastOther": "{count}টি অতীত অধ্যায় দেখুন",
-      "window": "সময়সীমা:"
+      "window": "সময়সীমা:",
+      "evidence": {
+        "cycle": "চক্র: প্রায় {years} বছর",
+        "lasts": "স্থায়িত্ব প্রায় {years} বছর",
+        "lord": "মহাদশার অধিপতি: {planet}",
+        "natal": "জন্মছকে {planet}: {placement}",
+        "node": "{planet}: {placement}",
+        "placement": "{sign} / ভাব {house}"
+      }
     },
     "sky": {
       "inSign": "{sign} রাশিতে",
