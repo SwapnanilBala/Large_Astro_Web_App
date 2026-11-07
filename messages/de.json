@@ -2560,6 +2560,43 @@
         "munthaSign": "Herrscher des Muntha-Zeichens ({sign})",
         "natalAscendant": "Herrscher des Aszendenten im Geburtshoroskop ({sign})",
         "returnAscendant": "Herrscher des Solar-Aszendenten ({sign})"
+      },
+      "summary": {
+        "listSeparator": ", ",
+        "ascendantSame": "Der Solar-Aszendent stimmt mit dem Aszendenten deines Geburtshoroskops ({sign}) überein und bestärkt in diesem Jahr die Themen deiner Kernidentität.",
+        "ascendantDifferent": "Der Solar-Aszendent ist {returnSign}, im Kontrast zum Aszendenten {natalSign} deines Geburtshoroskops. Das bringt eine andere Energie und Perspektive in das Jahr.",
+        "emotionalTone": "Der Mond im Zeichen {sign} (Haus {house}) gibt den emotionalen Ton an: {tone}.",
+        "moonUnavailable": "Die Stellung des Mondes ist nicht verfügbar, daher lässt sich der emotionale Ton nicht bestimmen.",
+        "munthaFocus": "Muntha im Zeichen {sign} (Haus {house}) lenkt die Aufmerksamkeit auf {themes}.",
+        "profectionFocus": "Die Jahresprofektion aktiviert Haus {house} ({sign}) und betont {themes}.",
+        "activatedFocus": "Planeten deines Geburtshoroskops im aktivierten Zeichen: {planets}. Das gibt den Themen dieses Hauses zusätzliches Gewicht.",
+        "angularInfluence": "{planet} im Eckhaus {house} ({sign}) übt in diesem Jahr einen starken, sichtbaren Einfluss aus.",
+        "noAngular": "Im Solarhoroskop steht kein Planet in einem Eckhaus. Das deutet auf ein ruhigeres Jahr innerer Entwicklung hin.",
+        "moonTones": {
+          "aries": "emotional durchsetzungsstark, impulsiv und handlungsorientiert",
+          "taurus": "emotional beständig, auf Geborgenheit bedacht und geerdet",
+          "gemini": "emotional neugierig, mitteilsam und geistig rege",
+          "cancer": "emotional tief, fürsorglich und feinfühlig für die Umgebung",
+          "leo": "emotional warmherzig, ausdrucksstark und auf Anerkennung aus",
+          "virgo": "emotional analytisch, hilfsbereit und auf Details bedacht",
+          "libra": "emotional diplomatisch, harmoniebedürftig und beziehungsorientiert",
+          "scorpio": "emotional intensiv, wandlungsfähig und tief wahrnehmend",
+          "sagittarius": "emotional optimistisch, freiheitsliebend und philosophisch geneigt",
+          "capricorn": "emotional diszipliniert, ehrgeizig und praktisch geerdet",
+          "aquarius": "emotional distanziert, menschenfreundlich und intellektuell ausgerichtet",
+          "pisces": "emotional intuitiv, mitfühlend und spirituell offen"
+        },
+        "yearLordThemes": {
+          "sun": "Ein Jahr der Sichtbarkeit, Führung und Selbstbestimmung. Autoritätspersonen spielen eine wichtige Rolle.",
+          "moon": "Ein Jahr emotionaler Tiefe, der Fürsorge und des Fokus auf Heim und Familie. Deine Intuition leitet deine Entscheidungen.",
+          "mars": "Ein Jahr der Initiative, Energie und mutigen Handelns. Konflikte können entstehen, treiben aber dein Wachstum an.",
+          "mercury": "Ein Jahr der Kommunikation, des Lernens und des Handels. Geistige Beweglichkeit ist dein wichtigstes Kapital.",
+          "jupiter": "Ein Jahr der Ausdehnung, Weisheit und Gelegenheiten. Wachstum kommt durch Vertrauen und Großzügigkeit.",
+          "venus": "Ein Jahr der Beziehungen, der Freude und des kreativen Ausdrucks. Harmonie und Schönheit zählen.",
+          "saturn": "Ein Jahr der Disziplin, Verantwortung und Struktur. Geduld schafft bleibende Ergebnisse.",
+          "rahu": "Ein Jahr des Ehrgeizes, unkonventioneller Wege und des Umbruchs. Verbindungen ins Ausland erweitern deinen Horizont.",
+          "ketu": "Ein Jahr spiritueller Tiefe, des Loslassens und innerer Wandlung. Abstand bringt dir Klarheit."
+        }
       }
     }
   },

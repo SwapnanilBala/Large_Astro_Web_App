@@ -2560,6 +2560,43 @@
         "munthaSign": "Seigneur du signe de la Muntha ({sign})",
         "natalAscendant": "Seigneur de l'ascendant natal ({sign})",
         "returnAscendant": "Seigneur de l'ascendant du retour solaire ({sign})"
+      },
+      "summary": {
+        "listSeparator": ", ",
+        "ascendantSame": "L'ascendant du retour solaire coïncide avec votre ascendant natal ({sign}), ce qui renforce cette année les thèmes de votre identité profonde.",
+        "ascendantDifferent": "L'ascendant du retour solaire est {returnSign}, en contraste avec votre ascendant natal {natalSign}. Cela apporte à l'année une énergie et une perspective différentes.",
+        "emotionalTone": "La Lune en {sign} (maison {house}) donne le ton émotionnel : {tone}.",
+        "moonUnavailable": "La position de la Lune n'est pas disponible pour évaluer le ton émotionnel.",
+        "munthaFocus": "La Muntha en {sign} (maison {house}) attire l'attention sur {themes}.",
+        "profectionFocus": "La profection annuelle active la maison {house} ({sign}), en mettant l'accent sur {themes}.",
+        "activatedFocus": "Planètes natales dans le signe activé : {planets}. Cela donne un poids supplémentaire aux thèmes de cette maison.",
+        "angularInfluence": "{planet} en maison angulaire {house} ({sign}) aura une influence forte et visible cette année.",
+        "noAngular": "Aucune planète n'occupe de maison angulaire dans la carte du retour, ce qui suggère une année plus calme de développement intérieur.",
+        "moonTones": {
+          "aries": "affirmation de soi, impulsivité et goût de l'action",
+          "taurus": "stabilité émotionnelle, recherche du confort et ancrage",
+          "gemini": "curiosité, besoin d'échanger et esprit en mouvement",
+          "cancer": "profondeur émotionnelle, sens du soin et sensibilité à l'entourage",
+          "leo": "chaleur, expressivité et besoin de reconnaissance",
+          "virgo": "esprit d'analyse, sens du service et attention aux détails",
+          "libra": "diplomatie, recherche d'harmonie et attention aux relations",
+          "scorpio": "intensité, transformation et perception profonde",
+          "sagittarius": "optimisme, amour de la liberté et penchant philosophique",
+          "capricorn": "discipline, ambition et sens pratique",
+          "aquarius": "détachement, humanisme et orientation intellectuelle",
+          "pisces": "intuition, compassion et ouverture spirituelle"
+        },
+        "yearLordThemes": {
+          "sun": "Une année de visibilité, de leadership et d'affirmation de soi. Les figures d'autorité jouent un rôle clé.",
+          "moon": "Une année de profondeur émotionnelle, de soin et d'attention au foyer. L'intuition guide les décisions.",
+          "mars": "Une année d'initiative, d'énergie et d'action audacieuse. Des conflits peuvent surgir, mais ils stimulent la croissance.",
+          "mercury": "Une année de communication, d'apprentissage et de commerce. L'agilité d'esprit est l'atout principal.",
+          "jupiter": "Une année d'expansion, de sagesse et d'opportunités. La croissance passe par la confiance et la générosité.",
+          "venus": "Une année de relations, de plaisir et d'expression créative. L'harmonie et la beauté comptent.",
+          "saturn": "Une année de discipline, de responsabilité et de structure. La patience construit des résultats durables.",
+          "rahu": "Une année d'ambition, de chemins hors des sentiers battus et de bouleversements. Les liens avec l'étranger élargissent les horizons.",
+          "ketu": "Une année de profondeur spirituelle, de lâcher-prise et de transformation intérieure. Le détachement apporte la clarté."
+        }
       }
     }
   },
