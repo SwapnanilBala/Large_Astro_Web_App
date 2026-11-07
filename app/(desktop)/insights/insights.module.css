@@ -1039,14 +1039,21 @@
   /* Above the back button (40), so the pill slides underneath the bar on the
      way out rather than across it. */
   z-index: 60;
-  display: flex;
   /*
-   * Never wraps now. The pills are equal flex tracks rather than natural
-   * width, so a narrow viewport shrinks them evenly instead of dropping one
-   * onto a second row -- and a fully rounded bar with a ragged second row was
-   * the other way this looked misshapen.
+   * Never wraps. The pills are equal tracks rather than natural width, so a
+   * narrow viewport shrinks them evenly instead of dropping one onto a second
+   * row -- and a fully rounded bar with a ragged second row was the other way
+   * this looked misshapen.
+   *
+   * A grid of 1fr columns rather than `flex: 1 1 0` pills: sized to content,
+   * every 1fr column comes out as wide as the WIDEST label, so the bar grows to
+   * fit "Lebensbereiche" (German) or "Áreas de la vida" instead of running the
+   * label through its pill's padding, while the pills stay equal. The 40rem
+   * floor below keeps English exactly where it was.
    */
-  flex-wrap: nowrap;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   /*
    * Hug the pills instead of spanning the card.
    *
@@ -1056,7 +1063,9 @@
    * not an encirclement, it is a racetrack. Capping the width and centring it
    * puts the curve back around the contents.
    */
-  width: min(100%, 40rem);
+  width: max-content;
+  min-width: min(100%, 40rem);
+  max-width: 100%;
   margin-inline: auto;
   gap: var(--anchor-rhythm);
   padding: var(--anchor-rhythm);
@@ -1099,14 +1108,19 @@
    * aspect ratios ran 2.18 to 3.24 -- a 49% spread, which is why five
    * identical controls read as five different shapes.
    *
-   * `flex` rather than a fixed min-width because this nav filters itself:
-   * `availableAnchorIds` drops sections that are not on the page, so the
-   * count is 5 or fewer at runtime and the survivors still have to come out
-   * equal. A magic width per label could not do that, and would need
-   * revisiting every time a label changed.
+   * The bar's 1fr columns rather than a fixed min-width because this nav
+   * filters itself: `availableAnchorIds` drops sections that are not on the
+   * page, so the count is 5 or fewer at runtime and the survivors still have
+   * to come out equal. A magic width per label could not do that, and would
+   * need revisiting every time a label (or a language) changed.
+   *
+   * Never narrower than its own label, though. Where the bar is capped by
+   * the column (601-900px) five equal pills cannot all hold "Lebensbereiche",
+   * and one wider pill reads better than a label running through its rim.
+   * Above that the 1fr columns already clear the widest label, so this
+   * changes nothing there.
    */
-  flex: 1 1 0;
-  min-width: 0;
+  min-width: max-content;
   display: grid;
   place-items: center;
   text-align: center;
@@ -5423,6 +5437,8 @@
     /* Same as the wider layouts now that the back button has a reserved
        band of its own above the card. */
     margin-top: 0.65rem;
+    /* A scroller of natural-width pills, not the wide layouts' grid. */
+    display: flex;
     justify-content: flex-start;
     overflow-x: auto;
     flex-wrap: nowrap;

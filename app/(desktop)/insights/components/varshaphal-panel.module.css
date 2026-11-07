@@ -266,6 +266,14 @@
   scrollbar-width: thin;
 }
 
+/* German runs to long compounds ("Sonnenrückkehr", "Arbeitsrhythmus"), and at
+   120px a month's 94px of text broke them mid-word or, before overflow-wrap
+   below, ran them out of the card. The strip already scrolls sideways in
+   every language, so a wider month costs only a little more scrolling. */
+.timelineTrack:lang(de) {
+  grid-template-columns: repeat(12, minmax(10rem, 1fr));
+}
+
 .timelineMonth {
   position: relative;
   min-height: 150px;
@@ -273,6 +281,12 @@
   border-radius: 12px;
   background: rgba(8, 12, 24, 0.24);
   padding: 0.8rem 0.7rem 0.75rem;
+  /* A month leaves about 94px for its words, and German compounds
+     ("Sonnenrückkehr", "Entscheidungen") are wider than that in one piece:
+     they ran out through the card's edge. Hyphenate by the page's language,
+     and break a word that still cannot fit rather than spill it. */
+  hyphens: auto;
+  overflow-wrap: break-word;
 }
 
 .timelineDot {
