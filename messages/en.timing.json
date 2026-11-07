@@ -448,6 +448,43 @@
         "munthaSign": "Lord of Muntha sign ({sign})",
         "natalAscendant": "Lord of natal ascendant ({sign})",
         "default": "Default to return ascendant lord"
+      },
+      "summary": {
+        "listSeparator": ", ",
+        "ascendantSame": "The solar return ascendant matches your natal ascendant ({sign}), reinforcing core identity themes this year.",
+        "ascendantDifferent": "The solar return ascendant is {returnSign}, contrasting with your natal {natalSign} ascendant. This brings a different energy and perspective to the year.",
+        "emotionalTone": "Moon in {sign} (house {house}) sets the emotional tone: {tone}.",
+        "moonUnavailable": "Moon position unavailable for emotional tone assessment.",
+        "munthaFocus": "Muntha in {sign} (house {house}) draws attention to {themes}.",
+        "profectionFocus": "Annual profection activates house {house} ({sign}), emphasizing {themes}.",
+        "activatedFocus": "Natal {planets} in the activated sign add extra weight to this house's themes.",
+        "angularInfluence": "{planet} in angular house {house} ({sign}) will have a strong visible influence this year.",
+        "noAngular": "No planets occupy angular houses in the return chart, suggesting a quieter year of internal development.",
+        "moonTones": {
+          "aries": "emotionally assertive, impulsive, and action-oriented",
+          "taurus": "emotionally steady, comfort-seeking, and grounded",
+          "gemini": "emotionally curious, communicative, and mentally active",
+          "cancer": "emotionally deep, nurturing, and sensitive to surroundings",
+          "leo": "emotionally warm, expressive, and seeking recognition",
+          "virgo": "emotionally analytical, service-minded, and detail-focused",
+          "libra": "emotionally diplomatic, harmony-seeking, and relationship-focused",
+          "scorpio": "emotionally intense, transformative, and deeply perceptive",
+          "sagittarius": "emotionally optimistic, freedom-loving, and philosophically inclined",
+          "capricorn": "emotionally disciplined, ambitious, and practically grounded",
+          "aquarius": "emotionally detached, humanitarian, and intellectually oriented",
+          "pisces": "emotionally intuitive, compassionate, and spiritually open"
+        },
+        "yearLordThemes": {
+          "sun": "A year of visibility, leadership, and self-definition. Authority figures play a key role.",
+          "moon": "A year of emotional depth, nurturing, and domestic focus. Intuition guides decisions.",
+          "mars": "A year of initiative, energy, and bold action. Conflict may arise but drives growth.",
+          "mercury": "A year of communication, learning, and commerce. Mental agility is the prime asset.",
+          "jupiter": "A year of expansion, wisdom, and opportunity. Growth comes through faith and generosity.",
+          "venus": "A year of relationships, pleasure, and creative expression. Harmony and beauty matter.",
+          "saturn": "A year of discipline, responsibility, and structure. Patience builds lasting results.",
+          "rahu": "A year of ambition, unconventional paths, and disruption. Foreign connections expand horizons.",
+          "ketu": "A year of spiritual depth, release, and inner transformation. Detachment brings clarity."
+        }
       }
     }
   }

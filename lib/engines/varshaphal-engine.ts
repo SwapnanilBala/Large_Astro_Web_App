@@ -16,6 +16,11 @@ import {
   type BirthInput,
 } from "./swiss-ephemeris-engine";
 import type { BirthDetailsInput } from "./compatibility-service";
+import { HOUSE_THEMES, MOON_TONES, PLANET_YEAR_LORD_THEMES } from "./varshaphal-words";
+
+/* The fixed vocabularies live in varshaphal-words.ts, which the panel can
+   import without the ephemeris; re-exported for the code that reads them here. */
+export { HOUSE_THEMES, MOON_TONES, PLANET_YEAR_LORD_THEMES };
 
 // --------------------------------------------------------------------------
 // Types
@@ -72,22 +77,6 @@ const SIGN_RULERS: Record<string, string> = {
   Pisces: "Jupiter",
 };
 
-/* Exported for the catalogs test: the panel words each theme by its slug. */
-export const HOUSE_THEMES: Record<number, string[]> = {
-  1: ["Self", "identity", "personal direction"],
-  2: ["Finances", "values", "material security"],
-  3: ["Communication", "siblings", "short travel"],
-  4: ["Home", "family", "emotional roots"],
-  5: ["Creativity", "children", "romance"],
-  6: ["Health", "service", "daily routines"],
-  7: ["Partnerships", "marriage", "contracts"],
-  8: ["Transformation", "shared resources", "occult"],
-  9: ["Higher learning", "long travel", "philosophy"],
-  10: ["Career", "public life", "authority"],
-  11: ["Friends", "aspirations", "community"],
-  12: ["Spirituality", "endings", "solitude"],
-};
-
 /** Dignity ranking (higher = stronger). */
 const DIGNITY_SCORE: Record<string, number> = {
   own: 5,
@@ -136,18 +125,6 @@ const FRIENDLY_SIGNS: Record<string, string[]> = {
   Jupiter: ["Aries", "Leo", "Scorpio"],
   Venus: ["Cancer", "Sagittarius", "Pisces"],
   Saturn: ["Gemini", "Virgo", "Libra"],
-};
-
-const PLANET_YEAR_LORD_THEMES: Record<string, string> = {
-  Sun: "A year of visibility, leadership, and self-definition. Authority figures play a key role.",
-  Moon: "A year of emotional depth, nurturing, and domestic focus. Intuition guides decisions.",
-  Mars: "A year of initiative, energy, and bold action. Conflict may arise but drives growth.",
-  Mercury: "A year of communication, learning, and commerce. Mental agility is the prime asset.",
-  Jupiter: "A year of expansion, wisdom, and opportunity. Growth comes through faith and generosity.",
-  Venus: "A year of relationships, pleasure, and creative expression. Harmony and beauty matter.",
-  Saturn: "A year of discipline, responsibility, and structure. Patience builds lasting results.",
-  Rahu: "A year of ambition, unconventional paths, and disruption. Foreign connections expand horizons.",
-  Ketu: "A year of spiritual depth, release, and inner transformation. Detachment brings clarity.",
 };
 
 // --------------------------------------------------------------------------
@@ -456,21 +433,7 @@ function buildYearSummary(
 }
 
 function getMoonToneDescription(sign: string): string {
-  const tones: Record<string, string> = {
-    Aries: "emotionally assertive, impulsive, and action-oriented",
-    Taurus: "emotionally steady, comfort-seeking, and grounded",
-    Gemini: "emotionally curious, communicative, and mentally active",
-    Cancer: "emotionally deep, nurturing, and sensitive to surroundings",
-    Leo: "emotionally warm, expressive, and seeking recognition",
-    Virgo: "emotionally analytical, service-minded, and detail-focused",
-    Libra: "emotionally diplomatic, harmony-seeking, and relationship-focused",
-    Scorpio: "emotionally intense, transformative, and deeply perceptive",
-    Sagittarius: "emotionally optimistic, freedom-loving, and philosophically inclined",
-    Capricorn: "emotionally disciplined, ambitious, and practically grounded",
-    Aquarius: "emotionally detached, humanitarian, and intellectually oriented",
-    Pisces: "emotionally intuitive, compassionate, and spiritually open",
-  };
-  return tones[sign] ?? "varied and responsive to circumstances";
+  return MOON_TONES[sign] ?? "varied and responsive to circumstances";
 }
 
 // --------------------------------------------------------------------------

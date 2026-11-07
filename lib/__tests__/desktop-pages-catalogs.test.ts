@@ -55,7 +55,7 @@ import {
   DIGNITIES,
   HOUSE_SYSTEM_CODES,
 } from "@/app/(desktop)/insights/divisional-charts/[division]/division-detail-view";
-import { HOUSE_THEMES } from "@/lib/engines/varshaphal-engine";
+import { HOUSE_THEMES, MOON_TONES, PLANET_YEAR_LORD_THEMES } from "@/lib/engines/varshaphal-engine";
 import { NAKSHATRA_QUALITY_LABELS, TITHI_GROUP_LABELS } from "@/lib/engines/panchanga";
 import { HOUSE_SYSTEMS } from "@/lib/engines/engine-registry";
 import { ASCENDANT_NAME_KEY, aspectNameKey } from "@/lib/chart-labels";
@@ -206,6 +206,11 @@ const RUNTIME_KEYS = [
   ...DIGNITIES.map((dignity) => `divisional.detail.dignities.${dignity}`),
   ...HOUSE_SYSTEM_CODES.map((code) => `divisional.detail.method.houseSystems.${code}`),
   ...Object.values(HOUSE_THEMES).flat().map(profectionThemeKey),
+  /* The year summary's tables, keyed by sign and by planet. */
+  ...Object.keys(MOON_TONES).map((sign) => `timing.varshaphal.summary.moonTones.${sign.toLowerCase()}`),
+  ...Object.keys(PLANET_YEAR_LORD_THEMES).map(
+    (planet) => `timing.varshaphal.summary.yearLordThemes.${planet.toLowerCase()}`,
+  ),
   ...Object.values(FACTOR_IDS).map((id) => `timing.muhurta.factors.${id}`),
   ...MUHURTA_QUALITIES.map((quality) => `timing.muhurta.factorQualities.${muhurtaSlug(quality)}`),
   ...["active", "clear"].map((state) => `timing.muhurta.periodStates.${state}`),
@@ -329,6 +334,17 @@ describe("English that moved out of the code reads as it did", () => {
   it("names the profection themes the engine's own way", () => {
     for (const theme of Object.values(HOUSE_THEMES).flat()) {
       expect(lookup(ENGLISH, profectionThemeKey(theme)), theme).toBe(theme);
+    }
+  });
+
+  it("words the year summary's moon tones and year-lord themes as the Varshaphal engine does", () => {
+    expect(Object.keys(MOON_TONES)).toHaveLength(12);
+    for (const [sign, tone] of Object.entries(MOON_TONES)) {
+      expect(lookup(ENGLISH, `timing.varshaphal.summary.moonTones.${sign.toLowerCase()}`), sign).toBe(tone);
+    }
+    expect(Object.keys(PLANET_YEAR_LORD_THEMES)).toHaveLength(9);
+    for (const [planet, theme] of Object.entries(PLANET_YEAR_LORD_THEMES)) {
+      expect(lookup(ENGLISH, `timing.varshaphal.summary.yearLordThemes.${planet.toLowerCase()}`), planet).toBe(theme);
     }
   });
 
