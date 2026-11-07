@@ -656,7 +656,9 @@
         "period": "দশা",
         "rising": "{sign} লগ্ন",
         "scriptLead": "একে মানচিত্র হিসেবে পড়ুন,",
-        "scriptTail": "রায় হিসেবে নয়।"
+        "scriptTail": "রায় হিসেবে নয়।",
+        "chartCore": "কুণ্ডলীর সার: {ascendant} লগ্ন, সূর্য {sun} রাশিতে এবং চন্দ্র {moon} রাশিতে। প্রধান তত্ত্ব {element}।",
+        "chartCoreStrongest": "সবচেয়ে বড় সহায়তা আসে {planets} থেকে।"
       },
       "houseSupport": {
         "heading": "আপনার কুণ্ডলী ভাবগুলি থেকে কতটা সমর্থন পায়",
@@ -2830,7 +2832,14 @@
     "yogaShows": "এটি কখন প্রকাশ পায়",
     "yogaSoftened": "কী এটিকে নরম করে",
     "yogaForms": "এটি কীভাবে গঠিত হয়",
-    "yogaSource": "উৎস"
+    "yogaSource": "উৎস",
+    "rarity": {
+      "unusual": "একটি অস্বাভাবিক যোগ",
+      "everyChart": "প্রতিটি কুণ্ডলীতে থাকে",
+      "perHundred": "প্রতি 100টির মধ্যে প্রায় {count}টি কুণ্ডলীতে দেখা যায়",
+      "perThousand": "প্রতি 1,000টির মধ্যে প্রায় {count}টি কুণ্ডলীতে দেখা যায়",
+      "underThousand": "1,000টির মধ্যে 1টিরও কম কুণ্ডলীতে দেখা যায়"
+    }
   },
   "mobileInsights": {
     "errorHeading": "এই কুণ্ডলী তৈরি করা যায়নি",
@@ -2987,7 +2996,16 @@
     "tabsLabel": "আপনার পাঠের অংশ",
     "tabReadings": "পাঠ",
     "moreReadingsOne": "আরও {count}টি পাঠ",
-    "moreReadingsOther": "আরও {count}টি পাঠ"
+    "moreReadingsOther": "আরও {count}টি পাঠ",
+    "chartCore": "কুণ্ডলীর সার: {ascendant} লগ্ন, সূর্য {sun} রাশিতে এবং চন্দ্র {moon} রাশিতে। প্রধান তত্ত্ব {element}।",
+    "chartCoreStrongest": "সবচেয়ে বড় সহায়তা আসে {planets} থেকে।",
+    "rarity": {
+      "unusual": "একটি অস্বাভাবিক যোগ",
+      "everyChart": "প্রতিটি কুণ্ডলীতে থাকে",
+      "perHundred": "প্রতি 100টির মধ্যে প্রায় {count}টি কুণ্ডলীতে দেখা যায়",
+      "perThousand": "প্রতি 1,000টির মধ্যে প্রায় {count}টি কুণ্ডলীতে দেখা যায়",
+      "underThousand": "1,000টির মধ্যে 1টিরও কম কুণ্ডলীতে দেখা যায়"
+    }
   },
   "strength": {
     "planets": {

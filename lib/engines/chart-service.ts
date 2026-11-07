@@ -16,6 +16,7 @@ import {
   HOUSE_THEMES,
 } from "./rule-engine";
 import type { DeterministicRule, LifeDomainInsight } from "./rule-engine";
+import type { ChartSummaryFacts } from "@/lib/astro-types";
 import type { LifeDomainExtendedEvidence } from "./life-domain-rules";
 import { RULES_SCHEMA_VERSION } from "@/lib/rules";
 import {
@@ -85,6 +86,9 @@ export interface ChartResponse {
     /** Mirrors rarity.json's version, so a stale cached payload is detectable. */
     rules_dataset_version: string;
     summary: string;
+    /** The summary's facts, for printing it in the reader's language. Absent
+        from payloads cached before it shipped. */
+    summary_facts?: ChartSummaryFacts;
     nakshatra?: {
       name: string;
       index: number;
@@ -349,6 +353,7 @@ interface CorePositionsResult {
   fallback_mode: boolean;
   rules: DeterministicRule[];
   summary: string;
+  summaryFacts?: ChartSummaryFacts;
 }
 
 interface DashaStageResult {
@@ -540,7 +545,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
     engine_id: birth.engine_id,
   });
 
-  const { rules, summary } = generateRules(
+  const { rules, summary, summaryFacts } = generateRules(
     computed.ascendant.sign,
     computed.planets,
     computed.houses
@@ -556,6 +561,7 @@ function computeCorePositions(birth: BirthDetailsInput): CorePositionsResult {
     fallback_mode: computed.fallback_mode,
     rules,
     summary,
+    summaryFacts,
   };
 
   stageCaches.positions.set(cacheKey, result);
@@ -1012,6 +1018,7 @@ export function buildChart(
       selected_rule_ids: selectedRuleIds(core.rules),
       rules_dataset_version: rulesDatasetVersion(),
       summary: core.summary,
+      summary_facts: core.summaryFacts,
       nakshatra: nakshatraInfo,
       dasha: dashaInfo,
       calculation_audit: calculationAudit,

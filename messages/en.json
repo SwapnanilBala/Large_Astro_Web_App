@@ -472,7 +472,9 @@
         "scriptTail": "not a verdict.",
         "rising": "{sign} rising",
         "identityAria": "Chart identity",
-        "period": "Period"
+        "period": "Period",
+        "chartCore": "Chart core: {ascendant} Lagna with Sun in {sun} and Moon in {moon}. Dominant elemental tone is {element}.",
+        "chartCoreStrongest": "Strongest support comes from {planets}."
       },
       "zone": {
         "kicker": "Ultimate Module",

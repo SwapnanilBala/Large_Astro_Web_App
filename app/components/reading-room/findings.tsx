@@ -1,6 +1,6 @@
 import type { DeterministicRule, RuleCategory } from "@/lib/astro-types";
 import { bySelectionRank } from "@/lib/rule-order";
-import { chartValue } from "@/lib/chart-labels";
+import { chartValue, rarityText } from "@/lib/chart-labels";
 import type { ReadingRoomFilter, ReadingRoomContent, ReadingRoomItem } from "./ReadingRoom";
 import type { ReadingRoomClasses, Translate } from "./classes";
 import { roomNavigation } from "./navigation";
@@ -115,7 +115,7 @@ export function buildFindingRoom(
               )}
               <p className={c.basis}>{rule.evidence.technical_note}</p>
               <p className={c.rarity} data-band={rule.evidence.rarity.band}>
-                {rule.display.rarity_label}
+                {rarityText(rule.evidence.rarity, rule.display.rarity_label, tr, "fullReading")}
               </p>
             </aside>
           </div>

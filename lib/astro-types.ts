@@ -100,6 +100,21 @@ export type RuleSelectionMeta = {
   rank: number;
 };
 
+/**
+ * What the chart's one-line summary is built from, in the engine's English
+ * names ("Cancer", "Water", "Jupiter"), so the page can print the sentence in
+ * the reader's language. `summary` keeps the English sentence itself.
+ */
+export type ChartSummaryFacts = {
+  ascendant: string;
+  sun: string;
+  moon: string;
+  /** "Fire" | "Earth" | "Air" | "Water". */
+  element: string;
+  /** At most two exalted or own-sign planets, strongest first; may be empty. */
+  strongest: string[];
+};
+
 export type DeterministicRule = {
   /** Stable, copy-independent id from the data file, e.g. "career.tenth_house_axis". */
   id: string;
@@ -768,6 +783,9 @@ export type ChartApiResponse = {
     /** Mirrors rarity.json's version, so a stale cached payload is detectable. */
     rules_dataset_version?: string;
     summary: string;
+    /** The summary's facts, for printing it in the reader's language. Absent
+        from payloads cached before it shipped. */
+    summary_facts?: ChartSummaryFacts;
     nakshatra?: NakshatraInfo;
     dasha?: DashaInfo;
     calculation_audit?: CalculationAuditInfo;

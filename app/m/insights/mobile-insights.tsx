@@ -16,7 +16,7 @@ import {
   type HouseSupport,
 } from "@/lib/engines/house-support-engine";
 import { HOUSE_THEMES } from "@/lib/rules/tables";
-import { nakshatraName, planetAbbreviation, planetName, signName } from "@/lib/chart-labels";
+import { chartSummaryText, nakshatraName, planetAbbreviation, planetName, rarityText, signName } from "@/lib/chart-labels";
 import Emphasise from "@/app/components/Emphasise";
 import MobileRasiChart, { bhavaSystemName, signHouse } from "./mobile-rasi-chart";
 import MobileChartSync from "./mobile-chart-sync";
@@ -307,7 +307,9 @@ function RuleCard({
   return (
     <li className={styles.rule}>
       <h3 className={styles.ruleTitle}>{rule.display.headline}</h3>
-      <span className={styles.rarity}>{rule.display.rarity_label}</span>
+      <span className={styles.rarity}>
+        {rarityText(rule.evidence.rarity, rule.display.rarity_label, tr, "mobileInsights")}
+      </span>
       <p className={styles.ruleInsight}>{rule.display.body}</p>
       {rule.display.tension && <p className={styles.ruleTension}>{rule.display.tension}</p>}
 
@@ -925,7 +927,9 @@ export default function MobileInsights({
 
             {chart.summary && (
               <Section title={tr("mobileInsights.summaryTitle")}>
-                <p className={styles.summary}>{chart.summary}</p>
+                <p className={styles.summary}>
+                  {chartSummaryText(chart.summary_facts, chart.summary, tr, "mobileInsights")}
+                </p>
               </Section>
             )}
 

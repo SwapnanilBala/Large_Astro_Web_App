@@ -26,6 +26,7 @@ export type {
 } from "@/lib/astro-types";
 
 import type {
+  ChartSummaryFacts,
   DeterministicRule,
   DomainRuleHit,
   DomainEvidenceFamily,
@@ -1140,7 +1141,7 @@ export function generateRules(
   ascendantSign: string,
   planets: PlanetPosition[],
   houses: HousePlacement[]
-): { rules: DeterministicRule[]; summary: string } {
+): { rules: DeterministicRule[]; summary: string; summaryFacts: ChartSummaryFacts } {
   const ctx = buildRuleContext(ascendantSign, planets, houses);
 
   const scored = evaluateRules(ctx).map((fired) => {
@@ -1207,7 +1208,18 @@ export function generateRules(
     `Chart core: ${ascendantSign} Lagna with Sun in ${sun.sign} and Moon in ${moon.sign}. ` +
     `Dominant elemental tone is ${domEl}.${strengthLine}`;
 
-  return { rules, summary };
+  /* The same facts, so a reader in another language gets this sentence in
+     theirs (lib/chart-labels.ts chartSummaryText). `summary` stays the
+     English that is stored and that the app reads. */
+  const summaryFacts: ChartSummaryFacts = {
+    ascendant: ascendantSign,
+    sun: sun.sign,
+    moon: moon.sign,
+    element: domEl,
+    strongest: strongestPlanets.slice(0, 2),
+  };
+
+  return { rules, summary, summaryFacts };
 }
 
 /** Rank-ordered instance keys of the selected rules. */

@@ -188,3 +188,83 @@ export function nakshatraNameKey(name: string): string | null {
 export function nakshatraName(name: string, tr: Translate): string {
   return resolve(tr, nakshatraNameKey(name), name);
 }
+
+/* ── The chart's one-line summary ── */
+
+const ELEMENT_KEYS: Readonly<Record<string, string>> = {
+  Fire: "zodiacElements.fire",
+  Earth: "zodiacElements.earth",
+  Air: "zodiacElements.air",
+  Water: "zodiacElements.water",
+};
+
+type SummaryFacts = {
+  ascendant: string;
+  sun: string;
+  moon: string;
+  element: string;
+  strongest: string[];
+};
+
+/**
+ * "Chart core: Cancer Lagna with Sun in Taurus and Moon in Capricorn. ..." in
+ * the reader's language, rebuilt from the facts the rule engine sends beside
+ * its English sentence (generateRules' summaryFacts). `namespace` is where
+ * the page keeps `chartCore` and `chartCoreStrongest`: the desktop and the
+ * phone each hold their own copy. With no facts (a payload cached before
+ * they shipped) or no catalog entry, the engine's English is the answer;
+ * lib/__tests__/chart-summary-text.test.ts holds the English to the engine's.
+ */
+export function chartSummaryText(
+  facts: SummaryFacts | null | undefined,
+  english: string,
+  tr: Translate,
+  namespace: string,
+): string {
+  if (!facts) return english;
+  const coreKey = `${namespace}.chartCore`;
+  const core = tr(coreKey, {
+    ascendant: signName(facts.ascendant, tr),
+    sun: signName(facts.sun, tr),
+    moon: signName(facts.moon, tr),
+    element: resolve(tr, ELEMENT_KEYS[facts.element] ?? null, facts.element),
+  });
+  if (core === coreKey) return english;
+  if (facts.strongest.length === 0) return core;
+  const strongestKey = `${namespace}.chartCoreStrongest`;
+  const strongest = tr(strongestKey, {
+    planets: facts.strongest.map((planet) => planetName(planet, tr)).join(", "),
+  });
+  return strongest === strongestKey ? english : `${core} ${strongest}`;
+}
+
+/* ── How common a finding is ── */
+
+type RarityFacts = { fire_rate: number; low_confidence: boolean };
+
+/**
+ * A finding's "Shows up in about 8 of every 100 charts" in the reader's
+ * language. The bands are lib/rules/rarity.ts rarityLabel's, which writes the
+ * English the payload carries; that module reads the rarity dataset, so it is
+ * not imported here, and the test holds the two to the same English.
+ */
+export function rarityText(
+  rarity: RarityFacts | null | undefined,
+  english: string,
+  tr: Translate,
+  namespace: string,
+): string {
+  if (!rarity) return english;
+  let band: string;
+  let count: number | undefined;
+  const perHundred = Math.round(rarity.fire_rate * 100);
+  const perThousand = Math.round(rarity.fire_rate * 1000);
+  if (rarity.low_confidence) band = "unusual";
+  else if (perHundred >= 100) band = "everyChart";
+  else if (perHundred >= 1) [band, count] = ["perHundred", perHundred];
+  else if (perThousand >= 1) [band, count] = ["perThousand", perThousand];
+  else band = "underThousand";
+  const key = `${namespace}.rarity.${band}`;
+  const text = tr(key, count === undefined ? undefined : { count: String(count) });
+  return text === key ? english : text;
+}

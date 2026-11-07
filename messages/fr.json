@@ -656,7 +656,9 @@
         "period": "Période",
         "rising": "Ascendant {sign}",
         "scriptLead": "À lire comme une carte,",
-        "scriptTail": "pas comme un verdict."
+        "scriptTail": "pas comme un verdict.",
+        "chartCore": "Cœur du thème : Lagna en {ascendant}, avec le Soleil en {sun} et la Lune en {moon}. L’élément dominant est {element}.",
+        "chartCoreStrongest": "Le soutien le plus fort vient de {planets}."
       },
       "houseSupport": {
         "heading": "Combien de soutien votre carte reçoit des maisons",
@@ -2830,7 +2832,14 @@
     "yogaShows": "Quand il se manifeste",
     "yogaSoftened": "Ce qui l'atténue",
     "yogaForms": "Ce qui le forme",
-    "yogaSource": "Source"
+    "yogaSource": "Source",
+    "rarity": {
+      "unusual": "Une combinaison inhabituelle",
+      "everyChart": "Présent dans tous les thèmes",
+      "perHundred": "Apparaît dans environ {count} thèmes sur 100",
+      "perThousand": "Apparaît dans environ {count} thèmes sur 1 000",
+      "underThousand": "Apparaît dans moins de 1 thème sur 1 000"
+    }
   },
   "mobileInsights": {
     "errorHeading": "Impossible de construire cette carte",
@@ -2987,7 +2996,16 @@
     "tabsLabel": "Sections de votre lecture",
     "tabReadings": "Lectures",
     "moreReadingsOne": "{count} lecture de plus",
-    "moreReadingsOther": "{count} lectures de plus"
+    "moreReadingsOther": "{count} lectures de plus",
+    "chartCore": "Cœur du thème : Lagna en {ascendant}, avec le Soleil en {sun} et la Lune en {moon}. L’élément dominant est {element}.",
+    "chartCoreStrongest": "Le soutien le plus fort vient de {planets}.",
+    "rarity": {
+      "unusual": "Une combinaison inhabituelle",
+      "everyChart": "Présent dans tous les thèmes",
+      "perHundred": "Apparaît dans environ {count} thèmes sur 100",
+      "perThousand": "Apparaît dans environ {count} thèmes sur 1 000",
+      "underThousand": "Apparaît dans moins de 1 thème sur 1 000"
+    }
   },
   "strength": {
     "planets": {

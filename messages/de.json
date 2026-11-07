@@ -656,7 +656,9 @@
         "period": "Periode",
         "rising": "Aszendent {sign}",
         "scriptLead": "Lies es als Landkarte,",
-        "scriptTail": "nicht als Urteil."
+        "scriptTail": "nicht als Urteil.",
+        "chartCore": "Kern deines Horoskops: Lagna in {ascendant}, die Sonne in {sun} und der Mond in {moon}. Das vorherrschende Element ist {element}.",
+        "chartCoreStrongest": "Die stärkste Unterstützung kommt von {planets}."
       },
       "houseSupport": {
         "heading": "Wie viel Unterstützung dein Horoskop aus den Häusern erhält",
@@ -2830,7 +2832,14 @@
     "yogaShows": "Wann es sich zeigt",
     "yogaSoftened": "Was es abmildert",
     "yogaForms": "Wodurch es entsteht",
-    "yogaSource": "Quelle"
+    "yogaSource": "Quelle",
+    "rarity": {
+      "unusual": "Eine ungewöhnliche Kombination",
+      "everyChart": "In jedem Horoskop vorhanden",
+      "perHundred": "Kommt in etwa {count} von 100 Horoskopen vor",
+      "perThousand": "Kommt in etwa {count} von 1.000 Horoskopen vor",
+      "underThousand": "Kommt in weniger als 1 von 1.000 Horoskopen vor"
+    }
   },
   "mobileInsights": {
     "errorHeading": "Dieses Horoskop konnte nicht erstellt werden",
@@ -2987,7 +2996,16 @@
     "tabsLabel": "Bereiche deiner Deutung",
     "tabReadings": "Deutungen",
     "moreReadingsOne": "{count} weitere Deutung",
-    "moreReadingsOther": "{count} weitere Deutungen"
+    "moreReadingsOther": "{count} weitere Deutungen",
+    "chartCore": "Kern deines Horoskops: Lagna in {ascendant}, die Sonne in {sun} und der Mond in {moon}. Das vorherrschende Element ist {element}.",
+    "chartCoreStrongest": "Die stärkste Unterstützung kommt von {planets}.",
+    "rarity": {
+      "unusual": "Eine ungewöhnliche Kombination",
+      "everyChart": "In jedem Horoskop vorhanden",
+      "perHundred": "Kommt in etwa {count} von 100 Horoskopen vor",
+      "perThousand": "Kommt in etwa {count} von 1.000 Horoskopen vor",
+      "underThousand": "Kommt in weniger als 1 von 1.000 Horoskopen vor"
+    }
   },
   "strength": {
     "planets": {

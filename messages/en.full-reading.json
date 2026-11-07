@@ -53,6 +53,14 @@
       "errorHeading": "The full reading could not be prepared.",
       "errorFallback": "No chart data was returned.",
       "backToReading": "Back to your reading"
+    },
+
+    "rarity": {
+      "unusual": "An unusual combination",
+      "everyChart": "Present in every chart",
+      "perHundred": "Shows up in about {count} of every 100 charts",
+      "perThousand": "Shows up in about {count} of every 1,000 charts",
+      "underThousand": "Shows up in fewer than 1 in 1,000 charts"
     }
   }
 }

@@ -656,7 +656,9 @@
         "period": "अवधि",
         "rising": "{sign} लग्न",
         "scriptLead": "इसे एक नक्शे की तरह पढ़ें,",
-        "scriptTail": "फ़ैसले की तरह नहीं।"
+        "scriptTail": "फ़ैसले की तरह नहीं।",
+        "chartCore": "कुंडली का सार: {ascendant} लग्न, सूर्य {sun} में और चंद्र {moon} में। प्रधान तत्व {element} है।",
+        "chartCoreStrongest": "सबसे प्रबल सहारा {planets} से मिलता है।"
       },
       "houseSupport": {
         "heading": "आपकी कुंडली को भावों से कितना समर्थन मिलता है",
@@ -2830,7 +2832,14 @@
     "yogaShows": "यह कब प्रकट होता है",
     "yogaSoftened": "इसे क्या नरम करता है",
     "yogaForms": "यह कैसे बनता है",
-    "yogaSource": "स्रोत"
+    "yogaSource": "स्रोत",
+    "rarity": {
+      "unusual": "एक असामान्य संयोग",
+      "everyChart": "हर कुंडली में मौजूद",
+      "perHundred": "लगभग हर 100 में से {count} कुंडलियों में मिलता है",
+      "perThousand": "लगभग हर 1,000 में से {count} कुंडलियों में मिलता है",
+      "underThousand": "1,000 में से 1 से भी कम कुंडलियों में मिलता है"
+    }
   },
   "mobileInsights": {
     "errorHeading": "यह कुंडली नहीं बनाई जा सकी",
@@ -2987,7 +2996,16 @@
     "tabsLabel": "आपके पाठ के खंड",
     "tabReadings": "पाठ",
     "moreReadingsOne": "{count} और पाठ",
-    "moreReadingsOther": "{count} और पाठ"
+    "moreReadingsOther": "{count} और पाठ",
+    "chartCore": "कुंडली का सार: {ascendant} लग्न, सूर्य {sun} में और चंद्र {moon} में। प्रधान तत्व {element} है।",
+    "chartCoreStrongest": "सबसे प्रबल सहारा {planets} से मिलता है।",
+    "rarity": {
+      "unusual": "एक असामान्य संयोग",
+      "everyChart": "हर कुंडली में मौजूद",
+      "perHundred": "लगभग हर 100 में से {count} कुंडलियों में मिलता है",
+      "perThousand": "लगभग हर 1,000 में से {count} कुंडलियों में मिलता है",
+      "underThousand": "1,000 में से 1 से भी कम कुंडलियों में मिलता है"
+    }
   },
   "strength": {
     "planets": {

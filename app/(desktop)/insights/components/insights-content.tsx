@@ -139,7 +139,7 @@ import type {
   TopLifeDomainSummary,
 } from "@/lib/astro-types";
 import { LOCALE_TAGS, useTranslation } from "@/lib/i18n-context";
-import { planetName, signName } from "@/lib/chart-labels";
+import { chartSummaryText, planetName, signName } from "@/lib/chart-labels";
 import Emphasise from "@/app/components/Emphasise";
 import { localScopedKey } from "@/lib/local-scope";
 import { TRADITION_ORDER } from "@/lib/engines/engine-registry";
@@ -1207,7 +1207,9 @@ export default function InsightsContent({
               <span className={styles.titleName}>{payload.client.name}</span>
               <span className={styles.titleSuffix}>{t("insights.headingSuffix")}</span>
             </h1>
-            <p className={styles.lead}>{payload.chart.summary}</p>
+            <p className={styles.lead}>
+              {chartSummaryText(payload.chart.summary_facts, payload.chart.summary, t, "insights.page.hero")}
+            </p>
             <div className={styles.heroActions} aria-label={t("insights.page.hero.actionsAria")}>
               <button
                 type="button"

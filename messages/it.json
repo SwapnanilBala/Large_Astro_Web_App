@@ -656,7 +656,9 @@
         "period": "Periodo",
         "rising": "Ascendente {sign}",
         "scriptLead": "Leggila come una mappa,",
-        "scriptTail": "non come un verdetto."
+        "scriptTail": "non come un verdetto.",
+        "chartCore": "Nucleo della carta: Lagna in {ascendant}, con il Sole in {sun} e la Luna in {moon}. L’elemento dominante è {element}.",
+        "chartCoreStrongest": "Il sostegno più forte viene da {planets}."
       },
       "houseSupport": {
         "heading": "Quanto sostegno riceve la tua carta dalle case",
@@ -2830,7 +2832,14 @@
     "yogaShows": "Quando si manifesta",
     "yogaSoftened": "Che cosa lo attenua",
     "yogaForms": "Che cosa lo forma",
-    "yogaSource": "Fonte"
+    "yogaSource": "Fonte",
+    "rarity": {
+      "unusual": "Una combinazione insolita",
+      "everyChart": "Presente in ogni carta",
+      "perHundred": "Compare in circa {count} carte su 100",
+      "perThousand": "Compare in circa {count} carte su 1.000",
+      "underThousand": "Compare in meno di 1 carta su 1.000"
+    }
   },
   "mobileInsights": {
     "errorHeading": "Non è stato possibile costruire questa carta",
@@ -2987,7 +2996,16 @@
     "tabsLabel": "Sezioni della tua lettura",
     "tabReadings": "Letture",
     "moreReadingsOne": "Ancora {count} lettura",
-    "moreReadingsOther": "Altre {count} letture"
+    "moreReadingsOther": "Altre {count} letture",
+    "chartCore": "Nucleo della carta: Lagna in {ascendant}, con il Sole in {sun} e la Luna in {moon}. L’elemento dominante è {element}.",
+    "chartCoreStrongest": "Il sostegno più forte viene da {planets}.",
+    "rarity": {
+      "unusual": "Una combinazione insolita",
+      "everyChart": "Presente in ogni carta",
+      "perHundred": "Compare in circa {count} carte su 100",
+      "perThousand": "Compare in circa {count} carte su 1.000",
+      "underThousand": "Compare in meno di 1 carta su 1.000"
+    }
   },
   "strength": {
     "planets": {

@@ -154,7 +154,16 @@
     "tabsLabel": "Sections of your reading",
     "tabReadings": "Readings",
     "moreReadingsOne": "{count} more reading",
-    "moreReadingsOther": "{count} more readings"
+    "moreReadingsOther": "{count} more readings",
+    "chartCore": "Chart core: {ascendant} Lagna with Sun in {sun} and Moon in {moon}. Dominant elemental tone is {element}.",
+    "chartCoreStrongest": "Strongest support comes from {planets}.",
+    "rarity": {
+      "unusual": "An unusual combination",
+      "everyChart": "Present in every chart",
+      "perHundred": "Shows up in about {count} of every 100 charts",
+      "perThousand": "Shows up in about {count} of every 1,000 charts",
+      "underThousand": "Shows up in fewer than 1 in 1,000 charts"
+    }
   },
   "nakshatraNames": {
     "ashwini": "Ashwini",
