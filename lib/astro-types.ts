@@ -505,10 +505,27 @@ export type ForecastAspectInsight = {
   days_in_orb?: number;
 };
 
+/** A period lord and the natal house it occupies. */
+export type ForecastPeriodLord = { planet: string; house: number };
+
+/**
+ * What a forecast's headline, overview, focus areas, opportunities and cautions
+ * are worded from, so the desktop card can say them in the reader's language
+ * (lib/forecast-text.ts) while the English strings stay as they were.
+ */
+export type ForecastParts = {
+  mahadasha: ForecastPeriodLord;
+  antardasha: ForecastPeriodLord;
+  /** Present only when the pratyantar's lord differs from the antardasha's, which is when the copy gives it its own layer. */
+  pratyantar?: ForecastPeriodLord;
+};
+
 export type ForecastReading = {
   target_date: string;
   headline: string;
   overview: string;
+  /** Absent on a payload cached before it existed; the card then prints the English. */
+  parts?: ForecastParts;
   dasha: DashaInfo;
   focus_areas: string[];
   opportunities: string[];
@@ -666,11 +683,25 @@ export type WeeklyEnergyCard = {
   best_day: string;
 };
 
+/** How the week's scores move, which picks the headline's verb and sentences. */
+export type WeeklyEnergyShape = "rises" | "settles" | "turns" | "holds" | "builds";
+
 export type WeeklyEnergyHeadline = {
   title: string;
   paragraph: string;
   /** A key under `quotes` in messages/*.json, not the text itself. */
   quote_key: string;
+  /*
+   * What the title and paragraph are worded from, so the panel can say them in
+   * the reader's language (lib/weekly-energy-text.ts). Optional because a
+   * response cached before they existed lacks them; the panel then prints the
+   * English.
+   */
+  /** The factor family behind the title's noun ("Clarity" is nakshatra). */
+  noun_kind?: EnergyFactorKind;
+  shape?: WeeklyEnergyShape;
+  /** The family the second sentence names, or "clear" when nothing pulled the week down. */
+  guidance_key?: EnergyFactorKind | "clear";
 };
 
 export type WeeklyEnergyWeek = {

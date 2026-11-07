@@ -16,7 +16,7 @@
  * than as two unrelated scoring systems.
  */
 
-import type { CalendarPlannerIntent } from "@/lib/astro-types";
+import type { CalendarPlannerIntent, WeeklyEnergyShape } from "@/lib/astro-types";
 import type { EnergyFactorKind } from "./weekly-energy-engine";
 
 // ---------------------------------------------------------------------------
@@ -197,7 +197,7 @@ export const HEADLINE_NOUNS: Record<EnergyFactorKind, string> = {
 };
 
 /** Verb, from the week's shape. */
-export type HeadlineShape = "rises" | "settles" | "turns" | "holds" | "builds";
+export type HeadlineShape = WeeklyEnergyShape;
 
 export const HEADLINE_VERBS: Record<HeadlineShape, string> = {
   rises: "Rises",

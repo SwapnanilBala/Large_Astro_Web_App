@@ -54,6 +54,11 @@ const BROWSER_MODULES = [
      keys its year summary on; the engine itself, with the ephemeris, stays on
      the server. */
   "lib/engines/varshaphal-words.ts",
+  /* The date forecast's and the weekly-energy panel's sentences, said again in
+     the reader's language from the pieces the engines send; the engines and
+     their tables stay on the server. */
+  "lib/forecast-text.ts",
+  "lib/weekly-energy-text.ts",
 ];
 
 const NODE_BUILTIN =

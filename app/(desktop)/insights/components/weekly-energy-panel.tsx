@@ -16,6 +16,12 @@ import { LOCALE_TAGS, useRouteMessages, useTranslation } from "@/lib/i18n-contex
 import sharedMessages from "@/messages/en.shared.json";
 import { addWeeks, currentWeekStart, formatWeekRangeLabel } from "@/lib/format-week";
 import type { WeeklyEnergyResponse } from "@/lib/astro-types";
+import {
+  weeklyCardText,
+  weeklyChartAltText,
+  weeklyHeadlineText,
+  weeklyPeakLabel,
+} from "@/lib/weekly-energy-text";
 import WeeklyEnergyChart from "./weekly-energy-chart";
 import styles from "./weekly-energy-panel.module.css";
 
@@ -168,6 +174,10 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
   /* The label follows the pager immediately; the chart catches up. Without
      this the header would lag a click behind on a slow request. */
   const label = formatWeekRangeLabel(weekStart, locale);
+  /* The engine words all of this in English; these say it in the reader's
+     language from the same response, falling back to the English for a
+     response cached before it carried the pieces. */
+  const headline = data ? weeklyHeadlineText(data.headline, t) : null;
 
   return (
     <section
@@ -245,8 +255,8 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
           <WeeklyEnergyChart
             days={data.days}
             bands={data.bands}
-            peak={data.peak}
-            altText={data.chart_alt_text}
+            peak={{ ...data.peak, label: weeklyPeakLabel(data, t) }}
+            altText={weeklyChartAltText(data, t, locale)}
             weekLabel={formatWeekRangeLabel(data.week.start_date, locale)}
             locale={locale}
             animate={!shouldReduceMotion}
@@ -257,22 +267,25 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
           <div className={styles.forecast}>
             <h3 className={styles.forecastTitle}>{t("shared.weeklyEnergyForecastTitle")}</h3>
             <div className={styles.cards}>
-              {data.cards.map((card) => (
-                <motion.article
-                  key={card.intent}
-                  className={styles.card}
-                  data-quality={card.quality}
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
-                >
-                  <span className={styles.cardIcon} aria-hidden="true">
-                    {CARD_ICONS[card.icon_key] ?? <Sparkles size={16} />}
-                  </span>
-                  <span className={styles.cardTitle}>{card.title}</span>
-                  <span className={styles.cardBody}>{card.body}</span>
-                </motion.article>
-              ))}
+              {data.cards.map((card) => {
+                const text = weeklyCardText(card, t, locale);
+                return (
+                  <motion.article
+                    key={card.intent}
+                    className={styles.card}
+                    data-quality={card.quality}
+                    initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={shouldReduceMotion ? { duration: 0 } : { duration: 0.3 }}
+                  >
+                    <span className={styles.cardIcon} aria-hidden="true">
+                      {CARD_ICONS[card.icon_key] ?? <Sparkles size={16} />}
+                    </span>
+                    <span className={styles.cardTitle}>{text.title}</span>
+                    <span className={styles.cardBody}>{text.body}</span>
+                  </motion.article>
+                );
+              })}
             </div>
           </div>
 
@@ -282,8 +295,8 @@ export default function WeeklyEnergyPanel({ queryString }: WeeklyEnergyPanelProp
             different week from the line above them.
           */}
           <div className={styles.vibe}>
-            <h3 className={styles.vibeTitle}>{data.headline.title}</h3>
-            <p className={styles.vibeBody}>{data.headline.paragraph}</p>
+            <h3 className={styles.vibeTitle}>{headline?.title}</h3>
+            <p className={styles.vibeBody}>{headline?.paragraph}</p>
             {/* The quote arrives as a key so it resolves through i18n. */}
             <p className={styles.quote}>{t(`quotes.${data.headline.quote_key}`)}</p>
           </div>

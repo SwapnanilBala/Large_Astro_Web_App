@@ -6,13 +6,23 @@ import type { ForecastAspectInsight, ForecastReading } from "@/lib/astro-types";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
+import strengthMessages from "@/messages/en.strength.json";
 import { aspectName, planetName } from "@/lib/chart-labels";
+import { forecastText, transitInterpretation, type ForecastText } from "@/lib/forecast-text";
 
 type FutureForecastPanelProps = {
   queryString: string;
 };
 
 type Translator = (key: string, params?: Record<string, string>) => string;
+
+/* The timing catalog, plus the house themes the forecast's sentences name --
+   they live with the strength page, whose catalog this route does not ship.
+   Module-level, so useRouteMessages sees one identity. */
+const forecastMessages = {
+  ...timingMessages,
+  strength: { houseThemes: strengthMessages.strength.houseThemes },
+};
 
 const FORECAST_TIMEOUT_MS = 30_000;
 const DATE_STRIP_DAYS = 7;
@@ -50,8 +60,8 @@ function forecastErrorText(error: ForecastError, tr: Translator): string {
 type LifeArea = "all" | "career" | "relationships" | "wellbeing" | "finances" | "learning" | "spiritual";
 
 /*
- * `keywords` stay English on purpose: they are matched against the forecast
- * text the API returns, which is English regardless of the interface language.
+ * `keywords` stay English on purpose: they are matched against the English
+ * the API returns for each line, whatever language the line is printed in.
  * Only `labelKey` is on screen.
  */
 const LIFE_AREAS: Array<{ value: LifeArea; labelKey: string; keywords: string[] }> = [
@@ -106,10 +116,16 @@ function buildForecastUrl(queryString: string, targetDate: string) {
   });
 }
 
+/* The first sentence, kept to a card's width. Hindi and Bengali end theirs
+   with a danda; a long one is cut at a space, so a Devanagari or Bengali
+   cluster is never split from its vowel sign. */
 function compactTransitText(value: string) {
-  const firstSentence = value.split(".")[0]?.trim();
+  const firstSentence = value.split(/[.\u0964]/)[0]?.trim();
   if (!firstSentence) return value;
-  return firstSentence.length > 120 ? `${firstSentence.slice(0, 117)}...` : firstSentence;
+  if (firstSentence.length <= 120) return firstSentence;
+  const cut = firstSentence.slice(0, 117);
+  const space = cut.lastIndexOf(" ");
+  return `${space > 80 ? cut.slice(0, space) : cut}...`;
 }
 
 function matchesLifeArea(value: string, lifeArea: LifeArea) {
@@ -130,6 +146,7 @@ function escapeIcs(text: string) {
 
 function downloadForecastCalendarEvent(
   forecast: ForecastReading,
+  text: ForecastText,
   lifeArea: LifeArea,
   tr: Translator,
   locale: string
@@ -147,8 +164,8 @@ function downloadForecastCalendarEvent(
     )
     .join("\n");
   const description = [
-    forecast.headline,
-    forecast.overview,
+    text.headline,
+    text.overview,
     lifeArea === "all" || !areaLabelKey
       ? ""
       : tr("timing.forecast.calendar.focusLine", { area: tr(areaLabelKey) }),
@@ -186,7 +203,8 @@ function downloadForecastCalendarEvent(
 }
 
 function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
-  const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
+  const tr = useRouteMessages(forecastMessages);
 
   return (
     <article className={`forecast-event ${signal.tone === "supportive" ? "forecast-event--supportive" : "forecast-event--challenging"}`}>
@@ -203,7 +221,7 @@ function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
             natal: planetName(signal.natal_planet, tr),
           })}
         </strong>
-        <p>{compactTransitText(signal.interpretation)}</p>
+        <p>{compactTransitText(transitInterpretation(signal, tr, language))}</p>
       </div>
       <span className="forecast-event-orb">{signal.orb.toFixed(2)}°</span>
     </article>
@@ -212,11 +230,14 @@ function MajorSignal({ signal }: { signal: ForecastAspectInsight }) {
 
 function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeArea: LifeArea }) {
   const { language } = useTranslation();
-  const tr = useRouteMessages(timingMessages);
+  const tr = useRouteMessages(forecastMessages);
   const locale = LOCALE_TAGS[language];
-  const focusItems = forecast.focus_areas.filter((item) => matchesLifeArea(item, lifeArea));
-  const openingItems = forecast.opportunities.filter((item) => matchesLifeArea(item, lifeArea));
-  const cautionItems = forecast.cautions.filter((item) => matchesLifeArea(item, lifeArea));
+  /* The engine's English, said again in the reader's language; each line
+     keeps its English beside it for the life-area filter. */
+  const text = forecastText(forecast, tr, (date) => formatFriendlyDate(date, locale));
+  const focusItems = text.focusAreas.filter((item) => matchesLifeArea(item.english, lifeArea));
+  const openingItems = text.opportunities.filter((item) => matchesLifeArea(item.english, lifeArea));
+  const cautionItems = text.cautions.filter((item) => matchesLifeArea(item.english, lifeArea));
   const majorSignals = getMajorSignals(forecast);
   /* The area inside a sentence: its label in lower case, except in German,
      which capitalises its nouns. English reads as the old raw value did. */
@@ -235,21 +256,21 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
               date: formatFriendlyDate(forecast.target_date, locale),
             })}
           </p>
-          <h3>{forecast.headline}</h3>
+          <h3>{text.headline}</h3>
         </div>
         <span className="access-pill access-pill--premium">
           {planetName(forecast.dasha.current_dasha, tr)} / {planetName(forecast.dasha.current_antardasha, tr)}
         </span>
       </div>
 
-      <p className="forecast-overview">{forecast.overview}</p>
+      <p className="forecast-overview">{text.overview}</p>
 
       <div className="forecast-grid">
         <section className="forecast-column">
           <h4>{tr("timing.forecast.card.focus")}</h4>
           {focusItems.length > 0 ? (
             <ul className="domain-reading-list">
-              {focusItems.map((item) => <li key={item}>{item}</li>)}
+              {focusItems.map((item) => <li key={item.english}>{item.text}</li>)}
             </ul>
           ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
@@ -258,7 +279,7 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
           <h4>{tr("timing.forecast.card.openings")}</h4>
           {openingItems.length > 0 ? (
             <ul className="domain-reading-list">
-              {openingItems.map((item) => <li key={item}>{item}</li>)}
+              {openingItems.map((item) => <li key={item.english}>{item.text}</li>)}
             </ul>
           ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
@@ -267,7 +288,7 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
           <h4>{tr("timing.forecast.card.cautions")}</h4>
           {cautionItems.length > 0 ? (
             <ul className="domain-reading-list">
-              {cautionItems.map((item) => <li key={item}>{item}</li>)}
+              {cautionItems.map((item) => <li key={item.english}>{item.text}</li>)}
             </ul>
           ) : <p className="forecast-filter-empty">{emptyNote}</p>}
         </section>
@@ -279,7 +300,7 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
             <p className="kicker">{tr("timing.forecast.card.transitTimeline")}</p>
             <h4 id="forecast-major-events">{tr("timing.forecast.card.majorSignals")}</h4>
           </div>
-          <button type="button" className="forecast-calendar-button" onClick={() => downloadForecastCalendarEvent(forecast, lifeArea, tr, locale)}>
+          <button type="button" className="forecast-calendar-button" onClick={() => downloadForecastCalendarEvent(forecast, text, lifeArea, tr, locale)}>
             <CalendarPlus size={16} aria-hidden="true" />
             {tr("timing.forecast.card.saveToCalendar")}
           </button>
@@ -298,7 +319,7 @@ function ForecastCard({ forecast, lifeArea }: { forecast: ForecastReading; lifeA
 
 export default function FutureForecastPanel({ queryString }: FutureForecastPanelProps) {
   const { language } = useTranslation();
-  const tr = useRouteMessages(timingMessages);
+  const tr = useRouteMessages(forecastMessages);
   const locale = LOCALE_TAGS[language];
   const [selectedDate, setSelectedDate] = useState(() => localDateString());
   const [lifeArea, setLifeArea] = useState<LifeArea>("all");
