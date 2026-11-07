@@ -50,6 +50,11 @@ const BROWSER_MODULES = [
   /* The sky line above both sign-in forms, worded on the client; the facts
      come from app/(desktop)/login/dailySky.ts, which runs the ephemeris. */
   "lib/daily-sky-line.ts",
+  /* The date forecast's and the weekly-energy panel's sentences, said again in
+     the reader's language from the pieces the engines send; the engines and
+     their tables stay on the server. */
+  "lib/forecast-text.ts",
+  "lib/weekly-energy-text.ts",
 ];
 
 const NODE_BUILTIN =

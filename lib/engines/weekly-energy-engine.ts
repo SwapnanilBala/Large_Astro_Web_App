@@ -94,7 +94,7 @@ export type {
  * instead of hiding behind up to six hours of warm cache. Same trick as
  * RULES_SCHEMA_VERSION and LIFE_DOMAIN_RULES_VERSION.
  */
-export const WEEKLY_ENERGY_MODEL_VERSION = "weekly-energy-1";
+export const WEEKLY_ENERGY_MODEL_VERSION = "weekly-energy-2";
 
 /**
  * Fixed thresholds, NOT relative to the week.
@@ -597,7 +597,14 @@ function buildHeadline(days: WeeklyEnergyDay[], natalMoonNakIndex: number, weekS
   const seed = hashString(weekStart) + natalMoonNakIndex;
   const quoteKey = pool[seed % pool.length];
 
-  return { title, paragraph: `${opener} ${guidance}`, quote_key: quoteKey };
+  return {
+    title,
+    paragraph: `${opener} ${guidance}`,
+    quote_key: quoteKey,
+    noun_kind: dominantPositive,
+    shape,
+    guidance_key: guidanceKey,
+  };
 }
 
 function hashString(value: string): number {

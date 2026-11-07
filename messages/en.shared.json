@@ -37,6 +37,257 @@
     "weeklyEnergyTableDay": "Day",
     "weeklyEnergyTableDate": "Date",
     "weeklyEnergyTableScore": "Score",
-    "weeklyEnergyTableBand": "Band"
+    "weeklyEnergyTableBand": "Band",
+    "weeklyEnergyCopy": {
+      "cards": {
+        "action": {
+          "title": "New Opportunities",
+          "excellent": "A fresh perspective opens doors. {day} carries it best.",
+          "good": "Momentum is available if you start it. {day} is the opening.",
+          "fair": "Push gently rather than hard. {day} gives the most room.",
+          "poor": "Not a week for forcing anything new. Hold and prepare."
+        },
+        "rest": {
+          "title": "Emotional Flow",
+          "excellent": "Greater ease in connection, with {day} the softest of them.",
+          "good": "Recovery comes easily this week. Take it on {day}.",
+          "fair": "Rest is available but has to be chosen. {day} is easiest.",
+          "poor": "Rest will feel effortful. Protect it anyway."
+        },
+        "communication": {
+          "title": "Creative Spark",
+          "excellent": "Your ideas find support. Say the thing on {day}.",
+          "good": "Words land well this week, {day} especially.",
+          "fair": "Be plainer than usual. {day} is the clearest window.",
+          "poor": "Expect to repeat yourself. Put it in writing."
+        },
+        "money": {
+          "title": "Steady Progress",
+          "excellent": "Small steps create big shifts, and {day} compounds them.",
+          "good": "Practical matters move. {day} is the day to file it.",
+          "fair": "Progress is slow but real. {day} is the best of it.",
+          "poor": "Hold the line rather than extending it."
+        },
+        "relationships": {
+          "title": "Shared Ground",
+          "excellent": "Deeper trust is on offer. {day} is the day to ask.",
+          "good": "People meet you halfway this week, {day} most of all.",
+          "fair": "Go first and go gently. {day} is the kindest window.",
+          "poor": "Give conversations more room than they seem to need."
+        },
+        "study": {
+          "title": "Deep Focus",
+          "excellent": "Difficult material goes in cleanly, {day} above all.",
+          "good": "A good week to learn something structural. Start {day}.",
+          "fair": "Focus comes in bursts. {day} holds the longest one.",
+          "poor": "Review rather than take on anything new."
+        },
+        "travel": {
+          "title": "Open Road",
+          "excellent": "Movement agrees with you. {day} is the day to go.",
+          "good": "A change of place would help. {day} is clearest.",
+          "fair": "Travel light and leave margin. {day} is smoothest.",
+          "poor": "Postpone what can be postponed."
+        }
+      },
+      "titles": {
+        "nakshatra": {
+          "rises": "Clarity Rises",
+          "settles": "Clarity Settles",
+          "turns": "Clarity Turns",
+          "holds": "Clarity Holds",
+          "builds": "Clarity Builds"
+        },
+        "tithi": {
+          "rises": "Fullness Rises",
+          "settles": "Fullness Settles",
+          "turns": "Fullness Turns",
+          "holds": "Fullness Holds",
+          "builds": "Fullness Builds"
+        },
+        "yoga": {
+          "rises": "Grace Rises",
+          "settles": "Grace Settles",
+          "turns": "Grace Turns",
+          "holds": "Grace Holds",
+          "builds": "Grace Builds"
+        },
+        "karana": {
+          "rises": "Steadiness Rises",
+          "settles": "Steadiness Settles",
+          "turns": "Steadiness Turns",
+          "holds": "Steadiness Holds",
+          "builds": "Steadiness Builds"
+        },
+        "weekday": {
+          "rises": "Rhythm Rises",
+          "settles": "Rhythm Settles",
+          "turns": "Rhythm Turns",
+          "holds": "Rhythm Holds",
+          "builds": "Rhythm Builds"
+        },
+        "tarabala": {
+          "rises": "Fortune Rises",
+          "settles": "Fortune Settles",
+          "turns": "Fortune Turns",
+          "holds": "Fortune Holds",
+          "builds": "Fortune Builds"
+        },
+        "chandrabala": {
+          "rises": "Feeling Rises",
+          "settles": "Feeling Settles",
+          "turns": "Feeling Turns",
+          "holds": "Feeling Holds",
+          "builds": "Feeling Builds"
+        },
+        "transit_aspect": {
+          "rises": "Support Rises",
+          "settles": "Support Settles",
+          "turns": "Support Turns",
+          "holds": "Support Holds",
+          "builds": "Support Builds"
+        }
+      },
+      "openers": {
+        "nakshatra": {
+          "rises": "A week of illumination and gentle momentum.",
+          "settles": "A week that grows quieter and easier to read.",
+          "turns": "A week of sharp changes in visibility.",
+          "holds": "A week of steady, unhurried clarity.",
+          "builds": "A week that comes into focus around its middle."
+        },
+        "tithi": {
+          "rises": "A week that fills out as it goes.",
+          "settles": "A week of completion rather than beginning.",
+          "turns": "A week of full days and empty ones in close succession.",
+          "holds": "A week with an even, generous weight to it.",
+          "builds": "A week that gathers toward something in the middle."
+        },
+        "yoga": {
+          "rises": "A week that opens up more the further in you go.",
+          "settles": "A week that resolves more kindly than it starts.",
+          "turns": "A week of uneven footing and sudden ease.",
+          "holds": "A week of quiet, reliable good will.",
+          "builds": "A week whose best hours sit at its centre."
+        },
+        "karana": {
+          "rises": "A week that firms up as it goes.",
+          "settles": "A week that asks less of you by the end.",
+          "turns": "A week that changes its mind more than once.",
+          "holds": "A week of level ground throughout.",
+          "builds": "A week that consolidates around midweek."
+        },
+        "weekday": {
+          "rises": "A week that finds its stride late.",
+          "settles": "A week that slows into something more sustainable.",
+          "turns": "A week of shifting tempo.",
+          "holds": "A week with a consistent beat to it.",
+          "builds": "A week that hits its pace in the middle."
+        },
+        "tarabala": {
+          "rises": "A week of widening luck and easier timing.",
+          "settles": "A week whose difficulties recede as it goes.",
+          "turns": "A week of mixed fortune, unevenly spread.",
+          "holds": "A week of consistent, undramatic favour.",
+          "builds": "A week whose luckiest hours are at its centre."
+        },
+        "chandrabala": {
+          "rises": "A week that warms as it goes.",
+          "settles": "A week that grows calmer and more inward.",
+          "turns": "A week of changeable mood.",
+          "holds": "A week of even temper.",
+          "builds": "A week that deepens toward its middle."
+        },
+        "transit_aspect": {
+          "rises": "A week of gathering support from outside you.",
+          "settles": "A week where the pressure eases off.",
+          "turns": "A week of help and hindrance in quick alternation.",
+          "holds": "A week of steady backing.",
+          "builds": "A week whose support concentrates midweek."
+        }
+      },
+      "guidance": {
+        "clear": {
+          "rises": "Trust what feels light, and let it carry you.",
+          "settles": "Let things land rather than chasing them.",
+          "turns": "Stay loose about plans and firm about priorities.",
+          "holds": "Keep the routine that is already working.",
+          "builds": "Put the important thing in the middle of the week."
+        },
+        "nakshatra": {
+          "rises": "Trust what feels light, release what feels heavy.",
+          "settles": "Choose the gentler option where there is one.",
+          "turns": "Do not read a hard day as a verdict.",
+          "holds": "Sameness is not stagnation this week.",
+          "builds": "Save the delicate conversations for midweek."
+        },
+        "tithi": {
+          "rises": "Finish something before starting the next thing.",
+          "settles": "Close what is open rather than opening more.",
+          "turns": "Expect some days to give less than they promise.",
+          "holds": "Small consistent effort beats a single push.",
+          "builds": "Let the early days be preparation."
+        },
+        "yoga": {
+          "rises": "Let the awkward hours pass rather than fighting them.",
+          "settles": "Difficulty early is not a pattern for the week.",
+          "turns": "Keep a margin around anything that matters.",
+          "holds": "Work with the grain, not against it.",
+          "builds": "Protect the middle of the week from interruption."
+        },
+        "karana": {
+          "rises": "Leave slack in the schedule for the rough patches.",
+          "settles": "Do not commit to firm times on the difficult days.",
+          "turns": "Half-days will serve you better than whole ones.",
+          "holds": "Steady, and unremarkable, is the plan.",
+          "builds": "Front-load the easy work."
+        },
+        "weekday": {
+          "rises": "Move the demanding tasks toward the end of the week.",
+          "settles": "The early days will ask more than the later ones.",
+          "turns": "Match the task to the day rather than the reverse.",
+          "holds": "Any day will do; pick one and start.",
+          "builds": "Midweek is where the weight belongs."
+        },
+        "tarabala": {
+          "rises": "Timing improves as the week goes on. Wait where you can.",
+          "settles": "Let the harder days pass without conclusions.",
+          "turns": "Some days are simply not for deciding.",
+          "holds": "Nothing forces itself this week, in either direction.",
+          "builds": "Hold the decision until the middle of the week."
+        },
+        "chandrabala": {
+          "rises": "Your own mood is the variable. Watch it, do not obey it.",
+          "settles": "Give yourself more quiet than usual.",
+          "turns": "Feeling and fact will disagree. Prefer fact.",
+          "holds": "An even mood is worth protecting.",
+          "builds": "Rest early so the middle has something to spend."
+        },
+        "transit_aspect": {
+          "rises": "Outside pressure eases. Use the space when it comes.",
+          "settles": "What has been pressing on you lets go this week.",
+          "turns": "Others' timing, not yours, is what shifts.",
+          "holds": "Steady pressure, steadily handled.",
+          "builds": "Expect the most interference midweek."
+        }
+      },
+      "peak": {
+        "nakshatra": "Peak Clarity",
+        "tithi": "Peak Fullness",
+        "yoga": "Peak Grace",
+        "karana": "Peak Steadiness",
+        "weekday": "Peak Rhythm",
+        "tarabala": "Peak Fortune",
+        "chandrabala": "Peak Feeling",
+        "transit_aspect": "Peak Support"
+      },
+      "alt": "Weekly energy for {week}: {days}. Average {average}.",
+      "altDay": "{day} {score} ({band})",
+      "altBands": {
+        "high": "high",
+        "balanced": "balanced",
+        "low": "low"
+      }
+    }
   }
 }
