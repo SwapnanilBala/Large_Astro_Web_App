@@ -5,7 +5,8 @@ import type { VarshaphalResult } from "@/lib/engines/varshaphal-engine";
 import { buildBirthProfileApiUrl } from "@/lib/chart-query";
 import { useRouteMessages, useTranslation, LOCALE_TAGS } from "@/lib/i18n-context";
 import timingMessages from "@/messages/en.timing.json";
-import { planetName, signAbbreviation, signName } from "@/lib/chart-labels";
+import { planetName, signAbbreviation, signName, signNameKey } from "@/lib/chart-labels";
+import { HOUSE_THEMES } from "@/lib/engines/varshaphal-words";
 import styles from "./varshaphal-panel.module.css";
 
 type VarshaphalPanelProps = {
@@ -194,6 +195,146 @@ function yearLordReason(reason: string, tr: Translator): string {
   return reason;
 }
 
+/*
+ * The year summary in the reader's language.
+ *
+ * The engine writes yearSummary in English (buildYearSummary in
+ * lib/engines/varshaphal-engine.ts), and that English stays as it is: it is
+ * data the Android app and the cache read too. The panel words the same
+ * sentences again from the fields the result carries -- the return chart, the
+ * Muntha, the Varshesh and the profection -- with every sign and planet named
+ * through chart-labels and the fixed vocabularies (moon tones, year-lord
+ * themes, profection themes) looked up by slug. The natal ascendant is house 1
+ * of the natal houses: cusp 1 is the ascendant in every house system.
+ *
+ * Any sentence whose fields are missing, or whose words the catalog lacks,
+ * prints as the engine sent it.
+ */
+type YearSummaryText = VarshaphalResult["yearSummary"];
+
+const ANGULAR_HOUSES = [1, 4, 7, 10];
+
+const isSign = (sign: unknown): sign is string => typeof sign === "string" && signNameKey(sign) !== null;
+
+/* A list of profection themes inside a sentence: lower case, except in
+   German, which capitalises its nouns. */
+function themeList(themes: string[], tr: Translator, language: string): string {
+  const joined = themes
+    .map((theme) => profectionTheme(theme, tr))
+    .join(tr("timing.varshaphal.summary.listSeparator"));
+  return language === "de" ? joined : joined.toLowerCase();
+}
+
+export function yearSummaryText(data: VarshaphalResult, tr: Translator, language: string): YearSummaryText {
+  const english: Partial<YearSummaryText> = data.yearSummary ?? {};
+  /* The catalog's sentence, or null when the catalog has no such key. */
+  const say = (key: string, params?: Record<string, string>): string | null => {
+    const text = tr(key, params);
+    return text === key ? null : text;
+  };
+  const allSaid = (lines: Array<string | null>): string[] | null =>
+    lines.every((line): line is string => line !== null) ? lines : null;
+
+  const planets = Array.isArray(data.returnChart?.planets) ? data.returnChart.planets : null;
+  const { muntha, profection } = data;
+
+  /* The return ascendant against the natal one. */
+  const natalSign = profection?.natalHouseSigns?.[1];
+  const returnSign = data.returnChart?.ascendant?.sign;
+  const ascendantComparison =
+    (isSign(natalSign) && isSign(returnSign)
+      ? natalSign === returnSign
+        ? say("timing.varshaphal.summary.ascendantSame", { sign: signName(natalSign, tr) })
+        : say("timing.varshaphal.summary.ascendantDifferent", {
+            returnSign: signName(returnSign, tr),
+            natalSign: signName(natalSign, tr),
+          })
+      : null) ?? english.ascendantComparison ?? "";
+
+  /* The return Moon's tone. */
+  let emotionalTone: string | null = null;
+  if (planets) {
+    const moon = planets.find((planet) => planet.name === "Moon");
+    if (!moon) {
+      emotionalTone = say("timing.varshaphal.summary.moonUnavailable");
+    } else if (isSign(moon.sign)) {
+      const tone = say(`timing.varshaphal.summary.moonTones.${moon.sign.toLowerCase()}`);
+      emotionalTone =
+        tone &&
+        say("timing.varshaphal.summary.emotionalTone", {
+          sign: signName(moon.sign, tr),
+          house: String(moon.house),
+          tone,
+        });
+    }
+  }
+
+  /* What the Muntha and the profection point at. */
+  let focusAreas: string[] | null = null;
+  const munthaThemes = muntha ? HOUSE_THEMES[muntha.house] : undefined;
+  if (
+    muntha &&
+    isSign(muntha.sign) &&
+    munthaThemes &&
+    profection &&
+    isSign(profection.activatedSign) &&
+    Array.isArray(profection.themes) &&
+    Array.isArray(profection.activatedPlanets)
+  ) {
+    focusAreas = allSaid([
+      say("timing.varshaphal.summary.munthaFocus", {
+        sign: signName(muntha.sign, tr),
+        house: String(muntha.house),
+        themes: themeList(munthaThemes, tr, language),
+      }),
+      say("timing.varshaphal.summary.profectionFocus", {
+        house: String(profection.activatedHouse),
+        sign: signName(profection.activatedSign, tr),
+        themes: themeList(profection.themes, tr, language),
+      }),
+      ...(profection.activatedPlanets.length > 0
+        ? [
+            say("timing.varshaphal.summary.activatedFocus", {
+              planets: joinThemes(profection.activatedPlanets.map((planet) => planetName(planet, tr)), tr),
+            }),
+          ]
+        : []),
+    ]);
+  }
+
+  /* Return-chart planets in the angles, as many as the engine keeps. */
+  let strongInfluences: string[] | null = null;
+  if (planets) {
+    const angular = planets
+      .filter((planet) => ANGULAR_HOUSES.includes(planet.house))
+      .map((planet) =>
+        say("timing.varshaphal.summary.angularInfluence", {
+          planet: planetName(planet.name, tr),
+          house: String(planet.house),
+          sign: signName(planet.sign, tr),
+        }),
+      );
+    strongInfluences = allSaid(
+      angular.length > 0 ? angular.slice(0, 5) : [say("timing.varshaphal.summary.noAngular")],
+    );
+  }
+
+  /* What the year lord makes of the year. */
+  const yearLord = data.varshesh?.planet;
+  const yearLordInterpretation =
+    (typeof yearLord === "string" ? say(`timing.varshaphal.summary.yearLordThemes.${yearLord.toLowerCase()}`) : null) ??
+    english.yearLordInterpretation ??
+    "";
+
+  return {
+    ascendantComparison,
+    emotionalTone: emotionalTone ?? english.emotionalTone ?? "",
+    focusAreas: focusAreas ?? english.focusAreas ?? [],
+    strongInfluences: strongInfluences ?? english.strongInfluences ?? [],
+    yearLordInterpretation,
+  };
+}
+
 function buildYearTimeline(data: VarshaphalResult, tr: Translator): TimelineMonth[] {
   const returnMonth = wrapMonth(new Date(data.solarReturnMoment).getMonth());
   const activatedHouse = data.profection.activatedHouse;
@@ -266,7 +407,7 @@ function AnnualThemeHero({ data }: { data: VarshaphalResult }) {
       <div className={styles.themeHeroCopy}>
         <span className={styles.eyebrow}>{tr("timing.varshaphal.hero.eyebrow")}</span>
         <h3 id="annual-compass-title">{getAnnualTheme(data, tr, language)}</h3>
-        <p>{data.yearSummary.yearLordInterpretation}</p>
+        <p>{yearSummaryText(data, tr, language).yearLordInterpretation}</p>
         <span className={styles.cycleLabel}>
           {tr("timing.varshaphal.hero.cycle", {
             from: String(data.year),
@@ -309,6 +450,7 @@ function YearInFocus({ data }: { data: VarshaphalResult }) {
   const themes =
     themesInSentence(data.profection.themes.slice(0, 2), tr, language) ||
     tr("timing.varshaphal.yearInFocus.themesFallback");
+  const summary = yearSummaryText(data, tr, language);
 
   return (
     <section className={styles.overviewCard} aria-labelledby="year-in-focus-title">
@@ -317,7 +459,7 @@ function YearInFocus({ data }: { data: VarshaphalResult }) {
           <span className={styles.eyebrow}>{tr("timing.varshaphal.yearInFocus.eyebrow")}</span>
           <h3 id="year-in-focus-title">{tr("timing.varshaphal.yearInFocus.title")}</h3>
         </div>
-        <p>{data.yearSummary.ascendantComparison}</p>
+        <p>{summary.ascendantComparison}</p>
       </div>
       <div className={styles.summaryCards}>
         <article className={styles.summaryCard}>
@@ -335,12 +477,12 @@ function YearInFocus({ data }: { data: VarshaphalResult }) {
           <strong>
             {tr("timing.varshaphal.yearInFocus.bestUseValue", { planet: planetName(data.varshesh.planet, tr) })}
           </strong>
-          <p>{data.yearSummary.yearLordInterpretation}</p>
+          <p>{summary.yearLordInterpretation}</p>
         </article>
         <article className={styles.summaryCard}>
           <span>{tr("timing.varshaphal.yearInFocus.keepInMindLabel")}</span>
           <strong>{tr("timing.varshaphal.yearInFocus.keepInMindValue")}</strong>
-          <p>{data.yearSummary.emotionalTone}</p>
+          <p>{summary.emotionalTone}</p>
         </article>
       </div>
     </section>
@@ -507,10 +649,11 @@ function MajorForces({ data }: { data: VarshaphalResult }) {
   );
 }
 
-function buildSeasonalForecasts(data: VarshaphalResult, tr: Translator): SeasonalForecast[] {
+function buildSeasonalForecasts(data: VarshaphalResult, tr: Translator, language: string): SeasonalForecast[] {
   const timeline = buildYearTimeline(data, tr);
-  const strongestInfluence = data.yearSummary.strongInfluences[0] ?? data.yearSummary.ascendantComparison;
-  const focusArea = data.yearSummary.focusAreas[0] ?? data.yearSummary.emotionalTone;
+  const summary = yearSummaryText(data, tr, language);
+  const strongestInfluence = summary.strongInfluences[0] ?? summary.ascendantComparison;
+  const focusArea = summary.focusAreas[0] ?? summary.emotionalTone;
   const quarters = [
     {
       label: tr("timing.varshaphal.seasons.q1Label"),
@@ -556,10 +699,11 @@ function buildSeasonalForecasts(data: VarshaphalResult, tr: Translator): Seasona
 
 function SeasonalForecastCards({ data }: { data: VarshaphalResult }) {
   const tr = useRouteMessages(timingMessages);
+  const { language } = useTranslation();
 
   return (
     <div className={styles.seasonGrid}>
-      {buildSeasonalForecasts(data, tr).map((season) => (
+      {buildSeasonalForecasts(data, tr, language).map((season) => (
         <article
           key={season.label}
           className={`${styles.seasonCard} ${styles[`seasonCard${season.tone[0].toUpperCase()}${season.tone.slice(1)}`]}`}
@@ -1353,7 +1497,7 @@ export default function VarshaphalPanel({ queryString, birthDate }: VarshaphalPa
                   planet: planetName(data.varshesh.planet, tr),
                 })}
               </strong>{" "}
-              {data.yearSummary.yearLordInterpretation}
+              {yearSummaryText(data, tr, language).yearLordInterpretation}
             </p>
           </div>
         </>

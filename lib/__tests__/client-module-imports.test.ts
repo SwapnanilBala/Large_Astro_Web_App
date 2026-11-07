@@ -50,6 +50,10 @@ const BROWSER_MODULES = [
   /* The sky line above both sign-in forms, worded on the client; the facts
      come from app/(desktop)/login/dailySky.ts, which runs the ephemeris. */
   "lib/daily-sky-line.ts",
+  /* The Varshaphal engine's fixed English words, which the yearly-chart panel
+     keys its year summary on; the engine itself, with the ephemeris, stays on
+     the server. */
+  "lib/engines/varshaphal-words.ts",
 ];
 
 const NODE_BUILTIN =
